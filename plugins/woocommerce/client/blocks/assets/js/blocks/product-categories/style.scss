@@ -1,13 +1,39 @@
 .wc-block-product-categories {
 	margin-bottom: 1em;
+}
 
-	&.is-dropdown {
-		display: flex;
-	}
+:where(.wc-block-product-categories.is-dropdown) {
+	display: flex;
+	align-items: stretch;
+	gap: 0.5em;
+}
 
-	select {
-		margin-right: 0.5em;
-	}
+:where(.wc-block-product-categories__dropdown) {
+	display: flex;
+	flex: 1;
+	min-inline-size: 0;
+}
+
+:where(.wc-block-product-categories__dropdown select, .wc-block-product-categories__button) {
+	box-sizing: border-box;
+	min-block-size: 2.75em;
+	margin: 0;
+	padding: 0.5em 0.75em;
+	border: 1px solid #949494;
+	border-radius: 0.25em;
+	background-color: transparent;
+	color: inherit;
+	font: inherit;
+}
+
+:where(.wc-block-product-categories__dropdown select) {
+	inline-size: 100%;
+	min-inline-size: 0;
+}
+
+:where(.wc-block-product-categories__dropdown select:focus-visible, .wc-block-product-categories__button:focus-visible) {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
 }
 
 .wc-block-product-categories-list--has-images {
@@ -62,31 +88,32 @@
 	opacity: 0.2;
 }
 
-.wc-block-product-categories__button {
+:where(.wc-block-product-categories__button) {
 	display: flex;
+	flex-shrink: 0;
 	align-items: center;
-	margin: 0;
-	padding: 0 0.5em;
+	justify-content: center;
 	position: relative;
-	overflow: hidden;
+	cursor: pointer;
+}
 
-	svg {
-		fill: currentColor;
-		outline: none;
-		.rtl & {
-			transform: rotate(180deg);
-		}
-	}
-	&:active {
-		color: currentColor;
-	}
-	&:disabled,
-	&[aria-disabled="true"] {
-		cursor: default;
-		opacity: 0.3;
-	}
-	&[aria-disabled="true"]:focus,
-	&:disabled:focus {
-		box-shadow: none;
-	}
+:where(.wc-block-product-categories__button svg) {
+	fill: currentColor;
+}
+
+:where(.rtl .wc-block-product-categories__button svg) {
+	transform: rotate(180deg);
+}
+
+:where(.wc-block-product-categories__button:active) {
+	color: currentColor;
+}
+
+:where(.wc-block-product-categories__button:disabled, .wc-block-product-categories__button[aria-disabled="true"]) {
+	cursor: default;
+	opacity: 0.3;
+}
+
+:where(.wc-block-product-categories__button[aria-disabled="true"]:focus, .wc-block-product-categories__button:disabled:focus) {
+	box-shadow: none;
 }
