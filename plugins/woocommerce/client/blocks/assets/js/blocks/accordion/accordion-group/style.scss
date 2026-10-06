@@ -56,6 +56,7 @@
 
 .wp-block-woocommerce-accordion-header.icon-position-left
 	.accordion-item__toggle {
+	/* This should be refactored to not use the row-reverse value. */
 	flex-direction: row-reverse;
 }
 
