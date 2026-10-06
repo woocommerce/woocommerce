@@ -251,10 +251,44 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.4.0 (owner-scoped due scan).
+	 * @testdox The schema version is 2.5.0 (nullable contract identity columns, HPOS-style meta indexes).
 	 */
-	public function test_schema_version_is_2_4_0(): void {
-		$this->assertSame( '2.4.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_5_0(): void {
+		$this->assertSame( '2.5.0', SchemaInstaller::get_version() );
+	}
+
+	/**
+	 * @testdox Contract identity columns are nullable until the extension supplies them.
+	 */
+	public function test_contracts_identity_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		foreach ( array( 'customer_id', 'currency', 'selling_plan_id', 'start_gmt' ) as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a contracts.{$column} column." );
+			$this->assertSame( 'YES', $row['Null'] ?? null, "Expected contracts.{$column} to be NULLable." );
+		}
+	}
+
+	/**
+	 * @testdox Contract meta carries the HPOS-style key/value indexes and no contract_key index.
+	 */
+	public function test_contract_meta_has_hpos_style_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'meta_key_value', $indexes );
+		$this->assertContains( 'contract_meta_key_value', $indexes );
+		$this->assertNotContains( 'contract_key', $indexes );
+		$this->assertSame( array( 'meta_key', 'meta_value' ), $this->index_columns( $table, 'meta_key_value' ) );
+		$this->assertSame(
+			array( 'contract_id', 'meta_key', 'meta_value' ),
+			$this->index_columns( $table, 'contract_meta_key_value' )
+		);
 	}
 
 	public function test_cycles_table_has_expected_columns(): void {
