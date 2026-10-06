@@ -691,6 +691,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'plugin_url'                                      => WC()->plugin_url(),
 					'ajax_url'                                        => admin_url( 'admin-ajax.php' ),
 					'order_item_nonce'                                => wp_create_nonce( 'order-item' ),
+					'save_order_billing_address_nonce'                 => wp_create_nonce( 'save-order-billing-address' ),
 					'add_attribute_nonce'                             => wp_create_nonce( 'add-attribute' ),
 					'save_attributes_nonce'                           => wp_create_nonce( 'save-attributes' ),
 					'add_attributes_and_variations'                   => wp_create_nonce( 'add-attributes-and-variations' ),

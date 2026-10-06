@@ -2686,6 +2686,136 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Saving a billing country and state via AJAX does not change the order status.
+	 */
+	public function test_save_order_billing_address() {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'NY' );
+		$order->save();
+		$original_status = $order->get_status();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['country']  = 'CA';
+		$_POST['state']    = 'ON';
+		$_POST['security'] = wp_create_nonce( 'save-order-billing-address' );
+
+		$response = $this->do_ajax( 'woocommerce_save_order_billing_address' );
+
+		$this->assertTrue( $response['success'] );
+		$saved_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'CA', $saved_order->get_billing_country() );
+		$this->assertSame( 'ON', $saved_order->get_billing_state() );
+		$this->assertSame( $original_status, $saved_order->get_status() );
+	}
+
+	/**
+	 * Selecting a new state saves it even when the country is unchanged.
+	 */
+	public function test_save_order_billing_address_state_only() {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'NY' );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['country']  = 'US';
+		$_POST['state']    = 'CA';
+		$_POST['security'] = wp_create_nonce( 'save-order-billing-address' );
+
+		$response = $this->do_ajax( 'woocommerce_save_order_billing_address' );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame( 'CA', wc_get_order( $order->get_id() )->get_billing_state() );
+	}
+
+	/**
+	 * Changing countries clears an old state when no new one is selected.
+	 */
+	public function test_save_order_billing_address_clears_state() {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'NY' );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['country']  = 'CA';
+		$_POST['state']    = '';
+		$_POST['security'] = wp_create_nonce( 'save-order-billing-address' );
+
+		$response = $this->do_ajax( 'woocommerce_save_order_billing_address' );
+
+		$this->assertTrue( $response['success'] );
+		$saved_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'CA', $saved_order->get_billing_country() );
+		$this->assertSame( '', $saved_order->get_billing_state() );
+	}
+
+	/**
+	 * Invalid countries must not be saved to an order.
+	 */
+	public function test_save_order_billing_address_rejects_invalid_country() {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'US' );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['country']  = 'INVALID';
+		$_POST['state']    = '';
+		$_POST['security'] = wp_create_nonce( 'save-order-billing-address' );
+
+		$response = $this->do_ajax( 'woocommerce_save_order_billing_address' );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'US', wc_get_order( $order->get_id() )->get_billing_country() );
+	}
+
+	/**
+	 * Reject states not defined for a country without changing either field.
+	 */
+	public function test_save_order_billing_address_rejects_invalid_state() {
+		$this->_setRole( 'administrator' );
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'NY' );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['country']  = 'CA';
+		$_POST['state']    = 'INVALID';
+		$_POST['security'] = wp_create_nonce( 'save-order-billing-address' );
+
+		$response = $this->do_ajax( 'woocommerce_save_order_billing_address' );
+
+		$this->assertFalse( $response['success'] );
+		$saved_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'US', $saved_order->get_billing_country() );
+		$this->assertSame( 'NY', $saved_order->get_billing_state() );
+	}
+
+	/**
+	 * Users without order-editing permission cannot silently change the billing address.
+	 */
+	public function test_save_order_billing_address_requires_permission() {
+		$order = WC_Helper_Order::create_order();
+		$this->_setRole( 'subscriber' );
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['country']  = 'CA';
+		$_POST['state']    = 'ON';
+		$_POST['security'] = wp_create_nonce( 'save-order-billing-address' );
+
+		$response = $this->do_ajax( 'woocommerce_save_order_billing_address' );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertNotSame( 'CA', wc_get_order( $order->get_id() )->get_billing_country() );
+	}
+
+	/**
 	 * @testdox remove_order_item rejects a negative quantity passed through the pre-delete save and deletes nothing.
 	 */
 	public function test_remove_order_item_rejects_negative_quantity_in_passthrough() {

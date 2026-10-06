@@ -185,6 +185,7 @@ class WC_AJAX {
 			'remove_order_tax',
 			'calc_line_taxes',
 			'save_order_items',
+			'save_order_billing_address',
 			'load_order_items',
 			'add_order_note',
 			'delete_order_note',
@@ -1722,6 +1723,42 @@ class WC_AJAX {
 	 */
 	public static function calc_line_taxes() {
 		wc_get_container()->get( TaxesController::class )->calc_line_taxes_via_ajax();
+	}
+
+	/**
+	 * Save an order's billing country and state without submitting the order form.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public static function save_order_billing_address() {
+		check_ajax_referer( 'save-order-billing-address', 'security' );
+
+		if ( ! isset( $_POST['order_id'], $_POST['country'], $_POST['state'] ) || ! is_string( $_POST['country'] ) || ! is_string( $_POST['state'] ) ) {
+			wp_send_json_error( null, 400 );
+		}
+
+		$order_id = absint( $_POST['order_id'] );
+		if ( ! current_user_can( 'edit_shop_order', $order_id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers this order-specific capability.
+			wp_send_json_error( null, 403 );
+		}
+
+		$order   = wc_get_order( $order_id );
+		$country = sanitize_text_field( wp_unslash( $_POST['country'] ) );
+		$state   = sanitize_text_field( wp_unslash( $_POST['state'] ) );
+		if ( ! $order instanceof WC_Order || ! isset( WC()->countries->get_countries()[ $country ] ) ) {
+			wp_send_json_error( null, 400 );
+		}
+
+		$states = WC()->countries->get_states( $country );
+		if ( $state && is_array( $states ) && ! isset( $states[ $state ] ) ) {
+			wp_send_json_error( null, 400 );
+		}
+
+		$order->set_billing_country( $country );
+		$order->set_billing_state( $state );
+		$order->save();
+		wp_send_json_success();
 	}
 
 	/**

@@ -12,6 +12,8 @@ jQuery( function ( $ ) {
 	 */
 	var wc_meta_boxes_order = {
 		states: null,
+		billing_address_save_request: null,
+		billing_address_to_save: null,
 		init: function() {
 			if (
 				! (
@@ -25,7 +27,21 @@ jQuery( function ( $ ) {
 
 			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
+			$( '#_billing_country' )
+				.on( 'select2:select', this.save_billing_address )
+				.on( 'change', function( event ) {
+					if ( event.originalEvent ) {
+						wc_meta_boxes_order.save_billing_address();
+					}
+				} );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
+			$( document.body )
+				.on( 'select2:select', 'select#_billing_state', this.save_billing_address )
+				.on( 'change', 'select#_billing_state', function( event ) {
+					if ( event.originalEvent ) {
+						wc_meta_boxes_order.save_billing_address();
+					}
+				} );
 			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
 				window.onbeforeunload = '';
 			});
@@ -105,6 +121,38 @@ jQuery( function ( $ ) {
 			// This event has a typo - deprecated in 2.5.0
 			$( document.body ).trigger( 'contry-change.woocommerce', [country, $( this ).closest( 'div' )] );
 			$( document.body ).trigger( 'country-change.woocommerce', [country, $( this ).closest( 'div' )] );
+		},
+
+		save_billing_address: function() {
+			var country = $( '#_billing_country' ).val(),
+				state = $( '#_billing_state' ).val() || '';
+
+			if ( ! country ) {
+				return;
+			}
+
+			wc_meta_boxes_order.billing_address_to_save = { country: country, state: state };
+			if ( wc_meta_boxes_order.billing_address_save_request ) {
+				return;
+			}
+
+			wc_meta_boxes_order.billing_address_save_request = $.ajax( {
+				url: woocommerce_admin_meta_boxes.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'woocommerce_save_order_billing_address',
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					country: country,
+					state: state,
+					security: woocommerce_admin_meta_boxes.save_order_billing_address_nonce
+				}
+			} ).always( function() {
+				wc_meta_boxes_order.billing_address_save_request = null;
+				if ( wc_meta_boxes_order.billing_address_to_save.country !== country ||
+					wc_meta_boxes_order.billing_address_to_save.state !== state ) {
+					wc_meta_boxes_order.save_billing_address();
+				}
+			} );
 		},
 
 		change_state: function() {
