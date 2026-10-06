@@ -37,7 +37,9 @@ class MemoryManager {
 	}
 
 	/**
-	 * Flush all caches.
+	 * Flush the in-memory caches of the current process.
+	 *
+	 * The shared persistent object cache (e.g. Redis or Memcached) is left untouched.
 	 *
 	 * @since 10.5.0
 	 */
@@ -46,7 +48,9 @@ class MemoryManager {
 
 		$wpdb->queries = array();
 
-		wp_cache_flush();
+		if ( wp_cache_supports( 'flush_runtime' ) ) {
+			wp_cache_flush_runtime();
+		}
 
 		if ( ! is_object( $wp_object_cache ) ) {
 			return;
