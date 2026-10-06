@@ -285,6 +285,10 @@ class ProductQuery implements QueryClausesGenerator {
 				$args['post__in'] = ! empty( $args['post__in'] )
 					? array_values( array_intersect( $args['post__in'], $related ) )
 					: array_values( $related );
+				// An empty intersection (no included product is related) must return no products, not all.
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
 			} else {
 				// No related products found, return empty result.
 				$args['post__in'] = array( 0 );

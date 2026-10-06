@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Products REST and Store API: return the correct products when the on_sale filter is combined with include or exclude.
+Products REST and Store API: return the correct products when the on_sale (or Store API related) filter is combined with include or exclude.

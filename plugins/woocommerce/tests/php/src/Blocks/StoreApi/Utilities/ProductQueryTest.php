@@ -326,6 +326,29 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The related filter must return no products when none of the included products are related, not every product.
+	 */
+	public function test_related_filter_with_empty_intersection_returns_no_products(): void {
+		$fixtures = new FixtureData();
+		$anchor   = $fixtures->get_simple_product( array( 'name' => 'Related anchor' ) );
+
+		$callback = static function () {
+			return array( 55, 66 );
+		};
+		add_filter( 'woocommerce_related_products', $callback );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $anchor->get_id() );
+		$request->set_param( 'include', array( 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		remove_filter( 'woocommerce_related_products', $callback );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
 	 * Get product IDs matched by a Store API slug filter.
 	 *
 	 * @param string $slug_filter Slug filter value.
