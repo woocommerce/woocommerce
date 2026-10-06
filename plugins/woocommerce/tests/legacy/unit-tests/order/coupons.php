@@ -52,7 +52,14 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = wc_create_order();
 		$order->update_meta_data( 'is_vat_exempt', $exemption_meta );
-		$order->add_product( $product, 1, array( 'subtotal' => 100, 'total' => 100 ) );
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
 
 		if ( null !== $filtered_exemption ) {
 			add_filter(
