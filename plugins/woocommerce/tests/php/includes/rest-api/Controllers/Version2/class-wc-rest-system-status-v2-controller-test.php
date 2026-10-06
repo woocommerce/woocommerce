@@ -67,6 +67,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 *
 	 * @testWith ["-1", 34359738368]
 	 *           ["2G", 2147483648]
+	 *           ["268435456", 268435456]
 	 *
 	 * @param string $php_memory_limit The PHP memory_limit ini value.
 	 * @param int    $expected         The expected reported memory limit in bytes.
