@@ -50,7 +50,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			var(--wpds-color-stroke-surface-neutral-weak);
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-sm, 8px);
+		gap: var(--wpds-dimension-gap-sm);
 		padding: var(--wpds-dimension-padding-2xl) 48px;
 	}
 
@@ -73,7 +73,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui-shell__header-actions {
 		display: flex;
 		flex: 0 0 auto;
-		gap: var(--wpds-dimension-gap-sm, 8px);
+		gap: var(--wpds-dimension-gap-sm);
 		margin-inline-start: auto;
 	}
 
@@ -84,13 +84,13 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__badge {
 		align-items: center;
-		border-radius: var(--wpds-border-radius-lg, 8px);
+		border-radius: var(--wpds-border-radius-lg);
 		display: inline-flex;
-		font-size: var(--wpds-typography-font-size-sm, 12px);
-		font-weight: var(--wpds-typography-font-weight-regular, 400);
-		line-height: var(--wpds-typography-line-height-xs, 16px);
+		font-size: var(--wpds-typography-font-size-sm);
+		font-weight: var(--wpds-typography-font-weight-regular);
+		line-height: var(--wpds-typography-line-height-xs);
 		min-height: 24px;
-		padding: 0 var(--wpds-dimension-padding-sm, 8px);
+		padding: 0 var(--wpds-dimension-padding-sm);
 
 		&,
 		&--default {
@@ -208,7 +208,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-xl, 24px);
+		gap: var(--wpds-dimension-gap-xl);
 		margin: var(--wpds-dimension-gap-2xl) auto 48px;
 		max-width: var(--wpds-dimension-surface-width-xl);
 	}

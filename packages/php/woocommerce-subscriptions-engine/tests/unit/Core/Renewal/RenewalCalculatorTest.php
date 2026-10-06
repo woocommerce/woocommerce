@@ -146,7 +146,7 @@ class RenewalCalculatorTest extends TestCase {
 			)
 		);
 
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::pending() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
 		$this->assertSame( 7, $cycle->get_contract_id() );
 		$this->assertSame( 5, $cycle->get_count() );
 		$this->assertSame( 5, $cycle->get_sequence_no() );
