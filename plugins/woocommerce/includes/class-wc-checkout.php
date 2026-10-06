@@ -411,23 +411,23 @@ class WC_Checkout {
 	/**
 	 * Checks whether the customer's shipping destination differs from their billing address.
 	 *
-	 * Names and company are ignored. When the shipping address has no street, as after using the cart's shipping
+	 * Compares unfiltered values. Names and company are ignored. When the shipping address has no street, as after using the cart's shipping
 	 * calculator, empty shipping fields are skipped, so fields the calculator hides don't count as a difference.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 * @return bool
 	 */
 	private function customer_has_different_shipping_destination( WC_Customer $customer ): bool {
-		if ( $customer->get_shipping_country() !== $customer->get_billing_country() || $customer->get_shipping_state() !== $customer->get_billing_state() ) {
+		if ( $customer->get_shipping_country( 'edit' ) !== $customer->get_billing_country( 'edit' ) || $customer->get_shipping_state( 'edit' ) !== $customer->get_billing_state( 'edit' ) ) {
 			return true;
 		}
 
-		$is_location_only = '' === trim( (string) $customer->get_shipping_address_1() );
+		$is_location_only = '' === trim( (string) $customer->get_shipping_address_1( 'edit' ) );
 		$fields           = $is_location_only ? array( 'city', 'postcode' ) : array( 'address_1', 'address_2', 'city', 'postcode' );
 
 		foreach ( $fields as $field ) {
-			$shipping_value = trim( (string) $customer->{"get_shipping_{$field}"}() );
-			$billing_value  = trim( (string) $customer->{"get_billing_{$field}"}() );
+			$shipping_value = trim( (string) $customer->{"get_shipping_{$field}"}( 'edit' ) );
+			$billing_value  = trim( (string) $customer->{"get_billing_{$field}"}( 'edit' ) );
 
 			if ( $is_location_only && '' === $shipping_value ) {
 				continue;
@@ -463,7 +463,7 @@ class WC_Checkout {
 		foreach ( array( 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) as $field ) {
 			$saved_value = (string) get_user_meta( $customer->get_id(), "shipping_{$field}", true );
 
-			if ( (string) $customer->{"get_shipping_{$field}"}() !== $saved_value ) {
+			if ( (string) $customer->{"get_shipping_{$field}"}( 'edit' ) !== $saved_value ) {
 				return false;
 			}
 		}

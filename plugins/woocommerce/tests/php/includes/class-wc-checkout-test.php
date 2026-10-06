@@ -1146,6 +1146,38 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'woocommerce_ship_to_different_address_checked' compares the saved shipping address without the customer getter filters.
+	 */
+	public function test_ship_to_different_address_checked_ignores_filtered_address_values(): void {
+		$customer = WC_Helper_Customer::create_customer();
+		$customer->set_billing_address_1( '60 29th Street #343' );
+		$customer->set_billing_city( 'San Francisco' );
+		$customer->set_billing_postcode( '94110' );
+		$customer->set_shipping_address_1( '500 Castro Street' );
+		$customer->set_shipping_city( 'Mountain View' );
+		$customer->set_shipping_postcode( '94041' );
+		$customer->save();
+
+		$format_postcode = function ( $postcode ) {
+			return $postcode . '-0000';
+		};
+		add_filter( 'woocommerce_customer_get_shipping_postcode', $format_postcode );
+		$this->reinstantiate_checkout();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer->get_id() );
+
+		try {
+			$checked = apply_filters( 'woocommerce_ship_to_different_address_checked', 0 );
+		} finally {
+			WC()->customer = $original_customer;
+			remove_filter( 'woocommerce_customer_get_shipping_postcode', $format_postcode );
+		}
+
+		$this->assertSame( 0, $checked, 'A filtered postcode should not make the saved shipping address look changed.' );
+	}
+
+	/**
 	 * Creates a fresh checkout singleton, so the hooks it registers on first instantiation are in place for this test.
 	 * The original singleton is restored on tear down.
 	 */
