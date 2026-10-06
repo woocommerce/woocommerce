@@ -1,4 +1,0 @@
-{
-  "extends": "@wordpress/stylelint-config",
-  "reportNeedlessDisables": true,
-}
