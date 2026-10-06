@@ -44,6 +44,7 @@ import {
 	recordPaymentsOnboardingEvent,
 	getPluginActionErrorMessage,
 	getFailedPluginAction,
+	getMorePaymentOptionsUrl,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
@@ -496,7 +497,7 @@ export const SettingsPaymentsMain = () => {
 
 	const morePaymentOptionsLink = (
 		<Link
-			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
+			href={ getMorePaymentOptionsUrl( businessCountry ) }
 			onClick={ trackMorePaymentsOptionsClicked }
 			rel="noopener noreferrer"
 			openInNewTab

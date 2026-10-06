@@ -39,13 +39,17 @@ final class SchemaInstaller {
 	 *         contracts for the batch renewal scan.
 	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
 	 *         options, gain merchant_code (UNIQUE).
+	 * 2.4.0 - owner-scoped due scan: `due_owner (extension_slug, next_payment_gmt)` replaces
+	 *         `due_contract (status, next_payment_gmt)` and makes the contracts
+	 *         `extension_slug` index redundant (dropped); pre-freeze, existing tables must be
+	 *         recreated to drop the old indexes.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.3.0';
+	private const VERSION = '2.4.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -222,8 +226,8 @@ final class SchemaInstaller {
 ) {$collate};";
 
 		// The contract row is the live source of truth: the totals and stamps are live
-		// values, not caches of cycles. The `due_contract (status, next_payment_gmt)` index
-		// keys the batch dispatcher's scan (status equality, then a range on the due date);
+		// values, not caches of cycles. The `due_owner (extension_slug, next_payment_gmt)` index
+		// keys the batch dispatcher's scan (owner equality, then a range on the due date);
 		// `due` is retained for next-bill-cache lookups keyed the other way. `origin_order_id`
 		// is NULLABLE (a manual/admin contract has no origin order). There is no generic
 		// `cycle_count` - counters are per-chain, derived as `MAX(count)` over
@@ -259,9 +263,8 @@ final class SchemaInstaller {
   PRIMARY KEY  (id),
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
-  KEY due_contract (status, next_payment_gmt),
-  KEY origin_order (origin_order_id),
-  KEY extension_slug (extension_slug)
+  KEY due_owner (extension_slug, next_payment_gmt),
+  KEY origin_order (origin_order_id)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (

@@ -1,5 +1,6 @@
 module.exports = {
 	extends: '@wordpress/stylelint-config/scss-stylistic',
+	reportNeedlessDisables: true,
 	ignoreFiles: [ './vendor/**/*.scss' ],
 	rules: {
 		'at-rule-empty-line-before': null,
