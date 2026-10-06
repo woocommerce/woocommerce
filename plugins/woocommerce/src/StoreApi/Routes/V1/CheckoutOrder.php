@@ -207,8 +207,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		// Shipping is optional. Keep the address the order already holds so a billing-only request does not
-		// re-address it, unless the store ships to billing only. Fall back to billing when it never had one.
+		// Shipping field is optional, so we keep an order existing shipping address if it didn't come via the request.
+		// Unless we shipping to billing addresses, in that case, we match shipping to billing.
 		$keep_shipping = ! wc_ship_to_billing_address_only() && '' !== $order->get_shipping_country();
 		$shipping      = $request['shipping_address'] ?? ( $keep_shipping ? $order->get_address( 'shipping' ) : $billing );
 

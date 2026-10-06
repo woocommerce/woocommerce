@@ -19,8 +19,7 @@ use Exception;
 class OrderController {
 
 	/**
-	 * Address fields that pick the shipping zone and tax rate. Shipping zones use country, state and
-	 * postcode, tax rates also use city. Both checks compare city so they stay consistent.
+	 * Address fields that decides shipping rate and tax rate.
 	 *
 	 * @see \WC_Shipping_Zones::get_zone_matching_package()
 	 * @see \WC_Tax::find_rates()
@@ -239,10 +238,10 @@ class OrderController {
 	}
 
 	/**
-	 * Puts back the state name an order had when the new address sends the code for the same state.
+	 * Keep a static state name as is if Checkout sends state code.
 	 *
-	 * Orders created outside the Store API (REST API, imports) can hold a state name, which matches no shipping
-	 * zone or tax rate. The Store API always sends the code, so saving it would change the total of an unchanged address.
+	 * This is because some edge cases would have an order with a state name (New York) instead of NY.
+	 * Switching from New York to NY might trigger new totals so we avoid that by keeping the full name.
 	 *
 	 * @param \WC_Order $order      Order with the new addresses set.
 	 * @param string[]  $old_states State per address type before the new addresses were set.
@@ -269,8 +268,8 @@ class OrderController {
 	 * @param array     $old_tax_location      Location the order was taxed on before the change.
 	 */
 	private function validate_location_change( \WC_Order $order, array $old_shipping_location, array $old_tax_location ): void {
-		// An order with no address has no shipping cost or tax tied to a location, e.g. a merchant-created
-		// order the shopper fills in for the first time, so any address is allowed.
+		// An order with no address has no shipping cost or tax tied to a location, e.g. an order created
+		// by a merchant and sent to the shopper to fill in for the first time, so any address is allowed.
 		if ( empty( $old_shipping_location['country'] ) ) {
 			return;
 		}
