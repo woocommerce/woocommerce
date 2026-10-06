@@ -68,6 +68,10 @@ body {
 	color: var(--wp--preset--color--theme-2);
 }
 
+.wp-block-woocommerce-checkout {
+	padding-top: 0;
+}
+
 .wp-block-woocommerce-checkout .wc-block-components-title {
 	font-size: var(--wp--preset--font-size--large);
 }

@@ -13,7 +13,7 @@
 
 ?>
 
-<!-- wp:group {"metadata":{"name":"Product grid with filters","categories":["woo-commerce","purple"],"patternName":"purple/product-grid-with-filters","description":"A product catalog grid with sidebar filters, sorting, and pagination."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}}},"layout":{"type":"constrained"}} -->
+<!-- wp:group {"metadata":{"name":"Product grid with filters","categories":["woo-commerce","purple"],"patternName":"purple/product-grid-with-filters","description":"A product catalog grid with sidebar filters, sorting, and pagination."},"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|70","bottom":"0"}},"@tablet":{"spacing":{"margin":{"top":"0"}}},"@mobile":{"spacing":{"margin":{"top":"0"}}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide" style="margin-top:var(--wp--preset--spacing--70);margin-bottom:0">
 <!-- wp:columns {"align":"wide","style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
 <div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--50);margin-bottom:0"><!-- wp:column {"width":"22%","style":{"@mobile":{"spacing":{"blockGap":"0"}},"@tablet":{"spacing":{"blockGap":"0"}}}} -->

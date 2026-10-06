@@ -9,7 +9,7 @@
 
 ?>
 
-<!-- wp:group {"tagName":"main","metadata":{"patternName":"purple/hidden-order-confirmation","name":"WooCommerce order confirmation"},"style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|50"}}},"layout":{"inherit":true,"type":"constrained","contentSize":"1060px"}} -->
+<!-- wp:group {"tagName":"main","metadata":{"patternName":"purple/hidden-order-confirmation","name":"WooCommerce order confirmation"},"style":{"spacing":{"margin":{"top":"0","bottom":"0"},"padding":{"top":"var:preset|spacing|30","bottom":"var:preset|spacing|50"}},"@tablet":{"spacing":{"padding":{"top":"0"}}},"@mobile":{"spacing":{"padding":{"top":"0"}}}},"layout":{"inherit":true,"type":"constrained","contentSize":"1060px"}} -->
 <main class="wp-block-group" style="margin-top:0;margin-bottom:0;padding-top:var(--wp--preset--spacing--30);padding-bottom:var(--wp--preset--spacing--50)"><!-- wp:woocommerce/order-confirmation-status /-->
 
 <!-- wp:woocommerce/order-confirmation-summary {"style":{"spacing":{"margin":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}}} /-->
