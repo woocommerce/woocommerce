@@ -217,9 +217,9 @@ final class RenewalEngine {
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
 	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
-	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
-	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
-	 * scheduled caller can park and a manual caller can return null; returns null for an
+	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no currency or
+	 * customer, no chain, an unresolvable plan, a non-adjacent count, a gateway that cannot
+	 * charge renewals) so the scheduled caller can park and a manual caller can return null; returns null for an
 	 * idempotent no-op (a non-active contract, a live claim, an already-settled cycle, an
 	 * unbuildable order).
 	 *
@@ -269,6 +269,15 @@ final class RenewalEngine {
 				)
 			);
 			return null;
+		}
+
+		// Renewal inputs an extension may not have supplied yet: without them no order can
+		// be built, so the scheduled caller parks the contract out of the due set.
+		if ( null === $contract->get_currency() ) {
+			throw new RenewalNotProcessable( 'the contract has no currency' );
+		}
+		if ( null === $contract->get_customer_id() ) {
+			throw new RenewalNotProcessable( 'the contract has no customer' );
 		}
 
 		// Pre-flight capability gate, ahead of the claim so an unchargeable renewal never
@@ -455,7 +464,7 @@ final class RenewalEngine {
 				'count'             => $cycle_count,
 				'period_start'      => $head->get_ends_at_gmt(),
 				'expected_total'    => $contract->get_billing_total(),
-				'currency'          => $contract->get_currency(),
+				'currency'          => (string) $contract->get_currency(),
 				'extension_slug'    => $contract->get_extension_slug(),
 				'plan_snapshot_id'  => $contract->get_plan_snapshot_id(),
 				'items_snapshot_id' => $contract->get_items_snapshot_id(),
@@ -828,7 +837,7 @@ final class RenewalEngine {
 
 		$renewal_order = wc_create_order(
 			array(
-				'customer_id' => $contract->get_customer_id(),
+				'customer_id' => (int) $contract->get_customer_id(),
 				'status'      => OrderStatus::CHECKOUT_DRAFT,
 				'created_via' => 'woocommerce_subscriptions_engine_renewal',
 			)

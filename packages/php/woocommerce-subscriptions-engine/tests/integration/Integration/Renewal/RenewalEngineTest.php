@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -1524,6 +1525,104 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
+	 * Create an active, overdue contract through the facade, minus the given renewal input.
+	 *
+	 * @param string $missing One of currency, customer, payment_method, billing_policy.
+	 */
+	private function seed_contract_missing( string $missing ): int {
+		$customer = self::factory()->user->create();
+		$this->assertIsInt( $customer );
+
+		$args = array(
+			'owner'            => 'engine-tests',
+			'customer_id'      => $customer,
+			'currency'         => 'USD',
+			'payment_method'   => self::GATEWAY_APPROVING,
+			'start_gmt'        => '2026-01-01 00:00:00',
+			'next_payment_gmt' => '2026-02-01 00:00:00',
+			'billing_total'    => '10',
+			'plan_snapshot'    => array(
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			),
+		);
+
+		switch ( $missing ) {
+			case 'currency':
+				unset( $args['currency'], $args['billing_total'] );
+				break;
+			case 'customer':
+				unset( $args['customer_id'] );
+				break;
+			case 'billing_policy':
+				unset( $args['plan_snapshot'] );
+				break;
+			default:
+				unset( $args[ $missing ] );
+		}
+
+		$id = Contracts::create( $args );
+		Contracts::add_cycle(
+			$id,
+			array(
+				'status'        => CycleStatus::BILLED,
+				'currency'      => 'USD',
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+			)
+		);
+		Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+
+		return $id;
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_missing_renewal_inputs(): array {
+		return array(
+			'currency'       => array( 'currency' ),
+			'customer'       => array( 'customer' ),
+			'payment method' => array( 'payment_method' ),
+			'billing policy' => array( 'billing_policy' ),
+		);
+	}
+
+	/**
+	 * @testdox the scheduled scan parks a contract missing a renewal input instead of erroring.
+	 * @dataProvider provide_missing_renewal_inputs
+	 *
+	 * @param string $missing The missing renewal input.
+	 */
+	public function test_scheduled_renewal_parks_a_contract_missing_a_renewal_input( string $missing ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( $missing );
+
+		$this->assertNull( $this->run_scheduled_renewal( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Parked out of the due set.' );
+	}
+
+	/**
+	 * @testdox renew_now refuses a contract missing a renewal input without parking it.
+	 * @dataProvider provide_missing_renewal_inputs
+	 *
+	 * @param string $missing The missing renewal input.
+	 */
+	public function test_renew_now_refuses_a_contract_missing_a_renewal_input( string $missing ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( $missing );
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( '2026-02-01 00:00:00', $this->reload_contract( $contract_id )->get_next_payment_gmt() );
 	}
 
 	/**
