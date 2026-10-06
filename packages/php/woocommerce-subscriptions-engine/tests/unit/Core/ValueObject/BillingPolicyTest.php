@@ -138,6 +138,33 @@ class BillingPolicyTest extends TestCase {
 		);
 	}
 
+	/**
+	 * @testdox compute_first_renewal_from refuses an unusable cadence even with a trial ($period / $interval).
+	 *
+	 * @testWith ["decade", 1, "BillingPolicy: invalid period \"decade\"."]
+	 *           ["month", 0, "BillingPolicy: interval must be positive, got 0."]
+	 *
+	 * @param string $period   Stored period.
+	 * @param int    $interval Stored interval.
+	 * @param string $message  Expected exception message.
+	 */
+	public function test_compute_first_renewal_with_a_trial_refuses_an_unusable_cadence( string $period, int $interval, string $message ): void {
+		$policy = BillingPolicy::from_array(
+			array(
+				'period'         => $period,
+				'interval'       => $interval,
+				'trial_duration' => array(
+					'length' => 7,
+					'unit'   => 'day',
+				),
+			)
+		);
+
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( $message );
+		$policy->compute_first_renewal_from( new DateTimeImmutable( '2026-01-01', new DateTimeZone( 'UTC' ) ) );
+	}
+
 	public function test_invalid_period_throws(): void {
 		$policy = BillingPolicy::from_array(
 			array(

@@ -159,7 +159,7 @@ final class BillingPolicy {
 	 *
 	 * @throws DomainException If the period is unknown or the interval is not positive.
 	 */
-	public function assert_usable_cadence(): void {
+	private function assert_usable_cadence(): void {
 		if ( $this->interval <= 0 ) {
 			throw new DomainException(
 				sprintf( 'BillingPolicy: interval must be positive, got %d.', $this->interval )
@@ -231,12 +231,15 @@ final class BillingPolicy {
 	 * Honours the policy's native trial: when set, the first cycle's billing
 	 * date is the end of the trial. With no trial this delegates to
 	 * {@see self::compute_next_renewal_from()} so there is one cadence-math path.
+	 * The cadence must be usable either way, since later renewals follow it.
 	 *
 	 * @param DateTimeImmutable $contract_start Moment the contract was created.
 	 * @return DateTimeImmutable The first renewal moment in UTC.
-	 * @throws DomainException If trial length is not positive or trial unit is unknown.
+	 * @throws DomainException If the cadence is unusable, the trial length is not positive or the trial unit is unknown.
 	 */
 	public function compute_first_renewal_from( DateTimeImmutable $contract_start ): DateTimeImmutable {
+		$this->assert_usable_cadence();
+
 		if ( null === $this->trial_duration ) {
 			return $this->compute_next_renewal_from( $contract_start );
 		}
