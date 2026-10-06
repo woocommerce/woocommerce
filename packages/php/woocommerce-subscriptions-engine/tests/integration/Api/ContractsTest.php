@@ -325,6 +325,52 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 6, $view->get_payment_token_id() );
 	}
 
+	public function test_update_does_not_revert_a_concurrent_write_to_other_fields(): void {
+		global $wpdb;
+
+		$id = Contracts::create(
+			array(
+				'owner'            => self::OWNER,
+				'status'           => ContractStatus::ACTIVE,
+				'next_payment_gmt' => '2026-02-01 00:00:00',
+			)
+		);
+
+		// A concurrent writer (e.g. a cancel compare-and-set) lands after the facade
+		// read the contract and before its own write.
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$injected = false;
+		$race     = static function ( string $query ) use ( &$injected, $table, $id, $wpdb ): string {
+			if ( ! $injected && 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+				$injected = true;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->update(
+					$table,
+					array(
+						'status'           => ContractStatus::CANCELLED,
+						'next_payment_gmt' => null,
+					),
+					array( 'id' => $id )
+				);
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $race );
+
+		try {
+			$this->assertTrue( Contracts::update( $id, array( 'payment_method_title' => 'X' ) ) );
+		} finally {
+			remove_filter( 'query', $race );
+		}
+
+		$this->assertTrue( $injected );
+		$view = $this->view( $id );
+		$this->assertSame( 'X', $view->get_payment_method_title() );
+		$this->assertSame( ContractStatus::CANCELLED, $view->get_status() );
+		$this->assertNull( $view->get_next_payment_gmt() );
+	}
+
 	public function test_items_and_addresses_are_replaced_as_a_whole(): void {
 		$id = Contracts::create(
 			array(

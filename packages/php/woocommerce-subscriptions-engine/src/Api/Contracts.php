@@ -148,9 +148,10 @@ final class Contracts {
 	/**
 	 * Write the given fields to an existing contract.
 	 *
-	 * Takes the keys of {@see self::create()} except `owner`. Only present keys are
-	 * written; `items` and `addresses` replace the whole set; `null` clears a nullable
-	 * field (and resets a money field to 0).
+	 * Takes the keys of {@see self::create()} except `owner`. Only the columns of the
+	 * present keys are written, so fields a concurrent writer changed in between keep
+	 * its values; `items` and `addresses` replace the whole set; `null` clears a
+	 * nullable field (and resets a money field to 0).
 	 *
 	 * @param int                  $id   Contract id.
 	 * @param array<string, mixed> $args Fields to write.
@@ -167,8 +168,11 @@ final class Contracts {
 		}
 
 		$snapshots = self::apply( $contract, $args );
+		$fields    = array_values( array_diff( array_keys( $args ), array( 'plan_snapshot', 'items_snapshot' ) ) );
 
-		$repository->update( $contract );
+		if ( array() !== $fields ) {
+			$repository->update_fields( $contract, $fields );
+		}
 		self::store_snapshots( $repository, $contract, $snapshots );
 
 		return true;

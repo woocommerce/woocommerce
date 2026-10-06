@@ -149,6 +149,58 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
+	 * and replace items / addresses when named. Unnamed columns keep their stored
+	 * values, so a concurrent write to them is not reverted.
+	 *
+	 * @param Contract           $contract Contract carrying the values. Must have an id whose row still exists.
+	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
+	 * @throws \InvalidArgumentException If a field is not a writable contract column.
+	 * @throws \RuntimeException If the contract has no id, its row no longer exists, or the write fails.
+	 */
+	public function update_fields( Contract $contract, array $fields ): void {
+		global $wpdb;
+
+		$id = $contract->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
+		}
+
+		$this->assert_contract_exists( $id );
+
+		$storage = $contract->to_storage();
+		$columns = array();
+		foreach ( $fields as $field ) {
+			if ( 'items' === $field || 'addresses' === $field ) {
+				continue;
+			}
+			if ( 'extension_slug' === $field || ! array_key_exists( $field, $storage ) ) {
+				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update contract field "%s".', $field ) ) );
+			}
+			$columns[ $field ] = $storage[ $field ];
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
+			array_merge( $columns, array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) ) ),
+			array( 'id' => (int) $id )
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		if ( in_array( 'items', $fields, true ) ) {
+			$this->replace_items( $id, $contract->get_items() );
+		}
+
+		if ( in_array( 'addresses', $fields, true ) ) {
+			$this->replace_addresses( $id, $contract->get_addresses() );
+		}
+	}
+
+	/**
 	 * Update the contract row (and children) ONLY while its stored status still matches
 	 * `$expected_status` - the optimistic compare-and-set for status-sensitive writes,
 	 * mirroring {@see self::transition_cycle_status()} on the cycle side.
@@ -216,7 +268,7 @@ final class ContractRepository {
 	 *
 	 * Each non-null payload is copy-forwarded against the contract's current snapshot of
 	 * that type (an unchanged payload keeps its id, a changed one inserts a new row); the
-	 * resulting ids are set on the entity and the contract row is written.
+	 * resulting ids are set on the entity and only the snapshot id columns are written.
 	 *
 	 * @param Contract                              $contract      Stored contract (must have an id).
 	 * @param array<string, mixed>|null             $plan_payload  Plan snapshot payload, or null to leave it.
@@ -229,12 +281,14 @@ final class ContractRepository {
 			throw new \RuntimeException( 'Cannot store snapshots for a contract that has no id.' );
 		}
 
+		$columns = array();
 		if ( null !== $plan_payload ) {
 			$plan = PlanSnapshot::from_array( $plan_payload );
 			$contract->set_plan_snapshot_id(
 				$this->copy_forward_or_insert( $id, SnapshotStore::TYPE_PLAN, $plan->get_selling_plan_id(), $plan->to_payload(), $plan->get_schema_version(), $contract->get_plan_snapshot_id() )
 			);
 			$contract->set_plan_snapshot( $plan );
+			$columns[] = 'plan_snapshot_id';
 		}
 
 		if ( null !== $items_payload ) {
@@ -242,9 +296,12 @@ final class ContractRepository {
 			$contract->set_items_snapshot_id(
 				$this->copy_forward_or_insert( $id, SnapshotStore::TYPE_ITEMS, null, $items->to_payload(), $items->get_schema_version(), $contract->get_items_snapshot_id() )
 			);
+			$columns[] = 'items_snapshot_id';
 		}
 
-		$this->update_contract_row( $contract );
+		if ( array() !== $columns ) {
+			$this->update_fields( $contract, $columns );
+		}
 	}
 
 	/**
