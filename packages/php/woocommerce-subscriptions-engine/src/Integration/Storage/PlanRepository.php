@@ -193,35 +193,6 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Persist changes to an existing plan's row. Plan meta is never touched.
-	 *
-	 * @param Plan $plan Plan to update. Must have an id.
-	 * @return bool True on success.
-	 * @throws \RuntimeException If the plan has no id or the update fails.
-	 */
-	public function update( Plan $plan ): bool {
-		global $wpdb;
-
-		$id = $plan->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot update a plan that has no id.' );
-		}
-
-		$data = $this->row_data( $plan );
-
-		$data['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $data, array( 'id' => $id ) );
-
-		if ( false === $updated ) {
-			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Write only the given columns of an existing plan's row (plus its update time), so
 	 * columns a concurrent writer changed in between keep its values. Plan meta is never
 	 * touched.

@@ -152,13 +152,13 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
-	public function test_meta_survives_a_whole_plan_update(): void {
+	public function test_meta_survives_a_plan_update(): void {
 		$this->sut->add_meta( $this->id, 'note', 'kept' );
 
 		$plan = $this->sut->find( $this->id );
 		$this->assertInstanceOf( Plan::class, $plan );
 		$plan->set_name( 'Renamed' );
-		$this->assertTrue( $this->sut->update( $plan ) );
+		$this->sut->update_fields( $plan, array( 'name' ) );
 
 		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}

@@ -118,7 +118,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNull( $fetched->get_extension_slug() );
 	}
 
-	public function test_update_persists_name_status_and_policies_and_keeps_the_created_date(): void {
+	public function test_update_fields_persists_name_status_and_policies_and_bumps_only_the_updated_date(): void {
 		global $wpdb;
 
 		$repo = new PlanRepository();
@@ -126,7 +126,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 		$table = $wpdb->prefix . 'wc_selling_plans';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET date_created_gmt = %s WHERE id = %d", '2020-01-01 00:00:00', $id ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET date_created_gmt = %s, date_updated_gmt = %s WHERE id = %d", '2020-01-01 00:00:00', '2020-01-01 00:00:00', $id ) );
 
 		$plan = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $plan );
@@ -136,7 +136,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$plan->set_billing_policy( array( 'period' => 'week' ) );
 		$plan->set_pricing_policy( array( 'policies' => array() ) );
 		$plan->set_delivery_policy( array( 'x' => 1 ) );
-		$this->assertTrue( $repo->update( $plan ) );
+		$repo->update_fields( $plan, array( 'name', 'status', 'billing_policy', 'pricing_policy', 'delivery_policy' ) );
 
 		$updated = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $updated );
@@ -146,18 +146,19 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'policies' => array() ), $updated->get_pricing_policy() );
 		$this->assertSame( array( 'x' => 1 ), $updated->get_delivery_policy() );
 		$this->assertSame( '2020-01-01 00:00:00', $updated->get_date_created_gmt() );
+		$this->assertNotSame( '2020-01-01 00:00:00', $updated->get_date_updated_gmt() );
 
 		$updated->set_billing_policy( null );
-		$this->assertTrue( $repo->update( $updated ) );
+		$repo->update_fields( $updated, array( 'billing_policy' ) );
 		$cleared = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $cleared );
 		$this->assertNull( $cleared->get_billing_policy() );
 	}
 
-	public function test_update_without_an_id_throws(): void {
+	public function test_update_fields_without_an_id_throws(): void {
 		$this->expectException( \RuntimeException::class );
 
-		( new PlanRepository() )->update( Plan::create( array( 'name' => 'Unsaved' ) ) );
+		( new PlanRepository() )->update_fields( Plan::create( array( 'name' => 'Unsaved' ) ), array( 'name' ) );
 	}
 
 	public function test_update_fields_writes_only_the_named_columns(): void {
@@ -379,7 +380,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$archived = $repo->find( $this->insert_plan( $repo, 'Archived lite', 'lite' ) );
 		$this->assertInstanceOf( Plan::class, $archived );
 		$archived->set_status( PlanStatus::ARCHIVED );
-		$this->assertTrue( $repo->update( $archived ) );
+		$repo->update_fields( $archived, array( 'status' ) );
 
 		$plans = $repo->query(
 			array(
