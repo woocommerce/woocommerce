@@ -9,31 +9,39 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { StatusBadge } from '../status-badge';
 
 describe( 'StatusBadge component', () => {
-	it( 'allows Enter on a popover link without preventing its default action', async () => {
-		render(
-			<StatusBadge
-				status="not_supported"
-				popoverContent={
-					<a href="https://example.test/">Learn more</a>
-				}
-			/>
-		);
-		fireEvent.click(
-			screen.getByRole( 'button', { name: 'More information' } )
-		);
-		const link = await screen.findByRole( 'link', { name: 'Learn more' } );
-		link.focus();
-		const enter = new window.KeyboardEvent( 'keydown', {
-			key: 'Enter',
-			bubbles: true,
-			cancelable: true,
-		} );
+	it.each( [
+		[ 'Enter', 'Enter' ],
+		[ 'Space', ' ' ],
+	] )(
+		'allows %s on a popover link without preventing its default action',
+		async ( _name, key ) => {
+			render(
+				<StatusBadge
+					status="not_supported"
+					popoverContent={
+						<a href="https://example.test/">Learn more</a>
+					}
+				/>
+			);
+			fireEvent.click(
+				screen.getByRole( 'button', { name: 'More information' } )
+			);
+			const link = await screen.findByRole( 'link', {
+				name: 'Learn more',
+			} );
+			link.focus();
+			const event = new window.KeyboardEvent( 'keydown', {
+				key,
+				bubbles: true,
+				cancelable: true,
+			} );
 
-		fireEvent( link, enter );
+			fireEvent( link, event );
 
-		expect( enter.defaultPrevented ).toBe( false );
-		expect( link ).toBeInTheDocument();
-	} );
+			expect( event.defaultPrevented ).toBe( false );
+			expect( link ).toBeInTheDocument();
+		}
+	);
 
 	it( 'opens with Enter and Space and returns focus to the trigger on Escape', async () => {
 		render(
