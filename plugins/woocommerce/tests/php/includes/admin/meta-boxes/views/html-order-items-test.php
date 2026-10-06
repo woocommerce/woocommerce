@@ -54,10 +54,6 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
 		$order_items_html = ob_get_clean();
 
-		remove_filter( 'wc_price', $price_filter );
-		$order->delete( true );
-		$product->delete( true );
-
 		$xpath          = $this->get_xpath_for_html( $order_items_html );
 		$discount_nodes = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'signed-price:-10:-10']" );
 		$refund_nodes   = $xpath->query( "//td[contains(concat(' ', normalize-space(@class), ' '), ' total ') and normalize-space(.) = 'signed-price:-25:-25']" );
@@ -81,9 +77,6 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		ob_start();
 		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
 		$order_items_html = ob_get_clean();
-
-		$order->delete( true );
-		$product->delete( true );
 
 		$xpath          = $this->get_xpath_for_html( $order_items_html );
 		$refunded_nodes = $xpath->query( "//tr[td[contains(concat(' ', normalize-space(@class), ' '), ' label ') and normalize-space(.) = 'Amount already refunded:']]/td[contains(concat(' ', normalize-space(@class), ' '), ' total ')]" );
