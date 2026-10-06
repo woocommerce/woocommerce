@@ -175,6 +175,27 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$customer->{"set_shipping_{$field}"}( $value );
 			}
 		}
+
+		$this->copy_additional_billing_fields_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the values of additional address checkout fields from billing to shipping.
+	 *
+	 * Works from the stored values rather than the registered fields: the session customer is loaded before
+	 * woocommerce_init, which is where extensions usually register their fields.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function copy_additional_billing_fields_to_shipping( WC_Customer $customer ): void {
+		$checkout_fields = \Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields::class );
+		$billing_fields  = $checkout_fields->get_all_fields_from_object( $customer, 'billing', true );
+		$shipping_fields = $checkout_fields->get_all_fields_from_object( $customer, 'shipping', true );
+
+		foreach ( array_keys( $billing_fields + $shipping_fields ) as $field_key ) {
+			$checkout_fields->persist_field_for_customer( (string) $field_key, $billing_fields[ $field_key ] ?? '', $customer, 'shipping' );
+		}
 	}
 
 	/**

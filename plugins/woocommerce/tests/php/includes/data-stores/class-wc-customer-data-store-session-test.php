@@ -424,6 +424,28 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should copy additional address field values from billing to shipping, even before the fields are registered.
+	 */
+	public function test_shipping_address_defaults_to_billing_including_additional_address_fields(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+
+		// Not registered: on front-end requests the session customer loads before woocommerce_init, where fields are usually registered.
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_billing_additional_fields' );
+		$customer    = new WC_Customer( $customer_id );
+		$customer->update_meta_data( '_wc_billing/plugin-namespace/entrance-code', 'B-1234' );
+		$customer->update_meta_data( '_wc_shipping/plugin-namespace/entrance-code', 'S-9999' );
+		$customer->update_meta_data( '_wc_shipping/plugin-namespace/floor', '3' );
+		$customer->save();
+
+		$session_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Stationsplein 23', $session_customer->get_shipping_address_1(), 'The core shipping address should be taken from the billing address' );
+		$this->assertSame( 'B-1234', $session_customer->get_meta( '_wc_shipping/plugin-namespace/entrance-code' ), 'The additional shipping field should be taken from the billing address' );
+		$this->assertSame( '', $session_customer->get_meta( '_wc_shipping/plugin-namespace/floor' ), 'A shipping-only additional field should be cleared, like empty core fields' );
+		$this->assertSame( 'S-9999', get_user_meta( $customer_id, '_wc_shipping/plugin-namespace/entrance-code', true ), 'The persisted additional shipping field should be unchanged' );
+	}
+
+	/**
 	 * Creates a persisted customer whose billing and shipping addresses differ.
 	 *
 	 * @param string $username Username for the customer.
