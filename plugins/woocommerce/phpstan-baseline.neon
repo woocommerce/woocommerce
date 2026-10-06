@@ -16762,13 +16762,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
