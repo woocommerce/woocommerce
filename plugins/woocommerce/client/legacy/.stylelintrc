@@ -8,7 +8,6 @@
 	# authoritative exclusion, so a direct `stylelint` run skips it too.
 	"ignoreFiles": [ "css/select2.scss" ],
 
-	# Fail on stylelint-disable comments that no longer suppress anything.
 	"reportNeedlessDisables": true,
 
 	"rules": {
