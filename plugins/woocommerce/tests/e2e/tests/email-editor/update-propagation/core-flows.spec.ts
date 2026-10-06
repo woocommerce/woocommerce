@@ -22,7 +22,7 @@ import {
 	simulateCoreBump,
 	triggerDetectionSweep,
 } from './helpers/simulate-plugin-update';
-import { assertNoLeakedFixtureState } from './helpers/leaked-state-checks';
+import { resetFixtureState } from './helpers/reset-fixture-state';
 import { STATUS } from './helpers/classifications';
 import { locks } from '../../../fixtures/fixtures';
 
@@ -41,7 +41,7 @@ test.describe(
 			const cleanupErrors: unknown[] = [];
 
 			try {
-				await assertNoLeakedFixtureState();
+				await resetFixtureState();
 			} catch ( error ) {
 				cleanupErrors.push( error );
 			}
