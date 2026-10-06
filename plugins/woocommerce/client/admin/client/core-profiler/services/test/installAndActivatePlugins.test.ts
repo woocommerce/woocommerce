@@ -32,6 +32,7 @@ describe( 'pluginInstallerMachine', () => {
 		[ 'woocommerce-services:tax', 'woocommerce-services', 4000, 4000 ],
 		[ 'woocommerce-services', 'woocommerce-services', 4000, 4000 ],
 		[ 'mailpoet', 'mailpoet', 4000, 4000 ],
+		[ 'mailpoet:alt', 'mailpoet', 4000, 4000 ],
 		[ 'woocommerce-services:tax', 'unrelated-plugin', 4000, 0 ],
 		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 0 ],
 	] )(
@@ -49,14 +50,17 @@ describe( 'pluginInstallerMachine', () => {
 				input: { selectedPlugins: [ plugin ], pluginsAvailable: [] },
 			} ).start();
 
-			await waitFor( service, ( snapshot ) =>
-				snapshot.matches( 'reportSuccess' )
-			);
+			try {
+				const snapshot = await waitFor( service, ( snap ) =>
+					snap.matches( 'reportSuccess' )
+				);
 
-			expect( service.getSnapshot().context.installedPlugins ).toEqual( [
-				{ plugin, installTime: expectedDuration },
-			] );
-			service.stop();
+				expect( snapshot.context.installedPlugins ).toEqual( [
+					{ plugin, installTime: expectedDuration },
+				] );
+			} finally {
+				service.stop();
+			}
 		}
 	);
 

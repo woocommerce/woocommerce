@@ -18,7 +18,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -231,27 +230,29 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The origin cycle's plan snapshot freezes the pricing policy.
+	 * @testdox The origin cycle's plan snapshot freezes the pricing payload exactly as stored.
 	 */
 	public function test_plan_snapshot_round_trips_the_pricing_policy(): void {
+		$pricing_policy = array(
+			'policies'      => array(
+				array(
+					'type'            => 'bogo',
+					'duration_cycles' => 1,
+				),
+				array(
+					'type'  => 'tiered',
+					'value' => 10,
+				),
+			),
+			'one_time_fees' => array(),
+			'custom_key'    => 'kept',
+		);
+
 		$plan = Plan::create(
 			array(
 				'name'           => 'Discounted monthly',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
-				'pricing_policy' => PricingPolicy::from_array(
-					array(
-						'policies' => array(
-							array(
-								'type'            => 'bogo',
-								'duration_cycles' => 1,
-							),
-							array(
-								'type'  => 'percentage',
-								'value' => 10,
-							),
-						),
-					)
-				),
+				'pricing_policy' => $pricing_policy,
 				'category'       => Plan::DEFAULT_CATEGORY,
 				'extension_slug' => 'lite',
 			)
@@ -269,23 +270,10 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$snapshot = $repo->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
 		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
 
-		// The stored payload carries the frozen pricing policy.
-		$payload = $snapshot->to_array();
-		$this->assertArrayHasKey( 'pricing_policy', $payload );
-		$this->assertIsArray( $payload['pricing_policy'] );
-
-		// The typed accessor reconstructs the frozen terms: bogo (first cycle only,
-		// value normalized to 0.0) plus the percentage entry, intact after the
-		// snapshot's DB round-trip.
-		$pricing = $snapshot->get_pricing_policy();
-		$this->assertInstanceOf( PricingPolicy::class, $pricing );
-		$policies = $pricing->get_policies();
-		$this->assertCount( 2, $policies );
-		$this->assertSame( 'bogo', $policies[0]['type'] );
-		$this->assertSame( 0.0, $policies[0]['value'] );
-		$this->assertSame( 1, $policies[0]['duration_cycles'] ?? null );
-		$this->assertSame( 'percentage', $policies[1]['type'] );
-		$this->assertSame( 10.0, $policies[1]['value'] );
+		// The engine freezes the payload uninterpreted: an unknown type and an extra
+		// key survive the DB round-trip, and no value is added to the bogo entry.
+		$this->assertSame( $pricing_policy, $snapshot->to_array()['pricing_policy'] );
+		$this->assertSame( $pricing_policy, $snapshot->get_pricing_policy() );
 	}
 
 	/**

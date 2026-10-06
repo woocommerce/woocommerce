@@ -95,7 +95,7 @@ type InstallAndActivateSuccessResponse = {
 	data: {
 		installed: PluginNames[];
 		results: Record< PluginNames, boolean >;
-		install_time: Record< PluginNames, number >;
+		install_time: Partial< Record< string, number > >;
 	};
 };
 
@@ -241,7 +241,7 @@ export const pluginInstallerMachine = createMachine(
 					const timingKey =
 						plugin === 'woocommerce-services:tax'
 							? 'woocommerce-services'
-							: plugin;
+							: plugin.replace( ':alt', '' );
 					return [
 						...context.installedPlugins,
 						{

@@ -13,8 +13,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const rtlcss = require( 'rtlcss' );
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 const pluginName = 'WebpackRTLPlugin';
+const cssRe = /\.css(?:$|\?)/;
 
 class WebpackRTLPlugin {
 	constructor( options ) {
@@ -28,7 +30,23 @@ class WebpackRTLPlugin {
 	}
 
 	apply( compiler ) {
+		const filenameSuffix = this.options.filenameSuffix || '-rtl$&';
+
 		compiler.hooks.thisCompilation.tap( pluginName, ( compilation ) => {
+			// WordPress only swaps in RTL files for stylesheets it enqueues, not lazy chunks.
+			// `data-href` keeps the LTR URL so the runtime can still find the loaded tag.
+			if ( ! this.options.inPlace ) {
+				MiniCssExtractPlugin.getCompilationHooks(
+					compilation
+				).beforeTagInsert.tap(
+					pluginName,
+					( source, { tag, href } ) =>
+						`${ source }\nif (document.dir === "rtl") { ${ tag }.setAttribute("data-href", ${ href }); ${ tag }.href = ${ href }.replace(${ cssRe }, ${ JSON.stringify(
+							filenameSuffix
+						) }); }`
+				);
+			}
+
 			compilation.hooks.processAssets.tapPromise(
 				{
 					name: pluginName,
@@ -36,7 +54,6 @@ class WebpackRTLPlugin {
 						.PROCESS_ASSETS_STAGE_DERIVED,
 				},
 				async ( assets ) => {
-					const cssRe = /\.css(?:$|\?)/;
 					return Promise.all(
 						[ ...compilation.chunks ]
 							.flatMap( ( chunk ) =>
@@ -81,7 +98,7 @@ class WebpackRTLPlugin {
 								// Compute the filename
 								const filename = asset.replace(
 									cssRe,
-									this.options.filenameSuffix || '-rtl$&'
+									filenameSuffix
 								);
 								const assetInstance = assets[ asset ];
 								chunk.files.add( filename );
