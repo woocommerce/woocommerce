@@ -169,12 +169,7 @@ const ProductCategoriesBlock = ( {
 			<Disabled>
 				<ServerSideRender
 					block={ name }
-					// The editor wrapper owns supports; Core's filter keeps align and anchor.
-					attributes={ {
-						...attributes,
-						align: undefined,
-						anchor: undefined,
-					} }
+					attributes={ attributes }
 					skipBlockSupportAttributes
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>

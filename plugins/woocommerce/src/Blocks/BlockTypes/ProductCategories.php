@@ -85,12 +85,7 @@ class ProductCategories extends AbstractDynamicBlock {
 			}
 		}
 
-		$classes = $this->get_container_classes( $attributes );
-		if ( ! empty( $attributes['fontSize'] ) ) {
-			// Retain the legacy class used by themes alongside Core's preset class.
-			$classes .= ' has-font-size';
-		}
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classes ) );
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $this->get_container_classes( $attributes ) ) );
 
 		$output  = '<div ' . $wrapper_attributes . '>';
 		$output .= ! empty( $attributes['isDropdown'] ) ? $this->renderDropdown( $categories, $attributes, $uid ) : $this->renderList( $categories, $attributes, $uid );
@@ -336,15 +331,10 @@ class ProductCategories extends AbstractDynamicBlock {
 	protected function renderListItems( $categories, $attributes, $uid, $depth = 0 ) {
 		$output = '';
 
-		$link_color_styles = wp_style_engine_get_styles(
-			array( 'color' => array( 'text' => $attributes['style']['elements']['link']['color']['text'] ?? null ) )
-		);
-		$link_color_style  = $link_color_styles['css'] ?? '';
-
 		foreach ( $categories as $category ) {
 			$output .= '
 				<li class="wc-block-product-categories-list-item">
-					<a style="' . esc_attr( $link_color_style ) . '" href="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">'
+					<a href="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">'
 						. $this->get_image_html( $category, $attributes )
 						. '<span class="wc-block-product-categories-list-item__name">' . esc_html( $category->name ) . '</span>'
 					. '</a>'
