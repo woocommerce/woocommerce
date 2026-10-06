@@ -608,7 +608,13 @@ class BatchProcessingController {
 	 * @return bool True if at least one lookup function exists.
 	 */
 	private function can_check_scheduled_actions(): bool {
-		return array() !== array_filter( $this->scheduled_action_lookups, 'function_exists' );
+		foreach ( $this->scheduled_action_lookups as $function ) {
+			if ( function_exists( $function ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
