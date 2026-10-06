@@ -12,12 +12,14 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 1. Release readiness review
 
-Go through this checklist together with the Product DRIs named on the parent tracking issue before starting the build - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. The goal is a deliberate "this RC is ready to go out" call, with the evidence in one place. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details on each item.
+Run this with the Product DRIs named on the parent tracking issue before starting the build - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. The RC doesn't exist yet, so the evidence is the latest beta and everything reported since feature freeze. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details on each item.
 
-- [ ] Review the QIT compatibility regression sweep report for this prerelease. Every introduced issue has a verdict: blocking or not; non-blocking findings get their full verdict in the next item.
-- [ ] Every open finding against this release (bug reports, testing threads, monitoring alerts, non-blocking QIT sweep findings) has a linked issue and a verdict per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/): release-blocking / fix in a point release / next release / not a bug.
-- [ ] The rollback path for this release is known: who reverts, how, and what revert means for this version (see the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/)).
-- [ ] Comms are ready: the changelog is in shape and there's a known-issues list if the verdicts above left anything open.
+Record each item as a comment on this GitHub issue: the links you checked and the verdict. A new comment thread started on the Linear mirror does not sync back here.
+
+- [ ] **Compatibility sweep.** Open the QIT compatibility regression sweep for the latest beta (posted in `#woo-qit-notifications`). Record the run link and, for each introduced issue, whether it blocks the release.
+- [ ] **Open findings.** Check the comments on this cycle's pre-release notes post on the developer blog, the [WordPress.org support forum](https://wordpress.org/support/plugin/woocommerce/), the canonical extensions testing post, and the [GitHub issues opened since feature freeze]({repository_url}/issues?q=is%3Aissue%20sort%3Acreated-desc). Record each finding that touches code in this release with its issue link and a verdict per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/): release-blocking / fix in a point release / next release / not a bug. For the rest, record how many you checked and why they don't apply.
+- [ ] **Rollback path.** Record who reverts and how, and anything in this release that a revert would not undo, such as database migrations or new settings (see the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/)).
+- [ ] **Comms.** Record that the changelog is reviewed, and the known-issues list for the release post - or "none".
 
 If an item can't be checked, raise it in `#woo-core-releases` before continuing - delaying an RC is cheaper than reverting a stable.
 

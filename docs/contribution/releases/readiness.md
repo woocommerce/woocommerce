@@ -23,11 +23,13 @@ The handle also holds a standing set of engineering members and the current and 
 
 The RC is the last point where finding a problem is cheap: nothing has shipped, and delaying costs a day, not a revert. The review runs before the RC build starts and answers one question - is there anything we know about that should stop this release?
 
+The RC build doesn't exist yet when the review runs, so it works from the latest beta and from everything reported since feature freeze. Each item is recorded as a comment on the RC sub-issue on GitHub: the evidence checked and the verdict.
+
 The checklist covers four areas:
 
-* **Compatibility evidence.** The QIT compatibility regression sweep runs automatically against each prerelease and reports which extension versions the release would break. Introduced issues need a verdict, not just a look.
-* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict per the [release decision matrix](/docs/contribution/releases/decision-matrix): release-blocking, fix in a point release, next release, or not a bug.
-* **Rollback path.** Who reverts, how, and what revert means for this version - answered before it's needed, not during an incident.
+* **Compatibility evidence.** The QIT compatibility regression sweep runs automatically against each prerelease and reports which extension versions the release would break. The review reads the latest beta's sweep. Introduced issues need a verdict, not just a look.
+* **Open findings.** Bug reports, testing threads, and monitoring alerts against the release each get a linked issue and a verdict per the [release decision matrix](/docs/contribution/releases/decision-matrix): release-blocking, fix in a point release, next release, or not a bug. The places to check are the comments on the cycle's pre-release notes post, the WordPress.org support forum, the canonical extensions testing post, and GitHub issues opened since feature freeze.
+* **Rollback path.** Who reverts, how, and what a revert would not undo for this version - database migrations, new settings - answered before it's needed, not during an incident.
 * **Comms.** Changelog in shape, and a known-issues list when verdicts left something open.
 
 ## Go/no-go (24-48 hours before stable)
