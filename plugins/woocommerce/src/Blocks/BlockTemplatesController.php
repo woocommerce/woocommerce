@@ -116,6 +116,30 @@ class BlockTemplatesController {
 		return function_exists( '\gutenberg_render_block_core_template_part' ) ? \gutenberg_render_block_core_template_part( $attributes ) : \render_block_core_template_part( $attributes );
 	}
 
+	/**
+	 * By default, the Template Part Block only supports template parts that are in the current theme directory.
+	 * This render_callback wrapper allows us to add support for plugin-housed template parts.
+	 *
+	 * @deprecated 11.4.0
+	 *
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata     Metadata provided for registering a block type.
+	 *
+	 * @return array
+	 */
+	public function add_plugin_templates_parts_support( $settings, $metadata ) {
+		wc_deprecated_function( __METHOD__, '11.4.0' );
+
+		if (
+			isset( $metadata['name'], $settings['render_callback'] ) &&
+			'core/template-part' === $metadata['name'] &&
+			in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
+		) {
+			$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
+		}
+		return $settings;
+	}
+
 
 	/**
 	 * Prevents shortcodes in templates having their HTML content broken by wpautop.
