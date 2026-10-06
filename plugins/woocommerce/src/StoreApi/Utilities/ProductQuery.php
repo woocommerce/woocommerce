@@ -160,7 +160,7 @@ class ProductQuery implements QueryClausesGenerator {
 			}
 
 			if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) && 'product_variation' !== $args['post_type'] ) {
-				$args['attribute_query'] = $att_queries;
+				$args['attribute_lookup_query'] = $att_queries;
 			} elseif ( 1 < count( $att_queries ) ) {
 				// Add relation arg when using multiple attributes.
 				$relation    = $request->get_param( 'attribute_relation' ) && isset( $operator_mapping[ $request->get_param( 'attribute_relation' ) ] ) ? $operator_mapping[ $request->get_param( 'attribute_relation' ) ] : 'IN';
@@ -472,8 +472,8 @@ class ProductQuery implements QueryClausesGenerator {
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
-		if ( $wp_query->get( 'attribute_query' ) ) {
-			$args = $this->add_attribute_lookup_clauses( $args, $wp_query->get( 'attribute_query' ) );
+		if ( $wp_query->get( 'attribute_lookup_query' ) ) {
+			$args = $this->add_attribute_lookup_clauses( $args, $wp_query->get( 'attribute_lookup_query' ) );
 		}
 
 		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
