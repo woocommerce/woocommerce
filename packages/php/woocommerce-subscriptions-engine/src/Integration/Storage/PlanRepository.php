@@ -70,7 +70,7 @@ final class PlanRepository {
 		$inserted = $wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $data );
 
 		if ( false === $inserted ) {
-			throw new \RuntimeException( 'Failed to insert plan.' );
+			throw new \RuntimeException( sprintf( 'Failed to insert plan: %s', esc_html( $wpdb->last_error ) ) );
 		}
 
 		$id = (int) $wpdb->insert_id;
@@ -219,6 +219,44 @@ final class PlanRepository {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Write only the given columns of an existing plan's row (plus its update time), so
+	 * columns a concurrent writer changed in between keep its values. Plan meta is never
+	 * touched.
+	 *
+	 * @param Plan               $plan   Plan to read the values from. Must have an id.
+	 * @param array<int, string> $fields Columns to write: `name`, `status`, `billing_policy`,
+	 *                                   `pricing_policy`, `delivery_policy`.
+	 * @throws \InvalidArgumentException If a field is not a writable column.
+	 * @throws \RuntimeException If the plan has no id or the update fails.
+	 */
+	public function update_fields( Plan $plan, array $fields ): void {
+		global $wpdb;
+
+		$id = $plan->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot update a plan that has no id.' );
+		}
+
+		$row     = $this->row_data( $plan );
+		$columns = array();
+		foreach ( $fields as $field ) {
+			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
+				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update plan field "%s".', $field ) ) );
+			}
+			$columns[ $field ] = $row[ $field ];
+		}
+
+		$columns['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $columns, array( 'id' => $id ) );
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
 	}
 
 	/**

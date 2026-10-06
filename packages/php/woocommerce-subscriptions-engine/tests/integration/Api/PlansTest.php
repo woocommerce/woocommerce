@@ -20,6 +20,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Plans
@@ -221,6 +222,89 @@ class PlansTest extends EngineIntegrationTestCase {
 		}
 
 		$this->assertSame( self::OWNER, $this->stored( $id )->get_extension_slug() );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_update_args(): array {
+		return array(
+			'unregistered status' => array( array( 'status' => 'seasonal' ) ),
+			'non-string status'   => array( array( 'status' => 5 ) ),
+			'empty name'          => array( array( 'name' => '' ) ),
+			'whitespace name'     => array( array( 'name' => '   ' ) ),
+			'non-string name'     => array( array( 'name' => 12 ) ),
+			'unknown key'         => array( array( 'sort_order' => 1 ) ),
+			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
+			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ) ),
+			'valid then invalid'  => array(
+				array(
+					'name'   => 'Changed',
+					'status' => 'seasonal',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider provide_invalid_update_args
+	 *
+	 * @param array<string, mixed> $args Invalid update args.
+	 */
+	public function test_update_rejects_invalid_args_and_leaves_the_plan_unchanged( array $args ): void {
+		$id     = $this->create();
+		$before = $this->stored( $id )->to_storage();
+
+		try {
+			Plans::update( $id, $args );
+			$this->fail( 'Expected InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertNotInstanceOf( PlanValidationException::class, $e );
+		}
+
+		$this->assertSame( $before, $this->stored( $id )->to_storage() );
+	}
+
+	public function test_update_accepts_the_stored_status_after_it_is_unregistered(): void {
+		StatusRegistry::register( StatusRegistry::KIND_PLAN, 'seasonal' );
+		$id = $this->create( array( 'status' => 'seasonal' ) );
+		StatusRegistry::reset();
+		$this->assertFalse( PlanStatus::is_registered( 'seasonal' ) );
+
+		$this->assertTrue(
+			Plans::update(
+				$id,
+				array(
+					'status' => 'seasonal',
+					'name'   => 'Renamed',
+				)
+			)
+		);
+
+		$plan = $this->stored( $id );
+		$this->assertSame( 'seasonal', $plan->get_status() );
+		$this->assertSame( 'Renamed', $plan->get_name() );
+	}
+
+	public function test_update_writes_only_the_present_fields(): void {
+		global $wpdb;
+
+		$id = $this->create();
+
+		// A concurrent writer renames the plan while the owner validates a status change.
+		add_action(
+			self::HOOK,
+			static function () use ( $wpdb, $id ): void {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), array( 'name' => 'Renamed elsewhere' ), array( 'id' => $id ) );
+			}
+		);
+
+		$this->assertTrue( Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
+
+		$plan = $this->stored( $id );
+		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
+		$this->assertSame( 'Renamed elsewhere', $plan->get_name(), 'The status-only update must not write the name it read.' );
 	}
 
 	public function test_validate_action_receives_the_would_be_state_on_create(): void {

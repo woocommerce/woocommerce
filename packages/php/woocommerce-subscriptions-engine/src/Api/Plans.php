@@ -9,6 +9,14 @@
  * Any caller may write any plan (authorization is the caller's concern). The engine
  * opens no transaction and keeps no cache.
  *
+ * Billing payload contract: the engine reads one plan payload itself. Until every
+ * contract carries a plan snapshot, renewal and reactivation fall back to the live
+ * plan's `billing_policy` and read it with {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy::from_array()}
+ * (a string `period` of day, week, month or year, a positive int `interval`, and
+ * optional cycle bounds and trial). A payload of another shape is still stored, but
+ * renewal parks such a contract and reactivation rolls it without a cadence. The
+ * snapshot's `billing_policy` is read the same way.
+ *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
 
@@ -93,8 +101,11 @@ final class Plans {
 	/**
 	 * Write the given fields to an existing plan.
 	 *
-	 * Takes the keys of {@see self::create()} except `owner`. A present policy key
-	 * replaces the whole payload (null clears it); policies are never merged.
+	 * Takes the keys of {@see self::create()} except `owner`. Only the columns of the
+	 * present keys are written, so fields a concurrent writer changed in between keep
+	 * its values. A present policy key replaces the whole payload (null clears it);
+	 * policies are never merged. Re-sending the stored status is accepted even when that
+	 * status is no longer registered (its extension was deactivated).
 	 *
 	 * @param int                  $id   Plan id.
 	 * @param array<string, mixed> $args Fields to write.
@@ -118,7 +129,11 @@ final class Plans {
 		self::apply( $plan, $args );
 		self::validate( $plan );
 
-		return $repository->update( $plan );
+		if ( array() !== $args ) {
+			$repository->update_fields( $plan, array_keys( $args ) );
+		}
+
+		return true;
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
@@ -217,7 +232,8 @@ final class Plans {
 
 		if ( array_key_exists( 'status', $args ) ) {
 			$status = $args['status'];
-			if ( ! is_string( $status ) || ! PlanStatus::is_registered( $status ) ) {
+			// The stored status stays writable after its extension is deactivated (as in Plan::set_status()).
+			if ( ! is_string( $status ) || ( $status !== $plan->get_status() && ! PlanStatus::is_registered( $status ) ) ) {
 				throw new InvalidArgumentException(
 					sprintf( 'Plans: "status" must be a registered plan status, got "%s".', esc_html( is_scalar( $status ) ? (string) $status : gettype( $status ) ) )
 				);
@@ -268,6 +284,11 @@ final class Plans {
 			 * Add errors to $errors to refuse the write; act only on your own $owner slug.
 			 * The view is the would-be state after the write (its id is 0 on create) and is
 			 * read-only.
+			 *
+			 * Changed with plans as records: `$plan` is a read-only {@see PlanView}. Earlier
+			 * engine versions passed the Core `Plan` entity; a callback still typed on `Plan`
+			 * throws here, which refuses every plan write, so update such callbacks together
+			 * with this engine version.
 			 *
 			 * @since 0.1.0
 			 *
