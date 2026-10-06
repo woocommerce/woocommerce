@@ -251,6 +251,16 @@ class ProductCollectionData extends ControllerTestCase {
 				'matches'  => ! $lookup_enabled,
 			),
 			array(
+				'slug'     => array( 'unknown' ),
+				'operator' => 'in',
+				'matches'  => false,
+			),
+			array(
+				'slug'     => array( 'unknown' ),
+				'operator' => 'not_in',
+				'matches'  => true,
+			),
+			array(
 				'slug'     => array( 's-slug', 'unknown' ),
 				'operator' => 'and',
 				'matches'  => false,
