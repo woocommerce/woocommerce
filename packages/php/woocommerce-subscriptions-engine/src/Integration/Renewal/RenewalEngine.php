@@ -39,7 +39,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
@@ -388,9 +387,10 @@ final class RenewalEngine {
 	/**
 	 * Resolve the billing policy the next cycle bills under, from the contract's own plan
 	 * snapshot - the live source of truth, so a contract updated since an earlier cycle bills
-	 * on its current terms. Falls back to the contract's selling plan when it carries no
-	 * snapshot, and returns null when neither resolves (a deleted plan) so the caller skips
-	 * gracefully rather than mis-billing.
+	 * on its current terms. Falls back to parsing the live selling plan's billing payload when
+	 * the contract carries no snapshot, and returns null when neither resolves (a deleted plan,
+	 * a null billing payload, or one that does not parse) so the caller skips gracefully
+	 * rather than mis-billing.
 	 *
 	 * @param Contract $contract The contract being renewed.
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
@@ -421,8 +421,25 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$plan = $this->plans->find( $plan_id );
-		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+		$plan    = $this->plans->find( $plan_id );
+		$billing = null !== $plan ? $plan->get_billing_policy() : null;
+		if ( null === $billing ) {
+			return null;
+		}
+
+		try {
+			return BillingPolicy::from_array( $billing );
+		} catch ( \DomainException $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine: contract %d has an unreadable live plan billing policy; the renewal cannot be processed. %s', (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+				)
+			);
+
+			return null;
+		}
 	}
 
 	/**

@@ -231,6 +231,30 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->assertSame( '2026-04-15 09:30:00', $this->reload( $id )->get_next_payment_gmt() );
 	}
 
+	/**
+	 * @dataProvider provide_unusable_live_billing_payloads
+	 *
+	 * @param array<string, mixed>|null $billing The live plan's billing payload.
+	 */
+	public function test_reactivate_floors_past_due_at_now_when_the_live_billing_is_unusable( ?array $billing ): void {
+		$plan_id = $this->make_plan( array( 'billing_policy' => $billing ) );
+		$id      = $this->seed_on_hold( '2026-02-01 00:00:00', $plan_id );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 09:30:00' ) );
+
+		$this->assertSame( '2026-04-15 09:30:00', $this->reload( $id )->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>|null}>
+	 */
+	public function provide_unusable_live_billing_payloads(): array {
+		return array(
+			'null payload'     => array( null ),
+			'missing interval' => array( array( 'period' => 'month' ) ),
+		);
+	}
+
 	public function test_reactivate_leaves_a_null_next_payment_null(): void {
 		$id = $this->seed_on_hold( null, $this->make_monthly_plan() );
 

@@ -16,6 +16,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
@@ -646,6 +647,78 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertNull( $reloaded->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox the scheduled scan parks a contract without a snapshot whose live plan billing payload is null or does not parse.
+	 *
+	 * @dataProvider provide_unusable_live_billing_payloads
+	 *
+	 * @param array<string, mixed>|null $billing   The live plan's billing payload.
+	 * @param bool                      $logs_warn Whether an unreadable-payload warning is expected.
+	 */
+	public function test_scheduled_renewal_parks_a_contract_whose_live_billing_is_unusable( ?array $billing, bool $logs_warn ): void {
+		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo = new ContractRepository();
+		$repo->append_cycle(
+			Cycle::create(
+				array(
+					'contract_id'    => $contract_id,
+					'sequence_no'    => 1,
+					'count'          => 1,
+					'status'         => new CycleStatus( CycleStatus::BILLED ),
+					'starts_at_gmt'  => '2026-01-15 00:00:00',
+					'ends_at_gmt'    => '2026-02-15 00:00:00',
+					'expected_total' => '19.99',
+					'currency'       => 'USD',
+				)
+			)
+		);
+
+		$this->assertTrue( Plans::update( $plan_id, array( 'billing_policy' => $billing ) ) );
+
+		$warnings = array();
+		$capture  = static function ( $message, $level ) use ( &$warnings ) {
+			if ( 'warning' === $level && is_string( $message ) && false !== strpos( $message, 'unreadable live plan billing policy' ) ) {
+				$warnings[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
+
+		try {
+			$result = $this->run_scheduled_renewal( $contract_id );
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$this->assertNull( $result );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertNull( $reloaded->get_next_payment_gmt(), 'The contract is parked out of the due set.' );
+		if ( $logs_warn ) {
+			$this->assertNotEmpty( $warnings, 'An unreadable live billing payload is logged.' );
+		} else {
+			$this->assertSame( array(), $warnings );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>|null, 1: bool}>
+	 */
+	public function provide_unusable_live_billing_payloads(): array {
+		return array(
+			'null payload'     => array( null, false ),
+			'missing interval' => array( array( 'period' => 'month' ), true ),
+		);
 	}
 
 	/**

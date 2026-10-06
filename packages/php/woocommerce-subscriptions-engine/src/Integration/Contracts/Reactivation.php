@@ -30,7 +30,6 @@ use DomainException;
 use RuntimeException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -224,7 +223,8 @@ final class Reactivation {
 	 * The billing policy the forward roll steps by: the contract's own frozen plan
 	 * terms first (the snapshot is what the contract actually bills under - the same
 	 * source the renewal money-path resolves), falling back to the live selling plan
-	 * for a contract with no snapshot, and null when neither resolves.
+	 * (parsing its billing payload) for a contract with no snapshot, and null when neither
+	 * resolves or the live payload does not parse.
 	 *
 	 * @param Contract $contract The contract.
 	 */
@@ -242,8 +242,16 @@ final class Reactivation {
 			return null;
 		}
 
-		$plan = $this->plans->find( $plan_id );
+		$plan    = $this->plans->find( $plan_id );
+		$billing = null !== $plan ? $plan->get_billing_policy() : null;
+		if ( null === $billing ) {
+			return null;
+		}
 
-		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+		try {
+			return BillingPolicy::from_array( $billing );
+		} catch ( DomainException $e ) {
+			return null;
+		}
 	}
 }
