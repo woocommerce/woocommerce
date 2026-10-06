@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a "Ready for pickup" order status and customer email for stores that offer local pickup.
