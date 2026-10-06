@@ -855,6 +855,21 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'three' ), Contracts::get_meta( $id, 'note' ) );
 	}
 
+	public function test_only_null_matches_any_meta_value(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+		Contracts::add_meta( $id, 'note', 'one' );
+		Contracts::add_meta( $id, 'note', '' );
+
+		$this->assertTrue( Contracts::update_meta( $id, 'note', 'blank', '' ) );
+		$this->assertSame( array( 'one', 'blank' ), Contracts::get_meta( $id, 'note' ), 'An empty previous value matches literally.' );
+
+		$this->assertFalse( Contracts::delete_meta( $id, 'note', '' ) );
+		$this->assertSame( array( 'one', 'blank' ), Contracts::get_meta( $id, 'note' ), 'An empty value deletes only empty values.' );
+
+		$this->assertTrue( Contracts::delete_meta( $id, 'note' ) );
+		$this->assertSame( array(), Contracts::get_meta( $id, 'note' ) );
+	}
+
 	public function test_meta_writes_to_an_unknown_contract_write_nothing(): void {
 		global $wpdb;
 

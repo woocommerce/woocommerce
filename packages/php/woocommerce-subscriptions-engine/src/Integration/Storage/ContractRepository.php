@@ -938,12 +938,13 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Add a meta row for a contract (WordPress `add_post_meta()` semantics).
+	 * Add a meta row for a contract, like `add_post_meta()`.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $key         Meta key.
 	 * @param mixed  $value       Meta value; serialized when not scalar.
-	 * @param bool   $unique      When true, add nothing if the key already exists.
+	 * @param bool   $unique      When true, add nothing if the key already exists. Advisory:
+	 *                            checked before the insert with no unique index.
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
 	 * @throws \InvalidArgumentException If `$key` is empty.
 	 * @throws \RuntimeException If the insert fails.
@@ -977,14 +978,15 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update a contract's meta rows for `$key` (WordPress `update_post_meta()` semantics):
-	 * adds a row when the key is absent, else rewrites every row for the key, or only the
-	 * rows holding `$prev_value` when it is given.
+	 * Update a contract's meta rows for `$key`, like `update_post_meta()`: adds a row when
+	 * the key is absent, else rewrites every row for the key, or only the rows holding
+	 * `$prev_value`. The absent-key check runs before the write with no unique index.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $key         Meta key.
 	 * @param mixed  $value       New value; serialized when not scalar.
 	 * @param mixed  $prev_value  Only update rows holding this value; null updates all rows for the key.
+	 *                            Any other value ('' and false included) matches literally.
 	 * @return bool True when a row was added or at least one row changed.
 	 * @throws \InvalidArgumentException If `$key` is empty.
 	 * @throws \RuntimeException If a write fails.
@@ -1024,11 +1026,12 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Delete a contract's meta rows for `$key` (WordPress `delete_post_meta()` semantics).
+	 * Delete a contract's meta rows for `$key`, like `delete_post_meta()`.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $key         Meta key.
 	 * @param mixed  $value       Only delete rows holding this value; null deletes every row for the key.
+	 *                            Any other value ('' and false included) matches literally.
 	 * @return bool True when at least one row was deleted.
 	 * @throws \InvalidArgumentException If `$key` is empty.
 	 * @throws \RuntimeException If the delete fails.
