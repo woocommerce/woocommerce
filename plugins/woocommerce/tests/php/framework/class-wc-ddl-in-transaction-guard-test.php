@@ -18,7 +18,7 @@ class WC_DDL_In_Transaction_Guard_Test extends WC_Unit_Test_Case {
 	 * Skip the calling test in report mode, which lets undeclared DDL through.
 	 */
 	private function skip_unless_enforcing(): void {
-		if ( WC_DDL_In_Transaction_Guard::MODE_REPORT === getenv( 'WC_DDL_GUARD' ) && ! getenv( 'CI' ) ) {
+		if ( ! WC_DDL_In_Transaction_Guard::is_enforcing() ) {
 			$this->markTestSkipped( 'The DDL guard is in report mode.' );
 		}
 	}

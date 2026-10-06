@@ -78,10 +78,19 @@ final class WC_DDL_In_Transaction_Guard {
 	 */
 	public static function register( array $allowlist, string $mode ): void {
 		self::$allowlist = array_fill_keys( $allowlist, true );
-		// Anything but report enforces. There is no off switch: the annotation and the allowlist are the escape hatches.
+		// Anything but report enforces.
 		self::$mode = self::MODE_REPORT === $mode ? self::MODE_REPORT : self::MODE_ENFORCE;
 		// Late priority: WP_UnitTestCase rewrites CREATE/DROP TABLE to TEMPORARY at priority 10.
 		add_filter( 'query', array( self::class, 'inspect_query' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Whether undeclared commits fail the test, rather than only being reported.
+	 *
+	 * @return bool
+	 */
+	public static function is_enforcing(): bool {
+		return self::MODE_ENFORCE === self::$mode;
 	}
 
 	/**
@@ -101,7 +110,7 @@ final class WC_DDL_In_Transaction_Guard {
 			if ( null !== $frame && ( $frame['object'] ?? null ) instanceof PHPUnit\Framework\TestCase ) {
 				$previous                        = self::$current_test;
 				self::$current_test              = get_class( $frame['object'] ) . '::' . $frame['object']->getName( false );
-				self::$current_test_declares_ddl = self::declares_ddl( $frame['object'] );
+				self::$current_test_declares_ddl = self::declares_ddl( $frame['object'], self::$current_test );
 				if ( null !== $previous ) {
 					self::flag( $previous, self::UNFINISHED );
 				}
@@ -208,17 +217,18 @@ final class WC_DDL_In_Transaction_Guard {
 	 * Whether the test declares its DDL, at method or class level.
 	 *
 	 * @param PHPUnit\Framework\TestCase $test The test about to run.
+	 * @param string                     $name 'Class::method'.
 	 * @return bool
 	 * @throws RuntimeException When the annotation has no reason.
 	 */
-	private static function declares_ddl( PHPUnit\Framework\TestCase $test ): bool {
+	private static function declares_ddl( PHPUnit\Framework\TestCase $test, string $name ): bool {
 		$annotations = PHPUnit\Util\Test::parseTestMethodAnnotations( get_class( $test ), $test->getName( false ) );
 		foreach ( array( 'method', 'class' ) as $depth ) {
 			if ( ! isset( $annotations[ $depth ][ self::ANNOTATION ] ) ) {
 				continue;
 			}
 			if ( '' === trim( implode( '', $annotations[ $depth ][ self::ANNOTATION ] ) ) ) {
-				throw new RuntimeException( esc_html( sprintf( '@%s on %s needs a reason: why the DDL is the subject under test.', self::ANNOTATION, get_class( $test ) . '::' . $test->getName( false ) ) ) );
+				throw new RuntimeException( esc_html( sprintf( '@%s on %s needs a reason: why the DDL is the subject under test.', self::ANNOTATION, $name ) ) );
 			}
 			return true;
 		}
