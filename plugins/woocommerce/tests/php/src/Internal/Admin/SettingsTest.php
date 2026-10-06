@@ -352,6 +352,24 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving the built-in default shown when a filter returns only undisplayable statuses stores it, so reports keep excluding what the page showed.
+	 */
+	public function test_saving_fallback_default_stores_it_when_runtime_default_differs(): void {
+		$callback = function () {
+			return array( 'not-a-real-status' );
+		};
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_excluded_report_order_statuses' );
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'], 'The page should fall back to the built-in default.' );
+
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ), 'The shown list differs from the runtime default, so it must be stored.' );
+	}
+
+	/**
 	 * @testdox Saving an order status list that differs from the default stores it.
 	 */
 	public function test_saving_non_default_order_statuses_stores_them(): void {
