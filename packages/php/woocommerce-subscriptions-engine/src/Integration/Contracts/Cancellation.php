@@ -7,8 +7,14 @@
  * contract down NOW (transition to cancelled, close any charge caught mid-flight,
  * announce it), while {@see self::cancel_at_period_end()} winds it down gracefully
  * (transition to pending-cancellation, stamp the end date, keep serving until the
- * period lapses). Lives under `Integration\Contracts` so contract lifecycle stays
- * separate from the renewal money-path.
+ * period lapses). Both modes disarm the contract's next-due moment themselves: the batch
+ * due scan keys on `next_payment_gmt` and a registered owner, so the flow stops renewals by
+ * clearing its own due moment rather than relying on status. Their preconditions are
+ * the flow's own, not rules of the status primitive. Lives under `Integration\Contracts`
+ * so contract lifecycle stays separate from the renewal money-path.
+ *
+ * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+ * cancel and their routes).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts
  */
@@ -57,14 +63,16 @@ final class Cancellation {
 	}
 
 	/**
-	 * Cancel `$contract`: transition to cancelled and close any mid-charge cycle.
+	 * Cancel `$contract`: move it to cancelled, disarm its next-due moment, and close any
+	 * mid-charge cycle.
 	 *
-	 * Status moves through the Core state machine ({@see Contract::set_status()}), which raises
-	 * a `DomainException` on an illegal transition. When the chain's most-recent cycle is still
-	 * `pending` (a charge caught mid-flight) it is transitioned `cancelled` so a stale claim is
-	 * not left open; a settled cycle is untouched. The due scan only selects active contracts,
-	 * so a cancelled contract simply stops being picked up - there is no per-contract schedule
-	 * to clear.
+	 * Only an active, on-hold or pending-cancellation contract can be cancelled; cancelling an
+	 * already cancelled contract is an idempotent no-op that still succeeds and fires the
+	 * action. Any other status - including one that is not registered - raises a
+	 * `DomainException`. The next-payment date and any hold anchor are cleared so the due scan
+	 * never selects the contract again. When the chain's most-recent cycle is still `pending`
+	 * (a charge caught mid-flight) it is transitioned `cancelled` so a stale claim is not left
+	 * open; a settled cycle is untouched.
 	 *
 	 * @param Contract $contract Contract to cancel. Must have an id.
 	 * @return bool True when the contract was cancelled and persisted.
@@ -77,8 +85,17 @@ final class Cancellation {
 			throw new RuntimeException( 'Cancellation::cancel(): cannot cancel a contract that has no id.' );
 		}
 
-		$previous = $contract->get_status();
-		$contract->set_status( ContractStatus::CANCELLED );
+		$previous   = $contract->get_status();
+		$cancelable = array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD, ContractStatus::PENDING_CANCELLATION, ContractStatus::CANCELLED );
+		if ( ! in_array( $previous, $cancelable, true ) ) {
+			throw new \DomainException( 'Cancellation::cancel(): only an active, on-hold or pending-cancellation contract can be cancelled.' );
+		}
+
+		if ( ContractStatus::CANCELLED !== $previous ) {
+			$contract->set_status( ContractStatus::CANCELLED );
+			$contract->set_next_payment_gmt( null );
+			$contract->set_meta( Hold::ANCHOR_META_KEY, null );
+		}
 
 		// Compare-and-set on the status read above: a concurrent transition (another
 		// request, the renewal engine's settle) makes this write miss loudly rather
@@ -90,8 +107,8 @@ final class Cancellation {
 		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no stale
 		// claim is left open. A settled (billed/failed/cancelled) cycle is left as is.
 		$current = $this->contracts->find_chain_head( $id );
-		if ( null !== $current && $current->get_status()->equals( CycleStatus::pending() ) ) {
-			$current->set_status( CycleStatus::cancelled() );
+		if ( null !== $current && $current->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) ) {
+			$current->set_status( new CycleStatus( CycleStatus::CANCELLED ) );
 			$this->contracts->update_cycle( $current );
 		}
 
@@ -106,26 +123,24 @@ final class Cancellation {
 	}
 
 	/**
-	 * Wind `$contract` down at the end of the current period: transition to
-	 * pending-cancellation and stamp the end date.
+	 * Wind `$contract` down at the end of the current period: move it to
+	 * pending-cancellation, stamp the end date, and disarm its next-due moment.
 	 *
-	 * Status moves through the Core state machine ({@see Contract::set_status()}), which
-	 * raises a `DomainException` on an illegal transition. The contract keeps serving
-	 * until the current period ends, so the next-payment moment is recorded as the
-	 * contract `end_gmt` (when not already set) for a first-class "cancels on" date, and
-	 * the next-payment date is deliberately LEFT in place so the contract lapses at the
-	 * date rather than being torn down now.
+	 * Only an active or on-hold contract can be wound down; winding down an already
+	 * pending-cancellation contract is an idempotent no-op that still succeeds and fires the
+	 * action. Any other status - including one that is not registered - raises a
+	 * `DomainException`. The contract keeps serving until the current period ends, so the
+	 * next-due moment (the next-payment date, or for a held contract the hold anchor) is
+	 * recorded as the contract `end_gmt` when not already set, for a first-class "cancels on"
+	 * date. The next-payment date and any hold anchor are then cleared, so no renewal fires
+	 * while the contract winds down.
 	 *
-	 * The due scan already refuses to charge a non-active contract ({@see RenewalEngine::process()}
-	 * skips it with no order), so no renewal fires while it winds down.
+	 * TODO: terminating a PENDING_CANCELLATION contract when its `end_gmt` arrives - moving
+	 * it to CANCELLED/EXPIRED at period end - is a follow-up slice. The contract now has no
+	 * next-due moment, so it stays PENDING_CANCELLATION (and is never charged) until a later
+	 * terminate-at-date pass ends it at its `end_gmt`.
 	 *
-	 * TODO: terminating a PENDING_CANCELLATION contract (ACTIVE has lapsed) when its date
-	 * arrives - moving it to CANCELLED/EXPIRED at period end - is a follow-up slice. The
-	 * current dispatcher only skips a non-active contract; it does not yet transition it
-	 * terminal at the date, so a wound-down contract stays PENDING_CANCELLATION until a
-	 * later terminate-at-date pass lands. No charge occurs in the meantime.
-	 *
-	 * @param Contract $contract Contract to wind down. Must have an id, and be ACTIVE.
+	 * @param Contract $contract Contract to wind down. Must have an id, and be ACTIVE or ON_HOLD.
 	 * @return bool True when the contract was wound down and persisted.
 	 * @throws RuntimeException If the contract has no id.
 	 * @throws \DomainException If the contract cannot be wound down from its current state, or its state changed concurrently.
@@ -137,13 +152,25 @@ final class Cancellation {
 		}
 
 		$previous = $contract->get_status();
-		$contract->set_status( ContractStatus::PENDING_CANCELLATION );
+		if ( ! in_array( $previous, array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD, ContractStatus::PENDING_CANCELLATION ), true ) ) {
+			throw new \DomainException( 'Cancellation::cancel_at_period_end(): only an active or on-hold contract can be cancelled at period end.' );
+		}
 
-		// The end of the current period is the next-payment moment: the contract is
-		// honoured up to (not through) it. Record it as the contract end when not already
-		// set, so reads have a first-class "cancels on" date.
-		if ( null === $contract->get_end_gmt() && null !== $contract->get_next_payment_gmt() ) {
-			$contract->set_end_gmt( $contract->get_next_payment_gmt() );
+		if ( ContractStatus::PENDING_CANCELLATION !== $previous ) {
+			$contract->set_status( ContractStatus::PENDING_CANCELLATION );
+
+			// The end of the current period is the next-due moment: the contract is honoured
+			// up to (not through) it. A held contract's moment lives in the hold anchor.
+			$period_end = $contract->get_next_payment_gmt();
+			if ( null === $period_end && ContractStatus::ON_HOLD === $previous ) {
+				$period_end = Hold::read_anchor( $contract );
+			}
+			if ( null === $contract->get_end_gmt() && null !== $period_end ) {
+				$contract->set_end_gmt( $period_end );
+			}
+
+			$contract->set_meta( Hold::ANCHOR_META_KEY, null );
+			$contract->set_next_payment_gmt( null );
 		}
 
 		// Compare-and-set on the status read above: a concurrent transition makes this
@@ -151,8 +178,6 @@ final class Cancellation {
 		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
 			throw new \DomainException( 'Cancellation::cancel_at_period_end(): the contract state changed concurrently; nothing was written.' );
 		}
-
-		// Intentionally leave the next-payment date in place: the contract lapses at the date (see the TODO above).
 
 		/**
 		 * Fires after a contract is set to wind down at the end of the current period.
