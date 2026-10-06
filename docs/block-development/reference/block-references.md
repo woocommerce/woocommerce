@@ -1191,7 +1191,7 @@ Displays an on-sale badge if the product is on-sale.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 - **Supports:** align, color (background, gradients, text, ~~link~~), email, interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** productId
+- **Attributes:** badgeContent, prefix, productId, saleText, suffix
 
 ## Product SKU - woocommerce/product-sku
 
@@ -1278,7 +1278,7 @@ Display filter options as chips.
 - **Name:** woocommerce/product-filter-chips
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status, woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, spacing (padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
+- **Supports:** interactivity, layout (default, ~~allowEditing~~, ~~allowInheriting~~, ~~allowJustification~~, ~~allowOrientation~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), spacing (blockGap, padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
 ## Clear filters - woocommerce/product-filter-clear-button
@@ -1622,7 +1622,7 @@ Display a single product of your choice with full control over its presentation.
 
 - **Name:** woocommerce/single-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity
+- **Supports:** align (full, wide), color (background, gradients, ~~text~~), interactivity, listView, shadow, spacing (margin, padding)
 - **Attributes:** productId
 
 ## Filter by Stock Controls - woocommerce/stock-filter

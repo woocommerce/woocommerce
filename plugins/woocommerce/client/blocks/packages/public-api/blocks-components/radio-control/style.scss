@@ -33,8 +33,7 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 		}
 
 		// This rule removes the fake border-top from the selected element to prevent a double border.
-		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted
-			+ div.wc-block-components-radio-control-accordion-option::after {
+		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option::after {
 			display: none;
 		}
 	}
@@ -80,8 +79,7 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 
 	// Remove the fake border-top from the item after the selected element, this is to prevent a double border with the
 	// selected element's box-shadow.
-	.wc-block-components-radio-control__option--checked-option-highlighted
-		+ .wc-block-components-radio-control__option::after {
+	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option::after {
 		display: none;
 	}
 
