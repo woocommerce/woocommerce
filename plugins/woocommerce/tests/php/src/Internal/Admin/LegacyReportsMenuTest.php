@@ -383,10 +383,7 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 	public function test_reports_menu_registers_admin_menu_handler(): void {
 		$this->reset_container_resolutions();
 		remove_all_actions( 'admin_menu' );
-		$menus = new WC_Admin_Menus();
-		add_action( 'admin_menu', array( $menus, 'admin_menu' ), 9 );
-		add_action( 'admin_menu', array( $menus, 'reports_menu' ), 20 );
-		add_action( 'admin_menu', array( $menus, 'settings_menu' ), 50 );
+		new WC_Admin_Menus();
 
 		do_action( 'admin_menu', '' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
