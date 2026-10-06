@@ -465,7 +465,7 @@ class WC_Tracker {
 	private static function get_wordpress_info() {
 		$wp_data = array();
 
-		$memory = wc_let_to_num( WP_MEMORY_LIMIT );
+		$memory = wp_convert_hr_to_bytes( WP_MEMORY_LIMIT );
 
 		if ( function_exists( 'memory_get_usage' ) ) {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- False positive.
@@ -474,7 +474,7 @@ class WC_Tracker {
 			if ( '-1' === $system_memory ) {
 				$system_memory = '32G';
 			}
-			$memory = max( $memory, wc_let_to_num( $system_memory ) );
+			$memory = max( $memory, wp_convert_hr_to_bytes( $system_memory ) );
 		}
 
 		// WordPress 5.5+ environment type specification.
