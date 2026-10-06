@@ -206,6 +206,74 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A '0' condition excludes every record instead of being dropped as empty.
+	 */
+	public function test_import_where_clauses_filter_keeps_zero_condition(): void {
+		list( $parent_id ) = $this->create_parent_child_and_refund();
+		$callback          = function ( $clauses ) {
+			$clauses[] = '0';
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$items    = OrdersScheduler::get_items( 100, 1, false, true );
+		$excluded = OrdersScheduler::is_excluded_from_import( $parent_id );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertSame( 0, $items->total );
+		$this->assertSame( array(), $items->ids );
+		$this->assertTrue( $excluded );
+	}
+
+	/**
+	 * @testdox A condition with a literal percent sign, such as a LIKE pattern, survives the prepared queries.
+	 */
+	public function test_import_where_clauses_filter_allows_like_patterns(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$callback                                 = function ( $clauses, $table_alias ) {
+			$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+			$clauses[] = "{$table_alias}.{$column} NOT LIKE '%shop_order_refund'"; // Starts with %s, which prepare() would read as a placeholder.
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10, 2 );
+
+		$items           = OrdersScheduler::get_items( 100, 1, false, true );
+		$refund_excluded = OrdersScheduler::is_excluded_from_import( $refund_id );
+		$parent_excluded = OrdersScheduler::is_excluded_from_import( $parent_id );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$ids = array_map( 'intval', $items->ids );
+		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
+		$this->assertContains( $parent_id, $ids );
+		$this->assertContains( $child_id, $ids );
+		$this->assertNotContains( $refund_id, $ids );
+		$this->assertTrue( $refund_excluded );
+		$this->assertFalse( $parent_excluded );
+	}
+
+	/**
+	 * @testdox A failing exclusion probe does not count as an exclusion, so the record stays on the failed list.
+	 */
+	public function test_is_excluded_from_import_treats_query_error_as_not_excluded(): void {
+		global $wpdb;
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::record_failed_order_import( $child_id );
+		$callback = function ( $clauses ) {
+			$clauses[] = 'no_such_column_for_this_test = 1';
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$suppress = $wpdb->suppress_errors();
+		$excluded = OrdersScheduler::is_excluded_from_import( $child_id );
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertFalse( $excluded );
+		$this->assertContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
+	}
+
+	/**
 	 * Test that batch processor is scheduled when called.
 	 */
 	public function test_batch_processor_scheduled() {

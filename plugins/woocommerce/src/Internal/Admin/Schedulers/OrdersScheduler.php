@@ -896,6 +896,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return string Empty string, or conditions starting with ' AND ' ready to append to a WHERE clause.
 	 */
 	private static function get_import_where_clause( string $table_alias ): string {
+		global $wpdb;
+
 		/**
 		 * Filters the SQL conditions that decide which orders and refunds Analytics imports.
 		 *
@@ -914,9 +916,21 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param string   $table_alias Table name or alias to prefix column names with.
 		 */
 		$clauses = apply_filters( 'woocommerce_analytics_orders_import_where_clauses', array(), $table_alias );
-		$clauses = array_filter( array_map( 'trim', array_filter( is_array( $clauses ) ? $clauses : array(), 'is_string' ) ) );
+		$clauses = array_filter(
+			array_map( 'trim', array_filter( is_array( $clauses ) ? $clauses : array(), 'is_string' ) ),
+			static function ( $clause ) {
+				// Keep '0': it is a valid condition that excludes every record.
+				return '' !== $clause;
+			}
+		);
 
-		return $clauses ? ' AND ( ' . implode( ' ) AND ( ', $clauses ) . ' )' : '';
+		if ( ! $clauses ) {
+			return '';
+		}
+
+		// The callers interpolate this fragment into $wpdb->prepare(), so a literal percent sign
+		// (a LIKE pattern, say) must not read as a placeholder. $wpdb->query() restores it.
+		return $wpdb->add_placeholder_escape( ' AND ( ' . implode( ' ) AND ( ', $clauses ) . ' )' );
 	}
 
 	/**
@@ -948,7 +962,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and filtered SQL conditions are interpolated; the ID is prepared.
-		return null === $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$from} WHERE {$id_column} = %d {$where} LIMIT 1", $order_id ) );
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$from} WHERE {$id_column} = %d {$where} LIMIT 1", $order_id ) );
+
+		// A failed probe must not pass as an exclusion: the import then runs (and may fail) as usual
+		// instead of silently dropping the record and clearing its failed-import entry.
+		if ( '' !== $wpdb->last_error ) {
+			return false;
+		}
+
+		return null === $found;
 	}
 
 	/**
