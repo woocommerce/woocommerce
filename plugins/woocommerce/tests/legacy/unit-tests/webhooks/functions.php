@@ -375,7 +375,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		if ( ! isset( $this->delivery_counter[ $webhook->get_id() . $arg ] ) ) {
 			$this->delivery_counter[ $webhook->get_id() . $arg ] = 0;
 		}
-		++$this->delivery_counter[ $webhook->get_id() . $arg ];
+		$this->delivery_counter[ $webhook->get_id() . $arg ] ++;
 	}
 
 	/**

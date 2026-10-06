@@ -500,7 +500,7 @@ class WC_Admin_Report {
 
 		// Ensure all days (or months) have values in this range.
 		if ( 'day' === $group_by ) {
-			for ( $i = 0; $i <= $interval; $i++ ) {
+			for ( $i = 0; $i <= $interval; $i ++ ) {
 				$time = strtotime( date( 'Ymd', strtotime( "+{$i} DAY", $start_date ) ) ) . '000';
 
 				if ( ! isset( $prepared_data[ $time ] ) ) {
@@ -511,18 +511,18 @@ class WC_Admin_Report {
 			$current_yearnum  = date( 'Y', $start_date );
 			$current_monthnum = date( 'm', $start_date );
 
-			for ( $i = 0; $i <= $interval; $i++ ) {
+			for ( $i = 0; $i <= $interval; $i ++ ) {
 				$time = strtotime( $current_yearnum . str_pad( $current_monthnum, 2, '0', STR_PAD_LEFT ) . '01' ) . '000';
 
 				if ( ! isset( $prepared_data[ $time ] ) ) {
 					$prepared_data[ $time ] = array( esc_js( $time ), 0 );
 				}
 
-				++$current_monthnum;
+				$current_monthnum ++;
 
 				if ( $current_monthnum > 12 ) {
 					$current_monthnum = 1;
-					++$current_yearnum;
+					$current_yearnum  ++;
 				}
 			}
 		}
@@ -545,7 +545,7 @@ class WC_Admin_Report {
 			if ( $data_key ) {
 				$prepared_data[ $time ][1] += is_numeric( $d->$data_key ) ? $d->$data_key : 0;
 			} else {
-				++$prepared_data[ $time ][1];
+				$prepared_data[ $time ][1] ++;
 			}
 		}
 
@@ -704,7 +704,7 @@ class WC_Admin_Report {
 
 				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $min_date = strtotime( '+1 MONTH', $min_date ) ) <= $this->end_date ) {
-					++$interval;
+					$interval ++;
 				}
 
 				// 3 months max for day view
@@ -757,7 +757,7 @@ class WC_Admin_Report {
 
 				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $min_date = strtotime( '+1 MONTH', $min_date ) ) <= $this->end_date ) {
-					++$this->chart_interval;
+					$this->chart_interval ++;
 				}
 
 				$this->barwidth = 60 * 60 * 24 * 7 * 4 * 1000;

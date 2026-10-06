@@ -80,7 +80,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	 * @testdox 'register_class_mocks' can be used to return class mocks by passing mock factory callbacks.
 	 */
 	public function test_register_class_mocks_can_be_used_so_that_get_instance_of_uses_a_factory_function_to_return_the_instance() {
-		$mock_factory = function ( $code, $message, $http_status_code = 400, $data = array() ) {
+		$mock_factory = function( $code, $message, $http_status_code = 400, $data = array() ) {
 			return "$code, $message, $http_status_code";
 		};
 		$this->sut->register_class_mocks( array( \WC_Data_Exception::class => $mock_factory ) );
@@ -102,7 +102,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_for_test_register_function_mocks_throws_if_invalid_parameters_supplied() {
 		return array(
-			array( 1234, function () {} ),
+			array( 1234, function() {} ),
 			array( 'SomeClassName', 1234 ),
 		);
 	}
@@ -128,7 +128,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	public function test_register_function_mocks_can_be_used_so_that_call_function_calls_mock_functions() {
 		$this->sut->register_function_mocks(
 			array(
-				'substr' => function ( $string, $start, $length ) {
+				'substr' => function( $string, $start, $length ) {
 					return "I'm returning substr of '$string' from $start with length $length";
 				},
 			)
@@ -154,9 +154,9 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_for_test_register_static_mocks_throws_if_invalid_parameters_supplied() {
 		return array(
-			array( 1234, array( 'some_method' => function () {} ) ),
+			array( 1234, array( 'some_method' => function(){} ) ),
 			array( 'SomeClassName', 1234 ),
-			array( 'SomeClassName', array( 1234 => function () {} ) ),
+			array( 'SomeClassName', array( 1234 => function(){} ) ),
 			array( 'SomeClassName', array( 'the_method' => 1234 ) ),
 		);
 	}
@@ -183,7 +183,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 		$this->sut->register_static_mocks(
 			array(
 				DependencyClass::class => array(
-					'concat' => function ( ...$parts ) {
+					'concat' => function( ...$parts ) {
 						return "I'm returning concat of these parts: " . join( ' ', $parts );
 					},
 				),
@@ -235,7 +235,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 
 		$this->sut->register_function_mocks(
 			array(
-				'substr' => function ( $string, $start, $length ) {
+				'substr' => function( $string, $start, $length ) {
 					return null;
 				},
 			)
@@ -244,7 +244,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 		$this->sut->register_static_mocks(
 			array(
 				DependencyClass::class => array(
-					'concat' => function ( ...$parts ) {
+					'concat' => function( ...$parts ) {
 						return null;
 					},
 				),

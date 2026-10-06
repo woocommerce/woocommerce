@@ -351,4 +351,5 @@ class OrdersTableFieldQuery {
 			'where' => $this->where ? array( $this->where ) : array(),
 		);
 	}
+
 }

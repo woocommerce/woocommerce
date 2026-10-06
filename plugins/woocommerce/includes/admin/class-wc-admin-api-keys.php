@@ -64,7 +64,7 @@ class WC_Admin_API_Keys {
 				}
 			}
 
-			include __DIR__ . '/settings/views/html-keys-edit.php';
+			include dirname( __FILE__ ) . '/settings/views/html-keys-edit.php';
 		} else {
 			self::table_list_output();
 		}
@@ -247,7 +247,7 @@ class WC_Admin_API_Keys {
 			$result = $this->remove_key( $key_id );
 
 			if ( $result ) {
-				++$qty;
+				$qty++;
 			}
 		}
 

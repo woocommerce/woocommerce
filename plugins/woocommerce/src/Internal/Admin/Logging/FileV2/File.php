@@ -224,7 +224,7 @@ class File {
 	 * @return bool
 	 */
 	public function has_standard_filename(): bool {
-		return (bool) $this->get_hash();
+		return ! ! $this->get_hash();
 	}
 
 	/**

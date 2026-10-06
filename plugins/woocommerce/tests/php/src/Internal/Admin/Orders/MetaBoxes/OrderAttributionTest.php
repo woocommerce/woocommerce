@@ -55,7 +55,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 		// Hook into the template to check the args.
 		add_action(
 			'woocommerce_before_template_part',
-			function ( $template_name, $template_path, $located, $args ) {
+			function( $template_name, $template_path, $located, $args ) {
 				$this->assertEquals( 'Unknown', $args['meta']['origin'] ?? '' );
 				$this->assertFalse( $args['has_more_details'] );
 			},
@@ -80,7 +80,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 		// Hook into the template to check the args.
 		add_action(
 			'woocommerce_before_template_part',
-			function ( $template_name, $template_path, $located, $args ) {
+			function( $template_name, $template_path, $located, $args ) {
 				$this->assertEquals( 'Unknown', $args['meta']['origin'] ?? '' );
 				$this->assertEquals( 'Desktop', $args['meta']['device_type'] ?? '' );
 				$this->assertTrue( $args['has_more_details'] );
@@ -124,7 +124,7 @@ class OrderAttributionTest extends WP_UnitTestCase {
 		// Hook into the template to check the args.
 		add_action(
 			'woocommerce_before_template_part',
-			function ( $template_name, $template_path, $located, $args ) {
+			function( $template_name, $template_path, $located, $args ) {
 				$this->assertEquals( 'Referral: Woocommerce.com', $args['meta']['origin'] ?? '' );
 				$this->assertEquals( 'Desktop', $args['meta']['device_type'] ?? '' );
 				$this->assertEquals(

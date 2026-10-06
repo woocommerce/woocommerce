@@ -341,6 +341,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 		} else {
 			return false;
 		}
+
 	}
 
 	/**

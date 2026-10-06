@@ -101,7 +101,7 @@ class MarketingCampaignTypes extends WC_REST_Controller {
 		$marketing_channels_service = wc_get_container()->get( MarketingChannelsService::class );
 
 		// Aggregate the supported campaign types from all registered marketing channels.
-		$responses = array();
+		$responses = [];
 		foreach ( $marketing_channels_service->get_registered_channels() as $channel ) {
 			foreach ( $channel->get_supported_campaign_types() as $campaign_type ) {
 				$response    = $this->prepare_item_for_response( $campaign_type, $request );
@@ -121,17 +121,17 @@ class MarketingCampaignTypes extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$data = array(
+		$data = [
 			'id'          => $item->get_id(),
 			'name'        => $item->get_name(),
 			'description' => $item->get_description(),
-			'channel'     => array(
+			'channel'     => [
 				'slug' => $item->get_channel()->get_slug(),
 				'name' => $item->get_channel()->get_name(),
-			),
+			],
 			'create_url'  => $item->get_create_url(),
 			'icon_url'    => $item->get_icon_url(),
-		);
+		];
 
 		$context = $request['context'] ?? 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -146,64 +146,66 @@ class MarketingCampaignTypes extends WC_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		$schema = array(
+		$schema = [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'marketing_campaign_type',
 			'type'       => 'object',
-			'properties' => array(
-				'id'          => array(
+			'properties' => [
+				'id'          => [
 					'description' => __( 'The unique identifier for the marketing campaign type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => [ 'view' ],
 					'readonly'    => true,
-				),
-				'name'        => array(
+				],
+				'name'        => [
 					'description' => __( 'Name of the marketing campaign type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => [ 'view' ],
 					'readonly'    => true,
-				),
-				'description' => array(
+				],
+				'description' => [
 					'description' => __( 'Description of the marketing campaign type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => [ 'view' ],
 					'readonly'    => true,
-				),
-				'channel'     => array(
+				],
+				'channel'     => [
 					'description' => __( 'The marketing channel that this campaign type belongs to.', 'woocommerce' ),
 					'type'        => 'object',
-					'context'     => array( 'view' ),
+					'context'     => [ 'view' ],
 					'readonly'    => true,
-					'properties'  => array(
-						'slug' => array(
+					'properties'  => [
+						'slug' => [
 							'description' => __( 'The unique identifier of the marketing channel that this campaign type belongs to.', 'woocommerce' ),
 							'type'        => 'string',
-							'context'     => array( 'view' ),
+							'context'     => [ 'view' ],
 							'readonly'    => true,
-						),
-						'name' => array(
+						],
+						'name' => [
 							'description' => __( 'The name of the marketing channel that this campaign type belongs to.', 'woocommerce' ),
 							'type'        => 'string',
-							'context'     => array( 'view' ),
+							'context'     => [ 'view' ],
 							'readonly'    => true,
-						),
-					),
-				),
-				'create_url'  => array(
+						],
+					],
+				],
+				'create_url'  => [
 					'description' => __( 'URL to the create campaign page for this campaign type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => [ 'view' ],
 					'readonly'    => true,
-				),
-				'icon_url'    => array(
+				],
+				'icon_url'    => [
 					'description' => __( 'URL to an image/icon for the campaign type.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
+					'context'     => [ 'view' ],
 					'readonly'    => true,
-				),
-			),
-		);
+				],
+			],
+		];
 
 		return $this->add_additional_fields_schema( $schema );
 	}
+
+
 }

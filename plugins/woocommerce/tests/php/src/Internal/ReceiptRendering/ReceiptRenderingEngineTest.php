@@ -77,8 +77,8 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 	public function test_generate_receipt_returns_new_receipt_file_if_no_receipt_exists_and_force_new_is_not_true() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'strtotime' => fn ( $arg ) => '+1 days' === $arg ? -1 : strtotime( $arg ),
-				'gmdate'    => fn ( $format, $value ) => 'Y-m-d' === $format && -1 === $value ? '2999-12-31' : gmdate( $format, $value ),
+				'strtotime' => fn ( $arg) => '+1 days' === $arg ? -1 : strtotime( $arg ),
+				'gmdate'    => fn ( $format, $value) => 'Y-m-d' === $format && -1 === $value ? '2999-12-31' : gmdate( $format, $value ),
 			)
 		);
 
@@ -103,8 +103,8 @@ class ReceiptRenderingEngineTest extends \WC_Unit_Test_Case {
 	public function test_generate_receipt_returns_new_receipt_file_if_receipt_exists_but_force_new_is_true() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'strtotime' => fn ( $arg ) => '+1 days' === $arg ? -1 : strtotime( $arg ),
-				'gmdate'    => fn ( $format, $value ) => 'Y-m-d' === $format && -1 === $value ? '2999-12-31' : gmdate( $format, $value ),
+				'strtotime' => fn ( $arg) => '+1 days' === $arg ? -1 : strtotime( $arg ),
+				'gmdate'    => fn ( $format, $value) => 'Y-m-d' === $format && -1 === $value ? '2999-12-31' : gmdate( $format, $value ),
 			)
 		);
 

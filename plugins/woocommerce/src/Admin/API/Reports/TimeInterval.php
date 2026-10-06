@@ -234,7 +234,7 @@ class TimeInterval {
 				$end_hour_min_sec   = (int) $end_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $end_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $end_datetime->format( 's' );
 				$start_hour_min_sec = (int) $start_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $start_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $start_datetime->format( 's' );
 				if ( $end_hour_min_sec < $start_hour_min_sec ) {
-					++$days;
+					$days++;
 				}
 
 				return $days + 1;
@@ -243,7 +243,7 @@ class TimeInterval {
 				$week_count = 0;
 				do {
 					$start_datetime = self::next_week_start( $start_datetime );
-					++$week_count;
+					$week_count++;
 				} while ( $start_datetime <= $end_datetime );
 				return $week_count;
 			case 'month':
@@ -283,7 +283,7 @@ class TimeInterval {
 		$hours_offset_timestamp = $timestamp + ( $hour_increment * HOUR_IN_SECONDS - $seconds_into_hour );
 
 		if ( $reversed ) {
-			--$hours_offset_timestamp;
+			$hours_offset_timestamp --;
 		}
 
 		$hours_offset_time = new \DateTime();
@@ -366,7 +366,7 @@ class TimeInterval {
 			$month += $month_increment;
 			if ( $month > 12 ) {
 				$month = 1;
-				++$year;
+				$year ++;
 			}
 			$day      = '01';
 			$datetime = new \DateTime( "$year-$month-$day 00:00:00", new \DateTimeZone( wc_timezone_string() ) );
@@ -421,7 +421,7 @@ class TimeInterval {
 					$month = 10;
 				} else {
 					$month = 1;
-					++$year;
+					$year ++;
 				}
 				break;
 		}

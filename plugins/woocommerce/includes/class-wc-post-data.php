@@ -576,7 +576,7 @@ class WC_Post_Data {
 			if ( $customer_id > 0 && 'shop_order' === $order->get_type() ) {
 				$customer    = new WC_Customer( $customer_id );
 				$order_count = $customer->get_order_count();
-				--$order_count;
+				$order_count --;
 
 				if ( 0 === $order_count ) {
 					$customer->set_is_paying_customer( false );

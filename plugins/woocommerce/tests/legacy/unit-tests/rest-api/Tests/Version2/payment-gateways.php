@@ -54,7 +54,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 		$matching_gateway_data = current(
 			array_filter(
 				$gateways,
-				function ( $gateway ) {
+				function( $gateway ) {
 					return WC_Gateway_Cheque::ID === $gateway['id'];
 				}
 			)
@@ -362,4 +362,5 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 		}
 		return $settings;
 	}
+
 }

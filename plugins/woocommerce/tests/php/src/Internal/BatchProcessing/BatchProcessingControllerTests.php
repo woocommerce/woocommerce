@@ -27,7 +27,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * Setup.
 	 */
-	public function setUp(): void {
+	public function setUp() : void {
 		parent::setUp();
 
 		// BatchProcessingController hooks onto actions when instantiated (at bootstrap), so we need to do a reset.
@@ -574,7 +574,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_get_batch_processor',
-			function () use ( $test_process_mock ) {
+			function() use ( $test_process_mock ) {
 				return $test_process_mock;
 			}
 		);
@@ -601,7 +601,7 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 			);
 		add_filter(
 			'woocommerce_get_batch_processor',
-			function () use ( $test_process_mock ) {
+			function() use ( $test_process_mock ) {
 				return $test_process_mock;
 			}
 		);

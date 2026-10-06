@@ -146,4 +146,5 @@ class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
 		$log_count = $wpdb->get_var( "SELECT count(*) FROM {$wpdb->prefix}woocommerce_log" );
 		$this->assertEquals( 1, $log_count );
 	}
+
 }

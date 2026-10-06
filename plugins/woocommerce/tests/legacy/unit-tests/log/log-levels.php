@@ -58,4 +58,5 @@ class WC_Tests_Log_Levels extends WC_Unit_Test_Case {
 		$this->assertTrue( WC_Log_Levels::is_valid_level( 'alert' ) );
 		$this->assertTrue( WC_Log_Levels::is_valid_level( 'emergency' ) );
 	}
+
 }

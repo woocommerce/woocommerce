@@ -80,4 +80,5 @@ class WPCacheEngineTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $object_to_cache2->prop1, $cached_objects[ $key2 ]->prop1 );
 		$this->assertEquals( $object_to_cache2->prop2, $cached_objects[ $key2 ]->prop2 );
 	}
+
 }

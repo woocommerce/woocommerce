@@ -91,7 +91,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	public function admin_options() {
 		parent::admin_options();
 
-		include __DIR__ . '/views/html-admin-options.php';
+		include dirname( __FILE__ ) . '/views/html-admin-options.php';
 	}
 
 	/**

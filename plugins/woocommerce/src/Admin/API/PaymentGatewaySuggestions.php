@@ -69,6 +69,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
+
 	}
 
 	/**

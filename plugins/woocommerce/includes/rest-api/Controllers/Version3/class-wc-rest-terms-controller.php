@@ -301,8 +301,10 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			if ( 0 === $request['parent'] ) {
 				// Only query top-level terms.
 				$prepared_args['parent'] = 0;
-			} elseif ( $request['parent'] ) {
+			} else {
+				if ( $request['parent'] ) {
 					$prepared_args['parent'] = $request['parent'];
+				}
 			}
 		}
 

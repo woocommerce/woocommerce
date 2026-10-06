@@ -46,7 +46,7 @@ class InitTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'transient_woocommerce_admin_' . MarketingRecommendationsDataSourcePoller::ID . '_specs' );
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function () {
+			function() {
 				return array();
 			}
 		);

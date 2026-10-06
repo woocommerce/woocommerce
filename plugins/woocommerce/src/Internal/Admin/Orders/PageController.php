@@ -116,7 +116,7 @@ class PageController {
 
 		add_action(
 			'admin_footer',
-			function () use ( $edit_lock ) {
+			function() use ( $edit_lock ) {
 				$edit_lock->render_dialog( $this->order );
 			}
 		);
@@ -275,7 +275,7 @@ class PageController {
 		// need an extra step to remove the menu entry for the menu post type.
 		add_action(
 			'admin_init',
-			function () use ( $order_types ) {
+			function() use ( $order_types ) {
 				foreach ( $order_types as $order_type ) {
 					remove_submenu_page( 'woocommerce', 'edit.php?post_type=' . $order_type );
 				}
@@ -432,7 +432,7 @@ class PageController {
 	 *
 	 * @return string Edit link.
 	 */
-	public function get_edit_url( int $order_id ): string {
+	public function get_edit_url( int $order_id ) : string {
 		if ( ! wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
 			return admin_url( 'post.php?post=' . absint( $order_id ) ) . '&action=edit';
 		}
@@ -475,7 +475,7 @@ class PageController {
 	 * @param string $order_type The order type. Defaults to 'shop_order'.
 	 * @return string
 	 */
-	public function get_new_page_url( $order_type = 'shop_order' ): string {
+	public function get_new_page_url( $order_type = 'shop_order' ) : string {
 		$url = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ?
 			add_query_arg( 'action', 'new', $this->get_base_page_url( $order_type ) ) :
 			admin_url( 'post-new.php?post_type=' . $order_type );
@@ -512,7 +512,7 @@ class PageController {
 	 *
 	 * @return bool
 	 */
-	public function is_order_screen( $type = 'shop_order', $action = '' ): bool {
+	public function is_order_screen( $type = 'shop_order', $action = '' ) : bool {
 		if ( ! did_action( 'current_screen' ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,

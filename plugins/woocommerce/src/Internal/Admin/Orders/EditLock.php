@@ -52,7 +52,7 @@ class EditLock {
 	 * @param \WC_Order $order Order to check.
 	 * @return bool TRUE if order is locked and currently being edited by another user. FALSE otherwise.
 	 */
-	public function is_locked_by_another_user( \WC_Order $order ): bool {
+	public function is_locked_by_another_user( \WC_Order $order ) : bool {
 		$lock = $this->get_lock( $order );
 		return $lock && ( get_current_user_id() !== $lock['user_id'] );
 	}
@@ -63,7 +63,7 @@ class EditLock {
 	 * @param \WC_Order $order Order to check.
 	 * @return boolean TRUE if order is locked and currently being edited by a user. FALSE otherwise.
 	 */
-	public function is_locked( \WC_Order $order ): bool {
+	public function is_locked( \WC_Order $order ) : bool {
 		return (bool) $this->get_lock( $order );
 	}
 
@@ -209,4 +209,5 @@ class EditLock {
 		</div>
 		<?php
 	}
+
 }

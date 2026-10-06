@@ -8,4 +8,4 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require __DIR__ . '/class-wc-product-cat-dropdown-walker.php';
+require dirname( __FILE__ ) . '/class-wc-product-cat-dropdown-walker.php';

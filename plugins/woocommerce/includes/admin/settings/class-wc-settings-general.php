@@ -258,7 +258,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select',
 					'options'  => array(
 						DefaultCustomerAddress::NO_DEFAULT => __( 'No location by default', 'woocommerce' ),
-						DefaultCustomerAddress::BASE       => __( 'Shop country/region', 'woocommerce' ),
+						DefaultCustomerAddress::BASE => __( 'Shop country/region', 'woocommerce' ),
 						DefaultCustomerAddress::GEOLOCATION => __( 'Geolocate', 'woocommerce' ),
 						DefaultCustomerAddress::GEOLOCATION_AJAX => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 					),

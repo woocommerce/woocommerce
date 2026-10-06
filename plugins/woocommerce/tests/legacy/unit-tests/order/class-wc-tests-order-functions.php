@@ -1926,7 +1926,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit'          => 2,
+				'usage_limit' => 2,
 				'usage_limit_per_user' => 2,
 			)
 		);
@@ -1969,7 +1969,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit'          => 1,
+				'usage_limit' => 1,
 				'usage_limit_per_user' => 1,
 			)
 		);
@@ -2006,7 +2006,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon(
 			$coupon_code,
 			array(
-				'usage_limit'          => 2,
+				'usage_limit' => 2,
 				'usage_limit_per_user' => 2,
 			)
 		);

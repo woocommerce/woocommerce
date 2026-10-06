@@ -21,6 +21,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/wc-admin-functions.php';
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/notes/class-wc-notes-run-db-update.php';
+
 	}
 
 	/**
@@ -161,6 +162,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 
 		// Only one notice should remain, in case 2 were created under some weird circumstances.
 		$this->assertEquals( 1, count( self::get_db_update_notes() ), 'A db update note should be created if db is NOT up to date.' );
+
 	}
 
 	/**
@@ -220,7 +222,7 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// An 'update required' notice should be created.
 		$this->assertEquals( 1, count( $note_ids ), 'A db update note should be created if db is NOT up to date.' );
 
-		$note    = new Note( $note_ids[0] );
+		$note = new Note( $note_ids[0] );
 		$actions = $note->get_actions();
 		$this->assertEquals( 'update-db_run', $actions[0]->name, 'A db update note to update the database should be displayed now.' );
 
@@ -230,8 +232,9 @@ class WC_Tests_Notes_Run_Db_Update extends WC_Unit_Test_Case {
 		// Magic 2: update-db note to thank you note.
 		WC_Notes_Run_Db_Update::show_reminder();
 
-		$note    = new Note( $note_ids[0] );
+		$note = new Note( $note_ids[0] );
 		$actions = $note->get_actions();
 		$this->assertEquals( 'update-db_done', $actions[0]->name, 'A db update note--Thanks for the update--should be displayed now.' );
 	}
+
 }

@@ -78,6 +78,7 @@ abstract class ImportScheduler implements ImportInterface {
 				'queue'  => 100,
 			)
 		);
+
 	}
 
 	/**

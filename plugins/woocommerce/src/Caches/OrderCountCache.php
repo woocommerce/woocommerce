@@ -122,7 +122,7 @@ class OrderCountCache {
 	 *
 	 * @param string $order_type The type of order.
 	 * @param string $order_status The status slug of the order.
-	 * @param int    $value The value to set.
+	 * @param int $value The value to set.
 	 *
 	 * @return bool True if the value was set, false otherwise.
 	 */

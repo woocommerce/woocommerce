@@ -344,6 +344,7 @@ class WC_Admin_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 				$this->assertEquals( $expected_week_no[ $date ][ $first_day_of_week ], TimeInterval::simple_week_number( $datetime, $first_day_of_week ), "First day of week: $first_day_of_week; Date: $date" );
 			}
 		}
+
 	}
 
 	/**

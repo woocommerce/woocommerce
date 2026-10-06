@@ -32,7 +32,7 @@ class WPConsentAPI {
 	public function register() {
 		add_action(
 			'init',
-			function () {
+			function() {
 				$this->on_init();
 			},
 			20 // After OrderAttributionController.
@@ -54,7 +54,7 @@ class WPConsentAPI {
 		add_filter( "wp_consent_api_registered_{$plugin}", '__return_true' );
 		add_action(
 			'wp_enqueue_scripts',
-			function () {
+			function() {
 				$this->enqueue_consent_api_scripts();
 			}
 		);
@@ -67,7 +67,7 @@ class WPConsentAPI {
 		 */
 		add_filter(
 			'wc_order_attribution_allow_tracking',
-			function () {
+			function() {
 				return function_exists( 'wp_has_consent' ) && wp_has_consent( self::$consent_category );
 			}
 		);

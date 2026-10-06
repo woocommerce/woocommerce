@@ -73,4 +73,5 @@ class MarketingChannelsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'test-channel-1', $data[0]['slug'] );
 		$this->assertEquals( 'Test Channel One', $data[0]['name'] );
 	}
+
 }

@@ -129,7 +129,7 @@ abstract class Component {
 		return array_values(
 			array_filter(
 				$this->required_arguments,
-				function ( $arg_key ) use ( $args ) {
+				function( $arg_key ) use ( $args ) {
 					return null === self::get_argument_from_path( $args, $arg_key );
 				}
 			)

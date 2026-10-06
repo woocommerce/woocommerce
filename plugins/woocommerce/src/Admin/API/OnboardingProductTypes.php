@@ -75,4 +75,5 @@ class OnboardingProductTypes extends \WC_REST_Data_Controller {
 	public function get_product_types( $request ) {
 		return OnboardingProducts::get_product_types_with_data();
 	}
+
 }

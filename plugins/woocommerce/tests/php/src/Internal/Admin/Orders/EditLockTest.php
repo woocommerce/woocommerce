@@ -104,7 +104,7 @@ class EditLockTest extends \WC_Unit_Test_Case {
 		// Change the lock window to 6 mins. Order should be considered locked.
 		add_filter(
 			'wp_check_post_lock_window',
-			function () {
+			function() {
 				return 6 * MINUTE_IN_SECONDS;
 			}
 		);
@@ -161,4 +161,6 @@ class EditLockTest extends \WC_Unit_Test_Case {
 		$this->order->update_meta_data( EditLock::META_KEY_NAME, $timestamp . ':' . $user_id );
 		$this->order->save_meta_data();
 	}
+
+
 }

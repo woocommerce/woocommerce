@@ -18,7 +18,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * Sets the global vars before each test.
 	 */
-	public function setUp(): void {
+	public function setUp() : void {
 		global $current_screen;
 
 		$this->old_current_screen = $current_screen;
@@ -29,7 +29,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	/**
 	 * Restores the global vars after each test.
 	 */
-	public function tearDown(): void {
+	public function tearDown() : void {
 		global $current_screen;
 
 		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -45,7 +45,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_exclude_reviews_from_comments(): void {
+	public function test_exclude_reviews_from_comments() : void {
 		global $current_screen;
 		$original_screen_value = $current_screen;
 
@@ -53,9 +53,9 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		$method    = ( new ReflectionClass( $overrides ) )->getMethod( 'exclude_reviews_from_comments' );
 		$method->setAccessible( true );
 
-		$original_args = array(
-			'post_type' => array( 'product' ),
-		);
+		$original_args = [
+			'post_type' => [ 'product' ],
+		];
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = WP_Screen::get( 'edit-comments' );
@@ -87,4 +87,5 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = $original_screen_value;
 	}
+
 }

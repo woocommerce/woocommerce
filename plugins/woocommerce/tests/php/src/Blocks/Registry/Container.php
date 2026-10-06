@@ -21,15 +21,11 @@ class Container extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->container = new ContainerTest();
+		$this->container = new ContainerTest;
 	}
 
 	public function test_factory() {
-		$factory = $this->container->factory(
-			function () {
-				return 'foo';
-			}
-		);
+		$factory = $this->container->factory( function () { return 'foo'; } );
 		$this->assertInstanceOf( FactoryType::class, $factory );
 	}
 
@@ -37,8 +33,7 @@ class Container extends TestCase {
 		$this->container->register(
 			MockTestDependency::class,
 			$this->container->factory(
-				function () {
-					return new MockTestDependency(); }
+				function () { return new MockTestDependency; }
 			)
 		);
 		$instanceA = $this->container->get( MockTestDependency::class );
@@ -51,8 +46,7 @@ class Container extends TestCase {
 	public function test_registering_shared_type() {
 		$this->container->register(
 			MockTestDependency::class,
-			function () {
-				return new MockTestDependency(); }
+			function () { return new MockTestDependency; }
 		);
 		$instanceA = $this->container->get( MockTestDependency::class );
 		$instanceB = $this->container->get( MockTestDependency::class );
@@ -64,12 +58,11 @@ class Container extends TestCase {
 	public function test_registering_shared_type_dependent_on_another_shared_type() {
 		$this->container->register(
 			MockTestDependency::class . 'A',
-			function () {
-				return new MockTestDependency(); }
+			function() { return new MockTestDependency; }
 		);
 		$this->container->register(
 			MockTestDependency::class . 'B',
-			function ( $container ) {
+			function( $container ) {
 				return new MockTestDependency(
 					$container->get( MockTestDependency::class . 'A' )
 				);

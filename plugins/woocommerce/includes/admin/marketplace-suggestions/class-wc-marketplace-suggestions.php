@@ -61,7 +61,7 @@ class WC_Marketplace_Suggestions {
 	 * Render additional panels in the product data metabox.
 	 */
 	public static function product_data_panels() {
-		include __DIR__ . '/templates/html-product-data-extensions.php';
+		include dirname( __FILE__ ) . '/templates/html-product-data-extensions.php';
 	}
 
 	/**
@@ -126,7 +126,7 @@ class WC_Marketplace_Suggestions {
 	 * @param string $context Suggestion context name (rendered as a css class).
 	 */
 	public static function render_suggestions_container( $context ) {
-		include __DIR__ . '/views/container.php';
+		include dirname( __FILE__ ) . '/views/container.php';
 	}
 
 	/**
@@ -213,3 +213,4 @@ class WC_Marketplace_Suggestions {
 }
 
 WC_Marketplace_Suggestions::init();
+

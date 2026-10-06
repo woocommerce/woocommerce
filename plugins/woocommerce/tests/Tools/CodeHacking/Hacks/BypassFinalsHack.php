@@ -39,3 +39,4 @@ final class BypassFinalsHack extends CodeHack {
 	public function reset() {
 	}
 }
+

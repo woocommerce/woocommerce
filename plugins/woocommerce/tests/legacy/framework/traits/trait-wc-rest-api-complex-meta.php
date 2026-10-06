@@ -17,27 +17,27 @@ trait WC_REST_API_Complex_Meta {
 	 */
 	public static $sample_meta = array(
 		array(
-			'key'   => 'string_meta',
+			'key' => 'string_meta',
 			'value' => 'string_value',
 		),
 		array(
-			'key'   => 'int_meta',
+			'key' => 'int_meta',
 			'value' => 1,
 		),
 		array(
-			'key'   => 'bool_meta',
+			'key' => 'bool_meta',
 			'value' => true,
 		),
 		array(
-			'key'   => 'array_meta',
+			'key' => 'array_meta',
 			'value' => array( 1, 2, 'string' ),
 		),
 		array(
-			'key'   => 'null_meta',
+			'key' => 'null_meta',
 			'value' => 'null',
 		),
 		array(
-			'key'   => 'object_meta',
+			'key' => 'object_meta',
 			'value' => array(
 				'nested_key1' => 'nested_value1',
 				'nested_key2' => 0,
@@ -55,7 +55,7 @@ trait WC_REST_API_Complex_Meta {
 	 * @param array  $options Options for customizations.
 	 */
 	public function assert_update_complex_meta( $url, $options = array() ) {
-		$meta    = $options['meta'] ?? self::$sample_meta;
+		$meta = $options['meta'] ?? self::$sample_meta;
 		$request = new WP_REST_Request( 'PUT', $url );
 		$request->set_body_params( array( 'meta_data' => $meta ) );
 

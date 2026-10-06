@@ -771,6 +771,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		// Read on new instance should get correct value.
 		$two_attribute_variation_2 = new WC_Product_Variation( $two_attribute_variation->get_id() );
 		$this->assertEquals( 'color: Blue, size: Not so Large', $two_attribute_variation_2->get_attribute_summary() );
+
 	}
 
 	/**

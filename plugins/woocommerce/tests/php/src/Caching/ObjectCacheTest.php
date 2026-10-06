@@ -35,7 +35,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 			private $random_string_index = 0;
 
 			protected function get_random_string(): string {
-				++$this->random_string_index;
+				$this->random_string_index++;
 				return 'random_' . $this->random_string_index;
 			}
 
@@ -440,7 +440,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	 * @testdox 'get' uses the passed object retrieval callback if there's no object cached under the passed id, and caches the object retrieved.
 	 */
 	public function test_try_getting_not_cached_object_with_callback() {
-		$callback = function ( $id ) {
+		$callback = function( $id ) {
 			return array( 'id' => $id );
 		};
 
@@ -556,7 +556,7 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'wc_object_cache_get_engine',
-			function ( $old_engine, $cache ) use ( $engine, &$engine_passed_to_filter, &$cache_passed_to_filter ) {
+			function( $old_engine, $cache ) use ( $engine, &$engine_passed_to_filter, &$cache_passed_to_filter ) {
 				$engine_passed_to_filter = $old_engine;
 				$cache_passed_to_filter  = $cache;
 				return $engine;

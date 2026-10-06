@@ -23,7 +23,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		delete_transient( 'abtest_variation_control' );
 		add_filter(
 			'pre_http_request',
-			function ( $arg1, $arg2, $url ) {
+			function( $arg1, $arg2, $url ) {
 				$this->assertTrue( false !== strpos( $url, 'test=test' ) );
 				return array(
 					'response'    => 200,
@@ -38,7 +38,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_explat_request_args',
-			function ( $args ) {
+			function( $args ) {
 				$args['test'] = 'test';
 				return $args;
 			},
@@ -68,7 +68,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		delete_transient( 'abtest_variation_control' );
 		add_filter(
 			'pre_http_request',
-			function ( $preempt, $parsed_args, $url ) {
+			function( $preempt, $parsed_args, $url ) {
 				return array(
 					'response'    => 200,
 					'status_code' => 200,

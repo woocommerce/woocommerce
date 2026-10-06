@@ -72,7 +72,7 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		$test_campaign_1->expects( $this->any() )->method( 'get_id' )->willReturn( 'test-campaign-1' );
 		$test_campaign_1->expects( $this->any() )->method( 'get_type' )->willReturn( $test_campaign_type_1 );
 		// Return the sample campaign by the mock marketing channel.
-		$test_channel_1->expects( $this->any() )->method( 'get_campaigns' )->willReturn( array( $test_campaign_1 ) );
+		$test_channel_1->expects( $this->any() )->method( 'get_campaigns' )->willReturn( [ $test_campaign_1 ] );
 		// Register the marketing channel.
 		$this->marketing_channels_service->register( $test_channel_1 );
 
@@ -87,7 +87,7 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		$test_campaign_2->expects( $this->any() )->method( 'get_id' )->willReturn( 'test-campaign-2' );
 		$test_campaign_2->expects( $this->any() )->method( 'get_type' )->willReturn( $test_campaign_type_2 );
 		// Return the sample campaign by the second mock marketing channel.
-		$test_channel_2->expects( $this->any() )->method( 'get_campaigns' )->willReturn( array( $test_campaign_2 ) );
+		$test_channel_2->expects( $this->any() )->method( 'get_campaigns' )->willReturn( [ $test_campaign_2 ] );
 		// Register the second marketing channel.
 		$this->marketing_channels_service->register( $test_channel_2 );
 
@@ -97,17 +97,17 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertCount( 2, $data );
 		$this->assertEquals(
-			array(
+			[
 				'test-campaign-1',
 				'test-campaign-2',
-			),
+			],
 			array_column( $data, 'id' )
 		);
 		$this->assertEquals(
-			array(
+			[
 				'test-channel-1',
 				'test-channel-2',
-			),
+			],
 			array_column( $data, 'channel' )
 		);
 	}
@@ -121,13 +121,13 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		$test_channel_1->expects( $this->any() )->method( 'get_slug' )->willReturn( 'test-channel-1' );
 		// Return mock campaigns by the mock marketing channel.
 		$test_channel_1->expects( $this->any() )->method( 'get_campaigns' )->willReturn(
-			array(
+			[
 				$this->createMock( MarketingCampaign::class ),
 				$this->createMock( MarketingCampaign::class ),
 				$this->createMock( MarketingCampaign::class ),
 				$this->createMock( MarketingCampaign::class ),
 				$this->createMock( MarketingCampaign::class ),
-			)
+			]
 		);
 		// Register the marketing channel.
 		$this->marketing_channels_service->register( $test_channel_1 );
@@ -135,10 +135,10 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		$endpoint = self::ENDPOINT;
 		$request  = new WP_REST_Request( 'GET', $endpoint );
 		$request->set_query_params(
-			array(
+			[
 				'page'     => '1',
 				'per_page' => '2',
-			)
+			]
 		);
 		$response = $this->server->dispatch( $request );
 		$headers  = $response->get_headers();
@@ -151,4 +151,5 @@ class MarketingCampaignsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 5, $headers['X-WP-Total'] );
 		$this->assertEquals( 3, $headers['X-WP-TotalPages'] );
 	}
+
 }

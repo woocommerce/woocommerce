@@ -50,7 +50,7 @@ class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_WCCOM_Site_Controller {
 	 * @param WP_USER $user User object.
 	 * @return bool
 	 */
-	public function user_has_permission( $user ): bool {
+	public function user_has_permission( $user ) : bool {
 		return user_can( $user, 'manage_woocommerce' );
 	}
 

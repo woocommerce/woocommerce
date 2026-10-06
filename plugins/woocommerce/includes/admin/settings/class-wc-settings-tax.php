@@ -345,7 +345,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		foreach ( $posted_countries as $key => $value ) {
 			$mode     = ( 0 === strpos( $key, 'new-' ) ) ? 'insert' : 'update';
-			$tax_rate = $this->get_posted_tax_rate( $key, $index++, $current_class );
+			$tax_rate = $this->get_posted_tax_rate( $key, $index ++, $current_class );
 
 			if ( 'insert' === $mode ) {
 				$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );

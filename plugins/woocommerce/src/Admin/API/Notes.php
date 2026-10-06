@@ -442,7 +442,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		 * @param array     $promo_notes    Array of allowed promo notes.
 		 * @since 7.8.0
 		 */
-		$allowed_promo_notes = apply_filters( 'woocommerce_admin_allowed_promo_notes', array() );
+		$allowed_promo_notes = apply_filters( 'woocommerce_admin_allowed_promo_notes', [] );
 
 		$promo_note_name = $request->get_param( 'promo_note_name' );
 
@@ -469,9 +469,9 @@ class Notes extends \WC_REST_CRUD_Controller {
 			$note = NotesRepository::get_note( $note_ids[0] );
 			NotesRepository::update_note(
 				$note,
-				array(
+				[
 					'status' => Note::E_WC_ADMIN_NOTE_ACTIONED,
-				)
+				]
 			);
 		}
 
@@ -528,7 +528,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @param string $name The nonce name.
 	 * @return string A fully formed URL.
 	 */
-	private function maybe_add_nonce_to_url( string $url, string $action = '', string $name = '' ): string {
+	private function maybe_add_nonce_to_url( string $url, string $action = '', string $name = '' ) : string {
 		if ( empty( $action ) ) {
 			return $url;
 		}

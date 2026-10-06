@@ -355,7 +355,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$main_product_in_stock = ! empty(
 				array_filter(
 					$data['variations'],
-					function ( $variation ) {
+					function( $variation ) {
 						return $variation['in_stock'];
 					}
 				)

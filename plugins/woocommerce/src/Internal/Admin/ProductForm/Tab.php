@@ -43,4 +43,5 @@ class Tab extends Component {
 			);
 		}
 	}
+
 }

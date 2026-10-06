@@ -36,6 +36,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
 	}
 
 	/**
@@ -51,7 +52,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		// update the base country to the U.S for testing purposes.
 		update_option( 'woocommerce_default_country', 'US:CA' );
 
-		$response_mock_ref = function ( $preempt, $parsed_args, $url ) {
+		$response_mock_ref = function( $preempt, $parsed_args, $url ) {
 			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json' ) ) {
 				return array(
 					'success' => true,

@@ -171,5 +171,6 @@ class WC_Admin_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'tax_codes', $subtotals );
 		$this->assertArrayHasKey( 'total_tax', $subtotals );
 		$this->assertArrayHasKey( 'segments', $subtotals );
+
 	}
 }

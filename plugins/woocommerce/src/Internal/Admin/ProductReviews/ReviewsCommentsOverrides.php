@@ -46,11 +46,12 @@ class ReviewsCommentsOverrides {
 		}
 
 		if ( ! is_array( $args ) ) {
-			$args = array();
+			$args = [];
 		}
 
 		$args['post_type'] = $post_types;
 
 		return $args;
 	}
+
 }

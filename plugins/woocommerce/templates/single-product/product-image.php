@@ -35,7 +35,7 @@ $first_media_item = $media_items[0] ?? array();
 $first_media_id   = isset( $first_media_item['id'] ) ? absint( $first_media_item['id'] ) : $post_thumbnail_id;
 $has_media        = ! empty( $first_media_item ) && 'placeholder' !== ( $first_media_item['source_type'] ?? '' );
 $is_video         = $has_media && 'video' === ( $first_media_item['media_type'] ?? '' );
-$wrapper_classes  = apply_filters(
+$wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
 		'woocommerce-product-gallery',

@@ -59,14 +59,14 @@ class WC_Meta_Box_Order_Downloads {
 						}
 
 						// Show file title instead of count if set.
-						$file = $product->get_file( $download->get_download_id() );
+						$file       = $product->get_file( $download->get_download_id() );
 						// translators: file name.
 						$file_count = isset( $file['name'] ) ? $file['name'] : sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 
 						include __DIR__ . '/views/html-order-download-permission.php';
 
-						++$loop;
-						++$file_counter;
+						$loop++;
+						$file_counter++;
 					}
 				}
 				?>
@@ -99,7 +99,7 @@ class WC_Meta_Box_Order_Downloads {
 			$access_expires      = $_POST['access_expires'];
 			$max                 = max( array_keys( $permission_ids ) );
 
-			for ( $i = 0; $i <= $max; $i++ ) {
+			for ( $i = 0; $i <= $max; $i ++ ) {
 				if ( ! isset( $permission_ids[ $i ] ) ) {
 					continue;
 				}

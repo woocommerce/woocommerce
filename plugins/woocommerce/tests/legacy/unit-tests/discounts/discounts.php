@@ -6,9 +6,9 @@
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
-/**
- * WC_Tests_Discounts.
- */
+ /**
+  * WC_Tests_Discounts.
+  */
 class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 	/**

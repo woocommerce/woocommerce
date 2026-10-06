@@ -207,7 +207,7 @@ class Users {
 	 * @return bool True on success, false on failure.
 	 * /
 	 */
-	public static function delete_site_user_meta( $user_id, $meta_key, $meta_value = '' ) {
+	public static function delete_site_user_meta(  $user_id, $meta_key, $meta_value = '' ) {
 		global $wpdb;
 		$site_specific_key = $meta_key . '_' . rtrim( $wpdb->get_blog_prefix(), '_' );
 		return delete_user_meta( $user_id, $site_specific_key, $meta_value );

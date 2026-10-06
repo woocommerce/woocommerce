@@ -24,4 +24,5 @@ interface ImportInterface {
 	 * @return null
 	 */
 	public static function get_total_imported();
+
 }

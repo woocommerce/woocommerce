@@ -48,6 +48,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		} catch ( Exception $e ) {
 			$this->assertEquals( 'Invalid coupon.', $e->getMessage() );
 		}
+
 	}
 
 	/**
@@ -242,4 +243,5 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$read_coupon = new WC_Coupon( $coupon->get_id() );
 		$this->assertEquals( 'draft', $read_coupon->get_status() );
 	}
+
 }

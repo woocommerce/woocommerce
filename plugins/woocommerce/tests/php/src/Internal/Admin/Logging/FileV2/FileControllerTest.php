@@ -402,7 +402,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $files );
 
 		$sources = array_map(
-			function ( $file ) {
+			function( $file ) {
 				return $file->get_source();
 			},
 			$files

@@ -621,6 +621,7 @@ class WC_Test_Shortcode_Products extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected16, $shortcode16->get_query_args() );
+
 	}
 
 	/**

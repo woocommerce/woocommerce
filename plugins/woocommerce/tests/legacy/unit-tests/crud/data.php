@@ -106,7 +106,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $meta_data );
 		foreach ( $meta_data as $mid => $data ) {
 			$this->assertEquals( "val{$i}", $data->value );
-			++$i;
+			$i++;
 		}
 	}
 
@@ -191,7 +191,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		foreach ( $meta as $data ) {
 			$this->assertEquals( 'test_multi_meta_key', $data->key );
 			$this->assertEquals( "val{$i}", $data->value );
-			++$i;
+			$i++;
 		}
 	}
 
@@ -266,6 +266,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 			$this->assertEquals( $metadata[ $id ]->key, $meta->key );
 			$this->assertEquals( $metadata[ $id ]->value, $meta->value );
 		}
+
 	}
 
 	/**

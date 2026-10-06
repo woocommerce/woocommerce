@@ -99,3 +99,4 @@ class WC_Mock_Enhanced_Payment_Gateway extends WC_Payment_Gateway {
 		return array( 'api_key' );
 	}
 }
+

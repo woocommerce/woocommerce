@@ -70,4 +70,5 @@ class InvalidCartException extends \Exception {
 	public function getAdditionalData() {
 		return $this->additional_data;
 	}
+
 }

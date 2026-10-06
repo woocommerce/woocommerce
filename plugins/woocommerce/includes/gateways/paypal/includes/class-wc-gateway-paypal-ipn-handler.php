@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/class-wc-gateway-paypal-response.php';
+require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php';
 
 /**
  * WC_Gateway_Paypal_IPN_Handler class.
@@ -209,11 +209,13 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			}
 
 			$this->payment_complete( $order, ( ! empty( $posted['txn_id'] ) ? wc_clean( $posted['txn_id'] ) : '' ), __( 'IPN payment completed', 'woocommerce' ) );
-		} elseif ( 'authorization' === $posted['pending_reason'] ) {
-				$this->payment_on_hold( $order, __( 'Payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ) );
 		} else {
-			/* translators: %s: pending reason. */
-			$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $posted['pending_reason'] ) );
+			if ( 'authorization' === $posted['pending_reason'] ) {
+				$this->payment_on_hold( $order, __( 'Payment authorized. Change payment status to processing or complete to capture funds.', 'woocommerce' ) );
+			} else {
+				/* translators: %s: pending reason. */
+				$this->payment_on_hold( $order, sprintf( __( 'Payment pending (%s).', 'woocommerce' ), $posted['pending_reason'] ) );
+			}
 		}
 	}
 

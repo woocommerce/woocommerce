@@ -38,10 +38,12 @@ class MobileMessagingHandler {
 
 			if ( IppFunctions::is_store_in_person_payment_eligible() && IppFunctions::is_order_in_person_payment_eligible( $order ) ) {
 				return self::accept_payment_message( $blog_id, $domain );
-			} elseif ( $used_app_in_last_month && $has_jetpack ) {
-					return self::manage_order_message( $blog_id, $order->get_id(), $domain );
 			} else {
-				return self::no_app_message( $blog_id, $domain );
+				if ( $used_app_in_last_month && $has_jetpack ) {
+					return self::manage_order_message( $blog_id, $order->get_id(), $domain );
+				} else {
+					return self::no_app_message( $blog_id, $domain );
+				}
 			}
 		} catch ( Exception $e ) {
 			return null;
@@ -75,8 +77,7 @@ class MobileMessagingHandler {
 	 * @return ?DateTime last used date of specified mobile app
 	 */
 	private static function get_last_used_or_null(
-		string $platform,
-		array $mobile_usage
+		string $platform, array $mobile_usage
 	): ?DateTime {
 		try {
 			if ( array_key_exists( $platform, $mobile_usage ) ) {

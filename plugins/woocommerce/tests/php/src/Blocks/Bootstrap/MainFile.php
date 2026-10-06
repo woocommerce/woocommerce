@@ -6,7 +6,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\Bootstrap;
 
-use WP_UnitTestCase;
+use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Bootstrap;
 use Automattic\WooCommerce\Blocks\Registry\Container;
 use Automattic\WooCommerce\Blocks\Package;

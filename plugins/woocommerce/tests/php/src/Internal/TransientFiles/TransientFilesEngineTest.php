@@ -234,7 +234,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_transient_files_directory',
-			function ( $path ) use ( &$original_directory ) {
+			function( $path ) use ( &$original_directory ) {
 				$original_directory = $path;
 				return '/my/files';
 			}
@@ -259,7 +259,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox get_transient_files_directory throws if the calculated directory doesn't exist.
 	 */
 	public function test_get_transient_files_directory_throws_if_filter_is_used_and_directory_does_not_exist() {
-		add_filter( 'woocommerce_transient_files_directory', fn( $default_dir ) => 'foobar_dir' );
+		add_filter( 'woocommerce_transient_files_directory', fn( $default_dir) => 'foobar_dir' );
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -590,7 +590,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'gmdate'        => function ( $format, $date = null ) use ( &$today ) {
+				'gmdate'        => function( $format, $date = null ) use ( &$today ) {
 					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
 				},
 			)
@@ -648,7 +648,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'gmdate'        => function ( $format, $date = null ) use ( &$today ) {
+				'gmdate'        => function( $format, $date = null ) use ( &$today ) {
 					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
 				},
 			)
@@ -739,7 +739,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 			array(
 				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'time'                      => fn() => 10000000,
-				'as_schedule_single_action' => function ( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
+				'as_schedule_single_action' => function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
 					$actual_next_time = $timestamp;
 				},
 			)
@@ -766,7 +766,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 			array(
 				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'time'                      => fn() => 10000000,
-				'as_schedule_single_action' => function ( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
+				'as_schedule_single_action' => function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
 					$actual_next_time = $timestamp;
 				},
 			)
@@ -796,17 +796,17 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'dirname'                   =>
-					function ( $path ) {
+					function( $path ) {
 						return false === StringUtil::ends_with( $path, '/TransientFiles/TransientFilesEngine.php' ) ?
 							dirname( $path ) : __DIR__;
 					},
 				'wp_upload_dir'             => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'time'                      => fn() => 10000000,
-				'gmdate'                    => function ( $format, $date = null ) use ( &$today ) {
+				'gmdate'                    => function( $format, $date = null ) use ( &$today ) {
 					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
 				},
 				'as_schedule_single_action' =>
-					function ( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
+					function( $timestamp, $hook, $args, $group ) use ( &$actual_next_time ) {
 						$actual_next_time = $timestamp;
 					},
 			)
@@ -869,17 +869,17 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
 				'gmdate'        => fn( $format, $date = null ) =>
 					is_null( $date ) && 'Y-m-d' === $format ? '2023-12-01' : gmdate( $format, $date ),
-				'header'        => function ( $header ) use ( &$actual_headers ) {
+				'header'        => function( $header ) use ( &$actual_headers ) {
 					$actual_headers[] = $header;
 				},
-				'status_header' => function ( $status ) use ( &$actual_status ) {
+				'status_header' => function( $status ) use ( &$actual_status ) {
 					$actual_status = $status;
 				},
 			)
 		);
 
 		$this->register_exit_mock(
-			function () {
+			function() {
 				throw new \LogicException();
 			}
 		);
@@ -917,11 +917,11 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'header'        => function ( $header ) {
+				'header'        => function( $header ) {
 					// We aren't interested in headers, but we still need to mock the function
 					// to prevent "headers already sent" errors being thrown in the PHPUnit context.
 				},
-				'status_header' => function ( $status ) use ( &$actual_status ) {
+				'status_header' => function( $status ) use ( &$actual_status ) {
 					// The 500 is caused by the LogicException that is thrown by "exit"
 					// after setting the real status code, thus we need to ignore it
 					// and keep the real code that had been set previously.
@@ -933,7 +933,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->register_exit_mock(
-			function () {
+			function() {
 				throw new \LogicException();
 			}
 		);
@@ -964,14 +964,14 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wp_upload_dir' => fn() => array( 'basedir' => static::$base_transient_files_dir ),
-				'gmdate'        => function ( $format, $date = null ) use ( &$today ) {
+				'gmdate'        => function( $format, $date = null ) use ( &$today ) {
 					return is_null( $date ) && 'Y-m-d' === $format ? $today : gmdate( $format, $date );
 				},
-				'header'        => function ( $header ) {
+				'header'        => function( $header ) {
 					// We aren't interested in headers, but we still need to mock the function
 					// to prevent "headers already sent" errors being thrown in the PHPUnit context.
 				},
-				'status_header' => function ( $status ) use ( &$actual_status ) {
+				'status_header' => function( $status ) use ( &$actual_status ) {
 					// The 500 is caused by the LogicException that is thrown by "exit"
 					// after setting the real status code, thus we need to ignore it
 					// and keep the real code that had been set previously.
@@ -985,7 +985,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$file_name = $this->sut->create_transient_file( 'foobar', '2024-01-01' );
 
 		$this->register_exit_mock(
-			function () {
+			function() {
 				throw new \LogicException();
 			}
 		);

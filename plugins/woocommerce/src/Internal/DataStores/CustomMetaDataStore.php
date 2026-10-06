@@ -71,7 +71,7 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function delete_meta( &$object, $meta ): bool {
+	public function delete_meta( &$object, $meta ) : bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) ) {
@@ -134,7 +134,7 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @return bool
 	 */
-	public function update_meta( &$object, $meta ): bool {
+	public function update_meta( &$object, $meta ) : bool {
 		global $wpdb;
 
 		if ( ! isset( $meta->id ) || empty( $meta->key ) || ! $object->get_id() ) {
@@ -300,4 +300,5 @@ abstract class CustomMetaDataStore {
 
 		return $meta_data;
 	}
+
 }

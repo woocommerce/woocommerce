@@ -62,4 +62,5 @@ class OnboardingJetpack {
 		}
 		return $plugins;
 	}
+
 }

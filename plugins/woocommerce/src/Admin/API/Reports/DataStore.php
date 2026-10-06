@@ -708,7 +708,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 						break;
 					}
 					$new_start_date = TimeInterval::iterate( $new_start_date, $query_args['interval'] );
-					++$start_iteration;
+					$start_iteration ++;
 				}
 
 				$new_end_date = clone $new_start_date;
@@ -717,7 +717,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 						break;
 					}
 					$new_end_date = TimeInterval::iterate( $new_end_date, $query_args['interval'] );
-					++$end_iteration;
+					$end_iteration ++;
 				}
 				if ( $new_end_date > $latest_end_date ) {
 					$new_end_date  = $latest_end_date;
@@ -739,7 +739,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 						break;
 					}
 					$new_end_date = TimeInterval::iterate( $new_end_date, $query_args['interval'], true );
-					++$end_iteration;
+					$end_iteration ++;
 				}
 
 				$new_start_date = clone $new_end_date;
@@ -748,7 +748,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 						break;
 					}
 					$new_start_date = TimeInterval::iterate( $new_start_date, $query_args['interval'], true );
-					++$start_iteration;
+					$start_iteration ++;
 				}
 				if ( $new_start_date < $earliest_start_date ) {
 					$new_start_date  = $earliest_start_date;

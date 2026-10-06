@@ -120,13 +120,13 @@ class Marketing extends \WC_REST_Data_Controller {
 		// Default to marketing category (if no category set).
 		$category      = ( ! empty( $request->get_param( 'category' ) ) ) ? $request->get_param( 'category' ) : 'marketing';
 		$all_plugins   = MarketingRecommendationsInit::get_recommended_plugins();
-		$valid_plugins = array();
+		$valid_plugins = [];
 		$per_page      = $request->get_param( 'per_page' );
 
 		foreach ( $all_plugins as $plugin ) {
 
 			// default to marketing if 'categories' is empty on the plugin object (support for legacy api while testing).
-			$plugin_categories = ( ! empty( $plugin['categories'] ) ) ? $plugin['categories'] : array( 'marketing' );
+			$plugin_categories = ( ! empty( $plugin['categories'] ) ) ? $plugin['categories'] : [ 'marketing' ];
 
 			if ( ! PluginsHelper::is_plugin_installed( $plugin['plugin'] ) && in_array( $category, $plugin_categories, true ) ) {
 				$valid_plugins[] = $plugin;

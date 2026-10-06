@@ -21,7 +21,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Sets the global vars before each test.
 	 */
-	public function setUp(): void {
+	public function setUp() : void {
 		global $current_screen;
 
 		$this->old_current_screen = $current_screen;
@@ -32,7 +32,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	/**
 	 * Restores the global vars after each test.
 	 */
-	public function tearDown(): void {
+	public function tearDown() : void {
 		global $current_screen;
 
 		$current_screen = $this->old_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -47,13 +47,13 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_view_page_capability(): void {
+	public function test_get_view_page_capability() : void {
 
 		$this->assertEquals( 'moderate_comments', Reviews::get_capability() );
 		$this->assertEquals( 'moderate_comments', Reviews::get_capability( 'view' ) );
 		$this->assertEquals( 'edit_products', Reviews::get_capability( 'moderate' ) );
 
-		$callback = function () {
+		$callback = function() {
 			return 'manage_woocommerce';
 		};
 
@@ -72,7 +72,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method or the property is not found.
 	 */
-	public function test_load_reviews_screen(): void {
+	public function test_load_reviews_screen() : void {
 		$reviews = wc_get_container()->get( Reviews::class );
 
 		// This has to be manually set, otherwise instantiating ReviewsListTable will throw an undefined index error.
@@ -85,7 +85,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( $list_table_property->getValue( $reviews ) );
 
-		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'load_reviews_screen' );
+		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'load_reviews_screen' );
 		$method->setAccessible( true );
 		$method->invoke( $reviews );
 
@@ -218,47 +218,47 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_pending_count_bubble( int $number_pending, string $expected_html ): void {
+	public function test_get_pending_count_bubble( int $number_pending, string $expected_html ) : void {
 		// Add a normal post with some pending comments -- these should not appear in our counts.
 		$post_id = $this->factory()->post->create(
-			array(
+			[
 				'post_type' => 'post',
-			)
+			]
 		);
 		$this->factory()->comment->create_many(
 			3,
-			array(
+			[
 				'comment_post_ID'  => $post_id,
 				'comment_approved' => '0',
-			)
+			]
 		);
 
 		if ( $number_pending > 0 ) {
 			// Now add a product with a bunch of reviews.
 			$product_id = $this->factory()->post->create(
-				array(
+				[
 					'post_type' => 'product',
-				)
+				]
 			);
 
 			// Create moderated comments -- these _should_ appear in our counts.
 			$this->factory()->comment->create_many(
 				$number_pending,
-				array(
-					'comment_type'     => 'review',
-					'comment_post_ID'  => $product_id,
+				[
+					'comment_type' => 'review',
+					'comment_post_ID' => $product_id,
 					'comment_approved' => '0',
-				)
+				]
 			);
 
 			// Create some approved comments -- these _should not_ appear in our counts.
 			$this->factory()->comment->create_many(
 				2,
-				array(
-					'comment_type'     => 'review',
-					'comment_post_ID'  => $product_id,
+				[
+					'comment_type' => 'review',
+					'comment_post_ID' => $product_id,
 					'comment_approved' => '1',
-				)
+				]
 			);
 		}
 
@@ -273,12 +273,12 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_pending_count_bubble */
-	public function data_provider_get_pending_count_bubble(): Generator {
-		yield 'no pending' => array( 0, '' );
-		yield 'has pending' => array(
+	public function data_provider_get_pending_count_bubble() : Generator {
+		yield 'no pending' => [ 0, '' ];
+		yield 'has pending' => [
 			2,
 			' <span class="menu-counter count-2"><span class="pending-count">2</span></span>',
-		);
+		];
 	}
 
 	/**
@@ -289,14 +289,14 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_edit_review_parent_file(): void {
+	public function test_edit_review_parent_file() : void {
 		global $submenu_file, $current_screen;
 
-		$product        = $this->factory()->post->create( array( 'post_type' => 'product' ) );
-		$review         = $this->factory()->comment->create( array( 'comment_post_ID' => $product ) );
-		$current_screen = (object) array( 'id' => 'comment' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$_GET['c']      = $review;
-		$reviews        = wc_get_container()->get( Reviews::class );
+		$product = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+		$review = $this->factory()->comment->create( [ 'comment_post_ID' => $product ] );
+		$current_screen = (object) [ 'id' => 'comment' ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$_GET['c'] = $review;
+		$reviews = wc_get_container()->get( Reviews::class );
 
 		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'edit_review_parent_file' );
 		$method->setAccessible( true );
@@ -313,11 +313,11 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the property doesn't exist.
 	 */
-	public function test_render_reviews_list_table(): void {
+	public function test_render_reviews_list_table() : void {
 		$GLOBALS['hook_suffix'] = 'product_page_product-reviews'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$reviews    = wc_get_container()->get( Reviews::class );
-		$list_table = new ReviewsListTable( array( 'screen' => 'product_page_product-reviews' ) );
+		$reviews = wc_get_container()->get( Reviews::class );
+		$list_table = new ReviewsListTable( [ 'screen' => 'product_page_product-reviews' ] );
 
 		$property = ( new ReflectionClass( $reviews ) )->getProperty( 'reviews_list_table' );
 		$property->setAccessible( true );
@@ -357,7 +357,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_is_reviews_page( $new_current_screen, bool $expected_result ): void {
+	public function test_is_reviews_page( $new_current_screen, bool $expected_result ) : void {
 		global $current_screen;
 
 		$current_screen = $new_current_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -368,31 +368,31 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_is_reviews_page */
-	public function provider_is_reviews_page(): Generator {
+	public function provider_is_reviews_page() : Generator {
 
-		yield 'Global current_screen is null' => array(
+		yield 'Global current_screen is null' => [
 			'new_current_screen' => null,
 			'expected_result'    => false,
-		);
+		];
 
-		yield 'Global current_screen has no base' => array(
-			'new_current_screen' => (object) array(),
+		yield 'Global current_screen has no base' => [
+			'new_current_screen' => (object) [],
 			'expected_result'    => false,
-		);
+		];
 
-		$any_screen = (object) array( 'base' => 'any-page' );
+		$any_screen = (object) [ 'base' => 'any-page' ];
 
-		yield 'current_screen->base is anything other than the reviews page' => array(
+		yield 'current_screen->base is anything other than the reviews page' => [
 			'new_current_screen' => $any_screen,
 			'expected_result'    => false,
-		);
+		];
 
-		$reviews_screen = (object) array( 'base' => 'product_page_product-reviews' );
+		$reviews_screen = (object) [ 'base' => 'product_page_product-reviews' ];
 
-		yield 'Page is product-reviews' => array(
+		yield 'Page is product-reviews' => [
 			'new_current_screen' => $reviews_screen,
 			'expected_result'    => true,
-		);
+		];
 	}
 
 	/**
@@ -408,14 +408,14 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_get_bulk_action_notice_messages( array $statuses, int $count, array $expected_result ): void {
+	public function test_get_bulk_action_notice_messages( array $statuses, int $count, array $expected_result ) : void {
 
 		$reviews = wc_get_container()->get( Reviews::class );
 
 		$method = ( new ReflectionClass( $reviews ) )->getMethod( 'get_bulk_action_notice_messages' );
 		$method->setAccessible( true );
 
-		$_REQUEST = array();
+		$_REQUEST = [];
 
 		foreach ( $statuses as $status ) {
 			$_REQUEST[ $status ] = $count;
@@ -430,97 +430,97 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_get_bulk_action_notice_messages */
-	public function provider_get_bulk_action_notice_messages(): Generator {
+	public function provider_get_bulk_action_notice_messages() : Generator {
 
-		yield 'An approved review status' => array(
-			'status'         => array( 'approved' ),
+		yield 'An approved review status' => [
+			'status'         => [ 'approved' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review approved' ),
-		);
+			'expected_array' => [ '1 review approved' ],
+		];
 
-		yield 'Two approved review statuses' => array(
-			'status'         => array( 'approved' ),
+		yield 'Two approved review statuses' => [
+			'status'         => [ 'approved' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews approved' ),
-		);
+			'expected_array' => [ '2 reviews approved' ],
+		];
 
-		yield 'An unapproved review status' => array(
-			'status'         => array( 'unapproved' ),
+		yield 'An unapproved review status' => [
+			'status'         => [ 'unapproved' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review unapproved' ),
-		);
+			'expected_array' => [ '1 review unapproved' ],
+		];
 
-		yield 'Two unapproved review statuses' => array(
-			'status'         => array( 'unapproved' ),
+		yield 'Two unapproved review statuses' => [
+			'status'         => [ 'unapproved' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews unapproved' ),
-		);
+			'expected_array' => [ '2 reviews unapproved' ],
+		];
 
-		yield 'A deleted review status' => array(
-			'status'         => array( 'deleted' ),
+		yield 'A deleted review status' => [
+			'status'         => [ 'deleted' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review permanently deleted' ),
-		);
+			'expected_array' => [ '1 review permanently deleted' ],
+		];
 
-		yield 'Two deleted review statuses' => array(
-			'status'         => array( 'deleted' ),
+		yield 'Two deleted review statuses' => [
+			'status'         => [ 'deleted' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews permanently deleted' ),
-		);
+			'expected_array' => [ '2 reviews permanently deleted' ],
+		];
 
-		yield 'A trashed review status' => array(
-			'status'         => array( 'trashed' ),
+		yield 'A trashed review status' => [
+			'status'         => [ 'trashed' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review moved to the Trash.' ),
-		);
+			'expected_array' => [ '1 review moved to the Trash.' ],
+		];
 
-		yield 'Two trashed review statuses' => array(
-			'status'         => array( 'trashed' ),
+		yield 'Two trashed review statuses' => [
+			'status'         => [ 'trashed' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews moved to the Trash.' ),
-		);
+			'expected_array' => [ '2 reviews moved to the Trash.' ],
+		];
 
-		yield 'An untrashed review status' => array(
-			'status'         => array( 'untrashed' ),
+		yield 'An untrashed review status' => [
+			'status'         => [ 'untrashed' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review restored from the Trash' ),
-		);
+			'expected_array' => [ '1 review restored from the Trash' ],
+		];
 
-		yield 'Two untrashed review statuses' => array(
-			'status'         => array( 'untrashed' ),
+		yield 'Two untrashed review statuses' => [
+			'status'         => [ 'untrashed' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews restored from the Trash' ),
-		);
+			'expected_array' => [ '2 reviews restored from the Trash' ],
+		];
 
-		yield 'A spammed review status' => array(
-			'status'         => array( 'spammed' ),
+		yield 'A spammed review status' => [
+			'status'         => [ 'spammed' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review marked as spam.' ),
-		);
+			'expected_array' => [ '1 review marked as spam.' ],
+		];
 
-		yield 'Two spammed review statuses' => array(
-			'status'         => array( 'spammed' ),
+		yield 'Two spammed review statuses' => [
+			'status'         => [ 'spammed' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews marked as spam.' ),
-		);
+			'expected_array' => [ '2 reviews marked as spam.' ],
+		];
 
-		yield 'An unspammed review status' => array(
-			'status'         => array( 'unspammed' ),
+		yield 'An unspammed review status' => [
+			'status'         => [ 'unspammed' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review restored from the spam' ),
-		);
+			'expected_array' => [ '1 review restored from the spam' ],
+		];
 
-		yield 'Two unspammed review statuses' => array(
-			'status'         => array( 'unspammed' ),
+		yield 'Two unspammed review statuses' => [
+			'status'         => [ 'unspammed' ],
 			'count'          => 2,
-			'expected_array' => array( '2 reviews restored from the spam' ),
-		);
+			'expected_array' => [ '2 reviews restored from the spam' ],
+		];
 
-		yield 'Two different statuses' => array(
-			'status'         => array( 'approved', 'unapproved' ),
+		yield 'Two different statuses' => [
+			'status'         => [ 'approved', 'unapproved' ],
 			'count'          => 1,
-			'expected_array' => array( '1 review approved', '1 review unapproved' ),
-		);
+			'expected_array' => [ '1 review approved', '1 review unapproved' ],
+		];
 	}
 
 	/**
@@ -535,10 +535,10 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_maybe_display_reviews_bulk_action_notice( array $messages, string $expected_result ): void {
+	public function test_maybe_display_reviews_bulk_action_notice( array $messages, string $expected_result ) : void {
 
 		$mock = $this->getMockBuilder( Reviews::class )
-			->setMethods( array( 'get_bulk_action_notice_messages' ) )
+			->setMethods( [ 'get_bulk_action_notice_messages' ] )
 			->getMock();
 
 		$mock->expects( $this->once() )
@@ -556,23 +556,23 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/** @see test_maybe_display_reviews_bulk_action_notice */
-	public function provider_maybe_display_reviews_bulk_action_notice(): Generator {
+	public function provider_maybe_display_reviews_bulk_action_notice() : Generator {
 
-		yield 'No messages are returned' => array(
-			'messages'        => array(),
+		yield 'No messages are returned' => [
+			'messages'        => [],
 			'expected_result' => '',
-		);
+		];
 
-		yield 'A message is returned' => array(
-			'messages'        => array( 'test' ),
+		yield 'A message is returned' => [
+			'messages'        => [ 'test' ],
 			'expected_result' => '<div id="moderated" class="updated"><p>test</p></div>',
-		);
+		];
 
-		yield 'Two messages are returned' => array(
-			'messages'        => array( 'test1', 'test2' ),
+		yield 'Two messages are returned' => [
+			'messages'        => [ 'test1', 'test2' ],
 			'expected_result' => '<div id="moderated" class="updated"><p>test1<br/>
 test2</p></div>',
-		);
+		];
 	}
 
 	/**
@@ -587,10 +587,10 @@ test2</p></div>',
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_display_notices( bool $is_reviews_page, bool $should_call_the_display_method ): void {
+	public function test_display_notices( bool $is_reviews_page, bool $should_call_the_display_method ) : void {
 
 		$mock = $this->getMockBuilder( Reviews::class )
-			->setMethods( array( 'is_reviews_page', 'maybe_display_reviews_bulk_action_notice' ) )
+			->setMethods( [ 'is_reviews_page', 'maybe_display_reviews_bulk_action_notice' ] )
 			->getMock();
 
 		$mock->expects( $this->once() )
@@ -607,17 +607,17 @@ test2</p></div>',
 	}
 
 	/** @see test_display_notices */
-	public function provider_display_notices(): Generator {
+	public function provider_display_notices() : Generator {
 
-		yield 'Is the reviews page' => array(
+		yield 'Is the reviews page' => [
 			'is_reviews_page'                          => true,
 			'maybe_display_reviews_bulk_action_notice' => true,
-		);
+		];
 
-		yield 'Is not the reviews page' => array(
+		yield 'Is not the reviews page' => [
 			'is_reviews_page'                          => false,
 			'maybe_display_reviews_bulk_action_notice' => false,
-		);
+		];
 	}
 
 	/**
@@ -632,7 +632,7 @@ test2</p></div>',
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_is_not_review_or_reply( $object, bool $expected ): void {
+	public function test_is_not_review_or_reply( $object, bool $expected ) : void {
 		$reviews = wc_get_container()->get( Reviews::class );
 		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
 		$method->setAccessible( true );
@@ -642,8 +642,8 @@ test2</p></div>',
 
 	/** @see test_is_not_review_or_reply */
 	public function provider_is_review_or_reply(): Generator {
-		yield 'null object' => array( null, false );
-		yield 'invalid array' => array( array( 'data' ), false );
+		yield 'null object' => [ null, false ];
+		yield 'invalid array' => [ [ 'data' ], false ];
 	}
 
 	/**
@@ -654,43 +654,43 @@ test2</p></div>',
 	 * @return void
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
-	public function test_is_review_or_reply_with_comment_object(): void {
+	public function test_is_review_or_reply_with_comment_object() : void {
 		$reviews = wc_get_container()->get( Reviews::class );
 		$method  = ( new ReflectionClass( $reviews ) )->getMethod( 'is_review_or_reply' );
 		$method->setAccessible( true );
 
 		$regular_comment = $this->factory()->comment->create_and_get(
-			array(
-				'comment_post_ID' => $this->factory()->post->create(),
-			)
+			[
+				'comment_post_ID'  => $this->factory()->post->create(),
+			]
 		);
 		$this->assertFalse( $method->invoke( $reviews, $regular_comment ) );
 
 		$review = $this->factory()->comment->create_and_get(
-			array(
-				'comment_type'    => 'review',
-				'comment_post_ID' => $this->factory()->post->create(
-					array(
-						'post_type' => 'product',
-					)
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $this->factory()->post->create(
+					[
+						'post_type'  => 'product',
+					]
 				),
-			)
+			]
 		);
 		$this->assertTrue( $method->invoke( $reviews, $review ) );
 
 		$review_reply = $this->factory()->comment->create_and_get(
-			array(
-				'comment_type'    => 'comment',
-				'comment_post_ID' => $this->factory()->post->create(
-					array(
-						'post_type' => 'product',
-					)
+			[
+				'comment_type'     => 'comment',
+				'comment_post_ID'  => $this->factory()->post->create(
+					[
+						'post_type'  => 'product',
+					]
 				),
-			)
+			]
 		);
 		$this->assertTrue( $method->invoke( $reviews, $review_reply ) );
 
-		$callback = function () {
+		$callback = function() {
 			return true;
 		};
 
@@ -708,7 +708,8 @@ test2</p></div>',
 	 *
 	 * @return void
 	 */
-	public function test_get_reviews_page_url(): void {
+	public function test_get_reviews_page_url() : void {
 		$this->assertSame( 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
 	}
+
 }

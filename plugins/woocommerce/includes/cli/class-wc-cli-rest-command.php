@@ -145,17 +145,19 @@ class WC_CLI_REST_Command {
 	 */
 	public function delete_item( $args, $assoc_args ) {
 		list( $status, $body ) = $this->do_request( 'DELETE', $this->get_filled_route( $args ), $assoc_args );
-		$object_id             = isset( $body['id'] ) ? $body['id'] : '';
+		$object_id = isset( $body['id'] ) ? $body['id'] : '';
 		if ( ! $object_id && isset( $body['slug'] ) ) {
 			$object_id = $body['slug'];
 		}
 
 		if ( \WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain' ) ) {
 			WP_CLI::line( $object_id );
-		} elseif ( empty( $assoc_args['force'] ) ) {
-				WP_CLI::success( __( 'Trashed', 'woocommerce' ) . " {$this->name} {$object_id}" );
 		} else {
-			WP_CLI::success( __( 'Deleted', 'woocommerce' ) . " {$this->name} {$object_id}." );
+			if ( empty( $assoc_args['force'] ) ) {
+				WP_CLI::success( __( 'Trashed', 'woocommerce' ) . " {$this->name} {$object_id}" );
+			} else {
+				WP_CLI::success( __( 'Deleted', 'woocommerce' ) . " {$this->name} {$object_id}." );
+			}
 		}
 	}
 
@@ -310,7 +312,7 @@ class WC_CLI_REST_Command {
 			}
 			usort(
 				$performed_queries,
-				function ( $a, $b ) {
+				function( $a, $b ) {
 					if ( $a[1] === $b[1] ) {
 						return 0;
 					}
@@ -327,7 +329,7 @@ class WC_CLI_REST_Command {
 			if ( $performed_queries && 'wc' === WP_CLI::get_config( 'debug' ) ) {
 				$slow_query_message .= '. Ordered by slowness, the queries are:' . PHP_EOL;
 				foreach ( $performed_queries as $i => $query ) {
-					++$i;
+					$i++;
 					$bits                = explode( ', ', $query[2] );
 					$backtrace           = implode( ', ', array_slice( $bits, 13 ) );
 					$seconds             = NumberUtil::round( $query[1], 6 );
@@ -374,10 +376,12 @@ EOT;
 			} else {
 				$fields = $assoc_args['fields'];
 			}
-		} elseif ( ! empty( $assoc_args['context'] ) ) {
-				$fields = $this->get_context_fields( $assoc_args['context'] );
 		} else {
-			$fields = $this->get_context_fields( 'view' );
+			if ( ! empty( $assoc_args['context'] ) ) {
+				$fields = $this->get_context_fields( $assoc_args['context'] );
+			} else {
+				$fields = $this->get_context_fields( 'view' );
+			}
 		}
 		return new \WP_CLI\Formatter( $assoc_args, $fields );
 	}
@@ -463,4 +467,5 @@ EOT;
 		}
 		return $arr;
 	}
+
 }

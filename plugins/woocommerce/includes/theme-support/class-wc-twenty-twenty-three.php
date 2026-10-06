@@ -41,6 +41,7 @@ class WC_Twenty_Twenty_Three {
 				'single_image_width'    => 600,
 			)
 		);
+
 	}
 
 	/**

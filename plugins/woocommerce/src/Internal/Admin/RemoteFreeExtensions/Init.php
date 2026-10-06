@@ -39,7 +39,7 @@ class Init extends RemoteSpecsEngine {
 
 		$plugins = array_filter(
 			$results['bundles'],
-			function ( $bundle ) {
+			function( $bundle ) {
 				return count( $bundle['plugins'] ) > 0;
 			}
 		);

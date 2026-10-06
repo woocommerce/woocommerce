@@ -45,4 +45,5 @@ class WC_Webhook_Data_Store_Test extends WC_Unit_Test_Case {
 			)
 		);
 	}
+
 }

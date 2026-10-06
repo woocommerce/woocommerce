@@ -47,6 +47,7 @@ class WC_Twenty_Twenty {
 
 		// Background color change.
 		add_action( 'after_setup_theme', array( __CLASS__, 'set_white_background' ), 10 );
+
 	}
 
 	/**
@@ -100,6 +101,7 @@ class WC_Twenty_Twenty {
 
 		return apply_filters( 'woocommerce_twenty_twenty_styles', $styles );
 	}
+
 }
 
 WC_Twenty_Twenty::init();

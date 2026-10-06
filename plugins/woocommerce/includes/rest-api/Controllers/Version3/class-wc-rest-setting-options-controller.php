@@ -49,8 +49,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 	 */
 	public function allowed_setting_keys( $key ) {
 		return in_array(
-			$key,
-			array(
+			$key, array(
 				'id',
 				'group_id',
 				'label',
@@ -62,8 +61,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 				'options',
 				'value',
 				'option_key',
-			),
-			true
+			), true
 		);
 	}
 

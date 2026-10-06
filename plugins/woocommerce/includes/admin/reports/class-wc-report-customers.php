@@ -119,7 +119,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 		</div>
 		<script type="text/javascript">
 			jQuery(function(){
-				jQuery.plot(
+				 jQuery.plot(
 					jQuery('.chart-placeholder.customers_vs_guests'),
 					[
 						{

@@ -37,3 +37,4 @@ class WC_Order_Tracking {
 		WC_Tracks::record_event( 'single_order_view', $properties );
 	}
 }
+

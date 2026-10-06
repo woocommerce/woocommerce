@@ -161,6 +161,7 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 		file_put_contents( $test_file, '' );
 		$this->assertTrue( file_exists( $test_file ), 'Confirms that our test files exists.' );
 
+
 		// Ensure the final test fails in the event exceptions are not raised later in the test.
 		$file_does_not_exist = new Exception( '1' );
 		$invalid_directory   = new Exception( '2' );

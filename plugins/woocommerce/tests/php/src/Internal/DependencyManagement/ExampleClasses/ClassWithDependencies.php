@@ -40,7 +40,7 @@ class ClassWithDependencies {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		++self::$instances_count;
+		self::$instances_count++;
 	}
 
 	/**

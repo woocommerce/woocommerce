@@ -59,7 +59,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 
 		$levels = array_reduce(
 			array_keys( $labels ),
-			function ( $carry, $item ) use ( $labels ) {
+			function( $carry, $item ) use ( $labels ) {
 				$carry[] = array(
 					'value' => $item,
 					'label' => $labels[ $item ],

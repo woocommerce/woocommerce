@@ -39,21 +39,21 @@ class PostsRedirectionController {
 
 		add_action(
 			'load-edit.php',
-			function () {
+			function() {
 				$this->maybe_redirect_to_orders_page();
 			}
 		);
 
 		add_action(
 			'load-post-new.php',
-			function () {
+			function() {
 				$this->maybe_redirect_to_new_order_page();
 			}
 		);
 
 		add_action(
 			'load-post.php',
-			function () {
+			function() {
 				$this->maybe_redirect_to_edit_order_page();
 			}
 		);

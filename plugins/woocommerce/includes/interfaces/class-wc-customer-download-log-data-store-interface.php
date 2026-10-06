@@ -28,4 +28,5 @@ interface WC_Customer_Download_Log_Data_Store_Interface {
 	 * @return array
 	 */
 	public function get_download_logs_for_permission( $permission_id );
+
 }

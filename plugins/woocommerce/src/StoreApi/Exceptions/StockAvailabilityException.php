@@ -68,4 +68,5 @@ class StockAvailabilityException extends \Exception {
 	public function getProductName() {
 		return $this->product_name;
 	}
+
 }

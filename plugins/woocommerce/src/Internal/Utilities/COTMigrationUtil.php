@@ -50,7 +50,7 @@ class COTMigrationUtil {
 	 *
 	 * @return string
 	 */
-	public function get_order_admin_screen(): string {
+	public function get_order_admin_screen() : string {
 		if ( ! is_admin() ) {
 			throw new \Exception( 'This function should only be called in admin.' );
 		}
@@ -64,7 +64,7 @@ class COTMigrationUtil {
 	 *
 	 * @return bool
 	 */
-	private function custom_orders_table_usage_is_enabled(): bool {
+	private function custom_orders_table_usage_is_enabled() : bool {
 		return $this->table_controller->custom_orders_table_usage_is_enabled();
 	}
 
@@ -73,7 +73,7 @@ class COTMigrationUtil {
 	 *
 	 * @return bool
 	 */
-	public function is_custom_order_tables_in_sync(): bool {
+	public function is_custom_order_tables_in_sync() : bool {
 		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
 			return false;
 		}
@@ -146,7 +146,7 @@ class COTMigrationUtil {
 	 *
 	 * @return int Order or post ID.
 	 */
-	public function get_post_or_order_id( $post_or_order_object ): int {
+	public function get_post_or_order_id( $post_or_order_object ) : int {
 		if ( is_numeric( $post_or_order_object ) ) {
 			return (int) $post_or_order_object;
 		} elseif ( $post_or_order_object instanceof WC_Order ) {
@@ -165,7 +165,7 @@ class COTMigrationUtil {
 	 *
 	 * @return bool Whether the passed param is an order.
 	 */
-	public function is_order( $order_id, array $types = array( 'shop_order' ) ): bool {
+	public function is_order( $order_id, array $types = array( 'shop_order' ) ) : bool {
 		$order_id         = $this->get_post_or_order_id( $order_id );
 		$order_data_store = \WC_Data_Store::load( 'order' );
 		return in_array( $order_data_store->get_order_type( $order_id ), $types, true );

@@ -75,4 +75,5 @@ class Features extends \WC_REST_Data_Controller {
 	public function get_features( $request ) {
 		return FeaturesClass::get_available_features();
 	}
+
 }

@@ -46,6 +46,7 @@ class WC_Helper_Fee {
 		}
 
 		WC()->cart->add_fee( 'Dummy Negative Fee', -10 );
+
 	}
 
 	/**

@@ -18,7 +18,7 @@ class MarketingChannels {
 	 *
 	 * @var MarketingChannelInterface[]
 	 */
-	private $registered_channels = array();
+	private $registered_channels = [];
 
 	/**
 	 * Registers a marketing channel.

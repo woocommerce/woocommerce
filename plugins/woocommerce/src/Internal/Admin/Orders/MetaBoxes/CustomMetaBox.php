@@ -140,7 +140,7 @@ class CustomMetaBox {
 	 *
 	 * @return void
 	 */
-	public function render_meta_form( \WC_Order $order ): void {
+	public function render_meta_form( \WC_Order $order ) : void {
 		?>
 		<p><strong><?php esc_html_e( 'Add New Custom Field:', 'woocommerce' ); ?></strong></p>
 		<table id="newmeta">
@@ -365,7 +365,7 @@ class CustomMetaBox {
 	 * @param int   $count Sequence number of meta entries.
 	 * @return string
 	 */
-	private function list_meta_row( array $entry, int &$count ): string {
+	private function list_meta_row( array $entry, int &$count ) : string {
 		if ( is_protected_meta( $entry['meta_key'], 'post' ) ) {
 			return '';
 		}
@@ -375,7 +375,7 @@ class CustomMetaBox {
 		}
 
 		$r = '';
-		++$count;
+		++ $count;
 
 		if ( is_serialized( $entry['meta_value'] ) ) {
 			if ( is_serialized_string( $entry['meta_value'] ) ) {

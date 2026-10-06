@@ -50,7 +50,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
-		$this->csv_file       = __DIR__ . '/sample.csv';
+		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
 	}
 
 	/**
@@ -210,7 +210,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'update_existing' => true,
 		);
 
-		$csv_file = __DIR__ . '/sample_update_product.csv';
+		$csv_file = dirname( __FILE__ ) . '/sample_update_product.csv';
 
 		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
 		$results  = $importer->import();

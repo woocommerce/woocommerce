@@ -318,7 +318,7 @@ abstract class WC_CSV_Exporter {
 
 		$this->fputcsv( $buffer, $export_row );
 
-		++$this->exported_row_count;
+		++ $this->exported_row_count;
 	}
 
 	/**

@@ -198,7 +198,7 @@ class WC_Order_Item_Meta {
 				$formatted_meta_key = $meta_key;
 				$loop               = 0;
 				while ( isset( $formatted_meta[ $formatted_meta_key ] ) ) {
-					++$loop;
+					$loop ++;
 					$formatted_meta_key = $meta_key . '-' . $loop;
 				}
 

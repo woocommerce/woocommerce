@@ -116,4 +116,5 @@ class FakeQueue implements \WC_Queue_Interface {
 	public function clear_methods_called() {
 		$this->methods_called = array();
 	}
+
 }

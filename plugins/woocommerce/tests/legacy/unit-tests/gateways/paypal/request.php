@@ -43,6 +43,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		if ( array_key_exists( 0, $this->products ) ) {
 			$this->products[0]->set_name( 'Dummy Product 😎😎😎😎😎😎😎😎😎😎😎' );
 		}
+
 	}
 
 	/**
@@ -73,7 +74,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			$item->save();
 			$order->add_item( $item );
 
-			++$prod_count;
+			$prod_count++;
 		}
 	}
 
@@ -159,6 +160,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			abs( $shipping_total - floatval( $query_array['shipping_1'] ) ) < $epsilon,
 			'Shipping tax mismatch: shipping total=' . $shipping_total . ' vs request shipping=' . $query_array['shipping_1']
 		);
+
 	}
 
 	/**
@@ -403,5 +405,8 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			$this->check_totals_mismatch( $testmode );
 
 		}
+
 	}
+
 }
+

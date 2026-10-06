@@ -228,3 +228,4 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, count( $sections ) );
 	}
 }
+

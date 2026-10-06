@@ -179,5 +179,6 @@ class WC_Admin_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'coupons_count', $subtotals );
 		$this->assertArrayHasKey( 'orders_count', $subtotals );
 		$this->assertArrayHasKey( 'segments', $subtotals );
+
 	}
 }

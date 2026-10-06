@@ -22,7 +22,7 @@ abstract class CodeHack {
 	 * @param string $path The path of the file containing the code to hack.
 	 * @return string The hacked code.
 	 */
-	abstract public function hack( $code, $path );
+	abstract public function hack( $code, $path);
 
 	/**
 	 * Revert the hack to its initial state.

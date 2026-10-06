@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-	include_once __DIR__ . '/class-wc-plugin-updates.php';
+	include_once dirname( __FILE__ ) . '/class-wc-plugin-updates.php';
 }
 
 /**

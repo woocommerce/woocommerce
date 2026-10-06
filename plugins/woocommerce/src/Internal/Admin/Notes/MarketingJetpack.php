@@ -34,7 +34,7 @@ class MarketingJetpack {
 	/**
 	 * Product IDs that include Backup.
 	 */
-	const BACKUP_IDS = array(
+	const BACKUP_IDS = [
 		2010,
 		2011,
 		2012,
@@ -51,7 +51,7 @@ class MarketingJetpack {
 		2003,
 		2001,
 		2004,
-	);
+	];
 
 	/**
 	 * Maybe add a note on Jetpack Backups for Jetpack sites older than a week without Backups.
@@ -122,7 +122,7 @@ class MarketingJetpack {
 	 * @return boolean  Whether or not this blog has backups.
 	 */
 	protected static function has_backups() {
-		$product_ids = array();
+		$product_ids = [];
 
 		$plan = get_option( 'jetpack_active_plan' );
 		if ( ! empty( $plan ) ) {
@@ -138,4 +138,5 @@ class MarketingJetpack {
 
 		return (bool) array_intersect( self::BACKUP_IDS, $product_ids );
 	}
+
 }

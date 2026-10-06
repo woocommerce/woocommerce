@@ -146,7 +146,7 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$original_data = $this->registry->get();
 		add_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
 		$this->registry->initialize_core_data();
-		$data                          = $this->registry->get();
+		$data = $this->registry->get();
 		$original_data['cheeseburger'] = 'fries';
 		$this->assertEquals( $original_data, $data );
 		remove_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );

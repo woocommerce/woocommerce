@@ -39,7 +39,7 @@ class WC_Helper_Orders_API {
 				'args'                => array(
 					'product_id' => array(
 						'required'          => true,
-						'validate_callback' => function ( $argument ) {
+						'validate_callback' => function( $argument ) {
 							return is_int( $argument );
 						},
 					),

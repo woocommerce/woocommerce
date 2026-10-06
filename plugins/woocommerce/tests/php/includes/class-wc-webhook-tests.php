@@ -460,4 +460,5 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
+
 }

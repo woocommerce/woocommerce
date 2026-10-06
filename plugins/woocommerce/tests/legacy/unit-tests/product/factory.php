@@ -257,4 +257,5 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		// Verify product is still valid.
 		$this->assertEquals( $product_id, $product->get_id() );
 	}
+
 }
