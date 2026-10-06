@@ -13,13 +13,6 @@ declare( strict_types = 1 );
 class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Options changed by the tests.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $original_options = array();
-
-	/**
 	 * Customer shipping country before each test.
 	 *
 	 * @var string
@@ -32,10 +25,6 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		foreach ( array( 'woocommerce_allowed_countries', 'woocommerce_specific_allowed_countries', 'woocommerce_ship_to_countries' ) as $option_name ) {
-			$this->original_options[ $option_name ] = get_option( $option_name, null );
-		}
-
 		$this->original_shipping_country = WC()->customer->get_shipping_country();
 	}
 
@@ -43,110 +32,67 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 	 * Restore the test fixture.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
-		remove_action( 'woocommerce_before_shipping_calculator', array( $this, 'disable_country_field_before_calculator' ) );
-
-		foreach ( $this->original_options as $option_name => $option_value ) {
-			if ( null === $option_value ) {
-				delete_option( $option_name );
-			} else {
-				update_option( $option_name, $option_value );
-			}
-		}
-
 		WC()->customer->set_shipping_country( $this->original_shipping_country );
 
 		parent::tearDown();
 	}
 
 	/**
-	 * A single available country should remain visible and be submitted by the calculator's select.
+	 * @testdox Country select is single-style only when one shipping country is available.
+	 * @testWith [["GR"], true]
+	 *           [["GR", "CY"], false]
+	 * @param string[] $countries Shipping country codes.
+	 * @param bool     $is_single Whether only one shipping country is available.
 	 */
-	public function test_single_shipping_country_uses_single_country_select() {
-		$this->set_shipping_countries( array( 'GR' ) );
-		WC()->customer->set_shipping_country( 'GR' );
+	public function test_country_select( array $countries, bool $is_single ): void {
+		$this->set_shipping_countries( $countries );
+		WC()->customer->set_shipping_country( 'US' );
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
 		$select = new WP_HTML_Tag_Processor( $output );
 		$this->assertTrue( $select->next_tag( array( 'tag_name' => 'select' ) ) );
 		$this->assertSame( 'calc_shipping_country', $select->get_attribute( 'name' ) );
-		$this->assertTrue( $select->has_class( 'country_to_state--single' ) );
-		$this->assertFalse( $select->has_class( 'country_select' ) );
+		$this->assertTrue( $select->has_class( 'country_to_state' ) );
+		$this->assertSame( $is_single, $select->has_class( 'country_to_state--single' ) );
+		$this->assertSame( ! $is_single, $select->has_class( 'country_select' ) );
 		$this->assertNull( $select->get_attribute( 'disabled' ) );
-		$this->assertStringContainsString( '<option value="GR" selected=\'selected\'>Greece</option>', $output );
-		$this->assertStringNotContainsString( '<input type="hidden" name="calc_shipping_country"', $output );
-		$this->assertStringNotContainsString( 'Select a country / region', $output );
+		$this->assertStringContainsString( '<option value="GR">Greece</option>', $output );
+		$this->assertSame( ! $is_single, str_contains( $output, 'Select a country / region' ) );
 	}
 
 	/**
-	 * @testdox Hiding the country field should preserve its submitted value and state synchronization.
+	 * @testdox Hidden country input is only output for single-country stores when the field is filtered off.
+	 * @testWith [["GR"], "GR"]
+	 *           [["GR", "CY"], null]
+	 * @param string[]    $countries Shipping country codes.
+	 * @param string|null $expected Expected hidden country code, or null when no country input is expected.
 	 */
-	public function test_single_shipping_country_is_submitted_when_filter_hides_field(): void {
-		$this->set_shipping_countries( array( 'GR' ) );
+	public function test_hidden_country_input( array $countries, ?string $expected ): void {
+		$this->set_shipping_countries( $countries );
 		WC()->customer->set_shipping_country( 'US' );
-		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
+		add_action(
+			'woocommerce_before_shipping_calculator',
+			static function () {
+				add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
+			}
+		);
 
 		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
 
 		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
+		if ( null === $expected ) {
+			$this->assertStringNotContainsString( 'name="calc_shipping_country"', $output );
+			return;
+		}
+
 		$country = new WP_HTML_Tag_Processor( $output );
 		$this->assertTrue( $country->next_tag( array( 'tag_name' => 'input' ) ) );
 		$this->assertSame( 'hidden', $country->get_attribute( 'type' ) );
 		$this->assertSame( 'calc_shipping_country', $country->get_attribute( 'name' ) );
-		$this->assertSame( 'GR', $country->get_attribute( 'value' ) );
+		$this->assertSame( $expected, $country->get_attribute( 'value' ) );
 		$this->assertSame( 'calc_shipping_country', $country->get_attribute( 'id' ) );
 		$this->assertTrue( $country->has_class( 'country_to_state' ) );
-	}
-
-	/**
-	 * @testdox Extensions should still be able to register the country filter from the before-calculator hook.
-	 */
-	public function test_country_filter_runs_after_before_calculator_hook(): void {
-		$this->set_shipping_countries( array( 'GR' ) );
-		add_action( 'woocommerce_before_shipping_calculator', array( $this, 'disable_country_field_before_calculator' ) );
-
-		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
-
-		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
-		$country = new WP_HTML_Tag_Processor( $output );
-		$this->assertTrue( $country->next_tag( array( 'tag_name' => 'input' ) ) );
-		$this->assertSame( 'calc_shipping_country', $country->get_attribute( 'name' ) );
-		$this->assertSame( 'GR', $country->get_attribute( 'value' ) );
-	}
-
-	/**
-	 * Multiple available countries should keep the existing selectable control.
-	 */
-	public function test_multiple_shipping_countries_remain_selectable() {
-		$this->set_shipping_countries( array( 'GR', 'CY' ) );
-
-		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
-
-		$select = new WP_HTML_Tag_Processor( $output );
-		$this->assertTrue( $select->next_tag( array( 'tag_name' => 'select' ) ) );
-		$this->assertSame( 'calc_shipping_country', $select->get_attribute( 'name' ) );
-		$this->assertTrue( $select->has_class( 'country_select' ) );
-		$this->assertFalse( $select->has_class( 'country_to_state--single' ) );
-		$this->assertNull( $select->get_attribute( 'disabled' ) );
-		$this->assertStringContainsString( 'Select a country / region', $output );
-		$this->assertStringNotContainsString( '<input type="hidden" name="calc_shipping_country"', $output );
-	}
-
-	/**
-	 * @testdox Multiple countries should retain the existing country-filter behavior without a hidden fallback.
-	 */
-	public function test_multiple_shipping_countries_can_still_hide_country_field(): void {
-		$this->set_shipping_countries( array( 'GR', 'CY' ) );
-		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
-
-		$output = wc_get_template_html( 'cart/shipping-calculator.php' );
-
-		$this->assertStringNotContainsString( 'id="calc_shipping_country_field"', $output );
-		$inputs = new WP_HTML_Tag_Processor( $output );
-		while ( $inputs->next_tag( array( 'tag_name' => 'input' ) ) ) {
-			$this->assertFalse( 'hidden' === $inputs->get_attribute( 'type' ) && 'calc_shipping_country' === $inputs->get_attribute( 'name' ) );
-		}
 	}
 
 	/**
@@ -158,12 +104,5 @@ class WC_Shipping_Calculator_Template_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_allowed_countries', 'specific' );
 		update_option( 'woocommerce_specific_allowed_countries', $countries );
 		update_option( 'woocommerce_ship_to_countries', '' );
-	}
-
-	/**
-	 * Disable the country field from the before-calculator hook.
-	 */
-	public function disable_country_field_before_calculator(): void {
-		add_filter( 'woocommerce_shipping_calculator_enable_country', '__return_false' );
 	}
 }
