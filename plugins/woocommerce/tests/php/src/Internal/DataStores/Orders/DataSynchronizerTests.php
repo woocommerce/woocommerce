@@ -168,6 +168,111 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Should not count an order whose authoritative record is older than its backup.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $hpos Whether HPOS is authoritative.
+	 */
+	public function test_older_authoritative_orders_are_not_pending_sync( bool $hpos ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => OrderInternalStatus::COMPLETED,
+			)
+		);
+		$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $hpos ? '2024-01-02 00:00:00' : '2024-01-01 00:00:00' ), array( 'ID' => $post_id ) );
+		$wpdb->insert(
+			OrdersTableDataStore::get_orders_table_name(),
+			array(
+				'id'               => $post_id,
+				'type'             => 'shop_order',
+				'status'           => OrderInternalStatus::COMPLETED,
+				'date_updated_gmt' => $hpos ? '2024-01-01 00:00:00' : '2024-01-02 00:00:00',
+			)
+		);
+
+		$this->assertSame( 0, $this->sut->get_current_orders_pending_sync_count(), 'A newer backup must not make the authoritative order pending sync.' );
+	}
+
+	/**
+	 * @testdox Should exclude missing auto-draft orders from the pending sync count.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $hpos Whether HPOS is authoritative.
+	 */
+	public function test_missing_auto_drafts_are_not_pending_sync( bool $hpos ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_type'   => $hpos ? DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE : 'shop_order',
+				'post_status' => OrderStatus::AUTO_DRAFT,
+			)
+		);
+		if ( $hpos ) {
+			$wpdb->insert(
+				OrdersTableDataStore::get_orders_table_name(),
+				array(
+					'id'     => $post_id,
+					'type'   => 'shop_order',
+					'status' => OrderStatus::AUTO_DRAFT,
+				)
+			);
+		}
+
+		$this->assertSame( 0, $this->sut->get_current_orders_pending_sync_count(), 'An auto-draft must not be pending sync just because its backup is missing.' );
+	}
+
+	/**
+	 * @testdox Should count missing HPOS orders with absent or placeholder posts, including custom order types.
+	 * @testWith ["shop_order", false]
+	 *           ["custom_order", false]
+	 *           ["custom_order", true]
+	 * @param string $order_type      The registered order type.
+	 * @param bool   $has_placeholder Whether a placeholder post exists.
+	 */
+	public function test_missing_hpos_orders_are_pending_sync( string $order_type, bool $has_placeholder ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		if ( 'custom_order' === $order_type ) {
+			add_filter(
+				'wc_order_types',
+				static function ( $types, $context ) use ( $order_type ) {
+					if ( 'cot-migration' === $context ) {
+						$types[] = $order_type;
+					}
+					return $types;
+				},
+				10,
+				2
+			);
+		}
+		$post_id = $this->factory->post->create( array( 'post_type' => DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) );
+		$wpdb->insert(
+			OrdersTableDataStore::get_orders_table_name(),
+			array(
+				'id'     => $post_id,
+				'type'   => $order_type,
+				'status' => OrderInternalStatus::COMPLETED,
+			)
+		);
+		if ( ! $has_placeholder ) {
+			// Remove only the backup row without triggering order deletion hooks.
+			$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
+		}
+
+		$this->assertSame( 1, $this->sut->get_current_orders_pending_sync_count(), 'An HPOS order without a real backup post must be pending sync.' );
+	}
+
+	/**
 	 * Provide full-count fixtures for each authority and overlapping predicates.
 	 *
 	 * @return array
