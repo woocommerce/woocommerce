@@ -28,7 +28,7 @@
 
 	// Legacy badge added by the Product Image block. This selectors don't
 	// target the Product Badge when used as an inner block.
-	:where(.wc-block-components-product-sale-badge:not( .wc-block-components-product-image__inner-container * )) {
+	:where(.wc-block-components-product-sale-badge:not(.wc-block-components-product-image__inner-container *)) {
 		&.wc-block-components-product-sale-badge--align-left {
 			position: absolute;
 			left: $gap-smaller * 0.5;
