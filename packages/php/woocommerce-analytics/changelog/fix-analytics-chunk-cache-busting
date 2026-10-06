@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add a content hash to lazy-loaded script URLs so a cached copy from an older release no longer breaks analytics after an update.
