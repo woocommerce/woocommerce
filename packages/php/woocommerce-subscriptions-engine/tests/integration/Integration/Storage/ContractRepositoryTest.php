@@ -205,6 +205,99 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox find_by_origin_order returns the matching contracts oldest first, with plan terms hydrated.
+	 */
+	public function test_find_by_origin_order_returns_matches_oldest_first(): void {
+		$first  = $this->sut->insert( $this->make_contract() );
+		$second = $this->sut->insert( $this->make_contract() );
+		$other  = $this->make_contract();
+		$other->set_origin_order_id( 2002 );
+		$this->sut->insert( $other );
+
+		$first_contract = $this->sut->find( $first );
+		$this->assertInstanceOf( Contract::class, $first_contract );
+		$this->sut->store_contract_snapshots(
+			$first_contract,
+			array(
+				'selling_plan_id' => 7,
+				'name'            => 'Monthly',
+			),
+			null
+		);
+
+		$found = $this->sut->find_by_origin_order( 1001 );
+
+		$this->assertSame(
+			array( $first, $second ),
+			array_map(
+				static function ( Contract $c ): ?int {
+					return $c->get_id();
+				},
+				$found
+			)
+		);
+		$snapshot = $found[0]->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
+		$this->assertSame( 'Monthly', $snapshot->to_array()['name'] );
+		$this->assertSame( array(), $this->sut->find_by_origin_order( 9999 ) );
+	}
+
+	/**
+	 * @testdox store_contract_snapshots inserts fresh rows, reuses an unchanged payload, and repoints on change.
+	 */
+	public function test_store_contract_snapshots_copy_forwards_by_type(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		$plan  = array(
+			'selling_plan_id' => 7,
+			'billing_policy'  => array(
+				'period'   => 'month',
+				'interval' => 1,
+			),
+		);
+		$items = array( array( 'item_name' => 'Coffee bag' ) );
+
+		$this->sut->store_contract_snapshots( $contract, $plan, $items );
+		$plan_id  = $contract->get_plan_snapshot_id();
+		$items_id = $contract->get_items_snapshot_id();
+		$this->assertNotNull( $plan_id );
+		$this->assertNotNull( $items_id );
+
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( $plan_id, $stored->get_plan_snapshot_id() );
+		$this->assertSame( $items_id, $stored->get_items_snapshot_id() );
+		$this->assertInstanceOf( PlanSnapshot::class, $stored->get_plan_snapshot() );
+
+		// Same payload: the id is reused.
+		$this->sut->store_contract_snapshots( $stored, $plan, $items );
+		$this->assertSame( $plan_id, $stored->get_plan_snapshot_id() );
+		$this->assertSame( $items_id, $stored->get_items_snapshot_id() );
+
+		// Changed plan payload, no items payload: plan repoints, items untouched.
+		$plan['name'] = 'Renamed';
+		$this->sut->store_contract_snapshots( $stored, $plan, null );
+		$this->assertNotSame( $plan_id, $stored->get_plan_snapshot_id() );
+		$this->assertSame( $items_id, $stored->get_items_snapshot_id() );
+
+		$reloaded = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertSame( $stored->get_plan_snapshot_id(), $reloaded->get_plan_snapshot_id() );
+		$this->assertSame( $items_id, $reloaded->get_items_snapshot_id() );
+	}
+
+	/**
+	 * @testdox store_contract_snapshots refuses an unsaved contract.
+	 */
+	public function test_store_contract_snapshots_requires_an_id(): void {
+		$this->expectException( \RuntimeException::class );
+
+		$this->sut->store_contract_snapshots( $this->make_contract(), array( 'selling_plan_id' => 7 ), null );
+	}
+
+	/**
 	 * @testdox Meta written through the meta methods survives whole-contract writes.
 	 */
 	public function test_meta_survives_a_whole_entity_update(): void {

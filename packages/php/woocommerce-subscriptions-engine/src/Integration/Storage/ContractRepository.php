@@ -246,6 +246,42 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Record plan and/or items snapshot payloads as the contract's current snapshots.
+	 *
+	 * Each non-null payload is copy-forwarded against the contract's current snapshot of
+	 * that type (an unchanged payload keeps its id, a changed one inserts a new row); the
+	 * resulting ids are set on the entity and the contract row is written.
+	 *
+	 * @param Contract                              $contract      Stored contract (must have an id).
+	 * @param array<string, mixed>|null             $plan_payload  Plan snapshot payload, or null to leave it.
+	 * @param array<int, array<string, mixed>>|null $items_payload Items snapshot payload, or null to leave it.
+	 * @throws \RuntimeException If the contract has no id, or a write fails.
+	 */
+	public function store_contract_snapshots( Contract $contract, ?array $plan_payload, ?array $items_payload ): void {
+		$id = $contract->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot store snapshots for a contract that has no id.' );
+		}
+
+		if ( null !== $plan_payload ) {
+			$plan = PlanSnapshot::from_array( $plan_payload );
+			$contract->set_plan_snapshot_id(
+				$this->copy_forward_or_insert( $id, SnapshotStore::TYPE_PLAN, $plan->get_selling_plan_id(), $plan->to_payload(), $plan->get_schema_version(), $contract->get_plan_snapshot_id() )
+			);
+			$contract->set_plan_snapshot( $plan );
+		}
+
+		if ( null !== $items_payload ) {
+			$items = ItemsSnapshot::from_items( $items_payload );
+			$contract->set_items_snapshot_id(
+				$this->copy_forward_or_insert( $id, SnapshotStore::TYPE_ITEMS, null, $items->to_payload(), $items->get_schema_version(), $contract->get_items_snapshot_id() )
+			);
+		}
+
+		$this->update_contract_row( $contract );
+	}
+
+	/**
 	 * Fetch a contract by id, hydrating the live entity with its items / addresses,
 	 * plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
 	 * `plan_snapshot_id` - so every full read carries the billing cadence off the
@@ -831,6 +867,24 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
+	 * Contracts whose `origin_order_id` is `$order_id`, oldest first. Row-only reads
+	 * (no items / addresses) with their frozen plan terms batch-hydrated.
+	 *
+	 * @param int $order_id Origin order id.
+	 * @return array<int, Contract>
+	 */
+	public function find_by_origin_order( int $order_id ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE origin_order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
