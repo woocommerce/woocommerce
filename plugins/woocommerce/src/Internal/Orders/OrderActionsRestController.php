@@ -22,23 +22,27 @@ class OrderActionsRestController extends RestApiControllerBase {
 	 * Maps order statuses to their corresponding email template class and ID.
 	 */
 	private const STATUS_TEMPLATE_MAP = array(
-		OrderStatus::COMPLETED  => array(
+		OrderStatus::COMPLETED        => array(
 			'class' => 'WC_Email_Customer_Completed_Order',
 			'id'    => 'customer_completed_order',
 		),
-		OrderStatus::FAILED     => array(
+		OrderStatus::FAILED           => array(
 			'class' => 'WC_Email_Customer_Failed_Order',
 			'id'    => 'customer_failed_order',
 		),
-		OrderStatus::ON_HOLD    => array(
+		OrderStatus::ON_HOLD          => array(
 			'class' => 'WC_Email_Customer_On_Hold_Order',
 			'id'    => 'customer_on_hold_order',
 		),
-		OrderStatus::PROCESSING => array(
+		OrderStatus::PROCESSING       => array(
 			'class' => 'WC_Email_Customer_Processing_Order',
 			'id'    => 'customer_processing_order',
 		),
-		OrderStatus::REFUNDED   => array(
+		OrderStatus::READY_FOR_PICKUP => array(
+			'class' => 'WC_Email_Customer_Ready_For_Pickup_Order',
+			'id'    => 'customer_ready_for_pickup_order',
+		),
+		OrderStatus::REFUNDED         => array(
 			'class' => 'WC_Email_Customer_Refunded_Order',
 			'id'    => 'customer_refunded_order',
 		),
@@ -574,6 +578,10 @@ class OrderActionsRestController extends RestApiControllerBase {
 			case 'customer_processing_order':
 				/** This action is documented in includes/class-wc-emails.php */
 				do_action( 'woocommerce_order_status_pending_to_processing_notification', $order->get_id(), $order );
+				break;
+			case 'customer_ready_for_pickup_order':
+				/** This action is documented in includes/class-wc-emails.php */
+				do_action( 'woocommerce_order_status_ready-for-pickup_notification', $order->get_id(), $order ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 				break;
 			case 'customer_refunded_order':
 			case 'customer_pos_refunded_order':

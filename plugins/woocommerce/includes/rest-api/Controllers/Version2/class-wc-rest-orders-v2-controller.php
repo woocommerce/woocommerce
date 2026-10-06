@@ -1146,7 +1146,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Maybe update product stock quantity.
 		if (
 			'line_items' === $item_type
-			&& in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true )
+			&& in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true )
 		) {
 			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );

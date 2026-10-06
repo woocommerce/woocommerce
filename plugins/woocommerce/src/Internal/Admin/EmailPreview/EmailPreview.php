@@ -457,6 +457,17 @@ class EmailPreview {
 					'total'        => '5.00',
 				)
 			);
+			if ( 'WC_Email_Customer_Ready_For_Pickup_Order' === $this->email_type ) {
+				$shipping_item->set_props(
+					array(
+						'method_title' => __( 'Pickup', 'woocommerce' ),
+						'method_id'    => 'pickup_location',
+					)
+				);
+				$shipping_item->add_meta_data( 'pickup_location', get_bloginfo( 'name', 'display' ) );
+				$shipping_item->add_meta_data( 'pickup_address', WC()->countries->get_formatted_address( $this->get_dummy_address(), ', ' ) );
+				$shipping_item->add_meta_data( 'pickup_details', __( 'Bring your order number and a photo ID.', 'woocommerce' ) );
+			}
 			$order->add_item( $shipping_item );
 		}
 
@@ -485,15 +496,16 @@ class EmailPreview {
 	 */
 	private function apply_dummy_order_status( WC_Order $order ): WC_Order {
 		$email_type_status_map = array(
-			'WC_Email_Customer_Completed_Order'  => OrderStatus::COMPLETED,
-			'WC_Email_Customer_Processing_Order' => OrderStatus::PROCESSING,
-			'WC_Email_Customer_On_Hold_Order'    => OrderStatus::ON_HOLD,
-			'WC_Email_Customer_Failed_Order'     => OrderStatus::FAILED,
-			'WC_Email_Customer_Cancelled_Order'  => OrderStatus::CANCELLED,
-			'WC_Email_Customer_Refunded_Order'   => OrderStatus::REFUNDED,
-			'WC_Email_New_Order'                 => OrderStatus::PROCESSING,
-			'WC_Email_Cancelled_Order'           => OrderStatus::CANCELLED,
-			'WC_Email_Failed_Order'              => OrderStatus::FAILED,
+			'WC_Email_Customer_Completed_Order'        => OrderStatus::COMPLETED,
+			'WC_Email_Customer_Processing_Order'       => OrderStatus::PROCESSING,
+			'WC_Email_Customer_Ready_For_Pickup_Order' => OrderStatus::READY_FOR_PICKUP,
+			'WC_Email_Customer_On_Hold_Order'          => OrderStatus::ON_HOLD,
+			'WC_Email_Customer_Failed_Order'           => OrderStatus::FAILED,
+			'WC_Email_Customer_Cancelled_Order'        => OrderStatus::CANCELLED,
+			'WC_Email_Customer_Refunded_Order'         => OrderStatus::REFUNDED,
+			'WC_Email_New_Order'                       => OrderStatus::PROCESSING,
+			'WC_Email_Cancelled_Order'                 => OrderStatus::CANCELLED,
+			'WC_Email_Failed_Order'                    => OrderStatus::FAILED,
 		);
 
 		$status = $email_type_status_map[ $this->email_type ] ?? OrderStatus::PROCESSING;

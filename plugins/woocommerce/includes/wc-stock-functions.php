@@ -124,6 +124,7 @@ function wc_maybe_reduce_stock_levels( $order_id ) {
 add_action( 'woocommerce_payment_complete', 'wc_maybe_reduce_stock_levels' );
 add_action( 'woocommerce_order_status_completed', 'wc_maybe_reduce_stock_levels' );
 add_action( 'woocommerce_order_status_processing', 'wc_maybe_reduce_stock_levels' );
+add_action( 'woocommerce_order_status_ready-for-pickup', 'wc_maybe_reduce_stock_levels' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_maybe_reduce_stock_levels' );
 
 /**
@@ -494,6 +495,7 @@ add_action( 'woocommerce_payment_complete', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_cancelled', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_completed', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_processing', 'wc_release_stock_for_order', 11 );
+add_action( 'woocommerce_order_status_ready-for-pickup', 'wc_release_stock_for_order', 11 );
 add_action( 'woocommerce_order_status_on-hold', 'wc_release_stock_for_order', 11 );
 
 /**

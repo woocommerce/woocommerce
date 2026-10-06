@@ -194,6 +194,27 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should offer the ready for pickup bulk action only when the status is available.
+	 */
+	public function test_bulk_actions_offer_ready_for_pickup_when_status_is_available(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$get_bulk_actions = function () {
+			$this->wp_post_type = get_post_type_object( 'shop_order' );
+			return array_keys( $this->get_bulk_actions() );
+		};
+
+		$this->assertNotContains( 'mark_ready-for-pickup', $get_bulk_actions->call( $this->sut ), 'The action should not be offered without local pickup' );
+
+		update_option( 'woocommerce_pickup_location_settings', array( 'enabled' => 'yes' ) );
+
+		$this->assertSame(
+			array( 'mark_processing', 'mark_on-hold', 'mark_ready-for-pickup', 'mark_completed', 'mark_cancelled', 'trash' ),
+			$get_bulk_actions->call( $this->sut ),
+			'The action should sit between on-hold and completed'
+		);
+	}
+
+	/**
 	 * Get the total number of year-month items there should be between two dates.
 	 *
 	 * Note that this is different from calculating the elapsed time between the two dates. For this we instead care

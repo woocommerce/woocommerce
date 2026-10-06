@@ -393,7 +393,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 			$item->save();
 
-			if ( in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
+			if ( in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 				$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 				if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 					$qty_change_order_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';

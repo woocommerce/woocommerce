@@ -43,6 +43,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 			// Triggers for this email.
 			add_action( 'woocommerce_order_status_processing_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_on-hold_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_ready-for-pickup_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_pending_to_cancelled_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.

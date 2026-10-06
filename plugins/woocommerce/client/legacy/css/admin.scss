@@ -3518,6 +3518,11 @@ body.woocommerce_page_wc-customer-stock-notifications {
 		color: #2c4700;
 	}
 
+	&.status-ready-for-pickup {
+		background: #c1e4e4;
+		color: #0b4a4a;
+	}
+
 	&.status-trash {
 		background: #eba3a3;
 		color: #550202;

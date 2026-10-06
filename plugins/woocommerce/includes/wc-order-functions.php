@@ -469,7 +469,7 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	if ( $order->has_status( OrderStatus::PROCESSING ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
+	if ( $order->has_status( array( OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP ) ) && 'no' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) ) {
 		return;
 	}
 
@@ -493,6 +493,7 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 }
 add_action( 'woocommerce_order_status_completed', 'wc_downloadable_product_permissions' );
 add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_permissions' );
+add_action( 'woocommerce_order_status_ready-for-pickup', 'wc_downloadable_product_permissions' );
 
 /**
  * Clear all transients cache for order data.
@@ -1003,9 +1004,11 @@ function wc_update_total_sales_counts( $order_id ) {
 }
 add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_ready-for-pickup', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_completed_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing_to_cancelled', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_ready-for-pickup_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold_to_cancelled', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_trash_order', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_untrash_order', 'wc_update_total_sales_counts' );
@@ -1080,6 +1083,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_completed', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_order_status_ready-for-pickup', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_failed', 'wc_update_coupon_usage_counts' );

@@ -1738,7 +1738,7 @@ class WC_Order extends WC_Abstract_Order {
 		 * @param WC_Order $this                  Order object.
 		 * @since 2.7.0
 		 */
-		return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( OrderStatus::COMPLETED ) || ( 'yes' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) && $this->has_status( OrderStatus::PROCESSING ) ), $this );
+		return apply_filters( 'woocommerce_order_is_download_permitted', $this->has_status( OrderStatus::COMPLETED ) || ( 'yes' === get_option( 'woocommerce_downloads_grant_access_after_payment' ) && $this->has_status( array( OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP ) ) ), $this );
 	}
 
 	/**

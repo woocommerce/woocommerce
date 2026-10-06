@@ -88,7 +88,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_subject() {
-			if ( $this->object->has_status( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING ) ) ) {
+			if ( $this->object->has_status( array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP ) ) ) {
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
 				if ( $this->block_email_editor_enabled ) {

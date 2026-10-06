@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\Orders\ReadyForPickupStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -69,6 +70,10 @@ class WCTransactionalEmails {
 				'customer_fulfillment_deleted',
 			);
 			$emails             = array_merge( $emails, $fulfillment_emails );
+		}
+
+		if ( wc_is_order_status( ReadyForPickupStatus::DB_STATUS ) ) {
+			$emails[] = 'customer_ready_for_pickup_order';
 		}
 
 		return $emails;

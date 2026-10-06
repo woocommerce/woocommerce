@@ -96,6 +96,15 @@ final class OrderStatus {
 	public const CHECKOUT_DRAFT = 'checkout-draft';
 
 	/**
+	 * The order is ready for the customer to collect. Only registered on stores that offer local pickup.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string
+	 */
+	public const READY_FOR_PICKUP = 'ready-for-pickup';
+
+	/**
 	 * Array of all the valid order statuses for a complete payment.
 	 *
 	 * @var string[]
@@ -118,6 +127,7 @@ final class OrderStatus {
 	 *
 	 * self::CHECKOUT_DRAFT sits on the helper's side of that line: WooCommerce adds it through the
 	 * `wc_order_statuses` filter, and the Store API assigns it to live orders during checkout.
+	 * self::READY_FOR_PICKUP is added through the same filter, on stores that offer local pickup.
 	 *
 	 * For the registered statuses, use wc_get_order_statuses(). It returns a value => label map
 	 * keyed on the `wc-` prefixed slug, so comparing its keys with this enum's values needs
@@ -142,6 +152,7 @@ final class OrderStatus {
 			self::AUTO_DRAFT,
 			self::DRAFT,
 			self::CHECKOUT_DRAFT,
+			self::READY_FOR_PICKUP,
 		);
 	}
 }

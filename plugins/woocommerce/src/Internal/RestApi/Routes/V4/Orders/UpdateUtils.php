@@ -235,7 +235,7 @@ class UpdateUtils {
 		}
 
 		// Maybe update product stock quantity.
-		if ( OrderItemType::LINE_ITEM === $line_items_type && in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
+		if ( OrderItemType::LINE_ITEM === $line_items_type && in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 			if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {

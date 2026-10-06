@@ -541,6 +541,42 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order previews offer "Ready for pickup" for processing orders with local pickup, then "Completed".
+	 */
+	public function test_order_preview_actions_for_local_pickup_orders(): void {
+		update_option( 'woocommerce_pickup_location_settings', array( 'enabled' => 'yes' ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$this->assertStringNotContainsString( 'status=ready-for-pickup', WC_Admin_List_Table_Orders::get_order_preview_actions_html( $order ), 'A shipped order should not be offered the action' );
+
+		foreach ( array_keys( $order->get_items( 'shipping' ) ) as $item_id ) {
+			$order->remove_item( $item_id );
+		}
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => 'Pickup',
+				'method_id'    => 'pickup_location',
+				'total'        => 0,
+			)
+		);
+		$order->add_item( $shipping_item );
+		$order->save();
+
+		$this->assertStringContainsString( 'status=ready-for-pickup', WC_Admin_List_Table_Orders::get_order_preview_actions_html( $order ), 'A processing pickup order should be offered the action' );
+
+		$order->update_status( 'ready-for-pickup' );
+		$actions_html = WC_Admin_List_Table_Orders::get_order_preview_actions_html( $order );
+
+		$this->assertStringNotContainsString( 'status=ready-for-pickup', $actions_html, 'An order that is already ready should not be offered the action again' );
+		$this->assertStringContainsString( 'status=completed', $actions_html, 'An order that is ready for pickup can be completed' );
+	}
+
+	/**
 	 * @testdox Should not warn or drop orders when the m parameter is not a string.
 	 */
 	public function test_date_filter_with_non_string_m_does_not_trigger_warning(): void {

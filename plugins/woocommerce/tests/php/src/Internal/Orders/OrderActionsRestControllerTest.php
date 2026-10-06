@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\OrderActionsRestController;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -730,6 +731,45 @@ class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Order details sent to', $data['message'] );
 
 		remove_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', $override_preferred_ids );
+	}
+
+	/**
+	 * @testdox Should offer and send the ready for pickup email for an order in that status.
+	 */
+	public function test_ready_for_pickup_email_is_offered_and_sent(): void {
+		update_option( 'woocommerce_pickup_location_settings', array( 'enabled' => 'yes' ) );
+
+		// The mailer is shared between tests, so give it a single copy of the email that listens for this test.
+		$mailer          = WC()->mailer();
+		$original_emails = $mailer->emails;
+		remove_all_actions( 'woocommerce_order_status_ready-for-pickup_notification' );
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		$mailer->emails['WC_Email_Customer_Ready_For_Pickup_Order'] = require $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-ready-for-pickup-order.php';
+
+		try {
+			$order = wc_create_order();
+			$order->set_billing_email( 'customer@example.org' );
+			$order->set_status( OrderStatus::READY_FOR_PICKUP );
+			$order->save();
+
+			wp_set_current_user( $this->user['shop_manager'] );
+
+			$templates = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/actions/email_templates' ) )->get_data();
+			$this->assertContains( 'customer_ready_for_pickup_order', wp_list_pluck( $templates, 'id' ), 'The email should be offered for the order' );
+
+			$sent_before = count( tests_retrieve_phpmailer_instance()->mock_sent );
+			$request     = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions/send_email' );
+			$request->add_header( 'User-Agent', 'some app' );
+			$response = $this->server->dispatch( $request );
+			$sent     = array_slice( tests_retrieve_phpmailer_instance()->mock_sent, $sent_before );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( 'Email template &quot;Ready for pickup&quot; sent to customer@example.org.', $response->get_data()['message'] );
+			$this->assertCount( 1, $sent, 'Exactly one email should be sent' );
+			$this->assertStringContainsString( 'ready for pickup', $sent[0]['subject'] );
+		} finally {
+			$mailer->emails = $original_emails;
+		}
 	}
 
 	/**

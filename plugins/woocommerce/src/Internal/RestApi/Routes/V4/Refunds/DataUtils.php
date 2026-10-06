@@ -32,6 +32,7 @@ class DataUtils {
 	public const REFUNDABLE_STATUSES = array(
 		OrderStatus::COMPLETED,
 		OrderStatus::PROCESSING,
+		OrderStatus::READY_FOR_PICKUP,
 		OrderStatus::ON_HOLD,
 	);
 

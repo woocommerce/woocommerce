@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Orders\ReadyForPickupStatus;
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -336,10 +337,15 @@ class ListTable extends WP_List_Table {
 			$actions = array(
 				'mark_processing' => __( 'Change status to processing', 'woocommerce' ),
 				'mark_on-hold'    => __( 'Change status to on-hold', 'woocommerce' ),
-				'mark_completed'  => __( 'Change status to completed', 'woocommerce' ),
-				'mark_cancelled'  => __( 'Change status to cancelled', 'woocommerce' ),
-				'trash'           => __( 'Move to Trash', 'woocommerce' ),
 			);
+
+			if ( wc_is_order_status( ReadyForPickupStatus::DB_STATUS ) ) {
+				$actions['mark_ready-for-pickup'] = __( 'Change status to ready for pickup', 'woocommerce' );
+			}
+
+			$actions['mark_completed'] = __( 'Change status to completed', 'woocommerce' );
+			$actions['mark_cancelled'] = __( 'Change status to cancelled', 'woocommerce' );
+			$actions['trash']          = __( 'Move to Trash', 'woocommerce' );
 		}
 
 		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
@@ -1249,14 +1255,15 @@ class ListTable extends WP_List_Table {
 	 */
 	private function get_order_status_label( WC_Order $order ): string {
 		$status_names = array(
-			'pending'        => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
-			'on-hold'        => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
-			'processing'     => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
-			'completed'      => __( 'Order fulfilled and complete.', 'woocommerce' ),
-			'failed'         => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
-			'checkout-draft' => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
-			'cancelled'      => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
-			'refunded'       => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
+			'pending'          => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
+			'on-hold'          => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
+			'processing'       => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
+			'ready-for-pickup' => __( 'The order is ready, and the customer has been asked to pick it up.', 'woocommerce' ),
+			'completed'        => __( 'Order fulfilled and complete.', 'woocommerce' ),
+			'failed'           => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
+			'checkout-draft'   => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'cancelled'        => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
+			'refunded'         => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
 		);
 
 		/**
@@ -1361,7 +1368,7 @@ class ListTable extends WP_List_Table {
 			);
 		}
 
-		if ( $order->has_status( array( 'pending', 'on-hold', 'processing' ) ) ) {
+		if ( $order->has_status( array( 'pending', 'on-hold', 'processing', OrderStatus::READY_FOR_PICKUP ) ) ) {
 			$actions['complete'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Complete', 'woocommerce' ),

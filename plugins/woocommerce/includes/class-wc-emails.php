@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\Orders\ReadyForPickupStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -116,6 +117,8 @@ class WC_Emails {
 				'woocommerce_order_status_on-hold_to_processing',
 				'woocommerce_order_status_on-hold_to_cancelled',
 				'woocommerce_order_status_on-hold_to_failed',
+				'woocommerce_order_status_ready-for-pickup',
+				'woocommerce_order_status_ready-for-pickup_to_cancelled',
 				'woocommerce_order_status_completed',
 				'woocommerce_order_status_failed',
 				'woocommerce_order_fully_refunded',
@@ -301,6 +304,9 @@ class WC_Emails {
 			'WC_Email_Customer_POS_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php',
 			'WC_Email_Customer_POS_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-pos-refunded-order.php',
 		);
+		if ( wc_is_order_status( ReadyForPickupStatus::DB_STATUS ) ) {
+			$emails['WC_Email_Customer_Ready_For_Pickup_Order'] = __DIR__ . '/emails/class-wc-email-customer-ready-for-pickup-order.php';
+		}
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 			$emails['WC_Email_Customer_Fulfillment_Created'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-created.php';
 			$emails['WC_Email_Customer_Fulfillment_Updated'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-updated.php';

@@ -8,6 +8,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
+use Automattic\WooCommerce\Internal\Orders\ReadyForPickupStatus;
 use Automattic\WooCommerce\Internal\Utilities\OrderItemMetaUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -147,8 +148,13 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		$actions['mark_processing'] = __( 'Change status to processing', 'woocommerce' );
 		$actions['mark_on-hold']    = __( 'Change status to on-hold', 'woocommerce' );
-		$actions['mark_completed']  = __( 'Change status to completed', 'woocommerce' );
-		$actions['mark_cancelled']  = __( 'Change status to cancelled', 'woocommerce' );
+
+		if ( wc_is_order_status( ReadyForPickupStatus::DB_STATUS ) ) {
+			$actions['mark_ready-for-pickup'] = __( 'Change status to ready for pickup', 'woocommerce' );
+		}
+
+		$actions['mark_completed'] = __( 'Change status to completed', 'woocommerce' );
+		$actions['mark_cancelled'] = __( 'Change status to cancelled', 'woocommerce' );
 
 		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
 			$actions['remove_personal_data'] = __( 'Remove personal data', 'woocommerce' );
@@ -384,7 +390,20 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			);
 		}
 
-		if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING ) ) ) {
+		if (
+			$order->has_status( OrderStatus::PROCESSING )
+			&& wc_is_order_status( ReadyForPickupStatus::DB_STATUS )
+			&& wc_get_container()->get( ReadyForPickupStatus::class )->order_has_local_pickup( $order )
+		) {
+			$status_actions['ready-for-pickup'] = array(
+				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=ready-for-pickup&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
+				'name'   => __( 'Ready for pickup', 'woocommerce' ),
+				'title'  => __( 'Change order status to ready for pickup', 'woocommerce' ),
+				'action' => 'ready-for-pickup',
+			);
+		}
+
+		if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING, OrderStatus::READY_FOR_PICKUP ) ) ) {
 			$status_actions['complete'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
 				'name'   => __( 'Completed', 'woocommerce' ),
