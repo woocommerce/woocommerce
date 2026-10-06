@@ -132,7 +132,7 @@ When `set_locked( true, 'Managed by MyShipping plugin' )` is called, the optiona
 #### Inherited methods from WC_Data
 
 - `save()`: Create or update the fulfillment in the database
-- `delete( $force_delete = false )`: Delete the fulfillment (soft delete by default)
+- `delete( $force_delete = false )`: Soft-delete the fulfillment; the fulfillment data store ignores `$force_delete`
 - `get_data()`: Get all data as an associative array
 - `get_changes()`: Get data that has been changed since the last save
 - `apply_changes()`: Apply changes and mark the object as clean
@@ -232,10 +232,11 @@ if ( $order instanceof WC_Order ) {
     echo "Order #" . $order->get_id();
 }
 
-// Delete a fulfillment
-$existing->delete(); // Soft delete
-$existing->delete( true ); // Force delete (permanent)
+// Soft-delete a fulfillment
+$existing->delete();
 ```
+
+Deletion sets `date_deleted` and retains the fulfillment record and its metadata. The fulfillment data store does not support permanent deletion through `delete( true )`.
 
 **Creating a fulfillment programmatically:**
 

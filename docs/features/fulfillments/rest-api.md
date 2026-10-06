@@ -38,7 +38,7 @@ The v3 create and update routes accept the fulfillment state in the request body
 | Field | Type | Notes |
 | --- | --- | --- |
 | `status` | string | A registered fulfillment status slug. |
-| `meta_data` | array | Array of metadata objects with `key`, `value`, and optional `id`. |
+| `meta_data` | array | Array of metadata objects with `key`, `value`, and `id`. Set `id` to `0` for each entry on create; `id` is optional on update. |
 | `notify_customer` | boolean | Query parameter used on create, update, and delete requests. |
 
 The `meta_data` array usually carries `_items`, `_tracking_number`, `_shipment_provider`, and `_tracking_url`.
@@ -46,6 +46,8 @@ The `meta_data` array usually carries `_items`, `_tracking_number`, `_shipment_p
 > **Note**: `is_fulfilled` is a **read-only** response field. It is derived automatically from `status` by WooCommerce and cannot be set directly in requests.
 
 ### Create a fulfillment
+
+Include `"id": 0` in each metadata entry when creating a fulfillment. Entries without an `id` are ignored, so omitting it from `_items` causes creation to fail because the fulfillment has no items.
 
 ```http
 POST /wp-json/wc/v3/orders/123/fulfillments?notify_customer=true
@@ -56,6 +58,7 @@ Authorization: Basic base64(consumer_key:consumer_secret)
   "status": "fulfilled",
   "meta_data": [
     {
+      "id": 0,
       "key": "_items",
       "value": [
         {
@@ -65,14 +68,17 @@ Authorization: Basic base64(consumer_key:consumer_secret)
       ]
     },
     {
+      "id": 0,
       "key": "_tracking_number",
       "value": "1Z999AA1234567890"
     },
     {
+      "id": 0,
       "key": "_shipment_provider",
       "value": "ups"
     },
     {
+      "id": 0,
       "key": "_tracking_url",
       "value": "https://www.ups.com/track?tracknum=1Z999AA1234567890"
     }
