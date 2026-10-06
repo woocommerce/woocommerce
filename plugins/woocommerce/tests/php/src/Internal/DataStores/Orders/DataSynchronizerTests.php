@@ -102,11 +102,12 @@ class DataSynchronizerTests extends \HposTestCase {
 	/**
 	 * @testdox Should preserve exact full pending counts and their cache under either authority.
 	 * @dataProvider provider_full_pending_count
-	 * @param bool   $hpos Whether HPOS is authoritative.
-	 * @param string $shape The pending-order fixture.
-	 * @param int    $expected The exact pending count.
+	 * @param bool   $hpos              Whether HPOS is authoritative.
+	 * @param string $shape             The pending-order fixture.
+	 * @param int    $expected          The exact pending count.
+	 * @param bool   $string_keyed_type Whether the added order type has a string key.
 	 */
-	public function test_full_pending_count( bool $hpos, string $shape, int $expected ): void {
+	public function test_full_pending_count( bool $hpos, string $shape, int $expected, bool $string_keyed_type = false ): void {
 		global $wpdb;
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
@@ -133,9 +134,13 @@ class DataSynchronizerTests extends \HposTestCase {
 				$post_type = 'custom' === $shape ? 'custom_order' : $post_type;
 				add_filter(
 					'wc_order_types',
-					static function ( $types, $context ) use ( $post_type ) {
+					static function ( $types, $context ) use ( $post_type, $string_keyed_type ) {
 						if ( 'cot-migration' === $context ) {
-							$types[] = $post_type;
+							if ( $string_keyed_type ) {
+								$types[ $post_type ] = $post_type;
+							} else {
+								$types[] = $post_type;
+							}
 						}
 						return $types;
 					},
@@ -230,14 +235,17 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testdox Should count missing HPOS orders with absent or placeholder posts, including custom order types.
+	 * @testdox Should count only registered missing HPOS orders with absent or placeholder posts.
 	 * @testWith ["shop_order", false]
 	 *           ["custom_order", false]
 	 *           ["custom_order", true]
-	 * @param string $order_type      The registered order type.
+	 *           ["unregistered_order", false, 0]
+	 *           ["unregistered_order", true, 0]
+	 * @param string $order_type      The order type to store.
 	 * @param bool   $has_placeholder Whether a placeholder post exists.
+	 * @param int    $expected        The expected pending count.
 	 */
-	public function test_missing_hpos_orders_are_pending_sync( string $order_type, bool $has_placeholder ): void {
+	public function test_missing_hpos_orders_are_pending_sync( string $order_type, bool $has_placeholder, int $expected = 1 ): void {
 		global $wpdb;
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -269,7 +277,7 @@ class DataSynchronizerTests extends \HposTestCase {
 			$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
 		}
 
-		$this->assertSame( 1, $this->sut->get_current_orders_pending_sync_count(), 'An HPOS order without a real backup post must be pending sync.' );
+		$this->assertSame( $expected, $this->sut->get_current_orders_pending_sync_count(), 'Only registered HPOS order types without a real backup post should be pending sync.' );
 	}
 
 	/**
@@ -279,17 +287,20 @@ class DataSynchronizerTests extends \HposTestCase {
 	 */
 	public function provider_full_pending_count(): array {
 		return array(
-			'hpos missing'   => array( true, 'missing', 1 ),
-			'posts missing'  => array( false, 'missing', 1 ),
-			'hpos changed'   => array( true, 'changed', 1 ),
-			'posts changed'  => array( false, 'changed', 1 ),
-			'hpos deletion'  => array( true, 'deletion', 2 ),
-			'posts deletion' => array( false, 'deletion', 2 ),
-			'overlap'        => array( true, 'overlap', 2 ),
-			'hpos custom'    => array( true, 'custom', 1 ),
-			'posts custom'   => array( false, 'custom', 1 ),
-			'hpos empty'     => array( true, 'empty', 0 ),
-			'posts empty'    => array( false, 'empty', 0 ),
+			'hpos missing'       => array( true, 'missing', 1 ),
+			'posts missing'      => array( false, 'missing', 1 ),
+			'hpos changed'       => array( true, 'changed', 1 ),
+			'posts changed'      => array( false, 'changed', 1 ),
+			'hpos deletion'      => array( true, 'deletion', 2 ),
+			'posts deletion'     => array( false, 'deletion', 2 ),
+			'overlap'            => array( true, 'overlap', 2 ),
+			'hpos custom'        => array( true, 'custom', 1 ),
+			'posts custom'       => array( false, 'custom', 1 ),
+			'hpos empty'         => array( true, 'empty', 0 ),
+			'posts empty'        => array( false, 'empty', 0 ),
+			'hpos keyed custom'  => array( true, 'custom', 1, true ),
+			'posts keyed custom' => array( false, 'custom', 1, true ),
+			'keyed overlap'      => array( true, 'overlap', 2, true ),
 		);
 	}
 
