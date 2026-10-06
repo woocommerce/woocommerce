@@ -3,8 +3,9 @@
  * ContractView - a read-only view of a contract at the `Api\` boundary.
  *
  * Consumers read contracts through this view instead of the Core entity. Getters may
- * be added, never removed. Children (`items`, `addresses`) are null when the read did
- * not load them (list reads) and an array when it did.
+ * be added, never removed. Children (`items`, `addresses`) take the shape the
+ * contracts write facade accepts; they are null when the read did not load them (list
+ * reads) and an array when it did.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api\View
  */
@@ -93,11 +94,48 @@ final class ContractView {
 			'schedule_source'      => $contract->get_schedule_source(),
 		);
 
-		$view->items         = $with_children ? $contract->get_items() : null;
-		$view->addresses     = $with_children ? $contract->get_addresses() : null;
+		$view->items         = $with_children ? array_map( array( self::class, 'item' ), $contract->get_items() ) : null;
+		$view->addresses     = $with_children ? array_map( array( self::class, 'address' ), $contract->get_addresses() ) : null;
 		$view->plan_snapshot = null !== $snapshot ? $snapshot->to_array() : null;
 
 		return $view;
+	}
+
+	/**
+	 * Project a stored item row onto the item write fields; `taxes` decoded to an array.
+	 *
+	 * @param array<string, mixed> $row Stored item row.
+	 * @return array<string, mixed>
+	 */
+	private static function item( array $row ): array {
+		$item = array();
+		foreach ( Contract::ITEM_FIELDS as $field ) {
+			$item[ $field ] = $row[ $field ] ?? null;
+		}
+
+		foreach ( array( 'product_id', 'variation_id' ) as $field ) {
+			$item[ $field ] = is_numeric( $item[ $field ] ) ? (int) $item[ $field ] : null;
+		}
+
+		$taxes         = is_string( $item['taxes'] ) ? json_decode( $item['taxes'], true ) : $item['taxes'];
+		$item['taxes'] = is_array( $taxes ) ? $taxes : null;
+
+		return $item;
+	}
+
+	/**
+	 * Project a stored address row onto the address write fields.
+	 *
+	 * @param array<string, mixed> $row Stored address row.
+	 * @return array<string, mixed>
+	 */
+	private static function address( array $row ): array {
+		$address = array();
+		foreach ( Contract::ADDRESS_FIELDS as $field ) {
+			$address[ $field ] = $row[ $field ] ?? null;
+		}
+
+		return $address;
 	}
 
 	/**

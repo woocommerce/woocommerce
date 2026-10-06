@@ -95,15 +95,54 @@ class ContractViewTest extends TestCase {
 		$this->assertNull( $view->get_addresses() );
 	}
 
-	public function test_children_are_arrays_when_loaded(): void {
-		$items     = array( array( 'item_name' => 'Tea' ) );
-		$addresses = array( 'billing' => array( 'city' => 'Lisbon' ) );
+	public function test_children_are_projected_onto_the_write_shape(): void {
+		$items     = array(
+			array(
+				'id'           => '7',
+				'contract_id'  => '42',
+				'item_name'    => 'Tea',
+				'item_type'    => 'line_item',
+				'product_id'   => '12',
+				'variation_id' => null,
+				'quantity'     => '2.0000',
+				'subtotal'     => '10.00000000',
+				'total'        => '9.00000000',
+				'taxes'        => '{"total":{"1":"0.90"}}',
+			),
+		);
+		$addresses = array(
+			'billing' => array(
+				'id'           => '3',
+				'contract_id'  => '42',
+				'address_type' => 'billing',
+				'city'         => 'Lisbon',
+			),
+		);
 
 		$loaded = ContractView::from_contract( Contract::from_storage( $this->row(), null, $items, $addresses ), true );
 		$empty  = ContractView::from_contract( Contract::from_storage( $this->row() ), true );
 
-		$this->assertSame( $items, $loaded->get_items() );
-		$this->assertSame( $addresses, $loaded->get_addresses() );
+		$this->assertSame(
+			array(
+				array(
+					'item_name'    => 'Tea',
+					'item_type'    => 'line_item',
+					'product_id'   => 12,
+					'variation_id' => null,
+					'quantity'     => '2.0000',
+					'subtotal'     => '10.00000000',
+					'total'        => '9.00000000',
+					'taxes'        => array( 'total' => array( 1 => '0.90' ) ),
+				),
+			),
+			$loaded->get_items()
+		);
+		$addresses = $loaded->get_addresses();
+		$this->assertIsArray( $addresses );
+		$this->assertSame( array( 'billing' ), array_keys( $addresses ) );
+		$this->assertSame( Contract::ADDRESS_FIELDS, array_keys( $addresses['billing'] ) );
+		$this->assertSame( 'Lisbon', $addresses['billing']['city'] );
+		$this->assertNull( $addresses['billing']['phone'] );
 		$this->assertSame( array(), $empty->get_items() );
 		$this->assertSame( array(), $empty->get_addresses() );
 	}

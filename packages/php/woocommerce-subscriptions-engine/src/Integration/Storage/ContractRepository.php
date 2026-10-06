@@ -39,25 +39,6 @@ defined( 'ABSPATH' ) || exit;
 final class ContractRepository {
 
 	/**
-	 * Address columns persisted to the addresses table.
-	 *
-	 * @var array<int, string>
-	 */
-	private const ADDRESS_COLUMNS = array(
-		'first_name',
-		'last_name',
-		'company',
-		'address_1',
-		'address_2',
-		'city',
-		'state',
-		'postcode',
-		'country',
-		'email',
-		'phone',
-	);
-
-	/**
 	 * Logger source tag.
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
@@ -1787,7 +1768,7 @@ final class ContractRepository {
 				'address_type' => (string) $type,
 			);
 
-			foreach ( self::ADDRESS_COLUMNS as $column ) {
+			foreach ( Contract::ADDRESS_FIELDS as $column ) {
 				$record[ $column ] = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : null;
 			}
 
@@ -1931,7 +1912,7 @@ final class ContractRepository {
 
 		foreach ( $addresses as $type => $address ) {
 			$record = array();
-			foreach ( self::ADDRESS_COLUMNS as $column ) {
+			foreach ( Contract::ADDRESS_FIELDS as $column ) {
 				$value             = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : '';
 				$record[ $column ] = '' !== $value ? $value : null;
 			}

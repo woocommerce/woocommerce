@@ -142,6 +142,52 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Ada', $addresses['billing']['first_name'] ?? null );
 	}
 
+	public function test_items_and_addresses_read_back_in_the_written_shape(): void {
+		$items     = array(
+			array(
+				'item_name'    => 'Coffee',
+				'item_type'    => 'line_item',
+				'product_id'   => 9,
+				'variation_id' => 10,
+				'quantity'     => '2.0000',
+				'subtotal'     => '20.00000000',
+				'total'        => '18.00000000',
+				'taxes'        => array(
+					'total'    => array( 1 => '1.80' ),
+					'subtotal' => array( 1 => '2.00' ),
+				),
+			),
+		);
+		$billing   = array_fill_keys( Contract::ADDRESS_FIELDS, null );
+		$addresses = array(
+			'billing'  => array_merge(
+				$billing,
+				array(
+					'first_name' => 'Ada',
+					'country'    => 'PT',
+				)
+			),
+			'shipping' => array_merge( $billing, array( 'city' => 'Porto' ) ),
+		);
+
+		$id = Contracts::create(
+			array(
+				'owner'     => self::OWNER,
+				'items'     => $items,
+				'addresses' => $addresses,
+			)
+		);
+
+		$view = $this->view( $id );
+		$this->assertSame( $items, $view->get_items() );
+		$this->assertEquals( $addresses, $view->get_addresses() );
+
+		$listed = Subscriptions::list( array( 'search' => (string) $id ) );
+		$this->assertSame( array( $id ), array_map( static fn( ContractView $row ): int => $row->get_id(), $listed ) );
+		$this->assertNull( $listed[0]->get_items() );
+		$this->assertNull( $listed[0]->get_addresses() );
+	}
+
 	public function test_datetime_objects_are_stored_as_utc_strings(): void {
 		$id = Contracts::create(
 			array(

@@ -49,6 +49,20 @@ final class Contract {
 	public const ADDRESS_SHIPPING = 'shipping';
 
 	/**
+	 * Fields of a line-item row.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ITEM_FIELDS = array( 'item_name', 'item_type', 'product_id', 'variation_id', 'quantity', 'subtotal', 'total', 'taxes' );
+
+	/**
+	 * Fields of an address.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ADDRESS_FIELDS = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'email', 'phone' );
+
+	/**
 	 * Contract id, or null before it is persisted.
 	 *
 	 * @var int|null

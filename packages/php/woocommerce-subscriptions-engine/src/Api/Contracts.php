@@ -98,20 +98,6 @@ final class Contracts {
 	private const MONEY_KEYS = array( 'billing_total', 'discount_total', 'shipping_total', 'tax_total' );
 
 	/**
-	 * Keys an item row may carry.
-	 *
-	 * @var array<int, string>
-	 */
-	private const ITEM_KEYS = array( 'item_name', 'item_type', 'product_id', 'variation_id', 'quantity', 'subtotal', 'total', 'taxes' );
-
-	/**
-	 * Keys an address may carry.
-	 *
-	 * @var array<int, string>
-	 */
-	private const ADDRESS_KEYS = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'email', 'phone' );
-
-	/**
 	 * Create a contract from explicit fields.
 	 *
 	 * Only `owner` is required; the status defaults to `draft`. Dates accept a
@@ -638,7 +624,7 @@ final class Contracts {
 		$rows = self::item_rows( 'items', $value );
 
 		foreach ( $rows as $row ) {
-			$unknown = array_diff( array_keys( $row ), self::ITEM_KEYS );
+			$unknown = array_diff( array_keys( $row ), Contract::ITEM_FIELDS );
 			if ( array() !== $unknown ) {
 				throw new InvalidArgumentException( sprintf( 'Contracts: unknown item key "%s".', esc_html( (string) reset( $unknown ) ) ) );
 			}
@@ -689,7 +675,7 @@ final class Contracts {
 				throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping" with array values.' );
 			}
 
-			$unknown = array_diff( array_keys( $address ), self::ADDRESS_KEYS );
+			$unknown = array_diff( array_keys( $address ), Contract::ADDRESS_FIELDS );
 			if ( array() !== $unknown ) {
 				throw new InvalidArgumentException( sprintf( 'Contracts: unknown address key "%s".', esc_html( (string) reset( $unknown ) ) ) );
 			}
