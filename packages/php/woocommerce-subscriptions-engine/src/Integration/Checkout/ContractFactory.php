@@ -152,7 +152,7 @@ final class ContractFactory {
 				'contract_id'    => 0,
 				'sequence_no'    => 1,
 				'count'          => 1,
-				'status'         => CycleStatus::billed(),
+				'status'         => new CycleStatus( CycleStatus::BILLED ),
 				'order_id'       => $order->get_id(),
 				'extension_slug' => $plan->get_extension_slug(),
 				'starts_at_gmt'  => $starts_at,

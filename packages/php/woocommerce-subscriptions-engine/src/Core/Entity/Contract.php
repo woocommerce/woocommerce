@@ -1,7 +1,8 @@
 <?php
 /**
  * Contract - the stable identity of a subscription and the live source of truth
- * for its current state. Enforces lifecycle transitions through {@see ContractStatus}.
+ * for its current state. Status writes must name a registered status ({@see ContractStatus});
+ * the entity enforces no transition rules between them.
  *
  * Being the live source of truth (mutable), it holds the live schedule
  * (`next_payment_gmt`), the latest snapshot references (`plan_snapshot_id` /
@@ -288,7 +289,7 @@ final class Contract {
 
 		$contract = new self( $args );
 
-		if ( ! ContractStatus::is_valid( $contract->status ) ) {
+		if ( ! ContractStatus::is_registered( $contract->status ) ) {
 			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
 		}
 
@@ -355,17 +356,23 @@ final class Contract {
 	}
 
 	/**
-	 * Transition the contract to a new status.
+	 * Set the contract status.
 	 *
-	 * @param string $status Target status.
-	 * @throws DomainException If the transition is not allowed by ContractStatus.
+	 * Any registered status may follow any other: the engine enforces no
+	 * transition table (flows own their preconditions). Setting the current
+	 * status is a no-op, so a hydrated unregistered status survives it.
+	 *
+	 * @param string $status Target status; must be registered.
+	 * @throws DomainException If `$status` is not a registered contract status.
 	 */
 	public function set_status( string $status ): void {
 		if ( $status === $this->status ) {
 			return;
 		}
 
-		ContractStatus::assert_transition_allowed( $this->status, $status );
+		if ( ! ContractStatus::is_registered( $status ) ) {
+			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
+		}
 
 		$this->status = $status;
 	}
@@ -656,6 +663,24 @@ final class Contract {
 	 */
 	public function get_meta(): array {
 		return $this->meta;
+	}
+
+	/**
+	 * Set or remove one meta entry.
+	 *
+	 * Meta is opaque key/value data; the repository's existing child sync
+	 * persists the map on save.
+	 *
+	 * @param string      $key   Meta key.
+	 * @param string|null $value Meta value, or null to remove the key.
+	 */
+	public function set_meta( string $key, ?string $value ): void {
+		if ( null === $value ) {
+			unset( $this->meta[ $key ] );
+			return;
+		}
+
+		$this->meta[ $key ] = $value;
 	}
 
 	/**
