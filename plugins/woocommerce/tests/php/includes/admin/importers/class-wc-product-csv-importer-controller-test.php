@@ -24,6 +24,19 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The CSV importer automatically maps the MPN column.
+	 */
+	public function test_mpn_csv_header_mapping(): void {
+		$sut    = new WC_Product_CSV_Importer_Controller();
+		$method = new ReflectionMethod( $sut, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$mapping = $method->invoke( $sut, array( 'ID', 'MPN' ), false );
+
+		$this->assertSame( 'mpn', $mapping['MPN'] );
+	}
+
+	/**
 	 * Tests that the automatic mapping is case insensitive so that columns can be matched more easily.
 	 */
 	public function test_that_auto_mapping_is_case_insensitive() {

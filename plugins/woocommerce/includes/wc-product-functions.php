@@ -2203,6 +2203,10 @@ function wc_update_product_lookup_tables() {
 		'tax_status', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
 	);
 
+	if ( get_option( 'woocommerce_schema_version', 0 ) >= 1130 ) {
+		array_splice( $columns, 4, 0, array( 'mpn' ) );
+	}
+
 	foreach ( $columns as $index => $column ) {
 		if ( 'average_rating' === $column && ! $reviews_enabled ) {
 			continue;
@@ -2299,6 +2303,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 				WHERE
 					meta1.meta_value = 'yes'
 				"
+			);
+			break;
+		case 'mpn':
+			$wpdb->query(
+				"UPDATE {$wpdb->wc_product_meta_lookup} lookup_table
+				LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_mpn'
+				SET lookup_table.mpn = LEFT( COALESCE( meta.meta_value, '' ), 100 )"
 			);
 			break;
 		case 'sku':

@@ -350,6 +350,69 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema includes zero MPNs, omits empty values, and preserves extension filters.
+	 * @testWith ["0"]
+	 *           [""]
+	 *
+	 * @param string $mpn Manufacturer part number.
+	 */
+	public function test_mpn_structured_data( string $mpn ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_mpn( $mpn );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( '' === $mpn ? null : $mpn, $sut->get_data()[0]['mpn'] ?? null );
+
+		add_filter(
+			'woocommerce_structured_data_product',
+			static function ( $markup ) {
+				$markup['mpn'] = 'EXTENSION-MPN';
+				return $markup;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'EXTENSION-MPN', $sut->get_data()[0]['mpn'] );
+	}
+
+	/**
+	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
+	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
+	 *           ["0", true, "0"]
+	 *           ["", true, null]
+	 *           ["CHILD-PART", false, "PARENT-PART"]
+	 *
+	 * @param string      $variation_mpn Variation MPN.
+	 * @param bool        $selected Whether the request selects the variation.
+	 * @param string|null $expected_mpn Expected MPN, or null when it should be omitted.
+	 */
+	public function test_mpn_structured_data_for_selected_variation( string $variation_mpn, bool $selected, ?string $expected_mpn ): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_mpn( 'PARENT-PART' );
+		$product->save();
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		$variation->set_mpn( $variation_mpn );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+
+		if ( $selected ) {
+			$_GET['attribute_pa_size']   = 'huge';
+			$_GET['attribute_pa_colour'] = 'red';
+			$_GET['attribute_pa_number'] = '0';
+		}
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( wc_get_product( $product->get_id() ) );
+		$data = $sut->get_data()[0];
+
+		$this->assertSame( $selected ? 'Offer' : 'AggregateOffer', $data['offers'][0]['@type'] );
+		if ( null === $expected_mpn ) {
+			$this->assertArrayNotHasKey( 'mpn', $data );
+		} else {
+			$this->assertSame( $expected_mpn, $data['mpn'] );
+		}
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void
