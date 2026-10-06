@@ -58,10 +58,11 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Create a variable product assigned to a product category.
 	 *
-	 * @return array{product: WC_Product_Variable, category_slug: string}
+	 * @param string $category_name Category name.
+	 * @return array{product: WC_Product_Variable, category_slug: string, category_id: int}
 	 */
-	private function create_categorized_variation_product(): array {
-		$term = wp_insert_term( 'Export Test Category', 'product_cat' );
+	private function create_categorized_variation_product( string $category_name = 'Export Test Category' ): array {
+		$term = wp_insert_term( $category_name, 'product_cat' );
 		$this->assertIsArray( $term, 'Failed to create product category for export test.' );
 
 		$product = WC_Helper_Product::create_variation_product();
@@ -73,7 +74,21 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		return array(
 			'product'       => $product,
 			'category_slug' => $category->slug,
+			'category_id'   => (int) $category->term_id,
 		);
+	}
+
+	/**
+	 * Write the current page the way file generation does, so the completion percentage includes its rows.
+	 *
+	 * @param WC_Product_CSV_Exporter $exporter Exporter instance.
+	 */
+	private function export_current_page( WC_Product_CSV_Exporter $exporter ): void {
+		$exporter->prepare_data_to_export();
+
+		$export_rows = ( new ReflectionClass( WC_Product_CSV_Exporter::class ) )->getMethod( 'export_rows' );
+		$export_rows->setAccessible( true );
+		$export_rows->invoke( $exporter );
 	}
 
 	/**
@@ -159,6 +174,50 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 				$exported_ids,
 				'Variations should not be auto-included when the type filter is variable only.'
 			);
+		}
+	}
+
+	/**
+	 * @testdox Category export includes variable products and their variations without changing the completion percentage.
+	 */
+	public function test_appended_variations_do_not_change_category_export_completion(): void {
+		$first  = $this->create_categorized_variation_product( 'Export Paged Progress Category' );
+		$second = WC_Helper_Product::create_variation_product();
+		$second->set_category_ids( array( $first['category_id'] ) );
+		$second->save();
+		$this->create_categorized_variation_product( 'Export Other Progress Category' );
+
+		$products    = array(
+			1 => $first['product'],
+			2 => $second,
+		);
+		$percentages = array(
+			1 => 50,
+			2 => 100,
+		);
+
+		foreach ( $products as $page => $product ) {
+			$exporter = new WC_Product_CSV_Exporter();
+			$exporter->set_limit( 1 );
+			$exporter->set_page( $page );
+			$exporter->set_product_types_to_export( array( ProductType::VARIABLE, ProductType::VARIATION ) );
+			$exporter->set_product_category_to_export( array( $first['category_slug'] ) );
+			$this->export_current_page( $exporter );
+
+			$exported_ids = array_map( 'intval', wp_list_pluck( $this->get_exported_data( $exporter ), 'id' ) );
+			$expected_ids = array_map(
+				'intval',
+				array_merge(
+					array( $product->get_id() ),
+					$product->get_children( 'edit' )
+				)
+			);
+			sort( $exported_ids );
+			sort( $expected_ids );
+
+			$this->assertGreaterThan( $exporter->get_limit(), count( $exported_ids ), 'The page should include the parent and its appended variations.' );
+			$this->assertSame( $expected_ids, $exported_ids, 'The page should include that variable product and its variations, and exclude the other category.' );
+			$this->assertSame( $percentages[ $page ], $exporter->get_percent_complete() );
 		}
 	}
 

@@ -234,18 +234,27 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The due_contract index keys the dispatcher scan as (status, next_payment_gmt).
+	 * @testdox The due_owner index keys the dispatcher scan as (extension_slug, next_payment_gmt).
 	 */
-	public function test_contracts_due_contract_index_keys_the_dispatcher_scan(): void {
+	public function test_contracts_due_owner_index_keys_the_dispatcher_scan(): void {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// The dispatcher scans status=active AND next_payment_gmt <= now; the status-first
-		// column order is load-bearing for the index, so assert it exactly.
-		$this->assertContains( 'due_contract', $this->index_names( $table ) );
+		// The dispatcher scans extension_slug IN (registered owners) AND next_payment_gmt <= now;
+		// the owner-first column order is load-bearing for the index, so assert it exactly.
+		// The retired due_contract index is not asserted absent: dbDelta never drops an index,
+		// so it lingers on any reused database until the tables are recreated.
+		$this->assertContains( 'due_owner', $this->index_names( $table ) );
 		$this->assertSame(
-			array( 'status', 'next_payment_gmt' ),
-			$this->index_columns( $table, 'due_contract' )
+			array( 'extension_slug', 'next_payment_gmt' ),
+			$this->index_columns( $table, 'due_owner' )
 		);
+	}
+
+	/**
+	 * @testdox The schema version is 2.4.0 (owner-scoped due scan).
+	 */
+	public function test_schema_version_is_2_4_0(): void {
+		$this->assertSame( '2.4.0', SchemaInstaller::get_version() );
 	}
 
 	public function test_cycles_table_has_expected_columns(): void {

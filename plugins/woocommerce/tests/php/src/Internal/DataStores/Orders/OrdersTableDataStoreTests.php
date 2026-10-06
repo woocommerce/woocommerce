@@ -619,6 +619,31 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox When the order's previous status is no longer registered, untrash falls back to pending and still reports success.
+	 */
+	public function test_cot_datastore_untrash_falls_back_to_pending_for_invalid_previous_status() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Simulate the plugin that registered the order's previous status being deactivated.
+		$order->update_meta_data( '_wp_trash_meta_status', 'wc-unregistered-status' );
+		$order->save_meta_data();
+
+		$this->sut->read( $order );
+		$result = $this->sut->untrash_order( $order );
+
+		$this->assertTrue( $result, 'untrash_order() should report success on the pending fallback path' );
+		$this->assertSame( OrderStatus::PENDING, $order->get_status() );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ), 'Trash meta should still be cleaned up on the pending fallback path' );
+	}
+
+	/**
 	 * @testdox Notes are still restored on untrash even without a comment-status record.
 	 */
 	public function test_cot_datastore_untrash_restores_notes_with_no_trash_meta_record() {
