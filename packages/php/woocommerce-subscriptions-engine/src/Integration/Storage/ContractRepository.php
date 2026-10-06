@@ -123,40 +123,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert a contract together with its signup cycle (cycle 1) - the checkout
-	 * create path.
-	 *
-	 * Durable-intent-first: insert the contract -> freeze the signup cycle's snapshots
-	 * (which need the contract id) -> record those ids on the contract and update its
-	 * row -> insert cycle 1 (which carries the same snapshot ids by construction). The
-	 * cycle is taken as built by the caller; this only stamps its contract id, resolves
-	 * its snapshots, and inserts it. The seam a later transaction-handling change wraps.
-	 *
-	 * @param Contract $contract The contract to insert.
-	 * @param Cycle    $cycle    The signup cycle (cycle 1), carrying its snapshot value objects.
-	 * @return int The new contract id.
-	 * @throws \RuntimeException If a contract, snapshot, or cycle write fails.
-	 */
-	public function insert_with_origin_cycle( Contract $contract, Cycle $cycle ): int {
-		$contract_id = $this->insert( $contract );
-
-		// First cycle in its chain: no previous to copy-forward from, so its snapshots
-		// are inserted fresh and their ids stamped onto it.
-		$cycle->set_contract_id( $contract_id );
-		$this->resolve_cycle_snapshots( $cycle, null );
-
-		// Record the signup snapshots as the contract's latest/live references, then
-		// persist the contract row before the cycle row (durable-intent-first).
-		$contract->set_plan_snapshot_id( $cycle->get_plan_snapshot_id() );
-		$contract->set_items_snapshot_id( $cycle->get_items_snapshot_id() );
-		$this->update_contract_row( $contract );
-
-		$this->insert_cycle( $cycle );
-
-		return $contract_id;
-	}
-
-	/**
 	 * Persist changes to an existing contract and its child rows.
 	 *
 	 * Updates the contract row in place, then reconciles items / addresses only when

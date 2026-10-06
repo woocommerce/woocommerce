@@ -735,35 +735,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox insert_with_origin_cycle records cycle 1's snapshot refs on the contract too.
-	 */
-	public function test_insert_with_origin_cycle_records_refs_on_the_contract(): void {
-		$contract = $this->make_contract();
-		$cycle    = $this->make_cycle( 0, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot(), 1001 );
-		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
-
-		$id = $this->sut->insert_with_origin_cycle( $contract, $cycle );
-		$this->assertGreaterThan( 0, $id );
-
-		// The signup cycle was stamped with the contract id and its snapshots resolved.
-		$this->assertSame( $id, $cycle->get_contract_id() );
-		$this->assertNotNull( $cycle->get_plan_snapshot_id() );
-		$this->assertNotNull( $cycle->get_items_snapshot_id() );
-
-		// The contract carries the SAME snapshot refs as cycle 1 (latest/live).
-		$reloaded = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( $cycle->get_plan_snapshot_id(), $reloaded->get_plan_snapshot_id() );
-		$this->assertSame( $cycle->get_items_snapshot_id(), $reloaded->get_items_snapshot_id() );
-
-		// Cycle 1 is the billed signup, reachable as the chain's most-recent cycle.
-		$current = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $current );
-		$this->assertSame( 1, $current->get_count() );
-		$this->assertTrue( $current->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
-	/**
 	 * @testdox extension_slug defaults to null when unset.
 	 */
 	public function test_extension_slug_defaults_to_null_when_unset(): void {
