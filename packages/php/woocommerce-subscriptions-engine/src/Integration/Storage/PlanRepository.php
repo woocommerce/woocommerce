@@ -222,7 +222,23 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Delete a plan by id and (optionally) extension slug.
+	 * Whether a plan row exists for `$id`.
+	 *
+	 * @param int $id Plan id.
+	 */
+	public function exists( int $id ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id ) );
+
+		return null !== $found;
+	}
+
+	/**
+	 * Delete a plan and its meta rows by id and (optionally) extension slug.
 	 * Most usages from applications should specify the extension slug
 	 * to guard against cross-application operations.
 	 *
@@ -240,9 +256,167 @@ final class PlanRepository {
 			$where['extension_slug'] = $extension_slug;
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $where );
+		$deleted = (bool) $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $where );
 
-		return (bool) $deleted;
+		if ( $deleted ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ), array( 'plan_id' => $id ) );
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Add a meta row for a plan, like `add_post_meta()`.
+	 *
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key.
+	 * @param mixed  $value   Meta value; serialized when not scalar.
+	 * @param bool   $unique  When true, add nothing if the key already exists. Advisory:
+	 *                        checked before the insert with no unique index.
+	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If the insert fails.
+	 */
+	public function add_meta( int $plan_id, string $key, $value, bool $unique = false ): ?int {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Plan meta key must not be empty.' );
+		}
+
+		if ( $unique && array() !== $this->find_meta_values( $plan_id, $key ) ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$inserted = $wpdb->insert(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ),
+			array(
+				'plan_id'    => $plan_id,
+				'meta_key'   => $key,
+				'meta_value' => maybe_serialize( $value ),
+			)
+		);
+
+		if ( false === $inserted ) {
+			throw new \RuntimeException( sprintf( 'Failed to add plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Update a plan's meta rows for `$key`, like `update_post_meta()`: adds a row when
+	 * the key is absent, else rewrites every row for the key, or only the rows holding
+	 * `$prev_value`. The absent-key check runs before the write with no unique index.
+	 *
+	 * @param int    $plan_id    Plan id.
+	 * @param string $key        Meta key.
+	 * @param mixed  $value      New value; serialized when not scalar.
+	 * @param mixed  $prev_value Only update rows holding this value; null updates all rows for the key.
+	 *                           Any other value ('' and false included) matches literally.
+	 * @return bool True when a row was added or at least one row changed.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If a write fails.
+	 */
+	public function update_meta( int $plan_id, string $key, $value, $prev_value = null ): bool {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Plan meta key must not be empty.' );
+		}
+
+		if ( array() === $this->find_meta_values( $plan_id, $key ) ) {
+			$this->add_meta( $plan_id, $key, $value );
+			return true;
+		}
+
+		$where = array(
+			'plan_id'  => $plan_id,
+			'meta_key' => $key,
+		);
+		if ( null !== $prev_value ) {
+			$where['meta_value'] = maybe_serialize( $prev_value );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ),
+			array( 'meta_value' => maybe_serialize( $value ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			$where
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( sprintf( 'Failed to update plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return $updated > 0;
+	}
+
+	/**
+	 * Delete a plan's meta rows for `$key`, like `delete_post_meta()`.
+	 *
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key.
+	 * @param mixed  $value   Only delete rows holding this value; null deletes every row for the key.
+	 *                        Any other value ('' and false included) matches literally.
+	 * @return bool True when at least one row was deleted.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If the delete fails.
+	 */
+	public function delete_meta( int $plan_id, string $key, $value = null ): bool {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Plan meta key must not be empty.' );
+		}
+
+		$where = array(
+			'plan_id'  => $plan_id,
+			'meta_key' => $key,
+		);
+		if ( null !== $value ) {
+			$where['meta_value'] = maybe_serialize( $value );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ), $where );
+
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete plan meta "%s" for plan %d: %s', esc_html( $key ), (int) $plan_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return $deleted > 0;
+	}
+
+	/**
+	 * Read plan meta (WordPress `get_post_meta()` semantics), values unserialized,
+	 * oldest row first.
+	 *
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key; empty for every key.
+	 * @param bool   $single  With a key: return the first value only.
+	 * @return mixed Empty key: `array<string, array<int, mixed>>` of all keys. Key + `$single`:
+	 *               the first value, or '' when absent. Key only: the list of values (`[]` when absent).
+	 */
+	public function get_meta( int $plan_id, string $key = '', bool $single = false ) {
+		if ( '' === $key ) {
+			$all = array();
+			foreach ( $this->find_meta_rows( $plan_id, null ) as $row ) {
+				$all[ $row['meta_key'] ][] = maybe_unserialize( $row['meta_value'] );
+			}
+
+			return $all;
+		}
+
+		$values = $this->find_meta_values( $plan_id, $key );
+
+		if ( $single ) {
+			return array() === $values ? '' : $values[0];
+		}
+
+		return $values;
 	}
 
 	/**
@@ -447,6 +621,57 @@ final class PlanRepository {
 		$decoded = json_decode( $value, true );
 
 		return is_array( $decoded ) ? $decoded : array();
+	}
+
+	/**
+	 * Unserialized values stored under `$key` for a plan, oldest first.
+	 *
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key.
+	 * @return array<int, mixed>
+	 */
+	private function find_meta_values( int $plan_id, string $key ): array {
+		$values = array();
+		foreach ( $this->find_meta_rows( $plan_id, $key ) as $row ) {
+			$values[] = maybe_unserialize( $row['meta_value'] );
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Raw meta rows for a plan, optionally for one key, by id ascending.
+	 *
+	 * @param int         $plan_id Plan id.
+	 * @param string|null $key     Meta key, or null for every key.
+	 * @return array<int, array{meta_key: string, meta_value: string}>
+	 */
+	private function find_meta_rows( int $plan_id, ?string $key ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+
+		if ( null === $key ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE plan_id = %d ORDER BY id ASC", $plan_id ), ARRAY_A );
+		} else {
+			// The engine's own plan-meta columns, not post/order meta; the
+			// slow-meta-query heuristic does not apply.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE plan_id = %d AND meta_key = %s ORDER BY id ASC", $plan_id, $key ), ARRAY_A );
+		}
+
+		$result = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$result[] = array(
+					'meta_key'   => ScalarCoercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => ScalarCoercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				);
+			}
+		}
+
+		return $result;
 	}
 
 	/**
