@@ -1,39 +1,19 @@
 .wc-block-product-categories {
 	margin-bottom: 1em;
+
+	&.is-dropdown {
+		display: flex;
+	}
+
+	select {
+		margin-inline-end: 0.5em;
+	}
 }
 
-:where(.wc-block-product-categories.is-dropdown) {
-	display: flex;
-	align-items: stretch;
-	gap: 0.5em;
-}
-
-:where(.wc-block-product-categories__dropdown) {
-	display: flex;
-	flex: 1;
-	min-inline-size: 0;
-}
-
-:where(.wc-block-product-categories__dropdown select, .wc-block-product-categories__button) {
-	box-sizing: border-box;
-	min-block-size: 2.75em;
-	margin: 0;
-	padding: 0.5em 0.75em;
-	border: 1px solid #949494;
-	border-radius: 0.25em;
-	background-color: transparent;
-	color: inherit;
-	font: inherit;
-}
-
+// Match the sizing defaults of the Add to Cart with Options variation dropdown.
 :where(.wc-block-product-categories__dropdown select) {
-	inline-size: 100%;
-	min-inline-size: 0;
-}
-
-:where(.wc-block-product-categories__dropdown select:focus-visible, .wc-block-product-categories__button:focus-visible) {
-	outline: 2px solid currentColor;
-	outline-offset: 2px;
+	height: 3em;
+	padding: 0.25em 1em;
 }
 
 .wc-block-product-categories-list--has-images {
@@ -88,32 +68,32 @@
 	opacity: 0.2;
 }
 
-:where(.wc-block-product-categories__button) {
+.wc-block-product-categories__button {
+	background-color: var(--wp--preset--color--white, #fff);
 	display: flex;
-	flex-shrink: 0;
 	align-items: center;
-	justify-content: center;
+	margin: 0;
+	padding: 0 0.5em;
 	position: relative;
-	cursor: pointer;
-}
+	overflow: hidden;
 
-:where(.wc-block-product-categories__button svg) {
-	fill: currentColor;
-}
-
-:where(.rtl .wc-block-product-categories__button svg) {
-	transform: rotate(180deg);
-}
-
-:where(.wc-block-product-categories__button:active) {
-	color: currentColor;
-}
-
-:where(.wc-block-product-categories__button:disabled, .wc-block-product-categories__button[aria-disabled="true"]) {
-	cursor: default;
-	opacity: 0.3;
-}
-
-:where(.wc-block-product-categories__button[aria-disabled="true"]:focus, .wc-block-product-categories__button:disabled:focus) {
-	box-shadow: none;
+	svg {
+		fill: currentColor;
+		outline: none;
+		.rtl & {
+			transform: rotate(180deg);
+		}
+	}
+	&:active {
+		color: currentColor;
+	}
+	&:disabled,
+	&[aria-disabled="true"] {
+		cursor: default;
+		opacity: 0.3;
+	}
+	&[aria-disabled="true"]:focus,
+	&:disabled:focus {
+		box-shadow: none;
+	}
 }
