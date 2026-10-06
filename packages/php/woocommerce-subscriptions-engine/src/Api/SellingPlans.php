@@ -1,14 +1,12 @@
 <?php
 /**
- * SellingPlans - the engine's public catalog read facade.
+ * SellingPlans - the engine's public plan read facade.
  *
- * The one surface consumers import to read the plans catalog: list an
- * extension's active plans and fetch specific plans by id for selection and
- * display UIs. Which products a plan applies to is consumer-owned - the
- * engine stores the catalog, not product attachment. The facade hides the
- * internal `Integration\` repositories behind a stable boundary, so the
- * internals stay refactorable. Strictly additive-only, like every `Api\`
- * surface.
+ * The one surface consumers import to read plans: list the scoped extensions'
+ * plans, fetch specific plans by id, or fetch one plan. Results are read-only
+ * {@see PlanView}s; callers choose which statuses they want (no status is
+ * filtered by default). Which products a plan applies to is consumer-owned.
+ * Strictly additive-only, like every `Api\` surface.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -17,19 +15,20 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Public selling-plans catalog read facade.
+ * Public selling-plans read facade.
  *
  * Each extension constructs one instance scoped to its own slugs and reuses
  * it for every read - the slug scope is fixed at construction so call sites
- * never carry it around. Instances are cheap and hold no state beyond the
- * scope, so constructing more is harmless. Final: a facade over the engine
- * internals, not an extension seam.
+ * never carry it around. Plans owned by an out-of-scope extension are never
+ * returned. Instances are cheap and hold no state beyond the scope. Final: a
+ * facade over the engine internals, not an extension seam.
  */
 final class SellingPlans {
 
@@ -58,41 +57,70 @@ final class SellingPlans {
 	}
 
 	/**
-	 * List the scoped extensions' active plans in display order - the read
-	 * behind a plan-selection UI.
+	 * List the scoped extensions' plans, oldest id first.
 	 *
-	 * @return array<int, Plan> Plans in display order.
+	 * @param array<string, mixed> $args Optional `status`: a plan status slug or a list of slugs. Absent: every status.
+	 * @return array<int, PlanView>
 	 */
-	public function list_plans(): array {
-		return ( new PlanRepository() )->query(
-			array(
-				'status'          => Plan::STATUS_ACTIVE,
-				'extension_slugs' => $this->extension_slugs,
-				'limit'           => self::PLAN_QUERY_LIMIT,
-			)
-		);
+	public function list_plans( array $args = array() ): array {
+		return $this->query( $args, array() );
 	}
 
 	/**
-	 * Fetch the active plans among the given ids owned by the scoped
-	 * extensions, in display order - the read behind rendering a stored plan
-	 * selection.
+	 * Fetch the plans among the given ids owned by the scoped extensions, oldest
+	 * id first. Unknown, out-of-scope, or status-filtered ids are absent; an
+	 * empty or invalid id list yields an empty array.
 	 *
-	 * Ids that are unknown, archived, or owned by an out-of-scope extension
-	 * are simply absent from the result. An empty or invalid id list yields
-	 * an empty array.
-	 *
-	 * @param array<int, int> $plan_ids Plan ids to fetch.
-	 * @return array<int, Plan> Plans in display order.
+	 * @param array<int, int>      $plan_ids Plan ids to fetch.
+	 * @param array<string, mixed> $args     Optional `status`: a plan status slug or a list of slugs. Absent: every status.
+	 * @return array<int, PlanView>
 	 */
-	public function get_plans( array $plan_ids ): array {
-		return ( new PlanRepository() )->query(
+	public function get_plans( array $plan_ids, array $args = array() ): array {
+		return $this->query( $args, array( 'ids' => $plan_ids ) );
+	}
+
+	/**
+	 * Fetch one plan owned by the scoped extensions, in any status.
+	 *
+	 * @param int $id Plan id.
+	 * @return PlanView|null Null for an unknown, out-of-scope, or non-positive id.
+	 */
+	public function get_plan( int $id ): ?PlanView {
+		if ( $id <= 0 ) {
+			return null;
+		}
+
+		$plans = $this->get_plans( array( $id ) );
+
+		return $plans[0] ?? null;
+	}
+
+	/**
+	 * Run a scoped repository query and map the results to views.
+	 *
+	 * @param array<string, mixed> $args    Caller args (only `status` is read).
+	 * @param array<string, mixed> $filters Extra repository filters.
+	 * @return array<int, PlanView>
+	 */
+	private function query( array $args, array $filters ): array {
+		$query = array_merge(
+			$filters,
 			array(
-				'status'          => Plan::STATUS_ACTIVE,
 				'extension_slugs' => $this->extension_slugs,
-				'ids'             => $plan_ids,
+				'orderby'         => 'id',
+				'order'           => 'asc',
 				'limit'           => self::PLAN_QUERY_LIMIT,
 			)
+		);
+		if ( array_key_exists( 'status', $args ) ) {
+			$query['status'] = $args['status'];
+		}
+
+		return array_map(
+			static function ( Plan $plan ): PlanView {
+				return PlanView::from_plan( $plan );
+			},
+			( new PlanRepository() )->query( $query )
 		);
 	}
 }
