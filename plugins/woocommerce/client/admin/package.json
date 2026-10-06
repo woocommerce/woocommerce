@@ -226,7 +226,10 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "client/**/*.{js,ts,tsx,scss}"
+				"changes": [
+					"client/**/*.{js,ts,tsx,scss}",
+					"stylelint.config.js"
+				]
 			},
 			"tests": [
 				{

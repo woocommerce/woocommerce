@@ -163,7 +163,10 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,ts,tsx,scss,css}"
+				"changes": [
+					"src/**/*.{js,ts,tsx,scss,css}",
+					".stylelintrc.json"
+				]
 			},
 			"tests": [
 				{

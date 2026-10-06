@@ -297,7 +297,8 @@
 				"changes": [
 					"assets/**/*.{js,ts,tsx,scss}",
 					"packages/**/*.{js,ts,tsx,scss}",
-					"tests/**/*.{js,ts,tsx,scss}"
+					"tests/**/*.{js,ts,tsx,scss}",
+					".stylelintrc.json"
 				]
 			},
 			"tests": [

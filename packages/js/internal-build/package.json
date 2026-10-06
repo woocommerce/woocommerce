@@ -88,7 +88,12 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "{src/**/*.{js,jsx,ts,tsx,cjs},styles/**/*.scss}"
+				"changes": [
+					"src/**/*.{js,jsx,ts,tsx,cjs}",
+					"styles/**/*.scss",
+					".stylelintrc.json",
+					"configs/stylelint.config.cjs"
+				]
 			}
 		}
 	}
