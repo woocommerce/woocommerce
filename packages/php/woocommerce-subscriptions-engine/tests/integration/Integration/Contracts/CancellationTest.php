@@ -14,6 +14,8 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use DomainException;
 use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
@@ -290,6 +292,33 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::CANCELLED, $stored->get_status() );
 		$this->assertNull( $stored->get_next_payment_gmt() );
+	}
+
+	public function test_cancel_accepts_a_draft_contract(): void {
+		// A stuck draft (created, never activated) has no cycles and no due moment.
+		$id = Contracts::create(
+			array(
+				'owner'       => 'test-owner',
+				'customer_id' => 1,
+				'currency'    => 'USD',
+			)
+		);
+		$this->assertSame( ContractStatus::DRAFT, $this->reload( $id )->get_status() );
+
+		$fired = 0;
+		add_action(
+			Cancellation::CONTRACT_CANCELLED_ACTION,
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+
+		$this->assertTrue( Subscriptions::cancel( $id ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::CANCELLED, $stored->get_status() );
+		$this->assertNull( $stored->get_next_payment_gmt() );
+		$this->assertSame( 1, $fired );
 	}
 
 	public function test_cancel_on_a_cancelled_contract_is_a_no_op_that_refires_the_action(): void {

@@ -66,7 +66,8 @@ final class Cancellation {
 	 * Cancel `$contract`: move it to cancelled, disarm its next-due moment, and close any
 	 * mid-charge cycle.
 	 *
-	 * Only an active, on-hold or pending-cancellation contract can be cancelled; cancelling an
+	 * Only a draft, active, on-hold or pending-cancellation contract can be cancelled (a draft is
+	 * never armed, so there is no due moment to disarm); cancelling an
 	 * already cancelled contract is an idempotent no-op that still succeeds and fires the
 	 * action. Any other status - including one that is not registered - raises a
 	 * `DomainException`. The next-payment date and any hold anchor are cleared so the due scan
@@ -86,9 +87,9 @@ final class Cancellation {
 		}
 
 		$previous   = $contract->get_status();
-		$cancelable = array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD, ContractStatus::PENDING_CANCELLATION, ContractStatus::CANCELLED );
+		$cancelable = array( ContractStatus::DRAFT, ContractStatus::ACTIVE, ContractStatus::ON_HOLD, ContractStatus::PENDING_CANCELLATION, ContractStatus::CANCELLED );
 		if ( ! in_array( $previous, $cancelable, true ) ) {
-			throw new \DomainException( 'Cancellation::cancel(): only an active, on-hold or pending-cancellation contract can be cancelled.' );
+			throw new \DomainException( 'Cancellation::cancel(): only a draft, active, on-hold or pending-cancellation contract can be cancelled.' );
 		}
 
 		if ( ContractStatus::CANCELLED !== $previous ) {
