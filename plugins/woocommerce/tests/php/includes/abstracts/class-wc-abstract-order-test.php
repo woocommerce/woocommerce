@@ -1061,6 +1061,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 *           [true, "collision"]
 	 *           [false, "collision"]
 	 *           [true, "clone"]
+	 *           [false, "clone"]
 	 *
 	 * @param bool   $persist_tax Whether to persist the tax before removing it.
 	 * @param string $filter_mode How to transform the filtered tax collection.
@@ -1113,12 +1114,13 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox update_taxes removes an unsaved duplicate while preserving the persisted tax item.
-	 * @testWith [false]
-	 *           [true]
+	 * @testWith ["none"]
+	 *           ["reindex"]
+	 *           ["clone"]
 	 *
-	 * @param bool $reindex_taxes Whether to reindex the filtered tax collection.
+	 * @param string $filter_mode How to transform the filtered tax collection.
 	 */
-	public function test_update_taxes_removes_unsaved_duplicate_tax_item( bool $reindex_taxes ): void {
+	public function test_update_taxes_removes_unsaved_duplicate_tax_item( string $filter_mode ): void {
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate'      => '10.0000',
@@ -1144,8 +1146,16 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->add_item( $duplicate );
 		$this->assertSame( 0, $duplicate->get_id(), 'The duplicate tax should still use a temporary collection key.' );
 
-		$filter_tax_items = static function ( $items, $filtered_order, $types ) use ( $order, $reindex_taxes ) {
-			return $reindex_taxes && $order === $filtered_order && array( 'tax' ) === $types ? array_values( $items ) : $items;
+		$filter_tax_items = static function ( $items, $filtered_order, $types ) use ( $order, $filter_mode ) {
+			if ( $order !== $filtered_order || array( 'tax' ) !== $types ) {
+				return $items;
+			}
+
+			if ( 'clone' === $filter_mode ) {
+				return array_map( static fn( $item ) => clone $item, $items );
+			}
+
+			return 'reindex' === $filter_mode ? array_values( $items ) : $items;
 		};
 		add_filter( 'woocommerce_order_get_items', $filter_tax_items, 10, 3 );
 
@@ -1478,13 +1488,11 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should remove a persisted item using an integer or digit-only string ID.
+	 * @testdox Should remove a persisted item using an integer or ordinary numeric-string ID.
 	 * @testWith [null, false]
 	 *           ["%d", false]
-	 *           ["0%d", false]
 	 *           [null, true]
 	 *           ["%d", true]
-	 *           ["0%d", true]
 	 *
 	 * @param string|null $item_id_format Format for a string ID, or null for an integer ID.
 	 * @param bool        $reload_order Whether to reload the order before removing the item.
@@ -1512,6 +1520,52 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should remove the resolved persisted item when a filter changes its collection key.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $save_after_removal Whether to inspect the reloaded order after saving.
+	 */
+	public function test_remove_item_removes_resolved_item_from_filtered_collection( bool $save_after_removal ): void {
+		$order  = new WC_Order();
+		$first  = new WC_Order_Item_Fee();
+		$second = new WC_Order_Item_Fee();
+		$first->set_name( 'First fee' );
+		$second->set_name( 'Second fee' );
+		$order->add_item( $first );
+		$order->add_item( $second );
+		$order->save();
+
+		$first_id   = $first->get_id();
+		$second_id  = $second->get_id();
+		$sut        = new WC_Order( $order->get_id() );
+		$alias_keys = static function ( $items, $filtered_order, $types ) use ( $sut, $first_id, $second_id ) {
+			if ( $filtered_order !== $sut || array( 'fee' ) !== $types ) {
+				return $items;
+			}
+
+			return array(
+				$first_id  => $items[ $second_id ],
+				$second_id => $items[ $first_id ],
+			);
+		};
+		add_filter( 'woocommerce_order_get_items', $alias_keys, 10, 3 );
+
+		try {
+			$sut->remove_item( $first_id );
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $alias_keys, 10 );
+		}
+
+		if ( $save_after_removal ) {
+			$sut->save();
+			$sut = new WC_Order( $order->get_id() );
+		}
+
+		$this->assertSame( array( $first_id ), array_keys( $sut->get_fees() ), 'Only the resolved second fee should be removed; the unrelated first fee should remain.' );
+	}
+
+	/**
 	 * @testdox Should leave other items attached when a temporary key is missing.
 	 */
 	public function test_remove_item_ignores_missing_temporary_key(): void {
@@ -1532,13 +1586,18 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject a non-integer numeric string as an item ID.
-	 * @testWith ["%s.5"]
-	 *           ["%se0"]
+	 * @testdox Should preserve removal behavior for unsupported numeric-string IDs.
+	 * @testWith ["0%s", false]
+	 *           ["0%s", true]
+	 *           ["%s.5", false]
+	 *           ["%s.5", true]
+	 *           ["%se0", false]
+	 *           ["%se0", true]
 	 *
-	 * @param string $item_id_format Format for an invalid item ID based on the persisted ID.
+	 * @param string $item_id_format Format for an unsupported ID based on the persisted ID.
+	 * @param bool   $reload_order Whether to reload the order before attempting removal.
 	 */
-	public function test_remove_item_rejects_non_integer_numeric_string( string $item_id_format ): void {
+	public function test_remove_item_preserves_unsupported_numeric_string_id( string $item_id_format, bool $reload_order ): void {
 		$order = new WC_Order();
 		$fee   = new WC_Order_Item_Fee();
 		$fee->set_name( 'Persisted fee' );
@@ -1550,9 +1609,12 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$item_id         = $fee->get_id();
 		$invalid_item_id = sprintf( $item_id_format, $item_id );
+		if ( $reload_order ) {
+			$order = new WC_Order( $order->get_id() );
+		}
 
-		$this->assertFalse( $order->get_item( $invalid_item_id, false ), 'A decimal or exponent string should not resolve to a persisted item.' );
-		$this->assertFalse( $order->remove_item( $invalid_item_id ), 'A decimal or exponent string should not remove a persisted item.' );
+		$this->assertFalse( $order->get_item( $invalid_item_id, false ), 'An unsupported numeric-string ID should not resolve through local lookup.' );
+		$this->assertFalse( $order->remove_item( $invalid_item_id ), 'An unsupported numeric-string ID should leave removal behavior unchanged.' );
 		$this->assertArrayHasKey( $item_id, $order->get_items( 'fee' ), 'The item should remain in the in-memory order.' );
 
 		$order->save();

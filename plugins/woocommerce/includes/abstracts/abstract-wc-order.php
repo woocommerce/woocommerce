@@ -1415,9 +1415,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get an order item object, based on its type.
 	 *
 	 * @since 3.0.0
-	 * @since 11.2.0 Supports temporary item keys when loading local items.
 	 *
-	 * @param  int|string $item_id Item ID or temporary item key to get.
+	 * @param  int|string $item_id Item ID or temporary item key to get. Temporary keys require $load_from_db to be false.
 	 * @param  bool       $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
@@ -1473,16 +1472,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Remove item from the order.
 	 *
 	 * @since 3.0.0
-	 * @since 11.2.0 Supports temporary item keys when loading local items.
+	 * @since 11.3.0 Supports removing items by their temporary keys.
 	 *
 	 * @param int|string $item_id Item ID or temporary item key to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
-		if ( is_string( $item_id ) && ctype_digit( $item_id ) ) {
-			$item_id = (int) $item_id;
-		}
-
 		$item      = $this->get_item( $item_id, false );
 		$items_key = $item ? $this->get_items_key( $item ) : false;
 
@@ -1490,7 +1485,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
-		$item_key = isset( $this->items[ $items_key ][ $item_id ] ) ? $item_id : $item->get_id();
+		$item_key = ( $this->items[ $items_key ][ $item_id ] ?? null ) === $item ? $item_id : $item->get_id();
 
 		// Unset and remove later.
 		$this->items_to_delete[] = $item;
@@ -2389,7 +2384,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
 	 *
-	 * @since 11.2.0 Removes unsaved tax items using their temporary keys.
+	 * @since 11.3.0 Removes unsaved tax items using their temporary keys.
 	 *
 	 * @return void
 	 */
@@ -2428,9 +2423,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
 				// Filters may change array keys without changing the local collection.
-				if ( ( $this->items['tax_lines'][ $tax_item_id ] ?? null ) !== $tax ) {
+				$local_tax = $this->items['tax_lines'][ $tax_item_id ] ?? null;
+				if ( $local_tax !== $tax ) {
 					$tax_item_key = array_search( $tax, $this->items['tax_lines'] ?? array(), true );
-					$tax_item_id  = false === $tax_item_key ? $tax->get_id() : $tax_item_key;
+
+					// A clone may retain an unsaved tax item's original temporary key.
+					if ( false === $tax_item_key && $local_tax instanceof WC_Order_Item_Tax && 0 === $tax->get_id() && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
+						$tax_item_key = $tax_item_id;
+					}
+
+					$tax_item_id = false === $tax_item_key ? $tax->get_id() : $tax_item_key;
 				}
 
 				$this->remove_item( $tax_item_id );
