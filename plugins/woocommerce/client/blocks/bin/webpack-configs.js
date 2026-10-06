@@ -63,7 +63,7 @@ const getSharedPlugins = ( {
 					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
-			  } )
+				} )
 			: false,
 		// The WP_BUNDLE_ANALYZER global variable enables a utility that represents bundle
 		// content as a convenient interactive zoomable treemap.
@@ -193,9 +193,7 @@ const getMainConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -321,9 +319,7 @@ const getFrontConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -413,9 +409,7 @@ const getPaymentsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -494,9 +488,7 @@ const getExtensionsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -575,9 +567,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -696,9 +686,7 @@ const getStylingConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -830,9 +818,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,

@@ -179,11 +179,11 @@ export const applyExtensionCartUpdate =
 				? {
 						shipping_address: raw.shipping_address === true,
 						billing_address: raw.billing_address === true,
-				  }
+					}
 				: {
 						shipping_address: raw === true,
 						billing_address: raw === true,
-				  };
+					};
 
 			const isDirty = getIsCustomerDataDirty();
 
