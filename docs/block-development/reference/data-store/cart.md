@@ -893,6 +893,21 @@ const store = select( cartStore );
 const isAddressFieldsForShippingRatesUpdating = store.isAddressFieldsForShippingRatesUpdating();
 ```
 
+### isShippingRatesStale
+
+Queries whether the shipping rates in the store are out of date because shipping address fields that affect them have changed. This is true from the moment the address changes, including while the change is waiting to be sent to the server, until the server has returned rates for the new address.
+
+#### _Returns_ 
+
+-   `boolean`: True if the shipping rates do not reflect the current shipping address yet.
+
+#### _Example_ 
+
+```js
+const store = select( cartStore );
+const isShippingRatesStale = store.isShippingRatesStale();
+```
+
 ### hasPendingItemsOperations
 
 Queries whether there are any pending cart operations (add, quantity update, or delete items).

@@ -5,7 +5,23 @@ import {
 	emptyHiddenAddressFields,
 	hasAllFieldsForShippingRates,
 	formatShippingAddress,
+	isAddressFieldForShippingRates,
 } from '@woocommerce/base-utils';
+
+describe( 'isAddressFieldForShippingRates', () => {
+	it.each( [
+		[ 'country', true ],
+		[ 'state', true ],
+		[ 'city', true ],
+		[ 'postcode', true ],
+		[ 'address_1', false ],
+		[ 'first_name', false ],
+		[ 'email', false ],
+		[ 'namespace/field', false ],
+	] )( 'returns %s -> %s', ( field, expected ) => {
+		expect( isAddressFieldForShippingRates( field ) ).toBe( expected );
+	} );
+} );
 
 describe( 'emptyHiddenAddressFields', () => {
 	it( "Removes state from an address where the country doesn't use states", () => {

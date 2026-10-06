@@ -874,4 +874,103 @@ describe( 'pushChanges', () => {
 
 		jest.useRealTimers();
 	} );
+
+	describe( 'queued shipping rates updates', () => {
+		const isShippingRatesUpdateQueued = () =>
+			wpDataFunctions.select( cartStore ).getCartMeta()
+				.isShippingRatesUpdateQueued;
+
+		beforeEach( () => {
+			jest.useFakeTimers();
+			updateCustomerDataMock.mockClear();
+			wpDataFunctions
+				.dispatch( cartStore )
+				.__internalSetShippingRatesUpdateQueued( false );
+		} );
+
+		afterEach( () => {
+			jest.useRealTimers();
+		} );
+
+		it( 'Queues a shipping rates update when a rate field changes, until the debounced push sends it', () => {
+			getCustomerDataMock.mockReturnValue( {
+				billingAddress: { ...initialBillingAddress },
+				shippingAddress: { ...initialShippingAddress, city: 'Albany' },
+			} );
+
+			pushChanges();
+
+			expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+			expect( isShippingRatesUpdateQueued() ).toBe( true );
+
+			jest.advanceTimersByTime( 1500 );
+
+			expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+			expect( isShippingRatesUpdateQueued() ).toBe( false );
+		} );
+
+		it( 'Does not queue an update for fields that do not affect the shipping rates', () => {
+			getCustomerDataMock.mockReturnValue( {
+				billingAddress: {
+					...initialBillingAddress,
+					city: 'Albany',
+					email: 'jane.doe@mail.com',
+				},
+				shippingAddress: {
+					...initialShippingAddress,
+					address_1: '456 Side St',
+				},
+			} );
+
+			pushChanges();
+
+			expect( isShippingRatesUpdateQueued() ).toBe( false );
+		} );
+
+		it( 'Clears the queued update when the changed address fails validation and is not sent', () => {
+			getValidationErrorMock.mockImplementation( ( key: string ) =>
+				key === 'shipping_postcode'
+					? { message: 'Please enter a valid postcode', hidden: true }
+					: undefined
+			);
+			getCustomerDataMock.mockReturnValue( {
+				billingAddress: { ...initialBillingAddress },
+				shippingAddress: {
+					...initialShippingAddress,
+					postcode: 'INVALID',
+				},
+			} );
+
+			pushChanges();
+
+			expect( isShippingRatesUpdateQueued() ).toBe( true );
+
+			jest.advanceTimersByTime( 1500 );
+
+			expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+			expect( isShippingRatesUpdateQueued() ).toBe( false );
+		} );
+
+		it( 'Clears the queued update when the address is changed back before the push runs', () => {
+			getCustomerDataMock.mockReturnValue( {
+				billingAddress: { ...initialBillingAddress },
+				shippingAddress: { ...initialShippingAddress, city: 'Albany' },
+			} );
+
+			pushChanges();
+
+			expect( isShippingRatesUpdateQueued() ).toBe( true );
+
+			getCustomerDataMock.mockReturnValue( {
+				billingAddress: { ...initialBillingAddress },
+				shippingAddress: { ...initialShippingAddress },
+			} );
+
+			pushChanges();
+			jest.advanceTimersByTime( 1500 );
+
+			expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+			expect( isShippingRatesUpdateQueued() ).toBe( false );
+		} );
+	} );
 } );
