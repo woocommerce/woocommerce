@@ -98,6 +98,8 @@ if ( ! class_exists( 'WC_Email_Customer_Ready_For_Pickup_Order', false ) ) :
 		/**
 		 * Output the pickup locations in the block email content.
 		 *
+		 * Only the instance being rendered prints them, so they appear once even if the email class is loaded twice.
+		 *
 		 * @internal
 		 *
 		 * @param bool     $sent_to_admin Whether the email is being sent to admin.
@@ -105,7 +107,7 @@ if ( ! class_exists( 'WC_Email_Customer_Ready_For_Pickup_Order', false ) ) :
 		 * @param WC_Email $email         The email being rendered.
 		 */
 		public function render_block_pickup_locations( $sent_to_admin, $plain_text, $email ): void {
-			if ( ! $email instanceof WC_Email || $this->id !== $email->id ) {
+			if ( $email !== $this ) {
 				return;
 			}
 

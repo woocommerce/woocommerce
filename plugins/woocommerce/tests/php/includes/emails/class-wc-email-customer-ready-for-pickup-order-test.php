@@ -158,23 +158,28 @@ class WC_Email_Customer_Ready_For_Pickup_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add the pickup location to the block email content for this email only.
+	 * @testdox Should add the pickup location to the block email content once, for the email being rendered.
 	 */
-	public function test_block_content_shows_pickup_location_for_this_email_only(): void {
+	public function test_block_content_shows_pickup_location_once_for_the_rendered_email(): void {
 		$this->sut->object = $this->create_order_with_shipping_method( 'pickup_location', 'Pickup', array( 'pickup_location' => 'Downtown store' ) );
 
-		ob_start();
-		$this->sut->render_block_pickup_locations( false, false, $this->sut );
-		$own_email = ob_get_clean();
+		$bootstrap     = \WC_Unit_Tests_Bootstrap::instance();
+		$second_copy   = require $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-ready-for-pickup-order.php';
+		$another_email = new WC_Email();
 
-		$other_email     = new WC_Email();
-		$other_email->id = 'customer_completed_order';
 		ob_start();
-		$this->sut->render_block_pickup_locations( false, false, $other_email );
-		$another_email = ob_get_clean();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_email_general_block_content', false, false, $this->sut );
+		$rendered_email = ob_get_clean();
 
-		$this->assertStringContainsString( 'Downtown store', $own_email );
-		$this->assertSame( '', $another_email, 'Other emails should not get the pickup location' );
+		ob_start();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_email_general_block_content', false, false, $another_email );
+		$other_email = ob_get_clean();
+
+		$this->assertInstanceOf( WC_Email_Customer_Ready_For_Pickup_Order::class, $second_copy );
+		$this->assertSame( 1, substr_count( $rendered_email, 'Downtown store' ), 'A second copy of the email class should not print the location again' );
+		$this->assertSame( '', $other_email, 'Other emails should not get the pickup location' );
 	}
 
 	/**

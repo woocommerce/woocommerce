@@ -28,7 +28,7 @@ if ( empty( $pickup_locations ) ) {
 <div class="email-pickup-locations" style="margin-bottom: 24px;">
 	<h2><?php echo esc_html( _n( 'Pickup location', 'Pickup locations', count( $pickup_locations ), 'woocommerce' ) ); ?></h2>
 	<?php foreach ( $pickup_locations as $pickup_location ) : ?>
-		<address class="address">
+		<address class="address" style="margin-bottom: 12px;">
 			<strong><?php echo esc_html( $pickup_location['name'] ); ?></strong>
 			<?php if ( '' !== $pickup_location['address'] ) : ?>
 				<br/><?php echo esc_html( $pickup_location['address'] ); ?>
