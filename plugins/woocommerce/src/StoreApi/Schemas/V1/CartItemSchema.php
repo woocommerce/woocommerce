@@ -111,15 +111,15 @@ class CartItemSchema extends ItemSchema {
 	 * @since 11.3.0
 	 *
 	 * @param array $cart_item Cart item array.
-	 * @return string|null Parent cart item key, or null when not declared.
+	 * @return string|null Parent cart item key, or null when no parent is declared or it is not in the cart.
 	 */
 	protected function get_parent_item_key( $cart_item ) {
 		/**
 		 * Filter to declare the parent cart item of a cart line.
 		 *
-		 * Only a non-empty string is kept; empty strings and other values become null. Core does not check whether the
-		 * key exists in the cart. A line with no declared parent counts as a standalone line. Callbacks that declare no
-		 * parent for a line should return the value unchanged.
+		 * Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the
+		 * current cart also becomes null. A line with no declared parent counts as a standalone line. Callbacks that
+		 * declare no parent for a line should return the value unchanged.
 		 *
 		 * @since 11.3.0
 		 * @see https://github.com/woocommerce/woocommerce/blob/trunk/docs/apis/store-api/extending-store-api/extend-store-api-parent-item.md
@@ -127,11 +127,21 @@ class CartItemSchema extends ItemSchema {
 		 * @param string|null $parent_item_key Initially null; may be a value returned by an earlier callback.
 		 * @param array       $cart_item       The raw cart item.
 		 * @param string      $cart_item_key   The cart item key.
-		 * @return string|null The parent item key, or null when no parent is declared.
+		 * @return string|null The parent item key, or null when no parent is declared or it is not in the cart.
 		 */
 		$parent_item_key = apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', null, $cart_item, $cart_item['key'] );
 
-		return is_string( $parent_item_key ) && '' !== $parent_item_key ? $parent_item_key : null;
+		if ( ! is_string( $parent_item_key ) || '' === $parent_item_key ) {
+			return null;
+		}
+
+		$cart = wc()->cart;
+
+		if ( ! ( $cart instanceof \WC_Cart ) || empty( $cart->get_cart_item( $parent_item_key ) ) ) {
+			return null;
+		}
+
+		return $parent_item_key;
 	}
 
 	/**

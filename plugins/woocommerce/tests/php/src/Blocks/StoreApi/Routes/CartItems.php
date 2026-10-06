@@ -421,15 +421,69 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox The parent item key filter keeps only non-empty strings, even when no cart line has that key.
-	 * @testWith ["not-a-cart-line-key", "not-a-cart-line-key"]
-	 *           ["", null]
+	 * @testdox Cart-item routes return null when the declared parent key is not in the cart.
+	 */
+	public function test_parent_item_key_is_null_when_key_is_not_in_cart() {
+		$parent_item_key_filter = static function () {
+			return 'not-a-cart-line-key';
+		};
+		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter );
+
+		try {
+			$cart_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+			$this->assertSame( 200, $cart_response->get_status() );
+			$cart_items = array_column( $cart_response->get_data()['items'], null, 'key' );
+			$this->assertArrayHasKey( $this->keys[0], $cart_items );
+			$this->assertNull( $cart_items[ $this->keys[0] ]['parent_item_key'] );
+
+			$items_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items' ) );
+			$this->assertSame( 200, $items_response->get_status() );
+			$items = array_column( $items_response->get_data(), null, 'key' );
+			$this->assertArrayHasKey( $this->keys[0], $items );
+			$this->assertNull( $items[ $this->keys[0] ]['parent_item_key'] );
+
+			$item_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items/' . $this->keys[0] ) );
+			$this->assertSame( 200, $item_response->get_status() );
+			$this->assertArrayHasKey( 'parent_item_key', $item_response->get_data() );
+			$this->assertNull( $item_response->get_data()['parent_item_key'] );
+		} finally {
+			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter );
+		}
+	}
+
+	/**
+	 * @testdox Cart-item responses use a null parent key when the session cart is unavailable.
+	 */
+	public function test_parent_item_key_is_null_when_session_cart_is_unavailable() {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart       = WC()->cart;
+		$cart_item  = current( $cart->get_cart() );
+		$filter     = function () {
+			return $this->keys[1];
+		};
+
+		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter );
+		WC()->cart = null;
+
+		try {
+			$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
+			$this->assertNull( $response->get_data()['parent_item_key'] );
+		} finally {
+			WC()->cart = $cart;
+			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter );
+		}
+	}
+
+	/**
+	 * @testdox The parent item key filter normalizes empty strings and non-string values to null.
+	 * @testWith ["", null]
 	 *           [42, null]
 	 *
 	 * @param mixed $filtered_value Value returned by the filter.
 	 * @param mixed $expected_value Value expected in the response.
 	 */
-	public function test_parent_item_key_filter_keeps_only_non_empty_strings( $filtered_value, $expected_value ) {
+	public function test_parent_item_key_filter_normalizes_empty_and_non_string_values( $filtered_value, $expected_value ) {
 		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
 		$controller = $routes->get( 'cart-items', 'v1' );
 
