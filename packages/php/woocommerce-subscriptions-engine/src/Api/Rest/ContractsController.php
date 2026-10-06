@@ -46,7 +46,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 
@@ -225,7 +225,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * Domain values only - the id and the resulting status slug - never labels,
 	 * formatted values, or other presentation: consumers own their view shaping.
 	 *
-	 * @param Contract        $item    Contract.
+	 * @param ContractView    $item    Contract view.
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */

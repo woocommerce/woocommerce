@@ -12,15 +12,15 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 use EngineIntegrationTestCase;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
@@ -103,10 +103,30 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $contract_id );
 
 		$loaded = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $loaded );
+		$this->assertInstanceOf( ContractView::class, $loaded );
 		$this->assertSame( $contract_id, $loaded->get_id() );
+		$this->assertIsArray( $loaded->get_items(), 'A single read loads children.' );
+		$this->assertIsArray( $loaded->get_addresses(), 'A single read loads children.' );
 
 		$this->assertNull( Subscriptions::get( 999999 ) );
+	}
+
+	/**
+	 * @testdox find_by_origin_order returns views of the contracts created from an order.
+	 */
+	public function test_find_by_origin_order_returns_views(): void {
+		$contract = $this->sign_up_contract();
+		$order_id = $contract->get_origin_order_id();
+		$this->assertNotNull( $order_id );
+
+		$found = Subscriptions::find_by_origin_order( $order_id );
+
+		$this->assertCount( 1, $found );
+		$this->assertInstanceOf( ContractView::class, $found[0] );
+		$this->assertSame( $contract->get_id(), $found[0]->get_id() );
+		$this->assertSame( $order_id, $found[0]->get_origin_order_id() );
+		$this->assertNull( $found[0]->get_items() );
+		$this->assertSame( array(), Subscriptions::find_by_origin_order( 999999 ) );
 	}
 
 	/**
@@ -121,16 +141,16 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->repoint_live_plan( $contract, new BillingPolicy( 'year', 2, null, null, null ) );
 
 		$loaded = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $loaded );
+		$this->assertInstanceOf( ContractView::class, $loaded );
 
 		$snapshot = $loaded->get_plan_snapshot();
-		$this->assertInstanceOf( PlanSnapshot::class, $snapshot, 'get() must hydrate the plan snapshot.' );
+		$this->assertIsArray( $snapshot, 'get() must carry the plan snapshot payload.' );
 
-		$policy = $snapshot->get_billing_policy();
-		$this->assertInstanceOf( BillingPolicy::class, $policy );
 		// Frozen monthly cadence, NOT the live plan's edited yearly cadence.
-		$this->assertSame( 'month', $policy->get_period() );
-		$this->assertSame( 1, $policy->get_interval() );
+		$billing = $snapshot['billing_policy'] ?? null;
+		$this->assertIsArray( $billing );
+		$this->assertSame( 'month', $billing['period'] ?? null );
+		$this->assertSame( 1, $billing['interval'] ?? null );
 	}
 
 	/**
@@ -210,10 +230,11 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $contracts );
 
 		$snapshot = $contracts[0]->get_plan_snapshot();
-		$this->assertInstanceOf( PlanSnapshot::class, $snapshot, 'list_for_customer must hydrate each row\'s plan snapshot.' );
-		$policy = $snapshot->get_billing_policy();
-		$this->assertInstanceOf( BillingPolicy::class, $policy );
-		$this->assertSame( 'month', $policy->get_period() );
+		$this->assertIsArray( $snapshot, 'list_for_customer must carry each row\'s plan snapshot payload.' );
+		$billing = $snapshot['billing_policy'] ?? null;
+		$this->assertIsArray( $billing );
+		$this->assertSame( 'month', $billing['period'] ?? null );
+		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
 	}
 
 	/**
@@ -226,7 +247,9 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $contracts );
 
 		$snapshot = $contracts[0]->get_plan_snapshot();
-		$this->assertInstanceOf( PlanSnapshot::class, $snapshot, 'list must hydrate each row\'s plan snapshot.' );
+		$this->assertIsArray( $snapshot, 'list must carry each row\'s plan snapshot payload.' );
+		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
+		$this->assertNull( $contracts[0]->get_addresses(), 'List reads do not load children.' );
 	}
 
 	/**
@@ -237,11 +260,11 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$second = $this->sign_up_contract();
 
 		$contracts = Subscriptions::list();
-		$ids       = array_map( static fn ( Contract $c ) => $c->get_id(), $contracts );
+		$ids       = array_map( static fn ( ContractView $c ) => $c->get_id(), $contracts );
 
 		// Newest first, and both signups are present.
 		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_slice( $ids, 0, 2 ) );
-		$this->assertInstanceOf( Contract::class, $contracts[0] );
+		$this->assertInstanceOf( ContractView::class, $contracts[0] );
 	}
 
 	/**
@@ -254,7 +277,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 		// Status filter + sort compose through the facade.
 		$ids = array_map(
-			static fn ( Contract $c ) => (int) $c->get_id(),
+			static fn ( ContractView $c ) => (int) $c->get_id(),
 			Subscriptions::list(
 				array(
 					'status'  => ContractStatus::ACTIVE,
@@ -305,8 +328,9 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 		$history = Subscriptions::get_history( $contract_id );
 		$this->assertCount( 1, $history );
-		$this->assertInstanceOf( Cycle::class, $history[0] );
+		$this->assertInstanceOf( CycleView::class, $history[0] );
 		$this->assertSame( 1, $history[0]->get_count() );
+		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
 	}
 
 	/**
@@ -345,19 +369,19 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		// Newest first: cycle 2 is billed, linked to the renewal order.
 		$cycle_two = $history[0];
 		$this->assertSame( 2, $cycle_two->get_count() );
-		$this->assertTrue( $cycle_two->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
+		$this->assertSame( CycleStatus::BILLED, $cycle_two->get_status() );
 		$this->assertSame( $renewal_order->get_id(), $cycle_two->get_order_id() );
 
 		// The schedule advanced one cadence (cycle 1 ended 2026-02-15 + 1 month).
 		$after_renew = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $after_renew );
+		$this->assertInstanceOf( ContractView::class, $after_renew );
 		$this->assertSame( '2026-03-15 00:00:00', $after_renew->get_next_payment_gmt() );
 
 		// Cancel: the contract goes terminal.
 		$this->assertTrue( Subscriptions::cancel( $contract_id ) );
 
 		$after_cancel = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $after_cancel );
+		$this->assertInstanceOf( ContractView::class, $after_cancel );
 		$this->assertSame( ContractStatus::CANCELLED, $after_cancel->get_status() );
 	}
 
@@ -415,7 +439,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$theirs = $this->seed_for_customer( 42 );
 
 		$ids = array_map(
-			static fn ( Contract $c ) => (int) $c->get_id(),
+			static fn ( ContractView $c ) => (int) $c->get_id(),
 			Subscriptions::list_for_customer( 41 )
 		);
 
@@ -433,7 +457,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 		$contract = Subscriptions::get_for_customer( $id, 43 );
 
-		$this->assertInstanceOf( Contract::class, $contract );
+		$this->assertInstanceOf( ContractView::class, $contract );
 		$this->assertSame( $id, $contract->get_id() );
 	}
 
@@ -466,19 +490,19 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 		$this->assertTrue( Subscriptions::hold( $contract_id ) );
 		$held = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $held );
+		$this->assertInstanceOf( ContractView::class, $held );
 		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
 		$this->assertNull( $held->get_next_payment_gmt(), 'Hold disarms the next-due moment.' );
 
 		$this->assertTrue( Subscriptions::reactivate( $contract_id ) );
 		$active = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $active );
+		$this->assertInstanceOf( ContractView::class, $active );
 		$this->assertSame( ContractStatus::ACTIVE, $active->get_status() );
 		$this->assertNotNull( $active->get_next_payment_gmt(), 'Reactivate re-arms the next-due moment.' );
 
 		$this->assertTrue( Subscriptions::cancel_at_period_end( $contract_id ) );
 		$pending = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( Contract::class, $pending );
+		$this->assertInstanceOf( ContractView::class, $pending );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $pending->get_status() );
 		$this->assertNull( $pending->get_next_payment_gmt(), 'Cancel at period end disarms the next-due moment.' );
 		$this->assertNotNull( $pending->get_end_gmt(), 'The former next-due moment becomes the end date.' );

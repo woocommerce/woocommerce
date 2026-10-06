@@ -7,9 +7,8 @@
  * now. It hides the internal `Core\` / `Integration\` collaborators (the repository,
  * the renewal engine) behind a stable boundary, so the internals stay refactorable.
  *
- * Interim return types: it returns the core entities ({@see Contract}, {@see Cycle})
- * and `WC_Order` directly for now; richer read-model views are a planned follow-up, so
- * consumers also reference those types until the views land. `Api\` is the public
+ * Reads return read-only views ({@see ContractView}, {@see CycleView});
+ * {@see self::get_related_orders()} returns `WC_Order` objects. `Api\` is the public
  * surface, not a third internal zone - the two-zone (Core/Integration) model still
  * describes the internals.
  *
@@ -21,6 +20,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\RelatedOrders;
@@ -40,17 +41,24 @@ defined( 'ABSPATH' ) || exit;
 final class Subscriptions {
 
 	/**
-	 * Fetch a subscription contract by id, with its frozen plan terms hydrated.
-	 *
-	 * The returned contract carries its plan snapshot ({@see Contract::get_plan_snapshot()}),
-	 * so a consumer reads the billing cadence straight off the snapshot - no live
-	 * plan-repository join.
+	 * Fetch a subscription contract by id, with its items, addresses, and plan snapshot
+	 * payload ({@see ContractView::get_plan_snapshot()}).
 	 *
 	 * @param int $contract_id Contract id.
-	 * @return Contract|null The contract, or null when none exists.
+	 * @return ContractView|null The contract, or null when none exists.
 	 */
-	public static function get( int $contract_id ): ?Contract {
-		return ( new ContractRepository() )->find( $contract_id );
+	public static function get( int $contract_id ): ?ContractView {
+		return self::view( ( new ContractRepository() )->find( $contract_id ), true );
+	}
+
+	/**
+	 * The contracts created from an origin order, oldest first (children not loaded).
+	 *
+	 * @param int $order_id Origin order id.
+	 * @return array<int, ContractView>
+	 */
+	public static function find_by_origin_order( int $order_id ): array {
+		return self::views( ( new ContractRepository() )->find_by_origin_order( $order_id ) );
 	}
 
 	/**
@@ -69,10 +77,10 @@ final class Subscriptions {
 	 *     @type string $order   ASC or DESC (case-insensitive); default DESC.
 	 *     @type string $search  Numeric term matches contract id or origin order id; text term matches the owning customer.
 	 * }
-	 * @return array<int, Contract> Contracts in the requested order.
+	 * @return array<int, ContractView> Contracts in the requested order (children not loaded).
 	 */
 	public static function list( array $args = array() ): array {
-		return ( new ContractRepository() )->query( $args );
+		return self::views( ( new ContractRepository() )->query( $args ) );
 	}
 
 	/**
@@ -117,21 +125,22 @@ final class Subscriptions {
 	 *
 	 * Owner-scoped by construction: the customer id is supplied by the caller (the
 	 * authenticated user at the REST boundary), never inferred, so it never returns
-	 * another customer's contracts. Returns interim {@see Contract} entities, each with its
-	 * frozen plan terms hydrated ({@see Contract::get_plan_snapshot()}) so a list row's
-	 * cadence is read off the snapshot.
+	 * another customer's contracts. Each view carries its plan snapshot payload (children
+	 * not loaded), so a list row's cadence is read off the snapshot.
 	 *
 	 * @param int $customer_id Owning customer id.
 	 * @param int $limit       Maximum contracts to return.
 	 * @param int $offset      Contracts to skip (for paging).
-	 * @return array<int, Contract> The customer's contracts, newest first.
+	 * @return array<int, ContractView> The customer's contracts, newest first.
 	 */
 	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0 ): array {
-		return ( new ContractRepository() )->find_by_customer_id(
-			$customer_id,
-			array(
-				'limit'  => $limit,
-				'offset' => $offset,
+		return self::views(
+			( new ContractRepository() )->find_by_customer_id(
+				$customer_id,
+				array(
+					'limit'  => $limit,
+					'offset' => $offset,
+				)
 			)
 		);
 	}
@@ -143,16 +152,15 @@ final class Subscriptions {
 	 * asymmetric not-found rule), so a caller cannot probe for the existence of a
 	 * contract it does not own.
 	 *
-	 * The returned contract carries its frozen plan terms ({@see Contract::get_plan_snapshot()}),
-	 * so the cadence is read off the snapshot with no live plan-repository join.
+	 * The returned view carries its items, addresses, and plan snapshot payload.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
-	 * @return Contract|null The contract when owned by `$customer_id`, else null.
+	 * @return ContractView|null The contract when owned by `$customer_id`, else null.
 	 * @phpstan-impure
 	 */
-	public static function get_for_customer( int $contract_id, int $customer_id ): ?Contract {
-		return ( new ContractRepository() )->find_for_customer( $contract_id, $customer_id );
+	public static function get_for_customer( int $contract_id, int $customer_id ): ?ContractView {
+		return self::view( ( new ContractRepository() )->find_for_customer( $contract_id, $customer_id ), true );
 	}
 
 	/**
@@ -160,10 +168,15 @@ final class Subscriptions {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $limit       Maximum cycles to return.
-	 * @return array<int, Cycle> Cycles newest first.
+	 * @return array<int, CycleView> Cycles newest first.
 	 */
 	public static function get_history( int $contract_id, int $limit = 20 ): array {
-		return ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit );
+		return array_map(
+			static function ( Cycle $cycle ): CycleView {
+				return CycleView::from_cycle( $cycle );
+			},
+			( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit )
+		);
 	}
 
 	/**
@@ -258,5 +271,30 @@ final class Subscriptions {
 	 */
 	public static function renew_now( int $contract_id ): ?WC_Order {
 		return ( new RenewalEngine() )->renew_now( $contract_id );
+	}
+
+	/**
+	 * A view of `$contract`, or null.
+	 *
+	 * @param Contract|null $contract      Contract, or null.
+	 * @param bool          $with_children Whether the read loaded items and addresses.
+	 */
+	private static function view( ?Contract $contract, bool $with_children ): ?ContractView {
+		return null === $contract ? null : ContractView::from_contract( $contract, $with_children );
+	}
+
+	/**
+	 * Views of row-only contracts (children not loaded).
+	 *
+	 * @param array<int, Contract> $contracts Contracts.
+	 * @return array<int, ContractView>
+	 */
+	private static function views( array $contracts ): array {
+		return array_map(
+			static function ( Contract $contract ): ContractView {
+				return ContractView::from_contract( $contract, false );
+			},
+			$contracts
+		);
 	}
 }
