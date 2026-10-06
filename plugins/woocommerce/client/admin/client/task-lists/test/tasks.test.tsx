@@ -151,7 +151,7 @@ describe( 'Task', () => {
 	} );
 
 	describe( 'toggle list', () => {
-		it( 'should trigger hide track when clicking Show things to do next button', () => {
+		it( 'should trigger hide track when clicking Show things to do next button', async () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {
 				isResolving: false,
 				taskLists: [
@@ -170,7 +170,7 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( async () => {
+			await act( async () => {
 				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
@@ -180,7 +180,7 @@ describe( 'Task', () => {
 			expect( hideTaskList ).toHaveBeenCalledWith( 'main' );
 		} );
 
-		it( 'should trigger show track when toggling task list when isHidden was true', () => {
+		it( 'should trigger show track when toggling task list when isHidden was true', async () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {
 				isResolving: false,
 				taskLists: [
@@ -199,7 +199,7 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( async () => {
+			await act( async () => {
 				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(

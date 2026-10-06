@@ -14,6 +14,8 @@ import {
 	within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { dispatch } from '@wordpress/data';
+import { QUERY_STATE_STORE_KEY } from '@woocommerce/block-data';
 import { server } from '@woocommerce/test-utils/msw';
 import { allSettings } from '@woocommerce/settings';
 
@@ -86,6 +88,7 @@ const selectors = {
 
 const setup = ( params: SetupParams = {} ) => {
 	cleanup();
+	dispatch( QUERY_STATE_STORE_KEY ).setValueForQueryContext( 'page', {} );
 	const url = `http://woo.local/${
 		params.filterStock ? '?filter_stock_status=' + params.filterStock : ''
 	}`;
@@ -287,62 +290,60 @@ describe( 'Filter by Stock block', () => {
 
 		test( 'replaces chosen option when another one is clicked', async () => {
 			const user = userEvent.setup();
-			await waitFor( async () => {
-				const ratingParam = 'instock';
-				const {
-					getDropdown,
-					getInStockChips,
-					getOutOfStockChips,
-					getOutOfStockSuggestion,
-				} = setupSingleChoiceDropdown( ratingParam );
+			const ratingParam = 'instock';
+			const {
+				getDropdown,
+				getInStockChips,
+				getOutOfStockChips,
+				getOutOfStockSuggestion,
+			} = setupSingleChoiceDropdown( ratingParam );
 
-				expect( getInStockChips() ).toBeInTheDocument();
-				expect( getOutOfStockChips() ).toBeNull();
+			expect( getInStockChips() ).toBeInTheDocument();
+			expect( getOutOfStockChips() ).toBeNull();
 
-				const dropdown = getDropdown();
+			const dropdown = getDropdown();
 
-				if ( dropdown ) {
-					await act( async () => {
-						await user.click( dropdown );
-					} );
-				}
+			if ( dropdown ) {
+				await act( async () => {
+					await user.click( dropdown );
+				} );
+			}
 
-				const outOfStockSuggestion = getOutOfStockSuggestion();
+			const outOfStockSuggestion = getOutOfStockSuggestion();
 
-				if ( outOfStockSuggestion ) {
-					await act( async () => {
-						await user.click( outOfStockSuggestion );
-					} );
-				}
-			} );
+			if ( outOfStockSuggestion ) {
+				await act( async () => {
+					await user.click( outOfStockSuggestion );
+				} );
+			}
+
 			expect( getOutOfStockChips() ).toBeInTheDocument();
 			expect( getInStockChips() ).toBeNull();
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
 			const user = userEvent.setup();
-			await waitFor( async () => {
-				const ratingParam = 'outofstock';
-				const {
-					getInStockChips,
-					getOutOfStockChips,
-					getOnBackorderChips,
-					getRemoveButtonFromChips,
-				} = setupMultipleChoiceDropdown( ratingParam );
+			const ratingParam = 'outofstock';
+			const {
+				getInStockChips,
+				getOutOfStockChips,
+				getOnBackorderChips,
+				getRemoveButtonFromChips,
+			} = setupMultipleChoiceDropdown( ratingParam );
 
-				expect( getInStockChips() ).toBeNull();
-				expect( getOutOfStockChips() ).toBeInTheDocument();
-				expect( getOnBackorderChips() ).toBeNull();
+			expect( getInStockChips() ).toBeNull();
+			expect( getOutOfStockChips() ).toBeInTheDocument();
+			expect( getOnBackorderChips() ).toBeNull();
 
-				const removeOutOfStockButton =
-					getRemoveButtonFromChips( getOutOfStockChips() );
+			const removeOutOfStockButton =
+				getRemoveButtonFromChips( getOutOfStockChips() );
 
-				if ( removeOutOfStockButton ) {
-					await act( async () => {
-						await user.click( removeOutOfStockButton );
-					} );
-				}
-			} );
+			if ( removeOutOfStockButton ) {
+				await act( async () => {
+					await user.click( removeOutOfStockButton );
+				} );
+			}
+
 			expect( getOnBackorderChips() ).toBeNull();
 			expect( getOutOfStockChips() ).toBeNull();
 			expect( getInStockChips() ).toBeNull();
@@ -373,76 +374,83 @@ describe( 'Filter by Stock block', () => {
 
 		test( 'adds chosen option to another one that is clicked', async () => {
 			const user = userEvent.setup();
-			await waitFor( async () => {
-				const ratingParam = 'onbackorder';
-				const {
-					getDropdown,
-					getInStockChips,
-					getOutOfStockChips,
-					getOnBackorderChips,
-					getInStockSuggestion,
-					getOutOfStockSuggestion,
-				} = setupMultipleChoiceDropdown( ratingParam );
+			const ratingParam = 'onbackorder';
+			const {
+				getDropdown,
+				getInStockChips,
+				getOutOfStockChips,
+				getOnBackorderChips,
+				getInStockSuggestion,
+				getOutOfStockSuggestion,
+			} = setupMultipleChoiceDropdown( ratingParam );
 
-				expect( getInStockChips() ).toBeNull();
-				expect( getOutOfStockChips() ).toBeNull();
-				expect( getOnBackorderChips() ).toBeInTheDocument();
+			expect( getInStockChips() ).toBeNull();
+			expect( getOutOfStockChips() ).toBeNull();
+			expect( getOnBackorderChips() ).toBeInTheDocument();
 
-				const dropdown = getDropdown();
+			const dropdown = getDropdown();
 
-				if ( dropdown ) {
+			if ( dropdown ) {
+				await act( async () => {
 					await user.click( dropdown );
-				}
+				} );
+			}
 
-				const inStockSuggestion = getInStockSuggestion();
+			const inStockSuggestion = getInStockSuggestion();
 
-				if ( inStockSuggestion ) {
+			if ( inStockSuggestion ) {
+				await act( async () => {
 					await user.click( inStockSuggestion );
-				}
+				} );
+			}
 
-				const freshDropdown = getDropdown();
-				if ( freshDropdown ) {
+			expect( getInStockChips() ).toBeInTheDocument();
+			expect( getOutOfStockChips() ).toBeNull();
+			expect( getOnBackorderChips() ).toBeInTheDocument();
+
+			const freshDropdown = getDropdown();
+			if ( freshDropdown ) {
+				await act( async () => {
 					await user.click( freshDropdown );
-				}
+				} );
+			}
 
-				const outOfStockSuggestion = getOutOfStockSuggestion();
+			const outOfStockSuggestion = getOutOfStockSuggestion();
 
-				if ( outOfStockSuggestion ) {
+			if ( outOfStockSuggestion ) {
+				await act( async () => {
 					await userEvent.click( outOfStockSuggestion );
-				}
-			} );
+				} );
+			}
+
 			expect( getOnBackorderChips() ).toBeInTheDocument();
 			expect( getOutOfStockChips() ).toBeInTheDocument();
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOnBackorderChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeNull();
 			expect( getInStockChips() ).toBeInTheDocument();
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
 			const user = userEvent.setup();
-			await waitFor( async () => {
-				const ratingParam = 'instock,outofstock,onbackorder';
-				const {
-					getInStockChips,
-					getOutOfStockChips,
-					getOnBackorderChips,
-					getRemoveButtonFromChips,
-				} = setupMultipleChoiceDropdown( ratingParam );
+			const ratingParam = 'instock,outofstock,onbackorder';
+			const {
+				getInStockChips,
+				getOutOfStockChips,
+				getOnBackorderChips,
+				getRemoveButtonFromChips,
+			} = setupMultipleChoiceDropdown( ratingParam );
 
-				expect( getInStockChips() ).toBeInTheDocument();
-				expect( getOutOfStockChips() ).toBeInTheDocument();
-				expect( getOnBackorderChips() ).toBeInTheDocument();
+			expect( getInStockChips() ).toBeInTheDocument();
+			expect( getOutOfStockChips() ).toBeInTheDocument();
+			expect( getOnBackorderChips() ).toBeInTheDocument();
 
-				const removeOutOfStockButton =
-					getRemoveButtonFromChips( getOutOfStockChips() );
+			const removeOutOfStockButton =
+				getRemoveButtonFromChips( getOutOfStockChips() );
 
-				if ( removeOutOfStockButton ) {
-					await act( async () => {
-						await user.click( removeOutOfStockButton );
-					} );
-				}
-			} );
+			if ( removeOutOfStockButton ) {
+				await act( async () => {
+					await user.click( removeOutOfStockButton );
+				} );
+			}
+
 			expect( getOnBackorderChips() ).toBeInTheDocument();
 			expect( getOutOfStockChips() ).toBeNull();
 			expect( getInStockChips() ).toBeInTheDocument();
@@ -473,26 +481,25 @@ describe( 'Filter by Stock block', () => {
 
 		test( 'replaces chosen option when another one is clicked', async () => {
 			const user = userEvent.setup();
-			await waitFor( async () => {
-				const ratingParam = 'outofstock';
-				const {
-					getInStockCheckbox,
-					getOutOfStockCheckbox,
-					getOnBackorderCheckbox,
-				} = setupSingleChoiceList( ratingParam );
+			const ratingParam = 'outofstock';
+			const {
+				getInStockCheckbox,
+				getOutOfStockCheckbox,
+				getOnBackorderCheckbox,
+			} = setupSingleChoiceList( ratingParam );
 
-				expect( getInStockCheckbox()?.checked ).toBeFalsy();
-				expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
-				expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+			expect( getInStockCheckbox()?.checked ).toBeFalsy();
+			expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
+			expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
 
-				const onBackorderCheckbox = getOnBackorderCheckbox();
+			const onBackorderCheckbox = getOnBackorderCheckbox();
 
-				if ( onBackorderCheckbox ) {
-					await act( async () => {
-						await user.click( onBackorderCheckbox );
-					} );
-				}
-			} );
+			if ( onBackorderCheckbox ) {
+				await act( async () => {
+					await user.click( onBackorderCheckbox );
+				} );
+			}
+
 			expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
 			expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
 			expect( getInStockCheckbox()?.checked ).toBeFalsy();
