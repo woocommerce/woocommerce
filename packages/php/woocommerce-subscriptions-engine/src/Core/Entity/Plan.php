@@ -241,7 +241,7 @@ final class Plan {
 	/**
 	 * Replace the billing payload.
 	 *
-	 * @param array<string, mixed>|null $billing_policy Billing payload.
+	 * @param array<array-key, mixed>|null $billing_policy Billing payload; must be string-keyed.
 	 * @throws InvalidArgumentException If the payload is not an object (string-keyed array).
 	 */
 	public function set_billing_policy( ?array $billing_policy ): void {
@@ -260,7 +260,7 @@ final class Plan {
 	/**
 	 * Replace the pricing payload.
 	 *
-	 * @param array<string, mixed>|null $pricing_policy Pricing payload.
+	 * @param array<array-key, mixed>|null $pricing_policy Pricing payload; must be string-keyed.
 	 * @throws InvalidArgumentException If the payload is not an object (string-keyed array).
 	 */
 	public function set_pricing_policy( ?array $pricing_policy ): void {
@@ -279,7 +279,7 @@ final class Plan {
 	/**
 	 * Replace the delivery payload.
 	 *
-	 * @param array<string, mixed>|null $delivery_policy Delivery payload.
+	 * @param array<array-key, mixed>|null $delivery_policy Delivery payload; must be string-keyed.
 	 * @throws InvalidArgumentException If the payload is not an object (string-keyed array).
 	 */
 	public function set_delivery_policy( ?array $delivery_policy ): void {

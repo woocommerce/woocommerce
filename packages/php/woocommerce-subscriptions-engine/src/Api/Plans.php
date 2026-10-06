@@ -53,6 +53,7 @@ final class Plans {
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw RuntimeException indirectly, through validate() and the repository.
 	/**
 	 * Create a plan.
 	 *
@@ -64,7 +65,7 @@ final class Plans {
 	 * @return int The new plan id.
 	 * @throws InvalidArgumentException If a key is unknown or a value is invalid, or a
 	 *                                  {@see PlanValidationException} when the owner refuses the plan.
-	 *                                  A `RuntimeException` signals a throwing validation callback or a failed insert.
+	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): int {
 		self::assert_known_keys( $args, array_merge( array( 'owner' ), self::PLAN_KEYS ) );
@@ -100,7 +101,7 @@ final class Plans {
 	 * @return bool True when written; false when the plan does not exist.
 	 * @throws InvalidArgumentException If the id is not positive, a key is unknown or a value is invalid,
 	 *                                  or a {@see PlanValidationException} when the owner refuses the plan.
-	 *                                  A `RuntimeException` signals a throwing validation callback or a failed update.
+	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
 	public static function update( int $id, array $args ): bool {
 		if ( $id <= 0 ) {
@@ -119,6 +120,8 @@ final class Plans {
 
 		return $repository->update( $plan );
 	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Add a meta value to a plan, like `add_post_meta()`. A key may hold several values.

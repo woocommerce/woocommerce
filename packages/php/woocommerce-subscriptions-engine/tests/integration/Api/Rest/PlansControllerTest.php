@@ -218,7 +218,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( 201, $created->get_status() );
-		$this->assertSame( '{}', wp_json_encode( $created->get_data()['pricing_policy'] ?? null ) );
+		$this->assertSame( '{}', wp_json_encode( $this->response_data( $created )['pricing_policy'] ) );
 	}
 
 	public function test_create_round_trips_the_pricing_payload_opaquely(): void {
