@@ -455,9 +455,11 @@ class ProductQuery implements QueryClausesGenerator {
 			if ( 1 < count( $slugs ) ) {
 				$slugs[] = $wp_query->get( 'slug' );
 			}
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$post_name__in  = implode( '","', array_map( 'esc_sql', $slugs ) );
-			$args['where'] .= " AND $wpdb->posts.post_name IN (\"$post_name__in\")";
+			$args['join'] = $this->append_product_sorting_table_join( $args['join'] );
+
+			$placeholders = implode( ', ', array_fill( 0, count( $slugs ), '%s' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a safe string of %s tokens.
+			$args['where'] .= $wpdb->prepare( " AND $wpdb->posts.post_name IN ($placeholders)", $slugs );
 		}
 
 		if ( $wp_query->get( 'stock_status' ) ) {

@@ -1191,7 +1191,7 @@ Displays an on-sale badge if the product is on-sale.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 - **Supports:** align, color (background, gradients, text, ~~link~~), email, interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** productId
+- **Attributes:** badgeContent, prefix, productId, saleText, suffix
 
 ## Product SKU - woocommerce/product-sku
 
@@ -1622,7 +1622,7 @@ Display a single product of your choice with full control over its presentation.
 
 - **Name:** woocommerce/single-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity
+- **Supports:** align (full, wide), color (background, gradients, ~~text~~), interactivity, listView, shadow, spacing (margin, padding)
 - **Attributes:** productId
 
 ## Filter by Stock Controls - woocommerce/stock-filter
