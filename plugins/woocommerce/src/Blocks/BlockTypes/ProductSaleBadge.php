@@ -36,15 +36,15 @@ class ProductSaleBadge extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return array( 'query', 'queryId', 'postId' );
 	}
 
 	/**
 	 * Include and render the block.
 	 *
-	 * @param array    $attributes Block attributes. Default empty array.
-	 * @param string   $content    Block content. Default empty string.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes. Default empty array.
+	 * @param string    $content    Block content. Default empty string.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -128,18 +128,56 @@ class ProductSaleBadge extends AbstractBlock {
 		 * @since 10.0.0
 		 *
 		 * @param string $sale_text The sale badge text.
-		 * @param WC_Product $product The product object.
+		 * @param \WC_Product $product The product object.
 		 * @return string The filtered sale badge text.
 		 */
 		$sale_text = apply_filters( 'woocommerce_sale_badge_text', $sale_text, $product );
 
-		$output  = '<div class="wp-block-woocommerce-product-sale-badge ' . esc_attr( $classname ) . '">';
-		$output .= sprintf( '<div class="wc-block-components-product-sale-badge %1$s wc-block-components-product-sale-badge--align-%2$s" style="%3$s">', esc_attr( $classes_and_styles['classes'] ), esc_attr( $align ), esc_attr( $classes_and_styles['styles'] ) );
-		$output .= '<span class="wc-block-components-product-sale-badge__text" aria-hidden="true">' . esc_html( $sale_text ) . '</span>';
 		/* translators: %s: sale badge text. */
-		$screen_reader_text = sprintf( __( 'Product on sale: %s', 'woocommerce' ), $sale_text );
+		$screen_reader_text     = sprintf( __( 'Product on sale: %s', 'woocommerce' ), $sale_text );
+		$is_interactive         = $product instanceof \WC_Product_Variable
+			&& ! isset( $block->context['query']['isProductCollectionBlock'] )
+			&& ! isset( $block->context['isDescendantOfGroupedProductSelector'] );
+		$interactive_attributes = '';
+		if ( $is_interactive ) {
+			wp_enqueue_script_module( 'woocommerce/product-elements' );
+			wp_interactivity_config(
+				'woocommerce/product-elements',
+				array(
+					/* translators: %s: discount percentage. %% is the percent sign. */
+					'saleBadgePercentageTemplate'   => sprintf( __( '%s%%', 'woocommerce' ), '%s' ),
+					/* translators: %s: sale badge text. */
+					'saleBadgeScreenReaderTemplate' => sprintf( __( 'Product on sale: %s', 'woocommerce' ), '%s' ),
+				)
+			);
+			wp_interactivity_state(
+				'woocommerce/product-elements',
+				array(
+					'saleBadgeText'             => static function () {
+						return wp_interactivity_get_context()['saleBadgeText'];
+					},
+					'saleBadgeScreenReaderText' => static function () {
+						return wp_interactivity_get_context()['saleBadgeScreenReaderText'];
+					},
+					'isSaleBadgeHidden'         => false,
+				)
+			);
+			$interactive_attributes = ' data-wp-interactive="woocommerce/product-elements" data-wp-bind--hidden="state.isSaleBadgeHidden" aria-live="polite" aria-atomic="true" ' . wp_interactivity_data_wp_context(
+				array(
+					'saleBadgeText'             => $sale_text,
+					'saleBadgeScreenReaderText' => $screen_reader_text,
+					'badgeContent'              => $attributes['badgeContent'] ?? 'text',
+					'prefix'                    => $attributes['prefix'] ?? '',
+					'suffix'                    => $attributes['suffix'] ?? '',
+				)
+			);
+		}
 
-		$output .= '<span class="screen-reader-text">' . esc_html( $screen_reader_text ) . '</span>';
+		$output  = '<div class="wp-block-woocommerce-product-sale-badge ' . esc_attr( $classname ) . '"' . $interactive_attributes . '>';
+		$output .= sprintf( '<div class="wc-block-components-product-sale-badge %1$s wc-block-components-product-sale-badge--align-%2$s" style="%3$s">', esc_attr( $classes_and_styles['classes'] ), esc_attr( $align ), esc_attr( $classes_and_styles['styles'] ) );
+		$output .= '<span' . ( $is_interactive ? ' data-wp-text="state.saleBadgeText"' : '' ) . ' class="wc-block-components-product-sale-badge__text" aria-hidden="true">' . esc_html( $sale_text ) . '</span>';
+
+		$output .= '<span' . ( $is_interactive ? ' data-wp-text="state.saleBadgeScreenReaderText"' : '' ) . ' class="screen-reader-text">' . esc_html( $screen_reader_text ) . '</span>';
 		$output .= '</div></div>';
 
 		return $output;
