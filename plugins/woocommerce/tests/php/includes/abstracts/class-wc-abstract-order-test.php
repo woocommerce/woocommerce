@@ -1062,6 +1062,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 *           [false, "collision"]
 	 *           [true, "clone"]
 	 *           [false, "clone"]
+	 *           [true, "clone_reindex"]
+	 *           [false, "clone_reindex"]
 	 *
 	 * @param bool   $persist_tax Whether to persist the tax before removing it.
 	 * @param string $filter_mode How to transform the filtered tax collection.
@@ -1086,13 +1088,14 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				return $items;
 			}
 
-			if ( 'clone' === $filter_mode ) {
-				return array_map(
+			if ( in_array( $filter_mode, array( 'clone', 'clone_reindex' ), true ) ) {
+				$items = array_map(
 					static function ( $item ) {
 						return clone $item;
 					},
 					$items
 				);
+				return 'clone_reindex' === $filter_mode ? array_values( $items ) : $items;
 			}
 
 			return 'collision' === $filter_mode ? array( $fee_id => reset( $items ) ) : array_values( $items );
@@ -1113,14 +1116,20 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_taxes removes an unsaved duplicate while preserving the persisted tax item.
-	 * @testWith ["none"]
-	 *           ["reindex"]
-	 *           ["clone"]
+	 * @testdox update_taxes removes an unsaved duplicate while preserving the original tax item.
+	 * @testWith ["none", true]
+	 *           ["reindex", true]
+	 *           ["clone", true]
+	 *           ["clone_reindex", true]
+	 *           ["none", false]
+	 *           ["reindex", false]
+	 *           ["clone", false]
+	 *           ["clone_reindex", false]
 	 *
 	 * @param string $filter_mode How to transform the filtered tax collection.
+	 * @param bool   $persist_tax Whether to persist the original tax before adding the duplicate.
 	 */
-	public function test_update_taxes_removes_unsaved_duplicate_tax_item( string $filter_mode ): void {
+	public function test_update_taxes_removes_unsaved_duplicate_tax_item( string $filter_mode, bool $persist_tax ): void {
 		$tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate'      => '10.0000',
@@ -1134,15 +1143,20 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$fee->set_total( '10' );
 		$fee->set_taxes( array( 'total' => array( $tax_rate_id => '1.00' ) ) );
 		$order->add_item( $fee );
+		$order->save();
 
 		$tax_item = new WC_Order_Item_Tax();
 		$tax_item->set_rate_id( $tax_rate_id );
+		$tax_item->add_meta_data( '_retained_tax', 'original', true );
 		$order->add_item( $tax_item );
-		$order->save();
-		$tax_item_id = $tax_item->get_id();
+		if ( $persist_tax ) {
+			$order->save();
+		}
+		$original_tax_item_id = $tax_item->get_id();
 
 		$duplicate = new WC_Order_Item_Tax();
 		$duplicate->set_rate_id( $tax_rate_id );
+		$duplicate->add_meta_data( '_retained_tax', 'duplicate', true );
 		$order->add_item( $duplicate );
 		$this->assertSame( 0, $duplicate->get_id(), 'The duplicate tax should still use a temporary collection key.' );
 
@@ -1151,11 +1165,11 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				return $items;
 			}
 
-			if ( 'clone' === $filter_mode ) {
-				return array_map( static fn( $item ) => clone $item, $items );
+			if ( in_array( $filter_mode, array( 'clone', 'clone_reindex' ), true ) ) {
+				$items = array_map( static fn( $item ) => clone $item, $items );
 			}
 
-			return 'reindex' === $filter_mode ? array_values( $items ) : $items;
+			return in_array( $filter_mode, array( 'reindex', 'clone_reindex' ), true ) ? array_values( $items ) : $items;
 		};
 		add_filter( 'woocommerce_order_get_items', $filter_tax_items, 10, 3 );
 
@@ -1165,9 +1179,146 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_order_get_items', $filter_tax_items, 10 );
 		}
 
-		$this->assertSame( array( $tax_item_id ), array_keys( $order->get_taxes() ), 'Only the original persisted tax should remain in memory.' );
+		$tax_item_id = $tax_item->get_id();
+		$this->assertGreaterThan( 0, $tax_item_id, 'The retained local tax should be saved during update_taxes().' );
+		if ( $persist_tax ) {
+			$this->assertSame( $original_tax_item_id, $tax_item_id, 'A persisted tax should retain its original ID.' );
+		}
+		$this->assertSame( array( $tax_item_id ), array_keys( $order->get_taxes() ), 'Only the original tax should remain in memory.' );
 		$this->assertSame( 1.0, (float) $order->get_cart_tax(), 'Removing the duplicate should preserve the fee tax total.' );
-		$this->assertSame( array( $tax_item_id ), array_keys( wc_get_order( $order->get_id() )->get_taxes() ), 'The duplicate tax should never be persisted.' );
+		$reloaded_taxes = wc_get_order( $order->get_id() )->get_taxes();
+		$this->assertSame( array( $tax_item_id ), array_keys( $reloaded_taxes ), 'The duplicate tax should never be persisted.' );
+		$this->assertSame( 'original', $reloaded_taxes[ $tax_item_id ]->get_meta( '_retained_tax' ), 'Tax cleanup should preserve the original item metadata.' );
+	}
+
+	/**
+	 * @testdox Should preserve metadata changes on filtered unsaved taxes without saving duplicate items or metadata.
+	 * @testWith ["none"]
+	 *           ["reindex"]
+	 *           ["clone"]
+	 *           ["clone_reindex"]
+	 *
+	 * @param string $filter_mode How to transform the filtered tax collection.
+	 */
+	public function test_update_taxes_preserves_filtered_unsaved_tax_metadata( string $filter_mode ): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate( array( 'tax_rate' => '10.0000' ) );
+		$order       = new WC_Order();
+		$fee         = new WC_Order_Item_Fee();
+		$fee->set_total( '10' );
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => '1.00' ) ) );
+		$order->add_item( $fee );
+		$order->save();
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate_id( $tax_rate_id );
+		$tax_item->add_meta_data( '_original_marker', 'original', true );
+		$tax_item->add_meta_data( '_edited_marker', 'before', true );
+		$tax_item->add_meta_data( '_deleted_marker', 'remove', true );
+		foreach ( array( 'first', 'first', 'remove', 'retained' ) as $value ) {
+			$tax_item->add_meta_data( '_multiple_values', $value );
+		}
+		$order->add_item( $tax_item );
+
+		$filter_tax_items = static function ( $items, $filtered_order, $types ) use ( $order, $filter_mode ) {
+			if ( $order !== $filtered_order || array( 'tax' ) !== $types ) {
+				return $items;
+			}
+
+			foreach ( $items as $item_key => $item ) {
+				if ( 0 !== $item->get_id() ) {
+					continue;
+				}
+				if ( in_array( $filter_mode, array( 'clone', 'clone_reindex' ), true ) ) {
+					$item = clone $item;
+				}
+				$item->add_meta_data( '_added_marker', array( 'source' => 'filter' ), true );
+				$item->update_meta_data( '_edited_marker', 'after' );
+				$item->delete_meta_data( '_deleted_marker' );
+				$item->delete_meta_data_value( '_multiple_values', 'remove' );
+				$item->add_meta_data( '_multiple_values', 'added' );
+				$items[ $item_key ] = $item;
+			}
+
+			return in_array( $filter_mode, array( 'reindex', 'clone_reindex' ), true ) ? array_values( $items ) : $items;
+		};
+		add_filter( 'woocommerce_order_get_items', $filter_tax_items, 10, 3 );
+		try {
+			$order->update_taxes();
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $filter_tax_items, 10 );
+		}
+
+		$tax_item_id = $tax_item->get_id();
+		$this->assertGreaterThan( 0, $tax_item_id, 'The retained local tax should be saved.' );
+		$this->assertSame( array( $tax_item_id ), array_keys( $order->get_taxes() ), 'Only the retained tax should remain in memory.' );
+		$reloaded_taxes = wc_get_order( $order->get_id() )->get_taxes();
+		$this->assertSame( array( $tax_item_id ), array_keys( $reloaded_taxes ), 'The filtered clone should not create a second tax row.' );
+		$reloaded_tax = $reloaded_taxes[ $tax_item_id ];
+		$this->assertSame( array( 'source' => 'filter' ), $reloaded_tax->get_meta( '_added_marker' ), 'Metadata added by the filter should be saved.' );
+		$this->assertSame( 'after', $reloaded_tax->get_meta( '_edited_marker' ), 'Metadata edited by the filter should be saved.' );
+		$this->assertFalse( $reloaded_tax->meta_exists( '_deleted_marker' ), 'Metadata deleted by the filter should remain absent.' );
+		$this->assertSame( 'original', $reloaded_tax->get_meta( '_original_marker' ), 'Unchanged metadata should be preserved.' );
+		$this->assertSame( array( 'first', 'first', 'retained', 'added' ), array_values( wp_list_pluck( $reloaded_tax->get_meta( '_multiple_values', false ), 'value' ) ), 'Repeated metadata values should be retained, added or deleted without collapsing the key.' );
+		$this->assertCount( 7, $reloaded_tax->get_meta_data(), 'Copying the clone metadata should not duplicate existing metadata.' );
+		$this->assertSame( 1.0, (float) $reloaded_tax->get_tax_total(), 'Metadata changes should preserve the calculated tax amount.' );
+
+		$order->save();
+		$this->assertCount( 7, wc_get_order( $order->get_id() )->get_item( $tax_item_id )->get_meta_data(), 'Saving the local order again should not duplicate metadata.' );
+	}
+
+	/**
+	 * @testdox Should preserve other tax rates and the first filtered tax metadata when a filter clones, reorders and reindexes unsaved taxes.
+	 */
+	public function test_update_taxes_preserves_other_rates_in_cloned_reindexed_collection(): void {
+		$cart_rate_id     = WC_Tax::_insert_tax_rate( array( 'tax_rate' => '10.0000' ) );
+		$shipping_rate_id = WC_Tax::_insert_tax_rate( array( 'tax_rate' => '20.0000' ) );
+		$order            = new WC_Order();
+		$fee              = new WC_Order_Item_Fee();
+		$fee->set_total( '10' );
+		$fee->set_taxes( array( 'total' => array( $cart_rate_id => '1.00' ) ) );
+		$order->add_item( $fee );
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_total( '10' );
+		$shipping->set_taxes( array( 'total' => array( $shipping_rate_id => '2.00' ) ) );
+		$order->add_item( $shipping );
+		$order->save();
+
+		$shipping_tax = new WC_Order_Item_Tax();
+		$shipping_tax->set_rate_id( $shipping_rate_id );
+		$order->add_item( $shipping_tax );
+		$obsolete_tax = new WC_Order_Item_Tax();
+		$obsolete_tax->set_rate_id( 1234 );
+		$order->add_item( $obsolete_tax );
+		$cart_tax = new WC_Order_Item_Tax();
+		$cart_tax->set_rate_id( $cart_rate_id );
+		$cart_tax->add_meta_data( '_retained_tax', 'original', true );
+		$order->add_item( $cart_tax );
+		$duplicate_tax = new WC_Order_Item_Tax();
+		$duplicate_tax->set_rate_id( $cart_rate_id );
+		$duplicate_tax->add_meta_data( '_retained_tax', 'duplicate', true );
+		$order->add_item( $duplicate_tax );
+
+		$clone_tax_items = static function ( $items, $filtered_order, $types ) use ( $order ) {
+			if ( $order !== $filtered_order || array( 'tax' ) !== $types ) {
+				return $items;
+			}
+			return array_values( array_reverse( array_map( static fn( $item ) => clone $item, $items ) ) );
+		};
+		add_filter( 'woocommerce_order_get_items', $clone_tax_items, 10, 3 );
+		try {
+			$order->update_taxes();
+		} finally {
+			remove_filter( 'woocommerce_order_get_items', $clone_tax_items, 10 );
+		}
+
+		$expected_item_ids = array( $shipping_tax->get_id(), $cart_tax->get_id() );
+		$this->assertSame( $expected_item_ids, array_keys( $order->get_taxes() ), 'Only the original shipping and cart taxes should remain in memory.' );
+		$this->assertSame( 1.0, (float) $order->get_cart_tax(), 'The cart tax total should be preserved.' );
+		$this->assertSame( 2.0, (float) $order->get_shipping_tax(), 'The shipping tax total should be preserved.' );
+		$reloaded_taxes = wc_get_order( $order->get_id() )->get_taxes();
+		$this->assertEqualsCanonicalizing( $expected_item_ids, array_keys( $reloaded_taxes ), 'The obsolete and duplicate taxes should never be persisted.' );
+		$this->assertSame( 'duplicate', $reloaded_taxes[ $cart_tax->get_id() ]->get_meta( '_retained_tax' ), 'Tax cleanup should preserve the metadata of the first cart tax returned by the filter.' );
+		$this->assertSame( 2.0, (float) $reloaded_taxes[ $shipping_tax->get_id() ]->get_shipping_tax_total(), 'The unrelated shipping tax item should retain its tax amount.' );
 	}
 
 	/**
