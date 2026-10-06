@@ -278,6 +278,79 @@ final class Contracts {
 	}
 
 	/**
+	 * Add a meta value to a contract (WordPress `add_post_meta()` semantics). A key may
+	 * hold several values.
+	 *
+	 * @param int    $id     Contract id.
+	 * @param string $key    Meta key.
+	 * @param mixed  $value  Meta value; serialized when not scalar.
+	 * @param bool   $unique When true, add nothing if the key already exists.
+	 * @return int|null The meta row id; null when the contract does not exist or `$unique` and the key exists.
+	 * @throws InvalidArgumentException If `$key` is empty.
+	 */
+	public static function add_meta( int $id, string $key, $value, bool $unique = false ): ?int {
+		self::assert_meta_key( $key );
+
+		$repository = new ContractRepository();
+		if ( ! $repository->exists( $id ) ) {
+			return null;
+		}
+
+		return $repository->add_meta( $id, $key, $value, $unique );
+	}
+
+	/**
+	 * Update a contract's meta values for `$key` (WordPress `update_post_meta()` semantics):
+	 * adds the key when absent, else rewrites every value, or only the values equal to
+	 * `$prev_value` when given.
+	 *
+	 * @param int    $id         Contract id.
+	 * @param string $key        Meta key.
+	 * @param mixed  $value      New value; serialized when not scalar.
+	 * @param mixed  $prev_value Only update values equal to this; null updates all.
+	 * @return bool True when a value was added or changed; false when nothing changed or the contract does not exist.
+	 * @throws InvalidArgumentException If `$key` is empty.
+	 */
+	public static function update_meta( int $id, string $key, $value, $prev_value = null ): bool {
+		self::assert_meta_key( $key );
+
+		$repository = new ContractRepository();
+		if ( ! $repository->exists( $id ) ) {
+			return false;
+		}
+
+		return $repository->update_meta( $id, $key, $value, $prev_value );
+	}
+
+	/**
+	 * Delete a contract's meta values for `$key` (WordPress `delete_post_meta()` semantics).
+	 *
+	 * @param int    $id    Contract id.
+	 * @param string $key   Meta key.
+	 * @param mixed  $value Only delete values equal to this; null deletes every value for the key.
+	 * @return bool True when at least one value was deleted.
+	 * @throws InvalidArgumentException If `$key` is empty.
+	 */
+	public static function delete_meta( int $id, string $key, $value = null ): bool {
+		self::assert_meta_key( $key );
+
+		return ( new ContractRepository() )->delete_meta( $id, $key, $value );
+	}
+
+	/**
+	 * Read contract meta (WordPress `get_post_meta()` semantics), oldest value first.
+	 *
+	 * @param int    $id     Contract id.
+	 * @param string $key    Meta key; empty for every key.
+	 * @param bool   $single With a key: return the first value only.
+	 * @return mixed Empty key: values grouped by key. Key + `$single`: the first value, or ''
+	 *               when absent. Key only: the list of values (`[]` when absent).
+	 */
+	public static function get_meta( int $id, string $key = '', bool $single = false ) {
+		return ( new ContractRepository() )->get_meta( $id, $key, $single );
+	}
+
+	/**
 	 * Validate the caller's fields and apply them to a contract through its setters.
 	 * Nothing is written to storage; an invalid value throws before any write.
 	 *
@@ -438,6 +511,18 @@ final class Contracts {
 			if ( 0.0 !== (float) $total ) {
 				throw new InvalidArgumentException( 'Contracts: the currency cannot be cleared while a money total is non-zero.' );
 			}
+		}
+	}
+
+	/**
+	 * Refuse an empty meta key.
+	 *
+	 * @param string $key Meta key.
+	 * @throws InvalidArgumentException If `$key` is empty.
+	 */
+	private static function assert_meta_key( string $key ): void {
+		if ( '' === $key ) {
+			throw new InvalidArgumentException( 'Contracts: the meta key must not be empty.' );
 		}
 	}
 

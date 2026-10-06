@@ -24,6 +24,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts
@@ -670,5 +671,76 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( $cycle_id, $history[0]->get_id() );
 		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
 		$this->assertSame( 77, $history[0]->get_order_id() );
+	}
+
+	public function test_meta_keeps_several_values_under_one_key(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+
+		$this->assertIsInt( Contracts::add_meta( $id, 'note', 'one' ) );
+		$this->assertIsInt( Contracts::add_meta( $id, 'note', array( 'two' ) ) );
+
+		$this->assertSame( array( 'one', array( 'two' ) ), Contracts::get_meta( $id, 'note' ) );
+		$this->assertSame( 'one', Contracts::get_meta( $id, 'note', true ) );
+		$this->assertSame( array( 'note' => array( 'one', array( 'two' ) ) ), Contracts::get_meta( $id ) );
+	}
+
+	public function test_a_unique_meta_add_refuses_an_existing_key(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+		Contracts::add_meta( $id, 'note', 'one' );
+
+		$this->assertNull( Contracts::add_meta( $id, 'note', 'two', true ) );
+		$this->assertSame( array( 'one' ), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	public function test_update_meta_with_a_previous_value_and_delete_one_value(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+		Contracts::add_meta( $id, 'note', 'one' );
+		Contracts::add_meta( $id, 'note', 'two' );
+
+		$this->assertTrue( Contracts::update_meta( $id, 'note', 'three', 'two' ) );
+		$this->assertSame( array( 'one', 'three' ), Contracts::get_meta( $id, 'note' ) );
+
+		$this->assertTrue( Contracts::delete_meta( $id, 'note', 'one' ) );
+		$this->assertSame( array( 'three' ), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	public function test_meta_writes_to_an_unknown_contract_write_nothing(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+
+		$this->assertNull( Contracts::add_meta( 999999, 'note', 'one' ) );
+		$this->assertFalse( Contracts::update_meta( 999999, 'note', 'one' ) );
+		$this->assertFalse( Contracts::delete_meta( 999999, 'note' ) );
+		$this->assertSame( '', Contracts::get_meta( 999999, 'note', true ) );
+		$this->assertSame( array(), Contracts::get_meta( 999999, 'note' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( $before, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ) );
+	}
+
+	public function test_an_empty_meta_key_is_rejected(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::add_meta( $id, '', 'one' );
+	}
+
+	public function test_meta_survives_a_contract_update(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+		Contracts::add_meta( $id, 'note', 'kept' );
+
+		Contracts::update(
+			$id,
+			array(
+				'status' => ContractStatus::ACTIVE,
+				'items'  => array( array( 'item_name' => 'Coffee' ) ),
+			)
+		);
+
+		$this->assertSame( array( 'kept' ), Contracts::get_meta( $id, 'note' ) );
 	}
 }
