@@ -116,7 +116,7 @@ final class Cancellation {
 		}
 
 		/**
-		 * Fires after a contract is cancelled.
+		 * Fires after a contract is cancelled. Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The cancelled contract.
 		 */
@@ -187,6 +187,7 @@ final class Cancellation {
 
 		/**
 		 * Fires after a contract is set to wind down at the end of the current period.
+		 * Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The pending-cancellation contract.
 		 */

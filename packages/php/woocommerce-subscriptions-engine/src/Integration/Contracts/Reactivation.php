@@ -138,7 +138,7 @@ final class Reactivation {
 
 		/**
 		 * Fires after a held contract is reactivated: its renewal is re-armed, or left
-		 * unscheduled when there was no next-due moment to resume from.
+		 * unscheduled when there was no next-due moment to resume from. Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The reactivated contract.
 		 */

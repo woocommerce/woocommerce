@@ -106,7 +106,7 @@ final class Hold {
 		}
 
 		/**
-		 * Fires after a contract is put on hold.
+		 * Fires after a contract is put on hold. Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The held contract.
 		 */

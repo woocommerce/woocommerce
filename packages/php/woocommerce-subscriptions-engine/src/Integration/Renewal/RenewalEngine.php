@@ -367,6 +367,13 @@ final class RenewalEngine {
 			// reclaimed stall resuming an earlier attempt - already announced its creation, so
 			// re-firing would double one-time side effects (customer emails, analytics).
 			if ( $order_created ) {
+				/**
+				 * Fires after a renewal order is created, before it is charged.
+				 * Fires immediately after the write, not after a surrounding transaction commits.
+				 *
+				 * @param WC_Order $renewal_order The new renewal order.
+				 * @param Contract $contract      The contract being renewed.
+				 */
 				do_action( self::RENEWAL_ORDER_CREATED_ACTION, $renewal_order, $contract );
 			}
 			$this->attempt_charge( $renewal_order, $contract );
@@ -772,6 +779,7 @@ final class RenewalEngine {
 
 			/**
 			 * Fires after a renewal cycle is billed and the contract schedule advanced.
+			 * Fires immediately after the write, not after a surrounding transaction commits.
 			 *
 			 * @param Contract $contract The renewed contract.
 			 * @param Cycle    $cycle    The newly-billed cycle.
