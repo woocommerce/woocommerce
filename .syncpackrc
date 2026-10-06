@@ -59,8 +59,7 @@
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
-				"eslint*",
-				"stylelint"
+				"eslint*"
 			],
 			"packages": [
 				"@woocommerce/block-library"
@@ -366,7 +365,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.61.1"
+			"pinVersion": "^1.63.0"
 		},
 		{
 			"dependencies": [
@@ -379,7 +378,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/e2e-test-utils"
@@ -601,13 +599,18 @@
 			"pinVersion": "^3.21.0"
 		},
 		{
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
+				"@wordpress/stylelint-config",
 				"stylelint"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^14.16.1"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [

@@ -35,6 +35,15 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
+	 * Memoized count_tokens() result for this request. The step log puts it on
+	 * every notification's recipients line, and one request can carry thousands
+	 * of notifications.
+	 *
+	 * @var int|null
+	 */
+	private ?int $token_count = null;
+
+	/**
 	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
 	 *
 	 * @var bool|null
@@ -121,7 +130,8 @@ class PushTokensDataStore {
 
 		$push_token->set_id( $id );
 
-		$this->has_tokens = null;
+		$this->has_tokens  = null;
+		$this->token_count = null;
 
 		return $push_token;
 	}
@@ -286,6 +296,7 @@ class PushTokensDataStore {
 
 		// Anything read earlier in this request now includes deleted tokens.
 		$this->tokens_by_roles_cache = array();
+		$this->token_count           = null;
 
 		return $deleted;
 	}
@@ -433,6 +444,34 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Counts every push token on the store, whatever the owner's role.
+	 *
+	 * Registration requires one of the roles that receive push notifications,
+	 * so no token starts out ineligible. A user can lose the role afterwards
+	 * though, and their token stays, which is the difference between this count
+	 * and what get_tokens_for_roles() returns.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function count_tokens(): int {
+		if ( null !== $this->token_count ) {
+			return $this->token_count;
+		}
+
+		global $wpdb;
+
+		$this->token_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->token_count;
+	}
+
+	/**
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
@@ -556,7 +595,7 @@ class PushTokensDataStore {
 				);
 
 				$result['total']       = (int) $count_query->found_posts;
-				$result['total_pages'] = (int) ceil( $result['total'] / $per_page );
+				$result['total_pages'] = (int) ceil( $result['total'] / max( 1, $per_page ) );
 			}
 
 			$this->tokens_by_roles_cache[ $cache_key ] = $result;

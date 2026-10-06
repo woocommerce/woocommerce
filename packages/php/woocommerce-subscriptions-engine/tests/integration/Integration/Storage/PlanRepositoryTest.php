@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
@@ -39,7 +38,16 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_plan_round_trips_with_policies_and_extension_slug(): void {
-		$repo = new PlanRepository();
+		$repo           = new PlanRepository();
+		$pricing_policy = array(
+			'policies'   => array(
+				array(
+					'type'  => 'percentage',
+					'value' => 10,
+				),
+			),
+			'custom_key' => array( 'nested' => '1.50' ),
+		);
 
 		$plan = Plan::create(
 			array(
@@ -52,16 +60,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 						'max_cycles' => 12,
 					)
 				),
-				'pricing_policy' => PricingPolicy::from_array(
-					array(
-						'policies' => array(
-							array(
-								'type'  => 'percentage',
-								'value' => 10,
-							),
-						),
-					)
-				),
+				'pricing_policy' => $pricing_policy,
 				'status'         => Plan::STATUS_ARCHIVED,
 				'sort_order'     => 4,
 				'extension_slug' => 'lite',
@@ -82,8 +81,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 4, $fetched->get_sort_order() );
 		$this->assertSame( 'month', $fetched->get_billing_policy()->get_period() );
 		$this->assertSame( 12, $fetched->get_billing_policy()->get_max_cycles() );
-		$this->assertNotNull( $fetched->get_pricing_policy() );
-		$this->assertSame( 90.0, $fetched->calculate_price( 100.0 ) );
+		$this->assertSame( $pricing_policy, $fetched->get_pricing_policy() );
 	}
 
 	public function test_plan_without_optional_policies_round_trips(): void {
