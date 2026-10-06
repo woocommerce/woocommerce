@@ -377,20 +377,18 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox from_storage() hydrates the plan snapshot, items, addresses, and meta children.
+	 * @testdox from_storage() hydrates the plan snapshot, items, and addresses.
 	 */
 	public function test_from_storage_hydrates_children(): void {
 		$snapshot  = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
 		$items     = array( array( 'product_id' => 42 ) );
 		$addresses = array( 'billing' => array( 'first_name' => 'Ada' ) );
-		$meta      = array( 'flag' => 'on' );
 
-		$contract = Contract::from_storage( $this->valid_row(), $snapshot, $items, $addresses, $meta );
+		$contract = Contract::from_storage( $this->valid_row(), $snapshot, $items, $addresses );
 
 		$this->assertSame( $snapshot, $contract->get_plan_snapshot() );
 		$this->assertSame( $items, $contract->get_items() );
 		$this->assertSame( $addresses, $contract->get_addresses() );
-		$this->assertSame( $meta, $contract->get_meta() );
 	}
 
 	/**
@@ -563,27 +561,5 @@ class ContractTest extends TestCase {
 		$contract->set_status( 'legacy-paused' );
 
 		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
-	}
-
-	/**
-	 * @testdox set_meta() adds, overwrites, and (with null) removes a key.
-	 */
-	public function test_set_meta_adds_overwrites_and_removes_a_key(): void {
-		$contract = Contract::from_storage( $this->valid_row(), null, array(), array(), array( 'keep' => 'me' ) );
-
-		$contract->set_meta( 'k', 'v' );
-		$this->assertSame(
-			array(
-				'keep' => 'me',
-				'k'    => 'v',
-			),
-			$contract->get_meta()
-		);
-
-		$contract->set_meta( 'k', 'w' );
-		$this->assertSame( 'w', $contract->get_meta()['k'] );
-
-		$contract->set_meta( 'k', null );
-		$this->assertSame( array( 'keep' => 'me' ), $contract->get_meta() );
 	}
 }

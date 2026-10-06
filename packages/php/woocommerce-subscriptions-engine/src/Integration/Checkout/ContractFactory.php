@@ -120,7 +120,6 @@ final class ContractFactory {
 			'tax_total'            => (string) $order->get_total_tax(),
 			'items'                => $this->map_items( $order ),
 			'addresses'            => $this->map_addresses( $order ),
-			'meta'                 => array(),
 		);
 
 		$contract = Contract::create( array_merge( $contract_defaults, $overrides ) );

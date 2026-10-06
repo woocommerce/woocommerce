@@ -94,9 +94,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 						'country'    => 'US',
 					),
 				),
-				'meta'                 => array(
-					'source_channel' => 'pdp',
-				),
 			)
 		);
 	}
@@ -191,8 +188,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertArrayHasKey( Contract::ADDRESS_BILLING, $addresses );
 		$this->assertArrayHasKey( Contract::ADDRESS_SHIPPING, $addresses );
 		$this->assertSame( 'Ada', $addresses[ Contract::ADDRESS_BILLING ]['first_name'] );
-
-		$this->assertSame( 'pdp', $fetched->get_meta()['source_channel'] );
 	}
 
 	/**
@@ -207,7 +202,24 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $id, $summary->get_id() );
 		$this->assertSame( '2026-07-15 00:00:00', $summary->get_next_payment_gmt() );
 		$this->assertSame( array(), $summary->get_items() );
-		$this->assertSame( array(), $summary->get_meta() );
+	}
+
+	/**
+	 * @testdox Meta written through the meta methods survives whole-contract writes.
+	 */
+	public function test_meta_survives_a_whole_entity_update(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->sut->add_meta( $id, 'source_channel', 'pdp' );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertSame( 'pdp', $this->sut->get_meta( $id, 'source_channel', true ) );
+
+		$contract->set_status( ContractStatus::ACTIVE );
+		$this->assertTrue( $this->sut->update_if_status( $contract, ContractStatus::ON_HOLD ) );
+		$this->assertSame( array( 'pdp' ), $this->sut->get_meta( $id, 'source_channel' ) );
 	}
 
 	/**

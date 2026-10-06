@@ -236,13 +236,6 @@ final class Contract {
 	private $addresses;
 
 	/**
-	 * Contract meta as key => value.
-	 *
-	 * @var array<string, string>
-	 */
-	private $meta;
-
-	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
 	 * to its property type; unknown keys are ignored, missing keys take the default.
 	 *
@@ -274,7 +267,6 @@ final class Contract {
 		$this->schedule_source      = ScalarCoercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
 		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
 		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
-		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
 		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
@@ -304,22 +296,20 @@ final class Contract {
 	 *
 	 * The frozen plan terms ride second, ahead of the child rows: a contract without
 	 * its plan is pretty pointless, so the snapshot is hydrated on the same footing as
-	 * items / addresses / meta rather than through a separate mutation step.
+	 * items / addresses rather than through a separate mutation step.
 	 *
 	 * @param array<string, mixed>                $row           Contract row.
 	 * @param PlanSnapshot|null                   $plan_snapshot Frozen plan terms for the row's `plan_snapshot_id`, or null.
 	 * @param array<int, array<string, mixed>>    $items         Item rows.
 	 * @param array<string, array<string, mixed>> $addresses     Address rows keyed by type.
-	 * @param array<string, string>               $meta          Meta as key => value.
 	 */
-	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array() ): self {
 		$contract = new self(
 			array_merge(
 				$row,
 				array(
 					'items'     => $items,
 					'addresses' => $addresses,
-					'meta'      => $meta,
 				)
 			)
 		);
@@ -731,33 +721,6 @@ final class Contract {
 	}
 
 	/**
-	 * Contract meta as key => value.
-	 *
-	 * @return array<string, string>
-	 */
-	public function get_meta(): array {
-		return $this->meta;
-	}
-
-	/**
-	 * Set or remove one meta entry.
-	 *
-	 * Meta is opaque key/value data; the repository's existing child sync
-	 * persists the map on save.
-	 *
-	 * @param string      $key   Meta key.
-	 * @param string|null $value Meta value, or null to remove the key.
-	 */
-	public function set_meta( string $key, ?string $value ): void {
-		if ( null === $value ) {
-			unset( $this->meta[ $key ] );
-			return;
-		}
-
-		$this->meta[ $key ] = $value;
-	}
-
-	/**
 	 * Serialize the contract row (excluding generated id/timestamps).
 	 *
 	 * @return array<string, mixed>
@@ -840,26 +803,6 @@ final class Contract {
 			if ( is_array( $address ) ) {
 				$map[ (string) $type ] = self::coerce_string_keyed( $address );
 			}
-		}
-
-		return $map;
-	}
-
-	/**
-	 * Shape a caller-supplied value into the meta map (string => string). A non-array
-	 * yields an empty map.
-	 *
-	 * @param mixed $value Caller-supplied meta.
-	 * @return array<string, string>
-	 */
-	private static function coerce_meta_map( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
-		}
-
-		$map = array();
-		foreach ( $value as $key => $meta_value ) {
-			$map[ (string) $key ] = ScalarCoercion::coerce_string( $meta_value );
 		}
 
 		return $map;

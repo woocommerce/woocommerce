@@ -1,7 +1,7 @@
 <?php
 /**
- * Persistence for the live {@see Contract} (row + items / addresses / meta) plus
- * targeted cycle access. Owns the $wpdb access across the contract-side tables.
+ * Persistence for the live {@see Contract} (row + items / addresses) plus contract
+ * meta and targeted cycle access. Owns the $wpdb access across the contract-side tables.
  *
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
@@ -10,6 +10,9 @@
  * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
  * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
  * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
+ * Meta is read and written only through the meta methods ({@see self::add_meta()} etc.),
+ * so a whole-contract write never rewrites meta. It opens no transactions and keeps no
+ * object cache; a caller may wrap several calls in its own transaction.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -77,7 +80,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert a new contract and its items, addresses, and meta.
+	 * Insert a new contract and its items and addresses.
 	 *
 	 * Durable-intent-first (parent row, then children) and the seam a later
 	 * transaction-handling change wraps; it does not open a transaction now (a naive
@@ -115,7 +118,6 @@ final class ContractRepository {
 
 		$this->insert_items( $id, $contract->get_items() );
 		$this->insert_addresses( $id, $contract->get_addresses() );
-		$this->insert_meta( $id, $contract->get_meta() );
 
 		return $id;
 	}
@@ -157,8 +159,8 @@ final class ContractRepository {
 	/**
 	 * Persist changes to an existing contract and its child rows.
 	 *
-	 * Updates the contract row in place, then reconciles items / addresses / meta only
-	 * when they differ - so the common renewal-cache write (status, next_payment_gmt)
+	 * Updates the contract row in place, then reconciles items / addresses only when
+	 * they differ (meta is never touched) - so the common renewal-cache write (status, next_payment_gmt)
 	 * does not churn child rows. The write seam a later transaction-handling change
 	 * wraps; no transaction now (see {@see self::insert()}).
 	 *
@@ -244,8 +246,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Fetch a contract by id, hydrating the live entity with its items / addresses /
-	 * meta, plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
+	 * Fetch a contract by id, hydrating the live entity with its items / addresses,
+	 * plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
 	 * `plan_snapshot_id` - so every full read carries the billing cadence off the
 	 * snapshot, with no live {@see PlanRepository} join. Cycles are NOT hydrated - they
 	 * are reached on demand through the targeted cycle reads. For list / guard paths
@@ -292,7 +294,7 @@ final class ContractRepository {
 
 	/**
 	 * Hydrate a fetched contract row into the full live entity: frozen plan terms,
-	 * items, addresses, and meta - the one full-read construction path.
+	 * items and addresses - the one full-read construction path.
 	 *
 	 * @param array<string, mixed> $row Contract row.
 	 */
@@ -303,8 +305,7 @@ final class ContractRepository {
 			$row,
 			$this->find_plan_snapshot( ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
 			$this->find_items( $id ),
-			$this->find_addresses( $id ),
-			$this->find_meta( $id )
+			$this->find_addresses( $id )
 		);
 	}
 
@@ -779,7 +780,7 @@ final class ContractRepository {
 	 * args, so the shape can widen without a signature change. Ordered by id DESC (monotonic
 	 * with creation) so the list is newest-first and stable for paging.
 	 *
-	 * Each row is row-only (no items / addresses / meta), but its frozen plan terms are
+	 * Each row is row-only (no items / addresses), but its frozen plan terms are
 	 * hydrated ({@see Contract::get_plan_snapshot()}) so the list rows carry the billing
 	 * cadence off the snapshot - batch-loaded in ONE `IN()` read for the whole page, not
 	 * one read per row.
@@ -1617,7 +1618,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Reconcile a contract's items, addresses, and meta rows only when they differ.
+	 * Reconcile a contract's items and address rows only when they differ.
 	 *
 	 * Each child set is compared via a normalized signature both the loaded rows and
 	 * the entity's arrays are projected through, so MySQL's column coercion (DECIMAL
@@ -1664,22 +1665,6 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
 		$this->insert_addresses( $contract_id, $addresses );
-	}
-
-	/**
-	 * Delete-then-reinsert a contract's meta rows.
-	 *
-	 * @param int                   $contract_id Contract id.
-	 * @param array<string, string> $meta        Meta as key => value.
-	 */
-	private function replace_meta( int $contract_id, array $meta ): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( false === $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), array( 'contract_id' => $contract_id ) ) ) {
-			$this->log_meta_write_failure( $contract_id, 'delete' );
-		}
-		$this->insert_meta( $contract_id, $meta );
 	}
 
 	/**
@@ -1732,54 +1717,6 @@ final class ContractRepository {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
 		}
-	}
-
-	/**
-	 * Insert meta for a contract.
-	 *
-	 * @param int                   $contract_id Contract id.
-	 * @param array<string, string> $meta        Meta as key => value.
-	 */
-	private function insert_meta( int $contract_id, array $meta ): void {
-		global $wpdb;
-
-		foreach ( $meta as $key => $value ) {
-			// The engine's own contract-meta columns, not post/order meta; the
-			// slow-meta-query heuristic does not apply.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			$inserted = $wpdb->insert(
-				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
-				array(
-					'contract_id' => $contract_id,
-					'meta_key'    => (string) $key,
-					'meta_value'  => (string) $value,
-				)
-			);
-			if ( false === $inserted ) {
-				$this->log_meta_write_failure( $contract_id, 'insert', (string) $key );
-			}
-		}
-	}
-
-	/**
-	 * Log a failed contract-meta write. Meta writes follow the row write without a
-	 * transaction, so a failure here leaves the row and its meta out of step; logging it
-	 * makes that visible.
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $operation   The failed operation (`delete` or `insert`).
-	 * @param string $meta_key    The meta key being inserted, if any.
-	 */
-	private function log_meta_write_failure( int $contract_id, string $operation, string $meta_key = '' ): void {
-		global $wpdb;
-
-		wc_get_logger()->error(
-			sprintf( 'ContractRepository: contract meta %s failed for contract %d%s - %s', $operation, $contract_id, '' === $meta_key ? '' : sprintf( ' (key %s)', $meta_key ), $wpdb->last_error ),
-			array(
-				'source'      => self::LOG_SOURCE,
-				'contract_id' => $contract_id,
-			)
-		);
 	}
 
 	/**
@@ -1875,32 +1812,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Load meta for a contract as key => value.
-	 *
-	 * @param int $contract_id Contract id.
-	 * @return array<string, string>
-	 */
-	private function find_meta( int $contract_id ): array {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
-
-		// The engine's own contract-meta columns, not post/order meta; the
-		// slow-meta-query heuristic does not apply.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
-
-		$meta = array();
-		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
-			if ( is_array( $row ) ) {
-				$meta[ ScalarCoercion::coerce_string( $row['meta_key'] ?? null ) ] = ScalarCoercion::coerce_string( $row['meta_value'] ?? null );
-			}
-		}
-
-		return $meta;
-	}
-
-	/**
 	 * A change-detection signature for an item set: each item projected to the
 	 * comparable columns, with money / count fields coerced to the fixed shape MySQL
 	 * stores (DECIMAL scale, INT-as-string) so a no-op round-trip compares equal in
@@ -1949,24 +1860,6 @@ final class ContractRepository {
 			}
 
 			$signature[ (string) $type ] = $record;
-		}
-
-		ksort( $signature );
-
-		return $signature;
-	}
-
-	/**
-	 * A change-detection signature for a meta set.
-	 *
-	 * @param array<string, string> $meta Meta as key => value.
-	 * @return array<string, string> Comparable projection (key-sorted).
-	 */
-	private function meta_signature( array $meta ): array {
-		$signature = array();
-
-		foreach ( $meta as $key => $value ) {
-			$signature[ (string) $key ] = (string) $value;
 		}
 
 		ksort( $signature );
