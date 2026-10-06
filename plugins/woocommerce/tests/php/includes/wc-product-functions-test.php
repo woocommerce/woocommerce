@@ -992,10 +992,13 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
 		}
 
-		wc_update_product_lookup_tables_column( 'stock_quantity' );
-		$values = $this->read_stock_lookup_values( $fixtures );
+		update_post_meta( $fixtures['unmanaged'], '_sold_individually', 'yes' );
+		update_post_meta( $fixtures['no_manage_meta'], '_sold_individually', 'yes' );
 
+		wc_update_product_lookup_tables_column( 'stock_quantity' );
 		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
+
+		$values = $this->read_stock_lookup_values( $fixtures );
 		$this->assertSame( 7.5, $values['positive'] );
 		$this->assertNull( $values['missing'], 'A managed product without stock meta gets NULL.' );
 		$this->assertSame( 99.0, $values['unmanaged'], 'A product with manage_stock set to no is left alone.' );

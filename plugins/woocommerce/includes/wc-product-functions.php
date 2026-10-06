@@ -2288,6 +2288,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'stock_quantity':
+			// STRAIGHT_JOIN keeps managed-stock metadata first so the optimizer avoids a full lookup-table scan.
 			$wpdb->query(
 				"
 				UPDATE
