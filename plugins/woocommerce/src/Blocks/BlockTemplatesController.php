@@ -65,8 +65,8 @@ class BlockTemplatesController {
 	 * @return string|null
 	 */
 	public function pre_render_woocommerce_template_part( $pre_render, $parsed_block ) {
-		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce
-		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead. See Gutenberg #67804.
+		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce parts via
+		// pre_render_block -> add_plugin_templates_parts_support; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead. See Gutenberg #67804.
 		if ( 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
 			$attributes = $parsed_block['attrs'];
 			if ( isset( $attributes['theme'], $attributes['slug'] ) ) {
