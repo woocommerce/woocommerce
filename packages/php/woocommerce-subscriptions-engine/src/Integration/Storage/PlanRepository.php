@@ -1,6 +1,7 @@
 <?php
 /**
- * PlanRepository - persistence for {@see Plan} entities.
+ * PlanRepository - persistence for {@see Plan} entities. The three policy columns are
+ * stored as the opaque JSON payloads the entity carries; null stays SQL NULL.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -44,48 +45,29 @@ final class PlanRepository {
 	private const ORDERBY_COLUMNS = array(
 		'id'               => 'id',
 		'name'             => 'name',
-		'sort_order'       => 'sort_order',
-		'status'           => 'status',
 		'date_created_gmt' => 'date_created_gmt',
 		'date_updated_gmt' => 'date_updated_gmt',
 	);
 
 	/**
-	 * Insert a new plan and stamp its id back onto the entity.
-	 *
-	 * `merchant_code` uniqueness is DB-enforced per extension (composite UNIQUE
-	 * with `extension_slug`, NULLs distinct): a duplicate code within one
-	 * extension fails the insert and surfaces as the RuntimeException.
+	 * Insert a new plan and stamp its id back onto the entity. The stored dates are
+	 * not stamped back; callers re-read the plan for them.
 	 *
 	 * @param Plan $plan Plan to insert.
 	 * @return int The new plan id.
-	 * @throws \RuntimeException If the insert fails, including on a duplicate merchant_code.
+	 * @throws \RuntimeException If the insert fails.
 	 */
 	public function insert( Plan $plan ): int {
 		global $wpdb;
 
 		$now  = gmdate( 'Y-m-d H:i:s' );
-		$data = $plan->to_storage();
+		$data = $this->row_data( $plan );
+
+		$data['date_created_gmt'] = $now;
+		$data['date_updated_gmt'] = $now;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$inserted = $wpdb->insert(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
-			array(
-				'name'             => $data['name'],
-				'description'      => $data['description'],
-				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
-				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
-				'inventory_policy' => null,
-				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
-				'category'         => $data['category'],
-				'status'           => $data['status'],
-				'sort_order'       => $data['sort_order'],
-				'merchant_code'    => $data['merchant_code'],
-				'extension_slug'   => $data['extension_slug'],
-				'date_created_gmt' => $now,
-				'date_updated_gmt' => $now,
-			)
-		);
+		$inserted = $wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $data );
 
 		if ( false === $inserted ) {
 			throw new \RuntimeException( 'Failed to insert plan.' );
@@ -136,12 +118,14 @@ final class PlanRepository {
 	 * Query plans.
 	 *
 	 * Supported args: limit, offset, search, status, extension_slugs, ids,
-	 * orderby, order. `extension_slugs` filters by owning extension: a list
-	 * of slugs (a single-slug list unfolds to an equality match) or
-	 * `array( 'any' )` to skip the scope. `ids` filters to plans whose id is
-	 * in the given int list; it composes with the other filters and is
-	 * honored by count(). Results default to manual order, oldest id as a
-	 * stable tiebreaker.
+	 * orderby, order. `status` is a slug or a list of slugs (an empty list or a
+	 * non-string entry matches nothing). `extension_slugs` filters by owning
+	 * extension: a list of slugs (a single-slug list unfolds to an equality
+	 * match) or `array( 'any' )` to skip the scope. `ids` filters to plans whose
+	 * id is in the given int list; it composes with the other filters and is
+	 * honored by count(). `search` matches the name. `orderby` is one of `id`
+	 * (default), `name`, `date_created_gmt`, `date_updated_gmt`, with the id
+	 * ascending as a stable tiebreaker.
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, Plan>
@@ -209,14 +193,11 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Persist changes to an existing plan.
-	 *
-	 * `merchant_code` is immutable post-create and intentionally not written here,
-	 * same as `id`.
+	 * Persist changes to an existing plan's row. Plan meta is never touched.
 	 *
 	 * @param Plan $plan Plan to update. Must have an id.
 	 * @return bool True on success.
-	 * @throws \RuntimeException If the plan has no id.
+	 * @throws \RuntimeException If the plan has no id or the update fails.
 	 */
 	public function update( Plan $plan ): bool {
 		global $wpdb;
@@ -226,27 +207,18 @@ final class PlanRepository {
 			throw new \RuntimeException( 'Cannot update a plan that has no id.' );
 		}
 
-		$data = $plan->to_storage();
+		$data = $this->row_data( $plan );
+
+		$data['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
-			array(
-				'name'             => $data['name'],
-				'description'      => $data['description'],
-				'billing_policy'   => wp_json_encode( $data['billing_policy'] ),
-				'delivery_policy'  => null !== $data['delivery_policy'] ? wp_json_encode( $data['delivery_policy'] ) : null,
-				'pricing_policy'   => null !== $data['pricing_policy'] ? wp_json_encode( $data['pricing_policy'] ) : null,
-				'category'         => $data['category'],
-				'status'           => $data['status'],
-				'sort_order'       => $data['sort_order'],
-				'extension_slug'   => $data['extension_slug'],
-				'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ),
-			),
-			array( 'id' => $id )
-		);
+		$updated = $wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $data, array( 'id' => $id ) );
 
-		return false !== $updated;
+		if ( false === $updated ) {
+			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -274,74 +246,6 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Persist manual sort-order values for plans in one extension.
-	 *
-	 * @param string          $extension_slug   Extension slug for the plans to operate on.
-	 * @param array<int, int> $sort_order_by_id Map of plan id => sort order.
-	 * @return bool True when every update succeeds.
-	 */
-	public function reorder( string $extension_slug, array $sort_order_by_id ): bool {
-		global $wpdb;
-
-		if ( ! self::is_valid_extension_slug( $extension_slug ) ) {
-			return false;
-		}
-
-		if ( array() === $sort_order_by_id ) {
-			return true;
-		}
-
-		$ok  = true;
-		$now = gmdate( 'Y-m-d H:i:s' );
-
-		$plans_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-		$ids         = array_map( 'intval', array_keys( $sort_order_by_id ) );
-		foreach ( $ids as $id ) {
-			if ( $id <= 0 ) {
-				return false;
-			}
-		}
-
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		$params       = array_merge( array( $extension_slug ), $ids );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
-		$matched_ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$plans_table} WHERE extension_slug = %s AND id IN ({$placeholders})", $params ) );
-		$matched_ids = is_array( $matched_ids )
-			? array_unique(
-				array_map(
-					static function ( $matched_id ): int {
-						return Coercion::coerce_int( $matched_id );
-					},
-					$matched_ids
-				)
-			)
-			: array();
-		if ( count( $matched_ids ) !== count( $ids ) ) {
-			return false;
-		}
-
-		foreach ( $sort_order_by_id as $id => $sort_order ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$updated = $wpdb->update(
-				$plans_table,
-				array(
-					'sort_order'       => (int) $sort_order,
-					'date_updated_gmt' => $now,
-				),
-				array(
-					'id'             => (int) $id,
-					'extension_slug' => $extension_slug,
-				)
-			);
-
-			$ok = $ok && false !== $updated;
-		}
-
-		return $ok;
-	}
-
-	/**
 	 * Build SQL WHERE clauses and params from supported query args.
 	 *
 	 * @param array<string, mixed> $args Query args.
@@ -353,10 +257,26 @@ final class PlanRepository {
 		$clauses = array();
 		$params  = array();
 
-		$status = Coercion::coerce_string( $args['status'] ?? null );
-		if ( '' !== $status ) {
-			$clauses[] = 'status = %s';
-			$params[]  = $status;
+		if ( array_key_exists( 'status', $args ) && null !== $args['status'] ) {
+			$statuses = is_array( $args['status'] ) ? array_values( $args['status'] ) : array( $args['status'] );
+			$valid    = array();
+			foreach ( $statuses as $status ) {
+				if ( ! is_string( $status ) || '' === $status ) {
+					$valid = array();
+					break;
+				}
+				$valid[ $status ] = $status;
+			}
+
+			if ( array() === $valid ) {
+				$clauses[] = self::MATCH_NOTHING;
+			} elseif ( 1 === count( $valid ) ) {
+				$clauses[] = 'status = %s';
+				$params[]  = reset( $valid );
+			} else {
+				$clauses[] = 'status IN (' . implode( ',', array_fill( 0, count( $valid ), '%s' ) ) . ')';
+				$params    = array_merge( $params, array_values( $valid ) );
+			}
 		}
 
 		if ( array_key_exists( 'extension_slugs', $args ) && null !== $args['extension_slugs'] ) {
@@ -428,8 +348,7 @@ final class PlanRepository {
 		$search = Coercion::coerce_string( $args['search'] ?? null );
 		if ( '' !== $search ) {
 			$like      = '%' . $wpdb->esc_like( $search ) . '%';
-			$clauses[] = '(name LIKE %s OR description LIKE %s)';
-			$params[]  = $like;
+			$clauses[] = 'name LIKE %s';
 			$params[]  = $like;
 		}
 
@@ -453,13 +372,11 @@ final class PlanRepository {
 	 */
 	private function build_order_clause( array $args ): string {
 		$orderby_arg = Coercion::coerce_string( $args['orderby'] ?? null );
-		$orderby     = isset( self::ORDERBY_COLUMNS[ $orderby_arg ] )
-			? self::ORDERBY_COLUMNS[ $orderby_arg ]
-			: 'sort_order';
+		$orderby     = self::ORDERBY_COLUMNS[ $orderby_arg ] ?? 'id';
 		$order       = 'desc' === strtolower( Coercion::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
 
-		if ( 'sort_order' === $orderby ) {
-			return "ORDER BY sort_order {$order}, id ASC";
+		if ( 'id' === $orderby ) {
+			return "ORDER BY id {$order}";
 		}
 
 		return "ORDER BY {$orderby} {$order}, id ASC";
@@ -481,6 +398,22 @@ final class PlanRepository {
 	}
 
 	/**
+	 * The writable plan columns for `$plan`, policies JSON-encoded (null stays null).
+	 *
+	 * @param Plan $plan Plan.
+	 * @return array<string, mixed>
+	 */
+	private function row_data( Plan $plan ): array {
+		$data = $plan->to_storage();
+
+		foreach ( self::JSON_COLUMNS as $column ) {
+			$data[ $column ] = null !== $data[ $column ] ? wp_json_encode( $data[ $column ] ) : null;
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Hydrate a database row into a plan.
 	 *
 	 * @param array<string, mixed> $row Raw row.
@@ -496,9 +429,8 @@ final class PlanRepository {
 	/**
 	 * Decode a JSON column into an array.
 	 *
-	 * A SQL NULL column stays null so nullable policy columns
-	 * (delivery_policy, pricing_policy) round-trip back to null rather than to
-	 * an empty value object. A present-but-empty value decodes to an array.
+	 * A SQL NULL column stays null so the nullable policy columns round-trip
+	 * back to null. A present-but-empty value decodes to an empty array.
 	 *
 	 * @param mixed $value Raw column value.
 	 * @return array<mixed>|null
