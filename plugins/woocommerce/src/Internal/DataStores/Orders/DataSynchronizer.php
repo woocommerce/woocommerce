@@ -563,6 +563,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 		if ( $full_count ) {
 			if ( $this->custom_orders_table_is_authoritative() ) {
+				// A placeholder registered as an order type can be both missing and changed, so count each condition separately.
 				$sql = $wpdb->prepare(
 					"
 SELECT
@@ -572,6 +573,7 @@ SELECT
   AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 END) AS count
 FROM $orders_table orders
 LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
+					// Both IN clauses need their own copy of the order-type arguments.
 					array_merge( $order_post_types, $order_post_types )
 				);
 			} else {
