@@ -3924,7 +3924,6 @@ ul.order_notes {
 	#add_order_note {
 		width: 100%;
 		min-height: 60px;
-		// stylelint-disable-next-line property-no-unknown -- field-sizing is missing from Stylelint 14. See #69077.
 		field-sizing: content;
 	}
 
@@ -4831,10 +4830,8 @@ table.wc_shipping {
 		animation-fill-mode: none;
 		animation-play-state: running;
 		animation-name: components-button__busy-animation;
-		// stylelint-disable property-no-unknown -- scroll-driven animation properties, newer than stylelint 14's property list.
 		animation-timeline: auto;
 		animation-range-start: normal;
-		// stylelint-enable property-no-unknown
 		color: #757575;
 	}
 }
@@ -7153,6 +7150,23 @@ img.help_tip {
 	}
 }
 
+.wc-product-customs {
+
+	.woocommerce_options_panel & > h4 {
+		padding-inline: 12px;
+	}
+
+	// Leave room for the error tip under the description, the last field in the Shipping panel, which the panel wrapper would otherwise clip.
+	#shipping_product_data & {
+		padding-block-end: 4em;
+	}
+
+	.woocommerce_variation & {
+		border-top: 1px solid #eee;
+		margin-top: 12px;
+	}
+}
+
 .woocommerce_variable_attributes {
 	background-color: #fdfdfd;
 	border-top: 1px solid #eee;
@@ -9443,9 +9457,11 @@ table.bar_chart {
 .woocommerce-progress-form-wrapper,
 .woocommerce-exporter-wrapper,
 .woocommerce-importer-wrapper {
-	text-align: center;
-	max-width: 710px;
-	margin: 40px auto;
+
+	@media screen and (min-width: 783px) {
+		max-width: 710px;
+		margin: 40px auto;
+	}
 
 	.error {
 		text-align: left;
@@ -9576,13 +9592,13 @@ table.bar_chart {
 			display: none;
 		}
 
-		.woocommerce-importer-options th,
-		.woocommerce-importer-options td,
-		.woocommerce-exporter-options th,
-		.woocommerce-exporter-options td {
-			vertical-align: top;
+		.form-table.woocommerce-importer-options th,
+		.form-table.woocommerce-importer-options td,
+		.form-table.woocommerce-exporter-options th,
+		.form-table.woocommerce-exporter-options td {
+			vertical-align: middle;
 			line-height: 1.75em;
-			padding: 0 0 24px 0;
+			padding: 0 0 24px;
 
 			label {
 				color: #555;
@@ -9631,10 +9647,13 @@ table.bar_chart {
 			}
 		}
 
-		.woocommerce-exporter-options th,
-		.woocommerce-importer-options th {
-			width: 35%;
-			padding-right: 20px;
+		@media screen and (min-width: 783px) {
+
+			.form-table.woocommerce-exporter-options th,
+			.form-table.woocommerce-importer-options th {
+				width: 35%;
+				padding-right: 24px;
+			}
 		}
 
 		progress {

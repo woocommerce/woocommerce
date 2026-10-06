@@ -397,7 +397,22 @@ class WC_AJAX {
 	 * @return void
 	 */
 	public static function update_order_review() {
-		check_ajax_referer( 'update-order-review', 'security' );
+		// A rejected nonce usually means the browser restored a checkout rendered for an earlier session,
+		// e.g. going back after logging in. Reload it once; if the fresh page is rejected too, show the expired notice.
+		// Without a session cookie the reload flag can't persist, so skip the reload to avoid an endless loop.
+		if ( ! check_ajax_referer( 'update-order-review', 'security', false ) ) {
+			$can_remember_reload = ! ( WC()->session instanceof WC_Session_Handler ) || WC()->session->has_session();
+
+			if ( ! $can_remember_reload || WC()->session->get( 'reload_checkout_for_nonce' ) ) {
+				unset( WC()->session->reload_checkout_for_nonce );
+				self::update_order_review_expired();
+			}
+
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+			wp_send_json( array( 'reload' => true ) );
+		}
+
+		unset( WC()->session->reload_checkout_for_nonce );
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
