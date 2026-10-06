@@ -6,6 +6,7 @@
  * @version 2.5.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\LegacyReportsMenu;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\Orders\COTRedirectionController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController as Custom_Orders_PageController;
@@ -112,6 +113,8 @@ class WC_Admin_Menus {
 		} else {
 			add_menu_page( __( 'Sales reports', 'woocommerce' ), __( 'Sales reports', 'woocommerce' ), 'view_woocommerce_reports', 'wc-reports', array( $this, 'reports_page' ), 'dashicons-chart-bar', '55.6' );
 		}
+
+		add_action( 'admin_head', array( wc_get_container()->get( LegacyReportsMenu::class ), 'handle_admin_head' ), PHP_INT_MAX );
 	}
 
 	/**

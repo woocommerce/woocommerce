@@ -73,6 +73,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( zoomWhileHoveringSetting ).toBeChecked();
 		} );
+
 		test( 'should work on frontend when is enabled', async ( {
 			pageObject,
 			editor,
@@ -126,6 +127,7 @@ test.describe( `${ blockData.name }`, () => {
 				expect( styleOnHover.transform ).toBe( '' );
 			} );
 		} );
+
 		test( 'should not work on frontend when is disabled', async ( {
 			pageObject,
 			editor,
@@ -294,14 +296,13 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
-	test.describe( 'Swipe to navigate', () => {
-		test.use( { hasTouch: true } ); // Enable touch support
+	test.describe( 'Frontend navigation', () => {
+		test.use( {
+			hasTouch: true,
+			contextOptions: { reducedMotion: 'no-preference' },
+		} );
 
-		test( 'should work on frontend when is enabled', async ( {
-			pageObject,
-			editor,
-			page,
-		} ) => {
+		test.beforeEach( async ( { pageObject, editor, page } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -313,7 +314,12 @@ test.describe( `${ blockData.name }`, () => {
 				height: 667,
 				width: 390, // iPhone 12 Pro
 			} );
+		} );
 
+		test( 'updates thumbnail selection during a native swipe', async ( {
+			pageObject,
+			page,
+		} ) => {
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
@@ -321,64 +327,44 @@ test.describe( `${ blockData.name }`, () => {
 
 			const initialImageId = await pageObject.getViewerImageId();
 
-			// Get the element's bounding box
-			const box = await viewerImage.boundingBox();
-			if ( ! box ) {
-				return;
+			await viewerImage.scrollIntoViewIfNeeded();
+			const box = ( await viewerImage.boundingBox() )!;
+			expect( box ).not.toBeNull();
+
+			// DOM-dispatched touch events cannot trigger the browser's native scrolling.
+			const session = await page.context().newCDPSession( page );
+			const startX = box.x + box.width * 0.8;
+			const y = box.y + box.height / 2;
+			await session.send( 'Input.dispatchTouchEvent', {
+				type: 'touchStart',
+				touchPoints: [ { x: startX, y } ],
+			} );
+			for ( let step = 1; step <= 8; step++ ) {
+				await session.send( 'Input.dispatchTouchEvent', {
+					type: 'touchMove',
+					touchPoints: [
+						{ x: startX - box.width * 0.075 * step, y },
+					],
+				} );
 			}
 
-			// Calculate start and end points for the swipe
-			const swipeStartX = box.x + box.width / 2; // middle of element
-			const swipeStartY = box.y + box.height / 2;
-			const swipeEndX = swipeStartX - 200; // swipe left by 200px
-			const swipeEndY = swipeStartY;
-
-			// Dispatch touch events to simulate swipe
-			await viewerImage.evaluate(
-				( element, { startX, startY, endX, endY } ) => {
-					const touchStart = new TouchEvent( 'touchstart', {
-						bubbles: true,
-						cancelable: true,
-						touches: [
-							new Touch( {
-								identifier: 0,
-								target: element,
-								clientX: startX,
-								clientY: startY,
-							} ),
-						],
-					} );
-
-					const touchMove = new TouchEvent( 'touchmove', {
-						bubbles: true,
-						cancelable: true,
-						touches: [
-							new Touch( {
-								identifier: 0,
-								target: element,
-								clientX: endX,
-								clientY: endY,
-							} ),
-						],
-					} );
-
-					const touchEnd = new TouchEvent( 'touchend', {
-						bubbles: true,
-						cancelable: true,
-						touches: [],
-					} );
-
-					element.dispatchEvent( touchStart );
-					element.dispatchEvent( touchMove );
-					element.dispatchEvent( touchEnd );
-				},
-				{
-					startX: swipeStartX,
-					startY: swipeStartY,
-					endX: swipeEndX,
-					endY: swipeEndY,
-				}
+			const scroller = viewerBlock.locator(
+				'.wc-block-product-gallery-large-image__container'
 			);
+			await expect
+				.poll( () =>
+					scroller.evaluate( ( element ) => element.scrollLeft )
+				)
+				.toBeGreaterThan( 0 );
+			const imageIds = await pageObject.getVisibleViewerImageIds();
+			await expect
+				.poll( () => pageObject.getActiveThumbnailImageId() )
+				.toEqual( imageIds[ 1 ] );
+			await session.send( 'Input.dispatchTouchEvent', {
+				type: 'touchEnd',
+				touchPoints: [],
+			} );
+			await session.detach();
 
 			// Verify dialog is not opened
 			const dialog = page.locator( '.wc-block-product-gallery-dialog' );
@@ -389,7 +375,18 @@ test.describe( `${ blockData.name }`, () => {
 				const nextImageId = await pageObject.getViewerImageId();
 
 				expect( nextImageId ).not.toEqual( initialImageId );
+				expect( await pageObject.getActiveThumbnailImageId() ).toEqual(
+					nextImageId
+				);
 			} ).toPass( { timeout: 1_000 } );
+
+			await expect
+				.poll( () =>
+					scroller.evaluate( ( element ) =>
+						Math.abs( element.scrollLeft - element.clientWidth )
+					)
+				)
+				.toBeLessThan( 1 );
 		} );
 	} );
 } );
