@@ -49,11 +49,9 @@ final class PlansController extends WP_REST_Controller {
 	private const WRITE_FIELDS = array( 'name', 'status', 'billing_policy', 'pricing_policy', 'delivery_policy' );
 
 	/**
-	 * Policy fields: JSON objects or null.
-	 *
-	 * @var array<int, string>
+	 * Logger source.
 	 */
-	private const POLICY_FIELDS = array( 'billing_policy', 'pricing_policy', 'delivery_policy' );
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
 	 * Columns the collection may be ordered by.
@@ -300,10 +298,7 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$args = $this->write_args( $request );
-		if ( $args instanceof WP_Error ) {
-			return $args;
-		}
+		$args          = $this->write_args( $request );
 		$args['owner'] = $extension_slug;
 
 		try {
@@ -311,9 +306,9 @@ final class PlansController extends WP_REST_Controller {
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
-			return $this->invalid_error( $e->getMessage() );
+			return $this->invalid_fields_error();
 		} catch ( RuntimeException $e ) {
-			return $this->write_failed_error( $e );
+			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_create_failed' );
 		}
 
 		$plan = $this->plan_repository->find( $id );
@@ -345,19 +340,14 @@ final class PlansController extends WP_REST_Controller {
 			return $this->not_found_error();
 		}
 
-		$args = $this->write_args( $request );
-		if ( $args instanceof WP_Error ) {
-			return $args;
-		}
-
 		try {
-			$updated = Plans::update( $id, $args );
+			$updated = Plans::update( $id, $this->write_args( $request ) );
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
-			return $this->invalid_error( $e->getMessage() );
+			return $this->invalid_fields_error();
 		} catch ( RuntimeException $e ) {
-			return $this->write_failed_error( $e );
+			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_update_failed' );
 		}
 
 		$plan = $updated ? $this->plan_repository->find( $id, $extension_slug ) : null;
@@ -475,10 +465,12 @@ final class PlansController extends WP_REST_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status'           => array(
-					'description'       => __( 'Plan status (any registered plan status).', 'woocommerce-subscriptions-engine' ),
-					'type'              => 'string',
-					'context'           => array( 'view', 'edit' ),
-					'validate_callback' => array( $this, 'validate_status_param' ),
+					'description' => __( 'Plan status (any registered plan status).', 'woocommerce-subscriptions-engine' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( $this, 'validate_status_param' ),
+					),
 				),
 				'name'             => array(
 					'description' => __( 'Display name.', 'woocommerce-subscriptions-engine' ),
@@ -533,35 +525,18 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Collect the present writable params as facade args. Policies must be JSON
-	 * objects or null; they pass through as given.
+	 * Collect the present writable params as facade args, passed through as given
+	 * (the name is sanitized); the facade validates them.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return array<string, mixed>|WP_Error
+	 * @return array<string, mixed>
 	 */
-	private function write_args( WP_REST_Request $request ) {
+	private function write_args( WP_REST_Request $request ): array {
 		$args = array();
 		foreach ( self::WRITE_FIELDS as $field ) {
-			if ( ! $request->has_param( $field ) ) {
-				continue;
+			if ( $request->has_param( $field ) ) {
+				$args[ $field ] = 'name' === $field ? $this->string_param( $request, 'name' ) : $request->get_param( $field );
 			}
-
-			$value = $request->get_param( $field );
-			if ( in_array( $field, self::POLICY_FIELDS, true ) ) {
-				$message = sprintf( '%s must be an object or null.', $field );
-				if ( null !== $value && ! is_array( $value ) ) {
-					return $this->invalid_error( $message );
-				}
-				try {
-					$value = null === $value ? null : $this->associative_array( $value, $message );
-				} catch ( InvalidArgumentException $e ) {
-					return $this->invalid_error( $e->getMessage() );
-				}
-			} elseif ( 'name' === $field ) {
-				$value = $this->string_param( $request, 'name' );
-			}
-
-			$args[ $field ] = $value;
 		}
 
 		return $args;
@@ -583,11 +558,13 @@ final class PlansController extends WP_REST_Controller {
 
 	/**
 	 * Map a failed write to a 500. The facade wraps a throwing validation callback
-	 * (the cause is chained); a failed insert or update carries no cause.
+	 * (the cause is chained, and the facade logs it); a failed insert or update carries
+	 * no cause and is logged here with the database error.
 	 *
-	 * @param RuntimeException $e Failure.
+	 * @param RuntimeException $e    Failure.
+	 * @param string           $code Error code for a failed insert or update.
 	 */
-	private function write_failed_error( RuntimeException $e ): WP_Error {
+	private function write_failed_error( RuntimeException $e, string $code ): WP_Error {
 		if ( $e->getPrevious() instanceof \Throwable ) {
 			return new WP_Error(
 				'woocommerce_subscriptions_engine_plan_validation_failed',
@@ -596,10 +573,25 @@ final class PlansController extends WP_REST_Controller {
 			);
 		}
 
+		wc_get_logger()->error(
+			sprintf( 'PlansController: the plan write failed: %s', $e->getMessage() ),
+			array( 'source' => self::LOG_SOURCE )
+		);
+
 		return new WP_Error(
-			'woocommerce_subscriptions_engine_plan_update_failed',
+			$code,
 			__( 'The plan could not be saved.', 'woocommerce-subscriptions-engine' ),
 			array( 'status' => 500 )
+		);
+	}
+
+	/**
+	 * Error for plan fields the facade refused: an empty name, an unregistered status,
+	 * or a policy that is not a JSON object or null.
+	 */
+	private function invalid_fields_error(): WP_Error {
+		return $this->invalid_error(
+			__( 'Invalid plan fields: the name must not be empty, the status must be a registered plan status, and each policy must be a JSON object or null.', 'woocommerce-subscriptions-engine' )
 		);
 	}
 
@@ -693,26 +685,6 @@ final class PlansController extends WP_REST_Controller {
 	 */
 	private function string_param( WP_REST_Request $request, string $key, string $fallback = '' ): string {
 		return sanitize_text_field( Coercion::coerce_string( $request->get_param( $key ), $fallback ) );
-	}
-
-	/**
-	 * Normalize a REST object payload to a string-keyed array.
-	 *
-	 * @param array<array-key, mixed> $value   Request value.
-	 * @param string                  $message Error message.
-	 * @return array<string, mixed>
-	 * @throws InvalidArgumentException If the array is not object-shaped.
-	 */
-	private function associative_array( array $value, string $message ): array {
-		$data = array();
-		foreach ( $value as $key => $item ) {
-			if ( ! is_string( $key ) ) {
-				throw new InvalidArgumentException( esc_html( $message ) );
-			}
-			$data[ $key ] = $item;
-		}
-
-		return $data;
 	}
 
 	/**

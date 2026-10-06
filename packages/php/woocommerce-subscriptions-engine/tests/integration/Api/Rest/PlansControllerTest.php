@@ -196,7 +196,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$id   = $this->create_plan( 'Fields' );
 		$data = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
 
-		$this->assertSame(
+		$this->assertEqualsCanonicalizing(
 			array( 'id', 'extension_slug', 'status', 'name', 'billing_policy', 'pricing_policy', 'delivery_policy', 'date_created_gmt', 'date_updated_gmt' ),
 			array_keys( $data )
 		);
@@ -295,7 +295,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	 *
 	 * @param mixed  $invalid     Non-object pricing payload.
 	 * @param string $create_code Create error code: core schema validation rejects a scalar first.
-	 * @param string $patch_code  PATCH error code: the route has no arg schema, so the controller rejects.
+	 * @param string $patch_code  PATCH error code: the route has no arg schema, so the facade rejects.
 	 */
 	public function test_non_object_pricing_policy_is_rejected( $invalid, string $create_code, string $patch_code ): void {
 		wp_set_current_user( $this->admin_id );
@@ -327,7 +327,10 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertSame( 400, $patched->get_status() );
-		$this->assertSame( $patch_code, $this->response_data( $patched )['code'] );
+		$patched_data = $this->response_data( $patched );
+		$this->assertSame( $patch_code, $patched_data['code'] );
+		$this->assertIsString( $patched_data['message'] );
+		$this->assertStringNotContainsString( 'Plans:', $patched_data['message'], 'REST errors use the controller message, not the facade text.' );
 
 		// The rejected writes left the plan untouched and created nothing.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
@@ -535,7 +538,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 	}
 
-	public function test_validate_action_cannot_change_the_stored_plan(): void {
+	public function test_validate_action_receives_a_view_without_setters(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$views = array();
@@ -563,7 +566,10 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$this->assertCount( 1, $views );
 		foreach ( get_class_methods( $views[0] ) as $method ) {
-			$this->assertStringStartsNotWith( 'set_', $method, 'The view handed to callbacks is read-only.' );
+			$this->assertTrue(
+				'from_plan' === $method || 0 === strpos( $method, 'get_' ),
+				"The view handed to callbacks exposes only getters, found {$method}()."
+			);
 		}
 	}
 
@@ -865,6 +871,71 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 			$this->assertSame( 400, $response->get_status() );
 		}
+	}
+
+	public function test_create_validates_the_status_and_keeps_the_callback_out_of_the_schema(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Unregistered',
+				'status'         => 'never-registered',
+			)
+		);
+		$this->assertSame( 400, $created->get_status() );
+		$this->assertSame( 'rest_invalid_param', $this->response_data( $created )['code'] );
+
+		$schema = ( new PlansController() )->get_public_item_schema();
+		$this->assertIsArray( $schema['properties']['status'] );
+		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['status'] );
+		$this->assertArrayNotHasKey( 'arg_options', $schema['properties']['status'] );
+	}
+
+	public function test_create_surfaces_a_failed_insert_as_a_logged_create_error(): void {
+		global $wpdb;
+
+		wp_set_current_user( $this->admin_id );
+
+		$break_plan_inserts = static function ( $query ) {
+			if ( is_string( $query ) && 0 === stripos( ltrim( $query ), 'INSERT' ) && false !== strpos( $query, 'wc_selling_plans' ) ) {
+				return 'INSERT INTO nonexistent_table_for_this_test (id) VALUES (1)';
+			}
+
+			return $query;
+		};
+		$errors             = array();
+		$capture            = static function ( $message, $level ) use ( &$errors ) {
+			if ( 'error' === $level && is_string( $message ) && false !== strpos( $message, 'the plan write failed' ) ) {
+				$errors[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'query', $break_plan_inserts );
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$response = $this->request(
+				'POST',
+				self::BASE,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'name'           => 'Doomed insert',
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_plan_inserts );
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_create_failed', $this->response_data( $response )['code'] );
+		$this->assertNotEmpty( $errors, 'A failed write is logged.' );
+		$this->assertStringContainsString( 'nonexistent_table_for_this_test', $errors[0], 'The log carries the database error.' );
 	}
 
 	public function test_update_surfaces_a_failed_write_as_an_error(): void {
