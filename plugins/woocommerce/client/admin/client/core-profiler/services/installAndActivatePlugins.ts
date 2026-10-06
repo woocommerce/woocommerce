@@ -238,11 +238,6 @@ export const pluginInstallerMachine = createMachine(
 			assignInstallationSuccessDetails: assign( {
 				installedPlugins: ( { context, event } ) => {
 					const plugin = context.pluginsInstallationQueue[ 0 ];
-					const timingKey =
-						plugin === 'woocommerce-services:tax' ||
-						plugin === 'woocommerce-services:shipping'
-							? 'woocommerce-services'
-							: plugin.replace( ':alt', '' );
 					return [
 						...context.installedPlugins,
 						{
@@ -250,7 +245,9 @@ export const pluginInstallerMachine = createMachine(
 							installTime:
 								(
 									event as DoneActorEvent< InstallAndActivateSuccessResponse >
-								 ).output.data.install_time[ timingKey ] || 0,
+								 ).output.data.install_time[
+									getPluginSlug( plugin )
+								] || 0,
 						},
 					];
 				},

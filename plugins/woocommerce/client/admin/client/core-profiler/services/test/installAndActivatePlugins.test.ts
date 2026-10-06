@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { PluginNames } from '@woocommerce/data';
 import { createActor, fromPromise, waitFor, SimulatedClock } from 'xstate5';
 
 /**
@@ -28,7 +27,7 @@ describe( 'pluginInstallerMachine', () => {
 		jest.resetAllMocks();
 	} );
 
-	it.each< [ PluginNames, string, number, number ] >( [
+	it.each< [ string, string, number, number ] >( [
 		[ 'woocommerce-services:tax', 'woocommerce-services', 4000, 4000 ],
 		[ 'woocommerce-services', 'woocommerce-services', 4000, 4000 ],
 		[ 'mailpoet', 'mailpoet', 4000, 4000 ],
@@ -36,6 +35,18 @@ describe( 'pluginInstallerMachine', () => {
 		[ 'woocommerce-services:tax', 'unrelated-plugin', 4000, 0 ],
 		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 4000 ],
 		[ 'woocommerce-services:shipping', 'unrelated-plugin', 4000, 0 ],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'woocommerce-paypal-payments',
+			4000,
+			4000,
+		],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'unrelated-plugin',
+			4000,
+			0,
+		],
 	] )(
 		'records %s duration from %s without changing its key',
 		async ( plugin, slug, duration, expectedDuration ) => {

@@ -450,14 +450,30 @@ describe( 'Core Profiler installation timing', () => {
 		jest.clearAllMocks();
 	} );
 
-	it.each( [ 'woocommerce-services:tax', 'woocommerce-services:shipping' ] )(
+	it.each( [
+		[
+			'woocommerce-services:tax',
+			'woocommerce-services',
+			'woocommerce_services',
+		],
+		[
+			'woocommerce-services:shipping',
+			'woocommerce-services',
+			'woocommerce_services',
+		],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'woocommerce-paypal-payments',
+			'woocommerce_paypal_payments',
+		],
+	] )(
 		'records the server duration for %s in both completion events',
-		async ( plugin ) => {
+		async ( plugin, slug, trackKey ) => {
 			const machine = pluginInstallerMachine.provide( {
 				actors: {
 					installPlugin: fromPromise( async () => ( {
 						data: {
-							install_time: { 'woocommerce-services': 4000 },
+							install_time: { [ slug ]: 4000 },
 						},
 					} ) ),
 				},
@@ -495,7 +511,7 @@ describe( 'Core Profiler installation timing', () => {
 				'coreprofiler_store_extension_installed_and_activated',
 				{
 					success: true,
-					extension: 'woocommerce_services',
+					extension: trackKey,
 					install_time: '2-5s',
 				}
 			);
@@ -503,9 +519,9 @@ describe( 'Core Profiler installation timing', () => {
 				'coreprofiler_store_extensions_installed_and_activated',
 				{
 					success: true,
-					installed_extensions: [ 'woocommerce_services' ],
+					installed_extensions: [ trackKey ],
 					total_time: '10-15s',
-					install_time_woocommerce_services: '2-5s',
+					[ `install_time_${ trackKey }` ]: '2-5s',
 				}
 			);
 			expect( recordEvent ).toHaveBeenCalledTimes( 2 );
