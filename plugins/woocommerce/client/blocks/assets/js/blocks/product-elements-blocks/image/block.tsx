@@ -35,6 +35,38 @@ const buildStyles = ( props: Partial< ImageProps > ) => {
 	};
 };
 
+/**
+ * Unset sides are omitted on purpose: assigning them as undefined clears a
+ * shorthand `padding` value when React writes the style.
+ */
+const getDefinedPaddingStyles = ( {
+	padding,
+	paddingTop,
+	paddingRight,
+	paddingBottom,
+	paddingLeft,
+}: CSSProperties ): CSSProperties => {
+	const paddingStyles: CSSProperties = {};
+
+	if ( padding !== undefined ) {
+		paddingStyles.padding = padding;
+	}
+	if ( paddingTop !== undefined ) {
+		paddingStyles.paddingTop = paddingTop;
+	}
+	if ( paddingRight !== undefined ) {
+		paddingStyles.paddingRight = paddingRight;
+	}
+	if ( paddingBottom !== undefined ) {
+		paddingStyles.paddingBottom = paddingBottom;
+	}
+	if ( paddingLeft !== undefined ) {
+		paddingStyles.paddingLeft = paddingLeft;
+	}
+
+	return paddingStyles;
+};
+
 const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
 	// Default to placeholder image if no product images are available.
 	if ( ! product.images.length ) {
@@ -182,11 +214,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		? cloneElement( children, {
 				style: {
 					...children.props.style,
-					padding,
-					paddingTop,
-					paddingRight,
-					paddingBottom,
-					paddingLeft,
+					...getDefinedPaddingStyles( {
+						padding,
+						paddingTop,
+						paddingRight,
+						paddingBottom,
+						paddingLeft,
+					} ),
 				},
 		  } )
 		: children;
