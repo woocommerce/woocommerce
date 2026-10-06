@@ -660,6 +660,8 @@ Returns the cart meta from state.
 
 -   `object`: The current cart meta with the following keys:
     -   _updatingCustomerData_ `boolean`: If the customer data (billing and/or shipping address) is being updated.
+    -   _updatingAddressFieldsForShippingRates_ `boolean`: If shipping address fields impacting the shipping rates are being updated.
+    -   _isShippingRatesUpdateQueued_ `boolean`: If shipping address fields impacting the shipping rates have changed but have not been sent to the server yet. Use `isShippingRatesStale()` to check whether the shipping rates are out of date.
     -   _updatingSelectedRate_ `boolean`: If the selected rate is being updated.
     -   _isCartDataStale_ `boolean`: If the cart data is stale.
     -   _applyingCoupon_ `string`: The coupon code being applied.
