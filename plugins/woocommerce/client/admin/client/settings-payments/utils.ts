@@ -10,12 +10,14 @@ import { getAdminLink } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
+	morePaymentOptionsBaseUrl,
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
 	wooPaymentsSuggestionId,
@@ -499,3 +501,17 @@ export const getPluginActionErrorMessage = (
 
 	return message || frame;
 };
+
+/**
+ * Build the WooCommerce.com marketplace link for the "More payment options" entry.
+ *
+ * @param businessCountryCode The selected business location, as an ISO 3166-1 alpha-2 country code.
+ * @return The marketplace URL, filtered by country when a business location is selected.
+ */
+export const getMorePaymentOptionsUrl = (
+	businessCountryCode: string | null
+): string =>
+	addQueryArgs(
+		morePaymentOptionsBaseUrl,
+		businessCountryCode ? { country: businessCountryCode } : {}
+	);
