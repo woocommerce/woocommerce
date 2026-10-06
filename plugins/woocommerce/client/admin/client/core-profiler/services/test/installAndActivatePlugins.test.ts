@@ -34,7 +34,8 @@ describe( 'pluginInstallerMachine', () => {
 		[ 'mailpoet', 'mailpoet', 4000, 4000 ],
 		[ 'mailpoet:alt', 'mailpoet', 4000, 4000 ],
 		[ 'woocommerce-services:tax', 'unrelated-plugin', 4000, 0 ],
-		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 0 ],
+		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 4000 ],
+		[ 'woocommerce-services:shipping', 'unrelated-plugin', 4000, 0 ],
 	] )(
 		'records %s duration from %s without changing its key',
 		async ( plugin, slug, duration, expectedDuration ) => {

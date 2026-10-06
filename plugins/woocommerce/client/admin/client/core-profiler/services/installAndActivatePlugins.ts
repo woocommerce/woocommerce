@@ -239,7 +239,8 @@ export const pluginInstallerMachine = createMachine(
 				installedPlugins: ( { context, event } ) => {
 					const plugin = context.pluginsInstallationQueue[ 0 ];
 					const timingKey =
-						plugin === 'woocommerce-services:tax'
+						plugin === 'woocommerce-services:tax' ||
+						plugin === 'woocommerce-services:shipping'
 							? 'woocommerce-services'
 							: plugin.replace( ':alt', '' );
 					return [
