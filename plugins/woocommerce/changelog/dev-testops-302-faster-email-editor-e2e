@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Speed up the slowest email editor e2e specs; no production change.
+

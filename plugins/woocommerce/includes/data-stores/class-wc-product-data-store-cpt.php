@@ -2065,7 +2065,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  string     $term Search term.
 	 * @param  string     $type Type of product.
 	 * @param  bool       $include_variations Include variations in search or not.
-	 * @param  bool       $all_statuses Should we search all statuses or limit to published.
+	 * @param  bool       $all_statuses True searches every status. False searches published products, plus private products when the current user can read them.
 	 * @param  null|int   $limit Limit returned results. @since 3.5.0.
 	 * @param  null|array $include Keep specific results. @since 3.6.0.
 	 * @param  null|array $exclude Discard specific results. @since 3.6.0.
@@ -2100,7 +2100,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 */
 		$post_statuses = apply_filters(
 			'woocommerce_search_products_post_statuses',
-			current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
+			current_user_can( 'read_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
 		);
 
 		// See if search term contains OR keywords.
