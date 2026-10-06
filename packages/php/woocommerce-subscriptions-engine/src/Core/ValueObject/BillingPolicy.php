@@ -1,8 +1,10 @@
 <?php
 /**
- * BillingPolicy - typed value object for a plan's billing cadence and trial.
+ * BillingPolicy - an optional parser for a billing cadence and trial payload.
  *
- * Mirrors the `billing_policy` JSON column shape. Shape:
+ * An extension may use {@see self::from_array()} to parse its plan billing arrays. The
+ * engine stores plan policies opaquely and does not construct this on plan reads or
+ * writes. The array shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
  *     interval:       int,

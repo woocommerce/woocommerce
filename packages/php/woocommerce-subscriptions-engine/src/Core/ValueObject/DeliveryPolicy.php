@@ -1,10 +1,11 @@
 <?php
 /**
- * DeliveryPolicy - typed value object for a plan's delivery anchors, cutoff,
- * and intent.
+ * DeliveryPolicy - an optional parser for a delivery anchors, cutoff, and
+ * intent payload.
  *
- * Mirrors the `delivery_policy` JSON column shape, deliberately thin for now.
- * Shape:
+ * An extension may use {@see self::from_array()} to parse its plan delivery arrays.
+ * The engine stores plan policies opaquely and does not construct this on plan reads
+ * or writes. Deliberately thin for now. The array shape it parses:
  *   {
  *     anchors: [{ type: 'MONTHDAY', day: int }, { type: 'YEARDAY', day: int, month: int }, ...],
  *     cutoff:  ?mixed,

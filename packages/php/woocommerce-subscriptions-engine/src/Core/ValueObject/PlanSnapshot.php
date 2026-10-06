@@ -106,8 +106,7 @@ final class PlanSnapshot {
 	 * Sourced from the `billing_policy` entry captured at signup, NOT the live plan -
 	 * so a consumer reads the cadence a contract is billed under straight off the
 	 * snapshot, even after the plan it came from is edited or deleted, with no live
-	 * {@see \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository}
-	 * join. Returns null when the payload carries no (or an unreadable) billing policy,
+	 * plan read. Returns null when the payload carries no (or an unreadable) billing policy,
 	 * so a caller degrades to "no cadence" rather than fataling.
 	 */
 	public function get_billing_policy(): ?BillingPolicy {
