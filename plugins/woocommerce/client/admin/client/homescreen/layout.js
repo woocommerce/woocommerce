@@ -132,7 +132,7 @@ export const Layout = ( {
 						<ProgressTitle taskListId="setup" />
 					</>
 				) }
-				<TaskLists query={ query } />
+				<TaskLists query={ query } isHomescreen />
 			</Suspense>
 		);
 	};
