@@ -939,6 +939,27 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the PHP memory limit, using 32 GB when PHP has no limit.
+	 *
+	 * @testWith ["-1", "32 GB"]
+	 *           ["2G", "2 GB"]
+	 *
+	 * @param string $php_memory_limit The PHP memory_limit ini value.
+	 * @param string $expected         The expected reported memory limit.
+	 */
+	public function test_get_tracking_data_reports_php_memory_limit( string $php_memory_limit, string $expected ): void {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'ini_get' => fn() => $php_memory_limit,
+			)
+		);
+
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertSame( $expected, $tracking_data['wp']['memory_limit'] );
+	}
+
+	/**
 	 * Helper method to register a mock address provider.
 	 */
 	private function register_mock_address_provider() {

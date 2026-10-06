@@ -61,4 +61,25 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 			'Template overridden via wc_get_template filter should appear in overrides'
 		);
 	}
+
+	/**
+	 * @testdox Should report the PHP memory limit in bytes, using 32 GB when PHP has no limit.
+	 *
+	 * @testWith ["-1", 34359738368]
+	 *           ["2G", 2147483648]
+	 *
+	 * @param string $php_memory_limit The PHP memory_limit ini value.
+	 * @param int    $expected         The expected reported memory limit in bytes.
+	 */
+	public function test_get_environment_info_reports_php_memory_limit( string $php_memory_limit, int $expected ): void {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'ini_get' => fn() => $php_memory_limit,
+			)
+		);
+
+		$environment = $this->sut->get_environment_info_per_fields( array() );
+
+		$this->assertSame( $expected, $environment['wp_memory_limit'] );
+	}
 }
