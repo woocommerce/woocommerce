@@ -760,12 +760,23 @@ function wc_create_refund( $args = array() ) {
 					$product        = wc_get_product( $product_id );
 					$download_limit = $product ? (int) $product->get_download_limit() : 0;
 					if ( $refunded_qty > 0 && $download_limit > 0 ) {
+						// Every order line holds its own permission row per file. The rows of one file share a single deduction.
+						$downloads_to_deduct = array();
 						foreach ( $downloads as $download ) {
 							if ( '' === $download->get_downloads_remaining() ) {
 								continue;
 							}
-							$download->set_downloads_remaining( max( 0, (int) $download->get_downloads_remaining() - (int) ( $download_limit * $refunded_qty ) ) );
+							$download_id = $download->get_download_id();
+							if ( ! isset( $downloads_to_deduct[ $download_id ] ) ) {
+								$downloads_to_deduct[ $download_id ] = (int) ( $download_limit * $refunded_qty );
+							}
+							$deduction = min( (int) $download->get_downloads_remaining(), $downloads_to_deduct[ $download_id ] );
+							if ( $deduction <= 0 ) {
+								continue;
+							}
+							$download->set_downloads_remaining( (int) $download->get_downloads_remaining() - $deduction );
 							$download->save();
+							$downloads_to_deduct[ $download_id ] -= $deduction;
 						}
 					}
 				}

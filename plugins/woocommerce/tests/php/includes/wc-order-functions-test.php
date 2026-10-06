@@ -846,4 +846,28 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $downloads, 'The download permission must be kept on a partial refund.' );
 		$this->assertSame( $expected_after, (string) $downloads[0]->get_downloads_remaining() );
 	}
+
+	/**
+	 * Test that refunding one of two line items of a limited product deducts the refunded
+	 * downloads only once across the permission rows of both line items.
+	 */
+	public function test_refunding_one_of_two_lines_deducts_remaining_downloads_once() {
+		$env   = $this->create_completed_order_with_downloadable_product( array( 1, 1 ), 2 );
+		$order = $env['order'];
+
+		$get_remaining = function ( WC_Customer_Download $download ): int {
+			return (int) $download->get_downloads_remaining();
+		};
+
+		$remaining_before = array_map( $get_remaining, $this->get_download_permissions( $order, $env['product'] ) );
+		$this->assertSame( array( 2, 2 ), $remaining_before, 'Each line item must have granted its own permission row with the download limit.' );
+
+		$first_item = $order->get_items( 'line_item' )[ $env['item_ids'][0] ];
+		$refund     = $this->refund_line_item( $order, $env['item_ids'][0], 1, (string) $first_item->get_total() );
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
+
+		$remaining_after = array_map( $get_remaining, $this->get_download_permissions( $order, $env['product'] ) );
+		$this->assertCount( 2, $remaining_after, 'Both permission rows must be kept while the second line item retains quantity.' );
+		$this->assertSame( 2, array_sum( $remaining_after ), 'Only the downloads of the refunded line item may be deducted.' );
+	}
 }
