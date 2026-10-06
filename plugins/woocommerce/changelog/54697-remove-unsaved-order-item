@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Remove unsaved order items correctly and preserve tax item identity when filters change collection keys.
+Fix order items and tax lines removed before saving still being added to the order.
