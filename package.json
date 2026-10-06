@@ -50,6 +50,7 @@
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/prettier-config": "4.49.0",
 		"@wordpress/stylelint-config": "catalog:tooling",
+		"@wordpress/theme": "catalog:wp-bundled",
 		"babel-loader": "9.2.x",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "13.0.x",
