@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -570,13 +571,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 				"
 SELECT
  COUNT(CASE WHEN (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
-  AND orders.status <> 'auto-draft' AND orders.type IN ($order_post_type_placeholder) THEN 1 END)
+  AND orders.status <> %s AND orders.type IN ($order_post_type_placeholder) THEN 1 END)
  + COUNT(CASE WHEN posts.post_type IN ($order_post_type_placeholder)
   AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 END) AS count
 FROM $orders_table orders
 LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
 				// Both IN clauses need their own copy of the order-type arguments.
-				array_merge( $order_post_types, $order_post_types )
+				array_merge( array( OrderStatus::AUTO_DRAFT ), $order_post_types, $order_post_types )
 			);
 		} else {
 			if ( $orders_table_is_authoritative ) {

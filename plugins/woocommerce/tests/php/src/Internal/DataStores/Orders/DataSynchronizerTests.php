@@ -101,7 +101,7 @@ class DataSynchronizerTests extends \HposTestCase {
 
 	/**
 	 * @testdox Should preserve exact full pending counts and their cache under either authority.
-	 * @dataProvider provider_full_pending_count
+	 * @dataProvider data_provider_test_full_pending_count
 	 * @param bool   $hpos              Whether HPOS is authoritative.
 	 * @param string $shape             The pending-order fixture.
 	 * @param int    $expected          The exact pending count.
@@ -161,7 +161,7 @@ class DataSynchronizerTests extends \HposTestCase {
 					array(
 						'id'               => $post_id,
 						'type'             => 'custom' === $shape ? $post_type : 'shop_order',
-						'status'           => 'changed' === $shape ? 'auto-draft' : OrderInternalStatus::COMPLETED,
+						'status'           => 'changed' === $shape ? OrderStatus::AUTO_DRAFT : OrderInternalStatus::COMPLETED,
 						'date_updated_gmt' => $hpos ? '2024-01-02 00:00:00' : '2024-01-01 00:00:00',
 					)
 				);
@@ -285,7 +285,7 @@ class DataSynchronizerTests extends \HposTestCase {
 	 *
 	 * @return array
 	 */
-	public function provider_full_pending_count(): array {
+	public function data_provider_test_full_pending_count(): array {
 		return array(
 			'hpos missing'       => array( true, 'missing', 1 ),
 			'posts missing'      => array( false, 'missing', 1 ),
