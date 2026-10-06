@@ -487,15 +487,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	}
 
 	/**
-	 * Generate a new unique hash as a delivery id based on current time and wehbook id.
-	 * Return the hash for inclusion in the webhook request.
+	 * Generate a new unique delivery ID for inclusion in the webhook request.
+	 * It is 32 random hex characters, so deliveries sent in the same second get different IDs.
 	 *
 	 * @since  2.2.0
 	 * @return string
 	 */
 	public function get_new_delivery_id() {
-		// Since we no longer use comments to store delivery logs, we generate a unique hash instead based on current time and webhook ID.
-		return wp_hash( $this->get_id() . strtotime( 'now' ) );
+		return wc_rand_hash( '', 32 );
 	}
 
 	/**
