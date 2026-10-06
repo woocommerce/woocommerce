@@ -32,9 +32,9 @@ The checklist covers four areas:
 * **Rollback path.** Who reverts, how, and what a revert would not undo for this version - database migrations, new settings - answered before it's needed, not during an incident.
 * **Comms.** Changelog in shape, and a known-issues list when verdicts left something open.
 
-## Go/no-go (24-48 hours before stable)
+## Go/no-go (after RC staging, before the stable build)
 
-A deliberate decision to ship, made while there is still time to not ship. The release lead and the Product DRI confirm the readiness verdicts still hold and nothing blocking has appeared since the readiness review, then record the decision on the release sub-issue: **go**, **no-go**, or **go with conditions** - with names.
+A deliberate decision to ship, made while there is still time to not ship. It runs once the RC has finished its staging monitoring - holding it earlier would mean deciding before the RC has been seen on real sites. The release lead and the Product DRI confirm the readiness verdicts still hold, review the RC's sweep and staging thread, and note any fix merged after the RC and whether it ran on staging. Then they record the decision as a comment on the release sub-issue on GitHub: **go**, **no-go**, or **go with conditions** - with names.
 
 Recorded decisions are the input for release retrospectives and future updates to these checklists.
 
