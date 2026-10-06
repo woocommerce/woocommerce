@@ -303,3 +303,23 @@ describe( 'ProductCard click tracking', () => {
 		expect( cardClickEvents() ).toHaveLength( 1 );
 	} );
 } );
+
+describe( 'ProductCard title', () => {
+	it( 'decodes HTML entities from the API', () => {
+		const { container } = renderCard( ProductCardType.compact, {
+			title: 'Mondial Relay &amp; Chronopost',
+			icon: 'https://example.com/icon.png',
+		} );
+
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__title'
+			)?.textContent
+		).toContain( 'Mondial Relay & Chronopost' );
+		expect(
+			container
+				.querySelector( '.woocommerce-marketplace__product-card__icon' )
+				?.getAttribute( 'alt' )
+		).toBe( 'Mondial Relay & Chronopost' );
+	} );
+} );

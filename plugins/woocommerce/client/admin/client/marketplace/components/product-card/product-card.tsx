@@ -95,6 +95,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	const showDescription = ! isTheme && ! isCompact;
 	const showCardIcon = ! isTheme || isCompact;
 	const showBigImage = isTheme && ! isCompact;
+	const decodedTitle = decodeEntities( product.title );
 	const decodedDescription = decodeEntities( product.description );
 
 	function isSponsored(): boolean {
@@ -259,7 +260,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 					handleCardClick();
 				} }
 			>
-				{ isLoading ? ' ' : product.title }
+				{ isLoading ? ' ' : decodedTitle }
 				{ screenReaderText }
 			</a>
 		);
@@ -325,7 +326,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 						<img
 							className="woocommerce-marketplace__product-card__image-inner"
 							src={ product.image }
-							alt={ product.title }
+							alt={ decodedTitle }
 						/>
 					) }
 				</div>
@@ -341,7 +342,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 								<img
 									className="woocommerce-marketplace__product-card__icon"
 									src={ product.icon || product.image }
-									alt={ product.title }
+									alt={ decodedTitle }
 								/>
 							) }
 						</>
@@ -422,7 +423,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 
 			{ shouldShowPreview && isPreviewModalOpen && product && (
 				<ProductPreviewModal
-					productTitle={ product.title }
+					productTitle={ decodedTitle }
 					productVendor={ createVendorLink(
 						'marketplace_product_preview_vendor_clicked'
 					) }
