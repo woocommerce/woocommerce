@@ -2484,6 +2484,9 @@ importers:
 
   packages/php/woocommerce-analytics:
     dependencies:
+      '@automattic/tracks-shared-utils':
+        specifier: ^1.0.0
+        version: 1.0.0
       debug:
         specifier: 4.4.3
         version: 4.4.3(supports-color@9.4.0)
@@ -4440,6 +4443,9 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
       redux: ^4.2.1
+
+  '@automattic/tracks-shared-utils@1.0.0':
+    resolution: {integrity: sha512-yHXhAmfEK64a8LE1kweoKGgIW5XWe96mbTF99XD5lgRQcZVvWOSqiauQ7Q48OQVXu9K+isWLSXYxk5nGbdN+FA==, tarball: https://registry.npmjs.org/@automattic/tracks-shared-utils/-/tracks-shared-utils-1.0.0.tgz}
 
   '@automattic/typography@1.0.0':
     resolution: {integrity: sha512-TnT+vPaNUXQYwDsPCPxhNY0d4LnOKvrb0SizUCC5iybo5sfOlX/rYalGDyz6nPQDF0EBaQwMf7qhVsflFR0cBg==}
@@ -19805,6 +19811,8 @@ snapshots:
       - '@emotion/is-prop-valid'
       - '@types/react'
       - supports-color
+
+  '@automattic/tracks-shared-utils@1.0.0': {}
 
   '@automattic/typography@1.0.0': {}
 
