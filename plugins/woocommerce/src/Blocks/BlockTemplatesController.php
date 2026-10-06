@@ -28,7 +28,7 @@ class BlockTemplatesController {
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_db_templates_with_woo_slug' ), 10, 3 );
 		add_filter( 'rest_pre_insert_wp_template', array( $this, 'dont_load_templates_for_suggestions' ), 10, 1 );
-		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
+		add_filter( 'pre_render_block', array( $this, 'pre_render_woocommerce_template_part' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
@@ -55,15 +55,48 @@ class BlockTemplatesController {
 	}
 
 	/**
+	 * Short-circuits rendering of `core/template-part` blocks that belong to WooCommerce (header, footer, navigation etc. are skipped).
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string|null $pre_render   The pre-rendered content, or null to let the block render normally.
+	 * @param array       $parsed_block The block being rendered.
+	 * @return string|null
+	 */
+	public function pre_render_woocommerce_template_part( $pre_render, $parsed_block ) {
+		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce
+		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead. See Gutenberg #67804.
+		if ( 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
+			$attributes = $parsed_block['attrs'];
+			if ( isset( $attributes['theme'], $attributes['slug'] ) ) {
+				$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
+				if ( $template_part && ! empty( $template_part->content ) ) {
+					$content            = do_blocks( $template_part->content );
+					$wrapper_attributes = get_block_wrapper_attributes();
+					$html_tag           = $attributes['tagName'] ?? null;
+					$html_tag           = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
+
+					return "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
+				}
+			}
+		}
+
+		return $pre_render;
+	}
+
+	/**
 	 * Renders the `core/template-part` block on the server.
 	 *
-	 * This is done because the core handling for template parts only supports templates from the current theme, not
-	 * from a plugin.
+	 * @deprecated 11.4.0
 	 *
 	 * @param array $attributes The block attributes.
-	 * @return string The render.
+	 * @return string
 	 */
 	public function render_woocommerce_template_part( $attributes ) {
+		// Predecessor of pre_render_woocommerce_template_part which was listening block_type_metadata_settings filter.
+		// Retired as it covering non-WooCommerce parts, and we want clearer boundaries for the block integration.
+		wc_deprecated_function( __METHOD__, '11.4.0' );
+
 		if ( isset( $attributes['theme'] ) && 'woocommerce/woocommerce' === $attributes['theme'] ) {
 			$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
 
@@ -81,24 +114,6 @@ class BlockTemplatesController {
 			}
 		}
 		return function_exists( '\gutenberg_render_block_core_template_part' ) ? \gutenberg_render_block_core_template_part( $attributes ) : \render_block_core_template_part( $attributes );
-	}
-
-	/**
-	 * By default, the Template Part Block only supports template parts that are in the current theme directory.
-	 * This render_callback wrapper allows us to add support for plugin-housed template parts.
-	 *
-	 * @param array $settings Array of determined settings for registering a block type.
-	 * @param array $metadata     Metadata provided for registering a block type.
-	 */
-	public function add_plugin_templates_parts_support( $settings, $metadata ) {
-		if (
-			isset( $metadata['name'], $settings['render_callback'] ) &&
-			'core/template-part' === $metadata['name'] &&
-			in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
-		) {
-			$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
-		}
-		return $settings;
 	}
 
 
