@@ -1618,6 +1618,26 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should remove an unsaved coupon line when the coupon is removed.
+	 */
+	public function test_remove_coupon_removes_unsaved_coupon_item(): void {
+		$coupon_code = 'unsaved_coupon_line';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order       = new WC_Order();
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( $coupon_code );
+		$order->add_item( $coupon_item );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+		$this->assertEmpty( $order->get_items( 'coupon' ), 'The unsaved coupon line should leave the in-memory collection.' );
+
+		$order->save();
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( 'coupon' ), 'The removed coupon line should not be persisted.' );
+	}
+
+	/**
 	 * @testdox Should preserve factory lookup behavior for numeric string item IDs.
 	 * @testWith ["%d"]
 	 *           ["0%d"]
