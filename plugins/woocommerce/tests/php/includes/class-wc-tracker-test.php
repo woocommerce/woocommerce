@@ -943,6 +943,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith ["-1", "32 GB"]
 	 *           ["2G", "2 GB"]
+	 *           ["268435456", "256 MB"]
 	 *
 	 * @param string $php_memory_limit The PHP memory_limit ini value.
 	 * @param string $expected         The expected reported memory limit.
