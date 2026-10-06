@@ -1584,7 +1584,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	public function provide_missing_renewal_inputs(): array {
 		return array(
 			'currency'       => array( 'currency' ),
-			'customer'       => array( 'customer' ),
 			'payment method' => array( 'payment_method' ),
 			'billing policy' => array( 'billing_policy' ),
 		);
@@ -1604,6 +1603,21 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
 		$this->assertNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Parked out of the due set.' );
+	}
+
+	/**
+	 * @testdox a contract with no customer renews as a guest order.
+	 */
+	public function test_a_contract_without_a_customer_renews_as_a_guest_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( 'customer' );
+
+		$order = $this->run_scheduled_renewal( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 0, $order->get_customer_id() );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( '2026-03-01 00:00:00', $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'The next-due moment advanced.' );
 	}
 
 	/**

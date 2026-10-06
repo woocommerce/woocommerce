@@ -271,13 +271,11 @@ final class RenewalEngine {
 			return null;
 		}
 
-		// Renewal inputs an extension may not have supplied yet: without them no order can
-		// be built, so the scheduled caller parks the contract out of the due set.
+		// A renewal input an extension may not have supplied yet: without it no order can
+		// be built, so the scheduled caller parks the contract out of the due set. A null
+		// customer is not one: the renewal order is built as a guest order.
 		if ( null === $contract->get_currency() ) {
 			throw new RenewalNotProcessable( 'the contract has no currency' );
-		}
-		if ( null === $contract->get_customer_id() ) {
-			throw new RenewalNotProcessable( 'the contract has no customer' );
 		}
 
 		// Pre-flight capability gate, ahead of the claim so an unchargeable renewal never
