@@ -164,6 +164,55 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Single terms use catalog-visible counts, including descendants.
+	 * @testWith ["product_cat", "parent", 2]
+	 *           ["product_cat", "child1", 0]
+	 *           ["product_tag", "tag1", 1]
+	 *           ["product_brand", "brand_parent", 2]
+	 *           ["product_brand", "brand_child", 1]
+	 *
+	 * @param string $taxonomy       Taxonomy to retrieve.
+	 * @param string $term_key       Test term to retrieve.
+	 * @param int    $expected_count Expected catalog-visible count.
+	 */
+	public function test_single_term_product_visibility( string $taxonomy, string $term_key, int $expected_count ): void {
+		$this->products['product1']->set_catalog_visibility( 'hidden' );
+		$this->products['product1']->save();
+		wc_recount_all_terms();
+		delete_transient( 'wc_term_counts' );
+
+		$term = get_term( $this->terms[ $term_key ]['term_id'], $taxonomy );
+
+		$this->assertInstanceOf( WP_Term::class, $term, 'Single-term lookups should still return a term object.' );
+		$this->assertSame( $expected_count, $term->count, 'Single-term lookups should count only catalog-visible products.' );
+	}
+
+	/**
+	 * @testdox Single-term counts use the metadata cache and reflect updates without changing the bulk transient.
+	 */
+	public function test_single_term_count_uses_metadata_cache(): void {
+		global $wpdb;
+
+		$term_id     = $this->terms['parent']['term_id'];
+		$term_counts = array( $term_id . '_product_cat' => 99 );
+		set_transient( 'wc_term_counts', $term_counts, MONTH_IN_SECONDS );
+		update_term_meta( $term_id, 'product_count_product_cat', 2 );
+
+		$term = get_term( $term_id, 'product_cat' );
+		$this->assertSame( 2, $term->count, 'Single-term counts should use metadata instead of the bulk transient.' );
+
+		$query_count = $wpdb->num_queries;
+		$term        = get_term( $term_id, 'product_cat' );
+		$this->assertSame( 2, $term->count, 'Repeated lookups should return the same catalog-visible count.' );
+		$this->assertSame( $query_count, $wpdb->num_queries, 'Repeated lookups should use the term and metadata caches without SQL queries.' );
+
+		update_term_meta( $term_id, 'product_count_product_cat', 4 );
+		$term = get_term( $term_id, 'product_cat' );
+		$this->assertSame( 4, $term->count, 'Metadata updates should be reflected in subsequent lookups.' );
+		$this->assertSame( $term_counts, get_transient( 'wc_term_counts' ), 'Single-term lookups should leave the bulk transient unchanged.' );
+	}
+
+	/**
 	 * @testdox Term product counts when a product is out of stock and OOS products are hidden from the catalog.
 	 */
 	public function test_hide_out_of_stock_products(): void {
