@@ -2,10 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
-use Automattic\WooCommerce\Internal\ProductFilters\FilterData;
-use Automattic\WooCommerce\Internal\ProductFilters\Params;
-use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
@@ -58,16 +56,30 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Cached attribute counts skip product queries after the request object cache is cleared.
+	 * @testdox Missing variations are excluded from lookup counts, including after changing the option.
 	 */
-	public function test_cached_attribute_counts_skip_product_query(): void {
-		$generator = $this->createMock( QueryClausesGenerator::class );
-		$generator->expects( $this->once() )->method( 'add_query_clauses' )->willReturnArgument( 0 );
-		$sut    = new FilterData( $generator, $this->taxonomy_hierarchy_data, wc_get_container()->get( Params::class ) );
-		$counts = $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' );
-		$this->assertNotEmpty( $counts );
-		wp_cache_flush();
-		$this->assertSame( $counts, $sut->get_attribute_counts( array( 'post_type' => 'product' ), 'pa_color' ) );
+	public function test_attribute_counts_exclude_missing_variations(): void {
+		$product                = wc_get_product( $this->products[4]->get_id() );
+		$blue                   = get_term_by( 'slug', 'blue-slug', 'pa_color' )->term_id;
+		$attributes             = $product->get_attributes();
+		$attributes['pa_color'] = clone $attributes['pa_color'];
+		$attributes['pa_color']->set_options( array_merge( $attributes['pa_color']->get_options(), array( $blue ) ) );
+		$product->set_attributes( $attributes );
+		$product->save();
+		wc_get_container()->get( LookupDataStore::class )->create_data_for_product( $product );
+		$query_vars = array(
+			'post_type' => 'product',
+			'post__in'  => array( $product->get_id() ),
+		);
+
+		foreach ( array(
+			'yes' => 0,
+			'no'  => 1,
+		) as $lookup => $expected ) {
+			update_option( 'woocommerce_attribute_lookup_enabled', $lookup );
+			$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+			$this->assertSame( $expected, $counts[ $blue ] ?? 0, 'Lookup option: ' . $lookup );
+		}
 	}
 
 	/**
