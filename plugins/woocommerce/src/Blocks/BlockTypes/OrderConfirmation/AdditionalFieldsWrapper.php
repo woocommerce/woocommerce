@@ -50,7 +50,9 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'additionalFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' ) );
+		$order_fields = Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' );
+		$this->asset_data_registry->add( 'additionalFields', $order_fields );
+		$this->asset_data_registry->add( 'additionalOrderFields', $order_fields );
 		$this->asset_data_registry->add( 'additionalContactFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'contact' ) );
 	}
 }
