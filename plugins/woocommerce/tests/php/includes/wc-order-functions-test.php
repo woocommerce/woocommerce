@@ -610,10 +610,11 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Creates a completed order holding a downloadable product with granted download permissions.
 	 *
-	 * @param int $quantity Ordered quantity of the downloadable product.
-	 * @return array Array with 'order', 'product' and 'item_id' keys.
+	 * @param int[] $line_quantities Quantity of the downloadable product per line item.
+	 * @param int   $download_limit  Download limit of the product (-1 = unlimited).
+	 * @return array Array with 'order', 'product' and 'item_ids' keys.
 	 */
-	private function create_completed_order_with_downloadable_product( int $quantity ): array {
+	private function create_completed_order_with_downloadable_product( array $line_quantities, int $download_limit = -1 ): array {
 		$approved_directories = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class );
 		if ( ! $approved_directories->approved_directory_exists( 'https://example.com/' ) ) {
 			$approved_directories->add_approved_directory( 'https://example.com/' );
@@ -627,18 +628,22 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 				),
 			)
 		);
+		$product->set_download_limit( $download_limit );
+		$product->save();
 
 		$order = new WC_Order();
-		$order->add_product( $product, $quantity );
+		foreach ( $line_quantities as $quantity ) {
+			$order->add_product( $product, $quantity );
+		}
 		$order->set_billing_email( 'customer@example.com' );
 		$order->calculate_totals();
 		$order->save();
 		$order->update_status( OrderStatus::COMPLETED );
 
 		return array(
-			'order'   => $order,
-			'product' => $product,
-			'item_id' => array_key_first( $order->get_items( 'line_item' ) ),
+			'order'    => $order,
+			'product'  => $product,
+			'item_ids' => array_keys( $order->get_items( 'line_item' ) ),
 		);
 	}
 
@@ -647,7 +652,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param WC_Order   $order   The order.
 	 * @param WC_Product $product The product.
-	 * @return array
+	 * @return WC_Customer_Download[]
 	 */
 	private function get_download_permissions( WC_Order $order, WC_Product $product ): array {
 		return WC_Data_Store::load( 'customer-download' )->get_downloads(
@@ -659,146 +664,115 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test how refunding affects the download permissions of the refunded product.
+	 * Creates a refund for one line item.
 	 *
-	 * Refunding an explicit quantity keeps the permissions while unrefunded quantity remains;
-	 * amount-only refunds keep the historical all-or-nothing behavior and revoke.
+	 * @param WC_Order $order   The order.
+	 * @param int      $item_id The line item id.
+	 * @param int      $qty     Quantity to refund (0 = amount-only refund).
+	 * @param string   $amount  Refund amount.
+	 * @return WC_Order_Refund|WP_Error
+	 */
+	private function refund_line_item( WC_Order $order, int $item_id, int $qty, string $amount ) {
+		return wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $amount,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => $qty,
+						'refund_total' => $amount,
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Test how refunding affects the download permissions of the refunded product.
 	 *
 	 * @see https://github.com/woocommerce/woocommerce/issues/67008
 	 *
 	 * @testWith [3, 1, 1]
 	 *           [2, 1, 1]
 	 *           [2, 2, 0]
-	 *           [1, 0, 0]
+	 *           [3, 0, 0]
 	 *
 	 * @param int $ordered_qty                  Ordered quantity of the downloadable product.
 	 * @param int $refund_qty                   Quantity being refunded (0 = amount-only refund).
 	 * @param int $expected_remaining_downloads Expected number of remaining download permissions.
 	 */
 	public function test_refund_download_permission_revocation( int $ordered_qty, int $refund_qty, int $expected_remaining_downloads ) {
-		$env    = $this->create_completed_order_with_downloadable_product( $ordered_qty );
-		$order  = $env['order'];
-		$item   = $order->get_items( 'line_item' )[ $env['item_id'] ];
-		$amount = $refund_qty > 0 ? wc_format_decimal( $item->get_total() / $ordered_qty * $refund_qty ) : 1;
+		$env     = $this->create_completed_order_with_downloadable_product( array( $ordered_qty ) );
+		$order   = $env['order'];
+		$item_id = $env['item_ids'][0];
+		$item    = $order->get_items( 'line_item' )[ $item_id ];
+		$amount  = $refund_qty > 0 ? wc_format_decimal( $item->get_total() / $ordered_qty * $refund_qty ) : '1';
 
 		$this->assertCount( 1, $this->get_download_permissions( $order, $env['product'] ), 'The completed order must have granted a download permission.' );
 
-		$refund = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $amount,
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => $refund_qty,
-						'refund_total' => $amount,
-					),
-				),
-			)
-		);
+		$refund = $this->refund_line_item( $order, $item_id, $refund_qty, $amount );
 
 		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
 		$this->assertCount( $expected_remaining_downloads, $this->get_download_permissions( $order, $env['product'] ) );
 	}
 
 	/**
-	 * Test that a second refund completing the item quantity revokes the download permission.
+	 * Test that a second refund revokes the download permission once no quantity remains,
+	 * whether it refunds the remaining quantity or only an amount.
 	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/67008
+	 * @testWith [1]
+	 *           [0]
+	 *
+	 * @param int $second_refund_qty Quantity of the second refund (0 = amount-only refund).
 	 */
-	public function test_second_refund_completing_quantity_revokes_download_permission() {
-		$env   = $this->create_completed_order_with_downloadable_product( 2 );
-		$order = $env['order'];
-		$item  = $order->get_items( 'line_item' )[ $env['item_id'] ];
-		$half  = wc_format_decimal( $item->get_total() / 2 );
+	public function test_second_refund_after_partial_refund_revokes_download_permission( int $second_refund_qty ) {
+		$env     = $this->create_completed_order_with_downloadable_product( array( 2 ) );
+		$order   = $env['order'];
+		$item_id = $env['item_ids'][0];
+		$half    = wc_format_decimal( $order->get_items( 'line_item' )[ $item_id ]->get_total() / 2 );
 
-		$first = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $half,
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $half,
-					),
-				),
-			)
-		);
+		$first = $this->refund_line_item( $order, $item_id, 1, $half );
 		$this->assertNotWPError( $first, 'The first refund should be created successfully.' );
-		$this->assertCount(
-			1,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'The download permission must survive the first partial refund.'
-		);
+		$this->assertCount( 1, $this->get_download_permissions( $order, $env['product'] ), 'The download permission must survive the first partial refund.' );
 
 		// A fresh order instance mirrors a later request handling the second refund.
 		$order  = wc_get_order( $order->get_id() );
-		$second = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $half,
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $half,
-					),
-				),
-			)
-		);
+		$second = $this->refund_line_item( $order, $item_id, $second_refund_qty, $half );
 		$this->assertNotWPError( $second, 'The second refund should be created successfully.' );
-		$this->assertCount(
-			0,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'Completing the refunded quantity across two refunds must revoke the download permission.'
-		);
+		$this->assertCount( 0, $this->get_download_permissions( $order, $env['product'] ), 'The second refund must revoke the download permission.' );
 	}
 
 	/**
-	 * Test that fully refunding one line item keeps the permission when another line item
+	 * Test that fully refunding one line item keeps the permissions when another line item
 	 * of the same product still has unrefunded quantity.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/67008
 	 */
-	public function test_refunding_one_of_two_lines_of_same_product_keeps_download_permission() {
-		$env   = $this->create_completed_order_with_downloadable_product( 1 );
-		$order = $env['order'];
+	public function test_refunding_one_of_two_lines_of_same_product_keeps_download_permissions() {
+		$env    = $this->create_completed_order_with_downloadable_product( array( 1, 1 ) );
+		$order  = $env['order'];
+		$before = count( $this->get_download_permissions( $order, $env['product'] ) );
+		$this->assertGreaterThan( 0, $before, 'The completed order must have granted download permissions.' );
 
-		// Add a second line item of the same product.
-		$order->add_product( $env['product'], 1 );
-		$order->calculate_totals();
-		$order->save();
-
-		$first_item = $order->get_items( 'line_item' )[ $env['item_id'] ];
-		$refund     = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $first_item->get_total(),
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $first_item->get_total(),
-					),
-				),
-			)
-		);
-
+		$first_item = $order->get_items( 'line_item' )[ $env['item_ids'][0] ];
+		$refund     = $this->refund_line_item( $order, $env['item_ids'][0], 1, (string) $first_item->get_total() );
 		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
-		$this->assertCount(
-			1,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'The permission must be kept while another line item of the same product retains quantity.'
-		);
+		$this->assertCount( $before, $this->get_download_permissions( $order, $env['product'] ), 'The permissions must be kept while another line item of the same product retains quantity.' );
+
+		$order       = wc_get_order( $order->get_id() );
+		$second_item = $order->get_items( 'line_item' )[ $env['item_ids'][1] ];
+		$refund2     = $this->refund_line_item( $order, $env['item_ids'][1], 1, (string) $second_item->get_total() );
+		$this->assertNotWPError( $refund2, 'The second refund should be created successfully.' );
+		$this->assertCount( 0, $this->get_download_permissions( $order, $env['product'] ), 'Refunding the last line item of the product must revoke the permissions.' );
 	}
 
 	/**
 	 * Test that a 'woocommerce_create_refund' callback raising the refunded quantity to the
 	 * full amount is respected when revoking download permissions.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/67008
 	 */
 	public function test_create_refund_hook_changing_quantity_is_respected_for_download_permissions() {
-		$env   = $this->create_completed_order_with_downloadable_product( 2 );
-		$order = $env['order'];
-		$item  = $order->get_items( 'line_item' )[ $env['item_id'] ];
+		$env     = $this->create_completed_order_with_downloadable_product( array( 2 ) );
+		$order   = $env['order'];
+		$item_id = $env['item_ids'][0];
+		$item    = $order->get_items( 'line_item' )[ $item_id ];
 
 		// Turn the partial refund into a full-quantity refund from a hook callback.
 		$raise_quantity = function ( $refund ) {
@@ -807,156 +781,69 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			}
 		};
 		add_action( 'woocommerce_create_refund', $raise_quantity );
-
-		$refund = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $item->get_total(),
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $item->get_total(),
-					),
-				),
-			)
-		);
-
+		$refund = $this->refund_line_item( $order, $item_id, 1, (string) $item->get_total() );
 		remove_action( 'woocommerce_create_refund', $raise_quantity );
 
 		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
-		$this->assertCount(
-			0,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'A hook callback refunding the full quantity must lead to the permission being revoked.'
-		);
+		$this->assertCount( 0, $this->get_download_permissions( $order, $env['product'] ), 'A hook callback refunding the full quantity must lead to the permission being revoked.' );
 	}
 
 	/**
 	 * Test that the 'woocommerce_refund_should_revoke_download_permissions' filter can
 	 * override the keep/revoke decision in both directions.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/67008
 	 */
 	public function test_refund_download_permission_revocation_filter() {
 		// Opt out of revocation on a full-quantity refund.
-		$env   = $this->create_completed_order_with_downloadable_product( 1 );
-		$order = $env['order'];
-		$item  = $order->get_items( 'line_item' )[ $env['item_id'] ];
+		$env     = $this->create_completed_order_with_downloadable_product( array( 1 ) );
+		$order   = $env['order'];
+		$item_id = $env['item_ids'][0];
+		$item    = $order->get_items( 'line_item' )[ $item_id ];
 
 		add_filter( 'woocommerce_refund_should_revoke_download_permissions', '__return_false' );
-		$refund = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $item->get_total(),
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $item->get_total(),
-					),
-				),
-			)
-		);
+		$refund = $this->refund_line_item( $order, $item_id, 1, (string) $item->get_total() );
 		remove_filter( 'woocommerce_refund_should_revoke_download_permissions', '__return_false' );
 
 		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
-		$this->assertCount(
-			1,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'The filter must be able to keep permissions on a full refund.'
-		);
+		$this->assertCount( 1, $this->get_download_permissions( $order, $env['product'] ), 'The filter must be able to keep permissions on a full refund.' );
 
 		// Opt into revocation on a partial refund.
-		$env2   = $this->create_completed_order_with_downloadable_product( 3 );
-		$order2 = $env2['order'];
-		$item2  = $order2->get_items( 'line_item' )[ $env2['item_id'] ];
-		$third  = wc_format_decimal( $item2->get_total() / 3 );
+		$env2     = $this->create_completed_order_with_downloadable_product( array( 3 ) );
+		$order2   = $env2['order'];
+		$item_id2 = $env2['item_ids'][0];
+		$third    = wc_format_decimal( $order2->get_items( 'line_item' )[ $item_id2 ]->get_total() / 3 );
 
 		add_filter( 'woocommerce_refund_should_revoke_download_permissions', '__return_true' );
-		$refund2 = wc_create_refund(
-			array(
-				'order_id'   => $order2->get_id(),
-				'amount'     => $third,
-				'line_items' => array(
-					$env2['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $third,
-					),
-				),
-			)
-		);
+		$refund2 = $this->refund_line_item( $order2, $item_id2, 1, $third );
 		remove_filter( 'woocommerce_refund_should_revoke_download_permissions', '__return_true' );
 
 		$this->assertNotWPError( $refund2, 'The refund should be created successfully.' );
-		$this->assertCount(
-			0,
-			$this->get_download_permissions( $order2, $env2['product'] ),
-			'The filter must be able to force revocation on a partial refund.'
-		);
+		$this->assertCount( 0, $this->get_download_permissions( $order2, $env2['product'] ), 'The filter must be able to force revocation on a partial refund.' );
 	}
 
 	/**
-	 * Test that fee lines (including negative fees) do not interfere with the
-	 * download permission handling of product line items.
+	 * Test that a partial quantity refund lowers the remaining downloads of a limited product
+	 * by the refunded quantity, while unlimited products are left untouched.
 	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/67008
+	 * @testWith [2, "6", "4"]
+	 *           [-1, "", ""]
+	 *
+	 * @param int    $download_limit     Download limit of the product (-1 = unlimited).
+	 * @param string $expected_before    Expected remaining downloads after completing the order.
+	 * @param string $expected_after     Expected remaining downloads after refunding one of three units.
 	 */
-	public function test_fee_refunds_do_not_affect_download_permissions() {
-		$env   = $this->create_completed_order_with_downloadable_product( 2 );
-		$order = $env['order'];
+	public function test_partial_refund_lowers_remaining_downloads( int $download_limit, string $expected_before, string $expected_after ) {
+		$env     = $this->create_completed_order_with_downloadable_product( array( 3 ), $download_limit );
+		$order   = $env['order'];
+		$item_id = $env['item_ids'][0];
+		$third   = wc_format_decimal( $order->get_items( 'line_item' )[ $item_id ]->get_total() / 3 );
 
-		$fee = new WC_Order_Item_Fee();
-		$fee->set_name( 'Handling' );
-		$fee->set_total( 5 );
-		$order->add_item( $fee );
+		$this->assertSame( $expected_before, (string) $this->get_download_permissions( $order, $env['product'] )[0]->get_downloads_remaining() );
 
-		$discount = new WC_Order_Item_Fee();
-		$discount->set_name( 'Loyalty discount' );
-		$discount->set_total( -3 );
-		$order->add_item( $discount );
+		$refund = $this->refund_line_item( $order, $item_id, 1, $third );
+		$this->assertNotWPError( $refund, 'The refund should be created successfully.' );
 
-		$order->calculate_totals();
-		$order->save();
-
-		// Refunding only the fee must not touch the product's download permission.
-		$fee_refund = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => 5,
-				'line_items' => array(
-					$fee->get_id() => array(
-						'qty'          => 0,
-						'refund_total' => 5,
-					),
-				),
-			)
-		);
-		$this->assertNotWPError( $fee_refund, 'The fee refund should be created successfully.' );
-		$this->assertCount(
-			1,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'Refunding a fee only must not revoke the download permission of the product.'
-		);
-
-		// A partial quantity refund of the product keeps the permission despite the fee lines.
-		$item    = $order->get_items( 'line_item' )[ $env['item_id'] ];
-		$partial = wc_format_decimal( $item->get_total() / 2 );
-		$refund  = wc_create_refund(
-			array(
-				'order_id'   => $order->get_id(),
-				'amount'     => $partial,
-				'line_items' => array(
-					$env['item_id'] => array(
-						'qty'          => 1,
-						'refund_total' => $partial,
-					),
-				),
-			)
-		);
-		$this->assertNotWPError( $refund, 'The partial product refund should be created successfully.' );
-		$this->assertCount(
-			1,
-			$this->get_download_permissions( $order, $env['product'] ),
-			'The partial quantity refund must keep the permission with fee lines on the order.'
-		);
+		$downloads = $this->get_download_permissions( $order, $env['product'] );
+		$this->assertCount( 1, $downloads, 'The download permission must be kept on a partial refund.' );
+		$this->assertSame( $expected_after, (string) $downloads[0]->get_downloads_remaining() );
 	}
 }

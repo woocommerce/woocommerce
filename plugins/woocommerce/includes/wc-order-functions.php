@@ -690,59 +690,82 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
-			// delete downloads that were refunded using order and product id, if present.
+			// Revoke or reduce the download permissions of refunded products.
 			if ( ! empty( $refunded_order_and_products ) && $order instanceof WC_Order ) {
 				$download_data_store = WC_Data_Store::load( 'customer-download' );
 
-				// Quantities refunded by this refund, per original order item.
-				$current_refund_quantities = array();
-				foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
-					$original_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-					if ( $original_item_id ) {
-						$already_counted                                = isset( $current_refund_quantities[ $original_item_id ] ) ? $current_refund_quantities[ $original_item_id ] : 0;
-						$current_refund_quantities[ $original_item_id ] = $already_counted + abs( (float) $refunded_item->get_quantity() );
+				// Quantities refunded so far, per original order item. Refund items carry negative quantities.
+				$refunded_qty_by_item = array();
+				foreach ( $order->get_refunds() as $order_refund ) {
+					foreach ( $order_refund->get_items( 'line_item' ) as $refunded_item ) {
+						$original_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+						if ( $original_item_id ) {
+							$refunded_qty_by_item[ $original_item_id ] = ( $refunded_qty_by_item[ $original_item_id ] ?? 0 ) + (float) $refunded_item->get_quantity();
+						}
 					}
 				}
 
-				// Products with unrefunded quantity left on the order, across all line items.
-				$products_with_remaining_qty = array();
+				// Unrefunded quantity per product, across all line items of the order.
+				$remaining_qty = array();
 				foreach ( $order->get_items() as $order_item_id => $order_item ) {
 					if ( ! $order_item instanceof WC_Order_Item_Product ) {
 						continue;
 					}
-
-					$remaining_qty = $order_item->get_quantity() - abs( (float) $order->get_qty_refunded_for_item( $order_item_id ) );
-					if ( $remaining_qty > 0 ) {
-						$products_with_remaining_qty[ $order_item->get_product_id() ] = true;
-					}
+					$product_id                   = $order_item->get_product_id();
+					$remaining_qty[ $product_id ] = ( $remaining_qty[ $product_id ] ?? 0 ) + $order_item->get_quantity() + ( $refunded_qty_by_item[ $order_item_id ] ?? 0 );
 				}
 
+				// Quantity entered for this refund, per product. Zero for amount-only refunds.
+				$refunded_qty_by_product = array();
 				foreach ( $refunded_order_and_products as $refunded_item_id => $refunded_order_and_product ) {
-					$product_id = $refunded_order_and_product['product_id'];
+					$product_id                             = $refunded_order_and_product['product_id'];
+					$refunded_qty_by_product[ $product_id ] = ( $refunded_qty_by_product[ $product_id ] ?? 0 ) + (float) ( $args['line_items'][ $refunded_item_id ]['qty'] ?? 0 );
+				}
 
+				foreach ( $refunded_qty_by_product as $product_id => $refunded_qty ) {
 					// Only a quantity refund keeps the permissions; amount-only refunds always revoke.
-					$is_quantity_refund = ! empty( $current_refund_quantities[ $refunded_item_id ] );
-					$should_revoke      = ! ( $is_quantity_refund && isset( $products_with_remaining_qty[ $product_id ] ) );
+					$should_revoke = empty( $refunded_qty ) || ( $remaining_qty[ $product_id ] ?? 0 ) <= 0;
 
 					/**
 					 * Filters whether creating a refund should revoke the download permissions of a
 					 * refunded product on the order.
 					 *
-					 * @since 11.2.0
+					 * @since 11.3.0
 					 *
 					 * @param bool            $should_revoke Whether the download permissions will be revoked.
 					 * @param int             $product_id    The id of the refunded product.
 					 * @param WC_Order        $order         The order the refund belongs to.
 					 * @param WC_Order_Refund $refund        The newly created refund.
 					 */
-					if ( ! apply_filters( 'woocommerce_refund_should_revoke_download_permissions', $should_revoke, $product_id, $order, $refund ) ) {
+					$should_revoke = apply_filters( 'woocommerce_refund_should_revoke_download_permissions', $should_revoke, $product_id, $order, $refund );
+
+					$downloads = $download_data_store->get_downloads(
+						array(
+							'order_id'   => $order->get_id(),
+							'product_id' => $product_id,
+						)
+					);
+					if ( empty( $downloads ) ) {
 						continue;
 					}
 
-					$downloads = $download_data_store->get_downloads( $refunded_order_and_product );
-					if ( ! empty( $downloads ) ) {
+					if ( $should_revoke ) {
 						foreach ( $downloads as $download ) {
 							$download_data_store->delete_by_id( $download->get_id() );
+						}
+						continue;
+					}
+
+					// Kept permissions of limited products lose the downloads of the refunded quantity.
+					$product        = wc_get_product( $product_id );
+					$download_limit = $product ? (int) $product->get_download_limit() : 0;
+					if ( $refunded_qty > 0 && $download_limit > 0 ) {
+						foreach ( $downloads as $download ) {
+							if ( '' === $download->get_downloads_remaining() ) {
+								continue;
+							}
+							$download->set_downloads_remaining( max( 0, (int) $download->get_downloads_remaining() - (int) ( $download_limit * $refunded_qty ) ) );
+							$download->save();
 						}
 					}
 				}
