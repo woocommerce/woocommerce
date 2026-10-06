@@ -285,7 +285,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->seed_list_contract( ContractStatus::ON_HOLD );
 
 		$by_status = Subscriptions::count_by_status();
-		$this->assertSame( ContractStatus::all(), array_keys( $by_status ) );
+		$this->assertSame( ContractStatus::get_all(), array_keys( $by_status ) );
 		$this->assertSame( 2, $by_status[ ContractStatus::ACTIVE ] );
 		$this->assertSame( 1, $by_status[ ContractStatus::ON_HOLD ] );
 		$this->assertSame( 0, $by_status[ ContractStatus::CANCELLED ] );
@@ -345,7 +345,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		// Newest first: cycle 2 is billed, linked to the renewal order.
 		$cycle_two = $history[0];
 		$this->assertSame( 2, $cycle_two->get_count() );
-		$this->assertTrue( $cycle_two->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle_two->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( $renewal_order->get_id(), $cycle_two->get_order_id() );
 
 		// The schedule advanced one cadence (cycle 1 ended 2026-02-15 + 1 month).
@@ -468,15 +468,19 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$held = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $held );
 		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
+		$this->assertNull( $held->get_next_payment_gmt(), 'Hold disarms the next-due moment.' );
 
 		$this->assertTrue( Subscriptions::reactivate( $contract_id ) );
 		$active = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $active );
 		$this->assertSame( ContractStatus::ACTIVE, $active->get_status() );
+		$this->assertNotNull( $active->get_next_payment_gmt(), 'Reactivate re-arms the next-due moment.' );
 
 		$this->assertTrue( Subscriptions::cancel_at_period_end( $contract_id ) );
 		$pending = Subscriptions::get( $contract_id );
 		$this->assertInstanceOf( Contract::class, $pending );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $pending->get_status() );
+		$this->assertNull( $pending->get_next_payment_gmt(), 'Cancel at period end disarms the next-due moment.' );
+		$this->assertNotNull( $pending->get_end_gmt(), 'The former next-due moment becomes the end date.' );
 	}
 }

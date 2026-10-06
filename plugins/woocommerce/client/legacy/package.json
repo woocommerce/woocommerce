@@ -24,7 +24,7 @@
 	"devDependencies": {
 		"@types/node": "^24.1.0",
 		"@wordpress/scripts": "32.6.0",
-		"@wordpress/stylelint-config": "^23.14.0",
+		"@wordpress/stylelint-config": "catalog:tooling",
 		"chokidar": "^3.6.0",
 		"eslint": "^10.0.0",
 		"globals": "^16.5.0",
@@ -40,7 +40,7 @@
 		"grunt-stylelint": "0.20.1",
 		"jest-fixed-jsdom": "^0.0.10",
 		"sass": "^1.69.5",
-		"stylelint": "^16.9.0"
+		"stylelint": "catalog:tooling"
 	},
 	"dependencies": {
 		"sourcebuster": "github:woocommerce/sourcebuster-js#d7f4616d5a17e17db925ca1842457f309379d861"

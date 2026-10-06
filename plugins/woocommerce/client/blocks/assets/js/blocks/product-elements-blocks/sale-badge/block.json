@@ -4,7 +4,11 @@
 	"description": "Displays an on-sale badge if the product is on-sale.",
 	"category": "woocommerce-product-elements",
 	"attributes": {
-		"productId": { "type": "number", "default": 0 }
+		"productId": { "type": "number", "default": 0 },
+		"badgeContent": { "type": "string" },
+		"saleText": { "type": "string" },
+		"prefix": { "type": "string" },
+		"suffix": { "type": "string" }
 	},
 	"supports": {
 		"interactivity": {
