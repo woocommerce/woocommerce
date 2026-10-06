@@ -118,7 +118,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
 		$this->assertSame( '2099-01-01 00:00:00', $stored->get_end_gmt() );
 		$this->assertNull( $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_cancel_at_period_end_on_a_pending_cancellation_contract_is_a_no_op(): void {
@@ -193,7 +193,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::CANCELLED, $stored->get_status() );
 		$this->assertNull( $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_cancel_accepts_a_pending_cancellation_contract(): void {
@@ -253,39 +253,28 @@ class CancellationTest extends EngineIntegrationTestCase {
 
 	public function test_cancel_at_period_end_ignores_a_malformed_hold_anchor(): void {
 		$id = $this->seed( ContractStatus::ON_HOLD );
-		$this->contracts->update( $this->with_hold_anchor( $this->reload( $id ), 'not-a-date' ) );
+		$this->contracts->update_meta( $id, Hold::ANCHOR_META_KEY, 'not-a-date' );
 
 		$this->sut->cancel_at_period_end( $this->reload( $id ) );
 
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
 		$this->assertSame( '2099-01-01 00:00:00', $stored->get_end_gmt(), 'The stored next payment, not the malformed anchor, is the period end.' );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_cancel_at_period_end_from_on_hold_without_a_date_leaves_no_end(): void {
 		$id   = $this->seed( ContractStatus::ON_HOLD );
 		$held = $this->reload( $id );
 		$held->set_next_payment_gmt( null );
-		$this->contracts->update( $this->with_hold_anchor( $held, 'not-a-date' ) );
+		$this->contracts->update( $held );
+		$this->contracts->update_meta( $id, Hold::ANCHOR_META_KEY, 'not-a-date' );
 
 		$this->sut->cancel_at_period_end( $this->reload( $id ) );
 
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
 		$this->assertNull( $stored->get_end_gmt(), 'A malformed anchor is never written as the end date.' );
-	}
-
-	/**
-	 * Set the hold anchor meta on a contract.
-	 *
-	 * @param Contract $contract Contract to change.
-	 * @param string   $anchor   Anchor value to store.
-	 */
-	private function with_hold_anchor( Contract $contract, string $anchor ): Contract {
-		$contract->set_meta( Hold::ANCHOR_META_KEY, $anchor );
-
-		return $contract;
 	}
 
 	public function test_cancel_at_period_end_rejects_an_expired_contract(): void {

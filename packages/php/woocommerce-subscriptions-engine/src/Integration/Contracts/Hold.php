@@ -116,60 +116,66 @@ final class Hold {
 	}
 
 	/**
-	 * Store the next-due moment as the hold anchor while the contract is still active,
-	 * before the hold disarms it.
+	 * Store the next-due moment as the hold anchor before the hold disarms it.
 	 *
-	 * The repository writes the row and its meta as separate statements (no
-	 * transaction), so the anchor is written and read back first: if it did not
-	 * persist, nothing has been disarmed yet and the hold aborts. A contract with no
-	 * next-due moment stores no anchor (null removes the key). An anchor left behind by
-	 * a hold that then loses its compare-and-set is harmless: the next hold overwrites
-	 * it and cancellation clears it.
+	 * The anchor lives in contract meta, written apart from the row (no transaction),
+	 * so it is written and read back first: if it did not persist, nothing has been
+	 * disarmed yet and the hold aborts. A contract with no next-due moment stores no
+	 * anchor. An anchor left behind by a hold that then loses its compare-and-set is
+	 * harmless: the next hold overwrites it and cancellation clears it.
 	 *
 	 * @param Contract $contract Active contract about to be held. Must have an id.
-	 * @throws \DomainException If the contract stopped being active concurrently.
 	 * @throws RuntimeException If the anchor could not be stored.
 	 */
 	private function persist_anchor( Contract $contract ): void {
+		$id               = (int) $contract->get_id();
 		$next_payment_gmt = $contract->get_next_payment_gmt();
-		$contract->set_meta( self::ANCHOR_META_KEY, $next_payment_gmt );
 
-		if ( ! $this->contracts->update_if_status( $contract, ContractStatus::ACTIVE ) ) {
-			throw new \DomainException( 'Hold::hold(): the contract state changed concurrently; nothing was written.' );
+		try {
+			if ( null === $next_payment_gmt ) {
+				$this->contracts->delete_meta( $id, self::ANCHOR_META_KEY );
+			} else {
+				$this->contracts->update_meta( $id, self::ANCHOR_META_KEY, $next_payment_gmt );
+			}
+		} catch ( RuntimeException $e ) {
+			throw new RuntimeException( 'Hold::hold(): the hold anchor could not be stored; the contract was not held.', 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the previous exception is not output.
 		}
 
-		$stored = $this->contracts->find( (int) $contract->get_id() );
-		$anchor = null === $stored ? null : ( $stored->get_meta()[ self::ANCHOR_META_KEY ] ?? null );
+		$stored = $this->contracts->get_meta( $id, self::ANCHOR_META_KEY, true );
+		$anchor = '' === $stored ? null : $stored;
 		if ( $anchor !== $next_payment_gmt ) {
 			throw new RuntimeException( 'Hold::hold(): the hold anchor could not be stored; the contract was not held.' );
 		}
 	}
 
 	/**
-	 * The hold anchor stored on `$contract`, or null when there is none.
+	 * The hold anchor stored for a contract, or null when there is none.
 	 *
 	 * The one reader of {@see self::ANCHOR_META_KEY}: a value that is not a well-formed
 	 * GMT datetime (`Y-m-d H:i:s`) counts as absent and is logged, since a flow resuming
 	 * or ending from it would otherwise act on garbage.
 	 *
-	 * @param Contract $contract Contract to read.
+	 * @param ContractRepository $contracts   Contract repository.
+	 * @param int                $contract_id Contract id.
 	 */
-	public static function read_anchor( Contract $contract ): ?string {
-		$anchor = $contract->get_meta()[ self::ANCHOR_META_KEY ] ?? '';
-		if ( '' === $anchor ) {
+	public static function read_anchor( ContractRepository $contracts, int $contract_id ): ?string {
+		$anchor = $contracts->get_meta( $contract_id, self::ANCHOR_META_KEY, true );
+		if ( '' === $anchor || null === $anchor ) {
 			return null;
 		}
 
-		$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $anchor, new DateTimeZone( 'UTC' ) );
-		if ( false !== $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $anchor ) {
-			return $anchor;
+		if ( is_string( $anchor ) ) {
+			$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $anchor, new DateTimeZone( 'UTC' ) );
+			if ( false !== $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $anchor ) {
+				return $anchor;
+			}
 		}
 
 		wc_get_logger()->warning(
-			sprintf( 'Hold: contract %d has a malformed hold anchor; it is ignored.', (int) $contract->get_id() ),
+			sprintf( 'Hold: contract %d has a malformed hold anchor; it is ignored.', $contract_id ),
 			array(
 				'source'      => 'woocommerce-subscriptions-engine',
-				'contract_id' => $contract->get_id(),
+				'contract_id' => $contract_id,
 			)
 		);
 

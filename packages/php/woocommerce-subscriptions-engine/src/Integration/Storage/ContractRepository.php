@@ -1636,10 +1636,6 @@ final class ContractRepository {
 		if ( $this->addresses_signature( $this->find_addresses( $id ) ) !== $this->addresses_signature( $contract->get_addresses() ) ) {
 			$this->replace_addresses( $id, $contract->get_addresses() );
 		}
-
-		if ( $this->meta_signature( $this->find_meta( $id ) ) !== $this->meta_signature( $contract->get_meta() ) ) {
-			$this->replace_meta( $id, $contract->get_meta() );
-		}
 	}
 
 	/**

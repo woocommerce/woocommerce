@@ -747,7 +747,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 						'total'      => '24.00',
 					),
 				),
-				'meta'            => array( 'source_channel' => 'email' ),
 			)
 		);
 		$mutated->set_id( $id );
@@ -759,7 +758,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$items = $reloaded->get_items();
 		$this->assertCount( 1, $items );
 		$this->assertSame( 'Tea tin', $items[0]['item_name'] );
-		$this->assertSame( 'email', $reloaded->get_meta()['source_channel'] );
 	}
 
 	/**

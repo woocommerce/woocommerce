@@ -122,10 +122,9 @@ final class Reactivation {
 
 		// A next-due moment set while held was re-armed deliberately (hold clears it), so
 		// it wins; otherwise resume from the hold anchor, ignoring a malformed one.
-		$anchor = $contract->get_next_payment_gmt() ?? Hold::read_anchor( $contract );
+		$anchor = $contract->get_next_payment_gmt() ?? Hold::read_anchor( $this->contracts, $id );
 
 		$contract->set_next_payment_gmt( $this->recompute_next_payment( $contract, $anchor, $now, $this->billing_policy( $contract ) ) );
-		$contract->set_meta( Hold::ANCHOR_META_KEY, null );
 		$contract->set_status( ContractStatus::ACTIVE );
 
 		// Compare-and-set on the ON_HOLD status read above: a concurrent transition
@@ -134,6 +133,8 @@ final class Reactivation {
 		if ( ! $this->contracts->update_if_status( $contract, ContractStatus::ON_HOLD ) ) {
 			throw new DomainException( 'Reactivation::reactivate(): the contract state changed concurrently; nothing was written.' );
 		}
+
+		$this->contracts->delete_meta( $id, Hold::ANCHOR_META_KEY );
 
 		/**
 		 * Fires after a held contract is reactivated: its renewal is re-armed, or left

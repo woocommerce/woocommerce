@@ -104,11 +104,15 @@ class ReactivationTest extends EngineIntegrationTestCase {
 				'start_gmt'        => '2026-01-01 00:00:00',
 				'next_payment_gmt' => $next_payment_gmt,
 				'billing_total'    => '19.99',
-				'meta'             => $meta,
 			)
 		);
 
-		return $this->contracts->insert( $contract );
+		$id = $this->contracts->insert( $contract );
+		foreach ( $meta as $key => $value ) {
+			$this->contracts->add_meta( $id, $key, $value );
+		}
+
+		return $id;
 	}
 
 	private function utc( string $datetime ): DateTimeImmutable {
@@ -156,7 +160,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_reactivate_rolls_a_past_due_anchor_forward(): void {
@@ -168,7 +172,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 
 		$stored = $this->reload( $id );
 		$this->assertSame( '2026-05-01 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	/**
@@ -181,7 +185,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 
 		$stored = $this->reload( $id );
 		$this->assertSame( '2099-06-01 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_reactivate_ignores_a_malformed_anchor(): void {
@@ -192,7 +196,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertNull( $stored->get_next_payment_gmt(), 'A malformed anchor counts as absent.' );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_reactivate_rolls_by_the_frozen_snapshot_cadence_over_the_live_plan(): void {

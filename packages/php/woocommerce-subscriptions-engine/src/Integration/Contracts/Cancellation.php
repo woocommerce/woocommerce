@@ -94,7 +94,6 @@ final class Cancellation {
 		if ( ContractStatus::CANCELLED !== $previous ) {
 			$contract->set_status( ContractStatus::CANCELLED );
 			$contract->set_next_payment_gmt( null );
-			$contract->set_meta( Hold::ANCHOR_META_KEY, null );
 		}
 
 		// Compare-and-set on the status read above: a concurrent transition (another
@@ -102,6 +101,10 @@ final class Cancellation {
 		// than be clobbered.
 		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
 			throw new \DomainException( 'Cancellation::cancel(): the contract state changed concurrently; nothing was written.' );
+		}
+
+		if ( ContractStatus::CANCELLED !== $previous ) {
+			$this->contracts->delete_meta( $id, Hold::ANCHOR_META_KEY );
 		}
 
 		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no stale
@@ -163,13 +166,12 @@ final class Cancellation {
 			// up to (not through) it. A held contract's moment lives in the hold anchor.
 			$period_end = $contract->get_next_payment_gmt();
 			if ( null === $period_end && ContractStatus::ON_HOLD === $previous ) {
-				$period_end = Hold::read_anchor( $contract );
+				$period_end = Hold::read_anchor( $this->contracts, $id );
 			}
 			if ( null === $contract->get_end_gmt() && null !== $period_end ) {
 				$contract->set_end_gmt( $period_end );
 			}
 
-			$contract->set_meta( Hold::ANCHOR_META_KEY, null );
 			$contract->set_next_payment_gmt( null );
 		}
 
@@ -177,6 +179,10 @@ final class Cancellation {
 		// write miss loudly rather than be clobbered.
 		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
 			throw new \DomainException( 'Cancellation::cancel_at_period_end(): the contract state changed concurrently; nothing was written.' );
+		}
+
+		if ( ContractStatus::PENDING_CANCELLATION !== $previous ) {
+			$this->contracts->delete_meta( $id, Hold::ANCHOR_META_KEY );
 		}
 
 		/**
