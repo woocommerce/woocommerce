@@ -7,6 +7,7 @@
  */
 module.exports = {
 	extends: '@wordpress/stylelint-config/scss-stylistic',
+	reportNeedlessDisables: true,
 	rules: {
 		'no-descending-specificity': null,
 		'no-duplicate-selectors': null,

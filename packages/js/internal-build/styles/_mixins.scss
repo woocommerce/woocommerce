@@ -112,7 +112,6 @@
 	outline-offset: -2px;
 }
 
-/* stylelint-disable block-closing-brace-newline-after */
 @mixin reduce-motion( $property: "" ) {
 	@if $property == "transition" {
 		@media ( prefers-reduced-motion: reduce ) {
@@ -129,7 +128,6 @@
 		}
 	}
 }
-/* stylelint-enable */
 
 // Gutenberg Switch.
 @mixin switch-style__focus-active() {
