@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -9,6 +9,61 @@ import { render } from '@testing-library/react';
 import { StatusBadge } from '../status-badge';
 
 describe( 'StatusBadge component', () => {
+	it( 'allows Enter on a popover link without preventing its default action', async () => {
+		render(
+			<StatusBadge
+				status="not_supported"
+				popoverContent={
+					<a href="https://example.test/">Learn more</a>
+				}
+			/>
+		);
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'More information' } )
+		);
+		const link = await screen.findByRole( 'link', { name: 'Learn more' } );
+		link.focus();
+		const enter = new window.KeyboardEvent( 'keydown', {
+			key: 'Enter',
+			bubbles: true,
+			cancelable: true,
+		} );
+
+		fireEvent( link, enter );
+
+		expect( enter.defaultPrevented ).toBe( false );
+		expect( link ).toBeInTheDocument();
+	} );
+
+	it( 'opens with Enter and Space and returns focus to the trigger on Escape', async () => {
+		render(
+			<StatusBadge
+				status="not_supported"
+				popoverContent={
+					<a href="https://example.test/">Learn more</a>
+				}
+			/>
+		);
+		const trigger = screen.getByRole( 'button', {
+			name: 'More information',
+		} );
+		trigger.focus();
+		fireEvent.keyDown( trigger, { key: 'Enter' } );
+		const link = await screen.findByRole( 'link', { name: 'Learn more' } );
+		link.focus();
+
+		fireEvent.keyDown( link, { key: 'Escape' } );
+
+		expect(
+			screen.queryByRole( 'link', { name: 'Learn more' } )
+		).not.toBeInTheDocument();
+		expect( trigger ).toHaveFocus();
+		fireEvent.keyDown( trigger, { key: ' ' } );
+		expect(
+			await screen.findByRole( 'link', { name: 'Learn more' } )
+		).toBeInTheDocument();
+	} );
+
 	it( 'renders the correct message for active status', () => {
 		const { getByText } = render( <StatusBadge status="active" /> );
 		expect( getByText( 'Active' ) ).toBeInTheDocument();
