@@ -378,7 +378,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/e2e-test-utils"
@@ -600,13 +599,18 @@
 			"pinVersion": "^3.21.0"
 		},
 		{
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
+				"@wordpress/stylelint-config",
 				"stylelint"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^16.9.0"
+			"policy": "catalog"
 		},
 		{
 			"dependencies": [
