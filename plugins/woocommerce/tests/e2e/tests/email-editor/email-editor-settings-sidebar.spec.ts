@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -15,6 +15,7 @@ import {
 import {
 	accessTheEmailEditor,
 	ensureEmailEditorSettingsPanelIsOpened,
+	openEmailPostInEditor,
 } from '../../utils/email';
 import { locks } from '../../fixtures/fixtures';
 
@@ -23,6 +24,23 @@ test.describe(
 	{ lock: locks.EMAIL_FEATURE_FLAGS },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		const emailPostIds = new Map< string, string >();
+
+		// The settings page is slow, so only the first test per email in a worker
+		// opens the editor through it. The lock keeps the post in place until afterAll.
+		const openEmail = async ( page: Page, emailTitle: string ) => {
+			const knownPostId = emailPostIds.get( emailTitle );
+			if ( knownPostId ) {
+				await openEmailPostInEditor( page, knownPostId );
+				return;
+			}
+			await accessTheEmailEditor( page, emailTitle );
+			const postId = new URL( page.url() ).searchParams.get( 'post' );
+			if ( postId ) {
+				emailPostIds.set( emailTitle, postId );
+			}
+		};
 
 		test.beforeAll( async ( { baseURL } ) => {
 			await enableEmailEditor( baseURL );
@@ -35,7 +53,7 @@ test.describe(
 		} );
 
 		test( 'Can update email status', async ( { page } ) => {
-			await accessTheEmailEditor( page, 'Customer note' );
+			await openEmail( page, 'Customer note' );
 
 			await page
 				.getByLabel( 'Email' )
@@ -53,8 +71,17 @@ test.describe(
 			await expect(
 				page.locator( '.editor-post-status__toggle' )
 			).toContainText( 'Inactive' );
-			// eslint-disable-next-line playwright/no-wait-for-timeout -- wait for content to be saved and updated.
-			await page.waitForTimeout( 1000 );
+			await expect
+				.poll( () =>
+					page.evaluate( () => {
+						const editor = window.wp.data.select( 'core/editor' );
+						return (
+							! editor.isSavingPost() &&
+							! editor.isEditedPostDirty()
+						);
+					} )
+				)
+				.toBe( true );
 			await page.reload();
 			await expect(
 				page.locator( '.editor-post-status__toggle' )
@@ -75,7 +102,7 @@ test.describe(
 		test( 'Can update email subject and preview text', async ( {
 			page,
 		} ) => {
-			await accessTheEmailEditor( page, 'Customer note' );
+			await openEmail( page, 'Customer note' );
 
 			await page
 				.getByLabel( 'Email' )
@@ -163,7 +190,7 @@ test.describe(
 		} );
 
 		test( 'Can update email recipients', async ( { page } ) => {
-			await accessTheEmailEditor( page, 'New order' );
+			await openEmail( page, 'New order' );
 			await page
 				.getByLabel( 'Email' )
 				.getByRole( 'button', { name: 'Settings' } )
@@ -215,7 +242,7 @@ test.describe(
 		test( 'Does not show the core Content block list in the Email tab', async ( {
 			page,
 		} ) => {
-			await accessTheEmailEditor( page, 'Customer note' );
+			await openEmail( page, 'Customer note' );
 
 			const emailTab = page.getByLabel( 'Email' );
 			await expect(
@@ -237,8 +264,18 @@ test.describe(
 		test( 'Shows the Content list in the Block tab of a content-only block', async ( {
 			page,
 		} ) => {
-			await accessTheEmailEditor( page, 'Customer note' );
-			await expect( page.getByLabel( 'Email' ) ).toBeVisible();
+			await openEmail( page, 'Customer note' );
+			// The email content replaces the post-content inner blocks when it
+			// loads, so wait for it before inserting a block.
+			await expect(
+				page
+					.locator( 'iframe[name="editor-canvas"]' )
+					.contentFrame()
+					.getByLabel( 'Block: Heading' )
+					.filter( {
+						hasText: 'A note has been added to your order',
+					} )
+			).toBeVisible();
 
 			await page.evaluate( () => {
 				const { createBlock } = window.wp.blocks;
