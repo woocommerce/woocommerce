@@ -337,6 +337,39 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The on_sale filter must combine with an include list correctly: a product that is not on sale
+	 * must not be returned when on_sale=true, even when it is in the include list.
+	 *
+	 * @return void
+	 */
+	public function test_on_sale_filter_combined_with_include() {
+		$on_sale = WC_Helper_Product::create_simple_product();
+		$on_sale->set_regular_price( 100 );
+		$on_sale->set_sale_price( 50 );
+		$on_sale->save();
+
+		$regular = WC_Helper_Product::create_simple_product();
+		$regular->set_regular_price( 100 );
+		$regular->save();
+
+		delete_transient( 'wc_products_onsale' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'on_sale' => true,
+				'include' => array( $regular->get_id(), $on_sale->get_id() ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$ids = wp_list_pluck( $response->get_data(), 'id' );
+		$this->assertContains( $on_sale->get_id(), $ids, 'The on-sale product should be returned.' );
+		$this->assertNotContains( $regular->get_id(), $ids, 'A product that is not on sale must not be returned when on_sale=true.' );
+	}
+
+	/**
 	 * Test that the `search_sku` parameter does partial matching in the product SKU, but not the name.
 	 *
 	 * @return void

@@ -464,7 +464,17 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			// += is array-union-by-key and mis-combines with include/exclude; intersect post__in, merge post__not_in.
+			if ( 'post__in' === $on_sale_key ) {
+				$args['post__in'] = empty( $args['post__in'] )
+					? $on_sale_ids
+					: array_values( array_intersect( $args['post__in'], $on_sale_ids ) );
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
+			} else {
+				$args['post__not_in'] = array_values( array_merge( (array) $args['post__not_in'], $on_sale_ids ) );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
