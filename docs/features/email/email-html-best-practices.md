@@ -308,4 +308,5 @@ Limited support; always provide a fallback bgcolor:
 - Check rendering in both desktop and mobile clients - Mobile email opens often exceed desktop, making mobile testing essential.
 - Test with images disabled - Many email clients block images by default, so ensure your email is readable and functional without them.
 - Check spam filter scores - Use tools like [Mail-Tester](https://www.mail-tester.com/) to identify potential spam triggers in your email content.
+- Confirm inbox placement - A clean spam score does not guarantee the inbox. [Email Spam Tester](https://email-spam-tester.com/) returns a test address for the full report, and its placement option adds a set of seed addresses and a subject marker: send your email once to all of them, and the report shows inbox, spam or Promotions at Gmail, Outlook, Yahoo and other providers.
 - Validate HTML - Use email-specific validators to catch potential rendering issues before sending.
