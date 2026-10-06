@@ -21,8 +21,6 @@
 
 namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
-use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
-
 /**
  * Class BatchProcessingController
  *
@@ -95,6 +93,14 @@ class BatchProcessingController {
 	 * @var \WC_Logger_Interface
 	 */
 	private $logger;
+
+	/**
+	 * Action Scheduler functions that report a pending or in-progress action, preferred first.
+	 * `as_has_scheduled_action` only exists since Action Scheduler 3.3.0, and another plugin can load an older copy.
+	 *
+	 * @var string[]
+	 */
+	private $scheduled_action_lookups = array( 'as_has_scheduled_action', 'as_next_scheduled_action' );
 
 	/**
 	 * BatchProcessingController constructor.
@@ -370,6 +376,10 @@ class BatchProcessingController {
 	 * @param bool $unique     Whether to make the action unique.
 	 */
 	private function schedule_watchdog_action( bool $with_delay = false, bool $unique = false ): void {
+		if ( ! $this->can_check_scheduled_actions() ) {
+			return;
+		}
+
 		$time = time();
 		if ( $with_delay ) {
 			/**
@@ -382,7 +392,7 @@ class BatchProcessingController {
 			$time += apply_filters( 'woocommerce_batch_processor_watchdog_delay_seconds', HOUR_IN_SECONDS );
 		}
 
-		if ( ! ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		if ( ! $this->has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
 			as_schedule_single_action(
 				$time,
 				self::WATCHDOG_ACTION_NAME,
@@ -568,7 +578,37 @@ class BatchProcessingController {
 	 * @return bool True if a batch processing action is already scheduled for the processor.
 	 */
 	public function is_scheduled( string $processor_class_name ): bool {
-		return ActionSchedulerUtil::has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		return $this->has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+	}
+
+	/**
+	 * Check for a pending or in-progress action, falling back to `as_next_scheduled_action` on Action Scheduler < 3.3.0.
+	 * Returns false if Action Scheduler is not loaded at all.
+	 *
+	 * @param string     $hook The hook of the action.
+	 * @param array|null $args The action args, null matches any args.
+	 *
+	 * @return bool True if a matching action is scheduled.
+	 */
+	private function has_scheduled_action( string $hook, ?array $args = null ): bool {
+		foreach ( $this->scheduled_action_lookups as $function ) {
+			if ( function_exists( $function ) ) {
+				// `as_next_scheduled_action` returns a timestamp, or true for an in-progress action.
+				return (bool) $function( $hook, $args );
+			}
+		}
+
+		wc_doing_it_wrong( __METHOD__, 'Action Scheduler is not loaded, so scheduled actions cannot be checked.', '11.2.0' );
+		return false;
+	}
+
+	/**
+	 * Whether has_scheduled_action() can query Action Scheduler, rather than answering false because it is not loaded.
+	 *
+	 * @return bool True if at least one lookup function exists.
+	 */
+	private function can_check_scheduled_actions(): bool {
+		return array() !== array_filter( $this->scheduled_action_lookups, 'function_exists' );
 	}
 
 	/**
@@ -851,11 +891,11 @@ class BatchProcessingController {
 		// Everything below reads "not scheduled" as grounds for recording a failure against a processor
 		// and eventually dropping it from the queue. Action Scheduler being unloaded also reads as
 		// "not scheduled", so bail rather than dismantle the queue over a missing dependency.
-		if ( ! ActionSchedulerUtil::can_check_scheduled_actions() ) {
+		if ( ! $this->can_check_scheduled_actions() ) {
 			return;
 		}
 
-		if ( ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		if ( $this->has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
 			return;
 		}
 

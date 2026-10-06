@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Guard the `as_has_scheduled_action()` calls in the batch processing controller behind a helper that falls back to `as_next_scheduled_action()`, preventing a fatal error when another plugin loads a pre-3.3.0 copy of Action Scheduler.
+Prevent fatal errors in the batch processing controller when another plugin loads an Action Scheduler older than 3.3.0, by falling back to `as_next_scheduled_action()` when `as_has_scheduled_action()` is missing.

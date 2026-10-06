@@ -738,4 +738,90 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 		);
 		$this->assertTrue( $this->sut->is_enqueued( get_class( $second_processor ) ), 'The sibling processor should remain enqueued.' );
 	}
+
+	/**
+	 * @testdox The watchdog is scheduled and an in-progress batch counts as scheduled, with or without as_has_scheduled_action().
+	 * @dataProvider provider_scheduled_action_lookups
+	 *
+	 * @param string[] $lookups Action Scheduler functions the controller may use.
+	 */
+	public function test_scheduled_action_checks_with_available_lookups( array $lookups ): void {
+		$this->set_scheduled_action_lookups( $lookups );
+		$processor = get_class( $this->test_process );
+
+		$this->sut->enqueue_processor( $processor );
+
+		$this->assertTrue( as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ), 'Enqueueing should schedule the watchdog.' );
+		$this->assertFalse( $this->sut->is_scheduled( $processor ), 'No batch action exists yet.' );
+
+		$action_id = as_schedule_single_action( time() + HOUR_IN_SECONDS, $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor ) );
+		\ActionScheduler::store()->log_execution( $action_id );
+
+		$this->assertTrue( $this->sut->is_scheduled( $processor ), 'An in-progress batch action should count as scheduled.' );
+	}
+
+	/**
+	 * Data provider for test_scheduled_action_checks_with_available_lookups.
+	 *
+	 * @return array
+	 */
+	public function provider_scheduled_action_lookups(): array {
+		return array(
+			'Action Scheduler 3.3+'  => array( array( 'as_has_scheduled_action', 'as_next_scheduled_action' ) ),
+			'Action Scheduler < 3.3' => array( array( 'as_next_scheduled_action' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Without as_has_scheduled_action(), the shutdown cleanup reschedules an enqueued processor that has no batch action.
+	 */
+	public function test_shutdown_cleanup_reschedules_processor_without_as_has_scheduled_action(): void {
+		$processor = get_class( $this->test_process );
+		$this->sut->enqueue_processor( $processor );
+		as_unschedule_all_actions( $this->sut::WATCHDOG_ACTION_NAME );
+		$this->set_scheduled_action_lookups( array( 'as_next_scheduled_action' ) );
+
+		$this->run_shutdown_cleanup();
+
+		$this->assertTrue( $this->sut->is_enqueued( $processor ), 'The processor should stay enqueued after a single failure.' );
+		$this->assertTrue( $this->sut->is_scheduled( $processor ), 'The cleanup should schedule a retry for the processor.' );
+	}
+
+	/**
+	 * @testdox With no Action Scheduler functions loaded, enqueueing and the shutdown cleanup leave the queue alone without fataling.
+	 */
+	public function test_no_action_scheduler_functions_leaves_queue_untouched(): void {
+		$processor = get_class( $this->test_process );
+		$this->set_scheduled_action_lookups( array() );
+
+		$this->sut->enqueue_processor( $processor );
+		$this->run_shutdown_cleanup();
+
+		$this->assertTrue( $this->sut->is_enqueued( $processor ), 'The processor should stay enqueued.' );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::WATCHDOG_ACTION_NAME ), 'No watchdog should be scheduled.' );
+		$this->assertFalse( as_has_scheduled_action( $this->sut::PROCESS_SINGLE_BATCH_ACTION_NAME ), 'No batch action should be scheduled.' );
+
+		$this->setExpectedIncorrectUsage( BatchProcessingController::class . '::has_scheduled_action' );
+		$this->assertFalse( $this->sut->is_scheduled( $processor ), 'is_scheduled() should report false instead of fataling.' );
+	}
+
+	/**
+	 * Override which Action Scheduler functions the controller treats as loaded.
+	 *
+	 * @param string[] $lookups Function names.
+	 */
+	private function set_scheduled_action_lookups( array $lookups ): void {
+		$property = new \ReflectionProperty( $this->sut, 'scheduled_action_lookups' );
+		$property->setAccessible( true );
+		$property->setValue( $this->sut, $lookups );
+	}
+
+	/**
+	 * Run the controller's 'shutdown' cleanup routine.
+	 */
+	private function run_shutdown_cleanup(): void {
+		$method = new \ReflectionMethod( $this->sut, 'remove_or_retry_failed_processors' );
+		$method->setAccessible( true );
+		$method->invoke( $this->sut );
+	}
 }
