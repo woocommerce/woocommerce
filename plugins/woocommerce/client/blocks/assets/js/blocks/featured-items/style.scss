@@ -156,9 +156,14 @@
 		padding: 0 48px 16px;
 		z-index: 1;
 
-		&.is-layout-flex {
-			flex: 1;
-			padding-block-start: 16px;
+		&.has-custom-gap {
+			display: flex;
+			flex-direction: column;
+			gap: var(--wc-featured-item-block-gap);
+
+			> * {
+				margin-block: 0;
+			}
 		}
 	}
 
@@ -201,12 +206,14 @@
 		overflow: hidden;
 		width: 100%;
 		height: auto;
+	}
 
-		&:has(> #{$block}__inner-blocks.is-layout-flex) {
-			flex-direction: column;
-			flex-wrap: nowrap;
-			align-items: stretch;
-		}
+	&.is-vertically-aligned-top > &__wrapper {
+		align-content: flex-start;
+	}
+
+	&.is-vertically-aligned-bottom > &__wrapper {
+		align-content: flex-end;
 	}
 
 	.wp-block-button.aligncenter {

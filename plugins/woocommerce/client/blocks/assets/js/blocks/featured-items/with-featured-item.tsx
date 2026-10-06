@@ -25,6 +25,7 @@ import {
 import { WP_REST_API_Category } from 'wp-types';
 import {
 	BlockContextProvider,
+	getSpacingPresetCssVar,
 	useInnerBlocksProps,
 	useBlockProps,
 } from '@wordpress/block-editor';
@@ -53,6 +54,7 @@ interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 
 export interface FeaturedItemRequiredAttributes {
 	contentAlign: BlockAlignment;
+	verticalAlignment?: 'top' | 'center' | 'bottom' | undefined;
 	dimRatio: number;
 	focalPoint: { x: number; y: number };
 	hasParallax: boolean;
@@ -139,10 +141,18 @@ function FeaturedItemInnerBlocks( {
 	>[ 'template' ];
 	attributes: FeaturedItemRequiredAttributes;
 } ) {
+	const spacing = attributes.style?.spacing?.blockGap;
+	const blockGap = typeof spacing === 'object' ? spacing?.top : spacing;
+	const hasBlockGap =
+		blockGap !== undefined && blockGap !== null && blockGap !== '';
 	const innerProps = useInnerBlocksProps(
 		{
-			className,
-			style: { gap: attributes.style?.spacing?.blockGap ? undefined : 0 },
+			className: clsx( className, { 'has-custom-gap': hasBlockGap } ),
+			style: {
+				'--wc-featured-item-block-gap': hasBlockGap
+					? getSpacingPresetCssVar( String( blockGap ) )
+					: undefined,
+			} as CSSProperties,
 		},
 		{
 			template,
@@ -359,7 +369,9 @@ export const withFeaturedItem =
 				},
 				dimRatioToClass( dimRatio ),
 				contentAlign !== 'center' && `has-${ contentAlign }-content`,
-				props.blockProps.className
+				props.blockProps.className,
+				attributes.verticalAlignment &&
+					`is-vertically-aligned-${ attributes.verticalAlignment }`
 			);
 
 			const hasAspectRatio = !! style?.dimensions?.aspectRatio;
