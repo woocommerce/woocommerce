@@ -11,13 +11,17 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
@@ -433,5 +437,238 @@ class ContractsTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( 'paused-by-merchant', $this->view( $id )->get_status() );
+	}
+
+	/**
+	 * Create a contract carrying a currency and snapshots, ready for cycles.
+	 */
+	private function contract_with_snapshots(): int {
+		return Contracts::create(
+			array(
+				'owner'          => self::OWNER,
+				'currency'       => 'USD',
+				'plan_snapshot'  => array(
+					'selling_plan_id' => 3,
+					'billing_policy'  => array(
+						'period'   => 'month',
+						'interval' => 1,
+					),
+				),
+				'items_snapshot' => array( array( 'item_name' => 'Coffee' ) ),
+			)
+		);
+	}
+
+	/**
+	 * Fetch a stored cycle by id.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $cycle_id    Cycle id.
+	 */
+	private function cycle( int $contract_id, int $cycle_id ): Cycle {
+		foreach ( ( new ContractRepository() )->find_cycle_history( $contract_id ) as $cycle ) {
+			if ( $cycle->get_id() === $cycle_id ) {
+				return $cycle;
+			}
+		}
+
+		$this->fail( "Cycle {$cycle_id} not found." );
+	}
+
+	/**
+	 * Minimal valid cycle args.
+	 *
+	 * @param array<string, mixed> $overrides Extra or replacement keys.
+	 * @return array<string, mixed>
+	 */
+	private function cycle_args( array $overrides = array() ): array {
+		return array_merge(
+			array(
+				'status'        => CycleStatus::BILLED,
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+			),
+			$overrides
+		);
+	}
+
+	public function test_the_first_cycle_takes_the_chain_and_contract_defaults(): void {
+		$id       = $this->contract_with_snapshots();
+		$contract = $this->entity( $id );
+
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$cycle    = $this->cycle( $id, $cycle_id );
+
+		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
+		$this->assertSame( 1, $cycle->get_sequence_no() );
+		$this->assertSame( 1, $cycle->get_count() );
+		$this->assertSame( 'USD', $cycle->get_currency() );
+		$this->assertSame( '0.00000000', $cycle->get_expected_total() );
+		$this->assertSame( 77, $cycle->get_order_id() );
+		$this->assertSame( self::OWNER, $cycle->get_extension_slug() );
+		$this->assertSame( $contract->get_plan_snapshot_id(), $cycle->get_plan_snapshot_id() );
+		$this->assertSame( $contract->get_items_snapshot_id(), $cycle->get_items_snapshot_id() );
+	}
+
+	public function test_the_next_cycle_defaults_to_the_next_position(): void {
+		$id = $this->contract_with_snapshots();
+		Contracts::add_cycle( $id, $this->cycle_args() );
+
+		$cycle_id = Contracts::add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'status'         => CycleStatus::PENDING,
+					'starts_at_gmt'  => '2026-02-01 00:00:00',
+					'ends_at_gmt'    => '2026-03-01 00:00:00',
+					'expected_total' => '19.99',
+				)
+			)
+		);
+		$cycle    = $this->cycle( $id, $cycle_id );
+
+		$this->assertSame( 2, $cycle->get_sequence_no() );
+		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertSame( '19.99000000', $cycle->get_expected_total() );
+	}
+
+	public function test_a_non_counting_cycle_takes_a_null_count(): void {
+		$id = $this->contract_with_snapshots();
+
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) );
+
+		$this->assertNull( $this->cycle( $id, $cycle_id )->get_count() );
+	}
+
+	public function test_a_taken_position_is_refused(): void {
+		$id = $this->contract_with_snapshots();
+		Contracts::add_cycle( $id, $this->cycle_args() );
+
+		$this->expectException( DomainException::class );
+
+		Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) );
+	}
+
+	/**
+	 * @dataProvider provide_invalid_cycle_args
+	 *
+	 * @param array<string, mixed> $args Cycle args.
+	 */
+	public function test_invalid_cycle_args_are_rejected( array $args ): void {
+		$id = $this->contract_with_snapshots();
+
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::add_cycle( $id, $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_cycle_args(): array {
+		return array(
+			'missing status'       => array(
+				array(
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+				),
+			),
+			'unregistered status'  => array(
+				array(
+					'status'        => 'nonsense',
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+				),
+			),
+			'missing starts_at'    => array(
+				array(
+					'status'      => CycleStatus::BILLED,
+					'ends_at_gmt' => '2026-02-01 00:00:00',
+				),
+			),
+			'missing ends_at'      => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+				),
+			),
+			'unknown key'          => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+					'reason'        => 'x',
+				),
+			),
+			'zero sequence number' => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+					'sequence_no'   => 0,
+				),
+			),
+		);
+	}
+
+	public function test_a_cycle_needs_a_currency(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::add_cycle( $id, $this->cycle_args() );
+	}
+
+	public function test_an_explicit_currency_serves_a_contract_without_one(): void {
+		$id = Contracts::create( array( 'owner' => self::OWNER ) );
+
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) );
+
+		$this->assertSame( 'EUR', $this->cycle( $id, $cycle_id )->get_currency() );
+	}
+
+	public function test_an_unknown_contract_is_rejected(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::add_cycle( 999999, $this->cycle_args() );
+	}
+
+	public function test_explicit_snapshot_payloads_attach_to_the_cycle_only(): void {
+		$id     = $this->contract_with_snapshots();
+		$before = $this->entity( $id );
+
+		$cycle_id = Contracts::add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'plan_snapshot'  => array(
+						'selling_plan_id' => 3,
+						'name'            => 'Different',
+					),
+					'items_snapshot' => array( array( 'item_name' => 'Tea' ) ),
+				)
+			)
+		);
+		$cycle    = $this->cycle( $id, $cycle_id );
+		$after    = $this->entity( $id );
+
+		$this->assertNotNull( $cycle->get_plan_snapshot_id() );
+		$this->assertNotSame( $before->get_plan_snapshot_id(), $cycle->get_plan_snapshot_id() );
+		$this->assertNotSame( $before->get_items_snapshot_id(), $cycle->get_items_snapshot_id() );
+		$this->assertSame( $before->get_plan_snapshot_id(), $after->get_plan_snapshot_id() );
+		$this->assertSame( $before->get_items_snapshot_id(), $after->get_items_snapshot_id() );
+	}
+
+	public function test_get_history_returns_the_appended_cycle_as_a_view(): void {
+		$id       = $this->contract_with_snapshots();
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
+
+		$history = Subscriptions::get_history( $id );
+
+		$this->assertCount( 1, $history );
+		$this->assertInstanceOf( CycleView::class, $history[0] );
+		$this->assertSame( $cycle_id, $history[0]->get_id() );
+		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
+		$this->assertSame( 77, $history[0]->get_order_id() );
 	}
 }

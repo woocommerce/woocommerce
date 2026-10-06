@@ -18,12 +18,18 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
+use DomainException;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,6 +67,25 @@ final class Contracts {
 		'tax_total',
 		'items',
 		'addresses',
+		'plan_snapshot',
+		'items_snapshot',
+	);
+
+	/**
+	 * Keys accepted by {@see self::add_cycle()}.
+	 *
+	 * @var array<int, string>
+	 */
+	private const CYCLE_KEYS = array(
+		'status',
+		'kind',
+		'sequence_no',
+		'count',
+		'starts_at_gmt',
+		'ends_at_gmt',
+		'expected_total',
+		'currency',
+		'order_id',
 		'plan_snapshot',
 		'items_snapshot',
 	);
@@ -147,6 +172,109 @@ final class Contracts {
 		self::store_snapshots( $repository, $contract, $snapshots );
 
 		return true;
+	}
+
+	/**
+	 * Append a cycle to a contract's chain `(contract_id, kind)`.
+	 *
+	 * The first public form of the cycle append tool: append-if-absent on the chain's
+	 * unique positions. `status` (a registered cycle status), `starts_at_gmt` and
+	 * `ends_at_gmt` are required. `kind` defaults to `billing`; `sequence_no` and `count`
+	 * default to the next position in the chain (`count` may be null for a non-counting
+	 * cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
+	 * `order_id` is optional. Without `plan_snapshot` / `items_snapshot` payloads the
+	 * cycle references the contract's current snapshots; payloads attach to the new cycle
+	 * only. The owner is copied from the contract.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        Cycle fields.
+	 * @return int The new cycle id.
+	 * @throws InvalidArgumentException If the contract is unknown, a key is unknown, or a value is invalid.
+	 * @throws DomainException If the chain position is already taken.
+	 */
+	public static function add_cycle( int $contract_id, array $args ): int {
+		self::assert_known_keys( $args, self::CYCLE_KEYS );
+
+		$repository = new ContractRepository();
+		$contract   = $repository->find_summary( $contract_id );
+		if ( null === $contract ) {
+			throw new InvalidArgumentException( sprintf( 'Contracts: contract %d does not exist.', (int) $contract_id ) );
+		}
+
+		$status = $args['status'] ?? null;
+		if ( ! is_string( $status ) || ! CycleStatus::is_registered( $status ) ) {
+			throw new InvalidArgumentException( 'Contracts: "status" is required and must be a registered cycle status.' );
+		}
+
+		$kind = $args['kind'] ?? Cycle::KIND_BILLING;
+		if ( ! is_string( $kind ) || '' === $kind ) {
+			throw new InvalidArgumentException( 'Contracts: "kind" must be a non-empty string.' );
+		}
+
+		$starts_at = self::nullable_date( 'starts_at_gmt', $args['starts_at_gmt'] ?? null );
+		$ends_at   = self::nullable_date( 'ends_at_gmt', $args['ends_at_gmt'] ?? null );
+		if ( null === $starts_at || null === $ends_at ) {
+			throw new InvalidArgumentException( 'Contracts: "starts_at_gmt" and "ends_at_gmt" are required.' );
+		}
+
+		$currency = array_key_exists( 'currency', $args ) ? self::currency( $args['currency'] ) : $contract->get_currency();
+		if ( null === $currency ) {
+			throw new InvalidArgumentException( 'Contracts: a cycle needs a currency, given or from the contract.' );
+		}
+
+		$head        = $repository->find_chain_head( $contract_id, $kind );
+		$sequence_no = array_key_exists( 'sequence_no', $args )
+			? self::nullable_id( 'sequence_no', $args['sequence_no'] )
+			: ( null === $head ? 1 : $head->get_sequence_no() + 1 );
+		if ( null === $sequence_no ) {
+			throw new InvalidArgumentException( 'Contracts: "sequence_no" must be a positive integer.' );
+		}
+		$count = array_key_exists( 'count', $args )
+			? self::nullable_id( 'count', $args['count'] )
+			: ( $repository->max_count( $contract_id, $kind ) ?? 0 ) + 1;
+
+		$cycle_args = array(
+			'contract_id'    => $contract_id,
+			'kind'           => $kind,
+			'sequence_no'    => $sequence_no,
+			'count'          => $count,
+			'status'         => $status,
+			'starts_at_gmt'  => $starts_at,
+			'ends_at_gmt'    => $ends_at,
+			'expected_total' => self::money( 'expected_total', $args['expected_total'] ?? null ),
+			'currency'       => $currency,
+			'order_id'       => self::nullable_id( 'order_id', $args['order_id'] ?? null ),
+			'extension_slug' => $contract->get_extension_slug(),
+		);
+
+		if ( array_key_exists( 'plan_snapshot', $args ) ) {
+			if ( ! is_array( $args['plan_snapshot'] ) ) {
+				throw new InvalidArgumentException( 'Contracts: "plan_snapshot" must be an array.' );
+			}
+			$cycle_args['plan_snapshot'] = PlanSnapshot::from_array( self::string_keyed( $args['plan_snapshot'] ) );
+		} else {
+			$cycle_args['plan_snapshot_id'] = $contract->get_plan_snapshot_id();
+		}
+
+		if ( array_key_exists( 'items_snapshot', $args ) ) {
+			$cycle_args['items_snapshot'] = ItemsSnapshot::from_items( self::item_rows( 'items_snapshot', $args['items_snapshot'] ) );
+		} else {
+			$cycle_args['items_snapshot_id'] = $contract->get_items_snapshot_id();
+		}
+
+		try {
+			$cycle = Cycle::create( $cycle_args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( esc_html( $e->getMessage() ) );
+		}
+
+		try {
+			$repository->append_cycle( $cycle, $head );
+		} catch ( DuplicateCycleException $e ) {
+			throw new DomainException( 'Contracts: the cycle position already exists.' );
+		}
+
+		return (int) $cycle->get_id();
 	}
 
 	/**
