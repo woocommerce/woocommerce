@@ -101,31 +101,11 @@ final class PlanSnapshot {
 	}
 
 	/**
-	 * The frozen billing cadence, reconstructed from the snapshot payload.
-	 *
-	 * Sourced from the `billing_policy` entry captured at signup, NOT the live plan -
-	 * so a consumer reads the cadence a contract is billed under straight off the
-	 * snapshot, even after the plan it came from is edited or deleted, with no live
-	 * plan read. Returns null when the payload carries no billing policy, or one that
-	 * does not parse or has no usable cadence, so a caller degrades to "no cadence"
-	 * rather than fataling. {@see self::read_billing_policy()} gives the reason instead.
-	 */
-	public function get_billing_policy(): ?BillingPolicy {
-		try {
-			return $this->read_billing_policy();
-		} catch ( DomainException $e ) {
-			// A stored policy with no usable cadence degrades to "no cadence" rather than
-			// fataling the read.
-			unset( $e );
-			return null;
-		}
-	}
-
-	/**
-	 * The frozen billing cadence, parsed with the engine's renewal rule
-	 * ({@see BillingPolicy::from_array_with_usable_cadence()}). Null when the payload
-	 * carries no billing policy array; throws when one is present but unusable, so a
-	 * caller can log why before falling back.
+	 * The frozen billing cadence captured at signup, parsed with the engine's renewal
+	 * rule ({@see BillingPolicy::from_array_with_usable_cadence()}), so it holds after
+	 * the source plan is edited or deleted. Null when the payload carries no billing
+	 * policy array; throws when one is present but unusable, so a caller can log why
+	 * before falling back.
 	 *
 	 * @throws DomainException If the stored policy does not parse or has no usable cadence.
 	 */

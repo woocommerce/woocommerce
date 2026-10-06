@@ -97,9 +97,9 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	/**
-	 * @testdox get_billing_policy reconstructs the frozen cadence from the payload.
+	 * @testdox read_billing_policy reconstructs the frozen cadence from the payload.
 	 */
-	public function test_get_billing_policy_reconstructs_the_frozen_cadence(): void {
+	public function test_read_billing_policy_reconstructs_the_frozen_cadence(): void {
 		$snapshot = PlanSnapshot::from_array(
 			array(
 				'selling_plan_id' => 7,
@@ -114,7 +114,7 @@ class PlanSnapshotTest extends TestCase {
 			)
 		);
 
-		$policy = $snapshot->get_billing_policy();
+		$policy = $snapshot->read_billing_policy();
 
 		$this->assertInstanceOf( BillingPolicy::class, $policy );
 		$this->assertSame( 'month', $policy->get_period() );
@@ -123,31 +123,22 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	/**
-	 * @testdox get_billing_policy is null when the payload carries no billing policy.
+	 * @testdox read_billing_policy throws for a structurally-invalid stored policy.
 	 */
-	public function test_get_billing_policy_is_null_when_absent(): void {
-		$snapshot = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
-
-		$this->assertNull( $snapshot->get_billing_policy() );
-	}
-
-	/**
-	 * @testdox get_billing_policy degrades to null for a structurally-invalid stored policy.
-	 */
-	public function test_get_billing_policy_is_null_for_an_unreadable_policy(): void {
-		// `interval` missing: BillingPolicy::from_array() would throw; the accessor swallows
-		// it and degrades to "no cadence" rather than fataling the read.
+	public function test_read_billing_policy_throws_for_an_unreadable_policy(): void {
+		// `interval` missing: BillingPolicy::from_array() refuses it.
 		$snapshot = PlanSnapshot::from_array(
 			array(
 				'billing_policy' => array( 'period' => 'month' ),
 			)
 		);
 
-		$this->assertNull( $snapshot->get_billing_policy() );
+		$this->expectException( DomainException::class );
+		$snapshot->read_billing_policy();
 	}
 
 	/**
-	 * @testdox get_billing_policy is null and read_billing_policy throws for a policy with no usable cadence ($label).
+	 * @testdox read_billing_policy throws for a policy with no usable cadence ($label).
 	 *
 	 * @testWith ["unknown period", "decade", 1]
 	 *           ["zero interval", "month", 0]
@@ -167,8 +158,6 @@ class PlanSnapshotTest extends TestCase {
 				),
 			)
 		);
-
-		$this->assertNull( $snapshot->get_billing_policy() );
 
 		$this->expectException( DomainException::class );
 		$snapshot->read_billing_policy();
