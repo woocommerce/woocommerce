@@ -16,9 +16,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
@@ -105,27 +104,23 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		return $order instanceof WC_Order ? $order : null;
 	}
 
-	private function make_plan( ?int $max_cycles = null ): int {
-		return (int) $this->make_plan_object( $max_cycles )->get_id();
-	}
-
 	/**
-	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
+	 * Create a monthly plan and return its view (the sign-up helper needs the plan).
 	 *
 	 * @param int|null $max_cycles Maximum billing cycles, or null for open-ended.
 	 */
-	private function make_plan_object( ?int $max_cycles = null ): Plan {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, $max_cycles, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
+	private function make_plan_view( ?int $max_cycles = null ): PlanView {
+		return $this->plan_view(
+			$this->make_plan(
+				array(
+					'billing_policy' => array(
+						'period'     => 'month',
+						'interval'   => 1,
+						'max_cycles' => $max_cycles,
+					),
+				)
 			)
 		);
-		( new PlanRepository() )->insert( $plan );
-
-		return $plan;
 	}
 
 	/**
@@ -137,7 +132,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract( string $gateway, ?int $max_cycles = null ): Contract {
-		$plan = $this->make_plan_object( $max_cycles );
+		$plan = $this->make_plan_view( $max_cycles );
 
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
@@ -447,7 +442,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_object() );
+		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_view() );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -1802,16 +1797,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract_with_line_item( string $gateway, ?array $pricing_policy, $quantity = 2 ): Contract {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
-				'pricing_policy' => $pricing_policy,
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
+		$plan = $this->plan_view( $this->make_plan( array( 'pricing_policy' => $pricing_policy ) ) );
 
 		$product = new \WC_Product_Simple();
 		$product->set_name( 'Monthly Filters' );

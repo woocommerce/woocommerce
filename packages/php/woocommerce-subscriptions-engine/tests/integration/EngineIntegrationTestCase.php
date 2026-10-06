@@ -11,15 +11,23 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 
 /**
  * Engine integration test case.
  */
 abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
+
+	/**
+	 * Owner slug of the plans {@see self::make_plan()} creates by default.
+	 */
+	protected const PLAN_OWNER = 'engine-tests';
 
 	/**
 	 * Gateway ids wired with an approving scheduled-payment handler, to unhook on teardown.
@@ -90,17 +98,53 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Create a plan through the plan write facade: a monthly billing payload owned by
+	 * {@see self::PLAN_OWNER} unless overridden.
+	 *
+	 * @param array<string, mixed> $overrides `Plans::create()` args to replace.
+	 * @return int The plan id.
+	 */
+	protected function make_plan( array $overrides = array() ): int {
+		return Plans::create(
+			array_merge(
+				array(
+					'owner'          => self::PLAN_OWNER,
+					'name'           => 'Monthly',
+					'billing_policy' => array(
+						'period'   => 'month',
+						'interval' => 1,
+					),
+				),
+				$overrides
+			)
+		);
+	}
+
+	/**
+	 * Read a plan through the selling plans facade, scoped to `$owner`.
+	 *
+	 * @param int    $id    Plan id.
+	 * @param string $owner Owner slug.
+	 */
+	protected function plan_view( int $id, string $owner = self::PLAN_OWNER ): PlanView {
+		$plan = ( new SellingPlans( array( $owner ) ) )->get_plan( $id );
+		$this->assertInstanceOf( PlanView::class, $plan );
+
+		return $plan;
+	}
+
+	/**
 	 * Sign up a contract for a paid order on `$plan` through the contracts facade, the way an
 	 * extension maps its checkout: create a draft from explicit order fields and snapshots,
 	 * record cycle 1 (billed, linked to the order), then activate. An order without a
 	 * customer gets a new one.
 	 *
 	 * @param WC_Order             $order     Saved, paid order.
-	 * @param Plan                 $plan      Saved selling plan.
+	 * @param PlanView             $plan      Saved selling plan.
 	 * @param array<string, mixed> $overrides `Contracts::create()` fields to replace; `status` is the final status.
 	 * @return int The contract id.
 	 */
-	protected function sign_up_from_order( WC_Order $order, Plan $plan, array $overrides = array() ): int {
+	protected function sign_up_from_order( WC_Order $order, PlanView $plan, array $overrides = array() ): int {
 		if ( $order->get_customer_id() <= 0 ) {
 			$customer_id = self::factory()->user->create();
 			$this->assertIsInt( $customer_id );
@@ -134,7 +178,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 		$args = array_merge(
 			array(
-				'extension_slug'       => (string) $plan->get_extension_slug(),
+				'extension_slug'       => (string) $plan->get_owner(),
 				'customer_id'          => $order->get_customer_id(),
 				'currency'             => $order->get_currency(),
 				'selling_plan_id'      => $plan->get_id(),
@@ -143,7 +187,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				'payment_method_title' => '' !== $order->get_payment_method_title() ? $order->get_payment_method_title() : null,
 				'payment_token_id'     => $token_id > 0 ? $token_id : null,
 				'start_gmt'            => $start,
-				'next_payment_gmt'     => $plan->get_billing_policy()->compute_first_renewal_from( $start ),
+				'next_payment_gmt'     => BillingPolicy::from_array( $plan->get_billing_policy() ?? array() )->compute_first_renewal_from( $start ),
 				'billing_total'        => (string) $order->get_total(),
 				'discount_total'       => (string) $order->get_total_discount(),
 				'shipping_total'       => (string) $order->get_shipping_total(),

@@ -17,13 +17,10 @@ use DomainException;
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -59,26 +56,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	 * Create a monthly plan and return its id.
 	 */
 	private function make_monthly_plan(): int {
-		return $this->make_plan( 'month' );
-	}
-
-	/**
-	 * Create a plan on the given cadence period and return its id.
-	 *
-	 * @param string $period Billing period slug: day/week/month/year.
-	 */
-	private function make_plan( string $period ): int {
-		$plan = Plan::create(
-			array(
-				'name'           => ucfirst( $period ) . 'ly',
-				'billing_policy' => new BillingPolicy( $period, 1, null, null, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
-
-		return (int) $plan->get_id();
+		return $this->make_plan();
 	}
 
 	/**
@@ -227,7 +205,17 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	public function test_reactivate_floors_past_due_at_now_when_the_roll_cap_exhausts(): void {
 		// Daily cadence, held ~6.5 years past due: more rolls than the cap allows, so
 		// the date is floored at `$now` - never returned still in the past.
-		$id = $this->seed_on_hold( '2020-01-01 00:00:00', $this->make_plan( 'day' ) );
+		$id = $this->seed_on_hold(
+			'2020-01-01 00:00:00',
+			$this->make_plan(
+				array(
+					'billing_policy' => array(
+						'period'   => 'day',
+						'interval' => 1,
+					),
+				)
+			)
+		);
 
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-07-06 00:00:00' ) );
 

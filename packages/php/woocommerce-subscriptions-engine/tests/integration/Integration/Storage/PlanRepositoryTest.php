@@ -27,7 +27,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string|null          $extension_slug Owner slug.
 	 * @param array<string, mixed> $args           Extra Plan::create() args.
 	 */
-	private function make_plan( PlanRepository $repo, string $name, ?string $extension_slug = 'lite', array $args = array() ): int {
+	private function insert_plan( PlanRepository $repo, string $name, ?string $extension_slug = 'lite', array $args = array() ): int {
 		return $repo->insert(
 			Plan::create(
 				array_merge(
@@ -122,7 +122,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		global $wpdb;
 
 		$repo = new PlanRepository();
-		$id   = $this->make_plan( $repo, 'Before' );
+		$id   = $this->insert_plan( $repo, 'Before' );
 
 		$table = $wpdb->prefix . 'wc_selling_plans';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -163,9 +163,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_and_count_filter_by_status_and_search(): void {
 		$repo = new PlanRepository();
 
-		$this->make_plan( $repo, 'Alpha monthly' );
-		$second_id = $this->make_plan( $repo, 'Beta weekly' );
-		$this->make_plan( $repo, 'Archived yearly', 'lite', array( 'status' => PlanStatus::ARCHIVED ) );
+		$this->insert_plan( $repo, 'Alpha monthly' );
+		$second_id = $this->insert_plan( $repo, 'Beta weekly' );
+		$this->insert_plan( $repo, 'Archived yearly', 'lite', array( 'status' => PlanStatus::ARCHIVED ) );
 
 		$active = $repo->query(
 			array(
@@ -182,8 +182,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_status_accepts_a_list(): void {
 		$repo = new PlanRepository();
 
-		$active_id   = $this->make_plan( $repo, 'Active' );
-		$archived_id = $this->make_plan( $repo, 'Archived', 'lite', array( 'status' => PlanStatus::ARCHIVED ) );
+		$active_id   = $this->insert_plan( $repo, 'Active' );
+		$archived_id = $this->insert_plan( $repo, 'Archived', 'lite', array( 'status' => PlanStatus::ARCHIVED ) );
 
 		$args = array( 'status' => array( PlanStatus::ACTIVE, PlanStatus::ARCHIVED ) );
 
@@ -194,7 +194,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 	public function test_query_empty_or_invalid_status_list_matches_nothing(): void {
 		$repo = new PlanRepository();
-		$this->make_plan( $repo, 'Active' );
+		$this->insert_plan( $repo, 'Active' );
 
 		$this->assertCount( 0, $repo->query( array( 'status' => array() ) ) );
 		$this->assertSame( 0, $repo->count( array( 'status' => array() ) ) );
@@ -206,9 +206,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_defaults_to_id_order_and_sorts_by_name(): void {
 		$repo = new PlanRepository();
 
-		$charlie = $this->make_plan( $repo, 'Charlie' );
-		$alpha   = $this->make_plan( $repo, 'Alpha' );
-		$bravo   = $this->make_plan( $repo, 'Bravo' );
+		$charlie = $this->insert_plan( $repo, 'Charlie' );
+		$alpha   = $this->insert_plan( $repo, 'Alpha' );
+		$bravo   = $this->insert_plan( $repo, 'Bravo' );
 
 		$this->assertSame( array( $charlie, $alpha, $bravo ), self::ids( $repo->query() ) );
 		$this->assertSame( array( $alpha, $bravo, $charlie ), self::ids( $repo->query( array( 'orderby' => 'name' ) ) ) );
@@ -253,8 +253,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_search_terms_starting_with_prepare_specifiers( string $search ): void {
 		$repo = new PlanRepository();
 
-		$this->make_plan( $repo, 'Unrelated prepare regression plan', 'lite' );
-		$expected_id = $this->make_plan( $repo, $search . ' plan', 'lite' );
+		$this->insert_plan( $repo, 'Unrelated prepare regression plan', 'lite' );
+		$expected_id = $this->insert_plan( $repo, $search . ' plan', 'lite' );
 
 		$query_args = array(
 			'extension_slugs' => array( 'lite' ),
@@ -276,7 +276,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_invalid_extension_scopes_do_not_return_unscoped_results(): void {
 		$repo = new PlanRepository();
 
-		$id = $this->make_plan( $repo, 'Scoped', 'lite' );
+		$id = $this->insert_plan( $repo, 'Scoped', 'lite' );
 
 		$this->assertInstanceOf( Plan::class, $repo->find( $id, 'any' ) );
 		// Test with extension_slugs array.
@@ -299,8 +299,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_extension_slugs_filters_by_single_and_multiple_slugs(): void {
 		$repo = new PlanRepository();
 
-		$lite_id  = $this->make_plan( $repo, 'Lite plan', 'lite' );
-		$other_id = $this->make_plan( $repo, 'Other plan', 'other-extension' );
+		$lite_id  = $this->insert_plan( $repo, 'Lite plan', 'lite' );
+		$other_id = $this->insert_plan( $repo, 'Other plan', 'other-extension' );
 
 		$single = $repo->query( array( 'extension_slugs' => array( 'lite' ) ) );
 		$this->assertSame( array( $lite_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $single ) );
@@ -313,7 +313,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_singular_extension_slug_arg_is_unknown_and_ignored(): void {
 		$repo = new PlanRepository();
 
-		$plan_id = $this->make_plan( $repo, 'Scoped', 'lite' );
+		$plan_id = $this->insert_plan( $repo, 'Scoped', 'lite' );
 
 		$plans = $repo->query( array( 'extension_slug' => 'other-extension' ) );
 		$this->assertSame( array( $plan_id ), array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $plans ) );
@@ -323,9 +323,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_ids_returns_only_those_plans(): void {
 		$repo = new PlanRepository();
 
-		$first_plan_id  = $this->make_plan( $repo, 'First', 'lite' );
-		$second_plan_id = $this->make_plan( $repo, 'Second', 'lite' );
-		$this->make_plan( $repo, 'Third', 'lite' );
+		$first_plan_id  = $this->insert_plan( $repo, 'First', 'lite' );
+		$second_plan_id = $this->insert_plan( $repo, 'Second', 'lite' );
+		$this->insert_plan( $repo, 'Third', 'lite' );
 
 		$plans = $repo->query( array( 'ids' => array( $first_plan_id, $second_plan_id ) ) );
 
@@ -336,10 +336,10 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_ids_composes_with_status_and_extension_slugs(): void {
 		$repo = new PlanRepository();
 
-		$active_id  = $this->make_plan( $repo, 'Active lite', 'lite' );
-		$foreign_id = $this->make_plan( $repo, 'Other extension', 'other-extension' );
+		$active_id  = $this->insert_plan( $repo, 'Active lite', 'lite' );
+		$foreign_id = $this->insert_plan( $repo, 'Other extension', 'other-extension' );
 
-		$archived = $repo->find( $this->make_plan( $repo, 'Archived lite', 'lite' ) );
+		$archived = $repo->find( $this->insert_plan( $repo, 'Archived lite', 'lite' ) );
 		$this->assertInstanceOf( Plan::class, $archived );
 		$archived->set_status( PlanStatus::ARCHIVED );
 		$this->assertTrue( $repo->update( $archived ) );
@@ -358,7 +358,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 
 	public function test_query_empty_or_invalid_ids_match_nothing(): void {
 		$repo    = new PlanRepository();
-		$plan_id = $this->make_plan( $repo, 'Plan', 'lite' );
+		$plan_id = $this->insert_plan( $repo, 'Plan', 'lite' );
 
 		$this->assertCount( 0, $repo->query( array( 'ids' => array() ) ) );
 		$this->assertSame( 0, $repo->count( array( 'ids' => array() ) ) );
@@ -370,8 +370,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_query_null_ids_behaves_as_arg_absent(): void {
 		$repo = new PlanRepository();
 
-		$first_plan_id  = $this->make_plan( $repo, 'First', 'lite' );
-		$second_plan_id = $this->make_plan( $repo, 'Second', 'lite' );
+		$first_plan_id  = $this->insert_plan( $repo, 'First', 'lite' );
+		$second_plan_id = $this->insert_plan( $repo, 'Second', 'lite' );
 
 		$plans = $repo->query( array( 'ids' => null ) );
 
@@ -382,7 +382,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_delete_removes_the_row(): void {
 		$repo = new PlanRepository();
 
-		$id = $this->make_plan( $repo, 'Doomed' );
+		$id = $this->insert_plan( $repo, 'Doomed' );
 
 		$this->assertTrue( $repo->delete( $id ) );
 		$this->assertNull( $repo->find( $id ) );

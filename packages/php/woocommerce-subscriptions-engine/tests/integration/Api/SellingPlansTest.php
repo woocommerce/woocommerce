@@ -12,9 +12,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans
@@ -24,25 +22,19 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 	private const SLUG = 'lite';
 
 	/**
-	 * Insert a plan.
+	 * Create a plan owned by {@see self::SLUG} unless overridden.
 	 *
 	 * @param string               $name      Plan name.
-	 * @param array<string, mixed> $overrides Attribute overrides.
+	 * @param array<string, mixed> $overrides `Plans::create()` arg overrides.
 	 */
 	private function insert_plan( string $name, array $overrides = array() ): int {
-		return ( new PlanRepository() )->insert(
-			Plan::create(
-				array_merge(
-					array(
-						'name'           => $name,
-						'billing_policy' => array(
-							'period'   => 'month',
-							'interval' => 1,
-						),
-						'extension_slug' => self::SLUG,
-					),
-					$overrides
-				)
+		return $this->make_plan(
+			array_merge(
+				array(
+					'owner' => self::SLUG,
+					'name'  => $name,
+				),
+				$overrides
 			)
 		);
 	}
@@ -66,7 +58,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$first_id    = $this->insert_plan( 'Zulu' );
 		$archived_id = $this->insert_plan( 'Archived', array( 'status' => PlanStatus::ARCHIVED ) );
 		$second_id   = $this->insert_plan( 'Alpha' );
-		$this->insert_plan( 'Foreign', array( 'extension_slug' => 'other-extension' ) );
+		$this->insert_plan( 'Foreign', array( 'owner' => 'other-extension' ) );
 
 		$plans = ( new SellingPlans( array( self::SLUG ) ) )->list_plans();
 
@@ -92,7 +84,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$second_id   = $this->insert_plan( 'Second' );
 		$excluded_id = $this->insert_plan( 'Excluded' );
 		$archived_id = $this->insert_plan( 'Archived', array( 'status' => PlanStatus::ARCHIVED ) );
-		$foreign_id  = $this->insert_plan( 'Foreign', array( 'extension_slug' => 'other-extension' ) );
+		$foreign_id  = $this->insert_plan( 'Foreign', array( 'owner' => 'other-extension' ) );
 
 		$catalog   = new SellingPlans( array( self::SLUG ) );
 		$requested = array( $archived_id, $second_id, $first_id, $foreign_id, 999999 );
@@ -126,7 +118,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 				'pricing_policy' => array( 'opaque' => true ),
 			)
 		);
-		$foreign_id  = $this->insert_plan( 'Foreign', array( 'extension_slug' => 'other-extension' ) );
+		$foreign_id  = $this->insert_plan( 'Foreign', array( 'owner' => 'other-extension' ) );
 
 		$catalog = new SellingPlans( array( self::SLUG ) );
 		$plan    = $catalog->get_plan( $archived_id );
@@ -145,8 +137,8 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 
 	public function test_two_slug_instance_reads_across_both_slugs(): void {
 		$lite_id    = $this->insert_plan( 'Lite plan' );
-		$other_id   = $this->insert_plan( 'Other plan', array( 'extension_slug' => 'other-extension' ) );
-		$foreign_id = $this->insert_plan( 'Foreign', array( 'extension_slug' => 'third-extension' ) );
+		$other_id   = $this->insert_plan( 'Other plan', array( 'owner' => 'other-extension' ) );
+		$foreign_id = $this->insert_plan( 'Foreign', array( 'owner' => 'third-extension' ) );
 
 		$catalog = new SellingPlans( array( self::SLUG, 'other-extension' ) );
 
