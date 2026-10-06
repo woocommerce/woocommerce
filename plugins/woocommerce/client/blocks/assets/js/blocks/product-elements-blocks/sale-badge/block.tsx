@@ -61,7 +61,11 @@ export const Block = ( props: Props ): ReactElement | null => {
 			}
 			const value =
 				props.badgeContent === 'percentage'
-					? `${ percentage }%`
+					? sprintf(
+							/* translators: %s: discount percentage. %% is the percent sign. */
+							__( '%s%%', 'woocommerce' ),
+							percentage
+					  )
 					: formatPrice(
 							discount,
 							getCurrencyFromPriceResponse( prices )

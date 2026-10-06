@@ -72,19 +72,24 @@ class ProductSaleBadge extends AbstractBlock {
 		$badge_content = $attributes['badgeContent'] ?? 'text';
 
 		if ( in_array( $badge_content, array( 'amount', 'percentage' ), true ) ) {
-			$amount     = 0;
-			$percentage = 0;
+			$amount                  = 0;
+			$percentage              = 0;
+			$has_different_discounts = false;
 
 			if ( $product instanceof \WC_Product_Variable ) {
-				$prices = $product->get_variation_prices( 'amount' === $badge_content );
+				$prices    = $product->get_variation_prices( 'amount' === $badge_content );
+				$discounts = array();
 				foreach ( $prices['price'] as $variation_id => $price ) {
-					$regular = (float) $prices['regular_price'][ $variation_id ];
+					$regular     = (float) $prices['regular_price'][ $variation_id ];
+					$discount    = max( 0, $regular - (float) $price );
+					$discounts[] = 'amount' === $badge_content ? $discount : ( $regular > 0 ? $discount / $regular : 0 );
 					if ( $regular <= 0 || (float) $price >= $regular ) {
 						continue;
 					}
 					$amount     = max( $amount, $regular - (float) $price );
 					$percentage = max( $percentage, ( $regular - (float) $price ) / $regular );
 				}
+				$has_different_discounts = count( array_unique( $discounts ) ) > 1;
 			} else {
 				$regular = (float) $product->get_regular_price();
 				$price   = (float) $product->get_price();
@@ -103,10 +108,11 @@ class ProductSaleBadge extends AbstractBlock {
 					return '';
 				}
 				$value = 'percentage' === $badge_content
-					? round( $percentage * 100 ) . '%'
+					/* translators: %s: discount percentage. %% is the percent sign. */
+					? sprintf( __( '%s%%', 'woocommerce' ), round( $percentage * 100 ) )
 					: html_entity_decode( wp_strip_all_tags( wc_price( $amount ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 
-				if ( $product->is_type( 'variable' ) ) {
+				if ( $has_different_discounts ) {
 					/* translators: %s: largest discount across variations. */
 					$sale_text = sprintf( __( 'Up to %s', 'woocommerce' ), $value );
 				} else {

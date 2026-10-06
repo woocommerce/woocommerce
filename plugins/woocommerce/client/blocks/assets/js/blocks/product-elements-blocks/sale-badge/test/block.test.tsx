@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { getLocaleData, resetLocaleData, setLocaleData } from '@wordpress/i18n';
 
 import { Block } from '../block';
 
@@ -156,3 +157,25 @@ it.each( [
 		).toBeInTheDocument();
 	}
 );
+
+it( 'uses localized spacing before the percent sign', () => {
+	const localeData = getLocaleData( 'woocommerce' );
+	setLocaleData( { '%s%%': [ '%s\u00a0%%' ] }, 'woocommerce' );
+	try {
+		render(
+			<Block
+				productId={ 1 }
+				align={ false }
+				isDescendentOfSingleProductTemplate={ false }
+				badgeContent="percentage"
+			/>
+		);
+		expect(
+			screen.getByText( 'Up to 10\u00a0%', {
+				normalizer: ( text ) => text,
+			} )
+		).toBeInTheDocument();
+	} finally {
+		resetLocaleData( localeData, 'woocommerce' );
+	}
+} );

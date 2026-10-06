@@ -207,6 +207,46 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Uniform variation discounts retain affixes only in the matching content mode.
+	 * @dataProvider provider_uniform_variation_discounts
+	 * @param string $sale Second variation sale price.
+	 * @param string $mode Badge content mode.
+	 * @param string $expected Expected badge text.
+	 */
+	public function test_uniform_variation_discounts( string $sale, string $mode, string $expected ): void {
+		$product = \WC_Helper_Product::create_variation_product();
+		foreach ( $product->get_children() as $index => $id ) {
+			$variation = wc_get_product( $id );
+			$variation->set_regular_price( 0 === $index ? '10' : '20' );
+			$variation->set_sale_price( 0 === $index ? '9' : $sale );
+			$variation->save();
+		}
+		$attributes = array(
+			'badgeContent' => $mode,
+			'prefix'       => 'Save ',
+			'suffix'       => ' off',
+		);
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
+		$this->assertStringContainsString( 'aria-hidden="true">' . $expected . '</span>', $markup );
+		$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+	}
+
+	/**
+	 * Uniform percentages, uniform amounts, and undiscounted variations.
+	 *
+	 * @return array
+	 */
+	public function provider_uniform_variation_discounts(): array {
+		return array(
+			'equal percentage'       => array( '18', 'percentage', 'Save 10% off' ),
+			'different amount'       => array( '18', 'amount', 'Up to $2.00' ),
+			'equal amount'           => array( '19', 'amount', 'Save $1.00 off' ),
+			'different percentage'   => array( '19', 'percentage', 'Up to 10%' ),
+			'undiscounted variation' => array( '20', 'percentage', 'Up to 10%' ),
+		);
+	}
+
+	/**
 	 * @testdox Discount amount reflects prices shown with tax on the storefront.
 	 */
 	public function test_discount_amount_includes_displayed_tax(): void {
