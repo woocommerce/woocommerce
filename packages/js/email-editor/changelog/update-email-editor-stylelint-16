@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Update the package's stylelint dev tooling to v16; no change to shipped code.

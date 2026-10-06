@@ -1,7 +1,7 @@
 /**
  * Internal Dependencies
  */
-@import './legend.scss';
+@import "./legend.scss";
 
 .woocommerce-chart__body-row .d3-chart__container {
 	width: calc(100% - 320px);
@@ -34,7 +34,7 @@
 		top: 0;
 		text-align: center;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			@include font-size( 13 );
 		}
 	}
@@ -57,7 +57,7 @@
 		visibility: hidden;
 		z-index: 1;
 
-		@include breakpoint( '<600px' ) {
+		@include breakpoint( "<600px" ) {
 			min-width: auto;
 			width: calc(100% - #{$gap-large * 2});
 		}
