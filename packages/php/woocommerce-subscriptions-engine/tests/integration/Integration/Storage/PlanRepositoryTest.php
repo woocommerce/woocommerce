@@ -160,6 +160,43 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		( new PlanRepository() )->update( Plan::create( array( 'name' => 'Unsaved' ) ) );
 	}
 
+	public function test_update_fields_writes_only_the_named_columns(): void {
+		$repo = new PlanRepository();
+		$id   = $this->insert_plan( $repo, 'Original' );
+
+		$stale = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $stale );
+
+		$other = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $other );
+		$other->set_name( 'Renamed elsewhere' );
+		$repo->update_fields( $other, array( 'name' ) );
+
+		$stale->set_status( PlanStatus::ARCHIVED );
+		$repo->update_fields( $stale, array( 'status' ) );
+
+		$stored = $repo->find( $id );
+		$this->assertInstanceOf( Plan::class, $stored );
+		$this->assertSame( 'Renamed elsewhere', $stored->get_name() );
+		$this->assertSame( PlanStatus::ARCHIVED, $stored->get_status() );
+	}
+
+	/**
+	 * @testWith ["extension_slug"]
+	 *           ["sort_order"]
+	 *
+	 * @param string $field Field that is not a writable column.
+	 */
+	public function test_update_fields_refuses_a_field_that_is_not_writable( string $field ): void {
+		$repo = new PlanRepository();
+		$plan = $repo->find( $this->insert_plan( $repo, 'Guarded' ) );
+		$this->assertInstanceOf( Plan::class, $plan );
+
+		$this->expectException( \InvalidArgumentException::class );
+
+		$repo->update_fields( $plan, array( $field ) );
+	}
+
 	public function test_query_and_count_filter_by_status_and_search(): void {
 		$repo = new PlanRepository();
 

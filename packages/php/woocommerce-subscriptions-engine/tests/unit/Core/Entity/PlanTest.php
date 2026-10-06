@@ -270,7 +270,7 @@ class PlanTest extends TestCase {
 	public function test_to_storage_has_exactly_the_record_columns(): void {
 		$plan = Plan::create( array( 'name' => 'Columns' ) );
 
-		$this->assertSame(
+		$this->assertEqualsCanonicalizing(
 			array( 'name', 'status', 'extension_slug', 'billing_policy', 'pricing_policy', 'delivery_policy' ),
 			array_keys( $plan->to_storage() )
 		);

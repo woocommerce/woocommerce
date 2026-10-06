@@ -87,6 +87,13 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertFalse( $this->sut->update_meta( $this->id, 'note', 'four', 'missing' ) );
 	}
 
+	public function test_update_meta_to_the_same_value_reports_no_change(): void {
+		$this->sut->add_meta( $this->id, 'note', 'one' );
+
+		$this->assertFalse( $this->sut->update_meta( $this->id, 'note', 'one' ) );
+		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
 	public function test_delete_meta_with_a_value_removes_only_that_row(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 		$this->sut->add_meta( $this->id, 'note', 'two' );
@@ -161,6 +168,14 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 
 		$this->assertTrue( $this->sut->delete( $this->id ) );
 		$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
+	}
+
+	public function test_a_wrong_owner_delete_keeps_the_plan_and_its_meta(): void {
+		$this->sut->add_meta( $this->id, 'note', 'kept' );
+
+		$this->assertFalse( $this->sut->delete( $this->id, 'another-extension' ) );
+		$this->assertTrue( $this->sut->exists( $this->id ) );
+		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
 	public function test_exists_reports_stored_plans_only(): void {
