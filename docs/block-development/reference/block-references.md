@@ -1622,7 +1622,7 @@ Display a single product of your choice with full control over its presentation.
 
 - **Name:** woocommerce/single-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity
+- **Supports:** align (full, wide), color (background, gradients, ~~text~~), interactivity, listView, shadow, spacing (margin, padding)
 - **Attributes:** productId
 
 ## Filter by Stock Controls - woocommerce/stock-filter
