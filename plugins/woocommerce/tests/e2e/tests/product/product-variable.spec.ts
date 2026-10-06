@@ -244,47 +244,43 @@ test.describe(
 
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 
-			const rowsLocator = 'tr.wc-block-cart-items__row';
+			const rows = page.locator( 'tr.wc-block-cart-items__row' );
 
-			await expect( page.locator( rowsLocator ) ).toHaveCount( 4 );
+			await expect( rows ).toHaveCount( variations1.length );
 
-			for ( const row of await page.locator( rowsLocator ).all() ) {
+			// Cart rows keep the order the variations were added in. Match by
+			// index: every row shares the product name, and the size options
+			// overlap as text ("Large" is inside "XLarge").
+			for ( let i = 0; i < variations1.length; i++ ) {
+				const row = rows.nth( i );
 				await expect( row ).toContainText( variableProductName );
 				await expect(
 					row.getByRole( 'spinbutton', { name: 'Quantity' } )
 				).toHaveValue( '1' );
+				await expect(
+					row.locator( 'td.wc-block-cart-item__total' )
+				).toHaveText(
+					`$${ parseFloat( variations1[ i ].regular_price ).toFixed(
+						2
+					) }`
+				);
 			}
 
-			const estimatedTotal = page
-				.getByRole( 'main' )
-				.locator( '.wc-block-components-totals-item' )
-				.filter( { hasText: 'Estimated total' } );
-			const estimatedTotalValue = estimatedTotal.locator(
-				'.wc-block-components-totals-item__value'
-			);
-
-			await expect( estimatedTotalValue ).toBeVisible();
-
-			// Assert a floor rather than an exact figure. Estimated total is
-			// cart->get_total(), so it carries shipping and tax on top of the
-			// line items, and this block resets neither. An upper bound would
-			// fail whenever the suite's real 20% tax rate and $10 flat rate
-			// stack, with nothing actually broken. The floor is the part that
-			// matters: the previous currency pattern was satisfied by $0.00,
-			// so a Cart block totals regression passed.
-			const expectedSubtotal = variations1.reduce(
+			// Site setup leaves core-parallel with no standard tax rate and
+			// free fallback shipping, so the total is the plain sum.
+			const expectedTotal = variations1.reduce(
 				( sum, variation ) =>
 					sum + parseFloat( variation.regular_price ),
 				0
 			);
-			const renderedTotal = Number(
-				( ( await estimatedTotalValue.textContent() ) ?? '' ).replace(
-					/[^\d.-]/g,
-					''
-				)
-			);
 
-			expect( renderedTotal ).toBeGreaterThanOrEqual( expectedSubtotal );
+			await expect(
+				page
+					.getByRole( 'main' )
+					.locator( '.wc-block-components-totals-item' )
+					.filter( { hasText: 'Estimated total' } )
+					.locator( '.wc-block-components-totals-item__value' )
+			).toHaveText( `$${ expectedTotal.toFixed( 2 ) }` );
 		} );
 
 		test( 'should be able to remove variation products from the cart', async ( {
