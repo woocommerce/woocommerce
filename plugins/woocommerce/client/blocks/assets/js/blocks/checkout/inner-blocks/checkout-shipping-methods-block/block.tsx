@@ -9,6 +9,7 @@ import {
 import { ShippingRatesControl } from '@woocommerce/base-components/cart-checkout';
 import {
 	getShippingRatesPackageCount,
+	getShippingRatesRateCount,
 	hasCollectableRate,
 	hasAllFieldsForShippingRates,
 } from '@woocommerce/base-utils';
@@ -28,6 +29,7 @@ import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import type { ReactElement } from 'react';
 import { useMemo } from '@wordpress/element';
 import ReadMore from '@woocommerce/base-components/read-more';
+import { CheckoutShippingSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-shipping';
 
 /**
  * Renders a shipping rate control option.
@@ -94,6 +96,7 @@ const Block = ( {
 		shippingRates,
 		needsShipping,
 		isLoadingRates,
+		isShippingRatesStale,
 		hasCalculatedShipping,
 		isCollectable,
 	} = useShippingData();
@@ -123,6 +126,15 @@ const Block = ( {
 
 	const shippingRatesPackageCount =
 		getShippingRatesPackageCount( shippingRates );
+
+	// Rates for a completed address are still on their way, so expect some rather than reporting there are none.
+	if (
+		isShippingRatesStale &&
+		! getShippingRatesRateCount( filteredShippingRates ) &&
+		hasAllFieldsForShippingRates( shippingAddress )
+	) {
+		return <CheckoutShippingSkeleton />;
+	}
 
 	if ( ! hasCalculatedShipping && ! shippingRatesPackageCount ) {
 		return <NoShippingAddressMessage />;
