@@ -33,7 +33,6 @@ module.exports = {
 		'scss/selector-no-redundant-nesting-selector': null,
 		'selector-id-pattern': null,
 		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
-		// Fallbacks are added at build time by the @wordpress/theme PostCSS plugin.
 		'plugin-wpds/no-token-fallback-values': true,
 	},
 	overrides: [
