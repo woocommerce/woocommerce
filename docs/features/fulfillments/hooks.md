@@ -87,6 +87,7 @@ These filters change how WooCommerce calculates fulfillment state and resolves s
 | `woocommerce_fulfillment_order_fulfillment_statuses` | Register or modify order-level fulfillment statuses. |
 | `woocommerce_fulfillment_fulfillment_statuses` | Register or modify fulfillment record statuses. |
 | `woocommerce_fulfillment_calculate_order_fulfillment_status` | Override how WooCommerce derives an order's fulfillment state from its fulfillment records. |
+| `woocommerce_fulfillments_auto_fulfill_products` | Return an array of product or variation IDs to fulfill automatically. Receives the IDs array and the `WC_Order` object. |
 | `woocommerce_fulfillment_order_fulfillment_status_text` | Customize the display label for an order-level fulfillment state. |
 | `woocommerce_fulfillment_shipping_providers` | Add or modify shipping providers available to the feature. |
 | `woocommerce_fulfillment_parse_tracking_number` | Parse or normalize tracking numbers based on origin and destination countries. |
@@ -128,3 +129,4 @@ The fulfillment email templates expose the standard extension points below.
 | `woocommerce_email_before_fulfillment_table` | `WC_Order $order`, `Fulfillment $fulfillment`, `bool $sent_to_admin`, `bool $plain_text`, `WC_Email $email` | Inject content before the fulfillment items table. |
 | `woocommerce_email_after_fulfillment_table` | `WC_Order $order`, `Fulfillment $fulfillment`, `bool $sent_to_admin`, `bool $plain_text`, `WC_Email $email` | Inject content after the fulfillment items table. |
 | `woocommerce_email_fulfillment_items_args` | Template arguments array | Customize how fulfillment line items are rendered in the email templates. |
+| `woocommerce_get_email_fulfillment_items_table` | `string $html`, `WC_Order $order`, `Fulfillment $fulfillment` | Filter and return the rendered fulfillment items table HTML. |
