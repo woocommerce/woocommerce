@@ -55,10 +55,10 @@ The `_items` meta key is required and must be an array of objects describing whi
 ]
 ```
 
-| Field     | Type    | Description                          |
-| --------- | ------- | ------------------------------------- |
-| `item_id` | integer | The order line item ID.               |
-| `qty`     | integer | Quantity of the item being fulfilled. |
+| Field     | Type    | Description                                    |
+| --------- | ------- | ---------------------------------------------- |
+| `item_id` | integer | The order line item ID.                        |
+| `qty`     | number  | Positive quantity of the item being fulfilled. |
 
 Other common (optional) meta keys: `_tracking_number`, `_shipment_provider`, `_tracking_url`. Meta keys prefixed with an underscore are private and only shown to merchants and in customer emails; unprefixed keys are also shown to merchants and customers alongside the fulfillment.
 
@@ -719,7 +719,7 @@ woocommerce.get("orders/723/fulfillments/2/metadata").parsed_response
 
 Like updating a fulfillment, this replaces the full metadata set: any existing meta keys not present in the request body are removed.
 
-The metadata must be wrapped in an object under the `meta_data` key. The endpoint requires the `meta_data` parameter, so sending a bare array returns a `400 rest_missing_callback_param` error. Because the request replaces the full set, keep `_items` in the payload (or the save fails with "The fulfillment should contain at least one item") unless you intend to remove the key.
+The metadata must be wrapped in an object under the `meta_data` key. The endpoint requires the `meta_data` parameter, so sending a bare array returns a `400 rest_missing_callback_param` error. Because the request replaces the full set, keep `_items` in the payload. The metadata update and delete endpoints cannot remove `_items`; saving without it fails with "The fulfillment should contain at least one item."
 
 ```http
 PUT /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>/metadata
