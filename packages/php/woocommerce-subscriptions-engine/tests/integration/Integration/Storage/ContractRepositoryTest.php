@@ -525,7 +525,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$counts = $this->sut->count_by_status();
 
 		$this->assertSame( ContractStatus::get_all(), array_keys( $counts ) );
-		$this->assertSame( array( 0, 0, 0, 0, 0 ), array_values( $counts ) );
+		$this->assertSame( array_fill( 0, count( $counts ), 0 ), array_values( $counts ) );
 	}
 
 	/**
