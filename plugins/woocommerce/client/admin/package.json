@@ -210,7 +210,7 @@
 		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
 		"sass-loader": "10.5.x",
-		"stylelint": "^16.9.0",
+		"stylelint": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",

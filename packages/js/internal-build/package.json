@@ -60,7 +60,7 @@
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "catalog:wp-bundled",
 		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
-		"@wordpress/stylelint-config": "^23.14.0",
+		"@wordpress/stylelint-config": "catalog:tooling",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",
 		"esbuild": "^0.24.0",
@@ -81,7 +81,7 @@
 		"@wordpress/editor": "14.33.11",
 		"@wordpress/notices": "5.33.1",
 		"eslint": "^10.0.0",
-		"stylelint": "^16.9.0",
+		"stylelint": "catalog:tooling",
 		"typescript": "5.7.x"
 	},
 	"config": {

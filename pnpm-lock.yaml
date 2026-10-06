@@ -27,9 +27,15 @@ catalogs:
     '@babel/runtime':
       specifier: 7.25.7
       version: 7.25.7
+    '@wordpress/stylelint-config':
+      specifier: ^23.14.0
+      version: 23.42.0
     postcss:
       specifier: ^8.5.26
       version: 8.5.26
+    stylelint:
+      specifier: ^16.9.0
+      version: 16.26.1
     webpack:
       specifier: 5.97.x
       version: 5.97.1
@@ -379,7 +385,7 @@ importers:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -683,7 +689,7 @@ importers:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -925,7 +931,7 @@ importers:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -1425,7 +1431,7 @@ importers:
         specifier: 5.0.5
         version: 5.0.5
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -1586,7 +1592,7 @@ importers:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -1737,7 +1743,7 @@ importers:
         specifier: catalog:wp-min
         version: 5.33.1(postcss@8.5.26)
       '@wordpress/stylelint-config':
-        specifier: ^23.14.0
+        specifier: catalog:tooling
         version: 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
       chokidar:
         specifier: ^3.6.0
@@ -1795,7 +1801,7 @@ importers:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       typescript:
         specifier: 5.7.x
@@ -2175,7 +2181,7 @@ importers:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -2367,7 +2373,7 @@ importers:
         specifier: 5.0.5
         version: 5.0.5
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -3227,7 +3233,7 @@ importers:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       ts-jest:
         specifier: 29.1.x
@@ -3597,7 +3603,7 @@ importers:
         specifier: 32.6.0
         version: 32.6.0(@playwright/test@1.63.0)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(babel-plugin-macros@3.1.0)(esbuild@0.24.2)(eslint-import-resolver-webpack@0.13.11)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
       '@wordpress/stylelint-config':
-        specifier: ^23.14.0
+        specifier: catalog:tooling
         version: 23.36.0(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
       ajv-cli:
         specifier: 3.3.x
@@ -3750,7 +3756,7 @@ importers:
         specifier: 10.5.10
         version: 10.5.10(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.0.3)
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
       stylelint-scss:
         specifier: ^6.4.0
@@ -3791,7 +3797,7 @@ importers:
         specifier: 32.6.0
         version: 32.6.0(@playwright/test@1.63.0)(@swc/core@1.15.24)(@types/node@24.12.2)(@types/react@18.3.28)(@types/webpack@4.41.40)(@wordpress/env@11.9.0(patch_hash=4ba152352e5408eabc62f88b83637a382c45c03b267bf8abf8e58fb1663c8cf7)(@types/node@24.12.2))(babel-plugin-macros@3.1.0)(file-loader@6.2.0(webpack@5.97.1))(jiti@2.6.1)(node-notifier@8.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass-embedded@1.100.0)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))(type-fest@4.41.0)(typescript@5.7.3)(webpack-hot-middleware@2.26.1)
       '@wordpress/stylelint-config':
-        specifier: ^23.14.0
+        specifier: catalog:tooling
         version: 23.42.0(@types/react@18.3.28)(esbuild@0.24.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint-scss@6.14.0(stylelint@16.26.1(typescript@5.7.3)))(stylelint@16.26.1(typescript@5.7.3))
       chokidar:
         specifier: ^3.6.0
@@ -3839,7 +3845,7 @@ importers:
         specifier: 1.69.5
         version: 1.69.5
       stylelint:
-        specifier: ^16.9.0
+        specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
 
   tools/code-analyzer:

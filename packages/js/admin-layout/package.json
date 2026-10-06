@@ -85,7 +85,7 @@
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
 		"eslint": "^10.0.0",
-		"stylelint": "^16.9.0",
+		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"postcss-loader": "4.3.x",
