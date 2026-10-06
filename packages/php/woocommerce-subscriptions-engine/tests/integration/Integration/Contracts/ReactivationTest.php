@@ -20,9 +20,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation
@@ -82,11 +84,16 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	/**
 	 * Seed a contract with a next-payment date and the given selling plan.
 	 *
-	 * @param string|null $next_payment_gmt Next-payment GMT string, or null.
-	 * @param int         $selling_plan_id  Selling plan id.
-	 * @param string      $status           Contract status. Default ON_HOLD.
+	 * An on-hold row that still carries `next_payment_gmt` and no hold anchor meta is the
+	 * shape of a contract held before hold started disarming the next-due moment; it is the
+	 * reactivation fallback these seeds exercise.
+	 *
+	 * @param string|null           $next_payment_gmt Next-payment GMT string, or null.
+	 * @param int                   $selling_plan_id  Selling plan id.
+	 * @param string                $status           Contract status. Default ON_HOLD.
+	 * @param array<string, string> $meta             Contract meta.
 	 */
-	private function seed_on_hold( ?string $next_payment_gmt, int $selling_plan_id, string $status = ContractStatus::ON_HOLD ): int {
+	private function seed_on_hold( ?string $next_payment_gmt, int $selling_plan_id, string $status = ContractStatus::ON_HOLD, array $meta = array() ): int {
 		$contract = Contract::create(
 			array(
 				'customer_id'      => 1,
@@ -97,6 +104,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 				'start_gmt'        => '2026-01-01 00:00:00',
 				'next_payment_gmt' => $next_payment_gmt,
 				'billing_total'    => '19.99',
+				'meta'             => $meta,
 			)
 		);
 
@@ -136,6 +144,55 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 00:00:00' ) );
 
 		$this->assertSame( '2026-05-01 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
+	}
+
+	public function test_reactivate_rearms_from_the_hold_anchor(): void {
+		$id = $this->seed_on_hold( '2099-01-01 00:00:00', $this->make_monthly_plan(), ContractStatus::ACTIVE );
+		( new Hold( $this->contracts ) )->hold( $this->reload( $id ) );
+		$this->assertNull( $this->reload( $id )->get_next_payment_gmt(), 'Hold disarmed the next-due moment.' );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt() );
+		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+	}
+
+	public function test_reactivate_rolls_a_past_due_anchor_forward(): void {
+		// Held with a 2026-02-01 anchor, resumed 2026-04-15: rolled forward by whole
+		// cadences exactly like a stored past-due date -> 2026-05-01.
+		$id = $this->seed_on_hold( null, $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => '2026-02-01 00:00:00' ) );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 00:00:00' ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( '2026-05-01 00:00:00', $stored->get_next_payment_gmt() );
+		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+	}
+
+	/**
+	 * Hold clears the next payment, so one set while held was re-armed deliberately and wins.
+	 */
+	public function test_reactivate_prefers_a_stored_next_payment_over_the_anchor(): void {
+		$id = $this->seed_on_hold( '2099-06-01 00:00:00', $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => '2099-01-01 00:00:00' ) );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( '2099-06-01 00:00:00', $stored->get_next_payment_gmt() );
+		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+	}
+
+	public function test_reactivate_ignores_a_malformed_anchor(): void {
+		$id = $this->seed_on_hold( null, $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => 'not-a-date' ) );
+
+		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertNull( $stored->get_next_payment_gmt(), 'A malformed anchor counts as absent.' );
+		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
 	}
 
 	public function test_reactivate_rolls_by_the_frozen_snapshot_cadence_over_the_live_plan(): void {
@@ -256,6 +313,36 @@ class ReactivationTest extends EngineIntegrationTestCase {
 
 		$this->expectException( DomainException::class );
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+	}
+
+	public function test_reactivate_rejects_a_pending_cancellation_contract(): void {
+		$id = $this->seed_on_hold( '2099-01-01 00:00:00', $this->make_monthly_plan(), ContractStatus::PENDING_CANCELLATION );
+
+		try {
+			$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+			$this->fail( 'Expected a DomainException for a pending-cancellation contract.' );
+		} catch ( DomainException $e ) {
+			$stored = $this->reload( $id );
+			$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt(), 'Nothing was written.' );
+		}
+	}
+
+	public function test_reactivate_rejects_an_unregistered_stored_status(): void {
+		global $wpdb;
+
+		$id = $this->seed_on_hold( '2099-01-01 00:00:00', $this->make_monthly_plan() );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		try {
+			$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) );
+			$this->fail( 'Expected a DomainException for an unregistered stored status.' );
+		} catch ( DomainException $e ) {
+			$stored = $this->reload( $id );
+			$this->assertSame( 'legacy-paused', $stored->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt(), 'Nothing was written.' );
+		}
 	}
 
 	/**
