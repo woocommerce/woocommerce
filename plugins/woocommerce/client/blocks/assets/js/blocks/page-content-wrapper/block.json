@@ -16,10 +16,6 @@
 			"default": ""
 		}
 	},
-	"providesContext": {
-		"postId": "postId",
-		"postType": "postType"
-	},
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
