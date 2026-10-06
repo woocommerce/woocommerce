@@ -7,14 +7,17 @@ import {
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
+import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
+	morePaymentOptionsBaseUrl,
 	wooPaymentsProviderId,
 	wooPaymentsProviderSuggestionId,
 	wooPaymentsSuggestionId,
@@ -428,3 +431,87 @@ export const removeOriginFromURL = ( url: string ) => {
 	const parsedUrl = parseAdminUrl( url );
 	return parsedUrl.href?.replace( parsedUrl.origin, '' ) ?? url;
 };
+
+/**
+ * Resolve which step of an install-and-activate run actually failed.
+ *
+ * `installAndActivatePlugins` installs and then activates, so an install that succeeded can
+ * still fail on activation. The rejection reports the step it failed on; the plugin status
+ * read before the request only says which step we expected to fail.
+ *
+ * @param error           The rejection value from installAndActivatePlugins.
+ * @param requestedAction The step implied by the plugin status before the request.
+ * @return The step that failed.
+ */
+export const getFailedPluginAction = (
+	error: unknown,
+	requestedAction: 'install' | 'activate'
+): 'install' | 'activate' => {
+	const reportedAction =
+		typeof error === 'object' && error !== null && 'actionType' in error
+			? ( error as { actionType: unknown } ).actionType
+			: undefined;
+
+	return reportedAction === 'install' || reportedAction === 'activate'
+		? reportedAction
+		: requestedAction;
+};
+
+/**
+ * Build the notice text for a failed provider extension install or activation.
+ *
+ * `@woocommerce/data` frames its message with the plugin slug. Re-frame with the provider
+ * title the merchant clicked, using the unframed reason the rejection carries. Keep the
+ * already-framed message only when the rejection has no reason at all.
+ *
+ * @param actionType Whether the extension was being installed or activated.
+ * @param title      The provider title shown in the UI.
+ * @param error      The rejection value from installAndActivatePlugins.
+ * @return The notice text.
+ */
+export const getPluginActionErrorMessage = (
+	actionType: 'install' | 'activate',
+	title: string,
+	error: unknown
+): string => {
+	const frame =
+		actionType === 'install'
+			? sprintf(
+					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
+					__( 'Could not install %s.', 'woocommerce' ),
+					title
+			  )
+			: sprintf(
+					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
+					__( 'Could not activate %s.', 'woocommerce' ),
+					title
+			  );
+
+	const rejection =
+		typeof error === 'object' && error !== null
+			? ( error as { reason?: unknown; message?: unknown } )
+			: undefined;
+
+	if ( typeof rejection?.reason === 'string' && rejection.reason ) {
+		return `${ frame } ${ rejection.reason }`;
+	}
+
+	const message =
+		typeof rejection?.message === 'string' ? rejection.message : '';
+
+	return message || frame;
+};
+
+/**
+ * Build the WooCommerce.com marketplace link for the "More payment options" entry.
+ *
+ * @param businessCountryCode The selected business location, as an ISO 3166-1 alpha-2 country code.
+ * @return The marketplace URL, filtered by country when a business location is selected.
+ */
+export const getMorePaymentOptionsUrl = (
+	businessCountryCode: string | null
+): string =>
+	addQueryArgs(
+		morePaymentOptionsBaseUrl,
+		businessCountryCode ? { country: businessCountryCode } : {}
+	);

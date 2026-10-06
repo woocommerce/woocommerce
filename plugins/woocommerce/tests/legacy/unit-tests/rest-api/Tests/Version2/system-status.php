@@ -91,7 +91,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
-		$this->skip_on_php_8_1();
 		$system_status_data = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user );
 		$this->assertArrayHasKey( 'environment', $system_status_data );
 		$this->assertArrayHasKey( 'database', $system_status_data );
@@ -108,8 +107,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_environment() {
-		$this->skip_on_php_8_1();
-
 		$store_id = get_option( \WC_Install::STORE_ID_OPTION, null );
 		if ( empty( $store_id ) ) {
 			$store_id = 'a1b2c3d4-e5f6-a1b2-c3d4-a1b2c3d4e5f6';
@@ -136,8 +133,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_database() {
-		$this->skip_on_php_8_1();
-
 		global $wpdb;
 		$database = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['database'];
 
@@ -189,7 +184,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_theme() {
-		$this->skip_on_php_8_1();
 		$active_theme = wp_get_theme();
 		$theme        = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['theme'];
 
@@ -204,8 +198,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_settings() {
-		$this->skip_on_php_8_1();
-
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $terms as $term ) {
@@ -226,8 +218,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_security() {
-		$this->skip_on_php_8_1();
-
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
@@ -241,8 +231,6 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_pages() {
-		$this->skip_on_php_8_1();
-
 		$pages = $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['pages'];
 		$this->assertEquals( 5, count( $pages ) );
 	}

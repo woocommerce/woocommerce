@@ -58,10 +58,11 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Create a variable product assigned to a product category.
 	 *
-	 * @return array{product: WC_Product_Variable, category_slug: string}
+	 * @param string $category_name Category name.
+	 * @return array{product: WC_Product_Variable, category_slug: string, category_id: int}
 	 */
-	private function create_categorized_variation_product(): array {
-		$term = wp_insert_term( 'Export Test Category', 'product_cat' );
+	private function create_categorized_variation_product( string $category_name = 'Export Test Category' ): array {
+		$term = wp_insert_term( $category_name, 'product_cat' );
 		$this->assertIsArray( $term, 'Failed to create product category for export test.' );
 
 		$product = WC_Helper_Product::create_variation_product();
@@ -73,7 +74,21 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		return array(
 			'product'       => $product,
 			'category_slug' => $category->slug,
+			'category_id'   => (int) $category->term_id,
 		);
+	}
+
+	/**
+	 * Write the current page the way file generation does, so the completion percentage includes its rows.
+	 *
+	 * @param WC_Product_CSV_Exporter $exporter Exporter instance.
+	 */
+	private function export_current_page( WC_Product_CSV_Exporter $exporter ): void {
+		$exporter->prepare_data_to_export();
+
+		$export_rows = ( new ReflectionClass( WC_Product_CSV_Exporter::class ) )->getMethod( 'export_rows' );
+		$export_rows->setAccessible( true );
+		$export_rows->invoke( $exporter );
 	}
 
 	/**
@@ -163,6 +178,104 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Category export includes variable products and their variations without changing the completion percentage.
+	 */
+	public function test_appended_variations_do_not_change_category_export_completion(): void {
+		$first  = $this->create_categorized_variation_product( 'Export Paged Progress Category' );
+		$second = WC_Helper_Product::create_variation_product();
+		$second->set_category_ids( array( $first['category_id'] ) );
+		$second->save();
+		$this->create_categorized_variation_product( 'Export Other Progress Category' );
+
+		$products    = array(
+			1 => $first['product'],
+			2 => $second,
+		);
+		$percentages = array(
+			1 => 50,
+			2 => 100,
+		);
+
+		foreach ( $products as $page => $product ) {
+			$exporter = new WC_Product_CSV_Exporter();
+			$exporter->set_limit( 1 );
+			$exporter->set_page( $page );
+			$exporter->set_product_types_to_export( array( ProductType::VARIABLE, ProductType::VARIATION ) );
+			$exporter->set_product_category_to_export( array( $first['category_slug'] ) );
+			$this->export_current_page( $exporter );
+
+			$exported_ids = array_map( 'intval', wp_list_pluck( $this->get_exported_data( $exporter ), 'id' ) );
+			$expected_ids = array_map(
+				'intval',
+				array_merge(
+					array( $product->get_id() ),
+					$product->get_children( 'edit' )
+				)
+			);
+			sort( $exported_ids );
+			sort( $expected_ids );
+
+			$this->assertGreaterThan( $exporter->get_limit(), count( $exported_ids ), 'The page should include the parent and its appended variations.' );
+			$this->assertSame( $expected_ids, $exported_ids, 'The page should include that variable product and its variations, and exclude the other category.' );
+			$this->assertSame( $percentages[ $page ], $exporter->get_percent_complete() );
+		}
+	}
+
+	/**
+	 * @testdox Selected product IDs restrict the export to those products and their variations.
+	 */
+	public function test_selected_product_ids_restrict_export_rows(): void {
+		$simple_product_ids = array();
+		$variable_product   = new WC_Product_Variable();
+
+		try {
+			$simple_product       = WC_Helper_Product::create_simple_product();
+			$simple_product_ids[] = $simple_product->get_id();
+
+			WC_Helper_Product::create_variation_product( $variable_product );
+			$variation_ids = $variable_product->get_children( 'edit' );
+
+			$unrelated_product    = WC_Helper_Product::create_simple_product();
+			$simple_product_ids[] = $unrelated_product->get_id();
+
+			$exporter = new WC_Product_CSV_Exporter();
+			$exporter->set_product_ids_to_export( array( $simple_product->get_id(), $variable_product->get_id() ) );
+			$exporter->prepare_data_to_export();
+
+			$exported_ids = array_map( 'intval', wp_list_pluck( $this->get_exported_data( $exporter ), 'id' ) );
+			$expected_ids = array_merge(
+				array( $simple_product->get_id(), $variable_product->get_id() ),
+				$variation_ids
+			);
+			sort( $exported_ids );
+			sort( $expected_ids );
+
+			$this->assertSame( $expected_ids, $exported_ids );
+			$this->assertCount( count( $expected_ids ), $exported_ids );
+			$this->assertNotContains( $unrelated_product->get_id(), $exported_ids );
+		} finally {
+			if ( $variable_product->get_id() ) {
+				$variation_ids = (array) wc_get_products(
+					array(
+						'parent' => $variable_product->get_id(),
+						'type'   => ProductType::VARIATION,
+						'return' => 'ids',
+						'limit'  => -1,
+					)
+				);
+				foreach ( $variation_ids as $variation_id ) {
+					WC_Helper_Product::delete_product( $variation_id );
+				}
+				WC_Helper_Product::delete_product( $variable_product->get_id() );
+			}
+
+			foreach ( array_reverse( $simple_product_ids ) as $product_id ) {
+				WC_Helper_Product::delete_product( $product_id );
+			}
+		}
+	}
+
+	/**
 	 * @testdox CSV data is written with an append-only fopen mode so write-only stream wrappers are supported.
 	 */
 	public function test_write_csv_data_uses_append_only_fopen_mode(): void {
@@ -202,5 +315,42 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @testdox Exporting a product loaded before its global attribute is deleted leaves the value empty without a warning.
+	 */
+	public function test_export_row_for_product_loaded_before_its_global_attribute_is_deleted(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'Stale Finish', array( 'Matte' ) );
+		$product   = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$product = wc_get_product( $product->get_id() );
+
+		wc_delete_attribute( $attribute->get_id() );
+
+		$exporter          = new WC_Product_CSV_Exporter();
+		$generate_row_data = ( new ReflectionClass( WC_Product_CSV_Exporter::class ) )->getMethod( 'generate_row_data' );
+		$generate_row_data->setAccessible( true );
+		$warnings = array();
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Capturing the warning is the assertion; PHPUnit would otherwise convert it to an exception.
+		set_error_handler(
+			static function ( int $errno, string $errstr ) use ( &$warnings ): bool {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting -- Reads the level only, to skip warnings silenced with @.
+				if ( error_reporting() & $errno ) {
+					$warnings[] = $errstr;
+				}
+				return true;
+			}
+		);
+		try {
+			$row = $generate_row_data->invoke( $exporter, $product );
+		} finally {
+			restore_error_handler();
+		}
+
+		$this->assertSame( array(), $warnings, 'Exporting the product should not raise warnings.' );
+		$this->assertSame( '', $row['attributes:value1'] );
+		$this->assertSame( 1, $row['attributes:taxonomy1'] );
 	}
 }

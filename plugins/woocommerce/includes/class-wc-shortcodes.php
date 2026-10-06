@@ -667,7 +667,7 @@ class WC_Shortcodes {
 		if ( ! function_exists( 'wc_print_notices' ) ) {
 			return '';
 		}
-		return '<div class="woocommerce">' . wc_print_notices( true ) . '</div>';
+		return '<div class="woocommerce woocommerce-notices-wrapper">' . wc_print_notices( true ) . '</div>';
 	}
 
 	/**

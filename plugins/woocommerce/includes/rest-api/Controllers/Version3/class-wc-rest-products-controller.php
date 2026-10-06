@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
@@ -400,7 +401,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					$skus[] = $request['sku'];
 				}
 
-				$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Exact _sku match; wc_product_meta_lookup truncates SKUs to 100 chars and is empty while it regenerates, so it is not an equivalent path.
 					$args,
 					array(
 						'key'     => '_sku',
@@ -425,7 +426,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- wc_product_meta_lookup.tax_class is unindexed and holds NULL where _tax_class is unset, so it is neither faster nor equivalent.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -436,12 +437,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- _price is stored once per child price; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Postmeta stays correct while wc_product_meta_lookup is stale or regenerating; the _stock_status meta_key index bounds the scan.
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -747,10 +748,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
+		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
 		$product = $this->get_product_for_rest_request( $request );
 
 		if ( is_wp_error( $product ) ) {
 			return $product;
+		}
+
+		foreach ( $customs as $property => $value ) {
+			$product->{ 'set_' . $property }( $value );
 		}
 
 		// Post title.
@@ -1848,6 +1854,24 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
+		$schema['properties']['customs_commodity_code'] = array(
+			'description' => __( 'Customs commodity code containing 6 to 14 digits. Punctuation and spaces are removed.', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['customs_country_of_origin'] = array(
+			'description' => __( 'Two-letter country of origin code.', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['customs_description'] = array(
+			'description' => __( 'Plain-text customs description, up to 35 characters, without emoji or special symbols such as ™.', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -1977,7 +2001,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params = parent::get_collection_params();
 
 		$params['categories'] = array(
-			'description'       => __( 'Limit result set to specific product categorie ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific product category ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -2064,6 +2088,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'global_unique_id', $fields, true ) ) {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
+			}
+
+			foreach ( CustomsDataValidator::FIELDS as $property ) {
+				if ( in_array( $property, $fields, true ) ) {
+					$data[ $property ] = $product->{ 'get_' . $property }( $context );
+				}
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

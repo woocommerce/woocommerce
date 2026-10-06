@@ -64,6 +64,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $product_ids_to_export = array();
 
 	/**
+	 * Rows on this page that the paginated query did not return.
+	 *
+	 * @var int
+	 */
+	protected $rows_outside_query = 0;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -225,10 +232,11 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		$products = wc_get_products( $args );
 
-		$this->total_rows   = $products->total;
-		$this->row_data     = array();
-		$variable_products  = array();
-		$include_variations = ! isset( $args['type'] ) || in_array( ProductType::VARIATION, (array) $args['type'], true );
+		$this->total_rows         = $products->total;
+		$this->row_data           = array();
+		$this->rows_outside_query = 0;
+		$variable_products        = array();
+		$include_variations       = ! isset( $args['type'] ) || in_array( ProductType::VARIATION, (array) $args['type'], true );
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
@@ -261,9 +269,28 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				foreach ( $products as $product ) {
 					$this->row_data[] = $this->generate_row_data( $product );
+					++$this->rows_outside_query;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get total percentage complete.
+	 *
+	 * Variations appended after the paginated query are written on this page, but total_rows does not include them. Leave them out of this calculation so the export finishes at 100 instead of stopping early or requesting pages forever.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function get_percent_complete() {
+		if ( 0 === $this->total_rows ) {
+			return 100;
+		}
+
+		$exported = parent::get_total_exported() - $this->rows_outside_query;
+
+		return (int) floor( ( max( 0, $exported ) / $this->total_rows ) * 100 );
 	}
 
 	/**
@@ -714,7 +741,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
 						if ( $attribute->is_taxonomy() ) {
-							$terms  = $attribute->get_terms();
+							$terms  = (array) $attribute->get_terms();
 							$values = array();
 
 							foreach ( $terms as $term ) {

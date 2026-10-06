@@ -62,7 +62,7 @@ window.addEventListener( 'load', () => {
 	const cachedCart = persistenceLayer.get();
 	// On login, if a customer had a cart session, the cached cart is equal to the default cart data, with no items.
 	// We need to check if the cached cart has items, otherwise we will wrongly skip the API request.
-	const hasItemsInCachedCart = cachedCart?.itemsCount > 0;
+	const hasItemsInCachedCart = ( cachedCart?.itemsCount ?? 0 ) > 0;
 
 	if (
 		( ! hasCartSession() || hasItemsInCachedCart ) &&
@@ -77,7 +77,7 @@ window.addEventListener( 'load', () => {
 // Pushes changes whenever the store is updated.
 subscribe( pushChanges, store );
 
-// Emmits event to sync iAPI store.
+// Emits event to sync iAPI store.
 let previousCart: object | null = null;
 subscribe( () => {
 	const cartData = select( STORE_KEY ).getCartData();

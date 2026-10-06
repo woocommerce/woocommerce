@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\MarketplaceTaskExperiment;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -163,6 +164,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'dismiss_task' ),
@@ -176,6 +183,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/undo_dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'undo_dismiss_task' ),
@@ -756,9 +769,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
+		$marketplace_task_experiment = wc_get_container()->get( MarketplaceTaskExperiment::class );
+
 		$json = array_map(
-			function ( $list ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
-				return $list->sort_tasks()->get_json();
+			function ( $list ) use ( $marketplace_task_experiment ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
+				$marketplace_task_experiment->maybe_move_task_first( $list->sort_tasks() );
+				return $list->get_json();
 			},
 			$lists
 		);
@@ -769,12 +785,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Dismiss a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -803,12 +831,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Undo dismissal of a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function undo_dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -964,7 +1004,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		}
 
 		$update = $task_list->unhide();
-		$json   = $task_list->get_json();
+		wc_get_container()->get( MarketplaceTaskExperiment::class )->maybe_move_task_first( $task_list );
+		$json = $task_list->get_json();
 
 		return rest_ensure_response( $json );
 	}

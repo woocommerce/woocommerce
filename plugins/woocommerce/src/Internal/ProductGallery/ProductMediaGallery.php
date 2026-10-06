@@ -194,7 +194,8 @@ class ProductMediaGallery {
 			if ( 'image' === $media_type ) {
 				if (
 					! wp_attachment_is_image( $attachment_id ) &&
-					0 !== strpos( (string) get_post_mime_type( $attachment_id ), 'image/' )
+					0 !== strpos( (string) get_post_mime_type( $attachment_id ), 'image/' ) &&
+					! wp_get_attachment_image_src( $attachment_id, 'full' )
 				) {
 					continue;
 				}

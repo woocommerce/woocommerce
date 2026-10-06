@@ -31,14 +31,23 @@ class FilterData {
 	private $taxonomy_hierarchy_data;
 
 	/**
+	 * Instance of Params.
+	 *
+	 * @var Params
+	 */
+	private $params;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param QueryClausesGenerator $query_clauses Instance of QueryClausesGenerator.
 	 * @param TaxonomyHierarchyData $taxonomy_hierarchy_data Instance of TaxonomyHierarchyData.
+	 * @param Params                $params Instance of Params.
 	 */
-	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data ) {
+	public function __construct( QueryClausesGenerator $query_clauses, TaxonomyHierarchyData $taxonomy_hierarchy_data, Params $params ) {
 		$this->query_clauses           = $query_clauses;
 		$this->taxonomy_hierarchy_data = $taxonomy_hierarchy_data;
+		$this->params                  = $params;
 	}
 
 	/**
@@ -486,6 +495,7 @@ class FilterData {
 				wp_json_encode(
 					array(
 						'query_vars'  => $this->normalize_query_vars( $query_vars ),
+						'params'      => $this->get_params_for_cache(),
 						'extra'       => $extra,
 						'filter_type' => $filter_type,
 					)
@@ -501,8 +511,8 @@ class FilterData {
 	 * Rules applied (cache key only – the original $query_vars are never modified):
 	 * - All keys are sorted alphabetically (ksort).
 	 * - Values for keys that start with "filter_", equal "rating_filter", or are
-	 *   built-in taxonomy short-names ("categories", "tags", "brands"):
-	 *   comma-separated items are trimmed, lower-cased, sorted, then re-joined.
+	 *   one of the taxonomy filter params: comma-separated items are trimmed,
+	 *   lower-cased, sorted, then re-joined.
 	 * - Values for keys that start with "query_type_": trimmed and lower-cased.
 	 * - Values for "min_price" / "max_price": trimmed.
 	 *
@@ -512,9 +522,9 @@ class FilterData {
 	 * @return array Normalised copy of $query_vars.
 	 */
 	private function normalize_query_vars( array $query_vars ): array {
-		// Built-in taxonomy filter params that are treated as unordered sets.
-		// See Params::get_taxonomy_params() for the source of these short names.
-		$taxonomy_set_params = array( 'categories', 'tags', 'brands' );
+		// Taxonomy filter params are treated as unordered sets. Read from Params so that names
+		// changed through the woocommerce_product_filter_taxonomy_params filter stay normalised.
+		$taxonomy_set_params = array_values( $this->params->get_param( 'taxonomy' ) );
 
 		ksort( $query_vars );
 
@@ -537,6 +547,22 @@ class FilterData {
 		}
 
 		return $query_vars;
+	}
+
+	/**
+	 * Get the complete parameter map in a stable order for cache keys.
+	 *
+	 * @return array Filter types mapped to their URL parameters.
+	 */
+	private function get_params_for_cache(): array {
+		$params = $this->params->get_params();
+		foreach ( $params as &$type_params ) {
+			ksort( $type_params );
+		}
+		unset( $type_params );
+		ksort( $params );
+
+		return $params;
 	}
 
 	/**
@@ -637,7 +663,14 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $this->normalize_query_vars( $query_vars ) ) );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5(
+			wp_json_encode(
+				array(
+					'query_vars' => $this->normalize_query_vars( $query_vars ),
+					'params'     => $this->get_params_for_cache(),
+				)
+			)
+		);
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {
