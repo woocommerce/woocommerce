@@ -384,6 +384,86 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A successful delivery clears the pending ping, so no ping follows it.
+	 */
+	public function test_successful_delivery_clears_pending_ping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$requests ) {
+				$is_ping    = 0 === strpos( (string) $args['body'], 'webhook_id=' );
+				$requests[] = $is_ping ? 'ping' : 'delivery';
+
+				// Like an endpoint that verifies signatures: the unsigned ping is rejected, the delivery accepted.
+				return $this->mock_http_response( $is_ping ? 401 : 200 );
+			},
+			10,
+			2
+		);
+
+		$webhook->deliver( $product->get_id() );
+
+		$this->assertSame( array( 'delivery' ), $requests, 'A successful delivery should not be followed by a ping.' );
+		$this->assertFalse( wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'A successful delivery should clear the pending ping.' );
+	}
+
+	/**
+	 * @testdox The ping counts any 2xx response as success, like deliveries do.
+	 *
+	 * @testWith [200, true]
+	 *           [202, true]
+	 *           [204, true]
+	 *           [302, false]
+	 *           [401, false]
+	 *           [500, false]
+	 *
+	 * @param int  $response_code  HTTP status code the delivery URL answers with.
+	 * @param bool $expect_success Whether the ping should succeed.
+	 */
+	public function test_ping_succeeds_on_any_2xx_response( int $response_code, bool $expect_success ): void {
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->save();
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $response_code ) {
+				return $this->mock_http_response( $response_code );
+			}
+		);
+
+		$result = $webhook->deliver_ping();
+
+		if ( $expect_success ) {
+			$this->assertTrue( $result, "A ping answered with {$response_code} should succeed." );
+		} else {
+			$this->assertInstanceOf( WP_Error::class, $result, "A ping answered with {$response_code} should fail with an error." );
+		}
+		$this->assertSame( ! $expect_success, wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'Only a successful ping should clear the pending ping.' );
+	}
+
+	/**
+	 * Build a pre_http_request response with the given status code.
+	 *
+	 * @param int $response_code HTTP status code.
+	 * @return array
+	 */
+	private function mock_http_response( int $response_code ): array {
+		return array(
+			'response' => array(
+				'code'    => $response_code,
+				'message' => get_status_header_desc( $response_code ),
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+	}
+
+	/**
 	 * @testDox The woocommerce_webhook_enable_delivery_log filter toggles delivery logging without affecting failure tracking.
 	 */
 	public function test_delivery_logging_respects_enable_delivery_log_filter() {

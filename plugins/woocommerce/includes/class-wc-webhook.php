@@ -575,6 +575,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		// Check for a success, which is a 2xx, 301 or 302 Response Code.
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
 			$this->set_failure_count( 0 );
+			// A successful delivery proves the delivery URL works, so it no longer needs a ping.
+			$this->set_pending_delivery( false );
 
 			if ( 0 !== $this->get_id() ) {
 				$this->save();
@@ -666,7 +668,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL cannot be reached: %s', 'woocommerce' ), $test->get_error_message() ) );
 		}
 
-		if ( 200 !== $response_code ) {
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			/* translators: error message */
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
