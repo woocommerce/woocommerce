@@ -753,7 +753,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_checkout_after_cart_item_meta_action_fires_for_visible_items() {
 		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			'',
+			'',
+			array(
+				'test_meta' => 'TEST_ITEM_META_DATA',
+			)
+		);
 
 		$fired = array();
 		$callback = static function ( $cart_item, $cart_item_key ) use ( &$fired ) {
@@ -767,11 +775,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10 );
 
 		$this->assertCount( 1, $fired, 'The action should fire once for the visible cart item.' );
+		$this->assertStringContainsString( 'TEST_ITEM_META_DATA', $output, 'The cart item data should be rendered for the test to be meaningful.' );
 		$this->assertStringContainsString( 'TEST_CHECKOUT_AFTER_CART_ITEM_META', $output );
 		$this->assertGreaterThan(
-			strpos( $output, 'class="product-name"' ),
+			strpos( $output, '<td class="product-name">' ),
 			strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' ),
-			'The action output should be rendered inside the product name cell, after the cart item data.'
+			'The action output should be rendered inside the product name cell.'
+		);
+		$this->assertGreaterThan(
+			strpos( $output, 'TEST_ITEM_META_DATA' ),
+			strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' ),
+			'The action output should be rendered after the cart item data.'
 		);
 	}
 
