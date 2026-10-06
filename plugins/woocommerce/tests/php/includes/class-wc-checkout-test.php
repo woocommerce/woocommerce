@@ -179,7 +179,19 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		$this->sut->process_order_without_payment( $order->get_id() );
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
 
 		$reloaded_order = wc_get_order( $order->get_id() );
 		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
