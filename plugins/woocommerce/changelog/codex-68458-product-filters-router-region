@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Remove obsolete Product Filters router workaround; no change on supported WordPress versions.
+
+

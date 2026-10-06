@@ -200,7 +200,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		}
 
 		$parent_id = $children_only ? get_queried_object_id() : 0;
-		$tree      = $categories_by_parent[ 'cat-' . $parent_id ]; // these are top level categories. So all parents.
+		$tree      = $categories_by_parent[ 'cat-' . $parent_id ] ?? []; // these are top level categories. So all parents.
 		unset( $categories_by_parent[ 'cat-' . $parent_id ] );
 
 		foreach ( $tree as $category ) {
