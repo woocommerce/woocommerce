@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
+use WC_Cache_Helper;
 use WC_Session;
 defined( 'ABSPATH' ) || exit;
 
@@ -14,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Token-based session handler for the Store API. Unlike WC_Session_Handler which
  * uses browser cookies, this handler uses an HTTP_CART_TOKEN header (JWT-like) to
  * identify sessions. It shares the same database table but has no cookie, cron,
- * or cache layer.
+ * or cache layer of its own. It does invalidate WC_Session_Handler's cached rows when
+ * writing, so cookie requests for the same customer don't read stale session data.
  *
  * @since 10.7.0
  */
@@ -79,20 +81,14 @@ final class SessionHandler extends WC_Session {
 	}
 
 	/**
-	 * Merge a guest cart token into the logged-in user's session on first authenticated load.
+	 * Migrate a guest cart token's session to the logged-in user on first authenticated load.
 	 *
-	 * Token-based logins (JWT, OAuth, etc.) never fire the `wp_login` hook, so the
-	 * `_woocommerce_load_saved_cart_after_login` flag the cookie session flow relies on to
-	 * merge carts is never set. When an authenticated request arrives carrying a guest cart
-	 * token, fold the guest cart into the user's session once and switch the session to the
-	 * user, so the response returns a user-scoped cart token (see
-	 * AbstractCartRoute::get_cart_token()).
+	 * Token logins (JWT, OAuth, etc.) never fire `wp_login`, so the saved-cart merge flag it sets is
+	 * never raised. As in WC_Session_Handler::migrate_guest_session_to_user_session(), guest session
+	 * data wins, the user's session cart is folded in, and the flag is set so the cart loader merges
+	 * the saved cart. The guest row is then deleted, so a stale guest token can't merge twice.
 	 *
-	 * The guest session is consumed (deleted) as part of the merge. A repeated, stale guest
-	 * token therefore loads an empty cart and cannot merge again, keeping the operation
-	 * one-shot and preventing removed items from reappearing.
-	 *
-	 * @since 11.0.0
+	 * @since 11.3.0
 	 */
 	protected function maybe_merge_guest_cart_on_login(): void {
 		if ( ! is_user_logged_in() ) {
@@ -101,71 +97,52 @@ final class SessionHandler extends WC_Session {
 
 		$guest_id = (string) $this->get_customer_id();
 
-		// Only merge a genuine guest session token (t_...). A user-scoped token — the current
-		// user's own, or another user's — must never be treated as a guest cart. This matches
-		// WC_Session_Handler::is_customer_guest() and also covers an empty/absent token.
+		// Only guest tokens (t_...) are merged; a user-scoped token, even another user's, never is.
 		if ( 't_' !== substr( $guest_id, 0, 2 ) ) {
 			return;
 		}
 
 		$user_id    = (string) get_current_user_id();
+		$guest_data = $this->_data;
 		$guest_cart = (array) $this->get( 'cart', array() );
 
-		// Switch this request to the user's own session.
-		$this->_customer_id = $user_id;
-		$this->_data        = (array) $this->get_session( $user_id, array() );
+		// Renew the expiry rather than inheriting the guest token's, which may be about to expire.
+		$this->_customer_id       = $user_id;
+		$this->session_expiration = CartTokenUtils::get_cart_token_expiration();
+		$this->_data              = (array) $this->get_session( $user_id, array() );
 
-		// Nothing to merge when the guest session has no cart (it may not even exist), so leave
-		// it untouched. get_cart_from_session() loads the saved cart on its own when the user's
-		// session is empty.
-		if ( empty( $guest_cart ) ) {
+		if ( empty( $guest_data ) ) {
 			return;
 		}
 
-		// Fold the saved cart and the active guest cart into the user's session. Later entries
-		// win on key collision, so the active guest cart takes precedence over saved items.
-		$saved_cart = $this->get_persistent_cart_contents( (int) $user_id );
-		$user_cart  = (array) $this->get( 'cart', array() );
-		$this->set( 'cart', array_merge( $saved_cart, $user_cart, $guest_cart ) );
+		$user_cart = (array) $this->get( 'cart', array() );
 
-		// Persist the merged user cart before consuming the guest session. delete_session()
-		// writes immediately but set() only flushes on shutdown, so saving first ensures a
-		// fatal between the two can't leave the guest session gone and the merge unsaved. A
-		// stale guest token still can't re-merge: it loads an empty cart next time.
+		// Guest data (coupons, shipping, draft order) and guest cart items win on key collision.
+		$this->_data  = array_merge( $this->_data, $guest_data );
+		$this->_dirty = true;
+		$this->set( 'cart', array_merge( $user_cart, $guest_cart ) );
+
+		// WC_Cart_Session::get_cart_from_session() merges the saved cart on the next cart load and
+		// writes the result back to the saved cart, as it does after a wp_login.
+		update_user_meta( (int) $user_id, '_woocommerce_load_saved_cart_after_login', 1 );
+
+		// Save before deleting the guest row so a fatal in between can't lose the cart.
 		$this->save_data();
 		$this->delete_session( $guest_id );
-	}
 
-	/**
-	 * Read the user's saved (persistent) cart contents.
-	 *
-	 * Mirrors the private WC_Cart_Session::get_saved_cart() so the merge can fold the
-	 * persistent cart in directly, without depending on the wp_login-era
-	 * `_woocommerce_load_saved_cart_after_login` flag being consumed elsewhere.
-	 *
-	 * @since 11.0.0
-	 *
-	 * @param int $user_id User ID.
-	 * @return array
-	 */
-	private function get_persistent_cart_contents( int $user_id ): array {
 		/**
-		 * Filters whether the persistent cart is enabled.
+		 * Fires after a customer has logged in, and their guest session id has been
+		 * deleted with its data migrated to a customer id.
 		 *
-		 * @since 3.4.0
-		 * @param bool $enabled Whether the persistent cart is enabled. Default true.
+		 * This hook gives extensions the chance to connect the old session id to the
+		 * customer id, if the key is being used externally.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param string $guest_session_id The former session ID, as generated by `::generate_customer_id()`.
+		 * @param string $user_session_id The Customer ID that the former session was converted to.
 		 */
-		if ( ! apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-			return array();
-		}
-
-		$saved_cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
-
-		if ( is_array( $saved_cart_meta ) && isset( $saved_cart_meta['cart'] ) ) {
-			return array_filter( (array) $saved_cart_meta['cart'] );
-		}
-
-		return array();
+		do_action( 'woocommerce_guest_session_to_user_id', $guest_id, $user_id );
 	}
 
 	/**
@@ -273,6 +250,7 @@ final class SessionHandler extends WC_Session {
 			return;
 		}
 		$GLOBALS['wpdb']->delete( $this->table, array( 'session_key' => $customer_id ) );
+		$this->invalidate_cached_session( (string) $customer_id );
 	}
 
 	/**
@@ -295,7 +273,21 @@ final class SessionHandler extends WC_Session {
 				)
 			);
 
+			$this->invalidate_cached_session( (string) $this->get_customer_id() );
 			$this->_dirty = false;
 		}
+	}
+
+	/**
+	 * Drop the object-cached copy of a session row that WC_Session_Handler keeps.
+	 *
+	 * This handler reads and writes the table directly, so without this a cookie request for
+	 * the same customer could keep reading, and later write back, a stale cached row.
+	 *
+	 * @param string $customer_id Customer session ID.
+	 * @return void
+	 */
+	private function invalidate_cached_session( string $customer_id ): void {
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $customer_id, WC_SESSION_CACHE_GROUP );
 	}
 }
