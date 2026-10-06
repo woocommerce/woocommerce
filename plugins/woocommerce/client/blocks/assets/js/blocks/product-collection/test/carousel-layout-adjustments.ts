@@ -10,15 +10,6 @@ import {
 	act,
 } from '@testing-library/react';
 
-// Use the editor's hook registry so WooCommerce's editor filters run.
-jest.mock( '@wordpress/hooks', () => {
-	const { createRequire } = jest.requireActual( 'module' );
-	const editorRequire = createRequire(
-		require.resolve( '@wordpress/block-editor' )
-	);
-	return jest.requireActual( editorRequire.resolve( '@wordpress/hooks' ) );
-} );
-
 /**
  * Internal dependencies
  */
