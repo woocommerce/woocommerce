@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use EngineIntegrationTestCase;
@@ -538,13 +539,13 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 	}
 
-	public function test_validate_action_receives_a_view_without_setters(): void {
+	public function test_validate_action_receives_a_read_only_view_not_the_entity(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$views = array();
 		add_action(
 			'woocommerce_subscriptions_engine_validate_plan',
-			static function ( WP_Error $errors, PlanView $plan ) use ( &$views ): void {
+			static function ( WP_Error $errors, $plan ) use ( &$views ): void {
 				unset( $errors );
 				$views[] = $plan;
 			},
@@ -565,12 +566,12 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'As sent', $this->response_data( $created )['name'] );
 
 		$this->assertCount( 1, $views );
-		foreach ( get_class_methods( $views[0] ) as $method ) {
-			$this->assertTrue(
-				'from_plan' === $method || 0 === strpos( $method, 'get_' ),
-				"The view handed to callbacks exposes only getters, found {$method}()."
-			);
-		}
+		$this->assertNotInstanceOf( Plan::class, $views[0], 'Callbacks never receive the mutable Core entity.' );
+		$this->assertInstanceOf( PlanView::class, $views[0] );
+		$reflection = new \ReflectionClass( $views[0] );
+		$this->assertTrue( $reflection->isFinal(), 'No subclass can add write access to the view.' );
+		$this->assertSame( array(), $reflection->getProperties( \ReflectionProperty::IS_PUBLIC ), 'The view has no writable state.' );
+		$this->assertSame( 'As sent', $views[0]->get_name() );
 	}
 
 	public function test_throwing_validate_callback_fails_the_write_without_storing(): void {
@@ -934,6 +935,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_plan_create_failed', $this->response_data( $response )['code'] );
+		$this->assertStringNotContainsString( 'nonexistent_table_for_this_test', (string) wp_json_encode( $response->get_data() ), 'The database error never reaches the client.' );
 		$this->assertNotEmpty( $errors, 'A failed write is logged.' );
 		$this->assertStringContainsString( 'nonexistent_table_for_this_test', $errors[0], 'The log carries the database error.' );
 	}
@@ -972,6 +974,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_subscriptions_engine_plan_update_failed', $this->response_data( $response )['code'] );
+		$this->assertStringNotContainsString( 'nonexistent_table_for_this_test', (string) wp_json_encode( $response->get_data() ), 'The database error never reaches the client.' );
 	}
 
 	public function test_archive_and_restore(): void {
