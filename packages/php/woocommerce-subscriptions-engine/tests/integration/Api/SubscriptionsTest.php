@@ -21,7 +21,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
@@ -48,10 +47,10 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract via the checkout factory (cycle 1 billed). The monthly plan's
+	 * Sign up a contract through the contracts facade (cycle 1 billed). The monthly plan's
 	 * cadence is frozen onto the contract's plan snapshot at signup.
 	 *
-	 * @param int $customer_id Owning customer id; 0 leaves the order customer unset.
+	 * @param int $customer_id Owning customer id; 0 gives the order a new customer.
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract( int $customer_id = 0 ): Contract {
@@ -75,7 +74,10 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		}
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		$contract = ( new ContractRepository() )->find( $this->sign_up_from_order( $order, $plan ) );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract;
 	}
 
 	/**

@@ -19,7 +19,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
@@ -111,7 +110,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Persist a monthly plan and return the entity (the ContractFactory needs the plan).
+	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
 	 *
 	 * @param int|null $max_cycles Maximum billing cycles, or null for open-ended.
 	 */
@@ -130,7 +129,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract via the checkout factory so its billing chain holds cycle 1
+	 * Sign up a contract through the contracts facade so its billing chain holds cycle 1
 	 * (billed), the starting point the renewal advances from.
 	 *
 	 * @param string   $gateway    Gateway id stamped on the order/contract.
@@ -147,7 +146,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		return $this->reload_contract( $this->sign_up_from_order( $order, $plan ) );
 	}
 
 	private function make_origin_order(): WC_Order {
@@ -448,9 +447,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		$contract    = ( new ContractFactory() )->create_from_order( $order, $this->make_plan_object() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
+		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_object() );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -1850,7 +1847,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		return $this->reload_contract( $this->sign_up_from_order( $order, $plan ) );
 	}
 
 	/**

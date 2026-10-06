@@ -27,7 +27,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
@@ -148,7 +147,7 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a monthly contract owned by `$owner` via the checkout factory (cycle 1 billed,
+	 * Sign up a monthly contract owned by `$owner` through the contracts facade (cycle 1 billed,
 	 * next payment due {@see self::FIRST_DUE}). Returns the contract id.
 	 *
 	 * @param string $owner The plan's (and so the contract's) extension slug.
@@ -171,8 +170,7 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		$contract = ( new ContractFactory() )->create_from_order( $order, $plan );
-		$id       = (int) $contract->get_id();
+		$id = $this->sign_up_from_order( $order, $plan );
 		$this->assertSame( self::FIRST_DUE, $this->reload( $id )->get_next_payment_gmt() );
 
 		return $id;

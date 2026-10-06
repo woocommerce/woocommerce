@@ -13,6 +13,7 @@ use DateTimeImmutable;
 use DateTimeZone;
 use EngineIntegrationTestCase;
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -20,7 +21,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
@@ -66,7 +66,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Persist a monthly plan and return the entity (the ContractFactory needs the plan).
+	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
 	 */
 	private function make_plan_object(): Plan {
 		$plan = Plan::create(
@@ -83,7 +83,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract via the checkout factory so its billing chain holds cycle 1 (billed),
+	 * Sign up a contract through the contracts facade so its billing chain holds cycle 1 (billed),
 	 * with its next payment due at the given date.
 	 *
 	 * @param string $gateway          Gateway id stamped on the order/contract.
@@ -100,12 +100,14 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		$contract = ( new ContractFactory() )->create_from_order( $order, $plan );
+		$id = $this->sign_up_from_order( $order, $plan );
 
-		// The factory anchors the first renewal off the plan cadence; pin the schedule date
+		// Sign-up anchors the first renewal off the plan cadence; pin the schedule date
 		// the test reasons about so due/not-due is explicit.
-		$contract->set_next_payment_gmt( $next_payment_gmt );
-		( new ContractRepository() )->update( $contract );
+		Contracts::update( $id, array( 'next_payment_gmt' => $next_payment_gmt ) );
+
+		$contract = ( new ContractRepository() )->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
 
 		return $contract;
 	}
