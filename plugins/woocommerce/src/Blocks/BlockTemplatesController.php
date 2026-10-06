@@ -58,6 +58,7 @@ class BlockTemplatesController {
 	 * Short-circuits rendering of `core/template-part` blocks that belong to WooCommerce (header, footer, navigation etc. are skipped).
 	 *
 	 * @since 11.4.0
+	 * @internal
 	 *
 	 * @param string|null $pre_render   The pre-rendered content, or null to let the block render normally.
 	 * @param array       $parsed_block The block being rendered.
