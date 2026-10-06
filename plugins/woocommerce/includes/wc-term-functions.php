@@ -682,39 +682,6 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );
 
 /**
- * Override a single product term's count to take catalog visibility into account.
- *
- * @since 11.3.0
- *
- * @param WP_Term $term     Term object.
- * @param string  $taxonomy Taxonomy slug.
- * @return WP_Term
- */
-function wc_change_term_count( $term, $taxonomy ) {
-	if ( is_admin() || wp_doing_ajax() || ! $term instanceof WP_Term ) {
-		return $term;
-	}
-
-	/**
-	 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
-	 *
-	 * @since 2.1.0
-	 *
-	 * @param array $valid_taxonomies List of taxonomy slugs.
-	 */
-	$valid_taxonomies = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
-	if ( ! is_array( $valid_taxonomies ) || ! in_array( $taxonomy, $valid_taxonomies, true ) ) {
-		return $term;
-	}
-
-	$count       = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
-	$term->count = '' !== $count ? absint( $count ) : 0;
-
-	return $term;
-}
-add_filter( 'get_term', 'wc_change_term_count', 10, 2 );
-
-/**
  * Return products in a given term, and cache value.
  *
  * To keep in sync, product_count will be cleared on "set_object_terms".

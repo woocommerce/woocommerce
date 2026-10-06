@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use WP_Term;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,8 +35,43 @@ class TermCount {
 	 * @internal
 	 */
 	final public function init(): void {
+		add_filter( 'get_term', array( $this, 'handle_get_term' ), 10, 2 );
 		add_action( 'set_object_terms', array( $this, 'handle_set_object_terms' ), 10, 6 );
 		add_action( 'deleted_term_relationships', array( $this, 'handle_deleted_term_relationships' ), 10, 3 );
+	}
+
+	/**
+	 * Override a single product term's count to take catalog visibility into account.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @internal
+	 *
+	 * @param WP_Term $term     Term object.
+	 * @param string  $taxonomy Taxonomy slug.
+	 * @return WP_Term
+	 */
+	public function handle_get_term( $term, $taxonomy ) {
+		if ( is_admin() || wp_doing_ajax() || ! $term instanceof WP_Term ) {
+			return $term;
+		}
+
+		/**
+		 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $valid_taxonomies List of taxonomy slugs.
+		 */
+		$valid_taxonomies = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
+		if ( ! is_array( $valid_taxonomies ) || ! in_array( $taxonomy, $valid_taxonomies, true ) ) {
+			return $term;
+		}
+
+		$count       = get_term_meta( $term->term_id, 'product_count_' . $term->taxonomy, true );
+		$term->count = '' !== $count ? absint( $count ) : 0;
+
+		return $term;
 	}
 
 	/**
