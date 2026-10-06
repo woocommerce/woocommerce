@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors in the batch processing controller when another plugin loads an Action Scheduler older than 3.3.0, by falling back to `as_next_scheduled_action()` when `as_has_scheduled_action()` is missing.
