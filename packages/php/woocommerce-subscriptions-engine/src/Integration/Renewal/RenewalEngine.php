@@ -388,7 +388,8 @@ final class RenewalEngine {
 	 * Resolve the billing policy the next cycle bills under, from the contract's own plan
 	 * snapshot - the live source of truth, so a contract updated since an earlier cycle bills
 	 * on its current terms. Falls back to parsing the live selling plan's billing payload when
-	 * the contract carries no snapshot, and returns null when neither resolves (a deleted plan,
+	 * the contract carries no snapshot, or one whose billing policy is absent or unusable (that
+	 * case is logged), and returns null when neither resolves (a deleted plan,
 	 * a null billing payload, or one that does not parse or has no usable cadence) so the
 	 * caller parks the contract rather than mis-billing or retrying every tick.
 	 *

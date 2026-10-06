@@ -571,6 +571,12 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$reflection = new \ReflectionClass( $views[0] );
 		$this->assertTrue( $reflection->isFinal(), 'No subclass can add write access to the view.' );
 		$this->assertSame( array(), $reflection->getProperties( \ReflectionProperty::IS_PUBLIC ), 'The view has no writable state.' );
+		foreach ( $reflection->getMethods( \ReflectionMethod::IS_PUBLIC ) as $method ) {
+			if ( $method->isStatic() ) {
+				continue;
+			}
+			$this->assertSame( 0, $method->getNumberOfParameters(), sprintf( 'PlanView::%s() takes no arguments, so the view has no mutators.', $method->getName() ) );
+		}
 		$this->assertSame( 'As sent', $views[0]->get_name() );
 	}
 
