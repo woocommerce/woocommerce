@@ -13,11 +13,10 @@
  *
  * It holds no cycle graph in memory (cycles are fetched on demand), and a chain is
  * just the pair `(contract_id, kind)` with its counters derived from the cycle rows.
- * `origin_order_id` is nullable (a manual contract has none; for a checkout contract
- * it equals cycle 1's `order_id`). Customer, currency, selling plan and start are
- * optional until the extension supplies them; a new contract defaults to `draft`. Timestamps are GMT strings; money totals are
- * decimal-safe strings on the storage scale; the payment instrument is exposed as an
- * {@see InstrumentRef}.
+ * `origin_order_id` is an optional extension fact. Customer, currency, selling plan and
+ * start are optional until the extension supplies them; a new contract defaults to
+ * `draft`. Timestamps are GMT strings; money totals are decimal-safe strings on the
+ * storage scale; the payment instrument is exposed as an {@see InstrumentRef}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -98,8 +97,7 @@ final class Contract {
 	private $selling_plan_id;
 
 	/**
-	 * Origin order id, or null for a manual contract. Equals cycle 1's `order_id`
-	 * for a checkout contract.
+	 * Origin order id, or null when the extension recorded none.
 	 *
 	 * @var int|null
 	 */

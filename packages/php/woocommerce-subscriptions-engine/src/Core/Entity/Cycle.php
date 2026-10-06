@@ -283,16 +283,6 @@ final class Cycle {
 	}
 
 	/**
-	 * Set the owning contract id. A cycle may be built with a placeholder id (0)
-	 * before its contract is persisted; the repository stamps the real id later.
-	 *
-	 * @param int $contract_id Owning contract id.
-	 */
-	public function set_contract_id( int $contract_id ): void {
-		$this->contract_id = $contract_id;
-	}
-
-	/**
 	 * Position within the chain.
 	 */
 	public function get_sequence_no(): int {
