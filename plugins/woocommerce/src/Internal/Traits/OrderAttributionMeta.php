@@ -345,9 +345,9 @@ trait OrderAttributionMeta {
 		 * Filter the label for the order origin.
 		 *
 		 * A label with a %s placeholder has the formatted source inserted via sprintf().
-		 * A label without a placeholder is used as the complete origin, which lets custom
-		 * source types show their own text instead of "Unknown". An empty label falls
-		 * back to the formatted source.
+		 * A label without one, including a label with a literal percent sign, is used as
+		 * the complete origin, which lets custom source types show their own text instead
+		 * of "Unknown". An empty label falls back to the formatted source.
 		 *
 		 * @since 8.5.0
 		 *
@@ -364,7 +364,7 @@ trait OrderAttributionMeta {
 			$formatted_source
 		);
 
-		if ( false === strpos( $label, '%' ) ) {
+		if ( ! preg_match( '/%(?:\d+\$)?s/', $label ) ) {
 			return '' === $label ? $formatted_source : $label;
 		}
 

@@ -152,11 +152,9 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that a label filtered without a %s placeholder is used as the whole origin.
-	 *
-	 * @return void
+	 * @testdox A label filtered without a %s placeholder is used as the whole origin.
 	 */
-	public function test_output_origin_column_uses_filtered_label_without_placeholder() {
+	public function test_output_origin_column_uses_filtered_label_without_placeholder(): void {
 		$test_cases = array(
 			array(
 				'source_type'     => 'trade-show',
@@ -182,6 +180,13 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 				'source'          => 'example',
 				'label'           => 'Campaign',
 				'expected_output' => 'Campaign',
+			),
+			// A literal percent sign is not a placeholder and must not reach sprintf().
+			array(
+				'source_type'     => 'trade-show',
+				'source'          => '',
+				'label'           => '100% organic',
+				'expected_output' => '100% organic',
 			),
 		);
 
