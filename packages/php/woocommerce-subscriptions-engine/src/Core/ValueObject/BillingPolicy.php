@@ -3,8 +3,11 @@
  * BillingPolicy - an optional parser for a billing cadence and trial payload.
  *
  * An extension may use {@see self::from_array()} to parse its plan billing arrays. The
- * engine stores plan policies opaquely and does not construct this on plan reads or
- * writes. The array shape it parses:
+ * engine stores plan policies opaquely and does not construct this on plan writes. It
+ * does read one payload with it: renewal and reactivation parse a contract's plan
+ * snapshot `billing_policy`, and the live plan's `billing_policy` when the contract has
+ * no readable snapshot, so a plan whose contracts the engine renews must store this
+ * shape there. The array shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
  *     interval:       int,

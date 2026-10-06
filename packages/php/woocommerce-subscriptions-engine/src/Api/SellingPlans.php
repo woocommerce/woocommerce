@@ -33,8 +33,8 @@ defined( 'ABSPATH' ) || exit;
 final class SellingPlans {
 
 	/**
-	 * Query limit for plan lookups; high enough that a plan catalog is never
-	 * truncated by the repository's default of 50.
+	 * Query limit for plan lookups: above the repository's default of 50. A
+	 * read never returns more than this many plans.
 	 *
 	 * @var int
 	 */
@@ -59,6 +59,10 @@ final class SellingPlans {
 	/**
 	 * List the scoped extensions' plans, oldest id first.
 	 *
+	 * Returns at most 200 plans with no truncation signal. Archived plans are never
+	 * purged and count toward that cap, so pass `status` (for example `active`) when
+	 * reading a catalog to sell from.
+	 *
 	 * @param array<string, mixed> $args Optional `status`: a plan status slug or a list of slugs. Absent: every status.
 	 * @return array<int, PlanView>
 	 */
@@ -69,7 +73,7 @@ final class SellingPlans {
 	/**
 	 * Fetch the plans among the given ids owned by the scoped extensions, oldest
 	 * id first. Unknown, out-of-scope, or status-filtered ids are absent; an
-	 * empty or invalid id list yields an empty array.
+	 * empty or invalid id list yields an empty array. At most 200 plans are returned.
 	 *
 	 * @param array<int, int>      $plan_ids Plan ids to fetch.
 	 * @param array<string, mixed> $args     Optional `status`: a plan status slug or a list of slugs. Absent: every status.

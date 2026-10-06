@@ -3,9 +3,10 @@
  * DeliveryPolicy - an optional parser for a delivery anchors, cutoff, and
  * intent payload.
  *
- * An extension may use {@see self::from_array()} to parse its plan delivery arrays.
- * The engine stores plan policies opaquely and does not construct this on plan reads
- * or writes. Deliberately thin for now. The array shape it parses:
+ * An opt-in parser for extensions: an extension may use {@see self::from_array()} to
+ * parse its plan delivery arrays. No engine code consumes it yet; the engine stores
+ * plan policies opaquely and does not construct this on plan reads or writes.
+ * Deliberately thin for now. The array shape it parses:
  *   {
  *     anchors: [{ type: 'MONTHDAY', day: int }, { type: 'YEARDAY', day: int, month: int }, ...],
  *     cutoff:  ?mixed,
