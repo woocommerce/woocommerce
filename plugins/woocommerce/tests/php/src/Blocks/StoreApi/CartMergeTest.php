@@ -68,13 +68,13 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		WC()->cart->empty_cart();
-		WC()->session = $this->original_session;
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
-		wp_set_current_user( 0 );
-		delete_user_meta( $this->user_id, '_woocommerce_load_saved_cart_after_login' );
-
-		parent::tearDown();
+		try {
+			// The parent empties the cart, resets the current user and rolls back user meta.
+			WC()->session = $this->original_session;
+			unset( $_SERVER['HTTP_CART_TOKEN'] );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
