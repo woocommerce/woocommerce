@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save billing country and state selections on manual orders so tax calculations use the correct address.
