@@ -102,7 +102,8 @@ class UserProfileField {
 		}
 
 		if ( isset( $_POST[ self::FIELD ] ) ) {
-			$this->service->mark_verified( $user_id );
+			$user = get_user_by( 'id', $user_id );
+			$this->service->mark_verified( $user_id, $user instanceof WP_User ? $user->user_email : null );
 		} else {
 			$this->service->clear_verification( $user_id );
 		}

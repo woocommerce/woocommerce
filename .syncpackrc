@@ -59,8 +59,7 @@
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
-				"eslint*",
-				"stylelint"
+				"eslint*"
 			],
 			"packages": [
 				"@woocommerce/block-library"
@@ -366,7 +365,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.61.1"
+			"pinVersion": "^1.63.0"
 		},
 		{
 			"dependencies": [
@@ -607,7 +606,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^14.16.1"
+			"pinVersion": "^16.9.0"
 		},
 		{
 			"dependencies": [
