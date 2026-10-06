@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import ServerSideRender from '@wordpress/server-side-render';
+// eslint-disable-next-line import/named -- listView is exported through @wordpress/icons' library re-export.
 import { Icon, listView } from '@wordpress/icons';
 import { isSiteEditorPage, isWidgetEditorPage } from '@woocommerce/utils';
 import { useSelect } from '@wordpress/data';
@@ -162,21 +163,23 @@ const ProductCategoriesBlock = ( {
 		);
 	};
 
-	const blockProps = useBlockProps( {
-		className: 'wc-block-product-categories',
-	} );
-
 	return (
-		<div { ...blockProps }>
+		<>
 			{ getInspectorControls() }
 			<Disabled>
 				<ServerSideRender
 					block={ name }
-					attributes={ attributes }
+					// The editor wrapper owns supports; Core's filter keeps align and anchor.
+					attributes={ {
+						...attributes,
+						align: undefined,
+						anchor: undefined,
+					} }
+					skipBlockSupportAttributes
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>
 			</Disabled>
-		</div>
+		</>
 	);
 };
 

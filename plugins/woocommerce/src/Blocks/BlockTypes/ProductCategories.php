@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * ProductCategories class.
  */
@@ -87,15 +85,14 @@ class ProductCategories extends AbstractDynamicBlock {
 			}
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
-			$attributes,
-			array( 'line_height', 'text_color', 'font_size', 'extra_classes' )
-		);
+		$classes = $this->get_container_classes( $attributes );
+		if ( ! empty( $attributes['fontSize'] ) ) {
+			// Retain the legacy class used by themes alongside Core's preset class.
+			$classes .= ' has-font-size';
+		}
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classes ) );
 
-		$classes = $this->get_container_classes( $attributes ) . ' ' . $classes_and_styles['classes'];
-		$styles  = $classes_and_styles['styles'];
-
-		$output  = '<div class="wp-block-woocommerce-product-categories ' . esc_attr( $classes ) . '" style="' . esc_attr( $styles ) . '">';
+		$output  = '<div ' . $wrapper_attributes . '>';
 		$output .= ! empty( $attributes['isDropdown'] ) ? $this->renderDropdown( $categories, $attributes, $uid ) : $this->renderList( $categories, $attributes, $uid );
 		$output .= '</div>';
 
@@ -339,9 +336,10 @@ class ProductCategories extends AbstractDynamicBlock {
 	protected function renderListItems( $categories, $attributes, $uid, $depth = 0 ) {
 		$output = '';
 
-		$link_color_class_and_style = StyleAttributesUtils::get_link_color_class_and_style( $attributes );
-
-		$link_color_style = isset( $link_color_class_and_style['style'] ) ? $link_color_class_and_style['style'] : '';
+		$link_color_styles = wp_style_engine_get_styles(
+			array( 'color' => array( 'text' => $attributes['style']['elements']['link']['color']['text'] ?? null ) )
+		);
+		$link_color_style  = $link_color_styles['css'] ?? '';
 
 		foreach ( $categories as $category ) {
 			$output .= '
