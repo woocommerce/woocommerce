@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Session\SessionDataWriter;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
 defined( 'ABSPATH' ) || exit;
@@ -66,6 +67,7 @@ final class SessionHandler extends WC_Session {
 			$this->_customer_id       = $this->generate_customer_id();
 			$this->session_expiration = CartTokenUtils::get_cart_token_expiration();
 			$this->_data              = array();
+			$this->set_loaded_session_snapshot( $this->_data );
 			return;
 		}
 
@@ -74,6 +76,7 @@ final class SessionHandler extends WC_Session {
 		$this->_customer_id       = $payload['user_id'];
 		$this->session_expiration = $payload['exp'];
 		$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );
+		$this->set_loaded_session_snapshot( $this->_data );
 	}
 
 	/**
@@ -168,6 +171,7 @@ final class SessionHandler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = null;
+		$this->set_loaded_session_snapshot( null );
 	}
 
 	/**
@@ -191,18 +195,16 @@ final class SessionHandler extends WC_Session {
 	public function save_data() {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty ) {
-			global $wpdb;
-
-			$wpdb->query(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-					"INSERT INTO {$this->table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
-					$this->get_customer_id(),
-					maybe_serialize( $this->_data ),
-					$this->session_expiration
-				)
+			// Writes only the keys this request changed, so changes other requests saved since it loaded are kept.
+			wc_get_container()->get( SessionDataWriter::class )->save(
+				$this->table,
+				$this->get_customer_id(),
+				(int) $this->session_expiration,
+				$this->_data,
+				$this->get_loaded_session_snapshot()
 			);
 
+			$this->set_loaded_session_snapshot( $this->_data );
 			$this->_dirty = false;
 		}
 	}

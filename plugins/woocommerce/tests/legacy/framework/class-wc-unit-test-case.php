@@ -195,6 +195,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			wc_clear_notices();
 		}
 
+		if ( WC()->session instanceof WC_Session ) {
+			// The session row is rolled back but the session object keeps what it loaded, which no longer matches
+			// storage. Make its next save a full write instead of a merge against that stale snapshot.
+			( function () {
+				$this->set_loaded_session_snapshot( null );
+			} )->call( WC()->session );
+		}
+
 		if ( isset( WC()->countries ) ) {
 			// The locale is cached on first read. A test that reads it while a
 			// woocommerce_get_country_locale filter is attached leaves the filtered

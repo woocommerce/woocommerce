@@ -40,6 +40,15 @@ abstract class WC_Session {
 	protected $_dirty = false; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
+	 * Session data as loaded from storage, used to work out which keys this request changed.
+	 *
+	 * Null when saving should write the whole session instead of merging with the stored data.
+	 *
+	 * @var array|null
+	 */
+	private $loaded_session_snapshot = null;
+
+	/**
 	 * Init hooks and session data. Extended by child classes.
 	 *
 	 * @since 3.3.0
@@ -129,6 +138,30 @@ abstract class WC_Session {
 
 		$this->_dirty        = true;
 		$this->_data[ $key ] = $serialized_value;
+	}
+
+	/**
+	 * Record the session data as loaded from storage, so saving writes only the keys this request changed.
+	 *
+	 * Pass null when the request replaces the whole session and saving should overwrite the stored data.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array|null $data Session data as loaded from storage.
+	 */
+	protected function set_loaded_session_snapshot( ?array $data ): void {
+		$this->loaded_session_snapshot = $data;
+	}
+
+	/**
+	 * Get the session data as loaded from storage.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array|null Session data as loaded, or null when saving should overwrite the stored data.
+	 */
+	protected function get_loaded_session_snapshot(): ?array {
+		return $this->loaded_session_snapshot;
 	}
 
 	/**
