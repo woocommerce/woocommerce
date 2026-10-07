@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cut about 1.0 MB from the plugin package by compressing placeholder images that no pattern uses.
