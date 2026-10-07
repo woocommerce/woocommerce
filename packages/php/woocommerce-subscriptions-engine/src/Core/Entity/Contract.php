@@ -297,8 +297,27 @@ final class Contract {
 		self::assert_status( $contract->status );
 		self::assert_extension_slug( $contract->extension_slug );
 		self::assert_schedule_source( $contract->schedule_source );
+		$contract->assert_money_has_currency();
 
 		return $contract;
+	}
+
+	/**
+	 * Refuse money without a currency: a contract with no currency must have every total at zero.
+	 * Cross-field, so callers that change several fields check it once after the last change.
+	 *
+	 * @throws DomainException If a total is non-zero while the currency is unset.
+	 */
+	public function assert_money_has_currency(): void {
+		if ( null !== $this->currency ) {
+			return;
+		}
+
+		foreach ( array( $this->billing_total, $this->discount_total, $this->shipping_total, $this->tax_total ) as $total ) {
+			if ( 0.0 !== (float) $total ) {
+				throw new DomainException( 'Contract: money totals require a currency.' );
+			}
+		}
 	}
 
 	/**

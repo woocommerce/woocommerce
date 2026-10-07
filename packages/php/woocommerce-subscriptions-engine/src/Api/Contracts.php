@@ -89,13 +89,6 @@ final class Contracts {
 	);
 
 	/**
-	 * Money keys (null resets to 0).
-	 *
-	 * @var array<int, string>
-	 */
-	private const MONEY_KEYS = array( 'billing_total', 'discount_total', 'shipping_total', 'tax_total' );
-
-	/**
 	 * Create a contract from explicit fields.
 	 *
 	 * Only `extension_slug` is required; the status defaults to `draft`. Dates accept a
@@ -368,35 +361,7 @@ final class Contracts {
 		}
 
 		$contract->set_payment_instrument( new InstrumentRef( $token_id, $gateway, $title ) );
-		self::validate_money_has_currency( $contract, $args );
+		$contract->assert_money_has_currency();
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
-
-	/**
-	 * Refuse money facts without a currency (data integrity): a non-null money value
-	 * needs a currency on the resulting contract, and the currency cannot be cleared
-	 * while a money fact is non-zero.
-	 *
-	 * @param Contract             $contract Contract with the caller's fields applied.
-	 * @param array<string, mixed> $args     Caller fields.
-	 * @throws InvalidArgumentException If a money fact has no currency.
-	 */
-	private static function validate_money_has_currency( Contract $contract, array $args ): void {
-		if ( null !== $contract->get_currency() ) {
-			return;
-		}
-
-		foreach ( self::MONEY_KEYS as $key ) {
-			if ( array_key_exists( $key, $args ) && null !== $args[ $key ] ) {
-				throw new InvalidArgumentException( sprintf( 'Contracts: "%s" requires the contract to have a currency.', esc_html( $key ) ) );
-			}
-		}
-
-		$totals = array( $contract->get_billing_total(), $contract->get_discount_total(), $contract->get_shipping_total(), $contract->get_tax_total() );
-		foreach ( $totals as $total ) {
-			if ( 0.0 !== (float) $total ) {
-				throw new InvalidArgumentException( 'Contracts: the currency cannot be cleared while a money total is non-zero.' );
-			}
-		}
-	}
 }

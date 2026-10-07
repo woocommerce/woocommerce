@@ -100,6 +100,44 @@ class ContractTest extends TestCase {
 	/**
 	 * @testdox create() requires an extension_slug.
 	 */
+	public function test_create_rejects_a_non_zero_total_without_a_currency(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'money totals require a currency' );
+
+		Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'billing_total'  => '10',
+			)
+		);
+	}
+
+	public function test_zero_totals_need_no_currency(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'billing_total'  => '0',
+			)
+		);
+
+		$contract->assert_money_has_currency();
+		$this->assertNull( $contract->get_currency() );
+	}
+
+	public function test_clearing_the_currency_with_a_non_zero_total_is_refused(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'currency'       => 'USD',
+				'billing_total'  => '10',
+			)
+		);
+		$contract->set_currency( null );
+
+		$this->expectException( DomainException::class );
+		$contract->assert_money_has_currency();
+	}
+
 	public function test_create_requires_an_extension_slug(): void {
 		$this->expectException( DomainException::class );
 		$this->expectExceptionMessage( 'Contract: extension_slug is required' );
