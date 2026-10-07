@@ -179,10 +179,11 @@ final class Contracts {
 	 * Append a cycle to a contract's chain `(contract_id, kind)`.
 	 *
 	 * The first public form of the cycle append tool: append-if-absent on the chain's
-	 * unique positions. `status` (a registered cycle status), `starts_at_gmt` and
-	 * `ends_at_gmt` are required. `kind` defaults to `billing`; `sequence_no` defaults to
+	 * unique positions. `starts_at_gmt`, `ends_at_gmt` and a currency (given or the
+	 * contract's) are required. `status` (a registered cycle status) defaults to `pending`;
+	 * `kind` defaults to `billing`; `sequence_no` defaults to
 	 * the head's plus one; `count` defaults to MAX(count) + 1 in the chain (pass `null` for
-	 * a non-counting cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
+	 * a non-counting cycle); `expected_total` defaults to 0;
 	 * `order_id` is optional. The extension slug is copied from the contract. Unknown keys
 	 * raise a `_doing_it_wrong()` notice and are ignored.
 	 *
@@ -202,8 +203,8 @@ final class Contracts {
 		}
 
 		$status = $filtered_args['status'] ?? null;
-		if ( ! is_string( $status ) ) {
-			throw new InvalidArgumentException( 'Contracts: "status" is required and must be a string.' );
+		if ( null !== $status && ! is_string( $status ) ) {
+			throw new InvalidArgumentException( 'Contracts: "status" must be a string.' );
 		}
 
 		$kind = $filtered_args['kind'] ?? Cycle::KIND_BILLING;
@@ -213,23 +214,13 @@ final class Contracts {
 
 		$starts_at = self::nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null );
 		$ends_at   = self::nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null );
-		if ( null === $starts_at || null === $ends_at ) {
-			throw new InvalidArgumentException( 'Contracts: "starts_at_gmt" and "ends_at_gmt" are required.' );
-		}
-
-		$currency = array_key_exists( 'currency', $filtered_args ) ? self::currency( $filtered_args['currency'] ) : $contract->get_currency();
-		if ( null === $currency ) {
-			throw new InvalidArgumentException( 'Contracts: a cycle needs a currency, given or from the contract.' );
-		}
+		$currency  = array_key_exists( 'currency', $filtered_args ) ? self::currency( $filtered_args['currency'] ) : $contract->get_currency();
 
 		$head        = $repository->find_chain_head( $contract_id, $kind );
 		$sequence_no = array_key_exists( 'sequence_no', $filtered_args )
 			? self::nullable_id( 'sequence_no', $filtered_args['sequence_no'] )
 			: ( null === $head ? 1 : $head->get_sequence_no() + 1 );
-		if ( null === $sequence_no ) {
-			throw new InvalidArgumentException( 'Contracts: "sequence_no" must be a positive integer.' );
-		}
-		$count = array_key_exists( 'count', $filtered_args )
+		$count       = array_key_exists( 'count', $filtered_args )
 			? self::nullable_id( 'count', $filtered_args['count'] )
 			: ( $repository->max_count( $contract_id, $kind ) ?? 0 ) + 1;
 

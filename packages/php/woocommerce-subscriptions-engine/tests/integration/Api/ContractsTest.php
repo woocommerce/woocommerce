@@ -842,12 +842,6 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_invalid_cycle_args(): array {
 		return array(
-			'missing status'       => array(
-				array(
-					'starts_at_gmt' => '2026-01-01 00:00:00',
-					'ends_at_gmt'   => '2026-02-01 00:00:00',
-				),
-			),
 			'unregistered status'  => array(
 				array(
 					'status'        => 'nonsense',
@@ -883,6 +877,35 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'ends_at_gmt'   => '2026-02-01 00:00:00',
 				),
 			),
+		);
+	}
+
+	public function test_add_cycle_defaults_the_status_to_pending(): void {
+		$id = $this->contract_with_currency();
+
+		$cycle = Contracts::add_cycle(
+			$id,
+			array(
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+			)
+		);
+
+		$this->assertSame( CycleStatus::PENDING, $cycle->get_status() );
+	}
+
+	public function test_add_cycle_without_a_currency_is_rejected(): void {
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Cycle: currency is required.' );
+
+		Contracts::add_cycle(
+			$id,
+			array(
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+			)
 		);
 	}
 

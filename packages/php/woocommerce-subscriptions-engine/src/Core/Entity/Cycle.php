@@ -227,6 +227,8 @@ final class Cycle {
 		self::assert_contract_id( $cycle->contract_id );
 		self::assert_kind( $cycle->kind );
 		self::assert_sequence_no( $cycle->sequence_no );
+		self::assert_period( $cycle->starts_at_gmt, $cycle->ends_at_gmt );
+		self::assert_currency( $cycle->currency );
 		self::assert_count( $cycle->count );
 		self::assert_status( $cycle->status );
 
@@ -579,6 +581,31 @@ final class Cycle {
 	private static function assert_kind( string $kind ): void {
 		if ( '' === $kind ) {
 			throw new DomainException( 'Cycle: kind must not be empty.' );
+		}
+	}
+
+	/**
+	 * Refuse a cycle without a start or end moment.
+	 *
+	 * @param string $starts_at_gmt Start (GMT).
+	 * @param string $ends_at_gmt   End (GMT).
+	 * @throws DomainException If either moment is missing.
+	 */
+	private static function assert_period( string $starts_at_gmt, string $ends_at_gmt ): void {
+		if ( '' === $starts_at_gmt || '' === $ends_at_gmt ) {
+			throw new DomainException( 'Cycle: starts_at_gmt and ends_at_gmt are required.' );
+		}
+	}
+
+	/**
+	 * Refuse a cycle without a currency.
+	 *
+	 * @param string $currency Currency code.
+	 * @throws DomainException If the currency is missing.
+	 */
+	private static function assert_currency( string $currency ): void {
+		if ( '' === $currency ) {
+			throw new DomainException( 'Cycle: currency is required.' );
 		}
 	}
 

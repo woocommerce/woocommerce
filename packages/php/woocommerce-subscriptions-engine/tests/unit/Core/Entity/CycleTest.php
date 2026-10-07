@@ -125,6 +125,20 @@ class CycleTest extends TestCase {
 		$this->make_pending( array( 'sequence_no' => 0 ) );
 	}
 
+	public function test_create_requires_a_start_and_an_end(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'starts_at_gmt and ends_at_gmt are required' );
+
+		$this->make_pending( array( 'ends_at_gmt' => null ) );
+	}
+
+	public function test_create_requires_a_currency(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'currency is required' );
+
+		$this->make_pending( array( 'currency' => null ) );
+	}
+
 	public function test_create_rejects_a_non_positive_count(): void {
 		$this->expectException( DomainException::class );
 
