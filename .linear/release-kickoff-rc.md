@@ -16,7 +16,7 @@ Run this with the Product DRIs named on the parent tracking issue before startin
 
 Record each item as a comment on this GitHub issue: the links you checked and the verdict. A new comment thread started on the Linear mirror does not sync back here.
 
-- [ ] **Compatibility sweep.** Open the QIT compatibility regression sweep for the latest beta (posted in `#woo-qit-notifications`). Record the run link and, for each introduced issue, whether it blocks the release.
+- [ ] **Compatibility sweep.** Open the QIT compatibility regression sweep for the latest beta. Record the run link and, for each introduced issue, whether it blocks the release.
 - [ ] **Open findings.** Check the comments on this cycle's pre-release notes post on the developer blog, the [WordPress.org support forum](https://wordpress.org/support/plugin/woocommerce/), the canonical extensions testing post, and the [GitHub issues opened since feature freeze]({repository_url}/issues?q=is%3Aissue%20sort%3Acreated-desc). Record each finding that touches code in this release with its issue link and a verdict per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/): release-blocking / fix in a point release / next release / not a bug. For the rest, record how many you checked and why they don't apply.
 - [ ] **Rollback path.** Record who reverts and how, and anything in this release that a revert would not undo, such as database migrations or new settings (see the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/)).
 - [ ] **Comms.** Record that the changelog is reviewed, and the known-issues list for the release post - or "none".
