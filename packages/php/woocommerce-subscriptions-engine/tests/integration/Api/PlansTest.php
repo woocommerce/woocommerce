@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 
+use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use RuntimeException;
@@ -166,6 +167,26 @@ class PlansTest extends EngineIntegrationTestCase {
 		}
 
 		$this->assertSame( $before, $this->plan_count() );
+	}
+
+	/**
+	 * @testdox an entity invariant failure is reported as invalid input, on create and on update.
+	 */
+	public function test_an_entity_invariant_failure_is_reported_as_invalid_input(): void {
+		try {
+			$this->create( array( 'status' => 'nonsense' ) );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
+			$this->assertSame( $e->getPrevious()->getMessage(), $e->getMessage() );
+		}
+
+		try {
+			Plans::update( $this->create(), array( 'name' => ' ' ) );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
+		}
 	}
 
 	public function test_create_requires_a_name(): void {

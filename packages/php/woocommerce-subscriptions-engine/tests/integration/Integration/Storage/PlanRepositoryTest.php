@@ -107,7 +107,13 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_plan_without_policies_round_trips_with_null_billing(): void {
 		$repo = new PlanRepository();
 
-		$id = $repo->insert( Plan::create( array( 'name' => 'Bare' ) ) );
+		$plan = Plan::create(
+			array(
+				'name'           => 'Bare',
+				'extension_slug' => 'lite',
+			)
+		);
+		$id   = $repo->insert( $plan );
 
 		$fetched = $repo->find( $id );
 
@@ -115,7 +121,6 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNull( $fetched->get_billing_policy() );
 		$this->assertNull( $fetched->get_pricing_policy() );
 		$this->assertNull( $fetched->get_delivery_policy() );
-		$this->assertNull( $fetched->get_extension_slug() );
 	}
 
 	public function test_update_fields_persists_name_status_and_policies_and_bumps_only_the_updated_date(): void {
@@ -184,9 +189,16 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_update_fields_without_an_id_throws(): void {
+		$plan = Plan::create(
+			array(
+				'name'           => 'Unsaved',
+				'extension_slug' => 'lite',
+			)
+		);
+
 		$this->expectException( \RuntimeException::class );
 
-		( new PlanRepository() )->update_fields( Plan::create( array( 'name' => 'Unsaved' ) ), array( 'name' ) );
+		( new PlanRepository() )->update_fields( $plan, array( 'name' ) );
 	}
 
 	public function test_update_fields_writes_only_the_named_columns(): void {

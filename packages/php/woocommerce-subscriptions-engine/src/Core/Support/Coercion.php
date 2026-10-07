@@ -117,6 +117,17 @@ final class Coercion {
 	}
 
 	/**
+	 * Coerce a value to a string-keyed array, or null when it is not an array.
+	 *
+	 * @param mixed $value The raw value.
+	 * @return array<string, mixed>|null
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	public static function coerce_nullable_string_keyed( $value ): ?array {
+		return is_array( $value ) ? self::coerce_string_keyed( $value ) : null;
+	}
+
+	/**
 	 * Coerce a value to a list of string-keyed rows. A non-array yields an empty
 	 * list; non-array rows are skipped.
 	 *

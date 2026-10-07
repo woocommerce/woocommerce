@@ -192,6 +192,22 @@ final class ArgumentValidator {
 	}
 
 	/**
+	 * Validate and return an array, or null.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int|string, mixed>|null
+	 * @throws InvalidArgumentException If the value is not null or an array.
+	 */
+	public static function validate_nullable_array( string $key, $value ): ?array {
+		if ( null !== $value && ! is_array( $value ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be null or an array.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Validate a GMT datetime, or null, and return it as a UTC `Y-m-d H:i:s` string.
 	 *
 	 * @param string $key   Field name.

@@ -54,6 +54,8 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 			'empty id list'         => array( 'validate_id_list', array( 'ids', array() ), array() ),
 			'string as list'        => array( 'validate_string_list', array( 'status', 'active' ), array( 'active' ) ),
 			'string list'           => array( 'validate_string_list', array( 'status', array( 'active', 'archived' ) ), array( 'active', 'archived' ) ),
+			'nullable array'        => array( 'validate_nullable_array', array( 'billing_policy', array( 'period' => 'month' ) ), array( 'period' => 'month' ) ),
+			'nullable array null'   => array( 'validate_nullable_array', array( 'billing_policy', null ), null ),
 		);
 	}
 
@@ -89,6 +91,7 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 			'id list map'     => array( 'validate_id_list', array( 'ids', array( 'a' => 3 ) ), '"ids" must be a list of positive integers.' ),
 			'string list'     => array( 'validate_string_list', array( 'status', array( 'active', '' ) ), '"status" must be a non-empty string or a list of them.' ),
 			'string list int' => array( 'validate_string_list', array( 'status', 5 ), '"status" must be a non-empty string or a list of them.' ),
+			'nullable array'  => array( 'validate_nullable_array', array( 'billing_policy', 'monthly' ), '"billing_policy" must be null or an array.' ),
 		);
 	}
 

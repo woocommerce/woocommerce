@@ -146,7 +146,13 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_meta_is_scoped_to_its_plan(): void {
-		$other = $this->sut->insert( Plan::create( array( 'name' => 'Other' ) ) );
+		$plan  = Plan::create(
+			array(
+				'name'           => 'Other',
+				'extension_slug' => 'acme-subs',
+			)
+		);
+		$other = $this->sut->insert( $plan );
 		$this->sut->add_meta( $other, 'note', 'theirs' );
 
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );

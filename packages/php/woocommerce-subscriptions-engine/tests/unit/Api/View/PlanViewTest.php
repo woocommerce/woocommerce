@@ -54,16 +54,28 @@ class PlanViewTest extends TestCase {
 	}
 
 	public function test_an_unsaved_plan_has_id_zero_and_no_dates(): void {
-		$view = PlanView::from_plan( Plan::create( array( 'name' => 'Draft' ) ) );
+		$plan = Plan::create(
+			array(
+				'name'           => 'Draft',
+				'extension_slug' => 'my-ext',
+			)
+		);
+		$view = PlanView::from_plan( $plan );
 
 		$this->assertSame( 0, $view->get_id() );
-		$this->assertNull( $view->get_extension_slug() );
+		$this->assertSame( 'my-ext', $view->get_extension_slug() );
 		$this->assertNull( $view->get_date_created_gmt() );
 		$this->assertNull( $view->get_date_updated_gmt() );
 	}
 
 	public function test_null_policies_stay_null(): void {
-		$view = PlanView::from_plan( Plan::create( array( 'name' => 'Bare' ) ) );
+		$plan = Plan::create(
+			array(
+				'name'           => 'Bare',
+				'extension_slug' => 'my-ext',
+			)
+		);
+		$view = PlanView::from_plan( $plan );
 
 		$this->assertNull( $view->get_billing_policy() );
 		$this->assertNull( $view->get_pricing_policy() );
@@ -74,6 +86,7 @@ class PlanViewTest extends TestCase {
 		$plan = Plan::create(
 			array(
 				'name'           => 'Before',
+				'extension_slug' => 'my-ext',
 				'pricing_policy' => array( 'a' => 1 ),
 			)
 		);

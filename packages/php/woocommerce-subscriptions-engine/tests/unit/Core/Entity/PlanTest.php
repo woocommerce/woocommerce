@@ -9,7 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use InvalidArgumentException;
+use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
@@ -26,12 +26,17 @@ class PlanTest extends TestCase {
 	}
 
 	public function test_create_defaults(): void {
-		$plan = Plan::create( array( 'name' => 'Monthly box' ) );
+		$plan = Plan::create(
+			array(
+				'name'           => 'Monthly box',
+				'extension_slug' => 'my-ext',
+			)
+		);
 
 		$this->assertNull( $plan->get_id() );
 		$this->assertSame( 'Monthly box', $plan->get_name() );
 		$this->assertSame( PlanStatus::ACTIVE, $plan->get_status() );
-		$this->assertNull( $plan->get_extension_slug() );
+		$this->assertSame( 'my-ext', $plan->get_extension_slug() );
 		$this->assertNull( $plan->get_billing_policy() );
 		$this->assertNull( $plan->get_pricing_policy() );
 		$this->assertNull( $plan->get_delivery_policy() );
@@ -105,8 +110,9 @@ class PlanTest extends TestCase {
 	public function test_a_null_policy_stays_null( string $field ): void {
 		$plan = Plan::create(
 			array(
-				'name' => 'Null',
-				$field => null,
+				'extension_slug' => 'my-ext',
+				'name'           => 'Null',
+				$field           => null,
 			)
 		);
 
@@ -134,32 +140,85 @@ class PlanTest extends TestCase {
 	 * @param mixed  $value Bad value.
 	 */
 	public function test_create_rejects_a_non_object_policy( string $field, $value ): void {
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( DomainException::class );
 		$this->expectExceptionMessage( $field );
 
 		Plan::create(
 			array(
-				'name' => 'Bad',
-				$field => $value,
+				'extension_slug' => 'my-ext',
+				'name'           => 'Bad',
+				$field           => $value,
 			)
 		);
 	}
 
 	/**
-	 * @dataProvider provide_bad_policy_values
-	 *
-	 * @param string $field Policy field.
-	 * @param mixed  $value Bad value.
+	 * @testdox from_storage hydrates a non-object stored policy without validating it.
 	 */
-	public function test_from_storage_rejects_a_non_object_policy( string $field, $value ): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		Plan::from_storage(
+	public function test_from_storage_does_not_validate(): void {
+		$plan = Plan::from_storage(
 			array(
-				'name' => 'Bad',
-				$field => $value,
+				'name'            => '',
+				'status'          => 'retired-by-ext',
+				'billing_policy'  => array( 'a', 'b' ),
+				'pricing_policy'  => 'monthly',
+				'delivery_policy' => 5,
 			)
 		);
+
+		$this->assertSame( '', $plan->get_name() );
+		$this->assertNull( $plan->get_extension_slug() );
+		$this->assertSame(
+			array(
+				'0' => 'a',
+				'1' => 'b',
+			),
+			$plan->get_billing_policy()
+		);
+		$this->assertNull( $plan->get_pricing_policy() );
+		$this->assertNull( $plan->get_delivery_policy() );
+	}
+
+	/**
+	 * @testdox create requires a non-empty name and an extension slug.
+	 * @dataProvider provide_missing_required_args
+	 *
+	 * @param array<string, mixed> $args    Create args.
+	 * @param string               $message Expected message.
+	 */
+	public function test_create_requires_a_name_and_an_extension_slug( array $args, string $message ): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( $message );
+
+		Plan::create( $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: string}>
+	 */
+	public function provide_missing_required_args(): array {
+		return array(
+			'no name'           => array( array( 'extension_slug' => 'my-ext' ), 'Plan: name is required and must be a non-empty string.' ),
+			'blank name'        => array(
+				array(
+					'extension_slug' => 'my-ext',
+					'name'           => '   ',
+				),
+				'Plan: name is required and must be a non-empty string.',
+			),
+			'no extension slug' => array( array( 'name' => 'Box' ), 'Plan: extension_slug is required and must be a non-empty string.' ),
+		);
+	}
+
+	/**
+	 * @testdox set_name rejects an empty name.
+	 */
+	public function test_set_name_rejects_an_empty_name(): void {
+		$plan = self::create_plan( 'Named' );
+
+		$this->expectException( DomainException::class );
+
+		$plan->set_name( '' );
 	}
 
 	/**
@@ -168,10 +227,10 @@ class PlanTest extends TestCase {
 	 * @param string $field Policy field.
 	 */
 	public function test_a_setter_rejects_a_list_policy( string $field ): void {
-		$plan   = Plan::create( array( 'name' => 'Bad' ) );
+		$plan   = self::create_plan( 'Bad' );
 		$setter = 'set_' . $field;
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( DomainException::class );
 
 		$plan->{$setter}( array( 'a', 'b' ) );
 	}
@@ -184,8 +243,9 @@ class PlanTest extends TestCase {
 	public function test_a_setter_replaces_the_whole_payload( string $field ): void {
 		$plan   = Plan::create(
 			array(
-				'name' => 'Replace',
-				$field => array(
+				'extension_slug' => 'my-ext',
+				'name'           => 'Replace',
+				$field           => array(
 					'a' => 1,
 					'b' => 2,
 				),
@@ -201,20 +261,21 @@ class PlanTest extends TestCase {
 	}
 
 	public function test_create_rejects_an_unregistered_status(): void {
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( DomainException::class );
 
 		Plan::create(
 			array(
-				'name'   => 'Unknown',
-				'status' => 'seasonal',
+				'extension_slug' => 'my-ext',
+				'name'           => 'Unknown',
+				'status'         => 'seasonal',
 			)
 		);
 	}
 
 	public function test_set_status_rejects_an_unregistered_status(): void {
-		$plan = Plan::create( array( 'name' => 'Unknown' ) );
+		$plan = self::create_plan( 'Unknown' );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( DomainException::class );
 
 		$plan->set_status( 'seasonal' );
 	}
@@ -224,8 +285,9 @@ class PlanTest extends TestCase {
 
 		$plan = Plan::create(
 			array(
-				'name'   => 'Seasonal',
-				'status' => 'seasonal',
+				'extension_slug' => 'my-ext',
+				'name'           => 'Seasonal',
+				'status'         => 'seasonal',
 			)
 		);
 		$this->assertSame( 'seasonal', $plan->get_status() );
@@ -268,7 +330,7 @@ class PlanTest extends TestCase {
 	}
 
 	public function test_to_storage_has_exactly_the_record_columns(): void {
-		$plan = Plan::create( array( 'name' => 'Columns' ) );
+		$plan = self::create_plan( 'Columns' );
 
 		$this->assertEqualsCanonicalizing(
 			array( 'name', 'status', 'extension_slug', 'billing_policy', 'pricing_policy', 'delivery_policy' ),
@@ -277,13 +339,27 @@ class PlanTest extends TestCase {
 	}
 
 	public function test_name_and_id_are_mutable(): void {
-		$plan = Plan::create( array( 'name' => 'Before' ) );
+		$plan = self::create_plan( 'Before' );
 
 		$plan->set_name( 'After' );
 		$plan->set_id( 9 );
 
 		$this->assertSame( 'After', $plan->get_name() );
 		$this->assertSame( 9, $plan->get_id() );
+	}
+
+	/**
+	 * A new plan owned by `my-ext`.
+	 *
+	 * @param string $name Plan name.
+	 */
+	private static function create_plan( string $name ): Plan {
+		return Plan::create(
+			array(
+				'name'           => $name,
+				'extension_slug' => 'my-ext',
+			)
+		);
 	}
 
 	/**

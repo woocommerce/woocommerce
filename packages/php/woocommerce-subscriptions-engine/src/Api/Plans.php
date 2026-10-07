@@ -25,13 +25,13 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
+use DomainException;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
 use WP_Error;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
 
@@ -111,24 +111,25 @@ final class Plans {
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): PlanView {
-		$args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
-		$extension_slug = $args['extension_slug'] ?? null;
-		if ( ! is_string( $extension_slug ) || '' === $extension_slug ) {
-			throw new InvalidArgumentException( 'Plans: "extension_slug" is required and must be a non-empty string.' );
-		}
-		unset( $args['extension_slug'] );
-		if ( ! array_key_exists( 'name', $args ) ) {
-			throw new InvalidArgumentException( 'Plans: "name" is required.' );
-		}
-
-		$plan = Plan::create(
-			array(
-				'name'           => '',
-				'extension_slug' => $extension_slug,
-			)
+		$plan_args = array(
+			'extension_slug' => ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null ),
+			'name'           => trim( ArgumentValidator::validate_string( 'name', $filtered_args['name'] ?? '' ) ),
 		);
-		self::apply( $plan, $args );
+		if ( array_key_exists( 'status', $filtered_args ) ) {
+			$plan_args['status'] = ArgumentValidator::validate_string( 'status', $filtered_args['status'] );
+		}
+		foreach ( self::POLICY_KEYS as $key ) {
+			$plan_args[ $key ] = ArgumentValidator::validate_nullable_array( $key, $filtered_args[ $key ] ?? null );
+		}
+
+		try {
+			$plan = Plan::create( $plan_args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
+
 		self::validate( $plan );
 
 		( new PlanRepository() )->insert( $plan );
@@ -167,7 +168,12 @@ final class Plans {
 			return null;
 		}
 
-		self::apply( $plan, $args );
+		try {
+			self::apply( $plan, $args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
+
 		self::validate( $plan );
 
 		$fields = array_keys( $args );
@@ -303,55 +309,39 @@ final class Plans {
 		);
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
 	/**
-	 * Validate the caller's fields and apply them to a plan through its setters.
-	 * Nothing is written to storage.
+	 * Validate the caller's field shapes and apply them to a plan through its setters,
+	 * which enforce the entity invariants. Nothing is written to storage; an invalid value
+	 * throws before any write.
 	 *
 	 * @param Plan                 $plan Plan to change.
 	 * @param array<string, mixed> $args Caller fields (known keys only, no `extension_slug`).
-	 * @throws InvalidArgumentException If a value is invalid.
+	 * @throws InvalidArgumentException If a value has the wrong shape.
+	 * @throws DomainException If a value breaks an entity invariant (from the entity setters).
 	 */
 	private static function apply( Plan $plan, array $args ): void {
-		if ( array_key_exists( 'name', $args ) ) {
-			$name = trim( ArgumentValidator::validate_string( 'name', $args['name'] ) );
-			if ( '' === $name ) {
-				throw new InvalidArgumentException( 'Plans: "name" must be a non-empty string.' );
-			}
-			$plan->set_name( $name );
-		}
-
-		if ( array_key_exists( 'status', $args ) ) {
-			$status = ArgumentValidator::validate_string( 'status', $args['status'] );
-			// The stored status stays writable after its extension is deactivated (as in Plan::set_status()).
-			if ( $status !== $plan->get_status() && ! PlanStatus::is_registered( $status ) ) {
-				throw new InvalidArgumentException( sprintf( 'Plans: "status" must be a registered plan status, got "%s".', esc_html( $status ) ) );
-			}
-			$plan->set_status( $status );
-		}
-
-		foreach ( self::POLICY_KEYS as $key ) {
-			if ( ! array_key_exists( $key, $args ) ) {
-				continue;
-			}
-
-			$value = $args[ $key ];
-			if ( null !== $value && ! is_array( $value ) ) {
-				throw new InvalidArgumentException( sprintf( 'Plans: "%s" must be an object (string-keyed array) or null.', esc_html( $key ) ) );
-			}
-
+		foreach ( $args as $key => $value ) {
 			switch ( $key ) {
+				case 'name':
+					$plan->set_name( trim( ArgumentValidator::validate_string( $key, $value ) ) );
+					break;
+				case 'status':
+					$plan->set_status( ArgumentValidator::validate_string( $key, $value ) );
+					break;
 				case 'billing_policy':
-					$plan->set_billing_policy( $value );
+					$plan->set_billing_policy( ArgumentValidator::validate_nullable_array( $key, $value ) );
 					break;
 				case 'pricing_policy':
-					$plan->set_pricing_policy( $value );
+					$plan->set_pricing_policy( ArgumentValidator::validate_nullable_array( $key, $value ) );
 					break;
-				default:
-					$plan->set_delivery_policy( $value );
+				case 'delivery_policy':
+					$plan->set_delivery_policy( ArgumentValidator::validate_nullable_array( $key, $value ) );
 					break;
 			}
 		}
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Let the plan's owner validate the would-be plan before it is written.
