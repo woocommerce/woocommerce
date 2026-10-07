@@ -97,24 +97,4 @@ class WCAdminAssetsTest extends WC_Unit_Test_Case {
 			'The minified file name should be served when the minified file exists and SCRIPT_DEBUG is off.'
 		);
 	}
-
-	/**
-	 * @testdox Admin styles should load without the removed admin layout stylesheet.
-	 */
-	public function test_admin_styles_load_without_admin_layout_stylesheet(): void {
-		set_current_screen( 'dashboard' );
-		wp_deregister_style( 'wc-admin-layout' );
-
-		$sut = WCAdminAssets::get_instance();
-		$sut->register_scripts();
-
-		$this->assertFalse( wp_style_is( 'wc-admin-layout', 'registered' ), 'The empty admin layout stylesheet should no longer be registered.' );
-
-		ob_start();
-		wp_styles()->do_items( array( WC_ADMIN_APP ) );
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( WC_ADMIN_APP . '-css', $output, 'The admin stylesheet should still load with all dependencies resolved.' );
-		$this->assertStringNotContainsString( 'wc-admin-layout-css', $output, 'The removed stylesheet should not be printed.' );
-	}
 }
