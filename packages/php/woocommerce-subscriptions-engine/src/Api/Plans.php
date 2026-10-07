@@ -94,7 +94,7 @@ final class Plans {
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw RuntimeException indirectly, through validate() and the repository.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw RuntimeException indirectly, through validate_with_owner() and the repository.
 	/**
 	 * Create a plan.
 	 *
@@ -130,7 +130,7 @@ final class Plans {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		self::validate( $plan );
+		self::validate_with_owner( $plan );
 
 		( new PlanRepository() )->insert( $plan );
 
@@ -149,8 +149,8 @@ final class Plans {
 	 * included) raise a `_doing_it_wrong()` notice and are ignored. The engine opens no
 	 * transaction: wrap the call in one when it must be atomic with other writes.
 	 *
-	 * @param int                  $id   Plan id.
-	 * @param array<string, mixed> $args Fields to write.
+	 * @param int                  $plan_id Plan id.
+	 * @param array<string, mixed> $args    Fields to write.
 	 * @return PlanView|null The row as read before the write plus the written fields (a column
 	 *                       another writer changed meanwhile may be stale here, not in storage);
 	 *                       null when the plan does not exist (also when it is deleted before
@@ -159,24 +159,24 @@ final class Plans {
 	 *                                  when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
-	public static function update( int $id, array $args ): ?PlanView {
-		$args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
+	public static function update( int $plan_id, array $args ): ?PlanView {
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		$repository = new PlanRepository();
-		$plan       = $repository->find( $id );
+		$plan       = $repository->find( $plan_id );
 		if ( null === $plan ) {
 			return null;
 		}
 
 		try {
-			self::apply( $plan, $args );
+			self::apply( $plan, $filtered_args );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		self::validate( $plan );
+		self::validate_with_owner( $plan );
 
-		$fields = array_keys( $args );
+		$fields = array_keys( $filtered_args );
 		if ( array() === $fields ) {
 			return PlanView::from_plan( $plan );
 		}
@@ -194,16 +194,16 @@ final class Plans {
 	 * Add a meta value to a plan, like `add_post_meta()`. A key may hold several values.
 	 * The plan is not looked up: meta for an unknown plan id is a caller error.
 	 *
-	 * @param int    $id     Plan id.
-	 * @param string $key    Meta key.
-	 * @param mixed  $value  Meta value; serialized when not scalar.
-	 * @param bool   $unique When true, add nothing if the key already exists. Advisory: checked
-	 *                       before the insert with no unique index, so concurrent adds can both write.
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key.
+	 * @param mixed  $value   Meta value; serialized when not scalar.
+	 * @param bool   $unique  When true, add nothing if the key already exists. Advisory: checked
+	 *                        before the insert with no unique index, so concurrent adds can both write.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
-	public static function add_meta( int $id, string $key, $value, bool $unique = false ): ?int {
-		return ( new PlanRepository() )->add_meta( $id, $key, $value, $unique );
+	public static function add_meta( int $plan_id, string $key, $value, bool $unique = false ): ?int {
+		return ( new PlanRepository() )->add_meta( $plan_id, $key, $value, $unique );
 	}
 
 	/**
@@ -212,7 +212,7 @@ final class Plans {
 	 * The absent-key check runs before the write with no unique index, so it is not a lock.
 	 * The plan is not looked up: meta for an unknown plan id is a caller error.
 	 *
-	 * @param int    $id         Plan id.
+	 * @param int    $plan_id    Plan id.
 	 * @param string $key        Meta key.
 	 * @param mixed  $value      New value; serialized when not scalar.
 	 * @param mixed  $prev_value Only update values equal to this; null updates all. Any other
@@ -220,35 +220,35 @@ final class Plans {
 	 * @return bool True when a value was added or changed; false when nothing changed.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
-	public static function update_meta( int $id, string $key, $value, $prev_value = null ): bool {
-		return ( new PlanRepository() )->update_meta( $id, $key, $value, $prev_value );
+	public static function update_meta( int $plan_id, string $key, $value, $prev_value = null ): bool {
+		return ( new PlanRepository() )->update_meta( $plan_id, $key, $value, $prev_value );
 	}
 
 	/**
 	 * Delete a plan's meta values for `$key`, like `delete_post_meta()`.
 	 *
-	 * @param int    $id    Plan id.
-	 * @param string $key   Meta key.
-	 * @param mixed  $value Only delete values equal to this; null deletes every value for the key.
-	 *                      Any other value ('' and false included) matches literally.
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key.
+	 * @param mixed  $value   Only delete values equal to this; null deletes every value for the key.
+	 *                        Any other value ('' and false included) matches literally.
 	 * @return bool True when at least one value was deleted.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
-	public static function delete_meta( int $id, string $key, $value = null ): bool {
-		return ( new PlanRepository() )->delete_meta( $id, $key, $value );
+	public static function delete_meta( int $plan_id, string $key, $value = null ): bool {
+		return ( new PlanRepository() )->delete_meta( $plan_id, $key, $value );
 	}
 
 	/**
 	 * Read plan meta (WordPress `get_post_meta()` semantics), oldest value first.
 	 *
-	 * @param int    $id     Plan id.
-	 * @param string $key    Meta key; empty for every key.
-	 * @param bool   $single With a key: return the first value only.
+	 * @param int    $plan_id Plan id.
+	 * @param string $key     Meta key; empty for every key.
+	 * @param bool   $single  With a key: return the first value only.
 	 * @return mixed Empty key: values grouped by key. Key + `$single`: the first value, or ''
 	 *               when absent. Key only: the list of values (`[]` when absent).
 	 */
-	public static function get_meta( int $id, string $key = '', bool $single = false ) {
-		return ( new PlanRepository() )->get_meta( $id, $key, $single );
+	public static function get_meta( int $plan_id, string $key = '', bool $single = false ) {
+		return ( new PlanRepository() )->get_meta( $plan_id, $key, $single );
 	}
 
 	/**
@@ -350,7 +350,7 @@ final class Plans {
 	 * @throws PlanValidationException If a callback added errors.
 	 * @throws RuntimeException If a callback threw.
 	 */
-	private static function validate( Plan $plan ): void {
+	private static function validate_with_owner( Plan $plan ): void {
 		$errors = new WP_Error();
 		$owner  = (string) $plan->get_extension_slug();
 

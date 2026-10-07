@@ -231,7 +231,7 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		$page     = max( 1, Coercion::coerce_int( $request->get_param( 'page' ), 1 ) );
-		$per_page = $this->resolve_per_page( $request );
+		$per_page = $this->get_per_page( $request );
 		$args     = array(
 			'limit'           => $per_page,
 			'offset'          => ( $page - 1 ) * $per_page,
@@ -298,7 +298,7 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$args                   = $this->write_args( $request );
+		$args                   = $this->get_write_args( $request );
 		$args['extension_slug'] = $extension_slug;
 
 		try {
@@ -337,7 +337,7 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		try {
-			$plan = Plans::update( $plan_id, $this->write_args( $request ) );
+			$plan = Plans::update( $plan_id, $this->get_write_args( $request ) );
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
@@ -506,11 +506,11 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Resolve per_page.
+	 * The requested page size, clamped to the allowed range.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 */
-	private function resolve_per_page( WP_REST_Request $request ): int {
+	private function get_per_page( WP_REST_Request $request ): int {
 		$value = Coercion::coerce_int( $request->get_param( 'per_page' ), self::DEFAULT_PER_PAGE );
 		if ( $value < 1 ) {
 			return self::DEFAULT_PER_PAGE;
@@ -526,11 +526,11 @@ final class PlansController extends WP_REST_Controller {
 	 * @param WP_REST_Request $request Request.
 	 * @return array<string, mixed>
 	 */
-	private function write_args( WP_REST_Request $request ): array {
+	private function get_write_args( WP_REST_Request $request ): array {
 		$args = array();
 		foreach ( self::WRITE_FIELDS as $field ) {
 			if ( $request->has_param( $field ) ) {
-				$args[ $field ] = 'name' === $field ? $this->string_param( $request, 'name' ) : $request->get_param( $field );
+				$args[ $field ] = 'name' === $field ? $this->get_string_param( $request, 'name' ) : $request->get_param( $field );
 			}
 		}
 
@@ -672,13 +672,13 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Read a string param.
+	 * A sanitized string param.
 	 *
 	 * @param WP_REST_Request $request  Request.
 	 * @param string          $key      Param key.
 	 * @param string          $fallback Fallback.
 	 */
-	private function string_param( WP_REST_Request $request, string $key, string $fallback = '' ): string {
+	private function get_string_param( WP_REST_Request $request, string $key, string $fallback = '' ): string {
 		return sanitize_text_field( Coercion::coerce_string( $request->get_param( $key ), $fallback ) );
 	}
 

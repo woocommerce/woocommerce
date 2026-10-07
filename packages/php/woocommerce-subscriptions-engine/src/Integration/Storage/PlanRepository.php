@@ -60,7 +60,7 @@ final class PlanRepository {
 		global $wpdb;
 
 		$now  = gmdate( 'Y-m-d H:i:s' );
-		$data = $this->row_data( $plan );
+		$data = $this->get_row_data( $plan );
 
 		$data['date_created_gmt'] = $now;
 		$data['date_updated_gmt'] = $now;
@@ -214,7 +214,7 @@ final class PlanRepository {
 			throw new \RuntimeException( 'Cannot update a plan that has no id.' );
 		}
 
-		$row     = $this->row_data( $plan );
+		$row     = $this->get_row_data( $plan );
 		$columns = array();
 		foreach ( $fields as $field ) {
 			if ( 'extension_slug' === $field || ! array_key_exists( $field, $row ) ) {
@@ -602,7 +602,7 @@ final class PlanRepository {
 	 * @param Plan $plan Plan.
 	 * @return array<string, mixed>
 	 */
-	private function row_data( Plan $plan ): array {
+	private function get_row_data( Plan $plan ): array {
 		$data = $plan->to_storage();
 
 		foreach ( self::JSON_COLUMNS as $column ) {
