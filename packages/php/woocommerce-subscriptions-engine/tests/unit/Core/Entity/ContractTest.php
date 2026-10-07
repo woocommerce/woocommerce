@@ -98,7 +98,7 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox create() requires an extension_slug.
+	 * @testdox create() rejects a non-zero total without a currency.
 	 */
 	public function test_create_rejects_a_non_zero_total_without_a_currency(): void {
 		$this->expectException( DomainException::class );
@@ -112,6 +112,9 @@ class ContractTest extends TestCase {
 		);
 	}
 
+	/**
+	 * @testdox Zero totals need no currency.
+	 */
 	public function test_zero_totals_need_no_currency(): void {
 		$contract = Contract::create(
 			array(
@@ -124,6 +127,9 @@ class ContractTest extends TestCase {
 		$this->assertNull( $contract->get_currency() );
 	}
 
+	/**
+	 * @testdox Clearing the currency while a total is non-zero is refused.
+	 */
 	public function test_clearing_the_currency_with_a_non_zero_total_is_refused(): void {
 		$contract = Contract::create(
 			array(
@@ -138,6 +144,9 @@ class ContractTest extends TestCase {
 		$contract->assert_money_has_currency();
 	}
 
+	/**
+	 * @testdox create() requires an extension_slug.
+	 */
 	public function test_create_requires_an_extension_slug(): void {
 		$this->expectException( DomainException::class );
 		$this->expectExceptionMessage( 'Contract: extension_slug is required' );
