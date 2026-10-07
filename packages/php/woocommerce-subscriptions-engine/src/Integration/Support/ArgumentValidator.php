@@ -109,10 +109,7 @@ final class ArgumentValidator {
 			return null;
 		}
 
-		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
-			$value = (int) $value;
-		}
-
+		$value = self::cast_digit_string( $value );
 		if ( ! is_int( $value ) || $value <= 0 ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be null or a positive integer.', esc_html( $key ) ) );
 		}
@@ -128,10 +125,7 @@ final class ArgumentValidator {
 	 * @throws InvalidArgumentException If the value is not a non-negative integer.
 	 */
 	public static function validate_non_negative_int( string $key, $value ): int {
-		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
-			$value = (int) $value;
-		}
-
+		$value = self::cast_digit_string( $value );
 		if ( ! is_int( $value ) || $value < 0 ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be a non-negative integer.', esc_html( $key ) ) );
 		}
@@ -148,15 +142,13 @@ final class ArgumentValidator {
 	 * @throws InvalidArgumentException If the value is not a list of positive integers.
 	 */
 	public static function validate_id_list( string $key, $value ): array {
-		if ( ! is_array( $value ) || ( array() !== $value && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
+		if ( ! self::is_list( $value ) ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be a list of positive integers.', esc_html( $key ) ) );
 		}
 
 		$ids = array();
 		foreach ( $value as $id ) {
-			if ( is_string( $id ) && 1 === preg_match( '/^[0-9]+$/', $id ) ) {
-				$id = (int) $id;
-			}
+			$id = self::cast_digit_string( $id );
 			if ( ! is_int( $id ) || $id <= 0 ) {
 				throw new InvalidArgumentException( sprintf( '"%s" must be a list of positive integers.', esc_html( $key ) ) );
 			}
@@ -176,7 +168,7 @@ final class ArgumentValidator {
 	 */
 	public static function validate_string_list( string $key, $value ): array {
 		$values = is_string( $value ) ? array( $value ) : $value;
-		if ( ! is_array( $values ) || ( array() !== $values && array_keys( $values ) !== range( 0, count( $values ) - 1 ) ) ) {
+		if ( ! self::is_list( $values ) ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string or a list of them.', esc_html( $key ) ) );
 		}
 
@@ -261,7 +253,7 @@ final class ArgumentValidator {
 	 * @throws InvalidArgumentException If the value is not a list of arrays.
 	 */
 	public static function validate_list_of_arrays( string $key, $value ): array {
-		if ( ! is_array( $value ) || ( array() !== $value && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
+		if ( ! self::is_list( $value ) ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be a list of arrays.', esc_html( $key ) ) );
 		}
 
@@ -319,5 +311,29 @@ final class ArgumentValidator {
 		}
 
 		return $addresses;
+	}
+
+	/**
+	 * Whether a value is a list: an array with consecutive int keys from 0 (an empty array is one).
+	 *
+	 * @param mixed $value Caller value.
+	 * @phpstan-assert-if-true array<int, mixed> $value
+	 */
+	private static function is_list( $value ): bool {
+		return is_array( $value ) && ( array() === $value || array_keys( $value ) === range( 0, count( $value ) - 1 ) );
+	}
+
+	/**
+	 * Cast a digit string to an int; any other value is returned unchanged.
+	 *
+	 * @param mixed $value Caller value.
+	 * @return mixed
+	 */
+	private static function cast_digit_string( $value ) {
+		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
+			return (int) $value;
+		}
+
+		return $value;
 	}
 }
