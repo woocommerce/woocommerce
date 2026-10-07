@@ -209,6 +209,10 @@ CSS;
 			},
 			''
 		);
+		if ( ! $this->should_render_filters( $inner_blocks, $active_filters ) ) {
+			return '';
+		}
+
 		$interactivity_context = array(
 			'params'          => $filter_params,
 			'activeFilters'   => $active_filters,
@@ -306,6 +310,43 @@ CSS;
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Determine whether the Product Filters wrapper should render.
+	 *
+	 * Keep the wrapper visible when filters are active so shoppers can remove
+	 * selections that may have produced an empty result set. Otherwise, render
+	 * only when at least one option-bearing filter is visible.
+	 *
+	 * @param string $inner_blocks   Rendered inner block markup.
+	 * @param array  $active_filters Active filter items.
+	 * @return bool Whether the wrapper should render.
+	 */
+	private function should_render_filters( $inner_blocks, $active_filters ) {
+		if ( ! empty( $active_filters ) ) {
+			return true;
+		}
+
+		$filter_block_classes = array(
+			'wp-block-woocommerce-product-filter-attribute',
+			'wp-block-woocommerce-product-filter-price',
+			'wp-block-woocommerce-product-filter-rating',
+			'wp-block-woocommerce-product-filter-taxonomy',
+			'wp-block-woocommerce-product-filter-status',
+		);
+
+		$processor = new \\WP_HTML_Tag_Processor( $inner_blocks );
+
+		while ( $processor->next_tag() ) {
+			foreach ( $filter_block_classes as $filter_block_class ) {
+				if ( $processor->has_class( $filter_block_class ) && ! $processor->has_class( 'wc-block-product-filter--hidden' ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
