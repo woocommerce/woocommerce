@@ -61,12 +61,13 @@ class WC_Download_Handler {
 		$downloads  = $product ? $product->get_downloads() : array();
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
-		$key = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$key       = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$order_key = empty( $_GET['order'] ) ? '' : wc_clean( wp_unslash( $_GET['order'] ) );
 
 		if (
 			! $product
 			|| empty( $key )
-			|| empty( $_GET['order'] )
+			|| empty( $order_key )
 			|| ! isset( $downloads[ $key ] )
 			|| ! $downloads[ $key ]->get_enabled()
 		) {
@@ -78,7 +79,7 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) );
+		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
 
 		if ( isset( $_GET['email'] ) ) {
@@ -95,10 +96,16 @@ class WC_Download_Handler {
 			}
 		}
 
+		$user_email = sanitize_email( str_replace( ' ', '+', $email_address ) );
+
+		if ( empty( $user_email ) ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
+
 		$download_ids = $data_store->get_downloads(
 			array(
-				'user_email'  => sanitize_email( str_replace( ' ', '+', $email_address ) ),
-				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ),
+				'user_email'  => $user_email,
+				'order_key'   => $order_key,
 				'product_id'  => $product_id,
 				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
