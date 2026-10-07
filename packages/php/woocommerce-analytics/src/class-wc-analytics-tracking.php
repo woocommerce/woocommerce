@@ -13,6 +13,8 @@ namespace Automattic\Woocommerce_Analytics;
 use Automattic\Jetpack\Device_Detection;
 use Automattic\Jetpack\Device_Detection\User_Agent_Info;
 use WP_Error;
+use function Automattic\TracksSharedUtils\sanitize_url;
+use function Automattic\TracksSharedUtils\url_props;
 
 /**
  * WooCommerce Analytics Tracking class
@@ -607,13 +609,21 @@ class WC_Analytics_Tracking {
 			$event_properties = array_slice( $event_properties, 0, self::MAX_CLIENT_PROPERTIES_PER_EVENT, true );
 		}
 
-		$values = array();
-		$costs  = array();
+		$values         = array();
+		$costs          = array();
+		$url_properties = array_fill_keys( url_props(), true );
 
 		foreach ( $event_properties as $key => $value ) {
 			// Dropped, not truncated: two long names could truncate to the same key.
 			if ( ! self::is_valid_client_name( $key ) || ! Pixel_Builder::prop_name_is_valid( $key ) ) {
 				continue;
+			}
+
+			if ( isset( $url_properties[ $key ] ) ) {
+				if ( ! is_string( $value ) ) {
+					continue;
+				}
+				$value = sanitize_url( $value );
 			}
 
 			// Arrays are flattened later by get_properties(); bound their members too.
@@ -891,17 +901,17 @@ class WC_Analytics_Tracking {
 			'_via_ua' => isset( $_SERVER['HTTP_USER_AGENT'] ) ? $clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			'_via_ip' => self::get_user_ip_address(),
 			'_lg'     => isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ), 0, 5 ) : '',
-			'_dr'     => isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'_dr'     => isset( $_SERVER['HTTP_REFERER'] ) && is_string( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		);
 
 		// Build the document location URL.
-		$uri         = isset( $_SERVER['REQUEST_URI'] ) ? $clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$host        = isset( $_SERVER['HTTP_HOST'] ) ? $clean( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) ? $clean( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$uri         = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$host        = isset( $_SERVER['HTTP_HOST'] ) && is_string( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) && is_string( $_SERVER['REQUEST_SCHEME'] ) ? sanitize_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Add _via_ref (referrer) for backward compatibility.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$data['_via_ref'] = isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+		$data['_via_ref'] = isset( $_SERVER['HTTP_REFERER'] ) && is_string( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) ) : '';
 
 		// Headers are caller-supplied, and the referer lands here twice. Uncapped, one
 		// long Referer pushes the finished URL past MAX_PIXEL_URL_LENGTH and costs the
