@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.2.0 2026-XX-XX =
+= 11.2.0 2026-10-07 =
 
 **WooCommerce**
 
@@ -179,6 +179,14 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Keep price separators as plain text in the Store API and block settings. [#69244](https://github.com/woocommerce/woocommerce/pull/69244)
 * Fix - Show each KOMOJU payment method's own name and description on the Payments settings page, instead of identical rows. [#69175](https://github.com/woocommerce/woocommerce/pull/69175)
 * Fix - Update the classic checkout totals after an address change when an extension hides a required address field. [#69333](https://github.com/woocommerce/woocommerce/pull/69333)
+* Fix - Ensure fulfillments REST API item requests operate on the fulfillment identified in the request URL. [#69534](https://github.com/woocommerce/woocommerce/pull/69534)
+* Fix - Prevent Cc/Bcc recipients from being configured for emails that carry a password reset key or a one-time verification link. [#69537](https://github.com/woocommerce/woocommerce/pull/69537)
+* Fix - Prevent fatal errors in the batch processing controller when another plugin loads an Action Scheduler older than 3.3.0, by falling back to `as_next_scheduled_action()` when `as_has_scheduled_action()` is missing. [#69415](https://github.com/woocommerce/woocommerce/pull/69415)
+* Fix - Prevent shop managers from editing users who have additional roles that cannot be edited by shop managers. [#69533](https://github.com/woocommerce/woocommerce/pull/69533)
+* Fix - Remove non-allowlisted query parameters and fragments from analytics document location and referrer properties. [#69536](https://github.com/woocommerce/woocommerce/pull/69536)
+* Fix - Require network super admin rights to import Blueprints on multisite. [#69529](https://github.com/woocommerce/woocommerce/pull/69529)
+* Fix - Revert recent changes to how conditional checkout field rules handle missing values. [#69530](https://github.com/woocommerce/woocommerce/pull/69530)
+* Fix - Update REST API key nonce handling. [#69532](https://github.com/woocommerce/woocommerce/pull/69532)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
