@@ -33,7 +33,6 @@ class SegmentedSelection extends Component {
 								className="woocommerce-segmented-selection__item"
 								key={ value }
 							>
-								{  }
 								<input
 									className="woocommerce-segmented-selection__input"
 									type="radio"
@@ -49,7 +48,6 @@ class SegmentedSelection extends Component {
 										{ label }
 									</span>
 								</label>
-								{  }
 							</div>
 						);
 					} ) }
