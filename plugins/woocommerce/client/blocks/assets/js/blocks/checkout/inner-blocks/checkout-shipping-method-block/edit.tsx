@@ -12,7 +12,6 @@ import {
 	InspectorControls,
 	useBlockProps,
 	RichText,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { Button } from '@ariakit/react';
 import { useShippingData } from '@woocommerce/base-context/hooks';
@@ -20,7 +19,7 @@ import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore as checkoutStoreDescriptor } from '@woocommerce/block-data';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -161,24 +160,16 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
-	const { __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
-	const hasEditedPickupText = useRef( false );
 	useEffect( () => {
 		const localPickupTitle = getSetting< string >(
 			'localPickupText',
 			attributes.localPickupText
 		);
-		// Keep the attribute in sync so saving the page doesn't reset the pickup title,
-		// without flagging the page as having unsaved changes on open (#48936).
-		if ( localPickupTitle !== attributes.localPickupText ) {
-			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( { localPickupText: localPickupTitle } );
-		}
+		setAttributes( { localPickupText: localPickupTitle } );
 		// Disable the exhaustive deps rule because we only want to run this on first mount to set the attribute, not
 		// each time the attribute changes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, [ setAttributes ] );
 	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
 	const { prefersCollection } = useSelect( ( select ) => {
 		const checkoutStore = select( checkoutStoreDescriptor );
@@ -186,12 +177,8 @@ export const Edit = ( {
 			prefersCollection: checkoutStore.prefersCollection(),
 		};
 	} );
-	const { showPrice, showIcon, className, shippingText } = attributes;
-	// Show the setting until the merchant edits the label, so the synced value doesn't
-	// change the RichText after mount (which would mark the page as changed).
-	const localPickupText = hasEditedPickupText.current
-		? attributes.localPickupText
-		: getSetting< string >( 'localPickupText', attributes.localPickupText );
+	const { showPrice, showIcon, className, localPickupText, shippingText } =
+		attributes;
 	const {
 		shippingRates,
 		needsShipping,
@@ -310,10 +297,7 @@ export const Edit = ( {
 						changeView( 'pickup' );
 					} }
 					showIcon={ showIcon }
-					setAttributes={ ( newAttributes ) => {
-						hasEditedPickupText.current = true;
-						setAttributes( newAttributes );
-					} }
+					setAttributes={ setAttributes }
 					toggleText={ localPickupText }
 				/>
 			</div>
