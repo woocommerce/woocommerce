@@ -298,7 +298,7 @@ jobs:
 
       # Skip install and tests when a `gh local-ci` receipt vouches for this
       # job on this commit. Off switch: repository variable
-      # LOCAL_CI_RECEIPTS_DISABLED=1. Rollback: revert this step and the two
+      # LOCAL_CI_RECEIPTS_DISABLED=1. Rollback: revert this step and the four
       # guards below. See .github/actions/local-ci-receipt/README.md.
       - uses: './.github/actions/local-ci-receipt'
         name: 'Look for a local CI receipt'
@@ -355,7 +355,7 @@ jobs:
         run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment: increase max-download-attempts'
-        if: ${{ matrix.testEnv.shouldCreate }}
+        if: ${{ matrix.testEnv.shouldCreate && steps.local-ci-receipt.outputs.substituted != 'true' }}
         uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
         with:
           daemon-config: |
@@ -366,7 +366,7 @@ jobs:
 
       - name: 'Start Test Environment: start'
         id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
+        if: ${{ matrix.testEnv.shouldCreate && steps.local-ci-receipt.outputs.substituted != 'true' }}
         # `wp-env start` fails on transient network timeouts from several subsystems:
         # composer fetching packagist inside the Docker build ("curl error 28"), wp-env's
         # own `got` client downloading WordPress core ("ETIMEDOUT"/"socket hang up"), and

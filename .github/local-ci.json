@@ -35,6 +35,24 @@
       },
       "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. The pool runs up to 4 jobs, so 4 workers each fills 16 cores without oversubscribing; measured on admin-library (1648 tests): 2 workers 62 s, 4 workers 38 s, 8 workers 32 s.",
       "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=4" ]
+    },
+    {
+      "$comment": "Core plugin PHP cells only; grow `exclude` when packages/php/* gain unit:php jobs. The driver resolves each cell's PHP and WordPress versions from the planner itself. Opt-in: four cells run one after another, about 25 min.",
+      "type": "unit:php",
+      "exclude": [
+        "WP: pre-release",
+        "@woocommerce/blueprint",
+        "@woocommerce/email-editor-config",
+        "@automattic/woocommerce-subscriptions-engine",
+        "@automattic/woocommerce-analytics"
+      ],
+      "serial": "wp-env",
+      "enabledByDefault": false,
+      "prepare": {
+        "$comment": "Ports 92xx so the worktree's wp-env cells never collide with cells started from the developer's checkout.",
+        "env": { "TEST_PHP_CI_PORT_BASE": "92" }
+      },
+      "run": [ "bash", "bin/test-php-ci.sh", "--cell", "{name}" ]
     }
   ],
 

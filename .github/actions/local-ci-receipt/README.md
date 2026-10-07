@@ -23,7 +23,7 @@ This action is tested live, against real GitHub, not with unit tests: the
 only test that sees what GitHub actually sends is a real pull request, which
 is how the `author_association` problem was found. The **live test is
 required** for any change to `receipt.js`, `action.yml`, the `ci.yml` step or
-its two `if:` guards, or `.github/local-ci.json`. `pr-check-local-actions.yml`
+its four `if:` guards, or `.github/local-ci.json`. `pr-check-local-actions.yml`
 still validates `.github/local-ci.json` on every change to it.
 
 The live test uses a scratch branch as a stand-in for trunk, so nothing
@@ -38,6 +38,7 @@ What it proves, in one PR:
 | Check | Expected in the job log |
 |---|---|
 | Positive path | `substituted=true reason=receipt … by <login> (has <permission> permission)`; `Install Monorepo` and `Run tests (unit)` skipped; job ≈ 10 s |
+| Positive path, PHP cell | same line; `Install Monorepo`, both `Start Test Environment` steps and `Run tests (unit:php)` skipped; job ≈ 10 s instead of 15–18 min |
 | Kill switch (new run with the variable set) | `substituted=false reason=kill switch LOCAL_CI_RECEIPTS_DISABLED=1` |
 | Config changed in the PR | `substituted=false reason=.github/local-ci.json differs …` |
 | Receipts absent | `substituted=false reason=no receipt named …` |

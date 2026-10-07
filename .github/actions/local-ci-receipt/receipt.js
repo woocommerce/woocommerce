@@ -11,7 +11,7 @@ const CONFIG_PATH = '.github/local-ci.json';
 const WRITE_PERMISSIONS = [ 'admin', 'maintain', 'write' ];
 const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
 // Only job types whose remaining steps ci.yml guards.
-const SUBSTITUTABLE_TYPES = [ 'unit' ];
+const SUBSTITUTABLE_TYPES = [ 'unit', 'unit:php' ];
 const RECEIPT_VERSION = 'v1';
 const API_TIMEOUT_MS = 20000;
 
