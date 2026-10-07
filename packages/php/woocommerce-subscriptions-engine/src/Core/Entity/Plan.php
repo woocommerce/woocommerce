@@ -294,10 +294,28 @@ final class Plan {
 	}
 
 	/**
+	 * Assign the creation time after a successful insert.
+	 *
+	 * @param string $date_created_gmt Stored creation time (GMT, `Y-m-d H:i:s`).
+	 */
+	public function set_date_created_gmt( string $date_created_gmt ): void {
+		$this->date_created_gmt = $date_created_gmt;
+	}
+
+	/**
 	 * Last update time (GMT) as stored, or null before insert.
 	 */
 	public function get_date_updated_gmt(): ?string {
 		return $this->date_updated_gmt;
+	}
+
+	/**
+	 * Assign the update time after a successful write.
+	 *
+	 * @param string $date_updated_gmt Stored update time (GMT, `Y-m-d H:i:s`).
+	 */
+	public function set_date_updated_gmt( string $date_updated_gmt ): void {
+		$this->date_updated_gmt = $date_updated_gmt;
 	}
 
 	/**

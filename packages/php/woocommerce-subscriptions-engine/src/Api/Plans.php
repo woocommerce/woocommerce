@@ -105,12 +105,12 @@ final class Plans {
 	 *                                   registered plan status, default `active`), and
 	 *                                   `billing_policy`, `pricing_policy`, `delivery_policy`
 	 *                                   (string-keyed arrays the owner interprets, or null).
-	 * @return int The new plan id.
+	 * @return PlanView The new plan, built from the written fields (no re-read).
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid, or a
 	 *                                  {@see PlanValidationException} when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
-	public static function create( array $args ): int {
+	public static function create( array $args ): PlanView {
 		$args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
 		$extension_slug = $args['extension_slug'] ?? null;
@@ -131,7 +131,9 @@ final class Plans {
 		self::apply( $plan, $args );
 		self::validate( $plan );
 
-		return ( new PlanRepository() )->insert( $plan );
+		( new PlanRepository() )->insert( $plan );
+
+		return PlanView::from_plan( $plan );
 	}
 
 	/**
@@ -141,37 +143,43 @@ final class Plans {
 	 * the present keys are written, so fields a concurrent writer changed in between keep
 	 * its values. A present policy key replaces the whole payload (null clears it);
 	 * policies are never merged. Re-sending the stored status is accepted even when that
-	 * status is no longer registered (its extension was deactivated). Unknown keys
-	 * (`extension_slug` included) raise a `_doing_it_wrong()` notice and are ignored.
+	 * status is no longer registered (its extension was deactivated). An empty `$args`
+	 * validates the stored plan and writes nothing. Unknown keys (`extension_slug`
+	 * included) raise a `_doing_it_wrong()` notice and are ignored. The engine opens no
+	 * transaction: wrap the call in one when it must be atomic with other writes.
 	 *
 	 * @param int                  $id   Plan id.
 	 * @param array<string, mixed> $args Fields to write.
-	 * @return bool True when the plan exists and the write passed validation (an empty `$args`
-	 *              validates the stored plan and writes nothing); false when the plan does not exist.
-	 * @throws InvalidArgumentException If the id is not positive or a value is invalid,
-	 *                                  or a {@see PlanValidationException} when the owner refuses the plan.
+	 * @return PlanView|null The row as read before the write plus the written fields (a column
+	 *                       another writer changed meanwhile may be stale here, not in storage);
+	 *                       null when the plan does not exist (also when it is deleted before
+	 *                       the write).
+	 * @throws InvalidArgumentException If a value is invalid, or a {@see PlanValidationException}
+	 *                                  when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
-	public static function update( int $id, array $args ): bool {
-		if ( $id <= 0 ) {
-			throw new InvalidArgumentException( 'Plans: the plan id must be a positive integer.' );
-		}
+	public static function update( int $id, array $args ): ?PlanView {
 		$args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		$repository = new PlanRepository();
 		$plan       = $repository->find( $id );
 		if ( null === $plan ) {
-			return false;
+			return null;
 		}
 
 		self::apply( $plan, $args );
 		self::validate( $plan );
 
-		if ( array() !== $args ) {
-			$repository->update_fields( $plan, array_keys( $args ) );
+		$fields = array_keys( $args );
+		if ( array() === $fields ) {
+			return PlanView::from_plan( $plan );
 		}
 
-		return true;
+		if ( ! $repository->update_fields( $plan, $fields ) ) {
+			return null;
+		}
+
+		return PlanView::from_plan( $plan );
 	}
 
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber

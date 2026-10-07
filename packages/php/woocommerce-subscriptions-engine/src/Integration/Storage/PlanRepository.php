@@ -50,8 +50,7 @@ final class PlanRepository {
 	);
 
 	/**
-	 * Insert a new plan and stamp its id back onto the entity. The stored dates are
-	 * not stamped back; callers re-read the plan for them.
+	 * Insert a new plan and stamp its id and stored dates back onto the entity.
 	 *
 	 * @param Plan $plan Plan to insert.
 	 * @return int The new plan id.
@@ -75,6 +74,8 @@ final class PlanRepository {
 
 		$id = (int) $wpdb->insert_id;
 		$plan->set_id( $id );
+		$plan->set_date_created_gmt( $now );
+		$plan->set_date_updated_gmt( $now );
 
 		return $id;
 	}
@@ -193,17 +194,19 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Write only the given columns of an existing plan's row (plus its update time), so
-	 * columns a concurrent writer changed in between keep its values. Plan meta is never
-	 * touched.
+	 * Write only the given columns of an existing plan's row (plus its update time, stamped
+	 * back onto the entity), so columns a concurrent writer changed in between keep its
+	 * values. Plan meta is never touched. Existence is checked only when the write changes
+	 * nothing.
 	 *
 	 * @param Plan               $plan   Plan to read the values from. Must have an id.
 	 * @param array<int, string> $fields Columns to write: `name`, `status`, `billing_policy`,
 	 *                                   `pricing_policy`, `delivery_policy`.
+	 * @return bool False when the plan row no longer exists (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable column.
 	 * @throws \RuntimeException If the plan has no id or the update fails.
 	 */
-	public function update_fields( Plan $plan, array $fields ): void {
+	public function update_fields( Plan $plan, array $fields ): bool {
 		global $wpdb;
 
 		$id = $plan->get_id();
@@ -220,14 +223,43 @@ final class PlanRepository {
 			$columns[ $field ] = $row[ $field ];
 		}
 
-		$columns['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
+		$now = gmdate( 'Y-m-d H:i:s' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $columns, array( 'id' => $id ) );
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
+			array_merge( $columns, array( 'date_updated_gmt' => $now ) ),
+			array( 'id' => $id )
+		);
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
 		}
+
+		// Zero changed rows: a missing row, or identical values written within the same second.
+		if ( 0 === $updated && ! $this->exists( $id ) ) {
+			return false;
+		}
+
+		$plan->set_date_updated_gmt( $now );
+
+		return true;
+	}
+
+	/**
+	 * Whether a plan row exists.
+	 *
+	 * @param int $id Plan id.
+	 */
+	public function exists( int $id ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id ) );
+
+		return null !== $found;
 	}
 
 	/**

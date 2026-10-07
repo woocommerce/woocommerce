@@ -97,14 +97,14 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Create a plan through the plan write facade: a monthly billing payload owned by
+	 * Create a plan through the plan facade: a monthly billing payload owned by
 	 * {@see self::PLAN_OWNER} unless overridden.
 	 *
 	 * @param array<string, mixed> $overrides `Plans::create()` args to replace.
 	 * @return int The plan id.
 	 */
 	protected function make_plan( array $overrides = array() ): int {
-		return Plans::create(
+		$plan = Plans::create(
 			array_merge(
 				array(
 					'extension_slug' => self::PLAN_OWNER,
@@ -117,6 +117,8 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				$overrides
 			)
 		);
+
+		return $plan->get_id();
 	}
 
 	/**

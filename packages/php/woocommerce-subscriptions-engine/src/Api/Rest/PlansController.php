@@ -302,7 +302,7 @@ final class PlansController extends WP_REST_Controller {
 		$args['extension_slug'] = $extension_slug;
 
 		try {
-			$id = Plans::create( $args );
+			$plan = Plans::create( $args );
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
@@ -311,12 +311,7 @@ final class PlansController extends WP_REST_Controller {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_create_failed' );
 		}
 
-		$plan = $this->plan_repository->find( $id );
-		if ( ! $plan instanceof Plan ) {
-			return $this->not_found_error();
-		}
-
-		$response = rest_ensure_response( $this->prepare_item_for_response( PlanView::from_plan( $plan ), $request ) );
+		$response = rest_ensure_response( $this->prepare_item_for_response( $plan, $request ) );
 		$response->set_status( 201 );
 
 		return $response;
@@ -335,13 +330,14 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$id = Coercion::coerce_int( $request->get_param( 'id' ) );
-		if ( ! $this->plan_repository->find( $id, $extension_slug ) instanceof Plan ) {
+		$plan_id = Coercion::coerce_int( $request->get_param( 'id' ) );
+		$stored  = Plans::get( $plan_id );
+		if ( null === $stored || $extension_slug !== $stored->get_extension_slug() ) {
 			return $this->not_found_error();
 		}
 
 		try {
-			$updated = Plans::update( $id, $this->write_args( $request ) );
+			$plan = Plans::update( $plan_id, $this->write_args( $request ) );
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
@@ -350,12 +346,11 @@ final class PlansController extends WP_REST_Controller {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_update_failed' );
 		}
 
-		$plan = $updated ? $this->plan_repository->find( $id, $extension_slug ) : null;
-		if ( ! $plan instanceof Plan ) {
+		if ( null === $plan ) {
 			return $this->not_found_error();
 		}
 
-		return rest_ensure_response( $this->prepare_item_for_response( PlanView::from_plan( $plan ), $request ) );
+		return rest_ensure_response( $this->prepare_item_for_response( $plan, $request ) );
 	}
 
 	/**

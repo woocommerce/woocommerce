@@ -44,7 +44,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @param array<string, mixed> $overrides Arg overrides.
 	 */
 	private function create( array $overrides = array() ): int {
-		return Plans::create(
+		$plan = Plans::create(
 			array_merge(
 				array(
 					'extension_slug' => self::OWNER,
@@ -57,6 +57,8 @@ class PlansTest extends EngineIntegrationTestCase {
 				$overrides
 			)
 		);
+
+		return $plan->get_id();
 	}
 
 	/**
@@ -78,14 +80,23 @@ class PlansTest extends EngineIntegrationTestCase {
 		return ( new PlanRepository() )->count();
 	}
 
-	public function test_create_stores_the_fields_and_returns_the_id(): void {
-		$id = $this->create(
+	public function test_create_stores_the_fields_and_returns_the_view(): void {
+		$created = Plans::create(
 			array(
+				'extension_slug'  => self::OWNER,
 				'name'            => '  Box  ',
+				'billing_policy'  => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
 				'pricing_policy'  => array( 'policies' => array() ),
 				'delivery_policy' => array( 'anchor' => 1 ),
 			)
 		);
+		$id      = $created->get_id();
+
+		$this->assertEquals( Plans::get( $id ), $created, 'The returned view matches a fresh read.' );
+		$this->assertNotNull( $created->get_date_created_gmt() );
 
 		$plan = $this->stored( $id );
 		$this->assertSame( 'Box', $plan->get_name() );
@@ -103,14 +114,13 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_create_without_policies_stores_nulls(): void {
-		$plan = $this->stored(
-			Plans::create(
-				array(
-					'extension_slug' => self::OWNER,
-					'name'           => 'Bare',
-				)
+		$created = Plans::create(
+			array(
+				'extension_slug' => self::OWNER,
+				'name'           => 'Bare',
 			)
 		);
+		$plan    = $this->stored( $created->get_id() );
 
 		$this->assertNull( $plan->get_billing_policy() );
 		$this->assertNull( $plan->get_pricing_policy() );
@@ -192,7 +202,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$this->assertTrue( Plans::update( $id, array( 'pricing_policy' => array( 'c' => 3 ) ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'pricing_policy' => array( 'c' => 3 ) ) ) );
 		$plan = $this->stored( $id );
 		$this->assertSame( array( 'c' => 3 ), $plan->get_pricing_policy() );
 		$this->assertSame(
@@ -204,43 +214,82 @@ class PlansTest extends EngineIntegrationTestCase {
 			'An omitted policy keeps its stored payload.'
 		);
 
-		$this->assertTrue( Plans::update( $id, array( 'pricing_policy' => null ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'pricing_policy' => null ) ) );
 		$this->assertNull( $this->stored( $id )->get_pricing_policy() );
 	}
 
 	public function test_status_only_update(): void {
 		$id = $this->create();
 
-		$this->assertTrue( Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
 
 		$plan = $this->stored( $id );
 		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
 		$this->assertSame( 'Monthly', $plan->get_name() );
 	}
 
-	public function test_update_of_a_missing_plan_returns_false(): void {
-		$this->assertFalse( Plans::update( 999999, array( 'name' => 'Nope' ) ) );
+	public function test_update_of_a_missing_plan_returns_null(): void {
+		$this->assertNull( Plans::update( 999999, array( 'name' => 'Nope' ) ) );
+		$this->assertNull( Plans::update( 0, array( 'name' => 'Nope' ) ) );
 	}
 
-	public function test_update_rejects_a_non_positive_id(): void {
-		$this->expectException( InvalidArgumentException::class );
+	/**
+	 * @testdox update returns the plan as read plus the written fields, with the bumped update time.
+	 */
+	public function test_update_returns_the_view_with_the_written_fields(): void {
+		$id = $this->create();
 
-		Plans::update( 0, array( 'name' => 'Nope' ) );
+		$updated = Plans::update( $id, array( 'name' => 'Renamed' ) );
+
+		$this->assertInstanceOf( PlanView::class, $updated );
+		$this->assertSame( 'Renamed', $updated->get_name() );
+		$this->assertEquals( Plans::get( $id ), $updated, 'The returned view matches a fresh read.' );
+	}
+
+	/**
+	 * @testdox update returns null when the plan is deleted before the write.
+	 */
+	public function test_update_returns_null_when_the_plan_is_deleted_before_the_write(): void {
+		global $wpdb;
+
+		$id = $this->create();
+
+		// A concurrent delete lands after the facade read the plan and before its write.
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$injected = false;
+		$race     = static function ( string $query ) use ( &$injected, $table, $id, $wpdb ): string {
+			if ( ! $injected && 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+				$injected = true;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $table, array( 'id' => $id ) );
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $race );
+
+		try {
+			$updated = Plans::update( $id, array( 'name' => 'Renamed' ) );
+		} finally {
+			remove_filter( 'query', $race );
+		}
+
+		$this->assertTrue( $injected );
+		$this->assertNull( $updated );
 	}
 
 	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
 		$id = $this->create();
 		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
 
-		$this->assertTrue(
-			Plans::update(
-				$id,
-				array(
-					'sort_order' => 1,
-					'name'       => 'Changed',
-				)
+		$updated = Plans::update(
+			$id,
+			array(
+				'sort_order' => 1,
+				'name'       => 'Changed',
 			)
 		);
+		$this->assertInstanceOf( PlanView::class, $updated );
 
 		$this->assertSame( 'Changed', $this->stored( $id )->get_name(), 'The known key beside the unknown one is written.' );
 	}
@@ -249,15 +298,14 @@ class PlansTest extends EngineIntegrationTestCase {
 		$id = $this->create();
 		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
 
-		$this->assertTrue(
-			Plans::update(
-				$id,
-				array(
-					'extension_slug' => 'other',
-					'name'           => 'Changed',
-				)
+		$updated = Plans::update(
+			$id,
+			array(
+				'extension_slug' => 'other',
+				'name'           => 'Changed',
 			)
 		);
+		$this->assertInstanceOf( PlanView::class, $updated );
 
 		$plan = $this->stored( $id );
 		$this->assertSame( self::OWNER, $plan->get_extension_slug(), 'The extension slug is not rewritten.' );
@@ -310,15 +358,14 @@ class PlansTest extends EngineIntegrationTestCase {
 		StatusRegistry::reset();
 		$this->assertFalse( PlanStatus::is_registered( 'seasonal' ) );
 
-		$this->assertTrue(
-			Plans::update(
-				$id,
-				array(
-					'status' => 'seasonal',
-					'name'   => 'Renamed',
-				)
+		$updated = Plans::update(
+			$id,
+			array(
+				'status' => 'seasonal',
+				'name'   => 'Renamed',
 			)
 		);
+		$this->assertInstanceOf( PlanView::class, $updated );
 
 		$plan = $this->stored( $id );
 		$this->assertSame( 'seasonal', $plan->get_status() );
@@ -339,7 +386,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			}
 		);
 
-		$this->assertTrue( Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
 
 		$plan = $this->stored( $id );
 		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
@@ -362,11 +409,11 @@ class PlansTest extends EngineIntegrationTestCase {
 			}
 		);
 
-		$this->assertTrue( Plans::update( $id, array() ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array() ) );
 		$this->assertSame( 1, $validated, 'An empty update still runs the owner validation.' );
 		$this->assertSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'An empty update writes nothing.' );
 
-		$this->assertTrue( Plans::update( $id, array( 'name' => 'Renamed' ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'name' => 'Renamed' ) ) );
 		$this->assertNotSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'A field update bumps the update time.' );
 	}
 

@@ -684,7 +684,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$this->assertTrue( Plans::update( $plan_id, array( 'billing_policy' => $billing ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $plan_id, array( 'billing_policy' => $billing ) ) );
 
 		$warnings = array();
 		$capture  = static function ( $message, $level ) use ( &$warnings ) {
@@ -766,7 +766,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'billing_policy'  => $snapshot_billing,
 			)
 		);
-		$this->assertTrue( Plans::update( $plan->get_id(), array( 'billing_policy' => $live_billing ) ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $plan->get_id(), array( 'billing_policy' => $live_billing ) ) );
 
 		$warnings = array();
 		$capture  = static function ( $message, $level ) use ( &$warnings ) {

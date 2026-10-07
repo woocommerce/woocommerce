@@ -136,7 +136,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$plan->set_billing_policy( array( 'period' => 'week' ) );
 		$plan->set_pricing_policy( array( 'policies' => array() ) );
 		$plan->set_delivery_policy( array( 'x' => 1 ) );
-		$repo->update_fields( $plan, array( 'name', 'status', 'billing_policy', 'pricing_policy', 'delivery_policy' ) );
+		$this->assertTrue( $repo->update_fields( $plan, array( 'name', 'status', 'billing_policy', 'pricing_policy', 'delivery_policy' ) ) );
+		$this->assertNotSame( '2020-01-01 00:00:00', $plan->get_date_updated_gmt(), 'The update time is stamped back onto the entity.' );
 
 		$updated = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $updated );
@@ -153,6 +154,33 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$cleared = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $cleared );
 		$this->assertNull( $cleared->get_billing_policy() );
+	}
+
+	/**
+	 * @testdox update_fields on a deleted plan returns false.
+	 */
+	public function test_update_fields_returns_false_for_a_deleted_plan(): void {
+		$repo  = new PlanRepository();
+		$stale = $repo->find( $this->insert_plan( $repo, 'Gone' ) );
+		$this->assertInstanceOf( Plan::class, $stale );
+		$this->assertTrue( $repo->delete( (int) $stale->get_id() ) );
+
+		$stale->set_name( 'Renamed' );
+
+		$this->assertFalse( $repo->update_fields( $stale, array( 'name' ) ) );
+	}
+
+	/**
+	 * @testdox update_fields writing identical values (no changed rows) returns true.
+	 */
+	public function test_update_fields_with_identical_values_returns_true(): void {
+		$repo = new PlanRepository();
+		$plan = $repo->find( $this->insert_plan( $repo, 'Same' ) );
+		$this->assertInstanceOf( Plan::class, $plan );
+
+		// The first write may bump the update time; the second, within the same second, changes no row.
+		$this->assertTrue( $repo->update_fields( $plan, array( 'name' ) ) );
+		$this->assertTrue( $repo->update_fields( $plan, array( 'name' ) ) );
 	}
 
 	public function test_update_fields_without_an_id_throws(): void {
