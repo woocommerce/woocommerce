@@ -381,9 +381,6 @@ class WCAdminAssets {
 		// Register the CSS styles.
 		$styles = array(
 			array(
-				'handle' => 'wc-admin-layout',
-			),
-			array(
 				'handle' => 'wc-components',
 			),
 			array(
@@ -394,7 +391,7 @@ class WCAdminAssets {
 			),
 			array(
 				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+				'dependencies' => array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
 			),
 			array(
 				'handle' => 'wc-onboarding',
