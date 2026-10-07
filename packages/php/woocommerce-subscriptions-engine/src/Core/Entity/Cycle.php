@@ -222,6 +222,7 @@ final class Cycle {
 
 		self::assert_contract_id( $cycle->contract_id );
 		self::assert_kind( $cycle->kind );
+		// Null is allowed here for auto-assign sequence_no during append operation.
 		if ( null !== $cycle->sequence_no ) {
 			self::assert_sequence_no( $cycle->sequence_no );
 		}

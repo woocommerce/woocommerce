@@ -140,7 +140,7 @@ final class Contracts {
 	 * nullable field (and resets a money field to 0). Unknown keys (`extension_slug`
 	 * included) raise a `_doing_it_wrong()` notice and are ignored.
 	 *
-	 * @param int                  $id   Contract id.
+	 * @param int                  $contract_id   Contract id.
 	 * @param array<string, mixed> $args Fields to write.
 	 * @return ContractView|null The row as read before the write plus the written fields (a column
 	 *                           another writer changed meanwhile may be stale here, not in storage);
@@ -148,11 +148,11 @@ final class Contracts {
 	 *                           before the write).
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
-	public static function update( int $id, array $args ): ?ContractView {
+	public static function update( int $contract_id, array $args ): ?ContractView {
 		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$repository = new ContractRepository();
-		$contract   = $repository->find( $id );
+		$contract   = $repository->find( $contract_id );
 		if ( null === $contract ) {
 			return null;
 		}
@@ -227,23 +227,21 @@ final class Contracts {
 	/**
 	 * Add a meta value to a contract, like `add_post_meta()`. A key may hold several values.
 	 *
-	 * @param int    $id     Contract id.
-	 * @param string $key    Meta key.
-	 * @param mixed  $value  Meta value; serialized when not scalar.
-	 * @param bool   $unique When true, add nothing if the key already exists. Advisory: checked
-	 *                       before the insert with no unique index, so concurrent adds can both write.
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       Meta value; serialized when not scalar.
+	 * @param bool   $unique      When true, add nothing if the key already exists. Advisory: checked
+	 *                            before the insert with no unique index, so concurrent adds can both write.
 	 * @return int|null The meta row id; null when the contract does not exist or `$unique` and the key exists.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
-	public static function add_meta( int $id, string $key, $value, bool $unique = false ): ?int {
-		self::assert_meta_key( $key );
-
+	public static function add_meta( int $contract_id, string $key, $value, bool $unique = false ): ?int {
 		$repository = new ContractRepository();
-		if ( ! $repository->exists( $id ) ) {
+		if ( ! $repository->exists( $contract_id ) ) {
 			return null;
 		}
 
-		return $repository->add_meta( $id, $key, $value, $unique );
+		return $repository->add_meta( $contract_id, $key, $value, $unique );
 	}
 
 	/**
@@ -251,52 +249,48 @@ final class Contracts {
 	 * when absent, else rewrites every value, or only the values equal to `$prev_value`.
 	 * The absent-key check runs before the write with no unique index, so it is not a lock.
 	 *
-	 * @param int    $id         Contract id.
-	 * @param string $key        Meta key.
-	 * @param mixed  $value      New value; serialized when not scalar.
-	 * @param mixed  $prev_value Only update values equal to this; null updates all. Any other
-	 *                           value ('' and false included) matches literally.
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       New value; serialized when not scalar.
+	 * @param mixed  $prev_value  Only update values equal to this; null updates all. Any other
+	 *                            value ('' and false included) matches literally.
 	 * @return bool True when a value was added or changed; false when nothing changed or the contract does not exist.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
-	public static function update_meta( int $id, string $key, $value, $prev_value = null ): bool {
-		self::assert_meta_key( $key );
-
+	public static function update_meta( int $contract_id, string $key, $value, $prev_value = null ): bool {
 		$repository = new ContractRepository();
-		if ( ! $repository->exists( $id ) ) {
+		if ( ! $repository->exists( $contract_id ) ) {
 			return false;
 		}
 
-		return $repository->update_meta( $id, $key, $value, $prev_value );
+		return $repository->update_meta( $contract_id, $key, $value, $prev_value );
 	}
 
 	/**
 	 * Delete a contract's meta values for `$key`, like `delete_post_meta()`.
 	 *
-	 * @param int    $id    Contract id.
-	 * @param string $key   Meta key.
-	 * @param mixed  $value Only delete values equal to this; null deletes every value for the key.
-	 *                      Any other value ('' and false included) matches literally.
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       Only delete values equal to this; null deletes every value for the key.
+	 *                            Any other value ('' and false included) matches literally.
 	 * @return bool True when at least one value was deleted.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
-	public static function delete_meta( int $id, string $key, $value = null ): bool {
-		self::assert_meta_key( $key );
-
-		return ( new ContractRepository() )->delete_meta( $id, $key, $value );
+	public static function delete_meta( int $contract_id, string $key, $value = null ): bool {
+		return ( new ContractRepository() )->delete_meta( $contract_id, $key, $value );
 	}
 
 	/**
 	 * Read contract meta (WordPress `get_post_meta()` semantics), oldest value first.
 	 *
-	 * @param int    $id     Contract id.
-	 * @param string $key    Meta key; empty for every key.
-	 * @param bool   $single With a key: return the first value only.
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key; empty for every key.
+	 * @param bool   $single      With a key: return the first value only.
 	 * @return mixed Empty key: values grouped by key. Key + `$single`: the first value, or ''
 	 *               when absent. Key only: the list of values (`[]` when absent).
 	 */
-	public static function get_meta( int $id, string $key = '', bool $single = false ) {
-		return ( new ContractRepository() )->get_meta( $id, $key, $single );
+	public static function get_meta( int $contract_id, string $key = '', bool $single = false ) {
+		return ( new ContractRepository() )->get_meta( $contract_id, $key, $single );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
@@ -442,18 +436,6 @@ final class Contracts {
 			if ( 0.0 !== (float) $total ) {
 				throw new InvalidArgumentException( 'Contracts: the currency cannot be cleared while a money total is non-zero.' );
 			}
-		}
-	}
-
-	/**
-	 * Refuse an empty meta key.
-	 *
-	 * @param string $key Meta key.
-	 * @throws InvalidArgumentException If `$key` is empty.
-	 */
-	private static function assert_meta_key( string $key ): void {
-		if ( '' === $key ) {
-			throw new InvalidArgumentException( 'Contracts: the meta key must not be empty.' );
 		}
 	}
 
