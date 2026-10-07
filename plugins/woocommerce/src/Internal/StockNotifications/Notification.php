@@ -427,7 +427,7 @@ class Notification extends \WC_Data {
 	public function get_product_permalink() {
 
 		$product = $this->get_product();
-		if ( ! $product ) {
+		if ( ! $product || ! $product->get_id() ) {
 			return '';
 		}
 
