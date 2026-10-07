@@ -85,7 +85,10 @@ set_error_handler(
 // Same order as WC_Download_Handler::download_file_force().
 foreach ( array( 'clean_buffers', 'log_remaining_buffers' ) as $wc_method ) {
 	$wc_method = new ReflectionMethod( WC_Download_Handler::class, $wc_method );
-	$wc_method->setAccessible( true );
+	// Needed before PHP 8.1. PHP 8.5 deprecates it, and the error handler would record that.
+	if ( PHP_VERSION_ID < 80100 ) {
+		$wc_method->setAccessible( true );
+	}
 	$wc_method->invoke( null );
 }
 WC_Download_Handler::readfile_chunked( $wc_file );
