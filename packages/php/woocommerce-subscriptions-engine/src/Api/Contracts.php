@@ -21,9 +21,7 @@ use DateTimeZone;
 use DomainException;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
@@ -123,14 +121,17 @@ final class Contracts {
 	public static function create( array $args ): int {
 		$args = self::known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
-		$extension_slug = $args['extension_slug'] ?? null;
-		if ( ! is_string( $extension_slug ) || '' === $extension_slug ) {
-			throw new InvalidArgumentException( 'Contracts: "extension_slug" is required and must be a non-empty string.' );
-		}
+		$extension_slug = self::nullable_string( 'extension_slug', $args['extension_slug'] ?? null );
 		unset( $args['extension_slug'] );
 
-		$contract  = Contract::create( array( 'extension_slug' => $extension_slug ) );
-		$snapshots = self::apply( __METHOD__, $contract, $args );
+		$method                       = __METHOD__;
+		list( $contract, $snapshots ) = self::invalid_input_on_domain_error(
+			static function () use ( $method, $extension_slug, $args ): array {
+				$contract = Contract::create( array( 'extension_slug' => $extension_slug ) );
+
+				return array( $contract, self::apply( $method, $contract, $args ) );
+			}
+		);
 
 		$repository = new ContractRepository();
 		$id         = $repository->insert( $contract );
@@ -162,7 +163,12 @@ final class Contracts {
 			return false;
 		}
 
-		$snapshots = self::apply( __METHOD__, $contract, $args );
+		$method    = __METHOD__;
+		$snapshots = self::invalid_input_on_domain_error(
+			static function () use ( $method, $contract, $args ): array {
+				return self::apply( $method, $contract, $args );
+			}
+		);
 		$fields    = array_values( array_diff( array_keys( $args ), array( 'plan_snapshot', 'items_snapshot' ) ) );
 
 		if ( array() !== $fields ) {
@@ -202,13 +208,13 @@ final class Contracts {
 		}
 
 		$status = $args['status'] ?? null;
-		if ( ! is_string( $status ) || ! CycleStatus::is_registered( $status ) ) {
-			throw new InvalidArgumentException( 'Contracts: "status" is required and must be a registered cycle status.' );
+		if ( ! is_string( $status ) ) {
+			throw new InvalidArgumentException( 'Contracts: "status" is required and must be a string.' );
 		}
 
 		$kind = $args['kind'] ?? Cycle::KIND_BILLING;
-		if ( ! is_string( $kind ) || '' === $kind ) {
-			throw new InvalidArgumentException( 'Contracts: "kind" must be a non-empty string.' );
+		if ( ! is_string( $kind ) ) {
+			throw new InvalidArgumentException( 'Contracts: "kind" must be a string.' );
 		}
 
 		$starts_at = self::nullable_date( 'starts_at_gmt', $args['starts_at_gmt'] ?? null );
@@ -262,11 +268,11 @@ final class Contracts {
 			$cycle_args['items_snapshot_id'] = $contract->get_items_snapshot_id();
 		}
 
-		try {
-			$cycle = Cycle::create( $cycle_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( esc_html( $e->getMessage() ) );
-		}
+		$cycle = self::invalid_input_on_domain_error(
+			static function () use ( $cycle_args ): Cycle {
+				return Cycle::create( $cycle_args );
+			}
+		);
 
 		try {
 			$repository->append_cycle( $cycle, $head );
@@ -353,8 +359,26 @@ final class Contracts {
 	}
 
 	/**
-	 * Validate the caller's fields and apply them to a contract through its setters.
-	 * Nothing is written to storage; an invalid value throws before any write.
+	 * Run entity calls, reporting an entity invariant failure (`DomainException`) as
+	 * invalid input. Storage conflicts must stay outside the callback.
+	 *
+	 * @template T
+	 * @param callable(): T $entity_calls Entity calls.
+	 * @return T
+	 * @throws InvalidArgumentException If an entity invariant fails; the previous exception is the entity's.
+	 */
+	private static function invalid_input_on_domain_error( callable $entity_calls ) {
+		try {
+			return $entity_calls();
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
+	}
+
+	/**
+	 * Validate the caller's field shapes and apply them to a contract through its setters,
+	 * which enforce the entity invariants. Nothing is written to storage; an invalid value
+	 * throws before any write.
 	 *
 	 * @param string               $method   Public facade method, for usage notices.
 	 * @param Contract             $contract Contract to change.
@@ -396,16 +420,10 @@ final class Contracts {
 					$contract->set_currency( self::currency( $value ) );
 					break;
 				case 'status':
-					if ( ! is_string( $value ) || ! ContractStatus::is_registered( $value ) ) {
-						throw new InvalidArgumentException( 'Contracts: "status" must be a registered contract status.' );
-					}
-					$contract->set_status( $value );
+					$contract->set_status( self::string( $key, $value ) );
 					break;
 				case 'schedule_source':
-					if ( ! is_string( $value ) || ! in_array( $value, array( Contract::SCHEDULE_SOURCE_PRIMITIVE, Contract::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
-						throw new InvalidArgumentException( 'Contracts: "schedule_source" must be "primitive" or "gateway".' );
-					}
-					$contract->set_schedule_source( $value );
+					$contract->set_schedule_source( self::string( $key, $value ) );
 					break;
 				case 'start_gmt':
 					$contract->set_start_gmt( self::nullable_date( $key, $value ) );
@@ -544,6 +562,21 @@ final class Contracts {
 	private static function currency( $value ): ?string {
 		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}$/', $value ) ) ) {
 			throw new InvalidArgumentException( 'Contracts: "currency" must be null or a three-letter uppercase ISO-4217 code.' );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate a string.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not a string.
+	 */
+	private static function string( string $key, $value ): string {
+		if ( ! is_string( $value ) ) {
+			throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be a string.', esc_html( $key ) ) );
 		}
 
 		return $value;

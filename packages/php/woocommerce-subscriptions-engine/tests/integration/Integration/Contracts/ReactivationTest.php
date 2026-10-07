@@ -96,6 +96,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	private function seed_on_hold( ?string $next_payment_gmt, int $selling_plan_id, string $status = ContractStatus::ON_HOLD, array $meta = array() ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -353,6 +354,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	public function test_reactivate_rejects_a_terminal_contract(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'engine-tests',
 				'customer_id'     => 1,
 				'status'          => ContractStatus::CANCELLED,
 				'currency'        => 'USD',

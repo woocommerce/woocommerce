@@ -442,6 +442,29 @@ class CycleTest extends TestCase {
 		$cycle->set_items_snapshot_id( 99 );
 	}
 
+	public function test_from_storage_keeps_stored_values_that_create_would_refuse(): void {
+		$cycle = Cycle::from_storage(
+			array(
+				'id'             => 5,
+				'contract_id'    => 0,
+				'sequence_no'    => 0,
+				'count'          => 0,
+				'kind'           => '',
+				'status'         => 'legacy-x',
+				'starts_at_gmt'  => '2026-03-01 00:00:00',
+				'ends_at_gmt'    => '2026-04-01 00:00:00',
+				'expected_total' => '20.00',
+				'currency'       => 'USD',
+			)
+		);
+
+		$row = $cycle->to_storage();
+		$this->assertSame( 0, $row['contract_id'] );
+		$this->assertSame( 0, $row['sequence_no'] );
+		$this->assertSame( 0, $row['count'] );
+		$this->assertSame( '', $row['kind'] );
+	}
+
 	public function test_from_storage_hydrates_a_non_counting_cycle(): void {
 		$cycle = Cycle::from_storage(
 			array(

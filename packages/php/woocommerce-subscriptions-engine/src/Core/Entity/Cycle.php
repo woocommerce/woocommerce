@@ -214,21 +214,21 @@ final class Cycle {
 	 * @throws DomainException If the attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		if ( ! isset( $args['contract_id'] ) ) {
-			throw new DomainException( 'Cycle: contract_id is required.' );
-		}
-
 		// A new cycle is always unsaved; never adopt a caller-supplied id.
 		unset( $args['id'] );
 
 		// Absent count defaults to 1 (counting); explicit null means non-counting. `?? 1` would conflate them.
-		$args['count'] = self::normalize_count( array_key_exists( 'count', $args ) ? $args['count'] : 1 );
+		if ( ! array_key_exists( 'count', $args ) ) {
+			$args['count'] = 1;
+		}
 
 		$cycle = new self( $args );
 
-		self::assert_valid_kind( $cycle->kind );
-		self::assert_valid_sequence_no( $cycle->sequence_no );
-		self::assert_registered_status( $cycle->status );
+		self::assert_contract_id( $cycle->contract_id );
+		self::assert_kind( $cycle->kind );
+		self::assert_sequence_no( $cycle->sequence_no );
+		self::assert_count( $cycle->count );
+		self::assert_status( $cycle->status );
 
 		return $cycle;
 	}
@@ -236,25 +236,15 @@ final class Cycle {
 	/**
 	 * Hydrate from a stored row.
 	 *
-	 * A well-formed stored status is kept verbatim, registered or not (registration is
-	 * checked only where a status is written), so a value written by a since-deactivated
-	 * extension round-trips unchanged.
+	 * Stored values are not validated (invariants are checked only where a value is
+	 * written), so a value written by a since-deactivated extension round-trips unchanged.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
-	 * @throws DomainException If the stored kind or sequence_no is invalid, or the stored
-	 *                         status is not a well-formed status slug.
+	 * @throws DomainException If the stored status is not a well-formed status slug.
 	 */
 	public static function from_storage( array $row ): self {
-		$kind = ScalarCoercion::coerce_string( $row['kind'] ?? null, self::KIND_BILLING );
-		self::assert_valid_kind( $kind );
-
-		$sequence_no = ScalarCoercion::coerce_int( $row['sequence_no'] ?? null );
-		self::assert_valid_sequence_no( $sequence_no );
-
 		// The typed snapshot value objects are attached on load, never hydrated here.
 		unset( $row['plan_snapshot'], $row['items_snapshot'] );
-
-		$row['count'] = array_key_exists( 'count', $row ) ? self::normalize_count( $row['count'] ) : null;
 
 		return new self( $row );
 	}
@@ -296,7 +286,7 @@ final class Cycle {
 	 * @throws DomainException If `$sequence_no` is not positive.
 	 */
 	public function set_sequence_no( int $sequence_no ): void {
-		self::assert_valid_sequence_no( $sequence_no );
+		self::assert_sequence_no( $sequence_no );
 
 		$this->sequence_no = $sequence_no;
 	}
@@ -338,7 +328,7 @@ final class Cycle {
 			return;
 		}
 
-		self::assert_registered_status( $status );
+		self::assert_status( $status );
 
 		$this->status = $status;
 	}
@@ -568,13 +558,25 @@ final class Cycle {
 	}
 
 	/**
+	 * Refuse a missing (non-positive) owning contract id.
+	 *
+	 * @param int $contract_id Contract id to check.
+	 * @throws DomainException If `$contract_id` is not positive.
+	 */
+	private static function assert_contract_id( int $contract_id ): void {
+		if ( $contract_id < 1 ) {
+			throw new DomainException( 'Cycle: contract_id is required.' );
+		}
+	}
+
+	/**
 	 * Validate a cycle kind. Known-but-extensible (deliberately not a sealed enum):
 	 * any non-empty kind is accepted so a third party may introduce its own.
 	 *
 	 * @param string $kind Kind to validate.
 	 * @throws DomainException If `$kind` is empty.
 	 */
-	private static function assert_valid_kind( string $kind ): void {
+	private static function assert_kind( string $kind ): void {
 		if ( '' === $kind ) {
 			throw new DomainException( 'Cycle: kind must not be empty.' );
 		}
@@ -586,7 +588,7 @@ final class Cycle {
 	 * @param int $sequence_no Sequence number to validate.
 	 * @throws DomainException If `$sequence_no` is not positive.
 	 */
-	private static function assert_valid_sequence_no( int $sequence_no ): void {
+	private static function assert_sequence_no( int $sequence_no ): void {
 		if ( $sequence_no < 1 ) {
 			throw new DomainException(
 				sprintf( 'Cycle: sequence_no must be 1 or greater, got %d.', $sequence_no )
@@ -602,7 +604,7 @@ final class Cycle {
 	 * @param CycleStatus $status Status to check.
 	 * @throws DomainException If the status is not registered.
 	 */
-	private static function assert_registered_status( CycleStatus $status ): void {
+	private static function assert_status( CycleStatus $status ): void {
 		if ( ! CycleStatus::is_registered( $status->get_value() ) ) {
 			throw new DomainException(
 				sprintf( 'Cycle: status "%s" is not registered.', $status->get_value() )
@@ -633,27 +635,16 @@ final class Cycle {
 	}
 
 	/**
-	 * Normalize and validate a chargeable count.
+	 * Validate a chargeable count: null (a non-counting cycle) or a positive integer.
 	 *
-	 * Null passes through (a non-counting cycle); a present value must be a
-	 * positive integer.
-	 *
-	 * @param mixed $count Raw count value (null, or coercible to int).
-	 * @return int|null
+	 * @param int|null $count Count to validate.
 	 * @throws DomainException If a present count is not positive.
 	 */
-	private static function normalize_count( $count ): ?int {
-		if ( null === $count ) {
-			return null;
-		}
-
-		$count = ScalarCoercion::coerce_int( $count );
-		if ( $count < 1 ) {
+	private static function assert_count( ?int $count ): void {
+		if ( null !== $count && $count < 1 ) {
 			throw new DomainException(
 				sprintf( 'Cycle: count must be 1 or greater when set, got %d.', $count )
 			);
 		}
-
-		return $count;
 	}
 }

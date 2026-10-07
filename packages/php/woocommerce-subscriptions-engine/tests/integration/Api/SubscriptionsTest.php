@@ -416,6 +416,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	private function seed_list_contract( string $status = ContractStatus::ACTIVE, string $billing_total = '19.99' ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 42,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -438,6 +439,7 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	private function seed_for_customer( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => $customer_id,
 				'status'           => $status,
 				'currency'         => 'USD',

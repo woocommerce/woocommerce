@@ -287,6 +287,21 @@ class ContractsTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	public function test_an_entity_invariant_failure_is_reported_as_invalid_input(): void {
+		try {
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => 'nonsense',
+				)
+			);
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
+			$this->assertSame( $e->getPrevious()->getMessage(), $e->getMessage() );
+		}
+	}
+
 	/**
 	 * @dataProvider provide_invalid_fields
 	 *
@@ -823,6 +838,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'starts_at_gmt' => '2026-01-01 00:00:00',
 					'ends_at_gmt'   => '2026-02-01 00:00:00',
 					'sequence_no'   => 0,
+				),
+			),
+			'empty kind'           => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'kind'          => '',
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
 				),
 			),
 		);

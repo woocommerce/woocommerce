@@ -82,7 +82,7 @@ class ContractTest extends TestCase {
 	 * @testdox create() with no attributes yields a draft with no customer, currency, plan or start.
 	 */
 	public function test_create_with_no_args_is_an_empty_draft(): void {
-		$contract = Contract::create( array() );
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
 
 		$this->assertSame( ContractStatus::DRAFT, $contract->get_status() );
 		$this->assertNull( $contract->get_customer_id() );
@@ -98,10 +98,38 @@ class ContractTest extends TestCase {
 	}
 
 	/**
+	 * @testdox create() requires an extension_slug.
+	 */
+	public function test_create_requires_an_extension_slug(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'Contract: extension_slug is required' );
+
+		Contract::create( array() );
+	}
+
+	/**
+	 * @testdox create() rejects an empty extension_slug.
+	 */
+	public function test_create_rejects_an_empty_extension_slug(): void {
+		$this->expectException( DomainException::class );
+
+		Contract::create( array( 'extension_slug' => '' ) );
+	}
+
+	/**
+	 * @testdox from_storage() hydrates a row with no extension_slug.
+	 */
+	public function test_from_storage_allows_a_null_extension_slug(): void {
+		$contract = Contract::from_storage( array( 'id' => 1 ) );
+
+		$this->assertNull( $contract->get_extension_slug() );
+	}
+
+	/**
 	 * @testdox The facade setters round-trip their values.
 	 */
 	public function test_setters_round_trip(): void {
-		$contract = Contract::create( array() );
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
 
 		$contract->set_customer_id( 7 );
 		$contract->set_currency( 'EUR' );
@@ -138,7 +166,7 @@ class ContractTest extends TestCase {
 	 * @testdox set_schedule_source() refuses an unknown source.
 	 */
 	public function test_set_schedule_source_rejects_an_unknown_source(): void {
-		$contract = Contract::create( array() );
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
 
 		$this->expectException( DomainException::class );
 		$this->expectExceptionMessage( 'Contract: invalid schedule source "bogus".' );
@@ -170,6 +198,7 @@ class ContractTest extends TestCase {
 	public function test_create_defaults_live_config(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -178,7 +207,6 @@ class ContractTest extends TestCase {
 		);
 
 		$this->assertNull( $contract->get_next_payment_gmt() );
-		$this->assertNull( $contract->get_extension_slug() );
 		$this->assertNull( $contract->get_origin_order_id() );
 		$this->assertNull( $contract->get_plan_snapshot_id() );
 		$this->assertNull( $contract->get_items_snapshot_id() );
@@ -198,6 +226,7 @@ class ContractTest extends TestCase {
 	public function test_create_normalizes_live_totals(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -222,6 +251,7 @@ class ContractTest extends TestCase {
 	public function test_create_allows_a_null_origin_order_id(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -240,6 +270,7 @@ class ContractTest extends TestCase {
 
 		Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -258,6 +289,7 @@ class ContractTest extends TestCase {
 
 		Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -533,6 +565,7 @@ class ContractTest extends TestCase {
 
 		$created = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,

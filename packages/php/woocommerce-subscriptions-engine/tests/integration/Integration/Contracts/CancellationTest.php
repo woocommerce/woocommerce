@@ -62,6 +62,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 	private function seed( string $status, ?string $end_gmt = null ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -162,6 +163,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 	public function test_rejects_a_terminal_contract(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'engine-tests',
 				'customer_id'     => 1,
 				'status'          => ContractStatus::CANCELLED,
 				'currency'        => 'USD',

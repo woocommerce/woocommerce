@@ -899,6 +899,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order       = $this->make_origin_order();
 		$contract    = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',

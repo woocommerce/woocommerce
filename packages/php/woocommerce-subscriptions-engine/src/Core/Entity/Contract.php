@@ -283,7 +283,7 @@ final class Contract {
 	}
 
 	/**
-	 * Build a new, unsaved contract.
+	 * Build a new, unsaved contract. `extension_slug` is required.
 	 *
 	 * @param array<string, mixed> $args Contract attributes.
 	 * @throws DomainException If the contract attributes are not valid.
@@ -294,10 +294,8 @@ final class Contract {
 
 		$contract = new self( $args );
 
-		if ( ! ContractStatus::is_registered( $contract->status ) ) {
-			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
-		}
-
+		self::assert_status( $contract->status );
+		self::assert_extension_slug( $contract->extension_slug );
 		self::assert_schedule_source( $contract->schedule_source );
 
 		return $contract;
@@ -371,9 +369,7 @@ final class Contract {
 			return;
 		}
 
-		if ( ! ContractStatus::is_registered( $status ) ) {
-			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
-		}
+		self::assert_status( $status );
 
 		$this->status = $status;
 	}
@@ -762,6 +758,30 @@ final class Contract {
 			'end_gmt'              => $this->end_gmt,
 			'schedule_source'      => $this->schedule_source,
 		);
+	}
+
+	/**
+	 * Refuse a status that is not a registered contract status.
+	 *
+	 * @param string $status Status to check.
+	 * @throws DomainException If `$status` is not registered.
+	 */
+	private static function assert_status( string $status ): void {
+		if ( ! ContractStatus::is_registered( $status ) ) {
+			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
+		}
+	}
+
+	/**
+	 * Refuse a missing or empty owning extension slug.
+	 *
+	 * @param string|null $extension_slug Extension slug to check.
+	 * @throws DomainException If `$extension_slug` is null or empty.
+	 */
+	private static function assert_extension_slug( ?string $extension_slug ): void {
+		if ( null === $extension_slug || '' === $extension_slug ) {
+			throw new DomainException( 'Contract: extension_slug is required and must be a non-empty string.' );
+		}
 	}
 
 	/**

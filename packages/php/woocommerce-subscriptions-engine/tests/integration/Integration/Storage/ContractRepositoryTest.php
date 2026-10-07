@@ -364,6 +364,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		return $this->sut->insert(
 			Contract::create(
 				array(
+					'extension_slug'   => 'engine-tests',
 					'customer_id'      => $customer_id,
 					'status'           => $status,
 					'currency'         => 'USD',
@@ -720,6 +721,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->sut->insert(
 			Contract::create(
 				array(
+					'extension_slug'  => 'engine-tests',
 					'status'          => ContractStatus::ACTIVE,
 					'customer_id'     => 1,
 					'currency'        => 'EUR',
@@ -735,12 +737,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox extension_slug defaults to null when unset.
+	 * @testdox A stored row with no extension_slug hydrates a null slug.
 	 */
-	public function test_extension_slug_defaults_to_null_when_unset(): void {
+	public function test_a_stored_null_extension_slug_hydrates_as_null(): void {
+		global $wpdb;
+
 		$id = $this->sut->insert(
 			Contract::create(
 				array(
+					'extension_slug'  => 'engine-tests',
 					'status'          => ContractStatus::ACTIVE,
 					'customer_id'     => 1,
 					'currency'        => 'EUR',
@@ -750,6 +755,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				)
 			)
 		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'extension_slug' => null ), array( 'id' => $id ) );
 
 		$fetched = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $fetched );
@@ -807,6 +815,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$mutated = Contract::create(
 			array(
+				'extension_slug'  => 'engine-tests',
 				'status'          => ContractStatus::ACTIVE,
 				'customer_id'     => 42,
 				'currency'        => 'USD',
@@ -1207,9 +1216,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_due skips a due contract with no owner.
 	 */
 	public function test_find_due_skips_a_contract_with_no_owner(): void {
+		global $wpdb;
+
 		$now      = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$owned    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$no_owner = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, null );
+		$no_owner = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'extension_slug' => null ), array( 'id' => $no_owner ) );
 
 		$ids = $this->due_ids( $now, 50 );
 
@@ -1522,7 +1535,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
 	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
-	 * @param string|null $owner            The owning extension slug; defaults to the registered test owner.
+	 * @param string      $owner            The owning extension slug; defaults to the registered test owner.
 	 */
 	private function insert_contract_due_at(
 		?string $next_payment_gmt,
@@ -1531,7 +1544,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		string $head_status = CycleStatus::BILLED,
 		?string $claimed_until = null,
 		?string $head_ends_at = null,
-		?string $owner = self::OWNER
+		string $owner = self::OWNER
 	): int {
 		$contract = Contract::create(
 			array(

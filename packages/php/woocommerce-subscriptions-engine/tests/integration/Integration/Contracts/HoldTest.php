@@ -48,6 +48,7 @@ class HoldTest extends EngineIntegrationTestCase {
 	private function seed( string $status, ?string $next_payment = '2099-01-01 00:00:00' ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
