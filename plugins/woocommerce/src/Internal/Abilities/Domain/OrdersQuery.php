@@ -52,6 +52,12 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
 			'meta'                => array(
 				'show_in_rest' => true,
+				'woocommerce'  => array(
+					'extension_fields' => array(
+						'object_type' => 'order',
+						'output'      => 'orders',
+					),
+				),
 				'mcp'          => array(
 					'public' => true,
 					'type'   => 'tool',

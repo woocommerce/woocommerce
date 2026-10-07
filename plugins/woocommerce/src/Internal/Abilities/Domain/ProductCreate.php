@@ -51,6 +51,12 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
+				'woocommerce'  => array(
+					'extension_fields' => array(
+						'object_type' => 'product',
+						'output'      => 'product',
+					),
+				),
 				'mcp'          => array(
 					'public' => true,
 					'type'   => 'tool',

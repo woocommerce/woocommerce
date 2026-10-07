@@ -65,7 +65,8 @@ class AbilityFields {
 	/**
 	 * Add the `extensions` output schema to an ability that opts in. When the
 	 * ability has no class of its own, run it as an ExtensibleAbility, so it
-	 * gets the values before WordPress 7.1 too.
+	 * gets the values before WordPress 7.1 too. With the feature off, drop the
+	 * opt-in, so the ability registers as if it never declared it.
 	 *
 	 * @internal
 	 *
@@ -73,12 +74,19 @@ class AbilityFields {
 	 * @return mixed
 	 */
 	public static function registration_args( $args ) {
-		if ( ! is_array( $args ) || ! AbilityContracts::is_enabled() ) {
+		if ( ! is_array( $args ) ) {
 			return $args;
 		}
 
 		$declaration = $args['meta'][ self::META ]['extension_fields'] ?? null;
 		if ( ! is_array( $declaration ) ) {
+			return $args;
+		}
+		if ( ! AbilityContracts::is_enabled() ) {
+			unset( $args['meta'][ self::META ]['extension_fields'] );
+			if ( empty( $args['meta'][ self::META ] ) ) {
+				unset( $args['meta'][ self::META ] );
+			}
 			return $args;
 		}
 
