@@ -62449,12 +62449,6 @@ parameters:
 			path: src/Internal/ProductFilters/QueryClauses.php
 
 		-
-			message: '#^Variable \$term_ids in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\TaxonomyHierarchyData\:\:build_term_tree\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
