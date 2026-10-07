@@ -174,10 +174,15 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 );
 
 const dispatchCheckoutEvent = ( eventName: string ) => {
-	window.wp.hooks.doAction(
-		`experimental__woocommerce_blocks-checkout-${ eventName }`,
-		{ storeCart: woocommerceState.cart }
-	);
+	try {
+		window.wp.hooks.doAction(
+			`experimental__woocommerce_blocks-checkout-${ eventName }`,
+			{ storeCart: woocommerceState.cart }
+		);
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.error( e );
+	}
 };
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
