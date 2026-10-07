@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 
 /**
  * NotificationTests data tests.
@@ -145,6 +146,15 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $expected, $notification->get_product_permalink(), 'Permalink should carry the variation attribute and the posted "Any" attribute, and nothing else' );
+	}
+
+	/**
+	 * @testdox Should return an empty string for an unsaved product, as used by the email preview.
+	 */
+	public function test_get_product_permalink_for_unsaved_product(): void {
+		$notification = Factory::create_dummy_notification();
+
+		$this->assertSame( '', $notification->get_product_permalink() );
 	}
 
 	/**
