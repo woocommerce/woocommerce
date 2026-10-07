@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for the public Contracts write facade.
+ * Integration tests for the public Contracts facade.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -14,16 +14,19 @@ use DateTimeZone;
 use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
+use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -44,7 +47,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param int $id Contract id.
 	 */
 	private function view( int $id ): ContractView {
-		$view = Subscriptions::get( $id );
+		$view = Contracts::get( $id );
 		$this->assertInstanceOf( ContractView::class, $view );
 
 		return $view;
@@ -197,7 +200,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( $items, $view->get_items() );
 		$this->assertEquals( $addresses, $view->get_addresses() );
 
-		$listed = Subscriptions::list( array( 'search' => (string) $id ) );
+		$listed = Contracts::list( array( 'search' => (string) $id ) );
 		$this->assertSame( array( $id ), array_map( static fn( ContractView $row ): int => $row->get_id(), $listed ) );
 		$this->assertNull( $listed[0]->get_items() );
 		$this->assertNull( $listed[0]->get_addresses() );
@@ -315,13 +318,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param array<string, mixed> $fields Invalid fields.
 	 */
 	public function test_invalid_values_are_rejected_without_a_write( array $fields ): void {
-		$before = Subscriptions::count();
+		$before = Contracts::count();
 
 		try {
 			Contracts::create( array_merge( array( 'extension_slug' => self::EXTENSION_SLUG ), $fields ) );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertSame( $before, Subscriptions::count(), 'Nothing is written.' );
+			$this->assertSame( $before, Contracts::count(), 'Nothing is written.' );
 		}
 	}
 
@@ -882,7 +885,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			Contracts::add_cycle( $id, $args );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertSame( array(), Subscriptions::get_history( $id ), 'No cycle is written.' );
+			$this->assertSame( array(), Contracts::get_cycles( $id ), 'No cycle is written.' );
 		}
 	}
 
@@ -985,11 +988,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'EUR', $this->cycle( $id, $cycle_id )->get_currency() );
 	}
 
-	public function test_get_history_returns_the_appended_cycle_as_a_view(): void {
+	public function test_get_cycles_returns_the_appended_cycle_as_a_view(): void {
 		$id      = $this->contract_with_currency();
 		$created = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 
-		$history = Subscriptions::get_history( $id );
+		$history = Contracts::get_cycles( $id );
 
 		$this->assertCount( 1, $history );
 		$this->assertEquals( $history[0], $created, 'The returned view matches a fresh read.' );
@@ -1083,5 +1086,287 @@ class ContractsTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( array( 'kept' ), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	/**
+	 * Sign up a contract through the contracts facade (cycle 1 billed). The monthly plan's
+	 * cadence is frozen onto the contract's plan snapshot at signup.
+	 *
+	 * @param int $customer_id Owning customer id; 0 gives the order a new customer.
+	 * @return Contract The persisted contract with cycle 1 billed.
+	 */
+	private function sign_up_contract( int $customer_id = 0 ): Contract {
+		$plan = Plan::create(
+			array(
+				'name'           => 'Monthly',
+				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
+				'category'       => Plan::DEFAULT_CATEGORY,
+				'extension_slug' => 'engine-tests',
+			)
+		);
+		( new PlanRepository() )->insert( $plan );
+
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( 'dummy' );
+		$order->set_total( '19.99' );
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		if ( $customer_id > 0 ) {
+			$order->set_customer_id( $customer_id );
+		}
+		$order->save();
+
+		$contract = ( new ContractRepository() )->find( $this->sign_up_from_order( $order, $plan ) );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract;
+	}
+
+	/**
+	 * Seed a bare contract at a status and billing total for the list-query tests,
+	 * returning its id.
+	 *
+	 * @param string $status        Contract status.
+	 * @param string $billing_total Billing total (decimal string).
+	 */
+	private function seed_list_contract( string $status = ContractStatus::ACTIVE, string $billing_total = '19.99' ): int {
+		$contract = Contract::create(
+			array(
+				'extension_slug'   => 'engine-tests',
+				'customer_id'      => 42,
+				'status'           => $status,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 1,
+				'start_gmt'        => '2026-01-01 00:00:00',
+				'next_payment_gmt' => '2099-02-01 00:00:00',
+				'billing_total'    => $billing_total,
+			)
+		);
+
+		return ( new ContractRepository() )->insert( $contract );
+	}
+
+	/**
+	 * Seed a contract for a customer at a status, returning its id.
+	 *
+	 * @param int    $customer_id Owning customer.
+	 * @param string $status      Contract status.
+	 */
+	private function seed_for_customer( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
+		$contract = Contract::create(
+			array(
+				'extension_slug'   => 'engine-tests',
+				'customer_id'      => $customer_id,
+				'status'           => $status,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 1,
+				'start_gmt'        => '2026-01-01 00:00:00',
+				'next_payment_gmt' => '2099-02-01 00:00:00',
+				'billing_total'    => '19.99',
+			)
+		);
+
+		return ( new ContractRepository() )->insert( $contract );
+	}
+
+	/**
+	 * @testdox get returns the contract, and null for an unknown id.
+	 */
+	public function test_get_round_trips_a_contract(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$loaded = Contracts::get( $contract_id );
+		$this->assertInstanceOf( ContractView::class, $loaded );
+		$this->assertSame( $contract_id, $loaded->get_id() );
+		$this->assertIsArray( $loaded->get_items(), 'A single read loads children.' );
+		$this->assertIsArray( $loaded->get_addresses(), 'A single read loads children.' );
+
+		$this->assertNull( Contracts::get( 999999 ) );
+	}
+
+	/**
+	 * @testdox find_by_origin_order returns views of the contracts created from an order.
+	 */
+	public function test_find_by_origin_order_returns_views(): void {
+		$contract = $this->sign_up_contract();
+		$order_id = $contract->get_origin_order_id();
+		$this->assertNotNull( $order_id );
+
+		$found = Contracts::find_by_origin_order( $order_id );
+
+		$this->assertCount( 1, $found );
+		$this->assertInstanceOf( ContractView::class, $found[0] );
+		$this->assertSame( $contract->get_id(), $found[0]->get_id() );
+		$this->assertSame( $order_id, $found[0]->get_origin_order_id() );
+		$this->assertNull( $found[0]->get_items() );
+		$this->assertSame( array(), Contracts::find_by_origin_order( 999999 ) );
+	}
+
+	/**
+	 * @testdox list_for_customer does not load children.
+	 */
+	public function test_list_for_customer_does_not_load_children(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$this->assertIsInt( $customer_id );
+
+		$this->sign_up_contract( $customer_id );
+
+		$contracts = Contracts::list_for_customer( $customer_id );
+		$this->assertCount( 1, $contracts );
+		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
+	}
+
+	/**
+	 * @testdox list does not load children.
+	 */
+	public function test_list_does_not_load_children(): void {
+		$this->sign_up_contract();
+
+		$contracts = Contracts::list( array( 'limit' => 1 ) );
+		$this->assertCount( 1, $contracts );
+		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
+		$this->assertNull( $contracts[0]->get_addresses(), 'List reads do not load children.' );
+	}
+
+	/**
+	 * @testdox list returns recent contracts newest first.
+	 */
+	public function test_list_returns_recent_contracts(): void {
+		$first  = $this->sign_up_contract();
+		$second = $this->sign_up_contract();
+
+		$contracts = Contracts::list();
+		$ids       = array_map( static fn ( ContractView $c ) => $c->get_id(), $contracts );
+
+		// Newest first, and both signups are present.
+		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_slice( $ids, 0, 2 ) );
+		$this->assertInstanceOf( ContractView::class, $contracts[0] );
+	}
+
+	/**
+	 * @testdox list passes status / sort / search / paging args through to the query.
+	 */
+	public function test_list_passes_query_args_through(): void {
+		$active_low  = $this->seed_list_contract( ContractStatus::ACTIVE, '10.00' );
+		$active_high = $this->seed_list_contract( ContractStatus::ACTIVE, '20.00' );
+		$this->seed_list_contract( ContractStatus::CANCELLED, '30.00' );
+
+		// Status filter + sort compose through the facade.
+		$ids = array_map(
+			static fn ( ContractView $c ) => (int) $c->get_id(),
+			Contracts::list(
+				array(
+					'status'  => ContractStatus::ACTIVE,
+					'orderby' => 'total',
+					'order'   => 'ASC',
+				)
+			)
+		);
+		$this->assertSame( array( $active_low, $active_high ), $ids );
+
+		// Paging windows the same filtered set.
+		$page = Contracts::list(
+			array(
+				'status' => ContractStatus::ACTIVE,
+				'limit'  => 1,
+				'offset' => 1,
+			)
+		);
+		$this->assertCount( 1, $page );
+	}
+
+	/**
+	 * @testdox count_by_status returns a full status map and count honours the same filter.
+	 */
+	public function test_count_by_status_and_count(): void {
+		$this->seed_list_contract( ContractStatus::ACTIVE );
+		$this->seed_list_contract( ContractStatus::ACTIVE );
+		$this->seed_list_contract( ContractStatus::ON_HOLD );
+
+		$by_status = Contracts::count_by_status();
+		$this->assertSame( ContractStatus::get_all(), array_keys( $by_status ) );
+		$this->assertSame( 2, $by_status[ ContractStatus::ACTIVE ] );
+		$this->assertSame( 1, $by_status[ ContractStatus::ON_HOLD ] );
+		$this->assertSame( 0, $by_status[ ContractStatus::CANCELLED ] );
+
+		// The grand total and a status-filtered total agree with the map.
+		$this->assertSame( 3, Contracts::count() );
+		$this->assertSame( 2, Contracts::count( array( 'status' => ContractStatus::ACTIVE ) ) );
+	}
+
+	/**
+	 * @testdox get_cycles returns the billing cycles newest first.
+	 */
+	public function test_get_cycles_returns_cycles(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$history = Contracts::get_cycles( $contract_id );
+		$this->assertCount( 1, $history );
+		$this->assertInstanceOf( CycleView::class, $history[0] );
+		$this->assertSame( 1, $history[0]->get_count() );
+		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
+	}
+
+	/**
+	 * @testdox list_for_customer returns only the requested customer's contracts.
+	 */
+	public function test_list_for_customer_is_owner_scoped(): void {
+		$mine_a = $this->seed_for_customer( 41 );
+		$mine_b = $this->seed_for_customer( 41 );
+		$theirs = $this->seed_for_customer( 42 );
+
+		$ids = array_map(
+			static fn ( ContractView $c ) => (int) $c->get_id(),
+			Contracts::list_for_customer( 41 )
+		);
+
+		$this->assertContains( $mine_a, $ids );
+		$this->assertContains( $mine_b, $ids );
+		$this->assertNotContains( $theirs, $ids );
+		$this->assertCount( 2, $ids );
+	}
+
+	/**
+	 * @testdox list_for_customer filters by status before paging.
+	 */
+	public function test_list_for_customer_filters_by_status_before_paging(): void {
+		$active_old = $this->seed_for_customer( 44 );
+		$this->seed_for_customer( 44, ContractStatus::DRAFT );
+		$on_hold = $this->seed_for_customer( 44, ContractStatus::ON_HOLD );
+		$this->seed_for_customer( 44, ContractStatus::DRAFT );
+
+		$ids  = static fn ( array $views ): array => array_map( static fn ( ContractView $c ): int => (int) $c->get_id(), $views );
+		$args = array( 'status' => array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD ) );
+
+		$this->assertSame( array( $on_hold ), $ids( Contracts::list_for_customer( 44, 1, 0, $args ) ) );
+		$this->assertSame( array( $active_old ), $ids( Contracts::list_for_customer( 44, 1, 1, $args ) ) );
+		$this->assertSame( array( $on_hold ), $ids( Contracts::list_for_customer( 44, 20, 0, array( 'status' => ContractStatus::ON_HOLD ) ) ), 'A single status is accepted.' );
+		$this->assertCount( 4, Contracts::list_for_customer( 44, 20, 0, array( 'status' => array( 'nonsense' ) ) ), 'An unregistered status is dropped, leaving no filter.' );
+	}
+
+	/**
+	 * @testdox get_for_customer returns the contract when the customer owns it.
+	 */
+	public function test_get_for_customer_returns_the_owned_contract(): void {
+		$id = $this->seed_for_customer( 43 );
+
+		$contract = Contracts::get_for_customer( $id, 43 );
+
+		$this->assertInstanceOf( ContractView::class, $contract );
+		$this->assertSame( $id, $contract->get_id() );
+	}
+
+	/**
+	 * @testdox get_for_customer is null for both a foreign owner and an unknown id (asymmetric).
+	 */
+	public function test_get_for_customer_is_null_for_foreign_and_unknown(): void {
+		$id = $this->seed_for_customer( 44 );
+
+		$this->assertNull( Contracts::get_for_customer( $id, 45 ), 'foreign-owned reads as not found' );
+		$this->assertNull( Contracts::get_for_customer( 987654, 44 ), 'unknown id reads as not found' );
 	}
 }

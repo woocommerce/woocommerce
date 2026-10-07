@@ -45,6 +45,7 @@ use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
@@ -292,7 +293,7 @@ final class ContractsController extends WP_REST_Controller {
 		// Guard ownership before acting: the facade's ownership-checked read returns
 		// null for an unknown id and a foreign-owned contract alike, so both map to
 		// the same 404 (anti-IDOR).
-		if ( null === Subscriptions::get_for_customer( $contract_id, $customer_id ) ) {
+		if ( null === Contracts::get_for_customer( $contract_id, $customer_id ) ) {
 			return $this->not_found_error();
 		}
 
@@ -314,7 +315,7 @@ final class ContractsController extends WP_REST_Controller {
 
 		// Re-read for the resulting status. The action already succeeded, so a row
 		// vanishing here is a server-side inconsistency - a 500, not a not-found.
-		$refreshed = Subscriptions::get_for_customer( $contract_id, $customer_id );
+		$refreshed = Contracts::get_for_customer( $contract_id, $customer_id );
 		if ( null === $refreshed ) {
 			return new WP_Error(
 				'woocommerce_subscriptions_engine_refresh_failed',

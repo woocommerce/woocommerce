@@ -1,10 +1,11 @@
 <?php
 /**
- * Contracts - the engine's public contract write facade.
+ * Contracts - the engine's public contract facade (reads and writes).
  *
  * Extensions create and progressively build contracts from explicit argument arrays:
  * the engine records the facts it is given and decides nothing about them. Any caller
- * may write any contract (authorization is the caller's concern). The engine opens no
+ * may read or write any contract (authorization is the caller's concern). Reads return
+ * read-only views ({@see ContractView}, {@see CycleView}). The engine opens no
  * transaction and keeps no cache, so a caller may wrap several calls in its own
  * transaction. No hooks fire.
  *
@@ -29,7 +30,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValid
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Public contract write facade.
+ * Public contract facade: reads and writes.
  *
  * Final and static-only: a stateless entry point, not an extension seam.
  */
@@ -275,6 +276,153 @@ final class Contracts {
 		return ( new ContractRepository() )->get_meta( $contract_id, $key, $single );
 	}
 
+	/**
+	 * Fetch a contract by id, with its items and addresses.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return ContractView|null The contract, or null when none exists.
+	 */
+	public static function get( int $contract_id ): ?ContractView {
+		return self::view( ( new ContractRepository() )->find( $contract_id ), true );
+	}
+
+	/**
+	 * The contracts created from an origin order, oldest first (children not loaded).
+	 *
+	 * @param int $order_id Origin order id.
+	 * @return array<int, ContractView>
+	 */
+	public static function find_by_origin_order( int $order_id ): array {
+		return self::views( ( new ContractRepository() )->find_by_origin_order( $order_id ) );
+	}
+
+	/**
+	 * List contracts for an admin list screen - newest first by default, or
+	 * filtered / sorted / paged / searched via a WooCommerce-style args array (cf.
+	 * `wc_get_orders()`). The status + search filter matches {@see self::count()}, so a page
+	 * and its total describe the same set.
+	 *
+	 * @param array<string, mixed> $args {
+	 *     Optional. Query args.
+	 *
+	 *     @type int    $limit   Maximum contracts to return. Default 20.
+	 *     @type int    $offset  Contracts to skip (for paging). Default 0.
+	 *     @type string $status  Filter to one status ({@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}); ignored when empty or invalid.
+	 *     @type string $orderby One of id, next_payment, total, start; default id.
+	 *     @type string $order   ASC or DESC (case-insensitive); default DESC.
+	 *     @type string $search  Numeric term matches contract id or origin order id; text term matches the owning customer.
+	 * }
+	 * @return array<int, ContractView> Contracts in the requested order (children not loaded).
+	 */
+	public static function list( array $args = array() ): array {
+		return self::views( ( new ContractRepository() )->query( $args ) );
+	}
+
+	/**
+	 * The contract count per status - the read behind an admin list's status views bar.
+	 * Keyed by every {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus} value (absent statuses are 0); the `All` total
+	 * is the caller's `array_sum()`. Independent of any search or paging.
+	 *
+	 * @return array<string, int> Status => count, every known status present.
+	 */
+	public static function count_by_status(): array {
+		return ( new ContractRepository() )->count_by_status();
+	}
+
+	/**
+	 * The number of contracts matching a list filter - the total behind a list view's
+	 * pagination. Honours the SAME status + search args as {@see self::list()} and ignores
+	 * paging / sort.
+	 *
+	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
+	 * @return int The matching contract count.
+	 */
+	public static function count( array $args = array() ): int {
+		return ( new ContractRepository() )->count( $args );
+	}
+
+	/**
+	 * The line-item count for a page of contracts - the read behind an admin list's
+	 * "Items" column. One grouped scan over the given ids, returned as a map keyed by
+	 * every requested id (ids with no items are 0), so a list renders an items count
+	 * per row without a per-row query. Ids are de-duplicated and int-cast.
+	 *
+	 * @param array<int, int> $contract_ids Contract ids to count items for.
+	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 */
+	public static function item_counts( array $contract_ids ): array {
+		return ( new ContractRepository() )->count_items_by_contract( $contract_ids );
+	}
+
+	/**
+	 * List a single customer's contracts, newest first - the customer
+	 * portal's owner-scoped list read.
+	 *
+	 * Owner-scoped by construction: the customer id is supplied by the caller (the
+	 * authenticated user at the REST boundary), never inferred, so it never returns
+	 * another customer's contracts. Each view carries its plan snapshot payload (children
+	 * not loaded), so a list row's cadence is read off the snapshot.
+	 *
+	 * The status filter applies before paging, so a page holds `$limit` matching contracts.
+	 *
+	 * @param int                  $customer_id Owning customer id.
+	 * @param int                  $limit       Maximum contracts to return.
+	 * @param int                  $offset      Contracts to skip (for paging).
+	 * @param array<string, mixed> $args {
+	 *     Optional. Query args.
+	 *
+	 *     @type string|string[] $status One status or a list of them ({@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus});
+	 *                                   unregistered values are dropped, and the filter is ignored when none remain.
+	 * }
+	 * @return array<int, ContractView> The customer's contracts, newest first.
+	 */
+	public static function list_for_customer( int $customer_id, int $limit = 20, int $offset = 0, array $args = array() ): array {
+		return self::views(
+			( new ContractRepository() )->find_by_customer_id(
+				$customer_id,
+				array(
+					'limit'  => $limit,
+					'offset' => $offset,
+					'status' => $args['status'] ?? array(),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Fetch a contract a customer owns - the customer portal's ownership-checked read.
+	 *
+	 * Returns null for BOTH an unknown id AND a contract owned by another customer (the
+	 * asymmetric not-found rule), so a caller cannot probe for the existence of a
+	 * contract it does not own.
+	 *
+	 * The returned view carries its items, addresses, and plan snapshot payload.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $customer_id Customer that must own the contract.
+	 * @return ContractView|null The contract when owned by `$customer_id`, else null.
+	 * @phpstan-impure
+	 */
+	public static function get_for_customer( int $contract_id, int $customer_id ): ?ContractView {
+		return self::view( ( new ContractRepository() )->find_for_customer( $contract_id, $customer_id ), true );
+	}
+
+	/**
+	 * Fetch a window of the contract's billing cycles, newest first.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $limit       Maximum cycles to return.
+	 * @return array<int, CycleView> Cycles newest first.
+	 */
+	public static function get_cycles( int $contract_id, int $limit = 20 ): array {
+		return array_map(
+			static function ( Cycle $cycle ): CycleView {
+				return CycleView::from_cycle( $cycle );
+			},
+			( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit )
+		);
+	}
+
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
 	/**
 	 * Validate the caller's field shapes and apply them to a contract through its setters,
@@ -364,4 +512,29 @@ final class Contracts {
 		$contract->assert_money_has_currency();
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * A view of `$contract`, or null.
+	 *
+	 * @param Contract|null $contract      Contract, or null.
+	 * @param bool          $with_children Whether the read loaded items and addresses.
+	 */
+	private static function view( ?Contract $contract, bool $with_children ): ?ContractView {
+		return null === $contract ? null : ContractView::from_contract( $contract, $with_children );
+	}
+
+	/**
+	 * Views of row-only contracts (children not loaded).
+	 *
+	 * @param array<int, Contract> $contracts Contracts.
+	 * @return array<int, ContractView>
+	 */
+	private static function views( array $contracts ): array {
+		return array_map(
+			static function ( Contract $contract ): ContractView {
+				return ContractView::from_contract( $contract, false );
+			},
+			$contracts
+		);
+	}
 }
