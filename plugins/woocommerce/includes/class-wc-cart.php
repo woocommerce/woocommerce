@@ -1890,8 +1890,8 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			// A field filter that recalculates the totals checks shipping again. That nested call reads the fields too, so it gives the same answer;
-			// a call nested inside it uses the country locale check below instead, which guards its own re-entry, so the reads stop there.
+			// Calling calculate_totals() from an address field filter, such as woocommerce_default_address_fields, triggers show_shipping() again.
+			// Allow one nested field read for compatibility, then use the locale-based check below to prevent unbounded recursion.
 			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {

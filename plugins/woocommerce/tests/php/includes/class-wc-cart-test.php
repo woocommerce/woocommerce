@@ -1024,21 +1024,32 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A show_shipping() call nested once inside the shipping address field read reads the fields too, so it answers like the outer call.
+	 * @testdox show_shipping() reads filtered fields for one nested call, then uses the country locale to stop further nesting.
 	 */
-	public function test_show_shipping_nested_once_answers_like_the_outer_call(): void {
-		$answers = $this->record_nested_show_shipping_answers_with_an_optional_postcode();
+	public function test_show_shipping_limits_nested_field_reads_before_checking_the_country_locale(): void {
+		$this->add_product_for_an_address_without_postcode();
+		$answers = array();
+		$level   = 1;
+		$calls   = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$answers, &$level, &$calls ) {
+				$fields['shipping_postcode']['required'] = false;
+				// Stop a runaway recursion so a regression fails an assertion instead of exhausting the process.
+				if ( ++$calls <= 30 ) {
+					$nested_level = ++$level;
+					$answer       = WC()->cart->show_shipping();
+					--$level;
+					$answers[ $nested_level ][] = $answer;
+				}
+				return $fields;
+			}
+		);
+
+		$answers[1] = WC()->cart->show_shipping();
 
 		$this->assertTrue( $answers[1], 'The outer call should apply the shipping fields filter that makes the postcode optional.' );
 		$this->assertSame( array( true ), array_unique( $answers[2] ), 'A call nested once should read the same fields and answer like the outer call.' );
-	}
-
-	/**
-	 * @testdox A show_shipping() call nested twice inside the shipping address field read checks the address against the country locale.
-	 */
-	public function test_show_shipping_nested_twice_checks_the_address_against_the_country_locale(): void {
-		$answers = $this->record_nested_show_shipping_answers_with_an_optional_postcode();
-
 		$this->assertSame( array( false ), array_unique( $answers[3] ), 'A call nested twice should require the postcode, as the US locale does.' );
 		$this->assertArrayNotHasKey( 4, $answers, 'The nesting should stop at the call that checks the country locale.' );
 	}
@@ -1222,36 +1233,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	private function add_product_for_an_address_without_postcode(): void {
 		$this->add_product_for_a_us_address_missing( 'postcode' );
 		$this->clear_checkout_fields();
-	}
-
-	/**
-	 * Record what show_shipping() answers at each nesting level, keyed by level (1 = the outer call), when a shipping fields filter makes the postcode optional and calls show_shipping() again.
-	 *
-	 * @return array<int, mixed> The outer answer at key 1, and a list of nested answers at each deeper key.
-	 */
-	private function record_nested_show_shipping_answers_with_an_optional_postcode(): array {
-		$this->add_product_for_an_address_without_postcode();
-		$answers = array();
-		$level   = 1;
-		$calls   = 0;
-		add_filter(
-			'woocommerce_shipping_fields',
-			function ( $fields ) use ( &$answers, &$level, &$calls ) {
-				$fields['shipping_postcode']['required'] = false;
-				// Stop a runaway recursion so a regression fails an assertion instead of exhausting the process.
-				if ( ++$calls <= 30 ) {
-					$nested_level = ++$level;
-					$answer       = WC()->cart->show_shipping();
-					--$level;
-					$answers[ $nested_level ][] = $answer;
-				}
-				return $fields;
-			}
-		);
-
-		$answers[1] = WC()->cart->show_shipping();
-
-		return $answers;
 	}
 
 	/**
