@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the experimental ability contracts feature. With it on, extensions register fields with wc_register_ability_field() and the product and order abilities return their values under extensions.

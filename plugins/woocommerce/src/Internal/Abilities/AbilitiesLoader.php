@@ -15,6 +15,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,6 +45,38 @@ class AbilitiesLoader {
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+	);
+
+	/**
+	 * The object type and output key of each core ability that returns extension fields.
+	 *
+	 * @var array<class-string, array{object_type: string, output: string}>
+	 */
+	private const EXTENSION_FIELDS = array(
+		OrdersQuery::class       => array(
+			'object_type' => 'order',
+			'output'      => 'orders',
+		),
+		OrderAddNote::class      => array(
+			'object_type' => 'order',
+			'output'      => 'order',
+		),
+		OrderUpdateStatus::class => array(
+			'object_type' => 'order',
+			'output'      => 'order',
+		),
+		ProductsQuery::class     => array(
+			'object_type' => 'product',
+			'output'      => 'products',
+		),
+		ProductCreate::class     => array(
+			'object_type' => 'product',
+			'output'      => 'product',
+		),
+		ProductUpdate::class     => array(
+			'object_type' => 'product',
+			'output'      => 'product',
+		),
 	);
 
 	/**
@@ -80,8 +114,32 @@ class AbilitiesLoader {
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 
 		AbilitiesRestBridge::init();
+		AbilityFields::init();
+		add_filter( 'woocommerce_ability_object', array( __CLASS__, 'load_object' ), 10, 3 );
 
 		self::$initialized = true;
+	}
+
+	/**
+	 * Load the product or order an ability output names, so its extension fields can be read.
+	 *
+	 * @internal
+	 *
+	 * @param mixed  $subject     Object another filter loaded.
+	 * @param string $object_type Object type.
+	 * @param mixed  $id          Object ID.
+	 * @return mixed
+	 */
+	public static function load_object( $subject, $object_type, $id ) {
+		if ( null !== $subject ) {
+			return $subject;
+		}
+		if ( 'product' === $object_type ) {
+			$subject = wc_get_product( $id );
+		} elseif ( 'order' === $object_type ) {
+			$subject = wc_get_order( $id );
+		}
+		return $subject ? $subject : null;
 	}
 
 	/**
@@ -136,7 +194,12 @@ class AbilitiesLoader {
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
 
-			$registered_ability = wp_register_ability( $ability_name, $class_name::get_registration_args() );
+			$args = $class_name::get_registration_args();
+			if ( isset( self::EXTENSION_FIELDS[ $class_name ] ) && AbilityContracts::is_enabled() ) {
+				$args['meta'][ AbilityFields::META ]['extension_fields'] = self::EXTENSION_FIELDS[ $class_name ];
+			}
+
+			$registered_ability = wp_register_ability( $ability_name, $args );
 
 			if ( $is_core_ability && null !== $registered_ability ) {
 				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
