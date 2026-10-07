@@ -41,53 +41,60 @@ defined( 'ABSPATH' ) || exit;
 final class Contracts {
 
 	/**
-	 * Keys accepted by {@see self::create()} (plus `extension_slug`) and {@see self::update()}.
+	 * Keys accepted by {@see self::update()}, as a key map.
 	 *
-	 * @var array<int, string>
+	 * @var array<string, true>
 	 */
 	private const CONTRACT_KEYS = array(
-		'customer_id',
-		'currency',
-		'selling_plan_id',
-		'origin_order_id',
-		'status',
-		'payment_method',
-		'payment_method_title',
-		'payment_token_id',
-		'start_gmt',
-		'next_payment_gmt',
-		'last_payment_gmt',
-		'last_attempt_gmt',
-		'trial_end_gmt',
-		'end_gmt',
-		'schedule_source',
-		'billing_total',
-		'discount_total',
-		'shipping_total',
-		'tax_total',
-		'items',
-		'addresses',
-		'plan_snapshot',
-		'items_snapshot',
+		'customer_id'          => true,
+		'currency'             => true,
+		'selling_plan_id'      => true,
+		'origin_order_id'      => true,
+		'status'               => true,
+		'payment_method'       => true,
+		'payment_method_title' => true,
+		'payment_token_id'     => true,
+		'start_gmt'            => true,
+		'next_payment_gmt'     => true,
+		'last_payment_gmt'     => true,
+		'last_attempt_gmt'     => true,
+		'trial_end_gmt'        => true,
+		'end_gmt'              => true,
+		'schedule_source'      => true,
+		'billing_total'        => true,
+		'discount_total'       => true,
+		'shipping_total'       => true,
+		'tax_total'            => true,
+		'items'                => true,
+		'addresses'            => true,
+		'plan_snapshot'        => true,
+		'items_snapshot'       => true,
 	);
 
 	/**
-	 * Keys accepted by {@see self::add_cycle()}.
+	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`.
 	 *
-	 * @var array<int, string>
+	 * @var array<string, true>
+	 */
+	private const CREATE_KEYS = array( 'extension_slug' => true ) + self::CONTRACT_KEYS;
+
+	/**
+	 * Keys accepted by {@see self::add_cycle()}, as a key map.
+	 *
+	 * @var array<string, true>
 	 */
 	private const CYCLE_KEYS = array(
-		'status',
-		'kind',
-		'sequence_no',
-		'count',
-		'starts_at_gmt',
-		'ends_at_gmt',
-		'expected_total',
-		'currency',
-		'order_id',
-		'plan_snapshot',
-		'items_snapshot',
+		'status'         => true,
+		'kind'           => true,
+		'sequence_no'    => true,
+		'count'          => true,
+		'starts_at_gmt'  => true,
+		'ends_at_gmt'    => true,
+		'expected_total' => true,
+		'currency'       => true,
+		'order_id'       => true,
+		'plan_snapshot'  => true,
+		'items_snapshot' => true,
 	);
 
 	/**
@@ -104,16 +111,17 @@ final class Contracts {
 	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
 	 * strings, and a non-null money value requires a currency. `items` is a list of item
 	 * rows; `addresses` is keyed `billing` / `shipping`; `plan_snapshot` / `items_snapshot`
-	 * are payload arrays recorded as the contract's current snapshots.
+	 * are payload arrays recorded as the contract's current snapshots. Unknown keys, also
+	 * inside item rows and addresses, raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
 	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
 	 * @return int The new contract id.
-	 * @throws InvalidArgumentException If a key is unknown or a value is invalid.
+	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
 	 */
 	public static function create( array $args ): int {
-		self::assert_known_keys( $args, array_merge( array( 'extension_slug' ), self::CONTRACT_KEYS ) );
+		$args = self::known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
 		$extension_slug = $args['extension_slug'] ?? null;
 		if ( ! is_string( $extension_slug ) || '' === $extension_slug ) {
@@ -122,7 +130,7 @@ final class Contracts {
 		unset( $args['extension_slug'] );
 
 		$contract  = Contract::create( array( 'extension_slug' => $extension_slug ) );
-		$snapshots = self::apply( $contract, $args );
+		$snapshots = self::apply( __METHOD__, $contract, $args );
 
 		$repository = new ContractRepository();
 		$id         = $repository->insert( $contract );
@@ -137,15 +145,16 @@ final class Contracts {
 	 * Takes the keys of {@see self::create()} except `extension_slug`. Only the columns of
 	 * the present keys are written, so fields a concurrent writer changed in between keep
 	 * its values; `items` and `addresses` replace the whole set; `null` clears a
-	 * nullable field (and resets a money field to 0).
+	 * nullable field (and resets a money field to 0). Unknown keys (`extension_slug`
+	 * included) raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $id   Contract id.
 	 * @param array<string, mixed> $args Fields to write.
 	 * @return bool True when written; false when the contract does not exist.
-	 * @throws InvalidArgumentException If a key is unknown or a value is invalid.
+	 * @throws InvalidArgumentException If a value is invalid.
 	 */
 	public static function update( int $id, array $args ): bool {
-		self::assert_known_keys( $args, self::CONTRACT_KEYS );
+		$args = self::known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$repository = new ContractRepository();
 		$contract   = $repository->find( $id );
@@ -153,7 +162,7 @@ final class Contracts {
 			return false;
 		}
 
-		$snapshots = self::apply( $contract, $args );
+		$snapshots = self::apply( __METHOD__, $contract, $args );
 		$fields    = array_values( array_diff( array_keys( $args ), array( 'plan_snapshot', 'items_snapshot' ) ) );
 
 		if ( array() !== $fields ) {
@@ -174,16 +183,17 @@ final class Contracts {
 	 * a non-counting cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
 	 * `order_id` is optional. Without `plan_snapshot` / `items_snapshot` payloads the
 	 * cycle references the contract's current snapshots; payloads attach to the new cycle
-	 * only. The extension slug is copied from the contract.
+	 * only. The extension slug is copied from the contract. Unknown keys raise a
+	 * `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
 	 * @return int The new cycle id.
-	 * @throws InvalidArgumentException If the contract is unknown, a key is unknown, or a value is invalid.
+	 * @throws InvalidArgumentException If the contract is unknown, a required key is missing, or a value is invalid.
 	 * @throws DomainException If the chain position is already taken.
 	 */
 	public static function add_cycle( int $contract_id, array $args ): int {
-		self::assert_known_keys( $args, self::CYCLE_KEYS );
+		$args = self::known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$repository = new ContractRepository();
 		$contract   = $repository->find_summary( $contract_id );
@@ -346,12 +356,13 @@ final class Contracts {
 	 * Validate the caller's fields and apply them to a contract through its setters.
 	 * Nothing is written to storage; an invalid value throws before any write.
 	 *
+	 * @param string               $method   Public facade method, for usage notices.
 	 * @param Contract             $contract Contract to change.
 	 * @param array<string, mixed> $args     Caller fields (known keys only, no `extension_slug`).
 	 * @return array{plan: array<string, mixed>|null, items: array<int, array<string, mixed>>|null} Snapshot payloads to store.
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
-	private static function apply( Contract $contract, array $args ): array {
+	private static function apply( string $method, Contract $contract, array $args ): array {
 		$snapshots  = array(
 			'plan'  => null,
 			'items' => null,
@@ -427,10 +438,10 @@ final class Contracts {
 					$contract->set_tax_total( self::money( $key, $value ) );
 					break;
 				case 'items':
-					$contract->set_items( self::items( $value ) );
+					$contract->set_items( self::items( $method, $value ) );
 					break;
 				case 'addresses':
-					$contract->set_addresses( self::addresses( $value ) );
+					$contract->set_addresses( self::addresses( $method, $value ) );
 					break;
 				case 'plan_snapshot':
 					if ( ! is_array( $value ) ) {
@@ -464,18 +475,24 @@ final class Contracts {
 	}
 
 	/**
-	 * Refuse any key outside `$allowed`.
+	 * Drop the keys outside `$allowed`, with a `_doing_it_wrong()` notice for each.
 	 *
-	 * @param array<string, mixed> $args    Caller arguments.
-	 * @param array<int, string>   $allowed Accepted keys.
-	 * @throws InvalidArgumentException If a key is unknown.
+	 * @param string                   $method  Public facade method, for the notice.
+	 * @param array<int|string, mixed> $args    Caller arguments.
+	 * @param array<string, true>      $allowed Accepted keys, as a key map.
+	 * @param string                   $what    What the keys belong to, for the notice.
+	 * @return array<string, mixed> The arguments with known keys only.
 	 */
-	private static function assert_known_keys( array $args, array $allowed ): void {
-		foreach ( array_keys( $args ) as $key ) {
-			if ( ! in_array( $key, $allowed, true ) ) {
-				throw new InvalidArgumentException( sprintf( 'Contracts: unknown key "%s".', esc_html( (string) $key ) ) );
-			}
+	private static function known_keys( string $method, array $args, array $allowed, string $what = 'key' ): array {
+		foreach ( array_keys( array_diff_key( $args, $allowed ) ) as $key ) {
+			_doing_it_wrong(
+				esc_html( $method ),
+				sprintf( 'Contracts: unknown %s "%s" ignored.', esc_html( $what ), esc_html( (string) $key ) ),
+				'0.0.1'
+			);
 		}
+
+		return self::string_keyed( array_intersect_key( $args, $allowed ) );
 	}
 
 	/**
@@ -616,20 +633,18 @@ final class Contracts {
 	}
 
 	/**
-	 * Validate an item row list.
+	 * Validate an item row list; unknown row keys are dropped with a notice.
 	 *
-	 * @param mixed $value Caller value.
+	 * @param string $method Public facade method, for usage notices.
+	 * @param mixed  $value  Caller value.
 	 * @return array<int, array<string, mixed>>
-	 * @throws InvalidArgumentException If the value is not a list of item rows with known keys.
+	 * @throws InvalidArgumentException If the value is not a list of item rows.
 	 */
-	private static function items( $value ): array {
-		$rows = self::item_rows( 'items', $value );
-
-		foreach ( $rows as $row ) {
-			$unknown = array_diff( array_keys( $row ), Contract::ITEM_FIELDS );
-			if ( array() !== $unknown ) {
-				throw new InvalidArgumentException( sprintf( 'Contracts: unknown item key "%s".', esc_html( (string) reset( $unknown ) ) ) );
-			}
+	private static function items( string $method, $value ): array {
+		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
+		$rows    = array();
+		foreach ( self::item_rows( 'items', $value ) as $row ) {
+			$rows[] = self::known_keys( $method, $row, $allowed, 'item key' );
 		}
 
 		return $rows;
@@ -660,13 +675,16 @@ final class Contracts {
 	}
 
 	/**
-	 * Validate an addresses map keyed `billing` / `shipping`.
+	 * Validate an addresses map keyed `billing` / `shipping`; unknown address keys are
+	 * dropped with a notice.
 	 *
-	 * @param mixed $value Caller value.
+	 * @param string $method Public facade method, for usage notices.
+	 * @param mixed  $value  Caller value.
 	 * @return array<string, array<string, mixed>>
-	 * @throws InvalidArgumentException If the map has unknown types or address keys.
+	 * @throws InvalidArgumentException If the map is not keyed `billing` / `shipping` with array values.
 	 */
-	private static function addresses( $value ): array {
+	private static function addresses( string $method, $value ): array {
+		$allowed = array_fill_keys( Contract::ADDRESS_FIELDS, true );
 		if ( ! is_array( $value ) ) {
 			throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping".' );
 		}
@@ -677,12 +695,7 @@ final class Contracts {
 				throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping" with array values.' );
 			}
 
-			$unknown = array_diff( array_keys( $address ), Contract::ADDRESS_FIELDS );
-			if ( array() !== $unknown ) {
-				throw new InvalidArgumentException( sprintf( 'Contracts: unknown address key "%s".', esc_html( (string) reset( $unknown ) ) ) );
-			}
-
-			$addresses[ $type ] = self::string_keyed( $address );
+			$addresses[ $type ] = self::known_keys( $method, $address, $allowed, 'address key' );
 		}
 
 		return $addresses;

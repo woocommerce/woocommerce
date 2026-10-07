@@ -210,16 +210,59 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( '2026-07-01 01:00:00', $view->get_next_payment_gmt() );
 	}
 
-	public function test_an_unknown_key_is_rejected(): void {
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'unknown key "custmer_id"' );
+	public function test_an_unknown_key_is_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$messages ): void {
+				$messages[] = $message;
+			},
+			10,
+			2
+		);
 
-		Contracts::create(
+		$id = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'custmer_id'     => 1,
+				'customer_id'    => 7,
 			)
 		);
+
+		$this->assertSame( array( 'Contracts: unknown key "custmer_id" ignored.' ), $messages );
+		$this->assertSame( 7, $this->view( $id )->get_customer_id(), 'The known key beside the unknown one is written.' );
+	}
+
+	public function test_unknown_item_and_address_keys_are_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+
+		$id = Contracts::create(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array(
+					array(
+						'item_name' => 'Coffee',
+						'price'     => '1',
+					),
+				),
+				'addresses'      => array(
+					'billing' => array(
+						'first_name' => 'Ada',
+						'zip'        => '1',
+					),
+				),
+			)
+		);
+
+		$contract = $this->entity( $id );
+		$items    = $contract->get_items();
+		$this->assertCount( 1, $items );
+		$this->assertSame( 'Coffee', $items[0]['item_name'] );
+		$this->assertArrayNotHasKey( 'price', $items[0] );
+		$billing = $contract->get_addresses()['billing'];
+		$this->assertSame( 'Ada', $billing['first_name'] );
+		$this->assertArrayNotHasKey( 'zip', $billing );
 	}
 
 	/**
@@ -283,9 +326,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'bad schedule source'    => array( array( 'schedule_source' => 'cron' ) ),
 			'non-string method'      => array( array( 'payment_method' => 5 ) ),
 			'items not a list'       => array( array( 'items' => array( 'a' => array() ) ) ),
-			'unknown item key'       => array( array( 'items' => array( array( 'price' => '1' ) ) ) ),
 			'unknown address type'   => array( array( 'addresses' => array( 'home' => array() ) ) ),
-			'unknown address key'    => array( array( 'addresses' => array( 'billing' => array( 'zip' => '1' ) ) ) ),
 			'plan snapshot scalar'   => array( array( 'plan_snapshot' => 'x' ) ),
 			'items snapshot scalar'  => array( array( 'items_snapshot' => array( 'x' ) ) ),
 		);
@@ -332,10 +373,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_invalid_update_fields(): array {
 		return array(
-			'unknown key'         => array( array( 'nonsense' => 1 ) ),
 			'unregistered status' => array( array( 'status' => 'nonsense' ) ),
 			'malformed date'      => array( array( 'end_gmt' => '2026-01-01' ) ),
-			'unknown item key'    => array( array( 'items' => array( array( 'price' => '1' ) ) ) ),
 		);
 	}
 
@@ -529,13 +568,47 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertFalse( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
 	}
 
+	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
+
+		$this->assertTrue(
+			Contracts::update(
+				$id,
+				array(
+					'nonsense'       => 1,
+					'payment_method' => 'dummy',
+					'items'          => array(
+						array(
+							'item_name' => 'Coffee',
+							'price'     => '1',
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertSame( 'dummy', $this->view( $id )->get_payment_method(), 'The known key beside the unknown one is written.' );
+		$items = $this->entity( $id )->get_items();
+		$this->assertSame( 'Coffee', $items[0]['item_name'] );
+		$this->assertArrayNotHasKey( 'price', $items[0] );
+	}
+
 	public function test_extension_slug_is_not_an_update_key(): void {
 		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
 
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'unknown key "extension_slug"' );
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => 'other',
+				'customer_id'    => 7,
+			)
+		);
 
-		Contracts::update( $id, array( 'extension_slug' => 'other' ) );
+		$view = $this->view( $id );
+		$this->assertSame( self::EXTENSION_SLUG, $view->get_extension_slug(), 'The extension slug is not rewritten.' );
+		$this->assertSame( 7, $view->get_customer_id() );
 	}
 
 	public function test_snapshot_payloads_are_stored_and_copy_forwarded(): void {
@@ -744,14 +817,6 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'starts_at_gmt' => '2026-01-01 00:00:00',
 				),
 			),
-			'unknown key'          => array(
-				array(
-					'status'        => CycleStatus::BILLED,
-					'starts_at_gmt' => '2026-01-01 00:00:00',
-					'ends_at_gmt'   => '2026-02-01 00:00:00',
-					'reason'        => 'x',
-				),
-			),
 			'zero sequence number' => array(
 				array(
 					'status'        => CycleStatus::BILLED,
@@ -761,6 +826,23 @@ class ContractsTest extends EngineIntegrationTestCase {
 				),
 			),
 		);
+	}
+
+	public function test_an_unknown_cycle_key_is_ignored_with_a_notice(): void {
+		$id = $this->contract_with_snapshots();
+		$this->setExpectedIncorrectUsage( Contracts::class . '::add_cycle' );
+
+		$cycle_id = Contracts::add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'reason'   => 'x',
+					'order_id' => 77,
+				)
+			)
+		);
+
+		$this->assertSame( 77, $this->cycle( $id, $cycle_id )->get_order_id(), 'The known key beside the unknown one is written.' );
 	}
 
 	public function test_a_cycle_needs_a_currency(): void {
