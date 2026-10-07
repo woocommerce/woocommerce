@@ -276,6 +276,11 @@ class SettingsController {
 	 */
 	public static function process_product_object( $product ) {
 
+		// Without the nonce field the checkbox was not rendered, so there is nothing to save.
+		if ( ! isset( $_POST['customer_stock_notifications_edit_product_security'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Only checks presence; the nonce is verified before saving.
+			return;
+		}
+
 		if ( ! Config::allows_signups() ) {
 			return;
 		}

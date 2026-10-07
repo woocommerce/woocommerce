@@ -173,9 +173,11 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	 */
 	public function provider_product_signups_checkbox(): array {
 		return array(
-			'no meta, checkbox unticked' => array( '', false, 'no' ),
-			'no meta, checkbox ticked'   => array( '', true, '' ),
-			'disabled, checkbox ticked'  => array( 'no', true, 'yes' ),
+			'no meta, checkbox unticked'  => array( '', false, 'no' ),
+			'no meta, checkbox ticked'    => array( '', true, '' ),
+			'disabled, checkbox ticked'   => array( 'no', true, 'yes' ),
+			'enabled, checkbox unticked'  => array( 'yes', false, 'no' ),
+			'disabled, checkbox unticked' => array( 'no', false, 'no' ),
 		);
 	}
 
@@ -207,6 +209,21 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		SettingsController::process_product_object( $product );
 
 		$this->assertSame( $expected_value, $product->get_meta( $meta_key ) );
+	}
+
+	/**
+	 * @testdox Saving a product from a form without the stock notifications nonce field leaves the setting unchanged.
+	 */
+	public function test_process_product_object_skips_save_when_nonce_field_is_absent(): void {
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
+		$meta_key = Config::get_product_signups_meta_key();
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( $meta_key, 'yes' );
+		$product->save();
+
+		SettingsController::process_product_object( $product );
+
+		$this->assertSame( 'yes', $product->get_meta( $meta_key ) );
 	}
 
 	/**
