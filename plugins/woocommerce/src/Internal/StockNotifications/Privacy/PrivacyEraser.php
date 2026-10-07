@@ -64,6 +64,21 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			)
 		);
 
+		// Sign-ups made before an account email change keep the old email, so also match by user ID.
+		$user = get_user_by( 'email', $email_address );
+		if ( $user instanceof \WP_User ) {
+			$notifications = array_unique(
+				array_merge(
+					$notifications,
+					NotificationQuery::get_notifications(
+						array(
+							'user_id' => $user->ID,
+						)
+					)
+				)
+			);
+		}
+
 		foreach ( $notifications as $notification_id ) {
 			$notification = Factory::get_notification( $notification_id );
 			if ( ! $notification instanceof Notification ) {
