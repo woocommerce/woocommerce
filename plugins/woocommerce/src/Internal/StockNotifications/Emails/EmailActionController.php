@@ -189,7 +189,7 @@ class EmailActionController {
 	}
 
 	/**
-	 * If the unsubscribe key matches, it updates the notification status to cancelled.
+	 * If the unsubscribe key matches, it cancels the notification, unless it was already sent or cancelled.
 	 *
 	 * @param Notification $notification The Notification to process.
 	 * @param string       $action_key The action key to verify.
@@ -197,21 +197,29 @@ class EmailActionController {
 	 */
 	private function process_unsubscribe_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_unsubscribe_key( $action_key ) ) {
-			$notification->set_status( NotificationStatus::CANCELLED );
-			$notification->set_cancellation_source( NotificationCancellationSource::USER );
-			$notification->set_date_cancelled( time() );
-			$notification->save();
-
 			// We need a cookie-based session for notices to work on frontend pages.
 			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
 				WC()->session->set_customer_session_cookie( true );
 			}
 
-			$product = wc_get_product( $notification->get_product_id() );
+			$status = $notification->get_status();
 
-			/* translators: %2$s product name, %1$s user email */
-			$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
-			wc_add_notice( $notice_text );
+			if ( NotificationStatus::SENT === $status ) {
+				wc_add_notice( esc_html__( 'This notification has already been sent, so there is nothing to unsubscribe from.', 'woocommerce' ), 'notice' );
+			} elseif ( NotificationStatus::ACTIVE !== $status && NotificationStatus::PENDING !== $status ) {
+				wc_add_notice( esc_html__( 'You are already unsubscribed from this notification.', 'woocommerce' ), 'notice' );
+			} else {
+				$notification->set_status( NotificationStatus::CANCELLED );
+				$notification->set_cancellation_source( NotificationCancellationSource::USER );
+				$notification->set_date_cancelled( time() );
+				$notification->save();
+
+				$product = wc_get_product( $notification->get_product_id() );
+
+				/* translators: %2$s product name, %1$s user email */
+				$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
+				wc_add_notice( $notice_text );
+			}
 			/**
 			 * `woocommerce_customer_stock_notification_unsubscribe_redirect_url` filter.
 			 *
