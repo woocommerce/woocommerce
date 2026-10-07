@@ -24,9 +24,6 @@ Install and activate WooCommerce before activating the theme.
 
 = 1.0.2 =
 * Load fall back styles only in relevant WC versions (#460)
-* Backfill Purple 0.0.2 and 1.0.1 changelogs (#466)
-* Add manual Purple release preparation workflow (#462)
-* Release Purple when preparation PRs merge (#464)
 * Update several instances of the Search block with Product Search (#468)
 * Purple: give palette colors semantic names (#469)
 * Make Purple WooCommerce notices permanently dismissible (#471)
