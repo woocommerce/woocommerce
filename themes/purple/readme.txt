@@ -3,7 +3,7 @@ Contributors: Automattic
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,16 @@ Purple requires:
 Install and activate WooCommerce before activating the theme.
 
 == Changelog ==
+
+= 1.0.2 =
+* Load fall back styles only in relevant WC versions (#460)
+* Backfill Purple 0.0.2 and 1.0.1 changelogs (#466)
+* Add manual Purple release preparation workflow (#462)
+* Release Purple when preparation PRs merge (#464)
+* Update several instances of the Search block with Product Search (#468)
+* Purple: give palette colors semantic names (#469)
+* Make Purple WooCommerce notices permanently dismissible (#471)
+* Update decrease header whitespace in several screens (#470)
 
 = 1.0.1 =
 * Remove the unregistered is-style-default class from Purple (#457)
