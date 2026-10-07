@@ -81,7 +81,10 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	/**
 	 * Extract the recognized context fields from a request.
 	 *
-	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
 	 * @return array
 	 */
 	protected function get_context( \WP_REST_Request $request ): array {
