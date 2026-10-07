@@ -336,7 +336,7 @@ CSS;
 			'wp-block-woocommerce-product-filter-status',
 		);
 
-		$processor = new \\WP_HTML_Tag_Processor( $inner_blocks );
+		$processor = new \WP_HTML_Tag_Processor( $inner_blocks );
 
 		while ( $processor->next_tag() ) {
 			foreach ( $filter_block_classes as $filter_block_class ) {
