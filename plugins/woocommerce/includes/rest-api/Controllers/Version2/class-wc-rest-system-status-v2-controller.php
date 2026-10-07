@@ -942,12 +942,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		// WP memory limit.
 		$wp_memory_limit = wp_convert_hr_to_bytes( WP_MEMORY_LIMIT );
 		if ( function_exists( 'memory_get_usage' ) ) {
-			$php_memory_limit = @wc_get_container()->get( LegacyProxy::class )->call_function( 'ini_get', 'memory_limit' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$php_memory_limit = wp_convert_hr_to_bytes( @wc_get_container()->get( LegacyProxy::class )->call_function( 'ini_get', 'memory_limit' ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			// Use 32G for no limit (-1) so numeric comparisons keep working.
-			if ( '-1' === $php_memory_limit ) {
-				$php_memory_limit = '32G';
+			if ( -1 === $php_memory_limit ) {
+				$php_memory_limit = 32 * GB_IN_BYTES;
 			}
-			$wp_memory_limit = max( $wp_memory_limit, wp_convert_hr_to_bytes( $php_memory_limit ) );
+			$wp_memory_limit = max( $wp_memory_limit, $php_memory_limit );
 		}
 
 		// Test POST requests.
