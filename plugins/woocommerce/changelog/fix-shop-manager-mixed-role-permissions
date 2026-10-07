@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent shop managers from editing users who have additional roles that cannot be edited by shop managers.

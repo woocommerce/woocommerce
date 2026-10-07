@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove non-allowlisted query parameters and fragments from analytics document location and referrer properties.

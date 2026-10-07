@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Require network super admin rights to import Blueprints on multisite.
