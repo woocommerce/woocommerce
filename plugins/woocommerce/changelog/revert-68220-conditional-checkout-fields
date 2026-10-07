@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert recent changes to how conditional checkout field rules handle missing values.
