@@ -1614,7 +1614,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  *
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @param  array      $args Optional quantity, price, order, and tax location arguments.
  * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
@@ -1646,11 +1646,11 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		} elseif ( $customer_id ) {
+		} elseif ( $customer_id && empty( $args['tax_location']['country'] ) ) {
 			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
 		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
-			$tax_location = $order->get_taxable_location();
+			$tax_location = $order->get_taxable_location( ! empty( $args['tax_location']['country'] ) ? $args['tax_location'] : array() );
 			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
 				$tax_rates = WC_Tax::find_rates(
 					array(
