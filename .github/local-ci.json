@@ -4,7 +4,7 @@
   "host": "github.com",
   "repository": "woocommerce/woocommerce",
   "app": { "clientId": "Iv23lix7ORqAqQLsB13K", "appId": 4830646 },
-  "baseBranch": "trunk",
+  "baseBranch": "test/local-ci-php-base",
   "receiptPrefix": "local-ci/v1: ",
 
   "enabled": true,
