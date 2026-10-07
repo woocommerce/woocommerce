@@ -454,7 +454,7 @@ class CheckoutFields {
 			return false;
 		}
 
-		if ( ! empty( $options['mask'] ) && ( ! is_string( $options['mask'] ) || 'text' !== ( $options['type'] ?? 'text' ) ) ) {
+		if ( array_key_exists( 'mask', $options ) && ( ! is_string( $options['mask'] ) || 'text' !== ( $options['type'] ?? 'text' ) ) ) {
 			$message = sprintf( 'The mask for field "%s" must be a string on a text field. It will be ignored.', $id );
 			_doing_it_wrong( 'woocommerce_register_additional_checkout_field', esc_html( $message ), '11.2.0' );
 			unset( $options['mask'] );
