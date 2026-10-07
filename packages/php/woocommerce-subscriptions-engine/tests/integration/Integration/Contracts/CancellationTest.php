@@ -304,7 +304,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 				'customer_id'    => 1,
 				'currency'       => 'USD',
 			)
-		);
+		)->get_id();
 		$this->assertSame( ContractStatus::DRAFT, $this->reload( $id )->get_status() );
 
 		$fired = 0;

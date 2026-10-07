@@ -11,7 +11,6 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
@@ -161,9 +160,8 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$status         = $args['status'] ?? ContractStatus::ACTIVE;
 		$args['status'] = ContractStatus::DRAFT;
 
-		$id   = Contracts::create( $args );
-		$view = Subscriptions::get( $id );
-		$this->assertNotNull( $view );
+		$view = Contracts::create( $args );
+		$id   = $view->get_id();
 
 		Contracts::add_cycle(
 			$id,

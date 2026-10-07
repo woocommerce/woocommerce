@@ -20,6 +20,8 @@ use DateTimeInterface;
 use DateTimeZone;
 use DomainException;
 use InvalidArgumentException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
@@ -108,10 +110,11 @@ final class Contracts {
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
 	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
-	 * @return int The new contract id.
+	 * @return ContractView The new contract, built from the written fields (no re-read): items
+	 *                      and addresses as given.
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
 	 */
-	public static function create( array $args ): int {
+	public static function create( array $args ): ContractView {
 		$filtered_args  = self::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
 		$extension_slug = self::nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		unset( $filtered_args['extension_slug'] );
@@ -123,7 +126,9 @@ final class Contracts {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		return ( new ContractRepository() )->insert( $contract );
+		( new ContractRepository() )->insert( $contract );
+
+		return ContractView::from_contract( $contract, true );
 	}
 
 	/**
@@ -137,16 +142,18 @@ final class Contracts {
 	 *
 	 * @param int                  $id   Contract id.
 	 * @param array<string, mixed> $args Fields to write.
-	 * @return bool True when written; false when the contract does not exist.
+	 * @return ContractView|null The row as read before the write plus the written fields (a column
+	 *                           another writer changed meanwhile may be stale here, not in storage);
+	 *                           null when the contract does not exist.
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
-	public static function update( int $id, array $args ): bool {
+	public static function update( int $id, array $args ): ?ContractView {
 		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$repository = new ContractRepository();
 		$contract   = $repository->find( $id );
 		if ( null === $contract ) {
-			return false;
+			return null;
 		}
 
 		try {
@@ -161,7 +168,7 @@ final class Contracts {
 			$repository->update_fields( $contract, $fields );
 		}
 
-		return true;
+		return ContractView::from_contract( $contract, true );
 	}
 
 	/**
@@ -177,11 +184,11 @@ final class Contracts {
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
-	 * @return int The new cycle id.
+	 * @return CycleView The appended cycle.
 	 * @throws InvalidArgumentException If the contract is unknown, a required key is missing, or a value is invalid.
 	 * @throws DomainException If the chain position is already taken.
 	 */
-	public static function add_cycle( int $contract_id, array $args ): int {
+	public static function add_cycle( int $contract_id, array $args ): CycleView {
 		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$repository = new ContractRepository();
@@ -248,7 +255,7 @@ final class Contracts {
 			throw new DomainException( 'Contracts: the cycle position already exists.' );
 		}
 
-		return (int) $cycle->get_id();
+		return CycleView::from_cycle( $cycle );
 	}
 
 	/**

@@ -1533,7 +1533,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				unset( $args[ $missing ] );
 		}
 
-		$id = Contracts::create( $args );
+		$id = Contracts::create( $args )->get_id();
 		Contracts::add_cycle(
 			$id,
 			array(

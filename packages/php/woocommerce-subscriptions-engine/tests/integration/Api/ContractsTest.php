@@ -63,9 +63,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_extension_slug_only_create_is_an_empty_draft(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$created = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id      = $created->get_id();
 
 		$view = $this->view( $id );
+		$this->assertEquals( $view, $created, 'The returned view matches a fresh read.' );
 		$this->assertSame( ContractStatus::DRAFT, $view->get_status() );
 		$this->assertSame( self::EXTENSION_SLUG, $view->get_extension_slug() );
 		$this->assertNull( $view->get_customer_id() );
@@ -78,8 +80,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $view->get_items() );
 	}
 
-	public function test_create_stores_every_field(): void {
-		$id = Contracts::create(
+	public function test_create_stores_and_returns_every_field(): void {
+		$created = Contracts::create(
 			array(
 				'extension_slug'       => self::EXTENSION_SLUG,
 				'status'               => ContractStatus::ACTIVE,
@@ -118,35 +120,39 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$view = $this->view( $id );
-		$this->assertSame( ContractStatus::ACTIVE, $view->get_status() );
-		$this->assertSame( 12, $view->get_customer_id() );
-		$this->assertSame( 'EUR', $view->get_currency() );
-		$this->assertSame( 3, $view->get_selling_plan_id() );
-		$this->assertSame( 4, $view->get_origin_order_id() );
-		$this->assertSame( 'dummy', $view->get_payment_method() );
-		$this->assertSame( 'Dummy', $view->get_payment_method_title() );
-		$this->assertSame( 5, $view->get_payment_token_id() );
-		$this->assertSame( '2026-01-01 00:00:00', $view->get_start_gmt() );
-		$this->assertSame( '2026-02-01 00:00:00', $view->get_next_payment_gmt() );
-		$this->assertSame( '2026-01-02 00:00:00', $view->get_last_payment_gmt() );
-		$this->assertSame( '2026-01-03 00:00:00', $view->get_last_attempt_gmt() );
-		$this->assertSame( '2026-01-04 00:00:00', $view->get_trial_end_gmt() );
-		$this->assertSame( '2027-01-01 00:00:00', $view->get_end_gmt() );
-		$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $view->get_schedule_source() );
-		$this->assertSame( '20.00000000', $view->get_billing_total() );
-		$this->assertSame( '1.50000000', $view->get_discount_total() );
-		$this->assertSame( '5.25000000', $view->get_shipping_total() );
-		$this->assertSame( '2.00000000', $view->get_tax_total() );
+		$id = $created->get_id();
+		$this->assertGreaterThan( 0, $id );
 
-		$items = $view->get_items();
-		$this->assertIsArray( $items );
-		$this->assertCount( 1, $items );
-		$this->assertSame( 'Coffee', $items[0]['item_name'] );
+		foreach ( array( $created, $this->view( $id ) ) as $view ) {
+			$this->assertSame( ContractStatus::ACTIVE, $view->get_status() );
+			$this->assertSame( 12, $view->get_customer_id() );
+			$this->assertSame( 'EUR', $view->get_currency() );
+			$this->assertSame( 3, $view->get_selling_plan_id() );
+			$this->assertSame( 4, $view->get_origin_order_id() );
+			$this->assertSame( 'dummy', $view->get_payment_method() );
+			$this->assertSame( 'Dummy', $view->get_payment_method_title() );
+			$this->assertSame( 5, $view->get_payment_token_id() );
+			$this->assertSame( '2026-01-01 00:00:00', $view->get_start_gmt() );
+			$this->assertSame( '2026-02-01 00:00:00', $view->get_next_payment_gmt() );
+			$this->assertSame( '2026-01-02 00:00:00', $view->get_last_payment_gmt() );
+			$this->assertSame( '2026-01-03 00:00:00', $view->get_last_attempt_gmt() );
+			$this->assertSame( '2026-01-04 00:00:00', $view->get_trial_end_gmt() );
+			$this->assertSame( '2027-01-01 00:00:00', $view->get_end_gmt() );
+			$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $view->get_schedule_source() );
+			$this->assertSame( '20.00000000', $view->get_billing_total() );
+			$this->assertSame( '1.50000000', $view->get_discount_total() );
+			$this->assertSame( '5.25000000', $view->get_shipping_total() );
+			$this->assertSame( '2.00000000', $view->get_tax_total() );
 
-		$addresses = $view->get_addresses();
-		$this->assertIsArray( $addresses );
-		$this->assertSame( 'Ada', $addresses['billing']['first_name'] ?? null );
+			$items = $view->get_items();
+			$this->assertIsArray( $items );
+			$this->assertCount( 1, $items );
+			$this->assertSame( 'Coffee', $items[0]['item_name'] );
+
+			$addresses = $view->get_addresses();
+			$this->assertIsArray( $addresses );
+			$this->assertSame( 'Ada', $addresses['billing']['first_name'] ?? null );
+		}
 	}
 
 	public function test_items_and_addresses_read_back_in_the_written_shape(): void {
@@ -177,15 +183,17 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'shipping' => array_merge( $billing, array( 'city' => 'Porto' ) ),
 		);
 
-		$id = Contracts::create(
+		$created = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => $items,
 				'addresses'      => $addresses,
 			)
 		);
+		$id      = $created->get_id();
 
 		$view = $this->view( $id );
+		$this->assertEquals( $view, $created, 'The returned view matches a fresh read.' );
 		$this->assertSame( $items, $view->get_items() );
 		$this->assertEquals( $addresses, $view->get_addresses() );
 
@@ -202,7 +210,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'start_gmt'        => new DateTimeImmutable( '2026-01-01 02:00:00', new DateTimeZone( 'Europe/Lisbon' ) ),
 				'next_payment_gmt' => new DateTimeImmutable( '2026-07-01 02:00:00', new DateTimeZone( 'Europe/Lisbon' ) ),
 			)
-		);
+		)->get_id();
 
 		$view = $this->view( $id );
 		$this->assertSame( '2026-01-01 02:00:00', $view->get_start_gmt() );
@@ -227,7 +235,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'custmer_id'     => 1,
 				'customer_id'    => 7,
 			)
-		);
+		)->get_id();
 
 		$this->assertSame( array( 'Contracts: unknown key "custmer_id" ignored.' ), $messages );
 		$this->assertSame( 7, $this->view( $id )->get_customer_id(), 'The known key beside the unknown one is written.' );
@@ -252,7 +260,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 					),
 				),
 			)
-		);
+		)->get_id();
 
 		$contract = $this->entity( $id );
 		$items    = $contract->get_items();
@@ -359,7 +367,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'payment_method' => 'dummy',
 				'billing_total'  => '10',
 			)
-		);
+		)->get_id();
 
 		try {
 			Contracts::update(
@@ -391,7 +399,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_money_without_currency_is_rejected_on_update(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->expectException( InvalidArgumentException::class );
 
@@ -399,9 +407,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_null_money_value_resets_to_zero_without_a_currency(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$this->assertTrue( Contracts::update( $id, array( 'billing_total' => null ) ) );
+		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'billing_total' => null ) ) );
 		$this->assertSame( '0.00000000', $this->view( $id )->get_billing_total() );
 	}
 
@@ -412,7 +420,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'currency'       => 'USD',
 				'billing_total'  => '10',
 			)
-		);
+		)->get_id();
 
 		try {
 			Contracts::update( $id, array( 'currency' => null ) );
@@ -422,7 +430,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		}
 
 		// Clearing the totals in the same call is allowed.
-		$this->assertTrue(
+		$this->assertInstanceOf(
+			ContractView::class,
 			Contracts::update(
 				$id,
 				array(
@@ -438,10 +447,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$customer = self::factory()->user->create();
 		$this->assertIsInt( $customer );
 
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$this->assertTrue( Contracts::update( $id, array( 'customer_id' => $customer ) ) );
-		$this->assertTrue(
+		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'customer_id' => $customer ) ) );
+		$this->assertInstanceOf(
+			ContractView::class,
 			Contracts::update(
 				$id,
 				array(
@@ -450,7 +460,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 				)
 			)
 		);
-		$this->assertTrue( Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) ) );
+		$updated = Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+		$this->assertInstanceOf( ContractView::class, $updated );
+		$this->assertEquals( $this->view( $id ), $updated, 'The returned view matches a fresh read.' );
 
 		$view = $this->view( $id );
 		$this->assertSame( $customer, $view->get_customer_id() );
@@ -468,7 +480,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'payment_method_title' => 'Dummy',
 				'payment_token_id'     => 5,
 			)
-		);
+		)->get_id();
 
 		Contracts::update( $id, array( 'payment_token_id' => 6 ) );
 
@@ -487,7 +499,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'status'           => ContractStatus::ACTIVE,
 				'next_payment_gmt' => '2026-02-01 00:00:00',
 			)
-		);
+		)->get_id();
 
 		// A concurrent writer (e.g. a cancel compare-and-set) lands after the facade
 		// read the contract and before its own write.
@@ -512,12 +524,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 		add_filter( 'query', $race );
 
 		try {
-			$this->assertTrue( Contracts::update( $id, array( 'payment_method_title' => 'X' ) ) );
+			$updated = Contracts::update( $id, array( 'payment_method_title' => 'X' ) );
 		} finally {
 			remove_filter( 'query', $race );
 		}
 
 		$this->assertTrue( $injected );
+		$this->assertInstanceOf( ContractView::class, $updated );
+		$this->assertSame( 'X', $updated->get_payment_method_title() );
+		$this->assertSame( ContractStatus::ACTIVE, $updated->get_status(), 'The returned view keeps the pre-write read of other columns.' );
 		$view = $this->view( $id );
 		$this->assertSame( 'X', $view->get_payment_method_title() );
 		$this->assertSame( ContractStatus::CANCELLED, $view->get_status() );
@@ -534,24 +549,26 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'shipping' => array( 'city' => 'Porto' ),
 				),
 			)
-		);
+		)->get_id();
 
-		Contracts::update(
+		$updated = Contracts::update(
 			$id,
 			array(
 				'items'     => array( array( 'item_name' => 'Cocoa' ) ),
 				'addresses' => array( 'billing' => array( 'city' => 'Faro' ) ),
 			)
 		);
+		$this->assertInstanceOf( ContractView::class, $updated );
 
-		$view  = $this->view( $id );
-		$items = $view->get_items();
-		$this->assertIsArray( $items );
-		$this->assertSame( array( 'Cocoa' ), array_column( $items, 'item_name' ) );
-		$addresses = $view->get_addresses();
-		$this->assertIsArray( $addresses );
-		$this->assertSame( array( 'billing' ), array_keys( $addresses ) );
-		$this->assertSame( 'Faro', $addresses['billing']['city'] ?? null );
+		foreach ( array( $updated, $this->view( $id ) ) as $view ) {
+			$items = $view->get_items();
+			$this->assertIsArray( $items );
+			$this->assertSame( array( 'Cocoa' ), array_column( $items, 'item_name' ) );
+			$addresses = $view->get_addresses();
+			$this->assertIsArray( $addresses );
+			$this->assertSame( array( 'billing' ), array_keys( $addresses ) );
+			$this->assertSame( 'Faro', $addresses['billing']['city'] ?? null );
+		}
 	}
 
 	public function test_null_clears_nullable_fields(): void {
@@ -561,7 +578,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'selling_plan_id'  => 3,
 				'next_payment_gmt' => '2026-02-01 00:00:00',
 			)
-		);
+		)->get_id();
 
 		Contracts::update(
 			$id,
@@ -576,15 +593,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertNull( $view->get_next_payment_gmt() );
 	}
 
-	public function test_update_on_an_unknown_contract_returns_false(): void {
-		$this->assertFalse( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
+	public function test_update_on_an_unknown_contract_returns_null(): void {
+		$this->assertNull( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
 	}
 
 	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
 
-		$this->assertTrue(
+		$this->assertInstanceOf(
+			ContractView::class,
 			Contracts::update(
 				$id,
 				array(
@@ -607,7 +625,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_extension_slug_is_not_an_update_key(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
 
 		Contracts::update(
@@ -641,7 +659,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'plan_snapshot'  => array( 'selling_plan_id' => 3 ),
 				'items_snapshot' => array( array( 'item_name' => 'Coffee' ) ),
 			)
-		);
+		)->get_id();
 
 		$this->assertSame(
 			array( 'Contracts: unknown key "plan_snapshot" ignored.', 'Contracts: unknown key "items_snapshot" ignored.' ),
@@ -659,7 +677,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'extension_slug' => self::EXTENSION_SLUG,
 				'status'         => 'paused-by-merchant',
 			)
-		);
+		)->get_id();
 
 		$this->assertSame( 'paused-by-merchant', $this->view( $id )->get_status() );
 	}
@@ -673,7 +691,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
 			)
-		);
+		)->get_id();
 	}
 
 	/**
@@ -712,7 +730,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_the_first_cycle_takes_the_chain_and_contract_defaults(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) )->get_id();
 		$cycle    = $this->cycle( $id, $cycle_id );
 
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
@@ -740,7 +758,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'expected_total' => '19.99',
 				)
 			)
-		);
+		)->get_id();
 		$cycle    = $this->cycle( $id, $cycle_id );
 
 		$this->assertSame( 2, $cycle->get_sequence_no() );
@@ -751,7 +769,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_a_non_counting_cycle_takes_a_null_count(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) );
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) )->get_id();
 
 		$this->assertNull( $this->cycle( $id, $cycle_id )->get_count() );
 	}
@@ -842,13 +860,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'order_id' => 77,
 				)
 			)
-		);
+		)->get_id();
 
 		$this->assertSame( 77, $this->cycle( $id, $cycle_id )->get_order_id(), 'The known key beside the unknown one is written.' );
 	}
 
 	public function test_a_cycle_needs_a_currency(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->expectException( InvalidArgumentException::class );
 
@@ -856,9 +874,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_explicit_currency_serves_a_contract_without_one(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) );
+		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) )->get_id();
 
 		$this->assertSame( 'EUR', $this->cycle( $id, $cycle_id )->get_currency() );
 	}
@@ -870,12 +888,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_get_history_returns_the_appended_cycle_as_a_view(): void {
-		$id       = $this->contract_with_currency();
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$id      = $this->contract_with_currency();
+		$created = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 
 		$history = Subscriptions::get_history( $id );
 
 		$this->assertCount( 1, $history );
+		$this->assertEquals( $history[0], $created, 'The returned view matches a fresh read.' );
+		$cycle_id = $created->get_id();
+		$this->assertGreaterThan( 0, $cycle_id );
 		$this->assertInstanceOf( CycleView::class, $history[0] );
 		$this->assertSame( $cycle_id, $history[0]->get_id() );
 		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
@@ -883,7 +904,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_meta_keeps_several_values_under_one_key(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->assertIsInt( Contracts::add_meta( $id, 'note', 'one' ) );
 		$this->assertIsInt( Contracts::add_meta( $id, 'note', array( 'two' ) ) );
@@ -894,7 +915,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_unique_meta_add_refuses_an_existing_key(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 
 		$this->assertNull( Contracts::add_meta( $id, 'note', 'two', true ) );
@@ -902,7 +923,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_update_meta_with_a_previous_value_and_delete_one_value(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 		Contracts::add_meta( $id, 'note', 'two' );
 
@@ -914,7 +935,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_only_null_matches_any_meta_value(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 		Contracts::add_meta( $id, 'note', '' );
 
@@ -946,7 +967,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_empty_meta_key_is_rejected(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->expectException( InvalidArgumentException::class );
 
@@ -954,7 +975,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_meta_survives_a_contract_update(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'kept' );
 
 		Contracts::update(
