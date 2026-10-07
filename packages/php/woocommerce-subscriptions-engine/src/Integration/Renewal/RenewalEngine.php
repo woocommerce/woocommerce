@@ -42,7 +42,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
@@ -217,11 +217,11 @@ final class RenewalEngine {
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
 	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
-	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
-	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
-	 * scheduled caller can park and a manual caller can return null; returns null for an
-	 * idempotent no-op (a non-active contract, a live claim, an already-settled cycle, an
-	 * unbuildable order).
+	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no currency, no
+	 * chain, an unresolvable plan, a non-adjacent count, a gateway that cannot charge
+	 * renewals) so the scheduled caller can park and a manual caller can return null; returns
+	 * null for an idempotent no-op (a non-active contract, a live claim, an already-settled
+	 * cycle, an unbuildable order). A contract without a customer renews as a guest order.
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
@@ -269,6 +269,13 @@ final class RenewalEngine {
 				)
 			);
 			return null;
+		}
+
+		// A renewal input an extension may not have supplied yet: without it no order can
+		// be built, so the scheduled caller parks the contract out of the due set. A null
+		// customer is not one: the renewal order is built as a guest order.
+		if ( null === $contract->get_currency() ) {
+			throw new RenewalNotProcessable( 'the contract has no currency' );
 		}
 
 		// Pre-flight capability gate, ahead of the claim so an unchargeable renewal never
@@ -358,6 +365,13 @@ final class RenewalEngine {
 			// reclaimed stall resuming an earlier attempt - already announced its creation, so
 			// re-firing would double one-time side effects (customer emails, analytics).
 			if ( $order_created ) {
+				/**
+				 * Fires after a renewal order is created, before it is charged.
+				 * Fires immediately after the write, not after a surrounding transaction commits.
+				 *
+				 * @param WC_Order $renewal_order The new renewal order.
+				 * @param Contract $contract      The contract being renewed.
+				 */
 				do_action( self::RENEWAL_ORDER_CREATED_ACTION, $renewal_order, $contract );
 			}
 			$this->attempt_charge( $renewal_order, $contract );
@@ -402,7 +416,12 @@ final class RenewalEngine {
 			}
 		}
 
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
+		$plan_id = $contract->get_selling_plan_id();
+		if ( null === $plan_id ) {
+			return null;
+		}
+
+		$plan = $this->plans->find( $plan_id );
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
 	}
 
@@ -450,7 +469,7 @@ final class RenewalEngine {
 				'count'             => $cycle_count,
 				'period_start'      => $head->get_ends_at_gmt(),
 				'expected_total'    => $contract->get_billing_total(),
-				'currency'          => $contract->get_currency(),
+				'currency'          => (string) $contract->get_currency(),
 				'extension_slug'    => $contract->get_extension_slug(),
 				'plan_snapshot_id'  => $contract->get_plan_snapshot_id(),
 				'items_snapshot_id' => $contract->get_items_snapshot_id(),
@@ -638,7 +657,7 @@ final class RenewalEngine {
 			return;
 		}
 
-		$contract_id = ScalarCoercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
+		$contract_id = Coercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		if ( $contract_id <= 0 ) {
 			return;
 		}
@@ -758,6 +777,7 @@ final class RenewalEngine {
 
 			/**
 			 * Fires after a renewal cycle is billed and the contract schedule advanced.
+			 * Fires immediately after the write, not after a surrounding transaction commits.
 			 *
 			 * @param Contract $contract The renewed contract.
 			 * @param Cycle    $cycle    The newly-billed cycle.
@@ -823,7 +843,7 @@ final class RenewalEngine {
 
 		$renewal_order = wc_create_order(
 			array(
-				'customer_id' => $contract->get_customer_id(),
+				'customer_id' => (int) $contract->get_customer_id(),
 				'status'      => OrderStatus::CHECKOUT_DRAFT,
 				'created_via' => 'woocommerce_subscriptions_engine_renewal',
 			)
@@ -842,7 +862,7 @@ final class RenewalEngine {
 
 		$instrument = $contract->get_payment_instrument();
 
-		$renewal_order->set_currency( $contract->get_currency() );
+		$renewal_order->set_currency( (string) $contract->get_currency() );
 		if ( null !== $instrument->get_gateway() ) {
 			$renewal_order->set_payment_method( (string) $instrument->get_gateway() );
 		}

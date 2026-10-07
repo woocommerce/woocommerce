@@ -96,6 +96,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	private function seed_on_hold( ?string $next_payment_gmt, int $selling_plan_id, string $status = ContractStatus::ON_HOLD, array $meta = array() ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -104,11 +105,15 @@ class ReactivationTest extends EngineIntegrationTestCase {
 				'start_gmt'        => '2026-01-01 00:00:00',
 				'next_payment_gmt' => $next_payment_gmt,
 				'billing_total'    => '19.99',
-				'meta'             => $meta,
 			)
 		);
 
-		return $this->contracts->insert( $contract );
+		$id = $this->contracts->insert( $contract );
+		foreach ( $meta as $key => $value ) {
+			$this->contracts->add_meta( $id, $key, $value );
+		}
+
+		return $id;
 	}
 
 	private function utc( string $datetime ): DateTimeImmutable {
@@ -156,7 +161,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_reactivate_rolls_a_past_due_anchor_forward(): void {
@@ -168,7 +173,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 
 		$stored = $this->reload( $id );
 		$this->assertSame( '2026-05-01 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	/**
@@ -181,7 +186,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 
 		$stored = $this->reload( $id );
 		$this->assertSame( '2099-06-01 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_reactivate_ignores_a_malformed_anchor(): void {
@@ -192,7 +197,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertNull( $stored->get_next_payment_gmt(), 'A malformed anchor counts as absent.' );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_reactivate_rolls_by_the_frozen_snapshot_cadence_over_the_live_plan(): void {
@@ -264,6 +269,54 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $fired );
 	}
 
+	/**
+	 * The anchor is cleared after the status write has committed, so a failed delete must
+	 * not abort the reactivation, which could not be retried on an active contract.
+	 */
+	public function test_a_failed_anchor_clear_does_not_abort_the_reactivation(): void {
+		$id = $this->seed_on_hold( null, $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => '2099-01-01 00:00:00' ) );
+
+		$fired = 0;
+		add_action(
+			Reactivation::CONTRACT_REACTIVATED_ACTION,
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+		$meta_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$break      = static function ( string $query ) use ( $meta_table ): string {
+			return 0 === strpos( $query, "DELETE FROM `{$meta_table}`" ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+
+		try {
+			$this->assertTrue( $this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-06-01 00:00:00' ) ) );
+		} finally {
+			remove_filter( 'query', $break );
+		}
+
+		$stored = $this->reload( $id );
+		$this->assertSame( 1, $fired, 'The reactivated action fires.' );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt() );
+	}
+
+	public function test_a_lost_race_keeps_the_hold_anchor(): void {
+		$id    = $this->seed_on_hold( null, $this->make_monthly_plan(), ContractStatus::ON_HOLD, array( Hold::ANCHOR_META_KEY => '2099-01-01 00:00:00' ) );
+		$stale = $this->reload( $id );
+
+		$concurrent = $this->reload( $id );
+		$concurrent->set_status( ContractStatus::CANCELLED );
+		$this->contracts->update( $concurrent );
+
+		try {
+			$this->sut->reactivate( $stale, $this->utc( '2026-06-01 00:00:00' ) );
+			$this->fail( 'Expected a DomainException when the conditional write misses.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( '2099-01-01 00:00:00', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
+		}
+	}
+
 	public function test_reactivate_rejects_an_already_active_contract(): void {
 		// An active contract past its due date must NOT reach the recompute: rolling its
 		// date forward would skip the charge the due scan owes it.
@@ -301,6 +354,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	public function test_reactivate_rejects_a_terminal_contract(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'engine-tests',
 				'customer_id'     => 1,
 				'status'          => ContractStatus::CANCELLED,
 				'currency'        => 'USD',

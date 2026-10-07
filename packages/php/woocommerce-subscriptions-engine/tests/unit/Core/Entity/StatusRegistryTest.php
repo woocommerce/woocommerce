@@ -27,7 +27,7 @@ class StatusRegistryTest extends TestCase {
 
 	public function test_all_returns_exactly_the_engine_defaults_with_nothing_registered(): void {
 		$this->assertSame(
-			array( 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
+			array( 'draft', 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
 			StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT )
 		);
 		$this->assertSame(
