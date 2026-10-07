@@ -119,19 +119,16 @@ final class Contracts {
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
 	 */
 	public static function create( array $args ): int {
-		$args = self::known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$filtered_args  = self::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$extension_slug = self::nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		unset( $filtered_args['extension_slug'] );
 
-		$extension_slug = self::nullable_string( 'extension_slug', $args['extension_slug'] ?? null );
-		unset( $args['extension_slug'] );
-
-		$method                       = __METHOD__;
-		list( $contract, $snapshots ) = self::invalid_input_on_domain_error(
-			static function () use ( $method, $extension_slug, $args ): array {
-				$contract = Contract::create( array( 'extension_slug' => $extension_slug ) );
-
-				return array( $contract, self::apply( $method, $contract, $args ) );
-			}
-		);
+		try {
+			$contract  = Contract::create( array( 'extension_slug' => $extension_slug ) );
+			$snapshots = self::apply( __METHOD__, $contract, $filtered_args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
 
 		$repository = new ContractRepository();
 		$id         = $repository->insert( $contract );
@@ -155,7 +152,7 @@ final class Contracts {
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
 	public static function update( int $id, array $args ): bool {
-		$args = self::known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
+		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$repository = new ContractRepository();
 		$contract   = $repository->find( $id );
@@ -163,13 +160,13 @@ final class Contracts {
 			return false;
 		}
 
-		$method    = __METHOD__;
-		$snapshots = self::invalid_input_on_domain_error(
-			static function () use ( $method, $contract, $args ): array {
-				return self::apply( $method, $contract, $args );
-			}
-		);
-		$fields    = array_values( array_diff( array_keys( $args ), array( 'plan_snapshot', 'items_snapshot' ) ) );
+		try {
+			$snapshots = self::apply( __METHOD__, $contract, $filtered_args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
+
+		$fields = array_values( array_diff( array_keys( $filtered_args ), array( 'plan_snapshot', 'items_snapshot' ) ) );
 
 		if ( array() !== $fields ) {
 			$repository->update_fields( $contract, $fields );
@@ -199,7 +196,7 @@ final class Contracts {
 	 * @throws DomainException If the chain position is already taken.
 	 */
 	public static function add_cycle( int $contract_id, array $args ): int {
-		$args = self::known_keys( __METHOD__, $args, self::CYCLE_KEYS );
+		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$repository = new ContractRepository();
 		$contract   = $repository->find_summary( $contract_id );
@@ -207,36 +204,36 @@ final class Contracts {
 			throw new InvalidArgumentException( sprintf( 'Contracts: contract %d does not exist.', (int) $contract_id ) );
 		}
 
-		$status = $args['status'] ?? null;
+		$status = $filtered_args['status'] ?? null;
 		if ( ! is_string( $status ) ) {
 			throw new InvalidArgumentException( 'Contracts: "status" is required and must be a string.' );
 		}
 
-		$kind = $args['kind'] ?? Cycle::KIND_BILLING;
+		$kind = $filtered_args['kind'] ?? Cycle::KIND_BILLING;
 		if ( ! is_string( $kind ) ) {
 			throw new InvalidArgumentException( 'Contracts: "kind" must be a string.' );
 		}
 
-		$starts_at = self::nullable_date( 'starts_at_gmt', $args['starts_at_gmt'] ?? null );
-		$ends_at   = self::nullable_date( 'ends_at_gmt', $args['ends_at_gmt'] ?? null );
+		$starts_at = self::nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null );
+		$ends_at   = self::nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null );
 		if ( null === $starts_at || null === $ends_at ) {
 			throw new InvalidArgumentException( 'Contracts: "starts_at_gmt" and "ends_at_gmt" are required.' );
 		}
 
-		$currency = array_key_exists( 'currency', $args ) ? self::currency( $args['currency'] ) : $contract->get_currency();
+		$currency = array_key_exists( 'currency', $filtered_args ) ? self::currency( $filtered_args['currency'] ) : $contract->get_currency();
 		if ( null === $currency ) {
 			throw new InvalidArgumentException( 'Contracts: a cycle needs a currency, given or from the contract.' );
 		}
 
 		$head        = $repository->find_chain_head( $contract_id, $kind );
-		$sequence_no = array_key_exists( 'sequence_no', $args )
-			? self::nullable_id( 'sequence_no', $args['sequence_no'] )
+		$sequence_no = array_key_exists( 'sequence_no', $filtered_args )
+			? self::nullable_id( 'sequence_no', $filtered_args['sequence_no'] )
 			: ( null === $head ? 1 : $head->get_sequence_no() + 1 );
 		if ( null === $sequence_no ) {
 			throw new InvalidArgumentException( 'Contracts: "sequence_no" must be a positive integer.' );
 		}
-		$count = array_key_exists( 'count', $args )
-			? self::nullable_id( 'count', $args['count'] )
+		$count = array_key_exists( 'count', $filtered_args )
+			? self::nullable_id( 'count', $filtered_args['count'] )
 			: ( $repository->max_count( $contract_id, $kind ) ?? 0 ) + 1;
 
 		$cycle_args = array(
@@ -247,32 +244,32 @@ final class Contracts {
 			'status'         => $status,
 			'starts_at_gmt'  => $starts_at,
 			'ends_at_gmt'    => $ends_at,
-			'expected_total' => self::money( 'expected_total', $args['expected_total'] ?? null ),
+			'expected_total' => self::money( 'expected_total', $filtered_args['expected_total'] ?? null ),
 			'currency'       => $currency,
-			'order_id'       => self::nullable_id( 'order_id', $args['order_id'] ?? null ),
+			'order_id'       => self::nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 			'extension_slug' => $contract->get_extension_slug(),
 		);
 
-		if ( array_key_exists( 'plan_snapshot', $args ) ) {
-			if ( ! is_array( $args['plan_snapshot'] ) ) {
+		if ( array_key_exists( 'plan_snapshot', $filtered_args ) ) {
+			if ( ! is_array( $filtered_args['plan_snapshot'] ) ) {
 				throw new InvalidArgumentException( 'Contracts: "plan_snapshot" must be an array.' );
 			}
-			$cycle_args['plan_snapshot'] = PlanSnapshot::from_array( self::string_keyed( $args['plan_snapshot'] ) );
+			$cycle_args['plan_snapshot'] = PlanSnapshot::from_array( self::string_keyed( $filtered_args['plan_snapshot'] ) );
 		} else {
 			$cycle_args['plan_snapshot_id'] = $contract->get_plan_snapshot_id();
 		}
 
-		if ( array_key_exists( 'items_snapshot', $args ) ) {
-			$cycle_args['items_snapshot'] = ItemsSnapshot::from_items( self::item_rows( 'items_snapshot', $args['items_snapshot'] ) );
+		if ( array_key_exists( 'items_snapshot', $filtered_args ) ) {
+			$cycle_args['items_snapshot'] = ItemsSnapshot::from_items( self::item_rows( 'items_snapshot', $filtered_args['items_snapshot'] ) );
 		} else {
 			$cycle_args['items_snapshot_id'] = $contract->get_items_snapshot_id();
 		}
 
-		$cycle = self::invalid_input_on_domain_error(
-			static function () use ( $cycle_args ): Cycle {
-				return Cycle::create( $cycle_args );
-			}
-		);
+		try {
+			$cycle = Cycle::create( $cycle_args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
 
 		try {
 			$repository->append_cycle( $cycle, $head );
@@ -358,23 +355,7 @@ final class Contracts {
 		return ( new ContractRepository() )->get_meta( $id, $key, $single );
 	}
 
-	/**
-	 * Run entity calls, reporting an entity invariant failure (`DomainException`) as
-	 * invalid input. Storage conflicts must stay outside the callback.
-	 *
-	 * @template T
-	 * @param callable(): T $entity_calls Entity calls.
-	 * @return T
-	 * @throws InvalidArgumentException If an entity invariant fails; the previous exception is the entity's.
-	 */
-	private static function invalid_input_on_domain_error( callable $entity_calls ) {
-		try {
-			return $entity_calls();
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
-		}
-	}
-
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
 	/**
 	 * Validate the caller's field shapes and apply them to a contract through its setters,
 	 * which enforce the entity invariants. Nothing is written to storage; an invalid value
@@ -384,7 +365,8 @@ final class Contracts {
 	 * @param Contract             $contract Contract to change.
 	 * @param array<string, mixed> $args     Caller fields (known keys only, no `extension_slug`).
 	 * @return array{plan: array<string, mixed>|null, items: array<int, array<string, mixed>>|null} Snapshot payloads to store.
-	 * @throws InvalidArgumentException If a value is invalid.
+	 * @throws InvalidArgumentException If a value has the wrong shape.
+	 * @throws DomainException If a value breaks an entity invariant (from the entity setters).
 	 */
 	private static function apply( string $method, Contract $contract, array $args ): array {
 		$snapshots  = array(
@@ -478,6 +460,7 @@ final class Contracts {
 
 		return $snapshots;
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Record the snapshot payloads, when any, as the contract's current snapshots.
@@ -493,7 +476,7 @@ final class Contracts {
 	}
 
 	/**
-	 * Drop the keys outside `$allowed`, with a `_doing_it_wrong()` notice for each.
+	 * Keep the keys in `$allowed`; each other key raises a `_doing_it_wrong()` notice and is dropped.
 	 *
 	 * @param string                   $method  Public facade method, for the notice.
 	 * @param array<int|string, mixed> $args    Caller arguments.
@@ -501,8 +484,14 @@ final class Contracts {
 	 * @param string                   $what    What the keys belong to, for the notice.
 	 * @return array<string, mixed> The arguments with known keys only.
 	 */
-	private static function known_keys( string $method, array $args, array $allowed, string $what = 'key' ): array {
-		foreach ( array_keys( array_diff_key( $args, $allowed ) ) as $key ) {
+	private static function filter_known_keys( string $method, array $args, array $allowed, string $what = 'key' ): array {
+		$filtered = array();
+		foreach ( $args as $key => $value ) {
+			if ( isset( $allowed[ $key ] ) ) {
+				$filtered[ (string) $key ] = $value;
+				continue;
+			}
+
 			_doing_it_wrong(
 				esc_html( $method ),
 				sprintf( 'Contracts: unknown %s "%s" ignored.', esc_html( $what ), esc_html( (string) $key ) ),
@@ -510,7 +499,7 @@ final class Contracts {
 			);
 		}
 
-		return self::string_keyed( array_intersect_key( $args, $allowed ) );
+		return $filtered;
 	}
 
 	/**
@@ -677,7 +666,7 @@ final class Contracts {
 		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
 		$rows    = array();
 		foreach ( self::item_rows( 'items', $value ) as $row ) {
-			$rows[] = self::known_keys( $method, $row, $allowed, 'item key' );
+			$rows[] = self::filter_known_keys( $method, $row, $allowed, 'item key' );
 		}
 
 		return $rows;
@@ -728,7 +717,7 @@ final class Contracts {
 				throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping" with array values.' );
 			}
 
-			$addresses[ $type ] = self::known_keys( $method, $address, $allowed, 'address key' );
+			$addresses[ $type ] = self::filter_known_keys( $method, $address, $allowed, 'address key' );
 		}
 
 		return $addresses;
