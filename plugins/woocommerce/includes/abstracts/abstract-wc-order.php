@@ -2418,22 +2418,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $cart_taxes + $shipping_taxes ) );
+		$tax_group        = $this->type_to_group( 'tax' );
 
 		foreach ( $existing_taxes as $tax_item_id => $tax ) {
 			$filtered_tax = $tax;
 			$tax_rate_id  = $tax->get_rate_id();
+			$local_taxes  = $this->items[ $tax_group ] ?? array();
 
 			// Unsaved clones have no database ID; update the local item so it is saved only once.
-			$local_tax = $this->items['tax_lines'][ $tax_item_id ] ?? null;
+			$local_tax = $local_taxes[ $tax_item_id ] ?? null;
 			if ( 0 === $tax->get_id() && $local_tax !== $tax ) {
-				$tax_item_key = array_search( $tax, $this->items['tax_lines'] ?? array(), true );
+				$tax_item_key = array_search( $tax, $local_taxes, true );
 
 				if ( false === $tax_item_key ) {
 					if ( $local_tax instanceof WC_Order_Item_Tax && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
 						$tax_item_key = $tax_item_id;
 					} else {
 						// A filter may clone an unsaved item and change its temporary key.
-						foreach ( $this->items['tax_lines'] ?? array() as $local_tax_key => $local_tax ) {
+						foreach ( $local_taxes as $local_tax_key => $local_tax ) {
 							if ( $local_tax instanceof WC_Order_Item_Tax && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
 								$tax_item_key = $local_tax_key;
 								break;
@@ -2442,7 +2444,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 				}
 
-				$local_tax = false === $tax_item_key ? null : $this->items['tax_lines'][ $tax_item_key ];
+				$local_tax = false === $tax_item_key ? null : $local_taxes[ $tax_item_key ];
 				if ( false !== $tax_item_key && $local_tax instanceof WC_Order_Item_Tax ) {
 					$tax_item_id = $tax_item_key;
 					$tax         = $local_tax;
@@ -2452,9 +2454,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
 				// Filters may change array keys without changing the local collection.
-				$local_tax = $this->items['tax_lines'][ $tax_item_id ] ?? null;
+				$local_tax = $local_taxes[ $tax_item_id ] ?? null;
 				if ( $local_tax !== $tax ) {
-					$tax_item_key = array_search( $tax, $this->items['tax_lines'] ?? array(), true );
+					$tax_item_key = array_search( $tax, $local_taxes, true );
 					$tax_item_id  = false === $tax_item_key ? $tax->get_id() : $tax_item_key;
 				}
 
