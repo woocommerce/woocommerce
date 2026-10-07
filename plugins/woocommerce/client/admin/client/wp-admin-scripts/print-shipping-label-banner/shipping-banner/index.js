@@ -448,7 +448,10 @@ export class ShippingBanner extends Component {
 					<img
 						className="wc-admin-shipping-banner-illustration"
 						src={ wcAssetUrl + 'images/shippingillustration.svg' }
-						alt={ __( 'Shipping', 'woocommerce' ) }
+						alt={
+							// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+							__( 'Shipping ', 'woocommerce' )
+						}
 					/>
 					<div className="wc-admin-shipping-banner-blob">
 						<h3>{ headline }</h3>

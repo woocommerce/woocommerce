@@ -372,8 +372,9 @@ export const ShippingTour = ( {
 				name: 'shipping-recommendations',
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
+					// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 					desktop: __(
-						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you!',
+						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you! ',
 						'woocommerce'
 					),
 				},

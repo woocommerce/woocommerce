@@ -84,8 +84,9 @@ export default {
 			'What category of legal entity identify your business?',
 			'woocommerce'
 		),
+		// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 		mcc: __(
-			'What type of goods or services does your business sell?',
+			'What type of goods or services does your business sell? ',
 			'woocommerce'
 		),
 	},

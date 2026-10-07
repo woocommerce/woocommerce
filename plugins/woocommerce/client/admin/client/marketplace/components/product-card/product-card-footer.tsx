@@ -165,8 +165,8 @@ function ProductCardFooter( props: { product: Product } ) {
 
 		if ( product.price !== 0 && product.freemium_type !== 'primary' ) {
 			return sprintf(
-				//translators: %1$s is the price of the product, %2$s is the billing period
-				__( '%1$s, %2$s', 'woocommerce' ),
+				/* eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace */ /* translators: %1$s is the price of the product, %2$s is the billing period */
+				__( ' %1$s, %2$s ', 'woocommerce' ),
 				getPriceLabel(),
 				getBillingText()
 			);

@@ -19,14 +19,16 @@ const LightbulbStage = {
 	image: <img src={ LightBulbImage } alt="loader-lightbulb" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact:', 'woocommerce' ),
+			// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
 				'Explore powerful extensions and themes at WooCommerce.com to enhance your store.',
 				'woocommerce'
 			),
 		},
 		{
-			label: __( '#FunWooFact:', 'woocommerce' ),
+			// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
 				'The Woo team is made up of over 350 talented individuals, distributed across 30+ countries.',
 				'woocommerce'
@@ -39,7 +41,8 @@ const LayoutStage = {
 	image: <img src={ LayoutImage } alt="loader-lightbulb" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact:', 'woocommerce' ),
+			// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
 				'Did you know that Woo powers almost 4 million stores worldwide? You’re in good company.',
 				'woocommerce'
@@ -53,7 +56,8 @@ const DevelopingStage = {
 	image: <img src={ DevelopingImage } alt="loader-developng" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact:', 'woocommerce' ),
+			// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
 				'Did you know that Woo was founded by two South Africans and a Norwegian? Here are three alternative ways to say “store” in those countries – Winkel, ivenkile, and butikk.',
 				'woocommerce'
@@ -67,8 +71,10 @@ const OpeningTheDoorsStage = {
 	image: <img src={ OpeningTheDoorsImage } alt="loader-opening-the-doors" />,
 	paragraphs: [
 		{
-			label: __( '#FunWooFact:', 'woocommerce' ),
-			text: __( 'Our favorite color is purple', 'woocommerce' ),
+			// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+			label: __( '#FunWooFact: ', 'woocommerce' ),
+			// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+			text: __( 'Our favorite color is purple ', 'woocommerce' ),
 			element: (
 				<img
 					src={ Hearticon }
