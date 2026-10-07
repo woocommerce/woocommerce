@@ -101,6 +101,50 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When the stored row cannot be read, saves this request's whole session instead of only its changes.
+	 */
+	public function test_saves_whole_session_when_stored_row_cannot_be_read(): void {
+		global $wpdb;
+		$this->store(
+			array(
+				'a'    => 'theirs',
+				'keep' => 'kept',
+			)
+		);
+		$break_read = function ( $query ) {
+			return 0 === strpos( $query, 'SELECT session_value FROM' ) ? str_replace( 'FROM ', 'FROM missing_', $query ) : $query;
+		};
+		add_filter( 'query', $break_read );
+		$suppress = $wpdb->suppress_errors( true );
+
+		try {
+			$saved = $this->sut->save(
+				$this->table,
+				self::SESSION_KEY,
+				time() + 100,
+				array(
+					'a'    => 'mine',
+					'keep' => 'kept',
+				),
+				array(
+					'a'    => 'old',
+					'keep' => 'kept',
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'query', $break_read );
+		}
+
+		$expected = array(
+			'a'    => 'mine',
+			'keep' => 'kept',
+		);
+		$this->assertSame( $expected, $saved );
+		$this->assertSame( $expected, $this->get_stored(), 'Keys this request did not change should not be dropped' );
+	}
+
+	/**
 	 * Store a session row directly.
 	 *
 	 * @param array $data Session data.
