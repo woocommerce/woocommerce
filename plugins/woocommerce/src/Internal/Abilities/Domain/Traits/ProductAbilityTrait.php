@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
-use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
+use Automattic\WooCommerce\Abilities\AbilityFields;
 
 defined( 'ABSPATH' ) || exit;
 

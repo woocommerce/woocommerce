@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
-use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
+use Automattic\WooCommerce\Abilities\AbilityFields;
 
 /**
  * Extension fields in the output of the product and order abilities.
@@ -90,7 +90,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 			remove_action( 'wp_abilities_api_categories_init', $callback );
 		}
 
-		wc_register_ability_field(
+		AbilityFields::register(
 			'product',
 			'test_code',
 			array(
@@ -101,7 +101,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-		wc_register_ability_field(
+		AbilityFields::register(
 			'order',
 			'test_note',
 			array(
@@ -111,7 +111,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-		wc_register_ability_field(
+		AbilityFields::register(
 			'order_item',
 			'test_gift',
 			array(
@@ -278,9 +278,9 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	 * @testdox Should refuse a field without a schema.
 	 */
 	public function test_field_without_schema_is_refused(): void {
-		$this->setExpectedIncorrectUsage( 'wc_register_ability_field' );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Abilities\AbilityFields::register' );
 
-		wc_register_ability_field( 'product', 'test_bad', array( 'get_callback' => '__return_true' ) );
+		AbilityFields::register( 'product', 'test_bad', array( 'get_callback' => '__return_true' ) );
 
 		$this->assertArrayNotHasKey( 'test_bad', AbilityFields::get( 'product' ) );
 	}

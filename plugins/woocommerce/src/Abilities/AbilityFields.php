@@ -5,18 +5,21 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\AbilitiesApi;
+namespace Automattic\WooCommerce\Abilities;
+
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Fields that extensions add to the abilities of an object type, as
- * register_rest_field() does for the REST API. An ability that formats an
- * object of that type adds the field values under `extensions`, keyed by
- * attribute, and lists the fields in its output schema.
+ * register_rest_field() does for the REST API. An extension registers a field
+ * with register(). An ability that formats an object of that type adds the
+ * field values under `extensions`, keyed by attribute, and lists the fields in
+ * its output schema.
  *
- * @internal Core's abilities call this class. The public contract is
- *           wc_register_ability_field(); the read side may change.
+ * The public contract is register(). The read side that Core's abilities call
+ * is internal and may change.
  *
  * @since 11.3.0
  */
@@ -30,13 +33,31 @@ class AbilityFields {
 	private static array $fields = array();
 
 	/**
-	 * Register a field. A later registration of the same attribute replaces it.
+	 * Register a field that the abilities of an object type return under `extensions`.
 	 *
-	 * @param string               $object_type Object type.
-	 * @param string               $attribute   Attribute under `extensions`.
-	 * @param array<string, mixed> $args        `schema` and `get_callback( $object )`.
+	 * Several extensions can add fields to the same object type, so prefix the
+	 * attribute with the extension's name, such as `subscription_trial_length`.
+	 * A later registration of the same attribute replaces it.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $object_type Object type: `product`, `order` or `order_item`.
+	 * @param string $attribute   Attribute under `extensions`.
+	 * @param array  $args        {
+	 *     Field arguments.
+	 *
+	 *     @type array    $schema       JSON schema of the value. Its `title` is the label clients show.
+	 *     @type callable $get_callback Receives the object and returns the value, or null to leave the
+	 *                                  attribute out. It reads the object it is given, not the database,
+	 *                                  because an ability can format an object before it is saved.
+	 * }
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
+		if ( ! is_array( $args['schema'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array.', '11.3.0' );
+			return;
+		}
+
 		self::$fields[ $object_type ][ $attribute ] = $args;
 	}
 
