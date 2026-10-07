@@ -82,6 +82,12 @@ export type EmailType = {
 	email_key: string;
 	email_class_name: string;
 	post_id: string;
+	/**
+	 * False for emails not registered for the block editor (classic
+	 * `WC_Email`s without a block template). Those are configured on the
+	 * classic per-email settings section instead.
+	 */
+	block_editor_supported: boolean;
 	/** Null for emails not registered for the block editor. */
 	file_template_preview_url: string | null;
 	recipients: Recipients;
