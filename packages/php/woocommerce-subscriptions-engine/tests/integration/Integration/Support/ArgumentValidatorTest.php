@@ -48,6 +48,12 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 			'money'                 => array( 'validate_money', array( 'tax_total', '1.5' ), '1.50000000' ),
 			'money null is zero'    => array( 'validate_money', array( 'tax_total', null ), '0.00000000' ),
 			'list of arrays'        => array( 'validate_list_of_arrays', array( 'items', array( array( 'name' => 'a' ) ) ), array( array( 'name' => 'a' ) ) ),
+			'non-negative int zero' => array( 'validate_non_negative_int', array( 'offset', 0 ), 0 ),
+			'non-negative digits'   => array( 'validate_non_negative_int', array( 'offset', '7' ), 7 ),
+			'id list'               => array( 'validate_id_list', array( 'ids', array( 3, '4' ) ), array( 3, 4 ) ),
+			'empty id list'         => array( 'validate_id_list', array( 'ids', array() ), array() ),
+			'string as list'        => array( 'validate_string_list', array( 'status', 'active' ), array( 'active' ) ),
+			'string list'           => array( 'validate_string_list', array( 'status', array( 'active', 'archived' ) ), array( 'active', 'archived' ) ),
 		);
 	}
 
@@ -77,6 +83,12 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 			'nullable date'   => array( 'validate_nullable_date', array( 'start_gmt', '2026-02-30 00:00:00' ), '"start_gmt" must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string.' ),
 			'money'           => array( 'validate_money', array( 'tax_total', 'ten' ), '"tax_total" must be a number or a numeric string.' ),
 			'list of arrays'  => array( 'validate_list_of_arrays', array( 'items', array( 'a' => array() ) ), '"items" must be a list of arrays.' ),
+			'negative int'    => array( 'validate_non_negative_int', array( 'offset', -1 ), '"offset" must be a non-negative integer.' ),
+			'id list entry'   => array( 'validate_id_list', array( 'ids', array( 3, 0 ) ), '"ids" must be a list of positive integers.' ),
+			'id list null'    => array( 'validate_id_list', array( 'ids', array( null ) ), '"ids" must be a list of positive integers.' ),
+			'id list map'     => array( 'validate_id_list', array( 'ids', array( 'a' => 3 ) ), '"ids" must be a list of positive integers.' ),
+			'string list'     => array( 'validate_string_list', array( 'status', array( 'active', '' ) ), '"status" must be a non-empty string or a list of them.' ),
+			'string list int' => array( 'validate_string_list', array( 'status', 5 ), '"status" must be a non-empty string or a list of them.' ),
 		);
 	}
 

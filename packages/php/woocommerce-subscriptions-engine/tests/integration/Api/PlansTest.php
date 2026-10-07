@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for the Plans write facade.
+ * Integration tests for the Plans facade.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -547,5 +547,186 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->expectException( InvalidArgumentException::class );
 
 		Plans::add_meta( $this->create(), '', 'x' );
+	}
+
+	/**
+	 * Map views to their ids.
+	 *
+	 * @param array<int, PlanView> $plans Views to map.
+	 * @return array<int, int>
+	 */
+	private static function plan_ids( array $plans ): array {
+		return array_map(
+			static function ( PlanView $plan ): int {
+				return $plan->get_id();
+			},
+			$plans
+		);
+	}
+
+	/**
+	 * @testdox get returns a plan in any status, and null for an unknown id.
+	 */
+	public function test_get_returns_a_plan_in_any_status(): void {
+		$archived_id = $this->create(
+			array(
+				'status'         => PlanStatus::ARCHIVED,
+				'pricing_policy' => array( 'opaque' => true ),
+			)
+		);
+
+		$plan = Plans::get( $archived_id );
+
+		$this->assertInstanceOf( PlanView::class, $plan );
+		$this->assertSame( $archived_id, $plan->get_id() );
+		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
+		$this->assertSame( self::OWNER, $plan->get_extension_slug() );
+		$this->assertSame( array( 'opaque' => true ), $plan->get_pricing_policy() );
+		$this->assertNull( Plans::get( 999999 ) );
+		$this->assertNull( Plans::get( 0 ) );
+	}
+
+	/**
+	 * @testdox list without args returns every extension's plans in every status, oldest id first.
+	 */
+	public function test_list_without_args_returns_every_plan_in_id_order(): void {
+		$first_id    = $this->create( array( 'name' => 'Zulu' ) );
+		$archived_id = $this->create( array( 'status' => PlanStatus::ARCHIVED ) );
+		$foreign_id  = $this->create( array( 'extension_slug' => 'other-extension' ) );
+
+		$plans = Plans::list();
+
+		$this->assertSame( array( $first_id, $archived_id, $foreign_id ), self::plan_ids( $plans ) );
+		$this->assertContainsOnlyInstancesOf( PlanView::class, $plans );
+	}
+
+	/**
+	 * @testdox list filters by an extension slug or a list of them.
+	 */
+	public function test_list_filters_by_extension_slug(): void {
+		$own_id   = $this->create();
+		$other_id = $this->create( array( 'extension_slug' => 'other-extension' ) );
+		$this->create( array( 'extension_slug' => 'third-extension' ) );
+
+		$this->assertSame( array( $own_id ), self::plan_ids( Plans::list( array( 'extension_slug' => self::OWNER ) ) ) );
+		$this->assertSame(
+			array( $own_id, $other_id ),
+			self::plan_ids( Plans::list( array( 'extension_slug' => array( self::OWNER, 'other-extension' ) ) ) )
+		);
+	}
+
+	/**
+	 * @testdox list filters by a status or a list of them.
+	 */
+	public function test_list_filters_by_status(): void {
+		$active_id   = $this->create();
+		$archived_id = $this->create( array( 'status' => PlanStatus::ARCHIVED ) );
+
+		$this->assertSame( array( $active_id ), self::plan_ids( Plans::list( array( 'status' => PlanStatus::ACTIVE ) ) ) );
+		$this->assertSame(
+			array( $active_id, $archived_id ),
+			self::plan_ids( Plans::list( array( 'status' => array( PlanStatus::ACTIVE, PlanStatus::ARCHIVED ) ) ) )
+		);
+	}
+
+	/**
+	 * @testdox list filters by ids in id order regardless of the requested order, composing with the other filters.
+	 */
+	public function test_list_filters_by_ids(): void {
+		$first_id    = $this->create();
+		$second_id   = $this->create();
+		$excluded_id = $this->create();
+		$archived_id = $this->create( array( 'status' => PlanStatus::ARCHIVED ) );
+		$foreign_id  = $this->create( array( 'extension_slug' => 'other-extension' ) );
+		$requested   = array( $archived_id, $second_id, $first_id, $foreign_id, 999999 );
+
+		$all = self::plan_ids(
+			Plans::list(
+				array(
+					'extension_slug' => self::OWNER,
+					'ids'            => $requested,
+				)
+			)
+		);
+		$this->assertSame( array( $first_id, $second_id, $archived_id ), $all );
+		$this->assertNotContains( $excluded_id, $all );
+
+		$active = self::plan_ids(
+			Plans::list(
+				array(
+					'extension_slug' => self::OWNER,
+					'ids'            => $requested,
+					'status'         => PlanStatus::ACTIVE,
+				)
+			)
+		);
+		$this->assertSame( array( $first_id, $second_id ), $active );
+	}
+
+	/**
+	 * @testdox list matches nothing for an empty list filter.
+	 */
+	public function test_list_matches_nothing_for_an_empty_list_filter(): void {
+		$this->create();
+
+		$this->assertSame( array(), Plans::list( array( 'ids' => array() ) ) );
+		$this->assertSame( array(), Plans::list( array( 'status' => array() ) ) );
+		$this->assertSame( array(), Plans::list( array( 'extension_slug' => array() ) ) );
+	}
+
+	/**
+	 * @testdox list pages with limit and offset in id order.
+	 */
+	public function test_list_pages_with_limit_and_offset(): void {
+		$this->create();
+		$second_id = $this->create();
+		$third_id  = $this->create();
+
+		$this->assertSame(
+			array( $second_id, $third_id ),
+			self::plan_ids(
+				Plans::list(
+					array(
+						'limit'  => 2,
+						'offset' => 1,
+					)
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox list ignores an unknown key with a notice.
+	 */
+	public function test_list_ignores_an_unknown_key_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Plans::class . '::list' );
+		$plan_id = $this->create();
+
+		$this->assertSame( array( $plan_id ), self::plan_ids( Plans::list( array( 'orderby' => 'name' ) ) ) );
+	}
+
+	/**
+	 * @testdox list rejects an invalid value.
+	 * @dataProvider provide_invalid_list_args
+	 *
+	 * @param array<string, mixed> $args List args.
+	 */
+	public function test_list_rejects_an_invalid_value( array $args ): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Plans::list( $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_list_args(): array {
+		return array(
+			'empty extension slug' => array( array( 'extension_slug' => '' ) ),
+			'status not a string'  => array( array( 'status' => 5 ) ),
+			'id not positive'      => array( array( 'ids' => array( 1, 0 ) ) ),
+			'zero limit'           => array( array( 'limit' => 0 ) ),
+			'negative offset'      => array( array( 'offset' => -1 ) ),
+		);
 	}
 }

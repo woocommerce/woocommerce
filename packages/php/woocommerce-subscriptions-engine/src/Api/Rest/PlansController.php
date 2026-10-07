@@ -278,12 +278,12 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$plan = $this->plan_repository->find( Coercion::coerce_int( $request->get_param( 'id' ) ), $extension_slug );
-		if ( ! $plan instanceof Plan ) {
+		$plan = Plans::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		if ( null === $plan || $extension_slug !== $plan->get_extension_slug() ) {
 			return $this->not_found_error();
 		}
 
-		return rest_ensure_response( $this->prepare_item_for_response( PlanView::from_plan( $plan ), $request ) );
+		return rest_ensure_response( $this->prepare_item_for_response( $plan, $request ) );
 	}
 
 	/**

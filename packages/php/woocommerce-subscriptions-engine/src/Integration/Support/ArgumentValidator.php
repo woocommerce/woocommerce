@@ -121,6 +121,77 @@ final class ArgumentValidator {
 	}
 
 	/**
+	 * Validate and return a non-negative integer (a digit string is cast).
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not a non-negative integer.
+	 */
+	public static function validate_non_negative_int( string $key, $value ): int {
+		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
+			$value = (int) $value;
+		}
+
+		if ( ! is_int( $value ) || $value < 0 ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a non-negative integer.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate a list of positive integer ids (digit strings are cast) and return it.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int, int>
+	 * @throws InvalidArgumentException If the value is not a list of positive integers.
+	 */
+	public static function validate_id_list( string $key, $value ): array {
+		if ( ! is_array( $value ) || ( array() !== $value && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a list of positive integers.', esc_html( $key ) ) );
+		}
+
+		$ids = array();
+		foreach ( $value as $id ) {
+			if ( is_string( $id ) && 1 === preg_match( '/^[0-9]+$/', $id ) ) {
+				$id = (int) $id;
+			}
+			if ( ! is_int( $id ) || $id <= 0 ) {
+				throw new InvalidArgumentException( sprintf( '"%s" must be a list of positive integers.', esc_html( $key ) ) );
+			}
+			$ids[] = $id;
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Validate a non-empty string or a list of them and return it as a list.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int, string>
+	 * @throws InvalidArgumentException If the value is not a non-empty string or a list of them.
+	 */
+	public static function validate_string_list( string $key, $value ): array {
+		$values = is_string( $value ) ? array( $value ) : $value;
+		if ( ! is_array( $values ) || ( array() !== $values && array_keys( $values ) !== range( 0, count( $values ) - 1 ) ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string or a list of them.', esc_html( $key ) ) );
+		}
+
+		$strings = array();
+		foreach ( $values as $item ) {
+			if ( ! is_string( $item ) || '' === $item ) {
+				throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string or a list of them.', esc_html( $key ) ) );
+			}
+			$strings[] = $item;
+		}
+
+		return $strings;
+	}
+
+	/**
 	 * Validate a GMT datetime, or null, and return it as a UTC `Y-m-d H:i:s` string.
 	 *
 	 * @param string $key   Field name.

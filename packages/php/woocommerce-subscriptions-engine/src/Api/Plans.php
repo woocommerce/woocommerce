@@ -1,13 +1,13 @@
 <?php
 /**
- * Plans - the engine's public plan write facade.
+ * Plans - the engine's public plan facade (reads and writes).
  *
- * Extensions create and update plans from explicit argument arrays: the engine records
+ * Extensions create, update and read plans through explicit argument arrays: the engine records
  * the payloads it is given and interprets none of them. It checks integrity only (a
  * non-empty name, a registered status, object-shaped policies), then lets the plan's
  * owner validate the write through `woocommerce_subscriptions_engine_validate_plan`.
- * Any caller may write any plan (authorization is the caller's concern). The engine
- * opens no transaction and keeps no cache.
+ * Any caller may read or write any plan (authorization is the caller's concern). Reads
+ * return read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
  *
  * Billing payload contract: the engine reads one plan payload itself. Until every
  * contract carries a plan snapshot, renewal and reactivation fall back to the live
@@ -38,7 +38,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValid
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Public plan write facade.
+ * Public plan facade: reads and writes.
  *
  * Final and static-only: a stateless entry point, not an extension seam.
  */
@@ -63,6 +63,24 @@ final class Plans {
 	 * @var array<string, true>
 	 */
 	private const CREATE_KEYS = array( 'extension_slug' => true ) + self::PLAN_KEYS;
+
+	/**
+	 * Keys accepted by {@see self::list()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const LIST_KEYS = array(
+		'extension_slug' => true,
+		'status'         => true,
+		'ids'            => true,
+		'limit'          => true,
+		'offset'         => true,
+	);
+
+	/**
+	 * Default `limit` of {@see self::list()}.
+	 */
+	private const DEFAULT_LIST_LIMIT = 200;
 
 	/**
 	 * Policy keys: each takes a string-keyed array (an object) or null.
@@ -217,6 +235,64 @@ final class Plans {
 	 */
 	public static function get_meta( int $id, string $key = '', bool $single = false ) {
 		return ( new PlanRepository() )->get_meta( $id, $key, $single );
+	}
+
+	/**
+	 * Fetch a plan by id, in any status.
+	 *
+	 * @param int $plan_id Plan id.
+	 * @return PlanView|null The plan, or null when none exists.
+	 */
+	public static function get( int $plan_id ): ?PlanView {
+		$plan = ( new PlanRepository() )->find( $plan_id );
+
+		return null === $plan ? null : PlanView::from_plan( $plan );
+	}
+
+	/**
+	 * List plans, oldest id first. Without args: every extension's plans in every status.
+	 *
+	 * Archived plans are never purged and count toward `limit`, so pass `status` (for
+	 * example `active`) when reading a catalog to sell from. An empty list filter matches
+	 * nothing. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
+	 *
+	 * @param array<string, mixed> $args {
+	 *     Optional. Query args.
+	 *
+	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them. Absent: every extension.
+	 *     @type string|string[] $status         Plan status, or a list of them. Absent: every status.
+	 *     @type int[]           $ids            Only these plan ids.
+	 *     @type int             $limit          Maximum plans to return. Default 200.
+	 *     @type int             $offset         Plans to skip (for paging). Default 0.
+	 * }
+	 * @return array<int, PlanView>
+	 * @throws InvalidArgumentException If a value is invalid.
+	 */
+	public static function list( array $args = array() ): array {
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::LIST_KEYS );
+
+		$query = array(
+			'orderby' => 'id',
+			'order'   => 'asc',
+			'limit'   => ArgumentValidator::validate_nullable_id( 'limit', $filtered_args['limit'] ?? null ) ?? self::DEFAULT_LIST_LIMIT,
+			'offset'  => ArgumentValidator::validate_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
+		);
+		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
+			$query['extension_slugs'] = ArgumentValidator::validate_string_list( 'extension_slug', $filtered_args['extension_slug'] );
+		}
+		if ( array_key_exists( 'status', $filtered_args ) ) {
+			$query['status'] = ArgumentValidator::validate_string_list( 'status', $filtered_args['status'] );
+		}
+		if ( array_key_exists( 'ids', $filtered_args ) ) {
+			$query['ids'] = ArgumentValidator::validate_id_list( 'ids', $filtered_args['ids'] );
+		}
+
+		return array_map(
+			static function ( Plan $plan ): PlanView {
+				return PlanView::from_plan( $plan );
+			},
+			( new PlanRepository() )->query( $query )
+		);
 	}
 
 	/**

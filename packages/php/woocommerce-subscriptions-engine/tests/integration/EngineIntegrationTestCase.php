@@ -12,7 +12,6 @@ declare( strict_types=1 );
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\SellingPlans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
@@ -121,13 +120,12 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Read a plan through the selling plans facade, scoped to `$owner`.
+	 * Read a plan through the plan facade, asserting it exists.
 	 *
-	 * @param int    $id    Plan id.
-	 * @param string $owner Owner slug.
+	 * @param int $plan_id Plan id.
 	 */
-	protected function plan_view( int $id, string $owner = self::PLAN_OWNER ): PlanView {
-		$plan = ( new SellingPlans( array( $owner ) ) )->get_plan( $id );
+	protected function plan_view( int $plan_id ): PlanView {
+		$plan = Plans::get( $plan_id );
 		$this->assertInstanceOf( PlanView::class, $plan );
 
 		return $plan;
