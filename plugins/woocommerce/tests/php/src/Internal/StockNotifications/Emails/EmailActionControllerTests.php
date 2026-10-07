@@ -185,11 +185,14 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe.
+	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe from $status.
+	 * @dataProvider provide_cancellable_statuses
+	 *
+	 * @param string $status Initial notification status.
 	 */
-	public function test_process_unsubscribe_action_sets_status_cancelled() {
+	public function test_process_unsubscribe_action_sets_status_cancelled( $status ) {
 		$id = $this->arrange_notification(
-			NotificationStatus::ACTIVE,
+			$status,
 			'unsubscribe_action_key',
 			wp_fast_hash( 'test' )
 		);
@@ -204,6 +207,18 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$updated = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
 		$this->assertEquals( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
+	}
+
+	/**
+	 * Statuses an unsubscribe link can cancel.
+	 *
+	 * @return array
+	 */
+	public function provide_cancellable_statuses() {
+		return array(
+			'active'  => array( NotificationStatus::ACTIVE ),
+			'pending' => array( NotificationStatus::PENDING ),
+		);
 	}
 
 	/**
