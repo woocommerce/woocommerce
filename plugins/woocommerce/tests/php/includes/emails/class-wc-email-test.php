@@ -97,6 +97,7 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 	 * @testWith ["WC_Email_Customer_Reset_Password"]
 	 *           ["WC_Email_Customer_New_Account"]
 	 *           ["Automattic\\WooCommerce\\Internal\\CustomerEmailVerification\\Emails\\CustomerVerifyEmail"]
+	 *           ["Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationVerifyEmail"]
 	 *
 	 * @param string $class_name Email class name.
 	 */
