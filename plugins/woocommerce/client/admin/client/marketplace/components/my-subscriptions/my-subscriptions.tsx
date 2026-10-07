@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
+import { Button, VisuallyHidden } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	createInterpolateElement,
 	useContext,
 	useEffect,
+	useRef,
 } from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
@@ -33,6 +34,7 @@ import {
 } from '../../contexts/types';
 import Notice from '../notice/notice';
 import MySubscriptionsAccount from './my-subscriptions-account';
+import { MARKETPLACE_CONNECT_DOCS_PATH } from '../constants';
 
 /**
  * Whether the failure captured at page load has already been reported.
@@ -47,6 +49,7 @@ let pageLoadErrorReported = false;
 export default function MySubscriptions(): React.JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const installedHeadingRef = useRef< HTMLHeadingElement >( null );
 
 	// Report the failure captured at page load as the notice a failed refresh
 	// would report, under the same id. The Refresh button reruns the very
@@ -115,7 +118,7 @@ export default function MySubscriptions(): React.JSX.Element {
 
 	if ( ! wccomSettings?.isConnected ) {
 		const connectMessage = __(
-			'Connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
+			'Create and connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
 			'woocommerce'
 		);
 
@@ -158,9 +161,25 @@ export default function MySubscriptions(): React.JSX.Element {
 					<p className="woocommerce-marketplace__my-subscriptions__description">
 						{ connectMessage }
 					</p>
-					<Button href={ connectUrl() } variant="primary">
-						{ __( 'Connect', 'woocommerce' ) }
-					</Button>
+					<div className="woocommerce-marketplace__my-subscriptions__connect-actions">
+						<Button href={ connectUrl() } variant="primary">
+							{ __( 'Connect', 'woocommerce' ) }
+						</Button>
+						<Button
+							href={ MARKETPLACE_CONNECT_DOCS_PATH }
+							target="_blank"
+							rel="noopener noreferrer"
+							variant="secondary"
+							icon={ external }
+							iconSize={ 16 }
+							iconPosition="right"
+						>
+							{ __( 'Learn more', 'woocommerce' ) }
+							<VisuallyHidden as="span">
+								{ __( '(opens in a new tab)', 'woocommerce' ) }
+							</VisuallyHidden>
+						</Button>
+					</div>
 				</div>
 			</>
 		);
@@ -209,11 +228,17 @@ export default function MySubscriptions(): React.JSX.Element {
 				<section className="woocommerce-marketplace__my-subscriptions__notices">
 					<Notices />
 				</section>
-				<MySubscriptionsAccount />
+				<MySubscriptionsAccount
+					onDismiss={ () => installedHeadingRef.current?.focus() }
+				/>
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 					<header className="woocommerce-marketplace__my-subscriptions__header">
 						<div className="woocommerce-marketplace__my-subscriptions__header-content">
-							<h2 className="woocommerce-marketplace__my-subscriptions__heading">
+							<h2
+								className="woocommerce-marketplace__my-subscriptions__heading"
+								ref={ installedHeadingRef }
+								tabIndex={ -1 }
+							>
 								{ __(
 									'Installed on this store',
 									'woocommerce'

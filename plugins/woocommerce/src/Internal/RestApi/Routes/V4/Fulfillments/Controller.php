@@ -226,7 +226,8 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function get_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		// Use the fulfillment ID from the matched route.
+		$fulfillment_id = (int) ( $request->get_url_params()['fulfillment_id'] ?? 0 );
 		$fulfillment    = new Fulfillment( $fulfillment_id );
 
 		if ( ! $fulfillment->get_id() ) {
@@ -245,7 +246,9 @@ class Controller extends AbstractController {
 			);
 		}
 
+		// Pass the route's IDs on to the v3 controller.
 		$order_id = (int) $fulfillment->get_entity_id();
+		$request->set_param( 'fulfillment_id', $fulfillment_id );
 		$request->set_param( 'order_id', $order_id );
 		return $this->order_fulfillments_controller->get_fulfillment( $request );
 	}
@@ -257,7 +260,8 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function update_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		// Use the fulfillment ID from the matched route.
+		$fulfillment_id = (int) ( $request->get_url_params()['fulfillment_id'] ?? 0 );
 		$fulfillment    = new Fulfillment( $fulfillment_id );
 
 		if ( ! $fulfillment->get_id() ) {
@@ -276,7 +280,9 @@ class Controller extends AbstractController {
 			);
 		}
 
+		// Pass the route's IDs on to the v3 controller.
 		$order_id = (int) $fulfillment->get_entity_id();
+		$request->set_param( 'fulfillment_id', $fulfillment_id );
 		$request->set_param( 'order_id', $order_id );
 		return $this->order_fulfillments_controller->update_fulfillment( $request );
 	}
@@ -288,9 +294,29 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function delete_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		// Use the fulfillment ID from the matched route.
+		$fulfillment_id = (int) ( $request->get_url_params()['fulfillment_id'] ?? 0 );
 		$fulfillment    = new Fulfillment( $fulfillment_id );
-		$order_id       = (int) $fulfillment->get_entity_id();
+
+		if ( ! $fulfillment->get_id() ) {
+			return $this->prepare_error_response(
+				'woocommerce_rest_fulfillment_invalid_id',
+				__( 'Invalid fulfillment ID.', 'woocommerce' ),
+				array( 'status' => WP_Http::NOT_FOUND )
+			);
+		}
+
+		if ( $fulfillment->get_entity_type() !== WC_Order::class ) {
+			return $this->prepare_error_response(
+				'woocommerce_rest_invalid_entity_type',
+				__( 'The entity type must be "order".', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// Pass the route's IDs on to the v3 controller.
+		$order_id = (int) $fulfillment->get_entity_id();
+		$request->set_param( 'fulfillment_id', $fulfillment_id );
 		$request->set_param( 'order_id', $order_id );
 		return $this->order_fulfillments_controller->delete_fulfillment( $request );
 	}
@@ -306,23 +332,16 @@ class Controller extends AbstractController {
 	 * @throws WP_Error If the URL contains an order, but the order does not exist.
 	 */
 	public function check_permission_for_fulfillments( WP_REST_Request $request ) {
-		// Fetch the order first if there's an order_id in the request.
-		$order = null;
+		// Item routes check the fulfillment's parent order, the collection read uses order_id, and create uses entity_id from the body.
+		$order      = null;
+		$url_params = $request->get_url_params();
 
-		// If there's an order_id in the request, try to get the order.
-		if ( $request->has_param( 'order_id' ) ) {
-			$order_id = (int) $request->get_param( 'order_id' );
-			$order    = wc_get_order( $order_id );
-		}
-
-		// If there's a fulfillment_id in the request, try to get the order from the fulfillment.
-		if ( ! $order && $request->has_param( 'fulfillment_id' ) ) {
-			$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		if ( isset( $url_params['fulfillment_id'] ) ) {
+			$fulfillment_id = (int) $url_params['fulfillment_id'];
 			if ( $fulfillment_id ) {
 				try {
 					$fulfillment = new Fulfillment( $fulfillment_id );
-					$order_id    = (int) $fulfillment->get_entity_id();
-					$order       = wc_get_order( $order_id );
+					$order       = wc_get_order( (int) $fulfillment->get_entity_id() );
 				} catch ( ApiException $ex ) {
 					return new WP_Error(
 						$ex->getErrorCode(),
@@ -337,21 +356,24 @@ class Controller extends AbstractController {
 					);
 				}
 			}
-		}
+		} elseif ( WP_REST_Server::CREATABLE === $request->get_method() ) {
+			// Create: the order comes from the request body as entity_id/entity_type.
+			$body_params = $request->get_json_params();
+			if ( isset( $body_params['entity_id'] ) && isset( $body_params['entity_type'] ) ) {
+				if ( WC_Order::class !== $body_params['entity_type'] ) {
+					return new WP_Error(
+						'woocommerce_rest_invalid_entity_type',
+						esc_html__( 'The entity type must be "order".', 'woocommerce' ),
+						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
+					);
+				}
 
-		// If there's no order_id in the request, try to get it from the request body.
-		$body_params = $request->get_json_params();
-		if ( ! $order && isset( $body_params['entity_id'] ) && isset( $body_params['entity_type'] ) ) {
-			if ( WC_Order::class !== $body_params['entity_type'] ) {
-				return new WP_Error(
-					'woocommerce_rest_invalid_entity_type',
-					esc_html__( 'The entity type must be "order".', 'woocommerce' ),
-					array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
-				);
+				$order = wc_get_order( (int) $body_params['entity_id'] );
 			}
-
-			$order_id = (int) $body_params['entity_id'];
-			$order    = wc_get_order( $order_id );
+		} else {
+			// Collection read (GET, and HEAD which core maps to GET): the order comes
+			// from the order_id query arg.
+			$order = wc_get_order( (int) $request->get_param( 'order_id' ) );
 		}
 
 		// If there's still no order, return an error.

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Taxes;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as StatsDataStore;
@@ -16,8 +17,11 @@ use WC_Helper_Order;
 use WC_Helper_Queue;
 use WC_Helper_Reports;
 use WC_Order;
+use WC_Order_Item_Fee;
+use WC_Order_Item_Shipping;
 use WC_Order_Item_Tax;
 use WC_Product_Simple;
+use WC_Tax;
 use WC_Unit_Test_Case;
 
 /**
@@ -43,13 +47,34 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $original_date_type;
 
 	/**
+	 * Original woocommerce_tax_based_on option value.
+	 *
+	 * @var string|false
+	 */
+	private $original_tax_based_on;
+
+	/**
+	 * Original woocommerce_shipping_tax_class option value.
+	 *
+	 * @var string|false
+	 */
+	private $original_shipping_tax_class;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_calc_taxes = get_option( 'woocommerce_calc_taxes' );
-		$this->original_date_type  = get_option( 'woocommerce_date_type' );
+		$this->original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$this->original_date_type          = get_option( 'woocommerce_date_type' );
+		$this->original_tax_based_on       = get_option( 'woocommerce_tax_based_on' );
+		$this->original_shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		// Pin the tax location basis and the shipping tax class so the DE order fixtures
+		// do not depend on the environment's store base address or on the class-inheritance
+		// resolution, which varies with state left behind by the wider suite.
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
 	}
 
 	/**
@@ -57,6 +82,16 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		update_option( 'woocommerce_calc_taxes', $this->original_calc_taxes );
+		if ( false === $this->original_tax_based_on ) {
+			delete_option( 'woocommerce_tax_based_on' );
+		} else {
+			update_option( 'woocommerce_tax_based_on', $this->original_tax_based_on );
+		}
+		if ( false === $this->original_shipping_tax_class ) {
+			delete_option( 'woocommerce_shipping_tax_class' );
+		} else {
+			update_option( 'woocommerce_shipping_tax_class', $this->original_shipping_tax_class );
+		}
 		if ( false === $this->original_date_type ) {
 			delete_option( 'woocommerce_date_type' );
 		} else {
@@ -68,23 +103,25 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * Insert a DE VAT tax rate and return its id.
 	 *
+	 * @param string $rate     Tax rate percentage.
+	 * @param int    $priority Tax rate priority.
+	 * @param int    $compound Whether the rate is compound.
 	 * @return int
 	 */
-	private function insert_tax_rate(): int {
-		global $wpdb;
-		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_tax_rates',
+	private function insert_tax_rate( string $rate = '19', int $priority = 1, int $compound = 0 ): int {
+		return (int) WC_Tax::_insert_tax_rate(
 			array(
-				'tax_rate_id'       => 1,
-				'tax_rate'          => '19',
 				'tax_rate_country'  => 'DE',
 				'tax_rate_state'    => '',
+				'tax_rate'          => $rate,
 				'tax_rate_name'     => 'VAT',
-				'tax_rate_priority' => 1,
-				'tax_rate_order'    => 1,
+				'tax_rate_priority' => $priority,
+				'tax_rate_compound' => $compound,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 0,
+				'tax_rate_class'    => '',
 			)
 		);
-		return 1;
 	}
 
 	/**
@@ -328,6 +365,42 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a completed DE order with two product units, a fee and shipping, all taxed.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_taxed_de_order(): \WC_Order {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Taxable Product' );
+		$product->set_regular_price( '100' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'DE' );
+		$order->set_shipping_country( 'DE' );
+		$order->add_product( $product, 2 );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Handling' );
+		$fee->set_total( '10' );
+		$fee->set_tax_status( 'taxable' );
+		$order->add_item( $fee );
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( '5' );
+		$order->add_item( $shipping );
+
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_date_paid( time() );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
 	 * Create a completed, paid order whose tax lines carry an arbitrary `rate_id`, including one
 	 * that has no `woocommerce_tax_rates` row and one shared by several lines.
 	 *
@@ -396,6 +469,336 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		ReportsCache::invalidate();
 
 		return $order;
+	}
+
+	/**
+	 * @testdox Syncing an order records the net amount its tax rate applied to, and the reports expose it.
+	 */
+	public function test_sync_order_taxes_records_taxable_amount(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		DataStore::sync_order_taxes( $order->get_id() );
+		ReportsCache::invalidate();
+
+		// 2 x 100 product + 10 fee + 5 shipping, all net of tax.
+		$lookup_amount = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 215.0, (float) $lookup_amount, 'The lookup row should record the net total the rate applied to.' );
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+
+		$taxes_data = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) );
+		$this->assertArrayHasKey( 'taxable_amount', $taxes_data->data[0] );
+		$this->assertSame( 215.0, $taxes_data->data[0]['taxable_amount'], 'The Taxes report row should expose the taxable amount.' );
+	}
+
+	/**
+	 * @testdox Syncing an order records the taxable amount for a zero-rated tax rate.
+	 */
+	public function test_sync_order_taxes_records_taxable_amount_for_zero_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate( '0' );
+		$order   = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT total_tax, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'A zero-rated tax should still produce a lookup row.' );
+		$this->assertSame( 0.0, (float) $lookup_row->total_tax );
+		$this->assertSame( 215.0, (float) $lookup_row->taxable_amount, 'A zero-rated sale should record the base amount it was taxed on.' );
+	}
+
+	/**
+	 * @testdox Syncing an order with a manual tax line no item carries records a zero taxable amount.
+	 */
+	public function test_sync_order_taxes_records_zero_taxable_amount_for_unapplied_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $rate_id );
+		$tax_item->set_tax_total( 19 );
+
+		$order = wc_create_order();
+		$order->add_item( $tax_item );
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'A manual tax line should still produce a lookup row.' );
+		$this->assertSame( 0.0, (float) $lookup_row->taxable_amount, 'A tax line applied to no order item should record a zero taxable amount.' );
+	}
+
+	/**
+	 * @testdox An admin order save that leaves empty tax placeholders on items records no base for that rate.
+	 */
+	public function test_sync_order_taxes_ignores_placeholder_tax_entries(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id       = $this->insert_tax_rate();
+		$other_rate_id = $this->insert_tax_rate( '7', 2 );
+		$order         = $this->create_taxed_de_order();
+
+		// An admin save without recalculating stores '' for rates that never applied to the
+		// item. Blank the second rate on the fee and shipping only, so its base must come
+		// from the product line alone.
+		foreach ( $order->get_items( array( OrderItemType::FEE, OrderItemType::SHIPPING ) ) as $item ) {
+			$taxes                            = $item->get_taxes();
+			$taxes['total'][ $other_rate_id ] = '';
+			if ( isset( $taxes['subtotal'] ) ) {
+				$taxes['subtotal'][ $other_rate_id ] = '';
+			}
+			$item->set_taxes( $taxes );
+			$item->save();
+		}
+		$order->update_taxes();
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$amounts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d",
+				$order->get_id()
+			),
+			OBJECT_K
+		);
+		$this->assertSame( 200.0, (float) $amounts[ $other_rate_id ]->taxable_amount, 'Placeholder entries must not add the fee and shipping totals to the rate.' );
+		$this->assertSame( 215.0, (float) $amounts[ $rate_id ]->taxable_amount, 'The rate without placeholders must keep its full base.' );
+	}
+
+	/**
+	 * @testdox Syncing an order records the base of a compound tax rate including the taxes it compounds over.
+	 */
+	public function test_sync_order_taxes_records_taxable_amount_for_compound_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$base_rate_id       = $this->insert_tax_rate( '5', 1 );
+		$compound_rate_id   = $this->insert_tax_rate( '7', 2, 1 );
+		$compound_rate_2_id = $this->insert_tax_rate( '10', 3, 1 );
+		$order              = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$amounts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d",
+				$order->get_id()
+			),
+			OBJECT_K
+		);
+
+		// 2 x 100 product + 10 fee + 5 shipping = 215 net; the first compound rate is
+		// applied on top of the 5% tax (10.75), so its base is 225.75, and the second
+		// compound rate is additionally applied on top of the first one's tax.
+		$this->assertSame( 215.0, (float) $amounts[ $base_rate_id ]->taxable_amount, 'The non-compound rate base should be the net total.' );
+		$this->assertSame( 225.75, (float) $amounts[ $compound_rate_id ]->taxable_amount, 'The compound rate base should include the taxes it compounds over.' );
+		$this->assertEqualsWithDelta( 241.55, (float) $amounts[ $compound_rate_2_id ]->taxable_amount, 0.02, 'A second compound rate should also compound over the first one.' );
+	}
+
+	/**
+	 * @testdox An order whose tax lines share one tax rate records the taxable amount once per rate.
+	 */
+	public function test_taxable_amount_is_recorded_once_for_tax_lines_sharing_a_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		// Automated tax plugins can add several tax lines carrying the same rate id.
+		$duplicate_tax_item = new WC_Order_Item_Tax();
+		$duplicate_tax_item->set_rate( $rate_id );
+		$duplicate_tax_item->set_tax_total( 0 );
+		$order->add_item( $duplicate_tax_item );
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// Pins the storage-layer invariant: however the lookup table is keyed, the base
+		// written for one rate must not multiply across its rows - it is the amount the
+		// rate applied to, counted once. The report query's join can still inflate
+		// duplicated tax lines, but that is pre-existing and shared with total_tax.
+		$summed = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT SUM(taxable_amount) FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 215.0, (float) $summed, 'Tax lines sharing a rate id must not multiply the taxable amount.' );
+	}
+
+	/**
+	 * Refund the given order in full, mirroring its items and their taxes.
+	 *
+	 * @param \WC_Order $order Order to refund.
+	 * @return \WC_Order_Refund
+	 */
+	private function refund_order_in_full( \WC_Order $order ): \WC_Order_Refund {
+		$line_items = array();
+		foreach ( $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE, OrderItemType::SHIPPING ) ) as $item_id => $item ) {
+			$line_items[ $item_id ] = array(
+				'qty'          => is_callable( array( $item, 'get_quantity' ) ) ? $item->get_quantity() : 0,
+				'refund_total' => $item->get_total(),
+				'refund_tax'   => $item->get_taxes()['total'],
+			);
+		}
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => $line_items,
+			)
+		);
+		$this->assertNotWPError( $refund, 'The full refund should be created.' );
+
+		return $refund;
+	}
+
+	/**
+	 * @testdox A fully refunded order nets its taxable amount back to zero.
+	 */
+	public function test_refunded_order_nets_taxable_amount_to_zero(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+		$refund  = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		$sums = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT SUM(total_tax) AS total_tax, SUM(taxable_amount) AS taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+				$order->get_id(),
+				$refund->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 0.0, (float) $sums->total_tax, 'A full refund should net the tax back to zero.' );
+		$this->assertSame( 0.0, (float) $sums->taxable_amount, 'A full refund should net the taxable amount back to zero.' );
+	}
+
+	/**
+	 * @testdox A refund created after a compound rate was deleted still nets the taxable amount to zero.
+	 */
+	public function test_refund_nets_compound_taxable_amount_after_rate_deletion(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$base_rate_id     = $this->insert_tax_rate( '5', 1 );
+		$compound_rate_id = $this->insert_tax_rate( '7', 2, 1 );
+		$order            = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// The refund's own tax items re-derive the compound flag from the live rate,
+		// so deleting the rate first exercises the parent-flags fallback.
+		WC_Tax::_delete_tax_rate( $compound_rate_id );
+
+		// A real refund happens in a later request, where the rate objects cache is cold;
+		// clear it so the refund's tax items re-derive their flags from the database.
+		$rate_store = wc_get_container()->get( \Automattic\WooCommerce\Internal\Tax\TaxRateDataStore::class );
+		$cache_prop = ( new \ReflectionClass( $rate_store ) )->getProperty( 'rate_objects_cache' );
+		$cache_prop->setAccessible( true );
+		$cache_prop->setValue( $rate_store, array() );
+
+		$refund = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		foreach ( array( $base_rate_id, $compound_rate_id ) as $rate_id ) {
+			$summed = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT SUM(taxable_amount) FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+					$order->get_id(),
+					$refund->get_id(),
+					$rate_id
+				)
+			);
+			$this->assertSame( 0.0, (float) $summed, "Rate {$rate_id} should net its taxable amount back to zero after a full refund." );
+		}
+	}
+
+	/**
+	 * @testdox While the taxable_amount column is missing, syncing still writes rows and the report still returns data.
+	 */
+	public function test_guards_apply_while_taxable_amount_column_is_missing(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		// Force the column-missing code paths through the static:: seam instead of
+		// dropping the real column, which would break test transaction isolation.
+		$sut       = new class() extends DataStore {
+			/**
+			 * Report the taxable_amount column as missing.
+			 *
+			 * @return bool
+			 */
+			public static function has_taxable_amount_column() {
+				return false;
+			}
+		};
+		$sut_class = get_class( $sut );
+
+		$sut_class::sync_order_taxes( $order->get_id() );
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		ReportsCache::invalidate();
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT total_tax, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'The sync must still write lookup rows while the column is missing.' );
+		$this->assertSame( 40.85, round( (float) $lookup_row->total_tax, 2 ), 'The tax columns must still be recorded.' );
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$query  = $this->taxes_query( $after, $before, $rate_id );
+
+		$data = $sut->get_data( array_merge( $query, array( 'orderby' => 'taxable_amount' ) ) );
+		$this->assertCount( 1, $data->data, 'Ordering by the missing column must fall back instead of erroring into an empty report.' );
+		$this->assertArrayNotHasKey( 'taxable_amount', $data->data[0], 'The report must omit the column it cannot select.' );
 	}
 
 	/**
@@ -1184,5 +1587,467 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertStringContainsString( 'NOT EXISTS', DataStore::get_legacy_row_condition(), 'The check should be back once the re-key has landed.' );
+	}
+
+	/**
+	 * Tax lines of three jurisdictions, none of them backed by a row in the tax rates table,
+	 * which is the shape a rate that has since been edited or deleted leaves behind.
+	 *
+	 * @return array
+	 */
+	private function tax_lines_in_three_locations(): array {
+		return array(
+			array(
+				'code'         => 'US-CA-STATE TAX-1',
+				'label'        => 'State Tax',
+				'rate_id'      => 201,
+				'rate_percent' => 7.25,
+				'tax_total'    => 7.25,
+			),
+			array(
+				'code'         => 'US-NY-STATE TAX-1',
+				'label'        => 'State Tax',
+				'rate_id'      => 202,
+				'rate_percent' => 4.0,
+				'tax_total'    => 4.0,
+			),
+			array(
+				'code'         => 'DE-VAT-1',
+				'label'        => 'VAT',
+				'rate_id'      => 203,
+				'rate_percent' => 19.0,
+				'tax_total'    => 19.0,
+			),
+		);
+	}
+
+	/**
+	 * Run the Taxes table report over February 2023 with a location filter.
+	 *
+	 * @param array $location_args Location filter arguments.
+	 * @return array Report rows.
+	 */
+	private function taxes_report_rows_for_location( array $location_args ): array {
+		$sut  = new DataStore();
+		$data = $sut->get_data( $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + $location_args );
+
+		return $data->data;
+	}
+
+	/**
+	 * @testdox Taxes report keeps only the rows of the filtered country.
+	 */
+	public function test_taxes_report_filters_rows_by_country(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'DE' ) );
+
+		$this->assertCount( 1, $rows, 'Only the German tax code should be reported.' );
+		$this->assertSame( 'DE', $rows[0]['country'], 'The reported row should be the one the filter names.' );
+		$this->assertSame( 19.0, $rows[0]['total_tax'], 'The row should carry its own tax amount.' );
+	}
+
+	/**
+	 * @testdox Taxes report keeps only the rows of the filtered state.
+	 */
+	public function test_taxes_report_filters_rows_by_country_and_state(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:CA' ) );
+
+		$this->assertCount( 1, $rows, 'Only the Californian tax code should be reported.' );
+		$this->assertSame( 'CA', $rows[0]['state'], 'The reported row should be the one the filter names.' );
+		$this->assertSame( 7.25, $rows[0]['total_tax'], 'The row should carry its own tax amount.' );
+	}
+
+	/**
+	 * @testdox Taxes report reads a filter holding several locations as any of them.
+	 */
+	public function test_taxes_report_filters_rows_by_several_locations(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:CA,DE' ) );
+
+		$this->assertCount( 2, $rows, 'Both named locations should be reported.' );
+		$this->assertSame( 26.25, array_sum( array_column( $rows, 'total_tax' ) ), 'The rows should add up to the tax of the named locations.' );
+	}
+
+	/**
+	 * @testdox Taxes report drops the rows of an excluded location.
+	 */
+	public function test_taxes_report_excludes_rows_by_location(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_excludes' => 'US' ) );
+
+		$this->assertCount( 1, $rows, 'Only the tax codes outside the excluded country should be reported.' );
+		$this->assertSame( 'DE', $rows[0]['country'], 'The excluded country should leave the report.' );
+	}
+
+	/**
+	 * Tax lines whose codes hold a hyphen where the country, state, name and priority meet:
+	 * `DE-BW` is a state code in `i18n/states.php`, and a rate name can hold one too.
+	 *
+	 * @return array
+	 */
+	private function tax_lines_with_hyphenated_codes(): array {
+		return array(
+			array(
+				'code'         => 'DE-DE-BW-VAT-1',
+				'label'        => 'VAT',
+				'rate_id'      => 301,
+				'rate_percent' => 19.0,
+				'tax_total'    => 19.0,
+			),
+			array(
+				'code'         => 'US-CA-CITY-TAX-2',
+				'label'        => 'City Tax',
+				'rate_id'      => 302,
+				'rate_percent' => 1.25,
+				'tax_total'    => 1.25,
+			),
+			array(
+				'code'         => 'US-NY-STATE TAX-1',
+				'label'        => 'State Tax',
+				'rate_id'      => 303,
+				'rate_percent' => 4.0,
+				'tax_total'    => 4.0,
+			),
+		);
+	}
+
+	/**
+	 * @testdox Taxes report keeps the rows of a state whose code holds a hyphen.
+	 */
+	public function test_taxes_report_filters_rows_by_a_state_code_holding_a_hyphen(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_with_hyphenated_codes(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'DE:DE-BW' ) );
+
+		$this->assertCount( 1, $rows, 'A state code holding a hyphen should still select its rows.' );
+		$this->assertSame( 19.0, $rows[0]['total_tax'], 'The reported row should be the German one.' );
+	}
+
+	/**
+	 * @testdox Taxes report keeps the rows of a state whose rate name holds a hyphen.
+	 */
+	public function test_taxes_report_filters_rows_by_state_when_the_rate_name_holds_a_hyphen(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_with_hyphenated_codes(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:CA' ) );
+
+		$this->assertCount( 1, $rows, 'A rate name holding a hyphen should not hide its row from its own state, and New York should stay out.' );
+		$this->assertSame( 1.25, $rows[0]['total_tax'], 'The reported row should be the Californian city tax.' );
+	}
+
+	/**
+	 * @testdox Taxes report keeps the rows of a state whose code holds a space.
+	 */
+	public function test_taxes_report_filters_rows_by_a_state_code_holding_a_space(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// `HONG KONG` and `NEW TERRITORIES` are state codes in `i18n/states.php` and the filter
+		// input offers them as they are written there, but `WC_Tax` drops the space on its way
+		// into the rate. The rates go in through `WC_Tax` so the codes read as the store writes
+		// them rather than as this test imagines them.
+		$rate_ids = array();
+		foreach ( array( 'HONG KONG', 'KOWLOON' ) as $state ) {
+			$rate_ids[ $state ] = (int) WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'HK',
+					'tax_rate_state'    => $state,
+					'tax_rate'          => '5',
+					'tax_rate_name'     => 'VAT',
+					'tax_rate_priority' => 1,
+					'tax_rate_compound' => 0,
+					'tax_rate_shipping' => 1,
+					'tax_rate_order'    => 0,
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$this->seed_order_with_tax_lines(
+			array(
+				array(
+					'code'         => WC_Tax::get_rate_code( $rate_ids['HONG KONG'] ),
+					'label'        => 'VAT',
+					'rate_id'      => $rate_ids['HONG KONG'],
+					'rate_percent' => 5.0,
+					'tax_total'    => 5.0,
+				),
+				array(
+					'code'         => WC_Tax::get_rate_code( $rate_ids['KOWLOON'] ),
+					'label'        => 'VAT',
+					'rate_id'      => $rate_ids['KOWLOON'],
+					'rate_percent' => 5.0,
+					'tax_total'    => 3.0,
+				),
+			),
+			'2023-02-10 10:00:00',
+			'2023-02-10 10:00:00'
+		);
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'HK:HONG KONG' ) );
+
+		$this->assertCount( 1, $rows, 'A state code holding a space should still select its rows, and Kowloon should stay out.' );
+		$this->assertSame( 5.0, $rows[0]['total_tax'], 'The reported row should be the Hong Kong Island one.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports nothing when a location holds a character no tax code carries.
+	 */
+	public function test_taxes_report_does_not_rewrite_a_location_holding_an_unexpected_character(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// `WC_Tax` leaves a country as it is, so an unreadable one has to match nothing rather
+		// than be rewritten into a country that exists. `%` and `_` are `LIKE` wildcards and have
+		// to stay literal, or a filter would answer with every location.
+		foreach ( array( 'U$S', 'US%', 'US:C_' ) as $location ) {
+			$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => $location ) );
+
+			$this->assertCount( 0, $rows, "Reading {$location} loosely would answer with another location's tax." );
+		}
+	}
+
+	/**
+	 * @testdox Taxes report reads a state the way the rate that carries it was written.
+	 */
+	public function test_taxes_report_normalizes_a_state_the_way_a_rate_is_written(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// `WC_Tax` would have written a rate for this state as `US-CA-`, so the filter reads it
+		// the same way instead of matching a code no rate can carry.
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => 'US:C@A' ) );
+
+		$this->assertCount( 1, $rows, 'A state should be read through the same pass that wrote the rate.' );
+		$this->assertSame( 7.25, $rows[0]['total_tax'], 'The reported row should be the Californian one.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports nothing when an included location holds no code to read.
+	 */
+	public function test_taxes_report_reports_nothing_for_an_included_location_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => '!!!' ) );
+
+		$this->assertCount( 0, $rows, 'An include filter should never widen the report, the way the Customers report narrows to nothing.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports every location when an excluded location holds no code to read.
+	 */
+	public function test_taxes_report_ignores_an_excluded_location_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_excludes' => '!!!' ) );
+
+		$this->assertCount( 3, $rows, 'An exclude filter that names nothing should leave the report alone.' );
+	}
+
+	/**
+	 * @testdox Taxes report reports nothing when an included location names a state it cannot read.
+	 */
+	public function test_taxes_report_reports_nothing_for_an_included_state_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		foreach ( array( 'US:', 'US:!!!' ) as $location ) {
+			$rows = $this->taxes_report_rows_for_location( array( 'location_includes' => $location ) );
+
+			$this->assertCount( 0, $rows, "An include naming a state that reads as nothing ({$location}) should not fall back to its country." );
+		}
+	}
+
+	/**
+	 * @testdox Taxes report keeps every row when an excluded location names a state it cannot read.
+	 */
+	public function test_taxes_report_ignores_an_excluded_state_holding_no_code(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$rows = $this->taxes_report_rows_for_location( array( 'location_excludes' => 'US:!!!' ) );
+
+		$this->assertCount( 3, $rows, 'An exclude naming a state that reads as nothing should not drop its country.' );
+	}
+
+	/**
+	 * @testdox Taxes report counts the rows a location filter leaves, not the tax codes asked for.
+	 */
+	public function test_taxes_report_counts_the_rows_left_by_a_location_filter(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// Two tax codes asked for, one of them outside the filtered location. Counting the codes
+		// would report a page that holds nothing.
+		$sut  = new DataStore();
+		$data = $sut->get_data(
+			$this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+				'taxes'             => array( 201, 202 ),
+				'location_includes' => 'US:CA',
+			)
+		);
+
+		$this->assertCount( 1, $data->data, 'Only the Californian tax code should be reported.' );
+		$this->assertSame( 1, $data->total, 'The total should count the rows the filter leaves.' );
+		$this->assertSame( 1, $data->pages, 'A page beyond the filtered rows should not be offered.' );
+	}
+
+	/**
+	 * @testdox Taxes stats totals count only the tax lines of the filtered location.
+	 */
+	public function test_taxes_stats_totals_honour_the_location_filter(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+			'interval'          => 'day',
+			'location_includes' => 'US:CA',
+		);
+		$data  = $sut->get_data( $query );
+
+		$this->assertSame( 7.25, $data->totals->total_tax, 'The summary should add up the filtered location alone, so it reconciles with the table.' );
+		$this->assertSame( 1, $data->totals->tax_codes, 'Only the tax code of the filtered location should be counted.' );
+		$this->assertSame( 1, $data->totals->orders_count, 'The order should be counted once.' );
+	}
+
+	/**
+	 * @testdox Taxes stats totals drop the tax lines of an excluded location.
+	 */
+	public function test_taxes_stats_totals_honour_an_excluded_location(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+			'interval'          => 'day',
+			'location_excludes' => 'US',
+		);
+		$data  = $sut->get_data( $query );
+
+		$this->assertSame( 19.0, $data->totals->total_tax, 'The summary should leave out the excluded country.' );
+		$this->assertSame( 1, $data->totals->tax_codes, 'Only the tax code outside the excluded country should be counted.' );
+	}
+
+	/**
+	 * @testdox Taxes stats count a tax line once when the order holds several lines on one rate.
+	 */
+	public function test_taxes_stats_do_not_repeat_a_line_under_a_location_filter(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Every line carries rate id 0, so a join to the tax order items would match each lookup
+		// row against all four of them.
+		$this->seed_order_with_tax_lines( $this->tax_lines_sharing_a_rate_id(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array(
+			'interval'          => 'day',
+			'location_includes' => 'US:CA',
+		);
+		$data  = $sut->get_data( $query );
+
+		$this->assertSame( 9.75, $data->totals->total_tax, 'The summary should match the tax the order carries, not a multiple of it.' );
+	}
+
+	/**
+	 * @testdox Taxes stats filter rows written before the lookup was keyed by tax order item.
+	 */
+	public function test_taxes_stats_filter_rows_written_before_the_grain_change(): void {
+		update_option( 'woocommerce_date_type', 'date_paid' );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$order = $this->seed_order_with_tax_lines( $this->tax_lines_in_three_locations(), '2023-02-10 10:00:00', '2023-02-10 10:00:00' );
+
+		// Until the rebuild runs, every row sits at the column default and names no tax line, so
+		// the filter has to find its code through the rate id the row carries.
+		$this->unmigrate_lookup_rows( $order->get_id() );
+
+		$sut   = new StatsDataStore();
+		$query = $this->all_taxes_query( '2023-02-01 00:00:00', '2023-02-28 23:59:59' ) + array( 'interval' => 'day' );
+
+		$included = $sut->get_data( $query + array( 'location_includes' => 'US:CA' ) );
+		$this->assertSame( 7.25, $included->totals->total_tax, 'A row waiting on the migration should still answer to its own location.' );
+
+		$excluded = $sut->get_data( $query + array( 'location_excludes' => 'US' ) );
+		$this->assertSame( 19.0, $excluded->totals->total_tax, 'Excluding a country should drop the rows waiting on the migration too.' );
+	}
+
+	/**
+	 * @testdox The country and state report columns keep the released SQL the report columns filter carries.
+	 */
+	public function test_report_columns_keep_their_released_sql(): void {
+		global $wpdb;
+
+		$columns = array();
+
+		add_filter(
+			'woocommerce_admin_report_columns',
+			function ( $report_columns, $context ) use ( &$columns ) {
+				if ( 'taxes' === $context ) {
+					$columns = $report_columns;
+				}
+
+				return $report_columns;
+			},
+			10,
+			2
+		);
+
+		new DataStore();
+
+		$this->assertSame(
+			"SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
+			$columns['country'],
+			'Extension callbacks inspect these strings, so the country column has to read as it was released.'
+		);
+		$this->assertSame(
+			"SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
+			$columns['state'],
+			'Extension callbacks inspect these strings, so the state column has to read as it was released.'
+		);
 	}
 }

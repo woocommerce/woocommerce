@@ -1,7 +1,7 @@
 // Frontend stylesheet for the Wishlist block.
 // Layout rules for `.wc-block-components-product-image`,
 // `.wc-block-components-product-price` and `.wc-block-components-product-button`
-// come from the atomic product-image / -price / -button blocks' stylesheets,
+// come from the product image, price, and button blocks' stylesheets,
 // which we declare as style dependencies in `block.json` so WordPress
 // enqueues them whenever this block renders. Don't duplicate those rules here.
 

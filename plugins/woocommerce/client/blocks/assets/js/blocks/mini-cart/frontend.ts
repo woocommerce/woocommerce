@@ -100,13 +100,12 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
-type MiniCart = {
+export type MiniCart = {
 	state: {
 		isHydrated: boolean;
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
-		drawerOverlayClass: string;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -230,14 +229,6 @@ store< MiniCart >(
 
 			get drawerTabIndex() {
 				return state.isOpen ? '-1' : null;
-			},
-
-			get drawerOverlayClass() {
-				const baseClasses =
-					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-				return state.isOpen
-					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
-					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
 			},
 
 			get badgeIsVisible(): boolean {
@@ -425,11 +416,7 @@ function resolveDataItemAttr(): ItemData | undefined {
 		dataProperty: DataProperty;
 	} >();
 
-	return (
-		itemData ||
-		// eslint-disable-next-line @typescript-eslint/no-use-before-define
-		cartItemState.cartItem[ dataProperty ]?.[ 0 ]
-	);
+	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 }
 
 /**

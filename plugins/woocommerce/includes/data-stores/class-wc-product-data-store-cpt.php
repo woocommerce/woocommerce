@@ -36,6 +36,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_visibility',
 		'_sku',
 		'_global_unique_id',
+		'_customs_commodity_code',
+		'_customs_country_of_origin',
+		'_customs_description',
 		'_price',
 		'_regular_price',
 		'_sale_price',
@@ -448,39 +451,42 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$id                = $product->get_id();
 		$post_meta_values  = get_post_meta( $id );
 		$meta_key_to_props = array(
-			'_sku'                   => 'sku',
-			'_global_unique_id'      => 'global_unique_id',
-			'_regular_price'         => 'regular_price',
-			'_sale_price'            => 'sale_price',
-			'_price'                 => 'price',
-			'_sale_price_dates_from' => 'date_on_sale_from',
-			'_sale_price_dates_to'   => 'date_on_sale_to',
-			'total_sales'            => 'total_sales',
-			'_tax_status'            => 'tax_status',
-			'_tax_class'             => 'tax_class',
-			'_manage_stock'          => 'manage_stock',
-			'_backorders'            => 'backorders',
-			'_low_stock_amount'      => 'low_stock_amount',
-			'_sold_individually'     => 'sold_individually',
-			'_weight'                => 'weight',
-			'_length'                => 'length',
-			'_width'                 => 'width',
-			'_height'                => 'height',
-			'_upsell_ids'            => 'upsell_ids',
-			'_crosssell_ids'         => 'cross_sell_ids',
-			'_purchase_note'         => 'purchase_note',
-			'_default_attributes'    => 'default_attributes',
-			'_virtual'               => 'virtual',
-			'_downloadable'          => 'downloadable',
-			'_download_limit'        => 'download_limit',
-			'_download_expiry'       => 'download_expiry',
-			'_thumbnail_id'          => 'image_id',
-			'_stock'                 => 'stock_quantity',
-			'_stock_status'          => 'stock_status',
-			'_wc_average_rating'     => 'average_rating',
-			'_wc_rating_count'       => 'rating_counts',
-			'_wc_review_count'       => 'review_count',
-			'_product_image_gallery' => 'gallery_image_ids',
+			'_sku'                       => 'sku',
+			'_global_unique_id'          => 'global_unique_id',
+			'_regular_price'             => 'regular_price',
+			'_sale_price'                => 'sale_price',
+			'_price'                     => 'price',
+			'_sale_price_dates_from'     => 'date_on_sale_from',
+			'_sale_price_dates_to'       => 'date_on_sale_to',
+			'total_sales'                => 'total_sales',
+			'_tax_status'                => 'tax_status',
+			'_tax_class'                 => 'tax_class',
+			'_manage_stock'              => 'manage_stock',
+			'_backorders'                => 'backorders',
+			'_low_stock_amount'          => 'low_stock_amount',
+			'_sold_individually'         => 'sold_individually',
+			'_weight'                    => 'weight',
+			'_length'                    => 'length',
+			'_width'                     => 'width',
+			'_height'                    => 'height',
+			'_upsell_ids'                => 'upsell_ids',
+			'_crosssell_ids'             => 'cross_sell_ids',
+			'_purchase_note'             => 'purchase_note',
+			'_default_attributes'        => 'default_attributes',
+			'_virtual'                   => 'virtual',
+			'_downloadable'              => 'downloadable',
+			'_download_limit'            => 'download_limit',
+			'_download_expiry'           => 'download_expiry',
+			'_thumbnail_id'              => 'image_id',
+			'_stock'                     => 'stock_quantity',
+			'_stock_status'              => 'stock_status',
+			'_wc_average_rating'         => 'average_rating',
+			'_wc_rating_count'           => 'rating_counts',
+			'_wc_review_count'           => 'review_count',
+			'_product_image_gallery'     => 'gallery_image_ids',
+			'_customs_commodity_code'    => 'customs_commodity_code',
+			'_customs_country_of_origin' => 'customs_country_of_origin',
+			'_customs_description'       => 'customs_description',
 		);
 
 		$set_props = array();
@@ -734,38 +740,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
-			'_sku'                   => 'sku',
-			'_global_unique_id'      => 'global_unique_id',
-			'_regular_price'         => 'regular_price',
-			'_sale_price'            => 'sale_price',
-			'_sale_price_dates_from' => 'date_on_sale_from',
-			'_sale_price_dates_to'   => 'date_on_sale_to',
-			'total_sales'            => 'total_sales',
-			'_tax_status'            => 'tax_status',
-			'_tax_class'             => 'tax_class',
-			'_manage_stock'          => 'manage_stock',
-			'_backorders'            => 'backorders',
-			'_low_stock_amount'      => 'low_stock_amount',
-			'_sold_individually'     => 'sold_individually',
-			'_weight'                => 'weight',
-			'_length'                => 'length',
-			'_width'                 => 'width',
-			'_height'                => 'height',
-			'_upsell_ids'            => 'upsell_ids',
-			'_crosssell_ids'         => 'cross_sell_ids',
-			'_purchase_note'         => 'purchase_note',
-			'_default_attributes'    => 'default_attributes',
-			'_virtual'               => 'virtual',
-			'_downloadable'          => 'downloadable',
-			'_product_image_gallery' => 'gallery_image_ids',
-			'_download_limit'        => 'download_limit',
-			'_download_expiry'       => 'download_expiry',
-			'_thumbnail_id'          => 'image_id',
-			'_stock'                 => 'stock_quantity',
-			'_stock_status'          => 'stock_status',
-			'_wc_average_rating'     => 'average_rating',
-			'_wc_rating_count'       => 'rating_counts',
-			'_wc_review_count'       => 'review_count',
+			'_sku'                       => 'sku',
+			'_global_unique_id'          => 'global_unique_id',
+			'_regular_price'             => 'regular_price',
+			'_sale_price'                => 'sale_price',
+			'_sale_price_dates_from'     => 'date_on_sale_from',
+			'_sale_price_dates_to'       => 'date_on_sale_to',
+			'total_sales'                => 'total_sales',
+			'_tax_status'                => 'tax_status',
+			'_tax_class'                 => 'tax_class',
+			'_manage_stock'              => 'manage_stock',
+			'_backorders'                => 'backorders',
+			'_low_stock_amount'          => 'low_stock_amount',
+			'_sold_individually'         => 'sold_individually',
+			'_weight'                    => 'weight',
+			'_length'                    => 'length',
+			'_width'                     => 'width',
+			'_height'                    => 'height',
+			'_upsell_ids'                => 'upsell_ids',
+			'_crosssell_ids'             => 'cross_sell_ids',
+			'_purchase_note'             => 'purchase_note',
+			'_default_attributes'        => 'default_attributes',
+			'_virtual'                   => 'virtual',
+			'_downloadable'              => 'downloadable',
+			'_product_image_gallery'     => 'gallery_image_ids',
+			'_download_limit'            => 'download_limit',
+			'_download_expiry'           => 'download_expiry',
+			'_thumbnail_id'              => 'image_id',
+			'_stock'                     => 'stock_quantity',
+			'_stock_status'              => 'stock_status',
+			'_wc_average_rating'         => 'average_rating',
+			'_wc_rating_count'           => 'rating_counts',
+			'_wc_review_count'           => 'review_count',
+			'_customs_commodity_code'    => 'customs_commodity_code',
+			'_customs_country_of_origin' => 'customs_country_of_origin',
+			'_customs_description'       => 'customs_description',
 		);
 
 		// Make sure to take extra data (like product url or text for external products) into account.
@@ -781,6 +790,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$value = $product->{"get_$prop"}( 'edit' );
 			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
+				case 'customs_commodity_code':
+				case 'customs_country_of_origin':
+				case 'customs_description':
+					$value = $value ?? '';
+					break;
 				case 'virtual':
 				case 'downloadable':
 				case 'manage_stock':
@@ -789,6 +803,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 				case 'gallery_image_ids':
 					$value = implode( ',', $value );
+					break;
+				case 'image_id':
+					// An empty string makes update_or_delete_post_meta() remove the meta, as earlier versions did; integer zero would persist a "0" row.
+					$value = $value ? $value : '';
 					break;
 				case 'date_on_sale_from':
 				case 'date_on_sale_to':
@@ -2047,7 +2065,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  string     $term Search term.
 	 * @param  string     $type Type of product.
 	 * @param  bool       $include_variations Include variations in search or not.
-	 * @param  bool       $all_statuses Should we search all statuses or limit to published.
+	 * @param  bool       $all_statuses True searches every status. False searches published products, plus private products when the current user can read them.
 	 * @param  null|int   $limit Limit returned results. @since 3.5.0.
 	 * @param  null|array $include Keep specific results. @since 3.6.0.
 	 * @param  null|array $exclude Discard specific results. @since 3.6.0.
@@ -2082,7 +2100,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 */
 		$post_statuses = apply_filters(
 			'woocommerce_search_products_post_statuses',
-			current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
+			current_user_can( 'read_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' )
 		);
 
 		// See if search term contains OR keywords.

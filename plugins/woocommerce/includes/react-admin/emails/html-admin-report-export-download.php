@@ -19,6 +19,21 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 		echo esc_html( sprintf( __( 'Download your %s Report', 'woocommerce' ), $report_name ) );
 	?>
 </a>
+<?php
+/**
+ * Date range the report covers, passed in by ReportCSVEmail. Empty for reports without one.
+ *
+ * @var string $date_range
+ */
+if ( ! empty( $date_range ) ) :
+	?>
+<p>
+	<?php
+		/* translators: %s: the date range the report covers, e.g. "June 1, 2025 - June 30, 2025" */
+		echo esc_html( sprintf( __( 'Date range: %s', 'woocommerce' ), $date_range ) );
+	?>
+</p>
+<?php endif; ?>
 <p>
 	<?php
 		/**

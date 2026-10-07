@@ -15,6 +15,7 @@ export type SettingsUISaveAdapter =
 export type SettingsUISaveSchema = {
 	adapter: SettingsUISaveAdapter;
 	name?: string;
+	initialValue?: string | string[];
 };
 
 export type SettingsUISaveStrategy =
@@ -39,6 +40,10 @@ export type SettingsUIField = {
 	placeholder?: string;
 	disabled?: boolean;
 	customAttributes?: Record< string, string | number | boolean >;
+	validation?: {
+		min?: number;
+		max?: number;
+	};
 	visibility?: SettingsUIVisibilityRule;
 	save?: SettingsUISaveSchema;
 };

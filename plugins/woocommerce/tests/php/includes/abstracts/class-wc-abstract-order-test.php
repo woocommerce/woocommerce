@@ -26,6 +26,140 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	private $registered_order_statuses = array();
 
 	/**
+	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
+	 * @dataProvider provide_order_tax_defaults
+	 *
+	 * @param string $order_class Order class.
+	 * @param string $tax_mode Store tax mode.
+	 * @param bool   $expected Expected order tax mode.
+	 * @phpstan-param class-string<WC_Abstract_Order> $order_class
+	 */
+	public function test_constructor_initializes_prices_include_tax( string $order_class, string $tax_mode, bool $expected ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$sut = new $order_class();
+
+			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ) );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $sut->get_changes(), 'Initialization must not be a pending edit.' );
+
+			update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'The default must be captured at construction, not at read time.' );
+		} finally {
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * Provides order classes and store tax modes.
+	 *
+	 * @return array<string, array{class-string<WC_Abstract_Order>, string, bool}>
+	 */
+	public static function provide_order_tax_defaults(): array {
+		return array(
+			'inclusive order'  => array( WC_Order::class, 'yes', true ),
+			'exclusive order'  => array( WC_Order::class, 'no', false ),
+			'inclusive refund' => array( WC_Order_Refund::class, 'yes', true ),
+			'exclusive refund' => array( WC_Order_Refund::class, 'no', false ),
+		);
+	}
+
+	/**
+	 * @testdox CRUD persists the initial tax mode or explicit override independently of later store settings.
+	 * @dataProvider provide_order_tax_persistence
+	 *
+	 * @param string    $tax_mode Store tax mode at construction.
+	 * @param bool|null $override Explicit tax mode, or null to leave the default untouched.
+	 * @param bool      $expected Expected persisted tax mode.
+	 */
+	public function test_prices_include_tax_persists_initial_value( string $tax_mode, ?bool $override, bool $expected ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$sut               = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$sut = new WC_Order();
+			if ( null !== $override ) {
+				$sut->set_prices_include_tax( $override );
+			}
+			update_option( 'woocommerce_prices_include_tax', $expected ? 'no' : 'yes' );
+			$sut->save();
+
+			$reloaded_order = new WC_Order( $sut->get_id() );
+			$this->assertSame( $expected, $reloaded_order->get_prices_include_tax( 'edit' ), 'Saving and loading must preserve the order value, not use the current store setting.' );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $reloaded_order->get_changes(), 'Loading a persisted value must not mark it as changed.' );
+		} finally {
+			if ( $sut ) {
+				$sut->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * Provides tax defaults and explicit overrides.
+	 *
+	 * @return array<string, array{string, bool|null, bool}>
+	 */
+	public static function provide_order_tax_persistence(): array {
+		return array(
+			'inclusive default' => array( 'yes', null, true ),
+			'exclusive default' => array( 'no', null, false ),
+			'explicit false'    => array( 'yes', false, false ),
+			'explicit true'     => array( 'no', true, true ),
+		);
+	}
+
+	/**
+	 * @testdox Refund creation preserves the parent order tax mode despite a different store default.
+	 * @dataProvider provide_order_tax_persistence
+	 *
+	 * @param string    $tax_mode Store tax mode at parent construction.
+	 * @param bool|null $override Explicit parent tax mode, or null for the default.
+	 * @param bool      $expected Expected refund tax mode.
+	 */
+	public function test_refund_inherits_parent_prices_include_tax( string $tax_mode, ?bool $override, bool $expected ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+		$sut               = null;
+
+		// This persistence test must not leave email logs for subsequent logging tests.
+		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$order = new WC_Order();
+			if ( null !== $override ) {
+				$order->set_prices_include_tax( $override );
+			}
+			$order->set_total( '10' );
+			$order->save();
+			update_option( 'woocommerce_prices_include_tax', $expected ? 'no' : 'yes' );
+
+			$sut = wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 1,
+				)
+			);
+			$this->assertInstanceOf( WC_Order_Refund::class, $sut );
+			$reloaded_refund = new WC_Order_Refund( $sut->get_id() );
+			$this->assertSame( $expected, $reloaded_refund->get_prices_include_tax( 'edit' ) );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $reloaded_refund->get_changes() );
+		} finally {
+			if ( $sut instanceof WC_Order_Refund ) {
+				$sut->delete( true );
+			}
+			if ( $order ) {
+				$order->delete( true );
+			}
+			remove_filter( 'woocommerce_email_log_enabled', '__return_false' );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {

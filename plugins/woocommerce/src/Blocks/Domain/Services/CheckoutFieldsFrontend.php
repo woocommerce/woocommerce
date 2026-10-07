@@ -172,14 +172,7 @@ class CheckoutFieldsFrontend {
 			$form_field['id']    = $field_key;
 			$form_field['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, 'contact' );
 
-			if ( 'select' === $field['type'] ) {
-				$form_field['options'] = array_column( $field['options'], 'label', 'value' );
-			}
-
-			if ( 'checkbox' === $field['type'] ) {
-				$form_field['checked_value']   = '1';
-				$form_field['unchecked_value'] = '0';
-			}
+			$form_field = $this->checkout_fields_controller->prepare_form_field( $form_field );
 
 			woocommerce_form_field( $field_key, $form_field, wc_get_post_data_by_key( $key, $form_field['value'] ) );
 		}
@@ -205,22 +198,7 @@ class CheckoutFieldsFrontend {
 			$address[ $field_key ]          = $field;
 			$address[ $field_key ]['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type );
 
-			if ( 'select' === $field['type'] ) {
-				$address[ $field_key ]['options'] = array_column( $field['options'], 'label', 'value' );
-
-				// If a placeholder is set, add a placeholder option if it doesn't exist already.
-				if (
-					! empty( $address[ $field_key ]['placeholder'] )
-					&& ! array_key_exists( '', $address[ $field_key ]['options'] )
-				) {
-					$address[ $field_key ]['options'] = array( '' => $address[ $field_key ]['placeholder'] ) + $address[ $field_key ]['options'];
-				}
-			}
-
-			if ( 'checkbox' === $field['type'] ) {
-				$address[ $field_key ]['checked_value']   = '1';
-				$address[ $field_key ]['unchecked_value'] = '0';
-			}
+			$address[ $field_key ] = $this->checkout_fields_controller->prepare_form_field( $address[ $field_key ] );
 		}
 
 		return $address;

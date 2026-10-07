@@ -24,8 +24,6 @@ const registrationMapKeys = [
 	'regions',
 ] as const;
 
-type RegistrationMapKey = ( typeof registrationMapKeys )[ number ];
-
 const isPlainRecord = ( value: unknown ): value is Record< string, unknown > =>
 	typeof value === 'object' && value !== null && ! Array.isArray( value );
 
@@ -100,44 +98,48 @@ const getScopeKey = ( scope: SettingsExtensionRegistration[ 'scope' ] ) =>
 		hasSectionScope( scope ) ? scope.section || 'default' : '*'
 	}`;
 
-const hasDuplicateScopeAndKeys = (
-	registration: SettingsExtensionRegistration,
-	key: RegistrationMapKey
-) => {
-	const entries = registration[ key ];
-	if ( ! entries ) {
-		return;
-	}
-
-	const incomingKeys = Object.keys( entries );
-	if ( incomingKeys.length === 0 ) {
-		return;
-	}
-
-	const scopeKey = getScopeKey( registration.scope );
-	for ( const existing of registrations ) {
-		if ( getScopeKey( existing.scope ) !== scopeKey ) {
+const pruneReplacedEntries = ( incoming: SettingsExtensionRegistration ) => {
+	let hasDuplicateKeys = false;
+	for ( let i = registrations.length - 1; i >= 0; i-- ) {
+		let existing = registrations[ i ];
+		if (
+			existing.scope.page !== incoming.scope.page ||
+			existing.scope.section !== incoming.scope.section
+		) {
 			continue;
 		}
 
-		const existingEntries = existing[ key ];
-		if ( ! existingEntries ) {
-			continue;
+		for ( const key of registrationMapKeys ) {
+			const entries = existing[ key ];
+			const replacements = incoming[ key ];
+			if ( ! entries || ! replacements ) {
+				continue;
+			}
+
+			const remaining = Object.entries( entries ).filter( ( [ id ] ) => {
+				const replaced =
+					Object.prototype.hasOwnProperty.call( replacements, id ) &&
+					typeof replacements[ id ] !== 'undefined';
+				hasDuplicateKeys ||= replaced;
+				return ! replaced;
+			} );
+			existing = {
+				...existing,
+				[ key ]: Object.fromEntries( remaining ),
+			};
 		}
 
 		if (
-			incomingKeys.some( ( entryKey ) =>
-				Object.prototype.hasOwnProperty.call(
-					existingEntries,
-					entryKey
-				)
+			registrationMapKeys.some(
+				( key ) => Object.keys( existing[ key ] ?? {} ).length > 0
 			)
 		) {
-			return true;
+			registrations[ i ] = existing;
+		} else {
+			registrations.splice( i, 1 );
 		}
 	}
-
-	return false;
+	return hasDuplicateKeys;
 };
 
 export const registerSettingsExtension = (
@@ -150,25 +152,15 @@ export const registerSettingsExtension = (
 		return;
 	}
 
-	const hasDuplicateKeys = registrationMapKeys.some( ( key ) =>
-		hasDuplicateScopeAndKeys( registration, key )
-	);
+	const hasDuplicateKeys = pruneReplacedEntries( registration );
 
 	if ( hasDuplicateKeys ) {
 		warn(
 			`Registration already exists for scope "${ getScopeKey(
 				registration.scope
-			) }". Replacing the existing registration.`,
+			) }". Replacing the conflicting entries.`,
 			{ registration }
 		);
-		for ( let i = registrations.length - 1; i >= 0; i-- ) {
-			if (
-				getScopeKey( registrations[ i ].scope ) ===
-				getScopeKey( registration.scope )
-			) {
-				registrations.splice( i, 1 );
-			}
-		}
 	}
 
 	registrations.push( registration );
@@ -199,7 +191,13 @@ export const resolveFieldComponent = (
 		findInMatchingRegistrations(
 			context,
 			( registration ) => registration.typeRenderers?.[ field.type ]
-		);
+		) ??
+		( field.type === 'integer'
+			? findInMatchingRegistrations(
+					context,
+					( registration ) => registration.typeRenderers?.number
+			  )
+			: undefined );
 
 	if ( resolvedComponent ) {
 		return resolvedComponent;

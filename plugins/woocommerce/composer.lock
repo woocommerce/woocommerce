@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7bbfec722f64c9ba34e6a6f79e91daa1",
+    "content-hash": "d04c0430452f13dd4fe7bc11bce08ce8",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -665,6 +665,50 @@
             "time": "2025-10-13T20:12:54+00:00"
         },
         {
+            "name": "automattic/tracks-shared-utils",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/tracks-shared-utils.git",
+                "reference": "6828997db5c76b1e810535c1d2729355b095aa91"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/tracks-shared-utils/zipball/6828997db5c76b1e810535c1d2729355b095aa91",
+                "reference": "6828997db5c76b1e810535c1d2729355b095aa91",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "phpcompatibility/php-compatibility": "^9.3",
+                "phpunit/phpunit": "^8.5 || ^9.6",
+                "squizlabs/php_codesniffer": "^3.7"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "php/src/functions.php"
+                ],
+                "psr-4": {
+                    "Automattic\\TracksSharedUtils\\": "php/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Shared allowlist and sanitization for URLs sent to Tracks.",
+            "homepage": "https://github.com/Automattic/tracks-shared-utils",
+            "support": {
+                "issues": "https://github.com/Automattic/tracks-shared-utils/issues",
+                "source": "https://github.com/Automattic/tracks-shared-utils"
+            },
+            "time": "2026-09-25T19:43:46+00:00"
+        },
+        {
             "name": "composer/installers",
             "version": "v1.12.0",
             "source": {
@@ -1182,11 +1226,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "2.17.1",
+            "version": "2.18.0",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "dc87a12de68d1079e0e5d4724a29462951bd1832"
+                "reference": "1bbd0ccac1d9e747ff83dfb13c5048211bf9c595"
             },
             "require": {
                 "php": ">=7.4"

@@ -39,6 +39,7 @@
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/dataviews": "17.1.0",
+		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min"
 	},
@@ -50,6 +51,7 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "^10.0.0",
+		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
@@ -85,7 +87,9 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
+		"lint:fix:lang:style": "stylelint 'src/**/*.scss' --fix",
 		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'src/**/*.scss'",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.js --passWithNoTests",
@@ -97,7 +101,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx}"
+				"changes": "src/**/*.{js,jsx,ts,tsx,scss}"
 			},
 			"tests": [
 				{

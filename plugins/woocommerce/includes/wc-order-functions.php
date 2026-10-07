@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/
+ * Args and usage: https://developer.woocommerce.com/docs/features/orders/wc-get-orders/
  *
  * @since  2.6.0
  * @param  array $args Array of args (above).
@@ -588,7 +588,9 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
-		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		// A refund can be created with nobody logged in (gateway webhook, REST, WP-CLI, cron). Record no
+		// user in that case; falling back to user 1 attributes the refund to whoever that happens to be.
+		$refund->set_refunded_by( get_current_user_id() );
 		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
