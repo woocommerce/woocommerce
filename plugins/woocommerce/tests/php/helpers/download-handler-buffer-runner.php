@@ -4,8 +4,8 @@
  *
  * Buffers started without PHP_OUTPUT_HANDLER_REMOVABLE can't be removed until the process exits, which
  * would break every later PHPUnit test, so WC_Download_Handler_Tests runs this script with the PHP CLI
- * instead. Usage: `php download-handler-buffer-runner.php <flags>[,<flags>...] <file contents>`, with one
- * flags value per buffer from the bottom of the stack up. Each buffer starts with "[junk-<level>]" in it.
+ * instead. Usage: `php download-handler-buffer-runner.php <buffer>[,<buffer>...] <file contents>`, listing buffers
+ * from the bottom of the stack up as `<flags>` or `<flags>:<callback function>`. Each buffer starts with "[junk-<level>]" in it.
  *
  * The process stdout is what a client would receive. A JSON report of the errors raised (including
  * @-suppressed ones) and the warnings logged is written to stderr.
@@ -50,17 +50,28 @@ function wc_get_logger() {
 	};
 }
 
+/**
+ * Output buffer callback that changes what passes through it, standing in for a third-party handler.
+ *
+ * @param string $buffer Buffer contents.
+ * @return string
+ */
+function wc_runner_reverse_output( $buffer ) {
+	return strrev( $buffer );
+}
+
 define( 'ABSPATH', __DIR__ . '/' );
 
 require dirname( __DIR__, 3 ) . '/includes/class-wc-download-handler.php';
 
-$wc_buffer_flags = '' === ( $argv[1] ?? '' ) ? array() : array_map( 'intval', explode( ',', $argv[1] ) );
-$wc_errors       = array();
-$wc_file         = tempnam( sys_get_temp_dir(), 'wc-download-buffers' );
+$wc_buffers = '' === ( $argv[1] ?? '' ) ? array() : explode( ',', $argv[1] );
+$wc_errors  = array();
+$wc_file    = tempnam( sys_get_temp_dir(), 'wc-download-buffers' );
 file_put_contents( $wc_file, $argv[2] ?? '' );
 
-foreach ( $wc_buffer_flags as $wc_level => $wc_flags ) {
-	ob_start( null, 0, $wc_flags );
+foreach ( $wc_buffers as $wc_level => $wc_buffer ) {
+	list( $wc_flags, $wc_callback ) = array_pad( explode( ':', $wc_buffer, 2 ), 2, null );
+	ob_start( $wc_callback, 0, (int) $wc_flags );
 	echo "[junk-$wc_level]";
 }
 

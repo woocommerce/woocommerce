@@ -759,7 +759,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provider_output_buffer_stacks
 	 *
-	 * @param int[]  $buffer_flags      Flags for each output buffer, from the bottom of the stack up. Each buffer holds "[junk-<level>]".
+	 * @param array  $buffer_flags      Flags for each output buffer from the bottom of the stack up, as `<flags>` or `"<flags>:<callback>"`. Each buffer holds "[junk-<level>]".
 	 * @param string $expected_body     Response body the client should receive.
 	 * @param int    $expected_warnings Number of warnings that should be logged.
 	 */
@@ -787,14 +787,14 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $report['errors'], 'Cleaning and flushing buffers should not raise errors, even silenced ones.' );
 		$this->assertCount( $expected_warnings, $report['warnings'], 'A warning should be logged only when buffers left behind can affect the download.' );
 		foreach ( $report['warnings'] as $warning ) {
-			$this->assertStringContainsString( 'default output handler', $warning, 'The warning should name the buffers left behind.' );
+			$this->assertMatchesRegularExpression( '/(default output handler|wc_runner_reverse_output)$/', $warning, 'The warning should name the buffers left behind.' );
 		}
 	}
 
 	/**
 	 * Output buffer stacks a download can be served through.
 	 *
-	 * @return array<string, array{int[], string, int}>
+	 * @return array<string, array{array<int|string>, string, int}>
 	 */
 	public function provider_output_buffer_stacks(): array {
 		$cleanable_flushable = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
@@ -806,6 +806,8 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			'cleanable only'                         => array( array( PHP_OUTPUT_HANDLER_CLEANABLE ), 'FILE-DATA', 1 ),
 			'standard below non-removable'           => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, $cleanable_flushable ), '[junk-0]FILE-DATA', 1 ),
 			'buffers from issue 51562'               => array( array( 0, 0, PHP_OUTPUT_HANDLER_CLEANABLE, PHP_OUTPUT_HANDLER_REMOVABLE ), '[junk-0][junk-1]FILE-DATA', 1 ),
+			// The callback rewrites the file, so this buffer is not safe even though it is empty and can be flushed.
+			'callback that changes the output'       => array( array( "$cleanable_flushable:wc_runner_reverse_output" ), 'ATAD-ELIF', 1 ),
 		);
 	}
 

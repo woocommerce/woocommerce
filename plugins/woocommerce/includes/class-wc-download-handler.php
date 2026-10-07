@@ -836,12 +836,17 @@ class WC_Download_Handler {
 	/**
 	 * Log a warning when output buffers that clean_buffers() could not remove may corrupt a streamed file or hold it in memory.
 	 *
-	 * No buffers, or a single empty buffer that can be flushed, pass the file straight through, so they aren't reported.
+	 * No buffers, or a single empty buffer that can be flushed and has no callback, pass the file straight through, so
+	 * they aren't reported. A callback may change the file, so a buffer with one is always reported.
 	 */
 	private static function log_remaining_buffers(): void {
-		$buffers = ob_get_status( true );
+		$buffers        = ob_get_status( true );
+		$passes_through = 1 === count( $buffers )
+			&& 'default output handler' === $buffers[0]['name']
+			&& 0 === $buffers[0]['buffer_used']
+			&& ( $buffers[0]['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE );
 
-		if ( ! $buffers || ( 1 === count( $buffers ) && 0 === $buffers[0]['buffer_used'] && ( $buffers[0]['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) ) ) {
+		if ( ! $buffers || $passes_through ) {
 			return;
 		}
 
