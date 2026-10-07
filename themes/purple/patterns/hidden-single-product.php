@@ -14,7 +14,7 @@
 
 <!-- wp:woocommerce/breadcrumbs /-->
 
-<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|90","left":"var:preset|spacing|90"},"margin":{"top":"var:preset|spacing|30"}}}} -->
+<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"var:preset|spacing|50","left":"var:preset|spacing|90"},"margin":{"top":"var:preset|spacing|30"}}}} -->
 <div class="wp-block-columns alignwide" style="margin-top:var(--wp--preset--spacing--30)"><!-- wp:column {"width":"50%","layout":{"type":"default"}} -->
 <div class="wp-block-column" style="flex-basis:50%"><!-- wp:woocommerce/product-gallery {"hoverZoom":false} -->
 <div class="wp-block-woocommerce-product-gallery wc-block-product-gallery"><!-- wp:woocommerce/product-gallery-thumbnails {"thumbnailSize":"18%","aspectRatio":"1","activeThumbnailStyle":"outline"} /-->
