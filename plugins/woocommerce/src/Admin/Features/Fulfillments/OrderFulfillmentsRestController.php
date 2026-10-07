@@ -296,14 +296,16 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment = new Fulfillment();
 			$params      = $request->get_json_params();
 			$fulfillment->set_props( $params );
-			if ( isset( $params['meta_data'] ) ) {
-				$this->apply_request_meta_data( $params['meta_data'], $fulfillment );
-			}
 			// Identity is assigned by the controller, never taken from the request body. Force a new row
-			// (so a nested props/id payload cannot turn create into an update) and the routed order.
+			// (so a nested props/id payload cannot turn create into an update) and the routed order. This
+			// runs before metadata is applied so the metadata attaches to the new fulfillment, not a
+			// fulfillment id smuggled through the body.
 			$fulfillment->set_id( 0 );
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( "$order_id" );
+			if ( isset( $params['meta_data'] ) ) {
+				$this->apply_request_meta_data( $params['meta_data'], $fulfillment );
+			}
 
 			$fulfillment->save();
 

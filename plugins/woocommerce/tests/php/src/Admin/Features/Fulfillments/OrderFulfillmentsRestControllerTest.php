@@ -356,6 +356,60 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Create ignores an id in the body: it inserts a new fulfillment and applies metadata to it, not to the supplied id.
+	 */
+	public function test_create_fulfillment_ignores_body_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a = WC_Helper_Order::create_order();
+		$order_b = WC_Helper_Order::create_order();
+		$victim  = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'id'           => $victim->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => 'smuggled_create_meta',
+							'value' => 'new_fulfillment',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$created = $response->get_data();
+		$this->assertNotEquals( $victim->get_id(), $created['id'], 'Create must insert a new fulfillment, not reuse the id from the body.' );
+		$this->assertEquals( (string) $order_a->get_id(), (string) $created['entity_id'], 'The new fulfillment must belong to the routed order.' );
+
+		$new_fulfillment = new Fulfillment( (int) $created['id'] );
+		$this->assertSame( 'new_fulfillment', $new_fulfillment->get_meta( 'smuggled_create_meta' ), 'Request metadata must persist on the newly created fulfillment.' );
+		$this->assertSame( '', (string) $new_fulfillment->get_meta( 'test_meta_key' ), 'The new fulfillment must not inherit metadata from the fulfillment whose id was supplied in the body.' );
+
+		$victim_reloaded = new Fulfillment( $victim->get_id() );
+		$this->assertSame( (string) $order_b->get_id(), $victim_reloaded->get_entity_id(), 'The fulfillment whose id was supplied in the body must be untouched.' );
+	}
+
+	/**
 	 * Test creating a fulfillment (user is admin).
 	 */
 	public function test_create_fulfillment_as_admin() {
