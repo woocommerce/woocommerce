@@ -242,7 +242,7 @@ describe( 'Payment method data store selectors/thunks', () => {
 		} );
 
 		// Express payment method clicked.
-		await userEvent.click(
+		userEvent.click(
 			screen.getByText( 'express-payment express payment method' )
 		);
 
@@ -254,7 +254,7 @@ describe( 'Payment method data store selectors/thunks', () => {
 		} );
 
 		// Express payment method closed.
-		await userEvent.click(
+		userEvent.click(
 			screen.getByText( 'express-payment express payment method close' )
 		);
 
@@ -335,7 +335,7 @@ describe( 'Testing Payment Methods work correctly with saved cards turned on', (
 		} );
 
 		// Express payment method clicked.
-		await userEvent.click(
+		userEvent.click(
 			screen.getByText( 'express-payment express payment method' )
 		);
 
@@ -352,7 +352,7 @@ describe( 'Testing Payment Methods work correctly with saved cards turned on', (
 		} );
 
 		// Express payment method closed.
-		await userEvent.click(
+		userEvent.click(
 			screen.getByText( 'express-payment express payment method close' )
 		);
 
