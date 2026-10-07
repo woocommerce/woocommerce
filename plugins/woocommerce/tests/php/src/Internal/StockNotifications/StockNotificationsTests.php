@@ -197,6 +197,39 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox register() adds the email classes before woocommerce_init, without waiting for maybe_init_services().
+	 */
+	public function test_register_adds_the_email_classes_before_services_are_initialized(): void {
+		$sut = new StockNotifications();
+		$sut->register();
+
+		$this->assertNotFalse( has_filter( 'woocommerce_email_classes', array( $sut, 'register_email_classes' ) ) );
+
+		$emails = $sut->register_email_classes( array( 'WC_Email_New_Order' => 'existing' ) );
+
+		$this->assertArrayHasKey( 'WC_Email_New_Order', $emails );
+		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification', $emails );
+		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verify', $emails );
+		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verified', $emails );
+
+		remove_action( 'init', array( $sut, 'maybe_init_services' ), 1 );
+		remove_action( 'woocommerce_installed', array( $sut, 'on_install_or_update' ) );
+		remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $sut, 'on_feature_enabled_changed' ), 10 );
+		remove_filter( 'woocommerce_email_classes', array( $sut, 'register_email_classes' ) );
+	}
+
+	/**
+	 * @testdox register_email_classes returns the email classes unchanged when the feature is disabled.
+	 */
+	public function test_register_email_classes_is_a_no_op_when_the_feature_is_disabled(): void {
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'no' );
+
+		$emails = array( 'WC_Email_New_Order' => 'existing' );
+
+		$this->assertSame( $emails, wc_get_container()->get( StockNotifications::class )->register_email_classes( $emails ) );
+	}
+
+	/**
 	 * @testdox The alpha constant keeps the data store registered while the option is still unset.
 	 */
 	public function test_register_data_stores_falls_back_to_the_alpha_constant(): void {

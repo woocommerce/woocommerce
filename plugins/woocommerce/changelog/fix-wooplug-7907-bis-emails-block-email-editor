@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send back in stock notification emails when the block email editor is enabled.
