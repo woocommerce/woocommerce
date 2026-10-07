@@ -490,6 +490,35 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 6, $view->get_payment_token_id() );
 	}
 
+	public function test_update_returns_null_when_the_contract_is_deleted_before_the_write(): void {
+		global $wpdb;
+
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		// A concurrent delete lands after the facade read the contract and before its write.
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$injected = false;
+		$race     = static function ( string $query ) use ( &$injected, $table, $id, $wpdb ): string {
+			if ( ! $injected && 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+				$injected = true;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $table, array( 'id' => $id ) );
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $race );
+
+		try {
+			$updated = Contracts::update( $id, array( 'payment_method_title' => 'X' ) );
+		} finally {
+			remove_filter( 'query', $race );
+		}
+
+		$this->assertTrue( $injected );
+		$this->assertNull( $updated );
+	}
+
 	public function test_update_does_not_revert_a_concurrent_write_to_other_fields(): void {
 		global $wpdb;
 

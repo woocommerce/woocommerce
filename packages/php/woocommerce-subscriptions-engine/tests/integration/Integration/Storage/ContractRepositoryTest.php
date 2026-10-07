@@ -839,9 +839,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update_fields on a deleted contract throws before any child write.
+	 * @testdox update_fields on a deleted contract returns false before any child write.
 	 */
-	public function test_update_fields_rejects_a_deleted_contract_and_writes_no_children(): void {
+	public function test_update_fields_returns_false_for_a_deleted_contract_and_writes_no_children(): void {
 		global $wpdb;
 
 		$id = $this->sut->insert( $this->make_contract() );
@@ -850,12 +850,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$stale = $this->make_contract();
 		$stale->set_id( $id );
 
-		try {
-			$this->sut->update_fields( $stale, array( 'status', 'items', 'addresses' ) );
-			$this->fail( 'Expected RuntimeException when updating a contract whose row no longer exists.' );
-		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'no longer exists', $e->getMessage() );
-		}
+		$this->assertFalse( $this->sut->update_fields( $stale, array( 'status', 'items', 'addresses' ) ) );
 
 		foreach ( array( SchemaInstaller::TABLE_CONTRACT_ITEMS, SchemaInstaller::TABLE_CONTRACT_ADDRESSES ) as $table ) {
 			$table = SchemaInstaller::get_table_name( $table );
@@ -877,7 +872,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		// A write in a new second changes date_updated_gmt; repeat until one changes no rows.
 		$zero_rows = false;
 		for ( $i = 0; $i < 3 && ! $zero_rows; $i++ ) {
-			$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
+			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) ) );
 			$zero_rows = 0 === $wpdb->rows_affected;
 		}
 

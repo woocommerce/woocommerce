@@ -135,12 +135,13 @@ final class ContractRepository {
 	 * values, so a concurrent write to them is not reverted. Existence is checked only
 	 * when the row write changes nothing, before any child write.
 	 *
-	 * @param Contract           $contract Contract carrying the values. Must have an id whose row still exists.
+	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
+	 * @return bool False when the contract row no longer exists (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable contract column.
-	 * @throws \RuntimeException If the contract has no id, its row no longer exists, or the write fails.
+	 * @throws \RuntimeException If the contract has no id or the write fails.
 	 */
-	public function update_fields( Contract $contract, array $fields ): void {
+	public function update_fields( Contract $contract, array $fields ): bool {
 		global $wpdb;
 
 		$id = $contract->get_id();
@@ -172,8 +173,8 @@ final class ContractRepository {
 		}
 
 		// Zero changed rows: a missing row, or identical values written within the same second.
-		if ( 0 === $updated ) {
-			$this->assert_contract_exists( $id );
+		if ( 0 === $updated && ! $this->exists( $id ) ) {
+			return false;
 		}
 
 		if ( in_array( 'items', $fields, true ) ) {
@@ -183,6 +184,8 @@ final class ContractRepository {
 		if ( in_array( 'addresses', $fields, true ) ) {
 			$this->replace_addresses( $id, $contract->get_addresses() );
 		}
+
+		return true;
 	}
 
 	/**

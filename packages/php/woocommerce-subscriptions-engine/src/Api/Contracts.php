@@ -144,7 +144,8 @@ final class Contracts {
 	 * @param array<string, mixed> $args Fields to write.
 	 * @return ContractView|null The row as read before the write plus the written fields (a column
 	 *                           another writer changed meanwhile may be stale here, not in storage);
-	 *                           null when the contract does not exist.
+	 *                           null when the contract does not exist (also when it is deleted
+	 *                           before the write).
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
 	public static function update( int $id, array $args ): ?ContractView {
@@ -164,8 +165,8 @@ final class Contracts {
 
 		$fields = array_keys( $filtered_args );
 
-		if ( array() !== $fields ) {
-			$repository->update_fields( $contract, $fields );
+		if ( array() !== $fields && ! $repository->update_fields( $contract, $fields ) ) {
+			return null;
 		}
 
 		return ContractView::from_contract( $contract, true );
