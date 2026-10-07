@@ -110,13 +110,13 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 		$this->setExpectedIncorrectUsage( 'facade' );
 
 		$rows = ArgumentValidator::validate_contract_items(
-			'facade',
 			array(
 				array(
 					'item_name' => 'Coffee',
 					'price'     => '1',
 				),
-			)
+			),
+			'facade'
 		);
 
 		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $rows );
@@ -126,20 +126,20 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( '"addresses" must be an array keyed "billing" / "shipping" with array values.' );
 
-		ArgumentValidator::validate_contract_addresses( 'facade', array( 'home' => array( 'first_name' => 'Ada' ) ) );
+		ArgumentValidator::validate_contract_addresses( array( 'home' => array( 'first_name' => 'Ada' ) ) );
 	}
 
 	public function test_contract_addresses_keep_address_fields_and_drop_unknown_keys_with_a_notice(): void {
 		$this->setExpectedIncorrectUsage( 'facade' );
 
 		$addresses = ArgumentValidator::validate_contract_addresses(
-			'facade',
 			array(
 				'billing' => array(
 					'first_name' => 'Ada',
 					'zip'        => '1',
 				),
-			)
+			),
+			'facade'
 		);
 
 		$this->assertSame( array( 'billing' => array( 'first_name' => 'Ada' ) ), $addresses );

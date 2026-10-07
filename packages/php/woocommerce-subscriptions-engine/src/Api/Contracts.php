@@ -350,10 +350,10 @@ final class Contracts {
 					$contract->set_tax_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'items':
-					$contract->set_items( ArgumentValidator::validate_contract_items( self::class, $value ) );
+					$contract->set_items( ArgumentValidator::validate_contract_items( $value, self::class ) );
 					break;
 				case 'addresses':
-					$contract->set_addresses( ArgumentValidator::validate_contract_addresses( self::class, $value ) );
+					$contract->set_addresses( ArgumentValidator::validate_contract_addresses( $value, self::class ) );
 					break;
 				case 'payment_token_id':
 					$token_id = ArgumentValidator::validate_nullable_id( $key, $value );

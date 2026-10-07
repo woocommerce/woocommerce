@@ -191,12 +191,12 @@ final class ArgumentValidator {
 	/**
 	 * Validate contract item rows; unknown row keys are dropped with a notice.
 	 *
-	 * @param string $function_name Function named in the notice.
 	 * @param mixed  $value         Caller value.
+	 * @param string $function_name Function named in the notice; defaults to this method.
 	 * @return array<int, array<string, mixed>>
 	 * @throws InvalidArgumentException If the value is not a list of item rows.
 	 */
-	public static function validate_contract_items( string $function_name, $value ): array {
+	public static function validate_contract_items( $value, string $function_name = __METHOD__ ): array {
 		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
 		$rows    = array();
 		foreach ( self::validate_list_of_arrays( 'items', $value ) as $row ) {
@@ -210,12 +210,12 @@ final class ArgumentValidator {
 	 * Validate contract addresses keyed `billing` / `shipping`; unknown address keys are
 	 * dropped with a notice.
 	 *
-	 * @param string $function_name Function named in the notice.
 	 * @param mixed  $value         Caller value.
+	 * @param string $function_name Function named in the notice; defaults to this method.
 	 * @return array<string, array<string, mixed>>
 	 * @throws InvalidArgumentException If the map is not keyed `billing` / `shipping` with array values.
 	 */
-	public static function validate_contract_addresses( string $function_name, $value ): array {
+	public static function validate_contract_addresses( $value, string $function_name = __METHOD__ ): array {
 		if ( ! is_array( $value ) ) {
 			throw new InvalidArgumentException( '"addresses" must be an array keyed "billing" / "shipping".' );
 		}
