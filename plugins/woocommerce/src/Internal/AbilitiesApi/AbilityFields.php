@@ -15,9 +15,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * An ability opts in with `meta.woocommerce.extension_fields`: the
  * `object_type` of the fields and the `output` key that holds the object, or
- * the list of objects. An `output` of '' means the whole output is the object
- * or the list. The output then carries the field values under `extensions`,
- * keyed by attribute.
+ * the list of objects. Its output then carries the field values under
+ * `extensions`, keyed by attribute.
  *
  * @since 11.3.0
  */
@@ -96,34 +95,16 @@ class AbilityFields {
 		}
 
 		$key = $declaration['output'] ?? null;
-		if ( ! is_string( $key ) || ! is_array( $args['output_schema'] ?? null ) ) {
-			return $args;
-		}
-
-		$extensions = self::schema( self::get( (string) ( $declaration['object_type'] ?? '' ) ) );
-		if ( '' === $key ) {
-			$args['output_schema'] = self::add_to_schema( $args['output_schema'], $extensions );
-		} elseif ( isset( $args['output_schema']['properties'][ $key ] ) ) {
-			$args['output_schema']['properties'][ $key ] = self::add_to_schema( $args['output_schema']['properties'][ $key ], $extensions );
+		if ( is_string( $key ) && isset( $args['output_schema']['properties'][ $key ] ) ) {
+			$extensions = self::schema( self::get( (string) ( $declaration['object_type'] ?? '' ) ) );
+			if ( 'array' === ( $args['output_schema']['properties'][ $key ]['type'] ?? null ) ) {
+				$args['output_schema']['properties'][ $key ]['items']['properties']['extensions'] = $extensions;
+			} else {
+				$args['output_schema']['properties'][ $key ]['properties']['extensions'] = $extensions;
+			}
 		}
 
 		return $args;
-	}
-
-	/**
-	 * Add the `extensions` schema to an object schema, or to the items of a list schema.
-	 *
-	 * @param array<string, mixed> $schema     Object or list schema.
-	 * @param array<string, mixed> $extensions `extensions` schema.
-	 * @return array<string, mixed>
-	 */
-	private static function add_to_schema( array $schema, array $extensions ): array {
-		if ( 'array' === ( $schema['type'] ?? null ) ) {
-			$schema['items']['properties']['extensions'] = $extensions;
-		} else {
-			$schema['properties']['extensions'] = $extensions;
-		}
-		return $schema;
 	}
 
 	/**
@@ -144,8 +125,8 @@ class AbilityFields {
 
 	/**
 	 * Add `extensions` to the object, or to each object of the list, at the
-	 * output key the ability declares, or to the output itself when the key is
-	 * ''. Each object is loaded by the `id` its output carries.
+	 * output key the ability declares. Each object is loaded by the `id` its
+	 * output carries.
 	 *
 	 * @param mixed       $result  Execute result.
 	 * @param \WP_Ability $ability Ability.
@@ -154,10 +135,7 @@ class AbilityFields {
 	public static function fill_result( $result, \WP_Ability $ability ) {
 		$declaration = $ability->get_meta()[ self::META ]['extension_fields'] ?? null;
 		$key         = is_array( $declaration ) ? ( $declaration['output'] ?? null ) : null;
-		if ( ! is_string( $key ) || ! is_array( $result ) ) {
-			return $result;
-		}
-		if ( '' !== $key && ! is_array( $result[ $key ] ?? null ) ) {
+		if ( ! is_string( $key ) || ! is_array( $result ) || ! is_array( $result[ $key ] ?? null ) ) {
 			return $result;
 		}
 
@@ -189,13 +167,7 @@ class AbilityFields {
 			return $item;
 		};
 
-		$fill_all = static function ( array $value ) use ( $fill ) {
-			return wp_is_numeric_array( $value ) ? array_map( $fill, $value ) : $fill( $value );
-		};
-		if ( '' === $key ) {
-			return $fill_all( $result );
-		}
-		$result[ $key ] = $fill_all( $result[ $key ] );
+		$result[ $key ] = wp_is_numeric_array( $result[ $key ] ) ? array_map( $fill, $result[ $key ] ) : $fill( $result[ $key ] );
 		return $result;
 	}
 
