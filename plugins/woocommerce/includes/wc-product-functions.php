@@ -2288,17 +2288,18 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'stock_quantity':
-			// STRAIGHT_JOIN keeps managed-stock metadata first so the optimizer avoids a full lookup-table scan.
+			// The subquery narrows the update to managed-stock products by primary key, so the optimizer never scans the whole lookup table.
 			$wpdb->query(
 				"
 				UPDATE
-					{$wpdb->postmeta} meta1
-					STRAIGHT_JOIN {$wpdb->wc_product_meta_lookup} lookup_table ON lookup_table.product_id = meta1.post_id
-					LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_stock'
 				SET
-					lookup_table.stock_quantity = meta2.meta_value
+					lookup_table.stock_quantity = meta.meta_value
 				WHERE
-					meta1.meta_key = '_manage_stock' AND meta1.meta_value = 'yes'
+					lookup_table.product_id IN (
+						SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'
+					)
 				"
 			);
 			break;
