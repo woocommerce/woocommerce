@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
@@ -29,7 +29,10 @@ const trimSlash = ( path: string ) => path.replace( /\/$/, '' );
 
 test.describe(
 	'Back in Stock Notifications — signing up',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );

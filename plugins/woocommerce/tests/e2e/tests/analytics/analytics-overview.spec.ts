@@ -13,7 +13,7 @@ import type {
  */
 import { admin } from '../../test-data/data';
 import { tags } from '../../fixtures/fixtures';
-import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { random } from '../../utils/helpers';
 
 const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
 
@@ -23,14 +23,28 @@ let buttons_ellipsis: Locator;
 let menuitem_moveDown: Locator;
 let page: Page;
 
-const base64String = Buffer.from(
-	`${ admin.username }:${ admin.password }`
-).toString( 'base64' );
-
-const headers = {
-	Authorization: `Basic ${ base64String }`,
-	cookie: '',
+// The section layout is stored per user, so this spec uses its own
+// administrator to leave the shared admin's Overview untouched for the specs
+// running alongside it.
+const sectionsUser = {
+	username: `analytics-overview-${ random() }`,
+	password: `password-${ random() }`,
 };
+
+const basicAuthHeaders = ( {
+	username,
+	password,
+}: {
+	username: string;
+	password: string;
+} ) => ( {
+	Authorization: `Basic ${ Buffer.from(
+		`${ username }:${ password }`
+	).toString( 'base64' ) }`,
+	cookie: '',
+} );
+
+const headers = basicAuthHeaders( sectionsUser );
 
 // Call this before the click that triggers the save, and await the returned
 // promise after it — registering the listener after the click can miss a
@@ -84,26 +98,38 @@ test.describe(
 	'Analytics pages',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		test.use( { storageState: ADMIN_STATE_PATH } );
-
 		test.beforeAll( async ( { browser } ) => {
-			page = await browser.newPage();
+			page = await browser.newPage( {
+				storageState: { cookies: [], origins: [] },
+			} );
 
-			await test.step( `Send GET request to get the current user id`, async () => {
-				const pageRequest = page.request;
-				const data = {
-					_fields: 'id',
-				};
-				const response = await pageRequest.get(
-					'./wp-json/wp/v2/users/me',
+			await test.step( `Create an administrator for this spec`, async () => {
+				const response = await page.request.post(
+					'./wp-json/wp/v2/users',
 					{
-						data,
-						headers,
+						data: {
+							...sectionsUser,
+							email: `${ sectionsUser.username }@example.com`,
+							roles: [ 'administrator' ],
+						},
+						headers: basicAuthHeaders( admin ),
 					}
 				);
-				const { id } = await response.json();
+				expect(
+					response.ok(),
+					`${ response.status() } ${ await response.text() }`
+				).toBeTruthy();
 
-				userId = id;
+				userId = ( await response.json() ).id;
+			} );
+
+			await test.step( `Log in as that administrator`, async () => {
+				await page.request.post( './wp-login.php', {
+					form: {
+						log: sectionsUser.username,
+						pwd: sectionsUser.password,
+					},
+				} );
 			} );
 
 			await resetSections();
@@ -140,6 +166,10 @@ test.describe(
 		} );
 
 		test.afterAll( async () => {
+			await page.request.delete( `./wp-json/wp/v2/users/${ userId }`, {
+				params: { force: true, reassign: false },
+				headers: basicAuthHeaders( admin ),
+			} );
 			await page.close();
 		} );
 

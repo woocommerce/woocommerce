@@ -10,7 +10,7 @@ import {
 /**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { expect, tags, test as baseTest, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 /**
@@ -369,6 +369,7 @@ test(
 	'downloads revenue report as CSV',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -401,6 +402,7 @@ test(
 	'use date filter on products report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// Scope the report to this spec's variable product so cumulative store
@@ -486,6 +488,7 @@ test(
 	'set custom date range on revenue report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -529,6 +532,7 @@ test(
 	'scope orders report via advanced product filter',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// Every one of this spec's ten orders contains productIds[ 0 ] and no
@@ -548,6 +552,7 @@ test(
 	'use filter by single product on products report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// Land already scoped to this spec's variable product. There is no
@@ -591,6 +596,7 @@ test(
 	'analytics settings',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -644,6 +650,7 @@ test(
 	'shows the import status bar and runs its manual trigger in scheduled mode',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page, request, restApi } ) => {
 		// Scheduled mode is the only mode that offers the manual trigger. The
@@ -719,6 +726,7 @@ test(
 	'loads the overview performance indicators from their own endpoint',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// `performance-indicators` has no browser owner otherwise. The Jest
