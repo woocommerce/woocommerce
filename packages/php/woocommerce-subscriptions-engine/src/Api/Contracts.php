@@ -360,8 +360,9 @@ final class Contracts {
 	 *
 	 * Owner-scoped by construction: the customer id is supplied by the caller (the
 	 * authenticated user at the REST boundary), never inferred, so it never returns
-	 * another customer's contracts. Each view carries its plan snapshot payload (children
-	 * not loaded), so a list row's cadence is read off the snapshot.
+	 * another customer's contracts. Each view projects the stored contract fields (items
+	 * and addresses not loaded); a caller needing plan terms resolves `selling_plan_id`
+	 * through {@see SellingPlans}.
 	 *
 	 * The status filter applies before paging, so a page holds `$limit` matching contracts.
 	 *
@@ -396,7 +397,8 @@ final class Contracts {
 	 * asymmetric not-found rule), so a caller cannot probe for the existence of a
 	 * contract it does not own.
 	 *
-	 * The returned view carries its items, addresses, and plan snapshot payload.
+	 * The returned view projects the stored contract fields with items and addresses; a
+	 * caller needing plan terms resolves `selling_plan_id` through {@see SellingPlans}.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.

@@ -305,6 +305,8 @@ final class Contract {
 	/**
 	 * Refuse money without a currency: a contract with no currency must have every total at zero.
 	 * Cross-field, so callers that change several fields check it once after the last change.
+	 * Checked against the state the caller holds: the engine opens no transaction or lock, so
+	 * concurrent writers to the currency and totals of one contract coordinate themselves.
 	 *
 	 * @throws DomainException If a total is non-zero while the currency is unset.
 	 */

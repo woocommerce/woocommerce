@@ -217,11 +217,11 @@ final class RenewalEngine {
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
 	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
-	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no currency or
-	 * customer, no chain, an unresolvable plan, a non-adjacent count, a gateway that cannot
-	 * charge renewals) so the scheduled caller can park and a manual caller can return null; returns null for an
-	 * idempotent no-op (a non-active contract, a live claim, an already-settled cycle, an
-	 * unbuildable order).
+	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no currency, no
+	 * chain, an unresolvable plan, a non-adjacent count, a gateway that cannot charge
+	 * renewals) so the scheduled caller can park and a manual caller can return null; returns
+	 * null for an idempotent no-op (a non-active contract, a live claim, an already-settled
+	 * cycle, an unbuildable order). A contract without a customer renews as a guest order.
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
