@@ -1172,6 +1172,39 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_shipping() clears shipping totals before reading address fields and after a field filter changes them.
+	 */
+	public function test_calculate_shipping_clears_totals_around_the_address_field_filters(): void {
+		$this->add_product_for_an_address_without_postcode();
+		WC()->cart->set_shipping_total( 9 );
+		WC()->cart->set_shipping_tax( 2 );
+		WC()->cart->set_shipping_taxes( array( 1 => 2 ) );
+		$before_filter = null;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$before_filter ) {
+				if ( null === $before_filter ) {
+					$before_filter = array( (float) WC()->cart->get_shipping_total(), (float) WC()->cart->get_shipping_tax(), WC()->cart->get_shipping_taxes() );
+				}
+				// Represent shipping state left by an extension's totals calculation inside the field filter.
+				WC()->cart->set_shipping_total( 5 );
+				WC()->cart->set_shipping_tax( 1 );
+				WC()->cart->set_shipping_taxes( array( 1 => 1 ) );
+				return $fields;
+			}
+		);
+
+		$result = WC()->cart->calculate_shipping();
+
+		$this->assertSame( array( 0.0, 0.0, array() ), $before_filter, 'Address field filters should start with cleared shipping totals and taxes.' );
+		$this->assertSame( array(), $result, 'A missing postcode should leave no calculated shipping methods.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_total(), 'Rejected shipping should clear the total left by the filter.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_tax(), 'Rejected shipping should clear the tax left by the filter.' );
+		$this->assertSame( array(), WC()->cart->get_shipping_taxes(), 'Rejected shipping should clear the tax breakdown left by the filter.' );
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'A missing postcode should keep shipping uncalculated.' );
+	}
+
+	/**
 	 * @testdox calculate_totals() leaves out shipping that a nested check allowed while the address fields still require a postcode.
 	 */
 	public function test_calculate_totals_leaves_out_shipping_that_a_nested_check_allowed(): void {
