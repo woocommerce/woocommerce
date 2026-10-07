@@ -21,6 +21,10 @@ function purple_get_woocommerce_notice(): string {
 		return '';
 	}
 
+	if ( get_user_meta( get_current_user_id(), 'purple_woocommerce_notice_dismissed', true ) ) {
+		return '';
+	}
+
 	// Read the parent theme directly: WooCommerce may not be loaded to register its custom header.
 	$headers = get_file_data( get_template_directory() . '/style.css', array( 'minimum_wc' => 'WC requires at least' ) );
 	$minimum = $headers['minimum_wc'];
@@ -58,7 +62,7 @@ function purple_get_woocommerce_outdated_notice( string $minimum, string $curren
 	$notice = esc_html(
 		sprintf(
 			/* translators: 1: Minimum WooCommerce version, 2: Active WooCommerce version. */
-			__( 'Purple requires WooCommerce %1$s or newer for its store features. You are running WooCommerce %2$s. Please update WooCommerce.', 'purple' ),
+			__( 'For the best experience with Purple, we recommend WooCommerce %1$s or newer. You are currently running WooCommerce %2$s.', 'purple' ),
 			$minimum,
 			$current
 		)
@@ -82,7 +86,7 @@ function purple_get_woocommerce_inactive_notice( string $minimum ): string {
 	$notice = esc_html(
 		sprintf(
 			/* translators: %s: Minimum WooCommerce version. */
-			__( 'Purple requires WooCommerce %s or newer for its store features. Please activate WooCommerce.', 'purple' ),
+			__( 'For the best experience with Purple, we recommend activating WooCommerce %s or newer.', 'purple' ),
 			$minimum
 		)
 	);
@@ -105,7 +109,7 @@ function purple_get_woocommerce_missing_notice( string $minimum ): string {
 	$notice = esc_html(
 		sprintf(
 			/* translators: %s: Minimum WooCommerce version. */
-			__( 'Purple requires WooCommerce %s or newer for its store features. Please install and activate WooCommerce.', 'purple' ),
+			__( 'For the best experience with Purple, we recommend installing and activating WooCommerce %s or newer.', 'purple' ),
 			$minimum
 		)
 	);
@@ -117,7 +121,7 @@ function purple_get_woocommerce_missing_notice( string $minimum ): string {
 }
 
 /**
- * Display the compatibility warning using the standard WordPress notice UI.
+ * Display the compatibility recommendation using the standard WordPress notice UI.
  *
  * @internal
  *
@@ -129,10 +133,60 @@ function purple_woocommerce_admin_notice(): void {
 		wp_admin_notice(
 			$notice,
 			array(
-				'id'   => 'purple-woocommerce-notice',
-				'type' => 'warning',
+				'id'          => 'purple-woocommerce-notice',
+				'type'        => 'warning',
+				'dismissible' => true,
 			)
 		);
 	}
 }
 add_action( 'admin_notices', 'purple_woocommerce_admin_notice' );
+
+/**
+ * Load the persistence handler only when the notice is visible.
+ *
+ * @internal
+ *
+ * @return void
+ */
+function purple_enqueue_woocommerce_notice_script(): void {
+	if ( '' === purple_get_woocommerce_notice() ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'purple-woocommerce-notice',
+		get_template_directory_uri() . '/assets/js/woocommerce-notice.js',
+		array( 'jquery', 'common' ),
+		wp_get_theme( get_template() )->get( 'Version' ),
+		true
+	);
+	wp_localize_script(
+		'purple-woocommerce-notice',
+		'purpleWooCommerceNotice',
+		array(
+			'nonce' => wp_create_nonce( 'purple_dismiss_woocommerce_notice' ),
+		)
+	);
+}
+add_action( 'admin_enqueue_scripts', 'purple_enqueue_woocommerce_notice_script' );
+
+/**
+ * Remember the current user's dismissal of the WooCommerce recommendation.
+ *
+ * @internal
+ *
+ * @return void
+ */
+function purple_dismiss_woocommerce_notice(): void {
+	check_ajax_referer( 'purple_dismiss_woocommerce_notice', 'nonce' );
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_send_json_error( null, 403 );
+		return;
+	}
+
+	update_user_meta( get_current_user_id(), 'purple_woocommerce_notice_dismissed', true );
+	wp_send_json_success();
+}
+add_action( 'wp_ajax_purple_dismiss_woocommerce_notice', 'purple_dismiss_woocommerce_notice' );
