@@ -740,7 +740,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox list filters by an extension slug or a list of them.
+	 * @testdox list filters by an extension slug or a list of them, ignoring duplicate slugs.
 	 */
 	public function test_list_filters_by_extension_slug(): void {
 		$own_id   = $this->create();
@@ -752,6 +752,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			array( $own_id, $other_id ),
 			self::plan_ids( Plans::list( array( 'extension_slug' => array( self::OWNER, 'other-extension' ) ) ) )
 		);
+		$this->assertSame( array( $own_id ), self::plan_ids( Plans::list( array( 'extension_slug' => array( self::OWNER, self::OWNER ) ) ) ) );
 	}
 
 	/**
@@ -862,8 +863,11 @@ class PlansTest extends EngineIntegrationTestCase {
 	public function provide_invalid_list_args(): array {
 		return array(
 			'empty extension slug' => array( array( 'extension_slug' => '' ) ),
+			'any extension slug'   => array( array( 'extension_slug' => 'any' ) ),
+			'any in a slug list'   => array( array( 'extension_slug' => array( self::OWNER, 'any' ) ) ),
 			'status not a string'  => array( array( 'status' => 5 ) ),
 			'id not positive'      => array( array( 'ids' => array( 1, 0 ) ) ),
+			'ids not a list'       => array( array( 'ids' => array( 'a' => 1 ) ) ),
 			'zero limit'           => array( array( 'limit' => 0 ) ),
 			'negative offset'      => array( array( 'offset' => -1 ) ),
 		);

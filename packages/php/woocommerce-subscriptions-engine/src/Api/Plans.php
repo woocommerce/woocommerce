@@ -264,14 +264,17 @@ final class Plans {
 	 * @param array<string, mixed> $args {
 	 *     Optional. Query args.
 	 *
-	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them. Absent: every extension.
+	 *     @type string|string[] $extension_slug Owning extension slug, or a list of them (duplicates are
+	 *                                           ignored; `any` is refused). Absent: every extension.
 	 *     @type string|string[] $status         Plan status, or a list of them. Absent: every status.
-	 *     @type int[]           $ids            Only these plan ids.
-	 *     @type int             $limit          Maximum plans to return. Default 200.
-	 *     @type int             $offset         Plans to skip (for paging). Default 0.
+	 *     @type int[]           $ids            Only these plan ids: a list of positive integers (digit
+	 *                                           strings are cast). A non-list or a non-positive id throws.
+	 *     @type int             $limit          Maximum plans to return, a positive integer. Default 200.
+	 *     @type int             $offset         Plans to skip (for paging), a non-negative integer. Default 0.
 	 * }
 	 * @return array<int, PlanView>
-	 * @throws InvalidArgumentException If a value is invalid.
+	 * @throws InvalidArgumentException If a value is invalid: an empty or non-string slug or status,
+	 *                                  `any` as a slug, a non-positive or non-integer id, limit or offset.
 	 */
 	public static function list( array $args = array() ): array {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::LIST_KEYS );
@@ -283,7 +286,11 @@ final class Plans {
 			'offset'  => ArgumentValidator::validate_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
 		);
 		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
-			$query['extension_slugs'] = ArgumentValidator::validate_string_list( 'extension_slug', $filtered_args['extension_slug'] );
+			$extension_slugs = array_values( array_unique( ArgumentValidator::validate_string_list( 'extension_slug', $filtered_args['extension_slug'] ) ) );
+			if ( in_array( 'any', $extension_slugs, true ) ) {
+				throw new InvalidArgumentException( '"extension_slug" must not be "any": leave it out to list every extension\'s plans.' );
+			}
+			$query['extension_slugs'] = $extension_slugs;
 		}
 		if ( array_key_exists( 'status', $filtered_args ) ) {
 			$query['status'] = ArgumentValidator::validate_string_list( 'status', $filtered_args['status'] );
