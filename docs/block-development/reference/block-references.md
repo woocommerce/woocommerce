@@ -1042,7 +1042,7 @@ Show all product categories as a list or dropdown.
 - **Name:** woocommerce/product-categories
 - **Category:** woocommerce
 - **Supports:** align (full, wide), color (background, gradients, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, showChildrenOnly
+- **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, isPreview, showChildrenOnly
 
 ## Products by Category - woocommerce/product-category
 

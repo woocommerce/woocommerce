@@ -85,7 +85,12 @@ class ProductCategories extends AbstractDynamicBlock {
 			}
 		}
 
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $this->get_container_classes( $attributes ) ) );
+		$classes = $this->get_container_classes( $attributes );
+		// The editor wrapper already applies block supports and Global Styles.
+		// Replace this workaround when Gutenberg exposes HtmlRenderer: https://github.com/WordPress/gutenberg/pull/74228.
+		$wrapper_attributes = ! empty( $attributes['isPreview'] )
+			? 'class="' . esc_attr( $classes ) . '"'
+			: get_block_wrapper_attributes( array( 'class' => $classes ) );
 
 		$output  = '<div ' . $wrapper_attributes . '>';
 		$output .= ! empty( $attributes['isDropdown'] ) ? $this->renderDropdown( $categories, $attributes, $uid ) : $this->renderList( $categories, $attributes, $uid );

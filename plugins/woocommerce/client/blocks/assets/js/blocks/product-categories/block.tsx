@@ -169,7 +169,7 @@ const ProductCategoriesBlock = ( {
 			<Disabled>
 				<ServerSideRender
 					block={ name }
-					attributes={ attributes }
+					attributes={ { ...attributes, isPreview: true } }
 					skipBlockSupportAttributes
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>

@@ -50,6 +50,9 @@
 			"type": "boolean",
 			"default": false
 		},
+		"isPreview": {
+			"type": "boolean"
+		},
 		"isHierarchical": {
 			"type": "boolean",
 			"default": true
