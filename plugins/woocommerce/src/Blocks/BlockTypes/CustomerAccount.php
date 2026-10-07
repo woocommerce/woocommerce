@@ -71,11 +71,9 @@ class CustomerAccount extends AbstractBlock {
 		$parsed_hooked_block['attrs']['iconStyle']    = 'line';
 		$parsed_hooked_block['attrs']['iconClass']    = 'wc-block-customer-account__account-icon';
 
-		$customer_account_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
-
+		$customer_account_block_font_size = $this->get_global_styles( array( 'blocks', 'woocommerce/customer-account', 'typography', 'fontSize' ) );
 		if ( ! is_string( $customer_account_block_font_size ) ) {
-			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
-
+			$navigation_block_font_size = $this->get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
 			if ( is_string( $navigation_block_font_size ) ) {
 				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
 			}
@@ -153,7 +151,7 @@ class CustomerAccount extends AbstractBlock {
 		<div
 			class="wp-block-woocommerce-customer-account <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-		>	
+		>
 			<a
 				class="wc-block-customer-account__link"
 				href="<?php echo esc_url( $account_link ); ?>"
@@ -397,5 +395,22 @@ class CustomerAccount extends AbstractBlock {
 		return get_current_user_id()
 			? __( 'My Account', 'woocommerce' )
 			: __( 'Login', 'woocommerce' );
+	}
+
+	/**
+	 * Caching wrapper for wp_get_global_styles, introduced to reduce blocks initialization footprint.
+	 *
+	 * @param string[] $path
+	 * @return string|null
+	 */
+	private function get_global_styles( array $path ) {
+		static $resolved = array();
+
+		$key = implode( '-', $path );
+		if ( ! array_key_exists( $key, $resolved ) ) {
+			$resolved[ $key ] = wp_get_global_styles( $path );
+		}
+
+		return $resolved[ $key ];
 	}
 }

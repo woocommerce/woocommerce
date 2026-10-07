@@ -118,11 +118,9 @@ class MiniCart extends AbstractBlock {
 	 * @return array|null
 	 */
 	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
-		$mini_cart_block_font_size = wp_get_global_styles( array( 'blocks', 'woocommerce/mini-cart', 'typography', 'fontSize' ) );
-
+		$mini_cart_block_font_size = $this->get_global_styles( array( 'blocks', 'woocommerce/mini-cart', 'typography', 'fontSize' ) );
 		if ( ! is_string( $mini_cart_block_font_size ) ) {
-			$navigation_block_font_size = wp_get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
-
+			$navigation_block_font_size = $this->get_global_styles( array( 'blocks', 'core/navigation', 'typography', 'fontSize' ) );
 			if ( is_string( $navigation_block_font_size ) ) {
 				$parsed_hooked_block['attrs']['style']['typography']['fontSize'] = $navigation_block_font_size;
 			}
@@ -747,5 +745,22 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function should_not_render_mini_cart( array $attributes ) {
 		return isset( $attributes['cartAndCheckoutRenderStyle'] ) && 'hidden' !== $attributes['cartAndCheckoutRenderStyle'];
+	}
+
+	/**
+	 * Caching wrapper for wp_get_global_styles, introduced to reduce blocks initialization footprint.
+	 *
+	 * @param string[] $path
+	 * @return string|null
+	 */
+	private function get_global_styles( array $path ) {
+		static $resolved = array();
+
+		$key = implode( '-', $path );
+		if ( ! array_key_exists( $key, $resolved ) ) {
+			$resolved[ $key ] = wp_get_global_styles( $path );
+		}
+
+		return $resolved[ $key ];
 	}
 }
