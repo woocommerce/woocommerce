@@ -181,11 +181,6 @@ add_action( 'admin_enqueue_scripts', 'purple_enqueue_woocommerce_notice_script' 
 function purple_dismiss_woocommerce_notice(): void {
 	check_ajax_referer( 'purple_dismiss_woocommerce_notice', 'nonce' );
 
-	if ( ! current_user_can( 'edit_theme_options' ) ) {
-		wp_send_json_error( null, 403 );
-		return;
-	}
-
 	update_user_meta( get_current_user_id(), 'purple_woocommerce_notice_dismissed', true );
 	wp_send_json_success();
 }
