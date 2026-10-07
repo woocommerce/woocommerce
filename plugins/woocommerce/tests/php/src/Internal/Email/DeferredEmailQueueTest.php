@@ -134,6 +134,196 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Customer passwords never enter persisted new-account email arguments.
+	 */
+	public function test_new_account_email_omits_password_from_scheduled_args(): void {
+		$customer_data = array(
+			'user_login' => 'new-customer',
+			'user_pass'  => 'secret-password',
+		);
+
+		$this->assertTrue( $this->sut->push( 'woocommerce_created_customer', array( 12, $customer_data, false ) ) );
+		$this->sut->dispatch();
+
+		$args = $this->get_scheduled_email_action()['args'][1];
+		$this->assertArrayNotHasKey( 'user_pass', $args[1] );
+		$this->assertSame( 'new-customer', $args[1]['user_login'] );
+		$this->assertArrayHasKey( 'user_pass', $customer_data, 'The original hook arguments must remain available to other callbacks.' );
+	}
+
+	/**
+	 * @testdox Sensitive fields are omitted from nested arguments on any deferred email hook.
+	 */
+	public function test_push_sanitizes_nested_sensitive_args(): void {
+		$args = array(
+			array(
+				'user_pass' => 'secret-one',
+				'nested'    => array(
+					'user_pass' => 'secret-two',
+					'message'   => 'Keep this',
+				),
+			),
+		);
+
+		$this->assertTrue( $this->sut->push( 'woocommerce_custom_email', $args ) );
+		$this->sut->dispatch();
+
+		$queued = $this->get_scheduled_email_action()['args'][1][0];
+		$this->assertArrayNotHasKey( 'user_pass', $queued );
+		$this->assertArrayNotHasKey( 'user_pass', $queued['nested'] );
+		$this->assertSame( 'Keep this', $queued['nested']['message'] );
+		$this->assertSame( 'secret-one', $args[0]['user_pass'], 'The original arguments must not be modified.' );
+	}
+
+	/**
+	 * @testdox The upgrade removes passwords from both short and extended persisted actions.
+	 */
+	public function test_upgrade_redacts_existing_deferred_customer_passwords(): void {
+		global $wpdb;
+
+		require_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		$table = $wpdb->prefix . 'actionscheduler_actions';
+		$ids   = array();
+		foreach ( array( false, true ) as $extended ) {
+			$args = wp_json_encode(
+				array(
+					'woocommerce_created_customer',
+					array(
+						12,
+						array(
+							'user_pass'  => 'secret-password',
+							'user_login' => str_repeat( 'x', $extended ? 200 : 5 ),
+						),
+						false,
+					),
+				)
+			);
+			$this->assertIsString( $args );
+			$wpdb->insert(
+				$table,
+				array(
+					'hook'          => 'woocommerce_send_queued_transactional_email',
+					'status'        => $extended ? 'failed' : 'complete',
+					'args'          => $extended ? md5( $args ) : $args,
+					'extended_args' => $extended ? $args : null,
+				)
+			);
+			$this->assertGreaterThan( 0, $wpdb->insert_id );
+			$ids[] = $wpdb->insert_id;
+		}
+
+		$this->assertFalse( \wc_update_1130_redact_deferred_customer_passwords() );
+
+		foreach ( $ids as $id ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+			$row     = $wpdb->get_row( $wpdb->prepare( "SELECT args, extended_args FROM {$table} WHERE action_id = %d", $id ) );
+			$encoded = $row->extended_args ?? $row->args;
+			$decoded = json_decode( $encoded, true );
+			$this->assertArrayNotHasKey( 'user_pass', $decoded[1][1] );
+			$this->assertArrayHasKey( 'user_login', $decoded[1][1] );
+			$this->assertStringNotContainsString( 'secret-password', $row->args );
+			$this->assertStringNotContainsString( 'secret-password', (string) $row->extended_args );
+		}
+	}
+
+	/**
+	 * @testdox The upgrade removes passwords at every depth from custom deferred email actions.
+	 */
+	public function test_upgrade_redacts_nested_custom_email_passwords(): void {
+		global $wpdb;
+
+		require_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		$table = $wpdb->prefix . 'actionscheduler_actions';
+		$ids   = array();
+		foreach ( array( false, true ) as $extended ) {
+			$args = wp_json_encode(
+				array(
+					'myplugin_customer_welcome',
+					array(
+						array(
+							'account' => array(
+								'user_pass' => 'plaintext-secret',
+								'nested'    => array(
+									'user_pass' => 'another-secret',
+									'message'   => str_repeat( 'Keep this', $extended ? 30 : 1 ),
+								),
+							),
+						),
+					),
+				)
+			);
+			$this->assertIsString( $args );
+			$wpdb->insert(
+				$table,
+				array(
+					'hook'          => 'woocommerce_send_queued_transactional_email',
+					'status'        => 'complete',
+					'args'          => $extended ? md5( $args ) : $args,
+					'extended_args' => $extended ? $args : null,
+				)
+			);
+			$this->assertGreaterThan( 0, $wpdb->insert_id );
+			$ids[] = $wpdb->insert_id;
+		}
+
+		$this->assertFalse( \wc_update_1130_redact_deferred_customer_passwords() );
+
+		foreach ( $ids as $id ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+			$row     = $wpdb->get_row( $wpdb->prepare( "SELECT args, extended_args FROM {$table} WHERE action_id = %d", $id ) );
+			$decoded = json_decode( $row->extended_args ?? $row->args, true );
+			$account = $decoded[1][0]['account'];
+			$this->assertSame( 'myplugin_customer_welcome', $decoded[0] );
+			$this->assertArrayNotHasKey( 'user_pass', $account );
+			$this->assertArrayNotHasKey( 'user_pass', $account['nested'] );
+			$this->assertStringContainsString( 'Keep this', $account['nested']['message'] );
+			$this->assertStringNotContainsString( 'plaintext-secret', $row->args . $row->extended_args );
+			$this->assertStringNotContainsString( 'another-secret', $row->args . $row->extended_args );
+		}
+	}
+
+	/**
+	 * @testdox The upgrade processes at most 100 actions per invocation and resumes at the next ID.
+	 */
+	public function test_upgrade_redacts_actions_in_bounded_batches(): void {
+		global $wpdb;
+
+		require_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		$table = $wpdb->prefix . 'actionscheduler_actions';
+		$args  = wp_json_encode( array( 'woocommerce_created_customer', array( 12, array( 'user_pass' => 'secret-password' ) ) ) );
+		$ids   = array();
+		$this->assertIsString( $args );
+
+		for ( $i = 0; $i < 101; ++$i ) {
+			$wpdb->insert(
+				$table,
+				array(
+					'hook'   => 'woocommerce_send_queued_transactional_email',
+					'status' => 'complete',
+					'args'   => $args,
+				)
+			);
+			$ids[] = $wpdb->insert_id;
+		}
+
+		$this->assertTrue( \wc_update_1130_redact_deferred_customer_passwords() );
+		$this->assertSame( $ids[99], get_option( 'woocommerce_update_1130_last_deferred_email_action_id' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+		$first = $wpdb->get_var( $wpdb->prepare( "SELECT args FROM {$table} WHERE action_id = %d", $ids[0] ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+		$last = $wpdb->get_var( $wpdb->prepare( "SELECT args FROM {$table} WHERE action_id = %d", $ids[100] ) );
+		$this->assertArrayNotHasKey( 'user_pass', json_decode( $first, true )[1][1] );
+		$this->assertArrayHasKey( 'user_pass', json_decode( $last, true )[1][1] );
+
+		$this->assertFalse( \wc_update_1130_redact_deferred_customer_passwords() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name uses the current site's trusted prefix.
+		$last = $wpdb->get_var( $wpdb->prepare( "SELECT args FROM {$table} WHERE action_id = %d", $ids[100] ) );
+		$this->assertArrayNotHasKey( 'user_pass', json_decode( $last, true )[1][1] );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_last_deferred_email_action_id' ) );
+	}
+
+	/**
 	 * @testdox Processing preserves null arguments.
 	 */
 	public function test_send_queued_transactional_email_preserves_null_args(): void {
