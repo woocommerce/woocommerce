@@ -155,7 +155,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->sent_messages );
 		$this->assertStringContainsString( 'https://shop.example/?email_link_action=', $this->sent_messages[0] );
-		$this->assertStringNotContainsString( 'https://shop.example/wp/?email_link_action=', $this->sent_messages[0] );
+		$this->assertStringNotContainsString( 'https://shop.example/wp', $this->sent_messages[0] );
 	}
 
 	/**
