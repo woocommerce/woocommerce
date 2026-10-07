@@ -2614,6 +2614,48 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
+	 */
+	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order_id = 0;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( &$order_id ) {
+				$order->set_status( OrderStatus::CANCELLED );
+				$order->save();
+				$order_id = $order->get_id();
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_payment_required', $response->get_data()['code'] );
+		$this->assertSame( 'This order cannot be completed without payment. Please try again.', $response->get_data()['message'] );
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should have created an order before refusing to complete it.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertSame( OrderStatus::CANCELLED, $order->get_status(), 'The order should remain cancelled.' );
+		$this->assertNull( $order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to waive payment for a pending non-zero order.
+	 */
+	public function test_checkout_allows_waived_payment_for_pending_non_zero_order(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'success', $response->get_data()['payment_result']['payment_status'] );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertTrue( $order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
 	 * Helper method to register custom order status.
 	 *
 	 * @param string $status_name             Custom status name to register.

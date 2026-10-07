@@ -66,13 +66,22 @@ trait CheckoutTrait {
 	 * Deliberately no recovery of the kind process_payment() does: nothing was charged, so a
 	 * failure costs the shopper only a retry, and claiming success would be the worse outcome.
 	 *
-	 * @throws RouteException If the order is missing.
+	 * @throws RouteException If the order is missing or a cancelled unpaid order would be marked paid.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
 	 */
 	private function process_without_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
 		$order = $this->get_order_or_throw();
+
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_payment_required',
+				esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ),
+				400
+			);
+		}
 
 		$order->payment_complete();
 
