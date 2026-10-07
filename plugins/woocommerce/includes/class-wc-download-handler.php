@@ -547,10 +547,12 @@ class WC_Download_Handler {
 				);
 
 				self::download_headers( $parsed_file_path['file_path'], $filename, $download_range, true );
+				self::log_remaining_buffers();
 				$read_result = self::readfile_from_handle( $handle, $start, $length );
 			}
 		} else {
 			self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+			self::log_remaining_buffers();
 			$read_result = self::readfile_chunked_with_result( $parsed_file_path['file_path'], $start, $length );
 		}
 
@@ -814,14 +816,59 @@ class WC_Download_Handler {
 	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
 	 */
 	private static function clean_buffers() {
-		if ( ob_get_level() ) {
-			$levels = ob_get_level();
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		foreach ( array_reverse( ob_get_status( true ) ) as $buffer ) {
+			$flags = $buffer['flags'];
+
+			if ( $flags & PHP_OUTPUT_HANDLER_REMOVABLE ) {
+				ob_end_clean();
+				continue;
 			}
-		} else {
-			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+			// This buffer can't be removed, and the ones below it can't be reached, so the file has to go through them.
+			if ( $flags & PHP_OUTPUT_HANDLER_CLEANABLE ) {
+				ob_clean();
+			}
+
+			return;
 		}
+	}
+
+	/**
+	 * Log a warning when output buffers that clean_buffers() could not remove may corrupt a streamed file or hold it in memory.
+	 *
+	 * No buffers, or a single empty buffer that can be flushed, pass the file straight through, so they aren't reported.
+	 */
+	private static function log_remaining_buffers(): void {
+		$buffers = ob_get_status( true );
+
+		if ( ! $buffers || ( 1 === count( $buffers ) && 0 === $buffers[0]['buffer_used'] && ( $buffers[0]['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) ) ) {
+			return;
+		}
+
+		wc_get_logger()->warning(
+			sprintf(
+				/* translators: %s: comma-separated names of PHP output buffers. */
+				__( 'A file download was served through output buffers that could not be removed, which may corrupt the file or hold it in memory: %s', 'woocommerce' ),
+				implode( ', ', array_column( $buffers, 'name' ) )
+			)
+		);
+	}
+
+	/**
+	 * Send the output so far to the web server.
+	 *
+	 * PHP's flush() only pushes its own write buffer, so a remaining output buffer has to be flushed into it first.
+	 * Only call this after file data has been output: some servers send the headers on flush(), and a read that
+	 * fails before any data must still be able to send an error page instead.
+	 */
+	private static function flush_output(): void {
+		$buffer = ob_get_status();
+
+		if ( $buffer && ( $buffer['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) ) {
+			ob_flush();
+		}
+
+		flush();
 	}
 
 	/**
@@ -918,12 +965,11 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$output_sent = $output_sent || '' !== $chunk;
-				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
+				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
 
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
+				if ( '' !== $chunk ) {
+					$output_sent = true;
+					self::flush_output();
 				}
 			}
 		} else {
@@ -936,10 +982,9 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$output_sent = $output_sent || '' !== $chunk;
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
+				if ( '' !== $chunk ) {
+					$output_sent = true;
+					self::flush_output();
 				}
 			}
 		}

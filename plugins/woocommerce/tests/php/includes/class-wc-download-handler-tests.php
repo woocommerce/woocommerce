@@ -638,6 +638,207 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox readfile_chunked() should push each chunk through a flushable output buffer instead of holding the whole file in it.
+	 *
+	 * @dataProvider provider_download_sources
+	 *
+	 * @param bool $unknown_size Whether to stream from a source with no known size, which reads until EOF.
+	 */
+	public function test_readfile_chunked_flushes_each_chunk_through_output_buffer( bool $unknown_size ): void {
+		$chunk_size = defined( 'WC_CHUNK_SIZE' ) ? (int) WC_CHUNK_SIZE : 1024 * 1024;
+		$contents   = str_repeat( 'a', $chunk_size ) . str_repeat( 'b', $chunk_size ) . 'c';
+		$source     = $this->create_download_source( $contents, $unknown_size );
+		$flushed    = array();
+
+		ob_start(
+			function ( $buffer, $phase ) use ( &$flushed ) {
+				if ( $phase & PHP_OUTPUT_HANDLER_FLUSH ) {
+					$flushed[] = $buffer;
+				}
+				return '';
+			}
+		);
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $source );
+		} finally {
+			ob_end_clean();
+			$this->delete_download_source( $source );
+		}
+
+		$this->assertTrue( $served, 'The file should be reported as served.' );
+		$this->assertGreaterThan( 1, count( $flushed ), 'Each chunk should be flushed as it is read.' );
+		$this->assertTrue( implode( '', $flushed ) === $contents, 'Every byte of the file should pass through the buffer by being flushed.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should not try to flush an output buffer that can't be flushed.
+	 *
+	 * @dataProvider provider_download_sources
+	 *
+	 * @param bool $unknown_size Whether to stream from a source with no known size, which reads until EOF.
+	 */
+	public function test_readfile_chunked_does_not_flush_unflushable_output_buffer( bool $unknown_size ): void {
+		$source = $this->create_download_source( 'file-data', $unknown_size );
+		$errors = array();
+
+		// WordPress hides notices unless WP_DEBUG is on, and sites that turn it on get them printed into the download.
+		$error_reporting = error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+		ob_start( null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Records notices rather than letting the first one abort the download mid-stream.
+		set_error_handler(
+			function ( $errno, $errstr ) use ( &$errors ) {
+				// Leave out errors silenced with @, such as filesize() failing on a stream of unknown size.
+				if ( error_reporting() & $errno ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+					$errors[] = $errstr;
+				}
+				return true;
+			}
+		);
+
+		try {
+			$served   = WC_Download_Handler::readfile_chunked( $source );
+			$buffered = ob_get_contents();
+		} finally {
+			restore_error_handler();
+			error_reporting( $error_reporting ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+			ob_end_clean();
+			$this->delete_download_source( $source );
+		}
+
+		$this->assertSame( array(), $errors, 'Streaming into a buffer that cannot be flushed should not raise notices, which would be written into the download.' );
+		$this->assertTrue( $served, 'The file should be reported as served.' );
+		$this->assertSame( 'file-data', $buffered, 'The file should be left intact in the buffer.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should not flush until file data has been read, so a failed read can still send an error page.
+	 *
+	 * @dataProvider provider_download_sources
+	 *
+	 * @param bool $unknown_size Whether to stream from a source with no known size, which reads until EOF.
+	 */
+	public function test_readfile_chunked_does_not_flush_before_file_data( bool $unknown_size ): void {
+		// An empty source gives one empty read before EOF.
+		$source  = $this->create_download_source( '', $unknown_size );
+		$flushes = 0;
+
+		ob_start(
+			function ( $buffer, $phase ) use ( &$flushes ) {
+				if ( $phase & PHP_OUTPUT_HANDLER_FLUSH ) {
+					++$flushes;
+				}
+				return '';
+			}
+		);
+
+		try {
+			WC_Download_Handler::readfile_chunked( $source );
+		} finally {
+			ob_end_clean();
+			$this->delete_download_source( $source );
+		}
+
+		$this->assertSame( 0, $flushes, 'Some servers send the headers on flush(), so nothing should be flushed before file data is output.' );
+	}
+
+	/**
+	 * Download sources for streaming coverage.
+	 *
+	 * @return array<string, array<bool>>
+	 */
+	public function provider_download_sources(): array {
+		return array(
+			'local file of known size' => array( false ),
+			'stream of unknown size'   => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Should send only the file through any output buffers it can remove or clean, raise no errors, and warn about buffers left behind.
+	 *
+	 * @dataProvider provider_output_buffer_stacks
+	 *
+	 * @param int[]  $buffer_flags      Flags for each output buffer, from the bottom of the stack up. Each buffer holds "[junk-<level>]".
+	 * @param string $expected_body     Response body the client should receive.
+	 * @param int    $expected_warnings Number of warnings that should be logged.
+	 */
+	public function test_download_output_through_output_buffers( array $buffer_flags, string $expected_body, int $expected_warnings ): void {
+		// Buffers that can't be removed would outlive this test, so run the download handler in its own process.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open -- Runs the PHP CLI on a fixed script with no user input.
+		$process = proc_open(
+			array( PHP_BINARY, '-d', 'display_errors=stderr', dirname( __DIR__ ) . '/helpers/download-handler-buffer-runner.php', implode( ',', $buffer_flags ), 'FILE-DATA' ),
+			array(
+				1 => array( 'pipe', 'w' ),
+				2 => array( 'pipe', 'w' ),
+			),
+			$pipes
+		);
+		$body    = stream_get_contents( $pipes[1] );
+		$stderr  = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		fclose( $pipes[2] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		proc_close( $process );
+
+		$report = json_decode( $stderr, true );
+
+		$this->assertIsArray( $report, "The runner script did not complete: $stderr" );
+		$this->assertSame( $expected_body, $body, 'The client should receive the file without the content of buffers that could be cleaned.' );
+		$this->assertSame( array(), $report['errors'], 'Cleaning and flushing buffers should not raise errors, even silenced ones.' );
+		$this->assertCount( $expected_warnings, $report['warnings'], 'A warning should be logged only when buffers left behind can affect the download.' );
+		foreach ( $report['warnings'] as $warning ) {
+			$this->assertStringContainsString( 'default output handler', $warning, 'The warning should name the buffers left behind.' );
+		}
+	}
+
+	/**
+	 * Output buffer stacks a download can be served through.
+	 *
+	 * @return array<string, array{int[], string, int}>
+	 */
+	public function provider_output_buffer_stacks(): array {
+		$cleanable_flushable = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
+
+		return array(
+			'no buffers'                             => array( array(), 'FILE-DATA', 0 ),
+			'standard buffers'                       => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, PHP_OUTPUT_HANDLER_STDFLAGS ), 'FILE-DATA', 0 ),
+			'cleanable and flushable, not removable' => array( array( $cleanable_flushable ), 'FILE-DATA', 0 ),
+			'cleanable only'                         => array( array( PHP_OUTPUT_HANDLER_CLEANABLE ), 'FILE-DATA', 1 ),
+			'standard below non-removable'           => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, $cleanable_flushable ), '[junk-0]FILE-DATA', 1 ),
+			'buffers from issue 51562'               => array( array( 0, 0, PHP_OUTPUT_HANDLER_CLEANABLE, PHP_OUTPUT_HANDLER_REMOVABLE ), '[junk-0][junk-1]FILE-DATA', 1 ),
+		);
+	}
+
+	/**
+	 * Create a download source holding the given contents.
+	 *
+	 * @param string $contents     File contents.
+	 * @param bool   $unknown_size Whether to use a data: URL, which has no size, instead of a temporary file.
+	 * @return string File path or URL.
+	 */
+	private function create_download_source( string $contents, bool $unknown_size ): string {
+		if ( $unknown_size ) {
+			return 'data://application/octet-stream;base64,' . base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		}
+
+		$file = wp_tempnam( 'wc-download-handler-streaming' );
+		file_put_contents( $file, $contents ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+
+		return $file;
+	}
+
+	/**
+	 * Delete a download source created by create_download_source().
+	 *
+	 * @param string $source File path or URL.
+	 */
+	private function delete_download_source( string $source ): void {
+		if ( is_file( $source ) ) {
+			wp_delete_file( $source );
+		}
+	}
+
+	/**
 	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
 	 */
 	public function test_content_type_fallback_applies_only_to_remote_files(): void {
