@@ -120,7 +120,7 @@ pnpm test:php:ci --cell 8.3 -- --group ajax                 # anything else goes
 - `--fresh` starts a cell as CI does (`--update`). Use it after a WordPress release, since a warm `latest` cell keeps the core it downloaded.
 - When a version appears in two cells (8.5 and its HPOS-off twin), select by index from `--list`.
 - Cells ignore `.wp-env.test.override.json`, as CI does; a per-cell `.wp-env.test-<cell>.override.json` is honoured.
-- `--tests` takes a class, `Class::method`, a regex, a test file, or `suite:<name>`, and can repeat. A selection never produces a receipt for `gh local-ci`; receipts cover whole jobs.
+- `--tests` takes a class, `Class::method`, a regex, a test file, or `suite:<name>`, and can repeat. A bare name matches that whole class (namespaced or not); anything with regex characters is passed to phpunit as is. A selection that matches nothing fails. Selections never produce a receipt for `gh local-ci`; receipts cover whole jobs.
 - `--jobs` (default 2) sets how many cells run at a time. Run one invocation at a time.
 - `TEST_PHP_CI_PORT_BASE` (default `82`) moves every cell's port, for a second checkout or the `gh local-ci` worktree.
 
