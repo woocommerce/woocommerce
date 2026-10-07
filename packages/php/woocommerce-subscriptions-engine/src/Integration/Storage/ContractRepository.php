@@ -132,7 +132,8 @@ final class ContractRepository {
 	/**
 	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
 	 * and replace items / addresses when named. Unnamed columns keep their stored
-	 * values, so a concurrent write to them is not reverted.
+	 * values, so a concurrent write to them is not reverted. Existence is checked only
+	 * when the row write changes nothing, before any child write.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id whose row still exists.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -146,8 +147,6 @@ final class ContractRepository {
 		if ( null === $id ) {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
 		}
-
-		$this->assert_contract_exists( $id );
 
 		$storage = $contract->to_storage();
 		$columns = array();
@@ -170,6 +169,11 @@ final class ContractRepository {
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		// Zero changed rows: a missing row, or identical values written within the same second.
+		if ( 0 === $updated ) {
+			$this->assert_contract_exists( $id );
 		}
 
 		if ( in_array( 'items', $fields, true ) ) {

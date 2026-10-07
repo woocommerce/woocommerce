@@ -839,6 +839,55 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox update_fields on a deleted contract throws before any child write.
+	 */
+	public function test_update_fields_rejects_a_deleted_contract_and_writes_no_children(): void {
+		global $wpdb;
+
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->assertTrue( $this->sut->delete( $id ) );
+
+		$stale = $this->make_contract();
+		$stale->set_id( $id );
+
+		try {
+			$this->sut->update_fields( $stale, array( 'status', 'items', 'addresses' ) );
+			$this->fail( 'Expected RuntimeException when updating a contract whose row no longer exists.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'no longer exists', $e->getMessage() );
+		}
+
+		foreach ( array( SchemaInstaller::TABLE_CONTRACT_ITEMS, SchemaInstaller::TABLE_CONTRACT_ADDRESSES ) as $table ) {
+			$table = SchemaInstaller::get_table_name( $table );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $id ) ) );
+		}
+	}
+
+	/**
+	 * @testdox update_fields writing identical values (no changed rows) does not throw.
+	 */
+	public function test_update_fields_with_identical_values_does_not_throw(): void {
+		global $wpdb;
+
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		// A write in a new second changes date_updated_gmt; repeat until one changes no rows.
+		$zero_rows = false;
+		for ( $i = 0; $i < 3 && ! $zero_rows; $i++ ) {
+			$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
+			$zero_rows = 0 === $wpdb->rows_affected;
+		}
+
+		$this->assertTrue( $zero_rows, 'A write changed no rows.' );
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+	}
+
+	/**
 	 * @testdox append_cycle inserts a cycle reachable as the chain's current cycle.
 	 */
 	public function test_append_cycle_and_find_chain_head(): void {
