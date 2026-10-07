@@ -118,7 +118,7 @@ final class Contracts {
 
 		try {
 			$contract = Contract::create( array( 'extension_slug' => $extension_slug ) );
-			self::apply( __METHOD__, $contract, $filtered_args );
+			self::apply( $contract, $filtered_args );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
@@ -155,7 +155,7 @@ final class Contracts {
 		}
 
 		try {
-			self::apply( __METHOD__, $contract, $filtered_args );
+			self::apply( $contract, $filtered_args );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
@@ -288,13 +288,12 @@ final class Contracts {
 	 * which enforce the entity invariants. Nothing is written to storage; an invalid value
 	 * throws before any write.
 	 *
-	 * @param string               $method   Public facade method, for usage notices.
 	 * @param Contract             $contract Contract to change.
 	 * @param array<string, mixed> $args     Caller fields (known keys only, no `extension_slug`).
 	 * @throws InvalidArgumentException If a value has the wrong shape.
 	 * @throws DomainException If a value breaks an entity invariant (from the entity setters).
 	 */
-	private static function apply( string $method, Contract $contract, array $args ): void {
+	private static function apply( Contract $contract, array $args ): void {
 		$instrument = $contract->get_payment_instrument();
 		$token_id   = $instrument->get_token_id();
 		$gateway    = $instrument->get_gateway();
@@ -351,10 +350,10 @@ final class Contracts {
 					$contract->set_tax_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'items':
-					$contract->set_items( self::validate_items( $method, $value ) );
+					$contract->set_items( self::validate_items( $value ) );
 					break;
 				case 'addresses':
-					$contract->set_addresses( self::validate_addresses( $method, $value ) );
+					$contract->set_addresses( self::validate_addresses( $value ) );
 					break;
 				case 'payment_token_id':
 					$token_id = ArgumentValidator::validate_nullable_id( $key, $value );
@@ -402,18 +401,17 @@ final class Contracts {
 	}
 
 	/**
-	 * Validate an item row list; unknown row keys are dropped with a notice.
+	 * Validate an item row list; unknown row keys are dropped with a notice naming the facade class.
 	 *
-	 * @param string $method Public facade method, for usage notices.
-	 * @param mixed  $value  Caller value.
+	 * @param mixed $value Caller value.
 	 * @return array<int, array<string, mixed>>
 	 * @throws InvalidArgumentException If the value is not a list of item rows.
 	 */
-	private static function validate_items( string $method, $value ): array {
+	private static function validate_items( $value ): array {
 		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
 		$rows    = array();
 		foreach ( ArgumentValidator::validate_list_of_arrays( 'items', $value ) as $row ) {
-			$rows[] = ArgumentValidator::filter_known_keys( $method, $row, $allowed, 'item key' );
+			$rows[] = ArgumentValidator::filter_known_keys( self::class, $row, $allowed, 'item key' );
 		}
 
 		return $rows;
@@ -421,14 +419,13 @@ final class Contracts {
 
 	/**
 	 * Validate an addresses map keyed `billing` / `shipping`; unknown address keys are
-	 * dropped with a notice.
+	 * dropped with a notice naming the facade class.
 	 *
-	 * @param string $method Public facade method, for usage notices.
-	 * @param mixed  $value  Caller value.
+	 * @param mixed $value Caller value.
 	 * @return array<string, array<string, mixed>>
 	 * @throws InvalidArgumentException If the map is not keyed `billing` / `shipping` with array values.
 	 */
-	private static function validate_addresses( string $method, $value ): array {
+	private static function validate_addresses( $value ): array {
 		$allowed = array_fill_keys( Contract::ADDRESS_FIELDS, true );
 		if ( ! is_array( $value ) ) {
 			throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping".' );
@@ -440,7 +437,7 @@ final class Contracts {
 				throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping" with array values.' );
 			}
 
-			$addresses[ $type ] = ArgumentValidator::filter_known_keys( $method, $address, $allowed, 'address key' );
+			$addresses[ $type ] = ArgumentValidator::filter_known_keys( self::class, $address, $allowed, 'address key' );
 		}
 
 		return $addresses;

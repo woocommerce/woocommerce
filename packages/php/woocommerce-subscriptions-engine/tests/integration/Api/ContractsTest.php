@@ -242,7 +242,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_unknown_item_and_address_keys_are_ignored_with_a_notice(): void {
-		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$this->setExpectedIncorrectUsage( Contracts::class );
 
 		$id = Contracts::create(
 			array(
@@ -638,6 +638,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
 		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
+		$this->setExpectedIncorrectUsage( Contracts::class );
 
 		$this->assertInstanceOf(
 			ContractView::class,
