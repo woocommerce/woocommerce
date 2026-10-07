@@ -282,6 +282,9 @@ class Checkout extends AbstractCartRoute {
 
 		$document_object = $this->get_document_object_from_rest_request( $request );
 
+		// On a full checkout, conditionally required additional fields that were not posted fall back to saved values, as in the document object.
+		$saved_additional_fields = $is_partial ? [] : $this->get_saved_additional_field_values();
+
 		foreach ( $validate_contexts as $context => $context_data ) {
 			$errors = new \WP_Error();
 
@@ -290,6 +293,7 @@ class Checkout extends AbstractCartRoute {
 
 			// These values are used to validate custom rules and generate the document object.
 			$field_values = (array) $request->get_param( $context_data['param'] ) ?? [];
+			$saved_values = 'additional_fields' === $context_data['param'] ? $saved_additional_fields : [];
 
 			foreach ( $additional_fields as $field_key => $field ) {
 				// Skip values that were not posted if the request is partial or the field is not required.
@@ -297,8 +301,11 @@ class Checkout extends AbstractCartRoute {
 					continue;
 				}
 
+				// Without a document object this is the registered rule: always-required fields must be posted and get no saved fallback.
+				$saved_value = $this->additional_fields_controller->is_required_field( $field_key ) ? '' : ( $saved_values[ $field_key ] ?? '' );
+
 				// Clean the field value to trim whitespace. Request body is JSON-decoded and never magic-quoted, so no wp_unslash().
-				$field_value = wc_clean( $field_values[ $field_key ] ?? '' );
+				$field_value = wc_clean( $field_values[ $field_key ] ?? $saved_value );
 
 				if ( empty( $field_value ) ) {
 					if ( true === $field['required'] ) {

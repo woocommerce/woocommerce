@@ -124,6 +124,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	 */
 	public function tearDown(): void {
 		global $wp_rest_server;
+		$this->clear_saved_referral_fields();
 		$wp_rest_server = null;
 		unset( WC()->countries->locale );
 		WC()->cart->empty_cart();
@@ -3026,6 +3027,16 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Clears the referral field values saved on the customer, which survives reset_session.
+	 */
+	private function clear_saved_referral_fields(): void {
+		foreach ( array( 'plugin-namespace/referral-source', 'plugin-namespace/referral-detail' ) as $key ) {
+			$this->controller->persist_field_for_customer( $key, '', wc()->customer, 'other' );
+		}
+		wc()->customer->save();
+	}
+
+	/**
 	 * Builds a checkout request with a valid address and the given additional field values.
 	 *
 	 * @param string $method The request method (POST|PUT|PATCH).
@@ -3118,10 +3129,77 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		// The POST omits referral-source, but its persisted value still makes the detail field required.
 		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
 		$this->assertEquals( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
 
-		// The customer object survives reset_session, so clear the value this test persisted.
-		$this->controller->persist_field_for_customer( 'plugin-namespace/referral-source', '', wc()->customer, 'other' );
-		wc()->customer->save();
+	/**
+	 * @testdox A full checkout that omits a conditionally required field uses its saved value.
+	 * @testWith ["order"]
+	 *           ["contact"]
+	 * @param string $location The field location.
+	 */
+	public function test_conditional_required_field_uses_saved_value_when_not_posted( string $location ): void {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required', $location );
+
+		$saved    = array(
+			'plugin-namespace/referral-source' => 'other',
+			'plugin-namespace/referral-detail' => 'a friend',
+		);
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'PUT', $saved ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array() ) );
+		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( 'a friend', $this->controller->get_field_from_object( 'plugin-namespace/referral-detail', wc_get_order( $data['order_id'] ) ) );
+	}
+
+	/**
+	 * @testdox A posted empty value overrides the saved value of a conditionally required field.
+	 */
+	public function test_conditional_required_field_posted_empty_value_overrides_saved_value(): void {
+		$this->unregister_fields();
+		$this->register_conditional_referral_fields( 'required' );
+
+		$saved    = array(
+			'plugin-namespace/referral-source' => 'other',
+			'plugin-namespace/referral-detail' => 'a friend',
+		);
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'PUT', $saved ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'POST', array( 'plugin-namespace/referral-detail' => '' ) ) );
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+	}
+
+	/**
+	 * @testdox A full checkout that omits an always-required field fails even when a value is saved.
+	 */
+	public function test_always_required_field_ignores_saved_value_when_not_posted(): void {
+		$this->unregister_fields();
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => 'plugin-namespace/referral-detail',
+				'label'    => 'Please specify',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $this->get_checkout_request_with_fields( 'PUT', array( 'plugin-namespace/referral-detail' => 'a friend' ) ) );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		// Omit additional_fields entirely so the schema check does not reject the request first.
+		$request = $this->get_checkout_request_with_fields( 'POST', array() );
+		$params  = $request->get_body_params();
+		unset( $params['additional_fields'] );
+		$request->set_body_params( $params );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertSame( 400, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( 'woocommerce_required_checkout_field', $data['data']['details']['additional_fields']['code'], print_r( $data, true ) );
 	}
 
 	/**

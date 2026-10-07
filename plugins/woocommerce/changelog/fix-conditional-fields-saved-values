@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API checkout: use saved values for conditionally required additional fields that a full checkout request omits.

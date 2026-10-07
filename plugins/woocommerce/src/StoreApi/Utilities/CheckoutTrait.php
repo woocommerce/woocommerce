@@ -507,12 +507,11 @@ trait CheckoutTrait {
 	}
 
 	/**
-	 * Returns a document object from a REST request.
+	 * Returns the saved additional field values: the customer session's, overridden by the current or draft order's.
 	 *
-	 * @param \WP_REST_Request $request The REST request.
-	 * @return DocumentObject The document object.
+	 * @return array
 	 */
-	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
+	private function get_saved_additional_field_values(): array {
 		// Keep the order local so validation errors do not release its stock or coupon holds.
 		$order        = $this->order ?? $this->get_draft_order();
 		$saved_fields = wc()->customer instanceof WC_Customer
@@ -524,8 +523,17 @@ trait CheckoutTrait {
 				$saved_fields
 			);
 		}
+		return $saved_fields;
+	}
 
-		$field_values      = wp_parse_args( $request['additional_fields'] ?? [], $saved_fields );
+	/**
+	 * Returns a document object from a REST request.
+	 *
+	 * @param \WP_REST_Request $request The REST request.
+	 * @return DocumentObject The document object.
+	 */
+	public function get_document_object_from_rest_request( \WP_REST_Request $request ) {
+		$field_values      = wp_parse_args( $request['additional_fields'] ?? [], $this->get_saved_additional_field_values() );
 		$additional_fields = [];
 		$registered_fields = array_merge(
 			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
