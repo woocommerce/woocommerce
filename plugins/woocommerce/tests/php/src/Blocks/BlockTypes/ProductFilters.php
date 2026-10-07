@@ -37,6 +37,13 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $canonical_method;
 
 	/**
+	 * Reflection method used to invoke the private should_render_filters method.
+	 *
+	 * @var \\ReflectionMethod
+	 */
+	private $should_render_method;
+
+	/**
 	 * Set up the test subject and dependencies.
 	 *
 	 * @return void
@@ -58,6 +65,9 @@ class ProductFilters extends \WP_UnitTestCase {
 
 		$this->canonical_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_canonical_url_no_pagination' );
 		$this->canonical_method->setAccessible( true );
+
+		$this->should_render_method = new \\ReflectionMethod( ProductFiltersBlock::class, 'should_render_filters' );
+		$this->should_render_method->setAccessible( true );
 	}
 
 	/**
@@ -101,6 +111,83 @@ class ProductFilters extends \WP_UnitTestCase {
 	 */
 	private function invoke_canonical_url_helper( array $filter_params ): string {
 		return (string) $this->canonical_method->invoke( $this->product_filters, $filter_params );
+	}
+
+	/**
+	 * Convenience wrapper for invoking the private filter visibility helper.
+	 *
+	 * @param string $inner_blocks   Rendered inner block markup.
+	 * @param array  $active_filters Active filter items.
+	 * @return bool
+	 */
+	private function invoke_should_render_helper( string $inner_blocks, array $active_filters = [] ): bool {
+		return (bool) $this->should_render_method->invoke( $this->product_filters, $inner_blocks, $active_filters );
+	}
+
+	/**
+	 * Product Filters should disappear when every option-bearing filter is hidden.
+	 *
+	 * @return void
+	 */
+	public function test_product_filters_do_not_render_when_all_filters_are_hidden(): void {
+		$inner_blocks = '
+			<h2>Filters</h2>
+			<div class="wp-block-woocommerce-product-filter-active"></div>
+			<div class="wp-block-woocommerce-product-filter-price wc-block-product-filter--hidden" hidden></div>
+			<div class="wp-block-woocommerce-product-filter-rating wc-block-product-filter--hidden" hidden></div>
+		';
+
+		$this->assertFalse( $this->invoke_should_render_helper( $inner_blocks ) );
+	}
+
+	/**
+	 * Product Filters should render when at least one option-bearing filter is visible.
+	 *
+	 * @return void
+	 */
+	public function test_product_filters_render_when_a_filter_is_visible(): void {
+		$inner_blocks = '
+			<div class="wp-block-woocommerce-product-filter-price wc-block-product-filter--hidden" hidden></div>
+			<div class="wp-block-woocommerce-product-filter-rating"></div>
+		';
+
+		$this->assertTrue( $this->invoke_should_render_helper( $inner_blocks ) );
+	}
+
+	/**
+	 * Nested controls inside a hidden filter must not make the wrapper visible.
+	 *
+	 * @return void
+	 */
+	public function test_hidden_filter_nested_controls_do_not_count_as_visible_filters(): void {
+		$inner_blocks = '
+			<div class="wp-block-woocommerce-product-filter-attribute wc-block-product-filter--hidden" hidden>
+				<div class="wp-block-woocommerce-product-filter-checkbox-list"></div>
+			</div>
+		';
+
+		$this->assertFalse( $this->invoke_should_render_helper( $inner_blocks ) );
+	}
+
+	/**
+	 * Active filters keep the wrapper visible so shoppers can clear them.
+	 *
+	 * @return void
+	 */
+	public function test_active_filters_keep_product_filters_visible(): void {
+		$inner_blocks = '
+			<div class="wp-block-woocommerce-product-filter-price wc-block-product-filter--hidden" hidden></div>
+		';
+
+		$active_filters = [
+			[
+				'type'        => 'price',
+				'value'       => '10|20',
+				'activeLabel' => 'Price: $10 - $20',
+			],
+		];
+
+		$this->assertTrue( $this->invoke_should_render_helper( $inner_blocks, $active_filters ) );
 	}
 
 	/**
