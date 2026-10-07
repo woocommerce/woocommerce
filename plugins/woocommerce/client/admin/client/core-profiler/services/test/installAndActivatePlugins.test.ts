@@ -27,6 +27,55 @@ describe( 'pluginInstallerMachine', () => {
 		jest.resetAllMocks();
 	} );
 
+	it.each< [ string, string, number, number ] >( [
+		[ 'woocommerce-services:tax', 'woocommerce-services', 4000, 4000 ],
+		[ 'woocommerce-services', 'woocommerce-services', 4000, 4000 ],
+		[ 'mailpoet', 'mailpoet', 4000, 4000 ],
+		[ 'mailpoet:alt', 'mailpoet', 4000, 4000 ],
+		[ 'woocommerce-services:tax', 'unrelated-plugin', 4000, 0 ],
+		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 4000 ],
+		[ 'woocommerce-services:shipping', 'unrelated-plugin', 4000, 0 ],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'woocommerce-paypal-payments',
+			4000,
+			4000,
+		],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'unrelated-plugin',
+			4000,
+			0,
+		],
+	] )(
+		'records %s duration from %s without changing its key',
+		async ( plugin, slug, duration, expectedDuration ) => {
+			const machine = pluginInstallerMachine.provide( {
+				...mockConfig,
+				actors: {
+					installPlugin: fromPromise( async () => ( {
+						data: { install_time: { [ slug ]: duration } },
+					} ) ),
+				},
+			} );
+			const service = createActor( machine, {
+				input: { selectedPlugins: [ plugin ], pluginsAvailable: [] },
+			} ).start();
+
+			try {
+				const snapshot = await waitFor( service, ( snap ) =>
+					snap.matches( 'reportSuccess' )
+				);
+
+				expect( snapshot.context.installedPlugins ).toEqual( [
+					{ plugin, installTime: expectedDuration },
+				] );
+			} finally {
+				service.stop();
+			}
+		}
+	);
+
 	it( 'when given one plugin it should call the installPlugin service once', async () => {
 		const mockInstallPlugin = jest.fn();
 		mockInstallPlugin.mockResolvedValueOnce( {
