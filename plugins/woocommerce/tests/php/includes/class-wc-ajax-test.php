@@ -2665,10 +2665,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		);
 
 		try {
-			$product = WC_Helper_Product::create_simple_product();
-			$product->set_price( 24 );
-			$product->set_tax_status( 'taxable' );
-			$product->save();
+			$product = WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'regular_price' => '24',
+					'price'         => '24',
+				)
+			);
 
 			$order = wc_create_order();
 			if ( $has_customer ) {
