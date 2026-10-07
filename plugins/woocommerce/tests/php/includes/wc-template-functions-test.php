@@ -359,6 +359,34 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Displaying product attributes does not crash when a term link cannot be resolved.
+	 */
+	public function test_display_product_attributes_does_not_crash_for_deleted_term(): void {
+		global $wc_product_attributes;
+
+		$previous_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_product_attribute_object( 'Archive Finish', array( 'Matte & Gloss' ) );
+		$taxonomy            = $attribute->get_name();
+
+		$this->expectNotToPerformAssertions();
+		try {
+			$wc_product_attributes[ $taxonomy ]->attribute_public = true;
+
+			$product = new WC_Product_Simple();
+			$product->set_attributes( array( $attribute ) );
+
+			$term = get_term( $attribute->get_options()[0], $taxonomy );
+			wp_delete_term( $term->term_id, $taxonomy );
+
+			add_filter( 'woocommerce_get_product_terms', static fn() => array( $term ) );
+			wc_display_product_attributes( $product );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $previous_attributes;
+		}
+	}
+
+	/**
 	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
 	 */
 	public function test_empty_cart_message_uses_notices_wrapper(): void {
