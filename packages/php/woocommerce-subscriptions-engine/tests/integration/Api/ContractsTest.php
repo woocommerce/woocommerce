@@ -760,12 +760,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'status'        => CycleStatus::BILLED,
 				'starts_at_gmt' => '2026-01-01 00:00:00',
 				'ends_at_gmt'   => '2026-02-01 00:00:00',
+				'currency'      => 'USD',
 			),
 			$overrides
 		);
 	}
 
-	public function test_the_first_cycle_takes_the_chain_and_contract_defaults(): void {
+	public function test_the_first_cycle_takes_the_chain_defaults(): void {
 		$id = $this->contract_with_currency();
 
 		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) )->get_id();
@@ -777,7 +778,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'USD', $cycle->get_currency() );
 		$this->assertSame( '0.00000000', $cycle->get_expected_total() );
 		$this->assertSame( 77, $cycle->get_order_id() );
-		$this->assertSame( self::EXTENSION_SLUG, $cycle->get_extension_slug() );
+		$this->assertNull( $cycle->get_extension_slug(), 'The contract is not read, so its owner is not copied.' );
 		$this->assertNull( $cycle->get_plan_snapshot_id() );
 		$this->assertNull( $cycle->get_items_snapshot_id() );
 	}
@@ -888,25 +889,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 			array(
 				'starts_at_gmt' => '2026-01-01 00:00:00',
 				'ends_at_gmt'   => '2026-02-01 00:00:00',
+				'currency'      => 'USD',
 			)
 		);
 
 		$this->assertSame( CycleStatus::PENDING, $cycle->get_status() );
-	}
-
-	public function test_add_cycle_without_a_currency_is_rejected(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
-
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Cycle: currency is required.' );
-
-		Contracts::add_cycle(
-			$id,
-			array(
-				'starts_at_gmt' => '2026-01-01 00:00:00',
-				'ends_at_gmt'   => '2026-02-01 00:00:00',
-			)
-		);
 	}
 
 	public function test_an_unknown_cycle_key_is_ignored_with_a_notice(): void {
@@ -927,25 +914,19 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_cycle_needs_a_currency(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->contract_with_currency();
 
 		$this->expectException( InvalidArgumentException::class );
 
-		Contracts::add_cycle( $id, $this->cycle_args() );
+		Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => null ) ) );
 	}
 
-	public function test_an_explicit_currency_serves_a_contract_without_one(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+	public function test_the_cycle_currency_is_the_given_one(): void {
+		$id = $this->contract_with_currency();
 
 		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) )->get_id();
 
 		$this->assertSame( 'EUR', $this->cycle( $id, $cycle_id )->get_currency() );
-	}
-
-	public function test_an_unknown_contract_is_rejected(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		Contracts::add_cycle( 999999, $this->cycle_args() );
 	}
 
 	public function test_get_history_returns_the_appended_cycle_as_a_view(): void {

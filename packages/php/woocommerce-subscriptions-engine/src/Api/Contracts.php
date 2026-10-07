@@ -179,28 +179,22 @@ final class Contracts {
 	 * Append a cycle to a contract's chain `(contract_id, kind)`.
 	 *
 	 * The first public form of the cycle append tool: append-if-absent on the chain's
-	 * unique positions. `starts_at_gmt`, `ends_at_gmt` and a currency (given or the
-	 * contract's) are required. `status` (a registered cycle status) defaults to `pending`;
-	 * `kind` defaults to `billing`; `sequence_no` defaults to
-	 * the head's plus one; `count` defaults to MAX(count) + 1 in the chain (pass `null` for
-	 * a non-counting cycle); `expected_total` defaults to 0;
-	 * `order_id` is optional. The extension slug is copied from the contract. Unknown keys
-	 * raise a `_doing_it_wrong()` notice and are ignored.
+	 * unique positions. `starts_at_gmt`, `ends_at_gmt` and `currency` are required.
+	 * `status` (a registered cycle status) defaults to `pending`; `kind` defaults to
+	 * `billing`; `sequence_no` defaults to the head's plus one; `count` defaults to
+	 * MAX(count) + 1 in the chain (pass `null` for a non-counting cycle); `expected_total`
+	 * defaults to 0; `order_id` is optional. The contract is not read: appending to an
+	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()`
+	 * notice and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
 	 * @return CycleView The appended cycle.
-	 * @throws InvalidArgumentException If the contract is unknown, a required key is missing, or a value is invalid.
+	 * @throws InvalidArgumentException If a required key is missing or a value is invalid.
 	 * @throws DomainException If the chain position is already taken.
 	 */
 	public static function add_cycle( int $contract_id, array $args ): CycleView {
 		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
-
-		$repository = new ContractRepository();
-		$contract   = $repository->find_summary( $contract_id );
-		if ( null === $contract ) {
-			throw new InvalidArgumentException( sprintf( 'Contracts: contract %d does not exist.', (int) $contract_id ) );
-		}
 
 		$status = $filtered_args['status'] ?? null;
 		if ( null !== $status && ! is_string( $status ) ) {
@@ -214,8 +208,9 @@ final class Contracts {
 
 		$starts_at = self::nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null );
 		$ends_at   = self::nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null );
-		$currency  = array_key_exists( 'currency', $filtered_args ) ? self::currency( $filtered_args['currency'] ) : $contract->get_currency();
+		$currency  = self::currency( $filtered_args['currency'] ?? null );
 
+		$repository  = new ContractRepository();
 		$head        = $repository->find_chain_head( $contract_id, $kind );
 		$sequence_no = array_key_exists( 'sequence_no', $filtered_args )
 			? self::nullable_id( 'sequence_no', $filtered_args['sequence_no'] )
@@ -235,7 +230,6 @@ final class Contracts {
 			'expected_total' => self::money( 'expected_total', $filtered_args['expected_total'] ?? null ),
 			'currency'       => $currency,
 			'order_id'       => self::nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
-			'extension_slug' => $contract->get_extension_slug(),
 		);
 
 		try {

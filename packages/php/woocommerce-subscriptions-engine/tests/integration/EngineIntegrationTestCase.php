@@ -171,6 +171,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				'starts_at_gmt'  => (string) $view->get_start_gmt(),
 				'ends_at_gmt'    => (string) $view->get_next_payment_gmt(),
 				'expected_total' => $view->get_billing_total(),
+				'currency'       => $view->get_currency(),
 			)
 		);
 		Contracts::update( $id, array( 'status' => $status ) );
