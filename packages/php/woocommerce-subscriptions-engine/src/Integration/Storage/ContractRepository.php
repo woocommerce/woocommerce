@@ -6,7 +6,7 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_chain_head()}, {@see self::max_count()},
+ * through purpose-built reads ({@see self::find_chain_head()},
  * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
  * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
  * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
@@ -1070,9 +1070,11 @@ final class ContractRepository {
 	/**
 	 * Append a cycle to its chain `(contract_id, kind)`, copy-forwarding snapshots.
 	 *
-	 * Resolves the cycle's snapshots (reused from `$previous` when unchanged, else
-	 * inserted fresh) then inserts the cycle row and stamps the generated id back onto
-	 * the entity. The seam a later transaction-handling change wraps.
+	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), resolves the
+	 * cycle's snapshots (reused from `$previous` when unchanged, else inserted fresh), then
+	 * inserts the cycle row and stamps the generated id back onto the entity. The chain's
+	 * UNIQUE indexes guard concurrent appends and duplicate counts. The seam a later
+	 * transaction-handling change wraps.
 	 *
 	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
 	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
@@ -1083,8 +1085,23 @@ final class ContractRepository {
 	 *                          other reason (the database error is in the message).
 	 */
 	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
+		$this->assign_next_sequence_no( $cycle );
 		$this->resolve_cycle_snapshots( $cycle, $previous );
 		$this->insert_cycle( $cycle );
+	}
+
+	/**
+	 * Assign the chain's next `sequence_no` to a cycle that awaits one.
+	 *
+	 * @param Cycle $cycle Cycle about to be appended.
+	 */
+	private function assign_next_sequence_no( Cycle $cycle ): void {
+		if ( ! $cycle->awaits_sequence_no() ) {
+			return;
+		}
+
+		$head = $this->find_chain_head( $cycle->get_contract_id(), $cycle->get_kind() );
+		$cycle->assign_sequence_no( null === $head ? 1 : $head->get_sequence_no() + 1 );
 	}
 
 	/**
@@ -1263,26 +1280,6 @@ final class ContractRepository {
 		}
 
 		return $cycles;
-	}
-
-	/**
-	 * The highest `count` in a chain `(contract_id, kind)` - the chargeable counter the
-	 * dispatcher advances (next chargeable cycle is `MAX(count) + 1`). Returns null for a
-	 * chain with no counting cycles (e.g. one holding only non-counting trial periods).
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $kind        Chain kind. Defaults to billing.
-	 * @return int|null The highest count, or null when the chain has no counting cycle.
-	 */
-	public function max_count( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?int {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$max = $wpdb->get_var( $wpdb->prepare( "SELECT MAX(count) FROM {$table} WHERE contract_id = %d AND kind = %s", $contract_id, $kind ) );
-
-		return null === $max ? null : (int) $max;
 	}
 
 	/**

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
 use DomainException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
@@ -532,19 +533,58 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'pending', $row['status'] );
 	}
 
-	public function test_sequence_no_can_be_reassigned_after_construction(): void {
-		$cycle = $this->make_pending( array( 'sequence_no' => 1 ) );
-
-		$cycle->set_sequence_no( 4 );
-
-		$this->assertSame( 4, $cycle->get_sequence_no() );
+	/**
+	 * Build a cycle without `sequence_no` or `count`.
+	 */
+	private function make_unpositioned(): Cycle {
+		return Cycle::create(
+			array(
+				'contract_id'   => 7,
+				'starts_at_gmt' => '2026-02-01 00:00:00',
+				'ends_at_gmt'   => '2026-03-01 00:00:00',
+				'currency'      => 'USD',
+			)
+		);
 	}
 
-	public function test_set_sequence_no_rejects_a_non_positive_value(): void {
-		$cycle = $this->make_pending();
+	public function test_create_without_a_sequence_no_leaves_it_to_the_append(): void {
+		$this->assertTrue( $this->make_unpositioned()->awaits_sequence_no() );
+		$this->assertFalse( $this->make_pending()->awaits_sequence_no() );
+	}
 
+	public function test_a_null_sequence_no_is_unassigned_like_an_absent_one(): void {
+		$this->assertTrue( $this->make_pending( array( 'sequence_no' => null ) )->awaits_sequence_no() );
+	}
+
+	public function test_create_without_a_count_is_non_counting(): void {
+		$this->assertNull( $this->make_unpositioned()->get_count() );
+	}
+
+	public function test_an_unassigned_sequence_no_cannot_be_read(): void {
+		$this->expectException( LogicException::class );
+
+		$this->make_unpositioned()->get_sequence_no();
+	}
+
+	public function test_the_sequence_no_can_be_assigned_once(): void {
+		$cycle = $this->make_unpositioned();
+
+		$cycle->assign_sequence_no( 4 );
+
+		$this->assertSame( 4, $cycle->get_sequence_no() );
+		$this->assertFalse( $cycle->awaits_sequence_no() );
+	}
+
+	public function test_assign_sequence_no_rejects_a_non_positive_value(): void {
 		$this->expectException( DomainException::class );
-		$cycle->set_sequence_no( 0 );
+
+		$this->make_unpositioned()->assign_sequence_no( 0 );
+	}
+
+	public function test_an_assigned_sequence_no_cannot_be_reassigned(): void {
+		$this->expectException( DomainException::class );
+
+		$this->make_pending()->assign_sequence_no( 2 );
 	}
 
 	public function test_id_can_be_stamped_after_persistence(): void {

@@ -992,27 +992,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox max_count tracks the highest count appended (the MAX(count) + 1 anchor).
-	 */
-	public function test_max_count_reads_the_per_chain_counter(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$this->assertNull( $this->sut->max_count( $id ), 'An empty chain has no counting cycle.' );
-
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
-		$this->assertSame( 1, $this->sut->max_count( $id ) );
-
-		$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
-		$this->assertSame( 2, $this->sut->max_count( $id ) );
-
-		// The next chargeable number is derived as MAX(count) + 1; appending it must
-		// advance the counter, confirming the derivation is wired through the writes.
-		$next = (int) $this->sut->max_count( $id ) + 1;
-		$this->sut->append_cycle( $this->make_cycle( $id, 3, $next, '2026-09-15 00:00:00', '2026-10-15 00:00:00' ) );
-		$this->assertSame( 3, $this->sut->max_count( $id ) );
-	}
-
-	/**
 	 * @testdox find_cycles_by_order_id returns every cycle linked to an order.
 	 */
 	public function test_find_cycles_by_order_id(): void {
@@ -1723,6 +1702,60 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * Build a billing cycle whose position the append assigns.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $overrides   Extra or replacement keys.
+	 */
+	private function make_unpositioned_cycle( int $contract_id, array $overrides = array() ): Cycle {
+		return Cycle::create(
+			array_merge(
+				array(
+					'contract_id'   => $contract_id,
+					'starts_at_gmt' => '2026-07-15 00:00:00',
+					'ends_at_gmt'   => '2026-08-15 00:00:00',
+					'currency'      => 'USD',
+				),
+				$overrides
+			)
+		);
+	}
+
+	/**
+	 * @testdox append_cycle assigns sequence 1 to the first unpositioned cycle and leaves the count alone.
+	 */
+	public function test_append_cycle_assigns_the_first_sequence_no(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->make_unpositioned_cycle( $id );
+
+		$this->sut->append_cycle( $cycle );
+
+		$this->assertSame( 1, $cycle->get_sequence_no() );
+		$this->assertNull( $cycle->get_count() );
+		$head = $this->sut->find_chain_head( $id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( $cycle->get_id(), $head->get_id() );
+	}
+
+	/**
+	 * @testdox append_cycle assigns the head's sequence + 1 within the cycle's own chain.
+	 */
+	public function test_append_cycle_assigns_the_next_sequence_no_in_its_chain(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
+
+		$next  = $this->make_unpositioned_cycle( $id, array( 'count' => 3 ) );
+		$other = $this->make_unpositioned_cycle( $id, array( 'kind' => 'shipping' ) );
+		$this->sut->append_cycle( $next );
+		$this->sut->append_cycle( $other );
+
+		$this->assertSame( 3, $next->get_sequence_no() );
+		$this->assertSame( 3, $next->get_count() );
+		$this->assertSame( 1, $other->get_sequence_no() );
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {
@@ -1737,9 +1770,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 2, $history );
 		$this->assertNull( $history[0]->get_count() );
 		$this->assertNull( $history[1]->get_count() );
-
-		// No counting cycle, so the per-chain counter is null.
-		$this->assertNull( $this->sut->max_count( $id ) );
 	}
 
 	/**

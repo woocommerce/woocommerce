@@ -774,7 +774,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
 		$this->assertSame( 1, $cycle->get_sequence_no() );
-		$this->assertSame( 1, $cycle->get_count() );
+		$this->assertNull( $cycle->get_count(), 'The engine never assigns a count.' );
 		$this->assertSame( 'USD', $cycle->get_currency() );
 		$this->assertSame( '0.00000000', $cycle->get_expected_total() );
 		$this->assertSame( 77, $cycle->get_order_id() );
@@ -801,7 +801,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$cycle    = $this->cycle( $id, $cycle_id );
 
 		$this->assertSame( 2, $cycle->get_sequence_no() );
-		$this->assertSame( 2, $cycle->get_count() );
+		$this->assertNull( $cycle->get_count() );
 		$this->assertSame( '19.99000000', $cycle->get_expected_total() );
 	}
 
@@ -820,6 +820,53 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->expectException( DomainException::class );
 
 		Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) );
+	}
+
+	public function test_a_null_sequence_no_takes_the_next_position(): void {
+		$id = $this->contract_with_currency();
+		Contracts::add_cycle( $id, $this->cycle_args() );
+
+		$view = Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => null ) ) );
+
+		$this->assertSame( 2, $view->get_sequence_no() );
+	}
+
+	public function test_a_taken_count_is_refused(): void {
+		$id = $this->contract_with_currency();
+		Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
+
+		$this->expectException( DomainException::class );
+
+		Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
+	}
+
+	public function test_an_explicit_position_is_kept(): void {
+		$id = $this->contract_with_currency();
+
+		$cycle_id = Contracts::add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'sequence_no' => 5,
+					'count'       => 3,
+				)
+			)
+		)->get_id();
+		$cycle    = $this->cycle( $id, $cycle_id );
+
+		$this->assertSame( 5, $cycle->get_sequence_no() );
+		$this->assertSame( 3, $cycle->get_count() );
+	}
+
+	public function test_another_kind_starts_its_own_chain(): void {
+		$id = $this->contract_with_currency();
+		Contracts::add_cycle( $id, $this->cycle_args() );
+		Contracts::add_cycle( $id, $this->cycle_args() );
+
+		$view = Contracts::add_cycle( $id, $this->cycle_args( array( 'kind' => 'shipping' ) ) );
+
+		$this->assertSame( 'shipping', $view->get_kind() );
+		$this->assertSame( 1, $view->get_sequence_no() );
 	}
 
 	/**
@@ -868,6 +915,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'starts_at_gmt' => '2026-01-01 00:00:00',
 					'ends_at_gmt'   => '2026-02-01 00:00:00',
 					'sequence_no'   => 0,
+				),
+			),
+			'non-string status'    => array(
+				array(
+					'status'        => array( 'billed' ),
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+					'currency'      => 'USD',
 				),
 			),
 			'empty kind'           => array(

@@ -131,7 +131,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 
 		// The contract was not advanced: still cycle 1, schedule unmoved.
 		$repo = new ContractRepository();
-		$this->assertSame( 1, $repo->max_count( $contract_id ) );
+		$this->assertSame( 1, $this->head_count( $contract_id ) );
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
@@ -185,7 +185,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 
 		// Untouched: still cycle 1, schedule unmoved, no renewal order.
 		$repo = new ContractRepository();
-		$this->assertSame( 1, $repo->max_count( $contract_id ) );
+		$this->assertSame( 1, $this->head_count( $contract_id ) );
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-06-15 00:00:00', $reloaded->get_next_payment_gmt() );
@@ -211,14 +211,14 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 2, $processed, 'A single tick processes at most the batch size.' );
 
 		// The two oldest-due contracts advanced; the third is still at cycle 1.
-		$this->assertSame( 2, $repo->max_count( (int) $first->get_id() ) );
-		$this->assertSame( 2, $repo->max_count( (int) $second->get_id() ) );
-		$this->assertSame( 1, $repo->max_count( (int) $third->get_id() ) );
+		$this->assertSame( 2, $this->head_count( (int) $first->get_id() ) );
+		$this->assertSame( 2, $this->head_count( (int) $second->get_id() ) );
+		$this->assertSame( 1, $this->head_count( (int) $third->get_id() ) );
 
 		// The next tick drains the remaining due contract.
 		$processed_next = $dispatcher->run_batch( $this->scan_now(), 2 );
 		$this->assertSame( 1, $processed_next );
-		$this->assertSame( 2, $repo->max_count( (int) $third->get_id() ) );
+		$this->assertSame( 2, $this->head_count( (int) $third->get_id() ) );
 	}
 
 	/**
@@ -308,7 +308,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 0, $dispatcher->run_batch( $this->scan_now(), -5 ) );
 
 		// Nothing was renewed by the no-op ticks.
-		$this->assertSame( 1, ( new ContractRepository() )->max_count( (int) $contract->get_id() ) );
+		$this->assertSame( 1, $this->head_count( (int) $contract->get_id() ) );
 	}
 
 	/**
@@ -361,5 +361,16 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 				}
 			)
 		);
+	}
+
+	/**
+	 * The billing chain head's count, or null for an empty chain.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function head_count( int $contract_id ): ?int {
+		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
+
+		return null === $head ? null : $head->get_count();
 	}
 }

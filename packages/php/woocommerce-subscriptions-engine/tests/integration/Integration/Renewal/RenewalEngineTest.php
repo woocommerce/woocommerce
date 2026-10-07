@@ -1538,6 +1538,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			$id,
 			array(
 				'status'        => CycleStatus::BILLED,
+				'count'         => 1,
 				'currency'      => 'USD',
 				'starts_at_gmt' => '2026-01-01 00:00:00',
 				'ends_at_gmt'   => '2026-02-01 00:00:00',

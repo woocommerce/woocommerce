@@ -167,6 +167,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 			$id,
 			array(
 				'status'         => CycleStatus::BILLED,
+				'count'          => 1,
 				'order_id'       => $order->get_id(),
 				'starts_at_gmt'  => (string) $view->get_start_gmt(),
 				'ends_at_gmt'    => (string) $view->get_next_payment_gmt(),

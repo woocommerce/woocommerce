@@ -17,6 +17,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use DomainException;
+use LogicException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
@@ -49,9 +50,9 @@ final class Cycle {
 	private $contract_id;
 
 	/**
-	 * Position within the chain, monotonic from 1.
+	 * Position within the chain, monotonic from 1, or null until the append assigns it.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	private $sequence_no;
 
@@ -181,7 +182,7 @@ final class Cycle {
 	private function __construct( array $data ) {
 		$this->id                = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
 		$this->contract_id       = ScalarCoercion::coerce_int( $data['contract_id'] ?? null );
-		$this->sequence_no       = ScalarCoercion::coerce_int( $data['sequence_no'] ?? null );
+		$this->sequence_no       = isset( $data['sequence_no'] ) ? ScalarCoercion::coerce_int( $data['sequence_no'] ) : null;
 		$this->count             = isset( $data['count'] ) ? ScalarCoercion::coerce_int( $data['count'] ) : null;
 		$this->kind              = ScalarCoercion::coerce_string( $data['kind'] ?? null, self::KIND_BILLING );
 		$this->status            = self::coerce_status( $data['status'] ?? null );
@@ -203,10 +204,10 @@ final class Cycle {
 	/**
 	 * Build a new, unsaved cycle.
 	 *
-	 * Required keys: `contract_id`, `sequence_no`, `starts_at_gmt`, `ends_at_gmt`,
-	 * `expected_total`, `currency`. Optional: `count` (defaults to 1; pass null for
-	 * a non-counting cycle), `status` (defaults to `pending`; a checkout signup
-	 * cycle is created directly `billed`), `kind` (defaults to billing), `reason`,
+	 * Required keys: `contract_id`, `starts_at_gmt`, `ends_at_gmt`, `expected_total`,
+	 * `currency`. Optional: `sequence_no` (absent or null: the append assigns the chain's
+	 * next position), `count` (absent or null for a non-counting cycle; the caller owns
+	 * the numbering), `status` (defaults to `pending`), `kind` (defaults to billing), `reason`,
 	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`,
 	 * `plan_snapshot`, `items_snapshot`.
 	 *
@@ -217,16 +218,13 @@ final class Cycle {
 		// A new cycle is always unsaved; never adopt a caller-supplied id.
 		unset( $args['id'] );
 
-		// Absent count defaults to 1 (counting); explicit null means non-counting. `?? 1` would conflate them.
-		if ( ! array_key_exists( 'count', $args ) ) {
-			$args['count'] = 1;
-		}
-
 		$cycle = new self( $args );
 
 		self::assert_contract_id( $cycle->contract_id );
 		self::assert_kind( $cycle->kind );
-		self::assert_sequence_no( $cycle->sequence_no );
+		if ( null !== $cycle->sequence_no ) {
+			self::assert_sequence_no( $cycle->sequence_no );
+		}
 		self::assert_period( $cycle->starts_at_gmt, $cycle->ends_at_gmt );
 		self::assert_currency( $cycle->currency );
 		self::assert_count( $cycle->count );
@@ -276,18 +274,38 @@ final class Cycle {
 
 	/**
 	 * Position within the chain.
+	 *
+	 * @throws LogicException If the position is not assigned yet (a new cycle before its append).
 	 */
 	public function get_sequence_no(): int {
+		if ( null === $this->sequence_no ) {
+			throw new LogicException( 'Cycle: sequence_no is assigned on append.' );
+		}
+
 		return $this->sequence_no;
 	}
 
 	/**
-	 * Set the position within the chain (assigned by the append path).
+	 * Whether the append still has to assign the position within the chain.
+	 *
+	 * @internal Used by the repository's append.
+	 */
+	public function awaits_sequence_no(): bool {
+		return null === $this->sequence_no;
+	}
+
+	/**
+	 * Assign the position within the chain. Only while it is unassigned.
+	 *
+	 * @internal Used by the repository's append.
 	 *
 	 * @param int $sequence_no Position, monotonic from 1.
-	 * @throws DomainException If `$sequence_no` is not positive.
+	 * @throws DomainException If the position is already assigned or `$sequence_no` is not positive.
 	 */
-	public function set_sequence_no( int $sequence_no ): void {
+	public function assign_sequence_no( int $sequence_no ): void {
+		if ( null !== $this->sequence_no ) {
+			throw new DomainException( 'Cycle: sequence_no is already assigned.' );
+		}
 		self::assert_sequence_no( $sequence_no );
 
 		$this->sequence_no = $sequence_no;

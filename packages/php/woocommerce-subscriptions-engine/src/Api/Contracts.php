@@ -181,54 +181,31 @@ final class Contracts {
 	 * The first public form of the cycle append tool: append-if-absent on the chain's
 	 * unique positions. `starts_at_gmt`, `ends_at_gmt` and `currency` are required.
 	 * `status` (a registered cycle status) defaults to `pending`; `kind` defaults to
-	 * `billing`; `sequence_no` defaults to the head's plus one; `count` defaults to
-	 * MAX(count) + 1 in the chain (pass `null` for a non-counting cycle); `expected_total`
-	 * defaults to 0; `order_id` is optional. The contract is not read: appending to an
-	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()`
-	 * notice and are ignored.
+	 * `billing`; an absent or null `sequence_no` is assigned on append as the head's plus one;
+	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
+	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional. The contract is not
+	 * read: appending to an unknown contract id is a caller error. Unknown keys raise a
+	 * `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
 	 * @return CycleView The appended cycle.
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid.
-	 * @throws DomainException If the chain position is already taken.
+	 * @throws DomainException If the chain position or count is already taken.
 	 */
 	public static function add_cycle( int $contract_id, array $args ): CycleView {
 		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
-		$status = $filtered_args['status'] ?? null;
-		if ( null !== $status && ! is_string( $status ) ) {
-			throw new InvalidArgumentException( 'Contracts: "status" must be a string.' );
-		}
-
-		$kind = $filtered_args['kind'] ?? Cycle::KIND_BILLING;
-		if ( ! is_string( $kind ) ) {
-			throw new InvalidArgumentException( 'Contracts: "kind" must be a string.' );
-		}
-
-		$starts_at = self::nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null );
-		$ends_at   = self::nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null );
-		$currency  = self::currency( $filtered_args['currency'] ?? null );
-
-		$repository  = new ContractRepository();
-		$head        = $repository->find_chain_head( $contract_id, $kind );
-		$sequence_no = array_key_exists( 'sequence_no', $filtered_args )
-			? self::nullable_id( 'sequence_no', $filtered_args['sequence_no'] )
-			: ( null === $head ? 1 : $head->get_sequence_no() + 1 );
-		$count       = array_key_exists( 'count', $filtered_args )
-			? self::nullable_id( 'count', $filtered_args['count'] )
-			: ( $repository->max_count( $contract_id, $kind ) ?? 0 ) + 1;
-
 		$cycle_args = array(
 			'contract_id'    => $contract_id,
-			'kind'           => $kind,
-			'sequence_no'    => $sequence_no,
-			'count'          => $count,
-			'status'         => $status,
-			'starts_at_gmt'  => $starts_at,
-			'ends_at_gmt'    => $ends_at,
+			'kind'           => $filtered_args['kind'] ?? null,
+			'sequence_no'    => self::nullable_id( 'sequence_no', $filtered_args['sequence_no'] ?? null ),
+			'count'          => self::nullable_id( 'count', $filtered_args['count'] ?? null ),
+			'status'         => $filtered_args['status'] ?? null,
+			'starts_at_gmt'  => self::nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null ),
+			'ends_at_gmt'    => self::nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null ),
 			'expected_total' => self::money( 'expected_total', $filtered_args['expected_total'] ?? null ),
-			'currency'       => $currency,
+			'currency'       => self::currency( $filtered_args['currency'] ?? null ),
 			'order_id'       => self::nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
@@ -239,9 +216,9 @@ final class Contracts {
 		}
 
 		try {
-			$repository->append_cycle( $cycle, $head );
+			( new ContractRepository() )->append_cycle( $cycle, null );
 		} catch ( DuplicateCycleException $e ) {
-			throw new DomainException( 'Contracts: the cycle position already exists.' );
+			throw new DomainException( 'Contracts: the cycle position or count already exists.' );
 		}
 
 		return CycleView::from_cycle( $cycle );
