@@ -42,7 +42,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
@@ -657,7 +657,7 @@ final class RenewalEngine {
 			return;
 		}
 
-		$contract_id = ScalarCoercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
+		$contract_id = Coercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		if ( $contract_id <= 0 ) {
 			return;
 		}

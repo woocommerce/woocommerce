@@ -14,6 +14,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 
 defined( 'ABSPATH' ) || exit;
@@ -182,7 +183,7 @@ final class ArgumentValidator {
 			if ( ! is_array( $row ) ) {
 				throw new InvalidArgumentException( sprintf( '"%s" must be a list of arrays.', esc_html( $key ) ) );
 			}
-			$rows[] = self::string_keyed( $row );
+			$rows[] = Coercion::coerce_string_keyed( $row );
 		}
 
 		return $rows;
@@ -231,20 +232,5 @@ final class ArgumentValidator {
 		}
 
 		return $addresses;
-	}
-
-	/**
-	 * Re-key an array as string-keyed.
-	 *
-	 * @param array<int|string, mixed> $value Array.
-	 * @return array<string, mixed>
-	 */
-	public static function string_keyed( array $value ): array {
-		$out = array();
-		foreach ( $value as $key => $entry ) {
-			$out[ (string) $key ] = $entry;
-		}
-
-		return $out;
 	}
 }

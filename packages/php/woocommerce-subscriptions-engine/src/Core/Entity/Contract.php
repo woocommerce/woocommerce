@@ -27,7 +27,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -254,31 +254,31 @@ final class Contract {
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                   = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
-		$this->status               = ScalarCoercion::coerce_string( $data['status'] ?? null, ContractStatus::DRAFT );
-		$this->customer_id          = ScalarCoercion::coerce_nullable_int( $data['customer_id'] ?? null );
-		$this->currency             = ScalarCoercion::coerce_nullable_string( $data['currency'] ?? null );
-		$this->selling_plan_id      = ScalarCoercion::coerce_nullable_int( $data['selling_plan_id'] ?? null );
-		$this->origin_order_id      = ScalarCoercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
-		$this->extension_slug       = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->payment_method       = ScalarCoercion::coerce_nullable_string( $data['payment_method'] ?? null );
-		$this->payment_method_title = ScalarCoercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
-		$this->payment_token_id     = ScalarCoercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
-		$this->start_gmt            = ScalarCoercion::coerce_nullable_string( $data['start_gmt'] ?? null );
-		$this->next_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
-		$this->plan_snapshot_id     = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id    = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->id                   = Coercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->status               = Coercion::coerce_string( $data['status'] ?? null, ContractStatus::DRAFT );
+		$this->customer_id          = Coercion::coerce_nullable_int( $data['customer_id'] ?? null );
+		$this->currency             = Coercion::coerce_nullable_string( $data['currency'] ?? null );
+		$this->selling_plan_id      = Coercion::coerce_nullable_int( $data['selling_plan_id'] ?? null );
+		$this->origin_order_id      = Coercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
+		$this->extension_slug       = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->payment_method       = Coercion::coerce_nullable_string( $data['payment_method'] ?? null );
+		$this->payment_method_title = Coercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
+		$this->payment_token_id     = Coercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
+		$this->start_gmt            = Coercion::coerce_nullable_string( $data['start_gmt'] ?? null );
+		$this->next_payment_gmt     = Coercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
+		$this->plan_snapshot_id     = Coercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id    = Coercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
 		$this->billing_total        = MoneyScale::normalize_money( $data['billing_total'] ?? '0' );
 		$this->discount_total       = MoneyScale::normalize_money( $data['discount_total'] ?? '0' );
 		$this->shipping_total       = MoneyScale::normalize_money( $data['shipping_total'] ?? '0' );
 		$this->tax_total            = MoneyScale::normalize_money( $data['tax_total'] ?? '0' );
-		$this->last_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
-		$this->last_attempt_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
-		$this->trial_end_gmt        = ScalarCoercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
-		$this->end_gmt              = ScalarCoercion::coerce_nullable_string( $data['end_gmt'] ?? null );
-		$this->schedule_source      = ScalarCoercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
-		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
-		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
+		$this->last_payment_gmt     = Coercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
+		$this->last_attempt_gmt     = Coercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
+		$this->trial_end_gmt        = Coercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
+		$this->end_gmt              = Coercion::coerce_nullable_string( $data['end_gmt'] ?? null );
+		$this->schedule_source      = Coercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		$this->items                = Coercion::coerce_list_of_arrays( $data['items'] ?? null );
+		$this->addresses            = Coercion::coerce_map_of_arrays( $data['addresses'] ?? null );
 		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
@@ -726,7 +726,7 @@ final class Contract {
 	 * @param array<int|string, mixed> $items Item rows; non-array elements are skipped.
 	 */
 	public function set_items( array $items ): void {
-		$this->items = self::coerce_item_rows( $items );
+		$this->items = Coercion::coerce_list_of_arrays( $items );
 	}
 
 	/**
@@ -744,7 +744,7 @@ final class Contract {
 	 * @param array<int|string, mixed> $addresses Address rows keyed by type; non-array elements are skipped.
 	 */
 	public function set_addresses( array $addresses ): void {
-		$this->addresses = self::coerce_address_map( $addresses );
+		$this->addresses = Coercion::coerce_map_of_arrays( $addresses );
 	}
 
 	/**
@@ -813,65 +813,5 @@ final class Contract {
 		if ( ! in_array( $schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
 			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
 		}
-	}
-
-	/**
-	 * Shape a caller-supplied value into the line-item row list. A non-array yields
-	 * no items; non-array elements are skipped.
-	 *
-	 * @param mixed $value Caller-supplied items.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function coerce_item_rows( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
-		}
-
-		$rows = array();
-		foreach ( $value as $row ) {
-			if ( is_array( $row ) ) {
-				$rows[] = self::coerce_string_keyed( $row );
-			}
-		}
-
-		return $rows;
-	}
-
-	/**
-	 * Shape a caller-supplied value into the addresses map keyed by type. A non-array
-	 * yields an empty map; non-array elements are skipped.
-	 *
-	 * @param mixed $value Caller-supplied addresses.
-	 * @return array<string, array<string, mixed>>
-	 */
-	private static function coerce_address_map( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
-		}
-
-		$map = array();
-		foreach ( $value as $type => $address ) {
-			if ( is_array( $address ) ) {
-				$map[ (string) $type ] = self::coerce_string_keyed( $address );
-			}
-		}
-
-		return $map;
-	}
-
-	/**
-	 * Re-key an array as a string-keyed map, recovering the `array<string, mixed>`
-	 * row shape from an otherwise `int|string`-keyed array.
-	 *
-	 * @param array<int|string, mixed> $value Array to re-key.
-	 * @return array<string, mixed>
-	 */
-	private static function coerce_string_keyed( array $value ): array {
-		$result = array();
-		foreach ( $value as $key => $entry ) {
-			$result[ (string) $key ] = $entry;
-		}
-
-		return $result;
 	}
 }

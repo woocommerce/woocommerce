@@ -27,7 +27,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -295,7 +295,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		return $this->hydrate_row( self::as_string_keyed( $row ) );
+		return $this->hydrate_row( Coercion::coerce_string_keyed( $row ) );
 	}
 
 	/**
@@ -305,11 +305,11 @@ final class ContractRepository {
 	 * @param array<string, mixed> $row Contract row.
 	 */
 	private function hydrate_row( array $row ): Contract {
-		$id = ScalarCoercion::coerce_int( $row['id'] ?? 0 );
+		$id = Coercion::coerce_int( $row['id'] ?? 0 );
 
 		return Contract::from_storage(
 			$row,
-			$this->find_plan_snapshot( ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
+			$this->find_plan_snapshot( Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
 			$this->find_items( $id ),
 			$this->find_addresses( $id )
 		);
@@ -532,11 +532,11 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
+			$status = Coercion::coerce_string( $row['status'] ?? '' );
 			// A row whose stored status is not registered is ignored, not added as a
 			// stray key - the map stays exactly ContractStatus::get_all().
 			if ( array_key_exists( $status, $counts ) ) {
-				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+				$counts[ $status ] = Coercion::coerce_int( $row['total'] ?? 0 );
 			}
 		}
 
@@ -568,7 +568,7 @@ final class ContractRepository {
 			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", $params ) );
 		}
 
-		return ScalarCoercion::coerce_int( $total );
+		return Coercion::coerce_int( $total );
 	}
 
 	/**
@@ -614,9 +614,9 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$cid = ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 );
+			$cid = Coercion::coerce_int( $row['contract_id'] ?? 0 );
 			if ( array_key_exists( $cid, $counts ) ) {
-				$counts[ $cid ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+				$counts[ $cid ] = Coercion::coerce_int( $row['total'] ?? 0 );
 			}
 		}
 
@@ -635,13 +635,13 @@ final class ContractRepository {
 		$clean_rows = array();
 		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$clean_rows[] = self::as_string_keyed( $row );
+				$clean_rows[] = Coercion::coerce_string_keyed( $row );
 			}
 		}
 
 		$snapshot_ids = array();
 		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$snapshot_id = Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
 			if ( null !== $snapshot_id ) {
 				$snapshot_ids[ $snapshot_id ] = $snapshot_id;
 			}
@@ -650,7 +650,7 @@ final class ContractRepository {
 
 		$contracts = array();
 		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$snapshot_id = Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
 			$contracts[] = Contract::from_storage( $row, null !== $snapshot_id ? ( $snapshots[ $snapshot_id ] ?? null ) : null );
 		}
 
@@ -763,10 +763,10 @@ final class ContractRepository {
 			}
 			$head_count = $row['head_count'] ?? null;
 			$result[]   = new RenewalCandidate(
-				ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 ),
-				null === $head_count ? null : ScalarCoercion::coerce_int( $head_count ),
-				ScalarCoercion::coerce_string( $row['head_status'] ?? '' ),
-				ScalarCoercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+				Coercion::coerce_int( $row['contract_id'] ?? 0 ),
+				null === $head_count ? null : Coercion::coerce_int( $head_count ),
+				Coercion::coerce_string( $row['head_status'] ?? '' ),
+				Coercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
 			);
 		}
 
@@ -1275,7 +1275,7 @@ final class ContractRepository {
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$cycles[] = $this->hydrate_cycle( self::as_string_keyed( $row ) );
+				$cycles[] = $this->hydrate_cycle( Coercion::coerce_string_keyed( $row ) );
 			}
 		}
 
@@ -1301,7 +1301,7 @@ final class ContractRepository {
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$cycles[] = $this->hydrate_cycle( self::as_string_keyed( $row ) );
+				$cycles[] = $this->hydrate_cycle( Coercion::coerce_string_keyed( $row ) );
 			}
 		}
 
@@ -1459,7 +1459,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		return PlanSnapshot::from_payload( self::as_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
+		return PlanSnapshot::from_payload( Coercion::coerce_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
 	}
 
 	/**
@@ -1499,11 +1499,11 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$payload = json_decode( ScalarCoercion::coerce_string( $row['payload'] ?? null ), true );
+			$payload = json_decode( Coercion::coerce_string( $row['payload'] ?? null ), true );
 
-			$snapshots[ ScalarCoercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
-				self::as_string_keyed( is_array( $payload ) ? $payload : array() ),
-				ScalarCoercion::coerce_int( $row['schema_version'] ?? 0 )
+			$snapshots[ Coercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
+				Coercion::coerce_string_keyed( is_array( $payload ) ? $payload : array() ),
+				Coercion::coerce_int( $row['schema_version'] ?? 0 )
 			);
 		}
 
@@ -1522,7 +1522,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		return ItemsSnapshot::from_payload( self::as_item_rows( $decoded['payload'] ), $decoded['schema_version'] );
+		return ItemsSnapshot::from_payload( Coercion::coerce_list_of_arrays( $decoded['payload'] ), $decoded['schema_version'] );
 	}
 
 	/**
@@ -1553,42 +1553,6 @@ final class ContractRepository {
 			'payload'        => is_array( $payload ) ? $payload : array(),
 			'schema_version' => (int) $row['schema_version'],
 		);
-	}
-
-	/**
-	 * Re-key a decoded payload as a string-keyed map. A no-op at runtime (decoded JSON
-	 * object keys are already strings); it recovers the string-keyed type that
-	 * json_decode erases to `array<int|string, mixed>`.
-	 *
-	 * @param array<int|string, mixed> $payload Decoded payload.
-	 * @return array<string, mixed>
-	 */
-	private static function as_string_keyed( array $payload ): array {
-		$result = array();
-		foreach ( $payload as $key => $value ) {
-			$result[ (string) $key ] = $value;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Shape a decoded payload as an ordered list of item rows: each array element is
-	 * re-keyed as a string-keyed row, non-array elements skipped. Recovers the value
-	 * object's modelled shape without trusting the erased JSON types.
-	 *
-	 * @param array<int|string, mixed> $payload Decoded payload.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function as_item_rows( array $payload ): array {
-		$rows = array();
-		foreach ( $payload as $row ) {
-			if ( is_array( $row ) ) {
-				$rows[] = self::as_string_keyed( $row );
-			}
-		}
-
-		return $rows;
 	}
 
 	/**
@@ -1717,13 +1681,13 @@ final class ContractRepository {
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
-					'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
-					'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-					'product_id'   => isset( $item['product_id'] ) ? ScalarCoercion::coerce_int( $item['product_id'] ) : null,
-					'variation_id' => isset( $item['variation_id'] ) ? ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
-					'quantity'     => ScalarCoercion::coerce_string( $item['quantity'] ?? null, '1' ),
-					'subtotal'     => ScalarCoercion::coerce_string( $item['subtotal'] ?? null, '0' ),
-					'total'        => ScalarCoercion::coerce_string( $item['total'] ?? null, '0' ),
+					'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
+					'item_type'    => Coercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+					'product_id'   => isset( $item['product_id'] ) ? Coercion::coerce_int( $item['product_id'] ) : null,
+					'variation_id' => isset( $item['variation_id'] ) ? Coercion::coerce_int( $item['variation_id'] ) : null,
+					'quantity'     => Coercion::coerce_string( $item['quantity'] ?? null, '1' ),
+					'subtotal'     => Coercion::coerce_string( $item['subtotal'] ?? null, '0' ),
+					'total'        => Coercion::coerce_string( $item['total'] ?? null, '0' ),
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
@@ -1746,7 +1710,7 @@ final class ContractRepository {
 			);
 
 			foreach ( Contract::ADDRESS_FIELDS as $column ) {
-				$record[ $column ] = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : null;
+				$record[ $column ] = isset( $address[ $column ] ) ? Coercion::coerce_string( $address[ $column ] ) : null;
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -1768,7 +1732,7 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
 
-		return self::as_item_rows( is_array( $rows ) ? $rows : array() );
+		return Coercion::coerce_list_of_arrays( $rows );
 	}
 
 	/**
@@ -1788,7 +1752,7 @@ final class ContractRepository {
 		$by_type = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$by_type[ ScalarCoercion::coerce_string( $row['address_type'] ?? null ) ] = self::as_string_keyed( $row );
+				$by_type[ Coercion::coerce_string( $row['address_type'] ?? null ) ] = Coercion::coerce_string_keyed( $row );
 			}
 		}
 
@@ -1837,8 +1801,8 @@ final class ContractRepository {
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
 				$result[] = array(
-					'meta_key'   => ScalarCoercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'meta_value' => ScalarCoercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_key'   => Coercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => Coercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 				);
 			}
 		}
@@ -1860,13 +1824,13 @@ final class ContractRepository {
 
 		foreach ( $items as $item ) {
 			$signature[] = array(
-				'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
-				'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-				'product_id'   => isset( $item['product_id'] ) ? (string) ScalarCoercion::coerce_int( $item['product_id'] ) : null,
-				'variation_id' => isset( $item['variation_id'] ) ? (string) ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
-				'quantity'     => number_format( ScalarCoercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
-				'subtotal'     => number_format( ScalarCoercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
-				'total'        => number_format( ScalarCoercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
+				'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
+				'item_type'    => Coercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+				'product_id'   => isset( $item['product_id'] ) ? (string) Coercion::coerce_int( $item['product_id'] ) : null,
+				'variation_id' => isset( $item['variation_id'] ) ? (string) Coercion::coerce_int( $item['variation_id'] ) : null,
+				'quantity'     => number_format( Coercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
+				'subtotal'     => number_format( Coercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
+				'total'        => number_format( Coercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
 				'taxes'        => $this->taxes_signature( $item['taxes'] ?? null ),
 			);
 		}
@@ -1890,7 +1854,7 @@ final class ContractRepository {
 		foreach ( $addresses as $type => $address ) {
 			$record = array();
 			foreach ( Contract::ADDRESS_FIELDS as $column ) {
-				$value             = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : '';
+				$value             = isset( $address[ $column ] ) ? Coercion::coerce_string( $address[ $column ] ) : '';
 				$record[ $column ] = '' !== $value ? $value : null;
 			}
 

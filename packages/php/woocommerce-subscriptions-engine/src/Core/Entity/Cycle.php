@@ -19,7 +19,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 use DomainException;
 use LogicException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 
@@ -180,23 +180,23 @@ final class Cycle {
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
-		$this->contract_id       = ScalarCoercion::coerce_int( $data['contract_id'] ?? null );
-		$this->sequence_no       = isset( $data['sequence_no'] ) ? ScalarCoercion::coerce_int( $data['sequence_no'] ) : null;
-		$this->count             = isset( $data['count'] ) ? ScalarCoercion::coerce_int( $data['count'] ) : null;
-		$this->kind              = ScalarCoercion::coerce_string( $data['kind'] ?? null, self::KIND_BILLING );
+		$this->id                = Coercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->contract_id       = Coercion::coerce_int( $data['contract_id'] ?? null );
+		$this->sequence_no       = isset( $data['sequence_no'] ) ? Coercion::coerce_int( $data['sequence_no'] ) : null;
+		$this->count             = isset( $data['count'] ) ? Coercion::coerce_int( $data['count'] ) : null;
+		$this->kind              = Coercion::coerce_string( $data['kind'] ?? null, self::KIND_BILLING );
 		$this->status            = self::coerce_status( $data['status'] ?? null );
-		$this->reason            = ScalarCoercion::coerce_nullable_string( $data['reason'] ?? null );
-		$this->starts_at_gmt     = ScalarCoercion::coerce_string( $data['starts_at_gmt'] ?? null );
-		$this->ends_at_gmt       = ScalarCoercion::coerce_string( $data['ends_at_gmt'] ?? null );
+		$this->reason            = Coercion::coerce_nullable_string( $data['reason'] ?? null );
+		$this->starts_at_gmt     = Coercion::coerce_string( $data['starts_at_gmt'] ?? null );
+		$this->ends_at_gmt       = Coercion::coerce_string( $data['ends_at_gmt'] ?? null );
 		$this->expected_total    = MoneyScale::normalize_money( $data['expected_total'] ?? '0' );
-		$this->currency          = ScalarCoercion::coerce_string( $data['currency'] ?? null );
-		$this->plan_snapshot_id  = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
-		$this->order_id          = ScalarCoercion::coerce_nullable_int( $data['order_id'] ?? null );
-		$this->extension_slug    = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->claimed_until_gmt = ScalarCoercion::coerce_nullable_string( $data['claimed_until'] ?? null );
-		$this->retry_at_gmt      = ScalarCoercion::coerce_nullable_string( $data['retry_at'] ?? null );
+		$this->currency          = Coercion::coerce_string( $data['currency'] ?? null );
+		$this->plan_snapshot_id  = Coercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id = Coercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->order_id          = Coercion::coerce_nullable_int( $data['order_id'] ?? null );
+		$this->extension_slug    = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->claimed_until_gmt = Coercion::coerce_nullable_string( $data['claimed_until'] ?? null );
+		$this->retry_at_gmt      = Coercion::coerce_nullable_string( $data['retry_at'] ?? null );
 		$this->plan_snapshot     = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 		$this->items_snapshot    = ( $data['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $data['items_snapshot'] : null;
 	}
@@ -677,7 +677,7 @@ final class Cycle {
 			return new CycleStatus( CycleStatus::PENDING );
 		}
 
-		return new CycleStatus( ScalarCoercion::coerce_string( $status ) );
+		return new CycleStatus( Coercion::coerce_string( $status ) );
 	}
 
 	/**

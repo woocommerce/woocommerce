@@ -48,7 +48,7 @@ use WP_REST_Server;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 
 defined( 'ABSPATH' ) || exit;
@@ -206,7 +206,7 @@ final class ContractsController extends WP_REST_Controller {
 		// schema, so it arrives as a real bool; the coercion path covers a caller
 		// invoking the method directly with a raw value.
 		$param         = $request->get_param( 'at_period_end' );
-		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( ScalarCoercion::coerce_string( $param, 'true' ) );
+		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( Coercion::coerce_string( $param, 'true' ) );
 
 		return $this->run_action(
 			$request,
@@ -287,7 +287,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	private function run_action( WP_REST_Request $request, callable $action ) {
-		$contract_id = ScalarCoercion::coerce_int( $request->get_param( 'id' ) );
+		$contract_id = Coercion::coerce_int( $request->get_param( 'id' ) );
 		$customer_id = get_current_user_id();
 
 		// Guard ownership before acting: the facade's ownership-checked read returns
