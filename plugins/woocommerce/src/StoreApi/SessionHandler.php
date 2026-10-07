@@ -134,6 +134,10 @@ final class SessionHandler extends WC_Session {
 		 * Fires after a customer has logged in, and their guest session id has been
 		 * deleted with its data migrated to a customer id.
 		 *
+		 * In the Store API, `wp_login` doesn't fire for token logins (JWT, OAuth, etc.), so this
+		 * fires on the first authenticated request that sends a guest `Cart-Token` with saved
+		 * session data. User-scoped tokens never trigger it.
+		 *
 		 * This hook gives extensions the chance to connect the old session id to the
 		 * customer id, if the key is being used externally.
 		 *
