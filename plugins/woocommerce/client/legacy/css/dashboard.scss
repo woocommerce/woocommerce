@@ -208,8 +208,7 @@ ul.woocommerce_stats {
 		li.extensions-without-subscription {
 
 			a::before {
-				font-family: WooCommerce;
-				content: "\e033";
+				content: "\f106";
 				color: $red;
 			}
 		}
