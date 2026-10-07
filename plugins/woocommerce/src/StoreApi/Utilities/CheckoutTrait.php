@@ -7,11 +7,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
-<<<<<<< HEAD
-=======
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Enums\OrderStatus;
->>>>>>> b3ce23d8aa (Revert "Fix conditional checkout field rules for fields with no value yet" (#69521))
 use WC_Customer;
 
 /**
