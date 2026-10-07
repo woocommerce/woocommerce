@@ -164,6 +164,56 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox get_related_orders bounds the linked-order query to the page and still pages like an unbounded read.
+	 */
+	public function test_get_related_orders_bounds_the_query_to_the_page(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		// Five renewal orders dated after the origin, newest last created.
+		foreach ( array( 1, 2, 3, 4, 5 ) as $days_ahead ) {
+			$order = wc_create_order();
+			$this->assertInstanceOf( WC_Order::class, $order );
+			$order->set_date_created( gmdate( 'Y-m-d H:i:s', time() + ( $days_ahead * DAY_IN_SECONDS ) ) );
+			$order->update_meta_data( OrderLinkage::META_CONTRACT_ID, (string) $contract_id );
+			$order->update_meta_data( OrderLinkage::META_RELATION_TYPE, OrderLinkage::RELATION_RENEWAL );
+			$order->save();
+		}
+
+		$all_ids = array_map(
+			static function ( WC_Order $order ): int {
+				return $order->get_id();
+			},
+			Subscriptions::get_related_orders( $contract_id )
+		);
+		$this->assertCount( 6, $all_ids );
+
+		$limits = array();
+		$record = static function ( array $args ) use ( &$limits ): array {
+			$limits[] = $args['limit'] ?? null;
+			return $args;
+		};
+		add_filter( 'woocommerce_order_query_args', $record );
+
+		try {
+			foreach ( array( 0, 2, 4 ) as $offset ) {
+				$page_ids = array_map(
+					static function ( WC_Order $order ): int {
+						return $order->get_id();
+					},
+					Subscriptions::get_related_orders( $contract_id, 2, $offset )
+				);
+				$this->assertSame( array_slice( $all_ids, $offset, 2 ), $page_ids, "Page at offset {$offset} matches the unbounded read." );
+			}
+		} finally {
+			remove_filter( 'woocommerce_order_query_args', $record );
+		}
+
+		$this->assertSame( array( 2, 4, 6 ), $limits, 'The linked-order query is bounded to offset + limit.' );
+	}
+
+	/**
 	 * @testdox cancel returns false for an unknown contract.
 	 */
 	public function test_cancel_unknown_contract_returns_false(): void {

@@ -58,9 +58,15 @@ final class RelatedOrders {
 			$by_id[ $origin->get_id() ] = $origin;
 		}
 
+		// The origin adds at most one entry, so the newest `$offset + $limit` linked orders
+		// always cover the requested page. Order like the merge below: newest first, then id.
 		$linked = wc_get_orders(
 			array(
-				'limit'      => -1,
+				'limit'      => $limit < 0 ? -1 : max( 0, $offset ) + $limit,
+				'orderby'    => array(
+					'date' => 'DESC',
+					'ID'   => 'DESC',
+				),
 				'status'     => 'any',
 				'type'       => 'shop_order',
 				'meta_key'   => OrderLinkage::META_CONTRACT_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
