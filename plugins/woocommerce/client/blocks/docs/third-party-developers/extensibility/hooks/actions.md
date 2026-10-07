@@ -627,6 +627,8 @@ do_action( 'woocommerce_guest_session_to_user_id', string $guest_session_id, str
 
 ### Description
 
+In the Store API, `wp_login` doesn't fire for token logins (JWT, OAuth, etc.), so this fires on the first authenticated request that sends a guest `Cart-Token` with saved session data. User-scoped tokens never trigger it.
+
 This hook gives extensions the chance to connect the old session id to the customer id, if the key is being used externally.
 
 ### Parameters
