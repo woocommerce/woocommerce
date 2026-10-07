@@ -359,7 +359,7 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Displaying product attributes does not crash when a term link cannot be resolved.
+	 * @testdox Displaying product attributes renders plain text when a term link cannot be resolved.
 	 */
 	public function test_display_product_attributes_does_not_crash_for_deleted_term(): void {
 		global $wc_product_attributes;
@@ -368,7 +368,6 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$attribute           = WC_Helper_Product::create_product_attribute_object( 'Archive Finish', array( 'Matte & Gloss' ) );
 		$taxonomy            = $attribute->get_name();
 
-		$this->expectNotToPerformAssertions();
 		try {
 			$wc_product_attributes[ $taxonomy ]->attribute_public = true;
 
@@ -379,11 +378,16 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_term( $term->term_id, $taxonomy );
 
 			add_filter( 'woocommerce_get_product_terms', static fn() => array( $term ) );
+			ob_start();
 			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
 		} finally {
 			unregister_taxonomy( $taxonomy );
 			$wc_product_attributes = $previous_attributes;
 		}
+
+		$this->assertStringContainsString( 'Matte &amp; Gloss', $markup, 'The term name should be rendered as escaped text.' );
+		$this->assertStringNotContainsString( '<a ', $markup, 'The deleted term should not be linked.' );
 	}
 
 	/**
