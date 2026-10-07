@@ -2959,7 +2959,16 @@ FROM $order_meta_table
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
-			$order->save_meta_data();
+
+			// The order was just saved. If the clock has moved on to a new second, a meta change triggers another
+			// save() that fires 'woocommerce_update_order', which a restore must not do.
+			$skip_save_after_meta_change = fn() => false;
+			add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $skip_save_after_meta_change );
+			try {
+				$order->save_meta_data();
+			} finally {
+				remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $skip_save_after_meta_change );
+			}
 
 			return true;
 		}

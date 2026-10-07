@@ -777,6 +777,46 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Untrash does not fire 'woocommerce_update_order', even when the clock moves to a new second during the restore.
+	 */
+	public function test_cot_datastore_untrash_does_not_fire_update_hook_when_clock_ticks() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Simulate time passing between the status save and the trash meta cleanup.
+		$later = gmdate( 'Y-m-d H:i:s', time() + MINUTE_IN_SECONDS );
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function () use ( $later ) {
+					return $later;
+				},
+			)
+		);
+
+		$update_count = 0;
+		$callback     = function () use ( &$update_count ) {
+			++$update_count;
+		};
+		add_action( 'woocommerce_update_order', $callback );
+
+		try {
+			$this->assertTrue( $this->sut->untrash_order( $order ) );
+		} finally {
+			remove_action( 'woocommerce_update_order', $callback );
+		}
+
+		$this->assertSame( OrderStatus::ON_HOLD, $order->get_status() );
+		$this->assertSame( 0, $update_count, 'Untrash should not fire woocommerce_update_order' );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ), 'Trash meta should still be cleaned up' );
+	}
+
+	/**
 	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
