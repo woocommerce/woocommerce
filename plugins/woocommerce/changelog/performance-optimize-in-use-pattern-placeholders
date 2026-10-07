@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Shave 44 KB off the plugin package by optimizing the placeholder images that Coming Soon patterns use.
+Shave about 72 KB off the plugin package by optimizing the placeholder images that Coming Soon patterns use.
