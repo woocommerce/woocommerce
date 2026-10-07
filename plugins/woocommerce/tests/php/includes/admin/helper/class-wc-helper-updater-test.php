@@ -2261,4 +2261,101 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'body'     => wp_json_encode( $this->mocked_updates ),
 		);
 	}
+
+	/**
+	 * @testdox Plugins without a subscription lists an installed Woo plugin the account holds no subscription for.
+	 */
+	public function test_plugins_without_subscription_lists_unsubscribed_plugin(): void {
+		$plugin_file = $this->mock_local_woo_plugin();
+		$this->set_connected_subscriptions( array( $this->subscription( array( 'product_id' => 999 ) ) ) );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A plugin with no subscription for its product should be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips a plugin the account holds any subscription for, even an expired one.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $expired Whether the subscription has expired.
+	 */
+	public function test_plugins_without_subscription_skips_subscribed_plugin( bool $expired ): void {
+		$this->mock_local_woo_plugin();
+		$this->set_connected_subscriptions( array( $this->subscription( array( 'expired' => $expired ) ) ) );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'A plugin with a subscription should not be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips the Woo Update Manager.
+	 */
+	public function test_plugins_without_subscription_skips_update_manager(): void {
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE => array(
+						'Name'    => 'WooCommerce.com Update Manager',
+						'Version' => '1.0.0',
+						'Woo'     => '18734002369816:abc123',
+					),
+				),
+			),
+			'plugins'
+		);
+		$this->set_connected_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'The Update Manager delivers updates and should never be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is empty when the store is not connected.
+	 */
+	public function test_plugins_without_subscription_is_empty_when_disconnected(): void {
+		$this->mock_local_woo_plugin();
+		$this->set_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'A disconnected store cannot know which subscriptions it holds.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is empty while the last subscriptions fetch is failing.
+	 * @testWith [429]
+	 *           [500]
+	 *
+	 * @param int $code HTTP status of the failed fetch.
+	 */
+	public function test_plugins_without_subscription_is_empty_while_the_api_is_failing( int $code ): void {
+		$this->mock_local_woo_plugin();
+		$this->set_connected_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => $code,
+				'message' => 'Error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'An empty list after a failed fetch is not proof that no subscription exists.' );
+	}
+
+	/**
+	 * Stand in a subscriptions payload for a store connected to WooCommerce.com.
+	 *
+	 * @param array $subscriptions Subscription records.
+	 * @return void
+	 */
+	private function set_connected_subscriptions( array $subscriptions ): void {
+		$this->set_subscriptions( $subscriptions );
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'site_id'      => 45,
+				'access_token' => 'token',
+			)
+		);
+	}
 }
