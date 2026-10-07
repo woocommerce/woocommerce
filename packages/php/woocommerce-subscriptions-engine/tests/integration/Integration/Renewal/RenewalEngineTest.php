@@ -19,6 +19,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
@@ -28,6 +29,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
@@ -755,15 +757,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		$contract_id = $this->sign_up_from_order(
-			$order,
-			$plan,
+		$contract_id = $this->sign_up_from_order( $order, $plan );
+		$this->seed_plan_snapshot(
+			$contract_id,
 			array(
-				'plan_snapshot' => array(
-					'selling_plan_id' => $plan->get_id(),
-					'name'            => $plan->get_name(),
-					'billing_policy'  => $snapshot_billing,
-				),
+				'selling_plan_id' => $plan->get_id(),
+				'name'            => $plan->get_name(),
+				'billing_policy'  => $snapshot_billing,
 			)
 		);
 		$this->assertTrue( Plans::update( $plan->get_id(), array( 'billing_policy' => $live_billing ) ) );
@@ -1014,6 +1014,21 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => $status ), array( 'id' => $contract_id ) );
+	}
+
+	/**
+	 * Store a plan snapshot row and point the contract at it.
+	 *
+	 * @param int                  $contract_id Stored contract id.
+	 * @param array<string, mixed> $payload     Plan snapshot payload.
+	 */
+	private function seed_plan_snapshot( int $contract_id, array $payload ): void {
+		$contract = $this->reload_contract( $contract_id );
+		$snapshot = PlanSnapshot::from_array( $payload );
+		$contract->set_plan_snapshot_id(
+			( new SnapshotStore() )->insert( $contract_id, SnapshotStore::TYPE_PLAN, $snapshot->get_selling_plan_id(), $snapshot->to_payload(), $snapshot->get_schema_version() )
+		);
+		( new ContractRepository() )->update_fields( $contract, array( 'plan_snapshot_id' ) );
 	}
 
 	/**
