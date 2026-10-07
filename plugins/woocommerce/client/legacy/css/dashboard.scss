@@ -204,6 +204,15 @@ ul.woocommerce_stats {
 				content: "\f158";
 			}
 		}
+
+		li.extensions-without-subscription {
+
+			a::before {
+				font-family: WooCommerce;
+				content: "\e033";
+				color: $red;
+			}
+		}
 	}
 }
 
