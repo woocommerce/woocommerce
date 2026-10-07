@@ -39,7 +39,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	/**
 	 * Reflection method used to invoke the private should_render_filters method.
 	 *
-	 * @var \\ReflectionMethod
+	 * @var \ReflectionMethod
 	 */
 	private $should_render_method;
 
@@ -66,7 +66,7 @@ class ProductFilters extends \WP_UnitTestCase {
 		$this->canonical_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_canonical_url_no_pagination' );
 		$this->canonical_method->setAccessible( true );
 
-		$this->should_render_method = new \\ReflectionMethod( ProductFiltersBlock::class, 'should_render_filters' );
+		$this->should_render_method = new \ReflectionMethod( ProductFiltersBlock::class, 'should_render_filters' );
 		$this->should_render_method->setAccessible( true );
 	}
 
