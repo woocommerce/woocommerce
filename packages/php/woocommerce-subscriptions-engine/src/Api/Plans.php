@@ -83,13 +83,6 @@ final class Plans {
 	private const DEFAULT_LIST_LIMIT = 200;
 
 	/**
-	 * Policy keys: each takes a string-keyed array (an object) or null.
-	 *
-	 * @var array<int, string>
-	 */
-	private const POLICY_KEYS = array( 'billing_policy', 'pricing_policy', 'delivery_policy' );
-
-	/**
 	 * Logger source.
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
@@ -111,21 +104,19 @@ final class Plans {
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): PlanView {
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
-
-		$plan_args = array(
-			'extension_slug' => ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null ),
-			'name'           => trim( ArgumentValidator::validate_string( 'name', $filtered_args['name'] ?? '' ) ),
-		);
-		if ( array_key_exists( 'status', $filtered_args ) ) {
-			$plan_args['status'] = ArgumentValidator::validate_string( 'status', $filtered_args['status'] );
-		}
-		foreach ( self::POLICY_KEYS as $key ) {
-			$plan_args[ $key ] = ArgumentValidator::validate_nullable_array( $key, $filtered_args[ $key ] ?? null );
-		}
+		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		unset( $filtered_args['extension_slug'] );
 
 		try {
-			$plan = Plan::create( $plan_args );
+			// The entity requires a name on create; apply() then sets every field, the name included.
+			$plan = Plan::create(
+				array(
+					'extension_slug' => $extension_slug,
+					'name'           => ArgumentValidator::validate_string( 'name', $filtered_args['name'] ?? '' ),
+				)
+			);
+			self::apply( $plan, $filtered_args );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
