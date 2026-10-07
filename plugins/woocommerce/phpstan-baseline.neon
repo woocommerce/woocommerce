@@ -16731,13 +16731,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
@@ -49895,12 +49895,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:pattern_is_excluded\(\) expects array\|WP_Block_Template, array\|WP_Block_Template\|WP_Post given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
