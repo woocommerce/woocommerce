@@ -164,6 +164,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			'positional placeholder'            => array( 'trade-show', '', 'Trade show: %1$s', 'Trade show: Unknown' ),
 			'width-qualified placeholder'       => array( 'trade-show', '', '[%10s]', '[   Unknown]' ),
 			'left-aligned width placeholder'    => array( 'trade-show', '', '[%-10s]', '[Unknown   ]' ),
+			'space flag with width placeholder' => array( 'trade-show', '', '[% 10s]', '[   Unknown]' ),
 			'custom padding placeholder'        => array( 'trade-show', '', "[%'.10s]", '[...Unknown]' ),
 			'empty label falls back'            => array( 'trade-show', '', '', 'Unknown' ),
 			'plain label, built-in type'        => array( 'utm', 'example', 'Campaign', 'Campaign' ),

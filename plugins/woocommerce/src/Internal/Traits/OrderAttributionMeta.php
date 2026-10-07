@@ -367,8 +367,9 @@ trait OrderAttributionMeta {
 
 		// Any sprintf() string placeholder (%s, %1$s, %10s, %-10s, %'.10s) or an escaped %% means the
 		// label is a format string, as every label was before plain labels were accepted. A lone
-		// percent sign is literal text; the space flag is left out so "50% sale" is not a placeholder.
-		if ( ! preg_match( '/(?<!%)(?:%%)*%(?:\d+\$)?(?:[-+0]|\'.)*\d*(?:\.\d+)?s|%%/', $label ) ) {
+		// percent sign is literal text: the space flag only counts when a width follows it, so
+		// "50% sale" is not a placeholder while "% 10s" still is.
+		if ( ! preg_match( '/(?<!%)(?:%%)*%(?:\d+\$)?(?:[-+0]|\'.| (?=\d))*\d*(?:\.\d+)?s|%%/', $label ) ) {
 			return '' === $label ? $formatted_source : $label;
 		}
 
