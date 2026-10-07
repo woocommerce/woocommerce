@@ -211,6 +211,67 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test process_batch on a parent that does not manage stock leaves out-of-stock variations alone.
+	 */
+	public function test_process_batch_variable_without_parent_stock_skips_out_of_stock_siblings() {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = array_map( 'wc_get_product', $variable->get_children() );
+		$this->assertFalse( $variable->get_manage_stock() );
+
+		$restocked = $variations[0];
+		$restocked->set_stock_status( ProductStockStatus::IN_STOCK );
+		$restocked->save();
+		$sibling = $variations[1];
+		$sibling->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$sibling->save();
+
+		\WC_Product_Variable::sync( $variable->get_id() );
+		$variable = wc_get_product( $variable->get_id() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $variable->get_stock_status() );
+
+		$notification = new Notification();
+		$notification->set_product_id( $sibling->get_id() );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->sut->process_batch( $variable->get_id() );
+
+		$notification = new Notification( $notification->get_id() );
+		$this->assertEquals( NotificationStatus::ACTIVE, $notification->get_status() );
+		$this->assertEmpty( $notification->get_date_notified() );
+	}
+
+	/**
+	 * Test process_batch skips a notification whose own product went out of stock after the job was queued.
+	 */
+	public function test_process_batch_skips_notification_when_its_product_is_out_of_stock() {
+		$variable = WC_Helper_Product::create_variation_product();
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 10 );
+		$variable->save();
+
+		$variation_id = $variable->get_children()[0];
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		// Simulate the variation going out of stock between queueing and sending.
+		update_post_meta( $variation_id, '_stock_status', ProductStockStatus::OUT_OF_STOCK );
+		wp_cache_flush();
+		$this->assertEquals( ProductStockStatus::OUT_OF_STOCK, wc_get_product( $variation_id )->get_stock_status() );
+
+		$this->sut->process_batch( $variable->get_id() );
+
+		$notification = new Notification( $notification->get_id() );
+		$this->assertEquals( NotificationStatus::ACTIVE, $notification->get_status() );
+		$this->assertEmpty( $notification->get_date_notified() );
+		$this->assertNotEmpty( $notification->get_date_last_attempt() );
+	}
+
+	/**
 	 * Test process_batch method bail out when product is not in stock.
 	 */
 	public function test_process_batch_bail_out_when_product_is_not_in_stock() {
