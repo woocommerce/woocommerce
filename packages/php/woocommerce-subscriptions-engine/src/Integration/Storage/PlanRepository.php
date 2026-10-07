@@ -81,30 +81,20 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Fetch a plan by id and (optionally) extension slug.
-	 * Most usages from applications should specify the extension slug
-	 * to guard against cross-application collisions.
+	 * Fetch a plan by id, in any status and of any owner.
 	 *
-	 * @param int         $id             Plan id.
-	 * @param string|null $extension_slug Extension slug to filter plans by.
+	 * @param int $id Plan id.
 	 * @return Plan|null Hydrated plan, or null if not found.
 	 */
-	public function find( int $id, ?string $extension_slug = null ): ?Plan {
+	public function find( int $id ): ?Plan {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
-		$extension_clause = '';
-		$params           = array( $id );
-		if ( null !== $extension_slug && 'any' !== $extension_slug ) {
-			$extension_clause = ' AND extension_slug = %s';
-			$params[]         = $extension_slug;
-		}
-
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$row = $wpdb->get_row(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d {$extension_clause}", $params ),
+			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
 

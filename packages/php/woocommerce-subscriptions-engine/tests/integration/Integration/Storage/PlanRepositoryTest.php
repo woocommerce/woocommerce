@@ -382,9 +382,8 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	public function test_invalid_extension_scopes_do_not_return_unscoped_results(): void {
 		$repo = new PlanRepository();
 
-		$id = $this->insert_plan( $repo, 'Scoped', 'lite' );
+		$this->insert_plan( $repo, 'Scoped', 'lite' );
 
-		$this->assertInstanceOf( Plan::class, $repo->find( $id, 'any' ) );
 		// Test with extension_slugs array.
 		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => array( 'any' ) ) ) );
 		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => array( 'any' ) ) ) );
@@ -392,8 +391,6 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $repo->query( array( 'extension_slugs' => null ) ) );
 		$this->assertSame( 1, $repo->count( array( 'extension_slugs' => null ) ) );
 
-		$this->assertNull( $repo->find( $id, '' ) );
-		$this->assertNull( $repo->find( $id, 'bad slug' ) );
 		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array() ) ) );
 		$this->assertSame( 0, $repo->count( array( 'extension_slugs' => array() ) ) );
 		$this->assertCount( 0, $repo->query( array( 'extension_slugs' => array( '' ) ) ) );
