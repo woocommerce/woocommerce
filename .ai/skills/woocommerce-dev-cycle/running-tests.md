@@ -110,14 +110,19 @@ CI runs the core plugin's PHP suite in several cells (PHP × WordPress version, 
 pnpm test:php:ci --list                       # the cells CI would run, with their ports
 pnpm test:php:ci --cell 8.3                   # one cell
 pnpm test:php:ci --cell 8.3 --cell 7.4        # two cells in parallel
-pnpm test:php:ci --cell 8.3 -- --filter WC_Tests_Product   # extra arguments go to phpunit
+pnpm test:php:ci --cell 8.3 --tests WC_Tests_Cart --tests 'WC_Abstract_Product_Test::test_on_sale'
+pnpm test:php:ci --cell 8.3 --tests tests/legacy/unit-tests/cart/cart.php   # the classes that file declares
+pnpm test:php:ci --cell 8.3 --tests suite:wc-phpunit-legacy
+pnpm test:php:ci --cell 8.3 -- --group ajax                 # anything else goes to phpunit as is
 ```
 
 - Each cell is its own wp-env instance (generated, gitignored `plugins/woocommerce/.wp-env.test-<cell>.json`) and stays up between runs, so a rerun costs only the phpunit time.
 - `--fresh` starts a cell as CI does (`--update`). Use it after a WordPress release, since a warm `latest` cell keeps the core it downloaded.
 - When a version appears in two cells (8.5 and its HPOS-off twin), select by index from `--list`.
 - Cells ignore `.wp-env.test.override.json`, as CI does; a per-cell `.wp-env.test-<cell>.override.json` is honoured.
+- `--tests` takes a class, `Class::method`, a regex, a test file, or `suite:<name>`, and can repeat. A selection never produces a receipt for `gh local-ci`; receipts cover whole jobs.
 - `--jobs` (default 2) sets how many cells run at a time. Run one invocation at a time.
+- `TEST_PHP_CI_PORT_BASE` (default `82`) moves every cell's port, for a second checkout or the `gh local-ci` worktree.
 
 What to expect (16-core Mac, Docker at 16 CPU / 16 GB; the core suite, about 16,300 tests):
 

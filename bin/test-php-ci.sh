@@ -4,7 +4,10 @@
 # instance per cell:
 #
 #   pnpm test:php:ci --list
-#   pnpm test:php:ci --cell 8.3 --cell 7.4 -- --filter WC_Tests_Product
+#   pnpm test:php:ci --cell 8.3 --cell 7.4
+#   pnpm test:php:ci --cell 8.3 --tests WC_Tests_Cart --tests 'WC_Abstract_Product_Test::test_on_sale'
+#   pnpm test:php:ci --cell 8.3 --tests tests/php/includes/abstracts/class-wc-abstract-product-test.php
+#   pnpm test:php:ci --cell 8.3 --tests suite:wc-phpunit-legacy
 #
 # Install mirrors the "backend" path of setup-woocommerce-monorepo; cells,
 # versions and commands come from `pnpm utils ci-jobs`, as in CI. Cells start
@@ -20,13 +23,16 @@ all=0
 fresh=0
 jobs=2
 cells=()
+tests=()
 phpunit_args=()
 
 usage() {
 	cat >&2 <<'EOF'
 usage: pnpm test:php:ci --list
-       pnpm test:php:ci (--cell <index|name fragment>)... [--jobs N] [--fresh] [-- phpunit args...]
-       pnpm test:php:ci --all [--jobs N] [--fresh] [-- phpunit args...]
+       pnpm test:php:ci (--cell <index|name fragment>)... [options]
+       pnpm test:php:ci --all [options]
+options: --tests <Class|Class::method|regex|file|suite:name>  (repeatable)
+         --jobs N  --fresh  [-- phpunit args...]
 EOF
 	exit 2
 }
@@ -38,6 +44,7 @@ while [[ $# -gt 0 ]]; do
 		--fresh) fresh=1 ;;
 		--jobs) [[ $# -ge 2 ]] || usage; jobs="$2"; shift ;;
 		--cell) [[ $# -ge 2 ]] || usage; cells+=( "$2" ); shift ;;
+		--tests) [[ $# -ge 2 ]] || usage; tests+=( "$2" ); shift ;;
 		--) shift; phpunit_args=( ${@+"$@"} ); break ;;
 		*) echo "unknown argument: $1" >&2; usage ;;
 	esac
@@ -47,9 +54,47 @@ if [[ $list -eq 0 && $all -eq 0 && ${#cells[@]} -eq 0 ]]; then
 	usage
 fi
 [[ "$jobs" =~ ^[1-9][0-9]*$ ]] || usage
+# A receipt says the whole CI job passed, so gh local-ci may not narrow the run.
+if [[ "${LOCAL_CI:-}" == "1" && ( ${#tests[@]} -gt 0 || ${#phpunit_args[@]} -gt 0 ) ]]; then
+	echo "error: test selection is not allowed under gh local-ci; a receipt covers the whole job" >&2
+	exit 2
+fi
 
 cd "$(dirname "$0")/.."
 tmp="$(mktemp -d)"
+keep_tmp=0
+# shellcheck disable=SC2329 # invoked by the trap
+cleanup() { [[ $keep_tmp -eq 1 ]] || rm -rf "$tmp"; }
+trap cleanup EXIT
+
+# --tests selectors -> phpunit arguments: an optional suite plus --filter
+# patterns (classes, methods, regexes, or the classes a file declares) joined with |.
+selection=()
+test_suite=""
+filters=()
+for t in ${tests[@]+"${tests[@]}"}; do
+	if [[ "$t" == suite:* ]]; then
+		[[ -z "$test_suite" ]] || { echo "error: only one suite: selector" >&2; usage; }
+		test_suite="${t#suite:}"
+	elif [[ -d "$project_dir/${t#"$project_dir"/}" ]]; then
+		# phpunit only picks *Test.php out of a directory and this repo's files end in -test.php.
+		echo "error: '$t' is a directory; select a test file, a class, or suite:<name>" >&2
+		usage
+	elif [[ -f "$project_dir/${t#"$project_dir"/}" ]]; then
+		# phpunit wants a file's class named after the file; this repo's are not, so select the classes it declares.
+		classes="$(grep -oE '^(final |abstract )?class +[A-Za-z0-9_]+' "$project_dir/${t#"$project_dir"/}" | awk '{print $NF}')"
+		[[ -n "$classes" ]] || { echo "error: no test class found in '$t'" >&2; usage; }
+		for c in $classes; do filters+=( "^$c\\b" ); done
+	else
+		filters+=( "$t" )
+	fi
+done
+[[ -n "$test_suite" ]] && selection+=( --testsuite "$test_suite" )
+if [[ ${#filters[@]} -gt 0 ]]; then
+	joined="$(printf '%s|' "${filters[@]}")"
+	selection+=( --filter "${joined%|}" )
+fi
+phpunit_args=( ${selection[@]+"${selection[@]}"} ${phpunit_args[@]+"${phpunit_args[@]}"} )
 
 run() {
 	printf '\n$' >&2
@@ -80,8 +125,12 @@ node -e '
 		if ( ! /^\d+$/.test( php ) || ! j.command ) {
 			throw new Error( `unexpected planner job ${ j.name }` );
 		}
+		const portBase = process.env.TEST_PHP_CI_PORT_BASE || "82";
+		if ( ! /^\d{2}$/.test( portBase ) ) {
+			throw new Error( `TEST_PHP_CI_PORT_BASE must be two digits, got ${ portBase }` );
+		}
 		const wp = /latest - 1/.test( j.name ) ? "latest-1" : /pre-release/.test( j.name ) ? "prerelease" : "latest";
-		const base = { latest: 82, "latest-1": 83, prerelease: 84 }[ wp ];
+		const base = Number( portBase ) + { latest: 0, "latest-1": 1, prerelease: 2 }[ wp ];
 		const row = [
 			i + 1, j.name, j.command, j.testEnv.start, `${ base }${ php }`, `php${ php }-wp-${ wp }`,
 			Object.entries( env ).map( ( [ k, v ] ) => `${ k }=${ v }` ).join( ";" ),
@@ -118,7 +167,7 @@ else
 			fi
 		done
 		if [[ ${#matches[@]} -ne 1 ]]; then
-			echo "error: --cell '$want' matches ${#matches[@]} cells; use --list and pick one index" >&2
+			echo "error: --cell '$want' matches ${#matches[@]} cells (only @woocommerce/plugin-woocommerce cells are supported); use --list and pick one index" >&2
 			exit 2
 		fi
 		[[ " ${selected[*]:-} " == *" ${matches[0]} "* ]] || selected+=( "${matches[0]}" )
@@ -227,7 +276,7 @@ done
 wait
 
 echo
-echo "Results (logs in $tmp):"
+echo "Results:"
 failed=0
 for index in "${selected[@]}"; do
 	row="${cell_rows[$(( index - 1 ))]}"
@@ -243,4 +292,8 @@ for index in "${selected[@]}"; do
 	printf '%-5s %-88s %4ss  %s\n' "$([[ $rc -eq 0 ]] && echo PASS || echo FAIL)" "$(field "$row" 2)" "$secs" "$summary"
 	[[ $rc -eq 0 ]] || failed=1
 done
+if [[ $failed -eq 1 ]]; then
+	keep_tmp=1
+	echo "logs kept in $tmp"
+fi
 exit $failed
