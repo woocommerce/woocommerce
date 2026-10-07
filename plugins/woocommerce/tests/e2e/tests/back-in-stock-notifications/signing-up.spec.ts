@@ -101,9 +101,9 @@ test.describe(
 				await page.goto( product.permalink );
 
 				await expect(
-					page.getByText(
-						/Want to be notified when this product is back in stock\?/i
-					)
+					page.getByRole( 'form', {
+						name: /Want to be notified when this product is back in stock\?/i,
+					} )
 				).toBeVisible();
 
 				// A logged-in customer does not see the email field — email is derived server-side.
