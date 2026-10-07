@@ -440,3 +440,5 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( _wc_delete_transients( new stdClass() ) );
 	}
 }
+
+// live receipt test marker
