@@ -237,7 +237,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		)->get_id();
 
-		$this->assertSame( array( 'Contracts: unknown key "custmer_id" ignored.' ), $messages );
+		$this->assertSame( array( 'Unknown key "custmer_id" ignored.' ), $messages );
 		$this->assertSame( 7, $this->view( $id )->get_customer_id(), 'The known key beside the unknown one is written.' );
 	}
 
@@ -700,7 +700,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		)->get_id();
 
 		$this->assertSame(
-			array( 'Contracts: unknown key "plan_snapshot" ignored.', 'Contracts: unknown key "items_snapshot" ignored.' ),
+			array( 'Unknown key "plan_snapshot" ignored.', 'Unknown key "items_snapshot" ignored.' ),
 			$messages
 		);
 		$this->assertNull( $this->entity( $id )->get_plan_snapshot_id() );

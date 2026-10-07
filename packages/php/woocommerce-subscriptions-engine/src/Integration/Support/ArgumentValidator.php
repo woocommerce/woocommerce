@@ -1,0 +1,204 @@
+<?php
+/**
+ * Argument validators shared by the public write facades.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Support
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Support;
+
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
+use InvalidArgumentException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Validate caller argument values and return them normalized.
+ *
+ * @internal Engine implementation detail shared by the `Api\` write facades, not part of the public API.
+ */
+final class ArgumentValidator {
+
+	/**
+	 * Keep the keys in `$allowed`; each other key raises a `_doing_it_wrong()` notice and is dropped.
+	 *
+	 * @param string                   $method  Public facade method, for the notice.
+	 * @param array<int|string, mixed> $args    Caller arguments.
+	 * @param array<string, true>      $allowed Accepted keys, as a key map.
+	 * @param string                   $what    What the keys belong to, for the notice.
+	 * @return array<string, mixed> The arguments with known keys only.
+	 */
+	public static function filter_known_keys( string $method, array $args, array $allowed, string $what = 'key' ): array {
+		$filtered = array();
+		foreach ( $args as $key => $value ) {
+			if ( isset( $allowed[ $key ] ) ) {
+				$filtered[ (string) $key ] = $value;
+				continue;
+			}
+
+			_doing_it_wrong(
+				esc_html( $method ),
+				sprintf( 'Unknown %s "%s" ignored.', esc_html( $what ), esc_html( (string) $key ) ),
+				'0.0.1'
+			);
+		}
+
+		return $filtered;
+	}
+
+	/**
+	 * Validate and return a currency code, or null.
+	 *
+	 * @param mixed $value Caller value.
+	 * @throws InvalidArgumentException If the value is not null or a three-letter uppercase code.
+	 */
+	public static function validate_currency( $value ): ?string {
+		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}$/', $value ) ) ) {
+			throw new InvalidArgumentException( '"currency" must be null or a three-letter uppercase ISO-4217 code.' );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate and return a string.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not a string.
+	 */
+	public static function validate_string( string $key, $value ): string {
+		if ( ! is_string( $value ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a string.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate and return a string, or null.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not null or a string.
+	 */
+	public static function validate_nullable_string( string $key, $value ): ?string {
+		if ( null !== $value && ! is_string( $value ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be null or a string.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate and return a positive integer id (a digit string is cast), or null.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not null or a positive integer.
+	 */
+	public static function validate_nullable_id( string $key, $value ): ?int {
+		if ( null === $value ) {
+			return null;
+		}
+
+		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
+			$value = (int) $value;
+		}
+
+		if ( ! is_int( $value ) || $value <= 0 ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be null or a positive integer.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate a GMT datetime, or null, and return it as a UTC `Y-m-d H:i:s` string.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value `DateTimeInterface`, GMT `Y-m-d H:i:s` string, or null.
+	 * @throws InvalidArgumentException If the value is not a valid datetime.
+	 */
+	public static function validate_nullable_date( string $key, $value ): ?string {
+		if ( null === $value ) {
+			return null;
+		}
+
+		if ( $value instanceof DateTimeInterface ) {
+			return ( new DateTimeImmutable( '@' . $value->getTimestamp() ) )->format( 'Y-m-d H:i:s' );
+		}
+
+		if ( is_string( $value ) ) {
+			$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $value, new DateTimeZone( 'UTC' ) );
+			if ( false !== $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $value ) {
+				return $value;
+			}
+		}
+
+		throw new InvalidArgumentException( sprintf( '"%s" must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string.', esc_html( $key ) ) );
+	}
+
+	/**
+	 * Validate a money value and return it normalized to the storage scale; null is 0.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Number, numeric string, or null.
+	 * @throws InvalidArgumentException If the value is not numeric.
+	 */
+	public static function validate_money( string $key, $value ): string {
+		if ( null === $value ) {
+			return MoneyScale::normalize_money( 0 );
+		}
+
+		if ( ! is_int( $value ) && ! is_float( $value ) && ! ( is_string( $value ) && is_numeric( $value ) ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a number or a numeric string.', esc_html( $key ) ) );
+		}
+
+		return MoneyScale::normalize_money( $value );
+	}
+
+	/**
+	 * Validate a list of arrays and return it with string-keyed rows.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int, array<string, mixed>>
+	 * @throws InvalidArgumentException If the value is not a list of arrays.
+	 */
+	public static function validate_list_of_arrays( string $key, $value ): array {
+		if ( ! is_array( $value ) || ( array() !== $value && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a list of arrays.', esc_html( $key ) ) );
+		}
+
+		$rows = array();
+		foreach ( $value as $row ) {
+			if ( ! is_array( $row ) ) {
+				throw new InvalidArgumentException( sprintf( '"%s" must be a list of arrays.', esc_html( $key ) ) );
+			}
+			$rows[] = self::string_keyed( $row );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Re-key an array as string-keyed.
+	 *
+	 * @param array<int|string, mixed> $value Array.
+	 * @return array<string, mixed>
+	 */
+	public static function string_keyed( array $value ): array {
+		$out = array();
+		foreach ( $value as $key => $entry ) {
+			$out[ (string) $key ] = $entry;
+		}
+
+		return $out;
+	}
+}

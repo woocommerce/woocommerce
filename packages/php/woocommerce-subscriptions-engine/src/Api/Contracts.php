@@ -15,19 +15,16 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
-use DateTimeImmutable;
-use DateTimeInterface;
-use DateTimeZone;
 use DomainException;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -115,8 +112,8 @@ final class Contracts {
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
 	 */
 	public static function create( array $args ): ContractView {
-		$filtered_args  = self::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
-		$extension_slug = self::nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		unset( $filtered_args['extension_slug'] );
 
 		try {
@@ -149,7 +146,7 @@ final class Contracts {
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
 	public static function update( int $contract_id, array $args ): ?ContractView {
-		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$repository = new ContractRepository();
 		$contract   = $repository->find( $contract_id );
@@ -194,19 +191,19 @@ final class Contracts {
 	 * @throws DomainException If the chain position or count is already taken.
 	 */
 	public static function add_cycle( int $contract_id, array $args ): CycleView {
-		$filtered_args = self::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$cycle_args = array(
 			'contract_id'    => $contract_id,
 			'kind'           => $filtered_args['kind'] ?? null,
-			'sequence_no'    => self::nullable_id( 'sequence_no', $filtered_args['sequence_no'] ?? null ),
-			'count'          => self::nullable_id( 'count', $filtered_args['count'] ?? null ),
+			'sequence_no'    => ArgumentValidator::validate_nullable_id( 'sequence_no', $filtered_args['sequence_no'] ?? null ),
+			'count'          => ArgumentValidator::validate_nullable_id( 'count', $filtered_args['count'] ?? null ),
 			'status'         => $filtered_args['status'] ?? null,
-			'starts_at_gmt'  => self::nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null ),
-			'ends_at_gmt'    => self::nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null ),
-			'expected_total' => self::money( 'expected_total', $filtered_args['expected_total'] ?? null ),
-			'currency'       => self::currency( $filtered_args['currency'] ?? null ),
-			'order_id'       => self::nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
+			'starts_at_gmt'  => ArgumentValidator::validate_nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null ),
+			'ends_at_gmt'    => ArgumentValidator::validate_nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null ),
+			'expected_total' => ArgumentValidator::validate_money( 'expected_total', $filtered_args['expected_total'] ?? null ),
+			'currency'       => ArgumentValidator::validate_currency( $filtered_args['currency'] ?? null ),
+			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
 		try {
@@ -306,102 +303,75 @@ final class Contracts {
 		foreach ( $args as $key => $value ) {
 			switch ( $key ) {
 				case 'customer_id':
-					$contract->set_customer_id( self::nullable_id( $key, $value ) );
+					$contract->set_customer_id( ArgumentValidator::validate_nullable_id( $key, $value ) );
 					break;
 				case 'selling_plan_id':
-					$contract->set_selling_plan_id( self::nullable_id( $key, $value ) );
+					$contract->set_selling_plan_id( ArgumentValidator::validate_nullable_id( $key, $value ) );
 					break;
 				case 'origin_order_id':
-					$contract->set_origin_order_id( self::nullable_id( $key, $value ) );
+					$contract->set_origin_order_id( ArgumentValidator::validate_nullable_id( $key, $value ) );
 					break;
 				case 'currency':
-					$contract->set_currency( self::currency( $value ) );
+					$contract->set_currency( ArgumentValidator::validate_currency( $value ) );
 					break;
 				case 'status':
-					$contract->set_status( self::string( $key, $value ) );
+					$contract->set_status( ArgumentValidator::validate_string( $key, $value ) );
 					break;
 				case 'schedule_source':
-					$contract->set_schedule_source( self::string( $key, $value ) );
+					$contract->set_schedule_source( ArgumentValidator::validate_string( $key, $value ) );
 					break;
 				case 'start_gmt':
-					$contract->set_start_gmt( self::nullable_date( $key, $value ) );
+					$contract->set_start_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
 					break;
 				case 'next_payment_gmt':
-					$contract->set_next_payment_gmt( self::nullable_date( $key, $value ) );
+					$contract->set_next_payment_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
 					break;
 				case 'last_payment_gmt':
-					$contract->set_last_payment_gmt( self::nullable_date( $key, $value ) );
+					$contract->set_last_payment_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
 					break;
 				case 'last_attempt_gmt':
-					$contract->set_last_attempt_gmt( self::nullable_date( $key, $value ) );
+					$contract->set_last_attempt_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
 					break;
 				case 'trial_end_gmt':
-					$contract->set_trial_end_gmt( self::nullable_date( $key, $value ) );
+					$contract->set_trial_end_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
 					break;
 				case 'end_gmt':
-					$contract->set_end_gmt( self::nullable_date( $key, $value ) );
+					$contract->set_end_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
 					break;
 				case 'billing_total':
-					$contract->set_billing_total( self::money( $key, $value ) );
+					$contract->set_billing_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'discount_total':
-					$contract->set_discount_total( self::money( $key, $value ) );
+					$contract->set_discount_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'shipping_total':
-					$contract->set_shipping_total( self::money( $key, $value ) );
+					$contract->set_shipping_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'tax_total':
-					$contract->set_tax_total( self::money( $key, $value ) );
+					$contract->set_tax_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'items':
-					$contract->set_items( self::items( $method, $value ) );
+					$contract->set_items( self::validate_items( $method, $value ) );
 					break;
 				case 'addresses':
-					$contract->set_addresses( self::addresses( $method, $value ) );
+					$contract->set_addresses( self::validate_addresses( $method, $value ) );
 					break;
 				case 'payment_token_id':
-					$token_id = self::nullable_id( $key, $value );
+					$token_id = ArgumentValidator::validate_nullable_id( $key, $value );
 					break;
 				case 'payment_method':
-					$gateway = self::nullable_string( $key, $value );
+					$gateway = ArgumentValidator::validate_nullable_string( $key, $value );
 					break;
 				case 'payment_method_title':
-					$title = self::nullable_string( $key, $value );
+					$title = ArgumentValidator::validate_nullable_string( $key, $value );
 					break;
 			}
 		}
 
 		$contract->set_payment_instrument( new InstrumentRef( $token_id, $gateway, $title ) );
-		self::assert_money_has_currency( $contract, $args );
+		self::validate_money_has_currency( $contract, $args );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
-
-	/**
-	 * Keep the keys in `$allowed`; each other key raises a `_doing_it_wrong()` notice and is dropped.
-	 *
-	 * @param string                   $method  Public facade method, for the notice.
-	 * @param array<int|string, mixed> $args    Caller arguments.
-	 * @param array<string, true>      $allowed Accepted keys, as a key map.
-	 * @param string                   $what    What the keys belong to, for the notice.
-	 * @return array<string, mixed> The arguments with known keys only.
-	 */
-	private static function filter_known_keys( string $method, array $args, array $allowed, string $what = 'key' ): array {
-		$filtered = array();
-		foreach ( $args as $key => $value ) {
-			if ( isset( $allowed[ $key ] ) ) {
-				$filtered[ (string) $key ] = $value;
-				continue;
-			}
-
-			_doing_it_wrong(
-				esc_html( $method ),
-				sprintf( 'Contracts: unknown %s "%s" ignored.', esc_html( $what ), esc_html( (string) $key ) ),
-				'0.0.1'
-			);
-		}
-
-		return $filtered;
-	}
 
 	/**
 	 * Refuse money facts without a currency (data integrity): a non-null money value
@@ -412,7 +382,7 @@ final class Contracts {
 	 * @param array<string, mixed> $args     Caller fields.
 	 * @throws InvalidArgumentException If a money fact has no currency.
 	 */
-	private static function assert_money_has_currency( Contract $contract, array $args ): void {
+	private static function validate_money_has_currency( Contract $contract, array $args ): void {
 		if ( null !== $contract->get_currency() ) {
 			return;
 		}
@@ -432,118 +402,6 @@ final class Contracts {
 	}
 
 	/**
-	 * Validate a currency code, or null.
-	 *
-	 * @param mixed $value Caller value.
-	 * @throws InvalidArgumentException If the value is not null or a three-letter uppercase code.
-	 */
-	private static function currency( $value ): ?string {
-		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}$/', $value ) ) ) {
-			throw new InvalidArgumentException( 'Contracts: "currency" must be null or a three-letter uppercase ISO-4217 code.' );
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Validate a string.
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value Caller value.
-	 * @throws InvalidArgumentException If the value is not a string.
-	 */
-	private static function string( string $key, $value ): string {
-		if ( ! is_string( $value ) ) {
-			throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be a string.', esc_html( $key ) ) );
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Validate a string, or null.
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value Caller value.
-	 * @throws InvalidArgumentException If the value is not null or a string.
-	 */
-	private static function nullable_string( string $key, $value ): ?string {
-		if ( null !== $value && ! is_string( $value ) ) {
-			throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be null or a string.', esc_html( $key ) ) );
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Validate a positive integer id, or null.
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value Caller value.
-	 * @throws InvalidArgumentException If the value is not null or a positive integer.
-	 */
-	private static function nullable_id( string $key, $value ): ?int {
-		if ( null === $value ) {
-			return null;
-		}
-
-		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
-			$value = (int) $value;
-		}
-
-		if ( ! is_int( $value ) || $value <= 0 ) {
-			throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be null or a positive integer.', esc_html( $key ) ) );
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Validate a GMT datetime, or null, as a UTC `Y-m-d H:i:s` string.
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value `DateTimeInterface`, GMT `Y-m-d H:i:s` string, or null.
-	 * @throws InvalidArgumentException If the value is not a valid datetime.
-	 */
-	private static function nullable_date( string $key, $value ): ?string {
-		if ( null === $value ) {
-			return null;
-		}
-
-		if ( $value instanceof DateTimeInterface ) {
-			return ( new DateTimeImmutable( '@' . $value->getTimestamp() ) )->format( 'Y-m-d H:i:s' );
-		}
-
-		if ( is_string( $value ) ) {
-			$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $value, new DateTimeZone( 'UTC' ) );
-			if ( false !== $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $value ) {
-				return $value;
-			}
-		}
-
-		throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string.', esc_html( $key ) ) );
-	}
-
-	/**
-	 * Validate a money value, normalized to the storage scale; null is 0.
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value Number, numeric string, or null.
-	 * @throws InvalidArgumentException If the value is not numeric.
-	 */
-	private static function money( string $key, $value ): string {
-		if ( null === $value ) {
-			return MoneyScale::normalize_money( 0 );
-		}
-
-		if ( ! is_int( $value ) && ! is_float( $value ) && ! ( is_string( $value ) && is_numeric( $value ) ) ) {
-			throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be a number or a numeric string.', esc_html( $key ) ) );
-		}
-
-		return MoneyScale::normalize_money( $value );
-	}
-
-	/**
 	 * Validate an item row list; unknown row keys are dropped with a notice.
 	 *
 	 * @param string $method Public facade method, for usage notices.
@@ -551,35 +409,11 @@ final class Contracts {
 	 * @return array<int, array<string, mixed>>
 	 * @throws InvalidArgumentException If the value is not a list of item rows.
 	 */
-	private static function items( string $method, $value ): array {
+	private static function validate_items( string $method, $value ): array {
 		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
 		$rows    = array();
-		foreach ( self::item_rows( 'items', $value ) as $row ) {
-			$rows[] = self::filter_known_keys( $method, $row, $allowed, 'item key' );
-		}
-
-		return $rows;
-	}
-
-	/**
-	 * Validate a list of array rows.
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value Caller value.
-	 * @return array<int, array<string, mixed>>
-	 * @throws InvalidArgumentException If the value is not a list of arrays.
-	 */
-	private static function item_rows( string $key, $value ): array {
-		if ( ! is_array( $value ) || ( array() !== $value && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
-			throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be a list of arrays.', esc_html( $key ) ) );
-		}
-
-		$rows = array();
-		foreach ( $value as $row ) {
-			if ( ! is_array( $row ) ) {
-				throw new InvalidArgumentException( sprintf( 'Contracts: "%s" must be a list of arrays.', esc_html( $key ) ) );
-			}
-			$rows[] = self::string_keyed( $row );
+		foreach ( ArgumentValidator::validate_list_of_arrays( 'items', $value ) as $row ) {
+			$rows[] = ArgumentValidator::filter_known_keys( $method, $row, $allowed, 'item key' );
 		}
 
 		return $rows;
@@ -594,7 +428,7 @@ final class Contracts {
 	 * @return array<string, array<string, mixed>>
 	 * @throws InvalidArgumentException If the map is not keyed `billing` / `shipping` with array values.
 	 */
-	private static function addresses( string $method, $value ): array {
+	private static function validate_addresses( string $method, $value ): array {
 		$allowed = array_fill_keys( Contract::ADDRESS_FIELDS, true );
 		if ( ! is_array( $value ) ) {
 			throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping".' );
@@ -606,24 +440,9 @@ final class Contracts {
 				throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping" with array values.' );
 			}
 
-			$addresses[ $type ] = self::filter_known_keys( $method, $address, $allowed, 'address key' );
+			$addresses[ $type ] = ArgumentValidator::filter_known_keys( $method, $address, $allowed, 'address key' );
 		}
 
 		return $addresses;
-	}
-
-	/**
-	 * Re-key an array as string-keyed.
-	 *
-	 * @param array<int|string, mixed> $value Array.
-	 * @return array<string, mixed>
-	 */
-	private static function string_keyed( array $value ): array {
-		$out = array();
-		foreach ( $value as $key => $entry ) {
-			$out[ (string) $key ] = $entry;
-		}
-
-		return $out;
 	}
 }
