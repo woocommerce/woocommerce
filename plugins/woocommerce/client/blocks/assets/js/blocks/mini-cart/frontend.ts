@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-import { doAction } from '@wordpress/hooks';
-import { select } from '@wordpress/data';
 import {
 	store,
 	getContext,
@@ -38,12 +36,6 @@ import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const dispatchCheckoutEvent = ( eventName: string ) => {
-	doAction( `experimental__woocommerce_blocks-checkout-${ eventName }`, {
-		storeCart: select( 'wc/store/cart' ).getCartData(),
-	} );
-};
 
 const {
 	currency,
@@ -180,6 +172,13 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	window.wp.hooks.doAction(
+		`experimental__woocommerce_blocks-checkout-${ eventName }`,
+		{ storeCart: woocommerceState.cart }
+	);
+};
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
