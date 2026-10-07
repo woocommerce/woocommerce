@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Stabilize the non-UTC refund sales report unit test so it no longer fails depending on the time of day CI runs; test-only, no changes to shipped code.

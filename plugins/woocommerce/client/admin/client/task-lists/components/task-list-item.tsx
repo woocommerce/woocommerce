@@ -12,6 +12,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import { Button } from '@wordpress/components';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useLayoutContext } from '@woocommerce/admin-layout';
 
@@ -27,6 +28,9 @@ export type TaskListItemProps = {
 	task: TaskType & {
 		onClick?: () => void;
 	};
+	isSkipDisabled?: boolean;
+	onTaskSkip?: ( task: TaskType ) => Promise< void >;
+	showSkipAction?: boolean;
 	trackClick?: () => void;
 };
 
@@ -35,6 +39,9 @@ export const TaskListItem = ( {
 	isExpanded = false,
 	setExpandedTask,
 	task,
+	isSkipDisabled = false,
+	onTaskSkip,
+	showSkipAction = false,
 	trackClick: trackTaskListClick,
 }: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -82,7 +89,7 @@ export const TaskListItem = ( {
 	const hasFills = Boolean( slot?.fills?.length );
 
 	const onDismiss = useCallback( () => {
-		dismissTask( id );
+		void dismissTask( id );
 		createNotice( 'success', __( 'Task dismissed', 'woocommerce' ), {
 			actions: [
 				{
@@ -93,8 +100,24 @@ export const TaskListItem = ( {
 		} );
 	}, [ id ] );
 
+	const onSkip = useCallback(
+		( event: React.MouseEvent | React.KeyboardEvent ) => {
+			event.preventDefault();
+			event.stopPropagation();
+
+			void onTaskSkip?.( task );
+		},
+		[ onTaskSkip, task ]
+	);
+
+	// The surrounding list item treats Enter as a click on the row, so the
+	// keydown has to stop here or skipping also navigates to the task.
+	const onSkipKeyDown = useCallback( ( event: React.KeyboardEvent ) => {
+		event.stopPropagation();
+	}, [] );
+
 	const onSnooze = useCallback( () => {
-		snoozeTask( id );
+		void snoozeTask( id );
 		createNotice(
 			'success',
 			__( 'Task postponed until tomorrow', 'woocommerce' ),
@@ -124,7 +147,7 @@ export const TaskListItem = ( {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks || {};
 
-		visitedTask( id );
+		void visitedTask( id );
 		await userPreferences.updateUserPreferences( {
 			task_list_tracked_started_tasks: {
 				...( trackedStartedTasks || {} ),
@@ -155,12 +178,29 @@ export const TaskListItem = ( {
 		navigateTo( { url: getNewPath( { task: id }, '/', {} ) } );
 	}, [ id, isComplete, actionUrl ] );
 
+	// Extended lists trade the ellipsis Dismiss for a row-level Skip. Keeping
+	// the skip action alongside the props it replaces means a fill that
+	// composes its own TaskItem receives it too, instead of losing both.
+	const skipAction =
+		showSkipAction && isDismissable && ! isComplete ? (
+			<Button
+				className="woocommerce-task-list__item-skip"
+				disabled={ isSkipDisabled }
+				variant="link"
+				onClick={ onSkip }
+				onKeyDown={ onSkipKeyDown }
+			>
+				{ __( 'Skip', 'woocommerce' ) }
+			</Button>
+		) : undefined;
+
 	const taskItemProps = {
 		expandable: isExpandable,
 		expanded: isExpandable && isExpanded,
 		completed: isComplete,
 		onSnooze: isSnoozeable ? onSnooze : undefined,
-		onDismiss: isDismissable ? onDismiss : undefined,
+		onDismiss: isDismissable && ! showSkipAction ? onDismiss : undefined,
+		secondaryAction: skipAction,
 	};
 
 	const DefaultTaskItem = useCallback(
@@ -169,11 +209,13 @@ export const TaskListItem = ( {
 				event?: React.MouseEvent | React.KeyboardEvent
 			) => {
 				trackTaskListClick?.();
-				trackClick().then( () => {
+				void trackClick().then( () => {
 					if ( ! isComplete ) {
 						// Invalidate the task list selector cache to force a re-fetch.
 						// This ensures the task completion status is up-to-date after visiting a task.
-						invalidateResolutionForStoreSelector( 'getTaskLists' );
+						void invalidateResolutionForStoreSelector(
+							'getTaskLists'
+						);
 					}
 				} );
 

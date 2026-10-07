@@ -74,7 +74,7 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 			{}
 		);
 
-		hideTaskList( id );
+		void hideTaskList( id );
 	};
 
 	const currentTask = getCurrentTask();

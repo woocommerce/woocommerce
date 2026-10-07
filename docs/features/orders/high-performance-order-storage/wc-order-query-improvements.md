@@ -128,7 +128,7 @@ $orders = wc_get_orders(
 // Obtain orders either "on-hold" or "pending" that have metadata `weight` >= 50 and metadata `color` or `size` is set.
 
 $query_args = array(
-    'status' => array( 'pending', 'on-hold' ),
+    'status' => array( \Automattic\WooCommerce\Enums\OrderStatus::PENDING, \Automattic\WooCommerce\Enums\OrderStatus::ON_HOLD ),
     'meta_query' => array(
         array(
             'key'     => 'weight',

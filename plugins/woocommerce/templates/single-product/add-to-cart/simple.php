@@ -23,7 +23,7 @@ if ( ! $product->is_purchasable() ) {
 	return;
 }
 
-echo wc_get_stock_html( $product ); // WPCS: XSS ok.
+echo wc_get_stock_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The stock helper returns intentionally filterable HTML.
 
 if ( $product->is_in_stock() ) : ?>
 
@@ -39,7 +39,7 @@ if ( $product->is_in_stock() ) : ?>
 			array(
 				'min_value'   => $product->get_min_purchase_quantity(),
 				'max_value'   => $product->get_max_purchase_quantity(),
-				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // WPCS: CSRF ok, input var ok.
+				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Template repopulates quantity; wc_stock_amount() normalizes it.
 			)
 		);
 

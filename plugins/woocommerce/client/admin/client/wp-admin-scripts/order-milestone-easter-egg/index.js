@@ -369,11 +369,11 @@
 					protectedEls.add( c );
 					eyeEls.push( c );
 					eyeElsSet.add( c );
-					HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter( function (
-						el
-					) {
-						return el !== c;
-					} );
+					HEAD_TOP_LAYER.els = HEAD_TOP_LAYER.els.filter(
+						function ( el ) {
+							return el !== c;
+						}
+					);
 					COLOR_LAYERS.forEach( function ( layer ) {
 						layer.els = layer.els.filter( function ( el ) {
 							return el !== c;

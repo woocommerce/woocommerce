@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Make the Abandoned cart recovery feature experimental and opt-in only; it is no longer enabled automatically on new installs.

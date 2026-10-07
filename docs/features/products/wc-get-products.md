@@ -1,6 +1,6 @@
 ---
 post_title: wc_get_products and product queries
-sidebar_label: Product Querying
+sidebar_label: Product queries
 sidebar_position: 1
 ---
 
@@ -86,6 +86,11 @@ $products = wc_get_products( array( 'status' => \Automattic\WooCommerce\Enums\Pr
 ```php
 // Get external products.
 $products = wc_get_products( array( 'type' => 'external' ) );
+```
+
+```php
+// Using constant class for type.
+$products = wc_get_products( array( 'type' => \Automattic\WooCommerce\Enums\ProductType::EXTERNAL ) );
 ```
 
 ```php

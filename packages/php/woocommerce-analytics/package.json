@@ -31,9 +31,9 @@
 		"debug": "4.4.3"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
-		"@babel/preset-env": "7.25.7",
-		"@babel/preset-typescript": "7.25.7",
+		"@babel/core": "catalog:tooling",
+		"@babel/preset-env": "catalog:tooling",
+		"@babel/preset-typescript": "catalog:tooling",
 		"@jest/globals": "29.5.x",
 		"@types/jest": "29.5.x",
 		"@types/jquery": "3.5.33",
@@ -42,7 +42,7 @@
 		"babel-loader": "9.2.x",
 		"jest": "29.5.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},
 	"config": {

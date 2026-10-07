@@ -89,7 +89,7 @@ const CustomizeStoreController = () => {
 	) => {
 		if ( isNewTabClick( event ) ) {
 			// New tab: page stays open, so fire-and-forget is safe
-			markTaskComplete();
+			void markTaskComplete();
 			return;
 		}
 

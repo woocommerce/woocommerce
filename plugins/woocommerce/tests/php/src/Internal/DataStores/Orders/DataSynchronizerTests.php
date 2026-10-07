@@ -29,6 +29,13 @@ class DataSynchronizerTests extends \HposTestCase {
 	private $sut;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
@@ -41,7 +48,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		OrderHelper::toggle_cot_feature_and_usage( false );
 		$this->sut = $container->get( DataSynchronizer::class );
@@ -142,6 +148,24 @@ class DataSynchronizerTests extends \HposTestCase {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
 		$this->assertFalse( $this->sut->has_orders_pending_sync() );
+	}
+
+	/**
+	 * @testDox An order edited after a full backfill is still detected as pending sync.
+	 */
+	public function test_has_orders_pending_sync_detects_stale_order_after_backfill_with_no_missing_orders() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+
+		$order = OrderHelper::create_complex_data_store_order();
+		$this->sut->process_batch( array( $order->get_id() ) );
+		$this->assertFalse( $this->sut->has_orders_pending_sync(), 'No orders should be pending sync right after a full backfill.' );
+
+		$order->set_date_modified( time() + 1000 );
+		$order->save();
+
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
+		$this->assertEquals( 1, $this->sut->get_current_orders_pending_sync_count() );
 	}
 
 	/**
@@ -631,7 +655,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		$order3->save();
 
 		// Run WP's auto-draft delete.
-		do_action( 'wp_scheduled_auto_draft_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+		do_action( 'wp_scheduled_auto_draft_delete' );
 
 		$orders = wc_get_orders(
 			array(
@@ -667,7 +691,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		$order->save();
 
 		// Run scheduled deletion.
-		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+		do_action( 'wp_scheduled_delete' );
 
 		// Refresh order and ensure it's *not* gone.
 		$order = wc_get_order( $order->get_id() );
@@ -683,7 +707,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		);
 
 		// Run scheduled deletion.
-		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+		do_action( 'wp_scheduled_delete' );
 
 		// Ensure the placeholder post is gone.
 		$placeholder = get_post( $order->get_id() );
@@ -744,7 +768,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		$this->disable_cot_sync();
 		OrderHelper::create_order();
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
 		$features = apply_filters( 'woocommerce_get_settings_advanced', array(), 'features' );
 
 		$cot_setting = array_filter(
@@ -816,7 +839,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		wc_get_container()->get( BatchProcessingController::class )->remove_processor( DataSynchronizer::class );
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
@@ -824,7 +846,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		$this->direct_delete_cot_order( $cot_order->get_id() );
 		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
@@ -852,7 +873,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		update_option( $this->sut::BACKGROUND_SYNC_MODE_OPTION, $this->sut::BACKGROUND_SYNC_MODE_INTERVAL );
 		$this->assertTrue( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
@@ -862,7 +882,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		$this->direct_delete_cot_order( $cot_order->get_id() );
 		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK );
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 
@@ -893,7 +912,6 @@ class DataSynchronizerTests extends \HposTestCase {
 		$this->assertTrue( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$this->assertFalse( as_has_scheduled_action( $this->sut::BACKGROUND_SYNC_EVENT_HOOK ) );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is a test.
 		do_action( wc_get_container()->get( BatchProcessingController::class )::PROCESS_SINGLE_BATCH_ACTION_NAME, get_class( $this->sut ) );
 		$this->assertFalse( wc_get_container()->get( BatchProcessingController::class )->is_enqueued( DataSynchronizer::class ) );
 		$handler_method->invoke( $this->sut );

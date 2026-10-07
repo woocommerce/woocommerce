@@ -146,6 +146,134 @@ class PricingPolicyTest extends TestCase {
 		);
 	}
 
+	public function test_bogo_entry_hydrates_value_less_and_leaves_prices_unchanged(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array( 'type' => 'bogo' ),
+				),
+			)
+		);
+
+		// A value-less bogo entry normalizes to value 0.0 and round-trips that shape.
+		$this->assertSame( 0.0, $policy->get_policies()[0]['value'] );
+		$this->assertSame(
+			array(
+				array(
+					'type'  => 'bogo',
+					'value' => 0.0,
+				),
+			),
+			$policy->to_array()['policies']
+		);
+
+		// Money-neutral: neither the unit price nor the line total moves.
+		$this->assertSame( 100.0, $policy->calculate_price( 100.0 ) );
+		$this->assertSame( 300.0, $policy->calculate_line_total( 100.0, 3.0 ) );
+	}
+
+	public function test_bogo_bonus_quantity_applies_to_all_cycles_without_scope_gates(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array( 'type' => 'bogo' ),
+				),
+			)
+		);
+
+		// One free unit per paid unit, on every cycle.
+		$this->assertSame( 2.0, $policy->calculate_bonus_quantity( 2.0, 1 ) );
+		$this->assertSame( 2.0, $policy->calculate_bonus_quantity( 2.0, 5 ) );
+		$this->assertSame( 1.0, $policy->calculate_bonus_quantity( 1.0, 3 ) );
+
+		// A non-positive paid quantity earns nothing.
+		$this->assertSame( 0.0, $policy->calculate_bonus_quantity( 0.0, 1 ) );
+	}
+
+	/**
+	 * @dataProvider provide_bogo_scope_windows
+	 *
+	 * @param array<string, int> $gates    Scope gate keys for the bogo entry.
+	 * @param int                $cycle    Cycle under test.
+	 * @param float              $expected Expected bonus for paid quantity 2.
+	 */
+	public function test_bogo_bonus_quantity_respects_the_cycle_scope_gates( array $gates, int $cycle, float $expected ): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array_merge( array( 'type' => 'bogo' ), $gates ),
+				),
+			)
+		);
+
+		$this->assertSame( $expected, $policy->calculate_bonus_quantity( 2.0, $cycle ) );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, int>, 1: int, 2: float}>
+	 */
+	public function provide_bogo_scope_windows(): array {
+		return array(
+			'first cycle only, cycle 1'    => array( array( 'duration_cycles' => 1 ), 1, 2.0 ),
+			'first cycle only, cycle 2'    => array( array( 'duration_cycles' => 1 ), 2, 0.0 ),
+			'three cycles, cycle 3'        => array( array( 'duration_cycles' => 3 ), 3, 2.0 ),
+			'three cycles, cycle 4'        => array( array( 'duration_cycles' => 3 ), 4, 0.0 ),
+			'starting cycle 2, cycle 1'    => array( array( 'starting_cycle' => 2 ), 1, 0.0 ),
+			'starting cycle 2, cycle 2'    => array( array( 'starting_cycle' => 2 ), 2, 2.0 ),
+			'window 2..3, cycle 3'         => array(
+				array(
+					'starting_cycle'  => 2,
+					'duration_cycles' => 2,
+				),
+				3,
+				2.0,
+			),
+			'window 2..3, cycle 4 (ended)' => array(
+				array(
+					'starting_cycle'  => 2,
+					'duration_cycles' => 2,
+				),
+				4,
+				0.0,
+			),
+		);
+	}
+
+	public function test_bonus_quantity_is_zero_without_a_bogo_entry(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'  => 'percentage',
+						'value' => 10,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 0.0, $policy->calculate_bonus_quantity( 5.0, 1 ) );
+		$this->assertSame( 0.0, PricingPolicy::from_array( array() )->calculate_bonus_quantity( 5.0, 1 ) );
+	}
+
+	public function test_bogo_composes_with_a_percentage_discount(): void {
+		$policy = PricingPolicy::from_array(
+			array(
+				'policies' => array(
+					array(
+						'type'  => 'percentage',
+						'value' => 10,
+					),
+					array( 'type' => 'bogo' ),
+				),
+			)
+		);
+
+		// The percentage entry discounts the price AND the bogo entry grants the bonus.
+		$this->assertSame( 90.0, $policy->calculate_price( 100.0 ) );
+		$this->assertSame( 180.0, $policy->calculate_line_total( 100.0, 2.0 ) );
+		$this->assertSame( 2.0, $policy->calculate_bonus_quantity( 2.0, 1 ) );
+	}
+
 	public function test_whole_number_values_normalize_to_float(): void {
 		$policy = PricingPolicy::from_array(
 			array(

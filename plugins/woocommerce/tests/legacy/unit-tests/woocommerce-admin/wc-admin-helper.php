@@ -82,12 +82,23 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$direct_update_mode = get_option( 'woocommerce_attribute_lookup_direct_updates' );
+		self::enable_direct_product_attribute_lookup_updates();
+		try {
+			// Create a product.
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_status( 'publish' );
+			$product->save();
+			$this->product_id = $product->get_id();
+		} finally {
+			self::disable_direct_product_attribute_lookup_updates();
+		}
 
-		// Create a product.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_status( 'publish' );
-		$product->save();
-		$this->product_id = $product->get_id();
+		$this->assertSame(
+			$direct_update_mode,
+			get_option( 'woocommerce_attribute_lookup_direct_updates' ),
+			'The direct attribute lookup update mode was not restored after fixture creation.'
+		);
 	}
 
 	/**
@@ -96,10 +107,45 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
+		$direct_update_mode = get_option( 'woocommerce_attribute_lookup_direct_updates' );
+		try {
+			// Clean up product.
+			self::enable_direct_product_attribute_lookup_updates();
+			try {
+				WC_Helper_Product::delete_product( $this->product_id );
+			} finally {
+				self::disable_direct_product_attribute_lookup_updates();
+			}
 
-		// Clean up product.
-		WC_Helper_Product::delete_product( $this->product_id );
+			$this->assertSame(
+				$direct_update_mode,
+				get_option( 'woocommerce_attribute_lookup_direct_updates' ),
+				'The direct attribute lookup update mode was not restored after fixture cleanup.'
+			);
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Test that the product fixture does not schedule an attribute lookup update.
+	 *
+	 * @testdox Product fixture does not schedule an attribute lookup update.
+	 */
+	public function test_product_fixture_does_not_schedule_attribute_lookup_update(): void {
+		$queue = WC()->get_instance_of( WC_Queue::class );
+
+		$this->assertEmpty(
+			$queue->search(
+				array(
+					'hook'   => 'woocommerce_run_product_attribute_lookup_update_callback',
+					'args'   => array( $this->product_id, \Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore::ACTION_INSERT ),
+					'status' => ActionScheduler_Store::STATUS_PENDING,
+				),
+				'ids'
+			),
+			"Product {$this->product_id} has a pending attribute lookup update."
+		);
 	}
 
 	/**

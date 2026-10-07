@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 ###################################################################################################
 # Import sample products and regenerate product lookup tables
 ###################################################################################################
@@ -25,6 +27,19 @@ hoodie_product_id=$(wp post list --post_type=product --field=ID --name="Hoodie" 
 image1=$(wp post list --post_type=attachment --field=ID --name="hoodie-with-logo-2.jpg" --format=ids)
 image2=$(wp post list --post_type=attachment --field=ID --name="hoodie-green-1.jpg" --format=ids)
 image3=$(wp post list --post_type=attachment --field=ID --name="hoodie-2.jpg" --format=ids)
+
+# The sample data pulls its images from a remote host, so the import can lose an
+# attachment while still exiting 0. A missing attachment resolves to an empty
+# string here, not an error, and `set -u` does not catch it because the variable
+# is set, just empty. Without this check the next line writes a `,,` gallery and
+# exits 0, and the gallery specs fail with no trace back to the import.
+for image_id in "$image1" "$image2" "$image3"; do
+	[ -n "$image_id" ] || {
+		echo "Missing gallery attachment; the sample-data image import did not complete." >&2
+		exit 1
+	}
+done
+
 wp post meta update $hoodie_product_id _product_image_gallery "$image1,$image2,$image3"
 
 # Create a tag, so we can add tests for tag-related blocks and templates.

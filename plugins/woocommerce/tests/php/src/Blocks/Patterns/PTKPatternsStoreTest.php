@@ -174,9 +174,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fetching patterns is scheduled when tracking is allowed.
+	 * @testdox Old fetch jobs are canceled when tracking is allowed.
 	 */
-	public function test_fetching_patterns_is_schedule_when_tracking_is_allowed() {
+	public function test_fetching_patterns_is_not_scheduled_when_tracking_is_allowed() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
@@ -194,10 +194,11 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			),
 		);
 		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns );
+		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
 
 		$this->pattern_store->flush_or_fetch_patterns();
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ) );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Old fetch jobs should be canceled' );
 	}
 
 	/**
@@ -434,14 +435,15 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ensure_recurring_fetch_patterns_if_enabled schedules recurring action when tracking is enabled.
+	 * @testdox The recurring action hook cancels old fetch jobs.
 	 */
-	public function test_ensure_recurring_fetch_patterns_schedules_recurring_action_when_tracking_enabled() {
+	public function test_ensure_recurring_fetch_patterns_cancels_old_actions() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'fetch_patterns', array(), 'woocommerce' );
 
 		$this->pattern_store->ensure_recurring_fetch_patterns_if_enabled();
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'fetch_patterns action should be scheduled' );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Old fetch jobs should be canceled' );
 	}
 
 	/**

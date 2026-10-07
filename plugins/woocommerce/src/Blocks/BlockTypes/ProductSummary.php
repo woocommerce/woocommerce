@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -200,7 +201,12 @@ class ProductSummary extends AbstractBlock {
 		}
 
 		$show_description_if_empty = isset( $attributes['showDescriptionIfEmpty'] ) && $attributes['showDescriptionIfEmpty'];
-		$source                    = $this->get_source( $product, $show_description_if_empty );
+		$source                    = ProductDescriptionUtils::guarded_format(
+			$product,
+			function () use ( $product, $show_description_if_empty ) {
+				return $this->get_source( $product, $show_description_if_empty );
+			}
+		);
 
 		if ( ! $source ) {
 			return '';

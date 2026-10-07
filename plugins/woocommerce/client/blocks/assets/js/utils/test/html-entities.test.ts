@@ -207,7 +207,9 @@ describe( 'decodeHtmlEntities', () => {
 				'&amp;&lt;&gt;&quot;&apos;&copy;&reg;&trade;&pound;&euro;&yen;';
 			const result = decodeHtmlEntities( complexString );
 			// Some browsers might handle &apos; differently
-			expect( [ '&<>"\'©®™£€¥', '&<>"\'©®™£€¥' ] ).toContain( result );
+			expect( [ '&<>"\'©®™£€¥', '&<>"\'©®™£€¥' ] ).toContain(
+				result
+			);
 		} );
 
 		it( 'handles unusual but valid entity formats', () => {

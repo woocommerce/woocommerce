@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -477,6 +478,9 @@ class OrderSchema extends AbstractSchema {
 				'description' => __( 'A list of line items (products) within this order.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'arg_options' => array(
+					'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+				),
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => $this->order_item_schema->get_item_schema_properties(),
@@ -496,6 +500,9 @@ class OrderSchema extends AbstractSchema {
 				'description' => __( 'Shipping lines data.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'arg_options' => array(
+					'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+				),
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => $this->order_shipping_schema->get_item_schema_properties(),
@@ -505,6 +512,9 @@ class OrderSchema extends AbstractSchema {
 				'description' => __( 'Fee lines data.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'arg_options' => array(
+					'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+				),
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => $this->order_fee_schema->get_item_schema_properties(),

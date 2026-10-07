@@ -8,11 +8,14 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 
 /**
  * Class StockNotificationsDataStoreTests.
  */
 class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The data store instance.
@@ -26,6 +29,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->data_store = wc_get_container()->get( StockNotificationsDataStore::class );
 	}
 
@@ -33,11 +37,12 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		// Clean up all notifications.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
+		parent::tearDown();
 	}
 
 	/**
@@ -71,7 +76,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		// Verify all properties were saved correctly.
-		$this->assertEquals( 1, $notification->get_id() );
+		$this->assertGreaterThan( 0, $notification->get_id() );
 		$this->assertEquals( 1, $notification->get_product_id() );
 		$this->assertEquals( 1, $notification->get_user_id() );
 		$this->assertEquals( 'test@test.com', $notification->get_user_email() );
@@ -125,7 +130,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->set_user_id( 1 );
 		$notification->save();
 
-		$this->assertEquals( 1, $notification->get_id() );
+		$this->assertGreaterThan( 0, $notification->get_id() );
 		$this->assertEquals( 1, $notification->get_product_id() );
 		$this->assertEquals( 1, $notification->get_user_id() );
 		$this->assertEquals( null, $notification->get_user_email() );
@@ -533,8 +538,8 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 2, $notifications );
-		$this->assertEquals( 2, $notifications[0] );
-		$this->assertEquals( 3, $notifications[1] );
+		$this->assertEquals( $notification_2->get_id(), $notifications[0] );
+		$this->assertEquals( $notification_3->get_id(), $notifications[1] );
 	}
 
 	/**
@@ -579,7 +584,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $notifications );
-		$this->assertEquals( 1, $notifications[0] );
+		$this->assertEquals( $notification->get_id(), $notifications[0] );
 
 		// Check the return type is ids.
 		$notifications = $this->data_store->query(
@@ -590,7 +595,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertCount( 1, $notifications );
-		$this->assertEquals( 1, $notifications[0] );
+		$this->assertEquals( $notification->get_id(), $notifications[0] );
 	}
 
 	/**
@@ -616,5 +621,34 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $notifications );
 		$this->assertInstanceOf( Notification::class, $notifications[0] );
 		$this->assertEquals( 'test@test.com', $notifications[0]->get_user_email() );
+	}
+
+	/**
+	 * @testdox notification_exists_by_email() should match a stored lowercase row from mixed-case input.
+	 */
+	public function test_notification_exists_by_email_is_case_insensitive(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'foo@bar.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, 'FOO@bar.com' ) );
+		$this->assertTrue( $this->data_store->notification_exists_by_email( 1, ' Foo@Bar.COM ' ) );
+		$this->assertFalse( $this->data_store->notification_exists_by_email( 1, 'other@bar.com' ) );
+	}
+
+	/**
+	 * @testdox query() should match an email containing a single quote.
+	 */
+	public function test_query_notifications_with_quoted_user_email(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( "o'brien@example.com" );
+		$notification->save();
+
+		$notifications = $this->data_store->query( array( 'user_email' => "O'Brien@Example.com" ) );
+
+		$this->assertSame( array( $notification->get_id() ), array_map( 'intval', $notifications ) );
 	}
 }

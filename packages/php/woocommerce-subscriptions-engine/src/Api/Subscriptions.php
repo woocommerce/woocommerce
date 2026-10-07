@@ -54,19 +54,61 @@ final class Subscriptions {
 	}
 
 	/**
-	 * List the most-recent subscription contracts, newest first.
+	 * List subscription contracts for an admin list screen - newest first by default, or
+	 * filtered / sorted / paged / searched via a WooCommerce-style args array (cf.
+	 * `wc_get_orders()`). The status + search filter matches {@see self::count()}, so a page
+	 * and its total describe the same set.
 	 *
-	 * @param int $limit  Maximum contracts to return.
-	 * @param int $offset Contracts to skip (for paging).
-	 * @return array<int, Contract> Contracts newest first.
+	 * @param array<string, mixed> $args {
+	 *     Optional. Query args.
+	 *
+	 *     @type int    $limit   Maximum contracts to return. Default 20.
+	 *     @type int    $offset  Contracts to skip (for paging). Default 0.
+	 *     @type string $status  Filter to one status ({@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}); ignored when empty or invalid.
+	 *     @type string $orderby One of id, next_payment, total, start; default id.
+	 *     @type string $order   ASC or DESC (case-insensitive); default DESC.
+	 *     @type string $search  Numeric term matches contract id or origin order id; text term matches the owning customer.
+	 * }
+	 * @return array<int, Contract> Contracts in the requested order.
 	 */
-	public static function list( int $limit = 20, int $offset = 0 ): array {
-		return ( new ContractRepository() )->query(
-			array(
-				'limit'  => $limit,
-				'offset' => $offset,
-			)
-		);
+	public static function list( array $args = array() ): array {
+		return ( new ContractRepository() )->query( $args );
+	}
+
+	/**
+	 * The contract count per status - the read behind an admin list's status views bar.
+	 * Keyed by every {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus} value (absent statuses are 0); the `All` total
+	 * is the caller's `array_sum()`. Independent of any search or paging.
+	 *
+	 * @return array<string, int> Status => count, every known status present.
+	 */
+	public static function count_by_status(): array {
+		return ( new ContractRepository() )->count_by_status();
+	}
+
+	/**
+	 * The number of contracts matching a list filter - the total behind a list view's
+	 * pagination. Honours the SAME status + search args as {@see self::list()} and ignores
+	 * paging / sort.
+	 *
+	 * @param array<string, mixed> $args Query args (only `status` and `search` are read).
+	 * @return int The matching contract count.
+	 */
+	public static function count( array $args = array() ): int {
+		return ( new ContractRepository() )->count( $args );
+	}
+
+	/**
+	 * The line-item count for a page of contracts - the read behind an admin list's
+	 * "Items" column. One grouped scan over the given ids, returned as a map keyed by
+	 * every requested id (ids with no items are 0), so a list renders an items count
+	 * per row without a per-row query. Ids are de-duplicated and int-cast.
+	 *
+	 * @param array<int, int> $contract_ids Contract ids to count items for.
+	 * @return array<int, int> Contract id => line-item count, one entry per requested id.
+	 */
+	public static function item_counts( array $contract_ids ): array {
+		return ( new ContractRepository() )->count_items_by_contract( $contract_ids );
 	}
 
 	/**

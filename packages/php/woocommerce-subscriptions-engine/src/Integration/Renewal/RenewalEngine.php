@@ -31,6 +31,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use InvalidArgumentException;
 use Throwable;
 use WC_Order;
 use WC_Order_Item_Product;
@@ -45,6 +46,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -375,9 +377,7 @@ final class RenewalEngine {
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
 	 */
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
-		// The full contract reads already carry the snapshot; the store fetch is the
-		// fallback for a contract built on a lean path (row-only reads).
-		$snapshot = $contract->get_plan_snapshot() ?? $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
+		$snapshot = $this->resolve_plan_snapshot( $contract );
 		if ( $snapshot instanceof PlanSnapshot ) {
 			$payload = $snapshot->to_array();
 			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
@@ -399,6 +399,66 @@ final class RenewalEngine {
 
 		$plan = $this->plans->find( $contract->get_selling_plan_id() );
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+	}
+
+	/**
+	 * Resolve the pricing policy the next cycle bills under - snapshot first, live
+	 * plan fallback, the same resolution order as {@see self::resolve_billing_policy()}.
+	 *
+	 * The snapshot's explicit `pricing_policy => null` means the frozen terms carry
+	 * no price adjustments, and is honored as null (a plan edited to gain a discount
+	 * after signup does not retroactively change the contract's terms). A snapshot
+	 * with NO `pricing_policy` key predates the key (or the contract has no
+	 * snapshot at all): those fall back to the live selling plan, as does an
+	 * unreadable stored policy. A null resolution means "no adjustments" - it never
+	 * blocks the renewal.
+	 *
+	 * @param Contract $contract The contract being renewed.
+	 * @return PricingPolicy|null The pricing policy, or null when none applies.
+	 */
+	private function resolve_pricing_policy( Contract $contract ): ?PricingPolicy {
+		$snapshot = $this->resolve_plan_snapshot( $contract );
+		if ( $snapshot instanceof PlanSnapshot ) {
+			$payload = $snapshot->to_array();
+			if ( array_key_exists( 'pricing_policy', $payload ) ) {
+				$stored = $payload['pricing_policy'];
+				if ( null === $stored ) {
+					// The frozen terms explicitly carry no pricing policy.
+					return null;
+				}
+				if ( is_array( $stored ) ) {
+					try {
+						return PricingPolicy::from_array( self::string_keyed( $stored ) );
+					} catch ( InvalidArgumentException $e ) {
+						// A corrupt stored policy must not crash the scheduled run; fall through
+						// to the live plan below so the renewal still resolves on current terms.
+						wc_get_logger()->warning(
+							sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot pricing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+							array(
+								'source'      => self::LOG_SOURCE,
+								'contract_id' => (int) $contract->get_id(),
+							)
+						);
+					}
+				}
+			}
+		}
+
+		$plan = $this->plans->find( $contract->get_selling_plan_id() );
+		return $plan instanceof Plan ? $plan->get_pricing_policy() : null;
+	}
+
+	/**
+	 * The contract's plan snapshot - the frozen terms the policy resolvers read.
+	 *
+	 * The full contract reads already carry the snapshot; the store fetch is the
+	 * fallback for a contract built on a lean path (row-only reads). Null when the
+	 * contract carries no snapshot at all.
+	 *
+	 * @param Contract $contract The contract being renewed.
+	 */
+	private function resolve_plan_snapshot( Contract $contract ): ?PlanSnapshot {
+		return $contract->get_plan_snapshot() ?? $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
 	}
 
 	/**
@@ -789,6 +849,14 @@ final class RenewalEngine {
 	 * renewal relation meta (contract id + chargeable number) so charge observers and the
 	 * order-to-cycle mapping can find it.
 	 *
+	 * BOGO materialization: when the contract's pricing policy grants bonus units for this
+	 * cycle ({@see PricingPolicy::calculate_bonus_quantity()}), each line's quantity is
+	 * raised to paid + bonus while its stored subtotal/total strings - and the cycle's
+	 * `expected_total`, applied below as the price authority - stay untouched: the benefit
+	 * is in-kind, never a price change. Renewal orders only: the ORIGIN order (cycle 1) is
+	 * built by the consumer's checkout, so first-cycle BOGO materialization on the initial
+	 * order is the consumer's job, not the engine's.
+	 *
 	 * Created draft-first: the order starts as `checkout-draft`, is linked onto the claimed
 	 * cycle (`order_id`), and only then becomes `pending`. A crash mid-way therefore leaves
 	 * either a linked draft the resume path promotes, or an unlinked draft that fires no emails
@@ -843,6 +911,11 @@ final class RenewalEngine {
 			$renewal_order->set_shipping_address( $addresses['shipping'] );
 		}
 
+		// The pricing policy the cycle bills under (frozen snapshot first, live plan
+		// fallback), for in-kind BOGO bonus units. Null resolves to "no bonus" - a
+		// missing policy never skips a renewal.
+		$pricing_policy = $this->resolve_pricing_policy( $contract );
+
 		// Only the contract's recurring line items - the origin order's one-time cart items are
 		// deliberately excluded so a mixed checkout cannot leak onto a renewal. A line for a
 		// since-deleted product makes WC_Order_Item_Product::set_product_id() throw; treat the
@@ -850,11 +923,24 @@ final class RenewalEngine {
 		// as a permanent failure that retries forever.
 		try {
 			foreach ( $contract->get_items() as $item ) {
+				$paid_quantity = max( 1, self::item_int( $item, 'quantity' ) );
+				$quantity      = $paid_quantity;
+				if ( null !== $pricing_policy ) {
+					// The quantity bump lands while the line is built, BEFORE add_item();
+					// set_total( $expected_total ) below stays the price authority, which
+					// BOGO never moves (money-neutral: the stored subtotal/total strings
+					// keep pricing the paid units only).
+					$bonus = $pricing_policy->calculate_bonus_quantity( (float) $paid_quantity, $count );
+					if ( $bonus > 0 ) {
+						$quantity = $paid_quantity + (int) round( $bonus );
+					}
+				}
+
 				$line = new WC_Order_Item_Product();
 				$line->set_name( self::item_string( $item, 'item_name' ) );
 				$line->set_product_id( self::item_int( $item, 'product_id' ) );
 				$line->set_variation_id( self::item_int( $item, 'variation_id' ) );
-				$line->set_quantity( max( 1, self::item_int( $item, 'quantity' ) ) );
+				$line->set_quantity( $quantity );
 				$line->set_subtotal( self::item_string( $item, 'subtotal' ) );
 				$line->set_total( self::item_string( $item, 'total' ) );
 				$renewal_order->add_item( $line );

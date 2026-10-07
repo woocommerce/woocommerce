@@ -17,6 +17,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -226,6 +228,87 @@ class ContractFactoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( '49.00000000', $cycle->get_expected_total() );
 		$this->assertSame( '2026-12-01 00:00:00', $cycle->get_ends_at_gmt() );
+	}
+
+	/**
+	 * @testdox The origin cycle's plan snapshot freezes the pricing policy.
+	 */
+	public function test_plan_snapshot_round_trips_the_pricing_policy(): void {
+		$plan = Plan::create(
+			array(
+				'name'           => 'Discounted monthly',
+				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
+				'pricing_policy' => PricingPolicy::from_array(
+					array(
+						'policies' => array(
+							array(
+								'type'            => 'bogo',
+								'duration_cycles' => 1,
+							),
+							array(
+								'type'  => 'percentage',
+								'value' => 10,
+							),
+						),
+					)
+				),
+				'category'       => Plan::DEFAULT_CATEGORY,
+				'extension_slug' => 'lite',
+			)
+		);
+		( new PlanRepository() )->insert( $plan );
+
+		$contract    = ( new ContractFactory() )->create_from_order( $this->make_order(), $plan );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+
+		$snapshot = $repo->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
+
+		// The stored payload carries the frozen pricing policy.
+		$payload = $snapshot->to_array();
+		$this->assertArrayHasKey( 'pricing_policy', $payload );
+		$this->assertIsArray( $payload['pricing_policy'] );
+
+		// The typed accessor reconstructs the frozen terms: bogo (first cycle only,
+		// value normalized to 0.0) plus the percentage entry, intact after the
+		// snapshot's DB round-trip.
+		$pricing = $snapshot->get_pricing_policy();
+		$this->assertInstanceOf( PricingPolicy::class, $pricing );
+		$policies = $pricing->get_policies();
+		$this->assertCount( 2, $policies );
+		$this->assertSame( 'bogo', $policies[0]['type'] );
+		$this->assertSame( 0.0, $policies[0]['value'] );
+		$this->assertSame( 1, $policies[0]['duration_cycles'] ?? null );
+		$this->assertSame( 'percentage', $policies[1]['type'] );
+		$this->assertSame( 10.0, $policies[1]['value'] );
+	}
+
+	/**
+	 * @testdox The plan snapshot records an explicit null when the plan has no pricing policy.
+	 */
+	public function test_plan_snapshot_is_null_safe_without_a_pricing_policy(): void {
+		$contract    = ( new ContractFactory() )->create_from_order( $this->make_order(), $this->make_plan() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo  = new ContractRepository();
+		$cycle = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $cycle );
+
+		$snapshot = $repo->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
+
+		// Explicit null (not a missing key): the frozen terms deliberately record
+		// "no pricing policy at signup", distinguishable from a pre-key snapshot.
+		$payload = $snapshot->to_array();
+		$this->assertArrayHasKey( 'pricing_policy', $payload );
+		$this->assertNull( $payload['pricing_policy'] );
+		$this->assertNull( $snapshot->get_pricing_policy() );
 	}
 
 	/**

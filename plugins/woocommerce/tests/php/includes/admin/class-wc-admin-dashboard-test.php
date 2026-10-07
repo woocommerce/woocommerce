@@ -1,6 +1,12 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Tests for the WC_Admin_Dashboard class.
  *
@@ -11,6 +17,24 @@ declare( strict_types = 1 );
  * WC_Admin_Dashboard_Test
  */
 class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure the HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
 
 	/**
 	 * The system under test.
@@ -56,6 +80,8 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_option_woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_hidden' );
 		delete_option( 'woocommerce_enable_reviews' );
+		delete_transient( 'wc_low_stock_count' );
+		delete_transient( 'wc_outofstock_count' );
 
 		parent::tearDown();
 	}
@@ -70,6 +96,25 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		$method = new ReflectionMethod( WC_Admin_Dashboard::class, 'should_display_widget' );
 		$method->setAccessible( true );
 		return $method->invoke( $dashboard );
+	}
+
+	/**
+	 * Invoke the private status_widget_stock_rows method and return its output.
+	 *
+	 * @return string
+	 */
+	private function capture_status_widget_stock_rows(): string {
+		delete_transient( 'wc_low_stock_count' );
+		delete_transient( 'wc_outofstock_count' );
+
+		$method = new ReflectionMethod( WC_Admin_Dashboard::class, 'status_widget_stock_rows' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->sut, '', '' );
+		$html = ob_get_clean();
+
+		return false === $html ? '' : $html;
 	}
 
 	/**
@@ -260,6 +305,77 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Status widget out-of-stock count includes unmanaged out-of-stock products.
+	 */
+	public function test_status_widget_out_of_stock_count_includes_unmanaged_out_of_stock_products(): void {
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock' => false,
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+
+		$html = $this->capture_status_widget_stock_rows();
+
+		$this->assertStringContainsString( 'Out of stock <strong>1 product</strong>', $html );
+	}
+
+	/**
+	 * @testdox Status widget out-of-stock count includes managed products with no stock.
+	 */
+	public function test_status_widget_out_of_stock_count_includes_managed_products_with_no_stock(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+			)
+		);
+
+		$html = $this->capture_status_widget_stock_rows();
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status( 'edit' ) );
+		$this->assertStringContainsString( 'Out of stock <strong>1 product</strong>', $html );
+	}
+
+	/**
+	 * @testdox Status widget out-of-stock count excludes managed products on backorder.
+	 */
+	public function test_status_widget_out_of_stock_count_excludes_managed_products_on_backorder(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+				'backorders'     => 'yes',
+			)
+		);
+
+		$html = $this->capture_status_widget_stock_rows();
+
+		$this->assertSame( ProductStockStatus::ON_BACKORDER, $product->get_stock_status( 'edit' ) );
+		$this->assertStringContainsString( 'Out of stock <strong>0 products</strong>', $html );
+	}
+
+	/**
+	 * @testdox Status widget out-of-stock count excludes unmanaged in-stock products.
+	 */
+	public function test_status_widget_out_of_stock_count_excludes_unmanaged_in_stock_products(): void {
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock' => false,
+				'stock_status' => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$html = $this->capture_status_widget_stock_rows();
+
+		$this->assertStringContainsString( 'Out of stock <strong>0 products</strong>', $html );
+	}
+
+	/**
 	 * @testdox Status widget order rows render labels before counts.
 	 */
 	public function test_status_widget_order_rows_render_labels_before_counts(): void {
@@ -272,6 +388,75 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Awaiting processing <strong>0 orders</strong>', $html );
 		$this->assertStringContainsString( 'On-hold <strong>0 orders</strong>', $html );
+	}
+
+	/**
+	 * @testdox The top-seller title is escaped without removing dashboard markup under legacy and HPOS storage.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_status_widget_escapes_top_seller_title_for_each_order_storage( bool $hpos_enabled ): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$product = null;
+		$order   = null;
+
+		$reports_filter = static function ( array $reports ): array {
+			$reports['get_sales_sparkline'] = static fn() => array(
+				'total' => 0,
+				'data'  => array(),
+			);
+
+			return $reports;
+		};
+
+		try {
+			$this->toggle_cot_authoritative( $hpos_enabled );
+
+			$product = WC_Helper_Product::create_simple_product();
+			$order   = wc_create_order();
+			$order->add_product( $product, 2 );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+
+			$title_filter = static function ( string $title, int $post_id ) use ( $product ) {
+				return $product->get_id() === $post_id ? 'Unsafe <script>alert("dashboard")</script> & title' : $title;
+			};
+
+			add_filter( 'woocommerce_admin_disabled', '__return_true' );
+			add_filter( 'woocommerce_dashboard_status_widget_reports', $reports_filter );
+			add_filter( 'the_title', $title_filter, 10, 2 );
+
+			ob_start();
+			$this->sut->status_widget_content();
+			$html = ob_get_clean();
+
+			$this->assertStringContainsString( '<strong>Unsafe &lt;script&gt;alert(&quot;dashboard&quot;)&lt;/script&gt; &amp; title</strong> (2 sales)', $html );
+			$this->assertStringNotContainsString( '<script>', $html );
+		} finally {
+			remove_filter( 'woocommerce_admin_disabled', '__return_true' );
+			remove_filter( 'woocommerce_dashboard_status_widget_reports', $reports_filter );
+			if ( isset( $title_filter ) ) {
+				remove_filter( 'the_title', $title_filter, 10 );
+			}
+			if ( $order instanceof WC_Order ) {
+				$order->delete( true );
+			}
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				$this->toggle_cot_authoritative( $previous_hpos_state );
+			}
+			add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
 	}
 
 	/**

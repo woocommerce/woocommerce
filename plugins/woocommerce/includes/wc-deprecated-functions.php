@@ -90,7 +90,7 @@ function wc_deprecated_hook( $hook, $version, $replacement = null, $message = nu
  * When catching an exception, this allows us to log it if unexpected.
  *
  * @since 3.3.0
- * @param Exception $exception_object The exception object.
+ * @param Throwable $exception_object The exception (or error) object.
  * @param string    $function The function which threw exception.
  * @param array     $args The args passed to the function.
  * @return void

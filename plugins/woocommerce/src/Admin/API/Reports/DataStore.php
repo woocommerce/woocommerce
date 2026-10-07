@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Common parent for custom report data stores.
@@ -97,6 +98,18 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * @var string
 	 */
 	protected $date_column_name = 'date_created';
+
+	/**
+	 * Allow-list a date column name before it is interpolated into SQL.
+	 *
+	 * @param string $column   Requested date column name.
+	 * @param string $fallback Column to use when the requested one is not allowed.
+	 * @return string
+	 */
+	protected function sanitize_date_column_name( $column, $fallback = 'date_created' ) {
+		$allowed = array( 'date_created', 'date_created_gmt', 'date_paid', 'date_completed' );
+		return in_array( $column, $allowed, true ) ? $column : $fallback;
+	}
 
 	/**
 	 * Mapping columns to data type to return correct response types.
@@ -830,9 +843,27 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * @return array
 	 */
 	protected static function get_excluded_report_order_statuses() {
-		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
-		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		$default_excluded_statuses = Settings::get_default_excluded_order_statuses();
+		$excluded_statuses         = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', $default_excluded_statuses );
+		$excluded_statuses         = Settings::get_valid_order_statuses_or_default( $excluded_statuses, $default_excluded_statuses );
+		$excluded_statuses         = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+
+		// Keep the value a broken filter would otherwise replace, so the merchant's saved
+		// selection survives it.
+		$pre_filter_statuses = $excluded_statuses;
+
+		/**
+		 * Filter the list of excluded order statuses for customer history and analytics reports.
+		 *
+		 * @since 4.0.0
+		 * @param array $excluded_statuses Order statuses to exclude.
+		 */
+		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		if ( ! is_array( $excluded_statuses ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_excluded_order_statuses filter must return an array.', '11.2.0' );
+			$excluded_statuses = $pre_filter_statuses;
+		}
+		return $excluded_statuses;
 	}
 
 	/**
@@ -843,7 +874,9 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 */
 	protected static function normalize_order_status( $status ) {
 		$status = trim( $status );
-		return 'wc-' . $status;
+		// Status columns are varchar(20) and longer values are silently truncated
+		// on write, so truncate the same way or comparisons never match long slugs.
+		return mb_substr( 'wc-' . $status, 0, 20 );
 	}
 
 	/**
@@ -1007,10 +1040,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Generates a virtual table given a list of IDs.
 	 *
-	 * @param array $ids          Array of IDs.
-	 * @param array $id_field     Name of the ID field.
-	 * @param array $other_values Other values that must be contained in the virtual table.
-	 * @return array
+	 * @param array  $ids          Array of IDs.
+	 * @param string $id_field     Name of the ID field.
+	 * @param array  $other_values Other values that must be contained in the virtual table.
+	 * @return string
 	 */
 	protected function get_ids_table( $ids, $id_field, $other_values = array() ) {
 		global $wpdb;
@@ -1215,6 +1248,12 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 				if ( 'AND' === $operator ) {
 					// AND results in an intersection between products from selected categories and manually included products.
 					$included_products = array_intersect( $included_products, $query_args['product_includes'] );
+
+					// Force an empty set the same way an empty category does. Callers cannot tell an
+					// empty list apart from an absent product filter, and would drop both filters.
+					if ( empty( $included_products ) ) {
+						$included_products = array( '-1' );
+					}
 				} elseif ( 'OR' === $operator ) {
 					// OR results in a union of products from selected categories and manually included products.
 					$included_products = array_merge( $included_products, $query_args['product_includes'] );
@@ -1374,7 +1413,9 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		$subqueries        = array();
 		$excluded_statuses = array();
 		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
-			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), esc_sql( $query_args['status_is'] ) );
+			// Escape after normalizing: truncation could otherwise cut an escape
+			// sequence in half and leave a dangling backslash in the SQL literal.
+			$allowed_statuses = array_map( 'esc_sql', array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] ) );
 			if ( $allowed_statuses ) {
 				$subqueries[] = "{$wpdb->prefix}wc_order_stats.status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
 			}
@@ -1391,7 +1432,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		}
 
 		if ( $excluded_statuses ) {
-			$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", $excluded_statuses ) . "' )";
+			$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", array_map( 'esc_sql', $excluded_statuses ) ) . "' )";
 		}
 
 		return implode( " $operator ", $subqueries );

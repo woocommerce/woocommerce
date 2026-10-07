@@ -187,7 +187,8 @@ const wcPages = [
 ];
 
 const product = getFakeProduct();
-let orderId: number;
+let productId: number | undefined;
+let orderId: number | undefined;
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -202,104 +203,90 @@ test.beforeAll( async ( { restApi } ) => {
 
 	expect( response.status ).toEqual( 200 );
 
-	// create a simple product
-	await restApi
-		.post( `${ WC_API_PATH }/products`, product )
-		.then( ( r ) => {
-			product.id = r.data.id;
-		} )
-		.catch( ( e ) => {
-			console.error(
-				`Failed to create product ${
-					e.data ? JSON.stringify( e.data ) : ''
-				}`
-			);
-			throw e;
-		} );
+	const productResponse = await restApi.post(
+		`${ WC_API_PATH }/products`,
+		product
+	);
+	const createdProductId: number = productResponse.data.id;
+	productId = createdProductId;
 
-	// create an order
-	await restApi
-		.post( `${ WC_API_PATH }/orders`, {
-			line_items: [
-				{
-					product_id: product.id,
-					quantity: 1,
-				},
-			],
-		} )
-		.then( ( r ) => {
-			orderId = r.data.id;
-		} )
-		.catch( ( e ) => {
-			console.error(
-				`Failed to create order ${
-					e.data ? JSON.stringify( e.data ) : ''
-				}`
-			);
-			throw e;
-		} );
+	const orderResponse = await restApi.post( `${ WC_API_PATH }/orders`, {
+		line_items: [
+			{
+				product_id: createdProductId,
+				quantity: 1,
+			},
+		],
+	} );
+	orderId = orderResponse.data.id;
 } );
 
 test.afterAll( async ( { restApi } ) => {
-	await restApi
-		.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
-			force: true,
-		} )
-		.catch( ( e ) => {
-			console.error(
-				`Failed to delete order ${
-					e.data ? JSON.stringify( e.data ) : ''
-				}`
-			);
-			throw e;
-		} );
-	await restApi
-		.delete( `${ WC_API_PATH }/products/${ product.id }`, {
-			force: true,
-		} )
-		.catch( ( e ) => {
-			console.error(
-				`Failed to delete product ${
-					e.data ? JSON.stringify( e.data ) : ''
-				}`
-			);
-			throw e;
-		} );
+	const cleanupErrors: unknown[] = [];
+
+	if ( orderId !== undefined ) {
+		try {
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
+		} catch ( error ) {
+			cleanupErrors.push( error );
+		}
+	}
+
+	if ( productId !== undefined ) {
+		try {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
+				force: true,
+			} );
+		} catch ( error ) {
+			cleanupErrors.push( error );
+		}
+	}
+
+	if ( cleanupErrors.length > 0 ) {
+		throw new AggregateError(
+			cleanupErrors,
+			'Failed to clean up page-load test fixtures.'
+		);
+	}
 } );
 
 for ( const currentPage of wcPages ) {
-	for ( let i = 0; i < currentPage.subpages.length; i++ ) {
-		test( `can load ${ currentPage.name } > ${ currentPage.subpages[ i ].name } page`, async ( {
-			page,
-		} ) => {
-			await page.goto( currentPage.url );
+	test( `can load ${ currentPage.name } pages`, async ( { page } ) => {
+		await page.goto( currentPage.url );
 
-			// needs a Regexp on link name to match exact text and also match the possible counter
-			// E.g. should match "Orders 3" or "Orders", but should not match "Quick Orders"
-			await page
-				.locator( 'li.wp-menu-open > ul.wp-submenu' )
-				.getByRole( 'link', {
-					name: new RegExp(
-						`^${ currentPage.subpages[ i ].name }( \\d+)?$`
-					),
-				} )
-				.click();
+		for ( const currentSubpage of currentPage.subpages ) {
+			await test.step( currentSubpage.name, async () => {
+				// needs a Regexp on link name to match exact text and also match the possible counter
+				// E.g. should match "Orders 3" or "Orders", but should not match "Quick Orders"
+				const subpageLink = page
+					.locator( 'li.wp-menu-open > ul.wp-submenu' )
+					.getByRole( 'link', {
+						name: new RegExp(
+							`^${ currentSubpage.name }( \\d+)?$`
+						),
+					} );
 
-			await expect(
-				page
-					.getByRole( 'heading', {
-						name: currentPage.subpages[ i ].heading,
-					} )
-					.first()
-			).toBeVisible();
+				await expect( subpageLink ).toBeVisible();
+				await subpageLink.click();
 
-			await expect(
-				page.locator( currentPage.subpages[ i ].element ).first()
-			).toBeVisible();
+				await expect(
+					page
+						.getByRole( 'heading', {
+							name: currentSubpage.heading,
+						} )
+						.first()
+				).toBeVisible();
 
-			await expect(
-				page.locator( currentPage.subpages[ i ].element )
-			).toContainText( currentPage.subpages[ i ].text );
-		} );
-	}
+				await expect(
+					page.locator( currentSubpage.element ).first()
+				).toBeVisible();
+
+				await expect(
+					page.locator( currentSubpage.element )
+				).toContainText( currentSubpage.text );
+			} );
+		}
+	} );
 }

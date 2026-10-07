@@ -6,10 +6,28 @@ use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
+require_once WC_ABSPATH . '/includes/class-wc-brands.php';
+
 /**
  * Tests related to Counts service.
  */
 class FilterDataTest extends AbstractProductFiltersTest {
+	/**
+	 * This class only reads its product catalog inside per-test transactions.
+	 */
+	protected static function uses_class_product_filter_fixtures(): bool {
+		return true;
+	}
+
+	/**
+	 * Add product reviews used by the filter-count assertions.
+	 */
+	protected function set_up_additional_class_product_filter_fixtures(): void {
+		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
+		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
+		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
+	}
+
 	/**
 	 * The system under test.
 	 *
@@ -34,10 +52,6 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 		$this->sut                     = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
 		$this->taxonomy_hierarchy_data = $container->get( TaxonomyHierarchyData::class );
-
-		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
-		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
-		$this->fixture_data->add_product_review( $this->products[3]->get_id(), 5 );
 	}
 
 	/**
@@ -47,6 +61,42 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$this->test_get_filtered_price_with( $wp_query );
+	}
+
+	/**
+	 * @testdox Changing the taxonomy URL map cannot reuse filter-data or product-ID cache entries.
+	 */
+	public function test_taxonomy_param_map_changes_filter_data_cache_keys(): void {
+		\WC_Brands::init_taxonomy();
+		$this->clear_params_cache();
+
+		$brand = wp_insert_term( 'Cache key brand', 'product_brand' );
+		$this->assertIsArray( $brand );
+		wp_set_object_terms( $this->products[0]->get_id(), (int) $brand['term_id'], 'product_brand' );
+
+		$query_vars = array(
+			'post_type'   => 'product',
+			'product_cat' => 'cat-1',
+			'brands'      => get_term( (int) $brand['term_id'], 'product_brand' )->slug,
+		);
+		$key_method = new \ReflectionMethod( $this->sut, 'get_transient_key' );
+		$key_method->setAccessible( true );
+
+		$rename = static function ( array $params ): array {
+			$params['product_brand'] = 'wc_brands';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+
+		$renamed_key = $key_method->invoke( $this->sut, $query_vars, 'price' );
+		$unfiltered  = (array) $this->sut->get_filtered_price( $query_vars );
+
+		remove_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		$this->clear_params_cache();
+
+		$this->assertNotSame( $renamed_key, $key_method->invoke( $this->sut, $query_vars, 'price' ) );
+		$this->assertGreaterThan( 10, (float) $unfiltered['max_price'] );
+		$this->assertSame( 10.0, (float) $this->sut->get_filtered_price( $query_vars )['max_price'] );
 	}
 
 	/**
@@ -91,8 +141,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	 */
 	public function test_get_stock_status_counts_with_default_query_using_postmeta_table() {
 		global $wpdb;
-		// Truncate the lookup table to confirm that the underlying query is targeting the correct postmeta table.
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// Empty the lookup table to confirm that the underlying query is targeting the correct postmeta table.
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		update_option( 'woocommerce_product_lookup_table_is_generating', '1' );
 		$this->test_get_stock_status_counts_with( new \WP_Query( array( 'post_type' => 'product' ) ) );
@@ -118,6 +168,34 @@ class FilterDataTest extends AbstractProductFiltersTest {
 					}
 				}
 				return true;
+			}
+		);
+	}
+
+	/**
+	 * @testdox Rating taxonomy queries constrain sibling stock counts.
+	 */
+	public function test_get_stock_status_counts_with_rating_tax_query(): void {
+		$product_visibility_terms = wc_get_product_visibility_term_ids();
+		$wp_query                 = new \WP_Query(
+			array(
+				'post_type' => 'product',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'field'         => 'term_taxonomy_id',
+						'taxonomy'      => 'product_visibility',
+						'terms'         => array( $product_visibility_terms['rated-5'] ),
+						'rating_filter' => true,
+					),
+				),
+			)
+		);
+
+		$this->test_get_stock_status_counts_with(
+			$wp_query,
+			function ( $product_data ) {
+				return in_array( $product_data['name'], array( 'Product 1', 'Product 4' ), true );
 			}
 		);
 	}
@@ -206,10 +284,8 @@ class FilterDataTest extends AbstractProductFiltersTest {
 
 	/**
 	 * @testdox Test attribute count with query_type set to `and`.
-	 * @todo Remove this test once the issue with `and` query type is fixed in https://github.com/woocommerce/woocommerce/pull/44825.
 	 */
 	public function test_get_attribute_counts_with_query_type_and() {
-		$this->markTestSkipped( 'Skipping tests with query_type `and` because there is an issue with Filterer::filter_by_attribute_post_clauses that generate wrong clauses for `and`. We can fix the same issue in FilterClausesGenerator::add_attribute_clauses but doing so will make the attribute counts data doesnt match with current query. A fix for both methods is pending. See https://github.com/woocommerce/woocommerce/pull/44825.' );
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'filter_color', 'blue-slug,green-slug' );
 		$wp_query->set( 'query_type_color', 'and' );

@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Revert #65595 (product-create meta fast-path). Added and reverted within the 11.0 cycle, so no net user-facing change to document.

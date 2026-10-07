@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
 import {
+	getSelectedOrFirstRateId,
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
 } from '@woocommerce/base-utils';
@@ -37,6 +38,56 @@ const Packages = ( {
 	renderOption,
 	context = '',
 }: PackagesProps ): JSX.Element | null => {
+	const { selectShippingRate } = useShippingData();
+	// In the editor the cart store never changes (the thunk returns early), so the rate
+	// lists have to keep owning their selection or clicking a rate would do nothing.
+	const { isEditor } = useEditorContext();
+	// Attempt initialization once; failed rates remain unchecked so shoppers can retry them.
+	const initializedPackageIds = useRef< Set< string | number > >( new Set() );
+
+	// Initial selection is coordinated here because the rate lists render the store's
+	// selected rate rather than their own state, so they no longer choose one on mount.
+	// Running it from the parent also reaches packages whose list is not mounted, such
+	// as a consumer that renders them in collapsed panels.
+	useEffect( () => {
+		// The rate lists own their selection in the editor, so leave it to them.
+		if ( isEditor ) {
+			return;
+		}
+
+		const currentPackageIds = new Set(
+			packages.map( ( shippingPackage ) => shippingPackage.package_id )
+		);
+
+		initializedPackageIds.current.forEach( ( packageId ) => {
+			if ( ! currentPackageIds.has( packageId ) ) {
+				initializedPackageIds.current.delete( packageId );
+			}
+		} );
+
+		packages.forEach( ( shippingPackage ) => {
+			const rateId = getSelectedOrFirstRateId(
+				shippingPackage.shipping_rates
+			);
+
+			if ( ! rateId ) {
+				initializedPackageIds.current.delete(
+					shippingPackage.package_id
+				);
+				return;
+			}
+
+			if (
+				initializedPackageIds.current.has( shippingPackage.package_id )
+			) {
+				return;
+			}
+
+			initializedPackageIds.current.add( shippingPackage.package_id );
+			selectShippingRate( rateId, shippingPackage.package_id );
+		} );
+	}, [ packages, selectShippingRate, isEditor ] );
+
 	// If there are no packages, return nothing.
 	if ( ! packages.length ) {
 		return null;
@@ -53,6 +104,7 @@ const Packages = ( {
 					showItems={ showItems }
 					noResultsMessage={ noResultsMessage }
 					renderOption={ renderOption }
+					manageSelectionLocally={ isEditor }
 				/>
 			) ) }
 		</>
