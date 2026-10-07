@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent stray page output from corrupting file downloads when another plugin or host holds it in an output buffer.
