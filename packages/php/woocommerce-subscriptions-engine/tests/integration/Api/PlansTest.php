@@ -47,7 +47,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		return Plans::create(
 			array_merge(
 				array(
-					'owner'          => self::OWNER,
+					'extension_slug' => self::OWNER,
 					'name'           => 'Monthly',
 					'billing_policy' => array(
 						'period'   => 'month',
@@ -106,8 +106,8 @@ class PlansTest extends EngineIntegrationTestCase {
 		$plan = $this->stored(
 			Plans::create(
 				array(
-					'owner' => self::OWNER,
-					'name'  => 'Bare',
+					'extension_slug' => self::OWNER,
+					'name'           => 'Bare',
 				)
 			)
 		);
@@ -133,11 +133,10 @@ class PlansTest extends EngineIntegrationTestCase {
 			'empty name'          => array( array( 'name' => '' ) ),
 			'whitespace name'     => array( array( 'name' => '   ' ) ),
 			'non-string name'     => array( array( 'name' => 12 ) ),
-			'unknown key'         => array( array( 'sort_order' => 1 ) ),
 			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
 			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ) ),
-			'missing owner'       => array( array( 'owner' => null ) ),
-			'empty owner'         => array( array( 'owner' => '' ) ),
+			'missing slug'        => array( array( 'extension_slug' => null ) ),
+			'empty slug'          => array( array( 'extension_slug' => '' ) ),
 		);
 	}
 
@@ -162,7 +161,25 @@ class PlansTest extends EngineIntegrationTestCase {
 	public function test_create_requires_a_name(): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		Plans::create( array( 'owner' => self::OWNER ) );
+		Plans::create( array( 'extension_slug' => self::OWNER ) );
+	}
+
+	public function test_an_unknown_create_key_is_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Plans::class . '::create' );
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$messages ): void {
+				$messages[] = $message;
+			},
+			10,
+			2
+		);
+
+		$id = $this->create( array( 'sort_order' => 1 ) );
+
+		$this->assertSame( array( 'Plans: unknown key "sort_order" ignored.' ), $messages );
+		$this->assertSame( 'Monthly', $this->stored( $id )->get_name(), 'The known keys beside the unknown one are written.' );
 	}
 
 	public function test_update_replaces_a_policy_wholesale_and_null_clears(): void {
@@ -211,17 +228,40 @@ class PlansTest extends EngineIntegrationTestCase {
 		Plans::update( 0, array( 'name' => 'Nope' ) );
 	}
 
-	public function test_update_refuses_the_owner_key(): void {
+	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
 		$id = $this->create();
+		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
 
-		try {
-			Plans::update( $id, array( 'owner' => 'other' ) );
-			$this->fail( 'Expected InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertStringContainsString( 'owner', $e->getMessage() );
-		}
+		$this->assertTrue(
+			Plans::update(
+				$id,
+				array(
+					'sort_order' => 1,
+					'name'       => 'Changed',
+				)
+			)
+		);
 
-		$this->assertSame( self::OWNER, $this->stored( $id )->get_extension_slug() );
+		$this->assertSame( 'Changed', $this->stored( $id )->get_name(), 'The known key beside the unknown one is written.' );
+	}
+
+	public function test_extension_slug_is_not_an_update_key(): void {
+		$id = $this->create();
+		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
+
+		$this->assertTrue(
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => 'other',
+					'name'           => 'Changed',
+				)
+			)
+		);
+
+		$plan = $this->stored( $id );
+		$this->assertSame( self::OWNER, $plan->get_extension_slug(), 'The extension slug is not rewritten.' );
+		$this->assertSame( 'Changed', $plan->get_name() );
 	}
 
 	/**
@@ -234,7 +274,6 @@ class PlansTest extends EngineIntegrationTestCase {
 			'empty name'          => array( array( 'name' => '' ) ),
 			'whitespace name'     => array( array( 'name' => '   ' ) ),
 			'non-string name'     => array( array( 'name' => 12 ) ),
-			'unknown key'         => array( array( 'sort_order' => 1 ) ),
 			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
 			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ) ),
 			'valid then invalid'  => array(
@@ -349,7 +388,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( PlanView::class, $seen[0][1] );
 		$this->assertSame( 0, $seen[0][1]->get_id() );
 		$this->assertSame( 'Seen', $seen[0][1]->get_name() );
-		$this->assertSame( self::OWNER, $seen[0][1]->get_owner() );
+		$this->assertSame( self::OWNER, $seen[0][1]->get_extension_slug() );
 		$this->assertSame( self::OWNER, $seen[0][2] );
 	}
 

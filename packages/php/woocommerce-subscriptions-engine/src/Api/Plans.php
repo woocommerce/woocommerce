@@ -44,11 +44,24 @@ defined( 'ABSPATH' ) || exit;
 final class Plans {
 
 	/**
-	 * Keys accepted by {@see self::create()} (plus `owner`) and {@see self::update()}.
+	 * Keys accepted by {@see self::update()}, as a key map.
 	 *
-	 * @var array<int, string>
+	 * @var array<string, true>
 	 */
-	private const PLAN_KEYS = array( 'name', 'status', 'billing_policy', 'pricing_policy', 'delivery_policy' );
+	private const PLAN_KEYS = array(
+		'name'            => true,
+		'status'          => true,
+		'billing_policy'  => true,
+		'pricing_policy'  => true,
+		'delivery_policy' => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`.
+	 *
+	 * @var array<string, true>
+	 */
+	private const CREATE_KEYS = array( 'extension_slug' => true ) + self::PLAN_KEYS;
 
 	/**
 	 * Policy keys: each takes a string-keyed array (an object) or null.
@@ -66,23 +79,26 @@ final class Plans {
 	/**
 	 * Create a plan.
 	 *
-	 * @param array<string, mixed> $args Plan fields: `owner` (required, the owning extension slug),
-	 *                                   `name` (required, non-empty), `status` (a registered plan
-	 *                                   status, default `active`), and `billing_policy`,
-	 *                                   `pricing_policy`, `delivery_policy` (string-keyed arrays
-	 *                                   the owner interprets, or null).
+	 * Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
+	 *
+	 * @param array<string, mixed> $args Plan fields: `extension_slug` (required, the owning
+	 *                                   extension), `name` (required, non-empty), `status` (a
+	 *                                   registered plan status, default `active`), and
+	 *                                   `billing_policy`, `pricing_policy`, `delivery_policy`
+	 *                                   (string-keyed arrays the owner interprets, or null).
 	 * @return int The new plan id.
-	 * @throws InvalidArgumentException If a key is unknown or a value is invalid, or a
+	 * @throws InvalidArgumentException If a required key is missing or a value is invalid, or a
 	 *                                  {@see PlanValidationException} when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): int {
-		self::assert_known_keys( $args, array_merge( array( 'owner' ), self::PLAN_KEYS ) );
+		$args = self::known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
-		$owner = $args['owner'] ?? null;
-		if ( ! is_string( $owner ) || '' === $owner ) {
-			throw new InvalidArgumentException( 'Plans: "owner" is required and must be a non-empty string.' );
+		$extension_slug = $args['extension_slug'] ?? null;
+		if ( ! is_string( $extension_slug ) || '' === $extension_slug ) {
+			throw new InvalidArgumentException( 'Plans: "extension_slug" is required and must be a non-empty string.' );
 		}
+		unset( $args['extension_slug'] );
 		if ( ! array_key_exists( 'name', $args ) ) {
 			throw new InvalidArgumentException( 'Plans: "name" is required.' );
 		}
@@ -90,7 +106,7 @@ final class Plans {
 		$plan = Plan::create(
 			array(
 				'name'           => '',
-				'extension_slug' => $owner,
+				'extension_slug' => $extension_slug,
 			)
 		);
 		self::apply( $plan, $args );
@@ -102,17 +118,18 @@ final class Plans {
 	/**
 	 * Write the given fields to an existing plan.
 	 *
-	 * Takes the keys of {@see self::create()} except `owner`. Only the columns of the
-	 * present keys are written, so fields a concurrent writer changed in between keep
+	 * Takes the keys of {@see self::create()} except `extension_slug`. Only the columns of
+	 * the present keys are written, so fields a concurrent writer changed in between keep
 	 * its values. A present policy key replaces the whole payload (null clears it);
 	 * policies are never merged. Re-sending the stored status is accepted even when that
-	 * status is no longer registered (its extension was deactivated).
+	 * status is no longer registered (its extension was deactivated). Unknown keys
+	 * (`extension_slug` included) raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $id   Plan id.
 	 * @param array<string, mixed> $args Fields to write.
 	 * @return bool True when the plan exists and the write passed validation (an empty `$args`
 	 *              validates the stored plan and writes nothing); false when the plan does not exist.
-	 * @throws InvalidArgumentException If the id is not positive, a key is unknown or a value is invalid,
+	 * @throws InvalidArgumentException If the id is not positive or a value is invalid,
 	 *                                  or a {@see PlanValidationException} when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
@@ -120,7 +137,7 @@ final class Plans {
 		if ( $id <= 0 ) {
 			throw new InvalidArgumentException( 'Plans: the plan id must be a positive integer.' );
 		}
-		self::assert_known_keys( $args, self::PLAN_KEYS );
+		$args = self::known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		$repository = new PlanRepository();
 		$plan       = $repository->find( $id );
@@ -220,7 +237,7 @@ final class Plans {
 	 * Nothing is written to storage.
 	 *
 	 * @param Plan                 $plan Plan to change.
-	 * @param array<string, mixed> $args Caller fields (known keys only; `owner` is ignored).
+	 * @param array<string, mixed> $args Caller fields (known keys only, no `extension_slug`).
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
 	private static function apply( Plan $plan, array $args ): void {
@@ -318,17 +335,28 @@ final class Plans {
 	}
 
 	/**
-	 * Throw on any key outside `$allowed`.
+	 * Drop the keys outside `$allowed`, with a `_doing_it_wrong()` notice for each.
 	 *
-	 * @param array<string, mixed> $args    Caller args.
-	 * @param array<int, string>   $allowed Allowed keys.
-	 * @throws InvalidArgumentException If a key is unknown.
+	 * @param string                   $method  Public facade method, for the notice.
+	 * @param array<int|string, mixed> $args    Caller arguments.
+	 * @param array<string, true>      $allowed Accepted keys, as a key map.
+	 * @return array<string, mixed> The arguments with known keys only.
 	 */
-	private static function assert_known_keys( array $args, array $allowed ): void {
-		$unknown = array_diff( array_keys( $args ), $allowed );
-		if ( array() !== $unknown ) {
-			throw new InvalidArgumentException( sprintf( 'Plans: unknown key(s) %s.', esc_html( implode( ', ', array_map( 'strval', $unknown ) ) ) ) );
+	private static function known_keys( string $method, array $args, array $allowed ): array {
+		foreach ( array_keys( array_diff_key( $args, $allowed ) ) as $key ) {
+			_doing_it_wrong(
+				esc_html( $method ),
+				sprintf( 'Plans: unknown key "%s" ignored.', esc_html( (string) $key ) ),
+				'0.0.1'
+			);
 		}
+
+		$known = array();
+		foreach ( array_intersect_key( $args, $allowed ) as $key => $value ) {
+			$known[ (string) $key ] = $value;
+		}
+
+		return $known;
 	}
 
 	/**

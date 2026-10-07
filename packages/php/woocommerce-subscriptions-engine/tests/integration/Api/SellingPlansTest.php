@@ -31,8 +31,8 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		return $this->make_plan(
 			array_merge(
 				array(
-					'owner' => self::SLUG,
-					'name'  => $name,
+					'extension_slug' => self::SLUG,
+					'name'           => $name,
 				),
 				$overrides
 			)
@@ -58,7 +58,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$first_id    = $this->insert_plan( 'Zulu' );
 		$archived_id = $this->insert_plan( 'Archived', array( 'status' => PlanStatus::ARCHIVED ) );
 		$second_id   = $this->insert_plan( 'Alpha' );
-		$this->insert_plan( 'Foreign', array( 'owner' => 'other-extension' ) );
+		$this->insert_plan( 'Foreign', array( 'extension_slug' => 'other-extension' ) );
 
 		$plans = ( new SellingPlans( array( self::SLUG ) ) )->list_plans();
 
@@ -84,7 +84,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$second_id   = $this->insert_plan( 'Second' );
 		$excluded_id = $this->insert_plan( 'Excluded' );
 		$archived_id = $this->insert_plan( 'Archived', array( 'status' => PlanStatus::ARCHIVED ) );
-		$foreign_id  = $this->insert_plan( 'Foreign', array( 'owner' => 'other-extension' ) );
+		$foreign_id  = $this->insert_plan( 'Foreign', array( 'extension_slug' => 'other-extension' ) );
 
 		$catalog   = new SellingPlans( array( self::SLUG ) );
 		$requested = array( $archived_id, $second_id, $first_id, $foreign_id, 999999 );
@@ -118,7 +118,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 				'pricing_policy' => array( 'opaque' => true ),
 			)
 		);
-		$foreign_id  = $this->insert_plan( 'Foreign', array( 'owner' => 'other-extension' ) );
+		$foreign_id  = $this->insert_plan( 'Foreign', array( 'extension_slug' => 'other-extension' ) );
 
 		$catalog = new SellingPlans( array( self::SLUG ) );
 		$plan    = $catalog->get_plan( $archived_id );
@@ -126,7 +126,7 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( PlanView::class, $plan );
 		$this->assertSame( $archived_id, $plan->get_id() );
 		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
-		$this->assertSame( self::SLUG, $plan->get_owner() );
+		$this->assertSame( self::SLUG, $plan->get_extension_slug() );
 		$this->assertSame( array( 'opaque' => true ), $plan->get_pricing_policy() );
 
 		$this->assertNull( $catalog->get_plan( $foreign_id ) );
@@ -137,8 +137,8 @@ class SellingPlansTest extends EngineIntegrationTestCase {
 
 	public function test_two_slug_instance_reads_across_both_slugs(): void {
 		$lite_id    = $this->insert_plan( 'Lite plan' );
-		$other_id   = $this->insert_plan( 'Other plan', array( 'owner' => 'other-extension' ) );
-		$foreign_id = $this->insert_plan( 'Foreign', array( 'owner' => 'third-extension' ) );
+		$other_id   = $this->insert_plan( 'Other plan', array( 'extension_slug' => 'other-extension' ) );
+		$foreign_id = $this->insert_plan( 'Foreign', array( 'extension_slug' => 'third-extension' ) );
 
 		$catalog = new SellingPlans( array( self::SLUG, 'other-extension' ) );
 

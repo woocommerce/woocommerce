@@ -43,7 +43,7 @@ class PlanViewTest extends TestCase {
 		);
 
 		$this->assertSame( 7, $view->get_id() );
-		$this->assertSame( 'acme-subs', $view->get_owner() );
+		$this->assertSame( 'acme-subs', $view->get_extension_slug() );
 		$this->assertSame( 'archived', $view->get_status() );
 		$this->assertSame( 'Monthly', $view->get_name() );
 		$this->assertSame( $billing, $view->get_billing_policy() );
@@ -57,7 +57,7 @@ class PlanViewTest extends TestCase {
 		$view = PlanView::from_plan( Plan::create( array( 'name' => 'Draft' ) ) );
 
 		$this->assertSame( 0, $view->get_id() );
-		$this->assertNull( $view->get_owner() );
+		$this->assertNull( $view->get_extension_slug() );
 		$this->assertNull( $view->get_date_created_gmt() );
 		$this->assertNull( $view->get_date_updated_gmt() );
 	}

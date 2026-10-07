@@ -42,7 +42,7 @@ final class PlansController extends WP_REST_Controller {
 	private const DEFAULT_PER_PAGE = 20;
 
 	/**
-	 * Writable plan fields (besides the owner, which is the request's extension slug).
+	 * Writable plan fields (the owning `extension_slug` comes from the request).
 	 *
 	 * @var array<int, string>
 	 */
@@ -298,8 +298,8 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$args          = $this->write_args( $request );
-		$args['owner'] = $extension_slug;
+		$args                   = $this->write_args( $request );
+		$args['extension_slug'] = $extension_slug;
 
 		try {
 			$id = Plans::create( $args );
@@ -368,7 +368,7 @@ final class PlansController extends WP_REST_Controller {
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(
 			'id'               => $item->get_id(),
-			'extension_slug'   => $item->get_owner(),
+			'extension_slug'   => $item->get_extension_slug(),
 			'status'           => $item->get_status(),
 			'name'             => $item->get_name(),
 			'billing_policy'   => self::as_json_object( $item->get_billing_policy() ),

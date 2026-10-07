@@ -108,7 +108,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		return Plans::create(
 			array_merge(
 				array(
-					'owner'          => self::PLAN_OWNER,
+					'extension_slug' => self::PLAN_OWNER,
 					'name'           => 'Monthly',
 					'billing_policy' => array(
 						'period'   => 'month',
@@ -178,7 +178,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 		$args = array_merge(
 			array(
-				'extension_slug'       => (string) $plan->get_owner(),
+				'extension_slug'       => (string) $plan->get_extension_slug(),
 				'customer_id'          => $order->get_customer_id(),
 				'currency'             => $order->get_currency(),
 				'selling_plan_id'      => $plan->get_id(),

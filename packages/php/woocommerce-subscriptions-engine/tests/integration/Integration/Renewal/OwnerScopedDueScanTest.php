@@ -150,7 +150,7 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 	 * @param string $owner The plan's (and so the contract's) extension slug.
 	 */
 	private function sign_up( string $owner ): int {
-		$plan = $this->plan_view( $this->make_plan( array( 'owner' => $owner ) ), $owner );
+		$plan = $this->plan_view( $this->make_plan( array( 'extension_slug' => $owner ) ), $owner );
 
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );

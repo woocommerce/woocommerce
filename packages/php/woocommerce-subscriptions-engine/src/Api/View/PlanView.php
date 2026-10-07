@@ -26,7 +26,7 @@ final class PlanView {
 	/**
 	 * Plan row values keyed by field name.
 	 *
-	 * @var array{id: int, owner: ?string, status: string, name: string, billing_policy: ?array<string, mixed>, pricing_policy: ?array<string, mixed>, delivery_policy: ?array<string, mixed>, date_created_gmt: ?string, date_updated_gmt: ?string}
+	 * @var array{id: int, extension_slug: ?string, status: string, name: string, billing_policy: ?array<string, mixed>, pricing_policy: ?array<string, mixed>, delivery_policy: ?array<string, mixed>, date_created_gmt: ?string, date_updated_gmt: ?string}
 	 */
 	private $fields;
 
@@ -48,7 +48,7 @@ final class PlanView {
 		$view         = new self();
 		$view->fields = array(
 			'id'               => (int) $plan->get_id(),
-			'owner'            => $plan->get_extension_slug(),
+			'extension_slug'   => $plan->get_extension_slug(),
 			'status'           => $plan->get_status(),
 			'name'             => $plan->get_name(),
 			'billing_policy'   => $plan->get_billing_policy(),
@@ -71,8 +71,8 @@ final class PlanView {
 	/**
 	 * Owning extension slug, or null.
 	 */
-	public function get_owner(): ?string {
-		return $this->fields['owner'];
+	public function get_extension_slug(): ?string {
+		return $this->fields['extension_slug'];
 	}
 
 	/**
