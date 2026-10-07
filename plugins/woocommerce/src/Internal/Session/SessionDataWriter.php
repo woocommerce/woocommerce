@@ -40,7 +40,15 @@ class SessionDataWriter {
 
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-		$stored = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$table} WHERE session_key = %s", $session_key ) ) );
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$table} WHERE session_key = %s", $session_key ) );
+
+		if ( '' !== $wpdb->last_error ) {
+			// Without the stored row there is nothing to apply the changes to, so save this request's whole session.
+			$this->upsert( $table, $session_key, $expiry, $current );
+			return $current;
+		}
+
+		$stored = maybe_unserialize( $value );
 		$data   = $this->apply_changes( is_array( $stored ) ? $stored : array(), $current, $loaded );
 
 		$this->upsert( $table, $session_key, $expiry, $data );
