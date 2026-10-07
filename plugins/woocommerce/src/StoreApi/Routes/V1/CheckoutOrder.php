@@ -106,15 +106,16 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$order_id    = absint( $request['id'] );
-		$this->order = wc_get_order( $order_id );
+		$order_id = absint( $request['id'] );
+		$order    = wc_get_order( $order_id );
 
-		if ( ! $this->order instanceof \WC_Order || ! $this->order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
 				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
+		$this->order = $order;
 
 		/**
 		 * Process request data.
