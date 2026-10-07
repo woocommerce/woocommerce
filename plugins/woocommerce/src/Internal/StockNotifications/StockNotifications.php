@@ -213,7 +213,9 @@ class StockNotifications implements RegisterHooksInterface {
 	/**
 	 * Check whether the feature is enabled, without building the feature definitions.
 	 *
-	 * Safe to call before `init`, unlike is_enabled().
+	 * Safe to call before `init`, unlike is_enabled(). It matches feature_is_enabled() only
+	 * because this feature has `enabled_by_default => false` and is not deprecated, the same
+	 * assumption register_data_stores() makes.
 	 *
 	 * @return bool
 	 */

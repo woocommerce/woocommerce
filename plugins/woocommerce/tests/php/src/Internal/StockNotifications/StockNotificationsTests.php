@@ -219,6 +219,27 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A mailer built before maybe_init_services() runs still holds the stock notification emails.
+	 */
+	public function test_mailer_built_before_services_are_initialized_holds_the_email_classes(): void {
+		$instance_property = new \ReflectionProperty( \WC_Emails::class, 'instance' );
+		$instance_property->setAccessible( true );
+		$previous_instance = $instance_property->getValue();
+
+		try {
+			$instance_property->setValue( null, null );
+
+			$emails = WC()->mailer()->get_emails();
+
+			$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification', $emails );
+			$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verify', $emails );
+			$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verified', $emails );
+		} finally {
+			$instance_property->setValue( null, $previous_instance );
+		}
+	}
+
+	/**
 	 * @testdox register_email_classes returns the email classes unchanged when the feature is disabled.
 	 */
 	public function test_register_email_classes_is_a_no_op_when_the_feature_is_disabled(): void {
