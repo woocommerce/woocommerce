@@ -124,31 +124,26 @@ const readCachedAssignment = (): CachedAssignment | null => {
 };
 
 /**
- * Variation for the Marketplace task, decided once per mount when the task is first shown. A live stored assignment is
- * used right away. Otherwise only `canRequest` callers (the home screen) ask ExPlat, and others get control.
- * The variation then sticks for the mount, so dismissing the task doesn't reorder the list.
+ * Variation for the Marketplace task, decided once per mount when the task is first shown: a live stored assignment
+ * right away, otherwise an ExPlat request. The variation then sticks for the mount, so dismissing the task doesn't
+ * reorder the list.
  */
 export const useMarketplaceTaskVariation = ( {
 	taskLists,
 	isReady,
-	canRequest,
 }: {
 	taskLists: TaskListType[];
 	isReady: boolean;
-	canRequest: boolean;
 } ): { isLoading: boolean; variation: Variation } => {
 	const [ state, setState ] = useState< Variation | 'requesting' | null >(
 		null
 	);
-	const isInTest = isReady && isMarketplaceTaskInTest( taskLists );
 
-	if ( isInTest && state === null ) {
+	if ( state === null && isReady && isMarketplaceTaskInTest( taskLists ) ) {
 		const cached = readCachedAssignment();
-		if ( cached?.isAlive ) {
-			setState( toVariation( cached.variationName ) );
-		} else {
-			setState( canRequest ? 'requesting' : CONTROL );
-		}
+		setState(
+			cached?.isAlive ? toVariation( cached.variationName ) : 'requesting'
+		);
 	}
 
 	const isRequesting = state === 'requesting';

@@ -31,13 +31,9 @@ import {
 export type TaskListsProps = {
 	query: { task?: string };
 	context?: string;
-	isHomescreen?: boolean;
 };
 
-export const TaskLists = ( {
-	query,
-	isHomescreen = false,
-}: TaskListsProps ) => {
+export const TaskLists = ( { query }: TaskListsProps ) => {
 	const { task } = query;
 	const { hideTaskList } = useDispatch( onboardingStore );
 
@@ -55,7 +51,6 @@ export const TaskLists = ( {
 		useMarketplaceTaskVariation( {
 			taskLists,
 			isReady: ! task && ! isResolving,
-			canRequest: isHomescreen,
 		} );
 
 	const taskListsWithVariation = useMemo(

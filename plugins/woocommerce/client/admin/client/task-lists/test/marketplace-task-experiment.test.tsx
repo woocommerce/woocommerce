@@ -137,10 +137,10 @@ describe( 'Marketplace task experiment', () => {
 		[ 'unknown_variation', HOME_ORDER ],
 		[ null, HOME_ORDER ],
 	] )(
-		'shows the placeholder, then the %s list on the home screen',
+		'shows the placeholder, then the %s list',
 		async ( variationName, expectedTitles ) => {
 			mockAssignment( variationName );
-			render( <TaskLists query={ {} } isHomescreen /> );
+			render( <TaskLists query={ {} } /> );
 
 			expect(
 				screen.getByText( 'task-placeholder' )
@@ -201,7 +201,7 @@ describe( 'Marketplace task experiment', () => {
 			arrange();
 			mockAssignment( 'first_position' );
 			mockCache( assignment( 'first_position' ) );
-			render( <TaskLists query={ {} } isHomescreen /> );
+			render( <TaskLists query={ {} } /> );
 
 			expect( titles() ).toEqual( expectedTitles );
 			expect( loadExperimentAssignment ).not.toHaveBeenCalled();
@@ -211,51 +211,37 @@ describe( 'Marketplace task experiment', () => {
 
 	it( 'does not request an assignment on a task screen', () => {
 		mockAssignment( 'first_position' );
-		render( <TaskLists query={ { task: 'extend-store' } } isHomescreen /> );
+		render( <TaskLists query={ { task: 'extend-store' } } /> );
 
 		expect( screen.getByText( 'task-screen' ) ).toBeInTheDocument();
 		expect( loadExperimentAssignment ).not.toHaveBeenCalled();
 	} );
 
 	it.each( [
-		[ 'home screen, live cache', true, {}, FIRST_ORDER, false ],
-		[ 'home screen, expired cache', true, { ttl: -1 }, HOME_ORDER, true ],
-		[ 'elsewhere, live cache', false, {}, FIRST_ORDER, false ],
-		[
-			'elsewhere, nothing cached',
-			false,
-			{ isFallbackExperimentAssignment: true },
-			HOME_ORDER,
-			false,
-		],
+		[ 'a live stored assignment without a request', {}, FIRST_ORDER, 0 ],
+		[ 'a fresh request for an expired one', { ttl: -1 }, HOME_ORDER, 1 ],
 	] )(
-		'uses the cached assignment: %s',
-		async (
-			_,
-			isHomescreen,
-			cacheOverrides,
-			expectedTitles,
-			shouldRequest
-		) => {
+		'uses %s',
+		async ( _, cacheOverrides, expectedTitles, requestCount ) => {
 			mockCache( assignment( 'first_position', cacheOverrides ) );
 			mockAssignment( 'control' );
-			render( <TaskLists query={ {} } isHomescreen={ isHomescreen } /> );
+			render( <TaskLists query={ {} } /> );
 
 			await screen.findAllByRole( 'listitem' );
 			expect( titles() ).toEqual( expectedTitles );
 			expect( loadExperimentAssignment ).toHaveBeenCalledTimes(
-				shouldRequest ? 1 : 0
+				requestCount
 			);
 		}
 	);
 
 	it( 'keeps the variation for the mount after the task is dismissed', async () => {
 		mockAssignment( 'first_position' );
-		const { rerender } = render( <TaskLists query={ {} } isHomescreen /> );
+		const { rerender } = render( <TaskLists query={ {} } /> );
 		await screen.findAllByRole( 'listitem' );
 
 		mockTaskLists( makeTaskLists( { isDismissed: true } ) );
-		rerender( <TaskLists query={ {} } isHomescreen /> );
+		rerender( <TaskLists query={ {} } /> );
 
 		expect( titles() ).toEqual( FIRST_ORDER );
 		expect( loadExperimentAssignment ).toHaveBeenCalledTimes( 1 );
@@ -267,7 +253,7 @@ describe( 'Marketplace task experiment', () => {
 		( loadExperimentAssignment as jest.Mock ).mockReturnValue(
 			new Promise( ( resolve ) => ( resolveLate = resolve ) )
 		);
-		render( <TaskLists query={ {} } isHomescreen /> );
+		render( <TaskLists query={ {} } /> );
 
 		expect( screen.getByText( 'task-placeholder' ) ).toBeInTheDocument();
 		await act( async () => {
