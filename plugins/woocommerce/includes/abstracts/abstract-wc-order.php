@@ -2418,51 +2418,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $cart_taxes + $shipping_taxes ) );
-		$tax_group        = $this->type_to_group( 'tax' );
 
-		foreach ( $existing_taxes as $tax_item_id => $tax ) {
-			$filtered_tax = $tax;
-			$tax_rate_id  = $tax->get_rate_id();
-			$local_taxes  = $this->items[ $tax_group ] ?? array();
-
-			// Unsaved clones have no database ID; update the local item so it is saved only once.
-			$local_tax = $local_taxes[ $tax_item_id ] ?? null;
-			if ( 0 === $tax->get_id() && $local_tax !== $tax ) {
-				$tax_item_key = array_search( $tax, $local_taxes, true );
-
-				// A clone that keeps its temporary key maps to the local item under that key.
-				if ( false === $tax_item_key && $local_tax instanceof WC_Order_Item_Tax && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
-					$tax_item_key = $tax_item_id;
-				}
-
-				$local_tax = false === $tax_item_key ? null : $local_taxes[ $tax_item_key ];
-				if ( false !== $tax_item_key && $local_tax instanceof WC_Order_Item_Tax ) {
-					$tax_item_id = $tax_item_key;
-					$tax         = $local_tax;
-				}
-			}
-
+		foreach ( $existing_taxes as $tax ) {
+			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
-				// Filters may change array keys without changing the local collection.
-				$local_tax = $local_taxes[ $tax_item_id ] ?? null;
-				if ( $local_tax !== $tax ) {
-					$tax_item_key = array_search( $tax, $local_taxes, true );
-					$tax_item_id  = false === $tax_item_key ? $tax->get_id() : $tax_item_key;
-				}
-
-				$this->remove_item( $tax_item_id );
+				// Unsaved taxes have no ID yet, so remove this exact item by its key in the order's own list.
+				$tax_item_key = array_search( $tax, $this->items[ $this->type_to_group( 'tax' ) ] ?? array(), true );
+				$this->remove_item( false === $tax_item_key ? $tax->get_id() : $tax_item_key );
 				continue;
-			}
-
-			// Preserve filtered metadata when saving an unsaved clone through its local item.
-			if ( $tax !== $filtered_tax ) {
-				foreach ( $tax->get_meta_data() as $meta ) {
-					$tax->delete_meta_data( $meta->key );
-				}
-				foreach ( $filtered_tax->get_meta_data() as $meta ) {
-					$tax->add_meta_data( $meta->key, $meta->value );
-				}
 			}
 
 			$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
