@@ -171,7 +171,7 @@ final class PaymentRecovery {
 		$order->add_order_note(
 			sprintf(
 				/* translators: %s: the error that was raised after the order moved past the payment step. */
-				__( 'Checkout could not be completed after the order moved past the payment step. The order keeps the status the gateway set: %s', 'woocommerce' ),
+				__( 'Checkout could not be completed after the order moved past the payment step. The order keeps the status the gateway set. Error: %s', 'woocommerce' ),
 				wp_strip_all_tags( $error->getMessage() )
 			)
 		);

@@ -204,7 +204,7 @@ class PaymentRecoveryTest extends WC_Unit_Test_Case {
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 
 		$this->assertStringContainsString(
-			'Checkout could not be completed after the order moved past the payment step. The order keeps the status the gateway set: Call to a member function push_order() on null',
+			'Checkout could not be completed after the order moved past the payment step. The order keeps the status the gateway set. Error: Call to a member function push_order() on null',
 			$notes[0]->content,
 			'The merchant is told what failed and why the order kept its status.'
 		);
