@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
+import type { FC, Dispatch, SetStateAction } from 'react';
 import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, useEffect } from '@wordpress/element';
 import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
 import { type ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -35,7 +36,7 @@ const REFERENCE_TYPE_PRODUCT = 'product';
 const REFERENCE_TYPE_CART = 'cart';
 const REFERENCE_TYPE_ORDER = 'order';
 
-const ProductButton: React.FC< {
+const ProductButton: FC< {
 	isOpen: boolean;
 	onToggle: () => void;
 	product: ProductResponseItem | null;
@@ -98,10 +99,10 @@ const ProductButton: React.FC< {
 	);
 };
 
-const LinkedProductPopoverContent: React.FC< {
+const LinkedProductPopoverContent: FC< {
 	query: ProductCollectionQuery;
 	setAttributes: ProductCollectionSetAttributes;
-	setIsDropdownOpen: React.Dispatch< React.SetStateAction< boolean > >;
+	setIsDropdownOpen: Dispatch< SetStateAction< boolean > >;
 } > = ( { query, setAttributes, setIsDropdownOpen } ) => (
 	<ProductControl
 		selected={ query?.productReference as SelectedOption }
@@ -127,6 +128,12 @@ const enum PRODUCT_REFERENCE_TYPE {
 	CURRENT_PRODUCT = 'CURRENT_PRODUCT',
 	SPECIFIC_PRODUCT = 'SPECIFIC_PRODUCT',
 }
+
+const isProductReferenceType = (
+	value: string
+): value is PRODUCT_REFERENCE_TYPE =>
+	value === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ||
+	value === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT;
 
 const getFromCurrentProductRadioLabel = (
 	currentLocation: string,
@@ -160,6 +167,8 @@ const LinkedProductControl = ( {
 		REFERENCE_TYPE_PRODUCT
 	);
 	const isCartLocation = location.type === REFERENCE_TYPE_CART;
+	const referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
+		isCartLocation ? REFERENCE_TYPE_CART : null;
 	const hasCartReference = !! usesReference?.includes( REFERENCE_TYPE_CART );
 
 	const isOrderLocation = location.type === REFERENCE_TYPE_ORDER;
@@ -187,6 +196,30 @@ const LinkedProductControl = ( {
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
 
+	// Sync initial radio state to attributes on mount.
+	// The UI shows "From current product/cart" selected based on location context.
+	// Intentionally runs only on mount: it is needed for compatibility
+	// with blocks saved before `productReferenceType` only.
+	useEffect( () => {
+		if ( ! showRadioControl ) {
+			return;
+		}
+		if ( query.productReferenceType !== undefined ) {
+			return;
+		}
+		if ( ! isEmpty( productReference ) ) {
+			return;
+		}
+
+		setAttributes( {
+			query: {
+				...query,
+				productReferenceType: referenceType,
+			},
+		} );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
 	const showLinkedProductControl =
 		( showRadioControl || showSpecificProductSelector ) &&
 		/**
@@ -202,25 +235,35 @@ const LinkedProductControl = ( {
 			? __(
 					'Linked products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
-				)
+			  )
 			: __(
 					'Select a product to pull the linked products from',
 					'woocommerce'
-				);
+			  );
 
-	const handleRadioControlChange = ( newValue: PRODUCT_REFERENCE_TYPE ) => {
+	const handleRadioControlChange = ( newValue: string ) => {
+		if ( ! isProductReferenceType( newValue ) ) {
+			return;
+		}
 		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
-			setAttributes( { query: rest } );
+
+			setAttributes( {
+				query: {
+					...rest,
+					productReferenceType: referenceType,
+				},
+			} );
 		} else {
+			const { productReferenceType, ...restQuery } = query;
 			setAttributes( {
 				query: prevReference.current
 					? {
-							...query,
+							...restQuery,
 							productReference: prevReference.current,
-						}
-					: query,
+					  }
+					: restQuery,
 			} );
 		}
 		setRadioControlState( newValue );

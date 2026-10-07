@@ -100,7 +100,7 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
-type MiniCart = {
+export type MiniCart = {
 	state: {
 		isHydrated: boolean;
 		isOpen: boolean;
