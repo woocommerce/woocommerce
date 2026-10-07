@@ -226,44 +226,36 @@ final class Contracts {
 
 	/**
 	 * Add a meta value to a contract, like `add_post_meta()`. A key may hold several values.
+	 * The contract is not looked up: meta for an unknown contract id is a caller error.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $key         Meta key.
 	 * @param mixed  $value       Meta value; serialized when not scalar.
 	 * @param bool   $unique      When true, add nothing if the key already exists. Advisory: checked
 	 *                            before the insert with no unique index, so concurrent adds can both write.
-	 * @return int|null The meta row id; null when the contract does not exist or `$unique` and the key exists.
+	 * @return int|null The meta row id; null when `$unique` and the key exists.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
 	public static function add_meta( int $contract_id, string $key, $value, bool $unique = false ): ?int {
-		$repository = new ContractRepository();
-		if ( ! $repository->exists( $contract_id ) ) {
-			return null;
-		}
-
-		return $repository->add_meta( $contract_id, $key, $value, $unique );
+		return ( new ContractRepository() )->add_meta( $contract_id, $key, $value, $unique );
 	}
 
 	/**
 	 * Update a contract's meta values for `$key`, like `update_post_meta()`: adds the key
 	 * when absent, else rewrites every value, or only the values equal to `$prev_value`.
 	 * The absent-key check runs before the write with no unique index, so it is not a lock.
+	 * The contract is not looked up: meta for an unknown contract id is a caller error.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $key         Meta key.
 	 * @param mixed  $value       New value; serialized when not scalar.
 	 * @param mixed  $prev_value  Only update values equal to this; null updates all. Any other
 	 *                            value ('' and false included) matches literally.
-	 * @return bool True when a value was added or changed; false when nothing changed or the contract does not exist.
+	 * @return bool True when a value was added or changed; false when nothing changed.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
 	public static function update_meta( int $contract_id, string $key, $value, $prev_value = null ): bool {
-		$repository = new ContractRepository();
-		if ( ! $repository->exists( $contract_id ) ) {
-			return false;
-		}
-
-		return $repository->update_meta( $contract_id, $key, $value, $prev_value );
+		return ( new ContractRepository() )->update_meta( $contract_id, $key, $value, $prev_value );
 	}
 
 	/**

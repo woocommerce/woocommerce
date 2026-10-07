@@ -1046,21 +1046,19 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), Contracts::get_meta( $id, 'note' ) );
 	}
 
-	public function test_meta_writes_to_an_unknown_contract_write_nothing(): void {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
-
-		$this->assertNull( Contracts::add_meta( 999999, 'note', 'one' ) );
-		$this->assertFalse( Contracts::update_meta( 999999, 'note', 'one' ) );
+	public function test_meta_reads_for_an_unknown_contract_are_empty(): void {
 		$this->assertFalse( Contracts::delete_meta( 999999, 'note' ) );
 		$this->assertSame( '', Contracts::get_meta( 999999, 'note', true ) );
 		$this->assertSame( array(), Contracts::get_meta( 999999, 'note' ) );
+	}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->assertSame( $before, (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ) );
+	public function test_deleting_a_contract_removes_its_meta(): void {
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		Contracts::add_meta( $id, 'note', 'one' );
+
+		$this->assertTrue( ( new ContractRepository() )->delete( $id ) );
+
+		$this->assertSame( array(), Contracts::get_meta( $id, 'note' ) );
 	}
 
 	public function test_an_empty_meta_key_is_rejected(): void {
