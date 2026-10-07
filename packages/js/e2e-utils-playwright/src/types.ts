@@ -48,11 +48,11 @@ export interface ApiClient {
 	 * @param    debug  - Enable debug logging
 	 * @return Promise resolving to the response
 	 */
-	get: < T = unknown >(
+	get< T = unknown >(
 		path: string,
 		params?: Record< string, unknown >,
 		debug?: boolean
-	) => Promise< AxiosResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 
 	/**
 	 * Make a POST request.
@@ -63,11 +63,11 @@ export interface ApiClient {
 	 * @param    debug - Enable debug logging
 	 * @return Promise resolving to the response
 	 */
-	post: < T = unknown >(
+	post< T = unknown >(
 		path: string,
 		data?: Record< string, unknown >,
 		debug?: boolean
-	) => Promise< AxiosResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 
 	/**
 	 * Make a PUT request.
@@ -78,11 +78,11 @@ export interface ApiClient {
 	 * @param    debug - Enable debug logging
 	 * @return Promise resolving to the response
 	 */
-	put: < T = unknown >(
+	put< T = unknown >(
 		path: string,
 		data?: Record< string, unknown >,
 		debug?: boolean
-	) => Promise< AxiosResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 
 	/**
 	 * Make a DELETE request.
@@ -93,11 +93,11 @@ export interface ApiClient {
 	 * @param    debug  - Enable debug logging
 	 * @return Promise resolving to the response
 	 */
-	delete: < T = unknown >(
+	delete< T = unknown >(
 		path: string,
 		params?: Record< string, unknown >,
 		debug?: boolean
-	) => Promise< AxiosResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 }
 
 /**
