@@ -386,6 +386,9 @@ store< MiniCart >(
 			},
 
 			disableScrollingOnBody() {
+				// eslint-disable-next-line react-hooks/rules-of-hooks
+				const previousIsOpen = useRef( state.isOpen );
+
 				if ( state.isOpen ) {
 					Object.assign( document.body.style, {
 						overflow: 'hidden',
@@ -394,14 +397,20 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
-					dispatchCheckoutEvent( 'mini-cart-open' );
+					if ( ! previousIsOpen.current ) {
+						dispatchCheckoutEvent( 'mini-cart-open' );
+					}
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
-					dispatchCheckoutEvent( 'mini-cart-close' );
+					if ( previousIsOpen.current ) {
+						dispatchCheckoutEvent( 'mini-cart-close' );
+					}
 				}
+
+				previousIsOpen.current = state.isOpen;
 			},
 
 			focusFirstElement() {
