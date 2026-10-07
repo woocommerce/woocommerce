@@ -26,7 +26,7 @@ final class ContractView {
 	/**
 	 * Contract row values keyed by field name.
 	 *
-	 * @var array{id: int, status: string, owner: ?string, customer_id: ?int, currency: ?string, selling_plan_id: ?int, origin_order_id: ?int, payment_method: ?string, payment_method_title: ?string, payment_token_id: ?int, start_gmt: ?string, next_payment_gmt: ?string, last_payment_gmt: ?string, last_attempt_gmt: ?string, trial_end_gmt: ?string, end_gmt: ?string, billing_total: string, discount_total: string, shipping_total: string, tax_total: string, schedule_source: string}
+	 * @var array{id: int, status: string, extension_slug: ?string, customer_id: ?int, currency: ?string, selling_plan_id: ?int, origin_order_id: ?int, payment_method: ?string, payment_method_title: ?string, payment_token_id: ?int, start_gmt: ?string, next_payment_gmt: ?string, last_payment_gmt: ?string, last_attempt_gmt: ?string, trial_end_gmt: ?string, end_gmt: ?string, billing_total: string, discount_total: string, shipping_total: string, tax_total: string, schedule_source: string}
 	 */
 	private $fields;
 
@@ -73,7 +73,7 @@ final class ContractView {
 		$view->fields = array(
 			'id'                   => (int) $contract->get_id(),
 			'status'               => $contract->get_status(),
-			'owner'                => $contract->get_extension_slug(),
+			'extension_slug'       => $contract->get_extension_slug(),
 			'customer_id'          => $contract->get_customer_id(),
 			'currency'             => $contract->get_currency(),
 			'selling_plan_id'      => $contract->get_selling_plan_id(),
@@ -155,8 +155,8 @@ final class ContractView {
 	/**
 	 * Owning extension slug, or null.
 	 */
-	public function get_owner(): ?string {
-		return $this->fields['owner'];
+	public function get_extension_slug(): ?string {
+		return $this->fields['extension_slug'];
 	}
 
 	/**

@@ -298,9 +298,9 @@ class CancellationTest extends EngineIntegrationTestCase {
 		// A stuck draft (created, never activated) has no cycles and no due moment.
 		$id = Contracts::create(
 			array(
-				'owner'       => 'test-owner',
-				'customer_id' => 1,
-				'currency'    => 'USD',
+				'extension_slug' => 'test-owner',
+				'customer_id'    => 1,
+				'currency'       => 'USD',
 			)
 		);
 		$this->assertSame( ContractStatus::DRAFT, $this->reload( $id )->get_status() );

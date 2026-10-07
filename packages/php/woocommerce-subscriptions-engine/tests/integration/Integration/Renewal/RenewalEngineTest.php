@@ -1534,7 +1534,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertIsInt( $customer );
 
 		$args = array(
-			'owner'            => 'engine-tests',
+			'extension_slug'   => 'engine-tests',
 			'customer_id'      => $customer,
 			'currency'         => 'USD',
 			'payment_method'   => self::GATEWAY_APPROVING,

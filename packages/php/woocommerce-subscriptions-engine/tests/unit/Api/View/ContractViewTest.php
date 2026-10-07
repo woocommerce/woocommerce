@@ -55,7 +55,7 @@ class ContractViewTest extends TestCase {
 
 		$this->assertSame( 10, $view->get_id() );
 		$this->assertSame( 'active', $view->get_status() );
-		$this->assertSame( 'acme-subs', $view->get_owner() );
+		$this->assertSame( 'acme-subs', $view->get_extension_slug() );
 		$this->assertSame( 1, $view->get_customer_id() );
 		$this->assertSame( 'USD', $view->get_currency() );
 		$this->assertSame( 2, $view->get_selling_plan_id() );
@@ -79,7 +79,7 @@ class ContractViewTest extends TestCase {
 	public function test_optional_fields_read_as_null(): void {
 		$view = ContractView::from_contract( Contract::from_storage( array( 'id' => 5 ) ), true );
 
-		$this->assertNull( $view->get_owner() );
+		$this->assertNull( $view->get_extension_slug() );
 		$this->assertNull( $view->get_customer_id() );
 		$this->assertNull( $view->get_currency() );
 		$this->assertNull( $view->get_selling_plan_id() );

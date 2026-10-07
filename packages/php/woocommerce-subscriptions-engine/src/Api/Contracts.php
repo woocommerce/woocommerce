@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 final class Contracts {
 
 	/**
-	 * Keys accepted by {@see self::create()} (plus `owner`) and {@see self::update()}.
+	 * Keys accepted by {@see self::create()} (plus `extension_slug`) and {@see self::update()}.
 	 *
 	 * @var array<int, string>
 	 */
@@ -100,28 +100,28 @@ final class Contracts {
 	/**
 	 * Create a contract from explicit fields.
 	 *
-	 * Only `owner` is required; the status defaults to `draft`. Dates accept a
+	 * Only `extension_slug` is required; the status defaults to `draft`. Dates accept a
 	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
 	 * strings, and a non-null money value requires a currency. `items` is a list of item
 	 * rows; `addresses` is keyed `billing` / `shipping`; `plan_snapshot` / `items_snapshot`
 	 * are payload arrays recorded as the contract's current snapshots.
 	 *
-	 * @param array<string, mixed> $args Contract fields: `owner` (required, the owning extension
-	 *                                   slug), `status` (a registered contract status, default
-	 *                                   `draft`), and any of {@see self::CONTRACT_KEYS}.
+	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
+	 *                                   extension), `status` (a registered contract status,
+	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
 	 * @return int The new contract id.
 	 * @throws InvalidArgumentException If a key is unknown or a value is invalid.
 	 */
 	public static function create( array $args ): int {
-		self::assert_known_keys( $args, array_merge( array( 'owner' ), self::CONTRACT_KEYS ) );
+		self::assert_known_keys( $args, array_merge( array( 'extension_slug' ), self::CONTRACT_KEYS ) );
 
-		$owner = $args['owner'] ?? null;
-		if ( ! is_string( $owner ) || '' === $owner ) {
-			throw new InvalidArgumentException( 'Contracts: "owner" is required and must be a non-empty string.' );
+		$extension_slug = $args['extension_slug'] ?? null;
+		if ( ! is_string( $extension_slug ) || '' === $extension_slug ) {
+			throw new InvalidArgumentException( 'Contracts: "extension_slug" is required and must be a non-empty string.' );
 		}
-		unset( $args['owner'] );
+		unset( $args['extension_slug'] );
 
-		$contract  = Contract::create( array( 'extension_slug' => $owner ) );
+		$contract  = Contract::create( array( 'extension_slug' => $extension_slug ) );
 		$snapshots = self::apply( $contract, $args );
 
 		$repository = new ContractRepository();
@@ -134,8 +134,8 @@ final class Contracts {
 	/**
 	 * Write the given fields to an existing contract.
 	 *
-	 * Takes the keys of {@see self::create()} except `owner`. Only the columns of the
-	 * present keys are written, so fields a concurrent writer changed in between keep
+	 * Takes the keys of {@see self::create()} except `extension_slug`. Only the columns of
+	 * the present keys are written, so fields a concurrent writer changed in between keep
 	 * its values; `items` and `addresses` replace the whole set; `null` clears a
 	 * nullable field (and resets a money field to 0).
 	 *
@@ -174,7 +174,7 @@ final class Contracts {
 	 * a non-counting cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
 	 * `order_id` is optional. Without `plan_snapshot` / `items_snapshot` payloads the
 	 * cycle references the contract's current snapshots; payloads attach to the new cycle
-	 * only. The owner is copied from the contract.
+	 * only. The extension slug is copied from the contract.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
@@ -347,7 +347,7 @@ final class Contracts {
 	 * Nothing is written to storage; an invalid value throws before any write.
 	 *
 	 * @param Contract             $contract Contract to change.
-	 * @param array<string, mixed> $args     Caller fields (known keys only, no `owner`).
+	 * @param array<string, mixed> $args     Caller fields (known keys only, no `extension_slug`).
 	 * @return array{plan: array<string, mixed>|null, items: array<int, array<string, mixed>>|null} Snapshot payloads to store.
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */

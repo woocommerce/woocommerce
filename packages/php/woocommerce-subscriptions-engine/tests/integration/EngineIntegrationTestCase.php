@@ -135,7 +135,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 		$args = array_merge(
 			array(
-				'owner'                => (string) $plan->get_extension_slug(),
+				'extension_slug'       => (string) $plan->get_extension_slug(),
 				'customer_id'          => $order->get_customer_id(),
 				'currency'             => $order->get_currency(),
 				'selling_plan_id'      => $plan->get_id(),
