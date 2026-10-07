@@ -11,7 +11,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
+import { Link } from '@wordpress/ui';
 import {
 	PaymentsProviderIncentive,
 	PaymentsProvider,
@@ -218,9 +218,8 @@ export const IncentiveModal = ( {
 											termsLink: (
 												<Link
 													href={ incentive.tc_url }
-													target="_blank"
-													rel="noreferrer"
-													type="external"
+													rel="noopener noreferrer"
+													openInNewTab
 												>
 													{ __(
 														'Terms and Conditions',

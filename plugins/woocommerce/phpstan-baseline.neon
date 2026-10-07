@@ -2749,12 +2749,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Cannot access property \$post_title on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Cannot call method remove_help_tabs\(\) on WP_Screen\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -16737,13 +16731,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
@@ -31516,12 +31510,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks-footer-pixel.php
 
 		-
-			message: '#^Binary operation "\." between array\|string and ''\://'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/tracks/class-wc-tracks.php
-
-		-
 			message: '#^Method WC_Tracks\:\:track_woocommerce_allow_tracking_toggled\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -35130,7 +35118,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -49906,12 +49894,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -51730,12 +51712,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
 			message: '#^Parameter \#1 \$weight of function wc_format_weight expects float, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -52524,12 +52500,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutLink\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutLink.php
-
-		-
-			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Domain/Services/CheckoutLink.php
 
@@ -61935,7 +61905,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, \(int\|string\) given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/ProductAttributesLookup/Filterer.php
 
 		-
@@ -62455,19 +62425,7 @@ parameters:
 			path: src/Internal/ProductFilters/QueryClauses.php
 
 		-
-			message: '#^Variable \$chosen_attributes in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
 			message: '#^Variable \$stock_statuses in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
-			message: '#^Variable \$term_ids in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
 			path: src/Internal/ProductFilters/QueryClauses.php
@@ -68179,18 +68137,6 @@ parameters:
 			path: src/StoreApi/Schemas/ExtendSchema.php
 
 		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
-			message: '#^Variable \$schema might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractAddressSchema\:\:sanitize_callback\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -69369,7 +69315,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, list\<array\|string\> given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-

@@ -1,7 +1,8 @@
+# Keep equal to .nvmrc: nvm and actions/setup-node read .nvmrc, pnpm uses this one for every pnpm command. CI fails when they differ. On a major bump also update the engines.node range in .syncpackrc.
 useNodeVersion: 24.15.0
 
 catalogs:
-	# A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
+    # A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
     wp-min:
         '@types/wordpress__block-editor': 15.0.6
         '@types/wordpress__block-library': 2.6.3
@@ -42,7 +43,6 @@ catalogs:
         '@wordpress/notices': 5.33.1
         '@wordpress/patterns': 2.33.9
         '@wordpress/plugins': 7.33.5
-        '@wordpress/postcss-plugins-preset': 5.33.1
         '@wordpress/preferences': 4.33.5
         '@wordpress/primitives': 4.33.1
         '@wordpress/priority-queue': 3.33.1
@@ -56,7 +56,7 @@ catalogs:
 
     # `@wordpress/*` runtime packages that WooCommerce needs to bundle because
     # they are not provided as WordPress script externals.
-	# https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
+    # https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
     wp-bundled:
         '@wordpress/admin-ui': 2.4.1
         '@wordpress/dataviews': 10.1.7
@@ -78,7 +78,11 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
+        '@wordpress/prettier-config': 4.49.0
+        '@wordpress/postcss-plugins-preset': 5.56.0
+        '@wordpress/stylelint-config': ^23.14.0
         postcss: ^8.5.26
+        stylelint: ^16.9.0
         webpack: 5.97.x
 
 packages:
@@ -119,9 +123,9 @@ patchedDependencies:
     '@wordpress/env@11.9.0': bin/patches/@wordpress__env@11.9.0.patch
 
 # Quality of life tweaks (migrated from .npmrc)
-childConcurrency: 8        # 5 by default
+childConcurrency: 8 # 5 by default
 confirmModulesPurge: false
-modulesCacheMaxAge: 20160  # two weeks in minutes
+modulesCacheMaxAge: 20160 # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
 
