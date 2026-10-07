@@ -193,10 +193,10 @@ final class ContractRepository {
 	 * `$expected_status` - the optimistic compare-and-set for status-sensitive writes,
 	 * mirroring {@see self::transition_cycle_status()} on the cycle side.
 	 *
-	 * The lifecycle transitions (hold / reactivate / cancel) and the renewal engine's
-	 * schedule advances all read-validate-write the contract row; unconditioned, the
-	 * slower writer silently clobbers the faster one - a customer cancel lost to a
-	 * concurrent settle would resurrect the contract into future billing. Keying the
+	 * The renewal engine's schedule advances read-validate-write the contract row while an
+	 * extension may change its status (a customer cancel); unconditioned, the slower writer
+	 * silently clobbers the faster one - a cancel lost to a concurrent settle would
+	 * resurrect the contract into future billing. Keying the
 	 * write on the status the caller read makes the race lose LOUDLY: no row matches,
 	 * false comes back, and the caller reports a conflict or re-reads instead of
 	 * overwriting.
