@@ -127,7 +127,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		);
 
 		$anon_test = Closure::bind(
-			function( $order ) {
+			function ( $order ) {
 				$this->output_origin_column( $order );
 			},
 			$this->attribution_class,
@@ -152,44 +152,41 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox A label filtered without a %s placeholder is used as the whole origin.
+	 * Data provider for test_output_origin_column_uses_filtered_label.
+	 *
+	 * @return array[] Source type, source, filtered label, expected output.
 	 */
-	public function test_output_origin_column_uses_filtered_label_without_placeholder(): void {
-		$test_cases = array(
-			array(
-				'source_type'     => 'trade-show',
-				'source'          => '',
-				'label'           => 'Trade show',
-				'expected_output' => 'Trade show',
-			),
+	public function provider_filtered_origin_labels(): array {
+		return array(
+			'plain label, custom type'          => array( 'trade-show', '', 'Trade show', 'Trade show' ),
 			// A placeholder is still filled with the formatted source, which is "Unknown" for a custom type.
-			array(
-				'source_type'     => 'trade-show',
-				'source'          => 'booth-12',
-				'label'           => 'Trade show: %s',
-				'expected_output' => 'Trade show: Unknown',
-			),
-			array(
-				'source_type'     => 'trade-show',
-				'source'          => '',
-				'label'           => '',
-				'expected_output' => 'Unknown',
-			),
-			array(
-				'source_type'     => 'utm',
-				'source'          => 'example',
-				'label'           => 'Campaign',
-				'expected_output' => 'Campaign',
-			),
-			// A literal percent sign is not a placeholder and must not reach sprintf().
-			array(
-				'source_type'     => 'trade-show',
-				'source'          => '',
-				'label'           => '100% organic',
-				'expected_output' => '100% organic',
-			),
+			'%s placeholder, custom type'       => array( 'trade-show', 'booth-12', 'Trade show: %s', 'Trade show: Unknown' ),
+			'positional placeholder'            => array( 'trade-show', '', 'Trade show: %1$s', 'Trade show: Unknown' ),
+			'width-qualified placeholder'       => array( 'trade-show', '', '[%10s]', '[   Unknown]' ),
+			'left-aligned width placeholder'    => array( 'trade-show', '', '[%-10s]', '[Unknown   ]' ),
+			'custom padding placeholder'        => array( 'trade-show', '', "[%'.10s]", '[...Unknown]' ),
+			'empty label falls back'            => array( 'trade-show', '', '', 'Unknown' ),
+			'plain label, built-in type'        => array( 'utm', 'example', 'Campaign', 'Campaign' ),
+			// A lone percent sign is literal text and must not reach sprintf().
+			'lone percent sign'                 => array( 'trade-show', '', '100% organic', '100% organic' ),
+			'percent followed by a space and s' => array( 'trade-show', '', '50% sale', '50% sale' ),
+			// An escaped percent sign keeps sprintf() semantics, as every label had before.
+			'escaped percent sign'              => array( 'trade-show', '', '100%% organic', '100% organic' ),
+			'escaped percent before s'          => array( 'trade-show', '', 'Save %%s today', 'Save %s today' ),
+			'escaped percent and a placeholder' => array( 'trade-show', '', '100%% from %s', '100% from Unknown' ),
 		);
+	}
 
+	/**
+	 * @testdox A filtered label is used as the whole origin unless it is a sprintf() format string.
+	 * @dataProvider provider_filtered_origin_labels
+	 *
+	 * @param string $source_type     Source type meta value.
+	 * @param string $source          Source meta value.
+	 * @param string $label           Label returned by the filter.
+	 * @param string $expected_output Expected column output.
+	 */
+	public function test_output_origin_column_uses_filtered_label( string $source_type, string $source, string $label, string $expected_output ): void {
 		$anon_test = Closure::bind(
 			function ( $order ) {
 				$this->output_origin_column( $order );
@@ -198,26 +195,24 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 			$this->attribution_class
 		);
 
-		foreach ( $test_cases as $test_case ) {
-			$order = $this->getMockBuilder( WC_Order::class )
-				->onlyMethods( array( 'get_meta' ) )
-				->getMock();
-			$order->method( 'get_meta' )
-				->willReturnOnConsecutiveCalls( $test_case['source_type'], $test_case['source'] );
+		$order = $this->getMockBuilder( WC_Order::class )
+			->onlyMethods( array( 'get_meta' ) )
+			->getMock();
+		$order->method( 'get_meta' )
+			->willReturnOnConsecutiveCalls( $source_type, $source );
 
-			$label_filter = function () use ( $test_case ) {
-				return $test_case['label'];
-			};
-			add_filter( 'wc_order_attribution_origin_label', $label_filter );
+		$label_filter = function () use ( $label ) {
+			return $label;
+		};
+		add_filter( 'wc_order_attribution_origin_label', $label_filter );
 
-			ob_start();
-			$anon_test( $order );
-			$output = ob_get_clean();
+		ob_start();
+		$anon_test( $order );
+		$output = ob_get_clean();
 
-			remove_filter( 'wc_order_attribution_origin_label', $label_filter );
+		remove_filter( 'wc_order_attribution_origin_label', $label_filter );
 
-			$this->assertEquals( $test_case['expected_output'], $output, "Source type {$test_case['source_type']} with label '{$test_case['label']}'" );
-		}
+		$this->assertSame( $expected_output, $output );
 	}
 
 	/**
