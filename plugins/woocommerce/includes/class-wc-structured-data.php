@@ -191,13 +191,15 @@ class WC_Structured_Data {
 	 * @return void
 	 */
 	public function maybe_generate_product_data() {
-		if ( ! is_product() ) {
+		if ( ! is_product() || false === has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
 			return;
 		}
 
 		$permalink = get_permalink( get_queried_object_id() );
 		foreach ( $this->get_data() as $data ) {
-			if ( in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) && ( ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink ) ) {
+			$is_product         = in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true );
+			$is_current_product = ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink;
+			if ( $is_product && $is_current_product ) {
 				return;
 			}
 		}
@@ -254,7 +256,7 @@ class WC_Structured_Data {
 			global $product;
 		}
 
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! is_a( $product, 'WC_Product' ) || '' !== $product->get_post_password() ) {
 			return;
 		}
 

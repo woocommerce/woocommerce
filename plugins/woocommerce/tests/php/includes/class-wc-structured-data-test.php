@@ -366,6 +366,34 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Password-protected products do not generate structured data from either the summary or the footer.
+	 */
+	public function test_password_protected_product_does_not_generate_product_data(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_post_password( 'secret' );
+		$product->save();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$this->structured_data->generate_product_data( $product );
+		$this->structured_data->maybe_generate_product_data();
+
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Password-protected products must not expose their details in structured data.' );
+	}
+
+	/**
+	 * @testdox Removing the product summary callback also disables the footer fallback.
+	 */
+	public function test_maybe_generate_product_data_respects_removed_summary_callback(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+		remove_action( 'woocommerce_single_product_summary', array( $this->structured_data, 'generate_product_data' ), 60 );
+
+		$this->structured_data->maybe_generate_product_data();
+
+		$this->assertSame( array(), $this->structured_data->get_data(), 'The fallback must respect extensions that disable product schema generation.' );
+	}
+
+	/**
 	 * @testdox Product structured data is not duplicated when the product summary already generated it.
 	 */
 	public function test_maybe_generate_product_data_does_not_duplicate_existing_product_data(): void {
