@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -784,7 +786,7 @@ trait ProductAbilityTrait {
 		$stock_quantity = $product->get_stock_quantity();
 		$permalink      = $product->get_permalink();
 
-		return array(
+		$data = array(
 			'id'                => $product->get_id(),
 			'name'              => $product->get_name(),
 			'slug'              => $product->get_slug(),
@@ -813,6 +815,31 @@ trait ProductAbilityTrait {
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
 			'date_modified_gmt' => wc_rest_prepare_date_response( $product->get_date_modified() ),
 		);
+
+		return AbilityFields::add_to_output( $data, 'product', $product );
+	}
+
+	/**
+	 * Product type slugs the read abilities list and return. With ability
+	 * contracts on, that includes every type that has a product_type term, so
+	 * products of a type an extension adds, such as a subscription, are included.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_product_type_slugs(): array {
+		$types = array_keys( wc_get_product_types() );
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $types;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_type',
+				'fields'     => 'slugs',
+				'hide_empty' => false,
+			)
+		);
+		return array_values( array_unique( array_merge( $types, is_array( $terms ) ? $terms : array() ) ) );
 	}
 
 	/**
@@ -821,87 +848,90 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_output_schema(): array {
-		return array(
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'                => array( 'type' => 'integer' ),
-				'name'              => array( 'type' => 'string' ),
-				'slug'              => array( 'type' => 'string' ),
-				'permalink'         => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
-					'format'      => 'uri',
+		return AbilityFields::add_to_schema(
+			array(
+				'type'                 => 'object',
+				'properties'           => array(
+					'id'                => array( 'type' => 'integer' ),
+					'name'              => array( 'type' => 'string' ),
+					'slug'              => array( 'type' => 'string' ),
+					'permalink'         => array(
+						'type'        => array( 'string', 'null' ),
+						'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
+						'format'      => 'uri',
+					),
+					'type'              => array(
+						'type'        => 'string',
+						'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
+						'enum'        => self::get_product_type_slugs(),
+					),
+					'status'            => array(
+						'type' => 'string',
+						'enum' => self::get_product_output_status_slugs(),
+					),
+					'sku'               => array( 'type' => 'string' ),
+					'currency'          => array(
+						'type' => 'string',
+						'enum' => array_keys( get_woocommerce_currencies() ),
+					),
+					'currency_symbol'   => array( 'type' => 'string' ),
+					'price'             => array(
+						'type'        => 'string',
+						'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+					),
+					'regular_price'     => array(
+						'type'        => 'string',
+						'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+					),
+					'sale_price'        => array(
+						'type'        => 'string',
+						'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+					),
+					'stock_status'      => array(
+						'type' => 'string',
+						'enum' => array_keys( wc_get_product_stock_status_options() ),
+					),
+					'stock_quantity'    => array(
+						'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
+						'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
+					),
+					'manage_stock'      => array( 'type' => 'boolean' ),
+					'virtual'           => array( 'type' => 'boolean' ),
+					'downloadable'      => array( 'type' => 'boolean' ),
+					'external_url'      => array(
+						'type'        => array( 'string', 'null' ),
+						'description' => __( 'External product URL for external products.', 'woocommerce' ),
+						'format'      => 'uri',
+					),
+					'button_text'       => array(
+						'type'        => array( 'string', 'null' ),
+						'description' => __( 'Button text for external products.', 'woocommerce' ),
+					),
+					'grouped_products'  => array(
+						'type'        => 'array',
+						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
+						'items'       => array( 'type' => 'integer' ),
+					),
+					'date_created'      => array(
+						'type'   => array( 'string', 'null' ),
+						'format' => 'date-time',
+					),
+					'date_created_gmt'  => array(
+						'type'   => array( 'string', 'null' ),
+						'format' => 'date-time',
+					),
+					'date_modified'     => array(
+						'type'   => array( 'string', 'null' ),
+						'format' => 'date-time',
+					),
+					'date_modified_gmt' => array(
+						'type'   => array( 'string', 'null' ),
+						'format' => 'date-time',
+					),
 				),
-				'type'              => array(
-					'type'        => 'string',
-					'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
-					'enum'        => array_keys( wc_get_product_types() ),
-				),
-				'status'            => array(
-					'type' => 'string',
-					'enum' => self::get_product_output_status_slugs(),
-				),
-				'sku'               => array( 'type' => 'string' ),
-				'currency'          => array(
-					'type' => 'string',
-					'enum' => array_keys( get_woocommerce_currencies() ),
-				),
-				'currency_symbol'   => array( 'type' => 'string' ),
-				'price'             => array(
-					'type'        => 'string',
-					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
-				),
-				'regular_price'     => array(
-					'type'        => 'string',
-					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
-				),
-				'sale_price'        => array(
-					'type'        => 'string',
-					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
-				),
-				'stock_status'      => array(
-					'type' => 'string',
-					'enum' => array_keys( wc_get_product_stock_status_options() ),
-				),
-				'stock_quantity'    => array(
-					'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
-					'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
-				),
-				'manage_stock'      => array( 'type' => 'boolean' ),
-				'virtual'           => array( 'type' => 'boolean' ),
-				'downloadable'      => array( 'type' => 'boolean' ),
-				'external_url'      => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'External product URL for external products.', 'woocommerce' ),
-					'format'      => 'uri',
-				),
-				'button_text'       => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Button text for external products.', 'woocommerce' ),
-				),
-				'grouped_products'  => array(
-					'type'        => 'array',
-					'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
-					'items'       => array( 'type' => 'integer' ),
-				),
-				'date_created'      => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
-				),
-				'date_created_gmt'  => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
-				),
-				'date_modified'     => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
-				),
-				'date_modified_gmt' => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
-				),
+				'additionalProperties' => false,
 			),
-			'additionalProperties' => false,
+			'product'
 		);
 	}
 

@@ -52,6 +52,12 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
 			'meta'                => array(
 				'show_in_rest' => true,
+				'woocommerce'  => array(
+					'extension_fields' => array(
+						'object_type' => 'product',
+						'output'      => 'products',
+					),
+				),
 				'mcp'          => array(
 					'public' => true,
 					'type'   => 'tool',
@@ -121,6 +127,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 
 			$args = array_merge( $args, $type_args );
+		}
+
+		if ( ! isset( $args['type'] ) ) {
+			$args['type'] = self::get_product_type_slugs();
 		}
 
 		if ( ! empty( $input['search'] ) ) {
