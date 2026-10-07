@@ -101,7 +101,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 					}
 					onFocus={ () => setIsActive( true ) }
 					onBlur={ ( event ) => {
-						onBlur( event.target.value );
+						onBlur( inputMask.getValue( event.target.value ) );
 						setIsActive( false );
 					} }
 					aria-label={ ariaLabel || label }

@@ -163,6 +163,7 @@ describe( 'TextInput with a mask', () => {
 		setInputMask( { bind } );
 		const user = userEvent.setup();
 		const onChange = jest.fn();
+		const onBlur = jest.fn();
 
 		render(
 			<TextInput
@@ -170,15 +171,18 @@ describe( 'TextInput with a mask', () => {
 				label="Phone"
 				value=""
 				onChange={ onChange }
+				onBlur={ onBlur }
 				mask="000-000"
 			/>
 		);
 
 		const input = screen.getByLabelText( 'Phone' );
 		await act( () => user.type( input, '1234' ) );
+		await act( () => user.tab() );
 
 		expect( input ).toHaveValue( '123-4' );
 		expect( onChange ).toHaveBeenLastCalledWith( '1234' );
+		expect( onBlur ).toHaveBeenLastCalledWith( '1234' );
 		expect( input ).toHaveAccessibleDescription(
 			'Expected format: 000-000'
 		);

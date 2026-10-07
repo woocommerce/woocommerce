@@ -67,6 +67,8 @@ export const useInputMask = (
 	return {
 		ref: inputRef,
 		onChange: handleChange,
+		getValue: ( displayValue: string ) =>
+			mask ? lastValue.current ?? displayValue : displayValue,
 		hasText: !! mask && hasText,
 		isBound: !! mask && !! bindMask,
 	};
