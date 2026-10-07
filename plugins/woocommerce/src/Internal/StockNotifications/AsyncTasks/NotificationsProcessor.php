@@ -156,27 +156,6 @@ class NotificationsProcessor {
 	}
 
 	/**
-	 * Check that the notification's own product is in stock, so a variation that went
-	 * out of stock after the job was queued is skipped instead of being sent.
-	 *
-	 * @param Notification $notification The notification.
-	 * @param WC_Product   $product      The product the batch runs for, already checked by parse_product().
-	 * @return bool
-	 */
-	private function is_notification_product_in_stock( Notification $notification, WC_Product $product ): bool {
-		if ( $notification->get_product_id() === $product->get_id() ) {
-			return true;
-		}
-
-		$notification_product = $notification->get_product();
-		if ( ! $notification_product instanceof WC_Product ) {
-			return true;
-		}
-
-		return $this->eligibility_service->is_stock_status_eligible( $notification_product->get_stock_status() );
-	}
-
-	/**
 	 * Process a batch of notifications.
 	 *
 	 * @param int $product_id The product ID from AS job args.
@@ -240,7 +219,7 @@ class NotificationsProcessor {
 			$notification->set_date_last_attempt( time() );
 			++$cycle_state['total_count'];
 
-			if ( $this->eligibility_service->should_skip_notification( $notification, $product ) || ! $this->is_notification_product_in_stock( $notification, $product ) ) {
+			if ( $this->eligibility_service->should_skip_notification( $notification, $product ) ) {
 				++$cycle_state['skipped_count'];
 				$notification->save();
 				continue;
