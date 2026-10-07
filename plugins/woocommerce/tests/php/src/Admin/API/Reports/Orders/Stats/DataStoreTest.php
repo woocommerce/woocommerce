@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -31,6 +32,13 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $previous_old_full_refund_flag;
 
 	/**
+	 * Post status registered by a test, unregistered in tearDown() so a failed assertion does not leak it.
+	 *
+	 * @var string|null
+	 */
+	private $registered_post_status = null;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -52,6 +60,10 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			update_option( 'woocommerce_analytics_uses_old_full_refund_data', $this->previous_old_full_refund_flag );
 		} else {
 			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		}
+		if ( null !== $this->registered_post_status ) {
+			unset( $GLOBALS['wp_post_statuses'][ $this->registered_post_status ] );
+			$this->registered_post_status = null;
 		}
 		parent::tearDown();
 	}
@@ -570,8 +582,9 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	public function test_returning_customer_recalculated_for_long_excluded_status(): void {
 		global $wpdb;
 
-		$long_status = 'competition-completed';
-		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
+		$long_status                  = 'competition-completed';
+		$this->registered_post_status = 'wc-' . $long_status;
+		register_post_status( $this->registered_post_status, array( 'public' => true ) );
 		$add_status = function ( $statuses ) use ( $long_status ) {
 			$statuses[ 'wc-' . $long_status ] = 'Competition Completed';
 			return $statuses;
@@ -615,6 +628,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 				array( '%s' ),
 				array( '%d' )
 			);
+			wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $order_1->get_id() ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -642,8 +656,5 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			$returning_flag( $order_2->get_id() ),
 			'The next oldest order should be reassigned as the customer\'s first order.'
 		);
-
-		remove_filter( 'wc_order_statuses', $add_status );
-		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $long_status ] );
 	}
 }

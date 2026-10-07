@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -80,6 +81,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 				array( '%s' ),
 				array( '%d' )
 			);
+			wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $order->get_id() ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
