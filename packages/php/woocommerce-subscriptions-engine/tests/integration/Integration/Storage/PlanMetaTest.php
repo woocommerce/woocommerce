@@ -233,6 +233,24 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox delete throws when the plan row fails to delete, and keeps the plan and its meta.
+	 */
+	public function test_delete_throws_when_the_plan_row_delete_fails(): void {
+		$this->sut->add_meta( $this->id, 'note', 'kept' );
+
+		$this->assert_write_throws_on_a_failed_query(
+			'DELETE FROM `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ) . '`',
+			'Failed to delete plan ' . $this->id,
+			function (): void {
+				$this->sut->delete( $this->id );
+			}
+		);
+
+		$this->assertNotNull( $this->sut->find( $this->id ) );
+		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
 	 * @testdox a failed meta write throws.
 	 * @dataProvider provide_failing_meta_writes
 	 *
