@@ -318,6 +318,40 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT keeps the fulfillment on its own order and ignores a different entity_id in the body.
+	 */
+	public function test_update_fulfillment_does_not_reparent_via_entity_id(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$other_order = WC_Helper_Order::create_order( self::$customer_user_id );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				$this->get_test_fulfillment_data(
+					array( 'entity_id' => (string) $other_order->get_id() )
+				)
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), 'The update must succeed so the reparenting guard is actually exercised.' );
+
+		$reloaded = new Fulfillment( $this->test_fulfillment->get_id() );
+		$this->assertSame(
+			(string) $this->test_order->get_id(),
+			$reloaded->get_entity_id(),
+			'A PUT must not move the fulfillment to a different order via the request body.'
+		);
+		$this->assertSame(
+			WC_Order::class,
+			$reloaded->get_entity_type(),
+			'A PUT must not change the fulfillment entity type via the request body.'
+		);
+	}
+
+	/**
 	 * Test delete_fulfillment endpoint
 	 */
 	public function test_delete_fulfillment_success() {

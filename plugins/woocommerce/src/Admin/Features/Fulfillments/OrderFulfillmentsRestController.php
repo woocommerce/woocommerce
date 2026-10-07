@@ -164,7 +164,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Fetch the order first if there's an order_id in the request.
 		$order = null;
 		if ( $request->has_param( 'order_id' ) ) {
-			$order_id = (int) $request->get_param( 'order_id' );
+			$order_id = $this->resolve_route_id( $request, 'order_id' );
 			$order    = wc_get_order( $order_id );
 
 			if ( ! $order ) {
@@ -205,6 +205,25 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Resolve a route identifier (order or fulfillment id) from the matched URL.
+	 *
+	 * The native v3 routes carry both ids as URL path segments; the v4 facade injects them
+	 * via set_param() after deriving them from the fulfillment. Reading the URL-captured
+	 * value first keeps the handler bound to the route it matched, and falls back to the
+	 * injected param for the v4 path.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @param string          $key     Either 'order_id' or 'fulfillment_id'.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return int The resolved identifier, or 0 when absent.
+	 */
+	private function resolve_route_id( WP_REST_Request $request, string $key ): int {
+		$url_params = $request->get_url_params();
+
+		return (int) ( $url_params[ $key ] ?? $request->get_param( $key ) );
+	}
+
+	/**
 	 * Get the fulfillments for the order.
 	 *
 	 * @since 10.1.0
@@ -215,7 +234,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The fulfillments for the order, or an error if the request fails.
 	 */
 	public function get_fulfillments( WP_REST_Request $request ): WP_REST_Response {
-		$order_id     = (int) $request->get_param( 'order_id' );
+		$order_id     = $this->resolve_route_id( $request, 'order_id' );
 		$fulfillments = array();
 
 		// Fetch fulfillments for the order.
@@ -257,7 +276,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The created fulfillment, or an error if the request fails.
 	 */
 	public function create_fulfillment( WP_REST_Request $request ) {
-		$order_id        = (int) $request->get_param( 'order_id' );
+		$order_id        = $this->resolve_route_id( $request, 'order_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
 
 		$order = wc_get_order( $order_id );
@@ -280,6 +299,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			if ( isset( $params['meta_data'] ) ) {
 				$this->apply_request_meta_data( $params['meta_data'], $fulfillment );
 			}
+			// Identity is assigned by the controller, never taken from the request body. Force a new row
+			// (so a nested props/id payload cannot turn create into an update) and the routed order.
+			$fulfillment->set_id( 0 );
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( "$order_id" );
 
@@ -338,8 +360,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @throws \Exception If the fulfillment is not found or is deleted.
 	 */
 	public function get_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$order_id       = (int) $request->get_param( 'order_id' );
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		$order_id       = $this->resolve_route_id( $request, 'order_id' );
+		$fulfillment_id = $this->resolve_route_id( $request, 'fulfillment_id' );
 
 		// Fetch the fulfillment for the order.
 		try {
@@ -376,8 +398,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The updated fulfillment, or an error if the request fails.
 	 */
 	public function update_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$order_id          = (int) $request->get_param( 'order_id' );
-		$fulfillment_id    = (int) $request->get_param( 'fulfillment_id' );
+		$order_id          = $this->resolve_route_id( $request, 'order_id' );
+		$fulfillment_id    = $this->resolve_route_id( $request, 'fulfillment_id' );
 		$notify_customer   = (bool) $request->get_param( 'notify_customer' );
 		$customer_note_raw = $request->get_param( 'customer_note' );
 		$customer_note     = is_string( $customer_note_raw ) ? $customer_note_raw : '';
@@ -401,6 +423,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			$fulfillment->set_props( $request->get_json_params() );
+			// Identity comes only from the route. Re-pin it after applying the body so that no field,
+			// including a nested props/props_from_storage payload, can redirect the write to another row
+			// or reparent the fulfillment to another entity.
+			$fulfillment->set_id( $fulfillment_id );
+			$fulfillment->set_entity_type( WC_Order::class );
+			$fulfillment->set_entity_id( (string) $order_id );
 			$next_state = $fulfillment->get_is_fulfilled();
 
 			if ( isset( $request->get_json_params()['meta_data'] ) ) {
@@ -489,8 +517,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The deleted fulfillment, or an error if the request fails.
 	 */
 	public function delete_fulfillment( WP_REST_Request $request ) {
-		$order_id        = (int) $request->get_param( 'order_id' );
-		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
+		$order_id        = $this->resolve_route_id( $request, 'order_id' );
+		$fulfillment_id  = $this->resolve_route_id( $request, 'fulfillment_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
 
 		// Delete the fulfillment for the order.
@@ -547,8 +575,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The metadata for the fulfillment, or an error if the request fails.
 	 */
 	public function get_fulfillment_meta( WP_REST_Request $request ): WP_REST_Response {
-		$order_id       = (int) $request->get_param( 'order_id' );
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		$order_id       = $this->resolve_route_id( $request, 'order_id' );
+		$fulfillment_id = $this->resolve_route_id( $request, 'fulfillment_id' );
 
 		// Fetch the metadata for the fulfillment.
 		try {
@@ -576,8 +604,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The updated metadata for the fulfillment, or an error if the request fails.
 	 */
 	public function update_fulfillment_meta( WP_REST_Request $request ): WP_REST_Response {
-		$order_id       = (int) $request->get_param( 'order_id' );
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		$order_id       = $this->resolve_route_id( $request, 'order_id' );
+		$fulfillment_id = $this->resolve_route_id( $request, 'fulfillment_id' );
 
 		// Update the metadata for the fulfillment.
 		try {
@@ -627,8 +655,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The deleted metadata for the fulfillment, or an error if the request fails.
 	 */
 	public function delete_fulfillment_meta( WP_REST_Request $request ) {
-		$order_id       = (int) $request->get_param( 'order_id' );
-		$fulfillment_id = (int) $request->get_param( 'fulfillment_id' );
+		$order_id       = $this->resolve_route_id( $request, 'order_id' );
+		$fulfillment_id = $this->resolve_route_id( $request, 'fulfillment_id' );
 
 		// Delete the metadata for the fulfillment.
 		try {
@@ -666,7 +694,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The tracking number details, or an error if the request fails.
 	 */
 	public function get_tracking_number_details( WP_REST_Request $request ) {
-		$order_id        = (int) $request->get_param( 'order_id' );
+		$order_id        = $this->resolve_route_id( $request, 'order_id' );
 		$tracking_number = sanitize_text_field( $request->get_param( 'tracking_number' ) );
 
 		if ( empty( $tracking_number ) ) {

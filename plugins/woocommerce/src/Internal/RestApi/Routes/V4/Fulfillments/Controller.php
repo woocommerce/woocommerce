@@ -341,7 +341,14 @@ class Controller extends AbstractController {
 			if ( $fulfillment_id ) {
 				try {
 					$fulfillment = new Fulfillment( $fulfillment_id );
-					$order       = wc_get_order( (int) $fulfillment->get_entity_id() );
+					if ( $fulfillment->get_id() && WC_Order::class !== $fulfillment->get_entity_type() ) {
+						return new WP_Error(
+							'woocommerce_rest_invalid_entity_type',
+							esc_html__( 'The entity type must be "order".', 'woocommerce' ),
+							array( 'status' => WP_Http::BAD_REQUEST )
+						);
+					}
+					$order = wc_get_order( (int) $fulfillment->get_entity_id() );
 				} catch ( ApiException $ex ) {
 					return new WP_Error(
 						$ex->getErrorCode(),
