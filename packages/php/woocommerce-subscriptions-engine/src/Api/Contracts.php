@@ -96,7 +96,9 @@ final class Contracts {
 	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
 	 * strings, and a non-null money value requires a currency. `items` is a list of item
 	 * rows; `addresses` is keyed `billing` / `shipping`. Unknown keys, also inside item rows
-	 * and addresses, raise a `_doing_it_wrong()` notice and are ignored.
+	 * and addresses, raise a `_doing_it_wrong()` notice and are ignored. The contract row,
+	 * items and addresses are separate writes and the engine opens no transaction: wrap the
+	 * call in one when a failed write must leave nothing behind.
 	 *
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
@@ -129,10 +131,12 @@ final class Contracts {
 	 * the present keys are written, so fields a concurrent writer changed in between keep
 	 * its values; `items` and `addresses` replace the whole set; `null` clears a
 	 * nullable field (and resets a money field to 0). Unknown keys (`extension_slug`
-	 * included) raise a `_doing_it_wrong()` notice and are ignored.
+	 * included) raise a `_doing_it_wrong()` notice and are ignored. Items and addresses are
+	 * replaced delete-then-insert and the engine opens no transaction: wrap the call in one
+	 * when a failed replacement must keep the previous rows.
 	 *
-	 * @param int                  $contract_id   Contract id.
-	 * @param array<string, mixed> $args Fields to write.
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        Fields to write.
 	 * @return ContractView|null The row as read before the write plus the written fields (a column
 	 *                           another writer changed meanwhile may be stale here, not in storage);
 	 *                           null when the contract does not exist (also when it is deleted
