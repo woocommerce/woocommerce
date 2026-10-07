@@ -288,6 +288,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public $block_email_editor_enabled;
 
+	/**
+	 * Whether Cc/Bcc recipients can be configured for this email.
+	 *
+	 * False for emails that carry a credential such as a password reset key.
+	 * The Cc/Bcc settings are then hidden and stored values are ignored.
+	 * The Cc/Bcc recipient filters still apply.
+	 *
+	 * @since 11.2.0
+	 * @var bool
+	 */
+	protected $supports_cc_bcc = true;
+
 
 
 	/**
@@ -333,7 +345,7 @@ class WC_Email extends WC_Settings_API {
 
 		$this->email_type = $this->get_option( 'email_type' );
 		$this->enabled    = $this->get_option( 'enabled' );
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) && $this->supports_cc_bcc() ) {
 			$this->cc  = $this->get_option( 'cc', '' );
 			$this->bcc = $this->get_option( 'bcc', '' );
 		}
@@ -636,6 +648,17 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Whether Cc/Bcc recipients can be configured for this email.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public function supports_cc_bcc() {
+		return $this->supports_cc_bcc;
+	}
+
+	/**
 	 * Get valid Cc recipients.
 	 *
 	 * @return string
@@ -645,11 +668,12 @@ class WC_Email extends WC_Settings_API {
 		 * Filter the Cc recipient for the email.
 		 *
 		 * @since 9.8.0
+		 * @since 11.2.0 The base value is empty when the email does not support Cc/Bcc.
 		 * @param string   $cc     Cc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->cc, $this->object, $this );
+		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->supports_cc_bcc() ? $this->cc : '', $this->object, $this );
 		$ccs = array_map( 'trim', explode( ',', $cc ?? '' ) );
 		$ccs = array_filter( $ccs, 'is_email' );
 		$ccs = array_map( 'sanitize_email', $ccs );
@@ -666,11 +690,12 @@ class WC_Email extends WC_Settings_API {
 		 * Filter the Bcc recipient for the email.
 		 *
 		 * @since 9.8.0
+		 * @since 11.2.0 The base value is empty when the email does not support Cc/Bcc.
 		 * @param string   $bcc    Bcc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->bcc, $this->object, $this );
+		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->supports_cc_bcc() ? $this->bcc : '', $this->object, $this );
 		$bccs = array_map( 'trim', explode( ',', $bcc ?? '' ) );
 		$bccs = array_filter( $bccs, 'is_email' );
 		$bccs = array_map( 'sanitize_email', $bccs );
@@ -1318,7 +1343,7 @@ class WC_Email extends WC_Settings_API {
 				'desc_tip'    => true,
 			),
 		);
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) && $this->supports_cc_bcc() ) {
 			$this->form_fields['cc']  = $this->get_cc_field();
 			$this->form_fields['bcc'] = $this->get_bcc_field();
 		}
