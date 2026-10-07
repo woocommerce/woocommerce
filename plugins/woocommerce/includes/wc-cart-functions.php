@@ -12,6 +12,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
@@ -196,8 +197,16 @@ function wc_clear_cart_after_payment() {
 	}
 
 	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
-	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
-		$order = wc_get_order( WC()->session->order_awaiting_payment );
+	$session_order_id = 0;
+	if ( is_object( WC()->session ) ) {
+		// The order sent to the gateway comes first: payment_complete() clears order_awaiting_payment
+		// before the status change, so after a request dies there it is the only pointer left.
+		$session_order_id = absint( WC()->session->get( PaymentRecovery::ORDER_SENT_TO_GATEWAY ) );
+		$session_order_id = $session_order_id ? $session_order_id : absint( WC()->session->order_awaiting_payment );
+	}
+
+	if ( $session_order_id > 0 && ! $should_clear_cart_after_payment ) {
+		$order = wc_get_order( $session_order_id );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
