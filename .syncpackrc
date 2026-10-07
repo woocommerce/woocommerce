@@ -54,7 +54,6 @@
 				"@testing-library/*",
 				"@typescript-eslint/*",
 				"@wordpress/autop",
-				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
@@ -121,6 +120,7 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
 				"postcss",
 				"webpack"
@@ -395,15 +395,6 @@
 				"@woocommerce/experimental"
 			],
 			"isIgnored": true
-		},
-		{
-			"dependencies": [
-				"@wordpress/prettier-config"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.49.0"
 		},
 		{
 			"dependencies": [

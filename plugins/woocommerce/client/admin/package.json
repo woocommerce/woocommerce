@@ -171,7 +171,6 @@
 		"@wordpress/jest-preset-default": "next",
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
-		"@wordpress/prettier-config": "4.49.0",
 		"@xstate/inspect": "0.8.0",
 		"@xstate/test": "0.5.1",
 		"autoprefixer": "^10.4.16",
