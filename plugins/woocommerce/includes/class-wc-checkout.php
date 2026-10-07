@@ -430,10 +430,7 @@ class WC_Checkout {
 				return new WP_Error(
 					self::ORDER_ALREADY_PLACED_ERROR,
 					__( 'This order has already been placed.', 'woocommerce' ),
-					array(
-						'order_id' => $session_order->get_id(),
-						'redirect' => $session_order->get_checkout_order_received_url(),
-					)
+					array( 'order_id' => $session_order->get_id() )
 				);
 			}
 
