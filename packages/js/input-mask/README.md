@@ -4,11 +4,7 @@ A small input mask engine. It formats text as the user types and reports the unm
 
 The engine never drops a typed character. When the typed text does not fit the mask, the input shows the text as typed until the user fixes it.
 
-## Installation
-
-```bash
-pnpm install @woocommerce/input-mask --save
-```
+This package is internal to WooCommerce for now and is not published to npm.
 
 ## Mask syntax
 
