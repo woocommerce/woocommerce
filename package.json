@@ -49,6 +49,8 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/prettier-config": "catalog:tooling",
+		"@wordpress/stylelint-config": "catalog:tooling",
+		"@wordpress/theme": "catalog:wp-bundled",
 		"babel-loader": "9.2.x",
 		"chalk": "^4.1.2",
 		"copy-webpack-plugin": "13.0.x",
@@ -67,6 +69,7 @@
 		"rimraf": "5.0.5",
 		"sass": "^1.69.5",
 		"sass-loader": "10.5.x",
+		"stylelint": "catalog:tooling",
 		"syncpack": "15.3.3",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling"

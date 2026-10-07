@@ -485,7 +485,8 @@ CREATE TABLE $meta_table_name (
 		$order_by         = '';
 		$order_by_clauses = array();
 
-		if ( $args['order_by'] && is_array( $args['order_by'] ) ) {
+		// A COUNT() has no rows to sort, and ORDER BY on it fails under ONLY_FULL_GROUP_BY.
+		if ( 'count' !== $args['return'] && $args['order_by'] && is_array( $args['order_by'] ) ) {
 			foreach ( $args['order_by'] as $what => $how ) {
 				$order_by_clauses[] = $table . '.' . esc_sql( strval( $what ) ) . ' ' . esc_sql( strval( $how ) );
 			}
