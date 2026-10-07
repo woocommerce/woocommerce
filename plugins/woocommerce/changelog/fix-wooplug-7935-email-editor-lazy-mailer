@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show and send emails registered late on init, such as Back in stock notifications, when the block email editor is enabled.
