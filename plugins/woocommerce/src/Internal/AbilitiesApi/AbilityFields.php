@@ -15,6 +15,9 @@ defined( 'ABSPATH' ) || exit;
  * object of that type adds the field values under `extensions`, keyed by
  * attribute, and lists the fields in its output schema.
  *
+ * @internal Core's abilities call this class. The public contract is
+ *           wc_register_ability_field(); the read side may change.
+ *
  * @since 11.3.0
  */
 class AbilityFields {
@@ -52,6 +55,8 @@ class AbilityFields {
 	 * `extensions`. A field that reads null is left out, and the key is left out
 	 * when no field has a value or the feature is off.
 	 *
+	 * @internal
+	 *
 	 * @param array<string, mixed> $output      Formatted object.
 	 * @param string               $object_type Object type.
 	 * @param object               $subject     Object to read.
@@ -79,6 +84,8 @@ class AbilityFields {
 	 * Add the `extensions` property to an object schema when the feature is on.
 	 * It lists the fields registered so far and allows others, because a field
 	 * can be registered after the ability.
+	 *
+	 * @internal
 	 *
 	 * @param array<string, mixed> $schema      Object schema.
 	 * @param string               $object_type Object type.
