@@ -114,7 +114,7 @@ final class Plan {
 		// A new plan is always unsaved; never adopt a caller-supplied id or stored dates.
 		unset( $args['id'], $args['date_created_gmt'], $args['date_updated_gmt'] );
 
-		// Checked before construction, which would re-key a list into an object.
+		// Checked before construction, which coerces a non-array payload to null.
 		self::assert_policy( 'billing_policy', $args['billing_policy'] ?? null );
 		self::assert_policy( 'pricing_policy', $args['pricing_policy'] ?? null );
 		self::assert_policy( 'delivery_policy', $args['delivery_policy'] ?? null );

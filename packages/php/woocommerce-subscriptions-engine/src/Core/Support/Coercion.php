@@ -117,7 +117,8 @@ final class Coercion {
 	}
 
 	/**
-	 * Coerce a value to a string-keyed array, or null when it is not an array.
+	 * Coerce a value to a string-keyed array, or null when it is not an array. Only the
+	 * declared type changes: PHP keeps an integer-like key as an int, so a list stays a list.
 	 *
 	 * @param mixed $value The raw value.
 	 * @return array<string, mixed>|null

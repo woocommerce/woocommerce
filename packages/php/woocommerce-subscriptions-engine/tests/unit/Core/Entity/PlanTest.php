@@ -160,7 +160,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
-	 * @testdox from_storage hydrates a non-object stored policy without validating it.
+	 * @testdox from_storage hydrates a stored list policy as it is and nulls a non-array one, without validating.
 	 */
 	public function test_from_storage_does_not_validate(): void {
 		$plan = Plan::from_storage(
@@ -175,13 +175,7 @@ class PlanTest extends TestCase {
 
 		$this->assertSame( '', $plan->get_name() );
 		$this->assertNull( $plan->get_extension_slug() );
-		$this->assertSame(
-			array(
-				'0' => 'a',
-				'1' => 'b',
-			),
-			$plan->get_billing_policy()
-		);
+		$this->assertSame( array( 'a', 'b' ), $plan->get_billing_policy() );
 		$this->assertNull( $plan->get_pricing_policy() );
 		$this->assertNull( $plan->get_delivery_policy() );
 	}
