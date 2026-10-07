@@ -68,11 +68,14 @@ cleanup() { [[ $keep_tmp -eq 1 ]] || rm -rf "$tmp"; }
 trap cleanup EXIT
 
 # --tests selectors -> phpunit arguments: an optional suite plus --filter
-# patterns (classes, methods, regexes, or the classes a file declares) joined with |.
+# patterns joined with |. A bare class or Class::method is anchored to the
+# whole (possibly namespaced) name; anything else is passed as a regex.
 selection=()
 test_suite=""
 filters=()
+identifier='^[A-Za-z0-9_\\]+(::[A-Za-z0-9_]+)?$'
 for t in ${tests[@]+"${tests[@]}"}; do
+	[[ -n "$t" ]] || usage
 	if [[ "$t" == suite:* ]]; then
 		[[ -z "$test_suite" ]] || { echo "error: only one suite: selector" >&2; usage; }
 		test_suite="${t#suite:}"
@@ -82,9 +85,11 @@ for t in ${tests[@]+"${tests[@]}"}; do
 		usage
 	elif [[ -f "$project_dir/${t#"$project_dir"/}" ]]; then
 		# phpunit wants a file's class named after the file; this repo's are not, so select the classes it declares.
-		classes="$(grep -oE '^(final |abstract )?class +[A-Za-z0-9_]+' "$project_dir/${t#"$project_dir"/}" | awk '{print $NF}')"
+		classes="$(grep -oE '^(final |abstract )?class +[A-Za-z0-9_]+' "$project_dir/${t#"$project_dir"/}" | awk '{print $NF}' || true)"
 		[[ -n "$classes" ]] || { echo "error: no test class found in '$t'" >&2; usage; }
-		for c in $classes; do filters+=( "^$c\\b" ); done
+		for c in $classes; do filters+=( "(^|\\\\)$c\\b" ); done
+	elif [[ "$t" =~ $identifier ]]; then
+		filters+=( "(^|\\\\)$t\\b" )
 	else
 		filters+=( "$t" )
 	fi
@@ -94,6 +99,8 @@ if [[ ${#filters[@]} -gt 0 ]]; then
 	joined="$(printf '%s|' "${filters[@]}")"
 	selection+=( --filter "${joined%|}" )
 fi
+# phpunit exits 0 when a selection matches nothing; make that a failure.
+[[ ${#tests[@]} -eq 0 ]] || selection+=( --fail-on-empty-test-suite )
 phpunit_args=( ${selection[@]+"${selection[@]}"} ${phpunit_args[@]+"${phpunit_args[@]}"} )
 
 run() {
