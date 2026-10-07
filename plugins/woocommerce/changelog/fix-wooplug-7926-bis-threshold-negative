@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save a negative "Delete unverified notification sign-ups after" value as 0, which turns the cleanup off.

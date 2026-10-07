@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use WC_Settings_Advanced;
 use WC_Settings_Products;
@@ -84,6 +85,7 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertSame( 100, has_filter( 'woocommerce_get_sections_products', array( $sut, 'add_customer_stock_notifications_section' ) ) );
 		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_products', array( $sut, 'add_customer_stock_notifications_settings' ) ) );
 		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_advanced', array( $sut, 'add_my_account_endpoint_setting' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', array( $sut, 'sanitize_unverified_deletion_days_threshold' ) ) );
 		$this->assertFalse( has_action( 'admin_notices', array( $sut, 'output_admin_notices' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) ) );
@@ -164,6 +166,31 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status(), 'Saving the endpoint setting via REST should succeed.' );
 		$this->assertSame( 'restock-alerts', get_option( MyAccountEndpoint::ENDPOINT_OPTION ), 'The value saved via the REST settings API should be sanitized as an endpoint slug, matching the classic admin settings save path.' );
+	}
+
+	/**
+	 * @testdox Saving a negative unverified sign-up deletion threshold stores 0 and unschedules the cleanup.
+	 */
+	public function test_negative_unverified_deletion_days_threshold_is_saved_as_zero() {
+		$option_id            = 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold';
+		$retention_controller = new DataRetentionController();
+		update_option( $option_id, 30 );
+		$this->assertSame( 'daily', wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ), 'A positive threshold should schedule the cleanup.' );
+
+		\WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'   => $option_id,
+					'type' => 'number',
+				),
+			),
+			array( $option_id => '-5' )
+		);
+
+		$this->assertSame( 0, (int) get_option( $option_id ), 'A negative threshold should be stored as 0.' );
+		$this->assertFalse( wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ), 'A negative threshold should turn the cleanup off.' );
+
+		$retention_controller->clear_daily_task();
 	}
 
 	/**
