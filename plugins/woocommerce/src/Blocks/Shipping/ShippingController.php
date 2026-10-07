@@ -450,7 +450,7 @@ class ShippingController {
 		$chosen_method_id       = explode( ':', $chosen_method )[0];
 		$chosen_method_instance = explode( ':', $chosen_method )[1] ?? 0;
 
-		// Only pickup_location rate ids end in a pickup location index; other pickup methods end in a zone instance id.
+		// Only pickup_location rates should get their address from the saved settings, local_pickup has another filter, and third party pickup locations should have their own filter and logic for the address as well.
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
 		if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			$pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
