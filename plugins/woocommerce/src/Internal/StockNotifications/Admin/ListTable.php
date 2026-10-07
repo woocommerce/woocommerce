@@ -200,7 +200,7 @@ class ListTable extends \WP_List_Table {
 			return;
 		}
 
-		$name                     = $product->get_name();
+		$name                     = $product->get_title();
 		$formatted_variation_list = $notification->get_product_formatted_variation_list( true );
 
 		if ( $formatted_variation_list ) {

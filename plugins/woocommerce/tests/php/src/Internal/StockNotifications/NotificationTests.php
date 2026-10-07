@@ -122,6 +122,29 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the variation's fixed attribute value when a different value was posted for it.
+	 */
+	public function test_get_product_formatted_variation_list_keeps_fixed_attribute_over_posted(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		// The first variation fixes "size" to "small"; "colour" is left as "Any".
+		$variation_id = $variable_product->get_children()[0];
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->update_meta_data(
+			'posted_attributes',
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$notification->save();
+
+		$this->assertSame( 'size: small, colour: red', $notification->get_product_formatted_variation_list( true ), 'The fixed attribute should win over the posted value, while the "Any" attribute is filled in' );
+	}
+
+	/**
 	 * Test the get_product_permalink method.
 	 */
 	public function test_get_product_permalink() {
