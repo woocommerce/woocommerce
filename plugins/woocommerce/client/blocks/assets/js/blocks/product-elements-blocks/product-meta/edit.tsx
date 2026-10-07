@@ -20,14 +20,16 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Category:', 'woocommerce' ),
+						// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+						prefix: __( 'Category: ', 'woocommerce' ),
 						term: 'product_cat',
 					},
 				],
 				[
 					'core/post-terms',
 					{
-						prefix: __( 'Tags:', 'woocommerce' ),
+						// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+						prefix: __( 'Tags: ', 'woocommerce' ),
 						term: 'product_tag',
 					},
 				],
