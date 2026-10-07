@@ -275,6 +275,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 * @testWith ["product_cat", ["cat-1"]]
 	 *           ["product_cat", ["cat-2"]]
 	 *           ["product_cat", ["cat-1", "cat-2"]]
+	 *           ["product_cat", ["cat-1", "not-exist-slug"]]
 	 *           ["product_tag", ["tag-1"]]
 	 *           ["product_tag", ["tag-2", "tag-3"]]
 	 *
@@ -320,9 +321,9 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Taxonomy filtering ignores selected taxonomies with no matching term.
+	 * @testdox Taxonomy filtering returns no products when a selected taxonomy has no matching terms.
 	 */
-	public function test_taxonomy_clauses_ignore_taxonomies_without_matching_terms(): void {
+	public function test_taxonomy_clauses_fail_closed_when_a_taxonomy_has_no_matching_terms(): void {
 		$chosen_taxonomies = array(
 			'product_cat' => array( 'cat-1' ),
 			'product_tag' => array( 'not-exist-slug' ),
@@ -335,7 +336,26 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
 		remove_filter( 'posts_clauses', $filter_callback );
 
-		$this->assertEqualsCanonicalizing( array( 'Product 1', 'Product 4', 'Product 5', 'Product 6' ), $received_products );
+		$this->assertSame( array(), $received_products );
+	}
+
+	/**
+	 * @testdox Taxonomy filtering ignores unknown terms when that taxonomy also has a matching term.
+	 */
+	public function test_taxonomy_clauses_ignore_unknown_terms_in_a_matching_taxonomy(): void {
+		$chosen_taxonomies = array(
+			'product_cat' => array( 'cat-1' ),
+			'product_tag' => array( 'tag-1', 'not-exist-slug' ),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_taxonomies ) {
+			return $this->sut->add_taxonomy_clauses( $args, $chosen_taxonomies );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$this->assertEqualsCanonicalizing( array( 'Product 1', 'Product 4' ), $received_products );
 	}
 
 	/**

@@ -82,23 +82,28 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	} );
 
 	let descriptionElement = (
-		<p { ...blockProps }>{ __( 'Category description', 'woocommerce' ) }</p>
+		<div { ...blockProps }>
+			<p>{ __( 'Category description', 'woocommerce' ) }</p>
+		</div>
 	);
 
 	if ( termId || isPreviewMode ) {
 		descriptionElement = userCanEdit ? (
-			<PlainText
-				tagName="p"
-				placeholder={ __( 'No description', 'woocommerce' ) as string }
-				value={ displayRawDescription }
-				onChange={ ( v: string ) =>
-					( setDescription as ( v: string ) => void )( v )
-				}
-				__experimentalVersion={ 2 }
-				{ ...blockProps }
-			/>
+			<div { ...blockProps }>
+				<PlainText
+					tagName="p"
+					placeholder={
+						__( 'No description', 'woocommerce' ) as string
+					}
+					value={ displayRawDescription }
+					onChange={ ( v: string ) =>
+						( setDescription as ( v: string ) => void )( v )
+					}
+					__experimentalVersion={ 2 }
+				/>
+			</div>
 		) : (
-			<p
+			<div
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
 					__html: displayFullDescription,
