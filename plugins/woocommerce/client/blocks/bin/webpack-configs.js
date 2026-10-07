@@ -254,8 +254,9 @@ const getMainConfig = ( options = {} ) => {
 							if (
 								metadata.parent &&
 								! genericBlocks[ blockName ]
-							)
+							) {
 								return `./inner-blocks/${ blockName }/block.json`;
+							}
 							return `./${ blockName }/block.json`;
 						},
 					},

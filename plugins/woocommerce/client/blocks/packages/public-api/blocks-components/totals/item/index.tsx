@@ -68,7 +68,7 @@ const TotalsItem = ( {
 							width="45px"
 							height="1em"
 							ariaMessage={ __(
-								'Loading price… ',
+								'Loading price…',
 								'woocommerce'
 							) }
 						/>

@@ -593,11 +593,7 @@ const quantityAbortControllers = new Map< string, AbortController >();
  * @param {number} quantity    Specified (new) quantity.
  */
 export const changeCartItemQuantity =
-	(
-		cartItemKey: string,
-		quantity: number
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unclear how to represent multiple different yields as type
-	) =>
+	( cartItemKey: string, quantity: number ) =>
 	async ( { dispatch, select }: CartThunkArgs ) => {
 		const cartItem = select.getCartItem( cartItemKey );
 		if ( cartItem?.quantity === quantity ) {
