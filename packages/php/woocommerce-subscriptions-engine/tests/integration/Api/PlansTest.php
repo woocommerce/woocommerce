@@ -178,7 +178,7 @@ class PlansTest extends EngineIntegrationTestCase {
 
 		$id = $this->create( array( 'sort_order' => 1 ) );
 
-		$this->assertSame( array( 'Plans: unknown key "sort_order" ignored.' ), $messages );
+		$this->assertSame( array( 'Unknown key "sort_order" ignored.' ), $messages );
 		$this->assertSame( 'Monthly', $this->stored( $id )->get_name(), 'The known keys beside the unknown one are written.' );
 	}
 

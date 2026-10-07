@@ -33,6 +33,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -92,7 +93,7 @@ final class Plans {
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): int {
-		$args = self::known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
 		$extension_slug = $args['extension_slug'] ?? null;
 		if ( ! is_string( $extension_slug ) || '' === $extension_slug ) {
@@ -137,7 +138,7 @@ final class Plans {
 		if ( $id <= 0 ) {
 			throw new InvalidArgumentException( 'Plans: the plan id must be a positive integer.' );
 		}
-		$args = self::known_keys( __METHOD__, $args, self::PLAN_KEYS );
+		$args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		$repository = new PlanRepository();
 		$plan       = $repository->find( $id );
@@ -242,7 +243,7 @@ final class Plans {
 	 */
 	private static function apply( Plan $plan, array $args ): void {
 		if ( array_key_exists( 'name', $args ) ) {
-			$name = is_string( $args['name'] ) ? trim( $args['name'] ) : '';
+			$name = trim( ArgumentValidator::validate_string( 'name', $args['name'] ) );
 			if ( '' === $name ) {
 				throw new InvalidArgumentException( 'Plans: "name" must be a non-empty string.' );
 			}
@@ -250,12 +251,10 @@ final class Plans {
 		}
 
 		if ( array_key_exists( 'status', $args ) ) {
-			$status = $args['status'];
+			$status = ArgumentValidator::validate_string( 'status', $args['status'] );
 			// The stored status stays writable after its extension is deactivated (as in Plan::set_status()).
-			if ( ! is_string( $status ) || ( $status !== $plan->get_status() && ! PlanStatus::is_registered( $status ) ) ) {
-				throw new InvalidArgumentException(
-					sprintf( 'Plans: "status" must be a registered plan status, got "%s".', esc_html( is_scalar( $status ) ? (string) $status : gettype( $status ) ) )
-				);
+			if ( $status !== $plan->get_status() && ! PlanStatus::is_registered( $status ) ) {
+				throw new InvalidArgumentException( sprintf( 'Plans: "status" must be a registered plan status, got "%s".', esc_html( $status ) ) );
 			}
 			$plan->set_status( $status );
 		}
@@ -332,31 +331,6 @@ final class Plans {
 		if ( $errors->has_errors() ) {
 			throw new PlanValidationException( $errors ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The exception escapes its message.
 		}
-	}
-
-	/**
-	 * Drop the keys outside `$allowed`, with a `_doing_it_wrong()` notice for each.
-	 *
-	 * @param string                   $method  Public facade method, for the notice.
-	 * @param array<int|string, mixed> $args    Caller arguments.
-	 * @param array<string, true>      $allowed Accepted keys, as a key map.
-	 * @return array<string, mixed> The arguments with known keys only.
-	 */
-	private static function known_keys( string $method, array $args, array $allowed ): array {
-		foreach ( array_keys( array_diff_key( $args, $allowed ) ) as $key ) {
-			_doing_it_wrong(
-				esc_html( $method ),
-				sprintf( 'Plans: unknown key "%s" ignored.', esc_html( (string) $key ) ),
-				'0.0.1'
-			);
-		}
-
-		$known = array();
-		foreach ( array_intersect_key( $args, $allowed ) as $key => $value ) {
-			$known[ (string) $key ] = $value;
-		}
-
-		return $known;
 	}
 
 	/**
