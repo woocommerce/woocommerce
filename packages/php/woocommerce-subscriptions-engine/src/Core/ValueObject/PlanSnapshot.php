@@ -115,7 +115,7 @@ final class PlanSnapshot {
 			return null;
 		}
 
-		return BillingPolicy::from_array_with_usable_cadence( self::string_keyed( $policy ) );
+		return BillingPolicy::from_array_with_usable_cadence( Coercion::coerce_string_keyed( $policy ) );
 	}
 
 	/**
@@ -128,7 +128,7 @@ final class PlanSnapshot {
 	public function get_pricing_policy(): ?array {
 		$policy = $this->data['pricing_policy'] ?? null;
 
-		return is_array( $policy ) ? self::string_keyed( $policy ) : null;
+		return is_array( $policy ) ? Coercion::coerce_string_keyed( $policy ) : null;
 	}
 
 	/**
@@ -148,22 +148,5 @@ final class PlanSnapshot {
 	 */
 	public function to_payload(): array {
 		return $this->data;
-	}
-
-	/**
-	 * Re-key a nested payload array as string-keyed for the typed value-object factory.
-	 * A no-op at runtime (decoded JSON object keys are already strings); it recovers the
-	 * string-keyed type that erases to `array<int|string, mixed>`.
-	 *
-	 * @param array<int|string, mixed> $value Nested payload array.
-	 * @return array<string, mixed>
-	 */
-	private static function string_keyed( array $value ): array {
-		$out = array();
-		foreach ( $value as $key => $item ) {
-			$out[ (string) $key ] = $item;
-		}
-
-		return $out;
 	}
 }

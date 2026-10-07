@@ -157,7 +157,7 @@ final class PlanRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$plans[] = $this->hydrate_row( self::string_keyed_array( $row ) );
+			$plans[] = $this->hydrate_row( Coercion::coerce_string_keyed( $row ) );
 		}
 
 		return $plans;
@@ -658,29 +658,12 @@ final class PlanRepository {
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
 				$result[] = array(
-					'meta_key'   => ScalarCoercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'meta_value' => ScalarCoercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_key'   => Coercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => Coercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 				);
 			}
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Normalize a database row to string keys.
-	 *
-	 * @param array<array-key, mixed> $row Raw row.
-	 * @return array<string, mixed>
-	 */
-	private static function string_keyed_array( array $row ): array {
-		$data = array();
-		foreach ( $row as $key => $value ) {
-			if ( is_string( $key ) ) {
-				$data[ $key ] = $value;
-			}
-		}
-
-		return $data;
 	}
 }
