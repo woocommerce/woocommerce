@@ -612,6 +612,69 @@ class ContractsTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	/**
+	 * Run a contract write while every insert into a child table fails, asserting it throws.
+	 *
+	 * @param string   $child_table Child table constant of SchemaInstaller.
+	 * @param callable $write       The facade write; must throw rather than return.
+	 */
+	private function assert_write_throws_when_child_inserts_fail( string $child_table, callable $write ): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( $child_table );
+		$break = static function ( string $query ) use ( $table ): string {
+			return 0 === strpos( $query, "INSERT INTO `{$table}`" ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$write();
+			$this->fail( 'Expected the write to throw instead of returning a view.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to insert', $e->getMessage() );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break );
+		}
+	}
+
+	public function test_create_throws_when_an_item_insert_fails(): void {
+		$this->assert_write_throws_when_child_inserts_fail(
+			SchemaInstaller::TABLE_CONTRACT_ITEMS,
+			static function () {
+				return Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'items'          => array( array( 'item_name' => 'Coffee' ) ),
+					)
+				);
+			}
+		);
+	}
+
+	public function test_update_throws_when_an_item_insert_fails(): void {
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->assert_write_throws_when_child_inserts_fail(
+			SchemaInstaller::TABLE_CONTRACT_ITEMS,
+			static function () use ( $id ) {
+				return Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			}
+		);
+	}
+
+	public function test_update_throws_when_an_address_insert_fails(): void {
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->assert_write_throws_when_child_inserts_fail(
+			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
+			static function () use ( $id ) {
+				return Contracts::update( $id, array( 'addresses' => array( 'billing' => array( 'city' => 'Faro' ) ) ) );
+			}
+		);
+	}
+
 	public function test_null_clears_nullable_fields(): void {
 		$id = Contracts::create(
 			array(

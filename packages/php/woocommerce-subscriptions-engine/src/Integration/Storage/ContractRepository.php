@@ -70,7 +70,7 @@ final class ContractRepository {
 	 *
 	 * @param Contract $contract Contract to insert.
 	 * @return int The new contract id.
-	 * @throws \RuntimeException If the contract insert fails.
+	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
 	public function insert( Contract $contract ): int {
 		global $wpdb;
@@ -113,7 +113,7 @@ final class ContractRepository {
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
-	 * @throws \RuntimeException If the contract has no id, or its row no longer exists.
+	 * @throws \RuntimeException If the contract has no id, its row no longer exists, or a write fails.
 	 */
 	public function update( Contract $contract ): bool {
 		$id = $contract->get_id();
@@ -1625,6 +1625,7 @@ final class ContractRepository {
 	 * equal. Only a changed set is rewritten (delete-then-reinsert for that one table).
 	 *
 	 * @param Contract $contract Contract whose children to reconcile. Must have an id.
+	 * @throws \RuntimeException If a child row write fails.
 	 */
 	private function sync_children( Contract $contract ): void {
 		$id = (int) $contract->get_id();
@@ -1643,12 +1644,17 @@ final class ContractRepository {
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @throws \RuntimeException If the delete or an insert fails.
 	 */
 	private function replace_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ), array( 'contract_id' => $contract_id ) );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ), array( 'contract_id' => $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
 		$this->insert_items( $contract_id, $items );
 	}
 
@@ -1657,12 +1663,17 @@ final class ContractRepository {
 	 *
 	 * @param int                                 $contract_id Contract id.
 	 * @param array<string, array<string, mixed>> $addresses   Address rows keyed by type.
+	 * @throws \RuntimeException If the delete or an insert fails.
 	 */
 	private function replace_addresses( int $contract_id, array $addresses ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete address rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
 		$this->insert_addresses( $contract_id, $addresses );
 	}
 
@@ -1671,13 +1682,14 @@ final class ContractRepository {
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @throws \RuntimeException If an insert fails.
 	 */
 	private function insert_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
 		foreach ( $items as $item ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert(
+			$inserted = $wpdb->insert(
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
@@ -1691,6 +1703,10 @@ final class ContractRepository {
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
+
+			if ( false === $inserted ) {
+				throw new \RuntimeException( sprintf( 'Failed to insert item row for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			}
 		}
 	}
 
@@ -1699,6 +1715,7 @@ final class ContractRepository {
 	 *
 	 * @param int                                 $contract_id Contract id.
 	 * @param array<string, array<string, mixed>> $addresses   Address rows keyed by type.
+	 * @throws \RuntimeException If an insert fails.
 	 */
 	private function insert_addresses( int $contract_id, array $addresses ): void {
 		global $wpdb;
@@ -1714,7 +1731,10 @@ final class ContractRepository {
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
+			$inserted = $wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
+			if ( false === $inserted ) {
+				throw new \RuntimeException( sprintf( 'Failed to insert %s address row for contract %d: %s', esc_html( (string) $type ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			}
 		}
 	}
 
