@@ -48,6 +48,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	/**
+	 * @testdox add_meta keeps every value under one key in order.
+	 */
 	public function test_add_meta_keeps_every_value_under_one_key_in_order(): void {
 		$first  = $this->sut->add_meta( $this->id, 'note', 'one' );
 		$second = $this->sut->add_meta( $this->id, 'note', 'two' );
@@ -59,6 +62,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'one', $this->sut->get_meta( $this->id, 'note', true ) );
 	}
 
+	/**
+	 * @testdox unique add on an existing key adds nothing.
+	 */
 	public function test_unique_add_on_an_existing_key_adds_nothing(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 
@@ -66,11 +72,17 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox update_meta adds the key when absent.
+	 */
 	public function test_update_meta_adds_when_absent(): void {
 		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'one' ) );
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox update_meta rewrites every row for the key.
+	 */
 	public function test_update_meta_rewrites_every_row_for_the_key(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 		$this->sut->add_meta( $this->id, 'note', 'two' );
@@ -79,6 +91,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'three', 'three' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox update_meta with a previous value rewrites only matching rows.
+	 */
 	public function test_update_meta_with_a_previous_value_rewrites_only_matching_rows(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 		$this->sut->add_meta( $this->id, 'note', 'two' );
@@ -88,6 +103,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertFalse( $this->sut->update_meta( $this->id, 'note', 'four', 'missing' ) );
 	}
 
+	/**
+	 * @testdox update_meta to the same value reports no change.
+	 */
 	public function test_update_meta_to_the_same_value_reports_no_change(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 
@@ -95,6 +113,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox delete_meta with a value removes only that row.
+	 */
 	public function test_delete_meta_with_a_value_removes_only_that_row(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 		$this->sut->add_meta( $this->id, 'note', 'two' );
@@ -103,6 +124,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox delete_meta without a value removes every row for the key.
+	 */
 	public function test_delete_meta_without_a_value_removes_every_row_for_the_key(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 		$this->sut->add_meta( $this->id, 'note', 'two' );
@@ -114,6 +138,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertFalse( $this->sut->delete_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox get_meta without a key groups every key.
+	 */
 	public function test_get_meta_without_a_key_groups_every_key(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 		$this->sut->add_meta( $this->id, 'flag', 'yes' );
@@ -128,6 +155,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	/**
+	 * @testdox arrays round-trip through serialization.
+	 */
 	public function test_arrays_round_trip_through_serialization(): void {
 		$value = array(
 			'a' => 1,
@@ -140,12 +170,18 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $this->sut->delete_meta( $this->id, 'payload', $value ) );
 	}
 
+	/**
+	 * @testdox a missing key reads as empty.
+	 */
 	public function test_missing_key_reads_as_empty(): void {
 		$this->assertSame( '', $this->sut->get_meta( $this->id, 'missing', true ) );
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'missing' ) );
 		$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
 	}
 
+	/**
+	 * @testdox meta is scoped to its plan.
+	 */
 	public function test_meta_is_scoped_to_its_plan(): void {
 		$plan  = Plan::create(
 			array(
@@ -159,6 +195,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox meta survives a plan update.
+	 */
 	public function test_meta_survives_a_plan_update(): void {
 		$this->sut->add_meta( $this->id, 'note', 'kept' );
 
@@ -170,6 +209,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox delete removes the plan's meta.
+	 */
 	public function test_delete_removes_the_plan_meta(): void {
 		$this->sut->add_meta( $this->id, 'note', 'gone' );
 
@@ -249,6 +291,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	/**
+	 * @testdox a wrong-owner delete keeps the plan and its meta.
+	 */
 	public function test_a_wrong_owner_delete_keeps_the_plan_and_its_meta(): void {
 		$this->sut->add_meta( $this->id, 'note', 'kept' );
 
@@ -258,6 +303,7 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox an empty key is rejected on writes.
 	 * @dataProvider provide_write_methods
 	 *
 	 * @param string $method Write method name.

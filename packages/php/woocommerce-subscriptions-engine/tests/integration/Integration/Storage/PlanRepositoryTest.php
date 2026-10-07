@@ -55,6 +55,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		return array_map( static fn ( Plan $plan ): ?int => $plan->get_id(), $plans );
 	}
 
+	/**
+	 * @testdox a plan round-trips all three opaque policies.
+	 */
 	public function test_plan_round_trips_all_three_opaque_policies(): void {
 		$repo     = new PlanRepository();
 		$billing  = array(
@@ -104,6 +107,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $fetched->get_date_updated_gmt() );
 	}
 
+	/**
+	 * @testdox a plan without policies round-trips with null billing.
+	 */
 	public function test_plan_without_policies_round_trips_with_null_billing(): void {
 		$repo = new PlanRepository();
 
@@ -123,6 +129,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNull( $fetched->get_delivery_policy() );
 	}
 
+	/**
+	 * @testdox update_fields persists the name, status and policies and bumps only the update time.
+	 */
 	public function test_update_fields_persists_name_status_and_policies_and_bumps_only_the_updated_date(): void {
 		global $wpdb;
 
@@ -188,6 +197,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertTrue( $repo->update_fields( $plan, array( 'name' ) ) );
 	}
 
+	/**
+	 * @testdox update_fields without an id throws.
+	 */
 	public function test_update_fields_without_an_id_throws(): void {
 		$plan = Plan::create(
 			array(
@@ -201,6 +213,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		( new PlanRepository() )->update_fields( $plan, array( 'name' ) );
 	}
 
+	/**
+	 * @testdox update_fields writes only the named columns.
+	 */
 	public function test_update_fields_writes_only_the_named_columns(): void {
 		$repo = new PlanRepository();
 		$id   = $this->insert_plan( $repo, 'Original' );
@@ -223,6 +238,7 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox update_fields refuses a field that is not writable.
 	 * @testWith ["extension_slug"]
 	 *           ["sort_order"]
 	 *
@@ -238,6 +254,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$repo->update_fields( $plan, array( $field ) );
 	}
 
+	/**
+	 * @testdox query and count filter by status and search.
+	 */
 	public function test_query_and_count_filter_by_status_and_search(): void {
 		$repo = new PlanRepository();
 
@@ -257,6 +276,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $repo->count( array( 'status' => PlanStatus::ARCHIVED ) ) );
 	}
 
+	/**
+	 * @testdox query accepts a status list.
+	 */
 	public function test_query_status_accepts_a_list(): void {
 		$repo = new PlanRepository();
 
@@ -270,6 +292,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( $archived_id ), self::ids( $repo->query( array( 'status' => array( PlanStatus::ARCHIVED ) ) ) ) );
 	}
 
+	/**
+	 * @testdox query matches nothing for an empty or invalid status list.
+	 */
 	public function test_query_empty_or_invalid_status_list_matches_nothing(): void {
 		$repo = new PlanRepository();
 		$this->insert_plan( $repo, 'Active' );
@@ -281,6 +306,9 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $repo->query( array( 'status' => null ) ) );
 	}
 
+	/**
+	 * @testdox query defaults to id order and sorts by name.
+	 */
 	public function test_query_defaults_to_id_order_and_sorts_by_name(): void {
 		$repo = new PlanRepository();
 

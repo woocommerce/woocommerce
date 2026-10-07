@@ -1,6 +1,6 @@
 <?php
 /**
- * Argument validators shared by the public write facades.
+ * Argument validators shared by the public facades.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Support
  */
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Validate caller argument values and return them normalized.
  *
- * @internal Engine implementation detail shared by the `Api\` write facades, not part of the public API.
+ * @internal Engine implementation detail shared by the `Api\` facades, not part of the public API.
  */
 final class ArgumentValidator {
 

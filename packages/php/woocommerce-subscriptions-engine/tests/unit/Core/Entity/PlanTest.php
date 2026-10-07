@@ -25,6 +25,9 @@ class PlanTest extends TestCase {
 		parent::tearDown();
 	}
 
+	/**
+	 * @testdox create applies the defaults.
+	 */
 	public function test_create_defaults(): void {
 		$plan = Plan::create(
 			array(
@@ -56,6 +59,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox a policy round-trips opaquely through storage.
 	 * @dataProvider provide_policy_fields
 	 *
 	 * @param string $field Policy field.
@@ -87,6 +91,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox an empty object policy is kept as an empty array.
 	 * @dataProvider provide_policy_fields
 	 *
 	 * @param string $field Policy field.
@@ -103,6 +108,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox a null policy stays null.
 	 * @dataProvider provide_policy_fields
 	 *
 	 * @param string $field Policy field.
@@ -134,6 +140,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox create rejects a non-object policy.
 	 * @dataProvider provide_bad_policy_values
 	 *
 	 * @param string $field Policy field.
@@ -222,6 +229,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox a setter rejects a list policy.
 	 * @dataProvider provide_policy_fields
 	 *
 	 * @param string $field Policy field.
@@ -236,6 +244,7 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox a setter replaces the whole payload.
 	 * @dataProvider provide_policy_fields
 	 *
 	 * @param string $field Policy field.
@@ -260,6 +269,9 @@ class PlanTest extends TestCase {
 		$this->assertNull( $this->policy( $plan, $field ) );
 	}
 
+	/**
+	 * @testdox create rejects an unregistered status.
+	 */
 	public function test_create_rejects_an_unregistered_status(): void {
 		$this->expectException( DomainException::class );
 
@@ -272,6 +284,9 @@ class PlanTest extends TestCase {
 		);
 	}
 
+	/**
+	 * @testdox set_status rejects an unregistered status.
+	 */
 	public function test_set_status_rejects_an_unregistered_status(): void {
 		$plan = self::create_plan( 'Unknown' );
 
@@ -280,6 +295,9 @@ class PlanTest extends TestCase {
 		$plan->set_status( 'seasonal' );
 	}
 
+	/**
+	 * @testdox a registered extension status is accepted.
+	 */
 	public function test_a_registered_extension_status_is_accepted(): void {
 		StatusRegistry::register( StatusRegistry::KIND_PLAN, 'seasonal' );
 
@@ -297,6 +315,9 @@ class PlanTest extends TestCase {
 		$this->assertSame( PlanStatus::ARCHIVED, $plan->to_storage()['status'] );
 	}
 
+	/**
+	 * @testdox from_storage hydrates an unregistered stored status.
+	 */
 	public function test_from_storage_hydrates_an_unregistered_stored_status(): void {
 		$plan = Plan::from_storage(
 			array(
@@ -312,6 +333,9 @@ class PlanTest extends TestCase {
 		$this->assertSame( 'retired-by-ext', $plan->to_storage()['status'] );
 	}
 
+	/**
+	 * @testdox from_storage hydrates the id and dates.
+	 */
 	public function test_from_storage_hydrates_the_id_and_dates(): void {
 		$plan = Plan::from_storage(
 			array(
@@ -329,6 +353,9 @@ class PlanTest extends TestCase {
 		$this->assertSame( '2026-02-03 04:05:06', $plan->get_date_updated_gmt() );
 	}
 
+	/**
+	 * @testdox to_storage has exactly the record columns.
+	 */
 	public function test_to_storage_has_exactly_the_record_columns(): void {
 		$plan = self::create_plan( 'Columns' );
 
@@ -338,6 +365,9 @@ class PlanTest extends TestCase {
 		);
 	}
 
+	/**
+	 * @testdox name and id are mutable.
+	 */
 	public function test_name_and_id_are_mutable(): void {
 		$plan = self::create_plan( 'Before' );
 

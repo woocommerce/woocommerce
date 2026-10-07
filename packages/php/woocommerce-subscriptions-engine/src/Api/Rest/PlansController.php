@@ -1,7 +1,8 @@
 <?php
 /**
- * REST controller for subscription engine plans: opaque CRUD over the plan read and
- * write facades. Policies pass through as JSON objects, never parsed or merged.
+ * REST controller for subscription engine plans: opaque CRUD over the plan facade (the
+ * paged, searchable collection reads the repository). Policies pass through as JSON
+ * objects, never parsed or merged.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest
  */

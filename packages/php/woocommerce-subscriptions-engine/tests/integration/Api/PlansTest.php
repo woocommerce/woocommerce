@@ -81,6 +81,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		return ( new PlanRepository() )->count();
 	}
 
+	/**
+	 * @testdox create stores the fields and returns the view.
+	 */
 	public function test_create_stores_the_fields_and_returns_the_view(): void {
 		$created = Plans::create(
 			array(
@@ -114,6 +117,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'anchor' => 1 ), $plan->get_delivery_policy() );
 	}
 
+	/**
+	 * @testdox create without policies stores nulls.
+	 */
 	public function test_create_without_policies_stores_nulls(): void {
 		$created = Plans::create(
 			array(
@@ -128,6 +134,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertNull( $plan->get_delivery_policy() );
 	}
 
+	/**
+	 * @testdox create accepts a registered extension status.
+	 */
 	public function test_create_accepts_a_registered_extension_status(): void {
 		StatusRegistry::register( StatusRegistry::KIND_PLAN, 'seasonal' );
 
@@ -152,6 +161,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox create rejects invalid args and stores nothing.
 	 * @dataProvider provide_invalid_create_args
 	 *
 	 * @param array<string, mixed> $overrides Invalid overrides.
@@ -189,12 +199,18 @@ class PlansTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	/**
+	 * @testdox create requires a name.
+	 */
 	public function test_create_requires_a_name(): void {
 		$this->expectException( InvalidArgumentException::class );
 
 		Plans::create( array( 'extension_slug' => self::OWNER ) );
 	}
 
+	/**
+	 * @testdox an unknown create key is ignored with a notice.
+	 */
 	public function test_an_unknown_create_key_is_ignored_with_a_notice(): void {
 		$this->setExpectedIncorrectUsage( Plans::class . '::create' );
 		$messages = array();
@@ -213,6 +229,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Monthly', $this->stored( $id )->get_name(), 'The known keys beside the unknown one are written.' );
 	}
 
+	/**
+	 * @testdox update replaces a policy wholesale and null clears.
+	 */
 	public function test_update_replaces_a_policy_wholesale_and_null_clears(): void {
 		$id = $this->create(
 			array(
@@ -239,6 +258,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertNull( $this->stored( $id )->get_pricing_policy() );
 	}
 
+	/**
+	 * @testdox a status-only update writes the status and keeps the name.
+	 */
 	public function test_status_only_update(): void {
 		$id = $this->create();
 
@@ -249,6 +271,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Monthly', $plan->get_name() );
 	}
 
+	/**
+	 * @testdox update of a missing plan returns null.
+	 */
 	public function test_update_of_a_missing_plan_returns_null(): void {
 		$this->assertNull( Plans::update( 999999, array( 'name' => 'Nope' ) ) );
 		$this->assertNull( Plans::update( 0, array( 'name' => 'Nope' ) ) );
@@ -299,6 +324,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertNull( $updated );
 	}
 
+	/**
+	 * @testdox an unknown update key is ignored with a notice.
+	 */
 	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
 		$id = $this->create();
 		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
@@ -315,6 +343,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Changed', $this->stored( $id )->get_name(), 'The known key beside the unknown one is written.' );
 	}
 
+	/**
+	 * @testdox extension slug is not an update key.
+	 */
 	public function test_extension_slug_is_not_an_update_key(): void {
 		$id = $this->create();
 		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
@@ -355,6 +386,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox update rejects invalid args and leaves the plan unchanged.
 	 * @dataProvider provide_invalid_update_args
 	 *
 	 * @param array<string, mixed> $args Invalid update args.
@@ -373,6 +405,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
 	}
 
+	/**
+	 * @testdox update accepts the stored status after it is unregistered.
+	 */
 	public function test_update_accepts_the_stored_status_after_it_is_unregistered(): void {
 		StatusRegistry::register( StatusRegistry::KIND_PLAN, 'seasonal' );
 		$id = $this->create( array( 'status' => 'seasonal' ) );
@@ -393,6 +428,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Renamed', $plan->get_name() );
 	}
 
+	/**
+	 * @testdox update writes only the present fields.
+	 */
 	public function test_update_writes_only_the_present_fields(): void {
 		global $wpdb;
 
@@ -414,6 +452,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Renamed elsewhere', $plan->get_name(), 'The status-only update must not write the name it read.' );
 	}
 
+	/**
+	 * @testdox update with no fields validates and writes nothing.
+	 */
 	public function test_update_with_no_fields_validates_and_writes_nothing(): void {
 		global $wpdb;
 
@@ -438,6 +479,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertNotSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'A field update bumps the update time.' );
 	}
 
+	/**
+	 * @testdox the validate action receives the would-be state on create.
+	 */
 	public function test_validate_action_receives_the_would_be_state_on_create(): void {
 		$seen = array();
 		add_action(
@@ -460,6 +504,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( self::OWNER, $seen[0][2] );
 	}
 
+	/**
+	 * @testdox the validate action receives the would-be state on update.
+	 */
 	public function test_validate_action_receives_the_would_be_state_on_update(): void {
 		$id   = $this->create();
 		$seen = null;
@@ -487,6 +534,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'x' => 1 ), $seen->get_pricing_policy() );
 	}
 
+	/**
+	 * @testdox an added error refuses the create with its codes.
+	 */
 	public function test_an_added_error_refuses_the_create_with_its_codes(): void {
 		$before = $this->plan_count();
 		add_action(
@@ -514,6 +564,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( $before, $this->plan_count() );
 	}
 
+	/**
+	 * @testdox an added error refuses the update.
+	 */
 	public function test_an_added_error_refuses_the_update(): void {
 		$id = $this->create();
 		add_action(
@@ -533,6 +586,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'Monthly', $this->stored( $id )->get_name() );
 	}
 
+	/**
+	 * @testdox a throwing callback throws a runtime exception and stores nothing.
+	 */
 	public function test_a_throwing_callback_throws_a_runtime_exception_and_stores_nothing(): void {
 		$before = $this->plan_count();
 		add_action(
@@ -552,6 +608,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( $before, $this->plan_count() );
 	}
 
+	/**
+	 * @testdox the meta methods round-trip values.
+	 */
 	public function test_meta_methods_round_trip(): void {
 		$id = $this->create();
 
@@ -571,12 +630,18 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( '', Plans::get_meta( $id, 'note', true ) );
 	}
 
+	/**
+	 * @testdox meta reads for a missing plan are empty.
+	 */
 	public function test_meta_reads_for_a_missing_plan_are_empty(): void {
 		$this->assertFalse( Plans::delete_meta( 999999, 'note' ) );
 		$this->assertSame( '', Plans::get_meta( 999999, 'note', true ) );
 		$this->assertSame( array(), Plans::get_meta( 999999 ) );
 	}
 
+	/**
+	 * @testdox meta writes do not look up the plan.
+	 */
 	public function test_meta_writes_do_not_look_up_the_plan(): void {
 		$id = $this->create();
 		Plans::add_meta( $id, 'note', 'one' );
@@ -602,6 +667,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'on', Plans::get_meta( $id, 'flag', true ) );
 	}
 
+	/**
+	 * @testdox deleting a plan removes its meta.
+	 */
 	public function test_deleting_a_plan_removes_its_meta(): void {
 		$id = $this->create();
 		Plans::add_meta( $id, 'note', 'one' );
@@ -611,6 +679,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), Plans::get_meta( $id, 'note' ) );
 	}
 
+	/**
+	 * @testdox an empty meta key is rejected.
+	 */
 	public function test_an_empty_meta_key_is_rejected(): void {
 		$this->expectException( InvalidArgumentException::class );
 
