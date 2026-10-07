@@ -8,6 +8,11 @@ sidebar_position: 7
 
 This page provides guidance for troubleshooting and recovering from issues that may arise during the WooCommerce release process. It covers common scenarios, recommended actions, and best practices to help ensure releases are handled smoothly and any problems are resolved efficiently.
 
+:::tip
+
+`@woo-core-release` in `#woo-core-releases` is the point of contact for release-process questions in general, not just the scenarios below. Use it for escalations, second opinions, or anything this doc doesn't answer.
+
+:::
 
 ## Scenarios / FAQ
 
@@ -23,9 +28,17 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 During the release process, you may encounter CI test failures on release-related PRs. These failures sometimes occur because test fixes were merged to trunk but not backported to the release branch before it was cut.
 
-1. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
-2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
-3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
+1. **Check [GitHub's status page](https://www.githubstatus.com/) first**: PRs stuck on _"Waiting for status to be reported"_ or entire batches of failing jobs are often caused by a GitHub Actions incident, not by the release.
+2. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
+3. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
+4. **Re-run before assuming a regression**: If nothing relevant changed since the last green run, the failure is likely flakiness. If a test keeps flaking on the release branch, file an issue for the owning team and don't let it block the release.
+5. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel.
+
+Note that a failing check that is not required and is clearly unrelated to the change (for example, a comparison job that references code only present on trunk) does not have to block merging a release-related PR. When in doubt, ask in the release Slack channel before merging over a failure.
+
+### The "Build ZIP file" workflow refuses to build because of open PRs
+
+The workflow checks two criteria: open PRs based on the release branch, and open PRs carrying the release milestone (on any base branch). Draft PRs are ignored, so switching a PR to draft is a quick way to bypass the check temporarily. The workflow's error message lists the offending PRs: merge the ones that belong in the release, and close stale or redundant ones (including auto-generated backport PRs whose changes are already on the release branch).
 
 ### Something looks wrong in the final release ZIP. Can I start over?
 
@@ -44,6 +57,13 @@ If, after downloading and unzipping the generated artifact, something seems off 
 4. Review any [auto-generated PRs](https://github.com/woocommerce/woocommerce/pulls?q=is%3Aopen+is%3Apr+author%3Aapp%2Fgithub-actions+label%3ARelease): if there are open PRs that weren't merged and are no longer needed, close them and delete their branches.
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
+
+### The "Upload release to WordPress.org" workflow failed
+
+When this workflow fails, it reports the state of the SVN side in the run summary; check it before doing anything else. Two things worth knowing:
+
+- **If the SVN tag for the version exists, the upload succeeded** even though the run is red: continue with the release process. Re-running against an existing tag fails validation.
+- **`E175013: Access to '/!svn/me' forbidden` means invalid SVN credentials**: update the SVN credentials secret from the secret store and re-run.
 
 ### A serious bug was detected during internal checks / monitoring
 
@@ -70,8 +90,16 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
 2. If the severity warrants it (e.g., checkout failure, data loss, or other critical impact affecting many stores), temporarily move the stable tag on WordPress.org back to the previous known-good version, so new installs and updates stop landing on the broken version while the fix is being prepared:
    - Identify the correct previous version and note its exact number.
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
-   - Merge any auto-generated PRs right away.
+   - Merge any auto-generated PRs right away: the revert opens PRs updating the `Stable tag` in `readme.txt` on `trunk` and the affected release branches, and the next build and upload will fail if the stable tag doesn't match SVN.
 3. Follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
+
+### The release is out, but sites don't see the update yet
+
+This is usually not a problem:
+
+- WordPress checks for plugin updates roughly every 12 hours by default, so it can take a while for a newly published release to be offered on any given site.
+- WordPress.org now also applies a delay of up to 24 hours before offering new releases ([announcement](https://wordpress.org/news/2026/06/pts/)), so the update may not appear immediately even after a site's update check runs.
+- Only the `Stable tag` in the `readme.txt` on WordPress.org's SVN `trunk` controls what the updater offers. The `readme.txt` bundled inside a released ZIP always shows the previous version as stable: that's expected, since published releases are frozen and can't be edited.
 
 ### The release needs to be delayed. What should we do?
 

@@ -208,8 +208,10 @@ final class RenewalEngine {
 	 *
 	 * The structural invariants it does enforce keep the money-path safe whatever the caller:
 	 * it skips (logging, never throwing - a scheduled action would retry a permanent condition
-	 * forever) when the contract is gone, gateway-scheduled, or inactive, and refuses a cycle
-	 * that is neither the head nor its immediate successor (no billing a gap). The claim is the
+	 * forever) when the contract is gone, gateway-scheduled, or not active, and refuses a cycle
+	 * that is neither the head nor its immediate successor (no billing a gap). The non-active
+	 * skip never parks: the engine does not clear the next-due moment of a contract whose
+	 * status it did not set. The claim is the
 	 * concurrency gate: appending the successor collides on `UNIQUE(contract_id, kind, count)`
 	 * and the head is reclaimed only through the lease compare-and-set, so a cycle is charged at
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
@@ -217,8 +219,9 @@ final class RenewalEngine {
 	 *
 	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
 	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
-	 * caller can park; returns null for an idempotent no-op (a live claim, an already-settled
-	 * cycle, an unbuildable order).
+	 * scheduled caller can park and a manual caller can return null; returns null for an
+	 * idempotent no-op (a non-active contract, a live claim, an already-settled cycle, an
+	 * unbuildable order).
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
@@ -252,6 +255,10 @@ final class RenewalEngine {
 			return null;
 		}
 
+		// Interim: moves out of the engine with the renewal flow.
+		// The due scan already selects only active contracts; a manual or racing caller that
+		// reaches a non-active one is skipped without parking, so its next-due moment is left
+		// for whichever flow set its status.
 		if ( ContractStatus::ACTIVE !== $contract->get_status() ) {
 			wc_get_logger()->info(
 				sprintf( 'RenewalEngine::process(): contract %d is %s, not active - skipping renewal. No order created.', $contract_id, $contract->get_status() ),
@@ -375,7 +382,7 @@ final class RenewalEngine {
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
 	 */
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
-		$snapshot = $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
+		$snapshot = $this->resolve_plan_snapshot( $contract );
 		if ( $snapshot instanceof PlanSnapshot ) {
 			$payload = $snapshot->to_array();
 			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
@@ -397,6 +404,19 @@ final class RenewalEngine {
 
 		$plan = $this->plans->find( $contract->get_selling_plan_id() );
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+	}
+
+	/**
+	 * The contract's plan snapshot - the frozen terms the policy resolvers read.
+	 *
+	 * The full contract reads already carry the snapshot; the store fetch is the
+	 * fallback for a contract built on a lean path (row-only reads). Null when the
+	 * contract carries no snapshot at all.
+	 *
+	 * @param Contract $contract The contract being renewed.
+	 */
+	private function resolve_plan_snapshot( Contract $contract ): ?PlanSnapshot {
+		return $contract->get_plan_snapshot() ?? $this->contracts->find_plan_snapshot( $contract->get_plan_snapshot_id() );
 	}
 
 	/**
@@ -497,7 +517,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		if ( $head->get_status()->equals( CycleStatus::pending() ) && $this->lease_has_expired( $head, $now ) ) {
+		if ( $head->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) && $this->lease_has_expired( $head, $now ) ) {
 			// Crash recovery, race-safe: only the caller whose CAS UPDATE matches the
 			// still-expired row reclaims it; a concurrent worker that already extended the
 			// lease leaves this caller matching zero rows, so it skips.
@@ -529,7 +549,7 @@ final class RenewalEngine {
 
 		// Admin retry: flip a failed head back to pending and re-attempt its charge. Scheduled
 		// selection never routes a failed head here; only a manual trigger does.
-		if ( $head->get_status()->equals( CycleStatus::failed() ) ) {
+		if ( $head->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) ) {
 			// Race-safe: only the caller whose CAS UPDATE matches the still-failed row wins.
 			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), self::LEASE_TTL_SECONDS ) ) {
 				wc_get_logger()->info(
@@ -709,7 +729,7 @@ final class RenewalEngine {
 			}
 			// Sync the entity with the row the CAS just wrote, for the action payload.
 			$cycle->set_order_id( $order->get_id() );
-			$cycle->set_status( CycleStatus::billed() );
+			$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
 			$cycle->set_claimed_until_gmt( null );
 
 			// Advance to the period actually billed (this cycle's end), not a recomputed one;
@@ -718,7 +738,23 @@ final class RenewalEngine {
 			$contract->set_next_payment_gmt( $cycle->get_ends_at_gmt() );
 			$contract->set_last_payment_gmt( null !== $paid_at ? gmdate( 'Y-m-d H:i:s', $paid_at->getTimestamp() ) : $now );
 			$contract->set_last_attempt_gmt( $now );
-			$this->contracts->update( $contract );
+			// Conditioned on the ACTIVE status this settle read: a lifecycle transition
+			// that landed mid-settle (a customer cancel) must not be clobbered by this
+			// schedule advance - the cycle outcome above already landed either way.
+			if ( ! $this->contracts->update_if_status( $contract, ContractStatus::ACTIVE ) ) {
+				wc_get_logger()->info(
+					sprintf( 'RenewalEngine: contract %d transitioned during settle; schedule advance skipped.', (int) $contract->get_id() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
+
+				// The action below announces "billed AND schedule advanced"; the advance
+				// did not persist, so do not hand listeners the unpersisted in-memory
+				// entity. The order + billed cycle rows carry the charge for audit.
+				return;
+			}
 
 			/**
 			 * Fires after a renewal cycle is billed and the contract schedule advanced.
@@ -737,12 +773,14 @@ final class RenewalEngine {
 				return;
 			}
 			$cycle->set_order_id( $order->get_id() );
-			$cycle->set_status( CycleStatus::failed() );
+			$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
 			$cycle->set_reason( 'gateway-charge-failed' );
 			$cycle->set_claimed_until_gmt( null );
 
 			$contract->set_last_attempt_gmt( $now );
-			$this->contracts->update( $contract );
+			// Conditioned like the billed branch: bookkeeping only, never worth
+			// clobbering a concurrent lifecycle transition for.
+			$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 
 			return;
 		}
@@ -756,7 +794,9 @@ final class RenewalEngine {
 		}
 
 		$contract->set_last_attempt_gmt( $now );
-		$this->contracts->update( $contract );
+		// Conditioned like the billed branch: bookkeeping only, never worth clobbering
+		// a concurrent lifecycle transition for.
+		$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 	}
 
 	/**
@@ -832,7 +872,9 @@ final class RenewalEngine {
 				$line->set_name( self::item_string( $item, 'item_name' ) );
 				$line->set_product_id( self::item_int( $item, 'product_id' ) );
 				$line->set_variation_id( self::item_int( $item, 'variation_id' ) );
-				$line->set_quantity( max( 1, self::item_int( $item, 'quantity' ) ) );
+				// Stored quantity as is (zero and fractional included); the woocommerce_stock_amount
+				// filter decides precision.
+				$line->set_quantity( self::item_string( $item, 'quantity' ) ); // @phpstan-ignore argument.type (docblock-only int; fractional quantities are valid)
 				$line->set_subtotal( self::item_string( $item, 'subtotal' ) );
 				$line->set_total( self::item_string( $item, 'total' ) );
 				$renewal_order->add_item( $line );
@@ -1052,17 +1094,22 @@ final class RenewalEngine {
 	 * vanished mid-park, a write error) must not stall the rest of the batch. On failure the
 	 * contract simply stays due and the park is re-attempted next tick.
 	 *
+	 * Only an active contract is parked: one that stopped being active since it was selected
+	 * already left the due set, and its next-due moment belongs to whoever changed its status.
+	 *
 	 * @param int $contract_id The contract to remove from the due set.
 	 */
 	public function park( int $contract_id ): void {
 		try {
 			$contract = $this->contracts->find( $contract_id );
-			if ( null === $contract ) {
+			if ( null === $contract || ContractStatus::ACTIVE !== $contract->get_status() ) {
 				return;
 			}
 
 			$contract->set_next_payment_gmt( null );
-			$this->contracts->update( $contract );
+			// Conditioned on active: a status change racing the park must not be
+			// clobbered, nor have its next-due moment cleared.
+			$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine::park(): failed to park contract %d - %s', $contract_id, $e->getMessage() ),

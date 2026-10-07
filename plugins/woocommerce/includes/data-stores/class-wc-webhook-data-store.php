@@ -53,7 +53,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'pending_delivery' => $webhook->get_pending_delivery( 'edit' ),
 		);
 
-		$wpdb->insert( $wpdb->prefix . 'wc_webhooks', $data ); // WPCS: DB call ok.
+		$wpdb->insert( $wpdb->prefix . 'wc_webhooks', $data ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- This data store owns the formatted write and invalidates webhook caches afterward.
 
 		$webhook_id = $wpdb->insert_id;
 		$webhook->set_id( $webhook_id );
@@ -77,7 +77,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$data = wp_cache_get( $webhook->get_id(), 'webhooks' );
 
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A ); // WPCS: cache ok, DB call ok.
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT webhook_id, status, name, user_id, delivery_url, secret, topic, date_created, date_modified, api_version, failure_count, pending_delivery FROM {$wpdb->prefix}wc_webhooks WHERE webhook_id = %d LIMIT 1;", $webhook->get_id() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This data store checks and populates the webhook object cache around the prepared query.
 
 			wp_cache_add( $webhook->get_id(), $data, 'webhooks' );
 		}
@@ -148,7 +148,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			array(
 				'webhook_id' => $webhook->get_id(),
 			)
-		); // WPCS: DB call ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- This data store owns the formatted update and invalidates webhook caches afterward.
 
 		$webhook->apply_changes();
 
@@ -181,7 +181,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 				'webhook_id' => $webhook->get_id(),
 			),
 			array( '%d' )
-		); // WPCS: cache ok, DB call ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This data store owns the formatted delete; caching a DELETE is not applicable.
 
 		$this->delete_transients( 'all' );
 		wp_cache_delete( $webhook->get_id(), 'webhooks' );

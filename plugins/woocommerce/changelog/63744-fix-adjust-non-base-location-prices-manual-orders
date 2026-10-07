@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: woocommerce_adjust_non_base_location_prices not respected for manual backend orders

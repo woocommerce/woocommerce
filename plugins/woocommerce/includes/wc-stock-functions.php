@@ -127,7 +127,8 @@ add_action( 'woocommerce_order_status_processing', 'wc_maybe_reduce_stock_levels
 add_action( 'woocommerce_order_status_on-hold', 'wc_maybe_reduce_stock_levels' );
 
 /**
- * When a payment is cancelled, restore stock.
+ * Restore stock for an order that reduced it, when it moves to a status that releases stock
+ * (cancelled, pending, or failed).
  *
  * @since 3.0.0
  * @param int $order_id Order ID.
@@ -154,6 +155,11 @@ function wc_maybe_increase_stock_levels( $order_id ) {
 }
 add_action( 'woocommerce_order_status_cancelled', 'wc_maybe_increase_stock_levels' );
 add_action( 'woocommerce_order_status_pending', 'wc_maybe_increase_stock_levels' );
+// Restore stock when a stock-reduced order fails. wc_maybe_increase_stock_levels() only acts when
+// the order carries the `_order_stock_reduced` flag, so it restores an order that reduced stock
+// (in practice one left on-hold by an async payment such as SEPA/ACH) and does nothing for a
+// pending -> failed decline that never reduced. Added in 11.0.0.
+add_action( 'woocommerce_order_status_failed', 'wc_maybe_increase_stock_levels' );
 
 /**
  * Reduce stock levels for items within an order, if stock has not already been reduced for the items.

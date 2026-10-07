@@ -66,7 +66,7 @@ export const Tax = ( { onComplete, query, task }: TaxProps ) => {
 	const onManual = useCallback( async () => {
 		setIsPending( true );
 		if ( generalSettings?.woocommerce_calc_taxes !== 'yes' ) {
-			updateAndPersistSettingsForGroup( 'tax', {
+			void updateAndPersistSettingsForGroup( 'tax', {
 				tax: {
 					...taxSettings,
 					wc_connect_taxes_enabled: 'no',
@@ -140,7 +140,7 @@ export const Tax = ( { onComplete, query, task }: TaxProps ) => {
 			no_tax: true,
 		} );
 
-		updateOptions( {
+		void updateOptions( {
 			woocommerce_no_sales_tax: true,
 			woocommerce_calc_taxes: 'no',
 		} ).then( () => {
@@ -188,7 +188,7 @@ export const Tax = ( { onComplete, query, task }: TaxProps ) => {
 	const { auto } = query;
 	useEffect( () => {
 		if ( auto === 'true' ) {
-			onAutomate();
+			void onAutomate();
 		}
 	}, [ auto, onAutomate ] );
 

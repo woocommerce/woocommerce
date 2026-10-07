@@ -19,6 +19,10 @@ jest.mock( '~/utils/features', () => ( {
 } ) );
 
 describe( 'SettingsPaymentsMain', () => {
+	afterEach( () => {
+		delete window.wcSettings.admin.woocommerce_payments_nox_profile;
+	} );
+
 	it( 'should record settings_payments_pageview event on load', () => {
 		render(
 			<Router>
@@ -62,37 +66,52 @@ describe( 'SettingsPaymentsMain', () => {
 			</Router>
 		);
 
-		const morePaymentOptionsLink = screen
-			.getByText( 'More payment options' )
-			.closest( 'a' );
+		const morePaymentOptionsLink = screen.getByText(
+			'More payment options'
+		);
 
 		// Verify the link has the correct href attribute for external navigation
-		expect( morePaymentOptionsLink ).toHaveAttribute(
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
 			'href',
 			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations'
 		);
 
 		// Verify the link opens in a new tab
-		expect( morePaymentOptionsLink ).toHaveAttribute( 'target', '_blank' );
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
+			'target',
+			'_blank'
+		);
 
 		// Verify security attributes are present for external links
-		expect( morePaymentOptionsLink ).toHaveAttribute(
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
 			'rel',
 			expect.stringContaining( 'noopener' )
 		);
 
-		expect( morePaymentOptionsLink ).toHaveAttribute(
+		expect( morePaymentOptionsLink.closest( 'a' ) ).toHaveAttribute(
 			'rel',
 			expect.stringContaining( 'noreferrer' )
 		);
+	} );
 
-		expect( morePaymentOptionsLink ).toHaveClass(
-			'components-external-link'
+	it( 'should filter the marketplace link by the selected business location', () => {
+		window.wcSettings.admin.woocommerce_payments_nox_profile = {
+			business_country_code: 'BR',
+		};
+
+		render(
+			<Router>
+				<SettingsPaymentsMain />
+			</Router>
 		);
+
 		expect(
-			morePaymentOptionsLink?.querySelector(
-				'.components-external-link__icon'
-			)
-		).not.toBeNull();
+			screen.getByRole( 'link', {
+				name: 'More payment options (opens in a new tab)',
+			} )
+		).toHaveAttribute(
+			'href',
+			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations&country=BR'
+		);
 	} );
 } );

@@ -152,7 +152,7 @@ final class ContractFactory {
 				'contract_id'    => 0,
 				'sequence_no'    => 1,
 				'count'          => 1,
-				'status'         => CycleStatus::billed(),
+				'status'         => new CycleStatus( CycleStatus::BILLED ),
 				'order_id'       => $order->get_id(),
 				'extension_slug' => $plan->get_extension_slug(),
 				'starts_at_gmt'  => $starts_at,
@@ -168,6 +168,10 @@ final class ContractFactory {
 	/**
 	 * Build the typed plan snapshot for the origin cycle.
 	 *
+	 * `pricing_policy` freezes the plan's pricing payload as is. It is an explicit
+	 * `null` when the plan has none, so a reader can tell "no pricing at signup"
+	 * from a snapshot written before the key existed.
+	 *
 	 * @param Plan $plan The plan whose terms to snapshot.
 	 */
 	private function build_plan_snapshot( Plan $plan ): PlanSnapshot {
@@ -177,6 +181,7 @@ final class ContractFactory {
 				'name'            => $plan->get_name(),
 				'category'        => $plan->get_category(),
 				'billing_policy'  => $plan->get_billing_policy()->to_array(),
+				'pricing_policy'  => $plan->get_pricing_policy(),
 			)
 		);
 	}

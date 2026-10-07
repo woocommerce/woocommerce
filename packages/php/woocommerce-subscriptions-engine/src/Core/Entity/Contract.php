@@ -1,7 +1,8 @@
 <?php
 /**
  * Contract - the stable identity of a subscription and the live source of truth
- * for its current state. Enforces lifecycle transitions through {@see ContractStatus}.
+ * for its current state. Status writes must name a registered status ({@see ContractStatus});
+ * the entity enforces no transition rules between them.
  *
  * Being the live source of truth (mutable), it holds the live schedule
  * (`next_payment_gmt`), the latest snapshot references (`plan_snapshot_id` /
@@ -28,6 +29,7 @@ use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -146,6 +148,16 @@ final class Contract {
 	private $items_snapshot_id;
 
 	/**
+	 * Optionally-hydrated frozen plan terms for `plan_snapshot_id` - the per-contract
+	 * billing cadence read off the snapshot, not the live plan. Populated by the
+	 * repository on the read paths that need it (the customer-portal reads); null on the
+	 * lean reads that do not. Not a stored column, so it is absent from `to_storage()`.
+	 *
+	 * @var PlanSnapshot|null
+	 */
+	private $plan_snapshot;
+
+	/**
 	 * Live billing total (the recurring amount), a decimal-safe string.
 	 *
 	 * @var string
@@ -262,6 +274,7 @@ final class Contract {
 		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
 		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
 		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
+		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
 	/**
@@ -276,7 +289,7 @@ final class Contract {
 
 		$contract = new self( $args );
 
-		if ( ! ContractStatus::is_valid( $contract->status ) ) {
+		if ( ! ContractStatus::is_registered( $contract->status ) ) {
 			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
 		}
 
@@ -290,13 +303,18 @@ final class Contract {
 	/**
 	 * Hydrate from stored rows.
 	 *
-	 * @param array<string, mixed>                $row       Contract row.
-	 * @param array<int, array<string, mixed>>    $items     Item rows.
-	 * @param array<string, array<string, mixed>> $addresses Address rows keyed by type.
-	 * @param array<string, string>               $meta      Meta as key => value.
+	 * The frozen plan terms ride second, ahead of the child rows: a contract without
+	 * its plan is pretty pointless, so the snapshot is hydrated on the same footing as
+	 * items / addresses / meta rather than through a separate mutation step.
+	 *
+	 * @param array<string, mixed>                $row           Contract row.
+	 * @param PlanSnapshot|null                   $plan_snapshot Frozen plan terms for the row's `plan_snapshot_id`, or null.
+	 * @param array<int, array<string, mixed>>    $items         Item rows.
+	 * @param array<string, array<string, mixed>> $addresses     Address rows keyed by type.
+	 * @param array<string, string>               $meta          Meta as key => value.
 	 */
-	public static function from_storage( array $row, array $items = array(), array $addresses = array(), array $meta = array() ): self {
-		return new self(
+	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+		$contract = new self(
 			array_merge(
 				$row,
 				array(
@@ -306,6 +324,12 @@ final class Contract {
 				)
 			)
 		);
+
+		if ( null !== $plan_snapshot ) {
+			$contract->set_plan_snapshot( $plan_snapshot );
+		}
+
+		return $contract;
 	}
 
 	/**
@@ -332,17 +356,23 @@ final class Contract {
 	}
 
 	/**
-	 * Transition the contract to a new status.
+	 * Set the contract status.
 	 *
-	 * @param string $status Target status.
-	 * @throws DomainException If the transition is not allowed by ContractStatus.
+	 * Any registered status may follow any other: the engine enforces no
+	 * transition table (flows own their preconditions). Setting the current
+	 * status is a no-op, so a hydrated unregistered status survives it.
+	 *
+	 * @param string $status Target status; must be registered.
+	 * @throws DomainException If `$status` is not a registered contract status.
 	 */
 	public function set_status( string $status ): void {
 		if ( $status === $this->status ) {
 			return;
 		}
 
-		ContractStatus::assert_transition_allowed( $this->status, $status );
+		if ( ! ContractStatus::is_registered( $status ) ) {
+			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
+		}
 
 		$this->status = $status;
 	}
@@ -446,6 +476,24 @@ final class Contract {
 	 */
 	public function set_items_snapshot_id( ?int $items_snapshot_id ): void {
 		$this->items_snapshot_id = $items_snapshot_id;
+	}
+
+	/**
+	 * The frozen plan terms for `plan_snapshot_id`, when hydrated - the per-contract
+	 * billing cadence read off the snapshot rather than the live plan. Null when the
+	 * read path did not hydrate it, or the contract carries no plan snapshot.
+	 */
+	public function get_plan_snapshot(): ?PlanSnapshot {
+		return $this->plan_snapshot;
+	}
+
+	/**
+	 * Attach the frozen plan terms for `plan_snapshot_id` (repository hydration).
+	 *
+	 * @param PlanSnapshot $plan_snapshot The decoded plan snapshot.
+	 */
+	public function set_plan_snapshot( PlanSnapshot $plan_snapshot ): void {
+		$this->plan_snapshot = $plan_snapshot;
 	}
 
 	/**
@@ -615,6 +663,24 @@ final class Contract {
 	 */
 	public function get_meta(): array {
 		return $this->meta;
+	}
+
+	/**
+	 * Set or remove one meta entry.
+	 *
+	 * Meta is opaque key/value data; the repository's existing child sync
+	 * persists the map on save.
+	 *
+	 * @param string      $key   Meta key.
+	 * @param string|null $value Meta value, or null to remove the key.
+	 */
+	public function set_meta( string $key, ?string $value ): void {
+		if ( null === $value ) {
+			unset( $this->meta[ $key ] );
+			return;
+		}
+
+		$this->meta[ $key ] = $value;
 	}
 
 	/**

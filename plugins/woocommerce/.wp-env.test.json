@@ -1,0 +1,24 @@
+{
+	"core": "https://wordpress.org/wordpress-latest.zip",
+	"phpVersion": "8.1",
+	"testsEnvironment": false,
+	"port": 8186,
+	"plugins": [ "." ],
+	"themes": [
+		"https://downloads.wordpress.org/theme/storefront.zip",
+		"https://downloads.wordpress.org/theme/twentytwentytwo.zip"
+	],
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
+		"WP_DEBUG": false,
+		"SCRIPT_DEBUG": false,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": false,
+		"WP_TESTS_DOMAIN": "localhost",
+		"ALTERNATE_WP_CRON": false
+	},
+	"lifecycleScripts": {
+		"afterStart": "./tests/php/bin/test-env-setup.sh",
+		"afterClean": "./tests/php/bin/test-env-setup.sh"
+	}
+}

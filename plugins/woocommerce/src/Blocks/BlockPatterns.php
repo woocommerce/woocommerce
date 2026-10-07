@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Registers patterns under the `./patterns/` directory and from the PTK API and updates their content.
@@ -74,10 +74,7 @@ class BlockPatterns {
 		$this->ptk_patterns_store = $ptk_patterns_store;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-
-		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
-			add_action( 'init', array( $this, 'register_ptk_patterns' ) );
-		}
+		add_action( 'init', array( $this, 'register_ptk_patterns' ) );
 	}
 
 	/**
@@ -144,7 +141,6 @@ class BlockPatterns {
 			'keywords'      => 'Keywords',
 			'blockTypes'    => 'Block Types',
 			'inserter'      => 'Inserter',
-			'featureFlag'   => 'Feature Flag',
 			'templateTypes' => 'Template Types',
 		);
 
@@ -211,24 +207,8 @@ class BlockPatterns {
 			return;
 		}
 
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
-			// Only log once per day by using a transient.
-			$transient_key = 'wc_ptk_pattern_store_warning';
-			// By only logging when patterns are empty and no fetch is scheduled,
-			// we ensure that warnings are only generated in genuinely problematic situations,
-			// such as when the pattern fetching mechanism has failed entirely.
-			if ( ! get_transient( $transient_key ) && ! call_user_func( $has_scheduled_action, 'fetch_patterns' ) ) {
-				wc_get_logger()->warning(
-					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
-				);
-				// Set the transient to true to indicate that the warning has been logged in the current day.
-				set_transient( $transient_key, true, DAY_IN_SECONDS );
-			}
 			return;
 		}
 

@@ -12,14 +12,6 @@ import debugFactory from 'debug';
 const debug = debugFactory( 'wc-admin:client' );
 
 export const renderCustomerEffortScoreTracks = ( root: HTMLElement ) => {
-	// Render the CustomerEffortScoreTracksContainer only if the feature flag is enabled.
-	if (
-		! window.wcAdminFeatures ||
-		window.wcAdminFeatures[ 'customer-effort-score-tracks' ] !== true
-	) {
-		return;
-	}
-
 	if ( ! root ) {
 		debug( 'Customer Effort Score Tracks root not found' );
 		return;

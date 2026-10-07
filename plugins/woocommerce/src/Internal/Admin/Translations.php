@@ -28,6 +28,14 @@ class Translations {
 	private static $plugin_domain = 'woocommerce';
 
 	/**
+	 * Whether an on-demand regeneration of the combined translation file has
+	 * already been attempted during this request.
+	 *
+	 * @var bool
+	 */
+	private $regeneration_attempted = false;
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -237,8 +245,48 @@ class Translations {
 		$cache_filename          = $this->get_combined_translation_filename( $plugin_domain, $locale );
 		$chunk_translations_json = wp_json_encode( $translations_from_chunks );
 
-		// Cache combined translations strings to a file.
-		$wp_filesystem->put_contents( $language_dir . $cache_filename, $chunk_translations_json );
+		// Publish via a temp file so readers do not observe a partial write; the fallback below
+		// gives that up rather than leave the previous pack's file in place.
+		$temp_path  = $language_dir . $cache_filename . '.' . wp_generate_password( 12, false ) . '.tmp';
+		$cache_path = $language_dir . $cache_filename;
+		$published  = false;
+
+		if ( $wp_filesystem->put_contents( $temp_path, $chunk_translations_json ) ) {
+			// Not WP_Filesystem_Direct::move(): it deletes the destination before renaming.
+			if ( 'direct' === get_filesystem_method() ) {
+				// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.rename_rename -- Atomic replace; failure handled below.
+				$published = @rename( $temp_path, $cache_path );
+			} else {
+				// Remote filesystems: overwrite only when refreshing an existing file.
+				$published = $wp_filesystem->move( $temp_path, $cache_path, $wp_filesystem->exists( $cache_path ) );
+			}
+		}
+
+		if ( ! $published ) {
+			/*
+			 * Reached when the temp file could not be written, and when publishing it failed: the
+			 * FTP filesystems ignore the $overwrite argument and return ftp_rename() as-is, so
+			 * servers that refuse to rename onto an existing path end up here. Without an in-place
+			 * overwrite the previous language pack's file would survive, and nothing would ever
+			 * replace it: the on-demand rebuild only runs when the file is missing, and never on a
+			 * remote filesystem.
+			 */
+			if ( ! $wp_filesystem->put_contents( $cache_path, $chunk_translations_json ) ) {
+				/*
+				 * An in-place write truncates the file before it can fail, so what survives may be
+				 * invalid JSON. A missing file recovers on its own - the rebuild triggers on it and
+				 * readers fall back to their own translation file - while a corrupt one is served
+				 * as-is forever.
+				 */
+				$leftover = $wp_filesystem->exists( $cache_path ) ? $wp_filesystem->get_contents( $cache_path ) : false;
+				if ( false !== $leftover && null === json_decode( $leftover, true ) ) {
+					$wp_filesystem->delete( $cache_path, false, 'f' );
+				}
+			}
+
+			// Without the type, FTPext::delete() falls through to ftp_rmdir() when the file is absent.
+			$wp_filesystem->delete( $temp_path, false, 'f' );
+		}
 	}
 
 	/**
@@ -264,6 +312,10 @@ class Translations {
 
 		$access_type = get_filesystem_method();
 		if ( 'direct' === $access_type ) {
+			// Skip the combine work when the file could never be saved anyway.
+			if ( ! wp_is_writable( $lang_dir ) ) {
+				return;
+			}
 			\WP_Filesystem();
 			$this->build_and_save_translations( $lang_dir, self::$plugin_domain, $locale );
 		} else {
@@ -307,8 +359,20 @@ class Translations {
 
 		$locale         = determine_locale();
 		$cache_filename = $this->get_combined_translation_filename( $domain, $locale );
+		$cache_path     = WP_LANG_DIR . '/plugins/' . $cache_filename;
 
-		return WP_LANG_DIR . '/plugins/' . $cache_filename;
+		// Rebuild the combined file on demand, since it is only generated on language pack updates and plugin activation.
+		if ( ! is_readable( $cache_path ) && ! $this->regeneration_attempted ) {
+			$this->regeneration_attempted = true;
+			$this->generate_translation_strings();
+		}
+
+		// Fall back so the app's own translation file still loads.
+		if ( ! is_readable( $cache_path ) ) {
+			return $file;
+		}
+
+		return $cache_path;
 	}
 
 	/**

@@ -9,8 +9,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use EngineIntegrationTestCase;
+use RuntimeException;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -41,6 +44,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	}
 
 	public function tearDown(): void {
+		remove_all_actions( 'woocommerce_subscriptions_engine_validate_plan' );
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -96,6 +100,8 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'global', $created_data['scope'] );
 		$this->assertSame( Plan::STATUS_ACTIVE, $created_data['status'] );
 		$this->assertSame( self::EXTENSION_SLUG, $created_data['extension_slug'] );
+		$this->assertArrayNotHasKey( 'group', $created_data );
+		$this->assertArrayNotHasKey( 'merchant_code', $created_data );
 
 		$id = $this->int_value( $created_data, 'id' );
 
@@ -140,9 +146,24 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			),
 			$billing_policy['trial_duration']
 		);
-		$this->assertSame( 'fixed_amount', $first_policy['type'] );
-		$this->assertSame( 3, $first_policy['duration_cycles'] );
-		$this->assertSame( 'setup', $first_fee['kind'] );
+		// Stored as sent: the engine coerces nothing inside the payload.
+		$this->assertSame(
+			array(
+				'type'            => 'fixed_amount',
+				'value'           => 2,
+				'duration_cycles' => 3,
+			),
+			$first_policy
+		);
+		$this->assertSame(
+			array(
+				'kind'      => 'setup',
+				'amount'    => 5,
+				'taxable'   => true,
+				'tax_class' => '',
+			),
+			$first_fee
+		);
 
 		$list = $this->request(
 			'GET',
@@ -156,6 +177,546 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 200, $list->get_status() );
 		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
 		$this->assertCount( 1, $this->response_data( $list ) );
+	}
+
+	public function test_create_round_trips_the_pricing_payload_opaquely(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$pricing_policy = array(
+			'policies'   => array(
+				array(
+					'type'            => 'tiered',
+					'duration_cycles' => 1,
+				),
+				array( 'type' => 'bogo' ),
+			),
+			'custom_key' => array( 'nested' => 'kept' ),
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Opaque monthly',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => $pricing_policy,
+			)
+		);
+
+		$this->assertSame( 201, $created->get_status() );
+		$created_data = $this->response_data( $created );
+		$this->assertSame( $pricing_policy, $created_data['pricing_policy'], 'Unknown types and keys come back unchanged; no value is added.' );
+
+		// A fresh read round-trips the stored shape through the database.
+		$id      = $this->int_value( $created_data, 'id' );
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( 200, $fetched->get_status() );
+		$this->assertSame( $pricing_policy, $this->response_data( $fetched )['pricing_policy'] );
+	}
+
+	public function test_update_replaces_provided_top_level_keys_and_keeps_omitted_ones(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Discounted monthly',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array(
+					'policies'      => array(
+						array(
+							'type'  => 'percentage',
+							'value' => 10,
+						),
+					),
+					'one_time_fees' => array(
+						array(
+							'kind'   => 'setup',
+							'amount' => 5,
+						),
+					),
+					'custom_key'    => 'kept',
+				),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => array(
+					'policies' => array(
+						array( 'type' => 'bogo' ),
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( 200, $fetched->get_status() );
+		$this->assertSame(
+			array(
+				'policies'      => array(
+					array( 'type' => 'bogo' ),
+				),
+				'one_time_fees' => array(
+					array(
+						'kind'   => 'setup',
+						'amount' => 5,
+					),
+				),
+				'custom_key'    => 'kept',
+			),
+			$this->response_data( $fetched )['pricing_policy']
+		);
+	}
+
+	public function test_arbitrary_payload_values_are_stored_as_given(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$pricing_policy = array(
+			'policies' => array(
+				array(
+					'type'  => 'bogo',
+					'value' => 5,
+				),
+			),
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Any payload',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => $pricing_policy,
+			)
+		);
+
+		$this->assertSame( 201, $created->get_status(), 'Payload semantics belong to the owning extension.' );
+		$this->assertSame( $pricing_policy, $this->response_data( $created )['pricing_policy'] );
+	}
+
+	/**
+	 * @dataProvider provide_non_object_pricing_policies
+	 *
+	 * @param mixed  $invalid     Non-object pricing payload.
+	 * @param string $create_code Create error code: core schema validation rejects a scalar first.
+	 * @param string $patch_code  PATCH error code: the route has no arg schema, so the controller rejects.
+	 */
+	public function test_non_object_pricing_policy_is_rejected( $invalid, string $create_code, string $patch_code ): void {
+		wp_set_current_user( $this->admin_id );
+
+		$id = $this->create_plan( 'Patch target' );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Bad payload',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => $invalid,
+			)
+		);
+		$this->assertSame( 400, $created->get_status() );
+		$this->assertSame( $create_code, $this->response_data( $created )['code'] );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => $invalid,
+			)
+		);
+		$this->assertSame( 400, $patched->get_status() );
+		$this->assertSame( $patch_code, $this->response_data( $patched )['code'] );
+
+		// The rejected writes left the plan untouched and created nothing.
+		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( 200, $fetched->get_status() );
+		$this->assertNull( $this->response_data( $fetched )['pricing_policy'] );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @return array<string, array{0: mixed, 1: string, 2: string}>
+	 */
+	public function provide_non_object_pricing_policies(): array {
+		return array(
+			'list'   => array( array( array( 'type' => 'bogo' ) ), 'woocommerce_subscriptions_engine_invalid_plan', 'woocommerce_subscriptions_engine_invalid_plan' ),
+			'string' => array( 'bogo', 'rest_invalid_param', 'woocommerce_subscriptions_engine_invalid_plan' ),
+		);
+	}
+
+	public function test_validate_action_receives_errors_a_plan_copy_and_slug(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$calls = array();
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( $errors, $plan, $extension_slug ) use ( &$calls ): void {
+				self::assertInstanceOf( WP_Error::class, $errors );
+				self::assertFalse( $errors->has_errors() );
+				self::assertInstanceOf( Plan::class, $plan );
+				$calls[] = array( $plan->get_id(), $plan->get_name(), $plan->get_pricing_policy(), $extension_slug );
+			},
+			10,
+			3
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Validated',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array(
+					'policies'   => array( array( 'type' => 'bogo' ) ),
+					'custom_key' => 'kept',
+				),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Validated again',
+				'pricing_policy' => array( 'one_time_fees' => array( array( 'amount' => 5 ) ) ),
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+
+		$renamed = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Renamed only',
+			)
+		);
+		$this->assertSame( 200, $renamed->get_status() );
+
+		$merged_pricing = array(
+			'policies'      => array( array( 'type' => 'bogo' ) ),
+			'custom_key'    => 'kept',
+			'one_time_fees' => array( array( 'amount' => 5 ) ),
+		);
+
+		$this->assertSame(
+			array(
+				array(
+					null,
+					'Validated',
+					array(
+						'policies'   => array( array( 'type' => 'bogo' ) ),
+						'custom_key' => 'kept',
+					),
+					self::EXTENSION_SLUG,
+				),
+				array( $id, 'Validated again', $merged_pricing, self::EXTENSION_SLUG ),
+				array( $id, 'Renamed only', $merged_pricing, self::EXTENSION_SLUG ),
+			),
+			$calls,
+			'Create passes a plan with a null id; updates pass the stored plan with the request merged in.'
+		);
+	}
+
+	/**
+	 * @dataProvider provide_rejecting_errors
+	 *
+	 * @param array<string, mixed> $data            Error data the owner adds.
+	 * @param int                  $expected_status Expected response status.
+	 */
+	public function test_validate_action_error_rejects_create_and_update( array $data, int $expected_status ): void {
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Untouched' );
+
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ) use ( $data ): void {
+				$errors->add( 'owner_rejected', 'No.', $data );
+			}
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Rejected',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array( 'policies' => array() ),
+			)
+		);
+		$this->assertSame( $expected_status, $created->get_status() );
+		$this->assertSame( 'owner_rejected', $this->response_data( $created )['code'] );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Changed',
+				'pricing_policy' => array( 'policies' => array() ),
+			)
+		);
+		$this->assertSame( $expected_status, $patched->get_status() );
+		$this->assertSame( 'owner_rejected', $this->response_data( $patched )['code'] );
+
+		remove_all_actions( 'woocommerce_subscriptions_engine_validate_plan' );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'Untouched', $fetched['name'] );
+		$this->assertNull( $fetched['pricing_policy'] );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: int}>
+	 */
+	public function provide_rejecting_errors(): array {
+		return array(
+			'without status' => array( array(), 400 ),
+			'with status'    => array( array( 'status' => 422 ), 422 ),
+		);
+	}
+
+	public function test_validate_action_errors_from_several_callbacks_accumulate(): void {
+		wp_set_current_user( $this->admin_id );
+
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'first_rejection', 'First.' );
+			}
+		);
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'second_rejection', 'Second.', array( 'status' => 422 ) );
+			},
+			20
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Rejected twice',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			)
+		);
+
+		$this->assertSame( 400, $created->get_status() );
+		$data = $this->response_data( $created );
+		$this->assertSame( 'first_rejection', $data['code'] );
+		$this->assertSame(
+			array(
+				array(
+					'code'    => 'second_rejection',
+					'message' => 'Second.',
+					'data'    => array( 'status' => 422 ),
+				),
+			),
+			$data['additional_errors']
+		);
+	}
+
+	public function test_validate_action_cannot_change_the_stored_plan(): void {
+		wp_set_current_user( $this->admin_id );
+
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors, Plan $plan ): void {
+				$plan->set_name( 'Changed by callback' );
+				$plan->set_pricing_policy( array( 'policies' => array( array( 'type' => 'changed' ) ) ) );
+			},
+			10,
+			2
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'As sent',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array( 'policies' => array( array( 'type' => 'raw' ) ) ),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$this->assertSame( 'As sent', $this->response_data( $created )['name'] );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'As sent again',
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+
+		remove_all_actions( 'woocommerce_subscriptions_engine_validate_plan' );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'As sent again', $fetched['name'] );
+		$this->assertSame( array( 'policies' => array( array( 'type' => 'raw' ) ) ), $fetched['pricing_policy'] );
+	}
+
+	public function test_throwing_validate_callback_fails_the_write_without_storing(): void {
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Untouched' );
+
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function (): void {
+				throw new RuntimeException( 'Internal detail.' );
+			}
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Thrown',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			)
+		);
+		$this->assertSame( 500, $created->get_status() );
+		$created_data = $this->response_data( $created );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_validation_failed', $created_data['code'] );
+		$this->assertIsString( $created_data['message'] );
+		$this->assertStringNotContainsString( 'Internal detail.', $created_data['message'] );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Changed',
+			)
+		);
+		$this->assertSame( 500, $patched->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_validation_failed', $this->response_data( $patched )['code'] );
+
+		remove_all_actions( 'woocommerce_subscriptions_engine_validate_plan' );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertSame( 'Untouched', $fetched['name'] );
+
+		$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertSame( '1', $list->get_headers()['X-WP-Total'] );
+	}
+
+	public function test_reorder_does_not_fire_the_validate_action(): void {
+		wp_set_current_user( $this->admin_id );
+		$first  = $this->create_plan( 'First' );
+		$second = $this->create_plan( 'Second' );
+
+		$calls = 0;
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function () use ( &$calls ): void {
+				++$calls;
+			}
+		);
+
+		$reordered = $this->request(
+			'POST',
+			self::BASE . '/reorder',
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'ids'            => array( $second, $first ),
+			)
+		);
+
+		$this->assertSame( 200, $reordered->get_status() );
+		$this->assertSame( 0, $calls );
+	}
+
+	public function test_patch_with_null_pricing_policy_clears_the_payload(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Priced',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+				'pricing_policy' => array( 'policies' => array( array( 'type' => 'raw' ) ) ),
+			)
+		);
+		$this->assertSame( 201, $created->get_status() );
+		$id = $this->int_value( $this->response_data( $created ), 'id' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'pricing_policy' => null,
+			)
+		);
+		$this->assertSame( 200, $patched->get_status() );
+		$this->assertNull( $this->response_data( $patched )['pricing_policy'] );
+
+		$fetched = $this->response_data( $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) ) );
+		$this->assertNull( $fetched['pricing_policy'] );
 	}
 
 	public function test_list_with_multiple_extension_slugs_returns_all_plans(): void {
@@ -315,6 +876,42 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 			$this->assertSame( 400, $response->get_status() );
 		}
+	}
+
+	public function test_update_surfaces_a_failed_write_as_an_error(): void {
+		global $wpdb;
+
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Doomed to fail' );
+
+		// Break UPDATEs against the plans table for this request so the write
+		// errors at the database and the repository reports failure.
+		$break_plan_updates = static function ( $query ) {
+			if ( is_string( $query ) && 0 === stripos( ltrim( $query ), 'UPDATE' ) && false !== strpos( $query, 'wc_selling_plans' ) ) {
+				return 'UPDATE nonexistent_table_for_this_test SET id = id';
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_plan_updates );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$response = $this->request(
+				'PATCH',
+				self::BASE . '/' . $id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'name'           => 'New name',
+				)
+			);
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_plan_updates );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_plan_update_failed', $this->response_data( $response )['code'] );
 	}
 
 	public function test_archive_restore_and_reorder(): void {

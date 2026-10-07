@@ -76,7 +76,7 @@ function FailedOrdersNotice() {
 	}, [] );
 
 	useEffect( () => {
-		fetchStatus();
+		void fetchStatus();
 	}, [ fetchStatus ] );
 
 	const failedCount = status?.failed_count ?? 0;

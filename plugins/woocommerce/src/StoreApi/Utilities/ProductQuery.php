@@ -178,7 +178,7 @@ class ProductQuery implements QueryClausesGenerator {
 				$args['tax_query'] = $tax_query; // phpcs:ignore
 			}
 		} else {
-			// For product_variantions we need to convert the tax_query to a meta_query.
+			// For product_variations we need to convert the tax_query to a meta_query.
 			if ( ! empty( $args['tax_query'] ) ) {
 				$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_merge( $tax_query, $args['tax_query'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			} else {
@@ -455,9 +455,11 @@ class ProductQuery implements QueryClausesGenerator {
 			if ( 1 < count( $slugs ) ) {
 				$slugs[] = $wp_query->get( 'slug' );
 			}
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$post_name__in  = implode( '","', array_map( 'esc_sql', $slugs ) );
-			$args['where'] .= " AND $wpdb->posts.post_name IN (\"$post_name__in\")";
+			$args['join'] = $this->append_product_sorting_table_join( $args['join'] );
+
+			$placeholders = implode( ', ', array_fill( 0, count( $slugs ), '%s' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a safe string of %s tokens.
+			$args['where'] .= $wpdb->prepare( " AND $wpdb->posts.post_name IN ($placeholders)", $slugs );
 		}
 
 		if ( $wp_query->get( 'stock_status' ) ) {
@@ -624,11 +626,6 @@ class ProductQuery implements QueryClausesGenerator {
 	 * @return string
 	 */
 	protected function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 }

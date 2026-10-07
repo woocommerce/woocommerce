@@ -1,7 +1,7 @@
 ---
 post_title: How to optimize performance for WooCommerce stores
 sidebar_label: Optimize store performance
-
+description: Best practices and techniques for optimizing the performance of WooCommerce stores, including caching, image optimization, database maintenance, code minification, and the use of Content Delivery Networks (CDNs).
 ---
 
 # How to optimize performance for WooCommerce stores

@@ -27,7 +27,7 @@ export interface ProductCollectionAttributes {
 	queryContext: [
 		{
 			page: number;
-		}
+		},
 	];
 	templateSlug: string;
 	displayLayout: ProductCollectionDisplayLayout;
@@ -120,6 +120,10 @@ export interface ProductCollectionQuery {
 	priceRange: undefined | PriceRange;
 	filterable: boolean;
 	productReference?: number;
+	/**
+	 * If `null`/`undefined`: Infer from location context.
+	 */
+	productReferenceType?: 'cart' | 'order' | null;
 	relatedBy?: RelatedBy | undefined;
 }
 

@@ -119,7 +119,7 @@ export default function ProductPreviewModal( {
 			}
 		};
 
-		loadPreview();
+		void loadPreview();
 		if ( onOpen ) {
 			onOpen();
 		}

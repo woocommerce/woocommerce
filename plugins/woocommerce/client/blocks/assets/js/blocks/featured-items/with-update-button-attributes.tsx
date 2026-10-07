@@ -84,7 +84,7 @@ export const withUpdateButtonAttributes =
 				url &&
 				permalink !== url
 			) {
-				updateBlockAttributes( buttonBlockId, {
+				void updateBlockAttributes( buttonBlockId, {
 					url: permalink,
 				} );
 				setDoUrlUpdate( false );

@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/admin-layout",
 	"version": "2.0.0",
-	"description": "WooCommerce admin layout copmonents and utilities.",
+	"description": "WooCommerce admin layout components and utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
@@ -61,7 +61,9 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
+		"lint:fix:lang:style": "stylelint 'src/**/*.scss' --fix",
 		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'src/**/*.scss'",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -77,11 +79,13 @@
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
-		"eslint": "^8.55.0",
+		"eslint": "^10.0.0",
+		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"postcss-loader": "4.3.x",
@@ -91,7 +95,7 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"webpack": "5.97.x",
+		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},
 	"peerDependencies": {
@@ -103,7 +107,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx}"
+				"changes": "src/**/*.{js,jsx,ts,tsx,scss}"
 			}
 		}
 	}

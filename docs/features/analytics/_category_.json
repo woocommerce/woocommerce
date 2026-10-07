@@ -1,6 +1,11 @@
 {
-    "position": 3,
+    "position": 6,
     "label": "Analytics",
     "collapsible": true,
-    "collapsed": true
+    "collapsed": true,
+    "link": {
+        "type": "generated-index",
+        "title": "Analytics",
+        "slug": "/features/analytics"
     }
+}

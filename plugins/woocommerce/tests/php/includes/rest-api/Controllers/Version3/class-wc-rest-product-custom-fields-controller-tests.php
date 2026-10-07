@@ -16,6 +16,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		for ( $i = 1; $i <= 4; $i ++ ) {
 			self::$products[] = WC_Helper_Product::create_simple_product();
 		}
@@ -26,6 +27,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 			}
 			$product->save();
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -34,9 +36,11 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 	 * @return void
 	 */
 	public static function wpTearDownAfterClass() {
+		self::enable_direct_product_attribute_lookup_updates();
 		foreach ( self::$products as $product ) {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**

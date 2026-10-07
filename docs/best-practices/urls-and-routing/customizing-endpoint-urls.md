@@ -1,7 +1,7 @@
 ---
 post_title: Customizing WooCommerce endpoint URLs
 sidebar_label: Customizing endpoint URLs
-
+description: A guide to customizing WooCommerce endpoint URLs, including how to change them in settings, use them in menus, and troubleshoot common issues.
 ---
 
 # Customizing WooCommerce endpoint URLs

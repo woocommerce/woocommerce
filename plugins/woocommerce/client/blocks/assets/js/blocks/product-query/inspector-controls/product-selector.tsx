@@ -24,7 +24,7 @@ function useProductsList() {
 	);
 
 	useEffect( () => {
-		getProducts( { selected: [] } ).then( ( results ) => {
+		void getProducts( { selected: [] } ).then( ( results ) => {
 			setProductsList( results as ProductResponseItem[] );
 		} );
 	}, [] );

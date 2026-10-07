@@ -1,12 +1,17 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Webpack loads this configuration as CommonJS. */
 /**
  * External dependencies
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const [
-	,
-	moduleConfig,
-] = require( '@wordpress/scripts/config/webpack.config' );
+// wp-scripts exports [ scriptConfig, moduleConfig ] when WP_EXPERIMENTAL_MODULES
+// is set, and a bare scriptConfig otherwise. Both carry the same module.rules,
+// which is the only thing taken from it here, so read that one value instead of
+// depending on the export's shape.
+const wpScriptsConfig = require( '@wordpress/scripts/config/webpack.config' );
+const {
+	module: { rules: wpScriptsModuleRules },
+} = Array.isArray( wpScriptsConfig ) ? wpScriptsConfig[ 1 ] : wpScriptsConfig;
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const {
 	WebpackRTLPlugin,
@@ -16,7 +21,7 @@ const {
  * Internal dependencies
  */
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
-const { getResolve } = require( './webpack-helpers' );
+const { getAlias, getResolve } = require( './webpack-helpers' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
@@ -35,18 +40,17 @@ const entries = {
 	...scriptModuleEntries,
 	...styleEntries,
 	...editorStyleEntries,
-
-	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
-	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
-
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
-		'./assets/js/atomic/blocks/product-elements/frontend.ts',
+		'./assets/js/blocks/product-elements-blocks/frontend.ts',
 	// Add to cart with options quantity selector frontend module used by the
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
-
+	// Product Collection store part for cart-referencing collections
+	// (cross-sells, upsells). Conditionally enqueued.
+	'woocommerce/product-collection-cart-reference':
+		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',
@@ -78,7 +82,7 @@ module.exports = {
 		module: true,
 	},
 	resolve: {
-		...getResolve(),
+		...getResolve( { alias: getAlias() } ),
 		extensions: [ '.js', '.ts', '.tsx' ],
 	},
 	plugins: [
@@ -104,7 +108,7 @@ module.exports = {
 	],
 	module: {
 		rules: [
-			...moduleConfig.module.rules.filter(
+			...wpScriptsModuleRules.filter(
 				( rule ) =>
 					! rule.test.test( '.css' ) &&
 					! rule.test.test( '.scss' ) &&

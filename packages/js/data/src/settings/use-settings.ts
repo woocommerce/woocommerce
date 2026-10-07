@@ -41,18 +41,18 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 	} = useDispatch( store );
 	const updateSettings = useCallback(
 		( name: string, data: Settings ) => {
-			updateSettingsForGroup( group, { [ name ]: data } );
+			void updateSettingsForGroup( group, { [ name ]: data } );
 		},
 		[ group ]
 	);
 	const persistSettings = useCallback( () => {
 		// this action would simply persist all settings marked as dirty in the
 		// store state and then remove the dirty record in the isDirtyMap
-		persistSettingsForGroup( group );
+		void persistSettingsForGroup( group );
 	}, [ group ] );
 	const updateAndPersistSettings = useCallback(
 		( name: string, data: Settings ) => {
-			updateAndPersistSettingsForGroup( group, { [ name ]: data } );
+			void updateAndPersistSettingsForGroup( group, { [ name ]: data } );
 		},
 		[ group ]
 	);

@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders
@@ -117,6 +118,155 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			),
 		);
 		$this->assertEquals( $expected, $data );
+	}
+
+	/**
+	 * @testdox Should use each guest order's billing name when the orders share an email address.
+	 */
+	public function test_extended_info_uses_each_guest_orders_billing_name_when_email_is_shared(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$registered_customer = new WC_Customer();
+		$registered_customer->set_username( 'marketplace-account' );
+		$registered_customer->set_password( 'password' );
+		$registered_customer->set_email( 'marketplace@example.org' );
+		$registered_customer->set_first_name( 'Registered' );
+		$registered_customer->set_last_name( 'Customer' );
+		$registered_customer->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$first_order = $this->create_guest_order( $product, 'marketplace@example.org' );
+		$first_order->set_billing_first_name( 'Ada' );
+		$first_order->set_billing_last_name( 'Lovelace' );
+		$first_order->save();
+
+		$second_order = $this->create_guest_order( $product, 'marketplace@example.org' );
+		$second_order->set_billing_first_name( 'Grace' );
+		$second_order->set_billing_last_name( 'Hopper' );
+		$second_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id(
+			$first_order,
+			array( $first_order->get_id(), $second_order->get_id() )
+		);
+
+		$this->assertNotEmpty( $rows[ $first_order->get_id() ]['customer_id'], 'Guest orders should have an analytics customer ID' );
+		$this->assertEquals(
+			$rows[ $first_order->get_id() ]['customer_id'],
+			$rows[ $second_order->get_id() ]['customer_id'],
+			'Orders sharing an email should retain the same analytics customer identity'
+		);
+		$this->assertSame( 'Ada', $rows[ $first_order->get_id() ]['extended_info']['customer']['first_name'], 'The first order should use its own billing first name' );
+		$this->assertSame( 'Lovelace', $rows[ $first_order->get_id() ]['extended_info']['customer']['last_name'], 'The first order should use its own billing last name' );
+		$this->assertSame( 'Grace', $rows[ $second_order->get_id() ]['extended_info']['customer']['first_name'], 'The second order should use its own billing first name' );
+		$this->assertSame( 'Hopper', $rows[ $second_order->get_id() ]['extended_info']['customer']['last_name'], 'The second order should use its own billing last name' );
+	}
+
+	/**
+	 * @testdox Should fall back to a guest order's shipping name when it has no billing name.
+	 */
+	public function test_extended_info_falls_back_to_shipping_name_for_a_guest_order(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$named_order = $this->create_guest_order( $product, 'warehouse@example.org' );
+		$named_order->set_billing_first_name( 'Katherine' );
+		$named_order->set_billing_last_name( 'Johnson' );
+		$named_order->save();
+
+		// Orders taken in person or over the API can reach Analytics with a shipping name only.
+		$shipping_only_order = $this->create_guest_order( $product, 'warehouse@example.org' );
+		$shipping_only_order->set_billing_first_name( '' );
+		$shipping_only_order->set_billing_last_name( '' );
+		$shipping_only_order->set_shipping_first_name( 'Mary' );
+		$shipping_only_order->set_shipping_last_name( 'Jackson' );
+		$shipping_only_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id(
+			$named_order,
+			array( $named_order->get_id(), $shipping_only_order->get_id() )
+		);
+
+		$this->assertSame( 'Mary', $rows[ $shipping_only_order->get_id() ]['extended_info']['customer']['first_name'], 'An order without a billing first name should use its own shipping first name' );
+		$this->assertSame( 'Jackson', $rows[ $shipping_only_order->get_id() ]['extended_info']['customer']['last_name'], 'An order without a billing last name should use its own shipping last name' );
+		$this->assertSame( 'Katherine', $rows[ $named_order->get_id() ]['extended_info']['customer']['first_name'], 'The billing name should still win when the order has one' );
+		$this->assertSame( 'Johnson', $rows[ $named_order->get_id() ]['extended_info']['customer']['last_name'], 'The billing name should still win when the order has one' );
+	}
+
+	/**
+	 * @testdox Should keep the profile name for a registered customer's order.
+	 */
+	public function test_extended_info_keeps_registered_customer_profile_name(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_id = $this->factory->user->create(
+			array(
+				'role'       => 'customer',
+				'user_email' => 'registered-customer@example.org',
+				'first_name' => 'Profile',
+				'last_name'  => 'Customer',
+			)
+		);
+		$product     = WC_Helper_Product::create_simple_product();
+		$order       = WC_Helper_Order::create_order( $customer_id, $product );
+		$order->set_billing_first_name( 'Order' );
+		$order->set_billing_last_name( 'Name' );
+		$order->set_total( 25 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id( $order, array( $order->get_id() ) );
+
+		$this->assertSame( 'Profile', $rows[ $order->get_id() ]['extended_info']['customer']['first_name'] );
+		$this->assertSame( 'Customer', $rows[ $order->get_id() ]['extended_info']['customer']['last_name'] );
+	}
+
+	/**
+	 * @testdox Should use the parent billing name for refunds and the order billing name for ordinary child orders.
+	 */
+	public function test_extended_info_resolves_billing_name_source_by_order_type(): void {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$parent_order = $this->create_guest_order( $product, 'parent@example.org' );
+		$parent_order->set_billing_first_name( 'Parent' );
+		$parent_order->set_billing_last_name( 'Customer' );
+		$parent_order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $parent_order->get_id(),
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created' );
+
+		$child_order = $this->create_guest_order( $product, 'child@example.org' );
+		$child_order->set_parent_id( $parent_order->get_id() );
+		$child_order->set_billing_first_name( 'Child' );
+		$child_order->set_billing_last_name( 'Customer' );
+		$child_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$rows = $this->get_extended_report_rows_by_order_id(
+			$parent_order,
+			array( $refund->get_id(), $child_order->get_id() )
+		);
+
+		$this->assertSame( 'Parent', $rows[ $refund->get_id() ]['extended_info']['customer']['first_name'], 'A refund should use its parent order billing name' );
+		$this->assertSame( 'Customer', $rows[ $refund->get_id() ]['extended_info']['customer']['last_name'], 'A refund should use its parent order billing name' );
+		$this->assertSame( 'Child', $rows[ $child_order->get_id() ]['extended_info']['customer']['first_name'], 'An ordinary child order should use its own billing name' );
+		$this->assertSame( 'Customer', $rows[ $child_order->get_id() ]['extended_info']['customer']['last_name'], 'An ordinary child order should use its own billing name' );
 	}
 
 	/**
@@ -327,5 +477,364 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 1, $data->total );
 		$this->assertEquals( $order_2->get_id(), $data->data[0]['order_id'] );
+	}
+
+	/**
+	 * Creates a completed order for a guest customer.
+	 *
+	 * @param WC_Product $product      Product to add to the order.
+	 * @param string     $email        Billing email used to identify the guest customer.
+	 * @param int|null   $date_created Optional timestamp to place the order at.
+	 * @return WC_Order
+	 */
+	private function create_guest_order( $product, $email, $date_created = null ) {
+		$order = WC_Helper_Order::create_order( 0, $product );
+		$order->set_billing_email( $email );
+		$order->set_total( 25 );
+		$order->set_status( OrderStatus::COMPLETED );
+
+		if ( $date_created ) {
+			// The report is filtered by date_paid, so both dates are pinned to keep the
+			// reporting time frame of the order independent of when the test runs.
+			$order->set_date_created( $date_created );
+			$order->set_date_paid( $date_created );
+		}
+
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Returns extended report rows keyed by order ID.
+	 *
+	 * @param WC_Order $order     Order used to derive the reporting time frame.
+	 * @param int[]    $order_ids Order IDs to include.
+	 * @return array
+	 */
+	private function get_extended_report_rows_by_order_id( $order, $order_ids ) {
+		$data_store = new OrdersDataStore();
+		$data       = $data_store->get_data(
+			array(
+				'after'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getOffsetTimestamp() - DAY_IN_SECONDS ),
+				'before'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getOffsetTimestamp() + DAY_IN_SECONDS ),
+				'extended_info'  => 1,
+				'order_includes' => $order_ids,
+			)
+		);
+
+		return array_column( $data->data, null, 'order_id' );
+	}
+
+	/**
+	 * Returns the customer type of every row in the report, keyed by order ID.
+	 *
+	 * @param WC_Order $order Order used to derive the reporting time frame.
+	 * @param array    $args  Extra query arguments.
+	 * @return array
+	 */
+	private function get_customer_types_by_order_id( $order, $args = array() ) {
+		$data_store = new OrdersDataStore();
+		$data       = $data_store->get_data(
+			array_merge(
+				array(
+					'after'  => gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() ),
+					'before' => gmdate( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() ),
+				),
+				$args
+			)
+		);
+
+		return wp_list_pluck( $data->data, 'customer_type', 'order_id' );
+	}
+
+	/**
+	 * @testdox Should report a refund of a customer's first order as a new customer.
+	 *
+	 * Refunds are stored without a customer type of their own, so they should report the customer
+	 * type of the order they refund instead of always being reported as returning.
+	 *
+	 * See: https://github.com/woocommerce/woocommerce/issues/33410.
+	 */
+	public function test_refund_of_first_order_is_reported_as_new_customer() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-33410@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $order );
+
+		$this->assertEquals( 'new', $customer_types[ $order->get_id() ], 'A guest customer\'s first order should be reported as new' );
+		$this->assertEquals( 'new', $customer_types[ $refund->get_id() ], 'A refund should be reported with the customer type of the refunded order' );
+	}
+
+	/**
+	 * @testdox Should report a refund of a returning customer's order as a returning customer.
+	 */
+	public function test_refund_of_later_order_is_reported_as_returning_customer() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$first_order  = $this->create_guest_order( $simple_product, 'guest-33410-returning@example.org' );
+		$second_order = $this->create_guest_order( $simple_product, 'guest-33410-returning@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $second_order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $first_order );
+
+		$this->assertEquals( 'new', $customer_types[ $first_order->get_id() ], 'The first order should be reported as new' );
+		$this->assertEquals( 'returning', $customer_types[ $second_order->get_id() ], 'The second order should be reported as returning' );
+		$this->assertEquals( 'returning', $customer_types[ $refund->get_id() ], 'A refund should be reported with the customer type of the refunded order' );
+	}
+
+	/**
+	 * The customer type filter still matches orders only, so that the report table keeps agreeing
+	 * with the totals from the orders stats endpoint, which excludes refunds from that filter too.
+	 *
+	 * @testdox Should match only orders, not their refunds, when filtering by customer type.
+	 */
+	public function test_customer_type_filter_matches_orders_only() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-33410-filter@example.org' );
+
+		wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$new_customer_rows = $this->get_customer_types_by_order_id( $order, array( 'customer_type' => 'new' ) );
+
+		$this->assertEqualSets(
+			array( $order->get_id() ),
+			array_keys( $new_customer_rows ),
+			'Filtering by new customers should return the order without its refund'
+		);
+
+		$returning_customer_rows = $this->get_customer_types_by_order_id( $order, array( 'customer_type' => 'returning' ) );
+
+		$this->assertEmpty( $returning_customer_rows, 'Filtering by returning customers should not return the order or its refund' );
+	}
+
+	/**
+	 * @testdox Should report the customer type of refunds when filtering by refunds.
+	 */
+	public function test_refunds_filter_returns_refunds_with_their_customer_type() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-33410-refunds@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$refund_rows = $this->get_customer_types_by_order_id( $order, array( 'refunds' => 'all' ) );
+
+		$this->assertEqualSets( array( $refund->get_id() ), array_keys( $refund_rows ), 'Filtering by refunds should return the refund only' );
+		$this->assertEquals( 'new', $refund_rows[ $refund->get_id() ], 'A refund should be reported with the customer type of the refunded order' );
+
+		$order_rows = $this->get_customer_types_by_order_id( $order, array( 'refunds' => 'none' ) );
+
+		$this->assertEqualSets( array( $order->get_id() ), array_keys( $order_rows ), 'Excluding refunds should return the order only' );
+	}
+
+	/**
+	 * Recalculating a customer's first order runs an UPDATE across all of the customer's stats
+	 * rows, which must not overwrite the NULL returning_customer of refund rows — the report
+	 * relies on that NULL to fall back to the refunded order's customer type.
+	 *
+	 * @testdox Should keep reporting a refund with the refunded order's customer type after the customer's first order is recalculated.
+	 */
+	public function test_refund_keeps_customer_type_after_first_order_recalculation() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$first_order  = $this->create_guest_order( $simple_product, 'guest-33410-recalc@example.org' );
+		$second_order = $this->create_guest_order( $simple_product, 'guest-33410-recalc@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $second_order->get_id(),
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Cancelling the first order makes the second order the customer's first order,
+		// triggering the returning_customer recalculation across the customer's rows.
+		$first_order->set_status( OrderStatus::CANCELLED );
+		$first_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $second_order );
+
+		$this->assertEquals( 'new', $customer_types[ $second_order->get_id() ], 'The second order should be reported as new once the first order is cancelled' );
+		$this->assertEquals( 'new', $customer_types[ $refund->get_id() ], 'A refund should keep reporting the customer type of the refunded order after the recalculation' );
+
+		$returning_customer_rows = $this->get_customer_types_by_order_id( $second_order, array( 'customer_type' => 'returning' ) );
+
+		$this->assertEmpty( $returning_customer_rows, 'Filtering by returning customers should not match the refund after the recalculation' );
+	}
+
+	/**
+	 * Orders can be given a parent through set_parent_id(), so a parent alone does not make a
+	 * stats row a refund: such orders still count as orders of the customer.
+	 *
+	 * @testdox Should keep counting a customer's orders that have a parent order.
+	 */
+	public function test_orders_with_a_parent_are_still_the_customers_orders() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$parent_order = $this->create_guest_order( $simple_product, 'guest-parent-order@example.org' );
+
+		$first_order = $this->create_guest_order( $simple_product, 'guest-child-order@example.org' );
+		$first_order->set_parent_id( $parent_order->get_id() );
+		$first_order->save();
+
+		$second_order = $this->create_guest_order( $simple_product, 'guest-child-order@example.org' );
+		$second_order->set_parent_id( $parent_order->get_id() );
+		$second_order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $first_order );
+
+		$this->assertEquals( 'new', $customer_types[ $first_order->get_id() ], "The customer's first order should be reported as new" );
+		$this->assertEquals( 'returning', $customer_types[ $second_order->get_id() ], 'The second order of the customer should be reported as returning' );
+	}
+
+	/**
+	 * A refund carries the customer of the order it refunds, but it is not one of that
+	 * customer's orders and must never be picked as their first one — the recalculation would
+	 * then flag every actual order of the customer as returning.
+	 *
+	 * @testdox Should keep reporting a customer's only order as new after its date is moved past its refund.
+	 */
+	public function test_refund_is_not_treated_as_the_customers_first_order() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$order = $this->create_guest_order( $simple_product, 'guest-refund-first-order@example.org' );
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 25,
+				'order_id' => $order->get_id(),
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		$updated = $wpdb->update(
+			$wpdb->prefix . 'wc_order_stats',
+			array( 'returning_customer' => 1 ),
+			array( 'order_id' => $refund->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+		$this->assertSame( 1, $updated, 'The fixture should simulate a legacy non-null refund marker.' );
+
+		// Moving the order past its refund makes the refund the oldest row of the customer,
+		// which triggers the first order recalculation.
+		$moved_to = $order->get_date_created()->getTimestamp() + HOUR_IN_SECONDS;
+		$order->set_date_created( $moved_to );
+		$order->set_date_paid( $moved_to );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$customer_types = $this->get_customer_types_by_order_id( $order );
+
+		$this->assertEquals( 'new', $customer_types[ $order->get_id() ], "The customer's only order should still be reported as new" );
+	}
+
+	/**
+	 * Orders are imported asynchronously and stats dates only have second resolution, so two
+	 * orders placed within the same second carry the same date_created. Which one is the
+	 * customer's first order has to be decided by ID rather than by import order.
+	 *
+	 * @testdox Should report the same customer types when a customer's orders are imported newest first.
+	 */
+	public function test_customer_type_does_not_depend_on_the_order_import_order() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$simple_product = new WC_Product_Simple();
+		$simple_product->set_name( 'Simple Product' );
+		$simple_product->set_regular_price( 25 );
+		$simple_product->save();
+
+		$date_created = time();
+		$first_order  = $this->create_guest_order( $simple_product, 'guest-import-order@example.org', $date_created );
+		$second_order = $this->create_guest_order( $simple_product, 'guest-import-order@example.org', $date_created );
+
+		// Import the newer order first, which is what an unordered queue can do.
+		WC_Helper_Queue::cancel_all_pending();
+		OrdersScheduler::import( $second_order->get_id() );
+		OrdersScheduler::import( $first_order->get_id() );
+
+		$customer_types = $this->get_customer_types_by_order_id( $first_order );
+
+		$this->assertEquals( 'new', $customer_types[ $first_order->get_id() ], 'The first order should be reported as new even when imported last' );
+		$this->assertEquals( 'returning', $customer_types[ $second_order->get_id() ], 'The second order should be reported as returning even when imported first' );
 	}
 }

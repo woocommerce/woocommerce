@@ -18,7 +18,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanGroup;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
@@ -26,7 +25,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanGroupRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
@@ -40,9 +38,11 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	private const GATEWAY_APPROVING = 'engine_dispatch_gateway_approve';
 
 	/**
-	 * The consumer slug registered to open the processing gate in charging tests.
+	 * The consumer slug registered in charging tests. It is the owner the test plan (and
+	 * therefore every contract signed up from it) carries, so registering it puts those
+	 * contracts in the owner-scoped due scan.
 	 */
-	private const CONSUMER = 'engine-tests-consumer';
+	private const CONSUMER = 'engine-tests';
 
 	public function set_up(): void {
 		parent::set_up();
@@ -69,10 +69,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	 * Persist a monthly plan and return the entity (the ContractFactory needs the plan).
 	 */
 	private function make_plan_object(): Plan {
-		$group_id = ( new PlanGroupRepository() )->insert( PlanGroup::create( array( 'name' => 'Club' ) ) );
-
 		$plan = Plan::create(
-			$group_id,
 			array(
 				'name'           => 'Monthly',
 				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
@@ -158,7 +155,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		// Cycle 2 was billed via the dummy gateway and the schedule advanced one cadence.
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
@@ -331,7 +328,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**

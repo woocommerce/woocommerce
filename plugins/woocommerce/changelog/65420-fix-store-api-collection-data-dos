@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API: limit and de-duplicate the attribute and taxonomy count requests accepted by the products/collection-data endpoint to prevent a single request from triggering an excessive number of database queries.

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'Plugin_Command' ) ) {
-	exit;
+	return;
 }
 
 /**

@@ -47,11 +47,9 @@ test.describe( 'Cart Store', () => {
 
 		await frontendUtils.goToShop();
 
-		// Wait for the GET /cart request (refreshCartItems) to complete.
-		await page.waitForResponse( '**/wc/store/v1/cart**' );
-
-		// refreshCartItems should return a nonce.
-		expect( refreshNonce ).toBeTruthy();
+		// The GET /cart fires during page load, so a waitForResponse set up
+		// here can miss it — poll the intercepted nonce instead.
+		await expect.poll( () => refreshNonce ).toBeTruthy();
 
 		// Adding a product should use the nonce from refreshCartItems.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );

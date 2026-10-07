@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
@@ -12,6 +13,24 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  * Provides methods to toggle the HPOS feature on and off.
  */
 trait HPOSToggleTrait {
+
+	/**
+	 * Ensure permanent HPOS tables exist and empty them without resetting IDs.
+	 */
+	protected static function setup_cot_tables(): void {
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		global $wpdb;
+		$tables = array(
+			OrdersTableDataStore::get_meta_table_name(),
+			OrdersTableDataStore::get_operational_data_table_name(),
+			OrdersTableDataStore::get_addresses_table_name(),
+			OrdersTableDataStore::get_orders_table_name(),
+		);
+		foreach ( $tables as $table ) {
+			$wpdb->query( "DELETE FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are provided by the data store.
+		}
+	}
 
 	/**
 	 * Call in setUp to enable COT/HPOS.

@@ -37,13 +37,19 @@ final class SchemaInstaller {
 	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery lease) and
 	 *         reserved `retry_at`; a `due_contract (status, next_payment_gmt)` index on
 	 *         contracts for the batch renewal scan.
+	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
+	 *         options, gain merchant_code (UNIQUE).
+	 * 2.4.0 - owner-scoped due scan: `due_owner (extension_slug, next_payment_gmt)` replaces
+	 *         `due_contract (status, next_payment_gmt)` and makes the contracts
+	 *         `extension_slug` index redundant (dropped); pre-freeze, existing tables must be
+	 *         recreated to drop the old indexes.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.2.0';
+	private const VERSION = '2.4.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -53,7 +59,6 @@ final class SchemaInstaller {
 	/**
 	 * Logical table identifiers - keys map to unprefixed table names.
 	 */
-	public const TABLE_PLAN_GROUPS        = 'plan_groups';
 	public const TABLE_PLANS              = 'plans';
 	public const TABLE_CONTRACTS          = 'contracts';
 	public const TABLE_CONTRACT_ITEMS     = 'contract_items';
@@ -162,7 +167,6 @@ final class SchemaInstaller {
 	 */
 	private static function get_table_names( string $prefix ): array {
 		return array(
-			self::TABLE_PLAN_GROUPS        => $prefix . 'wc_selling_plan_groups',
 			self::TABLE_PLANS              => $prefix . 'wc_selling_plans',
 			self::TABLE_CONTRACTS          => $prefix . 'wc_subscription_contracts',
 			self::TABLE_CONTRACT_ITEMS     => $prefix . 'wc_subscription_contract_items',
@@ -185,7 +189,6 @@ final class SchemaInstaller {
 	 * @return array<int, string>
 	 */
 	private static function get_table_definitions( array $names, string $collate ): array {
-		$plan_groups        = $names[ self::TABLE_PLAN_GROUPS ];
 		$plans              = $names[ self::TABLE_PLANS ];
 		$contracts          = $names[ self::TABLE_CONTRACTS ];
 		$contract_items     = $names[ self::TABLE_CONTRACT_ITEMS ];
@@ -194,31 +197,16 @@ final class SchemaInstaller {
 		$cycles             = $names[ self::TABLE_CYCLES ];
 		$snapshots          = $names[ self::TABLE_SNAPSHOTS ];
 
-		// `merchant_code` is UNIQUE (not KEY) for DB-enforced idempotency on
-		// consumer-supplied codes; NULLs are treated as distinct, so consumers that do
-		// not use merchant codes are unaffected.
-		$plan_groups_sql = "CREATE TABLE {$plan_groups} (
-  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  merchant_code VARCHAR(64) NULL,
-  options_display JSON NULL,
-  extension_slug VARCHAR(64) NULL,
-  date_created_gmt DATETIME NOT NULL,
-  date_updated_gmt DATETIME NOT NULL,
-  PRIMARY KEY  (id),
-  UNIQUE KEY merchant_code (merchant_code),
-  KEY extension_slug (extension_slug)
-) {$collate};";
-
-		// `extension_slug` records the creating extension's registered slug. Nullable
-		// while owner identifier/registration semantics are still open; tightened
-		// additively once decided.
+		// `merchant_code` is DB-enforced-unique per extension (composite with
+		// `extension_slug`) for idempotency on consumer-supplied codes - each consumer
+		// owns its own code namespace; NULLs are treated as distinct, so consumers that
+		// do not use merchant codes are unaffected. `extension_slug` records the creating
+		// extension's registered slug. Nullable while owner identifier/registration
+		// semantics are still open; tightened additively once decided.
 		$plans_sql = "CREATE TABLE {$plans} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  group_id BIGINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
   description TEXT NULL,
-  options JSON NOT NULL,
   billing_policy JSON NOT NULL,
   delivery_policy JSON NULL,
   inventory_policy JSON NULL,
@@ -226,19 +214,20 @@ final class SchemaInstaller {
   category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
   status VARCHAR(20) NOT NULL DEFAULT 'active',
   sort_order INT NOT NULL DEFAULT 0,
+  merchant_code VARCHAR(64) NULL,
   extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
-  KEY group_id (group_id),
+  UNIQUE KEY extension_merchant_code (extension_slug, merchant_code),
   KEY category (category),
   KEY status_sort (status, sort_order, id),
   KEY extension_slug (extension_slug)
 ) {$collate};";
 
 		// The contract row is the live source of truth: the totals and stamps are live
-		// values, not caches of cycles. The `due_contract (status, next_payment_gmt)` index
-		// keys the batch dispatcher's scan (status equality, then a range on the due date);
+		// values, not caches of cycles. The `due_owner (extension_slug, next_payment_gmt)` index
+		// keys the batch dispatcher's scan (owner equality, then a range on the due date);
 		// `due` is retained for next-bill-cache lookups keyed the other way. `origin_order_id`
 		// is NULLABLE (a manual/admin contract has no origin order). There is no generic
 		// `cycle_count` - counters are per-chain, derived as `MAX(count)` over
@@ -274,9 +263,8 @@ final class SchemaInstaller {
   PRIMARY KEY  (id),
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
-  KEY due_contract (status, next_payment_gmt),
-  KEY origin_order (origin_order_id),
-  KEY extension_slug (extension_slug)
+  KEY due_owner (extension_slug, next_payment_gmt),
+  KEY origin_order (origin_order_id)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (
@@ -381,7 +369,6 @@ final class SchemaInstaller {
 ) {$collate};";
 
 		return array(
-			$plan_groups_sql,
 			$plans_sql,
 			$contracts_sql,
 			$contract_items_sql,

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix undefined behavior and potential infinite loop in WC_Post_Data::do_deferred_product_sync when more products are deferred for sync while a deferred sync is running.

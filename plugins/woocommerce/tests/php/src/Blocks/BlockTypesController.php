@@ -5,13 +5,14 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+use WC_Unit_Test_Case;
 
 /**
- * Unit tests for the PatternRegistry class.
+ * Unit tests for the BlockTypesController class.
  */
-class BlockTypesController extends \WP_UnitTestCase {
+class BlockTypesController extends WC_Unit_Test_Case {
 
 	/**
 	 * Holds the BlockTypesController under test.
@@ -26,8 +27,9 @@ class BlockTypesController extends \WP_UnitTestCase {
 	 * @return void
 	 * @throws \Exception If there is no dependency for the given identifier in the container the setup will fail.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
+
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
 			new AssetDataRegistryMock( Package::container()->get( API::class ) )
@@ -35,12 +37,9 @@ class BlockTypesController extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Register 3 blocks, one will be allowed by full name, one by namespace,and one because it has a parent with a
-	 * woocommerce namespace.
-	 *
-	 * @return void
+	 * @testdox Should identify blocks that should have data attributes.
 	 */
-	public function test_block_should_have_data_attributes() {
+	public function test_block_should_have_data_attributes(): void {
 
 		// A block that will not be allowed data attributes.
 		register_block_type(
@@ -93,5 +92,76 @@ class BlockTypesController extends \WP_UnitTestCase {
 
 		$answer = $this->block_types_controller->block_should_have_data_attributes( 'child-of-woo/block-name' );
 		$this->assertTrue( $answer );
+	}
+
+	/**
+	 * @testdox register_block_patterns() registers the patterns referenced by the installed Cart page.
+	 */
+	public function test_register_block_patterns_registers_installed_cart_page_patterns(): void {
+		$registry = \WP_Block_Patterns_Registry::get_instance();
+
+		// The default Cart page created at install references these patterns
+		// (see WC_Install::get_cart_block_content()). Registering them here rather than
+		// in the Cart block type means the page can still resolve the references when
+		// the Cart block itself is not registered.
+		$slugs = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message', 'woocommerce/cart-cross-sells-message' );
+
+		foreach ( $slugs as $slug ) {
+			if ( $registry->is_registered( $slug ) ) {
+				unregister_block_pattern( $slug );
+			}
+		}
+
+		$this->block_types_controller->register_block_patterns();
+
+		foreach ( $slugs as $slug ) {
+			$this->assertTrue(
+				$registry->is_registered( $slug ),
+				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it."
+			);
+		}
+	}
+
+	/**
+	 * @testdox Should use the WooCommerce version when a bundled block.json omits one.
+	 */
+	public function test_block_json_style_without_version_uses_woocommerce_version(): void {
+		$metadata = array(
+			'name' => 'woocommerce/product-filter-chips',
+			'file' => WC_ABSPATH . 'assets/client/blocks/product-filter-chips/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( 'wc-' . WC_VERSION, $result['version'] );
+	}
+
+	/**
+	 * @testdox Should keep a version a bundled block.json already declares.
+	 */
+	public function test_block_json_keeps_explicit_version(): void {
+		$metadata = array(
+			'name'    => 'woocommerce/mini-cart',
+			'file'    => WC_ABSPATH . 'assets/client/blocks/mini-cart/block.json',
+			'version' => '1.0.0',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( '1.0.0', $result['version'] );
+	}
+
+	/**
+	 * @testdox Should leave block metadata from outside WooCommerce unchanged.
+	 */
+	public function test_block_json_outside_woocommerce_keeps_omitted_version(): void {
+		$metadata = array(
+			'name' => 'example/block',
+			'file' => '/tmp/example/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertArrayNotHasKey( 'version', $result );
 	}
 }

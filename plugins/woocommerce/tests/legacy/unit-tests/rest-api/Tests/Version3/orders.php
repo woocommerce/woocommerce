@@ -60,7 +60,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		// Create 10 orders.
 		for ( $i = 0; $i < 10; $i++ ) {
-			$this->orders[] = OrderHelper::create_order( $this->user );
+			$this->orders[] = wc_create_order( array( 'customer_id' => $this->user ) );
 		}
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders' ) );
@@ -80,9 +80,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$order2 = OrderHelper::create_order( $this->user );
 
 		$order1->set_status( OrderStatus::COMPLETED );
+		$order1->set_date_modified( '2020-01-01 00:00:00' );
 		$order1->save();
-		sleep( 1 );
+
 		$order2->set_status( OrderStatus::COMPLETED );
+		$order2->set_date_modified( '2020-01-02 00:00:00' );
 		$order2->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
@@ -114,7 +116,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
-		$this->orders[] = OrderHelper::create_order();
+		$this->orders[] = wc_create_order();
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -149,7 +151,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_without_permission() {
 		wp_set_current_user( 0 );
-		$order          = OrderHelper::create_order();
+		$order          = wc_create_order();
 		$this->orders[] = $order;
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
@@ -573,6 +575,33 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'test-update', $data['payment_method'] );
 		$this->assertEquals( 'Fish', $data['billing']['first_name'] );
 		$this->assertEquals( 'Face', $data['billing']['last_name'] );
+	}
+
+	/**
+	 * @testdox Should accept a null parent name when updating a non-variation line item.
+	 */
+	public function test_update_order_accepts_null_parent_name(): void {
+		wp_set_current_user( $this->user );
+		$product   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$order     = OrderHelper::create_order( 1, $product );
+		$line_item = current( $order->get_items( 'line_item' ) );
+		$request   = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'          => $line_item->get_id(),
+						'parent_name' => null,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertNull( $data['line_items'][0]['parent_name'] );
 	}
 
 	/**
@@ -1015,7 +1044,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = OrderHelper::create_order();
+		$order   = wc_create_order();
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
@@ -1073,7 +1102,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_order_without_permission() {
 		wp_set_current_user( 0 );
-		$order   = OrderHelper::create_order();
+		$order   = wc_create_order();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -1151,7 +1180,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the order line items schema.
+	 * @testdox Should expose the expected order line item schema.
 	 */
 	public function test_order_line_items_schema() {
 		wp_set_current_user( $this->user );
@@ -1166,6 +1195,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
 		$this->assertArrayHasKey( 'parent_name', $line_item_properties );
+		$this->assertSame( array( 'string', 'null' ), $line_item_properties['parent_name']['type'] );
 
 		$meta_data_item_properties = $line_item_properties['meta_data']['items']['properties'];
 		$this->assertEquals( 5, count( $meta_data_item_properties ) );

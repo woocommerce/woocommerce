@@ -12,13 +12,13 @@ import './card.scss';
 
 export default function FulfillmentCard( {
 	header,
-	isCollapsable,
+	isCollapsible,
 	initialState,
 	size = 'medium',
 	children,
 }: {
 	header: ReactNode;
-	isCollapsable?: boolean;
+	isCollapsible?: boolean;
 	initialState?: 'collapsed' | 'expanded';
 	size?: 'small' | 'medium' | 'large';
 	children: ReactNode;
@@ -41,11 +41,11 @@ export default function FulfillmentCard( {
 			<div
 				className={ [
 					'woocommerce-fulfillment-card__header',
-					isCollapsable
+					isCollapsible
 						? 'woocommerce-fulfillment-card__header--clickable'
 						: '',
 				].join( ' ' ) }
-				{ ...( isCollapsable
+				{ ...( isCollapsible
 					? {
 							onClick: handleToggle,
 							onKeyUp: handleKeyUp,
@@ -55,7 +55,7 @@ export default function FulfillmentCard( {
 					: {} ) }
 			>
 				{ header }
-				{ isCollapsable && (
+				{ isCollapsible && (
 					<Button
 						__next40pxDefaultSize
 						size="small"
@@ -80,7 +80,7 @@ export default function FulfillmentCard( {
 				<div
 					className={ [
 						'woocommerce-fulfillment-card__body',
-						isCollapsable ? '' : 'no-collapse',
+						isCollapsible ? '' : 'no-collapse',
 					].join( ' ' ) }
 				>
 					{ children }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add optional imageUrl and imageAlt fields to the onboarding TaskType.

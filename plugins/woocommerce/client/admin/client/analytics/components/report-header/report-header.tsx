@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { AdvancedFilterConfig } from '@woocommerce/components';
+
+/**
  * Internal dependencies
  */
 import { ImportStatusBar } from '../import-status-bar';
@@ -10,7 +15,7 @@ interface ReportHeaderProps {
 	/**
 	 * Config option passed through to `AdvancedFilters`
 	 */
-	advancedFilters?: object;
+	advancedFilters?: AdvancedFilterConfig;
 	/**
 	 * Config option passed through to `FilterPicker`
 	 */
@@ -38,9 +43,7 @@ export default function ReportHeader( props: ReportHeaderProps ): JSX.Element {
 		<div className="woocommerce-analytics-report-header">
 			{ /* @ts-expect-error - ReportFilters is a valid component but not typed */ }
 			<ReportFilters { ...props } />
-			{ !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] && (
-				<ImportStatusBar />
-			) }
+			<ImportStatusBar />
 		</div>
 	);
 }

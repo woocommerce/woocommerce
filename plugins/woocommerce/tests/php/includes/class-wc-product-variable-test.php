@@ -5,14 +5,6 @@
  */
 class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	/**
-	 * Reset variation gallery feature-flag option leaked by individual tests.
-	 */
-	public function tearDown(): void {
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox 'get_available_variations' returns the variations as arrays if no parameters is passed.
 	 */
 	public function test_get_available_variations_returns_array_when_no_parameter_is_passed() {
@@ -172,11 +164,30 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_available_variations' with 'array' return includes image and gallery data for variations that have images set.
+	 */
+	public function test_get_available_variations_array_includes_image_data_when_variation_has_images(): void {
+		$image_id   = $this->create_image_attachment( 'Variation Image', 'variation-image.jpg' );
+		$gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_image_id( $image_id );
+		$variation->set_gallery_image_ids( array( $gallery_id ) );
+		$variation->save();
+
+		$variations = $product->get_available_variations( 'array' );
+
+		$this->assertSame( $image_id, $variations[0]['image_id'] );
+		$this->assertSame( array( $gallery_id ), $variations[0]['gallery_image_ids'] );
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox 'get_available_variation' exposes typed variation gallery image IDs.
 	 */
 	public function test_get_available_variation_includes_gallery_image_ids() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
 		$product   = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
 		$image_id  = wp_insert_attachment(
@@ -219,56 +230,85 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_available_variation' omits multi-image gallery data when the variation gallery feature flag is disabled.
+	 * @testdox The product image template does not render variation galleries recursively when a gallery callback requests variation data.
 	 */
-	public function test_get_available_variation_returns_single_image_shape_when_feature_flag_disabled() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
+	public function test_product_image_template_does_not_render_variation_galleries_recursively(): void {
+		global $product;
 
-		$product   = WC_Helper_Product::create_variation_product();
-		$variation = wc_get_product( $product->get_children()[0] );
-		$image_id  = wp_insert_attachment(
-			array(
-				'post_title'     => 'Variation Image',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		$image_ids = array(
-			wp_insert_attachment(
-				array(
-					'post_title'     => 'Variation Gallery Image 1',
-					'post_type'      => 'attachment',
-					'post_mime_type' => 'image/jpeg',
-				)
-			),
-			wp_insert_attachment(
-				array(
-					'post_title'     => 'Variation Gallery Image 2',
-					'post_type'      => 'attachment',
-					'post_mime_type' => 'image/jpeg',
-				)
-			),
-		);
+		list( $test_product ) = $this->create_variation_gallery_fixture();
+		$previous_product     = $product;
+		$product              = $test_product;
+		$hook_calls           = 0;
+		$callback_results     = array();
+		$buffer_level         = ob_get_level();
+		$callback             = static function () use ( &$hook_calls, &$callback_results ) {
+			global $product;
 
-		update_post_meta( $image_id, '_wp_attached_file', 'variation-disabled.jpg' );
+			if ( ! $product instanceof WC_Product_Variable ) {
+				throw new RuntimeException( 'Expected the gallery template to expose the variable product.' );
+			}
 
-		$variation->set_image_id( $image_id );
-		$variation->set_gallery_image_ids( $image_ids );
-		$variation->save();
+			++$hook_calls;
+			if ( 2 < $hook_calls ) {
+				throw new RuntimeException( 'The gallery template was rendered recursively.' );
+			}
 
-		$available_variation = $product->get_available_variation( $variation );
+			$callback_results[] = $product->get_available_variations();
+		};
+		add_action( 'woocommerce_product_thumbnails', $callback );
 
-		$this->assertSame( array(), $available_variation['gallery_image_ids'] );
-		$this->assertSame( '', $available_variation['gallery_images_html'] );
-		$this->assertSame( $image_id, $available_variation['image_id'] );
+		ob_start();
+		try {
+			woocommerce_show_product_images();
+			$markup = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $buffer_level ) {
+				ob_end_clean();
+			}
+			remove_action( 'woocommerce_product_thumbnails', $callback );
+			$product = $previous_product;
+		}
+
+		$this->assertSame( 2, $hook_calls, 'The callback should run for the product template and its first variation gallery render.' );
+		$this->assertCount( 2, $callback_results, 'Both bounded callback invocations should return variation data.' );
+		$this->assertSame( '', $callback_results[0][0]['gallery_images_html'], 'Re-entrant variation data should omit gallery markup.' );
+		$this->assertNotEmpty( $callback_results[1][0]['gallery_images_html'], 'The first variation data request should retain gallery markup.' );
+		$this->assertNotEmpty( $markup, 'The product image template should still render.' );
+	}
+
+	/**
+	 * @testdox 'get_available_variations' allows a gallery callback to render a different product gallery.
+	 */
+	public function test_get_available_variations_allows_nested_gallery_for_different_product(): void {
+		list( $outer_product )  = $this->create_variation_gallery_fixture();
+		list( $nested_product ) = $this->create_variation_gallery_fixture();
+		$rendered_product_ids   = array();
+		$nested_result          = null;
+		$callback               = static function () use ( $outer_product, $nested_product, &$rendered_product_ids, &$nested_result ) {
+			global $product;
+
+			$rendered_product_ids[] = $product->get_id();
+			if ( $outer_product->get_id() === $product->get_id() ) {
+				$nested_result = $nested_product->get_available_variations();
+			}
+		};
+		add_action( 'woocommerce_product_thumbnails', $callback );
+
+		try {
+			$outer_product->get_available_variations();
+		} finally {
+			remove_action( 'woocommerce_product_thumbnails', $callback );
+		}
+
+		$this->assertContains( $outer_product->get_id(), $rendered_product_ids, 'The outer product gallery should render.' );
+		$this->assertContains( $nested_product->get_id(), $rendered_product_ids, 'The nested product gallery should render.' );
+		$this->assertNotEmpty( $nested_result[0]['gallery_images_html'], 'A different product should retain its gallery markup.' );
 	}
 
 	/**
 	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
 	 */
 	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
 		$product              = WC_Helper_Product::create_variation_product();
 		$variation            = wc_get_product( $product->get_children()[0] );
 		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
@@ -300,8 +340,6 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_available_variation' falls back to the parent featured image when both the variation featured image and gallery are absent.
 	 */
 	public function test_get_available_variation_falls_back_to_parent_featured_when_variation_has_no_images() {
-		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
-
 		$product            = WC_Helper_Product::create_variation_product();
 		$variation          = wc_get_product( $product->get_children()[0] );
 		$parent_featured_id = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
@@ -320,6 +358,175 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $parent_featured_id, $available_variation['image_id'] );
 		$this->assertSame( '', $available_variation['gallery_images_html'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' prefers the variation's own gallery over the inherited parent featured image.
+	 */
+	public function test_get_available_variation_prefers_own_gallery_over_inherited_parent_image(): void {
+		list( $product, $variation, $variation_gallery_id ) = $this->create_variation_gallery_fixture();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame(
+			$variation_gallery_id,
+			$available_variation['image_id'],
+			'A variation that owns a gallery but no featured image should open on gallery[0], not on the inherited parent image.'
+		);
+	}
+
+	/**
+	 * @testdox 'get_available_variation' treats a filtered image equal to the parent featured image as inheritance, so the variation gallery still wins.
+	 */
+	public function test_get_available_variation_treats_filtered_parent_image_as_inherited(): void {
+		list( $product, $variation, $variation_gallery_id ) = $this->create_variation_gallery_fixture();
+		$parent_featured_id                                 = $product->get_image_id();
+
+		// A filter returning exactly the parent's featured image is indistinguishable from
+		// plain inheritance, so the variation-owned gallery takes priority by design.
+		$filter              = static fn() => $parent_featured_id;
+		add_filter( 'woocommerce_product_variation_get_image_id', $filter );
+		$available_variation = $product->get_available_variation( $variation );
+		remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+
+		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
+	}
+
+	/**
+	 * @testdox 'get_available_variation' preserves a filtered variation image when no featured image is stored.
+	 */
+	public function test_get_available_variation_preserves_filtered_image(): void {
+		list( $product, $variation ) = $this->create_variation_gallery_fixture();
+		$filtered_image_id           = $this->create_image_attachment( 'Filtered Variation Image', 'filtered-variation.jpg' );
+
+		$filter              = static fn() => $filtered_image_id;
+		add_filter( 'woocommerce_product_variation_get_image_id', $filter );
+		$available_variation = $product->get_available_variation( $variation );
+		remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+
+		$this->assertSame( $filtered_image_id, $available_variation['image_id'] );
+	}
+
+	/**
+	 * @testdox get_variation_prices sorts on first call, skips re-sorting on repeat calls, and treats float and string prices as equal via loose comparison.
+	 */
+	public function test_get_variation_prices_skips_sort_on_repeated_call_and_with_equivalent_types(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$sut     = new class( $product->get_id() ) extends WC_Product_Variable {
+			public int $sort_count = 0; // phpcs:ignore Squiz.Commenting.VariableComment.Missing
+
+			protected function sort_variation_prices( $prices ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				++$this->sort_count;
+				return parent::sort_variation_prices( $prices );
+			}
+		};
+
+		// Ensure the store-level cache is not interfering the test.
+		$invalidate_cache = static fn ( array $hash ) => array( ...$hash, wp_rand() );
+		add_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+
+		try {
+			// First call: price data will be initially populated, including sorting. 3 is a number of sort calls on initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Second call: price data is unchanged and cache update being skipped. 3 is a number of sort calls, not changed since initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Modify price data type, while keeping the price same.
+			foreach ( $product->get_children() as $child_id ) {
+				foreach ( array( '_price', '_regular_price' ) as $meta_key ) {
+					$value = get_post_meta( $child_id, $meta_key, true );
+					if ( '' !== $value ) {
+						update_post_meta( $child_id, $meta_key, number_format( (float) $value, 2, '.', '' ) );
+					}
+				}
+			}
+
+			// Third call: price data is unchanged (data type is) and cache update being skipped. 3 is a number of sort calls, not changed since initial cache population.
+			$sut->get_variation_prices();
+			$this->assertSame( 3, $sut->sort_count );
+
+			// Modify price.
+			foreach ( $product->get_children() as $child_id ) {
+				foreach ( array( '_price', '_regular_price' ) as $meta_key ) {
+					$value = get_post_meta( $child_id, $meta_key, true );
+					if ( '' !== $value ) {
+						update_post_meta( $child_id, $meta_key, (float) $value + 0.01 );
+					}
+				}
+			}
+
+			// Fourth call: price data change detected — cache being updated. 6 is a number of sort calls: 3 on initial cache population + 3 on cache refresh.
+			$sut->get_variation_prices();
+			$this->assertSame( 6, $sut->sort_count );
+		} finally {
+			remove_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox get_variation_prices returns a valid array structure when the woocommerce_variation_prices filter returns malformed data (null or false), restoring the pre-refactor foreach behaviour that tolerated non-array filter output.
+	 * @dataProvider provider_malformed_variation_prices_filter_values
+	 *
+	 * @param mixed $malformed_value The malformed value for returning via woocommerce_get_variation_prices_hash filter.
+	 */
+	public function test_get_variation_prices_tolerates_malformed_filter_output( $malformed_value ): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Bust the transient so read_price_data() always reaches the woocommerce_variation_prices filter.
+		$invalidate_cache = static fn( array $hash ) => array( ...$hash, wp_rand() );
+		add_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+
+		$bad_filter = static fn() => $malformed_value;
+		add_filter( 'woocommerce_variation_prices', $bad_filter );
+
+		$this->setExpectedIncorrectUsage( 'WC_Product_Variable_Data_Store_CPT::prime_price_data_cache' );
+
+		try {
+			$prices = $product->get_variation_prices();
+			$this->assertSame( $malformed_value, $prices );
+		} finally {
+			remove_filter( 'woocommerce_variation_prices', $bad_filter );
+			remove_filter( 'woocommerce_get_variation_prices_hash', $invalidate_cache );
+		}
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @return array<string,array>
+	 */
+	public function provider_malformed_variation_prices_filter_values(): array {
+		return array(
+			'null'   => array( null ),
+			'false'  => array( false ),
+			'string' => array( 'bad_return' ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
+	 * Create a product with a parent image and an image-less variation with a gallery.
+	 *
+	 * @return array{0: WC_Product_Variable, 1: WC_Product_Variation, 2: int}
+	 */
+	private function create_variation_gallery_fixture(): array {
+		$product              = WC_Helper_Product::create_variation_product();
+		$parent_featured_id   = $this->create_image_attachment( 'Parent Featured Image', 'parent-featured.jpg' );
+		$variation_gallery_id = $this->create_image_attachment( 'Variation Gallery Image', 'variation-gallery.jpg' );
+		$product->set_image_id( $parent_featured_id );
+		$product->save();
+
+		wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductCache::class )->flush();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		return array( $product, $variation, $variation_gallery_id );
 	}
 
 	/**

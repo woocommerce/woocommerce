@@ -53,6 +53,13 @@ class FrontendContainerBlock extends Component<
 			: parseInt( attributes.reviewsOnLoadMore, 10 );
 	}
 
+	getOffset() {
+		const { attributes } = this.props;
+		const offset = Number( attributes.offset ?? 0 );
+
+		return Number.isInteger( offset ) && offset >= 0 ? offset : 0;
+	}
+
 	onAppendReviews() {
 		const { reviewsToDisplay } = this.state;
 
@@ -93,9 +100,13 @@ class FrontendContainerBlock extends Component<
 
 	render() {
 		const { attributes } = this.props;
-		const { categoryIds, productId } = attributes;
+		const { categoryIds, productId, isFilteredReviewsBlock } = attributes;
 		const { reviewsToDisplay } = this.state;
 		const { order, orderby } = getSortArgs( this.state.orderby );
+
+		if ( isFilteredReviewsBlock && ! categoryIds && ! productId ) {
+			return null;
+		}
 
 		return (
 			// @ts-expect-error - TODO: Refactor WrappedComponent
@@ -107,6 +118,7 @@ class FrontendContainerBlock extends Component<
 				onReviewsAppended={ this.onReviewsAppended }
 				onReviewsLoadError={ this.onReviewsLoadError }
 				onReviewsReplaced={ this.onReviewsReplaced }
+				offset={ this.getOffset() }
 				order={ order }
 				orderby={ orderby }
 				productId={ productId }

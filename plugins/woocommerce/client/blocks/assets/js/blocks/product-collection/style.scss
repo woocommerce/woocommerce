@@ -5,10 +5,6 @@
 		text-align: center;
 	}
 
-	h2.wp-block-heading {
-		@include font-small-locked;
-	}
-
 	// Gutenberg adds margin between elements but notices are often empty
 	// resulting in an unnecessary margin on product template.
 	.wc-block-components-notices:not(:has(*)) + .wc-block-product-template {
@@ -29,6 +25,11 @@
 			}
 		}
 	}
+}
+
+.wc-product-collection-carousel-header .wp-block-heading {
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 // Styles for the interactivity API store notices rendered top of block for client side errors.

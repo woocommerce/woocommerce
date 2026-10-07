@@ -6,11 +6,13 @@ import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse, BlockInstance } from '@wordpress/blocks';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import { getPersonalizationTagsQuery } from './personalization-tags-query';
 import {
 	State,
 	EmailTemplate,
@@ -18,6 +20,7 @@ import {
 	Feature,
 	PersonalizationTag,
 	GlobalEmailStylesPost,
+	RecentEmailsQuery,
 } from './types';
 
 function getContentFromEntity( entity ): string {
@@ -182,15 +185,38 @@ export const getEditedEmailContent = createRegistrySelector(
 	}
 );
 
+const DEFAULT_RECENT_EMAILS_QUERY: RecentEmailsQuery = {
+	per_page: 30, // show a maximum of 30 for now
+	status: 'publish,sent',
+};
+
+function isRecentEmailsQuery( value: unknown ): value is RecentEmailsQuery {
+	return !! value && typeof value === 'object' && ! Array.isArray( value );
+}
+
+/**
+ * Returns the emails listed in the "Recent" category of the template selection
+ * modal. The query can be changed with a filter, so integrations can list their
+ * own post statuses. A status has to be registered on the site, otherwise the
+ * REST API rejects the request and the list stays empty.
+ */
 export const getSentEmailEditorPosts = createRegistrySelector(
 	( select ) => () => {
 		const postType = select( storeName ).getEmailPostType();
+
+		const filteredQuery = applyFilters(
+			'woocommerce_email_editor_recent_emails_query',
+			{ ...DEFAULT_RECENT_EMAILS_QUERY },
+			postType
+		);
+
+		const query = isRecentEmailsQuery( filteredQuery )
+			? filteredQuery
+			: DEFAULT_RECENT_EMAILS_QUERY;
+
 		return (
 			select( coreDataStore )
-				.getEntityRecords( 'postType', postType, {
-					per_page: 30, // show a maximum of 30 for now
-					status: 'publish,sent', // show only sent emails
-				} )
+				.getEntityRecords( 'postType', postType, query )
 				?.filter(
 					( post: EmailEditorPostType ) => post?.content?.raw !== '' // filter out empty content
 				) || []
@@ -418,53 +444,81 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 	return state.preview;
 }
 
+const EMPTY_PERSONALIZATION_TAGS: PersonalizationTag[] = [];
+
 export const getPersonalizationTagsList = createRegistrySelector(
-	( select ) => () => {
-		const postId = select( storeName ).getEmailPostId();
-		const queryParams: Record< string, unknown > = {
-			context: 'view',
-			per_page: -1,
-		};
+	( select ) => {
+		// The block edit filter calls this selector once per block on every store
+		// change, so the filtered list is cached alongside the shared query object
+		// from `getPersonalizationTagsQuery`.
+		//
+		// `createRegistrySelector` resolves this factory once per registry, so the
+		// cache below is scoped to a registry rather than shared globally.
+		//
+		// Keying on `tags` identity is sound because `getQueriedItems` keeps a
+		// value-keyed cache (an `EquivalentKeyMap` per state), so it hands back the
+		// same records array until the entity state itself changes.
+		let listCache: {
+			tags: PersonalizationTag[];
+			postType: string;
+			templatePostTypes: string[] | undefined;
+			result: PersonalizationTag[];
+		} | null = null;
 
-		// Include post_id for context-aware tag filtering (e.g., automation emails)
-		if ( postId ) {
-			queryParams.post_id = postId;
-		}
+		return () => {
+			const postId = select( storeName ).getEmailPostId();
 
-		const tags = ( select( coreDataStore ).getEntityRecords(
-			PERSONALIZATION_TAG_ENTITY.kind,
-			PERSONALIZATION_TAG_ENTITY.name,
-			queryParams
-		) || [] ) as PersonalizationTag[];
+			const tags = ( select( coreDataStore ).getEntityRecords(
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				getPersonalizationTagsQuery( postId )
+			) || EMPTY_PERSONALIZATION_TAGS ) as PersonalizationTag[];
 
-		const postType = select( storeName ).getEmailPostType();
+			const postType = select( storeName ).getEmailPostType();
 
-		if ( ! postType ) {
-			return tags;
-		}
+			if ( ! postType ) {
+				return tags;
+			}
 
-		// When postType is template, we filter tags by registered template postTypes.
-		if ( postType === 'wp_template' ) {
-			const postTemplate = select( storeName ).getCurrentTemplate();
-			return tags.filter( ( tag ) => {
-				return (
+			// When postType is template, we filter tags by registered template postTypes.
+			const templatePostTypes =
+				postType === 'wp_template'
+					? select( storeName ).getCurrentTemplate()?.post_types
+					: undefined;
+
+			if (
+				listCache &&
+				listCache.tags === tags &&
+				listCache.postType === postType &&
+				listCache.templatePostTypes === templatePostTypes
+			) {
+				return listCache.result;
+			}
+
+			const result = tags.filter( ( tag ) => {
+				if (
 					tag.postTypes === undefined ||
-					tag.postTypes.length === 0 ||
-					( Array.isArray( postTemplate.post_types ) &&
-						postTemplate.post_types.some( ( pt ) =>
-							tag.postTypes.includes( pt )
-						) )
-				);
-			} );
-		}
+					tag.postTypes.length === 0
+				) {
+					return true;
+				}
 
-		return tags.filter( ( tag ) => {
-			return (
-				tag.postTypes === undefined ||
-				tag.postTypes.length === 0 ||
-				tag.postTypes.includes( postType )
-			);
-		} );
+				if ( postType === 'wp_template' ) {
+					return (
+						Array.isArray( templatePostTypes ) &&
+						templatePostTypes.some( ( pt ) =>
+							tag.postTypes.includes( pt )
+						)
+					);
+				}
+
+				return tag.postTypes.includes( postType );
+			} );
+
+			listCache = { tags, postType, templatePostTypes, result };
+
+			return result;
+		};
 	}
 );
 
