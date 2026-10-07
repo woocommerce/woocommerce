@@ -503,11 +503,44 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertSame( '', Plans::get_meta( $id, 'note', true ) );
 	}
 
-	public function test_meta_writes_on_a_missing_plan_return_null_or_false(): void {
-		$this->assertNull( Plans::add_meta( 999999, 'note', 'x' ) );
-		$this->assertFalse( Plans::update_meta( 999999, 'note', 'x' ) );
+	public function test_meta_reads_for_a_missing_plan_are_empty(): void {
 		$this->assertFalse( Plans::delete_meta( 999999, 'note' ) );
+		$this->assertSame( '', Plans::get_meta( 999999, 'note', true ) );
 		$this->assertSame( array(), Plans::get_meta( 999999 ) );
+	}
+
+	public function test_meta_writes_do_not_look_up_the_plan(): void {
+		$id = $this->create();
+		Plans::add_meta( $id, 'note', 'one' );
+
+		$queries = array();
+		$capture = static function ( $query ) use ( &$queries ) {
+			$queries[] = $query;
+			return $query;
+		};
+		add_filter( 'query', $capture );
+		try {
+			Plans::add_meta( $id, 'note', 'two' );
+			Plans::update_meta( $id, 'flag', 'on' );
+		} finally {
+			remove_filter( 'query', $capture );
+		}
+
+		$plans_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		foreach ( $queries as $query ) {
+			$this->assertDoesNotMatchRegularExpression( '/\\b' . preg_quote( $plans_table, '/' ) . '\\b/', $query, 'A meta write reads only the meta table.' );
+		}
+		$this->assertSame( array( 'one', 'two' ), Plans::get_meta( $id, 'note' ) );
+		$this->assertSame( 'on', Plans::get_meta( $id, 'flag', true ) );
+	}
+
+	public function test_deleting_a_plan_removes_its_meta(): void {
+		$id = $this->create();
+		Plans::add_meta( $id, 'note', 'one' );
+
+		$this->assertTrue( ( new PlanRepository() )->delete( $id ) );
+
+		$this->assertSame( array(), Plans::get_meta( $id, 'note' ) );
 	}
 
 	public function test_an_empty_meta_key_is_rejected(): void {

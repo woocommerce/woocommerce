@@ -160,48 +160,36 @@ final class Plans {
 
 	/**
 	 * Add a meta value to a plan, like `add_post_meta()`. A key may hold several values.
+	 * The plan is not looked up: meta for an unknown plan id is a caller error.
 	 *
 	 * @param int    $id     Plan id.
 	 * @param string $key    Meta key.
 	 * @param mixed  $value  Meta value; serialized when not scalar.
 	 * @param bool   $unique When true, add nothing if the key already exists. Advisory: checked
 	 *                       before the insert with no unique index, so concurrent adds can both write.
-	 * @return int|null The meta row id; null when the plan does not exist or `$unique` and the key exists.
+	 * @return int|null The meta row id; null when `$unique` and the key exists.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
 	public static function add_meta( int $id, string $key, $value, bool $unique = false ): ?int {
-		self::assert_meta_key( $key );
-
-		$repository = new PlanRepository();
-		if ( ! $repository->exists( $id ) ) {
-			return null;
-		}
-
-		return $repository->add_meta( $id, $key, $value, $unique );
+		return ( new PlanRepository() )->add_meta( $id, $key, $value, $unique );
 	}
 
 	/**
 	 * Update a plan's meta values for `$key`, like `update_post_meta()`: adds the key
 	 * when absent, else rewrites every value, or only the values equal to `$prev_value`.
 	 * The absent-key check runs before the write with no unique index, so it is not a lock.
+	 * The plan is not looked up: meta for an unknown plan id is a caller error.
 	 *
 	 * @param int    $id         Plan id.
 	 * @param string $key        Meta key.
 	 * @param mixed  $value      New value; serialized when not scalar.
 	 * @param mixed  $prev_value Only update values equal to this; null updates all. Any other
 	 *                           value ('' and false included) matches literally.
-	 * @return bool True when a value was added or changed; false when nothing changed or the plan does not exist.
+	 * @return bool True when a value was added or changed; false when nothing changed.
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
 	public static function update_meta( int $id, string $key, $value, $prev_value = null ): bool {
-		self::assert_meta_key( $key );
-
-		$repository = new PlanRepository();
-		if ( ! $repository->exists( $id ) ) {
-			return false;
-		}
-
-		return $repository->update_meta( $id, $key, $value, $prev_value );
+		return ( new PlanRepository() )->update_meta( $id, $key, $value, $prev_value );
 	}
 
 	/**
@@ -215,8 +203,6 @@ final class Plans {
 	 * @throws InvalidArgumentException If `$key` is empty.
 	 */
 	public static function delete_meta( int $id, string $key, $value = null ): bool {
-		self::assert_meta_key( $key );
-
 		return ( new PlanRepository() )->delete_meta( $id, $key, $value );
 	}
 
@@ -330,18 +316,6 @@ final class Plans {
 
 		if ( $errors->has_errors() ) {
 			throw new PlanValidationException( $errors ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The exception escapes its message.
-		}
-	}
-
-	/**
-	 * Throw on an empty meta key.
-	 *
-	 * @param string $key Meta key.
-	 * @throws InvalidArgumentException If the key is empty.
-	 */
-	private static function assert_meta_key( string $key ): void {
-		if ( '' === $key ) {
-			throw new InvalidArgumentException( 'Plans: the meta key must not be empty.' );
 		}
 	}
 }

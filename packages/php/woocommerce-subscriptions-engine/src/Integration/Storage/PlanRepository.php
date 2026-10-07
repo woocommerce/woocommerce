@@ -231,22 +231,6 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Whether a plan row exists for `$id`.
-	 *
-	 * @param int $id Plan id.
-	 */
-	public function exists( int $id ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id ) );
-
-		return null !== $found;
-	}
-
-	/**
 	 * Delete a plan and its meta rows by id and (optionally) extension slug.
 	 * Most usages from applications should specify the extension slug
 	 * to guard against cross-application operations.

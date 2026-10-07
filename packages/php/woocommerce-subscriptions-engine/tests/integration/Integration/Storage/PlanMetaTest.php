@@ -174,13 +174,8 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 		$this->sut->add_meta( $this->id, 'note', 'kept' );
 
 		$this->assertFalse( $this->sut->delete( $this->id, 'another-extension' ) );
-		$this->assertTrue( $this->sut->exists( $this->id ) );
+		$this->assertNotNull( $this->sut->find( $this->id ) );
 		$this->assertSame( array( 'kept' ), $this->sut->get_meta( $this->id, 'note' ) );
-	}
-
-	public function test_exists_reports_stored_plans_only(): void {
-		$this->assertTrue( $this->sut->exists( $this->id ) );
-		$this->assertFalse( $this->sut->exists( 999999 ) );
 	}
 
 	/**
