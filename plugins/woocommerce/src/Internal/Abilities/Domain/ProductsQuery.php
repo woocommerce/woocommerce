@@ -123,6 +123,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args = array_merge( $args, $type_args );
 		}
 
+		if ( ! isset( $args['type'] ) ) {
+			$args['type'] = self::get_product_type_slugs();
+		}
+
 		if ( ! empty( $input['search'] ) ) {
 			$args['s'] = wc_clean( $input['search'] );
 		}

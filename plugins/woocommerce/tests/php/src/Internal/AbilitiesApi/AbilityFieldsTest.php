@@ -132,6 +132,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 
 		$this->unregister_abilities();
 		$this->reset_fields();
+		remove_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10 );
 		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', 'no' );
 		$wp_version = $this->original_wp_version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		add_filter( 'wp_ability_execute_result', array( AbilityFields::class, 'execute_result' ), 10, 4 );
@@ -220,6 +221,43 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$products = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'search' => 'Pen' ) )['products'];
 
 		$this->assertSame( array( 'test_code' => 'A1' ), $products[0]['extensions'] );
+	}
+
+	/**
+	 * @testdox Should list and return products of a type that an extension adds.
+	 */
+	public function test_products_of_a_type_an_extension_adds_are_listed_and_returned(): void {
+		add_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10, 2 );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen membership' ) );
+		wp_set_object_terms( $product->get_id(), 'membership', 'product_type' );
+		wp_cache_flush();
+		$product = wc_get_product( $product->get_id() );
+		$product->update_meta_data( '_test_code', 'M1' );
+		$product->save();
+		$this->set_feature( true );
+
+		$query  = wp_get_ability( 'woocommerce/products-query' );
+		$listed = $query->execute( array( 'search' => 'Pen membership' ) );
+		$by_id  = $query->execute( array( 'id' => $product->get_id() ) );
+
+		$this->assertInstanceOf( TestMembershipProduct::class, $product );
+		$this->assertContains( 'membership', $query->get_output_schema()['properties']['products']['items']['properties']['type']['enum'] );
+		$this->assertSame( 'membership', $listed['products'][0]['type'] );
+		$this->assertSame( array( 'test_code' => 'M1' ), $listed['products'][0]['extensions'] );
+		$this->assertSame( 'membership', $by_id['products'][0]['type'] );
+	}
+
+	/**
+	 * Use TestMembershipProduct for the membership product type.
+	 *
+	 * @internal
+	 *
+	 * @param string $classname    Product class.
+	 * @param string $product_type Product type.
+	 * @return string
+	 */
+	public function membership_product_class( $classname, $product_type ) {
+		return 'membership' === $product_type ? TestMembershipProduct::class : $classname;
 	}
 
 	/**

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -816,6 +817,29 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Product type slugs the read abilities list and return. With ability
+	 * contracts on, that includes every type that has a product_type term, so
+	 * products of a type an extension adds, such as a subscription, are included.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_product_type_slugs(): array {
+		$types = array_keys( wc_get_product_types() );
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $types;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_type',
+				'fields'     => 'slugs',
+				'hide_empty' => false,
+			)
+		);
+		return array_values( array_unique( array_merge( $types, is_array( $terms ) ? $terms : array() ) ) );
+	}
+
+	/**
 	 * Get the schema for a single product in a response.
 	 *
 	 * @return array
@@ -835,7 +859,7 @@ trait ProductAbilityTrait {
 				'type'              => array(
 					'type'        => 'string',
 					'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
-					'enum'        => array_keys( wc_get_product_types() ),
+					'enum'        => self::get_product_type_slugs(),
 				),
 				'status'            => array(
 					'type' => 'string',
