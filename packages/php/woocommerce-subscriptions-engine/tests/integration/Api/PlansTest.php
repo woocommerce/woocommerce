@@ -280,7 +280,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update returns the plan as read plus the written fields, with the bumped update time.
+	 * @testdox update returns the plan as read plus the written fields, matching a fresh read (stored update time included).
 	 */
 	public function test_update_returns_the_view_with_the_written_fields(): void {
 		$id = $this->create();
@@ -780,27 +780,24 @@ class PlansTest extends EngineIntegrationTestCase {
 		$foreign_id  = $this->create( array( 'extension_slug' => 'other-extension' ) );
 		$requested   = array( $archived_id, $second_id, $first_id, $foreign_id, 999999 );
 
-		$all = self::plan_ids(
-			Plans::list(
-				array(
-					'extension_slug' => self::OWNER,
-					'ids'            => $requested,
-				)
+		$plans = Plans::list(
+			array(
+				'extension_slug' => self::OWNER,
+				'ids'            => $requested,
 			)
 		);
+		$all   = self::plan_ids( $plans );
 		$this->assertSame( array( $first_id, $second_id, $archived_id ), $all );
 		$this->assertNotContains( $excluded_id, $all );
 
-		$active = self::plan_ids(
-			Plans::list(
-				array(
-					'extension_slug' => self::OWNER,
-					'ids'            => $requested,
-					'status'         => PlanStatus::ACTIVE,
-				)
+		$active_plans = Plans::list(
+			array(
+				'extension_slug' => self::OWNER,
+				'ids'            => $requested,
+				'status'         => PlanStatus::ACTIVE,
 			)
 		);
-		$this->assertSame( array( $first_id, $second_id ), $active );
+		$this->assertSame( array( $first_id, $second_id ), self::plan_ids( $active_plans ) );
 	}
 
 	/**
@@ -822,17 +819,13 @@ class PlansTest extends EngineIntegrationTestCase {
 		$second_id = $this->create();
 		$third_id  = $this->create();
 
-		$this->assertSame(
-			array( $second_id, $third_id ),
-			self::plan_ids(
-				Plans::list(
-					array(
-						'limit'  => 2,
-						'offset' => 1,
-					)
-				)
+		$plans = Plans::list(
+			array(
+				'limit'  => 2,
+				'offset' => 1,
 			)
 		);
+		$this->assertSame( array( $second_id, $third_id ), self::plan_ids( $plans ) );
 	}
 
 	/**

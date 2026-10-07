@@ -507,7 +507,7 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * The requested page size, clamped to the allowed range.
+	 * The requested page size: capped at the maximum, and the default when below 1 or not a number.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 */
