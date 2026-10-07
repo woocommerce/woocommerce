@@ -2430,18 +2430,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( 0 === $tax->get_id() && $local_tax !== $tax ) {
 				$tax_item_key = array_search( $tax, $local_taxes, true );
 
-				if ( false === $tax_item_key ) {
-					if ( $local_tax instanceof WC_Order_Item_Tax && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
-						$tax_item_key = $tax_item_id;
-					} else {
-						// A filter may clone an unsaved item and change its temporary key.
-						foreach ( $local_taxes as $local_tax_key => $local_tax ) {
-							if ( $local_tax instanceof WC_Order_Item_Tax && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
-								$tax_item_key = $local_tax_key;
-								break;
-							}
-						}
-					}
+				// A clone that keeps its temporary key maps to the local item under that key.
+				if ( false === $tax_item_key && $local_tax instanceof WC_Order_Item_Tax && 0 === $local_tax->get_id() && $tax_rate_id === $local_tax->get_rate_id() ) {
+					$tax_item_key = $tax_item_id;
 				}
 
 				$local_tax = false === $tax_item_key ? null : $local_taxes[ $tax_item_key ];
