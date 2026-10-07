@@ -2263,10 +2263,10 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Plugins without a subscription lists an installed Woo plugin the account holds no subscription for.
+	 * @testdox Plugins without a subscription lists an active Woo plugin the account holds no subscription for.
 	 */
 	public function test_plugins_without_subscription_lists_unsubscribed_plugin(): void {
-		$plugin_file = $this->mock_local_woo_plugin();
+		$plugin_file = $this->mock_active_woo_plugin();
 		$this->set_connected_subscriptions( array( $this->subscription( array( 'product_id' => 999 ) ) ) );
 
 		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
@@ -2282,21 +2282,33 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @param bool $expired Whether the subscription has expired.
 	 */
 	public function test_plugins_without_subscription_skips_subscribed_plugin( bool $expired ): void {
-		$this->mock_local_woo_plugin();
+		$this->mock_active_woo_plugin();
 		$this->set_connected_subscriptions( array( $this->subscription( array( 'expired' => $expired ) ) ) );
 
 		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'A plugin with a subscription should not be listed.' );
 	}
 
 	/**
+	 * @testdox Plugins without a subscription skips inactive plugins.
+	 */
+	public function test_plugins_without_subscription_skips_inactive_plugin(): void {
+		$this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array() );
+		$this->set_connected_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'An inactive plugin should not be listed.' );
+	}
+
+	/**
 	 * @testdox Plugins without a subscription skips the Woo Update Manager.
 	 */
 	public function test_plugins_without_subscription_skips_update_manager(): void {
+		$plugin_file = WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE;
 		wp_cache_set(
 			'plugins',
 			array(
 				'' => array(
-					WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE => array(
+					$plugin_file => array(
 						'Name'    => 'WooCommerce.com Update Manager',
 						'Version' => '1.0.0',
 						'Woo'     => '18734002369816:abc123',
@@ -2305,30 +2317,33 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			),
 			'plugins'
 		);
+		update_option( 'active_plugins', array( $plugin_file ) );
 		$this->set_connected_subscriptions( array() );
 
 		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'The Update Manager delivers updates and should never be listed.' );
 	}
 
 	/**
-	 * @testdox Plugins without a subscription is empty when the store is not connected.
+	 * @testdox Plugins without a subscription lists every active Woo plugin when the store is not connected.
 	 */
-	public function test_plugins_without_subscription_is_empty_when_disconnected(): void {
-		$this->mock_local_woo_plugin();
-		$this->set_subscriptions( array() );
+	public function test_plugins_without_subscription_lists_all_when_disconnected(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_subscriptions( array( $this->subscription() ) );
 
-		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'A disconnected store cannot know which subscriptions it holds.' );
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A store that is not connected has no subscription for any extension.' );
 	}
 
 	/**
-	 * @testdox Plugins without a subscription is empty while the last subscriptions fetch is failing.
+	 * @testdox Plugins without a subscription is null while a connected store's last subscriptions fetch is failing.
 	 * @testWith [429]
 	 *           [500]
 	 *
 	 * @param int $code HTTP status of the failed fetch.
 	 */
-	public function test_plugins_without_subscription_is_empty_while_the_api_is_failing( int $code ): void {
-		$this->mock_local_woo_plugin();
+	public function test_plugins_without_subscription_is_null_while_the_api_is_failing( int $code ): void {
+		$this->mock_active_woo_plugin();
 		$this->set_connected_subscriptions( array() );
 		set_transient(
 			'_woocommerce_helper_subscriptions_api_error',
@@ -2339,7 +2354,19 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			HOUR_IN_SECONDS
 		);
 
-		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'An empty list after a failed fetch is not proof that no subscription exists.' );
+		$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription(), 'An empty list after a failed fetch is not proof that no subscription exists.' );
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_plugins() report a single active Woo plugin.
+	 *
+	 * @return string The plugin file name.
+	 */
+	private function mock_active_woo_plugin(): string {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+
+		return $plugin_file;
 	}
 
 	/**

@@ -281,8 +281,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				return;
 			}
 
-			// Inactive extensions don't affect the store, so only active ones are counted.
-			$count = count( array_filter( WC_Helper_Updater::get_plugins_without_subscription(), 'is_plugin_active', ARRAY_FILTER_USE_KEY ) );
+			$count = count( WC_Helper_Updater::get_plugins_without_subscription() ?? array() );
 			if ( 0 === $count ) {
 				return;
 			}

@@ -505,32 +505,32 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Installed WooCommerce.com plugins the connected account holds no subscription for.
+	 * Active WooCommerce.com plugins that have no subscription on this store.
 	 *
-	 * Uses the same check as the Plugins screen "Subscribe" notice. Returns nothing while the
-	 * store is disconnected or the last subscriptions fetch failed (for example, rate limited).
+	 * A connected store uses the same check as the Plugins screen "Subscribe" notice. A store that
+	 * isn't connected has no subscription for any of them. Returns null while a connected store's
+	 * last subscriptions fetch is failing (for example, rate limited), since the list would be a guess.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @return array Plugin data from WC_Helper::get_local_woo_plugins(), keyed by plugin file.
+	 * @return array|null Plugin data from WC_Helper::get_local_woo_plugins(), keyed by plugin file.
 	 */
-	public static function get_plugins_without_subscription(): array {
-		if ( ! WC_Helper::is_site_connected() ) {
-			return array();
-		}
+	public static function get_plugins_without_subscription(): ?array {
+		$is_connected = WC_Helper::is_site_connected();
 
 		$plugins = array_filter(
 			WC_Helper::get_local_woo_plugins(),
-			static function ( $plugin, $plugin_file ) {
+			static function ( $plugin, $plugin_file ) use ( $is_connected ) {
 				return WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE !== $plugin_file
-					&& empty( self::get_subscriptions_for_product( $plugin['_product_id'] ) );
+					&& is_plugin_active( $plugin_file )
+					&& ( ! $is_connected || empty( self::get_subscriptions_for_product( $plugin['_product_id'] ) ) );
 			},
 			ARRAY_FILTER_USE_BOTH
 		);
 
 		// Read after the subscriptions fetch above, so a failure from it is already recorded.
-		if ( null !== WC_Helper::get_api_error() ) {
-			return array();
+		if ( $is_connected && null !== WC_Helper::get_api_error() ) {
+			return null;
 		}
 
 		return $plugins;
