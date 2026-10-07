@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Reject product download links with invalid order or email values.
