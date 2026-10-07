@@ -121,4 +121,47 @@ class BlockTypesController extends WC_Unit_Test_Case {
 			);
 		}
 	}
+
+	/**
+	 * @testdox Should use the WooCommerce version when a bundled block.json omits one.
+	 */
+	public function test_block_json_style_without_version_uses_woocommerce_version(): void {
+		$metadata = array(
+			'name' => 'woocommerce/product-filter-chips',
+			'file' => WC_ABSPATH . 'assets/client/blocks/product-filter-chips/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( 'wc-' . WC_VERSION, $result['version'] );
+	}
+
+	/**
+	 * @testdox Should keep a version a bundled block.json already declares.
+	 */
+	public function test_block_json_keeps_explicit_version(): void {
+		$metadata = array(
+			'name'    => 'woocommerce/mini-cart',
+			'file'    => WC_ABSPATH . 'assets/client/blocks/mini-cart/block.json',
+			'version' => '1.0.0',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( '1.0.0', $result['version'] );
+	}
+
+	/**
+	 * @testdox Should leave block metadata from outside WooCommerce unchanged.
+	 */
+	public function test_block_json_outside_woocommerce_keeps_omitted_version(): void {
+		$metadata = array(
+			'name' => 'example/block',
+			'file' => '/tmp/example/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertArrayNotHasKey( 'version', $result );
+	}
 }

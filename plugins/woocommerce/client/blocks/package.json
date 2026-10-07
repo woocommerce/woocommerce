@@ -96,7 +96,7 @@
 		"@babel/preset-react": "catalog:tooling",
 		"@babel/preset-typescript": "catalog:tooling",
 		"@bartekbp/typescript-checkstyle": "5.0.0",
-		"@playwright/test": "^1.61.1",
+		"@playwright/test": "^1.63.0",
 		"@storybook/addon-a11y": "10.5.10",
 		"@storybook/addon-docs": "10.5.10",
 		"@storybook/addon-links": "10.5.10",
@@ -154,7 +154,8 @@
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
 		"@wordpress/scripts": "32.6.0",
-		"@wordpress/stylelint-config": "^23.14.0",
+		"@wordpress/stylelint-config": "catalog:tooling",
+		"@wordpress/theme": "catalog:wp-bundled",
 		"ajv-cli": "3.3.x",
 		"allure-playwright": "^2.9.2",
 		"autoprefixer": "10.4.14",
@@ -205,7 +206,7 @@
 		"rtlcss": "4.3.x",
 		"sass-loader": "10.5.x",
 		"storybook": "10.5.10",
-		"stylelint": "^16.8.2",
+		"stylelint": "catalog:tooling",
 		"stylelint-scss": "^6.4.0",
 		"typescript": "5.7.x",
 		"utility-types": "3.10.0",
@@ -297,7 +298,8 @@
 				"changes": [
 					"assets/**/*.{js,ts,tsx,scss}",
 					"packages/**/*.{js,ts,tsx,scss}",
-					"tests/**/*.{js,ts,tsx,scss}"
+					"tests/**/*.{js,ts,tsx,scss}",
+					".stylelintrc.json"
 				]
 			},
 			"tests": [

@@ -38,9 +38,11 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	private const GATEWAY_APPROVING = 'engine_dispatch_gateway_approve';
 
 	/**
-	 * The consumer slug registered to open the processing gate in charging tests.
+	 * The consumer slug registered in charging tests. It is the owner the test plan (and
+	 * therefore every contract signed up from it) carries, so registering it puts those
+	 * contracts in the owner-scoped due scan.
 	 */
-	private const CONSUMER = 'engine-tests-consumer';
+	private const CONSUMER = 'engine-tests';
 
 	public function set_up(): void {
 		parent::set_up();
@@ -153,7 +155,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		// Cycle 2 was billed via the dummy gateway and the schedule advanced one cadence.
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
@@ -326,7 +328,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
