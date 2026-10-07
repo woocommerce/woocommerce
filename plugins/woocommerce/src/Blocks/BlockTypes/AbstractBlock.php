@@ -374,7 +374,10 @@ abstract class AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = BlockEditorUnifiedAssets::is_enabled()
+		static $is_unified_assets_enabled;
+		$is_unified_assets_enabled = $is_unified_assets_enabled ?? BlockEditorUnifiedAssets::is_enabled();
+
+		$script = $is_unified_assets_enabled
 			? array(
 				'handle'       => 'wc-block-library',
 				'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
@@ -385,6 +388,7 @@ abstract class AbstractBlock {
 				'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
 				'dependencies' => array( 'wc-blocks' ),
 			);
+
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -395,7 +399,10 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return BlockEditorUnifiedAssets::is_enabled() ? 'wc-block-library-style' : 'wc-blocks-editor-style';
+		static $is_unified_assets_enabled;
+		$is_unified_assets_enabled = $is_unified_assets_enabled ?? BlockEditorUnifiedAssets::is_enabled();
+
+		return $is_unified_assets_enabled ? 'wc-block-library-style' : 'wc-blocks-editor-style';
 	}
 
 	/**
