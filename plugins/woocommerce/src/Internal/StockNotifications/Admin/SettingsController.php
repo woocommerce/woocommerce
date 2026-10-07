@@ -289,8 +289,8 @@ class SettingsController {
 		}
 
 		$posted_is_enabled = isset( $_POST[ Config::get_product_signups_meta_key() ] );
-		$current_value     = $product->get_meta( Config::get_product_signups_meta_key() );
-		if ( ( $posted_is_enabled && 'no' === $current_value ) || ( ! $posted_is_enabled && 'yes' === $current_value ) ) {
+		$current_enabled   = 'no' !== $product->get_meta( Config::get_product_signups_meta_key() );
+		if ( $posted_is_enabled !== $current_enabled ) {
 			check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
 
 			$product->update_meta_data( Config::get_product_signups_meta_key(), $posted_is_enabled ? 'yes' : 'no' );

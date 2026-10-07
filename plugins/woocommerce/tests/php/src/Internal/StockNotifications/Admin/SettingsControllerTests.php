@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use WC_Helper_Product;
 use WC_Settings_Advanced;
 use WC_Settings_Products;
 use WP_REST_Request;
@@ -167,9 +169,51 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset the REST server so this test does not leak it into tests that run after it.
+	 * @return array<string, array{0: string, 1: bool, 2: string}>
+	 */
+	public function provider_product_signups_checkbox(): array {
+		return array(
+			'no meta, checkbox unticked' => array( '', false, 'no' ),
+			'no meta, checkbox ticked'   => array( '', true, '' ),
+			'disabled, checkbox ticked'  => array( 'no', true, 'yes' ),
+		);
+	}
+
+	/**
+	 * @testdox Saving a product stores the "Stock notifications" checkbox when it differs from the effective value.
+	 *
+	 * @dataProvider provider_product_signups_checkbox
+	 *
+	 * @param string $stored_value   Meta value before saving.
+	 * @param bool   $posted_enabled Whether the checkbox is posted.
+	 * @param string $expected_value Meta value after saving.
+	 */
+	public function test_process_product_object_saves_signups_checkbox( string $stored_value, bool $posted_enabled, string $expected_value ): void {
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
+		$meta_key = Config::get_product_signups_meta_key();
+		$product  = WC_Helper_Product::create_simple_product();
+		if ( '' !== $stored_value ) {
+			$product->update_meta_data( $meta_key, $stored_value );
+			$product->save();
+		}
+
+		$nonce = wp_create_nonce( 'woocommerce-customer-stock-notifications-edit-product' );
+		$_POST['customer_stock_notifications_edit_product_security']    = $nonce;
+		$_REQUEST['customer_stock_notifications_edit_product_security'] = $nonce;
+		if ( $posted_enabled ) {
+			$_POST[ $meta_key ] = 'on';
+		}
+
+		SettingsController::process_product_object( $product );
+
+		$this->assertSame( $expected_value, $product->get_meta( $meta_key ) );
+	}
+
+	/**
+	 * Reset the REST server and request globals so this test does not leak them into tests that run after it.
 	 */
 	public function tearDown(): void {
+		unset( $_POST['customer_stock_notifications_edit_product_security'], $_REQUEST['customer_stock_notifications_edit_product_security'], $_POST[ Config::get_product_signups_meta_key() ] );
 		$this->clear_rest_server();
 		parent::tearDown();
 	}
