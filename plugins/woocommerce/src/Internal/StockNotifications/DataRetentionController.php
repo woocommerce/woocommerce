@@ -65,7 +65,7 @@ class DataRetentionController {
 	/**
 	 * Deletes overdue notifications based on the configured time threshold.
 	 * It retrieves notifications that are pending and past the threshold,
-	 * then deletes them.
+	 * then deletes them, except those whose verification email was resent within the threshold.
 	 *
 	 * @return void
 	 */
