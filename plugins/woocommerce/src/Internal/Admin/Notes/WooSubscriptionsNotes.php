@@ -23,6 +23,7 @@ class WooSubscriptionsNotes {
 	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';
 	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 	const BUMP_THRESHOLDS         = array( 60, 45, 20, 7, 1 ); // days.
+	private const UTM_SOURCE      = 'inbox_notification';
 
 	/**
 	 * Hook all the things.
@@ -320,7 +321,13 @@ class WooSubscriptionsNotes {
 		$note->add_action(
 			'enable-autorenew',
 			__( 'Enable Autorenew', 'woocommerce' ),
-			'https://woocommerce.com/my-account/my-subscriptions/?utm_medium=product'
+			add_query_arg(
+				array(
+					'utm_source'   => self::UTM_SOURCE,
+					'utm_campaign' => 'pu_inbox_enable_autorenew',
+				),
+				'https://woocommerce.com/my-account/my-subscriptions/'
+			)
 		);
 		$note->set_content( $note_content );
 		$note->set_content_data( $note_content_data );
@@ -338,11 +345,18 @@ class WooSubscriptionsNotes {
 		$product_page = $subscription['product_url'];
 		$expires      = intval( $subscription['expires'] );
 		$expires_date = gmdate( 'F jS', $expires );
+		$renew_url    = '' === (string) $product_page ? '' : add_query_arg(
+			array(
+				'utm_source'   => self::UTM_SOURCE,
+				'utm_campaign' => 'pu_inbox_renew',
+			),
+			$product_page
+		);
 
 		$note = $this->find_note_for_product_id( $product_id );
 		if ( $note ) {
 			$note_content_data = $note->get_content_data();
-			if ( $note_content_data->expired ) {
+			if ( $note_content_data->expired && $this->has_action_url( $note, 'renew-subscription', $renew_url ) ) {
 				// We've already got a full fledged expired note for this. Bail.
 				// Expired notes' content don't change with time.
 				return;
@@ -383,9 +397,29 @@ class WooSubscriptionsNotes {
 		$note->add_action(
 			'renew-subscription',
 			__( 'Renew Subscription', 'woocommerce' ),
-			$product_page
+			$renew_url
 		);
 		$note->save();
+	}
+
+	/**
+	 * Whether a note already has the given action with the given URL.
+	 *
+	 * Lets expired notes saved before a link change pick up the new URL on the next refresh.
+	 *
+	 * @param Note   $note        The note to check.
+	 * @param string $action_name The action name.
+	 * @param string $url         The expected action URL.
+	 * @return bool
+	 */
+	private function has_action_url( Note $note, string $action_name, string $url ): bool {
+		foreach ( (array) $note->get_actions() as $action ) {
+			if ( isset( $action->name, $action->query ) && $action_name === $action->name ) {
+				return esc_url_raw( $url ) === $action->query;
+			}
+		}
+
+		return false;
 	}
 
 	/**
