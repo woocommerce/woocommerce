@@ -50,6 +50,15 @@ class CatalogSearch extends AbstractCatalogRoute {
 	}
 
 	/**
+	 * The UCP capability this route serves.
+	 *
+	 * @return string
+	 */
+	protected function get_capability(): string {
+		return UcpUtils::CAPABILITY_CATALOG_SEARCH;
+	}
+
+	/**
 	 * Request body arguments accepted by this route.
 	 *
 	 * Bounds the UCP contract names its own error codes for (query length, price
@@ -138,7 +147,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 		$pagination_result['total_count'] = $search_result['total'];
 
 		$response = array(
-			'ucp'        => UcpUtils::response_metadata(),
+			'ucp'        => $this->ucp_metadata(),
 			'products'   => $mapped,
 			'pagination' => $pagination_result,
 		);

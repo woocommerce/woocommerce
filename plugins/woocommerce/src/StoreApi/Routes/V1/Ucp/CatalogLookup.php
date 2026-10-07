@@ -45,6 +45,15 @@ class CatalogLookup extends AbstractCatalogRoute {
 	}
 
 	/**
+	 * The UCP capability this route serves.
+	 *
+	 * @return string
+	 */
+	protected function get_capability(): string {
+		return UcpUtils::CAPABILITY_CATALOG_LOOKUP;
+	}
+
+	/**
 	 * Request body arguments accepted by this route.
 	 *
 	 * `ids` is deliberately not marked required: a missing list answers with the
@@ -160,7 +169,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 		);
 
 		$response = array(
-			'ucp'      => UcpUtils::response_metadata(),
+			'ucp'      => $this->ucp_metadata(),
 			'products' => $products,
 		);
 

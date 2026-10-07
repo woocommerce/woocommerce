@@ -42,6 +42,15 @@ class CatalogProduct extends AbstractCatalogRoute {
 	}
 
 	/**
+	 * The UCP capability this route serves.
+	 *
+	 * @return string
+	 */
+	protected function get_capability(): string {
+		return UcpUtils::CAPABILITY_CATALOG_LOOKUP;
+	}
+
+	/**
 	 * Request body arguments accepted by this route.
 	 *
 	 * `id` is deliberately not marked required: a missing id answers with the UCP
@@ -105,7 +114,7 @@ class CatalogProduct extends AbstractCatalogRoute {
 			// clients read `ucp.status` and `messages`, not the HTTP status.
 			return new \WP_REST_Response(
 				array(
-					'ucp'      => UcpUtils::response_metadata( 'error' ),
+					'ucp'      => $this->ucp_metadata( 'error' ),
 					'messages' => array(
 						array(
 							'type'         => 'error',
@@ -125,7 +134,7 @@ class CatalogProduct extends AbstractCatalogRoute {
 		$product = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ) );
 
 		$response = array(
-			'ucp'     => UcpUtils::response_metadata( 'success' ),
+			'ucp'     => $this->ucp_metadata( 'success' ),
 			'product' => $product,
 		);
 

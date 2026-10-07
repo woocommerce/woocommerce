@@ -26,6 +26,23 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	private $mapper;
 
 	/**
+	 * The UCP capability this route serves, one of the UcpUtils::CAPABILITY_* constants.
+	 *
+	 * @return string
+	 */
+	abstract protected function get_capability(): string;
+
+	/**
+	 * Build the `ucp` envelope for a response from this route.
+	 *
+	 * @param string|null $status Response status, omitted from the envelope when null.
+	 * @return array
+	 */
+	protected function ucp_metadata( ?string $status = null ): array {
+		return UcpUtils::response_metadata( $this->get_capability(), $status );
+	}
+
+	/**
 	 * Get method arguments for this REST route.
 	 *
 	 * @return array An array of endpoints.
@@ -117,7 +134,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	protected function ucp_error( string $code, string $message, string $severity, int $status ): \WP_REST_Response {
 		return new \WP_REST_Response(
 			array(
-				'ucp'      => UcpUtils::response_metadata( 'error' ),
+				'ucp'      => $this->ucp_metadata( 'error' ),
 				'messages' => array(
 					array(
 						'type'         => 'error',
