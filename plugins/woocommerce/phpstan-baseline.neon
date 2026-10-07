@@ -51712,12 +51712,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
 			message: '#^Parameter \#1 \$weight of function wc_format_weight expects float, string given\.$#'
 			identifier: argument.type
 			count: 1
