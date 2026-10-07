@@ -14,6 +14,7 @@ use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository
@@ -174,6 +175,78 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 
 		$this->assertTrue( $this->sut->delete( $this->id ) );
 		$this->assertSame( array(), $this->sut->get_meta( $this->id ) );
+	}
+
+	/**
+	 * @testdox delete throws when the meta rows fail to delete, so a caller transaction can roll back.
+	 */
+	public function test_delete_throws_when_the_meta_delete_fails(): void {
+		$this->assert_write_throws_on_a_failed_query(
+			'DELETE FROM `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ) . '`',
+			'Failed to delete meta rows',
+			function (): void {
+				$this->sut->delete( $this->id );
+			}
+		);
+	}
+
+	/**
+	 * @testdox a failed meta write throws.
+	 * @dataProvider provide_failing_meta_writes
+	 *
+	 * @param string            $statement Start of the failing SQL statement.
+	 * @param string            $message   Expected message fragment.
+	 * @param string            $method    Repository method.
+	 * @param array<int, mixed> $args      Arguments after the plan id.
+	 */
+	public function test_a_failed_meta_write_throws( string $statement, string $message, string $method, array $args ): void {
+		$this->sut->add_meta( $this->id, 'existing', 'one' );
+
+		$this->assert_write_throws_on_a_failed_query(
+			$statement . ' `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ) . '`',
+			$message,
+			function () use ( $method, $args ): void {
+				$this->sut->{$method}( $this->id, ...$args );
+			}
+		);
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string, 2: string, 3: array<int, mixed>}>
+	 */
+	public function provide_failing_meta_writes(): array {
+		return array(
+			'add'    => array( 'INSERT INTO', 'Failed to add plan meta', 'add_meta', array( 'note', 'x' ) ),
+			'update' => array( 'UPDATE', 'Failed to update plan meta', 'update_meta', array( 'existing', 'two' ) ),
+			'delete' => array( 'DELETE FROM', 'Failed to delete plan meta', 'delete_meta', array( 'existing' ) ),
+		);
+	}
+
+	/**
+	 * Break the queries starting with `$statement` and assert `$write` throws.
+	 *
+	 * @param string   $statement Start of the SQL statement to break.
+	 * @param string   $message   Expected message fragment.
+	 * @param callable $write     Write to run.
+	 */
+	private function assert_write_throws_on_a_failed_query( string $statement, string $message, callable $write ): void {
+		global $wpdb;
+
+		$break = static function ( string $query ) use ( $statement ): string {
+			return 0 === strpos( $query, $statement ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$write();
+			$this->fail( 'Expected the write to throw.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( $message, $e->getMessage() );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break );
+		}
 	}
 
 	public function test_a_wrong_owner_delete_keeps_the_plan_and_its_meta(): void {

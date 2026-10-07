@@ -267,9 +267,12 @@ final class PlanRepository {
 	 * Most usages from applications should specify the extension slug
 	 * to guard against cross-application operations.
 	 *
+	 * A failed delete throws, so a caller's transaction can roll back.
+	 *
 	 * @param int         $id             Plan id.
 	 * @param string|null $extension_slug Extension slug for the plan.
 	 * @return bool True when a row was removed.
+	 * @throws \RuntimeException If the plan row or its meta rows fail to delete.
 	 */
 	public function delete( int $id, ?string $extension_slug = null ): bool {
 		global $wpdb;
@@ -281,14 +284,24 @@ final class PlanRepository {
 			$where['extension_slug'] = $extension_slug;
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = (bool) $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $where );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ), $where );
 
-		if ( $deleted ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ), array( 'plan_id' => $id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		return $deleted;
+		if ( 0 === $deleted ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted_meta = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META ), array( 'plan_id' => $id ) );
+
+		if ( false === $deleted_meta ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete meta rows for plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return true;
 	}
 
 	/**
