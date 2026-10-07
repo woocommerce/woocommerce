@@ -504,7 +504,7 @@ The Cart Item object of the filters above has the following keys:
 -   _low_stock_remaining_ `number` - The low stock remaining.
 -   _name_ `string` - The item name.
 -   _permalink_ `string` - The item permalink.
--   _parent_item_key_ `string | null` - The key of the parent cart item when a parent was declared and that parent is in the cart. It is `null` when no parent was declared, or when the declared parent is not in the cart, so `null` does not always mean the item never had a parent. See [Marking a cart item as a child of another cart item](/docs/apis/store-api/extending-store-api/extend-store-api-parent-item) for how parents are declared and what happens when the parent leaves the cart.
+-   _parent_item_key_ `string | null` - The parent cart item key, or `null` if the item has no parent in the cart.
 -   _prices_ `object` - The item prices object with the following keys:
     -   _currency_code_ `string` - The currency code.
     -   _currency_decimal_separator_ `string` - The currency decimal separator.
