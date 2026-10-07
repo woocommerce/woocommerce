@@ -154,14 +154,6 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 					'billing'  => $order->get_address( 'billing' ),
 					'shipping' => $order->get_address( 'shipping' ),
 				),
-				'plan_snapshot'        => array(
-					'selling_plan_id' => $plan->get_id(),
-					'name'            => $plan->get_name(),
-					'category'        => $plan->get_category(),
-					'billing_policy'  => $plan->get_billing_policy()->to_array(),
-					'pricing_policy'  => $plan->get_pricing_policy(),
-				),
-				'items_snapshot'       => $items,
 			),
 			$overrides
 		);

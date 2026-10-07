@@ -81,22 +81,6 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Repoint the live plan a contract was created under to a different cadence, to prove
-	 * a read sources cadence from the frozen snapshot rather than the live plan.
-	 *
-	 * @param Contract      $contract The contract whose live plan to mutate.
-	 * @param BillingPolicy $policy   The new live cadence.
-	 */
-	private function repoint_live_plan( Contract $contract, BillingPolicy $policy ): void {
-		$plans = new PlanRepository();
-		$plan  = $plans->find( (int) $contract->get_selling_plan_id() );
-		$this->assertInstanceOf( Plan::class, $plan );
-
-		$plan->set_billing_policy( $policy );
-		$plans->update( $plan );
-	}
-
-	/**
 	 * @testdox get returns the contract, and null for an unknown id.
 	 */
 	public function test_get_round_trips_a_contract(): void {
@@ -129,30 +113,6 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$this->assertSame( $order_id, $found[0]->get_origin_order_id() );
 		$this->assertNull( $found[0]->get_items() );
 		$this->assertSame( array(), Subscriptions::find_by_origin_order( 999999 ) );
-	}
-
-	/**
-	 * @testdox get hydrates the contract's frozen plan terms, and the snapshot wins over a changed live plan.
-	 */
-	public function test_get_hydrates_the_plan_snapshot_and_snapshot_wins(): void {
-		$contract    = $this->sign_up_contract();
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		// Edit the live plan AFTER signup: the frozen snapshot must not move with it.
-		$this->repoint_live_plan( $contract, new BillingPolicy( 'year', 2, null, null, null ) );
-
-		$loaded = Subscriptions::get( $contract_id );
-		$this->assertInstanceOf( ContractView::class, $loaded );
-
-		$snapshot = $loaded->get_plan_snapshot();
-		$this->assertIsArray( $snapshot, 'get() must carry the plan snapshot payload.' );
-
-		// Frozen monthly cadence, NOT the live plan's edited yearly cadence.
-		$billing = $snapshot['billing_policy'] ?? null;
-		$this->assertIsArray( $billing );
-		$this->assertSame( 'month', $billing['period'] ?? null );
-		$this->assertSame( 1, $billing['interval'] ?? null );
 	}
 
 	/**
@@ -239,9 +199,9 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox list_for_customer hydrates each row's frozen plan terms.
+	 * @testdox list_for_customer does not load children.
 	 */
-	public function test_list_for_customer_hydrates_the_plan_snapshot(): void {
+	public function test_list_for_customer_does_not_load_children(): void {
 		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
 		$this->assertIsInt( $customer_id );
 
@@ -249,26 +209,17 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 
 		$contracts = Subscriptions::list_for_customer( $customer_id );
 		$this->assertCount( 1, $contracts );
-
-		$snapshot = $contracts[0]->get_plan_snapshot();
-		$this->assertIsArray( $snapshot, 'list_for_customer must carry each row\'s plan snapshot payload.' );
-		$billing = $snapshot['billing_policy'] ?? null;
-		$this->assertIsArray( $billing );
-		$this->assertSame( 'month', $billing['period'] ?? null );
 		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
 	}
 
 	/**
-	 * @testdox list hydrates each row's frozen plan terms, like the customer list.
+	 * @testdox list does not load children.
 	 */
-	public function test_list_hydrates_the_plan_snapshot(): void {
+	public function test_list_does_not_load_children(): void {
 		$this->sign_up_contract();
 
 		$contracts = Subscriptions::list( array( 'limit' => 1 ) );
 		$this->assertCount( 1, $contracts );
-
-		$snapshot = $contracts[0]->get_plan_snapshot();
-		$this->assertIsArray( $snapshot, 'list must carry each row\'s plan snapshot payload.' );
 		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
 		$this->assertNull( $contracts[0]->get_addresses(), 'List reads do not load children.' );
 	}

@@ -21,6 +21,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepos
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository
@@ -216,13 +217,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$first_contract = $this->sut->find( $first );
 		$this->assertInstanceOf( Contract::class, $first_contract );
-		$this->sut->store_contract_snapshots(
+		$this->seed_plan_snapshot(
 			$first_contract,
 			array(
 				'selling_plan_id' => 7,
 				'name'            => 'Monthly',
-			),
-			null
+			)
 		);
 
 		$found = $this->sut->find_by_origin_order( 1001 );
@@ -243,58 +243,17 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox store_contract_snapshots inserts fresh rows, reuses an unchanged payload, and repoints on change.
+	 * Store a plan snapshot row and point the contract at it.
+	 *
+	 * @param Contract             $contract Stored contract.
+	 * @param array<string, mixed> $payload  Plan snapshot payload.
 	 */
-	public function test_store_contract_snapshots_copy_forwards_by_type(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
-		$contract = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $contract );
-
-		$plan  = array(
-			'selling_plan_id' => 7,
-			'billing_policy'  => array(
-				'period'   => 'month',
-				'interval' => 1,
-			),
+	private function seed_plan_snapshot( Contract $contract, array $payload ): void {
+		$plan = PlanSnapshot::from_array( $payload );
+		$contract->set_plan_snapshot_id(
+			( new SnapshotStore() )->insert( (int) $contract->get_id(), SnapshotStore::TYPE_PLAN, $plan->get_selling_plan_id(), $plan->to_payload(), $plan->get_schema_version() )
 		);
-		$items = array( array( 'item_name' => 'Coffee bag' ) );
-
-		$this->sut->store_contract_snapshots( $contract, $plan, $items );
-		$plan_id  = $contract->get_plan_snapshot_id();
-		$items_id = $contract->get_items_snapshot_id();
-		$this->assertNotNull( $plan_id );
-		$this->assertNotNull( $items_id );
-
-		$stored = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $stored );
-		$this->assertSame( $plan_id, $stored->get_plan_snapshot_id() );
-		$this->assertSame( $items_id, $stored->get_items_snapshot_id() );
-		$this->assertInstanceOf( PlanSnapshot::class, $stored->get_plan_snapshot() );
-
-		// Same payload: the id is reused.
-		$this->sut->store_contract_snapshots( $stored, $plan, $items );
-		$this->assertSame( $plan_id, $stored->get_plan_snapshot_id() );
-		$this->assertSame( $items_id, $stored->get_items_snapshot_id() );
-
-		// Changed plan payload, no items payload: plan repoints, items untouched.
-		$plan['name'] = 'Renamed';
-		$this->sut->store_contract_snapshots( $stored, $plan, null );
-		$this->assertNotSame( $plan_id, $stored->get_plan_snapshot_id() );
-		$this->assertSame( $items_id, $stored->get_items_snapshot_id() );
-
-		$reloaded = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( $stored->get_plan_snapshot_id(), $reloaded->get_plan_snapshot_id() );
-		$this->assertSame( $items_id, $reloaded->get_items_snapshot_id() );
-	}
-
-	/**
-	 * @testdox store_contract_snapshots refuses an unsaved contract.
-	 */
-	public function test_store_contract_snapshots_requires_an_id(): void {
-		$this->expectException( \RuntimeException::class );
-
-		$this->sut->store_contract_snapshots( $this->make_contract(), array( 'selling_plan_id' => 7 ), null );
+		$this->sut->update_fields( $contract, array( 'plan_snapshot_id' ) );
 	}
 
 	/**

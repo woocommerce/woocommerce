@@ -45,13 +45,6 @@ final class ContractView {
 	private $addresses;
 
 	/**
-	 * Plan snapshot payload, or null when absent or not hydrated.
-	 *
-	 * @var array<string, mixed>|null
-	 */
-	private $plan_snapshot;
-
-	/**
 	 * Use {@see self::from_contract()}.
 	 */
 	private function __construct() {
@@ -67,7 +60,6 @@ final class ContractView {
 	 */
 	public static function from_contract( Contract $contract, bool $with_children ): self {
 		$instrument = $contract->get_payment_instrument();
-		$snapshot   = $contract->get_plan_snapshot();
 
 		$view         = new self();
 		$view->fields = array(
@@ -94,9 +86,8 @@ final class ContractView {
 			'schedule_source'      => $contract->get_schedule_source(),
 		);
 
-		$view->items         = $with_children ? array_map( array( self::class, 'item' ), $contract->get_items() ) : null;
-		$view->addresses     = $with_children ? array_map( array( self::class, 'address' ), $contract->get_addresses() ) : null;
-		$view->plan_snapshot = null !== $snapshot ? $snapshot->to_array() : null;
+		$view->items     = $with_children ? array_map( array( self::class, 'item' ), $contract->get_items() ) : null;
+		$view->addresses = $with_children ? array_map( array( self::class, 'address' ), $contract->get_addresses() ) : null;
 
 		return $view;
 	}
@@ -301,14 +292,5 @@ final class ContractView {
 	 */
 	public function get_addresses(): ?array {
 		return $this->addresses;
-	}
-
-	/**
-	 * The plan snapshot payload as stored, or null when the contract has none.
-	 *
-	 * @return array<string, mixed>|null
-	 */
-	public function get_plan_snapshot(): ?array {
-		return $this->plan_snapshot;
 	}
 }

@@ -24,8 +24,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 
@@ -65,8 +63,6 @@ final class Contracts {
 		'tax_total'            => true,
 		'items'                => true,
 		'addresses'            => true,
-		'plan_snapshot'        => true,
-		'items_snapshot'       => true,
 	);
 
 	/**
@@ -91,8 +87,6 @@ final class Contracts {
 		'expected_total' => true,
 		'currency'       => true,
 		'order_id'       => true,
-		'plan_snapshot'  => true,
-		'items_snapshot' => true,
 	);
 
 	/**
@@ -108,9 +102,8 @@ final class Contracts {
 	 * Only `extension_slug` is required; the status defaults to `draft`. Dates accept a
 	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
 	 * strings, and a non-null money value requires a currency. `items` is a list of item
-	 * rows; `addresses` is keyed `billing` / `shipping`; `plan_snapshot` / `items_snapshot`
-	 * are payload arrays recorded as the contract's current snapshots. Unknown keys, also
-	 * inside item rows and addresses, raise a `_doing_it_wrong()` notice and are ignored.
+	 * rows; `addresses` is keyed `billing` / `shipping`. Unknown keys, also inside item rows
+	 * and addresses, raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
@@ -124,17 +117,13 @@ final class Contracts {
 		unset( $filtered_args['extension_slug'] );
 
 		try {
-			$contract  = Contract::create( array( 'extension_slug' => $extension_slug ) );
-			$snapshots = self::apply( __METHOD__, $contract, $filtered_args );
+			$contract = Contract::create( array( 'extension_slug' => $extension_slug ) );
+			self::apply( __METHOD__, $contract, $filtered_args );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		$repository = new ContractRepository();
-		$id         = $repository->insert( $contract );
-		self::store_snapshots( $repository, $contract, $snapshots );
-
-		return $id;
+		return ( new ContractRepository() )->insert( $contract );
 	}
 
 	/**
@@ -161,17 +150,16 @@ final class Contracts {
 		}
 
 		try {
-			$snapshots = self::apply( __METHOD__, $contract, $filtered_args );
+			self::apply( __METHOD__, $contract, $filtered_args );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		$fields = array_values( array_diff( array_keys( $filtered_args ), array( 'plan_snapshot', 'items_snapshot' ) ) );
+		$fields = array_keys( $filtered_args );
 
 		if ( array() !== $fields ) {
 			$repository->update_fields( $contract, $fields );
 		}
-		self::store_snapshots( $repository, $contract, $snapshots );
 
 		return true;
 	}
@@ -184,10 +172,8 @@ final class Contracts {
 	 * `ends_at_gmt` are required. `kind` defaults to `billing`; `sequence_no` defaults to
 	 * the head's plus one; `count` defaults to MAX(count) + 1 in the chain (pass `null` for
 	 * a non-counting cycle); `expected_total` defaults to 0; `currency` defaults to the contract's;
-	 * `order_id` is optional. Without `plan_snapshot` / `items_snapshot` payloads the
-	 * cycle references the contract's current snapshots; payloads attach to the new cycle
-	 * only. The extension slug is copied from the contract. Unknown keys raise a
-	 * `_doing_it_wrong()` notice and are ignored.
+	 * `order_id` is optional. The extension slug is copied from the contract. Unknown keys
+	 * raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
@@ -249,21 +235,6 @@ final class Contracts {
 			'order_id'       => self::nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 			'extension_slug' => $contract->get_extension_slug(),
 		);
-
-		if ( array_key_exists( 'plan_snapshot', $filtered_args ) ) {
-			if ( ! is_array( $filtered_args['plan_snapshot'] ) ) {
-				throw new InvalidArgumentException( 'Contracts: "plan_snapshot" must be an array.' );
-			}
-			$cycle_args['plan_snapshot'] = PlanSnapshot::from_array( self::string_keyed( $filtered_args['plan_snapshot'] ) );
-		} else {
-			$cycle_args['plan_snapshot_id'] = $contract->get_plan_snapshot_id();
-		}
-
-		if ( array_key_exists( 'items_snapshot', $filtered_args ) ) {
-			$cycle_args['items_snapshot'] = ItemsSnapshot::from_items( self::item_rows( 'items_snapshot', $filtered_args['items_snapshot'] ) );
-		} else {
-			$cycle_args['items_snapshot_id'] = $contract->get_items_snapshot_id();
-		}
 
 		try {
 			$cycle = Cycle::create( $cycle_args );
@@ -364,15 +335,10 @@ final class Contracts {
 	 * @param string               $method   Public facade method, for usage notices.
 	 * @param Contract             $contract Contract to change.
 	 * @param array<string, mixed> $args     Caller fields (known keys only, no `extension_slug`).
-	 * @return array{plan: array<string, mixed>|null, items: array<int, array<string, mixed>>|null} Snapshot payloads to store.
 	 * @throws InvalidArgumentException If a value has the wrong shape.
 	 * @throws DomainException If a value breaks an entity invariant (from the entity setters).
 	 */
-	private static function apply( string $method, Contract $contract, array $args ): array {
-		$snapshots  = array(
-			'plan'  => null,
-			'items' => null,
-		);
+	private static function apply( string $method, Contract $contract, array $args ): void {
 		$instrument = $contract->get_payment_instrument();
 		$token_id   = $instrument->get_token_id();
 		$gateway    = $instrument->get_gateway();
@@ -443,37 +409,13 @@ final class Contracts {
 				case 'addresses':
 					$contract->set_addresses( self::addresses( $method, $value ) );
 					break;
-				case 'plan_snapshot':
-					if ( ! is_array( $value ) ) {
-						throw new InvalidArgumentException( 'Contracts: "plan_snapshot" must be an array.' );
-					}
-					$snapshots['plan'] = self::string_keyed( $value );
-					break;
-				case 'items_snapshot':
-					$snapshots['items'] = self::item_rows( $key, $value );
-					break;
 			}
 		}
 
 		$contract->set_payment_instrument( new InstrumentRef( $token_id, $gateway, $title ) );
 		self::assert_money_has_currency( $contract, $args );
-
-		return $snapshots;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
-
-	/**
-	 * Record the snapshot payloads, when any, as the contract's current snapshots.
-	 *
-	 * @param ContractRepository                                                                   $repository Repository.
-	 * @param Contract                                                                             $contract   Stored contract.
-	 * @param array{plan: array<string, mixed>|null, items: array<int, array<string, mixed>>|null} $snapshots  Payloads.
-	 */
-	private static function store_snapshots( ContractRepository $repository, Contract $contract, array $snapshots ): void {
-		if ( null !== $snapshots['plan'] || null !== $snapshots['items'] ) {
-			$repository->store_contract_snapshots( $contract, $snapshots['plan'], $snapshots['items'] );
-		}
-	}
 
 	/**
 	 * Keep the keys in `$allowed`; each other key raises a `_doing_it_wrong()` notice and is dropped.

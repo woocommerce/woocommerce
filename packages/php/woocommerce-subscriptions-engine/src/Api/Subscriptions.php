@@ -41,8 +41,7 @@ defined( 'ABSPATH' ) || exit;
 final class Subscriptions {
 
 	/**
-	 * Fetch a subscription contract by id, with its items, addresses, and plan snapshot
-	 * payload ({@see ContractView::get_plan_snapshot()}).
+	 * Fetch a subscription contract by id, with its items and addresses.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return ContractView|null The contract, or null when none exists.

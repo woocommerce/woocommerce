@@ -76,7 +76,6 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( '0.00000000', $view->get_billing_total() );
 		$this->assertSame( '0.00000000', $view->get_tax_total() );
 		$this->assertSame( array(), $view->get_items() );
-		$this->assertNull( $view->get_plan_snapshot() );
 	}
 
 	public function test_create_stores_every_field(): void {
@@ -342,8 +341,6 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'non-string method'      => array( array( 'payment_method' => 5 ) ),
 			'items not a list'       => array( array( 'items' => array( 'a' => array() ) ) ),
 			'unknown address type'   => array( array( 'addresses' => array( 'home' => array() ) ) ),
-			'plan snapshot scalar'   => array( array( 'plan_snapshot' => 'x' ) ),
-			'items snapshot scalar'  => array( array( 'items_snapshot' => array( 'x' ) ) ),
 		);
 	}
 
@@ -626,41 +623,32 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 7, $view->get_customer_id() );
 	}
 
-	public function test_snapshot_payloads_are_stored_and_copy_forwarded(): void {
-		$plan  = array(
-			'selling_plan_id' => 3,
-			'name'            => 'Monthly',
-			'billing_policy'  => array(
-				'period'   => 'month',
-				'interval' => 1,
-			),
+	public function test_snapshot_keys_are_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$messages ): void {
+				$messages[] = $message;
+			},
+			10,
+			2
 		);
-		$items = array( array( 'item_name' => 'Coffee' ) );
 
 		$id = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
-				'plan_snapshot'  => $plan,
-				'items_snapshot' => $items,
+				'plan_snapshot'  => array( 'selling_plan_id' => 3 ),
+				'items_snapshot' => array( array( 'item_name' => 'Coffee' ) ),
 			)
 		);
 
-		$this->assertSame( $plan, $this->view( $id )->get_plan_snapshot() );
-		$plan_snapshot_id  = $this->entity( $id )->get_plan_snapshot_id();
-		$items_snapshot_id = $this->entity( $id )->get_items_snapshot_id();
-		$this->assertNotNull( $plan_snapshot_id );
-		$this->assertNotNull( $items_snapshot_id );
-
-		// The same payload keeps the snapshot.
-		Contracts::update( $id, array( 'plan_snapshot' => $plan ) );
-		$this->assertSame( $plan_snapshot_id, $this->entity( $id )->get_plan_snapshot_id() );
-
-		// A changed payload repoints the plan snapshot only.
-		$plan['name'] = 'Monthly (renamed)';
-		Contracts::update( $id, array( 'plan_snapshot' => $plan ) );
-		$this->assertNotSame( $plan_snapshot_id, $this->entity( $id )->get_plan_snapshot_id() );
-		$this->assertSame( $items_snapshot_id, $this->entity( $id )->get_items_snapshot_id() );
-		$this->assertSame( $plan, $this->view( $id )->get_plan_snapshot() );
+		$this->assertSame(
+			array( 'Contracts: unknown key "plan_snapshot" ignored.', 'Contracts: unknown key "items_snapshot" ignored.' ),
+			$messages
+		);
+		$this->assertNull( $this->entity( $id )->get_plan_snapshot_id() );
+		$this->assertNull( $this->entity( $id )->get_items_snapshot_id() );
 	}
 
 	public function test_a_registered_extension_status_is_accepted(): void {
@@ -677,21 +665,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Create a contract carrying a currency and snapshots, ready for cycles.
+	 * Create a contract carrying a currency, ready for cycles.
 	 */
-	private function contract_with_snapshots(): int {
+	private function contract_with_currency(): int {
 		return Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
-				'plan_snapshot'  => array(
-					'selling_plan_id' => 3,
-					'billing_policy'  => array(
-						'period'   => 'month',
-						'interval' => 1,
-					),
-				),
-				'items_snapshot' => array( array( 'item_name' => 'Coffee' ) ),
 			)
 		);
 	}
@@ -730,8 +710,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_the_first_cycle_takes_the_chain_and_contract_defaults(): void {
-		$id       = $this->contract_with_snapshots();
-		$contract = $this->entity( $id );
+		$id = $this->contract_with_currency();
 
 		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 		$cycle    = $this->cycle( $id, $cycle_id );
@@ -743,12 +722,12 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( '0.00000000', $cycle->get_expected_total() );
 		$this->assertSame( 77, $cycle->get_order_id() );
 		$this->assertSame( self::EXTENSION_SLUG, $cycle->get_extension_slug() );
-		$this->assertSame( $contract->get_plan_snapshot_id(), $cycle->get_plan_snapshot_id() );
-		$this->assertSame( $contract->get_items_snapshot_id(), $cycle->get_items_snapshot_id() );
+		$this->assertNull( $cycle->get_plan_snapshot_id() );
+		$this->assertNull( $cycle->get_items_snapshot_id() );
 	}
 
 	public function test_the_next_cycle_defaults_to_the_next_position(): void {
-		$id = $this->contract_with_snapshots();
+		$id = $this->contract_with_currency();
 		Contracts::add_cycle( $id, $this->cycle_args() );
 
 		$cycle_id = Contracts::add_cycle(
@@ -770,7 +749,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_non_counting_cycle_takes_a_null_count(): void {
-		$id = $this->contract_with_snapshots();
+		$id = $this->contract_with_currency();
 
 		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) );
 
@@ -778,7 +757,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_taken_position_is_refused(): void {
-		$id = $this->contract_with_snapshots();
+		$id = $this->contract_with_currency();
 		Contracts::add_cycle( $id, $this->cycle_args() );
 
 		$this->expectException( DomainException::class );
@@ -792,7 +771,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param array<string, mixed> $args Cycle args.
 	 */
 	public function test_invalid_cycle_args_are_rejected( array $args ): void {
-		$id = $this->contract_with_snapshots();
+		$id = $this->contract_with_currency();
 
 		try {
 			Contracts::add_cycle( $id, $args );
@@ -852,7 +831,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_unknown_cycle_key_is_ignored_with_a_notice(): void {
-		$id = $this->contract_with_snapshots();
+		$id = $this->contract_with_currency();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::add_cycle' );
 
 		$cycle_id = Contracts::add_cycle(
@@ -890,34 +869,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		Contracts::add_cycle( 999999, $this->cycle_args() );
 	}
 
-	public function test_explicit_snapshot_payloads_attach_to_the_cycle_only(): void {
-		$id     = $this->contract_with_snapshots();
-		$before = $this->entity( $id );
-
-		$cycle_id = Contracts::add_cycle(
-			$id,
-			$this->cycle_args(
-				array(
-					'plan_snapshot'  => array(
-						'selling_plan_id' => 3,
-						'name'            => 'Different',
-					),
-					'items_snapshot' => array( array( 'item_name' => 'Tea' ) ),
-				)
-			)
-		);
-		$cycle    = $this->cycle( $id, $cycle_id );
-		$after    = $this->entity( $id );
-
-		$this->assertNotNull( $cycle->get_plan_snapshot_id() );
-		$this->assertNotSame( $before->get_plan_snapshot_id(), $cycle->get_plan_snapshot_id() );
-		$this->assertNotSame( $before->get_items_snapshot_id(), $cycle->get_items_snapshot_id() );
-		$this->assertSame( $before->get_plan_snapshot_id(), $after->get_plan_snapshot_id() );
-		$this->assertSame( $before->get_items_snapshot_id(), $after->get_items_snapshot_id() );
-	}
-
 	public function test_get_history_returns_the_appended_cycle_as_a_view(): void {
-		$id       = $this->contract_with_snapshots();
+		$id       = $this->contract_with_currency();
 		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 
 		$history = Subscriptions::get_history( $id );

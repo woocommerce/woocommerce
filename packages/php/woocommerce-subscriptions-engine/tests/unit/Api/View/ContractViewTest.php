@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Api\View;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView
@@ -85,7 +84,6 @@ class ContractViewTest extends TestCase {
 		$this->assertNull( $view->get_selling_plan_id() );
 		$this->assertNull( $view->get_payment_method() );
 		$this->assertNull( $view->get_start_gmt() );
-		$this->assertNull( $view->get_plan_snapshot() );
 	}
 
 	public function test_children_are_null_when_not_loaded(): void {
@@ -145,19 +143,5 @@ class ContractViewTest extends TestCase {
 		$this->assertNull( $addresses['billing']['phone'] );
 		$this->assertSame( array(), $empty->get_items() );
 		$this->assertSame( array(), $empty->get_addresses() );
-	}
-
-	public function test_plan_snapshot_payload_passes_through(): void {
-		$payload = array(
-			'selling_plan_id' => 2,
-			'billing_policy'  => array(
-				'period'   => 'month',
-				'interval' => 1,
-			),
-		);
-
-		$view = ContractView::from_contract( Contract::from_storage( $this->row(), PlanSnapshot::from_array( $payload ) ), false );
-
-		$this->assertSame( $payload, $view->get_plan_snapshot() );
 	}
 }

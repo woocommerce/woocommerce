@@ -245,47 +245,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Record plan and/or items snapshot payloads as the contract's current snapshots.
-	 *
-	 * Each non-null payload is copy-forwarded against the contract's current snapshot of
-	 * that type (an unchanged payload keeps its id, a changed one inserts a new row); the
-	 * resulting ids are set on the entity and only the snapshot id columns are written.
-	 *
-	 * @param Contract                              $contract      Stored contract (must have an id).
-	 * @param array<string, mixed>|null             $plan_payload  Plan snapshot payload, or null to leave it.
-	 * @param array<int, array<string, mixed>>|null $items_payload Items snapshot payload, or null to leave it.
-	 * @throws \RuntimeException If the contract has no id, or a write fails.
-	 */
-	public function store_contract_snapshots( Contract $contract, ?array $plan_payload, ?array $items_payload ): void {
-		$id = $contract->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot store snapshots for a contract that has no id.' );
-		}
-
-		$columns = array();
-		if ( null !== $plan_payload ) {
-			$plan = PlanSnapshot::from_array( $plan_payload );
-			$contract->set_plan_snapshot_id(
-				$this->copy_forward_or_insert( $id, SnapshotStore::TYPE_PLAN, $plan->get_selling_plan_id(), $plan->to_payload(), $plan->get_schema_version(), $contract->get_plan_snapshot_id() )
-			);
-			$contract->set_plan_snapshot( $plan );
-			$columns[] = 'plan_snapshot_id';
-		}
-
-		if ( null !== $items_payload ) {
-			$items = ItemsSnapshot::from_items( $items_payload );
-			$contract->set_items_snapshot_id(
-				$this->copy_forward_or_insert( $id, SnapshotStore::TYPE_ITEMS, null, $items->to_payload(), $items->get_schema_version(), $contract->get_items_snapshot_id() )
-			);
-			$columns[] = 'items_snapshot_id';
-		}
-
-		if ( array() !== $columns ) {
-			$this->update_fields( $contract, $columns );
-		}
-	}
-
-	/**
 	 * Fetch a contract by id, hydrating the live entity with its items / addresses,
 	 * plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
 	 * `plan_snapshot_id` - so every full read carries the billing cadence off the

@@ -752,32 +752,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled scan renews from the contract's own plan snapshot even when the live plan is deleted.
-	 *
-	 * The contract's frozen snapshot is the cadence source of truth, so a deleted live selling
-	 * plan no longer blocks the renewal - the chain advances on the snapshot's terms.
-	 */
-	public function test_scheduled_renewal_renews_from_contract_snapshot_when_live_plan_deleted(): void {
-		$this->approve_charges_for( self::GATEWAY_APPROVING );
-
-		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		// Delete the live selling plan; the contract keeps its frozen snapshot.
-		( new PlanRepository() )->delete( (int) $contract->get_selling_plan_id() );
-
-		$renewal_order = $this->run_scheduled_renewal( $contract_id );
-		$this->assertInstanceOf( WC_Order::class, $renewal_order );
-
-		// Cycle 2 was billed from the snapshot's cadence.
-		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $cycle );
-		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
-	/**
 	 * @testdox the scheduled scan expires the contract when it hits max cycles.
 	 */
 	public function test_scheduled_renewal_expires_contract_at_max_cycles(): void {
@@ -1542,12 +1516,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			'start_gmt'        => '2026-01-01 00:00:00',
 			'next_payment_gmt' => '2026-02-01 00:00:00',
 			'billing_total'    => '10',
-			'plan_snapshot'    => array(
-				'billing_policy' => array(
-					'period'   => 'month',
-					'interval' => 1,
-				),
-			),
+			'selling_plan_id'  => $this->make_plan(),
 		);
 
 		switch ( $missing ) {
@@ -1558,7 +1527,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				unset( $args['customer_id'] );
 				break;
 			case 'billing_policy':
-				unset( $args['plan_snapshot'] );
+				unset( $args['selling_plan_id'] );
 				break;
 			default:
 				unset( $args[ $missing ] );
