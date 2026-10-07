@@ -314,15 +314,6 @@ final class Contracts {
 				case 'origin_order_id':
 					$contract->set_origin_order_id( self::nullable_id( $key, $value ) );
 					break;
-				case 'payment_token_id':
-					$token_id = self::nullable_id( $key, $value );
-					break;
-				case 'payment_method':
-					$gateway = self::nullable_string( $key, $value );
-					break;
-				case 'payment_method_title':
-					$title = self::nullable_string( $key, $value );
-					break;
 				case 'currency':
 					$contract->set_currency( self::currency( $value ) );
 					break;
@@ -367,6 +358,15 @@ final class Contracts {
 					break;
 				case 'addresses':
 					$contract->set_addresses( self::addresses( $method, $value ) );
+					break;
+				case 'payment_token_id':
+					$token_id = self::nullable_id( $key, $value );
+					break;
+				case 'payment_method':
+					$gateway = self::nullable_string( $key, $value );
+					break;
+				case 'payment_method_title':
+					$title = self::nullable_string( $key, $value );
 					break;
 			}
 		}
