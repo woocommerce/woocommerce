@@ -27,6 +27,8 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-add-note',
 	);
 
+	private const ROOT_ABILITY_IDS = array( 'test/product-root', 'test/products-root' );
+
 	private const CODE_SCHEMA = array(
 		'type'  => 'string',
 		'title' => 'Test code',
@@ -205,6 +207,25 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fill the output itself when the declared output key is empty.
+	 */
+	public function test_output_key_empty_means_the_whole_output(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+		$item = array( 'id' => $product->get_id() );
+		$this->register_root_abilities( $item );
+
+		$one  = wp_get_ability( 'test/product-root' );
+		$many = wp_get_ability( 'test/products-root' );
+
+		$this->assertSame( array( 'test_code' => 'A1' ), $one->execute()['extensions'] );
+		$this->assertSame( array( 'test_code' => 'A1' ), $many->execute()[0]['extensions'] );
+		$this->assertSame( self::CODE_SCHEMA, $one->get_output_schema()['properties']['extensions']['properties']['test_code'] );
+		$this->assertSame( self::CODE_SCHEMA, $many->get_output_schema()['items']['properties']['extensions']['properties']['test_code'] );
+	}
+
+	/**
 	 * @testdox Should add the values itself before WordPress 7.1, when the execute result filter does not fire.
 	 */
 	public function test_extensible_ability_fills_output_before_wordpress_7_1(): void {
@@ -305,10 +326,54 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Unregister the core abilities.
+	 * Register two abilities whose whole output is a product, or a list of products.
+	 *
+	 * @param array $item Product output item.
+	 */
+	private function register_root_abilities( array $item ): void {
+		$callback = static function () use ( $item ) {
+			$object = array(
+				'type'       => 'object',
+				'properties' => array( 'id' => array( 'type' => 'integer' ) ),
+			);
+			foreach ( self::ROOT_ABILITY_IDS as $index => $ability_id ) {
+				$many = 1 === $index;
+				wp_register_ability(
+					$ability_id,
+					array(
+						'label'               => $ability_id,
+						'description'         => $ability_id,
+						'category'            => 'woocommerce',
+						'output_schema'       => $many ? array(
+							'type'  => 'array',
+							'items' => $object,
+						) : $object,
+						'execute_callback'    => static function () use ( $item, $many ) {
+							return $many ? array( $item ) : $item;
+						},
+						'permission_callback' => '__return_true',
+						'meta'                => array(
+							'woocommerce' => array(
+								'extension_fields' => array(
+									'object_type' => 'product',
+									'output'      => '',
+								),
+							),
+						),
+					)
+				);
+			}
+		};
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+	}
+
+	/**
+	 * Unregister the core abilities and the test abilities.
 	 */
 	private function unregister_abilities(): void {
-		foreach ( self::ABILITY_IDS as $ability_id ) {
+		foreach ( array_merge( self::ABILITY_IDS, self::ROOT_ABILITY_IDS ) as $ability_id ) {
 			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}
