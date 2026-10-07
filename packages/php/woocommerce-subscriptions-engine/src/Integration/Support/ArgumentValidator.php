@@ -13,6 +13,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 
 defined( 'ABSPATH' ) || exit;
@@ -185,6 +186,51 @@ final class ArgumentValidator {
 		}
 
 		return $rows;
+	}
+
+	/**
+	 * Validate contract item rows; unknown row keys are dropped with a notice.
+	 *
+	 * @param string $function_name Function named in the notice.
+	 * @param mixed  $value         Caller value.
+	 * @return array<int, array<string, mixed>>
+	 * @throws InvalidArgumentException If the value is not a list of item rows.
+	 */
+	public static function validate_contract_items( string $function_name, $value ): array {
+		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
+		$rows    = array();
+		foreach ( self::validate_list_of_arrays( 'items', $value ) as $row ) {
+			$rows[] = self::filter_known_keys( $function_name, $row, $allowed, 'item key' );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Validate contract addresses keyed `billing` / `shipping`; unknown address keys are
+	 * dropped with a notice.
+	 *
+	 * @param string $function_name Function named in the notice.
+	 * @param mixed  $value         Caller value.
+	 * @return array<string, array<string, mixed>>
+	 * @throws InvalidArgumentException If the map is not keyed `billing` / `shipping` with array values.
+	 */
+	public static function validate_contract_addresses( string $function_name, $value ): array {
+		if ( ! is_array( $value ) ) {
+			throw new InvalidArgumentException( '"addresses" must be an array keyed "billing" / "shipping".' );
+		}
+
+		$allowed   = array_fill_keys( Contract::ADDRESS_FIELDS, true );
+		$addresses = array();
+		foreach ( $value as $type => $address ) {
+			if ( ! in_array( $type, array( Contract::ADDRESS_BILLING, Contract::ADDRESS_SHIPPING ), true ) || ! is_array( $address ) ) {
+				throw new InvalidArgumentException( '"addresses" must be an array keyed "billing" / "shipping" with array values.' );
+			}
+
+			$addresses[ $type ] = self::filter_known_keys( $function_name, $address, $allowed, 'address key' );
+		}
+
+		return $addresses;
 	}
 
 	/**

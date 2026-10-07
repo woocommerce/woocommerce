@@ -105,4 +105,43 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'known' => 1 ), $filtered );
 		$this->assertSame( array( 'Unknown item key "other" ignored.' ), $messages );
 	}
+
+	public function test_contract_items_keep_item_fields_and_drop_unknown_keys_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( 'facade' );
+
+		$rows = ArgumentValidator::validate_contract_items(
+			'facade',
+			array(
+				array(
+					'item_name' => 'Coffee',
+					'price'     => '1',
+				),
+			)
+		);
+
+		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $rows );
+	}
+
+	public function test_contract_addresses_reject_an_unknown_address_type(): void {
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( '"addresses" must be an array keyed "billing" / "shipping" with array values.' );
+
+		ArgumentValidator::validate_contract_addresses( 'facade', array( 'home' => array( 'first_name' => 'Ada' ) ) );
+	}
+
+	public function test_contract_addresses_keep_address_fields_and_drop_unknown_keys_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( 'facade' );
+
+		$addresses = ArgumentValidator::validate_contract_addresses(
+			'facade',
+			array(
+				'billing' => array(
+					'first_name' => 'Ada',
+					'zip'        => '1',
+				),
+			)
+		);
+
+		$this->assertSame( array( 'billing' => array( 'first_name' => 'Ada' ) ), $addresses );
+	}
 }

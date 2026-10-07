@@ -350,10 +350,10 @@ final class Contracts {
 					$contract->set_tax_total( ArgumentValidator::validate_money( $key, $value ) );
 					break;
 				case 'items':
-					$contract->set_items( self::validate_items( $value ) );
+					$contract->set_items( ArgumentValidator::validate_contract_items( self::class, $value ) );
 					break;
 				case 'addresses':
-					$contract->set_addresses( self::validate_addresses( $value ) );
+					$contract->set_addresses( ArgumentValidator::validate_contract_addresses( self::class, $value ) );
 					break;
 				case 'payment_token_id':
 					$token_id = ArgumentValidator::validate_nullable_id( $key, $value );
@@ -398,48 +398,5 @@ final class Contracts {
 				throw new InvalidArgumentException( 'Contracts: the currency cannot be cleared while a money total is non-zero.' );
 			}
 		}
-	}
-
-	/**
-	 * Validate an item row list; unknown row keys are dropped with a notice naming the facade class.
-	 *
-	 * @param mixed $value Caller value.
-	 * @return array<int, array<string, mixed>>
-	 * @throws InvalidArgumentException If the value is not a list of item rows.
-	 */
-	private static function validate_items( $value ): array {
-		$allowed = array_fill_keys( Contract::ITEM_FIELDS, true );
-		$rows    = array();
-		foreach ( ArgumentValidator::validate_list_of_arrays( 'items', $value ) as $row ) {
-			$rows[] = ArgumentValidator::filter_known_keys( self::class, $row, $allowed, 'item key' );
-		}
-
-		return $rows;
-	}
-
-	/**
-	 * Validate an addresses map keyed `billing` / `shipping`; unknown address keys are
-	 * dropped with a notice naming the facade class.
-	 *
-	 * @param mixed $value Caller value.
-	 * @return array<string, array<string, mixed>>
-	 * @throws InvalidArgumentException If the map is not keyed `billing` / `shipping` with array values.
-	 */
-	private static function validate_addresses( $value ): array {
-		$allowed = array_fill_keys( Contract::ADDRESS_FIELDS, true );
-		if ( ! is_array( $value ) ) {
-			throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping".' );
-		}
-
-		$addresses = array();
-		foreach ( $value as $type => $address ) {
-			if ( ! in_array( $type, array( Contract::ADDRESS_BILLING, Contract::ADDRESS_SHIPPING ), true ) || ! is_array( $address ) ) {
-				throw new InvalidArgumentException( 'Contracts: "addresses" must be an array keyed "billing" / "shipping" with array values.' );
-			}
-
-			$addresses[ $type ] = ArgumentValidator::filter_known_keys( self::class, $address, $allowed, 'address key' );
-		}
-
-		return $addresses;
 	}
 }
