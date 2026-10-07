@@ -634,6 +634,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return void
 	 */
 	public static function process_pending_batch( $cursor_date = null, $cursor_id = null ) {
+		global $wpdb;
+
 		$logger  = wc_get_logger();
 		$context = array( 'source' => 'wc-analytics-order-import' );
 
@@ -666,6 +668,13 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		// Get orders updated since the cursor position.
 		$orders = self::get_orders_since( $cursor_date, $cursor_id, $batch_size );
+
+		// A failed query (a broken import conditions filter, say) also returns an empty result.
+		// Leave the cursor where it is so the batch is retried once the cause is fixed.
+		if ( '' !== $wpdb->last_error ) {
+			$logger->error( 'Could not query orders to import, leaving the cursor unchanged: ' . $wpdb->last_error, $context );
+			return;
+		}
 
 		if ( empty( $orders ) ) {
 			$logger->info( 'No orders to process', $context );

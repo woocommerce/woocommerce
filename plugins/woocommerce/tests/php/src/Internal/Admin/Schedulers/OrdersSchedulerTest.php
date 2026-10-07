@@ -274,6 +274,33 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The scheduled batch leaves the cursor unchanged when the import conditions make the query fail.
+	 */
+	public function test_process_pending_batch_keeps_cursor_when_filtered_query_fails(): void {
+		global $wpdb;
+		list( $parent_id ) = $this->create_parent_child_and_refund();
+		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, '2000-01-01 00:00:00', false );
+		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
+		$callback = function ( $clauses ) {
+			$clauses[] = 'no_such_column_for_this_test = 1';
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$suppress = $wpdb->suppress_errors();
+		OrdersScheduler::process_pending_batch();
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertSame( '2000-01-01 00:00:00', get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ), 'The cursor must not move past orders the failed query never returned.' );
+		$this->assertNotContains( $parent_id, $this->get_imported_order_ids() );
+
+		// Once the condition is gone, the same cursor picks the orders up.
+		OrdersScheduler::process_pending_batch();
+		$this->assertContains( $parent_id, $this->get_imported_order_ids() );
+	}
+
+	/**
 	 * Test that batch processor is scheduled when called.
 	 */
 	public function test_batch_processor_scheduled() {
