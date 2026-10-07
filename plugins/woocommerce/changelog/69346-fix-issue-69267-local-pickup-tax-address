@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop taxing a zone Local pickup order at the block pickup location whose list position matches the method's instance id.
