@@ -54,8 +54,10 @@ export function MarketplaceContextProvider( props: {
 	const [ , productPreviewAssignment ] = useExperiment(
 		PRODUCT_PREVIEW_EXPERIMENT_NAME
 	);
-	const productPreviewVariation =
-		productPreviewAssignment?.variationName ?? null;
+	// useExperiment keeps returning a cached assignment after tracking is turned off, so drop it here.
+	const productPreviewVariation = window.wcTracks?.isEnabled
+		? productPreviewAssignment?.variationName ?? null
+		: null;
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
