@@ -401,9 +401,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertNotEquals( $victim->get_id(), $created['id'], 'Create must insert a new fulfillment, not reuse the id from the body.' );
 		$this->assertEquals( (string) $order_a->get_id(), (string) $created['entity_id'], 'The new fulfillment must belong to the routed order.' );
 
-		$new_fulfillment = new Fulfillment( (int) $created['id'] );
-		$this->assertSame( 'new_fulfillment', $new_fulfillment->get_meta( 'smuggled_create_meta' ), 'Request metadata must persist on the newly created fulfillment.' );
-		$this->assertSame( '', (string) $new_fulfillment->get_meta( 'test_meta_key' ), 'The new fulfillment must not inherit metadata from the fulfillment whose id was supplied in the body.' );
+		$response_meta_keys = wp_list_pluck( $created['meta_data'], 'key' );
+		$this->assertContains( 'smuggled_create_meta', $response_meta_keys, 'Request metadata must be applied to the new fulfillment.' );
+		$this->assertNotContains( 'test_meta_key', $response_meta_keys, 'The new fulfillment must not inherit metadata from the fulfillment whose id was supplied in the body.' );
 
 		$victim_reloaded = new Fulfillment( $victim->get_id() );
 		$this->assertSame( (string) $order_b->get_id(), $victim_reloaded->get_entity_id(), 'The fulfillment whose id was supplied in the body must be untouched.' );
@@ -1022,6 +1022,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$victim->get_entity_id(),
 			'A body id must not redirect the update onto a different fulfillment row.'
 		);
+		$this->assertNotSame(
+			'fulfilled',
+			$victim->get_status(),
+			'A body id must not change the other fulfillment status.'
+		);
 	}
 
 	/**
@@ -1112,6 +1117,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			(string) $order_b->get_id(),
 			$victim->get_entity_id(),
 			'A nested props.id must not redirect the update onto a different fulfillment row.'
+		);
+		$this->assertNotSame(
+			'fulfilled',
+			$victim->get_status(),
+			'A nested props.id must not change the other fulfillment status.'
 		);
 	}
 
