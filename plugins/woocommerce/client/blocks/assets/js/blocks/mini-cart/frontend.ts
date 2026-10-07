@@ -185,6 +185,8 @@ const dispatchCheckoutEvent = ( eventName: string ) => {
 	}
 };
 
+let previousIsOpen: boolean | undefined;
+
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
@@ -386,9 +388,6 @@ store< MiniCart >(
 			},
 
 			disableScrollingOnBody() {
-				// eslint-disable-next-line react-hooks/rules-of-hooks
-				const previousIsOpen = useRef( state.isOpen );
-
 				if ( state.isOpen ) {
 					Object.assign( document.body.style, {
 						overflow: 'hidden',
@@ -397,7 +396,7 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
-					if ( ! previousIsOpen.current ) {
+					if ( previousIsOpen === false ) {
 						dispatchCheckoutEvent( 'mini-cart-open' );
 					}
 				} else {
@@ -405,12 +404,12 @@ store< MiniCart >(
 						overflow: '',
 						paddingRight: 0,
 					} );
-					if ( previousIsOpen.current ) {
+					if ( previousIsOpen === true ) {
 						dispatchCheckoutEvent( 'mini-cart-close' );
 					}
 				}
 
-				previousIsOpen.current = state.isOpen;
+				previousIsOpen = state.isOpen;
 			},
 
 			focusFirstElement() {
