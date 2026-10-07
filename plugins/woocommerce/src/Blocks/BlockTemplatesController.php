@@ -59,7 +59,7 @@ class BlockTemplatesController {
 	 */
 	public function pre_render_woocommerce_template_part( $pre_render, $parsed_block ) {
 		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce
-		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead. See Gutenberg #67804.
+		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead.
 		if ( 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
 			$attributes = $parsed_block['attrs'];
 			if ( isset( $attributes['theme'], $attributes['slug'] ) ) {
@@ -80,15 +80,16 @@ class BlockTemplatesController {
 
 	/**
 	 * Renders the `core/template-part` block on the server.
-	 *
-	 * @deprecated 11.4.0
+	 * Introduced because the core handling for template parts only supports templates from the current theme, not from a plugin.
 	 *
 	 * @param array $attributes The block attributes.
 	 * @return string
+	 *@deprecated 11.4.0
+	 *
 	 */
 	public function render_woocommerce_template_part( $attributes ) {
-		// Predecessor of pre_render_woocommerce_template_part which was listening block_type_metadata_settings filter via add_plugin_templates_parts_support.
-		// Retired as it covering non-WooCommerce parts, and we want clearer boundaries for the blocks integration.
+		// Superseded by pre_render_woocommerce_template_part. The old approach (add_plugin_templates_parts_support) replaced
+		// the render_callback for all core/template-part blocks, not just WooCommerce ones.
 		wc_deprecated_function( __METHOD__, '11.4.0' );
 
 		if ( isset( $attributes['theme'] ) && 'woocommerce/woocommerce' === $attributes['theme'] ) {
