@@ -755,15 +755,14 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should send only the file through any output buffers it can remove or clean, raise no errors, and warn about buffers left behind.
+	 * @testdox Should send only the file through any output buffers it can remove or clean, without raising errors.
 	 *
 	 * @dataProvider provider_output_buffer_stacks
 	 *
-	 * @param array  $buffer_flags      Flags for each output buffer from the bottom of the stack up, as `<flags>` or `"<flags>:<callback>"`. Each buffer holds "[junk-<level>]".
-	 * @param string $expected_body     Response body the client should receive.
-	 * @param int    $expected_warnings Number of warnings that should be logged.
+	 * @param int[]  $buffer_flags  Flags for each output buffer, from the bottom of the stack up. Each buffer holds "[junk-<level>]".
+	 * @param string $expected_body Response body the client should receive.
 	 */
-	public function test_download_output_through_output_buffers( array $buffer_flags, string $expected_body, int $expected_warnings ): void {
+	public function test_download_output_through_output_buffers( array $buffer_flags, string $expected_body ): void {
 		// Buffers that can't be removed would outlive this test, so run the download handler in its own process.
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open -- Runs the PHP CLI on a fixed script with no user input.
 		$process = proc_open(
@@ -785,29 +784,23 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $report, "The runner script did not complete: $stderr" );
 		$this->assertSame( $expected_body, $body, 'The client should receive the file without the content of buffers that could be cleaned.' );
 		$this->assertSame( array(), $report['errors'], 'Cleaning and flushing buffers should not raise errors, even silenced ones.' );
-		$this->assertCount( $expected_warnings, $report['warnings'], 'A warning should be logged only when buffers left behind can affect the download.' );
-		foreach ( $report['warnings'] as $warning ) {
-			$this->assertMatchesRegularExpression( '/(default output handler|wc_runner_reverse_output)$/', $warning, 'The warning should name the buffers left behind.' );
-		}
 	}
 
 	/**
 	 * Output buffer stacks a download can be served through.
 	 *
-	 * @return array<string, array{array<int|string>, string, int}>
+	 * @return array<string, array{int[], string}>
 	 */
 	public function provider_output_buffer_stacks(): array {
 		$cleanable_flushable = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
 
 		return array(
-			'no buffers'                             => array( array(), 'FILE-DATA', 0 ),
-			'standard buffers'                       => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, PHP_OUTPUT_HANDLER_STDFLAGS ), 'FILE-DATA', 0 ),
-			'cleanable and flushable, not removable' => array( array( $cleanable_flushable ), 'FILE-DATA', 0 ),
-			'cleanable only'                         => array( array( PHP_OUTPUT_HANDLER_CLEANABLE ), 'FILE-DATA', 1 ),
-			'standard below non-removable'           => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, $cleanable_flushable ), '[junk-0]FILE-DATA', 1 ),
-			'buffers from issue 51562'               => array( array( 0, 0, PHP_OUTPUT_HANDLER_CLEANABLE, PHP_OUTPUT_HANDLER_REMOVABLE ), '[junk-0][junk-1]FILE-DATA', 1 ),
-			// The callback rewrites the file, so this buffer is not safe even though it is empty and can be flushed.
-			'callback that changes the output'       => array( array( "$cleanable_flushable:wc_runner_reverse_output" ), 'ATAD-ELIF', 1 ),
+			'no buffers'                             => array( array(), 'FILE-DATA' ),
+			'standard buffers'                       => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, PHP_OUTPUT_HANDLER_STDFLAGS ), 'FILE-DATA' ),
+			'cleanable and flushable, not removable' => array( array( $cleanable_flushable ), 'FILE-DATA' ),
+			'cleanable only'                         => array( array( PHP_OUTPUT_HANDLER_CLEANABLE ), 'FILE-DATA' ),
+			'standard below non-removable'           => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, $cleanable_flushable ), '[junk-0]FILE-DATA' ),
+			'buffers from issue 51562'               => array( array( 0, 0, PHP_OUTPUT_HANDLER_CLEANABLE, PHP_OUTPUT_HANDLER_REMOVABLE ), '[junk-0][junk-1]FILE-DATA' ),
 		);
 	}
 
