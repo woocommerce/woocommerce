@@ -490,6 +490,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 6, $view->get_payment_token_id() );
 	}
 
+	public function test_update_with_no_fields_returns_the_view(): void {
+		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$updated = Contracts::update( $id, array() );
+
+		$this->assertInstanceOf( ContractView::class, $updated );
+		$this->assertSame( $id, $updated->get_id() );
+	}
+
 	public function test_update_returns_null_when_the_contract_is_deleted_before_the_write(): void {
 		global $wpdb;
 

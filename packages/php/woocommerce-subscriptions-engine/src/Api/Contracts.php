@@ -164,8 +164,11 @@ final class Contracts {
 		}
 
 		$fields = array_keys( $filtered_args );
+		if ( array() === $fields ) {
+			return ContractView::from_contract( $contract, true );
+		}
 
-		if ( array() !== $fields && ! $repository->update_fields( $contract, $fields ) ) {
+		if ( ! $repository->update_fields( $contract, $fields ) ) {
 			return null;
 		}
 
