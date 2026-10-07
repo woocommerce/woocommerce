@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure fulfillments REST API item requests operate on the fulfillment identified in the request URL.
