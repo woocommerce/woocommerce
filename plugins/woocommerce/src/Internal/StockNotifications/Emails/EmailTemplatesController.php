@@ -63,7 +63,7 @@ class EmailTemplatesController {
 	/**
 	 * Email product title.
 	 *
-	 * @param WC_Product   $product The product object.
+	 * @param \WC_Product  $product The product object.
 	 * @param Notification $notification The notification object.
 	 * @param bool         $plain_text Whether the email is plain text.
 	 */
@@ -74,7 +74,7 @@ class EmailTemplatesController {
 
 		ob_start();
 		?>
-		<div id="notification__product__title"><?php echo esc_html( $product->get_name() ); ?></div>
+		<div id="notification__product__title"><?php echo esc_html( $product->get_title() ); ?></div>
 		<?php
 		$html = ob_get_clean();
 		echo wp_kses_post( $html );

@@ -437,7 +437,7 @@ class Notification extends \WC_Data {
 	/**
 	 * Get the variation's attributes, with the shopper's posted values filled in.
 	 *
-	 * Posted attributes hold only the values chosen for "Any" attributes, so they are merged over the variation's own attributes.
+	 * Posted values only fill the variation's "Any" attributes (empty values); the variation's fixed values always win.
 	 * Keys that no longer belong to the variation (e.g. a removed attribute) are dropped.
 	 *
 	 * @param \WC_Product_Variation $product The notification's variation.
@@ -450,7 +450,14 @@ class Notification extends \WC_Data {
 			return $variation_attributes;
 		}
 
-		return array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $variation_attributes ) );
+		$any_attributes = array_filter(
+			$variation_attributes,
+			static function ( $value ) {
+				return '' === $value;
+			}
+		);
+
+		return array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $any_attributes ) );
 	}
 
 	/**
