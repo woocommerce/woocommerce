@@ -32,7 +32,7 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 
 		// Prefer to register with metadata if the path is set in the block's class.
 		register_block_type_from_metadata(
-			$this->asset_api->get_block_metadata_path( $this->block_name, 'inner-blocks/' ),
+			$this->asset_api->generate_block_metadata_path( $this->block_name, 'inner-blocks/' ),
 			$block_settings
 		);
 	}
