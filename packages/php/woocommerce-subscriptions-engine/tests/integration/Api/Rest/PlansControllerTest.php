@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
@@ -857,6 +858,37 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				)->get_status()
 			);
 		}
+	}
+
+	public function test_single_plan_routes_404_a_plan_of_another_extension_slug_or_an_unknown_id(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$foreign_id = $this->create_plan( 'Foreign', 'woocommerce-subscriptions-test' );
+		$unknown_id = $foreign_id + 1000;
+
+		foreach ( array( $foreign_id, $unknown_id ) as $id ) {
+			$get = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
+			$this->assertSame( 404, $get->get_status() );
+			$this->assertSame( 'woocommerce_subscriptions_engine_plan_not_found', $this->response_data( $get )['code'] );
+
+			$patch = $this->request(
+				'PATCH',
+				self::BASE . '/' . $id,
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'name'           => 'Hijacked',
+				)
+			);
+			$this->assertSame( 404, $patch->get_status() );
+			$this->assertSame( 'woocommerce_subscriptions_engine_plan_not_found', $this->response_data( $patch )['code'] );
+		}
+
+		$foreign = Plans::get( $foreign_id );
+		$this->assertNotNull( $foreign );
+		$this->assertSame( 'Foreign', $foreign->get_name(), 'A PATCH under another slug writes nothing.' );
+
+		$own = $this->request( 'GET', self::BASE . '/' . $foreign_id, array(), array( 'extension_slug' => 'woocommerce-subscriptions-test' ) );
+		$this->assertSame( 200, $own->get_status(), 'The plan resolves under its own slug.' );
 	}
 
 	public function test_create_rejects_wildcard_and_list_extension_slugs(): void {
