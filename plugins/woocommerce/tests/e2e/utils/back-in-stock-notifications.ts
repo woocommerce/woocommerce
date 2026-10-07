@@ -554,8 +554,8 @@ export async function signUpInNewContext(
 	} );
 	const page = await context.newPage();
 
-	// Closed in `finally`: these specs run on a single worker, so a context
-	// left open by a failed signup would otherwise outlive the test.
+	// Closed in `finally` so a context left open by a failed signup does not
+	// outlive the test.
 	try {
 		await page.goto( permalink );
 
