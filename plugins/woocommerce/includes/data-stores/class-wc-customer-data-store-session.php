@@ -126,15 +126,11 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
 		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
-		$is_same_customer = isset( $data['id'] ) && $data['id'] === (string) $customer->get_id();
-		$is_current       = $is_same_customer && isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' );
+		if ( isset( $data['id'] ) && $data['id'] === (string) $customer->get_id() ) {
+			$is_current = isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' );
 
-		if ( $is_same_customer ) {
-			foreach ( $this->session_keys as $session_key ) {
+			foreach ( $is_current ? $this->session_keys : $this->session_only_keys as $session_key ) {
 				if ( in_array( $session_key, array( 'id', 'date_modified' ), true ) ) {
-					continue;
-				}
-				if ( ! $is_current && ! in_array( $session_key, $this->session_only_keys, true ) ) {
 					continue;
 				}
 				$function_key = $session_key;

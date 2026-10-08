@@ -3409,6 +3409,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	public function test_failed_checkout_keeps_logged_in_customer_vat_exemption() {
 		$customer_id = \WC_Helper_Customer::create_customer( 'vat_exempt_retry', 'password', 'vat-exempt-retry@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
 		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
 		wp_set_current_user( $customer_id );
 		WC()->session->init();
