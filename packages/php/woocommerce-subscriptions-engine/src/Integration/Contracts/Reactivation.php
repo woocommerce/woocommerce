@@ -122,10 +122,9 @@ final class Reactivation {
 
 		// A next-due moment set while held was re-armed deliberately (hold clears it), so
 		// it wins; otherwise resume from the hold anchor, ignoring a malformed one.
-		$anchor = $contract->get_next_payment_gmt() ?? Hold::read_anchor( $contract );
+		$anchor = $contract->get_next_payment_gmt() ?? Hold::read_anchor( $this->contracts, $id );
 
 		$contract->set_next_payment_gmt( $this->recompute_next_payment( $contract, $anchor, $now, $this->billing_policy( $contract ) ) );
-		$contract->set_meta( Hold::ANCHOR_META_KEY, null );
 		$contract->set_status( ContractStatus::ACTIVE );
 
 		// Compare-and-set on the ON_HOLD status read above: a concurrent transition
@@ -135,9 +134,11 @@ final class Reactivation {
 			throw new DomainException( 'Reactivation::reactivate(): the contract state changed concurrently; nothing was written.' );
 		}
 
+		Hold::clear_anchor( $this->contracts, $id );
+
 		/**
 		 * Fires after a held contract is reactivated: its renewal is re-armed, or left
-		 * unscheduled when there was no next-due moment to resume from.
+		 * unscheduled when there was no next-due moment to resume from. Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The reactivated contract.
 		 */
@@ -236,7 +237,12 @@ final class Reactivation {
 			}
 		}
 
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
+		$plan_id = $contract->get_selling_plan_id();
+		if ( null === $plan_id ) {
+			return null;
+		}
+
+		$plan = $this->plans->find( $plan_id );
 
 		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
 	}

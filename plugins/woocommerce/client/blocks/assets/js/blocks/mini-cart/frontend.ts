@@ -173,6 +173,20 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	try {
+		window.wp.hooks.doAction(
+			`experimental__woocommerce_blocks-checkout-${ eventName }`,
+			{ storeCart: woocommerceState.cart }
+		);
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.error( e );
+	}
+};
+
+let previousIsOpen: boolean | undefined;
+
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
@@ -382,12 +396,20 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
+					if ( previousIsOpen === false ) {
+						dispatchCheckoutEvent( 'mini-cart-open' );
+					}
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
+					if ( previousIsOpen === true ) {
+						dispatchCheckoutEvent( 'mini-cart-close' );
+					}
 				}
+
+				previousIsOpen = state.isOpen;
 			},
 
 			focusFirstElement() {

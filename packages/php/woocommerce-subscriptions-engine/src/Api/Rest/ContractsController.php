@@ -45,9 +45,10 @@ use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 
 defined( 'ABSPATH' ) || exit;
@@ -205,7 +206,7 @@ final class ContractsController extends WP_REST_Controller {
 		// schema, so it arrives as a real bool; the coercion path covers a caller
 		// invoking the method directly with a raw value.
 		$param         = $request->get_param( 'at_period_end' );
-		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( ScalarCoercion::coerce_string( $param, 'true' ) );
+		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( Coercion::coerce_string( $param, 'true' ) );
 
 		return $this->run_action(
 			$request,
@@ -225,7 +226,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * Domain values only - the id and the resulting status slug - never labels,
 	 * formatted values, or other presentation: consumers own their view shaping.
 	 *
-	 * @param Contract        $item    Contract.
+	 * @param ContractView    $item    Contract view.
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
@@ -286,13 +287,13 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	private function run_action( WP_REST_Request $request, callable $action ) {
-		$contract_id = ScalarCoercion::coerce_int( $request->get_param( 'id' ) );
+		$contract_id = Coercion::coerce_int( $request->get_param( 'id' ) );
 		$customer_id = get_current_user_id();
 
 		// Guard ownership before acting: the facade's ownership-checked read returns
 		// null for an unknown id and a foreign-owned contract alike, so both map to
 		// the same 404 (anti-IDOR).
-		if ( null === Subscriptions::get_for_customer( $contract_id, $customer_id ) ) {
+		if ( null === Contracts::get_for_customer( $contract_id, $customer_id ) ) {
 			return $this->not_found_error();
 		}
 
@@ -314,7 +315,7 @@ final class ContractsController extends WP_REST_Controller {
 
 		// Re-read for the resulting status. The action already succeeded, so a row
 		// vanishing here is a server-side inconsistency - a 500, not a not-found.
-		$refreshed = Subscriptions::get_for_customer( $contract_id, $customer_id );
+		$refreshed = Contracts::get_for_customer( $contract_id, $customer_id );
 		if ( null === $refreshed ) {
 			return new WP_Error(
 				'woocommerce_subscriptions_engine_refresh_failed',
