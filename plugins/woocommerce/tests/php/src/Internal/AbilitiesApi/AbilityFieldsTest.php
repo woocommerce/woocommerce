@@ -554,6 +554,39 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should describe and return the product fields that two separate registrations add.
+	 */
+	public function test_product_fields_from_two_registrations_are_described_and_returned(): void {
+		AbilityFields::register(
+			'product',
+			'test_badge',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static function ( \WC_Product $product ) {
+					return 'badge-' . $product->get_id();
+				},
+			)
+		);
+		$this->set_feature( true );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen with badge' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+
+		$schema = wp_get_ability( 'woocommerce/products-query' )->get_output_schema()['properties']['products']['items']['properties'];
+		$listed = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'search' => 'Pen with badge' ) )['products'][0];
+
+		$this->assertSame( self::CODE_SCHEMA, $schema['extensions']['properties']['test_code'] );
+		$this->assertSame( array( 'type' => 'string' ), $schema['extensions']['properties']['test_badge'] );
+		$this->assertSame(
+			array(
+				'test_code'  => 'A1',
+				'test_badge' => 'badge-' . $product->get_id(),
+			),
+			$listed['extensions']
+		);
+	}
+
+	/**
 	 * Set the feature and register the abilities again.
 	 *
 	 * @param bool $enabled Whether the feature is on.
