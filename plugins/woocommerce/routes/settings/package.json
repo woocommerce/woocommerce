@@ -4,7 +4,7 @@
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/route": "0.22.0",
+		"@wordpress/route": "catalog:wp-min",
 		"react": "18.3.1",
 		"react-dom": "18.3.1"
 	},

@@ -194,6 +194,9 @@ catalogs:
     '@wordpress/rich-text':
       specifier: 7.33.2
       version: 7.33.2
+    '@wordpress/route':
+      specifier: 0.6.1
+      version: 0.6.1
     '@wordpress/server-side-render':
       specifier: 6.9.5
       version: 6.9.5
@@ -1778,7 +1781,7 @@ importers:
         version: link:../eslint-plugin
       '@wordpress/core-data':
         specifier: 7.33.9
-        version: 7.33.9(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+        version: 7.33.9(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/data':
         specifier: 10.33.1
         version: 10.33.1(@types/react@18.3.28)(react@18.3.1)
@@ -3863,8 +3866,8 @@ importers:
         specifier: catalog:wp-min
         version: 6.6.1
       '@wordpress/route':
-        specifier: 0.22.0
-        version: 0.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: catalog:wp-min
+        version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -10276,6 +10279,12 @@ packages:
     engines: {node: '>=18.12.0'}
     peerDependencies:
       react: ^18 || ^19
+
+  '@wordpress/route@0.6.1':
+    resolution: {integrity: sha512-KVd6+4mDt2/rS79ol2CnZdzdjrA+2Q57Wd5PBvfG2Ukidl8NQE09K4aBXVS3XmWd5i/5fz5Y5TN9h28fhnby3A==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+    peerDependencies:
+      react: ^18.0.0
 
   '@wordpress/router@0.7.0':
     resolution: {integrity: sha512-dOMbN8v6g9z8q6yDaAGS/7ZldVFVk0HvF/AvcMw2VFZ9QLOsP6VYRwuXgq8dAD2n8Rh42j1IfaMDTNznKScQpA==}
@@ -30340,6 +30349,15 @@ snapshots:
       - react-dom
 
   '@wordpress/route@0.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@tanstack/history': 1.161.6
+      '@tanstack/react-router': 1.168.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/private-apis': 1.48.1
+      react: 18.3.1
+    transitivePeerDependencies:
+      - react-dom
+
+  '@wordpress/route@0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@tanstack/history': 1.161.6
       '@tanstack/react-router': 1.168.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
