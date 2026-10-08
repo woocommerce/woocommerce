@@ -86,7 +86,8 @@ class AbilityFields {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions`. A field that throws or returns a value that its schema does not allow is left out, and the key is left out
+	 * `extensions`. A value is cast to its schema type, so `'12'` becomes `12`
+	 * for an integer field. A field that throws or returns a value that its schema does not allow is left out, and the key is left out
 	 * when no field has a value or the feature is off.
 	 *
 	 * @internal
@@ -113,7 +114,7 @@ class AbilityFields {
 				continue;
 			}
 			if ( self::matches_schema( $object_type, $attribute, $value ) ) {
-				$values[ $attribute ] = $value;
+				$values[ $attribute ] = rest_sanitize_value_from_schema( $value, $field['schema'], $attribute );
 			}
 		}
 		if ( ! empty( $values ) ) {
