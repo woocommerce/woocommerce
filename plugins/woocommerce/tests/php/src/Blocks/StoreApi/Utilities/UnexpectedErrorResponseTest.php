@@ -86,7 +86,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a safe response when logging fails.
+	 * @testdox Should return a safe response and fall back to the PHP error log when logging fails.
 	 */
 	public function test_returns_safe_response_when_logging_fails(): void {
 		$logger = $this->createMock( WC_Logger_Interface::class );
@@ -95,9 +95,19 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 			->willThrowException( new \RuntimeException( 'Fixture logger failure.' ) );
 		add_filter( 'woocommerce_logging_class', fn() => $logger );
 
-		$result = UnexpectedErrorResponse::create( new \TypeError( 'Fixture engine failure.' ), self::class );
+		$error_log          = tempnam( sys_get_temp_dir(), 'wc-store-api-error-log' );
+		$previous_error_log = ini_set( 'error_log', $error_log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		try {
+			$result = UnexpectedErrorResponse::create( new \TypeError( 'Fixture engine failure.' ), self::class );
+		} finally {
+			ini_set( 'error_log', $previous_error_log ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		}
 
 		$this->assert_error_response( $result, false, 'A logging failure must not change the safe response.' );
+
+		$fallback = file_get_contents( $error_log ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$this->assertStringContainsString( 'Fixture engine failure.', $fallback, 'The original failure must reach the PHP error log when the logger fails.' );
+		$this->assertStringContainsString( 'Fixture logger failure.', $fallback, 'The logging failure itself must be recorded alongside the original failure.' );
 	}
 
 	/**

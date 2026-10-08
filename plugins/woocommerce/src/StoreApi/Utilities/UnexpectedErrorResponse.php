@@ -28,16 +28,18 @@ final class UnexpectedErrorResponse {
 	 * @return WP_Error
 	 */
 	public static function create( \Throwable $error, string $failure_context, ?string $public_message = null ): WP_Error {
+		$log_message = sprintf(
+			'Store API request failed in %1$s: %2$s: %3$s in %4$s:%5$d',
+			$failure_context,
+			get_class( $error ),
+			$error->getMessage(),
+			$error->getFile(),
+			$error->getLine()
+		);
+
 		try {
 			wc_get_logger()->critical(
-				sprintf(
-					'Store API request failed in %1$s: %2$s: %3$s in %4$s:%5$d',
-					$failure_context,
-					get_class( $error ),
-					$error->getMessage(),
-					$error->getFile(),
-					$error->getLine()
-				),
+				$log_message,
 				array(
 					'source'    => 'store-api',
 					'exception' => $error,
@@ -45,8 +47,9 @@ final class UnexpectedErrorResponse {
 					'backtrace' => array_slice( explode( "\n", $error->getTraceAsString() ), 0, self::MAX_BACKTRACE_FRAMES ),
 				)
 			);
-		} catch ( \Throwable $logging_error ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			// Logging is best-effort here and must not prevent the safe response from being returned.
+		} catch ( \Throwable $logging_error ) {
+			// Logging must not prevent the safe response, but a failure that also broke logging should not vanish.
+			error_log( $log_message . ' (logging failed: ' . $logging_error->getMessage() . ')' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		$message = $public_message ?? __( 'Internal server error', 'woocommerce' );
