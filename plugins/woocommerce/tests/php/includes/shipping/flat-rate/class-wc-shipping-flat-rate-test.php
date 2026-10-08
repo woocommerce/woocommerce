@@ -184,6 +184,16 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 12.5, $val, 'A fee below the minimum should be raised to it.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="12,25" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee just below the minimum should be raised to it.' );
 	}
 
 	/**
@@ -199,6 +209,16 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 3, $val, 'A fee below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="20,25" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.25, $val, 'A fee just below the maximum should not be capped.' );
 
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
