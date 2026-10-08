@@ -44,6 +44,9 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 			wp_delete_term( $term_id, 'product_cat' );
 		}
 
+		// Nothing clears the map on delete_term here either, so drop the one this class built.
+		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
+
 		parent::tearDown();
 	}
 
