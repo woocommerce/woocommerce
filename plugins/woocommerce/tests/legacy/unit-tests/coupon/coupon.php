@@ -38,7 +38,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	 * Cleans up after the test class.
 	 */
 	public function tearDown(): void {
-		WC()->cart->remove_coupons();
 		\Automattic\Jetpack\Constants::clear_single_constant( 'WOOCOMMERCE_CHECKOUT' );
 		foreach ( $this->previous_shipping_address as $key => $value ) {
 			WC()->customer->{"set_shipping_{$key}"}( $value );

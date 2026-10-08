@@ -53,9 +53,6 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$this->zone->delete( true );
-		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
-		WC()->cart->cart_context = 'shortcode';
 		foreach ( $this->previous_shipping_address as $key => $value ) {
 			WC()->customer->{"set_shipping_{$key}"}( $value );
 		}
