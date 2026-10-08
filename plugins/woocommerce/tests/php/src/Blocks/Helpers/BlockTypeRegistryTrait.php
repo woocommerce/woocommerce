@@ -54,12 +54,7 @@ trait BlockTypeRegistryTrait {
 	 */
 	protected function replace_block_types( array $block_classes ): void {
 		foreach ( $block_classes as $block_name => $block_class ) {
-			$this->replace_block_type(
-				$block_name,
-				static function () use ( $block_class ) {
-					return new $block_class();
-				}
-			);
+			$this->replace_block_type( $block_name, static fn () => new $block_class() );
 		}
 	}
 
