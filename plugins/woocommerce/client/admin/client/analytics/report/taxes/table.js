@@ -104,11 +104,11 @@ class TaxesReportTable extends Component {
 				? {
 						display: renderCurrency( amount ),
 						value: getCurrencyFormatDecimal( amount ),
-				  }
+					}
 				: {
 						display: __( 'N/A', 'woocommerce' ),
 						value: '',
-				  };
+					};
 
 		return map( taxes, ( tax ) => {
 			const { query } = this.props;
