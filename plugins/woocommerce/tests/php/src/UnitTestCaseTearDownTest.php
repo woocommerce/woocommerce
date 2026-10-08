@@ -70,4 +70,40 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			'The filtered locale should not still be cached.'
 		);
 	}
+
+	/**
+	 * @testdox The customer's shipping address goes back to what it was when the test started.
+	 */
+	public function test_clear_wc_singleton_state_restores_the_customer_shipping_address(): void {
+		$before = WC()->customer->get_shipping( 'edit' );
+
+		WC()->customer->set_shipping_location( 'NZ', 'AUK', '1010', 'Auckland' );
+		WC()->customer->set_shipping_address_1( '1 Leaked Street' );
+
+		$this->clear_wc_singleton_state();
+
+		$this->assertSame( $before, WC()->customer->get_shipping( 'edit' ), 'The shipping address should be back to what the test started with.' );
+	}
+
+	/**
+	 * @testdox The address goes back onto the customer the test started with, not onto a stand-in the test left in WC()->customer.
+	 */
+	public function test_clear_wc_singleton_state_restores_the_address_on_the_customer_the_test_started_with(): void {
+		$customer = WC()->customer;
+		$before   = $customer->get_shipping( 'edit' );
+		$customer->set_shipping_address_1( '3 Original Customer Street' );
+
+		$stand_in = new \WC_Customer( 0, true );
+		$stand_in->set_shipping_address_1( '2 Stand-in Street' );
+		WC()->customer = $stand_in;
+
+		try {
+			$this->clear_wc_singleton_state();
+		} finally {
+			WC()->customer = $customer;
+		}
+
+		$this->assertSame( $before, $customer->get_shipping( 'edit' ), 'The original customer should get its shipping address back.' );
+		$this->assertSame( '2 Stand-in Street', $stand_in->get_shipping_address_1(), 'The stand-in customer should keep its own address.' );
+	}
 }

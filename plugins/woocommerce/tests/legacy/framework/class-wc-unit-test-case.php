@@ -49,6 +49,20 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_depth = 0;
 
 	/**
+	 * The customer WC() held when the test started.
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $customer_before_test = null;
+
+	/**
+	 * That customer's shipping address when the test started, keyed by prop name without the "shipping_" prefix.
+	 *
+	 * @var array<string, string>
+	 */
+	private $customer_shipping_address_before_test = array();
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
@@ -145,15 +159,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		$this->customer_before_test                  = WC()->customer instanceof WC_Customer ? WC()->customer : null;
+		$this->customer_shipping_address_before_test = $this->customer_before_test ? $this->customer_before_test->get_shipping( 'edit' ) : array();
 	}
 
 	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents, the cart context, the queued notices, and the cached country
-	 * locale all live on the WC() singletons, which neither the per-test database
-	 * rollback nor the hook restore resets, so clear them here or they leak into every
-	 * later test in the process.
+	 * The cart contents, the cart context, the queued notices, the cached country
+	 * locale, and the customer's shipping address all live on the WC() singletons,
+	 * which neither the per-test database rollback nor the hook restore resets, so
+	 * clear them here or they leak into every later test in the process. The shipping
+	 * address goes back to what it was when the test started rather than being cleared.
 	 *
 	 * @since 11.1.0
 	 */
@@ -201,6 +219,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// value behind, because the hook restore removes the filter but not the
 			// cache it produced.
 			WC()->countries->locale = array();
+		}
+
+		if ( $this->customer_before_test ) {
+			// Tests set a shipping address on the customer to get shipping rates. Write it
+			// back onto the customer the test started with, even if the test swapped
+			// WC()->customer for another one.
+			foreach ( $this->customer_shipping_address_before_test as $key => $value ) {
+				$this->customer_before_test->{"set_shipping_{$key}"}( $value );
+			}
 		}
 	}
 
