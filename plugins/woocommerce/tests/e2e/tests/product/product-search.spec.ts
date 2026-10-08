@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { faker } from '@faker-js/faker';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -12,13 +11,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 
 let productId: number;
-const fakeProduct = getFakeProduct( { regular_price: '9.99' } );
-// Other specs generate product names the same way, so a suffix keeps this
-// spec's exact-name match to its own product.
-const testProduct = {
-	...fakeProduct,
-	name: `${ fakeProduct.name } ${ faker.string.alphanumeric( 6 ) }`,
-};
+const testProduct = getFakeProduct( { regular_price: '9.99' } );
 
 test.describe( 'Products > Search and View a product', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -60,8 +53,9 @@ test.describe( 'Products > Search and View a product', () => {
 	test( 'can find and open a product from a partial search', async ( {
 		page,
 	} ) => {
+		// Search the second half of the name, which holds its random suffix, so
+		// products from other workers don't match.
 		const searchString = testProduct.name.substring(
-			0,
 			testProduct.name.length / 2
 		);
 
