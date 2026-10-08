@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Require permission to edit the parent product when managing its attributes and variations.
