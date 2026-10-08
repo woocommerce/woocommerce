@@ -277,24 +277,47 @@ class Styles_Helper {
 	}
 
 	/**
-	 * Every color a theme settings array defines, highest priority origin first.
+	 * Every color a theme settings array defines, one entry per slug, highest priority origin first.
 	 *
-	 * `WP_Theme_JSON` keys the palette by origin and layers them so a later origin wins. Flattened
-	 * in that order, the first entry matching a slug is the one that should win, and callers that
-	 * generate preset classes get the same set the lookup resolves against.
+	 * `WP_Theme_JSON` keys the palette by origin and layers them so a later origin wins, so the
+	 * origins are flattened in reverse of that order and the first entry for a slug is the one that
+	 * should win.
+	 *
+	 * Several origins can define the same slug, and a duplicate means two things to two callers: a
+	 * lookup takes the first entry, while a stylesheet emits one rule per entry and the cascade
+	 * takes the last. That splits the color a block gets by the route it arrives through. Returning
+	 * a single entry per slug is what keeps the two agreeing, and it emits no redundant CSS for the
+	 * inliner to carry.
+	 *
+	 * An entry without a string slug is dropped. The palette reaches here through the
+	 * `woocommerce_email_editor_theme_json` filter, and callers read `slug` and `color` directly, so
+	 * a malformed entry would otherwise be a PHP warning on every render.
 	 *
 	 * @param array $settings Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
-	 * @return array Flat list of color definitions.
+	 * @return array Flat list of color definitions, one per slug.
 	 */
 	public static function palette_definitions( array $settings ): array {
 		$palette = $settings['color']['palette'] ?? array();
 
-		return array_merge(
+		$definitions = array_merge(
 			$palette['custom'] ?? array(),
 			$palette['theme'] ?? array(),
 			$palette['blocks'] ?? array(),
 			$palette['default'] ?? array()
 		);
+
+		$by_slug = array();
+		foreach ( $definitions as $definition ) {
+			if ( ! is_array( $definition ) || ! isset( $definition['slug'] ) || ! is_string( $definition['slug'] ) ) {
+				continue;
+			}
+			// First origin wins, so a slug already seen is a lower-priority duplicate.
+			if ( ! array_key_exists( $definition['slug'], $by_slug ) ) {
+				$by_slug[ $definition['slug'] ] = $definition;
+			}
+		}
+
+		return array_values( $by_slug );
 	}
 
 	/**
@@ -314,7 +337,7 @@ class Styles_Helper {
 	 */
 	public static function resolve_color_from_palette( array $settings, string $color_slug ): string {
 		foreach ( self::palette_definitions( $settings ) as $color_definition ) {
-			if ( isset( $color_definition['slug'], $color_definition['color'] ) && $color_definition['slug'] === $color_slug ) {
+			if ( isset( $color_definition['color'] ) && $color_definition['slug'] === $color_slug ) {
 				return strtolower( (string) $color_definition['color'] );
 			}
 		}

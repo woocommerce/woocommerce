@@ -161,6 +161,53 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the generated preset classes agree with the color lookup on a duplicated slug.
+	 *
+	 * The stylesheet emits one rule per definition and the cascade takes the last, while the lookup
+	 * takes the first. A slug defined by more than one origin used to get a different color from
+	 * each route; one definition per slug is what keeps them the same.
+	 */
+	public function testItGeneratesPresetClassesThatAgreeWithTheColorLookup(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
+
+		// `black` is in core's default palette, so defining it again here duplicates the slug.
+		$duplicate = static function ( $theme ) {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'black',
+										'color' => '#abcdef',
+									),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $duplicate, 20 );
+
+		$controller = $this->di_container->get( Theme_Controller::class );
+		$stylesheet = $controller->get_stylesheet_for_rendering();
+
+		$this->assertSame( '#abcdef', $controller->translate_slug_to_color( 'black' ) );
+		$this->assertStringContainsString( '.has-black-color { color: #abcdef; }', $stylesheet );
+		$this->assertStringNotContainsString( '.has-black-color { color: #000000; }', $stylesheet );
+
+		// One rule per slug, not one per origin that defines it.
+		$this->assertSame( 1, substr_count( $stylesheet, '.has-black-color {' ) );
+
+		remove_filter( 'woocommerce_email_editor_theme_json', $duplicate, 20 );
+	}
+
+	/**
 	 * Test that a literal color passes through untranslated.
 	 *
 	 * Color block attributes usually hold a slug, but they can carry a literal color, and callers
