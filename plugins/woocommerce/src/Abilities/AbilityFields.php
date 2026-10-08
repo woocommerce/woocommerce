@@ -41,7 +41,7 @@ class AbilityFields {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param string $object_type Object type: `product`, `order` or `order_item`.
+	 * @param string $object_type Object type that an ability formats, for example `product`, `order` or `order_item`.
 	 * @param string $attribute   Attribute under `extensions`.
 	 * @param array  $args        {
 	 *     Field arguments.

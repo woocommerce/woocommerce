@@ -52,12 +52,6 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
 			'meta'                => array(
 				'show_in_rest' => true,
-				'woocommerce'  => array(
-					'extension_fields' => array(
-						'object_type' => 'product',
-						'output'      => 'products',
-					),
-				),
 				'mcp'          => array(
 					'public' => true,
 					'type'   => 'tool',
