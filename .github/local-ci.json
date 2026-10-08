@@ -37,7 +37,7 @@
       "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=4" ]
     },
     {
-      "$comment": "Core plugin PHP cells only; grow `exclude` when packages/php/* gain unit:php jobs. The driver resolves each cell's PHP and WordPress versions from the planner itself. Opt-in: four cells run one after another, about 25 min.",
+      "$comment": "Core plugin PHP cells only (live-test config change); grow `exclude` when packages/php/* gain unit:php jobs. The driver resolves each cell's PHP and WordPress versions from the planner itself. Opt-in: four cells run one after another, about 25 min.",
       "type": "unit:php",
       "exclude": [
         "WP: pre-release",
