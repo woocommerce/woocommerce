@@ -97,7 +97,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				'schema'       => self::CODE_SCHEMA,
 				'get_callback' => static function ( \WC_Product $product ) {
 					$code = $product->get_meta( '_test_code' );
-					return '' === $code ? AbilityFields::omit() : $code;
+					return '' === $code ? null : $code;
 				},
 			)
 		);
@@ -150,7 +150,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the registered field values under extensions, and leave out an object whose fields return omit().
+	 * @testdox Should return the registered field values under extensions, and leave out a null that the schema does not allow.
 	 */
 	public function test_product_reads_return_extension_values(): void {
 		$with_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen with code' ) );
@@ -325,7 +325,46 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a null field value under extensions.
+	 * @testdox Should leave out, log and report a value that does not match the field schema, and keep the output valid.
+	 */
+	public function test_field_value_that_does_not_match_its_schema_is_left_out(): void {
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Abilities\AbilityFields::register' );
+		AbilityFields::register(
+			'product',
+			'test_count',
+			array(
+				'schema'       => array( 'type' => 'integer' ),
+				'get_callback' => static function () {
+					return 'many';
+				},
+			)
+		);
+		$this->set_feature( true );
+		$reported = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$reported ) {
+				$reported[] = $message;
+			},
+			10,
+			2
+		);
+		$first  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
+		$second = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+		$first->update_meta_data( '_test_code', 'A1' );
+		$first->save();
+
+		$products = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'search' => 'Pen' ) );
+
+		$this->assertIsArray( $products );
+		$products = array_column( $products['products'], null, 'id' );
+		$this->assertSame( array( 'test_code' => 'A1' ), $products[ $first->get_id() ]['extensions'] );
+		$this->assertArrayNotHasKey( 'extensions', $products[ $second->get_id() ] );
+		$this->assertCount( 1, preg_grep( '/"test_count" of "product"/', $reported ) );
+	}
+
+	/**
+	 * @testdox Should return a null field value under extensions when the schema allows it.
 	 */
 	public function test_field_that_returns_null_is_kept(): void {
 		AbilityFields::register(
@@ -382,5 +421,8 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$fields = new \ReflectionProperty( AbilityFields::class, 'fields' );
 		$fields->setAccessible( true );
 		$fields->setValue( null, array() );
+		$reported = new \ReflectionProperty( AbilityFields::class, 'reported' );
+		$reported->setAccessible( true );
+		$reported->setValue( null, array() );
 	}
 }

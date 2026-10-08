@@ -33,11 +33,11 @@ class AbilityFields {
 	private static array $fields = array();
 
 	/**
-	 * Value that a get_callback returns to leave its attribute out.
+	 * Fields already reported for a value that does not match the schema, keyed by object type and attribute.
 	 *
-	 * @var object|null
+	 * @var array<string, bool>
 	 */
-	private static ?object $omit = null;
+	private static array $reported = array();
 
 	/**
 	 * Register a field that the abilities of an object type return under `extensions`.
@@ -54,11 +54,11 @@ class AbilityFields {
 	 *     Field arguments.
 	 *
 	 *     @type array    $schema       JSON schema of the value. Its `title` is the label clients show.
-	 *     @type callable $get_callback Receives the object and returns the value, or AbilityFields::omit()
-	 *                                  to leave the attribute out. A null is a value, so a schema that
-	 *                                  allows it must say so, such as `array( 'integer', 'null' )`. It
-	 *                                  reads the object it is given, not the database, because an
-	 *                                  ability can format an object before it is saved.
+	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
+	 *                                  does not allow is left out, so return null when the object has no
+	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
+	 *                                  keeps it. It reads the object it is given, not the database,
+	 *                                  because an ability can format an object before it is saved.
 	 * }
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
@@ -75,17 +75,6 @@ class AbilityFields {
 	}
 
 	/**
-	 * Value that a get_callback returns to leave its attribute out of the output.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @return object
-	 */
-	public static function omit(): object {
-		return self::$omit ??= new \stdClass();
-	}
-
-	/**
 	 * Fields of an object type, keyed by attribute.
 	 *
 	 * @param string $object_type Object type.
@@ -97,7 +86,7 @@ class AbilityFields {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions`. A field that returns omit() or throws is left out, and the key is left out
+	 * `extensions`. A field that throws or returns a value that its schema does not allow is left out, and the key is left out
 	 * when no field has a value or the feature is off.
 	 *
 	 * @internal
@@ -123,7 +112,7 @@ class AbilityFields {
 				);
 				continue;
 			}
-			if ( self::omit() !== $value ) {
+			if ( self::matches_schema( $object_type, $attribute, $value ) ) {
 				$values[ $attribute ] = $value;
 			}
 		}
@@ -131,6 +120,31 @@ class AbilityFields {
 			$output['extensions'] = $values;
 		}
 		return $output;
+	}
+
+	/**
+	 * Whether a value matches its field schema. A value other than null that
+	 * does not match is logged and reported one time for each field.
+	 *
+	 * @param string $object_type Object type.
+	 * @param string $attribute   Attribute.
+	 * @param mixed  $value       Value that the get_callback returned.
+	 * @return bool
+	 */
+	private static function matches_schema( string $object_type, string $attribute, $value ): bool {
+		$valid = rest_validate_value_from_schema( $value, self::$fields[ $object_type ][ $attribute ]['schema'], $attribute );
+		if ( true === $valid ) {
+			return true;
+		}
+		if ( null === $value || isset( self::$reported[ $object_type . '.' . $attribute ] ) ) {
+			return false;
+		}
+
+		self::$reported[ $object_type . '.' . $attribute ] = true;
+		$message = sprintf( 'Ability field "%s" of "%s" was left out because its value does not match its schema: %s', $attribute, $object_type, $valid->get_error_message() );
+		wc_get_logger()->error( $message, array( 'source' => 'ability-fields' ) );
+		wc_doing_it_wrong( __CLASS__ . '::register', $message, '11.3.0' );
+		return false;
 	}
 
 	/**
