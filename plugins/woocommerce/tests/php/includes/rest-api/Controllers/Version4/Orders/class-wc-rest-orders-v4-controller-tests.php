@@ -1976,4 +1976,185 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * Create an order with a product that has counted the given coupons.
+	 *
+	 * @param string[] $codes Coupon codes to apply.
+	 * @return WC_Order
+	 */
+	private function create_order_with_counted_coupons( array $codes ): WC_Order {
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => WC_Helper_Product::create_simple_product()->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		foreach ( $codes as $code ) {
+			$this->ensure_coupon( $code );
+			$order->apply_coupon( $code );
+		}
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Create the coupon when it does not exist yet.
+	 *
+	 * @param string $code Coupon code.
+	 */
+	private function ensure_coupon( string $code ): void {
+		if ( ! wc_get_coupon_id_by_code( $code ) ) {
+			WC_Helper_Coupon::create_coupon( $code );
+		}
+	}
+
+	/**
+	 * Get the usage count of a coupon, freshly loaded.
+	 *
+	 * @param string $code Coupon code.
+	 * @return int
+	 */
+	private function get_coupon_usage( string $code ): int {
+		return ( new WC_Coupon( $code ) )->get_usage_count();
+	}
+
+	/**
+	 * Get the ID of the coupon line holding the given code.
+	 *
+	 * @param WC_Order $order Order.
+	 * @param string   $code  Coupon code.
+	 * @return int
+	 */
+	private function get_coupon_item_id( WC_Order $order, string $code ): int {
+		foreach ( $order->get_items( 'coupon' ) as $item ) {
+			if ( $item->get_code() === $code ) {
+				return $item->get_id();
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Dispatch a PUT to the order.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $params   Body params.
+	 * @return WP_REST_Response
+	 */
+	private function put_order( int $order_id, array $params ): WP_REST_Response {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order_id );
+		$request->set_body_params( $params );
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * @testdox Adding a coupon to an order that counted its coupons counts the new coupon once.
+	 */
+	public function test_update_adding_coupon_counts_usage_on_recorded_order(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+		$this->ensure_coupon( 'v4-usage-b' );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array(
+					array( 'id' => $this->get_coupon_item_id( $order, 'v4-usage-a' ) ),
+					array( 'code' => 'v4-usage-b' ),
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-b' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Replacing a coupon on an order that counted its coupons moves the usage to the new coupon.
+	 */
+	public function test_update_replacing_coupon_moves_usage_on_recorded_order(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+		$this->ensure_coupon( 'v4-usage-b' );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array( array( 'code' => 'v4-usage-b' ) ) ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-b' ) );
+	}
+
+	/**
+	 * @testdox Removing every coupon from an order that counted them lowers the usage and clears the record.
+	 */
+	public function test_update_with_empty_coupon_lines_clears_usage_and_flag(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Sending the coupons an order already counts changes no usage.
+	 */
+	public function test_update_with_same_coupons_keeps_usage_counts(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array( array( 'code' => 'V4-USAGE-A' ) ) ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Adding a coupon and moving the order to processing in one request counts the coupon once.
+	 */
+	public function test_update_adding_coupon_and_setting_status_counts_once(): void {
+		$order = $this->create_test_order();
+		$this->ensure_coupon( 'v4-usage-a' );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array( array( 'code' => 'v4-usage-a' ) ),
+				'status'       => OrderStatus::PROCESSING,
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon and cancelling the order in one request leaves the removed coupon uncounted.
+	 */
+	public function test_update_removing_coupon_and_cancelling_releases_usage(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array(),
+				'status'       => OrderStatus::CANCELLED,
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v4-usage-a' ) );
+	}
 }

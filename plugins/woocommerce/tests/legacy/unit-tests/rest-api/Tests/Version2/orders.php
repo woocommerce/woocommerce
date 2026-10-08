@@ -6,6 +6,7 @@
  * @since 3.0.0
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 
 /**
@@ -659,6 +660,237 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( empty( $data['coupon_lines'] ) );
 		$this->assertEquals( '50.00', $data['total'] );
+	}
+
+	/**
+	 * Create an order that has counted the given coupons.
+	 *
+	 * @param string[] $codes Coupon codes to apply.
+	 * @return WC_Order
+	 */
+	private function create_order_with_counted_coupons( array $codes ): WC_Order {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		foreach ( $codes as $code ) {
+			if ( ! wc_get_coupon_id_by_code( $code ) ) {
+				\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( $code );
+			}
+			$order->apply_coupon( $code );
+		}
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Get the usage count of a coupon, freshly loaded.
+	 *
+	 * @param string $code Coupon code.
+	 * @return int
+	 */
+	private function get_coupon_usage( string $code ): int {
+		return ( new WC_Coupon( $code ) )->get_usage_count();
+	}
+
+	/**
+	 * Dispatch a PUT to the order.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $params   Body params.
+	 * @return WP_REST_Response
+	 */
+	private function put_order( int $order_id, array $params ): WP_REST_Response {
+		wp_set_current_user( $this->user );
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order_id );
+		$request->set_body_params( $params );
+
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Get the ID of the coupon line holding the given code.
+	 *
+	 * @param WC_Order $order Order.
+	 * @param string   $code  Coupon code.
+	 * @return int
+	 */
+	private function get_coupon_item_id( WC_Order $order, string $code ): int {
+		foreach ( $order->get_items( 'coupon' ) as $item ) {
+			if ( $item->get_code() === $code ) {
+				return $item->get_id();
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * @testdox Adding a coupon to an order that counted its coupons counts the new coupon once.
+	 */
+	public function test_update_order_adding_coupon_counts_usage_on_recorded_order() {
+		$order = $this->create_order_with_counted_coupons( array( 'v2-usage-a' ) );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'v2-usage-b' );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array( array( 'code' => 'v2-usage-b' ) ) ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-b' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Replacing a coupon on an order that counted its coupons moves the usage to the new coupon.
+	 */
+	public function test_update_order_replacing_coupon_moves_usage_on_recorded_order() {
+		$order = $this->create_order_with_counted_coupons( array( 'v2-usage-a' ) );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'v2-usage-b' );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array(
+					array(
+						'id'   => $this->get_coupon_item_id( $order, 'v2-usage-a' ),
+						'code' => null,
+					),
+					array( 'code' => 'v2-usage-b' ),
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-b' ) );
+	}
+
+	/**
+	 * @testdox Removing the last coupon from an order that counted it lowers the usage and clears the record.
+	 */
+	public function test_update_order_removing_last_coupon_clears_usage_and_flag() {
+		$order = $this->create_order_with_counted_coupons( array( 'v2-usage-a' ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array(
+					array(
+						'id'   => $this->get_coupon_item_id( $order, 'v2-usage-a' ),
+						'code' => null,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Sending the coupons an order already counts changes no usage.
+	 */
+	public function test_update_order_with_same_coupons_keeps_usage_counts() {
+		$order = $this->create_order_with_counted_coupons( array( 'v2-usage-a' ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array(
+					array(
+						'id'   => $this->get_coupon_item_id( $order, 'v2-usage-a' ),
+						'code' => 'V2-USAGE-A',
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Adding a coupon and moving the order to processing in one request counts the coupon once.
+	 */
+	public function test_update_order_adding_coupon_and_setting_status_counts_once() {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'v2-usage-a' );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array( array( 'code' => 'v2-usage-a' ) ),
+				'status'       => OrderStatus::PROCESSING,
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon and cancelling the order in one request leaves the removed coupon uncounted.
+	 */
+	public function test_update_order_removing_coupon_and_cancelling_releases_usage() {
+		$order = $this->create_order_with_counted_coupons( array( 'v2-usage-a' ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'coupon_lines' => array(
+					array(
+						'id'   => $this->get_coupon_item_id( $order, 'v2-usage-a' ),
+						'code' => null,
+					),
+				),
+				'status'       => OrderStatus::CANCELLED,
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v2-usage-a' ) );
+	}
+
+	/**
+	 * @testdox A failed batch item does not leak its coupon codes into the next item.
+	 */
+	public function test_orders_batch_failed_item_does_not_leak_coupon_codes() {
+		wp_set_current_user( $this->user );
+		$first  = $this->create_order_with_counted_coupons( array( 'v2-usage-a' ) );
+		$second = $this->create_order_with_counted_coupons( array( 'v2-usage-b' ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'           => $first->get_id(),
+						'coupon_lines' => array(
+							array(
+								'id'   => 99999999,
+								'code' => 'v2-usage-x',
+							),
+						),
+					),
+					array(
+						'id'            => $second->get_id(),
+						'customer_note' => 'Batch note',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'error', $data['update'][0] );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-b' ) );
+		$second = wc_get_order( $second->get_id() );
+		$this->assertTrue( $second->get_data_store()->get_recorded_coupon_usage_counts( $second ) );
 	}
 
 	/**
