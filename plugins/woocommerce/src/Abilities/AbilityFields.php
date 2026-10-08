@@ -68,9 +68,10 @@ class AbilityFields {
 	 *                                  keeps it. It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
 	 *     @type callable $update_callback Optional. Receives the value and the object, and changes the object
-	 *                                     in memory. It returns a WP_Error to reject the value, and then
-	 *                                     nothing is saved. It must not save, send email or make HTTP
-	 *                                     requests. A field without it cannot be written.
+	 *                                     in memory. A null value deletes the value of the field, as in an
+	 *                                     undo of a field that had no value. It returns a WP_Error to reject
+	 *                                     the value, and then nothing is saved. It must not save, send email
+	 *                                     or make HTTP requests. A field without it cannot be written.
 	 * }
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
@@ -221,7 +222,7 @@ class AbilityFields {
 				);
 			}
 
-			$valid = rest_validate_value_from_schema( $value, $fields[ $attribute ]['schema'], 'extensions.' . $attribute );
+			$valid = null === $value ? true : rest_validate_value_from_schema( $value, $fields[ $attribute ]['schema'], 'extensions.' . $attribute );
 			if ( is_wp_error( $valid ) ) {
 				return self::with_status( $valid );
 			}
@@ -261,7 +262,7 @@ class AbilityFields {
 	/**
 	 * Add the `extensions` property to an input schema when the feature is on.
 	 * It lists the fields that can be written, in each `oneOf` branch when the
-	 * schema has them.
+	 * schema has them. Each field also accepts null, which deletes its value.
 	 *
 	 * @internal
 	 *
@@ -287,7 +288,15 @@ class AbilityFields {
 		if ( ! empty( $fields ) ) {
 			$extensions['properties'] = array_map(
 				static function ( array $field ): array {
-					return $field['schema'];
+					$field_schema = $field['schema'];
+					if ( ! isset( $field_schema['type'] ) ) {
+						return array( 'anyOf' => array( $field_schema, array( 'type' => 'null' ) ) );
+					}
+					$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
+					if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
+						$field_schema['enum'][] = null;
+					}
+					return $field_schema;
 				},
 				$fields
 			);

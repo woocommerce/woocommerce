@@ -119,6 +119,10 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 					return '' === $color ? null : $color;
 				},
 				'update_callback' => static function ( $value, \WC_Product $product ) {
+					if ( null === $value ) {
+						$product->delete_meta_data( '_test_color' );
+						return;
+					}
 					$product->update_meta_data( '_test_color', $value );
 				},
 			)
@@ -745,7 +749,66 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 			$summary['expected']
 		);
 		$this->assertSame( array(), $summary['side_effects'] );
-		$this->assertNull( $summary['undo'] );
+		$this->assertSame(
+			array(
+				'test_code'  => 'A0',
+				'test_color' => null,
+			),
+			$summary['undo']['input']['extensions']
+		);
+	}
+
+	/**
+	 * @testdox Should delete the value of an extension field that had no value before, when the undo runs.
+	 */
+	public function test_product_update_undo_deletes_a_field_value_that_did_not_exist(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$input   = array(
+			'id'         => $product->get_id(),
+			'name'       => 'Pencil',
+			'extensions' => array( 'test_color' => 'red' ),
+		);
+
+		$summary = $ability->dry_run( $input );
+		$ability->execute( array_merge( $input, array( 'expected' => $summary['expected'] ) ) );
+		$undone = wp_get_ability( $summary['undo']['ability'] )->execute( $summary['undo']['input'] );
+		wp_cache_flush();
+		$saved = wc_get_product( $product->get_id() );
+
+		$this->assertIsArray( $undone );
+		$this->assertSame( 'Pen', $saved->get_name() );
+		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+		$this->assertArrayNotHasKey( 'extensions', $undone['product'] );
+	}
+
+	/**
+	 * @testdox Should accept null for a writable extension field in the input schema, so a write can delete its value.
+	 */
+	public function test_input_schema_accepts_null_for_extension_fields(): void {
+		$schema = AbilityFields::add_to_input_schema(
+			array( 'type' => 'object' ),
+			'product'
+		);
+		AbilityFields::register(
+			'product',
+			'test_size',
+			array(
+				'schema'          => array(
+					'type' => 'string',
+					'enum' => array( 'small', 'large' ),
+				),
+				'get_callback'    => '__return_null',
+				'update_callback' => '__return_null',
+			)
+		);
+		$fields = AbilityFields::add_to_input_schema( array( 'type' => 'object' ), 'product' )['properties']['extensions']['properties'];
+
+		$this->assertSame( array( 'string', 'null' ), $schema['properties']['extensions']['properties']['test_color']['type'] );
+		$this->assertSame( 'Test code', $schema['properties']['extensions']['properties']['test_code']['title'] );
+		$this->assertTrue( rest_validate_value_from_schema( null, $fields['test_size'] ) );
+		$this->assertTrue( rest_validate_value_from_schema( 'small', $fields['test_size'] ) );
+		$this->assertWPError( rest_validate_value_from_schema( 'medium', $fields['test_size'] ) );
 	}
 
 	/**
