@@ -320,6 +320,85 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a slug several origins define yields exactly one definition, the highest priority one.
+	 *
+	 * A duplicate is read two ways: a lookup takes the first entry, a stylesheet emits a rule per
+	 * entry and the cascade takes the last. Returning one entry per slug is what stops a block's
+	 * color depending on which route it arrives through.
+	 */
+	public function testItReturnsOneDefinitionPerSlug(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'default' => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#aaaaaa',
+						),
+						array(
+							'slug'  => 'core-only',
+							'color' => '#111111',
+						),
+					),
+					'theme'   => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#bbbbbb',
+						),
+					),
+					'custom'  => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		$definitions = Styles_Helper::palette_definitions( $settings );
+		$slugs       = array_column( $definitions, 'slug' );
+
+		$this->assertSame( array( 'shared', 'core-only' ), $slugs );
+		$this->assertCount( 1, array_keys( $slugs, 'shared', true ) );
+
+		// The one definition kept is the one the lookup resolves to, so both agree.
+		$this->assertSame( '#cccccc', $definitions[0]['color'] );
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'shared' ) );
+	}
+
+	/**
+	 * Test a palette entry with no usable slug is dropped rather than reaching a caller.
+	 *
+	 * The palette arrives through a filter, and callers read `slug` and `color` directly.
+	 */
+	public function testItDropsPaletteEntriesWithoutAStringSlug(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'theme' => array(
+						array( 'color' => '#aaaaaa' ),
+						array(
+							'slug'  => 123,
+							'color' => '#bbbbbb',
+						),
+						'not-an-array',
+						array(
+							'slug'  => 'usable',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		$definitions = Styles_Helper::palette_definitions( $settings );
+
+		$this->assertSame( array( 'usable' ), array_column( $definitions, 'slug' ) );
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'usable' ) );
+	}
+
+	/**
 	 * Test a palette entry wins over a CSS color of the same name.
 	 *
 	 * This is why treating a named color as a literal is safe: the lookup searches every origin
