@@ -116,12 +116,7 @@ class MiniCart extends \WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->mock = $this->replace_block_type(
-			'woocommerce/mini-cart',
-			static function () {
-				return new MiniCartMock();
-			}
-		);
+		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock() );
 
 		$fixtures       = new FixtureData();
 		$this->products = array(

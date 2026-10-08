@@ -35,12 +35,7 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->mock = $this->replace_block_type(
-			'woocommerce/coupon-code',
-			static function () {
-				return new CouponCodeMock();
-			}
-		);
+		$this->mock = $this->replace_block_type( 'woocommerce/coupon-code', static fn () => new CouponCodeMock() );
 
 		$theme_controller        = Email_Editor_Container::container()->get( Theme_Controller::class );
 		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme(), array() );

@@ -13,7 +13,8 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	use BlockTypeRegistryTrait;
 
 	/**
-	 * Block names these tests register, removed whatever happens in a test.
+	 * Names that outlive restore_block_types(): the original a test puts back, and the name
+	 * a callback registers without the trait tracking it.
 	 */
 	private const TEST_BLOCK_NAMES = array( 'woocommerce-test/swapped', 'woocommerce-test/other' );
 
@@ -40,12 +41,7 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	public function test_replacing_a_registered_block_type_puts_the_original_back(): void {
 		$original = register_block_type( 'woocommerce-test/swapped', array( 'title' => 'Original' ) );
 
-		$replacement = $this->replace_block_type(
-			'woocommerce-test/swapped',
-			static function () {
-				return register_block_type( 'woocommerce-test/swapped', array( 'title' => 'Replacement' ) );
-			}
-		);
+		$replacement = $this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/swapped', array( 'title' => 'Replacement' ) ) );
 
 		$registry = \WP_Block_Type_Registry::get_instance();
 		$this->assertSame( $replacement, $registry->get_registered( 'woocommerce-test/swapped' ), 'The replacement should be registered during the test.' );
@@ -59,12 +55,7 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	 * @testdox A block type that was not registered before the test is removed on restore.
 	 */
 	public function test_a_block_type_that_was_not_registered_is_removed(): void {
-		$this->replace_block_type(
-			'woocommerce-test/swapped',
-			static function () {
-				return register_block_type( 'woocommerce-test/swapped' );
-			}
-		);
+		$this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/swapped' ) );
 
 		$this->restore_block_types();
 
@@ -78,12 +69,7 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 		$original = register_block_type( 'woocommerce-test/swapped', array( 'title' => 'Original' ) );
 
 		foreach ( array( 'First', 'Second' ) as $title ) {
-			$this->replace_block_type(
-				'woocommerce-test/swapped',
-				static function () use ( $title ) {
-					return register_block_type( 'woocommerce-test/swapped', array( 'title' => $title ) );
-				}
-			);
+			$this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/swapped', array( 'title' => $title ) ) );
 		}
 
 		$this->restore_block_types();
@@ -106,11 +92,6 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	public function test_a_callback_that_registers_another_name_is_rejected(): void {
 		$this->expectException( \LogicException::class );
 
-		$this->replace_block_type(
-			'woocommerce-test/swapped',
-			static function () {
-				return register_block_type( 'woocommerce-test/other' );
-			}
-		);
+		$this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/other' ) );
 	}
 }

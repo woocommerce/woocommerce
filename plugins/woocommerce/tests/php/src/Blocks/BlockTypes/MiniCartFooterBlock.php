@@ -32,13 +32,11 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 
 		$this->block = $this->replace_block_type(
 			'woocommerce/mini-cart-footer-block',
-			static function () {
-				return new MiniCartFooterBlockType(
-					Package::container()->get( Api::class ),
-					Package::container()->get( AssetDataRegistry::class ),
-					new IntegrationRegistry()
-				);
-			}
+			static fn () => new MiniCartFooterBlockType(
+				Package::container()->get( Api::class ),
+				Package::container()->get( AssetDataRegistry::class ),
+				new IntegrationRegistry()
+			)
 		);
 	}
 
