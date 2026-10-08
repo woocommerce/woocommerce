@@ -74,6 +74,13 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 		'clicking custom button triggers validation when form is invalid',
 		{ tag: [ tags.PAYMENTS ] },
 		async ( { page, product } ) => {
+			const checkoutRequests: string[] = [];
+			page.on( 'request', ( request ) => {
+				if ( request.url().includes( 'wc-ajax=checkout' ) ) {
+					checkoutRequests.push( request.url() );
+				}
+			} );
+
 			await addAProductToCart( page, product.id, 1 );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 
@@ -90,11 +97,15 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 
 			// Ensuring validation errors are shown.
 			await expect(
-				page.locator( '.woocommerce-invalid:visible' ).first()
+				page.locator( '.woocommerce-invalid' ).first()
 			).toBeVisible();
 
 			// Ensuring we're still on checkout (order not submitted).
 			await expect( page ).not.toHaveURL( /order-received/ );
+
+			// The server also marks empty fields invalid, so check that client-side
+			// validation stopped the checkout request from being sent.
+			expect( checkoutRequests ).toHaveLength( 0 );
 		}
 	);
 
@@ -179,6 +190,12 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 		async ( { page, product } ) => {
 			await addAProductToCart( page, product.id, 1 );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
+
+			// The cart needs shipping, so the collapsed shipping fields render hidden
+			// and empty. The custom button must still submit with them on the page.
+			const shippingFirstName = page.locator( '#shipping_first_name' );
+			await expect( shippingFirstName ).toBeAttached();
+			await expect( shippingFirstName ).toBeHidden();
 
 			const customer = getFakeCustomer();
 			await page
