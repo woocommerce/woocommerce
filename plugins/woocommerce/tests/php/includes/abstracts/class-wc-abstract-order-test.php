@@ -583,30 +583,12 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$coupon_code = 'coupon_test_custom_order_type';
 		WC_Helper_Coupon::create_coupon( $coupon_code );
 
-		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
-		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
-			/**
-			 * Report that coupon usage has not been recorded for the order yet.
-			 *
-			 * @param WC_Abstract_Order $order Order object.
-			 * @return bool
-			 */
-			public function get_recorded_coupon_usage_counts( $order ) {
-				return false;
-			}
-		};
-		add_filter(
-			'woocommerce_data_stores',
-			function ( $stores ) use ( $data_store ) {
-				$stores['test-custom-order'] = $data_store;
-				return $stores;
-			}
-		);
+		$this->register_custom_order_data_store();
 
 		// Only the tax location is provided, since the abstract builds it from billing and shipping getters.
 		$order = new class() extends WC_Abstract_Order {
 			/**
-			 * Data store registered for this order type above.
+			 * Data store registered by register_custom_order_data_store().
 			 *
 			 * @var string
 			 */
@@ -649,6 +631,97 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result );
 		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Register the 'test-custom-order' data store used by custom order types in these tests.
+	 */
+	private function register_custom_order_data_store(): void {
+		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
+		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+			/**
+			 * Report that coupon usage has not been recorded for the order yet.
+			 *
+			 * @param WC_Abstract_Order $order Order object.
+			 * @return bool
+			 */
+			public function get_recorded_coupon_usage_counts( $order ) {
+				return false;
+			}
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $data_store ) {
+				$stores['test-custom-order'] = $data_store;
+				return $stores;
+			}
+		);
+	}
+
+	/**
+	 * @testdox The per-email coupon usage limit applies to a custom order type that has a billing email but no customer ID.
+	 */
+	public function test_apply_coupon_enforces_email_usage_limit_on_custom_order_type_without_customer_id() {
+		$coupon_code = 'coupon_test_custom_order_type_email_limit';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code, array( 'usage_limit_per_user' => '1' ) );
+		$coupon->increase_usage_count( 'guest@example.com' );
+
+		$this->register_custom_order_data_store();
+
+		$order = new class() extends WC_Abstract_Order {
+			/**
+			 * Data store registered by register_custom_order_data_store().
+			 *
+			 * @var string
+			 */
+			protected $data_store_name = 'test-custom-order';
+
+			/**
+			 * Get the order type.
+			 *
+			 * @return string
+			 */
+			public function get_type() {
+				return 'test_custom_order';
+			}
+
+			/**
+			 * Get the billing email of a guest who has already used the coupon.
+			 *
+			 * @return string
+			 */
+			public function get_billing_email() {
+				return 'guest@example.com';
+			}
+
+			/**
+			 * Return an empty tax location, as this order type has no address getters.
+			 *
+			 * @param array $args Override the location.
+			 * @return array
+			 */
+			protected function get_tax_location( $args = array() ) {
+				return wp_parse_args(
+					$args,
+					array(
+						'country'  => '',
+						'state'    => '',
+						'postcode' => '',
+						'city'     => '',
+					)
+				);
+			}
+		};
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $coupon->get_coupon_error( 106 ), $result->get_error_message() );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
 	}
 
 	/**
