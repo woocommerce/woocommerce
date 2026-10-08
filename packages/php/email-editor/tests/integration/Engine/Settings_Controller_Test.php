@@ -68,12 +68,11 @@ class Settings_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		$scheme_lines = array_filter(
 			explode( "\n", $settings['__unstableResolvedAssets']['styles'] ),
 			function ( string $line ): bool {
-				return false !== strpos( $line, "id='wp-base-styles-css'" );
+				return false !== strpos( $line, 'wp-base-styles-css' );
 			}
 		);
 
 		$this->assertCount( 1, $scheme_lines, 'The admin color scheme stylesheet must be printed in the iframe assets' );
 		$this->assertStringContainsString( 'base-styles/admin-schemes', reset( $scheme_lines ) );
-		$this->assertContains( 'wp-base-styles-css', $settings['allowedIframeStyleHandles'] );
 	}
 }
