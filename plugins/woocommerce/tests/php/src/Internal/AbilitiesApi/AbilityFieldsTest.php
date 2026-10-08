@@ -346,7 +346,10 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		);
 		AbilityProductTypes::register( 'membership', array( 'fields' => array( 'name' ) ) );
 
-		$this->assertSame( array(), AbilityProductTypes::get_all() );
+		$aliases = AbilityProductTypes::get_all();
+
+		$this->assertSame( array( 'physical', 'virtual', 'digital', 'affiliate', 'grouped' ), array_keys( $aliases ) );
+		$this->assertSame( 'simple', $aliases['physical']['wc_type'] );
 	}
 
 	/**

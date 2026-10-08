@@ -7,9 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFields;
 use Automattic\WooCommerce\Abilities\AbilityProductTypes;
@@ -294,26 +292,6 @@ trait ProductAbilityTrait {
 	 * @return string|\WP_Error
 	 */
 	protected static function get_product_type_alias_for_product( \WC_Product $product ) {
-		if ( $product->is_type( ProductType::SIMPLE ) ) {
-			if ( $product->get_virtual() && $product->get_downloadable() ) {
-				return 'digital';
-			}
-
-			if ( $product->get_virtual() ) {
-				return 'virtual';
-			}
-
-			return 'physical';
-		}
-
-		if ( $product->is_type( ProductType::EXTERNAL ) ) {
-			return 'affiliate';
-		}
-
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			return 'grouped';
-		}
-
 		$alias = AbilityProductTypes::get_alias_for( $product );
 		if ( null !== $alias ) {
 			return $alias;
@@ -332,87 +310,20 @@ trait ProductAbilityTrait {
 	 * @return array<int, string>
 	 */
 	private static function get_common_product_mutation_fields(): array {
-		return array( 'name', 'sku', 'description', 'short_description', 'status' );
+		return AbilityProductTypes::get_common_fields();
 	}
 
 	/**
 	 * Get product type alias configuration.
 	 *
-	 * The keys are agent-facing product type aliases. Each config maps the alias to a
-	 * WooCommerce product class plus the fields that can be applied to it. With ability
-	 * contracts on, the aliases that extensions register follow the Core aliases.
+	 * The keys are agent-facing product type aliases: the Core aliases, then the aliases
+	 * that extensions register with ability contracts on. Each config maps the alias to a
+	 * WooCommerce product class plus the fields that can be applied to it.
 	 *
-	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props?: array<string, mixed>}>
+	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props: array<string, mixed>}>
 	 */
 	private static function get_product_type_alias_configs(): array {
-		$common_fields = self::get_common_product_mutation_fields();
-		$simple_fields = array_merge(
-			$common_fields,
-			array( 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' )
-		);
-
-		$configs = array(
-			'physical'  => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => false,
-					'downloadable' => false,
-				),
-				'query_props'   => array(
-					'virtual'      => false,
-					'downloadable' => false,
-				),
-			),
-			'virtual'   => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => true,
-					'downloadable' => false,
-				),
-				'query_props'   => array(
-					'virtual'      => true,
-					'downloadable' => false,
-				),
-			),
-			'digital'   => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => true,
-					'downloadable' => true,
-				),
-				'query_props'   => array(
-					'virtual'      => true,
-					'downloadable' => true,
-				),
-			),
-			'affiliate' => array(
-				'wc_type'       => ProductType::EXTERNAL,
-				'fields'        => array_merge(
-					$common_fields,
-					array( 'regular_price', 'sale_price', 'external_url', 'button_text' )
-				),
-				'product_props' => array(
-					'virtual'        => false,
-					'downloadable'   => false,
-					'manage_stock'   => false,
-					'stock_quantity' => '',
-					'stock_status'   => ProductStockStatus::IN_STOCK,
-				),
-			),
-			'grouped'   => array(
-				'wc_type'       => ProductType::GROUPED,
-				'fields'        => array_merge( $common_fields, array( 'grouped_products' ) ),
-				'product_props' => array(
-					'manage_stock'   => false,
-					'stock_quantity' => '',
-				),
-			),
-		);
-
-		return $configs + AbilityProductTypes::get_all();
+		return AbilityProductTypes::get_all();
 	}
 
 	/**
