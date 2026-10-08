@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Reduce Local Pickup settings E2E tests from 7 to 2; three Jest suites own the settings screen's logic.
-

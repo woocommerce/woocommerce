@@ -62,9 +62,9 @@ export class ReportChart extends Component {
 					if ( segment.segment_label ) {
 						const label = intervalData[ segment.segment_label ]
 							? segment.segment_label +
-							  ' (#' +
-							  segment.segment_id +
-							  ')'
+								' (#' +
+								segment.segment_id +
+								')'
 							: segment.segment_label;
 						intervalData[ segment.segment_id ] = {
 							label,

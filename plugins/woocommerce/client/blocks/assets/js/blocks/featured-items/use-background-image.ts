@@ -109,7 +109,9 @@ export function useBackgroundImage( {
 					willReadFrequently: true,
 				} );
 
-				if ( ! ctx ) return;
+				if ( ! ctx ) {
+					return;
+				}
 
 				ctx.drawImage( img, 0, 0, width, height );
 

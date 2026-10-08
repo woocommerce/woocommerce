@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Exception;
 
 /**
@@ -56,6 +55,26 @@ class NotificationRetryHandler {
 	);
 
 	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
+	 * Initialize injected dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationStepLogger $step_logger The step logger.
+	 *
+	 * @since 11.3.0
+	 */
+	final public function init( NotificationStepLogger $step_logger ): void {
+		$this->step_logger = $step_logger;
+	}
+
+	/**
 	 * Registers the ActionScheduler hook for retry jobs.
 	 *
 	 * @return void
@@ -63,7 +82,7 @@ class NotificationRetryHandler {
 	 * @since 10.8.0
 	 */
 	public function register(): void {
-		add_action( self::RETRY_HOOK, array( $this, 'handle_retry' ), 10, 3 );
+		add_action( self::RETRY_HOOK, array( $this, 'handle_retry' ), 10, 4 );
 	}
 
 	/**
@@ -89,14 +108,18 @@ class NotificationRetryHandler {
 		$next_attempt = max( 0, $current_attempt ) + 1;
 
 		if ( $next_attempt > self::MAX_RETRIES || ! isset( self::BACKOFF_SCHEDULE[ $next_attempt ] ) ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'exhausted',
+				'error',
 				sprintf(
 					'Push notification permanently failed after %d attempts (type=%s, resource_id=%d).',
 					$next_attempt,
 					$notification->get_type(),
 					$notification->get_resource_id()
 				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array( 'attempt' => $current_attempt )
 			);
 			$notification->reset_processing_meta();
 			return;
@@ -105,7 +128,11 @@ class NotificationRetryHandler {
 		$delay = $retry_after ?? self::BACKOFF_SCHEDULE[ $next_attempt ];
 
 		if ( $delay > self::MAX_RETRY_DELAY ) {
-			wc_get_logger()->warning(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'delay_too_long',
+				'warning',
 				sprintf(
 					'Push notification dropped: retry delay %ds exceeds maximum %ds (type=%s, resource_id=%d).',
 					$delay,
@@ -113,63 +140,110 @@ class NotificationRetryHandler {
 					$notification->get_type(),
 					$notification->get_resource_id()
 				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array(
+					'attempt' => $current_attempt,
+					'delay'   => $delay,
+				)
 			);
 			$notification->reset_processing_meta();
 			return;
 		}
 
+		// Action Scheduler dispatches array_values( $args ), so these keys are
+		// decorative and the order alone decides which handle_retry() parameter
+		// each value lands in.
+		$args = array(
+			'type'        => $notification->get_type(),
+			'resource_id' => $notification->get_resource_id(),
+			'attempt'     => $next_attempt,
+		);
+
+		$identity_data = $notification->get_identity_data();
+
+		// Appended only when there is any, so orders and reviews keep the exact
+		// argument list they had before this field existed and `$unique` still
+		// matches a retry scheduled before it. Stock retries do change, so
+		// during the deploy both formats can be pending for one product.
+		if ( ! empty( $identity_data ) ) {
+			$args['extra'] = $identity_data;
+		}
+
 		$action_id = as_schedule_single_action(
 			time() + $delay,
 			self::RETRY_HOOK,
-			array(
-				'type'        => $notification->get_type(),
-				'resource_id' => $notification->get_resource_id(),
-				'attempt'     => $next_attempt,
-			),
+			$args,
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
 			true
 		);
 
 		if ( ! $action_id ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'schedule_failed',
+				'error',
 				sprintf(
 					'Push notification retry could not be scheduled (type=%s, resource_id=%d, attempt=%d).',
 					$notification->get_type(),
 					$notification->get_resource_id(),
 					$next_attempt
 				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array( 'attempt' => $current_attempt )
 			);
 			$notification->reset_processing_meta();
+			return;
 		}
+
+		$this->step_logger->log_notification_step(
+			$notification,
+			'retry',
+			'scheduled',
+			array(
+				'attempt'      => $current_attempt,
+				'next_attempt' => $next_attempt,
+				'delay'        => $delay,
+			)
+		);
 	}
 
 	/**
 	 * ActionScheduler callback for retry jobs.
 	 *
-	 * Reconstructs the notification from the stored type and resource ID,
-	 * then delegates to the processor with is_retry=true.
+	 * Reconstructs the notification from the stored identity, then delegates to
+	 * the processor with is_retry=true.
+	 *
+	 * `$extra` defaults to empty so retries scheduled before it was added still
+	 * run, rebuilding a stock notification as low_stock as they always did.
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
 	 * @param int    $attempt     The current retry attempt number (1-based).
+	 * @param array  $extra       Identity fields from {@see Notification::get_identity_data()}.
 	 * @return void
 	 *
 	 * @since 10.8.0
 	 */
-	public function handle_retry( string $type, int $resource_id, int $attempt ): void {
+	public function handle_retry( string $type, int $resource_id, int $attempt, array $extra = array() ): void {
 		try {
+			// `+` rather than array_merge for the reason given in
+			// NotificationProcessor::handle_safety_net().
 			$notification = Notification::from_array(
 				array(
 					'type'        => $type,
 					'resource_id' => $resource_id,
-				)
+				) + $extra
 			);
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_unattributed_failure(
+				'retry',
+				'invalid_notification',
+				'error',
 				sprintf( 'Retry failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+					'attempt'     => $attempt,
+				)
 			);
 			return;
 		}
@@ -181,9 +255,13 @@ class NotificationRetryHandler {
 				$attempt
 			);
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'exception',
+				'error',
 				sprintf( 'Retry failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array( 'attempt' => $attempt )
 			);
 			$this->schedule( $notification, null, $attempt );
 		}

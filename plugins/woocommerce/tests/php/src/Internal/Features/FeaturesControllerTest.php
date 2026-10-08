@@ -287,6 +287,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_feature_definition_initialization_is_reentrant_safe() {
 		$reflection_class = new \ReflectionClass( $this->sut );
+		$notice_function  = FeaturesController::class . '::maybe_init_feature_definitions';
+		$this->setExpectedIncorrectUsage( $notice_function );
 
 		$features_property = $reflection_class->getProperty( 'features' );
 		$features_property->setAccessible( true );
@@ -298,8 +300,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$reentrant_feature_enabled = null;
 		$translation_count         = 0;
+		$notices                   = array();
 
-		$gettext_filter = function ( $translation, $text, $domain ) use ( &$reentrant_feature_enabled, &$translation_count ) {
+		$gettext_filter  = function ( $translation, $text, $domain ) use ( &$reentrant_feature_enabled, &$translation_count ) {
 			unset( $text, $domain ); // Avoid parameter not used PHPCS errors.
 
 			++$translation_count;
@@ -310,17 +313,30 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 			return $translation;
 		};
+		$notice_listener = function ( $function_name, $message, $version ) use ( &$notices, $notice_function ) {
+			if ( $notice_function === $function_name ) {
+				$notices[] = array(
+					'message' => $message,
+					'version' => $version,
+				);
+			}
+		};
 
 		add_filter( 'gettext', $gettext_filter, 10, 3 );
+		add_action( 'doing_it_wrong_run', $notice_listener, 10, 3 );
 
 		try {
 			$this->sut->get_features( true, false );
 		} finally {
 			remove_filter( 'gettext', $gettext_filter, 10 );
+			remove_action( 'doing_it_wrong_run', $notice_listener, 10 );
 		}
 
 		$this->assertFalse( $reentrant_feature_enabled );
 		$this->assertGreaterThan( 0, $translation_count );
+		$this->assertCount( 1, $notices );
+		$this->assertStringContainsString( 'Use the woocommerce_init action or later.', $notices[0]['message'] );
+		$this->assertSame( '11.3.0', $notices[0]['version'] );
 		$this->assertNotNull( $this->sut->get_feature_definition( 'order_withdrawal' ) );
 	}
 

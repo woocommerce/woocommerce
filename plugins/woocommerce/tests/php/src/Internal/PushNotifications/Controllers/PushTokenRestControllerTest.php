@@ -10,12 +10,14 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use Exception;
 use RuntimeException;
 use ReflectionClass;
 use stdClass;
 use WC_Data_Exception;
+use WC_Logger;
 use WC_Unit_Test_Case;
 use WP_Error;
 use WP_Http;
@@ -119,7 +121,11 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->reset_push_notifications_cache();
+		/**
+		 * The write routes are only registered on an enabled store. Tests that
+		 * need it disabled re-mock the connection, which also resets the cache.
+		 */
+		$this->mock_jetpack_connection_manager_is_connected();
 
 		$this->controller = new PushTokenRestController();
 		$this->server     = $this->create_rest_server_with_routes(
@@ -1091,6 +1097,113 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let WPCOM delete a token belonging to any user, and log the deletion.
+	 */
+	public function test_wpcom_can_delete_another_users_push_token(): void {
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->other_shop_manager_id,
+				'token'         => str_repeat( 'a', 64 ),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-revoked-by-wpcom',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$logger_mock = $this->createMock( WC_Logger::class );
+		$logger_mock->expects( $this->once() )
+			->method( 'info' )
+			->with(
+				'Push token deleted by WordPress.com support. The device it was registered from will no longer receive push notifications from this store.',
+				array(
+					'source'   => PushNotifications::FEATURE_NAME,
+					'token_id' => $push_token->get_id(),
+					'user_id'  => $this->other_shop_manager_id,
+					'platform' => PushToken::PLATFORM_APPLE,
+				)
+			);
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
+
+		$server   = $this->create_rest_server_with_routes(
+			array( array( $this->create_blog_token_controller(), 'register_routes' ) ),
+			true
+		);
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $push_token->get_id() );
+		$response = $server->dispatch( $request );
+
+		$this->assertSame( WP_Http::NO_CONTENT, $response->get_status() );
+		$this->assertNull( get_post( $push_token->get_id() ), 'The token should be deleted' );
+	}
+
+	/**
+	 * @testdox Should not log when a user deletes their own token.
+	 */
+	public function test_it_does_not_log_when_a_user_deletes_their_own_push_token(): void {
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => str_repeat( 'a', 64 ),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-deleted-by-owner',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$logger_mock = $this->createMock( WC_Logger::class );
+		$logger_mock->expects( $this->never() )->method( 'info' );
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
+
+		wp_set_current_user( $this->user_id );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $push_token->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::NO_CONTENT, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Should let WPCOM delete a token while push notifications are disabled, so it is not
+	 * used again when the store is switched back on.
+	 */
+	public function test_wpcom_can_delete_a_push_token_when_disabled(): void {
+		$push_token = wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->other_shop_manager_id,
+				'token'         => str_repeat( 'a', 64 ),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-revoked-while-disabled',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$server   = $this->create_rest_server_with_routes(
+			array( array( $this->create_blog_token_controller(), 'register_routes' ) ),
+			true
+		);
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $push_token->get_id() );
+		$response = $server->dispatch( $request );
+
+		$this->assertSame( WP_Http::NO_CONTENT, $response->get_status() );
+		$this->assertNull( get_post( $push_token->get_id() ), 'The token should be deleted' );
+	}
+
+	/**
+	 * @testdox Should still require an allowed role when the request is not from WPCOM.
+	 */
+	public function test_authorize_wpcom_always_or_push_user_when_enabled_rejects_user_without_role(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+
+		$this->assertFalse( $this->controller->authorize_wpcom_always_or_push_user_when_enabled( $request ) );
+	}
+
+	/**
 	 * @testdox Test authorize returns false when push notifications are
 	 * disabled.
 	 */
@@ -1226,6 +1339,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			array(
 				'id',
 				'user_id',
+				'user_login',
+				'user_email',
 				'token',
 				'platform',
 				'origin',
@@ -1234,6 +1349,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
+				'last_sent_at_gmt',
 			),
 			array_keys( $schema['properties'] )
 		);
@@ -1412,7 +1528,19 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	public function test_authorize_as_from_wpcom_allows_blog_token_when_disabled(): void {
 		$this->mock_jetpack_connection_manager_is_connected( false );
 
-		$controller = new class() extends PushTokenRestController {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+
+		$this->assertTrue( $this->create_blog_token_controller()->authorize_as_from_wpcom( $request ) );
+	}
+
+	/**
+	 * Returns a controller that treats every request as signed by WPCOM with
+	 * the Jetpack blog token.
+	 *
+	 * @return PushTokenRestController
+	 */
+	private function create_blog_token_controller(): PushTokenRestController {
+		return new class() extends PushTokenRestController {
 			/**
 			 * Stands in for a request WPCOM signed with the Jetpack blog token.
 			 *
@@ -1422,10 +1550,6 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				return true;
 			}
 		};
-
-		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
-
-		$this->assertTrue( $controller->authorize_as_from_wpcom( $request ) );
 	}
 
 	/**
@@ -1503,6 +1627,82 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the username and email of the account each token belongs to.
+	 */
+	public function test_index_returns_account_fields_for_each_token(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'account-fields-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'account-fields-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$user       = get_userdata( $this->user_id );
+		$token_data = $response->get_data()['tokens'][0];
+
+		$this->assertSame( $this->user_id, $token_data['user_id'] );
+		$this->assertSame( $user->user_login, $token_data['user_login'] );
+		$this->assertSame( $user->user_email, $token_data['user_email'] );
+	}
+
+	/**
+	 * @testdox Should return null account fields when the token's user no longer exists.
+	 */
+	public function test_index_returns_null_account_fields_when_user_no_longer_exists(): void {
+		$missing_user_id = 999999;
+
+		$token = new PushToken(
+			array(
+				'id'            => 1,
+				'user_id'       => $missing_user_id,
+				'token'         => 'orphaned-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'orphaned-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store
+			->method( 'get_tokens_for_roles' )
+			->willReturn(
+				array(
+					'tokens'      => array( $token ),
+					'total'       => 1,
+					'total_pages' => 1,
+				)
+			);
+
+		wc_get_container()->replace( PushTokensDataStore::class, $data_store );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$token_data = $response->get_data()['tokens'][0];
+
+		$this->assertSame( $missing_user_id, $token_data['user_id'] );
+		$this->assertNull( $token_data['user_login'] );
+		$this->assertNull( $token_data['user_email'] );
+	}
+
+	/**
 	 * @testdox Should publish a schema on the index route describing every returned field.
 	 *
 	 * Asserted through an OPTIONS request rather than the registered callback,
@@ -1525,6 +1725,8 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 			array(
 				'id',
 				'user_id',
+				'user_login',
+				'user_email',
 				'token',
 				'platform',
 				'origin',
@@ -1533,6 +1735,7 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 				'metadata',
 				'created_at_gmt',
 				'last_confirmed_at_gmt',
+				'last_sent_at_gmt',
 			),
 			array_keys( $fields )
 		);
@@ -1729,6 +1932,51 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the last sent time for a sent token and null for an unsent one.
+	 */
+	public function test_index_returns_token_last_sent_at_time(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$sent = $data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'last-send-sent-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'last-send-sent-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'last-send-unsent-token',
+				'platform'      => PushToken::PLATFORM_ANDROID,
+				'device_uuid'   => 'last-send-unsent-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_ANDROID,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$data_store->record_last_sent_at( array( $sent ) );
+		$data_store->flush_last_sent_at();
+
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+
+		$by_token = array_column( ( new PushTokenRestController() )->index( $request )->get_data()['tokens'], null, 'token' );
+
+		$this->assertArrayHasKey( 'last_sent_at_gmt', $by_token['last-send-unsent-token'] );
+		$this->assertNull( $by_token['last-send-unsent-token']['last_sent_at_gmt'] );
+		$this->assertNotNull( $by_token['last-send-sent-token']['last_sent_at_gmt'] );
+	}
+
+	/**
 	 * @testdox Should return empty tokens array from the tokens endpoint when no tokens exist.
 	 */
 	public function test_index_returns_empty_when_no_tokens(): void {
@@ -1785,5 +2033,117 @@ class PushTokenRestControllerTest extends WC_Unit_Test_Case {
 		$response = $controller->index( $request );
 
 		$this->assertCount( 1, $response->get_data()['tokens'] );
+	}
+
+	/**
+	 * @testdox Should return only the given user's tokens when user_id is set.
+	 */
+	public function test_index_filters_by_user_id(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-user-1' );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-user-2' );
+		$this->create_index_token( $data_store, $this->other_shop_manager_id, 'filter-user-3' );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$request->set_param( 'user_id', $this->other_shop_manager_id );
+		$response = $controller->index( $request );
+
+		$tokens = $response->get_data()['tokens'];
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( $this->other_shop_manager_id, $tokens[0]['user_id'] );
+		$this->assertSame( '1', $response->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @testdox Should return only the matching device's token when device_uuid is set.
+	 */
+	public function test_index_filters_by_device_uuid(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-device-1' );
+		$this->create_index_token( $data_store, $this->user_id, 'filter-device-2' );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$request->set_param( 'device_uuid', 'filter-device-2' );
+		$response = $controller->index( $request );
+
+		$tokens = $response->get_data()['tokens'];
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'token-filter-device-2', $tokens[0]['token'] );
+		$this->assertSame( '1', $response->get_headers()['X-WP-Total'] );
+	}
+
+	/**
+	 * @testdox Should reject a user_id below 1.
+	 */
+	public function test_index_rejects_a_zero_user_id(): void {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'user_id', 0 );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should reject a device_uuid longer than the registration limit.
+	 */
+	public function test_index_rejects_an_overlong_device_uuid(): void {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'device_uuid', str_repeat( 'a', PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH + 1 ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should reject a device_uuid that is not a string.
+	 */
+	public function test_index_rejects_a_non_string_device_uuid(): void {
+		$request = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'device_uuid', array( 'filter-device-1' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Creates a token for the index filter tests, named so the token and
+	 * device UUID can be asserted on.
+	 *
+	 * @param PushTokensDataStore $data_store The data store.
+	 * @param int                 $user_id    The owner.
+	 * @param string              $name       Used as the device UUID and, prefixed, as the token.
+	 * @return PushToken
+	 */
+	private function create_index_token( PushTokensDataStore $data_store, int $user_id, string $name ): PushToken {
+		return $data_store->create(
+			array(
+				'user_id'       => $user_id,
+				'token'         => 'token-' . $name,
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => $name,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
 	}
 }

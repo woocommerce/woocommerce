@@ -21,7 +21,7 @@ const completer: AutoCompleter = {
 			? {
 					search,
 					per_page: 10,
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/coupons', query ),
