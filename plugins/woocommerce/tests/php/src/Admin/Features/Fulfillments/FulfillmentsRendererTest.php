@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDat
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsRenderer;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AmazonLogisticsShippingProvider;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Helper_Order;
 use WC_Helper_Product;
@@ -458,11 +459,22 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * @testdox The __other__ sentinel returns orders whose provider is not a known built-in or custom key.
 	 */
 	public function test_get_order_ids_other_excludes_known_providers(): void {
-		// 'amazon-logistics' is a registered built-in provider key; 'ghost-provider' is not known.
-		$this->seed_fulfillment( 201, 'amazon-logistics' );
-		$this->seed_fulfillment( 202, 'ghost-provider' );
+		// Register a known provider so the query uses the NOT IN branch rather than the
+		// empty-known-keys fallback, which would otherwise return every providered order.
+		$register_known = function ( array $providers ): array {
+			$providers[] = AmazonLogisticsShippingProvider::class;
+			return $providers;
+		};
+		add_filter( 'woocommerce_fulfillment_shipping_providers', $register_known );
 
-		$this->assertSame( array( 202 ), $this->get_order_ids( '__other__' ) );
+		try {
+			$this->seed_fulfillment( 201, 'amazon-logistics' );
+			$this->seed_fulfillment( 202, 'ghost-provider' );
+
+			$this->assertSame( array( 202 ), $this->get_order_ids( '__other__' ) );
+		} finally {
+			remove_filter( 'woocommerce_fulfillment_shipping_providers', $register_known );
+		}
 	}
 
 	/**
