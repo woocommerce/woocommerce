@@ -27,10 +27,18 @@ class WC_Admin_Addons_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		unset( $_GET['section'] );
+		parent::tearDown();
+	}
+
+	/**
 	 * Intercepts redirects so the tested handler's trailing exit does not run.
 	 *
 	 * @param string $location Redirect target.
-	 * @return never
+	 * @return void
 	 * @throws RuntimeException Always.
 	 */
 	public function intercept_redirect( string $location ): void {
