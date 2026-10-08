@@ -18,14 +18,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher
@@ -66,23 +63,6 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
-	 */
-	private function make_plan_object(): Plan {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
-
-		return $plan;
-	}
-
-	/**
 	 * Sign up a contract through the contracts facade so its billing chain holds cycle 1 (billed),
 	 * with its next payment due at the given date.
 	 *
@@ -91,7 +71,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract( string $gateway, string $next_payment_gmt ): Contract {
-		$plan = $this->make_plan_object();
+		$plan = $this->plan_view( $this->make_plan() );
 
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
