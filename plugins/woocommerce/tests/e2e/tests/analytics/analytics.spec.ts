@@ -20,6 +20,13 @@ const escapeRegExp = ( value: string ) =>
 	value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 
 /**
+ * Format a date as `YYYY-MM-DD` in UTC. The e2e store keeps WordPress's
+ * default UTC timezone, so this matches the dates Analytics puts in its
+ * report requests.
+ */
+const toUtcDate = ( date: Date ) => date.toISOString().slice( 0, 10 );
+
+/**
  * Locate an analytics summary tile ("performance indicator") by its label and
  * value, ignoring the volatile delta text that follows (e.g.
  * "No change from Previous year:").
@@ -426,6 +433,19 @@ test(
 		await page.getByRole( 'button', { name: 'Month to date' } ).click();
 		await page.getByText( 'Last month' ).click();
 
+		// Update fires the summary, the previous-year summary and the chart, and
+		// a Month to date response can still be in flight. Matching on last
+		// month's exact range picks only a request for the range just selected.
+		const now = new Date();
+		const expectedAfter = `${ toUtcDate(
+			new Date(
+				Date.UTC( now.getUTCFullYear(), now.getUTCMonth() - 1, 1 )
+			)
+		) }T00:00:00`;
+		const expectedBefore = `${ toUtcDate(
+			new Date( Date.UTC( now.getUTCFullYear(), now.getUTCMonth(), 0 ) )
+		) }T23:59:59`;
+
 		const statsResponsePromise = page.waitForResponse(
 			( response ) => {
 				const requestUrl = new URL( response.url() );
@@ -435,7 +455,9 @@ test(
 						'/wc-analytics/reports/products/stats'
 					) &&
 					requestUrl.searchParams.get( 'products' ) ===
-						String( variableProductId )
+						String( variableProductId ) &&
+					requestUrl.searchParams.get( 'after' ) === expectedAfter &&
+					requestUrl.searchParams.get( 'before' ) === expectedBefore
 				);
 			},
 			{ timeout: 15_000 }
@@ -461,23 +483,9 @@ test(
 		] );
 		expect( statsResponse.ok() ).toBeTruthy();
 
-		const requestQuery = new URL( statsResponse.url() ).searchParams;
-		const after = requestQuery.get( 'after' ) ?? '';
-		const before = requestQuery.get( 'before' ) ?? '';
-
-		expect( requestQuery.get( 'products' ) ).toBe(
-			String( variableProductId )
-		);
-		expect( requestQuery.get( 'interval' ) ).toBe( 'day' );
-		expect( after ).toMatch( /^\d{4}-\d{2}-01T00:00:00$/ );
-
-		const month = after.slice( 0, 7 );
-		const [ yearNumber, monthNumber ] = month.split( '-' ).map( Number );
-		const finalDay = new Date( Date.UTC( yearNumber, monthNumber, 0 ) )
-			.getUTCDate()
-			.toString()
-			.padStart( 2, '0' );
-		expect( before ).toBe( `${ month }-${ finalDay }T23:59:59` );
+		expect(
+			new URL( statsResponse.url() ).searchParams.get( 'interval' )
+		).toBe( 'day' );
 
 		await expect( summaryTile( page, 'Items sold', '0' ) ).toBeVisible();
 		await expect( summaryTile( page, 'Net sales', '$0.00' ) ).toBeVisible();
@@ -732,15 +740,26 @@ test(
 		// `performance-indicators` has no browser owner otherwise. The Jest
 		// suite mocks `@woocommerce/date` wholesale and answers from a fixture
 		// keyed on its own `appendTimestamp` stub, so a renamed endpoint or a
-		// broken date boundary cannot turn it red.
-		const indicatorsResponse = page.waitForResponse(
-			( response ) =>
-				response
-					.url()
-					.includes(
-						'/wc-analytics/reports/performance-indicators'
-					) && response.ok()
-		);
+		// broken date boundary cannot turn it red. Matching on the default
+		// Month to date range makes a wrong `after` or `before` time out here.
+		const now = new Date();
+		const expectedAfter = `${ toUtcDate(
+			new Date( Date.UTC( now.getUTCFullYear(), now.getUTCMonth(), 1 ) )
+		) }T00:00:00`;
+		const expectedBefore = `${ toUtcDate( now ) }T23:59:59`;
+
+		const indicatorsResponse = page.waitForResponse( ( response ) => {
+			const requestUrl = new URL( response.url() );
+
+			return (
+				requestUrl.pathname.endsWith(
+					'/wc-analytics/reports/performance-indicators'
+				) &&
+				requestUrl.searchParams.get( 'after' ) === expectedAfter &&
+				requestUrl.searchParams.get( 'before' ) === expectedBefore &&
+				response.ok()
+			);
+		} );
 
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
