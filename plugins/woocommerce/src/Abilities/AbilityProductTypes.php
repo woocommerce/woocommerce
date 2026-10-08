@@ -29,11 +29,72 @@ class AbilityProductTypes {
 	private const COMMON_FIELDS = array( 'name', 'sku', 'description', 'short_description', 'status' );
 
 	/**
-	 * Core alias configurations keyed by alias. An extension cannot replace them.
-	 *
-	 * @var array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props: array<string, mixed>}>
+	 * Fields of the simple product aliases.
 	 */
-	private static array $core = array();
+	private const SIMPLE_FIELDS = array( ...self::COMMON_FIELDS, 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' );
+
+	/**
+	 * Core alias configurations keyed by alias. An extension cannot replace them.
+	 */
+	private const CORE_ALIASES = array(
+		'physical'  => array(
+			'wc_type'       => ProductType::SIMPLE,
+			'fields'        => self::SIMPLE_FIELDS,
+			'product_props' => array(
+				'virtual'      => false,
+				'downloadable' => false,
+			),
+			'query_props'   => array(
+				'virtual'      => false,
+				'downloadable' => false,
+			),
+		),
+		'virtual'   => array(
+			'wc_type'       => ProductType::SIMPLE,
+			'fields'        => self::SIMPLE_FIELDS,
+			'product_props' => array(
+				'virtual'      => true,
+				'downloadable' => false,
+			),
+			'query_props'   => array(
+				'virtual'      => true,
+				'downloadable' => false,
+			),
+		),
+		'digital'   => array(
+			'wc_type'       => ProductType::SIMPLE,
+			'fields'        => self::SIMPLE_FIELDS,
+			'product_props' => array(
+				'virtual'      => true,
+				'downloadable' => true,
+			),
+			'query_props'   => array(
+				'virtual'      => true,
+				'downloadable' => true,
+			),
+		),
+		'affiliate' => array(
+			'wc_type'       => ProductType::EXTERNAL,
+			'fields'        => array( ...self::COMMON_FIELDS, 'regular_price', 'sale_price', 'external_url', 'button_text' ),
+			'product_props' => array(
+				'virtual'        => false,
+				'downloadable'   => false,
+				'manage_stock'   => false,
+				'stock_quantity' => '',
+				'stock_status'   => ProductStockStatus::IN_STOCK,
+			),
+			'query_props'   => array(),
+		),
+		'grouped'   => array(
+			'wc_type'       => ProductType::GROUPED,
+			'fields'        => array( ...self::COMMON_FIELDS, 'grouped_products' ),
+			'product_props' => array(
+				'manage_stock'   => false,
+				'stock_quantity' => '',
+			),
+			'query_props'   => array(),
+		),
+	);
 
 	/**
 	 * Alias configurations that extensions register, keyed by alias.
@@ -66,8 +127,7 @@ class AbilityProductTypes {
 	 * }
 	 */
 	public static function register( string $alias, array $config ): void {
-		self::register_core_aliases();
-		if ( isset( self::$core[ $alias ] ) || sanitize_key( $alias ) !== $alias ) {
+		if ( isset( self::CORE_ALIASES[ $alias ] ) || sanitize_key( $alias ) !== $alias ) {
 			wc_doing_it_wrong( __METHOD__, sprintf( 'The alias "%s" is a Core alias or is not a valid key.', $alias ), '11.3.0' );
 			return;
 		}
@@ -80,7 +140,12 @@ class AbilityProductTypes {
 			return;
 		}
 
-		self::$aliases[ $alias ] = self::normalize( $config );
+		self::$aliases[ $alias ] = array(
+			'wc_type'       => $config['wc_type'],
+			'fields'        => array_values( $config['fields'] ),
+			'product_props' => is_array( $config['product_props'] ?? null ) ? $config['product_props'] : array(),
+			'query_props'   => is_array( $config['query_props'] ?? null ) ? $config['query_props'] : array(),
+		);
 	}
 
 	/**
@@ -91,8 +156,7 @@ class AbilityProductTypes {
 	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props: array<string, mixed>}>
 	 */
 	public static function get_all(): array {
-		self::register_core_aliases();
-		return self::$core + ( AbilityContracts::is_enabled() ? self::$aliases : array() );
+		return self::CORE_ALIASES + ( AbilityContracts::is_enabled() ? self::$aliases : array() );
 	}
 
 	/**
@@ -127,93 +191,6 @@ class AbilityProductTypes {
 			$first = $first ?? $alias;
 		}
 		return $first;
-	}
-
-	/**
-	 * Register the Core aliases one time, before any alias of an extension.
-	 */
-	private static function register_core_aliases(): void {
-		if ( ! empty( self::$core ) ) {
-			return;
-		}
-
-		$simple_fields = array_merge( self::COMMON_FIELDS, array( 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' ) );
-		$aliases       = array(
-			'physical'  => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => false,
-					'downloadable' => false,
-				),
-				'query_props'   => array(
-					'virtual'      => false,
-					'downloadable' => false,
-				),
-			),
-			'virtual'   => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => true,
-					'downloadable' => false,
-				),
-				'query_props'   => array(
-					'virtual'      => true,
-					'downloadable' => false,
-				),
-			),
-			'digital'   => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => true,
-					'downloadable' => true,
-				),
-				'query_props'   => array(
-					'virtual'      => true,
-					'downloadable' => true,
-				),
-			),
-			'affiliate' => array(
-				'wc_type'       => ProductType::EXTERNAL,
-				'fields'        => array_merge( self::COMMON_FIELDS, array( 'regular_price', 'sale_price', 'external_url', 'button_text' ) ),
-				'product_props' => array(
-					'virtual'        => false,
-					'downloadable'   => false,
-					'manage_stock'   => false,
-					'stock_quantity' => '',
-					'stock_status'   => ProductStockStatus::IN_STOCK,
-				),
-			),
-			'grouped'   => array(
-				'wc_type'       => ProductType::GROUPED,
-				'fields'        => array_merge( self::COMMON_FIELDS, array( 'grouped_products' ) ),
-				'product_props' => array(
-					'manage_stock'   => false,
-					'stock_quantity' => '',
-				),
-			),
-		);
-
-		foreach ( $aliases as $alias => $config ) {
-			self::$core[ $alias ] = self::normalize( $config );
-		}
-	}
-
-	/**
-	 * An alias configuration with every key.
-	 *
-	 * @param array $config Alias configuration.
-	 * @return array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props: array<string, mixed>}
-	 */
-	private static function normalize( array $config ): array {
-		return array(
-			'wc_type'       => $config['wc_type'],
-			'fields'        => array_values( $config['fields'] ),
-			'product_props' => is_array( $config['product_props'] ?? null ) ? $config['product_props'] : array(),
-			'query_props'   => is_array( $config['query_props'] ?? null ) ? $config['query_props'] : array(),
-		);
 	}
 
 	/**
