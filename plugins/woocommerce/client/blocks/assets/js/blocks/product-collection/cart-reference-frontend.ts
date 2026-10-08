@@ -114,7 +114,7 @@ const cartReferenceStorePart = {
 					// to the same URL can share the prefetch request.
 					const pageUrl =
 						window.location.href === pendingRefreshUrl
-							? pendingPageUrl ?? window.location.href
+							? ( pendingPageUrl ?? window.location.href )
 							: window.location.href;
 					const url = new URL( pageUrl );
 					// Fetching markup must not repeat a classic add-to-cart action.
@@ -127,9 +127,8 @@ const cartReferenceStorePart = {
 					pendingPageUrl = pageUrl;
 
 					try {
-						const { actions: routerActions } = yield import(
-							'@wordpress/interactivity-router'
-						);
+						const { actions: routerActions } =
+							yield import( '@wordpress/interactivity-router' );
 						yield routerActions.prefetch( url.href );
 					} catch {
 						if ( pendingRefreshUrl === url.href ) {
@@ -157,7 +156,7 @@ const cartReferenceStorePart = {
 			try {
 				const {
 					actions: routerActions,
-				}: typeof import('@wordpress/interactivity-router') =
+				}: typeof import( '@wordpress/interactivity-router' ) =
 					yield import( '@wordpress/interactivity-router' );
 				if (
 					window.location.href !== restoreUrl ||

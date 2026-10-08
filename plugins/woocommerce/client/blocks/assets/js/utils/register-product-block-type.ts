@@ -373,8 +373,7 @@ export const registerProductBlockType = < T extends BlockAttributes >(
 	const metaDataWithoutName =
 		typeof blockNameOrMetadata === 'string'
 			? {}
-			: // eslint-disable-next-line @typescript-eslint/no-unused-vars
-			  ( ( { name, ...metadata } ) => metadata )( blockNameOrMetadata );
+			: ( ( { name, ...metadata } ) => metadata )( blockNameOrMetadata );
 
 	// Extract settings without custom properties
 	const {
