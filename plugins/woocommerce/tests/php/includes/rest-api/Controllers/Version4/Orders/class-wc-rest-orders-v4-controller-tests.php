@@ -2157,4 +2157,54 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 0, $this->get_coupon_usage( 'v4-usage-a' ) );
 	}
+
+	/**
+	 * @testdox Adding a coupon to a completed order that had none counts the coupon without a status change.
+	 */
+	public function test_update_adding_coupon_to_unrecorded_completed_order_counts_usage(): void {
+		$order = $this->create_test_order( array( 'status' => OrderStatus::COMPLETED ) );
+		$this->ensure_coupon( 'v4-usage-a' );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array( array( 'code' => 'v4-usage-a' ) ) ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon while changing the billing email releases the usage held under the old email.
+	 */
+	public function test_update_removing_coupon_and_changing_email_releases_old_identity(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+		$this->assertSame( 'john.doe@example.com', $order->get_billing_email() );
+		$coupon_id = wc_get_coupon_id_by_code( 'v4-usage-a' );
+		$this->assertContains( 'john.doe@example.com', get_post_meta( $coupon_id, '_used_by', false ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'billing'      => array( 'email' => 'new@example.com' ),
+				'coupon_lines' => array(),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$this->assertNotContains( 'john.doe@example.com', get_post_meta( $coupon_id, '_used_by', false ) );
+	}
+
+	/**
+	 * @testdox Updating an order without coupon lines leaves coupon usage untouched.
+	 */
+	public function test_update_without_coupon_lines_leaves_usage_untouched(): void {
+		$order = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+
+		$response = $this->put_order( $order->get_id(), array( 'customer_note' => 'Note' ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
+	}
 }

@@ -856,6 +856,75 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Adding a coupon to a completed order that had none counts the coupon without a status change.
+	 */
+	public function test_update_order_adding_coupon_to_unrecorded_completed_order_counts_usage() {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'v2-usage-a' );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array( array( 'code' => 'v2-usage-a' ) ) ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Creating an order with coupon lines and a status counts the coupon once.
+	 */
+	public function test_create_order_with_coupon_lines_and_status_counts_once() {
+		wp_set_current_user( $this->user );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'v2-usage-a' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/orders' );
+		$request->set_body_params(
+			array(
+				'status'       => OrderStatus::PROCESSING,
+				'coupon_lines' => array( array( 'code' => 'v2-usage-a' ) ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon while changing the billing email releases the usage held under the old email.
+	 */
+	public function test_update_order_removing_coupon_and_changing_email_releases_old_identity() {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 0 );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'v2-usage-a' );
+		$order->set_billing_email( 'old@example.com' );
+		$order->apply_coupon( 'v2-usage-a' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$coupon_id = wc_get_coupon_id_by_code( 'v2-usage-a' );
+		$this->assertContains( 'old@example.com', get_post_meta( $coupon_id, '_used_by', false ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'billing'      => array( 'email' => 'new@example.com' ),
+				'coupon_lines' => array(
+					array(
+						'id'   => $this->get_coupon_item_id( wc_get_order( $order->get_id() ), 'v2-usage-a' ),
+						'code' => null,
+					),
+				),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$this->assertNotContains( 'old@example.com', get_post_meta( $coupon_id, '_used_by', false ) );
+	}
+
+	/**
 	 * @testdox A failed batch item does not leak its coupon codes into the next item.
 	 */
 	public function test_orders_batch_failed_item_does_not_leak_coupon_codes() {
