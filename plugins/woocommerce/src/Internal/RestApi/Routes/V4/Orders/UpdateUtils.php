@@ -69,7 +69,12 @@ class UpdateUtils {
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
 		WC()->payment_gateways();
 
-		$previous_coupon_codes = $order->get_coupon_codes();
+		$coupons_controller = wc_get_container()->get( CouponsController::class );
+		$syncs_coupons      = isset( $request['coupon_lines'] );
+		if ( $syncs_coupons ) {
+			$previous_coupon_codes   = $order->get_coupon_codes();
+			$previous_usage_identity = $coupons_controller->get_usage_identity( $order );
+		}
 
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
@@ -113,8 +118,8 @@ class UpdateUtils {
 		// Save before calculating totals to ensure all line items are up to date.
 		$order->save();
 
-		if ( isset( $request['coupon_lines'] ) ) {
-			wc_get_container()->get( CouponsController::class )->sync_usage_counts( $order, $previous_coupon_codes );
+		if ( $syncs_coupons ) {
+			$coupons_controller->sync_usage_counts( $order, $previous_coupon_codes, $previous_usage_identity );
 		}
 
 		// If items have changed, recalculate order totals.

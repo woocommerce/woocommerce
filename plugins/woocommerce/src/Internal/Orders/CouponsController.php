@@ -101,15 +101,28 @@ class CouponsController {
 	}
 
 	/**
-	 * Adjust coupon usage counts after the coupons of an order changed outside of apply_coupon() and remove_coupon().
-	 *
-	 * Does nothing unless the order has already counted its coupons. Other orders are counted on their next status change.
+	 * Get who coupon usage is recorded against: the customer ID, or the billing email for guests.
 	 *
 	 * @since 11.3.0
-	 * @param \WC_Order $order          The saved order, with its current coupons.
-	 * @param string[]  $previous_codes Coupon codes the order had before the change.
+	 * @param \WC_Order $order Order.
+	 * @return string
 	 */
-	public function sync_usage_counts( \WC_Order $order, array $previous_codes ): void {
+	public function get_usage_identity( \WC_Order $order ): string {
+		return (string) ( $order->get_user_id() ? $order->get_user_id() : $order->get_billing_email() );
+	}
+
+	/**
+	 * Adjust coupon usage counts after the coupons of an order changed outside of apply_coupon() and remove_coupon().
+	 *
+	 * An order that has not counted its coupons yet is counted through wc_update_coupon_usage_counts(), which
+	 * only does so when the order status allows it.
+	 *
+	 * @since 11.3.0
+	 * @param \WC_Order $order                  The saved order, with its current coupons.
+	 * @param string[]  $previous_codes         Coupon codes the order had before the change.
+	 * @param string    $previous_usage_identity Value of get_usage_identity() before the change. Removed coupons release usage held under it.
+	 */
+	public function sync_usage_counts( \WC_Order $order, array $previous_codes, string $previous_usage_identity ): void {
 		/**
 		 * Order data store.
 		 *
@@ -118,12 +131,13 @@ class CouponsController {
 		$data_store = $order->get_data_store();
 
 		if ( ! $data_store->get_recorded_coupon_usage_counts( $order ) ) {
+			wc_update_coupon_usage_counts( $order->get_id() );
 			return;
 		}
 
 		$previous = $this->normalize_codes( $previous_codes );
 		$current  = $this->normalize_codes( $order->get_coupon_codes() );
-		$used_by  = (string) ( $order->get_user_id() ? $order->get_user_id() : $order->get_billing_email() );
+		$used_by  = $this->get_usage_identity( $order );
 
 		foreach ( array_diff_key( $current, $previous ) as $code ) {
 			$coupon = new \WC_Coupon( $code );
@@ -135,7 +149,7 @@ class CouponsController {
 		foreach ( array_diff_key( $previous, $current ) as $code ) {
 			$coupon = new \WC_Coupon( $code );
 			if ( $coupon->get_id() ) {
-				$coupon->decrease_usage_count( $used_by );
+				$coupon->decrease_usage_count( $previous_usage_identity );
 			}
 		}
 
