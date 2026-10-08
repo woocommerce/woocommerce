@@ -36,6 +36,12 @@ The following parameters are also accepted when creating or updating a fulfillme
 | `notify_customer` | boolean | Whether to notify the customer about this change. Default is `false`. `WRITE-ONLY`                                     |
 | `customer_note`   | string  | An optional note from the merchant, included in the update notification email. Only used when updating a fulfillment. `WRITE-ONLY` |
 
+:::note
+
+When you create or update a fulfillment, only `status`, `is_fulfilled`, and `meta_data` from the JSON body are applied to the fulfillment. The order ID comes from the URL path. On update, the fulfillment ID also comes from the URL path. On create, the server assigns it. A top-level `id`, `entity_type`, or `entity_id` in the body is silently ignored, so a request body cannot change which order or fulfillment is written to. These three fields are still returned in responses. `notify_customer` and `customer_note` (update only) are request parameters that control notifications. They are not stored on the fulfillment.
+
+:::
+
 ### Order fulfillment - Meta data properties
 
 | Attribute | Type    | Description                                                                     |
