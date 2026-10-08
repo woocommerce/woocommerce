@@ -73,7 +73,6 @@ export const filters = applyFilters( CUSTOMERS_REPORT_FILTERS_FILTER, [
 	},
 ] );
 
-/*eslint-disable max-len*/
 /**
  * Customers Report Advanced Filters.
  *
@@ -504,4 +503,3 @@ export const advancedFilters = applyFilters(
 		},
 	}
 );
-/*eslint-enable max-len*/

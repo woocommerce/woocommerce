@@ -1,15 +1,18 @@
 <?php
 /**
- * Persistence for the live {@see Contract} (row + items / addresses / meta) plus
- * targeted cycle access. Owns the $wpdb access across the contract-side tables.
+ * Persistence for the live {@see Contract} (row + items / addresses) plus contract
+ * meta and targeted cycle access. Owns the $wpdb access across the contract-side tables.
  *
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_chain_head()}, {@see self::max_count()},
+ * through purpose-built reads ({@see self::find_chain_head()},
  * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
  * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
  * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
+ * Meta is read and written only through the meta methods ({@see self::add_meta()} etc.),
+ * so a whole-contract write never rewrites meta. It opens no transactions and keeps no
+ * object cache; a caller may wrap several calls in its own transaction.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -24,7 +27,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -34,25 +37,6 @@ defined( 'ABSPATH' ) || exit;
  * Live contract repository with targeted cycle access.
  */
 final class ContractRepository {
-
-	/**
-	 * Address columns persisted to the addresses table.
-	 *
-	 * @var array<int, string>
-	 */
-	private const ADDRESS_COLUMNS = array(
-		'first_name',
-		'last_name',
-		'company',
-		'address_1',
-		'address_2',
-		'city',
-		'state',
-		'postcode',
-		'country',
-		'email',
-		'phone',
-	);
 
 	/**
 	 * Logger source tag.
@@ -77,7 +61,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert a new contract and its items, addresses, and meta.
+	 * Insert a new contract and its items and addresses.
 	 *
 	 * Durable-intent-first (parent row, then children) and the seam a later
 	 * transaction-handling change wraps; it does not open a transaction now (a naive
@@ -86,7 +70,7 @@ final class ContractRepository {
 	 *
 	 * @param Contract $contract Contract to insert.
 	 * @return int The new contract id.
-	 * @throws \RuntimeException If the contract insert fails.
+	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
 	public function insert( Contract $contract ): int {
 		global $wpdb;
@@ -115,56 +99,21 @@ final class ContractRepository {
 
 		$this->insert_items( $id, $contract->get_items() );
 		$this->insert_addresses( $id, $contract->get_addresses() );
-		$this->insert_meta( $id, $contract->get_meta() );
 
 		return $id;
 	}
 
 	/**
-	 * Insert a contract together with its signup cycle (cycle 1) - the checkout
-	 * create path.
-	 *
-	 * Durable-intent-first: insert the contract -> freeze the signup cycle's snapshots
-	 * (which need the contract id) -> record those ids on the contract and update its
-	 * row -> insert cycle 1 (which carries the same snapshot ids by construction). The
-	 * cycle is taken as built by the caller; this only stamps its contract id, resolves
-	 * its snapshots, and inserts it. The seam a later transaction-handling change wraps.
-	 *
-	 * @param Contract $contract The contract to insert.
-	 * @param Cycle    $cycle    The signup cycle (cycle 1), carrying its snapshot value objects.
-	 * @return int The new contract id.
-	 * @throws \RuntimeException If a contract, snapshot, or cycle write fails.
-	 */
-	public function insert_with_origin_cycle( Contract $contract, Cycle $cycle ): int {
-		$contract_id = $this->insert( $contract );
-
-		// First cycle in its chain: no previous to copy-forward from, so its snapshots
-		// are inserted fresh and their ids stamped onto it.
-		$cycle->set_contract_id( $contract_id );
-		$this->resolve_cycle_snapshots( $cycle, null );
-
-		// Record the signup snapshots as the contract's latest/live references, then
-		// persist the contract row before the cycle row (durable-intent-first).
-		$contract->set_plan_snapshot_id( $cycle->get_plan_snapshot_id() );
-		$contract->set_items_snapshot_id( $cycle->get_items_snapshot_id() );
-		$this->update_contract_row( $contract );
-
-		$this->insert_cycle( $cycle );
-
-		return $contract_id;
-	}
-
-	/**
 	 * Persist changes to an existing contract and its child rows.
 	 *
-	 * Updates the contract row in place, then reconciles items / addresses / meta only
-	 * when they differ - so the common renewal-cache write (status, next_payment_gmt)
+	 * Updates the contract row in place, then reconciles items / addresses only when
+	 * they differ (meta is never touched) - so the common renewal-cache write (status, next_payment_gmt)
 	 * does not churn child rows. The write seam a later transaction-handling change
 	 * wraps; no transaction now (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
-	 * @throws \RuntimeException If the contract has no id, or its row no longer exists.
+	 * @throws \RuntimeException If the contract has no id, its row no longer exists, or a write fails.
 	 */
 	public function update( Contract $contract ): bool {
 		$id = $contract->get_id();
@@ -176,6 +125,65 @@ final class ContractRepository {
 
 		$this->update_contract_row( $contract );
 		$this->sync_children( $contract );
+
+		return true;
+	}
+
+	/**
+	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
+	 * and replace items / addresses when named. Unnamed columns keep their stored
+	 * values, so a concurrent write to them is not reverted. Existence is checked only
+	 * when the row write changes nothing, before any child write.
+	 *
+	 * @param Contract           $contract Contract carrying the values. Must have an id.
+	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
+	 * @return bool False when the contract row no longer exists (nothing is written).
+	 * @throws \InvalidArgumentException If a field is not a writable contract column.
+	 * @throws \RuntimeException If the contract has no id or the write fails.
+	 */
+	public function update_fields( Contract $contract, array $fields ): bool {
+		global $wpdb;
+
+		$id = $contract->get_id();
+		if ( null === $id ) {
+			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
+		}
+
+		$storage = $contract->to_storage();
+		$columns = array();
+		foreach ( $fields as $field ) {
+			if ( 'items' === $field || 'addresses' === $field ) {
+				continue;
+			}
+			if ( 'extension_slug' === $field || ! array_key_exists( $field, $storage ) ) {
+				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update contract field "%s".', $field ) ) );
+			}
+			$columns[ $field ] = $storage[ $field ];
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
+			array_merge( $columns, array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) ) ),
+			array( 'id' => (int) $id )
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		// Zero changed rows: a missing row, or identical values written within the same second.
+		if ( 0 === $updated && ! $this->exists( $id ) ) {
+			return false;
+		}
+
+		if ( in_array( 'items', $fields, true ) ) {
+			$this->replace_items( $id, $contract->get_items() );
+		}
+
+		if ( in_array( 'addresses', $fields, true ) ) {
+			$this->replace_addresses( $id, $contract->get_addresses() );
+		}
 
 		return true;
 	}
@@ -244,8 +252,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Fetch a contract by id, hydrating the live entity with its items / addresses /
-	 * meta, plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
+	 * Fetch a contract by id, hydrating the live entity with its items / addresses,
+	 * plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
 	 * `plan_snapshot_id` - so every full read carries the billing cadence off the
 	 * snapshot, with no live {@see PlanRepository} join. Cycles are NOT hydrated - they
 	 * are reached on demand through the targeted cycle reads. For list / guard paths
@@ -287,24 +295,23 @@ final class ContractRepository {
 			return null;
 		}
 
-		return $this->hydrate_row( self::as_string_keyed( $row ) );
+		return $this->hydrate_row( Coercion::coerce_string_keyed( $row ) );
 	}
 
 	/**
 	 * Hydrate a fetched contract row into the full live entity: frozen plan terms,
-	 * items, addresses, and meta - the one full-read construction path.
+	 * items and addresses - the one full-read construction path.
 	 *
 	 * @param array<string, mixed> $row Contract row.
 	 */
 	private function hydrate_row( array $row ): Contract {
-		$id = ScalarCoercion::coerce_int( $row['id'] ?? 0 );
+		$id = Coercion::coerce_int( $row['id'] ?? 0 );
 
 		return Contract::from_storage(
 			$row,
-			$this->find_plan_snapshot( ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
+			$this->find_plan_snapshot( Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
 			$this->find_items( $id ),
-			$this->find_addresses( $id ),
-			$this->find_meta( $id )
+			$this->find_addresses( $id )
 		);
 	}
 
@@ -525,11 +532,11 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
+			$status = Coercion::coerce_string( $row['status'] ?? '' );
 			// A row whose stored status is not registered is ignored, not added as a
 			// stray key - the map stays exactly ContractStatus::get_all().
 			if ( array_key_exists( $status, $counts ) ) {
-				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+				$counts[ $status ] = Coercion::coerce_int( $row['total'] ?? 0 );
 			}
 		}
 
@@ -561,7 +568,7 @@ final class ContractRepository {
 			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", $params ) );
 		}
 
-		return ScalarCoercion::coerce_int( $total );
+		return Coercion::coerce_int( $total );
 	}
 
 	/**
@@ -607,9 +614,9 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$cid = ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 );
+			$cid = Coercion::coerce_int( $row['contract_id'] ?? 0 );
 			if ( array_key_exists( $cid, $counts ) ) {
-				$counts[ $cid ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+				$counts[ $cid ] = Coercion::coerce_int( $row['total'] ?? 0 );
 			}
 		}
 
@@ -628,13 +635,13 @@ final class ContractRepository {
 		$clean_rows = array();
 		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$clean_rows[] = self::as_string_keyed( $row );
+				$clean_rows[] = Coercion::coerce_string_keyed( $row );
 			}
 		}
 
 		$snapshot_ids = array();
 		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$snapshot_id = Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
 			if ( null !== $snapshot_id ) {
 				$snapshot_ids[ $snapshot_id ] = $snapshot_id;
 			}
@@ -643,7 +650,7 @@ final class ContractRepository {
 
 		$contracts = array();
 		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$snapshot_id = Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
 			$contracts[] = Contract::from_storage( $row, null !== $snapshot_id ? ( $snapshots[ $snapshot_id ] ?? null ) : null );
 		}
 
@@ -756,10 +763,10 @@ final class ContractRepository {
 			}
 			$head_count = $row['head_count'] ?? null;
 			$result[]   = new RenewalCandidate(
-				ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 ),
-				null === $head_count ? null : ScalarCoercion::coerce_int( $head_count ),
-				ScalarCoercion::coerce_string( $row['head_status'] ?? '' ),
-				ScalarCoercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+				Coercion::coerce_int( $row['contract_id'] ?? 0 ),
+				null === $head_count ? null : Coercion::coerce_int( $head_count ),
+				Coercion::coerce_string( $row['head_status'] ?? '' ),
+				Coercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
 			);
 		}
 
@@ -779,7 +786,7 @@ final class ContractRepository {
 	 * args, so the shape can widen without a signature change. Ordered by id DESC (monotonic
 	 * with creation) so the list is newest-first and stable for paging.
 	 *
-	 * Each row is row-only (no items / addresses / meta), but its frozen plan terms are
+	 * Each row is row-only (no items / addresses), but its frozen plan terms are
 	 * hydrated ({@see Contract::get_plan_snapshot()}) so the list rows carry the billing
 	 * cadence off the snapshot - batch-loaded in ONE `IN()` read for the whole page, not
 	 * one read per row.
@@ -790,17 +797,28 @@ final class ContractRepository {
 	 *
 	 *     @type int    $limit  Maximum contracts to return. Default 20.
 	 *     @type int    $offset Rows to skip (for paging). Default 0.
-	 *     @type string $status Optional status filter (one of {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}).
+	 *     @type string|string[] $status Optional status filter: one status or a list of them
+	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
+	 *                                   ignored when none remain.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
 	public function find_by_customer_id( int $customer_id, ?array $args = null ): array {
 		global $wpdb;
 
-		$args   = $args ?? array();
-		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
-		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
-		$status = isset( $args['status'] ) && is_string( $args['status'] ) && '' !== $args['status'] ? $args['status'] : null;
+		$args     = $args ?? array();
+		$limit    = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
+		$offset   = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
+		$statuses = array_values(
+			array_unique(
+				array_filter(
+					(array) ( $args['status'] ?? array() ),
+					static function ( $status ): bool {
+						return is_string( $status ) && ContractStatus::is_registered( $status );
+					}
+				)
+			)
+		);
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
@@ -809,9 +827,9 @@ final class ContractRepository {
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
-		if ( null !== $status ) {
-			$where   .= ' AND status = %s';
-			$params[] = $status;
+		if ( array() !== $statuses ) {
+			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+			$params = array_merge( $params, $statuses );
 		}
 		$params[] = $limit;
 		$params[] = $offset;
@@ -830,6 +848,24 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
+	 * Contracts whose `origin_order_id` is `$order_id`, oldest first. Row-only reads
+	 * (no items / addresses) with their frozen plan terms batch-hydrated.
+	 *
+	 * @param int $order_id Origin order id.
+	 * @return array<int, Contract>
+	 */
+	public function find_by_origin_order( int $order_id ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE origin_order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -879,11 +915,166 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Add a meta row for a contract, like `add_post_meta()`.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       Meta value; serialized when not scalar.
+	 * @param bool   $unique      When true, add nothing if the key already exists. Advisory:
+	 *                            checked before the insert with no unique index.
+	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If the insert fails.
+	 */
+	public function add_meta( int $contract_id, string $key, $value, bool $unique = false ): ?int {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
+		}
+
+		if ( $unique && array() !== $this->find_meta_values( $contract_id, $key ) ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$inserted = $wpdb->insert(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
+			array(
+				'contract_id' => $contract_id,
+				'meta_key'    => $key,
+				'meta_value'  => maybe_serialize( $value ),
+			)
+		);
+
+		if ( false === $inserted ) {
+			throw new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Update a contract's meta rows for `$key`, like `update_post_meta()`: adds a row when
+	 * the key is absent, else rewrites every row for the key, or only the rows holding
+	 * `$prev_value`. The absent-key check runs before the write with no unique index.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       New value; serialized when not scalar.
+	 * @param mixed  $prev_value  Only update rows holding this value; null updates all rows for the key.
+	 *                            Any other value ('' and false included) matches literally.
+	 * @return bool True when a row was added or at least one row changed.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If a write fails.
+	 */
+	public function update_meta( int $contract_id, string $key, $value, $prev_value = null ): bool {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
+		}
+
+		if ( array() === $this->find_meta_values( $contract_id, $key ) ) {
+			$this->add_meta( $contract_id, $key, $value );
+			return true;
+		}
+
+		$where = array(
+			'contract_id' => $contract_id,
+			'meta_key'    => $key,
+		);
+		if ( null !== $prev_value ) {
+			$where['meta_value'] = maybe_serialize( $prev_value );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
+			array( 'meta_value' => maybe_serialize( $value ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			$where
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( sprintf( 'Failed to update contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return $updated > 0;
+	}
+
+	/**
+	 * Delete a contract's meta rows for `$key`, like `delete_post_meta()`.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       Only delete rows holding this value; null deletes every row for the key.
+	 *                            Any other value ('' and false included) matches literally.
+	 * @return bool True when at least one row was deleted.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If the delete fails.
+	 */
+	public function delete_meta( int $contract_id, string $key, $value = null ): bool {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
+		}
+
+		$where = array(
+			'contract_id' => $contract_id,
+			'meta_key'    => $key,
+		);
+		if ( null !== $value ) {
+			$where['meta_value'] = maybe_serialize( $value );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), $where );
+
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return $deleted > 0;
+	}
+
+	/**
+	 * Read contract meta (WordPress `get_post_meta()` semantics), values unserialized,
+	 * oldest row first.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key; empty for every key.
+	 * @param bool   $single      With a key: return the first value only.
+	 * @return mixed Empty key: `array<string, array<int, mixed>>` of all keys. Key + `$single`:
+	 *               the first value, or '' when absent. Key only: the list of values (`[]` when absent).
+	 */
+	public function get_meta( int $contract_id, string $key = '', bool $single = false ) {
+		if ( '' === $key ) {
+			$all = array();
+			foreach ( $this->find_meta_rows( $contract_id, null ) as $row ) {
+				$all[ $row['meta_key'] ][] = maybe_unserialize( $row['meta_value'] );
+			}
+
+			return $all;
+		}
+
+		$values = $this->find_meta_values( $contract_id, $key );
+
+		if ( $single ) {
+			return array() === $values ? '' : $values[0];
+		}
+
+		return $values;
+	}
+
+	/**
 	 * Append a cycle to its chain `(contract_id, kind)`, copy-forwarding snapshots.
 	 *
-	 * Resolves the cycle's snapshots (reused from `$previous` when unchanged, else
-	 * inserted fresh) then inserts the cycle row and stamps the generated id back onto
-	 * the entity. The seam a later transaction-handling change wraps.
+	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), resolves the
+	 * cycle's snapshots (reused from `$previous` when unchanged, else inserted fresh), then
+	 * inserts the cycle row and stamps the generated id back onto the entity. The chain's
+	 * UNIQUE indexes guard concurrent appends and duplicate counts. The seam a later
+	 * transaction-handling change wraps.
 	 *
 	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
 	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
@@ -894,8 +1085,23 @@ final class ContractRepository {
 	 *                          other reason (the database error is in the message).
 	 */
 	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
+		$this->assign_next_sequence_no( $cycle );
 		$this->resolve_cycle_snapshots( $cycle, $previous );
 		$this->insert_cycle( $cycle );
+	}
+
+	/**
+	 * Assign the chain's next `sequence_no` to a cycle that awaits one.
+	 *
+	 * @param Cycle $cycle Cycle about to be appended.
+	 */
+	private function assign_next_sequence_no( Cycle $cycle ): void {
+		if ( ! $cycle->awaits_sequence_no() ) {
+			return;
+		}
+
+		$head = $this->find_chain_head( $cycle->get_contract_id(), $cycle->get_kind() );
+		$cycle->assign_sequence_no( null === $head ? 1 : $head->get_sequence_no() + 1 );
 	}
 
 	/**
@@ -1069,31 +1275,11 @@ final class ContractRepository {
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$cycles[] = $this->hydrate_cycle( self::as_string_keyed( $row ) );
+				$cycles[] = $this->hydrate_cycle( Coercion::coerce_string_keyed( $row ) );
 			}
 		}
 
 		return $cycles;
-	}
-
-	/**
-	 * The highest `count` in a chain `(contract_id, kind)` - the chargeable counter the
-	 * dispatcher advances (next chargeable cycle is `MAX(count) + 1`). Returns null for a
-	 * chain with no counting cycles (e.g. one holding only non-counting trial periods).
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $kind        Chain kind. Defaults to billing.
-	 * @return int|null The highest count, or null when the chain has no counting cycle.
-	 */
-	public function max_count( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?int {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$max = $wpdb->get_var( $wpdb->prepare( "SELECT MAX(count) FROM {$table} WHERE contract_id = %d AND kind = %s", $contract_id, $kind ) );
-
-		return null === $max ? null : (int) $max;
 	}
 
 	/**
@@ -1115,7 +1301,7 @@ final class ContractRepository {
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$cycles[] = $this->hydrate_cycle( self::as_string_keyed( $row ) );
+				$cycles[] = $this->hydrate_cycle( Coercion::coerce_string_keyed( $row ) );
 			}
 		}
 
@@ -1273,7 +1459,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		return PlanSnapshot::from_payload( self::as_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
+		return PlanSnapshot::from_payload( Coercion::coerce_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
 	}
 
 	/**
@@ -1313,11 +1499,11 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$payload = json_decode( ScalarCoercion::coerce_string( $row['payload'] ?? null ), true );
+			$payload = json_decode( Coercion::coerce_string( $row['payload'] ?? null ), true );
 
-			$snapshots[ ScalarCoercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
-				self::as_string_keyed( is_array( $payload ) ? $payload : array() ),
-				ScalarCoercion::coerce_int( $row['schema_version'] ?? 0 )
+			$snapshots[ Coercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
+				Coercion::coerce_string_keyed( is_array( $payload ) ? $payload : array() ),
+				Coercion::coerce_int( $row['schema_version'] ?? 0 )
 			);
 		}
 
@@ -1336,7 +1522,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		return ItemsSnapshot::from_payload( self::as_item_rows( $decoded['payload'] ), $decoded['schema_version'] );
+		return ItemsSnapshot::from_payload( Coercion::coerce_list_of_arrays( $decoded['payload'] ), $decoded['schema_version'] );
 	}
 
 	/**
@@ -1367,42 +1553,6 @@ final class ContractRepository {
 			'payload'        => is_array( $payload ) ? $payload : array(),
 			'schema_version' => (int) $row['schema_version'],
 		);
-	}
-
-	/**
-	 * Re-key a decoded payload as a string-keyed map. A no-op at runtime (decoded JSON
-	 * object keys are already strings); it recovers the string-keyed type that
-	 * json_decode erases to `array<int|string, mixed>`.
-	 *
-	 * @param array<int|string, mixed> $payload Decoded payload.
-	 * @return array<string, mixed>
-	 */
-	private static function as_string_keyed( array $payload ): array {
-		$result = array();
-		foreach ( $payload as $key => $value ) {
-			$result[ (string) $key ] = $value;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Shape a decoded payload as an ordered list of item rows: each array element is
-	 * re-keyed as a string-keyed row, non-array elements skipped. Recovers the value
-	 * object's modelled shape without trusting the erased JSON types.
-	 *
-	 * @param array<int|string, mixed> $payload Decoded payload.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function as_item_rows( array $payload ): array {
-		$rows = array();
-		foreach ( $payload as $row ) {
-			if ( is_array( $row ) ) {
-				$rows[] = self::as_string_keyed( $row );
-			}
-		}
-
-		return $rows;
 	}
 
 	/**
@@ -1467,7 +1617,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Reconcile a contract's items, addresses, and meta rows only when they differ.
+	 * Reconcile a contract's items and address rows only when they differ.
 	 *
 	 * Each child set is compared via a normalized signature both the loaded rows and
 	 * the entity's arrays are projected through, so MySQL's column coercion (DECIMAL
@@ -1475,6 +1625,7 @@ final class ContractRepository {
 	 * equal. Only a changed set is rewritten (delete-then-reinsert for that one table).
 	 *
 	 * @param Contract $contract Contract whose children to reconcile. Must have an id.
+	 * @throws \RuntimeException If a child row write fails.
 	 */
 	private function sync_children( Contract $contract ): void {
 		$id = (int) $contract->get_id();
@@ -1486,10 +1637,6 @@ final class ContractRepository {
 		if ( $this->addresses_signature( $this->find_addresses( $id ) ) !== $this->addresses_signature( $contract->get_addresses() ) ) {
 			$this->replace_addresses( $id, $contract->get_addresses() );
 		}
-
-		if ( $this->meta_signature( $this->find_meta( $id ) ) !== $this->meta_signature( $contract->get_meta() ) ) {
-			$this->replace_meta( $id, $contract->get_meta() );
-		}
 	}
 
 	/**
@@ -1497,12 +1644,17 @@ final class ContractRepository {
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @throws \RuntimeException If the delete or an insert fails.
 	 */
 	private function replace_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ), array( 'contract_id' => $contract_id ) );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ), array( 'contract_id' => $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
 		$this->insert_items( $contract_id, $items );
 	}
 
@@ -1511,29 +1663,18 @@ final class ContractRepository {
 	 *
 	 * @param int                                 $contract_id Contract id.
 	 * @param array<string, array<string, mixed>> $addresses   Address rows keyed by type.
+	 * @throws \RuntimeException If the delete or an insert fails.
 	 */
 	private function replace_addresses( int $contract_id, array $addresses ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
-		$this->insert_addresses( $contract_id, $addresses );
-	}
-
-	/**
-	 * Delete-then-reinsert a contract's meta rows.
-	 *
-	 * @param int                   $contract_id Contract id.
-	 * @param array<string, string> $meta        Meta as key => value.
-	 */
-	private function replace_meta( int $contract_id, array $meta ): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( false === $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), array( 'contract_id' => $contract_id ) ) ) {
-			$this->log_meta_write_failure( $contract_id, 'delete' );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete address rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
-		$this->insert_meta( $contract_id, $meta );
+
+		$this->insert_addresses( $contract_id, $addresses );
 	}
 
 	/**
@@ -1541,26 +1682,31 @@ final class ContractRepository {
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @throws \RuntimeException If an insert fails.
 	 */
 	private function insert_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
 		foreach ( $items as $item ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert(
+			$inserted = $wpdb->insert(
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
-					'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
-					'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-					'product_id'   => isset( $item['product_id'] ) ? ScalarCoercion::coerce_int( $item['product_id'] ) : null,
-					'variation_id' => isset( $item['variation_id'] ) ? ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
-					'quantity'     => ScalarCoercion::coerce_string( $item['quantity'] ?? null, '1' ),
-					'subtotal'     => ScalarCoercion::coerce_string( $item['subtotal'] ?? null, '0' ),
-					'total'        => ScalarCoercion::coerce_string( $item['total'] ?? null, '0' ),
+					'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
+					'item_type'    => Coercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+					'product_id'   => isset( $item['product_id'] ) ? Coercion::coerce_int( $item['product_id'] ) : null,
+					'variation_id' => isset( $item['variation_id'] ) ? Coercion::coerce_int( $item['variation_id'] ) : null,
+					'quantity'     => Coercion::coerce_string( $item['quantity'] ?? null, '1' ),
+					'subtotal'     => Coercion::coerce_string( $item['subtotal'] ?? null, '0' ),
+					'total'        => Coercion::coerce_string( $item['total'] ?? null, '0' ),
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
+
+			if ( false === $inserted ) {
+				throw new \RuntimeException( sprintf( 'Failed to insert item row for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			}
 		}
 	}
 
@@ -1569,6 +1715,7 @@ final class ContractRepository {
 	 *
 	 * @param int                                 $contract_id Contract id.
 	 * @param array<string, array<string, mixed>> $addresses   Address rows keyed by type.
+	 * @throws \RuntimeException If an insert fails.
 	 */
 	private function insert_addresses( int $contract_id, array $addresses ): void {
 		global $wpdb;
@@ -1579,61 +1726,16 @@ final class ContractRepository {
 				'address_type' => (string) $type,
 			);
 
-			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$record[ $column ] = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : null;
+			foreach ( Contract::ADDRESS_FIELDS as $column ) {
+				$record[ $column ] = isset( $address[ $column ] ) ? Coercion::coerce_string( $address[ $column ] ) : null;
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
-		}
-	}
-
-	/**
-	 * Insert meta for a contract.
-	 *
-	 * @param int                   $contract_id Contract id.
-	 * @param array<string, string> $meta        Meta as key => value.
-	 */
-	private function insert_meta( int $contract_id, array $meta ): void {
-		global $wpdb;
-
-		foreach ( $meta as $key => $value ) {
-			// The engine's own contract-meta columns, not post/order meta; the
-			// slow-meta-query heuristic does not apply.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			$inserted = $wpdb->insert(
-				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
-				array(
-					'contract_id' => $contract_id,
-					'meta_key'    => (string) $key,
-					'meta_value'  => (string) $value,
-				)
-			);
+			$inserted = $wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
 			if ( false === $inserted ) {
-				$this->log_meta_write_failure( $contract_id, 'insert', (string) $key );
+				throw new \RuntimeException( sprintf( 'Failed to insert %s address row for contract %d: %s', esc_html( (string) $type ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 			}
 		}
-	}
-
-	/**
-	 * Log a failed contract-meta write. Meta writes follow the row write without a
-	 * transaction, so a failure here leaves the row and its meta out of step; logging it
-	 * makes that visible.
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $operation   The failed operation (`delete` or `insert`).
-	 * @param string $meta_key    The meta key being inserted, if any.
-	 */
-	private function log_meta_write_failure( int $contract_id, string $operation, string $meta_key = '' ): void {
-		global $wpdb;
-
-		wc_get_logger()->error(
-			sprintf( 'ContractRepository: contract meta %s failed for contract %d%s - %s', $operation, $contract_id, '' === $meta_key ? '' : sprintf( ' (key %s)', $meta_key ), $wpdb->last_error ),
-			array(
-				'source'      => self::LOG_SOURCE,
-				'contract_id' => $contract_id,
-			)
-		);
 	}
 
 	/**
@@ -1650,7 +1752,7 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
 
-		return self::as_item_rows( is_array( $rows ) ? $rows : array() );
+		return Coercion::coerce_list_of_arrays( $rows );
 	}
 
 	/**
@@ -1670,7 +1772,7 @@ final class ContractRepository {
 		$by_type = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$by_type[ ScalarCoercion::coerce_string( $row['address_type'] ?? null ) ] = self::as_string_keyed( $row );
+				$by_type[ Coercion::coerce_string( $row['address_type'] ?? null ) ] = Coercion::coerce_string_keyed( $row );
 			}
 		}
 
@@ -1678,29 +1780,54 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Load meta for a contract as key => value.
+	 * Unserialized values stored under `$key` for a contract, oldest first.
 	 *
-	 * @param int $contract_id Contract id.
-	 * @return array<string, string>
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @return array<int, mixed>
 	 */
-	private function find_meta( int $contract_id ): array {
+	private function find_meta_values( int $contract_id, string $key ): array {
+		$values = array();
+		foreach ( $this->find_meta_rows( $contract_id, $key ) as $row ) {
+			$values[] = maybe_unserialize( $row['meta_value'] );
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Raw meta rows for a contract, optionally for one key, by id ascending.
+	 *
+	 * @param int         $contract_id Contract id.
+	 * @param string|null $key         Meta key, or null for every key.
+	 * @return array<int, array{meta_key: string, meta_value: string}>
+	 */
+	private function find_meta_rows( int $contract_id, ?string $key ): array {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 
-		// The engine's own contract-meta columns, not post/order meta; the
-		// slow-meta-query heuristic does not apply.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
+		if ( null === $key ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
+		} else {
+			// The engine's own contract-meta columns, not post/order meta; the
+			// slow-meta-query heuristic does not apply.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d AND meta_key = %s ORDER BY id ASC", $contract_id, $key ), ARRAY_A );
+		}
 
-		$meta = array();
+		$result = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$meta[ ScalarCoercion::coerce_string( $row['meta_key'] ?? null ) ] = ScalarCoercion::coerce_string( $row['meta_value'] ?? null );
+				$result[] = array(
+					'meta_key'   => Coercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => Coercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				);
 			}
 		}
 
-		return $meta;
+		return $result;
 	}
 
 	/**
@@ -1717,13 +1844,13 @@ final class ContractRepository {
 
 		foreach ( $items as $item ) {
 			$signature[] = array(
-				'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
-				'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-				'product_id'   => isset( $item['product_id'] ) ? (string) ScalarCoercion::coerce_int( $item['product_id'] ) : null,
-				'variation_id' => isset( $item['variation_id'] ) ? (string) ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
-				'quantity'     => number_format( ScalarCoercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
-				'subtotal'     => number_format( ScalarCoercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
-				'total'        => number_format( ScalarCoercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
+				'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
+				'item_type'    => Coercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+				'product_id'   => isset( $item['product_id'] ) ? (string) Coercion::coerce_int( $item['product_id'] ) : null,
+				'variation_id' => isset( $item['variation_id'] ) ? (string) Coercion::coerce_int( $item['variation_id'] ) : null,
+				'quantity'     => number_format( Coercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
+				'subtotal'     => number_format( Coercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
+				'total'        => number_format( Coercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
 				'taxes'        => $this->taxes_signature( $item['taxes'] ?? null ),
 			);
 		}
@@ -1746,30 +1873,12 @@ final class ContractRepository {
 
 		foreach ( $addresses as $type => $address ) {
 			$record = array();
-			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$value             = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : '';
+			foreach ( Contract::ADDRESS_FIELDS as $column ) {
+				$value             = isset( $address[ $column ] ) ? Coercion::coerce_string( $address[ $column ] ) : '';
 				$record[ $column ] = '' !== $value ? $value : null;
 			}
 
 			$signature[ (string) $type ] = $record;
-		}
-
-		ksort( $signature );
-
-		return $signature;
-	}
-
-	/**
-	 * A change-detection signature for a meta set.
-	 *
-	 * @param array<string, string> $meta Meta as key => value.
-	 * @return array<string, string> Comparable projection (key-sorted).
-	 */
-	private function meta_signature( array $meta ): array {
-		$signature = array();
-
-		foreach ( $meta as $key => $value ) {
-			$signature[ (string) $key ] = (string) $value;
 		}
 
 		ksort( $signature );

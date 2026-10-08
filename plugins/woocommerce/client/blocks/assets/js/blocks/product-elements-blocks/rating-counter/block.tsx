@@ -33,7 +33,7 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 					'woocommerce'
 				),
 				reviews
-		  )
+			)
 		: __( '(X customer reviews)', 'woocommerce' );
 
 	return (
