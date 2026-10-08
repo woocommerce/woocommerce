@@ -46,6 +46,15 @@ export default [
 		},
 	},
 	{
+		// Routes aren't packages, so check imports against this package's dependencies.
+		rules: {
+			'import/no-extraneous-dependencies': [
+				'error',
+				{ packageDir: import.meta.dirname },
+			],
+		},
+	},
+	{
 		linterOptions: {
 			reportUnusedDisableDirectives: 'error',
 		},

@@ -92,7 +92,6 @@ packages:
     - 'packages/php/*'
     - 'plugins/*'
     - 'plugins/woocommerce/admin-screens'
-    - 'plugins/woocommerce/admin-screens/routes/*'
     - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
