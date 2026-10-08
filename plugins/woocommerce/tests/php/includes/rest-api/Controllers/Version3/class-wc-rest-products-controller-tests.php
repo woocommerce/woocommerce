@@ -1902,6 +1902,49 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trashing a variable product via a REST status update records the same trash bookkeeping on the parent as on its variations.
+	 */
+	public function test_update_variable_product_status_to_trash_records_trash_meta_on_parent() {
+		$product       = WC_Helper_Product::create_variation_product();
+		$product_id    = $product->get_id();
+		$variation_ids = $product->get_children();
+
+		try {
+			$this->assertNotEmpty( $variation_ids );
+
+			$this->update_product_via_post_request(
+				$product,
+				array(
+					'status' => ProductStatus::TRASH,
+				)
+			);
+
+			$this->assertSame( ProductStatus::PUBLISH, get_post_meta( $product_id, '_wp_trash_meta_status', true ), 'Parent should remember its pre-trash status.' );
+			$this->assertNotEmpty( get_post_meta( $product_id, '_wp_trash_meta_time', true ), 'Parent should be eligible for the scheduled trash purge.' );
+
+			foreach ( $variation_ids as $variation_id ) {
+				$this->assertNotEmpty( get_post_meta( $variation_id, '_wp_trash_meta_time', true ) );
+			}
+
+			$this->update_product_via_post_request(
+				$product,
+				array(
+					'status' => ProductStatus::PUBLISH,
+				)
+			);
+
+			$this->assertSame( '', get_post_meta( $product_id, '_wp_trash_meta_status', true ), 'Trash status meta should be removed on restore.' );
+			$this->assertSame( '', get_post_meta( $product_id, '_wp_trash_meta_time', true ), 'Trash time meta should be removed on restore.' );
+
+			foreach ( $variation_ids as $variation_id ) {
+				$this->assertSame( ProductStatus::PUBLISH, get_post_status( $variation_id ) );
+			}
+		} finally {
+			$this->delete_variable_product_posts( $product_id, $variation_ids );
+		}
+	}
+
+	/**
 	 * Test that restoring a trashed variable product via REST also restores variations.
 	 */
 	public function test_update_variable_product_status_from_trash_restores_variations() {
