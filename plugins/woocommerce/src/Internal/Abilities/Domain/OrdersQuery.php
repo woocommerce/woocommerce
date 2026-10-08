@@ -186,29 +186,35 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
+					'title'   => __( 'Order ID', 'woocommerce' ),
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
 				'status'             => array(
+					'title'       => __( 'Status', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
 					'enum'        => self::get_allowed_order_status_slugs(),
 				),
 				'customer_id'        => array(
+					'title'       => __( 'Customer ID', 'woocommerce' ),
 					'type'        => 'integer',
 					'description' => __( 'Filter by customer ID. Use 0 to filter guest orders.', 'woocommerce' ),
 					'minimum'     => 0,
 				),
 				'billing_email'      => array(
+					'title'  => __( 'Billing email', 'woocommerce' ),
 					'type'   => 'string',
 					'format' => 'email',
 				),
 				'parent'             => array(
+					'title'       => __( 'Parent order ID', 'woocommerce' ),
 					'type'        => 'integer',
 					'description' => __( 'Filter by parent order ID.', 'woocommerce' ),
 					'minimum'     => 1,
 				),
 				'exclude'            => array(
+					'title'       => __( 'Excluded orders', 'woocommerce' ),
 					'type'        => 'array',
 					'description' => __( 'Order IDs to exclude from the results.', 'woocommerce' ),
 					'items'       => array(
@@ -217,34 +223,41 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					),
 				),
 				'date_after'         => array(
+					'title'       => __( 'Created after', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Filter orders created after this date/time.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'date_before'        => array(
+					'title'       => __( 'Created before', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Filter orders created before this date/time.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'modified_after'     => array(
+					'title'       => __( 'Modified after', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Filter orders modified after this date/time.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'modified_before'    => array(
+					'title'       => __( 'Modified before', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Filter orders modified before this date/time.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'orderby'            => array(
-					'type' => 'string',
-					'enum' => array( 'id', 'date', 'date_modified', 'total' ),
+					'title' => __( 'Order by', 'woocommerce' ),
+					'type'  => 'string',
+					'enum'  => array( 'id', 'date', 'date_modified', 'total' ),
 				),
 				'order'              => array(
-					'type' => 'string',
-					'enum' => array( 'asc', 'desc' ),
+					'title' => __( 'Sort order', 'woocommerce' ),
+					'type'  => 'string',
+					'enum'  => array( 'asc', 'desc' ),
 				),
 				'include_line_items' => array(
+					'title'       => __( 'Include line items', 'woocommerce' ),
 					'type'        => 'boolean',
 					'description' => __(
 						'Whether to include order line items in each returned order. Defaults to false.',
@@ -253,11 +266,13 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'default'     => false,
 				),
 				'page'               => array(
+					'title'   => __( 'Page', 'woocommerce' ),
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
 				'per_page'           => array(
+					'title'   => __( 'Results per page', 'woocommerce' ),
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,

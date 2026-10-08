@@ -253,6 +253,7 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'     => array(
+					'title'   => __( 'Order ID', 'woocommerce' ),
 					'type'    => 'integer',
 					'minimum' => 1,
 				),

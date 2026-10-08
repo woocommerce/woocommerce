@@ -212,6 +212,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give a title to every input field of the canonical abilities.
+	 */
+	public function test_canonical_ability_input_fields_have_titles(): void {
+		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
+			$schema = wp_get_ability( $ability_id )->get_input_schema();
+			foreach ( array_merge( array( $schema ), $schema['oneOf'] ?? array() ) as $branch ) {
+				foreach ( $branch['properties'] ?? array() as $field => $property ) {
+					$this->assertNotEmpty( $property['title'] ?? '', "{$ability_id} {$field} should have a title." );
+				}
+			}
+		}
+	}
+
+	/**
 	 * @testdox Should mark write abilities as destructive and queries as readonly/idempotent.
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {

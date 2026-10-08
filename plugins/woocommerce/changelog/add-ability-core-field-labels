@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
 
-Add a translated title to the Core fields of the product and order write abilities. The dry run shows it as the label of each change.
+Add a translated title to each input field of the product and order abilities. The dry run shows it as the label of each change.

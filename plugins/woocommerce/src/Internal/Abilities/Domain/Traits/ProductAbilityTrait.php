@@ -45,6 +45,7 @@ trait ProductAbilityTrait {
 		$mutation_schemas  = self::get_product_mutation_field_schemas();
 		$common_properties = array(
 			'id' => array(
+				'title'   => __( 'Product ID', 'woocommerce' ),
 				'type'    => 'integer',
 				'minimum' => 1,
 			),
@@ -91,6 +92,7 @@ trait ProductAbilityTrait {
 
 			if ( in_array( 'id', $base_required, true ) ) {
 				$properties['id'] = array(
+					'title'   => __( 'Product ID', 'woocommerce' ),
 					'type'    => 'integer',
 					'minimum' => 1,
 				);
@@ -126,6 +128,7 @@ trait ProductAbilityTrait {
 	 */
 	private static function get_product_type_alias_schema( ?string $product_type_alias = null ): array {
 		return array(
+			'title'       => __( 'Product type', 'woocommerce' ),
 			'type'        => 'string',
 			'description' => __(
 				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.',

@@ -172,19 +172,26 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
+					'title'   => __( 'Product ID', 'woocommerce' ),
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'             => array( 'type' => 'string' ),
+				'search'             => array(
+					'title' => __( 'Search', 'woocommerce' ),
+					'type'  => 'string',
+				),
 				'sku'                => array(
+					'title'       => __( 'SKU', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
 				'status'             => array(
-					'type' => 'string',
-					'enum' => self::get_product_query_status_slugs(),
+					'title' => __( 'Status', 'woocommerce' ),
+					'type'  => 'string',
+					'enum'  => self::get_product_query_status_slugs(),
 				),
 				'product_type_alias' => array(
+					'title'       => __( 'Product type', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __(
 						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped.',
@@ -193,15 +200,18 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'enum'        => self::get_supported_product_type_aliases(),
 				),
 				'stock_status'       => array(
-					'type' => 'string',
-					'enum' => array_keys( wc_get_product_stock_status_options() ),
+					'title' => __( 'Stock status', 'woocommerce' ),
+					'type'  => 'string',
+					'enum'  => array_keys( wc_get_product_stock_status_options() ),
 				),
 				'page'               => array(
+					'title'   => __( 'Page', 'woocommerce' ),
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
 				'per_page'           => array(
+					'title'   => __( 'Results per page', 'woocommerce' ),
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,
