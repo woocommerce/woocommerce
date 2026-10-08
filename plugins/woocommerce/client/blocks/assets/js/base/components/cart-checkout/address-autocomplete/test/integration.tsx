@@ -52,7 +52,6 @@ jest.mock( '@woocommerce/settings', () => ( {
 // jsdom/userEvent don't fully replicate. The suggestion rendering path
 // never fires because the typing guard isn't tripped. These tests should
 // be migrated to Playwright E2E where real browser events are available.
-// eslint-disable-next-line jest/no-disabled-tests
 describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', () => {
 	beforeAll( () => {
 		// Mock use select so we can override it when wc/store/cart or
@@ -611,7 +610,7 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			await act( async () => {
 				input.focus();
 			} );
-			expect( document.activeElement ).toBe( input );
+			expect( input ).toHaveFocus();
 
 			// Type to trigger suggestions
 			await act( async () => {
@@ -631,21 +630,21 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			} );
 
 			// Focus should remain on input
-			expect( document.activeElement ).toBe( input );
+			expect( input ).toHaveFocus();
 
 			await act( async () => {
 				await userEvent.type( input, '{arrowdown}' );
 			} );
 
 			// Focus should still be on input
-			expect( document.activeElement ).toBe( input );
+			expect( input ).toHaveFocus();
 
 			await act( async () => {
 				await userEvent.type( input, '{arrowup}' );
 			} );
 
 			// Focus should still be on input
-			expect( document.activeElement ).toBe( input );
+			expect( input ).toHaveFocus();
 		} );
 
 		it( 'Pressing Escape key hides suggestions and resets all ARIA states', async () => {
@@ -720,7 +719,7 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 			expect( input ).not.toHaveAttribute( 'aria-activedescendant' );
 
 			// Verify focus remains on input
-			expect( document.activeElement ).toBe( input );
+			expect( input ).toHaveFocus();
 
 			// Verify input value is preserved
 			expect( input ).toHaveValue( '1234' );

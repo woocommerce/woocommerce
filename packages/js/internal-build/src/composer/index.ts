@@ -122,23 +122,33 @@ async function resolvePackages(
 
 	const wanted = new Set< string >();
 	for ( const key of Object.keys( composer.require ?? {} ) ) {
-		if ( ! isPlatformReq( key ) ) wanted.add( key );
+		if ( ! isPlatformReq( key ) ) {
+			wanted.add( key );
+		}
 	}
 	for ( const key of Object.keys( composer[ 'require-dev' ] ?? {} ) ) {
-		if ( ! isPlatformReq( key ) ) wanted.add( key );
+		if ( ! isPlatformReq( key ) ) {
+			wanted.add( key );
+		}
 	}
 
 	const packages: WatchedPackage[] = [];
 
 	for ( const repo of composer.repositories ?? [] ) {
-		if ( repo.type !== 'path' || ! repo.url ) continue;
+		if ( repo.type !== 'path' || ! repo.url ) {
+			continue;
+		}
 
 		const sourceDir = path.resolve( projectDir, repo.url );
 		const pkgJsonPath = path.join( sourceDir, 'composer.json' );
-		if ( ! existsSync( pkgJsonPath ) ) continue;
+		if ( ! existsSync( pkgJsonPath ) ) {
+			continue;
+		}
 
 		const pkgJson = await readJson< ComposerJson >( pkgJsonPath );
-		if ( ! pkgJson.name || ! wanted.has( pkgJson.name ) ) continue;
+		if ( ! pkgJson.name || ! wanted.has( pkgJson.name ) ) {
+			continue;
+		}
 
 		// Composer's default for path repositories is "symlink if possible,
 		// copy otherwise" — so the only safe signal that Composer will copy
@@ -156,14 +166,18 @@ async function resolvePackages(
 		// host filesystem. Warn and skip — mirroring on top of a symlink
 		// would just duplicate state.
 		if ( repo.options?.symlink === true ) {
-			if ( ignoredPackages.has( pkgJson.name ) ) continue;
+			if ( ignoredPackages.has( pkgJson.name ) ) {
+				continue;
+			}
 			throw new Error(
 				`path repository '${ pkgJson.name }' has symlink: true but the consuming project depends on it. ` +
 					`Set 'options: { symlink: false }' so Composer copies the package, or add it to ignoredPackages if the symlink is intentional.`
 			);
 		}
 		if ( repo.options?.symlink !== false ) {
-			if ( ignoredPackages.has( pkgJson.name ) ) continue;
+			if ( ignoredPackages.has( pkgJson.name ) ) {
+				continue;
+			}
 			log.warn(
 				'warn',
 				`path repository '${ pkgJson.name }' has no explicit symlink option; skipping. Set 'options: { symlink: false }' to enable mirroring, or add it to ignoredPackages to silence this warning.`
@@ -204,7 +218,9 @@ function debounce( fn: () => Promise< void >, wait: number ): () => void {
 	let running = false;
 
 	function schedule(): void {
-		if ( timer ) clearTimeout( timer );
+		if ( timer ) {
+			clearTimeout( timer );
+		}
 		timer = setTimeout( () => {
 			if ( running ) {
 				pending = true;
@@ -240,7 +256,7 @@ function runComposer( args: string[], projectDir: string ): Promise< void > {
 						new Error(
 							`composer ${ args.join( ' ' ) } exited ${ code }`
 						)
-				  )
+					)
 		);
 		child.on( 'error', reject );
 	} );
@@ -329,7 +345,9 @@ export async function watchComposerPackages(
 
 		let composerInstallRunning = false;
 		const onComposerJsonChange = async (): Promise< void > => {
-			if ( composerInstallRunning ) return;
+			if ( composerInstallRunning ) {
+				return;
+			}
 			composerInstallRunning = true;
 			log.info( 'watch', 'composer.json changed; composer install' );
 			try {
@@ -363,13 +381,16 @@ export async function watchComposerPackages(
 		): Promise< void > => {
 			// Consuming project's composer.json is its own path; not in any pkg.
 			if ( absPath === composerJsonPath ) {
-				if ( event === 'change' || event === 'add' )
-					onComposerJsonChange();
+				if ( event === 'change' || event === 'add' ) {
+					void onComposerJsonChange();
+				}
 				return;
 			}
 
 			const pkg = findPackageFor( absPath );
-			if ( ! pkg ) return;
+			if ( ! pkg ) {
+				return;
+			}
 
 			// A watched package's own composer.json changing means its autoload
 			// spec may have changed. Mirror it and treat as a project-level
@@ -379,7 +400,7 @@ export async function watchComposerPackages(
 				absPath === path.join( pkg.sourceDir, 'composer.json' )
 			) {
 				await mirror( absPath, pkg ).catch( () => undefined );
-				onComposerJsonChange();
+				void onComposerJsonChange();
 				return;
 			}
 

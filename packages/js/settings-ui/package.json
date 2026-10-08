@@ -37,23 +37,26 @@
 	"dependencies": {
 		"@woocommerce/sanitize": "workspace:*",
 		"@wordpress/admin-ui": "catalog:wp-bundled",
-		"@wordpress/a11y": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/dataviews": "17.1.0",
+		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
-		"@wordpress/i18n": "catalog:wp-min",
-		"@wordpress/ui": "catalog:wp-bundled"
+		"@wordpress/i18n": "catalog:wp-min"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
+		"@babel/core": "catalog:tooling",
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "^10.0.0",
+		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x"
@@ -84,10 +87,12 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
+		"lint:fix:lang:style": "stylelint 'src/**/*.scss' --fix",
 		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'src/**/*.scss'",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
-		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"test:js": "jest --config ./jest.config.js --passWithNoTests",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
 		"watch:build:project:esm": "node build.mjs --watch"
@@ -96,14 +101,14 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx}"
+				"changes": "src/**/*.{js,jsx,ts,tsx,scss}"
 			},
 			"tests": [
 				{
 					"name": "JavaScript",
 					"command": "test:js",
 					"changes": [
-						"jest.config.json",
+						"jest.config.js",
 						"tsconfig.json",
 						"src/**/*.{js,jsx,ts,tsx}"
 					],

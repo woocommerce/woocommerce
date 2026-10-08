@@ -106,7 +106,7 @@ class Segmenter extends ReportsSegmenter {
 					GROUP BY
 						$segmenting_groupby",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
 		$totals_segments = $this->merge_segment_totals_results( $segmenting_dimension_name, $segments_products, array() );
 		return $totals_segments;
@@ -154,7 +154,7 @@ class Segmenter extends ReportsSegmenter {
 						time_interval, $segmenting_groupby
 					$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
 		$intervals_segments = $this->merge_segment_intervals_results( $segmenting_dimension_name, $segments_products, array() );
 		return $intervals_segments;
@@ -191,7 +191,7 @@ class Segmenter extends ReportsSegmenter {
 					GROUP BY
 						$segmenting_groupby",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
 		// Reformat result.
 		$totals_segments = $this->reformat_totals_segments( $totals_segments, $segmenting_groupby );
@@ -235,7 +235,7 @@ class Segmenter extends ReportsSegmenter {
 						time_interval, $segmenting_groupby
 					$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Report results are cached by the containing data store; direct aggregate SQL is intentional.
 
 		// Reformat result.
 		$intervals_segments = $this->reformat_intervals_segments( $intervals_segments, $segmenting_groupby );

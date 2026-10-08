@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Apply shipping tax to manual orders that contain shipping but no products.

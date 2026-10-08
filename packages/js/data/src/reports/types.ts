@@ -220,6 +220,8 @@ export type TaxesReport = {
 	order_tax: number;
 	/** Shipping tax. */
 	shipping_tax: number;
+	/** Taxable amount. */
+	taxable_amount?: number;
 	/** Number of orders. */
 	orders_count: number;
 };
@@ -336,24 +338,24 @@ export type ReportItemObjectInfer< T > = {
 	data: T extends 'customers'
 		? CustomerReport
 		: T extends 'products'
-		? ProductReport
-		: T extends 'variations'
-		? VariationReport
-		: T extends 'orders'
-		? OrderReport
-		: T extends 'categories'
-		? CategoriesReport
-		: T extends 'taxes'
-		? TaxesReport
-		: T extends 'coupons'
-		? CouponReport
-		: T extends 'stock'
-		? StockReport
-		: T extends 'downloads'
-		? DownloadReport
-		: T extends 'performance_indicators'
-		? PerformanceIndicatorReport
-		: never;
+			? ProductReport
+			: T extends 'variations'
+				? VariationReport
+				: T extends 'orders'
+					? OrderReport
+					: T extends 'categories'
+						? CategoriesReport
+						: T extends 'taxes'
+							? TaxesReport
+							: T extends 'coupons'
+								? CouponReport
+								: T extends 'stock'
+									? StockReport
+									: T extends 'downloads'
+										? DownloadReport
+										: T extends 'performance_indicators'
+											? PerformanceIndicatorReport
+											: never;
 	totalResults: number;
 	totalPages: number;
 };
@@ -386,7 +388,7 @@ type Interval = {
 };
 
 export type Segment = {
-	/** Segment identificator. */
+	/** Segment identifier. */
 	segment_id: number;
 	/** Human readable segment label, either product or variation name. */
 	segment_label: 'day' | 'week' | 'month' | 'year';
@@ -523,18 +525,18 @@ export type ReportStatObjectInfer< T > = {
 	data: T extends 'products'
 		? ProductReportStat
 		: T extends 'variations'
-		? VariationsReportStat
-		: T extends 'revenue'
-		? RevenueReportStat
-		: T extends 'orders'
-		? OrderReportStat
-		: T extends 'taxes'
-		? TaxesReportStat
-		: T extends 'coupons'
-		? CouponsReportStat
-		: T extends 'customers'
-		? CustomersReportStat
-		: never;
+			? VariationsReportStat
+			: T extends 'revenue'
+				? RevenueReportStat
+				: T extends 'orders'
+					? OrderReportStat
+					: T extends 'taxes'
+						? TaxesReportStat
+						: T extends 'coupons'
+							? CouponsReportStat
+							: T extends 'customers'
+								? CustomersReportStat
+								: never;
 	totalResults: number;
 	totalPages: number;
 };

@@ -6,6 +6,15 @@ import { Subscription } from '../components/my-subscriptions/types';
 
 export type { NoticeAction, NoticeOptions } from '~/lib/notices/types';
 
+/**
+ * Notice key shared by everything that refreshes subscriptions, so a refresh
+ * result always replaces the previous one instead of stacking. Lives here
+ * rather than in refresh-button so SubscriptionsContext can use it without
+ * importing a component that imports the context back.
+ */
+export const REFRESH_SUBSCRIPTIONS_NOTICE_ID =
+	'woocommerce-marketplace-refresh-subscriptions';
+
 export interface SearchResultsCountType {
 	extensions: number;
 	themes: number;
@@ -25,7 +34,18 @@ export type MarketplaceContextType = {
 	) => void;
 	iamSettings: {
 		product_previews?: 'modal' | 'none';
+		quality_badge?: {
+			enabled?: boolean;
+			label?: string;
+			tooltip?: string;
+			docs_url?: string;
+		};
 	};
+	/**
+	 * Variation of the product preview experiment, or null when it hasn't
+	 * loaded or the store isn't in the experiment.
+	 */
+	productPreviewVariation: string | null;
 };
 
 export type SubscriptionsContextType = {

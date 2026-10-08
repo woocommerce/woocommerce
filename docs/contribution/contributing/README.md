@@ -33,6 +33,7 @@ Our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/tru
 - [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)
 - [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) 
 - [Community contributions](/docs/contribution/contributing/community-contributions/)
+- [WordPress and WooCommerce version support policy](/docs/contribution/contributing/version-support-policy/)
 
 ## Templates, Bug Reports, and Feature Requests
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix analytics previous year comparisons around 29th February: chart days no longer shift by a day, to date ranges compare against the same calendar dates a year earlier, and previous period day charts line up across a DST change.

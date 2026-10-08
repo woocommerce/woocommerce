@@ -15,11 +15,10 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 	/**
 	 * Tear down test fixtures.
 	 *
-	 * The cart and current user are in-memory globals that the per-test DB transaction
-	 * does not roll back, so reset them explicitly to avoid leaking state into other tests.
+	 * The current user is an in-memory global that the per-test DB transaction does not
+	 * roll back, so reset it explicitly to avoid leaking state into other tests.
 	 */
 	public function tearDown(): void {
-		WC()->cart->empty_cart();
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}

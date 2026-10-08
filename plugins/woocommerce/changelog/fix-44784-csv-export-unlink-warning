@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a PHP warning raised on the first step of every CSV product export.

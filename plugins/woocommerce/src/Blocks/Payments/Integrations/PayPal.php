@@ -122,7 +122,7 @@ final class PayPal extends AbstractPaymentMethodType {
 		 *
 		 * @since 4.4.0
 		 *
-		 * @example See docs/examples/payment-gateways-features-list.md
+		 * @example docs/examples/payment-gateways-features-list.md
 		 *
 		 * @param array $features List of supported features.
 		 * @param string $name Gateway name.

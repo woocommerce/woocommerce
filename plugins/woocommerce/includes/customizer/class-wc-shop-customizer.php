@@ -940,7 +940,7 @@ class WC_Shop_Customizer {
 	}
 
 	/**
-	 * Weather or not the checkout page contains the Checkout block.
+	 * Whether or not the checkout page contains the Checkout block.
 	 *
 	 * @return bool
 	 */

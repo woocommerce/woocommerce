@@ -5,6 +5,10 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
+// ESM-only; Node's require( esm ) returns the module namespace.
+const {
+	default: dsTokenFallbacks,
+} = require( '@wordpress/theme/postcss-plugins/postcss-ds-token-fallbacks' );
 const StyleAssetPlugin = require( './style-asset-plugin.cjs' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin.cjs' );
 
@@ -31,7 +35,10 @@ module.exports = {
 						loader: 'postcss-loader',
 						options: {
 							postcssOptions: {
-								plugins: postcssPlugins,
+								plugins: [
+									...postcssPlugins,
+									dsTokenFallbacks,
+								],
 							},
 						},
 					},
@@ -78,7 +85,7 @@ module.exports = {
 			new RemoveEmptyScriptsPlugin(),
 			new MiniCssExtractPlugin( {
 				filename: '[name]/style.css',
-				chunkFilename: 'chunks/[id].style.css?ver=[contenthash]',
+				chunkFilename: 'chunks/[name].style.css?ver=[contenthash]',
 			} ),
 			new WebpackRTLPlugin(),
 			new StyleAssetPlugin(),

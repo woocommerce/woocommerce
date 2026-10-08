@@ -16,15 +16,15 @@ import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
+import {
+	formatPriceWithCurrency,
+	normalizeCurrencyResponse,
+} from '@woocommerce/price-format/utils/currency';
 
 /**
  * Internal dependencies
  */
-import {
-	formatPriceWithCurrency,
-	normalizeCurrencyResponse,
-} from '../../../../packages/prices/utils/currency';
-import { CartItem, Currency } from '../../types';
+import type { CartItem, Currency } from '@woocommerce/types';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 import {
 	getEntryFieldRaw,
@@ -100,13 +100,12 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
-type MiniCart = {
+export type MiniCart = {
 	state: {
 		isHydrated: boolean;
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
-		drawerOverlayClass: string;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -165,7 +164,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 	container
 		? Array.from(
 				container.querySelectorAll< HTMLElement >( focusableSelectors )
-		  ).filter( ( el ) => el.offsetParent !== null )
+			).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
@@ -173,6 +172,20 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	try {
+		window.wp.hooks.doAction(
+			`experimental__woocommerce_blocks-checkout-${ eventName }`,
+			{ storeCart: woocommerceState.cart }
+		);
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.error( e );
+	}
+};
+
+let previousIsOpen: boolean | undefined;
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
@@ -210,10 +223,10 @@ store< MiniCart >(
 
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
+						parseInt(
 							woocommerceState.cart.totals.total_items_tax,
 							10
-					  )
+						)
 					: parseInt( woocommerceState.cart.totals.total_items, 10 );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
@@ -230,14 +243,6 @@ store< MiniCart >(
 
 			get drawerTabIndex() {
 				return state.isOpen ? '-1' : null;
-			},
-
-			get drawerOverlayClass() {
-				const baseClasses =
-					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-				return state.isOpen
-					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
-					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
 			},
 
 			get badgeIsVisible(): boolean {
@@ -391,12 +396,20 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
+					if ( previousIsOpen === false ) {
+						dispatchCheckoutEvent( 'mini-cart-open' );
+					}
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
+					if ( previousIsOpen === true ) {
+						dispatchCheckoutEvent( 'mini-cart-close' );
+					}
 				}
+
+				previousIsOpen = state.isOpen;
 			},
 
 			focusFirstElement() {
@@ -425,11 +438,7 @@ function resolveDataItemAttr(): ItemData | undefined {
 		dataProperty: DataProperty;
 	} >();
 
-	return (
-		itemData ||
-		// eslint-disable-next-line @typescript-eslint/no-use-before-define
-		cartItemState.cartItem[ dataProperty ]?.[ 0 ]
-	);
+	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 }
 
 /**
@@ -716,7 +725,7 @@ const { state: cartItemState } = store(
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
+						parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
 				const price = formatPriceWithCurrency(
@@ -766,16 +775,18 @@ const { state: cartItemState } = store(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
-							filterName: 'showRemoveItemLink',
-							defaultValue: true,
-							extensions: cartItemState.cartItem.extensions,
-							arg: {
-								context: 'cart',
-								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
-							},
-					  } )
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'showRemoveItemLink',
+								defaultValue: true,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						)
 					: true;
 			},
 

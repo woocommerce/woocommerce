@@ -1,4 +1,3 @@
 Significance: patch
-Type: enhancement
-
-Expose when Launch Your Store option fetching is intentionally disabled.
+Type: dev
+Comment: Clarify Launch Your Store hook fetch state; no merchant-facing change.

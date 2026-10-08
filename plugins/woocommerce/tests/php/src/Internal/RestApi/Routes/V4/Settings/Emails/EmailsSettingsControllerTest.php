@@ -12,6 +12,8 @@ namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Settings\Email
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Schema\EmailsSettingsSchema;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
@@ -155,9 +157,17 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		WC_Emails::instance()->init();
 		$this->email = WC_Emails::instance()->emails['WC_Email_Customer_Completed_Order'];
 
-		// Generate transactional email template posts.
+		// Create a published, mapped email post for the sample email (posts are
+		// created lazily now, so only the email under test gets one).
 		$email_generator = new WCTransactionalEmailPostsGenerator();
-		$email_generator->initialize();
+		$sample_post_id  = $email_generator->create_draft( $this->email );
+		wp_update_post(
+			array(
+				'ID'          => $sample_post_id,
+				'post_status' => 'publish',
+			)
+		);
+		WCTransactionalEmailPostsManager::get_instance()->save_email_template_post_id( self::SAMPLE_EMAIL_ID, $sample_post_id );
 	}
 
 	/**
@@ -181,8 +191,9 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 				}
 			}
 
-			// Clean up email template posts transient.
-			delete_transient( 'wc_email_editor_initial_templates_generated' );
+			// The DB rolls back between tests but the posts manager singleton's
+			// in-memory cache does not — clear it so stale mappings don't leak.
+			WCTransactionalEmailPostsManager::get_instance()->clear_caches();
 			$this->clear_rest_server();
 			unset( $this->server, $this->controller );
 		} finally {
@@ -301,6 +312,57 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 		$this->assertEmpty( $data );
+	}
+
+	/**
+	 * @testdox Cc/Bcc sent for an email that does not support them are dropped, while other emails still accept them.
+	 */
+	public function test_update_item_drops_cc_bcc_for_email_without_cc_bcc_support() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
+		$features_controller->change_feature_enable( 'email_improvements', true );
+		$this->prev_options['woocommerce_customer_reset_password_settings'] = get_option( 'woocommerce_customer_reset_password_settings', null );
+		delete_option( 'woocommerce_customer_reset_password_settings' );
+		wp_set_current_user( self::$user_id );
+
+		$response = $this->put_values( self::SAMPLE_EMAIL_ID, array( 'cc' => 'copy@example.com' ) );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'copy@example.com', $response->get_data()['values']['cc'], 'Control: an email that supports Cc must still accept it' );
+
+		$response = $this->put_values(
+			'customer_reset_password',
+			array(
+				'subject' => 'Reset subject',
+				'cc'      => 'cc@example.com',
+				'bcc'     => 'copy@example.com',
+			)
+		);
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'Reset subject', $data['values']['subject'] );
+		$this->assertArrayNotHasKey( 'cc', $data['values'] );
+		$this->assertArrayNotHasKey( 'bcc', $data['values'] );
+		$settings = get_option( 'woocommerce_customer_reset_password_settings', array() );
+		$this->assertEquals( 'Reset subject', $settings['subject'] );
+		$this->assertArrayNotHasKey( 'cc', $settings );
+		$this->assertArrayNotHasKey( 'bcc', $settings );
+
+		$features_controller->change_feature_enable( 'email_improvements', $original_value );
+	}
+
+	/**
+	 * Dispatch a PUT request updating the given values of an email.
+	 *
+	 * @param string $email_id Email ID.
+	 * @param array  $values   Settings values to update.
+	 * @return \WP_REST_Response
+	 */
+	private function put_values( string $email_id, array $values ) {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/emails/' . $email_id );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'values' => $values ) ) );
+		return $this->server->dispatch( $request );
 	}
 
 	/**

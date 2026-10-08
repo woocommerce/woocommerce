@@ -20,6 +20,7 @@ jobs:
   extract-versions:
     name: Extract release current and previous versions
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     outputs:
       current_version: ${{ steps.calculate-versions.outputs.current_version }}
       previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
@@ -96,6 +97,7 @@ jobs:
     name: Count commits and contributors between releases
     needs: extract-versions
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     outputs:
       commit_count: ${{ steps.count-commits.outputs.commit_count }}
       contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
@@ -132,6 +134,7 @@ jobs:
     name: Generate contributors list
     needs: extract-versions
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     outputs:
       contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
       artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
@@ -182,6 +185,7 @@ jobs:
         with:
           name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
           path: ${{ steps.generate-contributors-list.outputs.filepath }}
+          retention-days: 30
 
       - name: Output artifact URL
         id: output-artifact-url
@@ -193,6 +197,7 @@ jobs:
     name: Check for database updates
     needs: extract-versions
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     outputs:
       has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
       updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
@@ -323,6 +328,7 @@ jobs:
     name: Send Slack Notification
     needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     steps:
       - name: Send Slack message
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0

@@ -40,7 +40,7 @@ export const useSiteVisibilityTour = () => {
 	} = useUserPreferences();
 
 	const onClose = () => {
-		updateUserPreferences( {
+		void updateUserPreferences( {
 			launch_your_store_tour_hidden: 'yes',
 		} );
 	};

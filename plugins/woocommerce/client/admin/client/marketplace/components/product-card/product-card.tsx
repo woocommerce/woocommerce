@@ -14,6 +14,9 @@ import { useState, useContext, useRef } from '@wordpress/element';
  */
 import './product-card.scss';
 import ProductCardFooter from './product-card-footer';
+import QualityBadge, {
+	getVisibleQualityBadge,
+} from '../quality-badge/quality-badge';
 import {
 	Product,
 	ProductCardType,
@@ -23,6 +26,10 @@ import {
 import { appendURLParams } from '../../utils/functions';
 import ProductPreviewModal from '../product-preview-modal/product-preview-modal';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import {
+	PRODUCT_PREVIEW_TREATMENT,
+	PRODUCT_PREVIEW_VARIATION_PARAM,
+} from '../../utils/product-preview-experiment';
 export interface ProductCardProps {
 	type?: string;
 	product?: Product;
@@ -76,11 +83,22 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
-	const { iamSettings } = useContext( MarketplaceContext );
+	const { iamSettings, productPreviewVariation } =
+		useContext( MarketplaceContext );
+	// Themes, business services and the small cards in install modals never show the preview, so their clicks stay out of the experiment.
+	const canShowPreview = ! isTheme && ! isBusinessService && ! props.small;
+	const previewVariation = canShowPreview ? productPreviewVariation : null;
+	// Stores outside the experiment follow the WooCommerce.com setting.
 	const shouldShowPreview =
-		iamSettings?.product_previews === 'modal' &&
-		! isTheme &&
-		! isBusinessService;
+		canShowPreview &&
+		( previewVariation
+			? previewVariation === PRODUCT_PREVIEW_TREATMENT
+			: iamSettings?.product_previews === 'modal' );
+	// Business service cards use a layout with no slot for the badge.
+	const showsQualityBadge =
+		! isLoading &&
+		! isBusinessService &&
+		getVisibleQualityBadge( props.product, iamSettings ) !== null;
 
 	const showVendor = ! isCompact && ! isLoading;
 	const showVendorLoading = ! isCompact && isLoading;
@@ -92,6 +110,9 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	function isSponsored(): boolean {
 		return SPONSORED_PRODUCT_LABEL === product.label;
 	}
+
+	const showSponsoredLabel = ! isLoading && isSponsored();
+	const showVendorDetails = showVendor || showSponsoredLabel;
 
 	/**
 	 * Sponsored products with a primary_color set have that color applied as a dynamically-colored stripe at the top of the card.
@@ -174,12 +195,19 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	);
 
 	const productUrl = () => {
+		const params: Array< [ string, string ] > = [];
 		if ( query.ref ) {
-			return appendURLParams( product.url, [
-				[ 'utm_content', query.ref ],
+			params.push( [ 'utm_content', query.ref ] );
+		}
+		if ( previewVariation ) {
+			params.push( [
+				PRODUCT_PREVIEW_VARIATION_PARAM,
+				previewVariation,
 			] );
 		}
-		return product.url;
+		return params.length
+			? appendURLParams( product.url, params )
+			: product.url;
 	};
 
 	const handleCardClick = () => {
@@ -188,6 +216,8 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 			product_name: product.title,
 			vendor: product.vendorName,
 			product_type: type,
+			has_quality_badge: showsQualityBadge,
+			...( previewVariation && { preview_variation: previewVariation } ),
 		} );
 
 		if ( shouldShowPreview ) {
@@ -243,15 +273,8 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 				onClick={ ( e ) => {
 					if ( shouldShowPreview ) {
 						e.preventDefault();
-						handleCardClick();
-					} else {
-						recordTracksEvent( 'marketplace_product_card_clicked', {
-							product_id: product.id,
-							product_name: product.title,
-							vendor: product.vendorName,
-							product_type: type,
-						} );
 					}
+					handleCardClick();
 				} }
 			>
 				{ isLoading ? ' ' : product.title }
@@ -293,11 +316,19 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 		);
 	};
 
+	const qualityBadge =
+		showsQualityBadge && props.product ? (
+			<QualityBadge product={ props.product } />
+		) : null;
+
 	const footer = ! isBusinessService ? (
 		<footer className="woocommerce-marketplace__product-card__footer">
 			{ isLoading && (
 				<div className="woocommerce-marketplace__product-card__price" />
 			) }
+			{ /* Regular cards show the badge on its own row above the price;
+			     compact cards show it between the title and the price. */ }
+			{ ! isCompact && qualityBadge }
 			{ ! isLoading && props.product && (
 				<ProductCardFooter product={ props.product } />
 			) }
@@ -342,31 +373,34 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 								<span className="woocommerce-marketplace__product-card__vendor" />
 							</p>
 						) }
-						{ showVendor && (
+						{ showVendorDetails && (
 							<p className="woocommerce-marketplace__product-card__vendor-details">
-								{ productVendor && (
+								{ showVendor && productVendor && (
 									<span className="woocommerce-marketplace__product-card__vendor">
 										<span>
-											{ __( 'By ', 'woocommerce' ) }
-										</span>
+											{ __( 'By', 'woocommerce' ) }
+										</span>{ ' ' }
 										{ productVendor }
 									</span>
 								) }
-								{ productVendor && isSponsored() && (
-									<span
-										aria-hidden="true"
-										className="woocommerce-marketplace__product-card__vendor-details__separator"
-									>
-										·
-									</span>
-								) }
-								{ isSponsored() && (
+								{ showVendor &&
+									productVendor &&
+									showSponsoredLabel && (
+										<span
+											aria-hidden="true"
+											className="woocommerce-marketplace__product-card__vendor-details__separator"
+										>
+											·
+										</span>
+									) }
+								{ showSponsoredLabel && (
 									<span className="woocommerce-marketplace__product-card__sponsored-label">
 										{ __( 'Sponsored', 'woocommerce' ) }
 									</span>
 								) }
 							</p>
 						) }
+						{ isCompact && qualityBadge }
 						{ isCompact && footer }
 					</div>
 				</div>
@@ -415,6 +449,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 					onClose={ handleModalClose }
 					productId={ product.id as number }
 					triggerRef={ linkRef }
+					variation={ previewVariation }
 				/>
 			) }
 		</>
