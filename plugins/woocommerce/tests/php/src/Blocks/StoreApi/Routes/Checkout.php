@@ -3798,9 +3798,24 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox A failure while the order is still a draft releases the stock it had reserved.
+	 * Failures an extension can raise while the order is still a draft.
+	 *
+	 * @return array<string, array{\Throwable}>
 	 */
-	public function test_failure_before_the_order_leaves_draft_releases_held_stock() {
+	public function provider_draft_order_failures() {
+		return array(
+			'ordinary exception' => array( new \Exception( 'Extension failed while the order was still a draft.' ) ),
+			'engine error'       => array( new \TypeError( 'Extension raised an engine error while the order was still a draft.' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A failure while the order is still a draft releases the stock it had reserved: $_dataName.
+	 * @dataProvider provider_draft_order_failures
+	 *
+	 * @param \Throwable $failure The failure raised while the order is still a draft.
+	 */
+	public function test_failure_before_the_order_leaves_draft_releases_held_stock( \Throwable $failure ) {
 		// Its own product rather than a class fixture, so enabling stock management here cannot
 		// leak into the other tests in this class.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -3824,7 +3839,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$state_at_failure = null;
 		add_action(
 			'woocommerce_blocks_checkout_order_processed',
-			function () use ( &$state_at_failure, $product ) {
+			function () use ( &$state_at_failure, $product, $failure ) {
 				$draft_ids = wc_get_orders(
 					array(
 						'limit'  => 1,
@@ -3837,7 +3852,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
 					'status' => $draft_ids ? wc_get_order( $draft_ids[0] )->get_status() : 'none',
 				);
-				throw new \Exception( 'Extension failed while the order was still a draft.' );
+				throw $failure;
 			}
 		);
 
@@ -3858,11 +3873,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox An Error raised before any payment was taken still surfaces instead of being swallowed.
+	 * @testdox An Error raised before any payment was taken is reported as a failed checkout.
 	 */
 	public function test_error_raised_before_payment_is_not_converted_into_a_successful_checkout() {
 		// No payment_complete() here: the order is still awaiting payment when this lands, so the
-		// recovery path must not claim it, and an Error must keep behaving as it did before.
+		// recovery path must not claim it, and the Error must reach the client as a failure.
 		add_action(
 			'woocommerce_rest_checkout_process_payment_with_context',
 			function () {
@@ -3873,14 +3888,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 			998
 		);
 
-		$caught = null;
-		try {
-			rest_get_server()->dispatch( $this->build_checkout_post_request() );
-		} catch ( \Throwable $error ) {
-			$caught = $error;
-		}
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
 
-		$this->assertInstanceOf( \Error::class, $caught, 'An Error with no payment taken must surface rather than be reported as a successful checkout.' );
+		$this->assertSame( 500, $response->get_status(), 'An Error with no payment taken must be reported as a failed checkout: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 
 		$orders = wc_get_orders(
 			array(
