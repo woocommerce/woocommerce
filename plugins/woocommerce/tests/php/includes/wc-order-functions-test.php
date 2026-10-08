@@ -851,4 +851,127 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
 		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 	}
+
+	/**
+	 * @testdox Should count coupon usage again when a trashed order is restored.
+	 */
+	public function test_restoring_a_trashed_order_counts_coupon_usage_again() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'restored-order' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( wc_get_order( $order_id )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should count coupon usage again when a trashed order is restored with wp_untrash_post.
+	 */
+	public function test_wp_untrash_post_on_a_trashed_order_counts_coupon_usage_again() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'wp-restored-order' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		wp_untrash_post( $order_id );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should count coupon usage only once when more than one restore hook fires for the order.
+	 */
+	public function test_restoring_a_trashed_order_counts_coupon_usage_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'restored-once' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+
+		do_action( 'woocommerce_untrash_order', $order_id, OrderInternalStatus::PROCESSING );
+		do_action( 'untrashed_post', $order_id );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should not count coupon usage when a trashed order is restored to a cancelled status.
+	 */
+	public function test_restoring_a_cancelled_order_does_not_count_coupon_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'restored-cancelled' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertFalse( wc_get_order( $order_id )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should leave coupon usage untouched when an unrelated post is restored.
+	 */
+	public function test_restoring_a_product_post_leaves_coupon_usage_unchanged() {
+		$coupon  = WC_Helper_Coupon::create_coupon( 'product-restored' );
+		$order   = $this->create_recorded_order( $coupon );
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_trash_post( $product->get_id() );
+		wp_untrash_post( $product->get_id() );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should release coupon usage when a recorded order is trashed with wp_trash_post, and count it again on restore.
+	 */
+	public function test_wp_trash_post_on_a_recorded_order_releases_coupon_usage() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'wp-trashed-order' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		wp_trash_post( $order->get_id() );
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertFalse( wc_get_order( $order->get_id() )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		wp_untrash_post( $order->get_id() );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage once when a recorded order is trashed.
+	 */
+	public function test_trashing_a_recorded_order_releases_coupon_usage_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'trashed-once' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order->delete( false );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
 }

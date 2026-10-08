@@ -1018,7 +1018,7 @@ add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
  * @param int $order_id Order ID.
  */
 function wc_update_coupon_usage_counts( $order_id ) {
-	if ( 'before_delete_post' === current_action() && 'shop_order' !== get_post_type( $order_id ) ) {
+	if ( in_array( current_action(), array( 'before_delete_post', 'trashed_post', 'untrashed_post' ), true ) && 'shop_order' !== get_post_type( $order_id ) ) {
 		return;
 	}
 
@@ -1092,6 +1092,8 @@ add_action( 'woocommerce_order_status_failed', 'wc_update_coupon_usage_counts' )
 add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_before_delete_order', 'wc_update_coupon_usage_counts' );
 add_action( 'before_delete_post', 'wc_update_coupon_usage_counts' );
+add_action( 'trashed_post', 'wc_update_coupon_usage_counts' );
+add_action( 'untrashed_post', 'wc_update_coupon_usage_counts' );
 
 /**
  * Cancel all unpaid orders after held duration to prevent stock lock for those products.
