@@ -17,7 +17,12 @@
 		"noFallthroughCasesInSwitch": true,
 		"noPropertyAccessFromIndexSignature": true,
 		"noUnusedLocals": true,
-		"noUnusedParameters": true
+		"noUnusedParameters": true,
+		"paths": {
+			"@wordpress/data/build-types/*": [
+				"./node_modules/@wordpress/data/build-types/*"
+			]
+		}
 	},
 	"include": [ "**/*.ts", "**/*.tsx" ],
 	"exclude": [ "node_modules" ]
