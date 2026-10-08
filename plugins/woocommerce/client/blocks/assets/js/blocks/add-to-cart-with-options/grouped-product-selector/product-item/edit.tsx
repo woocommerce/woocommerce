@@ -33,7 +33,7 @@ type ProductItemWithContextProps = {
 	product?: ProductResponseItem | null;
 	blocks: BlockInstance[];
 	isSelected: boolean;
-	onSelect(): void;
+	onSelect: () => void;
 };
 
 type ProductItemProps = {
@@ -41,7 +41,7 @@ type ProductItemProps = {
 	blocks: BlockInstance[];
 	isLoading: boolean;
 	isSelected: boolean;
-	onSelect(): void;
+	onSelect: () => void;
 };
 
 const ProductItem = ( {
@@ -200,7 +200,7 @@ export default function ProductItemTemplateEdit(
 					}
 					onSelect={ () => setSelectedProductItem( productItem.id ) }
 				/>
-		  ) )
+			) )
 		: previewProductResponseItems?.map( ( productItem ) => (
 				<ProductItem
 					key={ productItem.id }
@@ -214,7 +214,7 @@ export default function ProductItemTemplateEdit(
 					}
 					onSelect={ () => setSelectedProductItem( productItem.id ) }
 				/>
-		  ) );
+			) );
 
 	return (
 		<div { ...blockProps }>

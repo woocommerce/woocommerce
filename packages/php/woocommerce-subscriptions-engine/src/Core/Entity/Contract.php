@@ -13,10 +13,10 @@
  *
  * It holds no cycle graph in memory (cycles are fetched on demand), and a chain is
  * just the pair `(contract_id, kind)` with its counters derived from the cycle rows.
- * `origin_order_id` is nullable (a manual contract has none; for a checkout contract
- * it equals cycle 1's `order_id`). Timestamps are GMT strings; money totals are
- * decimal-safe strings on the storage scale; the payment instrument is exposed as an
- * {@see InstrumentRef}.
+ * `origin_order_id` is an optional extension fact. Customer, currency, selling plan and
+ * start are optional until the extension supplies them; a new contract defaults to
+ * `draft`. Timestamps are GMT strings; money totals are decimal-safe strings on the
+ * storage scale; the payment instrument is exposed as an {@see InstrumentRef}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -27,7 +27,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -48,6 +48,20 @@ final class Contract {
 	public const ADDRESS_SHIPPING = 'shipping';
 
 	/**
+	 * Fields of a line-item row.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ITEM_FIELDS = array( 'item_name', 'item_type', 'product_id', 'variation_id', 'quantity', 'subtotal', 'total', 'taxes' );
+
+	/**
+	 * Fields of an address.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ADDRESS_FIELDS = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'email', 'phone' );
+
+	/**
 	 * Contract id, or null before it is persisted.
 	 *
 	 * @var int|null
@@ -62,29 +76,28 @@ final class Contract {
 	private $status;
 
 	/**
-	 * Owning customer id.
+	 * Owning customer id, or null.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	private $customer_id;
 
 	/**
-	 * ISO-4217 currency code, locked at creation.
+	 * ISO-4217 currency code, or null.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $currency;
 
 	/**
-	 * Foreign key to the selling plan.
+	 * Selling plan id, or null.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	private $selling_plan_id;
 
 	/**
-	 * Origin order id, or null for a manual contract. Equals cycle 1's `order_id`
-	 * for a checkout contract.
+	 * Origin order id, or null when the extension recorded none.
 	 *
 	 * @var int|null
 	 */
@@ -119,9 +132,9 @@ final class Contract {
 	private $payment_token_id;
 
 	/**
-	 * When the contract goes (or went) active. GMT string.
+	 * When the contract goes (or went) active, or null. GMT string.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $start_gmt;
 
@@ -235,50 +248,42 @@ final class Contract {
 	private $addresses;
 
 	/**
-	 * Contract meta as key => value.
-	 *
-	 * @var array<string, string>
-	 */
-	private $meta;
-
-	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
 	 * to its property type; unknown keys are ignored, missing keys take the default.
 	 *
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                   = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
-		$this->status               = ScalarCoercion::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
-		$this->customer_id          = ScalarCoercion::coerce_int( $data['customer_id'] ?? null );
-		$this->currency             = ScalarCoercion::coerce_string( $data['currency'] ?? null );
-		$this->selling_plan_id      = ScalarCoercion::coerce_int( $data['selling_plan_id'] ?? null );
-		$this->origin_order_id      = ScalarCoercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
-		$this->extension_slug       = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->payment_method       = ScalarCoercion::coerce_nullable_string( $data['payment_method'] ?? null );
-		$this->payment_method_title = ScalarCoercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
-		$this->payment_token_id     = ScalarCoercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
-		$this->start_gmt            = ScalarCoercion::coerce_string( $data['start_gmt'] ?? null );
-		$this->next_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
-		$this->plan_snapshot_id     = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id    = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->id                   = Coercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->status               = Coercion::coerce_string( $data['status'] ?? null, ContractStatus::DRAFT );
+		$this->customer_id          = Coercion::coerce_nullable_int( $data['customer_id'] ?? null );
+		$this->currency             = Coercion::coerce_nullable_string( $data['currency'] ?? null );
+		$this->selling_plan_id      = Coercion::coerce_nullable_int( $data['selling_plan_id'] ?? null );
+		$this->origin_order_id      = Coercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
+		$this->extension_slug       = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->payment_method       = Coercion::coerce_nullable_string( $data['payment_method'] ?? null );
+		$this->payment_method_title = Coercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
+		$this->payment_token_id     = Coercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
+		$this->start_gmt            = Coercion::coerce_nullable_string( $data['start_gmt'] ?? null );
+		$this->next_payment_gmt     = Coercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
+		$this->plan_snapshot_id     = Coercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id    = Coercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
 		$this->billing_total        = MoneyScale::normalize_money( $data['billing_total'] ?? '0' );
 		$this->discount_total       = MoneyScale::normalize_money( $data['discount_total'] ?? '0' );
 		$this->shipping_total       = MoneyScale::normalize_money( $data['shipping_total'] ?? '0' );
 		$this->tax_total            = MoneyScale::normalize_money( $data['tax_total'] ?? '0' );
-		$this->last_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
-		$this->last_attempt_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
-		$this->trial_end_gmt        = ScalarCoercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
-		$this->end_gmt              = ScalarCoercion::coerce_nullable_string( $data['end_gmt'] ?? null );
-		$this->schedule_source      = ScalarCoercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
-		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
-		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
-		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
+		$this->last_payment_gmt     = Coercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
+		$this->last_attempt_gmt     = Coercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
+		$this->trial_end_gmt        = Coercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
+		$this->end_gmt              = Coercion::coerce_nullable_string( $data['end_gmt'] ?? null );
+		$this->schedule_source      = Coercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		$this->items                = Coercion::coerce_list_of_arrays( $data['items'] ?? null );
+		$this->addresses            = Coercion::coerce_map_of_arrays( $data['addresses'] ?? null );
 		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
 	/**
-	 * Build a new, unsaved contract.
+	 * Build a new, unsaved contract. `extension_slug` is required.
 	 *
 	 * @param array<string, mixed> $args Contract attributes.
 	 * @throws DomainException If the contract attributes are not valid.
@@ -289,15 +294,32 @@ final class Contract {
 
 		$contract = new self( $args );
 
-		if ( ! ContractStatus::is_registered( $contract->status ) ) {
-			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
-		}
-
-		if ( ! in_array( $contract->schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
-			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $contract->schedule_source ) );
-		}
+		self::assert_status( $contract->status );
+		self::assert_extension_slug( $contract->extension_slug );
+		self::assert_schedule_source( $contract->schedule_source );
+		$contract->assert_money_has_currency();
 
 		return $contract;
+	}
+
+	/**
+	 * Refuse money without a currency: a contract with no currency must have every total at zero.
+	 * Cross-field, so callers that change several fields check it once after the last change.
+	 * Checked against the state the caller holds: the engine opens no transaction or lock, so
+	 * concurrent writers to the currency and totals of one contract coordinate themselves.
+	 *
+	 * @throws DomainException If a total is non-zero while the currency is unset.
+	 */
+	public function assert_money_has_currency(): void {
+		if ( null !== $this->currency ) {
+			return;
+		}
+
+		foreach ( array( $this->billing_total, $this->discount_total, $this->shipping_total, $this->tax_total ) as $total ) {
+			if ( 0.0 !== (float) $total ) {
+				throw new DomainException( 'Contract: money totals require a currency.' );
+			}
+		}
 	}
 
 	/**
@@ -305,22 +327,20 @@ final class Contract {
 	 *
 	 * The frozen plan terms ride second, ahead of the child rows: a contract without
 	 * its plan is pretty pointless, so the snapshot is hydrated on the same footing as
-	 * items / addresses / meta rather than through a separate mutation step.
+	 * items / addresses rather than through a separate mutation step.
 	 *
 	 * @param array<string, mixed>                $row           Contract row.
 	 * @param PlanSnapshot|null                   $plan_snapshot Frozen plan terms for the row's `plan_snapshot_id`, or null.
 	 * @param array<int, array<string, mixed>>    $items         Item rows.
 	 * @param array<string, array<string, mixed>> $addresses     Address rows keyed by type.
-	 * @param array<string, string>               $meta          Meta as key => value.
 	 */
-	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array() ): self {
 		$contract = new self(
 			array_merge(
 				$row,
 				array(
 					'items'     => $items,
 					'addresses' => $addresses,
-					'meta'      => $meta,
 				)
 			)
 		);
@@ -370,32 +390,57 @@ final class Contract {
 			return;
 		}
 
-		if ( ! ContractStatus::is_registered( $status ) ) {
-			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
-		}
+		self::assert_status( $status );
 
 		$this->status = $status;
 	}
 
 	/**
-	 * Owning customer id.
+	 * Owning customer id, or null.
 	 */
-	public function get_customer_id(): int {
+	public function get_customer_id(): ?int {
 		return $this->customer_id;
 	}
 
 	/**
-	 * ISO-4217 currency code.
+	 * Set the owning customer id.
+	 *
+	 * @param int|null $customer_id Customer id, or null.
 	 */
-	public function get_currency(): string {
+	public function set_customer_id( ?int $customer_id ): void {
+		$this->customer_id = $customer_id;
+	}
+
+	/**
+	 * ISO-4217 currency code, or null.
+	 */
+	public function get_currency(): ?string {
 		return $this->currency;
 	}
 
 	/**
-	 * Foreign key to the selling plan.
+	 * Set the ISO-4217 currency code.
+	 *
+	 * @param string|null $currency Currency code, or null.
 	 */
-	public function get_selling_plan_id(): int {
+	public function set_currency( ?string $currency ): void {
+		$this->currency = $currency;
+	}
+
+	/**
+	 * Selling plan id, or null.
+	 */
+	public function get_selling_plan_id(): ?int {
 		return $this->selling_plan_id;
+	}
+
+	/**
+	 * Set the selling plan id.
+	 *
+	 * @param int|null $selling_plan_id Selling plan id, or null.
+	 */
+	public function set_selling_plan_id( ?int $selling_plan_id ): void {
+		$this->selling_plan_id = $selling_plan_id;
 	}
 
 	/**
@@ -403,6 +448,15 @@ final class Contract {
 	 */
 	public function get_origin_order_id(): ?int {
 		return $this->origin_order_id;
+	}
+
+	/**
+	 * Set the origin order id.
+	 *
+	 * @param int|null $origin_order_id Order id, or null.
+	 */
+	public function set_origin_order_id( ?int $origin_order_id ): void {
+		$this->origin_order_id = $origin_order_id;
 	}
 
 	/**
@@ -625,10 +679,19 @@ final class Contract {
 	}
 
 	/**
-	 * Start timestamp (GMT string).
+	 * Start timestamp (GMT string), or null.
 	 */
-	public function get_start_gmt(): string {
+	public function get_start_gmt(): ?string {
 		return $this->start_gmt;
+	}
+
+	/**
+	 * Set the start timestamp.
+	 *
+	 * @param string|null $start_gmt GMT string or null.
+	 */
+	public function set_start_gmt( ?string $start_gmt ): void {
+		$this->start_gmt = $start_gmt;
 	}
 
 	/**
@@ -636,6 +699,18 @@ final class Contract {
 	 */
 	public function get_schedule_source(): string {
 		return $this->schedule_source;
+	}
+
+	/**
+	 * Set who runs renewals.
+	 *
+	 * @param string $schedule_source 'primitive' or 'gateway'.
+	 * @throws DomainException If `$schedule_source` is neither.
+	 */
+	public function set_schedule_source( string $schedule_source ): void {
+		self::assert_schedule_source( $schedule_source );
+
+		$this->schedule_source = $schedule_source;
 	}
 
 	/**
@@ -648,6 +723,15 @@ final class Contract {
 	}
 
 	/**
+	 * Replace the line items.
+	 *
+	 * @param array<int|string, mixed> $items Item rows; non-array elements are skipped.
+	 */
+	public function set_items( array $items ): void {
+		$this->items = Coercion::coerce_list_of_arrays( $items );
+	}
+
+	/**
 	 * Addresses keyed by type.
 	 *
 	 * @return array<string, array<string, mixed>>
@@ -657,30 +741,12 @@ final class Contract {
 	}
 
 	/**
-	 * Contract meta as key => value.
+	 * Replace the addresses.
 	 *
-	 * @return array<string, string>
+	 * @param array<int|string, mixed> $addresses Address rows keyed by type; non-array elements are skipped.
 	 */
-	public function get_meta(): array {
-		return $this->meta;
-	}
-
-	/**
-	 * Set or remove one meta entry.
-	 *
-	 * Meta is opaque key/value data; the repository's existing child sync
-	 * persists the map on save.
-	 *
-	 * @param string      $key   Meta key.
-	 * @param string|null $value Meta value, or null to remove the key.
-	 */
-	public function set_meta( string $key, ?string $value ): void {
-		if ( null === $value ) {
-			unset( $this->meta[ $key ] );
-			return;
-		}
-
-		$this->meta[ $key ] = $value;
+	public function set_addresses( array $addresses ): void {
+		$this->addresses = Coercion::coerce_map_of_arrays( $addresses );
 	}
 
 	/**
@@ -716,82 +782,38 @@ final class Contract {
 	}
 
 	/**
-	 * Shape a caller-supplied value into the line-item row list. A non-array yields
-	 * no items; non-array elements are skipped.
+	 * Refuse a status that is not a registered contract status.
 	 *
-	 * @param mixed $value Caller-supplied items.
-	 * @return array<int, array<string, mixed>>
+	 * @param string $status Status to check.
+	 * @throws DomainException If `$status` is not registered.
 	 */
-	private static function coerce_item_rows( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
+	private static function assert_status( string $status ): void {
+		if ( ! ContractStatus::is_registered( $status ) ) {
+			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
 		}
-
-		$rows = array();
-		foreach ( $value as $row ) {
-			if ( is_array( $row ) ) {
-				$rows[] = self::coerce_string_keyed( $row );
-			}
-		}
-
-		return $rows;
 	}
 
 	/**
-	 * Shape a caller-supplied value into the addresses map keyed by type. A non-array
-	 * yields an empty map; non-array elements are skipped.
+	 * Refuse a missing or empty owning extension slug.
 	 *
-	 * @param mixed $value Caller-supplied addresses.
-	 * @return array<string, array<string, mixed>>
+	 * @param string|null $extension_slug Extension slug to check.
+	 * @throws DomainException If `$extension_slug` is null or empty.
 	 */
-	private static function coerce_address_map( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
+	private static function assert_extension_slug( ?string $extension_slug ): void {
+		if ( null === $extension_slug || '' === $extension_slug ) {
+			throw new DomainException( 'Contract: extension_slug is required and must be a non-empty string.' );
 		}
-
-		$map = array();
-		foreach ( $value as $type => $address ) {
-			if ( is_array( $address ) ) {
-				$map[ (string) $type ] = self::coerce_string_keyed( $address );
-			}
-		}
-
-		return $map;
 	}
 
 	/**
-	 * Shape a caller-supplied value into the meta map (string => string). A non-array
-	 * yields an empty map.
+	 * Refuse a schedule source other than 'primitive' or 'gateway'.
 	 *
-	 * @param mixed $value Caller-supplied meta.
-	 * @return array<string, string>
+	 * @param string $schedule_source Schedule source to check.
+	 * @throws DomainException If `$schedule_source` is neither.
 	 */
-	private static function coerce_meta_map( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
+	private static function assert_schedule_source( string $schedule_source ): void {
+		if ( ! in_array( $schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
+			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
 		}
-
-		$map = array();
-		foreach ( $value as $key => $meta_value ) {
-			$map[ (string) $key ] = ScalarCoercion::coerce_string( $meta_value );
-		}
-
-		return $map;
-	}
-
-	/**
-	 * Re-key an array as a string-keyed map, recovering the `array<string, mixed>`
-	 * row shape from an otherwise `int|string`-keyed array.
-	 *
-	 * @param array<int|string, mixed> $value Array to re-key.
-	 * @return array<string, mixed>
-	 */
-	private static function coerce_string_keyed( array $value ): array {
-		$result = array();
-		foreach ( $value as $key => $entry ) {
-			$result[ (string) $key ] = $entry;
-		}
-
-		return $result;
 	}
 }

@@ -36,11 +36,10 @@ export interface FormProps<
 	isEditing?: boolean;
 }
 
-export interface AddressLineFieldsProps
-	extends Omit<
-		FormProps< AddressFormValues >,
-		'fields' | 'values' | 'onChange'
-	> {
+export interface AddressLineFieldsProps extends Omit<
+	FormProps< AddressFormValues >,
+	'fields' | 'values' | 'onChange'
+> {
 	// Overwriting the id for the fields.
 	formId: string;
 	// Address 1 fields and value.
