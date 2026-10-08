@@ -196,8 +196,14 @@ class WC_Admin_Addons {
 			exit();
 		}
 
+		// get_sections() returns false when the request fails, and the filter can return anything.
 		$sections         = self::get_sections();
-		$allowed_sections = array_map( fn( $section_object ) => $section_object->slug, $sections );
+		$allowed_sections = array();
+		foreach ( is_array( $sections ) ? $sections : array() as $section_object ) {
+			if ( is_object( $section_object ) && isset( $section_object->slug ) && is_string( $section_object->slug ) ) {
+				$allowed_sections[] = $section_object->slug;
+			}
+		}
 		// Validate if the category is supported.
 		$section = in_array( $section, $allowed_sections, true ) ? $section : '_featured';
 
