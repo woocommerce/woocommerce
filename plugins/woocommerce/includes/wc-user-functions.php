@@ -748,7 +748,8 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 						break;
 					}
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					$can_manage_user             = ! empty( $userdata->roles ) && empty( array_diff( $userdata->roles, array_unique( $shop_manager_editable_roles ) ) );
+					if ( ! $can_manage_user ) {
 						$caps[] = 'do_not_allow';
 					}
 				}

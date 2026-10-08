@@ -319,9 +319,7 @@ export default function Content(): React.JSX.Element {
 					} );
 
 					const tab = query.tab as
-						| 'extensions'
-						| 'themes'
-						| 'business-services';
+						'extensions' | 'themes' | 'business-services';
 
 					recordSearchFinishedEvent( resultsCounts[ tab ] );
 

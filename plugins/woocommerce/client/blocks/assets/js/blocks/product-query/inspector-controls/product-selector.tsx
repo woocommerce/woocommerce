@@ -82,7 +82,7 @@ export const ProductSelector = ( props: ProductQueryBlock ) => {
 						? token
 						: productsList.find(
 								( product ) => product.id === Number( token )
-						  )?.name || ''
+							)?.name || ''
 				}
 				label={ __( 'Pick some products', 'woocommerce' ) }
 				onChange={ onTokenChange }

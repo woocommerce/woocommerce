@@ -134,7 +134,9 @@ const productButtonStore = {
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
-			if ( ! displayViewCart ) return false;
+			if ( ! displayViewCart ) {
+				return false;
+			}
 			return state.quantity > 0;
 		},
 	},

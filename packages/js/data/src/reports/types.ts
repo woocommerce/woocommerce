@@ -222,6 +222,10 @@ export type TaxesReport = {
 	shipping_tax: number;
 	/** Taxable amount. */
 	taxable_amount?: number;
+	/** Taxable amount of line items and fees. */
+	order_taxable_amount?: number;
+	/** Taxable amount of shipping. */
+	shipping_taxable_amount?: number;
 	/** Number of orders. */
 	orders_count: number;
 };
@@ -338,24 +342,24 @@ export type ReportItemObjectInfer< T > = {
 	data: T extends 'customers'
 		? CustomerReport
 		: T extends 'products'
-		? ProductReport
-		: T extends 'variations'
-		? VariationReport
-		: T extends 'orders'
-		? OrderReport
-		: T extends 'categories'
-		? CategoriesReport
-		: T extends 'taxes'
-		? TaxesReport
-		: T extends 'coupons'
-		? CouponReport
-		: T extends 'stock'
-		? StockReport
-		: T extends 'downloads'
-		? DownloadReport
-		: T extends 'performance_indicators'
-		? PerformanceIndicatorReport
-		: never;
+			? ProductReport
+			: T extends 'variations'
+				? VariationReport
+				: T extends 'orders'
+					? OrderReport
+					: T extends 'categories'
+						? CategoriesReport
+						: T extends 'taxes'
+							? TaxesReport
+							: T extends 'coupons'
+								? CouponReport
+								: T extends 'stock'
+									? StockReport
+									: T extends 'downloads'
+										? DownloadReport
+										: T extends 'performance_indicators'
+											? PerformanceIndicatorReport
+											: never;
 	totalResults: number;
 	totalPages: number;
 };
@@ -525,18 +529,18 @@ export type ReportStatObjectInfer< T > = {
 	data: T extends 'products'
 		? ProductReportStat
 		: T extends 'variations'
-		? VariationsReportStat
-		: T extends 'revenue'
-		? RevenueReportStat
-		: T extends 'orders'
-		? OrderReportStat
-		: T extends 'taxes'
-		? TaxesReportStat
-		: T extends 'coupons'
-		? CouponsReportStat
-		: T extends 'customers'
-		? CustomersReportStat
-		: never;
+			? VariationsReportStat
+			: T extends 'revenue'
+				? RevenueReportStat
+				: T extends 'orders'
+					? OrderReportStat
+					: T extends 'taxes'
+						? TaxesReportStat
+						: T extends 'coupons'
+							? CouponsReportStat
+							: T extends 'customers'
+								? CustomersReportStat
+								: never;
 	totalResults: number;
 	totalPages: number;
 };

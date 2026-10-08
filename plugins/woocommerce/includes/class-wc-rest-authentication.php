@@ -684,19 +684,26 @@ class WC_REST_Authentication {
 
 		$used_nonces = maybe_unserialize( $user->nonces );
 
-		if ( empty( $used_nonces ) ) {
+		if ( empty( $used_nonces ) || ! is_array( $used_nonces ) ) {
 			$used_nonces = array();
 		}
 
-		if ( in_array( $nonce, $used_nonces, true ) ) {
-			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid nonce - nonce has already been used.', 'woocommerce' ), array( 'status' => 401 ) );
+		foreach ( $used_nonces as $timestamp_nonces ) {
+			if ( in_array( $nonce, (array) $timestamp_nonces, true ) ) {
+				return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid nonce - nonce has already been used.', 'woocommerce' ), array( 'status' => 401 ) );
+			}
 		}
 
-		$used_nonces[ $timestamp ] = $nonce;
+		if ( isset( $used_nonces[ $timestamp ] ) ) {
+			$used_nonces[ $timestamp ]   = (array) $used_nonces[ $timestamp ];
+			$used_nonces[ $timestamp ][] = $nonce;
+		} else {
+			$used_nonces[ $timestamp ] = $nonce;
+		}
 
 		// Remove expired nonces.
-		foreach ( $used_nonces as $nonce_timestamp => $nonce ) {
-			if ( $nonce_timestamp < ( time() - $valid_window ) ) {
+		foreach ( array_keys( $used_nonces ) as $nonce_timestamp ) {
+			if ( ! is_numeric( $nonce_timestamp ) || $nonce_timestamp < ( time() - $valid_window ) ) {
 				unset( $used_nonces[ $nonce_timestamp ] );
 			}
 		}

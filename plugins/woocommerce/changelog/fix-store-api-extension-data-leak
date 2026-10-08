@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: stop an extension whose data or schema callback throws from receiving another extension's data

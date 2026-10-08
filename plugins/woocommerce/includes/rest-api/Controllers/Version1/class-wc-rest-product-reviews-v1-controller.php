@@ -319,7 +319,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_product_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
+		update_comment_meta( $product_review_id, 'rating', ! empty( $request['rating'] ) ? $request['rating'] : '0' );
+		wc_review_is_from_verified_owner( $product_review_id );
 
 		$product_review = get_comment( $product_review_id );
 

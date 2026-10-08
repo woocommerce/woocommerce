@@ -37,11 +37,11 @@ export const OverwriteConfirmationModal = ( {
 					? __(
 							'Importing the file will overwrite the current configuration for the following items in WooCommerce Settings:',
 							'woocommerce'
-					  )
+						)
 					: __(
 							'Importing the file will overwrite the current configuration in WooCommerce Settings.',
 							'woocommerce'
-					  ) }
+						) }
 			</p>
 
 			<ul className="woocommerce-blueprint-overwrite-modal__list">

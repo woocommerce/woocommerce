@@ -39,13 +39,24 @@ final class SchemaInstaller {
 	 *         contracts for the batch renewal scan.
 	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
 	 *         options, gain merchant_code (UNIQUE).
+	 * 2.4.0 - owner-scoped due scan: `due_owner (extension_slug, next_payment_gmt)` replaces
+	 *         `due_contract (status, next_payment_gmt)` and makes the contracts
+	 *         `extension_slug` index redundant (dropped); pre-freeze, existing tables must be
+	 *         recreated to drop the old indexes.
+	 * 2.5.0 - contracts `customer_id`, `currency`, `selling_plan_id`, `start_gmt` nullable;
+	 *         contract_meta indexes `meta_key_value` and `contract_meta_key_value` (HPOS
+	 *         shape) replace `contract_key`; pre-freeze, recreate the tables.
+	 * 2.6.0 - plans drop `description`, `category`, `sort_order`, `merchant_code`,
+	 *         `inventory_policy` and their indexes; `billing_policy` nullable; an
+	 *         `extension_status (extension_slug, status)` index; new selling_plan_meta
+	 *         table (HPOS-style indexes); pre-freeze, recreate the tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.3.0';
+	private const VERSION = '2.6.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -56,6 +67,7 @@ final class SchemaInstaller {
 	 * Logical table identifiers - keys map to unprefixed table names.
 	 */
 	public const TABLE_PLANS              = 'plans';
+	public const TABLE_PLAN_META          = 'plan_meta';
 	public const TABLE_CONTRACTS          = 'contracts';
 	public const TABLE_CONTRACT_ITEMS     = 'contract_items';
 	public const TABLE_CONTRACT_ADDRESSES = 'contract_addresses';
@@ -164,6 +176,7 @@ final class SchemaInstaller {
 	private static function get_table_names( string $prefix ): array {
 		return array(
 			self::TABLE_PLANS              => $prefix . 'wc_selling_plans',
+			self::TABLE_PLAN_META          => $prefix . 'wc_selling_plan_meta',
 			self::TABLE_CONTRACTS          => $prefix . 'wc_subscription_contracts',
 			self::TABLE_CONTRACT_ITEMS     => $prefix . 'wc_subscription_contract_items',
 			self::TABLE_CONTRACT_ADDRESSES => $prefix . 'wc_subscription_contract_addresses',
@@ -186,6 +199,7 @@ final class SchemaInstaller {
 	 */
 	private static function get_table_definitions( array $names, string $collate ): array {
 		$plans              = $names[ self::TABLE_PLANS ];
+		$plan_meta          = $names[ self::TABLE_PLAN_META ];
 		$contracts          = $names[ self::TABLE_CONTRACTS ];
 		$contract_items     = $names[ self::TABLE_CONTRACT_ITEMS ];
 		$contract_addresses = $names[ self::TABLE_CONTRACT_ADDRESSES ];
@@ -193,39 +207,43 @@ final class SchemaInstaller {
 		$cycles             = $names[ self::TABLE_CYCLES ];
 		$snapshots          = $names[ self::TABLE_SNAPSHOTS ];
 
-		// `merchant_code` is DB-enforced-unique per extension (composite with
-		// `extension_slug`) for idempotency on consumer-supplied codes - each consumer
-		// owns its own code namespace; NULLs are treated as distinct, so consumers that
-		// do not use merchant codes are unaffected. `extension_slug` records the creating
-		// extension's registered slug. Nullable while owner identifier/registration
-		// semantics are still open; tightened additively once decided.
+		// Mirrors the HPOS orders meta table indexes, including its meta_value prefix length.
+		$meta_value_index_length = max( min( absint( apply_filters( 'woocommerce_database_max_index_length', 191 ) ), 767 ) - 8 - 100 - 1, 20 );
+
+		// The three policies are opaque JSON payloads of the owning extension; the engine
+		// checks their shape only. `extension_slug` is the owner (nullable while owner
+		// registration semantics are still open). `extension_status` keys owner-scoped
+		// reads filtered by status.
 		$plans_sql = "CREATE TABLE {$plans} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
-  description TEXT NULL,
-  billing_policy JSON NOT NULL,
+  billing_policy JSON NULL,
   delivery_policy JSON NULL,
-  inventory_policy JSON NULL,
   pricing_policy JSON NULL,
-  category VARCHAR(32) NOT NULL DEFAULT 'SUBSCRIPTION',
   status VARCHAR(20) NOT NULL DEFAULT 'active',
-  sort_order INT NOT NULL DEFAULT 0,
-  merchant_code VARCHAR(64) NULL,
   extension_slug VARCHAR(64) NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),
-  UNIQUE KEY extension_merchant_code (extension_slug, merchant_code),
-  KEY category (category),
-  KEY status_sort (status, sort_order, id),
-  KEY extension_slug (extension_slug)
+  KEY extension_status (extension_slug, status)
+) {$collate};";
+
+		$plan_meta_sql = "CREATE TABLE {$plan_meta} (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  plan_id BIGINT UNSIGNED NOT NULL,
+  meta_key VARCHAR(255) NOT NULL,
+  meta_value LONGTEXT NULL,
+  PRIMARY KEY  (id),
+  KEY meta_key_value (meta_key(50), meta_value(20)),
+  KEY plan_meta_key_value (plan_id, meta_key(100), meta_value({$meta_value_index_length}))
 ) {$collate};";
 
 		// The contract row is the live source of truth: the totals and stamps are live
-		// values, not caches of cycles. The `due_contract (status, next_payment_gmt)` index
-		// keys the batch dispatcher's scan (status equality, then a range on the due date);
+		// values, not caches of cycles. The `due_owner (extension_slug, next_payment_gmt)` index
+		// keys the batch dispatcher's scan (owner equality, then a range on the due date);
 		// `due` is retained for next-bill-cache lookups keyed the other way. `origin_order_id`
-		// is NULLABLE (a manual/admin contract has no origin order). There is no generic
+		// is NULLABLE (a manual/admin contract has no origin order); `customer_id`, `currency`,
+		// `selling_plan_id` and `start_gmt` are NULLABLE until the extension supplies them. There is no generic
 		// `cycle_count` - counters are per-chain, derived as `MAX(count)` over
 		// `(contract_id, kind)`. `currency` is first-class (forward-compat for multi-currency
 		// recurring; today the store base currency). `schedule_source` distinguishes
@@ -233,15 +251,15 @@ final class SchemaInstaller {
 		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
-  customer_id BIGINT UNSIGNED NOT NULL,
-  currency CHAR(3) NOT NULL,
-  selling_plan_id BIGINT UNSIGNED NOT NULL,
+  customer_id BIGINT UNSIGNED NULL,
+  currency CHAR(3) NULL,
+  selling_plan_id BIGINT UNSIGNED NULL,
   origin_order_id BIGINT UNSIGNED NULL,
   extension_slug VARCHAR(64) NULL,
   payment_method VARCHAR(100) NULL,
   payment_method_title VARCHAR(200) NULL,
   payment_token_id BIGINT UNSIGNED NULL,
-  start_gmt DATETIME NOT NULL,
+  start_gmt DATETIME NULL,
   next_payment_gmt DATETIME NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
@@ -259,9 +277,8 @@ final class SchemaInstaller {
   PRIMARY KEY  (id),
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
-  KEY due_contract (status, next_payment_gmt),
-  KEY origin_order (origin_order_id),
-  KEY extension_slug (extension_slug)
+  KEY due_owner (extension_slug, next_payment_gmt),
+  KEY origin_order (origin_order_id)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (
@@ -304,7 +321,8 @@ final class SchemaInstaller {
   meta_key VARCHAR(255) NOT NULL,
   meta_value LONGTEXT NULL,
   PRIMARY KEY  (id),
-  KEY contract_key (contract_id, meta_key(100))
+  KEY meta_key_value (meta_key(50), meta_value(20)),
+  KEY contract_meta_key_value (contract_id, meta_key(100), meta_value({$meta_value_index_length}))
 ) {$collate};";
 
 		// Immutable billing records. A chain is the pair `(contract_id, kind)` - there is
@@ -367,6 +385,7 @@ final class SchemaInstaller {
 
 		return array(
 			$plans_sql,
+			$plan_meta_sql,
 			$contracts_sql,
 			$contract_items_sql,
 			$contract_addresses_sql,

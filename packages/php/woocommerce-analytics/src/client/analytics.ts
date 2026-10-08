@@ -2,6 +2,7 @@
  * External dependencies
  */
 import debugFactory from 'debug';
+import { sanitizeUrl } from '@automattic/tracks-shared-utils';
 /**
  * Internal dependencies
  */
@@ -202,10 +203,10 @@ export class Analytics {
 		eventProperties._sy = sy !== undefined ? sy : 0;
 
 		if ( document.location !== undefined ) {
-			eventProperties._dl = document.location.toString();
+			eventProperties._dl = sanitizeUrl( document.location.toString() );
 		}
 		if ( document.referrer !== undefined ) {
-			eventProperties._dr = document.referrer;
+			eventProperties._dr = sanitizeUrl( document.referrer );
 		}
 	};
 

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * External dependencies
  */
@@ -19,7 +18,7 @@ export default {
 	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
 	TosAndPp: createInterpolateElement(
 		sprintf(
-			/* translators: 1: Payment provider name (e.g., WooPayments) */
+			/* eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace */ /* translators: 1: Payment provider name (e.g., WooPayments) */
 			__(
 				'By using %1$s you agree to our <a1>Terms of Service</a1> and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via %1$s upon completion of installation, setup, and connection. ',
 				'woocommerce'
@@ -47,7 +46,7 @@ export default {
 	),
 	TosAndPpWooPay: createInterpolateElement(
 		sprintf(
-			/* translators: 1: Payment provider name (e.g., WooPayments) */
+			/* eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace */ /* translators: 1: Payment provider name (e.g., WooPayments) */
 			__(
 				'By using %1$s you agree to our <a1>Terms of Service</a1> (including WooPay <a3>merchant terms</a3>) and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via %1$s upon completion of installation, setup, and connection. ',
 				'woocommerce'

@@ -86,8 +86,8 @@ class EmailApiController {
 			'email_type'      => $email_type,
 			// Recipient is possible to set only for the specific type of emails. When the field `recipient` is set in the form fields, it means that the email type has a recipient field.
 			'recipient'       => array_key_exists( 'recipient', $form_fields ) ? $email->get_option( 'recipient', get_option( 'admin_email' ) ) : null,
-			'cc'              => $email->get_option( 'cc' ),
-			'bcc'             => $email->get_option( 'bcc' ),
+			'cc'              => $email->supports_cc_bcc() ? $email->get_option( 'cc' ) : null,
+			'bcc'             => $email->supports_cc_bcc() ? $email->get_option( 'bcc' ) : null,
 		);
 	}
 
@@ -136,11 +136,13 @@ class EmailApiController {
 		if ( array_key_exists( 'recipient', $data ) ) {
 			$email->update_option( 'recipient', $data['recipient'] );
 		}
-		if ( array_key_exists( 'cc', $data ) ) {
-			$email->update_option( 'cc', $data['cc'] );
-		}
-		if ( array_key_exists( 'bcc', $data ) ) {
-			$email->update_option( 'bcc', $data['bcc'] );
+		if ( $email->supports_cc_bcc() ) {
+			if ( array_key_exists( 'cc', $data ) ) {
+				$email->update_option( 'cc', $data['cc'] );
+			}
+			if ( array_key_exists( 'bcc', $data ) ) {
+				$email->update_option( 'bcc', $data['bcc'] );
+			}
 		}
 
 		return null;

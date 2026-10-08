@@ -1472,6 +1472,80 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Assigned-customer orders apply matched rates for the editor tax location and pass the order customer to the filter.
+	 */
+	public function test_wc_get_price_excluding_tax_editor_location_filters_customer_rates(): void {
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$customer = WC_Helper_Customer::create_customer();
+		$order    = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->set_billing_country( 'DE' );
+		$order->save();
+
+		$product = new WC_Product_Simple();
+		$product->set_price( 100 );
+		$product->set_tax_status( 'taxable' );
+
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$filter_calls = array();
+		$filter       = function ( $rates, $tax_class, $filtered_customer ) use ( &$filter_calls ) {
+			$filter_calls[] = array( $rates, $tax_class, $filtered_customer );
+			foreach ( $rates as &$rate ) {
+				$rate['rate'] = 25.0;
+			}
+			return $rates;
+		};
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $filter, 10, 3 );
+
+		try {
+			$net_price = wc_get_price_excluding_tax(
+				$product,
+				array(
+					'order'        => $order,
+					'tax_location' => array(
+						'country'  => 'FR',
+						'state'    => '',
+						'postcode' => '75001',
+						'city'     => 'Paris',
+					),
+				)
+			);
+
+			$this->assertCount( 1, $filter_calls, 'The matched rates filter should run for an assigned-customer order.' );
+			$this->assertSame( '', $filter_calls[0][1], 'The filter should receive the product tax class.' );
+			$this->assertInstanceOf( WC_Customer::class, $filter_calls[0][2] );
+			$this->assertSame( $customer->get_id(), $filter_calls[0][2]->get_id(), 'The filter should receive the order customer.' );
+			$this->assertArrayHasKey( $french_tax_rate_id, $filter_calls[0][0], 'The editor location should determine the matched rate.' );
+			$this->assertEquals( 80, $net_price, 'The filtered 25% rate should determine the net price.' );
+		} finally {
+			remove_filter( 'woocommerce_matched_rates', $filter );
+			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+			WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+			$order->delete( true );
+			wp_delete_user( $customer->get_id() );
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		}
+	}
+
+	/**
 	 * @testDox Test 'wc_get_related_products' with actual related products.
 	 */
 	public function test_wc_get_related_products_with_actual_related_products() {

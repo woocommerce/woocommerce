@@ -336,7 +336,7 @@ describe( 'product filters interactivity store', () => {
 						actions: {
 							navigate: routerNavigate,
 						},
-					} as unknown as typeof import('@wordpress/interactivity-router') );
+					} as unknown as typeof import( '@wordpress/interactivity-router' ) );
 
 					expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
 					const [ navigatedUrl ] = routerNavigate.mock.calls[ 0 ];
@@ -500,7 +500,7 @@ describe( 'product filters interactivity store', () => {
 			expect( firstYield.done ).toBe( false );
 			iterator.next( {
 				actions: { navigate: routerNavigate },
-			} as unknown as typeof import('@wordpress/interactivity-router') );
+			} as unknown as typeof import( '@wordpress/interactivity-router' ) );
 
 			expect( mockReload ).not.toHaveBeenCalled();
 			expect( routerNavigate ).toHaveBeenCalledTimes( 1 );

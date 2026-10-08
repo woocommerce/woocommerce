@@ -75,7 +75,7 @@ const TotalsFooterItem = ( {
 
 	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { receiveCart, ...cart } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
 
@@ -132,7 +132,7 @@ const TotalsFooterItem = ( {
 					/* translators: %s is a list of tax rates */
 					__( 'Including %s', 'woocommerce' ),
 					'<TaxLines/>'
-			  )
+				)
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
 	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
@@ -144,7 +144,10 @@ const TotalsFooterItem = ( {
 				height="1em"
 				width="45px"
 				tag="span"
-				ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+				ariaMessage={
+					// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+					__( 'Loading price… ', 'woocommerce' )
+				}
 			/>
 		</>
 	);

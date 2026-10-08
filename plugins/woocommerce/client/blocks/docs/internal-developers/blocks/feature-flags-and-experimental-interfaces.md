@@ -15,7 +15,7 @@ WooCommerce currently uses two feature-flag systems in Blocks:
 
 | Flag | Defaults | Current Blocks usage |
 | --- | --- | --- |
-| `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items. It does not determine which block scripts webpack builds or which general block types are registered. |
+| `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items and conditional checkout-field processing in the Store API. It does not determine which block scripts webpack builds or which general block types are registered. |
 | `rest-api-v4` | Disabled in both development and core build configurations. | Exposed through [`isExperimentalWcRestApiV4Enabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It switches product entities from `/wc/v3/products` to `/wc/v4/products`, registers the settings entity, and enables the v4 product-data paths used by Product Price and Product Button in the editor. |
 
 ### Runtime feature flags
@@ -147,6 +147,9 @@ Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `di
 | Action | Additional parameters |
 | --- | --- |
 | `experimental__woocommerce_blocks-checkout-submit` | None |
+| `experimental__woocommerce_blocks-checkout-cart-render` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-open` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-close` | None |
 | `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` | `shippingRateId` |
 | `experimental__woocommerce_blocks-checkout-set-active-payment-method` | `paymentMethodSlug` |
 | `experimental__woocommerce_blocks-checkout-render-checkout-form` | None |

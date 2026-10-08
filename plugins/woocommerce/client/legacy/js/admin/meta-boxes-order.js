@@ -1702,12 +1702,12 @@ jQuery( function ( $ ) {
 			add_items: function( add_items ) {
 				wc_meta_boxes_order_items.block();
 
-				var data = {
+				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action   : 'woocommerce_add_order_item',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
 					data     : add_items
-				};
+				} );
 
 				// Check if items have changed, if so pass them through so we can save them before adding a new item.
 				if ( 'true' === $( 'button.cancel-action' ).attr( 'data-reload' ) ) {

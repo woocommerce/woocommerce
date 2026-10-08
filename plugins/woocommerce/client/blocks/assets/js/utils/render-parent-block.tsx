@@ -193,7 +193,7 @@ const renderInnerBlocks = ( {
 						children: node.childNodes,
 						depth: depth + 1,
 						blockWrapper,
-				  } )
+					} )
 				: undefined;
 
 			// We pass props here rather than componentProps to avoid the data attributes being renamed.
@@ -205,11 +205,11 @@ const renderInnerBlocks = ( {
 							...( parsedElement?.props || {} ),
 						},
 						renderedChildren
-				  )
+					)
 				: cloneElement( parsedElement, {
 						key: componentKey,
 						...( parsedElement?.props || {} ),
-				  } );
+					} );
 		}
 
 		// This will wrap inner blocks with the provided wrapper. If no wrapper is provided, we default to Fragment.

@@ -46,6 +46,10 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 		update_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION, 'yes' );
 
+		// Eagerly boot \WC_Emails so the \WC_Email class is autoloaded before any
+		// test reflects on it via getMockBuilder() / onlyMethods().
+		\WC_Emails::instance();
+
 		// Reuse the divergence-detector fixture file — same shape, same @version header.
 		$this->fixtures_base = dirname( __DIR__ ) . '/WCTransactionalEmails/fixtures/';
 		$this->posts_manager = WCTransactionalEmailPostsManager::get_instance();

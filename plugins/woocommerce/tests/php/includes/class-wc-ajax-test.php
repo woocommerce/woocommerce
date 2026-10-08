@@ -2625,6 +2625,160 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Adding a product uses the unsaved editor tax location without saving the order address.
+	 * @dataProvider add_order_item_editor_tax_location_cases
+	 *
+	 * @param string $tax_based_on Whether taxes use the billing or shipping address.
+	 * @param bool   $has_customer Whether the order has a customer with a saved base-country address.
+	 */
+	public function test_add_order_item_uses_unsaved_tax_location( string $tax_based_on, bool $has_customer ): void {
+		$this->_setRole( 'administrator' );
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', $tax_based_on );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+
+		$order = wc_create_order();
+		if ( $has_customer ) {
+			$customer = WC_Helper_Customer::create_customer( 'tax-location-customer', wp_generate_password(), 'tax-location@example.com' );
+			$customer->set_billing_country( 'BE' );
+			$customer->save();
+			$order->set_customer_id( $customer->get_id() );
+			$order->save();
+		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = 'NL';
+		$_POST['state']    = '';
+		$_POST['postcode'] = '';
+		$_POST['city']     = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.09, (float) $item->get_total(), 0.0001, 'The line price should exclude the editor location tax rate.' );
+		$this->assertSame( '', $stored_order->get_billing_country(), 'The unsaved billing country must not be persisted.' );
+		$this->assertSame( '', $stored_order->get_shipping_country(), 'The unsaved shipping country must not be persisted.' );
+	}
+
+	/**
+	 * Editor address cases for the Add product request.
+	 *
+	 * @return array
+	 */
+	public function add_order_item_editor_tax_location_cases(): array {
+		return array(
+			'billing guest'    => array( 'billing', false ),
+			'billing customer' => array( 'billing', true ),
+			'shipping guest'   => array( 'shipping', false ),
+		);
+	}
+
+	/**
+	 * @testdox Adding a product with no editor country uses the assigned customer's tax location.
+	 */
+	public function test_add_order_item_without_editor_country_uses_customer_tax_location(): void {
+		$this->_setRole( 'administrator' );
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'NL' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product  = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+		$customer = WC_Helper_Customer::create_customer( 'tax-fallback-customer', wp_generate_password(), 'tax-fallback@example.com' );
+		$customer->set_billing_country( 'BE' );
+		$customer->save();
+
+		$order = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.06, (float) $item->get_total(), 0.0001, 'The net price should use the customer’s Belgian rate rather than the Dutch base rate.' );
+	}
+
+	/**
 	 * @testdox save_order_items rejects a negative quantity and leaves the stored item untouched.
 	 */
 	public function test_save_order_items_rejects_negative_quantity() {

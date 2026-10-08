@@ -3,7 +3,7 @@
  * Integration tests for the lifecycle-actions REST controller: the auth + ownership
  * matrix (anonymous 401, valid owner 200, foreign owner 404, unknown id 404), the
  * action round-trips with their domain-summary responses, and the
- * illegal-transition 409.
+ * precondition 409.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -86,6 +86,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	private function seed( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'       => 'engine-tests',
 				'customer_id'          => $customer_id,
 				'status'               => $status,
 				'currency'             => 'USD',
@@ -211,14 +212,41 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_illegal_transition_is_a_conflict(): void {
-		// Reactivating an active contract is a no-op (idempotent) - so to force the
-		// illegal path, try to hold a cancelled contract.
+		// There is no status state machine: each flow guards its own preconditions, and
+		// a precondition the current state does not meet (holding a cancelled contract)
+		// surfaces as a 409.
 		wp_set_current_user( $this->owner_id );
 		$id = $this->seed( $this->owner_id, ContractStatus::CANCELLED );
 
 		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
 
 		$this->assertSame( 409, $response->get_status() );
+	}
+
+	public function test_hold_on_an_expired_contract_is_a_conflict(): void {
+		wp_set_current_user( $this->owner_id );
+		$id = $this->seed( $this->owner_id, ContractStatus::EXPIRED );
+
+		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
+
+		$this->assertSame( 409, $response->get_status() );
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::EXPIRED, $stored->get_status() );
+		$this->assertSame( '2099-02-01 00:00:00', $stored->get_next_payment_gmt(), 'The rejected action writes nothing.' );
+	}
+
+	public function test_cancel_on_an_expired_contract_is_a_conflict(): void {
+		wp_set_current_user( $this->owner_id );
+		$id = $this->seed( $this->owner_id, ContractStatus::EXPIRED );
+
+		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/cancel' );
+		$request->set_body_params( array( 'at_period_end' => false ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 409, $response->get_status() );
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::EXPIRED, $stored->get_status() );
+		$this->assertSame( '2099-02-01 00:00:00', $stored->get_next_payment_gmt(), 'The rejected action writes nothing.' );
 	}
 
 	/**

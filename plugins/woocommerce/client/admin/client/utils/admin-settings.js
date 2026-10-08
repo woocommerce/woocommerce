@@ -77,7 +77,7 @@ export function getAdminSetting(
 		? createDeprecatedPropertiesProxy(
 				filtered,
 				deprecatedProperties[ name ]
-		  )
+			)
 		: filtered;
 }
 

@@ -97,7 +97,7 @@ jobs:
               - '.github/workflows/scripts/docs-link-check-policy-test.sh'
               - '.github/workflows/scripts/install-lychee.sh'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)'
+              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
@@ -693,6 +693,15 @@ jobs:
     steps:
       - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
 
+      - name: 'Validate - Node version sources agree'
+        run: |
+          nvmrc="$(tr -d 'v[:space:]' < .nvmrc)"
+          workspace="$(sed -nE "s/^useNodeVersion:[[:space:]]*['\"]?([^'\"#[:space:]]+).*/\1/p" pnpm-workspace.yaml)"
+          if [ -z "$nvmrc" ] || [ -z "$workspace" ] || [ "$nvmrc" != "$workspace" ]; then
+            echo "::error::.nvmrc ($nvmrc) and useNodeVersion in pnpm-workspace.yaml ($workspace) must name the same Node version."
+            exit 1
+          fi
+
       - name: 'Setup - node'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -702,10 +711,11 @@ jobs:
         run: npm install -g syncpack@15.3.3
 
       - name: 'Validate - mismatches'
+        id: syncpack
         run: syncpack lint
 
       - name: 'Validate - prompt mitigation on failed validation'
-        if: failure()
+        if: ${{ !cancelled() && steps.syncpack.outcome == 'failure' }}
         run: |
           echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running: \`pnpm sync-dependencies\`"
           exit 1

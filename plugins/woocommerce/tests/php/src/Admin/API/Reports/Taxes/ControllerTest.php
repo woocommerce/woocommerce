@@ -148,6 +148,48 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox prepare_item_for_export formats each part of the taxable amount against the tax charged on it.
+	 */
+	public function test_prepare_item_for_export_formats_taxable_amount_parts(): void {
+		$item = array(
+			'tax_rate_id'  => 1,
+			'country'      => 'US',
+			'state'        => 'CA',
+			'name'         => 'State Tax',
+			'priority'     => 1,
+			'tax_rate'     => '8.25',
+			'total_tax'    => 82.50,
+			'order_tax'    => 75.00,
+			'shipping_tax' => 7.50,
+			'orders_count' => 10,
+		);
+
+		// Keys absent (columns missing during the upgrade window): empty cells.
+		$export_item = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( '', $export_item['order_taxable_amount'], 'A missing order part should export as an empty cell.' );
+		$this->assertSame( '', $export_item['shipping_taxable_amount'], 'A missing shipping part should export as an empty cell.' );
+
+		// Zero parts under non-zero taxes (row recorded before the split existed): empty cells.
+		$item['order_taxable_amount']    = 0;
+		$item['shipping_taxable_amount'] = 0;
+		$export_item                     = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( '', $export_item['order_taxable_amount'], 'An unknown order part should export as an empty cell, not a zero.' );
+		$this->assertSame( '', $export_item['shipping_taxable_amount'], 'An unknown shipping part should export as an empty cell, not a zero.' );
+
+		// A rate that applied to no shipping charged no shipping tax, so its zero part is known.
+		$item['shipping_tax'] = 0;
+		$export_item          = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( Controller::csv_number_format( 0 ), $export_item['shipping_taxable_amount'], 'A rate that charged no shipping tax should export a zero shipping part.' );
+
+		// Known values: formatted numbers.
+		$item['order_taxable_amount']    = 900.25;
+		$item['shipping_taxable_amount'] = 100.25;
+		$export_item                     = $this->sut->prepare_item_for_export( $item );
+		$this->assertSame( Controller::csv_number_format( 900.25 ), $export_item['order_taxable_amount'], 'A recorded order part should export as a formatted number.' );
+		$this->assertSame( Controller::csv_number_format( 100.25 ), $export_item['shipping_taxable_amount'], 'A recorded shipping part should export as a formatted number.' );
+	}
+
+	/**
 	 * @testdox prepare_item_for_export passes the original item to the filter.
 	 */
 	public function test_prepare_item_for_export_filter_receives_original_item(): void {

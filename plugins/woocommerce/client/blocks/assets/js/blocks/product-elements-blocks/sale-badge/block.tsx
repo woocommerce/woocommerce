@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import {
+	formatPrice,
+	getCurrencyFromPriceResponse,
+} from '@woocommerce/price-format';
 import clsx from 'clsx';
 import { Label } from '@woocommerce/blocks-components';
 import {
@@ -10,7 +14,7 @@ import {
 } from '@woocommerce/shared-context';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, ReactElement } from 'react';
 
 /**
  * Internal dependencies
@@ -24,7 +28,7 @@ type Props = BlockAttributes &
 		isDescendentOfSingleProductTemplate: boolean;
 	};
 
-export const Block = ( props: Props ): JSX.Element | null => {
+export const Block = ( props: Props ): ReactElement | null => {
 	const { className, align, isDescendentOfSingleProductTemplate } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
@@ -39,6 +43,45 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		! isDescendentOfSingleProductTemplate
 	) {
 		return null;
+	}
+
+	const isNumeric =
+		props.badgeContent === 'amount' || props.badgeContent === 'percentage';
+
+	let label = props.saleText || __( 'Sale', 'woocommerce' );
+	if ( isNumeric && product.type !== 'grouped' ) {
+		const prices = 'prices' in product ? product.prices : undefined;
+		const regular = Number( prices?.regular_price );
+		const price = Number( prices?.price );
+		if ( regular > 0 && price < regular ) {
+			const discount = regular - price;
+			const percentage = Math.round( ( discount / regular ) * 100 );
+			if ( props.badgeContent === 'percentage' && percentage === 0 ) {
+				return null;
+			}
+			const value =
+				props.badgeContent === 'percentage'
+					? sprintf(
+							/* translators: %s: discount percentage. %% is the percent sign. */
+							__( '%s%%', 'woocommerce' ),
+							percentage
+						)
+					: formatPrice(
+							discount,
+							getCurrencyFromPriceResponse( prices )
+						);
+			// Parent prices are independent minima, so the editor preview may differ from the largest variation discount.
+			label =
+				product.type === 'variable'
+					? sprintf(
+							/* translators: %s: approximate discount for a variable product in the editor. */
+							__( 'Up to %s', 'woocommerce' ),
+							value
+						)
+					: `${ props.prefix ?? '' }${ value }${
+							props.suffix ?? ''
+						}`;
+		}
 	}
 
 	const alignClass =
@@ -60,8 +103,12 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			style={ styleProps.style }
 		>
 			<Label
-				label={ __( 'Sale', 'woocommerce' ) }
-				screenReaderLabel={ __( 'Product on sale', 'woocommerce' ) }
+				label={ label }
+				screenReaderLabel={ sprintf(
+					/* translators: %s: sale badge text. */
+					__( 'Product on sale: %s', 'woocommerce' ),
+					label
+				) }
 			/>
 		</div>
 	);

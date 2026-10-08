@@ -52,19 +52,37 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		add_action(
 			'woocommerce_updated',
 			function () {
-				$next_hook = WC()->queue()->get_next(
+				$queue = WC()->queue();
+				// Custom queues, including subclasses, must retain their search overrides.
+				if ( \WC_Action_Queue::class === get_class( $queue ) && function_exists( 'as_has_scheduled_action' ) ) {
+					if ( as_has_scheduled_action( 'woocommerce_run_on_woocommerce_admin_updated', array(), 'woocommerce-remote-inbox-engine' ) ) {
+						return;
+					}
+				} else {
+					// A date lookup cannot represent running actions or pending async actions.
+					foreach ( array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ) as $status ) {
+						$actions = $queue->search(
+							array(
+								'hook'     => 'woocommerce_run_on_woocommerce_admin_updated',
+								'args'     => array(),
+								'group'    => 'woocommerce-remote-inbox-engine',
+								'status'   => $status,
+								'per_page' => 1,
+							),
+							'ids'
+						);
+						if ( ! empty( $actions ) ) {
+							return;
+						}
+					}
+				}
+
+				$queue->schedule_single(
+					time(),
 					'woocommerce_run_on_woocommerce_admin_updated',
 					array(),
 					'woocommerce-remote-inbox-engine'
 				);
-				if ( null === $next_hook ) {
-					WC()->queue()->schedule_single(
-						time(),
-						'woocommerce_run_on_woocommerce_admin_updated',
-						array(),
-						'woocommerce-remote-inbox-engine'
-					);
-				}
 			}
 		);
 

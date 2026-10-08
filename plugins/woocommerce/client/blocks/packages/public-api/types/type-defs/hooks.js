@@ -94,7 +94,6 @@
  * @property {string} EXPRESS_PAYMENTS Notices for the express payments step.
  */
 
-/* eslint-disable jsdoc/valid-types */
 // Enum format below triggers the above rule even though VSCode interprets it fine.
 /**
  * @typedef {NoticeContexts['PAYMENTS']|NoticeContexts['EXPRESS_PAYMENTS']} NoticeContextsEnum
@@ -143,7 +142,6 @@
  *                                                           response. This varies between context
  *                                                           emitters.
  */
-/* eslint-enable jsdoc/valid-types */
 
 /**
  * @typedef {Object} EmitResponseApi
