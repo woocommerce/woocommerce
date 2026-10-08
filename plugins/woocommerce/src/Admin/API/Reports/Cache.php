@@ -79,7 +79,7 @@ class Cache {
 		 * @param string $key        Cache key.
 		 */
 		$expiration = apply_filters( 'woocommerce_reports_cache_expiration', WEEK_IN_SECONDS, $key );
-		$expiration = is_numeric( $expiration ) && $expiration >= 0 ? (int) $expiration : WEEK_IN_SECONDS;
+		$expiration = is_numeric( $expiration ) && $expiration >= 0 ? (int) ceil( (float) $expiration ) : WEEK_IN_SECONDS;
 
 		$result = set_transient( $key, $transient_value, $expiration );
 

@@ -12,15 +12,18 @@ use WC_Unit_Test_Case;
 class CacheTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox set() stores the value for one week by default, or for the filtered expiration.
+	 * @testdox set() stores the value for one week by default, or for the filtered expiration when it is valid.
 	 *
 	 * @testWith [null, 604800]
 	 *           [60, 60]
+	 *           [0.5, 1]
+	 *           [-60, 604800]
+	 *           ["soon", 604800]
 	 *
-	 * @param int|null $expiration Filtered expiration, or null to leave the default.
-	 * @param int      $expected   Expected lifetime in seconds.
+	 * @param mixed $expiration Filtered expiration, or null to leave the default.
+	 * @param int   $expected   Expected lifetime in seconds.
 	 */
-	public function test_set_uses_expiration( ?int $expiration, int $expected ): void {
+	public function test_set_uses_expiration( $expiration, int $expected ): void {
 		$filter = fn() => $expiration;
 		if ( null !== $expiration ) {
 			add_filter( 'woocommerce_reports_cache_expiration', $filter );
