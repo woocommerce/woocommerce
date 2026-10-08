@@ -1,11 +1,14 @@
 /**
+ * External dependencies
+ */
+import type { Extension } from '@woocommerce/data';
+
+/**
  * Internal dependencies
  */
-import type { CoreProfilerEvents } from '../../events';
+import type { CoreProfilerPageComponent } from '../../index';
 
-type DriverProps = {
-	sendEvent: ( event: CoreProfilerEvents ) => void;
-};
+type DriverProps = Pick< CoreProfilerPageComponent, 'sendEvent' >;
 
 export const possibleDefaultStoreNames = [
 	undefined,
@@ -14,9 +17,8 @@ export const possibleDefaultStoreNames = [
 	'',
 ];
 
-export const exampleExtension = {
+export const exampleExtension: Extension = {
 	key: 'example-extension',
-	slug: 'example-extension',
 	name: 'Example Extension',
 	label: 'Example Extension',
 	description: 'Example extension for controller flow tests.',
@@ -170,6 +172,6 @@ export const PluginsDriver = ( { sendEvent }: DriverProps ) => (
 
 export const NoPermissionsDriver = () => <div>No installation permission</div>;
 
-export const LoaderDriver = () => <div>Installing extension</div>;
+export const LoaderDriver = () => null;
 
-export const SpinnerDriver = () => <div>Loading profiler</div>;
+export const SpinnerDriver = () => null;

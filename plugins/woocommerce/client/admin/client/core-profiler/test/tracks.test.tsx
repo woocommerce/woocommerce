@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ComponentProps } from 'react';
 import { fromCallback, fromPromise } from 'xstate5';
+import type { AnyActorLogic } from 'xstate5';
 import { recordEvent } from '@woocommerce/tracks';
 import { getQuery } from '@woocommerce/navigation';
 
@@ -12,6 +13,7 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { CoreProfilerController } from '../index';
+import { pluginInstallerMachine } from '../services/installAndActivatePlugins';
 import { exampleExtension } from './fixtures';
 
 jest.mock( '@woocommerce/tracks', () => ( {
@@ -22,13 +24,6 @@ jest.mock( '@wordpress/data', () => ( {
 	resolveSelect: jest.fn(),
 	dispatch: jest.fn( () => ( {
 		updateProfileItems: jest.fn().mockResolvedValue( undefined ),
-		updateStoreCurrencyAndMeasurementUnits: jest
-			.fn()
-			.mockResolvedValue( undefined ),
-		saveSetting: jest.fn().mockResolvedValue( undefined ),
-		saveEntityRecord: jest.fn().mockResolvedValue( undefined ),
-		invalidateResolutionForStoreSelector: jest.fn(),
-		coreProfilerCompleted: jest.fn().mockResolvedValue( undefined ),
 	} ) ),
 } ) );
 
@@ -68,19 +63,8 @@ jest.mock( '~/xstate', () => ( {
 } ) );
 
 jest.mock( '~/utils', () => ( {
-	getPluginTrackKey: jest.fn( ( key: string ) => key ),
-	getTimeFrame: jest.fn( () => 'under_10_seconds' ),
+	...jest.requireActual( '~/utils' ),
 	useFullScreen: jest.fn(),
-} ) );
-
-jest.mock( '~/utils/plugins', () => ( {
-	getPluginSlug: jest.fn( ( key: string ) => key ),
-} ) );
-
-jest.mock( '~/dashboard/utils', () => ( {
-	getCountryCode: jest.fn(
-		( location?: string ) => location?.split( ':' )[ 0 ]
-	),
 } ) );
 
 jest.mock( '../services/country', () => ( {
@@ -88,15 +72,6 @@ jest.mock( '../services/country', () => ( {
 		{ key: 'US:CA', label: 'United States — California' },
 	] ),
 } ) );
-
-jest.mock( '../services/installAndActivatePlugins', () => {
-	const { fromCallback: createCallbackActor } =
-		jest.requireActual( 'xstate5' );
-
-	return {
-		pluginInstallerMachine: createCallbackActor( () => () => undefined ),
-	};
-} );
 
 jest.mock( '../pages/IntroOptIn', () => ( {
 	IntroOptIn: jest.requireActual( './fixtures' ).IntroOptInDriver,
@@ -133,6 +108,12 @@ jest.mock( '../components/profile-spinner/profile-spinner', () => ( {
 } ) );
 
 type ControllerProps = ComponentProps< typeof CoreProfilerController >;
+type ServicesOverrides = Partial<
+	Record< keyof ControllerProps[ 'servicesOverrides' ], AnyActorLogic >
+>;
+
+const mockRecordEvent = jest.mocked( recordEvent );
+const mockGetQuery = jest.mocked( getQuery );
 
 const resolvedActor = < T, >( output: T ) => fromPromise( async () => output );
 
@@ -144,75 +125,79 @@ const delayedActor = < T, >( output: T ) =>
 			} )
 	);
 
-const createServiceOverrides = (): ControllerProps[ 'servicesOverrides' ] =>
-	( {
-		preFetchGetPlugins: resolvedActor( [] ),
-		getAllowTrackingOption: resolvedActor( 'yes' ),
-		getStoreNameOption: resolvedActor( '' ),
-		getStoreCountryOption: resolvedActor( 'US:CA' ),
-		getCountries: resolvedActor( [
-			{ code: 'US', name: 'United States', states: [] },
-		] ),
-		getGeolocation: resolvedActor( undefined ),
-		getOnboardingProfileItems: resolvedActor( {} ),
-		getCurrentUserEmail: resolvedActor( 'merchant@example.test' ),
-		getCurrentUser: resolvedActor( {
-			capabilities: { install_plugins: true },
-		} ),
-		// Let the current-user actor populate capabilities before the plugins
-		// permission guard runs when the plugins actor completes.
-		getPlugins: delayedActor( [ exampleExtension ] ),
-		getJetpackIsConnected: resolvedActor( true ),
-		browserPopstateHandler: fromCallback( () => () => undefined ),
-		updateBusinessInfo: resolvedActor( undefined ),
-		updateTrackingOption: resolvedActor( undefined ),
-		updateOnboardingProfileOption: resolvedActor( undefined ),
-		updateProfilerCompletedSteps: resolvedActor( undefined ),
-		getCoreProfilerCompletedSteps: resolvedActor( {} ),
-		skipFlowUpdateBusinessLocation: resolvedActor( undefined ),
-		pluginInstallerMachine: fromCallback( () => () => undefined ),
-		exitToWooHome: resolvedActor( undefined ),
-	} ) as ControllerProps[ 'servicesOverrides' ];
+const noopCallbackActor = fromCallback( () => {} );
 
-const createActionOverrides = (): ControllerProps[ 'actionOverrides' ] =>
-	( {
-		preFetchIsJetpackConnected: jest.fn(),
-		preFetchJetpackAuthUrl: jest.fn(),
-		updateQueryStep: jest.fn(),
-		redirectToWooHome: jest.fn(),
-		redirectToJetpackAuthPage: jest.fn(),
-		reloadPage: jest.fn(),
-	} ) as ControllerProps[ 'actionOverrides' ];
+const defaultServicesOverrides: ServicesOverrides = {
+	preFetchGetPlugins: resolvedActor( [] ),
+	getAllowTrackingOption: resolvedActor( 'yes' ),
+	getStoreNameOption: resolvedActor( '' ),
+	getStoreCountryOption: resolvedActor( 'US:CA' ),
+	getCountries: resolvedActor( [
+		{ code: 'US', name: 'United States', states: [] },
+	] ),
+	getGeolocation: resolvedActor( undefined ),
+	getOnboardingProfileItems: resolvedActor( {} ),
+	getCurrentUserEmail: resolvedActor( 'merchant@example.test' ),
+	getCurrentUser: resolvedActor( {
+		capabilities: { install_plugins: true },
+	} ),
+	// Let the current-user actor populate capabilities before the plugins
+	// permission guard runs when the plugins actor completes.
+	getPlugins: delayedActor( [ exampleExtension ] ),
+	getJetpackIsConnected: resolvedActor( true ),
+	browserPopstateHandler: noopCallbackActor,
+	updateBusinessInfo: resolvedActor( undefined ),
+	updateTrackingOption: resolvedActor( undefined ),
+	updateOnboardingProfileOption: resolvedActor( undefined ),
+	updateProfilerCompletedSteps: resolvedActor( undefined ),
+	getCoreProfilerCompletedSteps: resolvedActor( {} ),
+	skipFlowUpdateBusinessLocation: resolvedActor( undefined ),
+};
 
-const renderController = async (
-	actionOverrides: ControllerProps[ 'actionOverrides' ] = {},
-	servicesOverrides: ControllerProps[ 'servicesOverrides' ] = {}
-) => {
-	let rendered: ReturnType< typeof render >;
+const actionOverrides = {
+	preFetchIsJetpackConnected: () => undefined,
+	preFetchJetpackAuthUrl: () => undefined,
+	updateQueryStep: () => undefined,
+	redirectToWooHome: () => undefined,
+	redirectToJetpackAuthPage: () => undefined,
+	reloadPage: () => undefined,
+} as ControllerProps[ 'actionOverrides' ];
 
-	// XState promise actors settle after RTL's synchronous render act completes.
-	// eslint-disable-next-line testing-library/no-unnecessary-act
+// Runs the real installer machine with only the network call replaced.
+const installerWith = ( installPlugin: AnyActorLogic ) =>
+	pluginInstallerMachine.provide( { actors: { installPlugin } } );
+
+// XState promise actors settle after RTL's synchronous act scope completes,
+// so flush one macrotask inside the same scope.
+const actAndFlush = async ( callback: () => unknown ) => {
 	await act( async () => {
-		rendered = render(
-			<CoreProfilerController
-				actionOverrides={ {
-					...createActionOverrides(),
-					...actionOverrides,
-				} }
-				servicesOverrides={ {
-					...createServiceOverrides(),
-					...servicesOverrides,
-				} }
-			/>
-		);
+		await callback();
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 	} );
+};
 
-	return rendered!;
+const renderController = ( servicesOverrides: ServicesOverrides = {} ) =>
+	actAndFlush( () =>
+		render(
+			<CoreProfilerController
+				actionOverrides={ actionOverrides }
+				servicesOverrides={
+					{
+						...defaultServicesOverrides,
+						...servicesOverrides,
+					} as ControllerProps[ 'servicesOverrides' ]
+				}
+			/>
+		)
+	);
+
+const clickButton = async ( name: string ) => {
+	const button = await screen.findByRole( 'button', { name } );
+	await actAndFlush( () => userEvent.click( button ) );
 };
 
 const expectEventOrder = ( expectedEvents: string[] ) => {
-	const recordedEvents = ( recordEvent as jest.Mock ).mock.calls.map(
+	const recordedEvents = mockRecordEvent.mock.calls.map(
 		( [ name, properties ] ) => {
 			if (
 				( name === 'coreprofiler_step_view' ||
@@ -228,79 +213,33 @@ const expectEventOrder = ( expectedEvents: string[] ) => {
 	let previousIndex = -1;
 
 	expectedEvents.forEach( ( event ) => {
-		const index = recordedEvents.indexOf( event, previousIndex + 1 );
-		expect( index ).toBeGreaterThan( previousIndex );
-		previousIndex = index;
-	} );
-};
-
-const clickAndFlushActors = async (
-	button: Parameters< typeof userEvent.click >[ 0 ]
-) => {
-	// The user event starts XState promise actors that need the same act scope.
-	// eslint-disable-next-line testing-library/no-unnecessary-act
-	await act( async () => {
-		await userEvent.click( button );
-		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+		expect( recordedEvents.slice( previousIndex + 1 ) ).toContain( event );
+		previousIndex = recordedEvents.indexOf( event, previousIndex + 1 );
 	} );
 };
 
 const completeStandardProfile = async () => {
-	await clickAndFlushActors(
-		await screen.findByRole( 'button', { name: 'Complete intro' } )
-	);
-	await clickAndFlushActors(
-		await screen.findByRole( 'button', {
-			name: 'Complete user profile',
-		} )
-	);
-	await clickAndFlushActors(
-		await screen.findByRole( 'button', {
-			name: 'Complete business info',
-		} )
-	);
+	await clickButton( 'Complete intro' );
+	await clickButton( 'Complete user profile' );
+	await clickButton( 'Complete business info' );
 };
 
 describe( 'Core Profiler Tracks flows', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		( getQuery as jest.Mock ).mockReturnValue( {} );
+		mockGetQuery.mockReturnValue( {} );
 	} );
 
 	it( 'records the guided-setup skip flow', async () => {
 		await renderController();
 
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', {
-				name: 'Skip guided setup',
-			} )
-		);
+		await clickButton( 'Skip guided setup' );
+		await clickButton( 'Complete business location' );
 
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', {
-				name: 'Complete business location',
-			} )
-		);
-
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'coreprofiler_step_complete',
-				expect.objectContaining( {
-					step: 'skip_business_location',
-				} )
-			)
-		);
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'coreprofiler_step_view',
-			expect.objectContaining( {
-				step: 'skip_business_location',
-			} )
-		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'coreprofiler_skip_guided_setup',
 			expect.objectContaining( { wc_version: 'current' } )
 		);
-
 		expectEventOrder( [
 			'coreprofiler_step_view:skip_business_location',
 			'coreprofiler_skip_guided_setup',
@@ -309,47 +248,16 @@ describe( 'Core Profiler Tracks flows', () => {
 	} );
 
 	it( 'records the standard skipped steps', async () => {
-		const { unmount } = await renderController();
+		await renderController();
 
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', { name: 'Complete intro' } )
-		);
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', {
-				name: 'Skip user profile',
-			} )
-		);
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', {
-				name: 'Skip business info',
-			} )
-		);
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', { name: 'Skip extensions' } )
-		);
+		await clickButton( 'Complete intro' );
+		await clickButton( 'Skip user profile' );
+		await clickButton( 'Skip business info' );
+		await clickButton( 'Skip extensions' );
 
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'coreprofiler_plugins_skip'
-			)
-		);
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'coreprofiler_step_complete',
-			expect.objectContaining( { step: 'intro_opt_in' } )
+			'coreprofiler_plugins_skip'
 		);
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'coreprofiler_step_view',
-			expect.objectContaining( { step: 'user_profile' } )
-		);
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'coreprofiler_step_view',
-			expect.objectContaining( { step: 'business_info' } )
-		);
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'coreprofiler_step_view',
-			expect.objectContaining( { step: 'plugins' } )
-		);
-
 		expectEventOrder( [
 			'coreprofiler_step_complete:intro_opt_in',
 			'coreprofiler_step_view:user_profile',
@@ -359,53 +267,21 @@ describe( 'Core Profiler Tracks flows', () => {
 			'coreprofiler_step_view:plugins',
 			'coreprofiler_plugins_skip',
 		] );
-
-		unmount();
 	} );
 
 	it( 'records completed profile and extension installation flows', async () => {
-		const successfulInstaller = fromCallback( ( { sendBack } ) => {
-			sendBack( {
-				type: 'PLUGINS_INSTALLATION_COMPLETED',
-				payload: {
-					installationCompletedResult: {
-						installedPlugins: [
-							{
-								plugin: 'example-extension',
-								installTime: 1000,
-							},
-						],
-						totalTime: 1000,
-					},
-				},
-			} );
-
-			return () => undefined;
+		await renderController( {
+			pluginInstallerMachine: installerWith(
+				resolvedActor( {
+					data: { install_time: { 'example-extension': 1000 } },
+				} )
+			),
 		} );
 
-		await renderController( {}, {
-			pluginInstallerMachine: successfulInstaller,
-		} as ControllerProps[ 'servicesOverrides' ] );
-
 		await completeStandardProfile();
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', {
-				name: 'Learn more about extension',
-			} )
-		);
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', { name: 'Install extension' } )
-		);
+		await clickButton( 'Learn more about extension' );
+		await clickButton( 'Install extension' );
 
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'coreprofiler_store_extensions_installed_and_activated',
-				expect.objectContaining( {
-					success: true,
-					installed_extensions: [ 'example-extension' ],
-				} )
-			)
-		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'coreprofiler_user_profile',
 			expect.objectContaining( {
@@ -450,7 +326,14 @@ describe( 'Core Profiler Tracks flows', () => {
 			'coreprofiler_store_extension_installed_and_activated',
 			expect.objectContaining( {
 				success: true,
-				extension: 'example-extension',
+				extension: 'example_extension',
+			} )
+		);
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'coreprofiler_store_extensions_installed_and_activated',
+			expect.objectContaining( {
+				success: true,
+				installed_extensions: [ 'example_extension' ],
 			} )
 		);
 
@@ -475,19 +358,10 @@ describe( 'Core Profiler Tracks flows', () => {
 		await renderController();
 		await completeStandardProfile();
 
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', {
-				name: 'Continue without extensions',
-			} )
-		);
+		await clickButton( 'Continue without extensions' );
 
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'coreprofiler_plugins_skip'
-			)
-		);
 		expect(
-			( recordEvent as jest.Mock ).mock.calls.filter(
+			mockRecordEvent.mock.calls.filter(
 				( [ eventName ] ) => eventName === 'coreprofiler_plugins_skip'
 			)
 		).toHaveLength( 1 );
@@ -498,26 +372,19 @@ describe( 'Core Profiler Tracks flows', () => {
 	} );
 
 	it( 'records when extension-installation permission is missing', async () => {
-		( getQuery as jest.Mock ).mockReturnValue( { step: 'plugins' } );
+		mockGetQuery.mockReturnValue( { step: 'plugins' } );
 
-		await renderController( {}, {
+		await renderController( {
 			getCurrentUser: resolvedActor( {
 				capabilities: { install_plugins: false },
 			} ),
-		} as ControllerProps[ 'servicesOverrides' ] );
+		} );
 
 		await screen.findByText( 'No installation permission' );
 
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'coreprofiler_store_extensions_no_permission_error'
-			)
-		);
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'coreprofiler_step_view',
-			expect.objectContaining( { step: 'plugins' } )
+			'coreprofiler_store_extensions_no_permission_error'
 		);
-
 		expectEventOrder( [
 			'coreprofiler_step_view:plugins',
 			'coreprofiler_store_extensions_no_permission_error',
@@ -525,52 +392,30 @@ describe( 'Core Profiler Tracks flows', () => {
 	} );
 
 	it( 'records a failed extension installation', async () => {
-		const failedInstaller = fromCallback( ( { sendBack } ) => {
-			sendBack( {
-				type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS',
-				payload: {
-					errors: [
-						{
-							plugin: 'example-extension',
-							error: 'Installation failed',
-							errorDetails: {
-								data: {
-									code: 'install_error',
-									data: { status: 500 },
-								},
-							},
-						},
-					],
-				},
-			} );
-
-			return () => undefined;
+		await renderController( {
+			pluginInstallerMachine: installerWith(
+				fromPromise( async () => {
+					throw new Error( 'Installation failed' );
+				} )
+			),
 		} );
 
-		await renderController( {}, {
-			pluginInstallerMachine: failedInstaller,
-		} as ControllerProps[ 'servicesOverrides' ] );
-
 		await completeStandardProfile();
-		await clickAndFlushActors(
-			await screen.findByRole( 'button', { name: 'Install extension' } )
-		);
+		await clickButton( 'Install extension' );
 
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'coreprofiler_store_extension_installed_and_activated',
-				{
-					success: false,
-					extension: 'example-extension',
-					error_message: 'Installation failed',
-				}
-			)
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'coreprofiler_store_extension_installed_and_activated',
+			{
+				success: false,
+				extension: 'example_extension',
+				error_message: 'Installation failed',
+			}
 		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'coreprofiler_store_extensions_installed_and_activated',
 			{
 				success: false,
-				failed_extensions: [ 'example-extension' ],
+				failed_extensions: [ 'example_extension' ],
 			}
 		);
 
