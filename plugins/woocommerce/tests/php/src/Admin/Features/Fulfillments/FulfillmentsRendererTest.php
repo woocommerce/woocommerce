@@ -405,6 +405,36 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The filter finds an order whose provider was saved through the fulfillment CRUD path.
+	 */
+	public function test_get_order_ids_matches_provider_saved_through_crud(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_shipment_provider( 'acme-couriers' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->save();
+
+		$this->assertSame(
+			array( $order->get_id() ),
+			$this->get_order_ids( 'acme-couriers' ),
+			'The filter must match the provider meta the data store actually persists.'
+		);
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
 	 * @testdox A soft-deleted fulfillment is excluded from the provider filter.
 	 */
 	public function test_get_order_ids_excludes_soft_deleted_fulfillment(): void {
