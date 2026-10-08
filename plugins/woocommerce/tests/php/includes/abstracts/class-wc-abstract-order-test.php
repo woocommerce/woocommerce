@@ -509,7 +509,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A refund reports the customer ID of its parent order.
-	 * See: https://github.com/woocommerce/woocommerce/issues/30922.
 	 * @dataProvider provide_refund_parent_customer_ids
 	 *
 	 * @param int $customer_id Customer ID of the parent order.
@@ -521,8 +520,18 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A refund uses the tax location of its parent order.
+	 */
+	public function test_refund_get_taxable_location_returns_parent_tax_location() {
+		$refund       = $this->create_line_item_refund( 1 );
+		$parent_order = wc_get_order( $refund->get_parent_id() );
+
+		$this->assertSame( 'US', $parent_order->get_taxable_location()['country'] );
+		$this->assertSame( $parent_order->get_taxable_location(), $refund->get_taxable_location() );
+	}
+
+	/**
 	 * @testdox Applying a coupon records usage on an order type that has no billing email.
-	 * See: https://github.com/woocommerce/woocommerce/issues/30922.
 	 */
 	public function test_apply_coupon_records_usage_on_order_type_without_billing_email() {
 		$coupon_code = 'coupon_test_usage_without_billing_email';

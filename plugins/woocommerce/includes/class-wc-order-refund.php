@@ -143,6 +143,31 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the tax location of the parent order, since refunds have no address of their own.
+	 *
+	 * @since 11.3.0
+	 * @param array $args Override the location.
+	 * @return array
+	 */
+	protected function get_tax_location( $args = array() ) {
+		$parent_order = wc_get_order( $this->get_parent_id() );
+
+		if ( $parent_order ) {
+			return $parent_order->get_taxable_location( $args );
+		}
+
+		return wp_parse_args(
+			$args,
+			array(
+				'country'  => '',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+	}
+
+	/**
 	 * Get formatted refunded amount.
 	 *
 	 * @since 2.4
