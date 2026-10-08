@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
@@ -31,7 +32,7 @@ final class ProductFilterChips extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+			$this->asset_data_registry->add( 'globalStylesColors', StyleAttributesUtils::get_global_styles( array( 'color' ) ) );
 		}
 	}
 

@@ -789,4 +789,21 @@ class StyleAttributesUtils {
 			'styles'  => implode( ' ', $styles ),
 		);
 	}
+
+	/**
+	 * Request-level Caching wrapper for wp_get_global_styles, which is pretty expensive in runtime.
+	 *
+	 * @param string[] $path Path to the desired global styles value.
+	 * @return mixed The resolved global styles value.
+	 */
+	public static function get_global_styles( array $path ) {
+		static $resolved = array();
+
+		$key = implode( '-', $path );
+		if ( ! array_key_exists( $key, $resolved ) ) {
+			$resolved[ $key ] = wp_get_global_styles( $path );
+		}
+
+		return $resolved[ $key ];
+	}
 }

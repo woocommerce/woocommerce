@@ -460,6 +460,7 @@ abstract class AbstractBlock {
 		return [];
 	}
 
+
 	/**
 	 * Parses block attributes from the render_callback.
 	 *
