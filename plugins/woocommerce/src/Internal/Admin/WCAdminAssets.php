@@ -66,8 +66,11 @@ class WCAdminAssets {
 
 	/**
 	 * Registers deprecated scripts and styles.
+	 *
+	 * @return void
 	 */
 	public static function register_deprecated_scripts_and_styles() {
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_register_style( 'wc-admin-layout', false );
 	}
 
