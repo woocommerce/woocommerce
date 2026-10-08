@@ -86,7 +86,9 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 			}
 
 			if ( changes.selectedItem && changes.selectedItem.items ) {
-				if ( searchText ) return state;
+				if ( searchText ) {
+					return state;
+				}
 				const key = changes.selectedItem.key;
 				if ( openedGroups.has( key ) ) {
 					openedGroups.delete( key );
@@ -211,7 +213,6 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 								const isGroup = !! item.items;
 
 								return (
-									// eslint-disable-next-line react/jsx-key
 									<li
 										key={ item.key }
 										{ ...getItemProps( {

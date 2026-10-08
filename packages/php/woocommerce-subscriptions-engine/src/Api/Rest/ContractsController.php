@@ -21,6 +21,9 @@
  * fields and must not assume the set is closed. A generic resource read API is a
  * planned follow-up alongside the read-model views, when a consumer needs it.
  *
+ * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
+ * cancel and their routes).
+ *
  * Every route requires a logged-in user, enforced through the shared
  * {@see RESTPermissions} floor (core's cookie auth has already verified the REST nonce
  * `wp_rest` by then). Per-route, ownership is enforced with the asymmetric not-found
@@ -42,9 +45,10 @@ use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 
 defined( 'ABSPATH' ) || exit;
@@ -202,7 +206,7 @@ final class ContractsController extends WP_REST_Controller {
 		// schema, so it arrives as a real bool; the coercion path covers a caller
 		// invoking the method directly with a raw value.
 		$param         = $request->get_param( 'at_period_end' );
-		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( ScalarCoercion::coerce_string( $param, 'true' ) );
+		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( Coercion::coerce_string( $param, 'true' ) );
 
 		return $this->run_action(
 			$request,
@@ -222,7 +226,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * Domain values only - the id and the resulting status slug - never labels,
 	 * formatted values, or other presentation: consumers own their view shaping.
 	 *
-	 * @param Contract        $item    Contract.
+	 * @param ContractView    $item    Contract view.
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
@@ -274,7 +278,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * Run a lifecycle action behind the ownership guard, then return the domain
 	 * summary with the resulting status.
 	 *
-	 * A `DomainException` (an illegal transition for the contract's current state) maps to
+	 * A `DomainException` (an action whose preconditions the contract's current state does not meet) maps to
 	 * a 409 Conflict; any other failure maps to a 500. The ownership guard keeps the
 	 * asymmetric 404 for not-owned / unknown.
 	 *
@@ -283,13 +287,13 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	private function run_action( WP_REST_Request $request, callable $action ) {
-		$contract_id = ScalarCoercion::coerce_int( $request->get_param( 'id' ) );
+		$contract_id = Coercion::coerce_int( $request->get_param( 'id' ) );
 		$customer_id = get_current_user_id();
 
 		// Guard ownership before acting: the facade's ownership-checked read returns
 		// null for an unknown id and a foreign-owned contract alike, so both map to
 		// the same 404 (anti-IDOR).
-		if ( null === Subscriptions::get_for_customer( $contract_id, $customer_id ) ) {
+		if ( null === Contracts::get_for_customer( $contract_id, $customer_id ) ) {
 			return $this->not_found_error();
 		}
 
@@ -311,7 +315,7 @@ final class ContractsController extends WP_REST_Controller {
 
 		// Re-read for the resulting status. The action already succeeded, so a row
 		// vanishing here is a server-side inconsistency - a 500, not a not-found.
-		$refreshed = Subscriptions::get_for_customer( $contract_id, $customer_id );
+		$refreshed = Contracts::get_for_customer( $contract_id, $customer_id );
 		if ( null === $refreshed ) {
 			return new WP_Error(
 				'woocommerce_subscriptions_engine_refresh_failed',

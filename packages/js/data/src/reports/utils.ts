@@ -349,7 +349,7 @@ export function getRequestQuery( options: QueryOptions ) {
 				segmentby: query.segmentby,
 				fields,
 				...filterQuery,
-		  };
+			};
 }
 
 /**
