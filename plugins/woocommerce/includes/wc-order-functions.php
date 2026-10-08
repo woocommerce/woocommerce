@@ -1024,6 +1024,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
+	$coupon_codes     = array_filter( $order->get_coupon_codes(), fn( $code ) => ! StringUtil::is_null_or_whitespace( $code ) );
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
@@ -1039,25 +1040,24 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
-	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
+	$is_invalid = $order->has_status( $invalid_statuses );
+
+	// A flag on an order without coupons is stale, so it is cleared and no usage is reduced.
+	if ( $has_recorded && ( $is_invalid || ! $coupon_codes ) ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
+	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( $invalid_statuses ) ) {
+	} elseif ( $is_invalid ) {
 		wc_release_coupons_for_order( $order );
 		return;
 	} else {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( StringUtil::is_null_or_whitespace( $code ) ) {
-				continue;
-			}
-
+	if ( count( $coupon_codes ) > 0 ) {
+		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 

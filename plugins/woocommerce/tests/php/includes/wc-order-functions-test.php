@@ -179,6 +179,119 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Add a raw coupon item to an order and save it, bypassing apply_coupon().
+	 *
+	 * @param WC_Order $order Order.
+	 * @param string   $code  Coupon code.
+	 */
+	private function add_raw_coupon_item( WC_Order $order, string $code ): void {
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$item->set_discount( 1 );
+		$order->add_item( $item );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Coupon usage is not marked as recorded while the order has no coupons, so coupons added later are counted.
+	 */
+	public function test_wc_update_coupon_usage_counts_counts_coupons_added_after_first_status_change() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'late-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox An order without coupons never gets the recorded flag through valid status changes.
+	 */
+	public function test_wc_update_coupon_usage_counts_does_not_flag_orders_without_coupons() {
+		$order = WC_Helper_Order::create_order();
+		$store = $order->get_data_store();
+
+		foreach ( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING, OrderStatus::COMPLETED ) as $status ) {
+			$order->update_status( $status );
+			$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ), "Flag set for status {$status}." );
+		}
+	}
+
+	/**
+	 * @testdox A legacy coupon-less order carrying the recorded flag is counted once a coupon is added.
+	 */
+	public function test_wc_update_coupon_usage_counts_treats_legacy_flag_without_coupons_as_unrecorded() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'legacy-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$store->set_recorded_coupon_usage_counts( $order, true );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Pinning: a coupon applied to an auto-draft order is counted once when the order is later paid.
+	 */
+	public function test_wc_update_coupon_usage_counts_admin_applied_coupon_paid_later_counts_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'admin-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$order->set_status( 'auto-draft' );
+		$order->save();
+
+		$result = $order->apply_coupon_using_edited_totals( $coupon->get_code() );
+		$this->assertTrue( $result );
+
+		$order->update_status( OrderStatus::PENDING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->payment_complete();
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		\Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_order_coupons( $order->get_id() );
+		global $wpdb;
+		$rows = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_coupon_lookup WHERE order_id = %d AND coupon_id = %d",
+				$order->get_id(),
+				$coupon->get_id()
+			)
+		);
+		$this->assertEquals( 1, (int) $rows );
+	}
+
+	/**
 	 * Test getting total refunded for an item with and without refunds.
 	 */
 	public function test_get_total_refunded_for_item() {
