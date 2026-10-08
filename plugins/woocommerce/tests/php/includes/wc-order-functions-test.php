@@ -179,6 +179,31 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_update_coupon_usage_counts() counts coupon usage for an order type that has no billing email.
+	 */
+	public function test_wc_update_coupon_usage_counts_for_order_type_without_billing_email() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_without_billing_email' );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => WC_Helper_Order::create_order( 0 )->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$refund->add_item( $item );
+		$refund->save();
+
+		$this->assertFalse( is_callable( array( $refund, 'get_billing_email' ) ) );
+
+		wc_update_coupon_usage_counts( $refund->get_id() );
+
+		$coupon = new WC_Coupon( $coupon->get_code() );
+		$this->assertSame( 1, $coupon->get_usage_count() );
+		$this->assertSame( array(), $coupon->get_used_by() );
+	}
+
+	/**
 	 * Test getting total refunded for an item with and without refunds.
 	 */
 	public function test_get_total_refunded_for_item() {

@@ -491,20 +491,22 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A coupon can be applied to a refund.
+	 * @testdox Applying a coupon to a refund returns an error and records no coupon usage.
 	 * @dataProvider provide_refund_parent_customer_ids
 	 *
 	 * @param int $customer_id Customer ID of the parent order.
 	 */
-	public function test_apply_coupon_on_refund( int $customer_id ) {
+	public function test_apply_coupon_on_refund_returns_error( int $customer_id ) {
 		$coupon_code = 'coupon_test_refund_' . $customer_id;
 		WC_Helper_Coupon::create_coupon( $coupon_code );
 		$refund = $this->create_line_item_refund( $customer_id );
 
 		$result = $refund->apply_coupon( $coupon_code );
 
-		$this->assertTrue( $result );
-		$this->assertCount( 1, $refund->get_items( 'coupon' ) );
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_coupon', $result->get_error_code() );
+		$this->assertCount( 0, $refund->get_items( 'coupon' ) );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 	}
 
 	/**
@@ -528,52 +530,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'US', $parent_order->get_taxable_location()['country'] );
 		$this->assertSame( $parent_order->get_taxable_location(), $refund->get_taxable_location() );
-	}
-
-	/**
-	 * @testdox Applying a coupon records usage on an order type that has no billing email.
-	 */
-	public function test_apply_coupon_records_usage_on_order_type_without_billing_email() {
-		$coupon_code = 'coupon_test_usage_without_billing_email';
-		WC_Helper_Coupon::create_coupon( $coupon_code );
-		$refund = $this->create_line_item_refund( 1 );
-
-		// Give the order type a customer ID and a tax location so apply_coupon() reaches the
-		// usage-recording step, where get_user_id() is 0 and there is no get_billing_email().
-		$order = new class( $refund->get_id() ) extends WC_Order_Refund {
-			/**
-			 * Return a registered customer ID, so apply_coupon() skips the guest usage check.
-			 *
-			 * @param string $context What the value is for.
-			 * @return int
-			 */
-			public function get_customer_id( $context = 'view' ) {
-				return 1;
-			}
-
-			/**
-			 * Return an empty tax location, as this order type has no billing or shipping getters.
-			 *
-			 * @param array $args Override the location.
-			 * @return array
-			 */
-			protected function get_tax_location( $args = array() ) {
-				return wp_parse_args(
-					$args,
-					array(
-						'country'  => '',
-						'state'    => '',
-						'postcode' => '',
-						'city'     => '',
-					)
-				);
-			}
-		};
-
-		$result = $order->apply_coupon( $coupon_code );
-
-		$this->assertTrue( $result );
-		$this->assertSame( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 	}
 
 	/**
