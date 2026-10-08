@@ -208,6 +208,29 @@ describe( 'TemplateCanvasAffordance', () => {
 		);
 	} );
 
+	it( 'uses logical borders for the toolbar divider so it works in RTL', async () => {
+		const iframe = addEditorCanvas();
+		setupUseSelectMock();
+
+		render( <TemplateCanvasAffordance /> );
+
+		await waitFor( () => {
+			expect(
+				iframe.contentDocument?.getElementById(
+					'woocommerce-email-editor-template-area-affordance-style'
+				)
+			).toBeInTheDocument();
+		} );
+
+		const css =
+			iframe.contentDocument?.getElementById(
+				'woocommerce-email-editor-template-area-affordance-style'
+			)?.textContent ?? '';
+
+		expect( css ).toContain( 'border-inline-end' );
+		expect( css ).not.toMatch( /border-(left|right)/ );
+	} );
+
 	it( 'shows the toolbar after the template area is selected', async () => {
 		const iframe = addEditorCanvas();
 		setupUseSelectMock();

@@ -70,7 +70,7 @@ const CANVAS_STYLES = `
 }
 .woocommerce-email-editor-template-area-affordance__label {
 	align-items: center;
-	border-right: 1px solid #ddd;
+	border-inline-end: 1px solid #ddd;
 	display: inline-flex;
 	font-weight: 500;
 	gap: 8px;
