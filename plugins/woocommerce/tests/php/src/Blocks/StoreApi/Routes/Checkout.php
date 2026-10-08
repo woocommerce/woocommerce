@@ -3657,9 +3657,24 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox A failure while the order is still a draft releases the stock it had reserved.
+	 * Failures an extension can raise while the order is still a draft.
+	 *
+	 * @return array<string, array{\Throwable}>
 	 */
-	public function test_failure_before_the_order_leaves_draft_releases_held_stock() {
+	public function provider_draft_order_failures() {
+		return array(
+			'ordinary exception' => array( new \Exception( 'Extension failed while the order was still a draft.' ) ),
+			'engine error'       => array( new \TypeError( 'Extension raised an engine error while the order was still a draft.' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A failure while the order is still a draft releases the stock it had reserved: $_dataName.
+	 * @dataProvider provider_draft_order_failures
+	 *
+	 * @param \Throwable $failure The failure raised while the order is still a draft.
+	 */
+	public function test_failure_before_the_order_leaves_draft_releases_held_stock( \Throwable $failure ) {
 		// Its own product rather than a class fixture, so enabling stock management here cannot
 		// leak into the other tests in this class.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -3683,7 +3698,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$state_at_failure = null;
 		add_action(
 			'woocommerce_blocks_checkout_order_processed',
-			function () use ( &$state_at_failure, $product ) {
+			function () use ( &$state_at_failure, $product, $failure ) {
 				$draft_ids = wc_get_orders(
 					array(
 						'limit'  => 1,
@@ -3696,7 +3711,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
 					'status' => $draft_ids ? wc_get_order( $draft_ids[0] )->get_status() : 'none',
 				);
-				throw new \Exception( 'Extension failed while the order was still a draft.' );
+				throw $failure;
 			}
 		);
 
