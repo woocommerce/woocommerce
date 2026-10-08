@@ -30,6 +30,11 @@ class RemoteLogger extends \WC_Log_Handler {
 	const WC_NEW_VERSION_TRANSIENT = 'woocommerce_new_version';
 
 	/**
+	 * Log sources whose entries carry an engine-error backtrace and go through the third-party error check.
+	 */
+	private const THIRD_PARTY_CHECK_SOURCES = array( 'fatal-errors', 'store-api' );
+
+	/**
 	 * Handle a log entry.
 	 *
 	 * @param int    $timestamp Log timestamp.
@@ -310,7 +315,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	}
 
 	/**
-	 * Check if the error exclusively contains third-party stack frames for fatal-errors source context.
+	 * Check if the error exclusively contains third-party stack frames, for the sources that carry an engine-error backtrace.
 	 *
 	 * @param string $message The error message.
 	 * @param array  $context The error context.
@@ -318,8 +323,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	protected function is_third_party_error( string $message, array $context ): bool {
-		// Only check for fatal-errors source context.
-		if ( ! isset( $context['source'] ) || 'fatal-errors' !== $context['source'] ) {
+		if ( ! isset( $context['source'] ) || ! in_array( $context['source'], self::THIRD_PARTY_CHECK_SOURCES, true ) ) {
 			return false;
 		}
 

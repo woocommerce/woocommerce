@@ -58,7 +58,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log the engine failure as critical with a bounded backtrace.
+	 * @testdox Should log the engine failure as critical, opted into remote logging, with a bounded backtrace.
 	 */
 	public function test_logs_engine_failure_as_critical_with_bounded_backtrace(): void {
 		$error = new \TypeError( 'Fixture logged engine failure.' );
@@ -69,8 +69,13 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 			'critical',
 			self::class,
 			array(
-				'source'    => 'store-api',
-				'exception' => $error,
+				'source'         => 'store-api',
+				'exception'      => $error,
+				'error'          => array(
+					'file' => $error->getFile(),
+					'line' => $error->getLine(),
+				),
+				'remote-logging' => true,
 			)
 		);
 		$this->assertCount( 1, $this->captured_logs );

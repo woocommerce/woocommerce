@@ -41,10 +41,16 @@ final class UnexpectedErrorResponse {
 			wc_get_logger()->critical(
 				$log_message,
 				array(
-					'source'    => 'store-api',
-					'exception' => $error,
+					'source'         => 'store-api',
+					'exception'      => $error,
+					'error'          => array(
+						'file' => $error->getFile(),
+						'line' => $error->getLine(),
+					),
 					// Same shape the fatal-error shutdown handler logs, so log handlers and readers see one trace format.
-					'backtrace' => array_slice( explode( "\n", $error->getTraceAsString() ), 0, self::MAX_BACKTRACE_FRAMES ),
+					'backtrace'      => array_slice( explode( "\n", $error->getTraceAsString() ), 0, self::MAX_BACKTRACE_FRAMES ),
+					// These failures reached remote logging as fatals before the dispatchers caught them.
+					'remote-logging' => true,
 				)
 			);
 		} catch ( \Throwable $logging_error ) {
