@@ -26,7 +26,7 @@ final class SideEffectGuard {
 	 * Run steps with side effects dropped.
 	 *
 	 * @param callable $steps Steps that must not change the store.
-	 * @return array{0: mixed, 1: string[]} What the steps returned, and a sentence for each kind of side effect they tried.
+	 * @return array{0: mixed, 1: array<int, array{code: string, value: mixed, description: string}>} What the steps returned, and each kind of side effect they tried.
 	 */
 	public static function run( callable $steps ): array {
 		global $wpdb;
@@ -42,19 +42,19 @@ final class SideEffectGuard {
 				&& ! preg_match( $log_tables, $sql )
 				&& ! preg_match( $transients, $sql )
 			) {
-				$attempts['database'] = __( 'Writes to the database before the save.', 'woocommerce' );
+				$attempts['database'] = self::side_effect( 'database_write_before_save', null, __( 'Writes to the database before the save.', 'woocommerce' ) );
 				return '';
 			}
 			return $sql;
 		};
 		$mail  = static function () use ( &$attempts ) {
-			$attempts['email'] = __( 'Sends an email before the save.', 'woocommerce' );
+			$attempts['email'] = self::side_effect( 'email_before_save', null, __( 'Sends an email before the save.', 'woocommerce' ) );
 			return false;
 		};
 		$http  = static function ( $pre, $args, $url ) use ( &$attempts ) {
 			$host = (string) wp_parse_url( $url, PHP_URL_HOST );
 			/* translators: %s: host name, such as example.com. */
-			$attempts[ 'http:' . $host ] = sprintf( __( 'Makes an HTTP request to %s before the save.', 'woocommerce' ), $host );
+			$attempts[ 'http:' . $host ] = self::side_effect( 'http_request_before_save', $host, sprintf( __( 'Makes an HTTP request to %s before the save.', 'woocommerce' ), $host ) );
 			return new \WP_Error( 'woocommerce_ability_dry_run', 'Outbound HTTP is dropped in a dry run.' );
 		};
 
@@ -70,5 +70,21 @@ final class SideEffectGuard {
 		}
 
 		return array( $result, array_values( $attempts ) );
+	}
+
+	/**
+	 * A side effect for a dry run summary.
+	 *
+	 * @param string $code        Stable code.
+	 * @param mixed  $value       What the side effect acts on, or null.
+	 * @param string $description Description for people.
+	 * @return array{code: string, value: mixed, description: string}
+	 */
+	public static function side_effect( string $code, $value, string $description ): array {
+		return array(
+			'code'        => $code,
+			'value'       => $value,
+			'description' => $description,
+		);
 	}
 }

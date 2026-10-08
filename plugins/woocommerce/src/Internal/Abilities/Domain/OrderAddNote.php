@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\AbilitiesApi\ChangeSummary;
+use Automattic\WooCommerce\Internal\AbilitiesApi\SideEffectGuard;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -145,15 +147,15 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			'ability'      => self::get_name(),
 			'object_type'  => self::get_object_type(),
 			'object_id'    => $order->get_id(),
-			'object_label' => null,
+			'object_label' => ChangeSummary::object_label( $order ),
 			'changes'      => array(),
 			'expected'     => array(),
 			'side_effects' => array(
 				(bool) ( $input['customer_note'] ?? false )
 					/* translators: %s: Order note. */
-					? sprintf( __( 'Adds the note "%s" and emails it to the customer.', 'woocommerce' ), $note )
+					? SideEffectGuard::side_effect( 'customer_note', $note, sprintf( __( 'Adds the note "%s" and emails it to the customer.', 'woocommerce' ), $note ) )
 					/* translators: %s: Order note. */
-					: sprintf( __( 'Adds the private note "%s".', 'woocommerce' ), $note ),
+					: SideEffectGuard::side_effect( 'order_note', $note, sprintf( __( 'Adds the private note "%s".', 'woocommerce' ), $note ) ),
 			),
 			'undo'         => null,
 		);

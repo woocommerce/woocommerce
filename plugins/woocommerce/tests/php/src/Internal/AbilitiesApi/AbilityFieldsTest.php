@@ -683,7 +683,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should describe a product update with Core and extension fields in a dry run, and save nothing.
+	 * @testdox Should describe a product update with Core and extension fields in a dry run, save nothing, and offer no undo for a field it cannot clear.
 	 */
 	public function test_product_update_dry_run_describes_the_change_and_saves_nothing(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -749,6 +749,43 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should undo a product update of Core and extension fields with the undo from the dry run.
+	 */
+	public function test_product_update_undo_restores_the_product(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A0' );
+		$product->save();
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$input   = array(
+			'id'         => $product->get_id(),
+			'name'       => 'Pencil',
+			'extensions' => array( 'test_code' => 'A1' ),
+		);
+
+		$summary = $ability->dry_run( $input );
+		$ability->execute( array_merge( $input, array( 'expected' => $summary['expected'] ) ) );
+		$undone = wp_get_ability( $summary['undo']['ability'] )->execute( $summary['undo']['input'] );
+
+		$this->assertSame(
+			array(
+				'ability' => 'woocommerce/product-update',
+				'input'   => array(
+					'id'         => $product->get_id(),
+					'name'       => 'Pen',
+					'extensions' => array( 'test_code' => 'A0' ),
+					'expected'   => array(
+						'name'                 => 'Pencil',
+						'extensions.test_code' => 'A1',
+					),
+				),
+			),
+			$summary['undo']
+		);
+		$this->assertSame( 'Pen', $undone['product']['name'] );
+		$this->assertSame( array( 'test_code' => 'A0' ), $undone['product']['extensions'] );
+	}
+
+	/**
 	 * @testdox Should refuse a write whose expected values are outdated, and save nothing.
 	 */
 	public function test_write_with_outdated_expected_values_returns_409(): void {
@@ -810,32 +847,77 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 			),
 			$summary['changes']
 		);
+		$this->assertSame( 'Order #' . $order->get_order_number(), $summary['object_label'] );
 		$this->assertSame(
 			array(
 				'ability' => 'woocommerce/order-update-status',
 				'input'   => array(
-					'id'       => $order->get_id(),
-					'status'   => 'pending',
-					'expected' => array( 'status' => 'on-hold' ),
+					'id'             => $order->get_id(),
+					'status'         => 'pending',
+					'date_paid'      => null,
+					'date_completed' => null,
+					'expected'       => array( 'status' => 'on-hold' ),
 				),
 			),
 			$summary['undo']
 		);
-		$this->assertContains( 'Sends the "Order on-hold" email to the customer.', $summary['side_effects'] );
-		$this->assertContains( 'Writes to the database before the save.', $summary['side_effects'] );
+		$this->assertContains(
+			array(
+				'code'        => 'email',
+				'value'       => 'customer_on_hold_order',
+				'description' => 'Sends the "Order on-hold" email to the customer.',
+			),
+			$summary['side_effects']
+		);
+		$this->assertContains(
+			array(
+				'code'        => 'database_write_before_save',
+				'value'       => null,
+				'description' => 'Writes to the database before the save.',
+			),
+			$summary['side_effects']
+		);
 		$this->assertSame( 'on-hold', $executed['order']['status'] );
 		$this->assertSame( 'yes', get_option( 'test_side_effect' ) );
 		$this->assertSame( 'pending', $undone['order']['status'] );
 	}
 
 	/**
+	 * @testdox Should undo a status change and the dates it set, when the real save sets other dates than the dry run.
+	 */
+	public function test_order_status_undo_restores_the_dates(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->set_date_paid( '2026-01-02T03:04:05+00:00' );
+		$order->save();
+		$ability = wp_get_ability( 'woocommerce/order-update-status' );
+		$input   = array(
+			'id'     => $order->get_id(),
+			'status' => 'completed',
+		);
+
+		$summary = $ability->dry_run( $input );
+		$ability->execute( $input );
+		$later = wc_get_order( $order->get_id() );
+		$later->set_date_completed( time() + 60 );
+		$later->save();
+		$undone = wp_get_ability( $summary['undo']['ability'] )->execute( $summary['undo']['input'] );
+		$order  = wc_get_order( $order->get_id() );
+
+		$this->assertSame( array( 'status' => 'completed' ), $summary['undo']['input']['expected'] );
+		$this->assertSame( 'processing', $undone['order']['status'] );
+		$this->assertNull( $order->get_date_completed() );
+		$this->assertSame( '2026-01-02T03:04:05+00:00', (string) $order->get_date_paid() );
+	}
+
+	/**
 	 * @testdox Should report and drop an email or an HTTP request before the save in a dry run, and allow log and transient writes.
 	 * @dataProvider dry_run_side_effect_provider
 	 *
-	 * @param callable    $side_effect Code that a validator runs.
-	 * @param string|null $reported    Expected side effect, or null for none.
+	 * @param callable   $side_effect Code that a validator runs.
+	 * @param array|null $reported    Expected side effect, or null for none.
 	 */
-	public function test_dry_run_drops_and_reports_side_effects( callable $side_effect, ?string $reported ): void {
+	public function test_dry_run_drops_and_reports_side_effects( callable $side_effect, ?array $reported ): void {
 		AbilityFields::register_validator( 'product', $side_effect );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$http    = new \MockAction();
@@ -857,7 +939,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	/**
 	 * Code that a step runs before the save.
 	 *
-	 * @return array<string, array{0: callable, 1: string|null}>
+	 * @return array<string, array{0: callable, 1: array|null}>
 	 */
 	public function dry_run_side_effect_provider(): array {
 		return array(
@@ -865,13 +947,21 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				static function () {
 					wp_mail( 'jane@example.com', 'Hi', 'Hi' );
 				},
-				'Sends an email before the save.',
+				array(
+					'code'        => 'email_before_save',
+					'value'       => null,
+					'description' => 'Sends an email before the save.',
+				),
 			),
 			'HTTP'      => array(
 				static function () {
 					wp_remote_get( 'https://example.com/hook' );
 				},
-				'Makes an HTTP request to example.com before the save.',
+				array(
+					'code'        => 'http_request_before_save',
+					'value'       => 'example.com',
+					'description' => 'Makes an HTTP request to example.com before the save.',
+				),
 			),
 			'log'       => array(
 				static function () {
@@ -937,15 +1027,30 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				'ability'      => 'woocommerce/order-add-note',
 				'object_type'  => 'order',
 				'object_id'    => $order->get_id(),
-				'object_label' => null,
+				'object_label' => 'Order #' . $order->get_order_number(),
 				'changes'      => array(),
 				'expected'     => array(),
-				'side_effects' => array( 'Adds the private note "Packed".' ),
+				'side_effects' => array(
+					array(
+						'code'        => 'order_note',
+						'value'       => 'Packed',
+						'description' => 'Adds the private note "Packed".',
+					),
+				),
 				'undo'         => null,
 			),
 			$private
 		);
-		$this->assertSame( array( 'Adds the note "Shipped" and emails it to the customer.' ), $customer['side_effects'] );
+		$this->assertSame(
+			array(
+				array(
+					'code'        => 'customer_note',
+					'value'       => 'Shipped',
+					'description' => 'Adds the note "Shipped" and emails it to the customer.',
+				),
+			),
+			$customer['side_effects']
+		);
 	}
 
 	/**

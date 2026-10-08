@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\AbilityFields;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
+use Automattic\WooCommerce\Internal\AbilitiesApi\SideEffectGuard;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -129,6 +131,12 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			true
 		);
 
+		foreach ( array( 'date_paid', 'date_completed' ) as $date ) {
+			if ( array_key_exists( $date, $input ) ) {
+				$subject->{"set_{$date}"}( $input[ $date ] );
+			}
+		}
+
 		return null;
 	}
 
@@ -162,18 +170,23 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * The status update that sets the status back.
+	 * The status update that sets the status and the dates that a status change sets back.
 	 *
 	 * @param \WC_Order $subject Order before the change.
 	 * @param array     $input   Ability input.
 	 * @return array{ability: string, input: array}
 	 */
 	public static function undo( $subject, array $input ): ?array {
+		$date_paid      = $subject->get_date_paid( 'edit' );
+		$date_completed = $subject->get_date_completed( 'edit' );
+
 		return array(
 			'ability' => self::get_name(),
 			'input'   => array(
-				'id'     => $subject->get_id(),
-				'status' => $subject->get_status(),
+				'id'             => $subject->get_id(),
+				'status'         => $subject->get_status(),
+				'date_paid'      => null === $date_paid ? null : (string) $date_paid,
+				'date_completed' => null === $date_completed ? null : (string) $date_completed,
 			),
 		);
 	}
@@ -183,7 +196,7 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	 *
 	 * @param \WC_Order $subject Order before the change.
 	 * @param array     $input   Ability input.
-	 * @return string[]
+	 * @return array<int, array{code: string, value: mixed, description: string}>
 	 */
 	public static function side_effects( $subject, array $input ): array {
 		$to    = OrderUtil::remove_status_prefix( sanitize_key( (string) ( $input['status'] ?? '' ) ) );
@@ -199,13 +212,17 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			}
 			foreach ( $hooks as $hook ) {
 				if ( false !== has_action( $hook, array( $email, 'trigger' ) ) ) {
-					$effects[] = sprintf(
-						$email->is_customer_email()
-							/* translators: %s: Email title, such as Completed order. */
-							? __( 'Sends the "%s" email to the customer.', 'woocommerce' )
-							/* translators: %s: Email title, such as New order. */
-							: __( 'Sends the "%s" email to the store.', 'woocommerce' ),
-						$email->get_title()
+					$effects[] = SideEffectGuard::side_effect(
+						'email',
+						$email->id,
+						sprintf(
+							$email->is_customer_email()
+								/* translators: %s: Email title, such as Completed order. */
+								? __( 'Sends the "%s" email to the customer.', 'woocommerce' )
+								/* translators: %s: Email title, such as New order. */
+								: __( 'Sends the "%s" email to the store.', 'woocommerce' ),
+							$email->get_title()
+						)
 					);
 					break;
 				}
@@ -252,6 +269,18 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			'required'             => array( 'id', 'status' ),
 			'additionalProperties' => false,
 		);
+		if ( AbilityContracts::is_enabled() ) {
+			$schema['properties']['date_paid']      = array(
+				'type'        => array( 'string', 'null' ),
+				'format'      => 'date-time',
+				'description' => __( 'Optional. Date the order was paid, or null for none. The undo of a status change sets it back.', 'woocommerce' ),
+			);
+			$schema['properties']['date_completed'] = array(
+				'type'        => array( 'string', 'null' ),
+				'format'      => 'date-time',
+				'description' => __( 'Optional. Date the order was completed, or null for none. The undo of a status change sets it back.', 'woocommerce' ),
+			);
+		}
 		return AbilityFields::add_to_input_schema( $schema, 'order' );
 	}
 }

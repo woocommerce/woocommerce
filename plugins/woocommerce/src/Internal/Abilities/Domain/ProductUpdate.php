@@ -164,6 +164,57 @@ class ProductUpdate extends AbstractChangeAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * The product update that sets the fields of the input back to their values before the change.
+	 *
+	 * @param \WC_Product $subject Product before the change.
+	 * @param array       $input   Ability input.
+	 * @return array{ability: string, input: array}
+	 */
+	public static function undo( $subject, array $input ): ?array {
+		$getters = array(
+			'name'              => 'get_name',
+			'sku'               => 'get_sku',
+			'regular_price'     => 'get_regular_price',
+			'sale_price'        => 'get_sale_price',
+			'description'       => 'get_description',
+			'short_description' => 'get_short_description',
+			'status'            => 'get_status',
+			'manage_stock'      => 'get_manage_stock',
+			'stock_quantity'    => 'get_stock_quantity',
+			'stock_status'      => 'get_stock_status',
+			'external_url'      => 'get_product_url',
+			'button_text'       => 'get_button_text',
+			'grouped_products'  => 'get_children',
+		);
+
+		$undo = array( 'id' => $subject->get_id() );
+		if ( isset( $input['product_type_alias'] ) ) {
+			$alias = self::get_product_type_alias_for_product( $subject );
+			if ( is_wp_error( $alias ) ) {
+				return null;
+			}
+			$undo['product_type_alias'] = $alias;
+		}
+		foreach ( $getters as $field => $getter ) {
+			if ( array_key_exists( $field, $input ) && is_callable( array( $subject, $getter ) ) ) {
+				$undo[ $field ] = $subject->{$getter}( 'edit' );
+			}
+		}
+		if ( ! empty( $input['extensions'] ) && is_array( $input['extensions'] ) ) {
+			$values             = AbilityFields::get_values( 'product', $subject );
+			$undo['extensions'] = array();
+			foreach ( array_keys( $input['extensions'] ) as $attribute ) {
+				$undo['extensions'][ $attribute ] = $values[ $attribute ] ?? null;
+			}
+		}
+
+		return array(
+			'ability' => self::get_name(),
+			'input'   => $undo,
+		);
+	}
+
+	/**
 	 * Save the product.
 	 *
 	 * @param \WC_Product $subject Changed product.

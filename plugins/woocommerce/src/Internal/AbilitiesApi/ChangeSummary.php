@@ -44,6 +44,52 @@ final class ChangeSummary {
 	}
 
 	/**
+	 * The changes of the fields that an input sets: its top-level keys and the
+	 * attributes under its `extensions`.
+	 *
+	 * @param array $changes Changes, as changes() returns them.
+	 * @param array $input   Ability input.
+	 * @return array
+	 */
+	public static function requested( array $changes, array $input ): array {
+		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
+		unset( $input['id'], $input['expected'], $input['extensions'] );
+
+		return array_values(
+			array_filter(
+				$changes,
+				static function ( array $change ) use ( $input, $extensions ): bool {
+					$path = explode( '.', $change['field'] );
+					return 'extensions' === $path[0]
+						? array_key_exists( $path[1] ?? '', $extensions )
+						: array_key_exists( $path[0], $input );
+				}
+			)
+		);
+	}
+
+	/**
+	 * The label of an object, such as "Order #71" or a product name, or null.
+	 *
+	 * @param object $subject Object.
+	 * @return string|null
+	 */
+	public static function object_label( $subject ): ?string {
+		if ( $subject instanceof \WC_Abstract_Order ) {
+			$type = get_post_type_object( $subject->get_type() );
+			return sprintf(
+				/* translators: 1: Order type, such as Order or Subscription. 2: Order number. */
+				__( '%1$s #%2$s', 'woocommerce' ),
+				$type ? $type->labels->singular_name : __( 'Order', 'woocommerce' ),
+				$subject->get_order_number()
+			);
+		}
+
+		$label = is_callable( array( $subject, 'get_name' ) ) ? $subject->get_name() : null;
+		return is_string( $label ) && '' !== $label ? $label : null;
+	}
+
+	/**
 	 * The dotted paths whose values differ from the expected values.
 	 *
 	 * @param array $values   Current values.

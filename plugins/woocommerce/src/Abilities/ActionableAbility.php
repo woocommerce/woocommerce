@@ -104,13 +104,15 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Sentences that describe what the save does beyond the object, such as an email.
+	 * What the save does beyond the object, such as an email. Each side effect
+	 * has a stable `code`, the `value` it acts on, such as the email ID, and a
+	 * `description` for people.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param object $subject Object before the change.
 	 * @param array  $input   Ability input.
-	 * @return string[]
+	 * @return array<int, array{code: string, value: mixed, description: string}>
 	 */
 	public function side_effects( $subject, array $input ): array {
 		return array();
@@ -243,7 +245,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			return is_wp_error( $rejected ) ? $rejected : array( 'subject' => $subject );
 		}
 
-		$label        = is_callable( array( $subject, 'get_name' ) ) ? $subject->get_name() : null;
+		$label        = ChangeSummary::object_label( $subject );
 		$undo         = $this->undo( $subject, $input );
 		$side_effects = $this->side_effects( $subject, $input );
 
@@ -257,20 +259,41 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$changes = ChangeSummary::changes( $type, $before, $this->read( $subject ) );
-		if ( null !== $undo && ! isset( $undo['input']['expected'] ) && wp_get_ability( (string) $undo['ability'] ) instanceof self ) {
-			$undo['input']['expected'] = array_column( $changes, 'after', 'field' );
-		}
+		$undo    = null === $undo ? null : self::prepare_undo( $undo, ChangeSummary::requested( $changes, $input ) );
 
 		return array(
 			'ability'      => $this->get_name(),
 			'object_type'  => $type,
 			'object_id'    => is_callable( array( $subject, 'get_id' ) ) ? $subject->get_id() : null,
-			'object_label' => is_string( $label ) && '' !== $label ? $label : null,
+			'object_label' => $label,
 			'changes'      => $changes,
 			'expected'     => array_column( $changes, 'before', 'field' ),
 			'side_effects' => array_merge( $side_effects, $dropped ),
 			'undo'         => $undo,
 		);
+	}
+
+	/**
+	 * Add the values that the undo expects, and drop an undo whose input its
+	 * ability refuses. The undo expects only the values that the input asked
+	 * for, because a value that the change derives, such as a date, can differ
+	 * in the real save.
+	 *
+	 * @param array $undo      Undo call.
+	 * @param array $requested Changes of the fields that the input set.
+	 * @return array|null
+	 */
+	private static function prepare_undo( array $undo, array $requested ): ?array {
+		$ability = wp_get_ability( (string) $undo['ability'] );
+		if ( ! $ability instanceof self ) {
+			return $undo;
+		}
+
+		if ( ! isset( $undo['input']['expected'] ) ) {
+			$undo['input']['expected'] = array_column( $requested, 'after', 'field' );
+		}
+		$input = $ability->normalize_input( $undo['input'] );
+		return is_wp_error( $input ) || true !== $ability->validate_input( $input ) ? null : $undo;
 	}
 
 	/**

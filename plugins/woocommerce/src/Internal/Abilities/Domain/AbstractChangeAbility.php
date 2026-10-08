@@ -68,11 +68,11 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	}
 
 	/**
-	 * Sentences that describe what the save does beyond the object.
+	 * What the save does beyond the object.
 	 *
 	 * @param object $subject Object before the change.
 	 * @param array  $input   Ability input.
-	 * @return string[]
+	 * @return array<int, array{code: string, value: mixed, description: string}>
 	 */
 	public static function side_effects( $subject, array $input ): array {
 		return array();
