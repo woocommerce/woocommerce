@@ -212,4 +212,62 @@ class WC_Order_Item_Data_Store_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 56.78, $item2->get_cogs_value() );
 	}
+
+	/**
+	 * @testdox The 'item-{id}' object cache entry has the same shape whether it was populated by the order data store or by the individual order item data store.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/31656
+	 */
+	public function test_cached_item_row_shape_is_identical_across_data_store_paths() {
+		$order    = WC_Helper_Order::create_order();
+		$item_id  = reset( $order->get_items() )->get_id();
+		$order_id = $order->get_id();
+
+		// Populate the cache via the order data store (bulk read of the order items).
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		WC_Data_Store::load( 'order' )->read_items( wc_get_order( $order_id ), 'line_item' );
+		$from_order_store = wp_cache_get( 'item-' . $item_id, 'order-items' );
+
+		// Populate the cache via the individual order item data store.
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		new WC_Order_Item_Product( $item_id );
+		$from_item_store = wp_cache_get( 'item-' . $item_id, 'order-items' );
+
+		$this->assertIsObject( $from_order_store );
+		$this->assertIsObject( $from_item_store );
+
+		$order_store_keys = array_keys( (array) $from_order_store );
+		$item_store_keys  = array_keys( (array) $from_item_store );
+		sort( $order_store_keys );
+		sort( $item_store_keys );
+
+		$this->assertSame( $order_store_keys, $item_store_keys );
+		$this->assertSame( array( 'order_id', 'order_item_id', 'order_item_name', 'order_item_type' ), $order_store_keys );
+	}
+
+	/**
+	 * @testdox A cached order item row that was populated by the individual order item data store can be converted back into an order item via WC_Order_Factory::get_order_item().
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/31656
+	 */
+	public function test_cached_order_item_row_from_item_store_is_factory_compatible() {
+		$order    = WC_Helper_Order::create_order();
+		$item_id  = reset( $order->get_items() )->get_id();
+		$order_id = $order->get_id();
+
+		wp_cache_delete( 'item-' . $item_id, 'order-items' );
+		wp_cache_delete( 'order-items-' . $order_id, 'orders' );
+		new WC_Order_Item_Product( $item_id );
+
+		$cached_row = wp_cache_get( 'item-' . $item_id, 'order-items' );
+
+		$this->assertIsObject( $cached_row );
+
+		$item = WC_Order_Factory::get_order_item( $cached_row );
+
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $item );
+		$this->assertSame( (int) $item_id, $item->get_id() );
+	}
 }

@@ -11,6 +11,7 @@ permissions:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        timeout-minutes: 10
         if: ${{ github.repository == 'woocommerce/woocommerce' }}
 
         steps:
@@ -23,7 +24,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install: true
+                  install: '@woocommerce/storybook...'
 
             - name: Build Storybook
               run: pnpm --filter='@woocommerce/storybook' build

@@ -27,6 +27,28 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Encoded spaces in a local URL resolve to an existing file with spaces in its name.
+	 */
+	public function test_parse_file_path_for_encoded_space_in_existing_file(): void {
+		$uploads       = wp_upload_dir();
+		$filename      = 'wc download ' . wp_generate_uuid4() . '.pdf';
+		$absolute_path = trailingslashit( $uploads['basedir'] ) . $filename;
+		$file_url      = trailingslashit( $uploads['baseurl'] ) . rawurlencode( $filename );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
+		$this->assertNotFalse( file_put_contents( $absolute_path, 'download fixture' ) );
+
+		try {
+			$parsed_file_path = WC_Download_Handler::parse_file_path( $file_url );
+			$this->assertFalse( $parsed_file_path['remote_file'] );
+			$this->assertSame( $absolute_path, $parsed_file_path['file_path'] );
+		} finally {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Remove test fixtures from the uploads directory.
+			unlink( $absolute_path );
+		}
+	}
+
+	/**
 	 * Test for local file with `file` protocol.
 	 */
 	public function test_parse_file_path_for_local_file_protocol() {
@@ -548,6 +570,74 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox readfile_chunked() should emit binary download bytes unchanged.
+	 */
+	public function test_readfile_chunked_emits_binary_data_unchanged(): void {
+		$binary_content = "\x00\xFF\xFE<script>&\x80";
+		$temp_file      = wp_tempnam( 'wc-download-handler-streaming' );
+
+		file_put_contents( $temp_file, $binary_content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+
+		$output = '';
+		ob_start(
+			function ( $chunk ) use ( &$output ) {
+				$output .= $chunk;
+				return '';
+			}
+		);
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $temp_file, 0, strlen( $binary_content ) );
+		} finally {
+			ob_end_clean();
+			wp_delete_file( $temp_file );
+		}
+
+		$this->assertTrue( $served, 'A complete binary stream should be reported as served.' );
+		$this->assertSame( $binary_content, $output, 'Binary download bytes must not be escaped or otherwise transformed.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should stop and report failure when a stream read fails.
+	 *
+	 * @dataProvider provider_stream_lengths
+	 *
+	 * @param int $length Requested download length, where zero means until EOF.
+	 */
+	public function test_readfile_chunked_reports_read_failure( int $length ): void {
+		$scheme = 'wc-failing-download';
+
+		FakeRemoteStreamWrapper::$fail_reads = true;
+		stream_wrapper_register( $scheme, FakeRemoteStreamWrapper::class );
+
+		ob_start();
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $scheme . '://fixture', 0, $length );
+		} finally {
+			$output = ob_get_clean();
+			stream_wrapper_unregister( $scheme );
+			FakeRemoteStreamWrapper::$fail_reads = false;
+		}
+
+		$this->assertFalse( $served, 'A failed fread() call should make the download fail.' );
+		$this->assertSame( '', $output, 'A failed read should not append anything to the download response.' );
+		$this->assertTrue( FakeRemoteStreamWrapper::$closed, 'The failed stream should be closed immediately.' );
+	}
+
+	/**
+	 * Download lengths for failed-stream coverage.
+	 *
+	 * @return array<string, array<int>>
+	 */
+	public function provider_stream_lengths(): array {
+		return array(
+			'requested range'       => array( 4 ),
+			'read until stream EOF' => array( 0 ),
+		);
+	}
+
+	/**
 	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
 	 */
 	public function test_content_type_fallback_applies_only_to_remote_files(): void {
@@ -584,6 +674,225 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox download_product() should treat array query args as an invalid download link.
+	 */
+	public function test_download_product_rejects_array_query_args(): void {
+		$string_args = array(
+			'download_file' => '1',
+			'order'         => 'wc_order_x',
+			'key'           => 'k',
+			'email'         => 'a@example.org',
+		);
+
+		$product_was_looked_up = false;
+		$lookup_watcher        = function ( $type ) use ( &$product_was_looked_up ) {
+			$product_was_looked_up = true;
+			return $type;
+		};
+
+		add_filter( 'woocommerce_product_type_query', $lookup_watcher );
+
+		try {
+			foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $arg ) {
+				$_GET = $string_args;
+
+				if ( 'uid' === $arg ) {
+					// The UID is only consulted when no email address is supplied.
+					unset( $_GET['email'] );
+				}
+
+				$_GET[ $arg ]          = array( 'x' );
+				$wp_die_message        = '';
+				$product_was_looked_up = false;
+
+				// We do not use expectException() here because every argument is checked in turn.
+				try {
+					WC_Download_Handler::download_product();
+				} catch ( WPDieException $e ) {
+					$wp_die_message = $e->getMessage();
+				}
+
+				$this->assertStringContainsString(
+					'Invalid download link',
+					$wp_die_message,
+					"An array value for the \"$arg\" query argument should render the invalid download link error."
+				);
+
+				$this->assertFalse(
+					$product_was_looked_up,
+					"Array query arguments are rejected before any product lookup, but the \"$arg\" case reached one."
+				);
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $lookup_watcher );
+			$_GET = array();
+		}
+	}
+
+	/**
+	 * @testdox download_product() should reject authorization values that sanitize to empty.
+	 *
+	 * @dataProvider provider_authorization_values_that_sanitize_to_empty
+	 *
+	 * @param string $argument Query argument under test.
+	 * @param string $value    Query argument value.
+	 */
+	public function test_download_product_rejects_authorization_values_that_sanitize_to_empty( string $argument, string $value ): void {
+		self::remove_download_handlers();
+
+		try {
+			list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+				array(
+					array(
+						'name' => 'Protected download',
+						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+					),
+				)
+			);
+
+			$download_key = current( array_keys( $product->get_downloads() ) );
+			$download     = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'product_id' => $product->get_id() ) ) );
+			$download->set_downloads_remaining( 5 );
+			$download->save();
+
+			$_GET = array(
+				'download_file' => $product->get_id(),
+				'order'         => $order->get_order_key(),
+				'email'         => $order->get_billing_email(),
+				'key'           => $download_key,
+			);
+
+			$_GET[ $argument ] = $value;
+
+			$wp_die_message = '';
+
+			try {
+				WC_Download_Handler::download_product();
+			} catch ( WPDieException $e ) {
+				$wp_die_message = $e->getMessage();
+			}
+
+			$this->assertStringContainsString( 'Invalid download link', $wp_die_message, 'The malformed authorization value should render the invalid download link error.' );
+
+			$download = new WC_Customer_Download( $download->get_id() );
+			$this->assertSame( 5, $download->get_downloads_remaining(), 'A rejected request must not consume the customer\'s remaining downloads.' );
+		} finally {
+			self::restore_download_handlers();
+			$_GET = array();
+		}
+	}
+
+	/**
+	 * @testdox download_product() should authorize the current email download URL format.
+	 */
+	public function test_download_product_accepts_current_email_download_url(): void {
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+				),
+			)
+		);
+
+		$download_key = current( array_keys( $product->get_downloads() ) );
+		$order_item   = current( $order->get_items() );
+		$download_url = $order_item->get_item_download_url( $download_key );
+		$query_args   = array();
+
+		parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+
+		$this->assertArrayHasKey( 'email', $query_args, 'The current email download URL should contain an email argument.' );
+		$this->assertArrayNotHasKey( 'uid', $query_args, 'The email download URL should exercise the email authorization path.' );
+		$this->assert_download_url_is_authorized( $download_url );
+	}
+
+	/**
+	 * @testdox download_product() should authorize the current UID download URL format.
+	 */
+	public function test_download_product_accepts_current_uid_download_url(): void {
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+				),
+			)
+		);
+
+		$downloadable_items = $order->get_downloadable_items();
+		$download_url       = current( $downloadable_items )['download_url'];
+		$query_args         = array();
+
+		parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+
+		$this->assertArrayHasKey( 'uid', $query_args, 'The current UID download URL should contain a UID argument.' );
+		$this->assertArrayNotHasKey( 'email', $query_args, 'The UID download URL should exercise the UID authorization path.' );
+		$this->assert_download_url_is_authorized( $download_url );
+	}
+
+	/**
+	 * @testdox download_product() should reject a generated UID link when the order billing email is empty.
+	 */
+	public function test_download_product_rejects_generated_uid_link_when_billing_email_is_empty(): void {
+		self::remove_download_handlers();
+
+		try {
+			list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+				array(
+					array(
+						'name' => 'Protected download',
+						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+					),
+				)
+			);
+
+			$download = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'product_id' => $product->get_id() ) ) );
+			$download->set_downloads_remaining( 5 );
+			$download->save();
+
+			$order->set_customer_id( 0 );
+			$order->set_billing_email( '' );
+			$order->save();
+
+			$downloadable_items = $order->get_downloadable_items();
+			$download_url       = current( $downloadable_items )['download_url'];
+			$query_args         = array();
+
+			parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+			$_GET = $query_args;
+
+			$wp_die_message = '';
+
+			try {
+				WC_Download_Handler::download_product();
+			} catch ( WPDieException $e ) {
+				$wp_die_message = $e->getMessage();
+			}
+
+			$this->assertStringContainsString( 'Invalid download link', $wp_die_message, 'A UID derived from an empty billing email should be rejected.' );
+
+			$download = new WC_Customer_Download( $download->get_id() );
+			$this->assertSame( 5, $download->get_downloads_remaining(), 'A rejected UID request must not consume the customer\'s remaining downloads.' );
+		} finally {
+			self::restore_download_handlers();
+			$_GET = array();
+		}
+	}
+
+	/**
+	 * Values which are present in the request but empty after sanitization.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_authorization_values_that_sanitize_to_empty(): array {
+		return array(
+			'order key' => array( 'order', ' ' ),
+			'email'     => array( 'email', 'x' ),
+		);
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *
@@ -605,6 +914,38 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			$product,
 			$order,
 		);
+	}
+
+	/**
+	 * Assert that a generated download URL passes authorization without serving a file.
+	 *
+	 * @param string $download_url Generated download URL.
+	 */
+	private function assert_download_url_is_authorized( string $download_url ): void {
+		$downloads_dispatched = 0;
+		$download_method      = function () {
+			return 'test';
+		};
+		$download_counter     = function () use ( &$downloads_dispatched ) {
+			++$downloads_dispatched;
+		};
+
+		add_filter( 'woocommerce_file_download_method', $download_method );
+		add_action( 'woocommerce_download_file_test', $download_counter );
+
+		try {
+			$query_args = array();
+			parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+			$_GET = $query_args;
+
+			WC_Download_Handler::download_product();
+
+			$this->assertSame( 1, $downloads_dispatched, 'An authorized URL should reach the download dispatch without serving a file.' );
+		} finally {
+			remove_filter( 'woocommerce_file_download_method', $download_method );
+			remove_action( 'woocommerce_download_file_test', $download_counter );
+			$_GET = array();
+		}
 	}
 
 	/**

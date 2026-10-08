@@ -21,9 +21,12 @@ jest.mock( '@wordpress/data', () => ( {
 	} ) ),
 } ) );
 jest.mock( '@wordpress/date', () => ( {
+	...jest.requireActual( '@wordpress/date' ),
 	dateI18n: jest.fn( ( format, date ) => {
 		// Simple mock that returns a date-like string
-		if ( ! date ) return 'Never';
+		if ( ! date ) {
+			return 'Never';
+		}
 		return 'Nov 21 00:00';
 	} ),
 } ) );

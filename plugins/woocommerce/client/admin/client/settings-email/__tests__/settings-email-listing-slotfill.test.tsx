@@ -10,7 +10,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -34,18 +34,53 @@ jest.mock( '@wordpress/components', () => ( {
 			<div>{ children }</div>
 		),
 	} ),
-	Button: ( { children }: { children: React.ReactNode } ) => (
-		<button>{ children }</button>
-	),
+	Button: ( {
+		children,
+		onClick,
+		disabled,
+		href,
+	}: {
+		children: React.ReactNode;
+		onClick?: () => void;
+		disabled?: boolean;
+		href?: string;
+	} ) =>
+		href ? (
+			<a href={ href }>{ children }</a>
+		) : (
+			<button onClick={ onClick } disabled={ disabled }>
+				{ children }
+			</button>
+		),
 } ) );
 
 jest.mock( '../settings-email-listing-listview', () => ( {
 	ListView: () => <div data-testid="listview" />,
 } ) );
 
+// The slotfill imports `recreateEmailPostRequest` from the data module, which
+// transitively pulls in `@wordpress/core-data`; mock it out — these tests only
+// exercise the Tracks instrumentation, payload normalization, and the
+// "Edit template" lazy-creation flow.
+jest.mock( '../settings-email-listing-data', () => ( {
+	recreateEmailPostRequest: jest.fn(),
+} ) );
+
+const createErrorNoticeMock = jest.fn();
+
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	dispatch: () => ( { createErrorNotice: createErrorNoticeMock } ),
+} ) );
+
+jest.mock( '@woocommerce/settings', () => ( {
+	getAdminLink: ( path: string ) => `https://example.com/wp-admin/${ path }`,
+} ) );
+
 const baseEmail: EmailType = {
 	id: 'new-order',
 	post_id: '123',
+	file_template_preview_url: null,
 	title: 'New order',
 	description: '',
 	enabled: true,
@@ -75,13 +110,15 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		window.sessionStorage.clear();
 	} );
 
-	it( 'fires one block_email_list_viewed on mount with eligible_count and total_count', () => {
+	it( 'fires one block_email_list_viewed on mount with eligible_count and total_count', async () => {
 		render(
 			<EmailListingFill
 				emailTypes={ [ baseEmail, eligibleEmail ] }
 				editTemplateUrl={ null }
+				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 
 		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 		expect( recordEventMock ).toHaveBeenCalledWith(
@@ -94,25 +131,29 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		);
 	} );
 
-	it( 'dedups within a session: a second mount in the same tab does not refire', () => {
+	it( 'dedups within a session: a second mount in the same tab does not refire', async () => {
 		const { unmount } = render(
 			<EmailListingFill
 				emailTypes={ [ eligibleEmail ] }
 				editTemplateUrl={ null }
+				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 		unmount();
 		render(
 			<EmailListingFill
 				emailTypes={ [ eligibleEmail ] }
 				editTemplateUrl={ null }
+				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 
 		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'still fires when sessionStorage is unavailable (privacy-mode fallback)', () => {
+	it( 'still fires when sessionStorage is unavailable (privacy-mode fallback)', async () => {
 		const setItemSpy = jest
 			.spyOn( window.sessionStorage.__proto__, 'setItem' )
 			.mockImplementation( () => {
@@ -124,8 +165,10 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 				<EmailListingFill
 					emailTypes={ [ eligibleEmail ] }
 					editTemplateUrl={ null }
+					emailTemplateId={ null }
 				/>
 			);
+			await screen.findByTestId( 'listview' );
 
 			expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 		} finally {
@@ -133,13 +176,15 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		}
 	} );
 
-	it( 'reports eligible_count=0 when no rows are eligible', () => {
+	it( 'reports eligible_count=0 when no rows are eligible', async () => {
 		render(
 			<EmailListingFill
 				emailTypes={ [ baseEmail, baseEmail ] }
 				editTemplateUrl={ null }
+				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'block_email_list_viewed',
@@ -204,6 +249,7 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 			<EmailListingFill
 				emailTypes={ [ rawAsEmailType ] }
 				editTemplateUrl={ null }
+				emailTemplateId={ null }
 			/>
 		);
 
@@ -232,6 +278,7 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 			<EmailListingFill
 				emailTypes={ [ normalized ] }
 				editTemplateUrl={ null }
+				emailTemplateId={ null }
 			/>
 		);
 
@@ -263,5 +310,119 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 		const normalized = normalizeEmailTypePayload( withoutStatus );
 
 		expect( normalized.templateStatus ).toBeNull();
+	} );
+} );
+
+describe( 'EditTemplateButton — lazy post creation', () => {
+	const TEMPLATE_ID = 'my-theme//wooemailtemplate';
+
+	const { recreateEmailPostRequest } = jest.requireMock(
+		'../settings-email-listing-data'
+	) as { recreateEmailPostRequest: jest.Mock };
+
+	const originalLocation = window.location;
+
+	beforeAll( () => {
+		// jsdom throws on real navigation; replace location with a writable stub.
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: { ...originalLocation, href: '' },
+		} );
+	} );
+
+	afterAll( () => {
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: originalLocation,
+		} );
+	} );
+
+	beforeEach( () => {
+		recordEventMock.mockClear();
+		recreateEmailPostRequest.mockReset();
+		createErrorNoticeMock.mockClear();
+		window.sessionStorage.clear();
+		window.location.href = '';
+	} );
+
+	it( 'links directly to the template editor when editTemplateUrl is provided', () => {
+		render(
+			<EmailListingFill
+				emailTypes={ [ baseEmail ] }
+				editTemplateUrl="https://example.com/wp-admin/site-editor.php"
+				emailTemplateId={ TEMPLATE_ID }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'link', { name: 'Edit template' } )
+		).toHaveAttribute(
+			'href',
+			'https://example.com/wp-admin/site-editor.php'
+		);
+	} );
+
+	it( 'renders no button when there is no URL and no template id', () => {
+		render(
+			<EmailListingFill
+				emailTypes={ [ baseEmail ] }
+				editTemplateUrl={ null }
+				emailTemplateId={ null }
+			/>
+		);
+
+		expect( screen.queryByText( 'Edit template' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'lazily creates the post and navigates to the editor with the template param', async () => {
+		recreateEmailPostRequest.mockResolvedValue( {
+			message: 'ok',
+			post_id: '42',
+		} );
+
+		render(
+			<EmailListingFill
+				emailTypes={ [ baseEmail ] }
+				editTemplateUrl={ null }
+				emailTemplateId={ TEMPLATE_ID }
+			/>
+		);
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Edit template' } )
+		);
+
+		await waitFor( () => {
+			expect( window.location.href ).toBe(
+				`https://example.com/wp-admin/post.php?post=42&action=edit&template=${ encodeURIComponent(
+					TEMPLATE_ID
+				) }`
+			);
+		} );
+		expect( recreateEmailPostRequest ).toHaveBeenCalledWith( baseEmail.id );
+	} );
+
+	it( 'shows an error notice and re-enables the button when post creation fails', async () => {
+		recreateEmailPostRequest.mockResolvedValue( null );
+
+		render(
+			<EmailListingFill
+				emailTypes={ [ baseEmail ] }
+				editTemplateUrl={ null }
+				emailTemplateId={ TEMPLATE_ID }
+			/>
+		);
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: 'Edit template' } )
+		);
+
+		await waitFor( () => {
+			expect( createErrorNoticeMock ).toHaveBeenCalled();
+		} );
+		expect( window.location.href ).toBe( '' );
+		expect(
+			screen.getByRole( 'button', { name: 'Edit template' } )
+		).toBeEnabled();
 	} );
 } );

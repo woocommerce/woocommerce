@@ -38,9 +38,9 @@ export const ShippingAddress = (): JSX.Element => {
 
 	const deliversToLabel = hasRates
 		? // Translators: <address/> is the formatted shipping address.
-		  __( 'Delivers to <address/>', 'woocommerce' )
+			__( 'Delivers to <address/>', 'woocommerce' )
 		: // Translators: <address/> is the formatted shipping address.
-		  __( 'No delivery options available for <address/>', 'woocommerce' );
+			__( 'No delivery options available for <address/>', 'woocommerce' );
 
 	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
 
@@ -54,7 +54,7 @@ export const ShippingAddress = (): JSX.Element => {
 
 	const addressLabel = prefersCollection
 		? // Translators: <address/> is the pickup location.
-		  __( 'Collection from <address/>', 'woocommerce' )
+			__( 'Collection from <address/>', 'woocommerce' )
 		: deliversToLabel;
 
 	const title = (

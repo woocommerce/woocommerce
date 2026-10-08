@@ -11,6 +11,7 @@ permissions: {}
 jobs:
     stale:
         runs-on: ubuntu-latest
+        timeout-minutes: 10
         permissions:
             contents: write
             issues: write
@@ -102,6 +103,7 @@ jobs:
 
     remove-draft-approvals:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
         permissions:
             pull-requests: write
         if: github.event_name == 'pull_request' && github.event.action == 'converted_to_draft'

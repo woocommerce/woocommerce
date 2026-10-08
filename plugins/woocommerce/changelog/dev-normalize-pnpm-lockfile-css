@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Update the browser data the CSS minifier uses; smaller minified CSS with the same styling.

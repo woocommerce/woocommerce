@@ -491,6 +491,10 @@ describe( 'Core Profiler Tracks flows', () => {
 				( [ eventName ] ) => eventName === 'coreprofiler_plugins_skip'
 			)
 		).toHaveLength( 1 );
+		expect( recordEvent ).not.toHaveBeenCalledWith(
+			'coreprofiler_store_extensions_continue',
+			expect.anything()
+		);
 	} );
 
 	it( 'records when extension-installation permission is missing', async () => {

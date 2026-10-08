@@ -98,7 +98,7 @@ export function useApplyUpdate(
 			if ( ! current ) {
 				return;
 			}
-			receiveEntityRecords(
+			void receiveEntityRecords(
 				'postType',
 				'woo_email',
 				[
@@ -130,15 +130,18 @@ export function useApplyUpdate(
 
 				syncEditorState( res.restored_content );
 
-				createSuccessNotice( __( 'Update reverted.', 'woocommerce' ), {
-					type: 'snackbar',
-				} );
+				void createSuccessNotice(
+					__( 'Update reverted.', 'woocommerce' ),
+					{
+						type: 'snackbar',
+					}
+				);
 			} catch ( err: unknown ) {
 				const message =
 					err && typeof err === 'object' && 'message' in err
 						? String( err.message )
 						: __( 'Could not revert the update.', 'woocommerce' );
-				createErrorNotice( message, { type: 'snackbar' } );
+				void createErrorNotice( message, { type: 'snackbar' } );
 			}
 		},
 		[ postId, createSuccessNotice, createErrorNotice, syncEditorState ]
@@ -172,8 +175,8 @@ export function useApplyUpdate(
 					: __(
 							'Update applied · customizations preserved',
 							'woocommerce'
-					  );
-				createSuccessNotice( successMessage, {
+						);
+				void createSuccessNotice( successMessage, {
 					type: 'snackbar',
 					actions: [
 						{
@@ -192,7 +195,7 @@ export function useApplyUpdate(
 						? String( err.message )
 						: __( 'Could not apply the update.', 'woocommerce' );
 				if ( ! options.suppressSnackbarOnError ) {
-					createErrorNotice( message, { type: 'snackbar' } );
+					void createErrorNotice( message, { type: 'snackbar' } );
 				}
 				return null;
 			} finally {

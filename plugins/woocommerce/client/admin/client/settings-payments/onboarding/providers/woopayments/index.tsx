@@ -24,7 +24,9 @@ import WooPaymentsOnboardingModalSnackbar from './components/snackbar';
 
 const SnackbarWrapper = () => {
 	const { snackbar } = useOnboardingContext();
-	if ( ! snackbar.show ) return null;
+	if ( ! snackbar.show ) {
+		return null;
+	}
 
 	return (
 		<WooPaymentsOnboardingModalSnackbar
@@ -128,7 +130,9 @@ export default function WooPaymentsModal( {
 		setIsOpen( false );
 	};
 
-	if ( ! isOpen ) return null;
+	if ( ! isOpen ) {
+		return null;
+	}
 
 	return (
 		<Modal setIsOpen={ handleClose }>

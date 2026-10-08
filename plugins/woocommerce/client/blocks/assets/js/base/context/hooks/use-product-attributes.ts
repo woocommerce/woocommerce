@@ -24,8 +24,9 @@ export default function useProductAttributes( shouldLoadAttributes: boolean ) {
 			! shouldLoadAttributes ||
 			isLoadingAttributes ||
 			hasLoadedAttributes.current
-		)
+		) {
 			return;
+		}
 
 		async function fetchAttributesWithTerms() {
 			setIsLoadingAttributes( true );
@@ -64,7 +65,7 @@ export default function useProductAttributes( shouldLoadAttributes: boolean ) {
 			}
 		}
 
-		fetchAttributesWithTerms();
+		void fetchAttributesWithTerms();
 
 		return () => {
 			hasLoadedAttributes.current = true;

@@ -202,6 +202,32 @@ const QuantitySelector = ( {
 
 	return (
 		<div className={ classes }>
+			{ editable && (
+				<button
+					ref={ decreaseButtonRef }
+					aria-label={ sprintf(
+						/* translators: %s refers to the item name in the cart. */
+						__( 'Reduce quantity of %s', 'woocommerce' ),
+						itemName
+					) }
+					className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
+					disabled={ ! canDecrease }
+					onClick={ () => {
+						const newQuantity = internalState - step;
+						commitValue( newQuantity );
+						expectedQuantityTypeRef.current = 'decrease';
+						speak(
+							sprintf(
+								/* translators: %s refers to the item's new quantity in the cart. */
+								__( 'Quantity reduced to %s.', 'woocommerce' ),
+								newQuantity
+							)
+						);
+					} }
+				>
+					&#8722;
+				</button>
+			) }
 			<input
 				ref={ inputRef }
 				className="wc-block-components-quantity-selector__input"
@@ -222,62 +248,33 @@ const QuantitySelector = ( {
 				) }
 			/>
 			{ editable && (
-				<>
-					<button
-						ref={ decreaseButtonRef }
-						aria-label={ sprintf(
-							/* translators: %s refers to the item name in the cart. */
-							__( 'Reduce quantity of %s', 'woocommerce' ),
-							itemName
-						) }
-						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
-						disabled={ ! canDecrease }
-						onClick={ () => {
-							const newQuantity = internalState - step;
-							commitValue( newQuantity );
-							expectedQuantityTypeRef.current = 'decrease';
-							speak(
-								sprintf(
-									/* translators: %s refers to the item's new quantity in the cart. */
-									__(
-										'Quantity reduced to %s.',
-										'woocommerce'
-									),
-									newQuantity
-								)
-							);
-						} }
-					>
-						&#8722;
-					</button>
-					<button
-						ref={ increaseButtonRef }
-						aria-label={ sprintf(
-							/* translators: %s refers to the item's name in the cart. */
-							__( 'Increase quantity of %s', 'woocommerce' ),
-							itemName
-						) }
-						disabled={ ! canIncrease }
-						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
-						onClick={ () => {
-							const newQuantity = internalState + step;
-							commitValue( newQuantity );
-							expectedQuantityTypeRef.current = 'increase';
-							speak(
-								sprintf(
-									/* translators: %s refers to the item's new quantity in the cart. */
-									__(
-										'Quantity increased to %s.',
-										'woocommerce'
-									),
-									newQuantity
-								)
-							);
-						} }
-					>
-						+
-					</button>
-				</>
+				<button
+					ref={ increaseButtonRef }
+					aria-label={ sprintf(
+						/* translators: %s refers to the item's name in the cart. */
+						__( 'Increase quantity of %s', 'woocommerce' ),
+						itemName
+					) }
+					disabled={ ! canIncrease }
+					className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
+					onClick={ () => {
+						const newQuantity = internalState + step;
+						commitValue( newQuantity );
+						expectedQuantityTypeRef.current = 'increase';
+						speak(
+							sprintf(
+								/* translators: %s refers to the item's new quantity in the cart. */
+								__(
+									'Quantity increased to %s.',
+									'woocommerce'
+								),
+								newQuantity
+							)
+						);
+					} }
+				>
+					+
+				</button>
 			) }
 		</div>
 	);

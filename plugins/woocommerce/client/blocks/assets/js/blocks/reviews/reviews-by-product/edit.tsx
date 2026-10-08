@@ -77,31 +77,6 @@ const ReviewsByProductEditor = ( {
 		return (
 			<InspectorControls key="inspector">
 				<ToolsPanel
-					label={ __( 'Product', 'woocommerce' ) }
-					resetAll={ () => setAttributes( { productId: 0 } ) }
-				>
-					<ToolsPanelItem
-						hasValue={ () => !! attributes.productId }
-						label={ __( 'Product', 'woocommerce' ) }
-						onDeselect={ () => setAttributes( { productId: 0 } ) }
-						isShownByDefault
-					>
-						<ProductControl
-							selected={
-								attributes.productId
-									? [ attributes.productId ]
-									: []
-							}
-							onChange={ ( value = [] ) => {
-								const id = value[ 0 ] ? value[ 0 ].id : 0;
-								setAttributes( { productId: id } );
-							} }
-							renderItem={ renderProductControlItem }
-							isCompact={ true }
-						/>
-					</ToolsPanelItem>
-				</ToolsPanel>
-				<ToolsPanel
 					label={ __( 'Content', 'woocommerce' ) }
 					resetAll={ () =>
 						setAttributes( {
@@ -126,12 +101,40 @@ const ReviewsByProductEditor = ( {
 							showOrderby: true,
 							orderby: 'most-recent',
 							reviewsOnPageLoad: 10,
+							offset: 0,
 							showLoadMore: true,
 							reviewsOnLoadMore: 10,
 						} )
 					}
 				>
-					{ getSharedReviewListControls( attributes, setAttributes ) }
+					{ getSharedReviewListControls( attributes, setAttributes, {
+						showOffset: true,
+					} ) }
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Product', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { productId: 0 } ) }
+				>
+					<ToolsPanelItem
+						hasValue={ () => !! attributes.productId }
+						label={ __( 'Product', 'woocommerce' ) }
+						onDeselect={ () => setAttributes( { productId: 0 } ) }
+						isShownByDefault
+					>
+						<ProductControl
+							selected={
+								attributes.productId
+									? [ attributes.productId ]
+									: []
+							}
+							onChange={ ( value = [] ) => {
+								const id = value[ 0 ] ? value[ 0 ].id : 0;
+								setAttributes( { productId: id } );
+							} }
+							renderItem={ renderProductControlItem }
+							isCompact={ true }
+						/>
+					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
 		);

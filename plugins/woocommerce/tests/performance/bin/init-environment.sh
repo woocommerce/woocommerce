@@ -34,8 +34,9 @@ $wp_cli wp wc --user=admin tool run install_pages
 # Importing WooCommerce sample products"
 $wp_cli wp import wp-content/plugins/woocommerce/sample-data/sample_products.xml --authors=skip
 
-# install Storefront
-$wp_cli wp theme install storefront --activate
+# Activate Storefront (pre-provisioned via .wp-env.e2e.json themes[]; `theme install
+# --activate` would skip activation on the already-installed path).
+$wp_cli wp theme activate storefront || { echo "Error: failed to activate storefront." >&2; exit 1; }
 
 # Pin order storage to the legacy posts table (HPOS off) for deterministic runs.
 # These performance requests assert the classic post.php order-edit screens,

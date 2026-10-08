@@ -162,7 +162,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		};
 
 		add_action( 'wp_abilities_api_categories_init', $callback );
-		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		do_action( 'wp_abilities_api_categories_init' );
 		remove_action( 'wp_abilities_api_categories_init', $callback );
 
 		if ( null !== $category ) {
@@ -271,7 +271,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		};
 
 		add_action( 'wp_abilities_api_init', $callback );
-		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		do_action( 'wp_abilities_api_init' );
 		remove_action( 'wp_abilities_api_init', $callback );
 
 		$ability = wp_get_ability( $ability_id );

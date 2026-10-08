@@ -55,7 +55,6 @@ async function getOrderIdFromPage( page: Page ) {
 async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
-	await page.getByText( 'Search for a product…' ).click();
 	await page.locator( 'span > .select2-search__field' ).fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
 
@@ -421,6 +420,72 @@ test.describe(
 			).toBeVisible();
 		} );
 
+		test( 'can add a product without an extra click or rogue search box', async ( {
+			page,
+			simpleProduct,
+		} ) => {
+			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
+
+			// Open the Add products modal.
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add product(s)' } )
+				.click();
+
+			const modal = page.locator( '.wc-backbone-modal-content' );
+			await expect( modal ).toBeVisible();
+
+			const productSearch = page.locator(
+				'span > .select2-search__field'
+			);
+			await expect( productSearch ).toBeFocused();
+
+			// Close the automatically opened search so the existing keyboard
+			// regression still exercises opening the control with Enter.
+			await page.keyboard.press( 'Escape' );
+
+			// Focus the (closed) product-search control and press Enter.
+			// Before the fix this submitted the modal, closing it and
+			// stranding a detached selectWoo dropdown at the top-left of the
+			// page.
+			await modal.locator( '.select2-selection' ).first().focus();
+			await page.keyboard.press( 'Enter' );
+
+			// The modal must still be open: Enter on the search control must
+			// not submit/close the modal.
+			await expect( modal ).toBeVisible();
+
+			// selectWoo attaches its search dropdown to <body> (not inside the
+			// modal), so target the search field at the page level — the same
+			// locator the mouse-driven helper uses. Enter (above) opened the
+			// dropdown; type the query, wait for the result, then press Enter to
+			// choose it with the keyboard (results are loaded first, so this is
+			// not the premature-Enter path).
+			await productSearch.fill( simpleProduct.name );
+			await page
+				.getByRole( 'option', { name: simpleProduct.name } )
+				.first()
+				.waitFor();
+			await page.keyboard.press( 'Enter' );
+
+			// The product is selected in the modal's search control; commit.
+			// Assert on the rendered selection specifically — a bare getByText
+			// also matches the hidden <option>, which trips strict mode.
+			await expect(
+				modal
+					.locator( '.select2-selection__rendered' )
+					.filter( { hasText: simpleProduct.name } )
+			).toBeVisible();
+			await page.locator( '#btn-ok' ).click();
+
+			// Line item lands on the order.
+			await expect(
+				page
+					.locator( 'td.name > a' )
+					.filter( { hasText: simpleProduct.name } )
+			).toBeVisible();
+		} );
+
 		test( 'can create an order for an existing customer', async ( {
 			page,
 			simpleProduct,
@@ -534,13 +599,15 @@ test.describe(
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for each product to add
-			for ( const product of [
+			for ( const [ index, product ] of [
 				simpleProduct,
 				variableProduct,
 				groupedProduct,
 				externalProduct,
-			] ) {
-				await page.getByText( 'Search for a product…' ).click();
+			].entries() ) {
+				if ( index > 0 ) {
+					await page.getByText( 'Search for a product…' ).click();
+				}
 				await page
 					.locator( 'span > .select2-search__field' )
 					.fill( product.name );

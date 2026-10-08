@@ -47,21 +47,6 @@ class CouponCode extends AbstractBlock {
 	);
 
 	/**
-	 * Get the editor script handle for this block type.
-	 *
-	 * @param string|null $key Data to get. Valid keys: "handle", "path", "dependencies".
-	 * @return array|string|null
-	 */
-	protected function get_block_type_editor_script( $key = null ) {
-		$script = array(
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => array( 'wc-blocks' ),
-		);
-		return null === $key ? $script : ( $script[ $key ] ?? null );
-	}
-
-	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null

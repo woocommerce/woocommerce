@@ -37,28 +37,38 @@ if ( ! $tab_exists ) {
 }
 
 // Resolve the Settings UI context for this request, falling back to legacy
-// rendering when the settings SDK classes are unavailable. The class can be
-// missing mid-update, when this file has been replaced on disk but the cached
-// autoloader has not refreshed yet.
-$settings_ui_context = null;
+// rendering when the settings SDK classes are unavailable or stale. The class
+// can be missing or outdated mid-update, when this file has been replaced on
+// disk but the cached autoloader has not refreshed yet.
+$settings_ui_context                 = null;
+$settings_ui_settings_page           = null;
+$is_rendering_settings_ui_drill_down = false;
 try {
 	if ( class_exists( SettingsUIRequestContext::class ) ) {
 		$settings_ui_context = SettingsUIRequestContext::get_current();
 	}
+
+	if ( $settings_ui_context ) {
+		$settings_ui_settings_page           = $settings_ui_context->get_settings_page();
+		$is_rendering_settings_ui_drill_down = $settings_ui_context->is_rendering_enabled()
+			&& $settings_ui_context->is_drill_down()
+			&& ! $settings_ui_context->has_schema_failed()
+			&& ! $settings_ui_context->has_script_handle_loading_failed();
+	}
 } catch ( \Throwable $e ) {
-	$settings_ui_context = null;
+	$settings_ui_context                 = null;
+	$settings_ui_settings_page           = null;
+	$is_rendering_settings_ui_drill_down = false;
 }
 
-// Drill-down pages replace the top-level settings tabs with their own header.
+// Drill-down pages replace the top-level settings tabs with their own header when the shell can render.
 $hide_nav = ( 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true ) )
-	|| ( $settings_ui_context && $settings_ui_context->is_drill_down() );
+	|| $is_rendering_settings_ui_drill_down;
 
-$settings_ui_settings_page = $settings_ui_context ? $settings_ui_context->get_settings_page() : null;
-$is_settings_ui_page       = null !== $settings_ui_settings_page;
+$is_settings_ui_page = null !== $settings_ui_settings_page;
 
-// Drill-down pages replace the section links with header breadcrumbs. Top-level
-// pages keep the classic section links.
-if ( $settings_ui_settings_page instanceof WC_Settings_Page && $settings_ui_context->is_drill_down() ) {
+// Drill-down pages replace the section links with header breadcrumbs when the shell can render.
+if ( $settings_ui_settings_page instanceof WC_Settings_Page && $is_rendering_settings_ui_drill_down ) {
 	remove_action( 'woocommerce_sections_' . $current_tab, array( $settings_ui_settings_page, 'output_sections' ) );
 }
 
@@ -87,6 +97,12 @@ $marketplace_links = array(
 		/* translators: %1$s: opening link tag, %2$s: closing link tag */
 		'message'     => __( '%1$sExplore solutions%2$s that help with tax calculations, compliance, and regional requirements.', 'woocommerce' ),
 	),
+	'shipping' => array(
+		'url'         => $marketplace_base_url . 'shipping-delivery-and-fulfillment/',
+		'is_external' => true,
+		/* translators: %1$s: opening link tag, %2$s: closing link tag */
+		'message'     => __( '%1$sExplore solutions%2$s that enhance shipping, delivery, and fulfillment workflows.', 'woocommerce' ),
+	),
 	'account'  => array(
 		'url'         => $marketplace_base_url . 'store-content-and-customizations/cart-and-checkout-features/',
 		'is_external' => true,
@@ -106,6 +122,27 @@ $marketplace_links = array(
 		'message'     => __( '%1$sDiscover additional solutions%2$s to boost your business and expand what your store can do.', 'woocommerce' ),
 	),
 );
+
+// The React recommendations component owns the marketplace link on the main
+// Shipping screen, but it does not render on subsections, zone screens, or for
+// users who cannot install plugins.
+$shipping_zone_id = '';
+// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Used only to select non-mutating view output.
+if ( isset( $_GET['zone_id'] ) && is_string( $_GET['zone_id'] ) ) {
+	$shipping_zone_id = sanitize_text_field( wp_unslash( $_GET['zone_id'] ) );
+}
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+$is_shipping_zone_screen = '' !== $shipping_zone_id;
+if (
+	'shipping' === $current_tab
+	&& (
+		'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' )
+		|| ( '' === $current_section && ! $is_shipping_zone_screen && current_user_can( 'install_plugins' ) )
+	)
+) {
+	unset( $marketplace_links['shipping'] );
+}
 
 ?>
 

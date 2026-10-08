@@ -14,7 +14,7 @@ export const useRemoveSavingFailedNotices = () => {
 	// Create a regular expression that escapes special characters and matches the beginning of the string
 	const savingFailedRegex = useMemo( () => {
 		// Get the translated "Saving failed" message once
-		// eslint-disable-next-line @wordpress/i18n-text-domain -- We want to match WordPress translation here.
+
 		const savingFailedMessage = __( 'Saving failed.' );
 		return new RegExp(
 			'^' + savingFailedMessage.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' )
@@ -30,7 +30,7 @@ export const useRemoveSavingFailedNotices = () => {
 						typeof notice.content === 'string' &&
 						savingFailedRegex.test( notice.content )
 					) {
-						dispatch( noticesStore ).removeNotice( notice.id );
+						void dispatch( noticesStore ).removeNotice( notice.id );
 					}
 				} );
 		} );

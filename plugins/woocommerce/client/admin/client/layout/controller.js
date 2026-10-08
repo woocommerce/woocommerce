@@ -27,49 +27,62 @@ import { useFilterHook } from '~/utils/use-filter-hook';
 import { NoMatch } from './NoMatch';
 import { isFeatureEnabled } from '~/utils/features';
 
-const AnalyticsReport = lazy( () =>
-	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
+const AnalyticsReport = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-report" */ '../analytics/report'
+		)
 );
-const AnalyticsSettings = lazy( () =>
-	import(
-		/* webpackChunkName: "analytics-settings" */ '../analytics/settings'
-	)
+const AnalyticsSettings = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "analytics-settings" */ '../analytics/settings'
+		)
 );
-const Dashboard = lazy( () =>
-	import( /* webpackChunkName: "dashboard" */ '../dashboard' )
+const Dashboard = lazy(
+	() => import( /* webpackChunkName: "dashboard" */ '../dashboard' )
 );
-const Homescreen = lazy( () =>
-	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
+const Homescreen = lazy(
+	() => import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
-const MarketingOverviewMultichannel = lazy( () =>
-	import(
-		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
-	)
+const MarketingOverviewMultichannel = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
+		)
 );
-const Marketplace = lazy( () =>
-	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
-);
-
-const CoreProfiler = lazy( () =>
-	import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
-);
-
-const WCPaymentsWelcomePage = lazy( () =>
-	import(
-		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
-	)
+const Marketplace = lazy(
+	() => import( /* webpackChunkName: "marketplace" */ '../marketplace' )
 );
 
-const CustomizeStore = lazy( () =>
-	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
+const CoreProfiler = lazy(
+	() => import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
 );
 
-const LaunchStore = lazy( () =>
-	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
+const WCPaymentsWelcomePage = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
+		)
 );
 
-const MobileAppLoginPage = lazy( () =>
-	import( /* webpackChunkName: "mobile-app-login" */ '../mobile-app-login' )
+const CustomizeStore = lazy(
+	() =>
+		import( /* webpackChunkName: "customize-store" */ '../customize-store' )
+);
+
+const LaunchStore = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "launch-store" */ '../launch-your-store/hub'
+		)
+);
+
+const MobileAppLoginPage = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "mobile-app-login" */ '../mobile-app-login'
+		)
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -85,6 +98,18 @@ export const getPages = ( reports = [] ) => {
 		path: '/',
 		breadcrumbs: [ ...initialBreadcrumbs, __( 'Home', 'woocommerce' ) ],
 		wpOpenMenu: 'toplevel_page_woocommerce',
+		navArgs: {
+			id: 'woocommerce-home',
+		},
+		capability: 'manage_woocommerce',
+	} );
+
+	pages.push( {
+		container: Homescreen,
+		path: '/add-product',
+		breadcrumbs: [ ...initialBreadcrumbs, __( 'Products', 'woocommerce' ) ],
+		wpMenuUrl: 'edit.php?post_type=product',
+		wpOpenMenu: 'menu-posts-product',
 		navArgs: {
 			id: 'woocommerce-home',
 		},
@@ -494,6 +519,10 @@ window.wpNavMenuClassChange = function ( page, url ) {
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
 
+	if ( page.wpMenuUrl ) {
+		currentItemsSelector = `li > a[href$="${ page.wpMenuUrl }"]`;
+	}
+
 	// 3. Handle parent paths with proper hierarchy
 	const parentPath = page.navArgs?.parentPath;
 	if ( parentPath ) {
@@ -501,7 +530,7 @@ window.wpNavMenuClassChange = function ( page, url ) {
 			parentPath === '/'
 				? 'admin.php?page=wc-admin'
 				: 'admin.php?page=wc-admin&path=' +
-				  encodeURIComponent( parentPath );
+					encodeURIComponent( parentPath );
 		currentItemsSelector += `, li > a[href*="${ parentPageUrl }"]`;
 	}
 

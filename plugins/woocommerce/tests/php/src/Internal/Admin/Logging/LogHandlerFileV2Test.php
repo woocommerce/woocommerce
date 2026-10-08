@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 
@@ -124,7 +124,7 @@ class LogHandlerFileV2Test extends WC_Unit_Test_Case {
 	 */
 	public function test_handle_message_formatting() {
 		$time    = time();
-		$message = <<<MESSAGE
+		$message = <<<'MESSAGE'
 How to win
 1. Bake cookies
 2. ???
@@ -337,7 +337,8 @@ MESSAGE;
 		$this->assertEquals( 3, $result );
 
 		$paths = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 2, $paths ); // New log gets created when old logs are deleted!
+		$this->assertCount( 2, $paths );
+		// New log gets created when old logs are deleted!
 
 		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
 		$this->assertCount( 1, $paths );
@@ -346,6 +347,229 @@ MESSAGE;
 		$actual_content  = file_get_contents( reset( $paths ) );
 		$expected_string = '3 log files from source <code>duck</code> were deleted.';
 		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that clear deletes more than the default per-page of log files from a source in one run.
+	 */
+	public function test_clear_deletes_more_than_default_per_page() {
+		// Create more files for a single source than a single delete batch can
+		// remove (batch size is 100), using a distinct date per file.
+		$expired_count = 101;
+		foreach ( range( 1, $expired_count ) as $days_ago ) {
+			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
+		}
+
+		// Add a couple of files from a different source that must be left alone.
+		$this->sut->handle( time(), 'debug', 'honk.', array( 'source' => 'goose' ) );
+		$this->sut->handle( strtotime( '-1 day' ), 'debug', 'honk.', array( 'source' => 'goose' ) );
+
+		$paths = glob( Settings::get_log_directory() . 'duck*.log' );
+		$this->assertCount( $expired_count, $paths );
+
+		$result = $this->sut->clear( 'duck' );
+		$this->assertEquals( $expired_count, $result );
+
+		$paths = glob( Settings::get_log_directory() . 'duck*.log' );
+		$this->assertCount( 0, $paths );
+
+		// The two goose files remain untouched.
+		$paths = glob( Settings::get_log_directory() . 'goose*.log' );
+		$this->assertCount( 2, $paths );
+
+		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '101 log files from source <code>duck</code> were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that clear terminates and deletes everything when a source has exactly the batch-size number of files.
+	 */
+	public function test_clear_deletes_exactly_one_full_batch() {
+		// 100 files is exactly DELETE_BATCH_SIZE: the loop fetches a full page, then
+		// must make one more (empty) fetch and break rather than miscount or hang.
+		$total = 100;
+		foreach ( range( 1, $total ) as $days_ago ) {
+			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
+		}
+
+		$this->assertCount( $total, glob( Settings::get_log_directory() . 'duck*.log' ) );
+
+		$result = $this->sut->clear( 'duck' );
+
+		$this->assertEquals( $total, $result );
+		$this->assertCount( 0, glob( Settings::get_log_directory() . 'duck*.log' ) );
+	}
+
+	/**
+	 * @testdox Check that clear removes every deletable file for a source even when a full batch contains undeletable files.
+	 */
+	public function test_clear_removes_all_deletable_files_when_a_full_batch_contains_undeletable_files() {
+		$total = 150;
+		foreach ( range( 1, $total ) as $days_ago ) {
+			$this->sut->handle( strtotime( "-{$days_ago} days" ), 'debug', 'quack.', array( 'source' => 'duck' ) );
+		}
+
+		/*
+		 * Give every file the same modified time. This is the tie condition that
+		 * makes the default 'modified' sort non-deterministic on PHP < 8.0 (unstable
+		 * usort). clear() pages by 'created' instead, which is unique per file for a
+		 * single source, so the batch layout stays deterministic and offset paging
+		 * never strands a deletable file behind an undeletable one.
+		 */
+		$filesystem = FilesystemUtil::get_wp_filesystem();
+		$paths      = glob( Settings::get_log_directory() . 'duck*.log' );
+		$this->assertCount( $total, $paths );
+		$shared_mtime = time();
+		foreach ( $paths as $path ) {
+			$filesystem->touch( $path, $shared_mtime );
+		}
+		// glob() sorts oldest-date first; reverse to created-descending, the order clear() pages in.
+		$newest_first = array_reverse( $paths );
+
+		/*
+		 * Lock files at adversarial positions: inside the first full batch (0, 50, 99),
+		 * on the batch boundary (100), and in the trailing partial batch (149). If clear()
+		 * advanced its offset past a deletable file while skipping an undeletable one, one of
+		 * the non-locked files would survive and the deleted count would fall short.
+		 */
+		$locked_indexes = array( 0, 50, 99, 100, 149 );
+		$locked_ids     = array();
+		foreach ( $locked_indexes as $index ) {
+			$locked_ids[] = ( new File( $newest_first[ $index ] ) )->get_file_id();
+		}
+
+		$controller = new class( $locked_ids ) extends FileController {
+			/**
+			 * File IDs that delete_files() must refuse to delete, simulating files that
+			 * cannot be removed from disk (e.g. a permission error).
+			 *
+			 * @var string[]
+			 */
+			private $locked_ids;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string[] $locked_ids File IDs that must not be deleted.
+			 */
+			public function __construct( array $locked_ids ) {
+				// FileController declares no constructor, so there is intentionally no parent::__construct() call.
+				$this->locked_ids = $locked_ids;
+			}
+
+			/**
+			 * Delete every requested file except the locked ones.
+			 *
+			 * @param string[] $file_ids The file IDs to delete.
+			 *
+			 * @return int The number of files that were deleted.
+			 */
+			public function delete_files( array $file_ids ): int {
+				return parent::delete_files( array_values( array_diff( $file_ids, $this->locked_ids ) ) );
+			}
+		};
+
+		$property = new \ReflectionProperty( LogHandlerFileV2::class, 'file_controller' );
+		$property->setAccessible( true );
+		$property->setValue( $this->sut, $controller );
+
+		$result = $this->sut->clear( 'duck' );
+
+		$this->assertEquals( $total - count( $locked_indexes ), $result, 'Every deletable file for the source should be removed.' );
+
+		$remaining = glob( Settings::get_log_directory() . 'duck*.log' );
+		sort( $remaining );
+		$expected_remaining = array();
+		foreach ( $locked_indexes as $index ) {
+			$expected_remaining[] = $newest_first[ $index ];
+		}
+		sort( $expected_remaining );
+		$this->assertSame( $expected_remaining, $remaining, 'Only the undeletable files should remain on disk.' );
+	}
+
+	/**
+	 * @testdox Check that clear only deletes files for the exact source, not sources that merely share its prefix.
+	 */
+	public function test_clear_only_deletes_the_exact_source() {
+		$this->sut->handle( time(), 'debug', 'a', array( 'source' => 'foo' ) );
+		$this->sut->handle( time(), 'debug', 'b', array( 'source' => 'foo-two' ) );
+		$this->sut->handle( time(), 'debug', 'c', array( 'source' => 'foobar' ) );
+
+		$this->assertCount( 3, glob( Settings::get_log_directory() . '*.log' ) );
+
+		$result = $this->sut->clear( 'foo' );
+
+		$this->assertEquals( 1, $result, 'clear() should delete only the file belonging to the exact source.' );
+		$this->assertCount( 1, glob( Settings::get_log_directory() . 'foo-two-*.log' ), 'The foo-two source must be left untouched.' );
+		$this->assertCount( 1, glob( Settings::get_log_directory() . 'foobar-*.log' ), 'The foobar source must be left untouched.' );
+	}
+
+	/**
+	 * @testdox Check that clear deletes rotated files of the exact source while leaving a prefix-sibling source alone.
+	 */
+	public function test_clear_deletes_rotated_files_of_the_exact_source() {
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		// Log to 'foo', rotate that file, then log again so there is a current file plus
+		// a rotation of it. Both parse to source 'foo'.
+		$this->sut->handle( time(), 'debug', 'first', array( 'source' => 'foo' ) );
+		$foo = $file_controller->get_files(
+			array(
+				'source'       => 'foo',
+				'exact_source' => true,
+			)
+		);
+		$foo[0]->rotate();
+		$this->sut->handle( time(), 'debug', 'second', array( 'source' => 'foo' ) );
+
+		// A prefix sibling that must survive.
+		$this->sut->handle( time(), 'debug', 'sibling', array( 'source' => 'foo-two' ) );
+
+		$this->assertCount(
+			2,
+			$file_controller->get_files(
+				array(
+					'source'       => 'foo',
+					'exact_source' => true,
+				)
+			),
+			'Setup: expected the current file and one rotation for source foo.'
+		);
+
+		$result = $this->sut->clear( 'foo' );
+
+		$this->assertEquals( 2, $result, 'clear() should delete the current and rotated files of the exact source.' );
+		$this->assertCount(
+			0,
+			$file_controller->get_files(
+				array(
+					'source'       => 'foo',
+					'exact_source' => true,
+				)
+			),
+			'All foo files, including rotations, should be gone.'
+		);
+		$this->assertCount( 1, glob( Settings::get_log_directory() . 'foo-two-*.log' ), 'The foo-two source must be left untouched.' );
+	}
+
+	/**
+	 * @testdox Check that clear does nothing when given a source that sanitizes to an empty string.
+	 */
+	public function test_clear_does_nothing_for_an_empty_source() {
+		$this->sut->handle( time(), 'debug', 'a', array( 'source' => 'keep-me' ) );
+		$this->sut->handle( time(), 'debug', 'b', array( 'source' => 'keep-me-too' ) );
+
+		$this->assertCount( 2, glob( Settings::get_log_directory() . '*.log' ) );
+
+		$result = $this->sut->clear( '' );
+
+		$this->assertEquals( 0, $result, 'clear() must not delete anything for an empty source.' );
+		$this->assertCount( 2, glob( Settings::get_log_directory() . '*.log' ), 'No log files should be deleted for an empty source.' );
 	}
 
 	/**
@@ -369,7 +593,8 @@ MESSAGE;
 		$this->assertEquals( 4, $result );
 
 		$paths = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 3, $paths ); // New log gets created when old logs are deleted!
+		$this->assertCount( 3, $paths );
+		// New log gets created when old logs are deleted!
 
 		$paths = glob( Settings::get_log_directory() . 'wc_logger*.log' );
 		$this->assertCount( 1, $paths );

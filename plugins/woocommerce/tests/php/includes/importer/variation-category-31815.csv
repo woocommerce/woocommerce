@@ -1,0 +1,4 @@
+ID,Type,SKU,Name,Published,Categories,Regular price,Parent,Attribute 1 Name,Attribute 1 Value(s)
+90001,variable,VARBUG31815,Variation Category Bug Parent,1,Uncategorized,,,Color,"Red, Blue"
+90002,variation,,Variation Category Bug Parent - Red,1,,20,VARBUG31815,Color,Red
+90003,variation,,Variation Category Bug Parent - Blue,1,,20,VARBUG31815,Color,Blue
