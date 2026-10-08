@@ -6,8 +6,10 @@
  * engine stores plan policies opaquely and does not construct this on plan writes. It
  * does read one payload with it: renewal and reactivation parse a contract's plan
  * snapshot `billing_policy`, and the live plan's `billing_policy` when the contract has
- * no usable snapshot policy, both through {@see self::from_array_with_usable_cadence()},
- * so a plan whose contracts the engine renews must store this shape there. The array
+ * no usable snapshot policy, both through {@see self::from_array()}, so a plan whose
+ * contracts the engine renews must store this shape there. A policy always has a
+ * usable cadence: construction refuses an unknown period or a non-positive interval.
+ * The array
  * shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
@@ -85,8 +87,15 @@ final class BillingPolicy {
 	 * @param int|null                              $min_cycles     Minimum cycles before cancellation is allowed.
 	 * @param int|null                              $max_cycles     Total cycles before the contract ends.
 	 * @param array{length: int, unit: string}|null $trial_duration Native trial; null if none.
+	 * @throws DomainException If the period is unknown, the interval is not positive, or the cycle bounds are invalid.
 	 */
 	public function __construct( string $period, int $interval, ?int $min_cycles, ?int $max_cycles, ?array $trial_duration ) {
+		if ( $interval <= 0 ) {
+			throw new DomainException(
+				sprintf( 'BillingPolicy: interval must be positive, got %d.', $interval )
+			);
+		}
+		$this->normalize_unit( $period, 'period' );
 		$this->validate_min_max_cycles( $min_cycles, $max_cycles );
 
 		$this->period         = $period;
@@ -99,7 +108,8 @@ final class BillingPolicy {
 	/**
 	 * Hydrate from the JSON-decoded `billing_policy` column shape.
 	 *
-	 * Missing nullable keys default to null. `period` and `interval` are required.
+	 * Missing nullable keys default to null. `period` and `interval` are required, and
+	 * must form a usable cadence (see the constructor).
 	 *
 	 * @param array<string, mixed> $data Decoded billing_policy row.
 	 * @throws DomainException If the data is not valid.
@@ -134,39 +144,6 @@ final class BillingPolicy {
 			Coercion::coerce_nullable_int( $data['max_cycles'] ?? null ),
 			$trial
 		);
-	}
-
-	/**
-	 * Hydrate like {@see self::from_array()} and also require a usable cadence.
-	 *
-	 * The one rule the engine applies before it renews on a payload: an unknown period
-	 * or a non-positive interval parses, but no next renewal can be computed from it.
-	 *
-	 * @param array<string, mixed> $data Decoded billing_policy row.
-	 * @throws DomainException If the data does not parse or has no usable cadence.
-	 */
-	public static function from_array_with_usable_cadence( array $data ): self {
-		$policy = self::from_array( $data );
-		$policy->assert_usable_cadence();
-
-		return $policy;
-	}
-
-	/**
-	 * Check that a next renewal can be computed from this policy's cadence: the period
-	 * is one of day/week/month/year and the interval is positive. Trial fields are not
-	 * checked here.
-	 *
-	 * @throws DomainException If the period is unknown or the interval is not positive.
-	 */
-	private function assert_usable_cadence(): void {
-		if ( $this->interval <= 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: interval must be positive, got %d.', $this->interval )
-			);
-		}
-
-		$this->normalize_unit( $this->period, 'period' );
 	}
 
 	/**
@@ -215,11 +192,8 @@ final class BillingPolicy {
 	 *
 	 * @param DateTimeImmutable $anchor The moment the next cycle is computed from.
 	 * @return DateTimeImmutable The next renewal moment in UTC.
-	 * @throws DomainException If `period` is unknown or `interval` is not positive.
 	 */
 	public function compute_next_renewal_from( DateTimeImmutable $anchor ): DateTimeImmutable {
-		$this->assert_usable_cadence();
-
 		$utc = $anchor->setTimezone( new DateTimeZone( 'UTC' ) );
 
 		return $utc->modify( sprintf( '+%d %s', $this->interval, $this->period ) );
@@ -231,15 +205,12 @@ final class BillingPolicy {
 	 * Honours the policy's native trial: when set, the first cycle's billing
 	 * date is the end of the trial. With no trial this delegates to
 	 * {@see self::compute_next_renewal_from()} so there is one cadence-math path.
-	 * The cadence must be usable either way, since later renewals follow it.
 	 *
 	 * @param DateTimeImmutable $contract_start Moment the contract was created.
 	 * @return DateTimeImmutable The first renewal moment in UTC.
-	 * @throws DomainException If the cadence is unusable, the trial length is not positive or the trial unit is unknown.
+	 * @throws DomainException If the trial length is not positive or the trial unit is unknown.
 	 */
 	public function compute_first_renewal_from( DateTimeImmutable $contract_start ): DateTimeImmutable {
-		$this->assert_usable_cadence();
-
 		if ( null === $this->trial_duration ) {
 			return $this->compute_next_renewal_from( $contract_start );
 		}

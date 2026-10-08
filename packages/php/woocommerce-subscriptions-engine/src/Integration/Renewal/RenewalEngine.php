@@ -429,7 +429,7 @@ final class RenewalEngine {
 		}
 
 		try {
-			return BillingPolicy::from_array_with_usable_cadence( $billing );
+			return BillingPolicy::from_array( $billing );
 		} catch ( \DomainException $e ) {
 			wc_get_logger()->warning(
 				sprintf( 'RenewalEngine: contract %d has an unreadable live plan billing policy; the renewal cannot be processed. %s', (int) $contract->get_id(), $e->getMessage() ),

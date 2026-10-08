@@ -12,7 +12,7 @@
  *
  * Billing payload contract: the engine reads one plan payload itself. Until every
  * contract carries a plan snapshot, renewal and reactivation fall back to the live
- * plan's `billing_policy` and read it with {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy::from_array_with_usable_cadence()}
+ * plan's `billing_policy` and read it with {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy::from_array()}
  * (a string `period` of day, week, month or year, a positive int `interval`, and
  * optional cycle bounds and trial). A payload of another shape is still stored, but
  * renewal parks such a contract and reactivation rolls it without a cadence. The

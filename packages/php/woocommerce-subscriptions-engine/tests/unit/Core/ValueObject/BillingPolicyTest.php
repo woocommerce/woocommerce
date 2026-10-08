@@ -21,7 +21,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 class BillingPolicyTest extends TestCase {
 
 	/**
-	 * @testdox from_array_with_usable_cadence refuses an unusable cadence.
+	 * @testdox from_array refuses an unusable cadence.
 	 * @testWith ["decade", 1, "BillingPolicy: invalid period \"decade\"."]
 	 *           ["month", 0, "BillingPolicy: interval must be positive, got 0."]
 	 *           ["day", -1, "BillingPolicy: interval must be positive, got -1."]
@@ -30,24 +30,23 @@ class BillingPolicyTest extends TestCase {
 	 * @param int    $interval Interval.
 	 * @param string $message  Expected exception message.
 	 */
-	public function test_from_array_with_usable_cadence_refuses_an_unusable_cadence( string $period, int $interval, string $message ): void {
+	public function test_from_array_refuses_an_unusable_cadence( string $period, int $interval, string $message ): void {
 		$data = array(
 			'period'   => $period,
 			'interval' => $interval,
 		);
-		BillingPolicy::from_array( $data );
 
 		$this->expectException( DomainException::class );
 		$this->expectExceptionMessage( $message );
 
-		BillingPolicy::from_array_with_usable_cadence( $data );
+		BillingPolicy::from_array( $data );
 	}
 
 	/**
-	 * @testdox from_array_with_usable_cadence accepts a usable cadence.
+	 * @testdox from_array accepts a usable cadence.
 	 */
-	public function test_from_array_with_usable_cadence_accepts_a_usable_cadence(): void {
-		$policy = BillingPolicy::from_array_with_usable_cadence(
+	public function test_from_array_accepts_a_usable_cadence(): void {
+		$policy = BillingPolicy::from_array(
 			array(
 				'period'   => 'week',
 				'interval' => 2,
@@ -143,54 +142,21 @@ class BillingPolicyTest extends TestCase {
 	}
 
 	/**
-	 * @testdox compute_first_renewal_from refuses an unusable cadence even with a trial ($period / $interval).
-	 *
-	 * @testWith ["decade", 1, "BillingPolicy: invalid period \"decade\"."]
-	 *           ["month", 0, "BillingPolicy: interval must be positive, got 0."]
-	 *
-	 * @param string $period   Stored period.
-	 * @param int    $interval Stored interval.
-	 * @param string $message  Expected exception message.
+	 * @testdox construction refuses an unknown period.
 	 */
-	public function test_compute_first_renewal_with_a_trial_refuses_an_unusable_cadence( string $period, int $interval, string $message ): void {
-		$policy = BillingPolicy::from_array(
-			array(
-				'period'         => $period,
-				'interval'       => $interval,
-				'trial_duration' => array(
-					'length' => 7,
-					'unit'   => 'day',
-				),
-			)
-		);
-
+	public function test_construction_refuses_an_unknown_period(): void {
 		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( $message );
-		$policy->compute_first_renewal_from( new DateTimeImmutable( '2026-01-01', new DateTimeZone( 'UTC' ) ) );
+
+		new BillingPolicy( 'fortnight', 1, null, null, null );
 	}
 
-	public function test_invalid_period_throws(): void {
-		$policy = BillingPolicy::from_array(
-			array(
-				'period'   => 'fortnight',
-				'interval' => 1,
-			)
-		);
-
+	/**
+	 * @testdox construction refuses a non-positive interval.
+	 */
+	public function test_construction_refuses_a_non_positive_interval(): void {
 		$this->expectException( DomainException::class );
-		$policy->compute_next_renewal_from( new DateTimeImmutable( '2026-01-01', new DateTimeZone( 'UTC' ) ) );
-	}
 
-	public function test_non_positive_interval_throws(): void {
-		$policy = BillingPolicy::from_array(
-			array(
-				'period'   => 'month',
-				'interval' => 0,
-			)
-		);
-
-		$this->expectException( DomainException::class );
-		$policy->compute_next_renewal_from( new DateTimeImmutable( '2026-01-01', new DateTimeZone( 'UTC' ) ) );
+		new BillingPolicy( 'month', 0, null, null, null );
 	}
 
 	public function test_non_array_trial_duration_throws(): void {

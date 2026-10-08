@@ -102,7 +102,7 @@ final class PlanSnapshot {
 
 	/**
 	 * The frozen billing cadence captured at signup, parsed with the engine's renewal
-	 * rule ({@see BillingPolicy::from_array_with_usable_cadence()}), so it holds after
+	 * rule ({@see BillingPolicy::from_array()}), so it holds after
 	 * the source plan is edited or deleted. Null when the payload carries no billing
 	 * policy array; throws when one is present but unusable, so a caller can log why
 	 * before falling back.
@@ -115,7 +115,7 @@ final class PlanSnapshot {
 			return null;
 		}
 
-		return BillingPolicy::from_array_with_usable_cadence( Coercion::coerce_string_keyed( $policy ) );
+		return BillingPolicy::from_array( Coercion::coerce_string_keyed( $policy ) );
 	}
 
 	/**

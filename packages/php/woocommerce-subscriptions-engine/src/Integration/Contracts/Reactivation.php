@@ -226,7 +226,7 @@ final class Reactivation {
 	 * (parsing its billing payload) when the contract has no snapshot or its snapshot
 	 * policy does not parse or has no usable cadence (logged), and null when neither
 	 * resolves. Both sources are read with the renewal rule
-	 * ({@see BillingPolicy::from_array_with_usable_cadence()}), so the forward roll never
+	 * ({@see BillingPolicy::from_array()}), so the forward roll never
 	 * throws on a stored payload.
 	 *
 	 * @param Contract $contract The contract.
@@ -262,7 +262,7 @@ final class Reactivation {
 		}
 
 		try {
-			return BillingPolicy::from_array_with_usable_cadence( $billing );
+			return BillingPolicy::from_array( $billing );
 		} catch ( DomainException $e ) {
 			wc_get_logger()->warning(
 				sprintf( 'Reactivation: contract %d has an unreadable live plan billing policy; a past-due next payment is floored at now. %s', (int) $contract->get_id(), $e->getMessage() ),
