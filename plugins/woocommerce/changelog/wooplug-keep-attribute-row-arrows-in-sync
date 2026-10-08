@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the open/close arrows on product attribute rows pointing the same way as the row content after every click.
