@@ -12,52 +12,42 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema as RelocatedRefundPreviewSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
 
 /**
  * Keeps the old RefundPreviewSchema FQCN working after the class moved to the
- * version-neutral Internal\RestApi\Refunds namespace. Restores the members the old
- * class inherited from the V4 AbstractSchema, which the relocated class does not
- * carry; only instanceof AbstractSchema no longer matches.
+ * version-neutral Internal\RestApi\Refunds namespace. It still extends the V4
+ * AbstractSchema, like the old class did, and reads its properties from the relocated class.
  *
  * @deprecated 11.2.0 Use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema instead.
  */
-class RefundPreviewSchema extends RelocatedRefundPreviewSchema {
+class RefundPreviewSchema extends AbstractSchema {
 
 	/**
-	 * Context for the item schema - view and edit only.
+	 * The schema item identifier.
 	 *
-	 * @var array
+	 * @var string
 	 */
-	const VIEW_EDIT_CONTEXT = array( 'view', 'edit' );
+	const IDENTIFIER = RelocatedRefundPreviewSchema::IDENTIFIER;
 
 	/**
-	 * Return all writable properties for the item schema.
+	 * Return all properties for the item schema.
 	 *
-	 * @return array The schema properties.
+	 * @return array
+	 *
 	 * @since 10.9.0
 	 */
-	public function get_writable_item_schema_properties(): array {
-		return array_filter( $this->get_item_schema_properties(), array( $this, 'filter_writable_props' ) );
-	}
-
-	/**
-	 * Filter schema properties to only return writable ones.
-	 *
-	 * @param array $schema The schema property to check.
-	 * @return bool True if the property is writable, false otherwise.
-	 * @since 10.9.0
-	 */
-	protected function filter_writable_props( array $schema ): bool {
-		return empty( $schema['readonly'] );
+	public function get_item_schema_properties(): array {
+		return ( new RelocatedRefundPreviewSchema() )->get_item_schema_properties();
 	}
 
 	// The next method always throws so its return type can never be reached.
 	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 	/**
 	 * Not used. The refund preview controllers bypass prepare_item_for_response and
-	 * return the raw data array directly, so this method must never be invoked. It is
-	 * kept only because the old class exposed it via AbstractSchema.
+	 * return the raw data array directly, so this method must never be invoked.
+	 * AbstractSchema requires it, but the body always throws.
 	 *
 	 * @param mixed           $item           Item data.
 	 * @param WP_REST_Request $request        Request object.
