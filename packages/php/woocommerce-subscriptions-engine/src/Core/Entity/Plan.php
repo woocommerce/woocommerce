@@ -350,27 +350,23 @@ final class Plan {
 	}
 
 	/**
-	 * Refuse a policy payload that is not an object (string-keyed array) or null. An empty
-	 * array is accepted (a JSON `{}` decodes to it). The same rule for each of the three policies.
+	 * Refuse a policy payload that is not an object or null. Any keyed array is an object,
+	 * including numeric keys (a JSON `{"123": ...}` decodes to an int key); only a list (keys
+	 * 0..n-1), which would come back as a JSON array, is refused. An empty array is accepted
+	 * (a JSON `{}` decodes to it). The same rule for each of the three policies.
 	 *
 	 * @param string $field Policy field name, for the error message.
 	 * @param mixed  $value Candidate payload.
-	 * @throws DomainException If the value is a list or not an array.
+	 * @throws DomainException If the value is a non-empty list or not an array.
 	 */
 	private static function assert_policy( string $field, $value ): void {
 		if ( null === $value ) {
 			return;
 		}
 
-		$message = sprintf( 'Plan: %s must be an object (string-keyed array) or null.', $field );
-		if ( ! is_array( $value ) ) {
-			throw new DomainException( $message );
-		}
-
-		foreach ( array_keys( $value ) as $key ) {
-			if ( ! is_string( $key ) ) {
-				throw new DomainException( $message );
-			}
+		$is_list = is_array( $value ) && array() !== $value && array_keys( $value ) === range( 0, count( $value ) - 1 );
+		if ( ! is_array( $value ) || $is_list ) {
+			throw new DomainException( sprintf( 'Plan: %s must be an object or null.', $field ) );
 		}
 	}
 }

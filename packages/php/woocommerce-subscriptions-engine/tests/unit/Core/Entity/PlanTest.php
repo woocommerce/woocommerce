@@ -160,6 +160,26 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox create accepts a policy object keyed by numeric ids.
+	 * @dataProvider provide_policy_fields
+	 *
+	 * @param string $field Policy field.
+	 */
+	public function test_create_accepts_a_policy_object_keyed_by_numeric_ids( string $field ): void {
+		$payload = json_decode( '{"123": {"price": "9.00"}, "456": {"price": "12.00"}}', true );
+
+		$plan = Plan::create(
+			array(
+				'extension_slug' => 'my-ext',
+				'name'           => 'Per variation',
+				$field           => $payload,
+			)
+		);
+
+		$this->assertSame( $payload, $this->policy( $plan, $field ) );
+	}
+
+	/**
 	 * @testdox from_storage hydrates a stored list policy as it is and nulls a non-array one, without validating.
 	 */
 	public function test_from_storage_does_not_validate(): void {
