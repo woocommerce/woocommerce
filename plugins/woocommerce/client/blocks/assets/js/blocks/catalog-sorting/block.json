@@ -8,17 +8,19 @@
 		"interactivity": true,
 		"color": {
 			"text": true,
-			"background": false
+			"background": true
 		},
 		"typography": {
 			"fontSize": true,
+			"textAlign": true,
 			"__experimentalFontFamily": true,
 			"__experimentalFontWeight": true,
 			"__experimentalFontStyle": true,
 			"__experimentalLetterSpacing": true
 		},
 		"spacing": {
-			"margin": true
+			"margin": true,
+			"padding": true
 		}
 	},
 	"viewScriptModule": "woocommerce/catalog-sorting",
