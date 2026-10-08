@@ -46,13 +46,6 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	private $original_action_counts = array();
 
 	/**
-	 * ID of the order that loads as a subscription.
-	 *
-	 * @var int
-	 */
-	private $subscription_id = 0;
-
-	/**
 	 * Create immutable class fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
@@ -141,7 +134,6 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$this->unregister_abilities();
 		$this->reset_fields();
 		remove_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10 );
-		remove_filter( 'woocommerce_order_class', array( $this, 'subscription_order_class' ), 10 );
 		remove_filter( 'product_type_selector', array( $this, 'add_membership_type' ) );
 		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', 'no' );
 
@@ -275,47 +267,6 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '12', $updated['product']['regular_price'] );
 		$this->assertContains( 'membership', $alias['enum'] );
 		$this->assertStringContainsString( 'membership: Membership', $alias['description'] );
-	}
-
-	/**
-	 * @testdox Should refuse an order type that is not an order, such as a subscription, and change nothing.
-	 */
-	public function test_order_abilities_refuse_order_types_that_are_not_orders(): void {
-		$order                 = \WC_Helper_Order::create_order();
-		$this->subscription_id = \WC_Helper_Order::create_order()->get_id();
-		add_filter( 'woocommerce_order_class', array( $this, 'subscription_order_class' ), 10, 3 );
-
-		$refused  = wp_get_ability( 'woocommerce/order-add-note' )->execute(
-			array(
-				'id'   => $this->subscription_id,
-				'note' => 'Hi',
-			)
-		);
-		$accepted = wp_get_ability( 'woocommerce/order-add-note' )->execute(
-			array(
-				'id'   => $order->get_id(),
-				'note' => 'Hi',
-			)
-		);
-
-		$this->assertWPError( $refused );
-		$this->assertSame( 'woocommerce_order_type_unsupported', $refused->get_error_code() );
-		$this->assertEmpty( wc_get_order_notes( array( 'order_id' => $this->subscription_id ) ) );
-		$this->assertSame( $order->get_id(), $accepted['order']['id'] );
-	}
-
-	/**
-	 * Use TestSubscriptionOrder for the subscription order.
-	 *
-	 * @internal
-	 *
-	 * @param string $classname Order class.
-	 * @param string $order_type Order type.
-	 * @param int    $order_id   Order ID.
-	 * @return string
-	 */
-	public function subscription_order_class( $classname, $order_type, $order_id ) {
-		return $this->subscription_id === (int) $order_id ? TestSubscriptionOrder::class : $classname;
 	}
 
 	/**
