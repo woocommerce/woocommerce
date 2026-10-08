@@ -225,7 +225,7 @@ final class Reactivation {
 	 * source the renewal money-path resolves), falling back to the live selling plan
 	 * (parsing its billing payload) when the contract has no snapshot or its snapshot
 	 * policy does not parse or has no usable cadence (logged), and null when neither
-	 * resolves. Both sources are read with the renewal rule
+	 * resolves (a live plan with a null or unusable billing payload is logged too). Both sources are read with the renewal rule
 	 * ({@see BillingPolicy::from_array()}), so the forward roll never
 	 * throws on a stored payload.
 	 *
@@ -255,9 +255,22 @@ final class Reactivation {
 			return null;
 		}
 
-		$plan    = $this->plans->find( $plan_id );
-		$billing = null !== $plan ? $plan->get_billing_policy() : null;
+		$plan = $this->plans->find( $plan_id );
+		if ( null === $plan ) {
+			return null;
+		}
+
+		$billing = $plan->get_billing_policy();
 		if ( null === $billing ) {
+			wc_get_logger()->warning(
+				sprintf( 'Reactivation: contract %d has a live plan %d with no billing policy; a past-due next payment is floored at now.', (int) $contract->get_id(), (int) $plan_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
 			return null;
 		}
 
@@ -269,6 +282,7 @@ final class Reactivation {
 				array(
 					'source'      => self::LOG_SOURCE,
 					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
 				)
 			);
 

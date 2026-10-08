@@ -389,9 +389,10 @@ final class RenewalEngine {
 	 * snapshot - the live source of truth, so a contract updated since an earlier cycle bills
 	 * on its current terms. Falls back to parsing the live selling plan's billing payload when
 	 * the contract carries no snapshot, or one whose billing policy is absent or unusable (that
-	 * case is logged), and returns null when neither resolves (a deleted plan,
-	 * a null billing payload, or one that does not parse or has no usable cadence) so the
-	 * caller parks the contract rather than mis-billing or retrying every tick.
+	 * case is logged), and returns null when neither resolves (a deleted plan, or a live
+	 * billing payload that is null, does not parse or has no usable cadence; the payload
+	 * cases are logged) so the caller parks the contract rather than mis-billing or
+	 * retrying every tick.
 	 *
 	 * @param Contract $contract The contract being renewed.
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
@@ -422,9 +423,22 @@ final class RenewalEngine {
 			return null;
 		}
 
-		$plan    = $this->plans->find( $plan_id );
-		$billing = null !== $plan ? $plan->get_billing_policy() : null;
+		$plan = $this->plans->find( $plan_id );
+		if ( null === $plan ) {
+			return null;
+		}
+
+		$billing = $plan->get_billing_policy();
 		if ( null === $billing ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine: contract %d has a live plan %d with no billing policy; the renewal cannot be processed.', (int) $contract->get_id(), (int) $plan_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
 			return null;
 		}
 
@@ -436,6 +450,7 @@ final class RenewalEngine {
 				array(
 					'source'      => self::LOG_SOURCE,
 					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
 				)
 			);
 

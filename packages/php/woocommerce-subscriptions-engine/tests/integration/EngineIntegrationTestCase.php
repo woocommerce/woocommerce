@@ -122,6 +122,42 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Run `$run` and return the context of every engine log entry at `$level` it wrote whose
+	 * context matches `$context_match` (for example a contract id). Matching on source, level and
+	 * context, not message text, keeps the assertions valid when a message is reworded.
+	 *
+	 * @param string               $level         Log level, e.g. `warning`.
+	 * @param array<string, mixed> $context_match Context keys and values every returned entry carries.
+	 * @param callable             $run           Code under test.
+	 * @return array<int, array<string, mixed>> Contexts of the matching entries, in log order.
+	 */
+	protected function capture_engine_log( string $level, array $context_match, callable $run ): array {
+		$entries = array();
+		$capture = static function ( $message, $entry_level, $context ) use ( &$entries, $level, $context_match ) {
+			if ( $level !== $entry_level || ! is_array( $context ) || 'woocommerce-subscriptions-engine' !== ( $context['source'] ?? null ) ) {
+				return $message;
+			}
+			foreach ( $context_match as $key => $value ) {
+				if ( ! array_key_exists( $key, $context ) || $value !== $context[ $key ] ) {
+					return $message;
+				}
+			}
+			$entries[] = $context;
+
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+
+		try {
+			$run();
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		return $entries;
+	}
+
+	/**
 	 * Read a plan through the plan facade, asserting it exists.
 	 *
 	 * @param int $plan_id Plan id.

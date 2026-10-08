@@ -656,10 +656,9 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 *
 	 * @dataProvider provide_unusable_live_billing_payloads
 	 *
-	 * @param array<string, mixed>|null $billing   The live plan's billing payload.
-	 * @param bool                      $logs_warn Whether an unreadable-payload warning is expected.
+	 * @param array<string, mixed>|null $billing The live plan's billing payload.
 	 */
-	public function test_scheduled_renewal_parks_a_contract_whose_live_billing_is_unusable( ?array $billing, bool $logs_warn ): void {
+	public function test_scheduled_renewal_parks_a_contract_whose_live_billing_is_unusable( ?array $billing ): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
 
 		$plan_id     = $this->make_plan();
@@ -695,53 +694,44 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$warnings = array();
-		$capture  = static function ( $message, $level ) use ( &$warnings ) {
-			if ( 'warning' === $level && is_string( $message ) && false !== strpos( $message, 'unreadable live plan billing policy' ) ) {
-				$warnings[] = $message;
+		$result   = null;
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array(
+				'contract_id' => $contract_id,
+				'plan_id'     => $plan_id,
+			),
+			function () use ( &$result, $contract_id ): void {
+				$result = $this->run_scheduled_renewal( $contract_id );
 			}
-			return $message;
-		};
-		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
-
-		try {
-			$result = $this->run_scheduled_renewal( $contract_id );
-		} finally {
-			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
-		}
+		);
 
 		$this->assertNull( $result );
 		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertNull( $reloaded->get_next_payment_gmt(), 'The contract is parked out of the due set.' );
-		if ( $logs_warn ) {
-			$this->assertNotEmpty( $warnings, 'An unreadable live billing payload is logged.' );
-		} else {
-			$this->assertSame( array(), $warnings );
-		}
+		$this->assertNotEmpty( $warnings, 'A null or unusable live billing payload is logged with the contract and plan.' );
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>|null, 1: bool}>
+	 * @return array<string, array{0: array<string, mixed>|null}>
 	 */
 	public function provide_unusable_live_billing_payloads(): array {
 		return array(
-			'null payload'     => array( null, false ),
-			'missing interval' => array( array( 'period' => 'month' ), true ),
+			'null payload'     => array( null ),
+			'missing interval' => array( array( 'period' => 'month' ) ),
 			'unknown period'   => array(
 				array(
 					'period'   => 'decade',
 					'interval' => 1,
 				),
-				true,
 			),
 			'zero interval'    => array(
 				array(
 					'period'   => 'month',
 					'interval' => 0,
 				),
-				true,
 			),
 		);
 	}
@@ -786,20 +776,14 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$warnings = array();
-		$capture  = static function ( $message, $level ) use ( &$warnings ) {
-			if ( 'warning' === $level && is_string( $message ) && false !== strpos( $message, 'unreadable plan-snapshot billing policy' ) ) {
-				$warnings[] = $message;
+		$result   = null;
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $contract_id ),
+			function () use ( &$result, $contract_id ): void {
+				$result = $this->run_scheduled_renewal( $contract_id );
 			}
-			return $message;
-		};
-		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
-
-		try {
-			$result = $this->run_scheduled_renewal( $contract_id );
-		} finally {
-			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
-		}
+		);
 
 		$this->assertNotEmpty( $warnings, 'An unusable snapshot billing payload is logged.' );
 		$this->assertSame( $expected_next, $this->reload_contract( $contract_id )->get_next_payment_gmt() );
