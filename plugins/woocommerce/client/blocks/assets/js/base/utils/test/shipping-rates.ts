@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	getTotalShippingValue,
 	hasCollectableRate,
 	isPackageRateCollectable,
 } from '@woocommerce/base-utils';
@@ -19,6 +20,9 @@ import {
 } from '../../../blocks/checkout/inner-blocks/checkout-shipping-method-block/shared/helpers';
 import { generateShippingRate } from '../../../mocks/shipping-package';
 
+// Toggled per test so the tax-display branch of getTotalShippingValue can be exercised.
+let mockDisplayPricesIncludingTax = false;
+
 jest.mock( '@woocommerce/settings', () => {
 	return {
 		__esModule: true,
@@ -26,6 +30,9 @@ jest.mock( '@woocommerce/settings', () => {
 		getSetting: jest.fn().mockImplementation( ( setting: string ) => {
 			if ( setting === 'collectableMethodIds' ) {
 				return [ 'local_pickup' ];
+			}
+			if ( setting === 'displayCartPricesIncludingTax' ) {
+				return mockDisplayPricesIncludingTax;
 			}
 			return jest
 				.requireActual( '@woocommerce/settings' )
@@ -153,5 +160,33 @@ describe( 'isPackageRateCollectable', () => {
 			const ratesToTest = [ 'flat_rate', 'local_pickup' ];
 			expect( hasCollectableRate( ratesToTest ) ).toBe( false );
 		} );
+	} );
+} );
+
+describe( 'getTotalShippingValue', () => {
+	afterEach( () => {
+		mockDisplayPricesIncludingTax = false;
+	} );
+
+	it( 'excludes shipping tax when the store displays prices excluding tax', () => {
+		mockDisplayPricesIncludingTax = false;
+
+		expect(
+			getTotalShippingValue( {
+				total_shipping: '1000',
+				total_shipping_tax: '100',
+			} )
+		).toBe( 1000 );
+	} );
+
+	it( 'includes shipping tax when the store displays prices including tax', () => {
+		mockDisplayPricesIncludingTax = true;
+
+		expect(
+			getTotalShippingValue( {
+				total_shipping: '1000',
+				total_shipping_tax: '100',
+			} )
+		).toBe( 1100 );
 	} );
 } );
