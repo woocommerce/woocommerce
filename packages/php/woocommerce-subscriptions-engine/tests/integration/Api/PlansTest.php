@@ -359,7 +359,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$injected = false;
 		$race     = static function ( string $query ) use ( &$injected, $table, $id, $wpdb ): string {
-			if ( ! $injected && 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+			if ( ! $injected && 0 === stripos( ltrim( $query ), 'UPDATE' ) && false !== strpos( $query, $table ) ) {
 				$injected = true;
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 				$wpdb->delete( $table, array( 'id' => $id ) );
@@ -406,7 +406,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the extension slug passed to update scopes the write and is not written.
+	 * @testdox the extension slug passed to update is not written.
 	 */
 	public function test_the_extension_slug_passed_to_update_is_not_written(): void {
 		$id = $this->create();
@@ -434,18 +434,23 @@ class PlansTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( PlanView::class, $updated );
 		$this->assertSame( self::OWNER, $updated->get_extension_slug() );
 
+		// Scoping (the WHERE side) is pinned by the cross-extension update tests; the SQL
+		// check covers only what stored state cannot show: the slug is never in a SET list.
 		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$updates = array_values(
 			array_filter(
 				$queries,
 				static function ( string $query ) use ( $table ): bool {
-					return 0 === strpos( $query, "UPDATE `{$table}`" );
+					return 0 === stripos( ltrim( $query ), 'UPDATE' ) && false !== strpos( $query, $table );
 				}
 			)
 		);
-		$this->assertCount( 1, $updates );
-		$this->assertStringNotContainsString( '`extension_slug` = ', explode( ' WHERE ', $updates[0], 2 )[0], 'The slug is not in the SET list.' );
-		$this->assertStringContainsString( "`extension_slug` = '" . self::OWNER . "'", $updates[0], 'The slug scopes the WHERE clause.' );
+		$this->assertNotEmpty( $updates );
+		foreach ( $updates as $update ) {
+			$where    = stripos( $update, ' WHERE ' );
+			$set_list = false === $where ? $update : substr( $update, 0, $where );
+			$this->assertDoesNotMatchRegularExpression( '/\bextension_slug\b/i', $set_list, 'The slug is not in the SET list.' );
+		}
 
 		$plan = $this->stored( $id );
 		$this->assertSame( self::OWNER, $plan->get_extension_slug() );

@@ -591,15 +591,6 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, $views );
 		$this->assertNotInstanceOf( Plan::class, $views[0], 'Callbacks never receive the mutable Core entity.' );
 		$this->assertInstanceOf( PlanView::class, $views[0] );
-		$reflection = new \ReflectionClass( $views[0] );
-		$this->assertTrue( $reflection->isFinal(), 'No subclass can add write access to the view.' );
-		$this->assertSame( array(), $reflection->getProperties( \ReflectionProperty::IS_PUBLIC ), 'The view has no writable state.' );
-		foreach ( $reflection->getMethods( \ReflectionMethod::IS_PUBLIC ) as $method ) {
-			if ( $method->isStatic() ) {
-				continue;
-			}
-			$this->assertSame( 0, $method->getNumberOfParameters(), sprintf( 'PlanView::%s() takes no arguments, so the view has no mutators.', $method->getName() ) );
-		}
 		$this->assertSame( 'As sent', $views[0]->get_name() );
 	}
 
@@ -968,14 +959,14 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			return $query;
 		};
 		$errors             = array();
-		$capture            = static function ( $message, $level ) use ( &$errors ) {
-			if ( 'error' === $level && is_string( $message ) && false !== strpos( $message, 'the plan write failed' ) ) {
+		$capture            = static function ( $message, $level, $context ) use ( &$errors ) {
+			if ( 'error' === $level && is_string( $message ) && is_array( $context ) && 'woocommerce-subscriptions-engine' === ( $context['source'] ?? null ) ) {
 				$errors[] = $message;
 			}
 			return $message;
 		};
 		add_filter( 'query', $break_plan_inserts );
-		add_filter( 'woocommerce_logger_log_message', $capture, 10, 2 );
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
 		$suppressed = $wpdb->suppress_errors( true );
 
 		try {

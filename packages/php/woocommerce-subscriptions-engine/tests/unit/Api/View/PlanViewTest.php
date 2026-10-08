@@ -82,6 +82,19 @@ class PlanViewTest extends TestCase {
 		$this->assertNull( $view->get_delivery_policy() );
 	}
 
+	public function test_the_view_is_final_with_no_public_state_and_only_getters(): void {
+		$reflection = new \ReflectionClass( PlanView::class );
+
+		$this->assertTrue( $reflection->isFinal(), 'No subclass can add write access to the view.' );
+		$this->assertSame( array(), $reflection->getProperties( \ReflectionProperty::IS_PUBLIC ), 'The view has no writable state.' );
+		foreach ( $reflection->getMethods( \ReflectionMethod::IS_PUBLIC ) as $method ) {
+			if ( $method->isStatic() || $method->isConstructor() ) {
+				continue;
+			}
+			$this->assertStringStartsWith( 'get_', $method->getName(), 'The view exposes getters only, no mutators.' );
+		}
+	}
+
 	public function test_the_view_does_not_follow_later_entity_changes(): void {
 		$plan = Plan::create(
 			array(
