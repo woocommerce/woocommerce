@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Fulfillments: local pickup orders get Ready for pickup and Picked up fulfillment statuses, a Pickup Information card in the side panel, and a Ready for pickup customer email that names the pickup location.

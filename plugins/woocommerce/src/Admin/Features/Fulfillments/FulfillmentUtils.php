@@ -3,7 +3,9 @@
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use WC_Order;
+use WC_Order_Item_Shipping;
 
 /**
  * Class FulfillmentUtils
@@ -11,6 +13,29 @@ use WC_Order;
  * Utility class for handling order fulfillments.
  */
 class FulfillmentUtils {
+
+	/**
+	 * Fulfillment status: the items are waiting at the pickup location. Not yet fulfilled.
+	 *
+	 * @since 11.3.0
+	 */
+	public const STATUS_READY_FOR_PICKUP = 'ready_for_pickup';
+
+	/**
+	 * Fulfillment status: the customer collected the items. Fulfilled.
+	 *
+	 * @since 11.3.0
+	 */
+	public const STATUS_PICKED_UP = 'picked_up';
+
+	/**
+	 * Fulfillment meta keys holding the pickup location the customer chose at checkout.
+	 *
+	 * @since 11.3.0
+	 */
+	public const PICKUP_LOCATION_META_KEY = '_pickup_location';
+	public const PICKUP_ADDRESS_META_KEY  = '_pickup_address';
+	public const PICKUP_DETAILS_META_KEY  = '_pickup_details';
 
 	/**
 	 * Get pending items for an order.
@@ -151,9 +176,11 @@ class FulfillmentUtils {
 			}
 
 			if ( $all_fulfilled && empty( $pending_items ) ) {
-				$status = 'fulfilled';
+				$status = self::all_fulfillments_have_status( $fulfillments, self::STATUS_PICKED_UP ) ? self::STATUS_PICKED_UP : 'fulfilled';
 			} elseif ( $some_fulfilled ) {
 				$status = 'partially_fulfilled';
+			} elseif ( empty( $pending_items ) && self::all_fulfillments_have_status( $fulfillments, self::STATUS_READY_FOR_PICKUP ) ) {
+				$status = self::STATUS_READY_FOR_PICKUP;
 			} else {
 				$status = 'unfulfilled';
 			}
@@ -175,6 +202,93 @@ class FulfillmentUtils {
 			$status,
 			$order,
 			$fulfillments
+		);
+	}
+
+	/**
+	 * Whether every fulfillment in the list has the given status.
+	 *
+	 * @param array  $fulfillments An array of fulfillments.
+	 * @param string $status       The status to look for.
+	 *
+	 * @return bool
+	 */
+	private static function all_fulfillments_have_status( array $fulfillments, string $status ): bool {
+		foreach ( $fulfillments as $fulfillment ) {
+			if ( ! $fulfillment instanceof Fulfillment || $status !== $fulfillment->get_status() ) {
+				return false;
+			}
+		}
+		return ! empty( $fulfillments );
+	}
+
+	/**
+	 * Get the order's local pickup shipping line, when the customer chose local pickup.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return WC_Order_Item_Shipping|null The pickup shipping line, or null for an order that ships.
+	 */
+	public static function get_pickup_shipping_line( WC_Order $order ): ?WC_Order_Item_Shipping {
+		foreach ( $order->get_shipping_methods() as $shipping_line ) {
+			$method_id = (string) $shipping_line->get_method_id();
+			if ( 'pickup_location' === $method_id || 'local_pickup' === $method_id || LocalPickupUtils::is_local_pickup_method( $method_id ) ) {
+				return $shipping_line;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get the pickup location the customer chose at checkout, for a local pickup order.
+	 *
+	 * A Local pickup shipping zone method stores no location, so its title stands in for the name.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order The order object.
+	 *
+	 * @return array{name: string, address: string, details: string}|null The location, or null for an order that ships.
+	 */
+	public static function get_order_pickup_location( WC_Order $order ): ?array {
+		$shipping_line = self::get_pickup_shipping_line( $order );
+		if ( null === $shipping_line ) {
+			return null;
+		}
+		$meta = static function ( string $key ) use ( $shipping_line ): string {
+			$value = $shipping_line->get_meta( $key );
+			return is_string( $value ) ? trim( wp_strip_all_tags( $value ) ) : '';
+		};
+		$name = $meta( 'pickup_location' );
+		return array(
+			'name'    => '' !== $name ? $name : trim( (string) $shipping_line->get_name() ),
+			'address' => $meta( 'pickup_address' ),
+			'details' => $meta( 'pickup_details' ),
+		);
+	}
+
+	/**
+	 * Get the pickup location stored on a fulfillment.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param Fulfillment $fulfillment The fulfillment.
+	 *
+	 * @return array{name: string, address: string, details: string}|null The location, or null for a shipment.
+	 */
+	public static function get_fulfillment_pickup_location( Fulfillment $fulfillment ): ?array {
+		$name = $fulfillment->get_meta( self::PICKUP_LOCATION_META_KEY, true );
+		if ( ! is_string( $name ) || '' === $name ) {
+			return null;
+		}
+		$address = $fulfillment->get_meta( self::PICKUP_ADDRESS_META_KEY, true );
+		$details = $fulfillment->get_meta( self::PICKUP_DETAILS_META_KEY, true );
+		return array(
+			'name'    => $name,
+			'address' => is_string( $address ) ? $address : '',
+			'details' => is_string( $details ) ? $details : '',
 		);
 	}
 
@@ -464,22 +578,32 @@ class FulfillmentUtils {
 	 */
 	protected static function get_default_order_fulfillment_statuses(): array {
 		return array(
-			'fulfilled'           => array(
+			'fulfilled'                   => array(
 				'label'            => __( 'Fulfilled', 'woocommerce' ),
 				'background_color' => '#C6E1C6',
 				'text_color'       => '#13550F',
 			),
-			'partially_fulfilled' => array(
+			self::STATUS_READY_FOR_PICKUP => array(
+				'label'            => __( 'Ready for pickup', 'woocommerce' ),
+				'background_color' => '#F8DDA7',
+				'text_color'       => '#573B00',
+			),
+			self::STATUS_PICKED_UP        => array(
+				'label'            => __( 'Picked up', 'woocommerce' ),
+				'background_color' => '#C6E1C6',
+				'text_color'       => '#13550F',
+			),
+			'partially_fulfilled'         => array(
 				'label'            => __( 'Partially fulfilled', 'woocommerce' ),
 				'background_color' => '#C8D7E1',
 				'text_color'       => '#003D66',
 			),
-			'unfulfilled'         => array(
+			'unfulfilled'                 => array(
 				'label'            => __( 'Unfulfilled', 'woocommerce' ),
 				'background_color' => '#FBE5E5',
 				'text_color'       => '#CC1818',
 			),
-			'no_fulfillments'     => array(
+			'no_fulfillments'             => array(
 				'label'            => __( 'No fulfillments', 'woocommerce' ),
 				'background_color' => '#F0F0F0',
 				'text_color'       => '#2F2F2F',
@@ -498,17 +622,29 @@ class FulfillmentUtils {
 	 */
 	protected static function get_default_fulfillment_statuses(): array {
 		return array(
-			'fulfilled'   => array(
+			'fulfilled'                   => array(
 				'label'            => __( 'Fulfilled', 'woocommerce' ),
 				'is_fulfilled'     => true,
 				'background_color' => '#C6E1C6',
 				'text_color'       => '#13550F',
 			),
-			'unfulfilled' => array(
+			'unfulfilled'                 => array(
 				'label'            => __( 'Unfulfilled', 'woocommerce' ),
 				'is_fulfilled'     => false,
 				'background_color' => '#FBE5E5',
 				'text_color'       => '#CC1818',
+			),
+			self::STATUS_READY_FOR_PICKUP => array(
+				'label'            => __( 'Ready for pickup', 'woocommerce' ),
+				'is_fulfilled'     => false,
+				'background_color' => '#F8DDA7',
+				'text_color'       => '#573B00',
+			),
+			self::STATUS_PICKED_UP        => array(
+				'label'            => __( 'Picked up', 'woocommerce' ),
+				'is_fulfilled'     => true,
+				'background_color' => '#C6E1C6',
+				'text_color'       => '#13550F',
 			),
 		);
 	}
