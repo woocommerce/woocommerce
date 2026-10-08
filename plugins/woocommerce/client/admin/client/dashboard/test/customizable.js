@@ -239,13 +239,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 				{ key: 'leaderboards', isVisible: true },
 			],
 		} );
-	} );
-
-	it( 'moves the first section down in the dashboard', async () => {
-		renderDashboard();
-
-		await invokeSectionAction( 'Performance', 'Move down' );
-
 		expect( await getVisibleSectionTitles() ).toEqual( [
 			'Charts',
 			'Performance',
@@ -265,13 +258,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 				{ key: 'leaderboards', isVisible: true },
 			],
 		} );
-	} );
-
-	it( 'moves the second section up in the dashboard', async () => {
-		renderDashboard();
-
-		await invokeSectionAction( 'Charts', 'Move up' );
-
 		expect( await getVisibleSectionTitles() ).toEqual( [
 			'Charts',
 			'Performance',
@@ -291,13 +277,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 				{ key: 'store-performance', isVisible: false },
 			],
 		} );
-	} );
-
-	it( 'removes Performance from the dashboard', async () => {
-		renderDashboard();
-
-		await invokeSectionAction( 'Performance', 'Remove section' );
-
 		expect( await getVisibleSectionTitles() ).toEqual( [
 			'Charts',
 			'Leaderboards',
@@ -305,34 +284,6 @@ describe( 'CustomizableDashboard section preferences', () => {
 	} );
 
 	it( 'adds hidden Performance back and saves it visible at the end', async () => {
-		renderDashboard( [
-			{ key: 'charts', isVisible: true },
-			{ key: 'leaderboards', isVisible: true },
-			{ key: 'store-performance', isVisible: false },
-		] );
-
-		await userEvent.click(
-			await screen.findByRole( 'button', { name: 'Add more sections' } )
-		);
-		const choices = await screen.findByRole( 'heading', {
-			name: 'Dashboard Sections',
-		} );
-		await userEvent.click(
-			within( choices.parentElement ).getByRole( 'button', {
-				name: 'Performance',
-			} )
-		);
-
-		expect( getLastPreferencePayload() ).toEqual( {
-			dashboard_sections: [
-				{ key: 'charts', isVisible: true },
-				{ key: 'leaderboards', isVisible: true },
-				{ key: 'store-performance', isVisible: true },
-			],
-		} );
-	} );
-
-	it( 'adds hidden Performance back to the dashboard', async () => {
 		renderDashboard( [
 			{ key: 'charts', isVisible: true },
 			{ key: 'leaderboards', isVisible: true },
@@ -360,6 +311,13 @@ describe( 'CustomizableDashboard section preferences', () => {
 		await userEvent.click( addPerformance );
 		await screen.findByRole( 'heading', { name: 'Performance' } );
 
+		expect( getLastPreferencePayload() ).toEqual( {
+			dashboard_sections: [
+				{ key: 'charts', isVisible: true },
+				{ key: 'leaderboards', isVisible: true },
+				{ key: 'store-performance', isVisible: true },
+			],
+		} );
 		expect( await getVisibleSectionTitles() ).toEqual( [
 			'Charts',
 			'Leaderboards',
