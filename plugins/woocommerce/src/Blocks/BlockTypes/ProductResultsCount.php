@@ -39,9 +39,14 @@ class ProductResultsCount extends AbstractBlock {
 		woocommerce_result_count();
 		$product_results_count = ob_get_clean();
 
+		$classes = 'woocommerce wc-block-product-results-count wp-block-woocommerce-product-results-count';
+		if ( ! empty( $attributes['fontSize'] ) ) {
+			$classes .= ' has-font-size';
+		}
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'                 => 'woocommerce wc-block-product-results-count wp-block-woocommerce-product-results-count',
+				'class'                 => $classes,
 				'data-wp-interactive'   => $this->get_full_block_name(),
 				'data-wp-router-region' => 'wc-product-results-count-' . ( $block->context['queryId'] ?? 0 ),
 			)
