@@ -567,6 +567,63 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A coupon can be applied to a custom order type that has no customer ID or billing email.
+	 */
+	public function test_apply_coupon_on_custom_order_type_without_customer() {
+		$coupon_code = 'coupon_test_custom_order_type';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
+		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+			public function get_recorded_coupon_usage_counts( $order ) {
+				return false;
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $data_store ) {
+				$stores['test-custom-order'] = $data_store;
+				return $stores;
+			}
+		);
+
+		// Only the tax location is provided, since the abstract builds it from billing and shipping getters.
+		$order = new class() extends WC_Abstract_Order {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+			protected $data_store_name = 'test-custom-order';
+
+			public function get_type() {
+				return 'test_custom_order';
+			}
+
+			protected function get_tax_location( $args = array() ) {
+				return wp_parse_args(
+					$args,
+					array(
+						'country'  => '',
+						'state'    => '',
+						'postcode' => '',
+						'city'     => '',
+					)
+				);
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+		};
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+		$this->assertFalse( is_callable( array( $order, 'get_billing_email' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+	}
+
+	/**
 	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
 	 */
 	public function test_remove_coupon_fires_order_removed_coupon_hook() {
