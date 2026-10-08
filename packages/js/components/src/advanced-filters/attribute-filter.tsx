@@ -66,7 +66,7 @@ const getScreenReaderText = ( {
 	const rule: Partial< FilterRule > = Array.isArray( config.rules )
 		? config.rules.find(
 				( configRule ) => configRule.value === filter.rule
-		  ) || {}
+			) || {}
 		: {};
 
 	const attributeName = selectedAttribute[ 0 ].label;

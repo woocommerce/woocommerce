@@ -38,8 +38,7 @@ export interface SavedPaymentMethod {
 	actions: ObjectType;
 }
 export type SavedPaymentMethods =
-	| Record< string, SavedPaymentMethod[] >
-	| EmptyObjectType;
+	Record< string, SavedPaymentMethod[] > | EmptyObjectType;
 
 export interface PaymentMethodDispatchers {
 	setRegisteredPaymentMethods: (
