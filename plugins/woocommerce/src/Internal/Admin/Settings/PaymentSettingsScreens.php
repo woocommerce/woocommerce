@@ -24,7 +24,7 @@ final class PaymentSettingsScreens {
 	/**
 	 * Get the valid registered screens, keyed by screen ID.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @return array<string, array{id: string, title: string, rest_path: string, scripts: string[]}>
 	 */
@@ -35,7 +35,7 @@ final class PaymentSettingsScreens {
 		 * Each screen is keyed by its ID and has a `title`, the `rest_path` of its settings entity,
 		 * and optional `scripts` (script handles to load on the screen).
 		 *
-		 * @since 11.4.0
+		 * @since 11.3.0
 		 *
 		 * @param array $screens The registered screens.
 		 */
@@ -58,7 +58,7 @@ final class PaymentSettingsScreens {
 	/**
 	 * Get one registered screen.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @param string $id The screen ID.
 	 * @return array{id: string, title: string, rest_path: string, scripts: string[]}|null

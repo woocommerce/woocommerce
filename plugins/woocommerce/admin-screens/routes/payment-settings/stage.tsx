@@ -80,8 +80,11 @@ function SettingsForm( {
 			void editEntityRecord( kind, name, NO_KEY, edits );
 		}
 	};
+	// A field whose module failed to load renders with default controls, which may not
+	// represent its value correctly, so saving waits until the screen loads completely.
+	const canSave = isDirty && isValid && definition.errors.length === 0;
 	const onSave = async () => {
-		if ( isSaving || ! isDirty || ! isValid ) {
+		if ( isSaving || ! canSave ) {
 			return;
 		}
 		try {
@@ -113,7 +116,7 @@ function SettingsForm( {
 						variant="primary"
 						size="compact"
 						isBusy={ isSaving }
-						disabled={ isSaving || ! isDirty || ! isValid }
+						disabled={ isSaving || ! canSave }
 						onClick={ () => void onSave() }
 					>
 						{ __( 'Save changes', 'woocommerce' ) }
@@ -167,16 +170,10 @@ function ScreenContent( { screen }: { screen: PaymentSettingsScreen } ) {
 	return <SettingsForm screen={ screen } definition={ definition } />;
 }
 
-// useParams() is untyped without a registered router, so narrow it here.
-function getPageParam( params: unknown ): string {
-	if ( typeof params === 'object' && params !== null && 'page' in params ) {
-		return typeof params.page === 'string' ? params.page : '';
-	}
-	return '';
-}
-
 function SettingsStage() {
-	const screen = getScreen( getPageParam( useParams( { strict: false } ) ) );
+	// useParams() is untyped without a registered router.
+	const { page }: { page?: string } = useParams( { strict: false } );
+	const screen = getScreen( page );
 
 	return screen ? <ScreenContent screen={ screen } /> : null;
 }
