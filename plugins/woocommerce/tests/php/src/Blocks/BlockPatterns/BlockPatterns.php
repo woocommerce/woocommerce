@@ -163,9 +163,11 @@ class BlockPatterns extends \WP_UnitTestCase {
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
-			->willReturnCallback( function ( $source ) use ( &$registered_sources ) {
-				$registered_sources[] = basename( $source );
-			} );
+			->willReturnCallback(
+				function ( $source ) use ( &$registered_sources ) {
+					$registered_sources[] = basename( $source );
+				}
+			);
 
 		$this->block_patterns->register_block_patterns();
 
