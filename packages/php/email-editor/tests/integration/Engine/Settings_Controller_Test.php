@@ -58,4 +58,22 @@ class Settings_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame( $expected_css, reset( $styles_with_comment_rules )['css'], 'The iframe must receive the shared rich-text-comment.css unchanged' );
 		$this->assertDoesNotMatchRegularExpression( '/\{[^}]*\{/', $expected_css, 'Nested rules must be flattened so selector prefixing keeps them valid' );
 	}
+
+	/**
+	 * Test it keeps the admin color scheme stylesheet in the iframe assets.
+	 */
+	public function testItKeepsAdminColorSchemeStylesInIframeAssets(): void {
+		$settings = $this->settings_controller->get_settings();
+
+		$scheme_lines = array_filter(
+			explode( "\n", $settings['__unstableResolvedAssets']['styles'] ),
+			function ( string $line ): bool {
+				return false !== strpos( $line, "id='wp-base-styles-css'" );
+			}
+		);
+
+		$this->assertCount( 1, $scheme_lines, 'The admin color scheme stylesheet must be printed in the iframe assets' );
+		$this->assertStringContainsString( 'base-styles/admin-schemes', reset( $scheme_lines ) );
+		$this->assertContains( 'wp-base-styles-css', $settings['allowedIframeStyleHandles'] );
+	}
 }
