@@ -281,9 +281,14 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox It builds options for legacy page selectors that do not declare options.
+	 * @testdox It builds options for legacy $type page selectors that do not declare options.
+	 *
+	 * @testWith ["single_select_page"]
+	 *           ["single_select_page_with_search"]
+	 *
+	 * @param string $type Legacy page selector type.
 	 */
-	public function test_from_legacy_settings_builds_page_options(): void {
+	public function test_from_legacy_settings_builds_page_options( string $type ): void {
 		$page_id = self::factory()->post->create(
 			array(
 				'post_type'   => 'page',
@@ -300,7 +305,7 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 				array(
 					'id'    => 'acme_page',
 					'label' => 'Acme page',
-					'type'  => 'single_select_page',
+					'type'  => $type,
 					'value' => (string) $page_id,
 				),
 			)

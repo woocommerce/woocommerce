@@ -10,7 +10,7 @@ import {
 /**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { expect, tags, test as baseTest, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { setOption } from '../../utils/options';
 
@@ -370,6 +370,7 @@ test(
 	'renders the overview performance indicators',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -405,6 +406,7 @@ test(
 	'downloads revenue report as CSV',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -437,6 +439,7 @@ test(
 	'use date filter on products report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// Scope the report to this spec's variable product so cumulative store
@@ -469,6 +472,7 @@ test(
 	'set custom date range on revenue report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -513,6 +517,7 @@ test(
 	'scope orders report via advanced product filter',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// Scope the orders report to this spec's data with the product advanced
@@ -542,6 +547,7 @@ test(
 	'use filter by single product on products report',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		// Land already scoped to this spec's variable product. There is no
@@ -585,6 +591,7 @@ test(
 	'analytics settings',
 	{
 		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
 	},
 	async ( { page } ) => {
 		await page.goto(
@@ -634,11 +641,13 @@ test(
 	}
 );
 
-// Overview manual-import trigger. Folded in here so its `scheduled_import`
-// toggle serialises with the data suite's within one core-parallel worker.
+// Overview manual-import trigger.
 test.describe(
 	'manual import trigger',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+	{
+		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
+	},
 	() => {
 		test.beforeEach( async ( { page } ) => {
 			await page.goto(

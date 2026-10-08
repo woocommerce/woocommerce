@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -175,6 +176,8 @@ class Checkout extends AbstractCartRoute {
 				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 			} catch ( \Exception $error ) {
 				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+			} catch ( \Throwable $error ) {
+				$response = UnexpectedErrorResponse::create( $error, static::class );
 			}
 		}
 
@@ -280,11 +283,10 @@ class Checkout extends AbstractCartRoute {
 		$invalid_details = [];
 		$is_partial      = in_array( $request->get_method(), [ 'PUT', 'PATCH' ], true );
 
-		$document_object = $this->get_document_object_from_rest_request( $request );
-
 		foreach ( $validate_contexts as $context => $context_data ) {
 			$errors = new \WP_Error();
 
+			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 
@@ -926,10 +928,9 @@ class Checkout extends AbstractCartRoute {
 			],
 		];
 
-		$document_object = $this->get_document_object_from_rest_request( $request );
-
 		foreach ( $additional_field_contexts as $context => $context_data ) {
 
+			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( $context );
 			$additional_fields = $this->additional_fields_controller->get_contextual_fields_for_location( $context_data['location'], $document_object );
 

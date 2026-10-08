@@ -23,7 +23,7 @@ import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './';
 
 type WPDataRegistry = ReturnType< typeof createRegistry >;
-type Selectors = typeof import('./selectors');
+type Selectors = typeof import( './selectors' );
 
 type CurriedState< F > = F extends (
 	state: SettingsState,
@@ -36,7 +36,7 @@ type CurriedSelectors< T > = {
 	[ K in keyof T ]: CurriedState< T[ K ] >;
 };
 
-type Resolvers = typeof import('./resolvers');
+type Resolvers = typeof import( './resolvers' );
 type CoreDataActions = ReturnType<
 	ReturnType< typeof coreDataStore.instantiate >[ 'getActions' ]
 >;
@@ -156,7 +156,7 @@ export const editSettings =
 			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
 					id,
 					value,
-			  } ) );
+				} ) );
 
 		if ( ! updatesArray.every( validateSettingEdit ) ) {
 			throw new Error( 'Invalid setting edit payload' );
@@ -354,7 +354,7 @@ export const saveSettingsGroup =
 			: Object.entries( updates ).map( ( [ id, value ] ) => ( {
 					id,
 					value,
-			  } ) );
+				} ) );
 
 		return saveSettingsGroupRequest( groupId, updatesArray, dispatch );
 	};

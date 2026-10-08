@@ -26,7 +26,7 @@ const completer: AutoCompleter = {
 					search: name,
 					searchby: 'name',
 					per_page: 10,
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/customers', query ),
