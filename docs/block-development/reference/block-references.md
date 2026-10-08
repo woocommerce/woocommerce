@@ -396,7 +396,7 @@ Displays the current category description.
 
 - **Name:** woocommerce/category-description
 - **Category:** woocommerce
-- **Supports:** anchor, color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
+- **Supports:** color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
 - **Attributes:** textAlign
 
 ## Product Category Title - woocommerce/category-title
@@ -405,7 +405,7 @@ Displays the current category title and lets permitted users edit it.
 
 - **Name:** woocommerce/category-title
 - **Category:** woocommerce
-- **Supports:** anchor, color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
+- **Supports:** color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
 - **Attributes:** isLink, level, linkTarget, rel, textAlign
 
 ## Checkout - woocommerce/checkout

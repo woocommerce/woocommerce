@@ -33,7 +33,6 @@
 			"__experimentalTextDecoration": true,
 			"__experimentalLetterSpacing": true
 		},
-		"anchor": true,
 		"__experimentalBorder": {
 			"color": true,
 			"radius": true,
