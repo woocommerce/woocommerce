@@ -98,7 +98,8 @@ final class Plans {
 	 * @return PlanView The new plan, built from the written fields (no re-read).
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid, or a
 	 *                                  {@see PlanValidationException} when the owning extension refuses the plan.
-	 * @throws RuntimeException If a validation callback throws or the insert fails.
+	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
+	 *                          as the previous exception) or the insert fails (no previous exception).
 	 */
 	public static function create( array $args ): PlanView {
 		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
@@ -149,7 +150,8 @@ final class Plans {
 	 *                       deleted before the write).
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid, or a
 	 *                                  {@see PlanValidationException} when the owning extension refuses the plan.
-	 * @throws RuntimeException If a validation callback throws or the update fails.
+	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
+	 *                          as the previous exception) or the update fails (no previous exception).
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
 		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
@@ -349,7 +351,8 @@ final class Plans {
 	 *
 	 * @param Plan $plan The would-be plan (unsaved on create).
 	 * @throws PlanValidationException If a callback added errors.
-	 * @throws RuntimeException If a callback threw.
+	 * @throws RuntimeException If a callback threw, with the callback's throwable as the previous
+	 *                          exception. The REST controller relies on that to tell it from a failed write.
 	 */
 	private static function validate_with_extension( Plan $plan ): void {
 		$errors         = new WP_Error();

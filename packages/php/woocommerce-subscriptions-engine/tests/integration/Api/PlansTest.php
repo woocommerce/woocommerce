@@ -819,6 +819,35 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox a failed insert throws a runtime exception without a previous exception.
+	 */
+	public function test_a_failed_insert_throws_a_runtime_exception_without_a_previous_exception(): void {
+		global $wpdb;
+
+		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$break_insert = static function ( string $query ) use ( $table ): string {
+			if ( 0 === stripos( ltrim( $query ), 'INSERT' ) && false !== strpos( $query, $table ) ) {
+				return 'INSERT INTO nonexistent_table_for_this_test (id) VALUES (1)';
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $break_insert );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$this->create();
+			$this->fail( 'Expected RuntimeException.' );
+		} catch ( RuntimeException $e ) {
+			// The REST controller reads a previous exception as "a validation callback threw".
+			$this->assertNull( $e->getPrevious() );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_insert );
+		}
+	}
+
+	/**
 	 * @testdox the meta methods round-trip values.
 	 */
 	public function test_meta_methods_round_trip(): void {

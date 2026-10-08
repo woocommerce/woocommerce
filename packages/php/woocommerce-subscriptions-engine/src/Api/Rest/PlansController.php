@@ -553,7 +553,8 @@ final class PlansController extends WP_REST_Controller {
 	/**
 	 * Map a failed write to a 500. The facade wraps a throwing validation callback
 	 * (the cause is chained, and the facade logs it); a failed insert or update carries
-	 * no cause and is logged here with the database error.
+	 * no cause and is logged here with the database error. `Api\Plans` documents this
+	 * on its create and update `@throws`, and PlansTest pins both sides.
 	 *
 	 * @param RuntimeException $e    Failure.
 	 * @param string           $code Error code for a failed insert or update.
