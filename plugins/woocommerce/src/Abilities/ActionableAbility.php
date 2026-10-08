@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\AbilitiesApi\SideEffectGuard;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -17,7 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * rejection from any step saves nothing.
  *
  * Only save() saves. The other steps must not save, send email or make HTTP
- * requests.
+ * requests. Core blocks these while change(), the field update callbacks and
+ * the validators run, and a step that tries one makes the change fail.
  *
  * @since 11.3.0
  */
@@ -91,15 +94,20 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $subject;
 		}
 
-		$changed = $this->change( $subject, $input );
-		if ( is_wp_error( $changed ) ) {
-			return $changed;
-		}
+		$rejected = SideEffectGuard::run(
+			$this->get_name(),
+			function () use ( $subject, $input ) {
+				$changed = $this->change( $subject, $input );
+				if ( is_wp_error( $changed ) ) {
+					return $changed;
+				}
 
-		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-		$rejected   = AbilityFields::update( $this->get_object_type(), $subject, $extensions )
-			?? AbilityFields::validate( $this->get_object_type(), $subject );
-		if ( null !== $rejected ) {
+				$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
+				return AbilityFields::update( $this->get_object_type(), $subject, $extensions )
+					?? AbilityFields::validate( $this->get_object_type(), $subject );
+			}
+		);
+		if ( is_wp_error( $rejected ) ) {
 			return $rejected;
 		}
 

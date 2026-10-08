@@ -683,6 +683,118 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should save nothing when a step before the save tries a side effect.
+	 * @dataProvider side_effect_provider
+	 *
+	 * @param callable $side_effect Code that a validator runs.
+	 */
+	public function test_side_effect_before_the_save_saves_nothing( callable $side_effect ): void {
+		AbilityFields::register_validator( 'product', $side_effect );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array( 'test_code' => 'A1' ),
+			)
+		);
+		wp_cache_flush();
+		$saved = wc_get_product( $product->get_id() );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_side_effect', $result->get_error_code() );
+		$this->assertSame( 'Pen', $saved->get_name() );
+		$this->assertSame( '', $saved->get_meta( '_test_code' ) );
+		$this->assertFalse( get_option( 'test_side_effect' ) );
+	}
+
+	/**
+	 * Code that tries a side effect.
+	 *
+	 * @return array<string, array{0: callable}>
+	 */
+	public function side_effect_provider(): array {
+		return array(
+			'saves the product'    => array(
+				static function ( \WC_Product $product ) {
+					$product->save();
+				},
+			),
+			'writes an option'     => array(
+				static function () {
+					update_option( 'test_side_effect', 'yes' );
+				},
+			),
+			'sends an email'       => array(
+				static function () {
+					wp_mail( 'jane@example.com', 'Hi', 'Hi' );
+				},
+			),
+			'makes an HTTP call'   => array(
+				static function () {
+					wp_remote_get( 'https://example.com' );
+				},
+			),
+			'throws after a write' => array(
+				static function () {
+					update_option( 'test_side_effect', 'yes' );
+					throw new \RuntimeException( 'Broken' );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should save nothing when a plugin writes from a hook that the order status change fires.
+	 */
+	public function test_hook_listener_that_writes_during_a_status_change_saves_nothing(): void {
+		$order = \WC_Helper_Order::create_order();
+		add_action(
+			'woocommerce_order_edit_status',
+			static function () {
+				update_option( 'test_side_effect', 'yes' );
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'cancelled',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_side_effect', $result->get_error_code() );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+		$this->assertFalse( get_option( 'test_side_effect' ) );
+	}
+
+	/**
+	 * @testdox Should allow log and transient writes before the save.
+	 */
+	public function test_log_and_transient_writes_are_allowed(): void {
+		AbilityFields::register_validator(
+			'product',
+			static function () {
+				set_transient( 'test_side_effect', 'yes' );
+				wc_get_logger()->info( 'Checked.', array( 'source' => 'test' ) );
+			}
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertSame( 'Pencil', $result['product']['name'] );
+		$this->assertSame( 'yes', get_transient( 'test_side_effect' ) );
+	}
+
+	/**
 	 * @testdox Should refuse a field whose update_callback is not callable.
 	 */
 	public function test_field_with_uncallable_update_callback_is_refused(): void {
