@@ -273,7 +273,15 @@ class Styles_Helper {
 			return true;
 		}
 
-		return 1 === preg_match( '/^(#|[a-z][a-z0-9-]*\()/', $value );
+		// A complete hex value: #rgb, #rgba, #rrggbb or #rrggbbaa. Matching a bare `#` or a stray
+		// `#zz` would emit exactly the kind of invalid declaration this whole check exists to stop.
+		if ( 1 === preg_match( '/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/', $value ) ) {
+			return true;
+		}
+
+		// Functional notation of any name, so CSS color functions need no list here. The closing
+		// bracket is required for the same reason as the hex digits above: `rgb(` is not a color.
+		return 1 === preg_match( '/^[a-z][a-z0-9-]*\(.*\)$/', $value );
 	}
 
 	/**
@@ -301,12 +309,15 @@ class Styles_Helper {
 	public static function palette_definitions( array $settings ): array {
 		$palette = $settings['color']['palette'] ?? array();
 
-		$definitions = array_merge(
-			$palette['custom'] ?? array(),
-			$palette['theme'] ?? array(),
-			$palette['blocks'] ?? array(),
-			$palette['default'] ?? array()
-		);
+		// Each origin is read defensively: the palette arrives through a filter, and a non-array
+		// origin is a TypeError in array_merge() rather than a warning, which would take the whole
+		// render down.
+		$definitions = array();
+		foreach ( array( 'custom', 'theme', 'blocks', 'default' ) as $origin ) {
+			if ( isset( $palette[ $origin ] ) && is_array( $palette[ $origin ] ) ) {
+				$definitions = array_merge( $definitions, $palette[ $origin ] );
+			}
+		}
 
 		$by_slug = array();
 		foreach ( $definitions as $definition ) {
@@ -354,7 +365,9 @@ class Styles_Helper {
 			}
 		}
 
-		return self::is_color_literal( $color_slug ) ? $color_slug : '';
+		// Trimmed, but deliberately not lowercased the way a palette color is: a custom property
+		// name inside `var()` is case-sensitive.
+		return self::is_color_literal( $color_slug ) ? trim( $color_slug ) : '';
 	}
 
 	/**
