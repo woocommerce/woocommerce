@@ -229,8 +229,6 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * Identity fields (id, entity_id, entity_type) and raw storage props are controller-owned,
 	 * so they are dropped here and never reach set_props() where they could redirect the write.
 	 *
-	 * @since 11.3.0
-	 *
 	 * @param array<string, mixed> $params The request body params.
 	 * @return array<string, mixed> The mutable subset of the params.
 	 */

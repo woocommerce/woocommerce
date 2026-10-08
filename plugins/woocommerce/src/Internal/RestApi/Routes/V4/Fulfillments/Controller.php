@@ -433,8 +433,6 @@ class Controller extends AbstractController {
 	 * entity_type are not writable on edit. They stay required on create, where the parent is taken
 	 * from the body.
 	 *
-	 * @since 11.3.0
-	 *
 	 * @return array The update endpoint args.
 	 */
 	private function get_update_args(): array {
