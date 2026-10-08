@@ -61,35 +61,41 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		update_user_meta( $customer->get_id(), 'last_update', time() - MINUTE_IN_SECONDS );
 		WC()->session->init();
 
-		$session_customer = new \WC_Customer( $customer->get_id(), true );
-		WC()->customer    = $session_customer;
-		$session_customer->set_is_vat_exempt( true );
-		$session_customer->set_calculated_shipping( true );
-		$session_customer->save();
+		$session_customer  = new \WC_Customer( $customer->get_id(), true );
+		$original_customer = WC()->customer;
+		WC()->customer     = $session_customer;
 
-		$session_data = (array) WC()->session->get( 'customer' );
+		try {
+			$session_customer->set_is_vat_exempt( true );
+			$session_customer->set_calculated_shipping( true );
+			$session_customer->save();
 
-		$this->sut->sync_customer_data_with_order( $order );
+			$session_data = (array) WC()->session->get( 'customer' );
 
-		$persistent_customer = new \WC_Customer( $customer->get_id() );
-		$this->assertNotSame(
-			$session_data['date_modified'],
-			(string) $persistent_customer->get_date_modified( 'edit' ),
-			'The fixture must update the persistent customer after the session snapshot is saved.'
-		);
+			$this->sut->sync_customer_data_with_order( $order );
 
-		$reloaded_customer = new \WC_Customer( $customer->get_id(), true );
-		$this->assertSame(
-			array(
-				'is_vat_exempt'       => true,
-				'calculated_shipping' => true,
-			),
-			array(
-				'is_vat_exempt'       => $reloaded_customer->get_is_vat_exempt(),
-				'calculated_shipping' => $reloaded_customer->get_calculated_shipping(),
-			),
-			'Session-only customer properties should survive persistent customer updates during checkout.'
-		);
+			$persistent_customer = new \WC_Customer( $customer->get_id() );
+			$this->assertNotSame(
+				$session_data['date_modified'],
+				(string) $persistent_customer->get_date_modified( 'edit' ),
+				'The fixture must update the persistent customer after the session snapshot is saved.'
+			);
+
+			$reloaded_customer = new \WC_Customer( $customer->get_id(), true );
+			$this->assertSame(
+				array(
+					'is_vat_exempt'       => true,
+					'calculated_shipping' => true,
+				),
+				array(
+					'is_vat_exempt'       => $reloaded_customer->get_is_vat_exempt(),
+					'calculated_shipping' => $reloaded_customer->get_calculated_shipping(),
+				),
+				'Session-only customer properties should survive persistent customer updates during checkout.'
+			);
+		} finally {
+			WC()->customer = $original_customer;
+		}
 	}
 
 	/**
