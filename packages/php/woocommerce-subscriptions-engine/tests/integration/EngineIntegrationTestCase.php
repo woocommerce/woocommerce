@@ -10,6 +10,10 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 
 /**
@@ -83,5 +87,96 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		);
 
 		$this->approved_gateways[] = $gateway;
+	}
+
+	/**
+	 * Sign up a contract for a paid order on `$plan` through the contracts facade, the way an
+	 * extension maps its checkout: create a draft from explicit order fields and snapshots,
+	 * record cycle 1 (billed, linked to the order), then activate. An order without a
+	 * customer gets a new one.
+	 *
+	 * @param WC_Order             $order     Saved, paid order.
+	 * @param Plan                 $plan      Saved selling plan.
+	 * @param array<string, mixed> $overrides `Contracts::create()` fields to replace; `status` is the final status.
+	 * @return int The contract id.
+	 */
+	protected function sign_up_from_order( WC_Order $order, Plan $plan, array $overrides = array() ): int {
+		if ( $order->get_customer_id() <= 0 ) {
+			$customer_id = self::factory()->user->create();
+			$this->assertIsInt( $customer_id );
+			$order->set_customer_id( $customer_id );
+			$order->save();
+		}
+
+		$paid  = $order->get_date_paid();
+		$start = null !== $paid
+			? new DateTimeImmutable( '@' . $paid->getTimestamp() )
+			: new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+
+		$items = array();
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$items[] = array(
+					'item_name'    => $item->get_name(),
+					'item_type'    => 'line_item',
+					'product_id'   => $item->get_product_id(),
+					'variation_id' => $item->get_variation_id(),
+					'quantity'     => (string) $item->get_quantity(),
+					'subtotal'     => (string) $item->get_subtotal(),
+					'total'        => (string) $item->get_total(),
+					'taxes'        => $item->get_taxes(),
+				);
+			}
+		}
+
+		$tokens   = $order->get_payment_tokens();
+		$token_id = array() !== $tokens ? (int) end( $tokens ) : 0;
+
+		$args = array_merge(
+			array(
+				'extension_slug'       => (string) $plan->get_extension_slug(),
+				'customer_id'          => $order->get_customer_id(),
+				'currency'             => $order->get_currency(),
+				'selling_plan_id'      => $plan->get_id(),
+				'origin_order_id'      => $order->get_id(),
+				'payment_method'       => '' !== $order->get_payment_method() ? $order->get_payment_method() : null,
+				'payment_method_title' => '' !== $order->get_payment_method_title() ? $order->get_payment_method_title() : null,
+				'payment_token_id'     => $token_id > 0 ? $token_id : null,
+				'start_gmt'            => $start,
+				'next_payment_gmt'     => $plan->get_billing_policy()->compute_first_renewal_from( $start ),
+				'billing_total'        => (string) $order->get_total(),
+				'discount_total'       => (string) $order->get_total_discount(),
+				'shipping_total'       => (string) $order->get_shipping_total(),
+				'tax_total'            => (string) $order->get_total_tax(),
+				'items'                => $items,
+				'addresses'            => array(
+					'billing'  => $order->get_address( 'billing' ),
+					'shipping' => $order->get_address( 'shipping' ),
+				),
+			),
+			$overrides
+		);
+
+		$status         = $args['status'] ?? ContractStatus::ACTIVE;
+		$args['status'] = ContractStatus::DRAFT;
+
+		$view = Contracts::create( $args );
+		$id   = $view->get_id();
+
+		Contracts::add_cycle(
+			$id,
+			array(
+				'status'         => CycleStatus::BILLED,
+				'count'          => 1,
+				'order_id'       => $order->get_id(),
+				'starts_at_gmt'  => (string) $view->get_start_gmt(),
+				'ends_at_gmt'    => (string) $view->get_next_payment_gmt(),
+				'expected_total' => $view->get_billing_total(),
+				'currency'       => $view->get_currency(),
+			)
+		);
+		Contracts::update( $id, array( 'status' => $status ) );
+
+		return $id;
 	}
 }

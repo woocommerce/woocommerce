@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -18,8 +19,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
@@ -28,6 +27,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
@@ -110,7 +110,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Persist a monthly plan and return the entity (the ContractFactory needs the plan).
+	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
 	 *
 	 * @param int|null $max_cycles Maximum billing cycles, or null for open-ended.
 	 */
@@ -129,7 +129,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract via the checkout factory so its billing chain holds cycle 1
+	 * Sign up a contract through the contracts facade so its billing chain holds cycle 1
 	 * (billed), the starting point the renewal advances from.
 	 *
 	 * @param string   $gateway    Gateway id stamped on the order/contract.
@@ -146,7 +146,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		return $this->reload_contract( $this->sign_up_from_order( $order, $plan ) );
 	}
 
 	private function make_origin_order(): WC_Order {
@@ -166,10 +166,12 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		// so the renewal amount resolves off the current cycle.
 		$contract = Contract::create(
 			array(
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
 				'origin_order_id'  => $origin_order_id,
+				'extension_slug'   => 'engine-tests',
 				'payment_method'   => self::GATEWAY,
 				'start_gmt'        => '2026-01-15 00:00:00',
 				'next_payment_gmt' => '2026-02-15 00:00:00',
@@ -250,7 +252,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'contract_id'    => $contract_id,
 				'sequence_no'    => $previous->get_sequence_no() + 1,
 				'count'          => 2,
-				'status'         => CycleStatus::pending(),
+				'status'         => new CycleStatus( CycleStatus::PENDING ),
 				'starts_at_gmt'  => '2026-02-15 00:00:00',
 				'ends_at_gmt'    => '2026-03-15 00:00:00',
 				'expected_total' => '19.99',
@@ -310,7 +312,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		// SAME cycle row reclaimed (not a duplicate), now billed with the lease cleared.
 		$this->assertSame( $stalled_id, $head->get_id() );
 		$this->assertSame( 2, $head->get_count() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertNull( $head->get_claimed_until_gmt() );
 
 		// The schedule advances to the RECLAIMED cycle's own end (2026-03-15), not a
@@ -361,7 +363,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( $claimed->get_id(), $head->get_id() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::pending() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
 		$this->assertSame( $live_until, $head->get_claimed_until_gmt() );
 	}
 
@@ -390,7 +392,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_sequence_no() );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( $renewal_order->get_id(), $cycle->get_order_id() );
 		$this->assertSame( '19.99000000', $cycle->get_expected_total() );
 		$this->assertSame( 'engine-tests', $cycle->get_extension_slug() );
@@ -445,9 +447,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		$contract    = ( new ContractFactory() )->create_from_order( $order, $this->make_plan_object() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
+		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_object() );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -490,7 +490,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		// charge did not settle (for dunning + admin visibility).
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::failed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) );
 		$this->assertSame( $renewal_order->get_id(), $cycle->get_order_id() );
 
 		// The contract schedule is untouched (left for dunning), still active.
@@ -572,7 +572,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$cycle = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
@@ -631,7 +631,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 					'contract_id'    => $contract_id,
 					'sequence_no'    => 1,
 					'count'          => 1,
-					'status'         => CycleStatus::billed(),
+					'status'         => new CycleStatus( CycleStatus::BILLED ),
 					'starts_at_gmt'  => '2026-01-15 00:00:00',
 					'ends_at_gmt'    => '2026-02-15 00:00:00',
 					'expected_total' => '19.99',
@@ -692,7 +692,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( $stalled_id, $head->get_id() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertNull( $head->get_claimed_until_gmt() );
 
 		// The schedule advances to the reclaimed cycle's own end - one cadence, not skipped.
@@ -744,37 +744,11 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 2, $head->get_count() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-03-15 00:00:00', $reloaded->get_next_payment_gmt() );
-	}
-
-	/**
-	 * @testdox the scheduled scan renews from the contract's own plan snapshot even when the live plan is deleted.
-	 *
-	 * The contract's frozen snapshot is the cadence source of truth, so a deleted live selling
-	 * plan no longer blocks the renewal - the chain advances on the snapshot's terms.
-	 */
-	public function test_scheduled_renewal_renews_from_contract_snapshot_when_live_plan_deleted(): void {
-		$this->approve_charges_for( self::GATEWAY_APPROVING );
-
-		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		// Delete the live selling plan; the contract keeps its frozen snapshot.
-		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
-
-		$renewal_order = $this->run_scheduled_renewal( $contract_id );
-		$this->assertInstanceOf( WC_Order::class, $renewal_order );
-
-		// Cycle 2 was billed from the snapshot's cadence.
-		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $cycle );
-		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
 	}
 
 	/**
@@ -785,22 +759,108 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled scan skips a non-active contract and creates no renewal order.
+	 * @testdox the due scan excludes a past-due non-active contract: no renewal order, its next-due moment untouched.
+	 *
+	 * A shape no flow produces (on hold while still carrying a due moment), seeded here. The
+	 * scan's interim `active` predicate keeps it out of the batch, so neither `process()` nor
+	 * `park()` is reached; those paths are pinned by the `renew_now` and `park` tests below.
 	 */
-	public function test_scheduled_renewal_skips_non_active_contract(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+	public function test_due_scan_excludes_a_non_active_contract_and_leaves_it_untouched(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-		$contract->set_status( ContractStatus::ON_HOLD );
-		( new ContractRepository() )->update( $contract );
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->force_status( $contract_id, ContractStatus::ON_HOLD );
+
+		$repo         = new ContractRepository();
+		$before       = $repo->find_chain_head( $contract_id );
+		$next_payment = $this->reload_contract( $contract_id )->get_next_payment_gmt();
+		$this->assertInstanceOf( Cycle::class, $before );
+		$this->assertNotNull( $next_payment, 'Seeded with a due moment.' );
 
 		$this->assertNull( $this->run_scheduled_renewal( $contract_id ) );
 
-		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 1 ) );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$after = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $after );
+		$this->assertSame( $before->get_id(), $after->get_id(), 'No successor cycle was claimed.' );
+		$skipped = $this->reload_contract( $contract_id );
+		$this->assertSame( ContractStatus::ON_HOLD, $skipped->get_status() );
+		$this->assertSame( $next_payment, $skipped->get_next_payment_gmt(), 'The non-active contract is not parked.' );
+	}
+
+	/**
+	 * @testdox renew_now returns null for a non-active contract and does not park it.
+	 */
+	public function test_renew_now_returns_null_for_a_non_active_contract_without_parking(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->force_status( $contract_id, ContractStatus::ON_HOLD );
+		$next_payment = $this->reload_contract( $contract_id )->get_next_payment_gmt();
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( $next_payment, $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'A manual renew never parks.' );
+	}
+
+	/**
+	 * @testdox park leaves a contract that is no longer active untouched.
+	 *
+	 * A contract can stop being active between being selected and being parked; its next-due
+	 * moment then belongs to whoever changed the status, so the park is a no-op.
+	 */
+	public function test_park_leaves_a_non_active_contract_untouched(): void {
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->force_status( $contract_id, ContractStatus::ON_HOLD );
+		$next_payment = $this->reload_contract( $contract_id )->get_next_payment_gmt();
+		$this->assertNotNull( $next_payment, 'Seeded with a due moment.' );
+
+		( new RenewalEngine() )->park( $contract_id );
+
+		$this->assertSame( $next_payment, $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @testdox park clears the next-due moment of an active contract.
+	 */
+	public function test_park_clears_the_next_payment_of_an_active_contract(): void {
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = (int) $contract->get_id();
+		$this->assertNotNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Seeded with a due moment.' );
+
+		( new RenewalEngine() )->park( $contract_id );
+
+		$this->assertNull( $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+	}
+
+	/**
+	 * Overwrite a contract's stored status directly, keeping every other column (a shape no
+	 * flow produces, e.g. an on-hold contract that still has a next-due moment).
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $status      Status to store.
+	 */
+	private function force_status( int $contract_id, string $status ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => $status ), array( 'id' => $contract_id ) );
+	}
+
+	/**
+	 * Reload a contract, asserting it still exists.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function reload_contract( int $contract_id ): Contract {
+		$contract = ( new ContractRepository() )->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract;
 	}
 
 	/**
@@ -813,6 +873,8 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order       = $this->make_origin_order();
 		$contract    = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
@@ -838,10 +900,10 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox cancel transitions the contract to cancelled.
+	 * @testdox cancel transitions the contract to cancelled and disarms its next-due moment.
 	 *
-	 * The due scan only selects active contracts, so cancellation needs no schedule
-	 * cleanup - the status transition alone removes the contract from renewal.
+	 * Cancellation clears `next_payment_gmt` itself - the flow disarms its own due moment
+	 * rather than relying on the scan's status predicate.
 	 */
 	public function test_cancel_transitions_the_contract(): void {
 		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
@@ -857,6 +919,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$reloaded = ( new ContractRepository() )->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( ContractStatus::CANCELLED, $reloaded->get_status() );
+		$this->assertNull( $reloaded->get_next_payment_gmt() );
 	}
 
 	/**
@@ -876,7 +939,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'contract_id'    => $contract_id,
 				'sequence_no'    => $previous->get_sequence_no() + 1,
 				'count'          => 2,
-				'status'         => CycleStatus::pending(),
+				'status'         => new CycleStatus( CycleStatus::PENDING ),
 				'starts_at_gmt'  => '2026-02-15 00:00:00',
 				'ends_at_gmt'    => '2026-03-15 00:00:00',
 				'expected_total' => '19.99',
@@ -894,7 +957,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::cancelled() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::CANCELLED ) ) );
 	}
 
 	/**
@@ -910,7 +973,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		// Cycle 1 stays billed (only a pending head is closed by cancel).
 		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 
@@ -940,7 +1003,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$cycle = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::processing() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::PROCESSING ) ) );
 		// A processing cycle carries no crash-recovery lease.
 		$this->assertNull( $cycle->get_claimed_until_gmt() );
 
@@ -975,7 +1038,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$repo            = new ContractRepository();
 		$processing_head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $processing_head );
-		$this->assertTrue( $processing_head->get_status()->equals( CycleStatus::processing() ) );
+		$this->assertTrue( $processing_head->get_status()->equals( new CycleStatus( CycleStatus::PROCESSING ) ) );
 
 		// The async confirmation arrives: the order is paid. Drive completion as the listener would.
 		$order->payment_complete();
@@ -985,7 +1048,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
@@ -995,7 +1058,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$engine->complete_from_order( $paid_order );
 		$billed_head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $billed_head );
-		$this->assertTrue( $billed_head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $billed_head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
@@ -1021,7 +1084,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 2, $head->get_count() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		// The scheduled path before cycle 2's period ends: selection skips, so nothing advances.
 		$ahead = $this->run_scheduled_renewal( $contract_id, new \DateTimeImmutable( '2026-03-01 00:00:00', new \DateTimeZone( 'UTC' ) ) );
@@ -1059,7 +1122,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 2, $head->get_count() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
@@ -1088,7 +1151,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$cycle = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $cycle );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		// Schedule preserved: cycle 2 runs from cycle 1's end (2026-02-15), so next payment is one
 		// cadence on from that (2026-03-15) - not one cadence from the manual-renewal moment.
@@ -1120,7 +1183,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$failed = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $failed );
 		$this->assertSame( 2, $failed->get_count() );
-		$this->assertTrue( $failed->get_status()->equals( CycleStatus::failed() ) );
+		$this->assertTrue( $failed->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) );
 
 		// The customer fixes their payment method; the same gateway now approves the retry.
 		remove_all_actions( 'woocommerce_subscriptions_engine_scheduled_payment_' . self::GATEWAY_DECLINING );
@@ -1145,7 +1208,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 2, $head->get_count() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 
 		// The failed order was reused, not duplicated.
 		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
@@ -1205,7 +1268,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	/**
@@ -1237,7 +1300,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( $draft->get_id(), $head->get_order_id(), 'The cycle link is healed from the meta match.' );
 	}
 
@@ -1269,7 +1332,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 2, $head->get_count() );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 		$this->assertSame( $renewal_order->get_id(), $head->get_order_id(), 'The cycle is linked to its own order, not the stray.' );
 
 		$stray_after = wc_get_order( $stray->get_id() );
@@ -1351,7 +1414,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::pending() ), 'The linked head is not settled by a rogue order.' );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ), 'The linked head is not settled by a rogue order.' );
 		$this->assertSame( $order_a->get_id(), $head->get_order_id() );
 	}
 
@@ -1381,7 +1444,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::pending() ), 'No settlement happens from a stale order copy.' );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ), 'No settlement happens from a stale order copy.' );
 	}
 
 	/**
@@ -1437,6 +1500,114 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * Create an active, overdue contract through the facade, minus the given renewal input.
+	 *
+	 * @param string $missing One of currency, customer, payment_method, billing_policy.
+	 */
+	private function seed_contract_missing( string $missing ): int {
+		$customer = self::factory()->user->create();
+		$this->assertIsInt( $customer );
+
+		$args = array(
+			'extension_slug'   => 'engine-tests',
+			'customer_id'      => $customer,
+			'currency'         => 'USD',
+			'payment_method'   => self::GATEWAY_APPROVING,
+			'start_gmt'        => '2026-01-01 00:00:00',
+			'next_payment_gmt' => '2026-02-01 00:00:00',
+			'billing_total'    => '10',
+			'selling_plan_id'  => $this->make_plan(),
+		);
+
+		switch ( $missing ) {
+			case 'currency':
+				unset( $args['currency'], $args['billing_total'] );
+				break;
+			case 'customer':
+				unset( $args['customer_id'] );
+				break;
+			case 'billing_policy':
+				unset( $args['selling_plan_id'] );
+				break;
+			default:
+				unset( $args[ $missing ] );
+		}
+
+		$id = Contracts::create( $args )->get_id();
+		Contracts::add_cycle(
+			$id,
+			array(
+				'status'        => CycleStatus::BILLED,
+				'count'         => 1,
+				'currency'      => 'USD',
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+			)
+		);
+		Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+
+		return $id;
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_missing_renewal_inputs(): array {
+		return array(
+			'currency'       => array( 'currency' ),
+			'payment method' => array( 'payment_method' ),
+			'billing policy' => array( 'billing_policy' ),
+		);
+	}
+
+	/**
+	 * @testdox the scheduled scan parks a contract missing a renewal input instead of erroring.
+	 * @dataProvider provide_missing_renewal_inputs
+	 *
+	 * @param string $missing The missing renewal input.
+	 */
+	public function test_scheduled_renewal_parks_a_contract_missing_a_renewal_input( string $missing ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( $missing );
+
+		$this->assertNull( $this->run_scheduled_renewal( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Parked out of the due set.' );
+	}
+
+	/**
+	 * @testdox a contract with no customer renews as a guest order.
+	 */
+	public function test_a_contract_without_a_customer_renews_as_a_guest_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( 'customer' );
+
+		$order = $this->run_scheduled_renewal( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 0, $order->get_customer_id() );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( '2026-03-01 00:00:00', $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'The next-due moment advanced.' );
+	}
+
+	/**
+	 * @testdox renew_now refuses a contract missing a renewal input without parking it.
+	 * @dataProvider provide_missing_renewal_inputs
+	 *
+	 * @param string $missing The missing renewal input.
+	 */
+	public function test_renew_now_refuses_a_contract_missing_a_renewal_input( string $missing ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( $missing );
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( '2026-02-01 00:00:00', $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+	}
+
+	/**
 	 * @testdox a manual paid-status change settles a processing cycle (cash-on-delivery shape).
 	 *
 	 * A gateway-less settlement never calls payment_complete(): an admin marks the renewal
@@ -1457,14 +1628,14 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$repo = new ContractRepository();
 		$head = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::processing() ) );
+		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::PROCESSING ) ) );
 
 		// An admin marks the order paid by hand; the status-transition listener settles.
 		$renewal_order->update_status( 'processing' );
 
 		$settled = $repo->find_chain_head( $contract_id );
 		$this->assertInstanceOf( Cycle::class, $settled );
-		$this->assertTrue( $settled->get_status()->equals( CycleStatus::billed() ), 'The manual paid transition bills the cycle.' );
+		$this->assertTrue( $settled->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ), 'The manual paid transition bills the cycle.' );
 
 		// The schedule advanced to the billed cycle's own period end.
 		$reloaded = $repo->find( $contract_id );
@@ -1473,19 +1644,17 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled scan materializes an all-cycles bogo as bonus line quantity, money-neutral.
+	 * @testdox renewal order lines carry the paid quantity whatever the pricing payload says.
 	 */
-	public function test_scheduled_renewal_materializes_bogo_bonus_quantity(): void {
+	public function test_renewal_order_lines_carry_the_paid_quantity_whatever_the_pricing_payload(): void {
 		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
 		$contract    = $this->sign_up_contract_with_line_item(
 			self::GATEWAY_APPROVING,
-			PricingPolicy::from_array(
-				array(
-					'policies' => array(
-						array( 'type' => 'bogo' ),
-					),
-				)
+			array(
+				'policies' => array(
+					array( 'type' => 'bogo' ),
+				),
 			)
 		);
 		$contract_id = $contract->get_id();
@@ -1495,144 +1664,144 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
 		$this->assertTrue( $renewal_order->is_paid() );
 
-		// The line carries paid + bonus units: 2 paid earn 2 free.
+		// The engine interprets no pricing vocabulary: paid quantity, stored amounts.
 		$items = array_values( $renewal_order->get_items() );
 		$this->assertCount( 1, $items );
 		$item = $items[0];
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-		$this->assertSame( 4, $item->get_quantity() );
-
-		// Money-neutral: the line amounts still price the paid units only, and the
-		// order total is exactly the cycle's expected_total (the price authority).
+		$this->assertSame( 2, $item->get_quantity() );
 		$this->assertSame( 39.98, (float) $item->get_subtotal() );
 		$this->assertSame( 39.98, (float) $item->get_total() );
 		$this->assertSame( 39.98, (float) $renewal_order->get_total() );
-
-		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( CycleStatus::billed() ) );
-		$this->assertSame( '39.98000000', $head->get_expected_total() );
 	}
 
 	/**
-	 * @testdox a first-cycle-only bogo grants no bonus on the cycle-2 renewal order.
-	 *
-	 * `duration_cycles: 1` scopes the bogo benefit to cycle 1 (the origin order, whose
-	 * materialization is the consumer's checkout, not the engine's). The engine-built
-	 * cycle-2 renewal is outside the window: paid quantity only.
+	 * @testdox the renewal-order-created action receives the built order, linked on its cycle, and the contract.
 	 */
-	public function test_scheduled_renewal_grants_no_bonus_when_the_bogo_window_has_ended(): void {
-		$this->approve_charges_for( self::GATEWAY_APPROVING );
-
-		$contract    = $this->sign_up_contract_with_line_item(
-			self::GATEWAY_APPROVING,
-			PricingPolicy::from_array(
-				array(
-					'policies' => array(
-						array(
-							'type'            => 'bogo',
-							'duration_cycles' => 1,
-						),
-					),
-				)
-			)
-		);
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$renewal_order = $this->run_scheduled_renewal( $contract_id );
-		$this->assertInstanceOf( WC_Order::class, $renewal_order );
-
-		$items = array_values( $renewal_order->get_items() );
-		$this->assertCount( 1, $items );
-		$item = $items[0];
-		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-		$this->assertSame( 2, $item->get_quantity(), 'No bonus outside the bogo window.' );
-		$this->assertSame( 39.98, (float) $renewal_order->get_total() );
-	}
-
-	/**
-	 * @testdox the bogo bonus materializes from the contract's frozen snapshot even when the live plan is deleted.
-	 */
-	public function test_scheduled_renewal_materializes_bogo_from_the_snapshot_when_the_live_plan_is_deleted(): void {
-		$this->approve_charges_for( self::GATEWAY_APPROVING );
-
-		$contract    = $this->sign_up_contract_with_line_item(
-			self::GATEWAY_APPROVING,
-			PricingPolicy::from_array(
-				array(
-					'policies' => array(
-						array( 'type' => 'bogo' ),
-					),
-				)
-			)
-		);
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		// The live plan goes away; the contract's frozen snapshot carries the terms.
-		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
-
-		$renewal_order = $this->run_scheduled_renewal( $contract_id );
-		$this->assertInstanceOf( WC_Order::class, $renewal_order );
-
-		$items = array_values( $renewal_order->get_items() );
-		$this->assertCount( 1, $items );
-		$item = $items[0];
-		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-		$this->assertSame( 4, $item->get_quantity(), 'The snapshot terms grant the bonus without the live plan.' );
-	}
-
-	/**
-	 * @testdox a discount added to the live plan after signup does not change a contract's frozen terms.
-	 *
-	 * The snapshot records an explicit "no pricing policy" at signup; a bogo entry added
-	 * to the live plan later must not leak onto the contract's renewals (and the base
-	 * quantity regression holds: no pricing policy means quantities are untouched).
-	 */
-	public function test_scheduled_renewal_honors_the_snapshots_explicit_lack_of_a_pricing_policy(): void {
+	public function test_renewal_order_created_action_receives_the_built_order_and_contract(): void {
 		$this->approve_charges_for( self::GATEWAY_APPROVING );
 
 		$contract    = $this->sign_up_contract_with_line_item( self::GATEWAY_APPROVING, null );
 		$contract_id = $contract->get_id();
 		$this->assertNotNull( $contract_id );
 
-		// The merchant later adds a bogo discount to the live plan.
-		$plans = new PlanRepository();
-		$plan  = $plans->find( $contract->get_selling_plan_id() );
-		$this->assertInstanceOf( Plan::class, $plan );
-		$plan->set_pricing_policy(
-			PricingPolicy::from_array(
-				array(
-					'policies' => array(
-						array( 'type' => 'bogo' ),
-					),
-				)
-			)
+		$calls = array();
+		add_action(
+			RenewalEngine::RENEWAL_ORDER_CREATED_ACTION,
+			static function ( $order, $hooked_contract ) use ( &$calls ): void {
+				$head    = ( new ContractRepository() )->find_chain_head( (int) $hooked_contract->get_id() );
+				$calls[] = array(
+					'order'         => $order,
+					'contract'      => $hooked_contract,
+					'head_order_id' => $head instanceof Cycle ? $head->get_order_id() : null,
+				);
+			},
+			10,
+			2
 		);
-		$this->assertTrue( $plans->update( $plan ) );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
 
-		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $calls, 'The action fires once for a new renewal order.' );
+		$this->assertInstanceOf( WC_Order::class, $calls[0]['order'] );
+		$this->assertSame( $renewal_order->get_id(), $calls[0]['order']->get_id() );
+		$this->assertInstanceOf( Contract::class, $calls[0]['contract'] );
+		$this->assertSame( $contract_id, $calls[0]['contract']->get_id() );
+
+		// The order is already linked on its cycle when listeners run.
+		$this->assertSame( $renewal_order->get_id(), $calls[0]['head_order_id'] );
+
+		$items = array_values( $calls[0]['order']->get_items() );
 		$this->assertCount( 1, $items );
-		$item = $items[0];
-		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-		$this->assertSame( 2, $item->get_quantity(), 'Frozen terms: the later live-plan discount does not apply.' );
-		$this->assertSame( 39.98, (float) $renewal_order->get_total() );
+		$this->assertSame( 2, $items[0]->get_quantity() );
 	}
 
 	/**
-	 * Sign up a contract from an order carrying a real product line (quantity 2, USD
-	 * 39.98) on a monthly plan with the given pricing policy - the shape the BOGO
-	 * materialization tests read renewal line quantities from.
+	 * @testdox the renewal-order-created action does not re-fire for a resumed order, and fires once for a fresh one.
+	 */
+	public function test_renewal_order_created_action_is_not_refired_for_a_reused_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo     = new ContractRepository();
+		$previous = $repo->find_chain_head( $contract_id );
+		$this->assertInstanceOf( Cycle::class, $previous );
+		$this->make_pending_cycle_2( $contract_id, $previous, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$ghost = $this->make_ghost_renewal_order( $contract_id, 2, false );
+
+		$fired = new \ArrayObject();
+		add_action(
+			RenewalEngine::RENEWAL_ORDER_CREATED_ACTION,
+			static function ( $order ) use ( $fired ): void {
+				$fired->append( $order->get_id() );
+			}
+		);
+
+		$resumed = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $resumed );
+		$this->assertSame( $ghost->get_id(), $resumed->get_id() );
+		$this->assertSame( array(), $fired->getArrayCopy(), 'A reused order does not re-fire the action.' );
+
+		$fresh = $this->run_scheduled_renewal( $contract_id, new \DateTimeImmutable( '2026-03-16 00:00:00', new \DateTimeZone( 'UTC' ) ) );
+		$this->assertInstanceOf( WC_Order::class, $fresh );
+		$this->assertNotSame( $ghost->get_id(), $fresh->get_id() );
+		$this->assertSame( array( $fresh->get_id() ), $fired->getArrayCopy(), 'A freshly built order fires the action once.' );
+	}
+
+	/**
+	 * @testdox renewal order lines keep the stored quantity: $label.
+	 * @dataProvider provide_unclamped_quantities
 	 *
-	 * @param string             $gateway        Gateway id stamped on the order/contract.
-	 * @param PricingPolicy|null $pricing_policy The plan's pricing policy, or null for none.
+	 * @param string    $label      Case label.
+	 * @param int|float $quantity   Origin line quantity.
+	 * @param bool      $fractional Whether a fractional stock-amount filter is active.
+	 */
+	public function test_renewal_order_lines_keep_the_stored_quantity( string $label, $quantity, bool $fractional ): void {
+		if ( $fractional ) {
+			remove_filter( 'woocommerce_stock_amount', 'intval' );
+			add_filter( 'woocommerce_stock_amount', 'floatval' );
+		}
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$contract    = $this->sign_up_contract_with_line_item( self::GATEWAY_APPROVING, null, $quantity );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$renewal_order = $this->run_scheduled_renewal( $contract_id );
+		$this->assertInstanceOf( WC_Order::class, $renewal_order, $label );
+
+		$items = array_values( $renewal_order->get_items() );
+		$this->assertCount( 1, $items );
+		$this->assertInstanceOf( \WC_Order_Item_Product::class, $items[0] );
+		$this->assertEquals( $quantity, $items[0]->get_quantity(), $label );
+	}
+
+	/**
+	 * Quantities the engine must not floor or round.
+	 *
+	 * @return array<string, array{0: string, 1: int|float, 2: bool}>
+	 */
+	public function provide_unclamped_quantities(): array {
+		return array(
+			'zero'       => array( 'zero', 0, false ),
+			'fractional' => array( 'fractional', 1.5, true ),
+		);
+	}
+
+	/**
+	 * Sign up a contract from an order carrying a real product line (quantity 2 by default,
+	 * USD 39.98) on a monthly plan with the given pricing payload.
+	 *
+	 * @param string                    $gateway        Gateway id stamped on the order/contract.
+	 * @param array<string, mixed>|null $pricing_policy The plan's pricing payload, or null for none.
+	 * @param int|float                 $quantity       Origin line quantity.
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
-	private function sign_up_contract_with_line_item( string $gateway, ?PricingPolicy $pricing_policy ): Contract {
+	private function sign_up_contract_with_line_item( string $gateway, ?array $pricing_policy, $quantity = 2 ): Contract {
 		$plan = Plan::create(
 			array(
 				'name'           => 'Monthly',
@@ -1657,13 +1826,13 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$line = new \WC_Order_Item_Product();
 		$line->set_name( 'Monthly Filters' );
 		$line->set_product_id( $product_id );
-		$line->set_quantity( 2 );
+		$line->set_quantity( $quantity ); // @phpstan-ignore argument.type (docblock-only int; fractional quantities are valid)
 		$line->set_subtotal( '39.98' );
 		$line->set_total( '39.98' );
 		$order->add_item( $line );
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		return $this->reload_contract( $this->sign_up_from_order( $order, $plan ) );
 	}
 
 	/**
@@ -1681,7 +1850,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 				'contract_id'    => $contract_id,
 				'sequence_no'    => $previous->get_sequence_no() + 1,
 				'count'          => 2,
-				'status'         => CycleStatus::pending(),
+				'status'         => new CycleStatus( CycleStatus::PENDING ),
 				'starts_at_gmt'  => '2026-02-15 00:00:00',
 				'ends_at_gmt'    => '2026-03-15 00:00:00',
 				'expected_total' => '19.99',

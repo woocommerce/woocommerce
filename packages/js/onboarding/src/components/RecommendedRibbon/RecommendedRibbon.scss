@@ -1,10 +1,8 @@
 .woocommerce-task-payment__recommended-ribbon {
-	position: absolute;
 	transform: rotate(-45deg) translate(-50%, -50%);
 	background: $studio-gray-80;
 	color: $studio-white;
 	font-size: 11px;
-	line-height: 20px;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -19,7 +17,7 @@
 	}
 }
 
-@include breakpoint( '<600px' ) {
+@include breakpoint( "<600px" ) {
 	.woocommerce-task-payment__recommended-ribbon {
 		margin-top: 24px;
 		margin-left: 24px;

@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -151,8 +151,8 @@ final class PlanRepository {
 
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 		$order  = $this->build_order_clause( $args );
-		$limit  = max( 1, ScalarCoercion::coerce_int( $args['limit'] ?? null, 50 ) );
-		$offset = max( 0, ScalarCoercion::coerce_int( $args['offset'] ?? null, 0 ) );
+		$limit  = max( 1, Coercion::coerce_int( $args['limit'] ?? null, 50 ) );
+		$offset = max( 0, Coercion::coerce_int( $args['offset'] ?? null, 0 ) );
 
 		// phpcs:ignore Generic.Arrays.DisallowShortArraySyntax.Found
 		[
@@ -311,7 +311,7 @@ final class PlanRepository {
 			? array_unique(
 				array_map(
 					static function ( $matched_id ): int {
-						return ScalarCoercion::coerce_int( $matched_id );
+						return Coercion::coerce_int( $matched_id );
 					},
 					$matched_ids
 				)
@@ -353,7 +353,7 @@ final class PlanRepository {
 		$clauses = array();
 		$params  = array();
 
-		$status = ScalarCoercion::coerce_string( $args['status'] ?? null );
+		$status = Coercion::coerce_string( $args['status'] ?? null );
 		if ( '' !== $status ) {
 			$clauses[] = 'status = %s';
 			$params[]  = $status;
@@ -402,7 +402,7 @@ final class PlanRepository {
 				$ids       = array();
 				$all_valid = true;
 				foreach ( array_values( $args['ids'] ) as $possible_id ) {
-					$plan_id = ScalarCoercion::coerce_int( $possible_id );
+					$plan_id = Coercion::coerce_int( $possible_id );
 					if ( $plan_id <= 0 ) {
 						$all_valid = false;
 						break;
@@ -425,7 +425,7 @@ final class PlanRepository {
 			}
 		}
 
-		$search = ScalarCoercion::coerce_string( $args['search'] ?? null );
+		$search = Coercion::coerce_string( $args['search'] ?? null );
 		if ( '' !== $search ) {
 			$like      = '%' . $wpdb->esc_like( $search ) . '%';
 			$clauses[] = '(name LIKE %s OR description LIKE %s)';
@@ -452,11 +452,11 @@ final class PlanRepository {
 	 * @param array<string, mixed> $args Query args.
 	 */
 	private function build_order_clause( array $args ): string {
-		$orderby_arg = ScalarCoercion::coerce_string( $args['orderby'] ?? null );
+		$orderby_arg = Coercion::coerce_string( $args['orderby'] ?? null );
 		$orderby     = isset( self::ORDERBY_COLUMNS[ $orderby_arg ] )
 			? self::ORDERBY_COLUMNS[ $orderby_arg ]
 			: 'sort_order';
-		$order       = 'desc' === strtolower( ScalarCoercion::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
+		$order       = 'desc' === strtolower( Coercion::coerce_string( $args['order'] ?? null ) ) ? 'DESC' : 'ASC';
 
 		if ( 'sort_order' === $orderby ) {
 			return "ORDER BY sort_order {$order}, id ASC";

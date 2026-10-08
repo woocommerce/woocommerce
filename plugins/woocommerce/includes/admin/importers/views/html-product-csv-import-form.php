@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 				</tr>
 				<tr>
-					<th><label for="woocommerce-importer-update-existing"><?php esc_html_e( 'Update existing products', 'woocommerce' ); ?></label><br/></th>
+					<th><label for="woocommerce-importer-update-existing"><?php esc_html_e( 'Update existing products', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="hidden" name="update_existing" value="0" />
 						<input type="checkbox" id="woocommerce-importer-update-existing" name="update_existing" value="1" />
@@ -71,15 +71,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
+					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label></th>
 					<td><input type="text" name="delimiter" placeholder="," size="2" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label><br/></th>
+					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label></th>
 					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label for="woocommerce-importer-character-encoding"><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
+					<th><label for="woocommerce-importer-character-encoding"><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label></th>
 					<td>
 						<?php
 						if ( function_exists( 'mb_list_encodings' ) ) {
