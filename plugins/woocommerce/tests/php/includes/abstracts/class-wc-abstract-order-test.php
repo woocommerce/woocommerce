@@ -497,6 +497,114 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Removing a coupon from an order that never recorded usage leaves the coupon usage count alone.
+	 */
+	public function test_remove_coupon_keeps_usage_count_when_order_did_not_record_it() {
+		$coupon_code = 'remove_unrecorded_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$counted_order = WC_Helper_Order::create_order();
+		$counted_order->set_status( OrderStatus::PENDING );
+		$counted_order->save();
+		$counted_order->apply_coupon( $coupon_code );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$order->add_item( $item );
+		$order->save();
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing the last coupon from a recorded order releases its usage, clears the flag, and lets a later coupon be counted.
+	 */
+	public function test_remove_coupon_from_recorded_order_releases_usage_and_clears_flag() {
+		$coupon_code = 'remove_recorded_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$reloaded = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $reloaded->get_items( 'coupon' ) );
+		$this->assertFalse( $reloaded->get_data_store()->get_recorded_coupon_usage_counts( $reloaded ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$reloaded->add_item( $item );
+		$reloaded->save();
+		$reloaded->set_status( OrderStatus::ON_HOLD );
+		$reloaded->save();
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon right after applying it on the same order instance clears the stored flag.
+	 */
+	public function test_remove_coupon_after_apply_on_same_instance_clears_stored_flag() {
+		$coupon_code = 'remove_same_instance_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$reloaded = wc_get_order( $order->get_id() );
+		$this->assertFalse( $reloaded->get_data_store()->get_recorded_coupon_usage_counts( $reloaded ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$reloaded->add_item( $item );
+		$reloaded->save();
+		$reloaded->set_status( OrderStatus::ON_HOLD );
+		$reloaded->save();
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon from a recorded guest order removes the billing email that was recorded as a user.
+	 */
+	public function test_remove_coupon_from_recorded_guest_order_removes_billing_email() {
+		$coupon_code = 'remove_guest_test';
+		$email       = 'guest-remove-coupon@example.com';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+
+		$this->assertContains( $email, ( new WC_Coupon( $coupon_code ) )->get_used_by() );
+
+		$order->remove_coupon( $coupon_code );
+
+		$this->assertNotContains( $email, ( new WC_Coupon( $coupon_code ) )->get_used_by() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
 	 * Create a pending order with one $100 product whose line total was manually edited to $50.
 	 *
 	 * @return WC_Order
