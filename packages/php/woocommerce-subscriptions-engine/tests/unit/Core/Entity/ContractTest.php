@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 /**
@@ -348,12 +348,12 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox The payment instrument round-trips through an InstrumentRef.
+	 * @testdox The payment instrument round-trips through a PaymentInstrumentRef.
 	 */
 	public function test_payment_instrument_round_trips(): void {
 		$contract = $this->make_contract();
 
-		$contract->set_payment_instrument( new InstrumentRef( 99, 'dummy', 'Dummy Gateway' ) );
+		$contract->set_payment_instrument( new PaymentInstrumentRef( 99, 'dummy', 'Dummy Gateway' ) );
 
 		$instrument = $contract->get_payment_instrument();
 		$this->assertSame( 99, $instrument->get_token_id() );
