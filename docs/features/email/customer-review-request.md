@@ -45,7 +45,7 @@ Storage is on the parent product post — WC reviews don't live on variations �
 - `_review_variation_id` — the line item's `variation_id` (`0` for simple products, kept for symmetry).
 - `_review_variation_summary` — the attribute summary at the moment the review was written (e.g. `"Size: Small, Colour: Red"`). Captured as a snapshot so historical reviews stay readable even if the variation is later retired or its attribute terms are renamed.
 
-`ItemEligibility::find_existing_review()` keys by `(order_id, product_id, variation_id, email)`, so each variation row pre-fills against its own review on revisit. The Review Order row template renders the variation's attribute summary via `wc_get_formatted_variation()`, restricted to the live variation's whitelisted attribute slugs — third-party item meta (engraving, gift-wrap, custom add-ons) is intentionally excluded so private personalisation data can't leak into the public review snapshot.
+`ItemEligibility::find_existing_review()` keys by `(order_id, product_id, variation_id, email)`, so each variation row pre-fills against its own review on revisit. The Review Order row template renders the variation's attribute summary via `ItemEligibility::format_variation_summary()`, which restricts the attributes to the live variation's whitelisted slugs before passing them to `wc_get_formatted_variation()` — third-party item meta (engraving, gift-wrap, custom add-ons) is intentionally excluded so private personalisation data can't leak into the public review snapshot.
 
 On the parent product's single-product Reviews tab, the variation summary is prepended above each comment body through the existing `woocommerce_review_before_comment_text` action; reviews without the summary meta render unchanged. The theming class is `.woocommerce-review__variation-summary`.
 
@@ -71,10 +71,10 @@ Returns the tokenized review-order URL for a given `WC_Order`. Use this rather t
   Replace the URL emitted by `wc_get_review_order_url()`.
 
 - `woocommerce_review_order_eligible_statuses` (`string[]`, `WC_Order|null`)  
-  Widen or narrow the order statuses that pass the route-level gate. Defaults to `[ 'completed' ]`. The second argument is the order, or `null` when the scheduler evaluates a status change without a resolved order.
+  The order statuses treated as eligible. Defaults to `[ 'completed' ]`. The same list is consulted at four points: the route-level page gate, the AJAX submission handler, the send-time re-check, and the scheduler's cancellation (a queued email is unscheduled only when the order leaves this set). Initial scheduling stays tied to the `completed` transition, so widening this filter does not queue a request when an order enters the added status; it only keeps a queued request alive through transitions inside the expanded set and lets the page and send pass. The second argument is the order, or `null` when the scheduler evaluates a status change without a resolved order.
 
 - `woocommerce_review_order_eligible_items` (`WC_Order_Item[]`, `WC_Order`)  
-  Filter the line items rendered on the page. The default callback excludes fully-refunded items.
+  The order items considered reviewable. The default callback excludes fully-refunded items. Beyond choosing which rows the page renders, it feeds the actionable-items check at both schedule time and send time, so emptying it for an order suppresses scheduling and sending too.
 
 - `woocommerce_review_order_rating_labels` (`array<int,string>`)  
   Customize the 1-5 star labels surfaced beside the control. Defaults to `Very poor / Not that bad / Average / Good / Perfect`.
@@ -84,7 +84,7 @@ Returns the tokenized review-order URL for a given `WC_Order`. Use this rather t
 #### Send pipeline
 
 - `woocommerce_send_review_request` (`int $order_id`)  
-  Action Scheduler hook. `Scheduler` enqueues this for each eligible order when the order moves to `completed`, with the delay configured on the email settings screen. When the delay elapses, Action Scheduler fires the hook and WC's transactional-email pipeline (`WC_Emails::email_actions()`) re-dispatches it as `woocommerce_send_review_request_notification`. Useful for plugins that need to observe the scheduled send without owning the email itself. It is a plain `do_action`, so a callback's return value cannot cancel the send — to prevent a send, use the `woocommerce_should_send_review_request` filter (evaluated at schedule time) instead.
+  Action Scheduler hook. `Scheduler` enqueues this for each eligible order when the order moves to `completed`, with the delay configured on the email settings screen. When the delay elapses, Action Scheduler fires the hook and WC's transactional-email pipeline re-dispatches it as `woocommerce_send_review_request_notification` (the hook is registered with the pipeline in `WC_Emails::init_transactional_emails()`). Useful for plugins that need to observe the scheduled send without owning the email itself. It is a plain `do_action`, so a callback's return value cannot cancel the send — to prevent a send, use the `woocommerce_should_send_review_request` filter (evaluated at schedule time) instead.
 
 - `woocommerce_send_review_request_notification` (`int $order_id`)  
   Transactional email pipeline action, fired by `WC_Emails` after `woocommerce_send_review_request`. `WC_Email_Customer_Review_Request::trigger()` listens here and builds + sends the email. Useful when you need to add a second listener (e.g. analytics) alongside the built-in mailer.
