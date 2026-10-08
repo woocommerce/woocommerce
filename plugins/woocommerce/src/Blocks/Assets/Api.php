@@ -120,7 +120,7 @@ class Api {
 	/**
 	 * Get the path to a block's metadata
 	 *
-	 * @deprecated 11.4.0 Use ::generate_block_metadata_path() instead.
+	 * @deprecated 11.3.0 Use ::generate_block_metadata_path() instead.
 	 *
 	 * @param string $block_name The block to get metadata for.
 	 * @param string $path Optional. The path to the metadata file inside the 'assets/client/blocks' folder.
@@ -128,7 +128,7 @@ class Api {
 	 * @return string|boolean False if metadata file is not found for the block.
 	 */
 	public function get_block_metadata_path( $block_name, $path = '' ) {
-		wc_deprecated_function( __METHOD__, '11.4.0', __CLASS__ . '::generate_block_metadata_path()' );
+		wc_deprecated_function( __METHOD__, '11.3.0', __CLASS__ . '::generate_block_metadata_path()' );
 
 		$path_to_metadata_from_plugin_root = $this->generate_block_metadata_path( $block_name, $path );
 		if ( ! file_exists( $path_to_metadata_from_plugin_root ) ) {
@@ -140,7 +140,7 @@ class Api {
 	/**
 	 * Generate the path to a block's metadata.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @param string $block_name The block to get metadata for.
 	 * @param string $path       Optional. The path to the metadata file inside the 'assets/client/blocks' folder.
