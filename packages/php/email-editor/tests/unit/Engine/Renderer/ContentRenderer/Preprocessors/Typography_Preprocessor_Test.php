@@ -84,6 +84,8 @@ class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$settings_mock->method( 'translate_slug_to_color' )->willReturnMap(
 			array(
 				array( 'slug-red', '#ff0000' ),
+				// A slug the email's palette does not define resolves to nothing.
+				array( 'theme-4', '' ),
 			)
 		);
 		$this->preprocessor = new Typography_Preprocessor( $settings_mock );
@@ -234,6 +236,48 @@ class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][0]['email_attrs'] );
 		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][1]['email_attrs'] );
 		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][1]['innerBlocks'][0]['email_attrs'] );
+	}
+
+	/**
+	 * Test an unresolvable text color slug is not copied down to children.
+	 *
+	 * Passing the slug on put `color: theme-4` in the children's styles, and passing on the empty
+	 * string it now resolves to would put `color: ;` there. Leaving it unset lets
+	 * set_defaults_from_theme() fill in the theme's own text color instead.
+	 */
+	public function testItDoesNotCopyUnresolvableTextColorSlugs(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(
+					'textColor' => 'theme-4',
+					'style'     => array(),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+		// The theme's own text color, not the slug and not an empty string.
+		$expected_email_attrs = array(
+			'color'     => '#000000',
+			'font-size' => '13px',
+		);
+		$result               = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$result               = $result[0];
+		$this->assertSame( '#000000', $result['email_attrs']['color'] );
+		$this->assertEquals( $expected_email_attrs, $result['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][0]['email_attrs'] );
+		$this->assertEquals( $expected_email_attrs, $result['innerBlocks'][0]['innerBlocks'][0]['email_attrs'] );
 	}
 
 	/**

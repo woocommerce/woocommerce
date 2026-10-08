@@ -128,6 +128,41 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a border color slug the palette defines is rendered.
+	 */
+	public function testItRendersResolvableBorderColorSlug(): void {
+		$parsed_table                             = $this->parsed_table;
+		$parsed_table['innerHTML']                = $this->simple_table_content;
+		$parsed_table['attrs']['borderColor']     = 'vivid-purple';
+		$parsed_table['attrs']['style']['border'] = array( 'width' => '2px' );
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'solid #9b51e0', $rendered );
+	}
+
+	/**
+	 * Test a border color slug the palette cannot resolve falls back to the table's own color.
+	 *
+	 * Two failures are pinned here. The slug used to pass through sanitize_color() untouched, since
+	 * it matches that method's permissive named-color branch, and reached the markup as
+	 * `solid theme-4`. Now that it resolves to an empty string, sanitize_color() would turn it into
+	 * black instead, which is why get_custom_border_color() returns null rather than sanitizing: a
+	 * foreign slug must not paint a border color the author never chose.
+	 */
+	public function testItFallsBackToTableColorForUnresolvableBorderColorSlug(): void {
+		$parsed_table                             = $this->parsed_table;
+		$parsed_table['innerHTML']                = $this->simple_table_content;
+		$parsed_table['email_attrs']['color']     = '#abcdef';
+		$parsed_table['attrs']['borderColor']     = 'theme-4';
+		$parsed_table['attrs']['style']['border'] = array( 'width' => '2px' );
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'solid #abcdef', $rendered );
+		$this->assertStringNotContainsString( 'theme-4', $rendered );
+		$this->assertStringNotContainsString( 'solid #000000', $rendered );
+	}
+
+	/**
 	 * Test it uses RTL default wrapper and cell alignment when alignment is absent.
 	 */
 	public function testItRendersTableWithRtlDefaultAlignment(): void {

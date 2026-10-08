@@ -123,18 +123,7 @@ class Rendering_Context {
 	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
-		$settings = $this->get_theme_settings();
-
-		$color_definitions = array_merge(
-			$settings['color']['palette']['theme'] ?? array(),
-			$settings['color']['palette']['default'] ?? array()
-		);
-		foreach ( $color_definitions as $color_definition ) {
-			if ( $color_definition['slug'] === $color_slug ) {
-				return strtolower( $color_definition['color'] );
-			}
-		}
-		return Styles_Helper::is_color_literal( $color_slug ) ? $color_slug : '';
+		return Styles_Helper::resolve_color_from_palette( $this->get_theme_settings(), $color_slug );
 	}
 
 	/**
