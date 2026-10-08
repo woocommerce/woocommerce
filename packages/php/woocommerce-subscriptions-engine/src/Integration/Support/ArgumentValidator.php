@@ -83,6 +83,21 @@ final class ArgumentValidator {
 	}
 
 	/**
+	 * Validate and return a non-empty string.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not a non-empty string.
+	 */
+	public static function validate_non_empty_string( string $key, $value ): string {
+		if ( ! is_string( $value ) || '' === $value ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Validate and return a string, or null.
 	 *
 	 * @param string $key   Field name.

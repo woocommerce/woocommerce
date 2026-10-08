@@ -331,14 +331,12 @@ final class PlansController extends WP_REST_Controller {
 			return $extension_slug;
 		}
 
-		$plan_id = Coercion::coerce_int( $request->get_param( 'id' ) );
-		$stored  = Plans::get( $plan_id );
-		if ( null === $stored || $extension_slug !== $stored->get_extension_slug() ) {
-			return $this->not_found_error();
-		}
+		$args                   = $this->get_write_args( $request );
+		$args['extension_slug'] = $extension_slug;
 
 		try {
-			$plan = Plans::update( $plan_id, $this->get_write_args( $request ) );
+			// A plan of another extension reads as missing: the facade scopes the update to the owner.
+			$plan = Plans::update( Coercion::coerce_int( $request->get_param( 'id' ) ), $args );
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {

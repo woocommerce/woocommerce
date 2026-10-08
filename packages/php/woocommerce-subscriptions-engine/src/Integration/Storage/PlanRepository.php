@@ -81,22 +81,27 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Fetch a plan by id, in any status and of any owner.
+	 * Fetch a plan by id, in any status, of any owner or (when given) only of the given owner.
 	 *
-	 * @param int $id Plan id.
-	 * @return Plan|null Hydrated plan, or null if not found.
+	 * @param int         $id             Plan id.
+	 * @param string|null $extension_slug Owning extension slug to scope the read to; null reads any owner.
+	 * @return Plan|null Hydrated plan, or null if not found (also when it belongs to another owner).
 	 */
-	public function find( int $id ): ?Plan {
+	public function find( int $id, ?string $extension_slug = null ): ?Plan {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row = $wpdb->get_row(
+		if ( null === $extension_slug ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ),
-			ARRAY_A
-		);
+			$sql = $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id );
+		} else {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sql = $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d AND extension_slug = %s", $id, $extension_slug );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$row = $wpdb->get_row( $sql, ARRAY_A );
 
 		if ( null === $row ) {
 			return null;
@@ -186,15 +191,17 @@ final class PlanRepository {
 	/**
 	 * Write only the given columns of an existing plan's row (plus its update time, stamped
 	 * back onto the entity), so columns a concurrent writer changed in between keep its
-	 * values. Plan meta is never touched. Existence is checked only when the write changes
-	 * nothing.
+	 * values. The write is scoped to the plan's owner: it matches the row by id and the
+	 * entity's extension slug, so a row of another owner is never written. Plan meta is
+	 * never touched. Existence (by id and owner) is checked only when the write changes
+	 * nothing. Opens no transaction: a caller's transaction covers the write.
 	 *
-	 * @param Plan               $plan   Plan to read the values from. Must have an id.
+	 * @param Plan               $plan   Plan to read the values from. Must have an id and an extension slug.
 	 * @param array<int, string> $fields Columns to write: `name`, `status`, `billing_policy`,
 	 *                                   `pricing_policy`, `delivery_policy`.
-	 * @return bool False when the plan row no longer exists (nothing is written).
+	 * @return bool False when no row of the plan's owner has its id (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable column.
-	 * @throws \RuntimeException If the plan has no id or the update fails.
+	 * @throws \RuntimeException If the plan has no id or no extension slug, or the update fails.
 	 */
 	public function update_fields( Plan $plan, array $fields ): bool {
 		global $wpdb;
@@ -202,6 +209,11 @@ final class PlanRepository {
 		$id = $plan->get_id();
 		if ( null === $id ) {
 			throw new \RuntimeException( 'Cannot update a plan that has no id.' );
+		}
+
+		$extension_slug = $plan->get_extension_slug();
+		if ( null === $extension_slug || '' === $extension_slug ) {
+			throw new \RuntimeException( 'Cannot update a plan that has no extension slug.' );
 		}
 
 		$row     = $this->get_row_data( $plan );
@@ -219,15 +231,18 @@ final class PlanRepository {
 		$updated = $wpdb->update(
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS ),
 			array_merge( $columns, array( 'date_updated_gmt' => $now ) ),
-			array( 'id' => $id )
+			array(
+				'id'             => $id,
+				'extension_slug' => $extension_slug,
+			)
 		);
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		// Zero changed rows: a missing row, or identical values written within the same second.
-		if ( 0 === $updated && ! $this->exists( $id ) ) {
+		// Zero changed rows: no row of this owner, or identical values written within the same second.
+		if ( 0 === $updated && ! $this->exists( $id, $extension_slug ) ) {
 			return false;
 		}
 
@@ -237,17 +252,26 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Whether a plan row exists.
+	 * Whether a plan row exists, of any owner or (when given) of the given owner.
 	 *
-	 * @param int $id Plan id.
+	 * @param int         $id             Plan id.
+	 * @param string|null $extension_slug Owning extension slug to scope the check to; null checks any owner.
 	 */
-	public function exists( int $id ): bool {
+	public function exists( int $id, ?string $extension_slug = null ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id ) );
+		if ( null === $extension_slug ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id );
+		} else {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sql = $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND extension_slug = %s", $id, $extension_slug );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$found = $wpdb->get_var( $sql );
 
 		return null !== $found;
 	}

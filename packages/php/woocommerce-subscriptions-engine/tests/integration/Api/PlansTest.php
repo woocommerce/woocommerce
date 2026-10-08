@@ -192,7 +192,13 @@ class PlansTest extends EngineIntegrationTestCase {
 		}
 
 		try {
-			Plans::update( $this->create(), array( 'name' => ' ' ) );
+			Plans::update(
+				$this->create(),
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => ' ',
+				)
+			);
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
@@ -242,7 +248,16 @@ class PlansTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'pricing_policy' => array( 'c' => 3 ) ) ) );
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'pricing_policy' => array( 'c' => 3 ),
+				)
+			)
+		);
 		$plan = $this->stored( $id );
 		$this->assertSame( array( 'c' => 3 ), $plan->get_pricing_policy() );
 		$this->assertSame(
@@ -254,7 +269,16 @@ class PlansTest extends EngineIntegrationTestCase {
 			'An omitted policy keeps its stored payload.'
 		);
 
-		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'pricing_policy' => null ) ) );
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'pricing_policy' => null,
+				)
+			)
+		);
 		$this->assertNull( $this->stored( $id )->get_pricing_policy() );
 	}
 
@@ -264,7 +288,16 @@ class PlansTest extends EngineIntegrationTestCase {
 	public function test_status_only_update(): void {
 		$id = $this->create();
 
-		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'status'         => PlanStatus::ARCHIVED,
+				)
+			)
+		);
 
 		$plan = $this->stored( $id );
 		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
@@ -275,8 +308,24 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox update of a missing plan returns null.
 	 */
 	public function test_update_of_a_missing_plan_returns_null(): void {
-		$this->assertNull( Plans::update( 999999, array( 'name' => 'Nope' ) ) );
-		$this->assertNull( Plans::update( 0, array( 'name' => 'Nope' ) ) );
+		$this->assertNull(
+			Plans::update(
+				999999,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Nope',
+				)
+			)
+		);
+		$this->assertNull(
+			Plans::update(
+				0,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Nope',
+				)
+			)
+		);
 	}
 
 	/**
@@ -285,7 +334,13 @@ class PlansTest extends EngineIntegrationTestCase {
 	public function test_update_returns_the_view_with_the_written_fields(): void {
 		$id = $this->create();
 
-		$updated = Plans::update( $id, array( 'name' => 'Renamed' ) );
+		$updated = Plans::update(
+			$id,
+			array(
+				'extension_slug' => self::OWNER,
+				'name'           => 'Renamed',
+			)
+		);
 
 		$this->assertInstanceOf( PlanView::class, $updated );
 		$this->assertSame( 'Renamed', $updated->get_name() );
@@ -315,7 +370,13 @@ class PlansTest extends EngineIntegrationTestCase {
 		add_filter( 'query', $race );
 
 		try {
-			$updated = Plans::update( $id, array( 'name' => 'Renamed' ) );
+			$updated = Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Renamed',
+				)
+			);
 		} finally {
 			remove_filter( 'query', $race );
 		}
@@ -334,8 +395,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$updated = Plans::update(
 			$id,
 			array(
-				'sort_order' => 1,
-				'name'       => 'Changed',
+				'extension_slug' => self::OWNER,
+				'sort_order'     => 1,
+				'name'           => 'Changed',
 			)
 		);
 		$this->assertInstanceOf( PlanView::class, $updated );
@@ -344,24 +406,146 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox extension slug is not an update key.
+	 * @testdox the extension slug passed to update scopes the write and is not written.
 	 */
-	public function test_extension_slug_is_not_an_update_key(): void {
+	public function test_the_extension_slug_passed_to_update_is_not_written(): void {
 		$id = $this->create();
-		$this->setExpectedIncorrectUsage( Plans::class . '::update' );
 
-		$updated = Plans::update(
-			$id,
-			array(
-				'extension_slug' => 'other',
-				'name'           => 'Changed',
+		$queries = array();
+		$capture = static function ( string $query ) use ( &$queries ): string {
+			$queries[] = $query;
+
+			return $query;
+		};
+		add_filter( 'query', $capture );
+
+		try {
+			$updated = Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Changed',
+				)
+			);
+		} finally {
+			remove_filter( 'query', $capture );
+		}
+
+		$this->assertInstanceOf( PlanView::class, $updated );
+		$this->assertSame( self::OWNER, $updated->get_extension_slug() );
+
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$updates = array_values(
+			array_filter(
+				$queries,
+				static function ( string $query ) use ( $table ): bool {
+					return 0 === strpos( $query, "UPDATE `{$table}`" );
+				}
 			)
 		);
-		$this->assertInstanceOf( PlanView::class, $updated );
+		$this->assertCount( 1, $updates );
+		$this->assertStringNotContainsString( '`extension_slug` = ', explode( ' WHERE ', $updates[0], 2 )[0], 'The slug is not in the SET list.' );
+		$this->assertStringContainsString( "`extension_slug` = '" . self::OWNER . "'", $updates[0], 'The slug scopes the WHERE clause.' );
 
 		$plan = $this->stored( $id );
-		$this->assertSame( self::OWNER, $plan->get_extension_slug(), 'The extension slug is not rewritten.' );
+		$this->assertSame( self::OWNER, $plan->get_extension_slug() );
 		$this->assertSame( 'Changed', $plan->get_name() );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_update_scopes(): array {
+		return array(
+			'missing slug'    => array( array( 'name' => 'Changed' ) ),
+			'null slug'       => array(
+				array(
+					'extension_slug' => null,
+					'name'           => 'Changed',
+				),
+			),
+			'empty slug'      => array(
+				array(
+					'extension_slug' => '',
+					'name'           => 'Changed',
+				),
+			),
+			'non-string slug' => array(
+				array(
+					'extension_slug' => 5,
+					'name'           => 'Changed',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox update without a valid extension slug throws and leaves the plan unchanged.
+	 * @dataProvider provide_invalid_update_scopes
+	 *
+	 * @param array<string, mixed> $args Update args without a valid owner scope.
+	 */
+	public function test_update_without_a_valid_extension_slug_throws( array $args ): void {
+		$id     = $this->create();
+		$before = $this->stored( $id )->to_storage();
+
+		try {
+			Plans::update( $id, $args );
+			$this->fail( 'Expected InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertNotInstanceOf( PlanValidationException::class, $e );
+		}
+
+		$this->assertSame( $before, $this->stored( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox update under another extension slug returns null, leaves the plan unchanged and never asks the owner to validate.
+	 */
+	public function test_update_under_another_extension_slug_returns_null_and_writes_nothing(): void {
+		$id     = $this->create();
+		$before = $this->stored( $id )->to_storage();
+
+		$validated = 0;
+		add_action(
+			self::HOOK,
+			static function () use ( &$validated ): void {
+				++$validated;
+			}
+		);
+
+		$this->assertNull(
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => 'other-extension',
+					'name'           => 'Hijacked',
+				)
+			)
+		);
+		$this->assertNull( Plans::update( $id, array( 'extension_slug' => 'other-extension' ) ), 'A fieldless update is scoped too.' );
+
+		$this->assertSame( 0, $validated, 'The validate action never sees a plan of another extension.' );
+		$this->assertSame( $before, $this->stored( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox an update writing identical values within the same second still returns the view.
+	 */
+	public function test_an_identical_update_within_the_same_second_returns_the_view(): void {
+		$id   = $this->create();
+		$args = array(
+			'extension_slug' => self::OWNER,
+			'name'           => 'Same',
+		);
+
+		// The first write may change the row; the second, within the same second, changes none.
+		$views = array( Plans::update( $id, $args ), Plans::update( $id, $args ) );
+
+		foreach ( $views as $view ) {
+			$this->assertInstanceOf( PlanView::class, $view );
+			$this->assertSame( 'Same', $view->get_name() );
+		}
 	}
 
 	/**
@@ -396,7 +580,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		$before = $this->stored( $id )->to_storage();
 
 		try {
-			Plans::update( $id, $args );
+			Plans::update( $id, array( 'extension_slug' => self::OWNER ) + $args );
 			$this->fail( 'Expected InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertNotInstanceOf( PlanValidationException::class, $e );
@@ -417,8 +601,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		$updated = Plans::update(
 			$id,
 			array(
-				'status' => 'seasonal',
-				'name'   => 'Renamed',
+				'extension_slug' => self::OWNER,
+				'status'         => 'seasonal',
+				'name'           => 'Renamed',
 			)
 		);
 		$this->assertInstanceOf( PlanView::class, $updated );
@@ -445,7 +630,16 @@ class PlansTest extends EngineIntegrationTestCase {
 			}
 		);
 
-		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'status' => PlanStatus::ARCHIVED ) ) );
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'status'         => PlanStatus::ARCHIVED,
+				)
+			)
+		);
 
 		$plan = $this->stored( $id );
 		$this->assertSame( PlanStatus::ARCHIVED, $plan->get_status() );
@@ -471,11 +665,20 @@ class PlansTest extends EngineIntegrationTestCase {
 			}
 		);
 
-		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array() ) );
+		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'extension_slug' => self::OWNER ) ) );
 		$this->assertSame( 1, $validated, 'An empty update still runs the owner validation.' );
 		$this->assertSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'An empty update writes nothing.' );
 
-		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'name' => 'Renamed' ) ) );
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Renamed',
+				)
+			)
+		);
 		$this->assertNotSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'A field update bumps the update time.' );
 	}
 
@@ -523,6 +726,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		Plans::update(
 			$id,
 			array(
+				'extension_slug' => self::OWNER,
 				'name'           => 'Renamed',
 				'pricing_policy' => array( 'x' => 1 ),
 			)
@@ -577,7 +781,13 @@ class PlansTest extends EngineIntegrationTestCase {
 		);
 
 		try {
-			Plans::update( $id, array( 'name' => 'Refused' ) );
+			Plans::update(
+				$id,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Refused',
+				)
+			);
 			$this->fail( 'Expected PlanValidationException.' );
 		} catch ( PlanValidationException $e ) {
 			$this->assertSame( array( 'acme_no' ), $e->get_errors()->get_error_codes() );

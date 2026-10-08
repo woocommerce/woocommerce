@@ -6,8 +6,9 @@
  * the payloads it is given and interprets none of them. It checks integrity only (a
  * non-empty name, a registered status, object-shaped policies), then lets the plan's
  * owner validate the write through `woocommerce_subscriptions_engine_validate_plan`.
- * Any caller may read or write any plan (authorization is the caller's concern). Reads
- * return read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
+ * Any caller may read any plan; an update names the plan's owning extension and never
+ * reaches a plan of another one (authorization is the caller's concern). Reads return
+ * read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
  *
  * Billing payload contract: the engine reads one plan payload itself. Until every
  * contract carries a plan snapshot, renewal and reactivation fall back to the live
@@ -45,7 +46,7 @@ defined( 'ABSPATH' ) || exit;
 final class Plans {
 
 	/**
-	 * Keys accepted by {@see self::update()}, as a key map.
+	 * The plan fields {@see self::create()} and {@see self::update()} write, as a key map.
 	 *
 	 * @var array<string, true>
 	 */
@@ -58,11 +59,18 @@ final class Plans {
 	);
 
 	/**
-	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`.
+	 * Keys accepted by {@see self::create()}: the plan fields plus the owning `extension_slug`.
 	 *
 	 * @var array<string, true>
 	 */
 	private const CREATE_KEYS = array( 'extension_slug' => true ) + self::PLAN_KEYS;
+
+	/**
+	 * Keys accepted by {@see self::update()}: the plan fields plus the owner scope `extension_slug`.
+	 *
+	 * @var array<string, true>
+	 */
+	private const UPDATE_KEYS = array( 'extension_slug' => true ) + self::PLAN_KEYS;
 
 	/**
 	 * Keys accepted by {@see self::list()}, as a key map.
@@ -129,32 +137,38 @@ final class Plans {
 	}
 
 	/**
-	 * Write the given fields to an existing plan.
+	 * Write the given fields to an existing plan of the given owner.
 	 *
-	 * Takes the keys of {@see self::create()} except `extension_slug`. Only the columns of
-	 * the present keys are written, so fields a concurrent writer changed in between keep
-	 * its values. A present policy key replaces the whole payload (null clears it);
+	 * Takes the keys of {@see self::create()}. `extension_slug` is required, as on create,
+	 * but here it is the owner scope, never a written field (a plan's owner never changes):
+	 * the plan is read and written only where its row carries that slug, so a plan of
+	 * another extension reads as missing and is never written. Only the columns of the
+	 * present plan fields are written, so fields a concurrent writer changed in between
+	 * keep its values. A present policy key replaces the whole payload (null clears it);
 	 * policies are never merged. Re-sending the stored status is accepted even when that
-	 * status is no longer registered (its extension was deactivated). An empty `$args`
-	 * validates the stored plan and writes nothing. Unknown keys (`extension_slug`
-	 * included) raise a `_doing_it_wrong()` notice and are ignored. The engine opens no
-	 * transaction: wrap the call in one when it must be atomic with other writes.
+	 * status is no longer registered (its extension was deactivated). Args with no plan
+	 * field validate the stored plan and write nothing. Unknown keys raise a
+	 * `_doing_it_wrong()` notice and are ignored. The engine opens no transaction: wrap
+	 * the call in one when it must be atomic with other writes.
 	 *
 	 * @param int                  $plan_id Plan id.
-	 * @param array<string, mixed> $args    Fields to write.
+	 * @param array<string, mixed> $args    `extension_slug` (required, the owning extension)
+	 *                                      and the fields to write.
 	 * @return PlanView|null The row as read before the write plus the written fields (a column
 	 *                       another writer changed meanwhile may be stale here, not in storage);
-	 *                       null when the plan does not exist (also when it is deleted before
-	 *                       the write).
-	 * @throws InvalidArgumentException If a value is invalid, or a {@see PlanValidationException}
-	 *                                  when the owner refuses the plan.
+	 *                       null when no plan of that owner has the id (also when it is
+	 *                       deleted before the write).
+	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid, or a
+	 *                                  {@see PlanValidationException} when the owner refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
+		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::UPDATE_KEYS );
+		$extension_slug = ArgumentValidator::validate_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		unset( $filtered_args['extension_slug'] );
 
 		$repository = new PlanRepository();
-		$plan       = $repository->find( $plan_id );
+		$plan       = $repository->find( $plan_id, $extension_slug );
 		if ( null === $plan ) {
 			return null;
 		}
