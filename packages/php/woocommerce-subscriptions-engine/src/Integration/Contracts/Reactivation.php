@@ -30,7 +30,6 @@ use DomainException;
 use RuntimeException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -224,16 +223,30 @@ final class Reactivation {
 	 * The billing policy the forward roll steps by: the contract's own frozen plan
 	 * terms first (the snapshot is what the contract actually bills under - the same
 	 * source the renewal money-path resolves), falling back to the live selling plan
-	 * for a contract with no snapshot, and null when neither resolves.
+	 * (parsing its billing payload) when the contract has no snapshot or its snapshot
+	 * policy does not parse or has no usable cadence (logged), and null when neither
+	 * resolves (a live plan with a null or unusable billing payload is logged too). Both sources are read with the renewal rule
+	 * ({@see BillingPolicy::from_array()}), so the forward roll never
+	 * throws on a stored payload.
 	 *
 	 * @param Contract $contract The contract.
 	 */
 	private function billing_policy( Contract $contract ): ?BillingPolicy {
 		$snapshot = $contract->get_plan_snapshot();
 		if ( null !== $snapshot ) {
-			$policy = $snapshot->get_billing_policy();
-			if ( $policy instanceof BillingPolicy ) {
-				return $policy;
+			try {
+				$policy = $snapshot->read_billing_policy();
+				if ( null !== $policy ) {
+					return $policy;
+				}
+			} catch ( DomainException $e ) {
+				wc_get_logger()->warning(
+					sprintf( 'Reactivation: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
 			}
 		}
 
@@ -243,7 +256,37 @@ final class Reactivation {
 		}
 
 		$plan = $this->plans->find( $plan_id );
+		if ( null === $plan ) {
+			return null;
+		}
 
-		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+		$billing = $plan->get_billing_policy();
+		if ( null === $billing ) {
+			wc_get_logger()->warning(
+				sprintf( 'Reactivation: contract %d has a live plan %d with no billing policy; a past-due next payment is floored at now.', (int) $contract->get_id(), (int) $plan_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
+			return null;
+		}
+
+		try {
+			return BillingPolicy::from_array( $billing );
+		} catch ( DomainException $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'Reactivation: contract %d has an unreadable live plan billing policy; a past-due next payment is floored at now. %s', (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
+			return null;
+		}
 	}
 }

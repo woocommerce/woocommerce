@@ -39,7 +39,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
@@ -388,9 +387,12 @@ final class RenewalEngine {
 	/**
 	 * Resolve the billing policy the next cycle bills under, from the contract's own plan
 	 * snapshot - the live source of truth, so a contract updated since an earlier cycle bills
-	 * on its current terms. Falls back to the contract's selling plan when it carries no
-	 * snapshot, and returns null when neither resolves (a deleted plan) so the caller skips
-	 * gracefully rather than mis-billing.
+	 * on its current terms. Falls back to parsing the live selling plan's billing payload when
+	 * the contract carries no snapshot, or one whose billing policy is absent or unusable (that
+	 * case is logged), and returns null when neither resolves (a deleted plan, or a live
+	 * billing payload that is null, does not parse or has no usable cadence; the payload
+	 * cases are logged) so the caller parks the contract rather than mis-billing or
+	 * retrying every tick.
 	 *
 	 * @param Contract $contract The contract being renewed.
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
@@ -398,21 +400,21 @@ final class RenewalEngine {
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
 		$snapshot = $this->resolve_plan_snapshot( $contract );
 		if ( $snapshot instanceof PlanSnapshot ) {
-			$payload = $snapshot->to_array();
-			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
-				try {
-					return BillingPolicy::from_array( self::string_keyed( $payload['billing_policy'] ) );
-				} catch ( \DomainException $e ) {
-					// A corrupt stored policy must not crash the scheduled run; fall through to the
-					// live plan below so the renewal can still resolve on current terms.
-					wc_get_logger()->warning(
-						sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
-						array(
-							'source'      => self::LOG_SOURCE,
-							'contract_id' => (int) $contract->get_id(),
-						)
-					);
+			try {
+				$policy = $snapshot->read_billing_policy();
+				if ( null !== $policy ) {
+					return $policy;
 				}
+			} catch ( \DomainException $e ) {
+				// A corrupt stored policy must not crash the scheduled run; fall through to the
+				// live plan below so the renewal can still resolve on current terms.
+				wc_get_logger()->warning(
+					sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
 			}
 		}
 
@@ -422,7 +424,38 @@ final class RenewalEngine {
 		}
 
 		$plan = $this->plans->find( $plan_id );
-		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
+		if ( null === $plan ) {
+			return null;
+		}
+
+		$billing = $plan->get_billing_policy();
+		if ( null === $billing ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine: contract %d has a live plan %d with no billing policy; the renewal cannot be processed.', (int) $contract->get_id(), (int) $plan_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
+			return null;
+		}
+
+		try {
+			return BillingPolicy::from_array( $billing );
+		} catch ( \DomainException $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine: contract %d has an unreadable live plan billing policy; the renewal cannot be processed. %s', (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
+			return null;
+		}
 	}
 
 	/**
@@ -981,20 +1014,6 @@ final class RenewalEngine {
 	private static function item_int( array $item, string $key ): int {
 		$value = $item[ $key ] ?? null;
 		return is_numeric( $value ) ? (int) $value : 0;
-	}
-
-	/**
-	 * Coerce a decoded array to a string-keyed array for the typed value-object factories.
-	 *
-	 * @param array<mixed, mixed> $value The decoded array.
-	 * @return array<string, mixed>
-	 */
-	private static function string_keyed( array $value ): array {
-		$out = array();
-		foreach ( $value as $key => $item ) {
-			$out[ (string) $key ] = $item;
-		}
-		return $out;
 	}
 
 	/**
