@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -56,6 +57,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @var bool
 	 */
 	protected $hierarchical = true;
+
+	/**
+	 * Coupon codes the order had before the current request changed its coupon lines, or null when it did not.
+	 *
+	 * @var string[]|null
+	 */
+	protected $previous_coupon_codes = null;
 
 	/**
 	 * Stores the request.
@@ -746,6 +754,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'shipping_lines':
 					case 'fee_lines':
 					case 'coupon_lines':
+						if ( 'coupon_lines' === $key ) {
+							$this->previous_coupon_codes = $order->get_coupon_codes();
+						}
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
@@ -799,6 +810,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
+		$this->previous_coupon_codes = null;
+
 		try {
 			$object = $this->prepare_object_for_database( $request, $creating );
 
@@ -833,6 +846,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				}
 			}
 
+			if ( null !== $this->previous_coupon_codes && $object instanceof WC_Order ) {
+				wc_get_container()->get( CouponsController::class )->sync_usage_counts( $object, $this->previous_coupon_codes );
+			}
+
 			// Set status.
 			if ( ! empty( $request['status'] ) ) {
 				$object->set_status( $request['status'] );
@@ -852,6 +869,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		} finally {
+			$this->previous_coupon_codes = null;
 		}
 	}
 

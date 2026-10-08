@@ -99,4 +99,64 @@ class CouponsController {
 
 		return $order;
 	}
+
+	/**
+	 * Adjust coupon usage counts after the coupons of an order changed outside of apply_coupon() and remove_coupon().
+	 *
+	 * Does nothing unless the order has already counted its coupons. Other orders are counted on their next status change.
+	 *
+	 * @since 11.3.0
+	 * @param \WC_Order $order          The saved order, with its current coupons.
+	 * @param string[]  $previous_codes Coupon codes the order had before the change.
+	 */
+	public function sync_usage_counts( \WC_Order $order, array $previous_codes ): void {
+		/**
+		 * Order data store.
+		 *
+		 * @var \WC_Order_Data_Store_Interface $data_store
+		 */
+		$data_store = $order->get_data_store();
+
+		if ( ! $data_store->get_recorded_coupon_usage_counts( $order ) ) {
+			return;
+		}
+
+		$previous = $this->normalize_codes( $previous_codes );
+		$current  = $this->normalize_codes( $order->get_coupon_codes() );
+		$used_by  = (string) ( $order->get_user_id() ? $order->get_user_id() : $order->get_billing_email() );
+
+		foreach ( array_diff_key( $current, $previous ) as $code ) {
+			$coupon = new \WC_Coupon( $code );
+			if ( $coupon->get_id() ) {
+				$coupon->increase_usage_count( $used_by, $order );
+			}
+		}
+
+		foreach ( array_diff_key( $previous, $current ) as $code ) {
+			$coupon = new \WC_Coupon( $code );
+			if ( $coupon->get_id() ) {
+				$coupon->decrease_usage_count( $used_by );
+			}
+		}
+
+		if ( ! $current ) {
+			$data_store->set_recorded_coupon_usage_counts( $order, false );
+		}
+	}
+
+	/**
+	 * Drop blank codes and duplicates, keyed by the lowercase code.
+	 *
+	 * @param string[] $codes Coupon codes.
+	 * @return array<string, string>
+	 */
+	private function normalize_codes( array $codes ): array {
+		$normalized = array();
+		foreach ( $codes as $code ) {
+			if ( ! StringUtil::is_null_or_whitespace( $code ) ) {
+				$normalized[ wc_strtolower( $code ) ] = $code;
+			}
+		}
+		return $normalized;
+	}
 }
