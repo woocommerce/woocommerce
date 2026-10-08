@@ -27,7 +27,7 @@ const getProps = ( el ) => {
 
 const Wrapper = ( { children } ) => {
 	// we need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	return Children.map( children, ( child ) => {
 		if ( isValidElement( child ) ) {

@@ -3,12 +3,12 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	__experimentalItemGroup as ItemGroup, // eslint-disable-line
-	__experimentalItem as Item, // eslint-disable-line
-	__experimentalVStack as VStack, // eslint-disable-line
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalHeading as Heading, // eslint-disable-line
-	__experimentalNavigatorButton as NavigatorButton, // eslint-disable-line
+	__experimentalItemGroup as ItemGroup,
+	__experimentalItem as Item,
+	__experimentalVStack as VStack,
+	__experimentalHStack as HStack,
+	__experimentalHeading as Heading,
+	__experimentalNavigatorButton as NavigatorButton,
 	FlexItem,
 	Card,
 	CardBody,

@@ -58,7 +58,7 @@ export const getShippingRestrictionFields = (
 	const shippingMethodsOptions = gateway?.settings.enable_for_methods?.options
 		? mapShippingMethodsOptions(
 				gateway.settings.enable_for_methods.options
-		  )
+			)
 		: [];
 
 	return [
