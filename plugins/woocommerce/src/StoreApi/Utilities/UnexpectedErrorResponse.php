@@ -42,7 +42,6 @@ final class UnexpectedErrorResponse {
 				$log_message,
 				array(
 					'source'         => 'store-api',
-					'exception'      => $error,
 					'error'          => array(
 						'file' => $error->getFile(),
 						'line' => $error->getLine(),
