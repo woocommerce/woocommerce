@@ -48,13 +48,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	private $backup_wc;
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Initialize the registry instance.
 	 *
 	 * @return void
@@ -88,8 +81,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
 		);
-		// WC()->customer outlives the test, so keep its location to restore at teardown.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		// Start each test from a customer without a shipping location.
 		WC()->customer->set_shipping_postcode( '' );
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
@@ -109,9 +101,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			wp_delete_post( $this->block_checkout_page_id );
 			remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 			$woocommerce = $this->backup_wc;
-			foreach ( $this->previous_shipping_address as $key => $value ) {
-				WC()->customer->{"set_shipping_{$key}"}( $value );
-			}
 			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
 			// and register a lone pickup method on the shared WC_Shipping. Undo both.
 			unset( WC()->shipping );
