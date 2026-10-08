@@ -136,7 +136,7 @@ final class Plans {
 	 * keep its values. A present policy key replaces the whole payload (null clears it);
 	 * policies are never merged. Re-sending the stored status is accepted even when that
 	 * status is no longer registered (its extension was deactivated). Args with no plan
-	 * field validate the stored plan and write nothing. Unknown keys raise a
+	 * field return the stored plan without validating or writing. Unknown keys raise a
 	 * `_doing_it_wrong()` notice and are ignored. The engine opens no transaction: wrap
 	 * the call in one when it must be atomic with other writes.
 	 *
@@ -162,6 +162,11 @@ final class Plans {
 			return null;
 		}
 
+		$fields = array_keys( $filtered_args );
+		if ( array() === $fields ) {
+			return PlanView::from_plan( $plan );
+		}
+
 		try {
 			self::apply( $plan, $filtered_args );
 		} catch ( DomainException $e ) {
@@ -169,11 +174,6 @@ final class Plans {
 		}
 
 		self::validate_with_extension( $plan );
-
-		$fields = array_keys( $filtered_args );
-		if ( array() === $fields ) {
-			return PlanView::from_plan( $plan );
-		}
 
 		if ( ! $repository->update_fields( $plan, $fields ) ) {
 			return null;

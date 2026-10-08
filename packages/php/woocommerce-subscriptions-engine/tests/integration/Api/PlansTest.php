@@ -647,9 +647,9 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update with no fields validates and writes nothing.
+	 * @testdox update with no fields returns the plan without validating or writing.
 	 */
-	public function test_update_with_no_fields_validates_and_writes_nothing(): void {
+	public function test_update_with_no_fields_returns_the_plan_without_validating_or_writing(): void {
 		global $wpdb;
 
 		$id    = $this->create();
@@ -666,7 +666,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'extension_slug' => self::OWNER ) ) );
-		$this->assertSame( 1, $validated, 'An empty update still runs the extension validation.' );
+		$this->assertSame( 0, $validated, 'An empty update has nothing to validate.' );
 		$this->assertSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'An empty update writes nothing.' );
 
 		$this->assertInstanceOf(
