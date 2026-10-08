@@ -1652,15 +1652,24 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
 			$tax_location = $order->get_taxable_location( ! empty( $args['tax_location']['country'] ) ? $args['tax_location'] : array() );
 			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
-				$tax_rates = WC_Tax::find_rates(
-					array(
-						'country'   => $tax_location['country'],
-						'state'     => $tax_location['state'] ?? '',
-						'postcode'  => $tax_location['postcode'] ?? '',
-						'city'      => $tax_location['city'] ?? '',
-						'tax_class' => $product->get_tax_class(),
-					)
-				);
+				if ( $customer_id ) {
+					$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
+					$tax_rates = WC_Tax::get_rates_from_location(
+						$product->get_tax_class(),
+						array( $tax_location['country'], $tax_location['state'] ?? '', $tax_location['postcode'] ?? '', $tax_location['city'] ?? '' ),
+						$customer
+					);
+				} else {
+					$tax_rates = WC_Tax::find_rates(
+						array(
+							'country'   => $tax_location['country'],
+							'state'     => $tax_location['state'] ?? '',
+							'postcode'  => $tax_location['postcode'] ?? '',
+							'city'      => $tax_location['city'] ?? '',
+							'tax_class' => $product->get_tax_class(),
+						)
+					);
+				}
 			}
 		}
 
