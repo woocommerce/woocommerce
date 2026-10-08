@@ -33,7 +33,7 @@ const mockUseUserPreferences = jest.fn( () => {
 									isVisible,
 								} )
 							),
-					  }
+						}
 					: { ...payload }
 			);
 			setPreferences( ( current ) => ( { ...current, ...payload } ) );
