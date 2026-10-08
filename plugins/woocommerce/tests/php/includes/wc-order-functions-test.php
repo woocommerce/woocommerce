@@ -974,4 +974,105 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
 	}
+
+	/**
+	 * @testdox Should not save the order and should release usage once when a recorded order is deleted permanently.
+	 */
+	public function test_force_deleting_a_recorded_order_does_not_save_the_order() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'delete-no-save' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$updates  = 0;
+		$callback = function () use ( &$updates ) {
+			++$updates;
+		};
+		add_action( 'woocommerce_before_order_object_save', $callback );
+		// The total sales update saves the order on delete as well; keep it out of the count.
+		remove_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
+
+		$order->delete( true );
+
+		add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
+		remove_action( 'woocommerce_before_order_object_save', $callback );
+		$this->assertSame( 0, $updates );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage once when both delete hooks fire for the same order.
+	 */
+	public function test_both_delete_hooks_for_one_order_release_coupon_usage_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'both-delete-hooks' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		// The order stays in place, so keep the cleanup that removes its items out of the way.
+		$cleanup = array( WC_Post_Data::class, 'before_delete_order' );
+		remove_action( 'woocommerce_before_delete_order', $cleanup );
+		remove_action( 'before_delete_post', $cleanup );
+
+		do_action( 'woocommerce_before_delete_order', $order->get_id(), $order );
+		do_action( 'woocommerce_before_delete_order', $order->get_id(), $order );
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			do_action( 'before_delete_post', $order->get_id(), get_post( $order->get_id() ) );
+		}
+
+		add_action( 'woocommerce_before_delete_order', $cleanup );
+		add_action( 'before_delete_post', $cleanup );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should read the order items before another callback ahead of the order item cleanup removes them.
+	 */
+	public function test_coupon_usage_is_released_before_the_order_items_are_deleted() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'items-still-present' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$delete_items = array( WC_Post_Data::class, 'delete_order_items' );
+		add_action( 'woocommerce_before_delete_order', $delete_items, 9 );
+		add_action( 'before_delete_post', $delete_items, 9 );
+
+		$order->delete( true );
+
+		remove_action( 'woocommerce_before_delete_order', $delete_items, 9 );
+		remove_action( 'before_delete_post', $delete_items, 9 );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage through the post hooks for a counted order type other than shop_order.
+	 */
+	public function test_post_delete_hook_releases_usage_for_other_counted_order_types() {
+		global $wc_order_types;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'custom-type-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		wc_register_order_type( 'shop_order_custom', array( 'exclude_from_order_count' => false ) );
+		wp_update_post(
+			array(
+				'ID'        => $order->get_id(),
+				'post_type' => 'shop_order_custom',
+			)
+		);
+		$this->assertContains( 'shop_order_custom', wc_get_order_types( 'order-count' ) );
+		add_filter( 'woocommerce_order_class', fn() => WC_Order::class );
+
+		do_action( 'before_delete_post', $order->get_id(), get_post( $order->get_id() ) );
+
+		unset( $wc_order_types['shop_order_custom'] );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
 }
