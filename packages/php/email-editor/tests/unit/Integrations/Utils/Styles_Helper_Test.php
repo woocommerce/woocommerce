@@ -170,6 +170,21 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertFalse( Styles_Helper::is_color_literal( 'mark' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( 'highlight' ) );
 
+		// Incomplete values are not colors. Emitting one would be the same invalid declaration this
+		// check exists to prevent.
+		$this->assertFalse( Styles_Helper::is_color_literal( '#' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( '#zz' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( '#abcd1' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'rgb(' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'oklch(' ) );
+
+		// Hex lengths CSS actually defines.
+		$this->assertTrue( Styles_Helper::is_color_literal( '#abcd' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '#aabbccdd' ) );
+
+		// Nested functional notation.
+		$this->assertTrue( Styles_Helper::is_color_literal( 'color-mix(in srgb, rgb(1 2 3), blue)' ) );
+
 		// An identifier that is not a color is a slug nothing defines.
 		$this->assertFalse( Styles_Helper::is_color_literal( 'theme-4' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( 'primary' ) );
@@ -316,6 +331,45 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame(
 			null === $expected ? '' : $expected,
 			Styles_Helper::resolve_color_from_palette( $settings, $value )
+		);
+	}
+
+	/**
+	 * Test a palette origin that is not an array does not take the render down.
+	 *
+	 * The palette arrives through the `woocommerce_email_editor_theme_json` filter, and a non-array
+	 * origin reaching array_merge() is a TypeError rather than a warning.
+	 */
+	public function testItSurvivesAPaletteOriginThatIsNotAnArray(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'custom' => 'not-an-array',
+					'theme'  => array(
+						array(
+							'slug'  => 'usable',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'usable' ) );
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'theme-4' ) );
+	}
+
+	/**
+	 * Test a literal is returned trimmed but not case-folded.
+	 *
+	 * A palette color is lowercased, but a literal cannot be: the custom property name inside
+	 * `var()` is case-sensitive.
+	 */
+	public function testItTrimsButDoesNotCaseFoldALiteral(): void {
+		$this->assertSame( 'BLUE', Styles_Helper::resolve_color_from_palette( array(), '  BLUE  ' ) );
+		$this->assertSame(
+			'var(--wp--preset--color--myBrand)',
+			Styles_Helper::resolve_color_from_palette( array(), ' var(--wp--preset--color--myBrand) ' )
 		);
 	}
 
