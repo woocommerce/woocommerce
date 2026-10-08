@@ -29,13 +29,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	private $previous_shipping_address = array();
 
 	/**
-	 * Customer shipping address to restore after a test that changes it, keyed by prop name.
-	 *
-	 * @var array<string, string>|null
-	 */
-	private $original_shipping_address = null;
-
-	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
@@ -59,12 +52,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		}
 		WC()->session->set( 'wc_notices', null );
 
-		if ( null !== $this->original_shipping_address ) {
-			WC()->customer->set_props( $this->original_shipping_address );
-			$this->original_shipping_address = null;
-			// The checkout fields were built while the test's filters were attached.
-			$this->clear_checkout_fields();
-		}
+		// The checkout fields may have been built while a test's filters were attached.
+		$this->clear_checkout_fields();
 
 		// The parent teardown only clears chosen_shipping_methods, through
 		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
@@ -1398,13 +1387,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'US' );
 		$customer->set_shipping_city( 'New York' );
 		$customer->set_shipping_state( 'state' === $missing_field ? '' : 'NY' );
