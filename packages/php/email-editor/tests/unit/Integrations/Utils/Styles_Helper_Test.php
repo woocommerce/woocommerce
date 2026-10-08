@@ -134,11 +134,89 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertTrue( Styles_Helper::is_color_literal( 'var(--wp--preset--color--base)' ) );
 		$this->assertTrue( Styles_Helper::is_color_literal( '  #abcdef  ' ) );
 
+		// Any functional notation is a literal, including CSS Color 4/5 forms.
+		$this->assertTrue( Styles_Helper::is_color_literal( 'oklch(0.7 0.1 200)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'lab(50% 40 59.5)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'lch(50% 40 30)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'hwb(90 10% 10%)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'color(display-p3 1 0 0)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'color-mix(in srgb, red, blue)' ) );
+
+		// Keywords that are colors in their own right.
+		$this->assertTrue( Styles_Helper::is_color_literal( 'transparent' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'currentColor' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'inherit' ) );
+
 		// A bare identifier cannot be told apart from a palette slug, so it is not a literal.
 		$this->assertFalse( Styles_Helper::is_color_literal( 'theme-4' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( 'primary' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( 'red' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( '' ) );
+	}
+
+	/**
+	 * Test it resolves a slug against every palette origin, highest priority first.
+	 */
+	public function testItResolvesColorsFromEveryPaletteOrigin(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'default' => array(
+						array(
+							'slug'  => 'core-slug',
+							'color' => '#111111',
+						),
+						array(
+							'slug'  => 'shared',
+							'color' => '#aaaaaa',
+						),
+					),
+					'theme'   => array(
+						array(
+							'slug'  => 'theme-slug',
+							'color' => '#222222',
+						),
+						array(
+							'slug'  => 'shared',
+							'color' => '#bbbbbb',
+						),
+					),
+					'blocks'  => array(
+						array(
+							'slug'  => 'block-slug',
+							'color' => '#333333',
+						),
+					),
+					'custom'  => array(
+						array(
+							'slug'  => 'user-slug',
+							'color' => '#DDEEFF',
+						),
+						array(
+							'slug'  => 'shared',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		// A color the user defined in the email's own global styles resolves, not just the theme's.
+		$this->assertSame( '#ddeeff', Styles_Helper::resolve_color_from_palette( $settings, 'user-slug' ) );
+		$this->assertSame( '#222222', Styles_Helper::resolve_color_from_palette( $settings, 'theme-slug' ) );
+		$this->assertSame( '#333333', Styles_Helper::resolve_color_from_palette( $settings, 'block-slug' ) );
+		$this->assertSame( '#111111', Styles_Helper::resolve_color_from_palette( $settings, 'core-slug' ) );
+
+		// On a slug several origins define, the highest priority origin wins.
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'shared' ) );
+
+		// A slug no origin defines yields nothing, so the caller skips the declaration.
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'theme-4' ) );
+
+		// A literal still passes through, and an absent palette is not a fatal.
+		$this->assertSame( '#012345', Styles_Helper::resolve_color_from_palette( $settings, '#012345' ) );
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( array(), 'theme-4' ) );
+		$this->assertSame( '#012345', Styles_Helper::resolve_color_from_palette( array(), '#012345' ) );
 	}
 
 	/**

@@ -67,18 +67,79 @@ class Styles_Helper {
 	}
 
 	/**
+	 * Color keywords that are values rather than palette slugs.
+	 *
+	 * @var string[]
+	 */
+	private const COLOR_KEYWORDS = array( 'transparent', 'currentcolor', 'inherit', 'initial', 'unset', 'revert' );
+
+	/**
 	 * Whether a value is already a literal CSS color rather than a palette slug.
 	 *
 	 * Color block attributes such as `backgroundColor` normally hold a palette slug, but they can
 	 * carry a literal color instead, in which case there is nothing to translate. Only unambiguous
-	 * literal forms count: a bare identifier such as `red` cannot be told apart from a slug, so it
-	 * is treated as a slug.
+	 * forms count: a hex value, any functional notation (`rgb()`, `oklch()`, `var()`, and the rest),
+	 * and the keywords that are colors in their own right. A palette slug cannot contain a bracket,
+	 * so functional notation is safe to treat as a literal. Any other bare identifier -- `red` as
+	 * much as `theme-4` -- cannot be told apart from a slug, so it is treated as one.
 	 *
 	 * @param string $value Value of a color block attribute.
 	 * @return bool
 	 */
 	public static function is_color_literal( string $value ): bool {
-		return 1 === preg_match( '/^(#|rgba?\(|hsla?\(|var\()/i', trim( $value ) );
+		$value = strtolower( trim( $value ) );
+
+		if ( in_array( $value, self::COLOR_KEYWORDS, true ) ) {
+			return true;
+		}
+
+		return 1 === preg_match( '/^(#|[a-z][a-z0-9-]*\()/', $value );
+	}
+
+	/**
+	 * Every color a theme settings array defines, highest priority origin first.
+	 *
+	 * `WP_Theme_JSON` keys the palette by origin and layers them so a later origin wins. Flattened
+	 * in that order, the first entry matching a slug is the one that should win, and callers that
+	 * generate preset classes get the same set the lookup resolves against.
+	 *
+	 * @param array $settings Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
+	 * @return array Flat list of color definitions.
+	 */
+	public static function palette_definitions( array $settings ): array {
+		$palette = $settings['color']['palette'] ?? array();
+
+		return array_merge(
+			$palette['custom'] ?? array(),
+			$palette['theme'] ?? array(),
+			$palette['blocks'] ?? array(),
+			$palette['default'] ?? array()
+		);
+	}
+
+	/**
+	 * Resolve a color slug against a theme settings array's palette.
+	 *
+	 * Every palette origin is searched, highest priority first, in the order `WP_Theme_JSON` layers
+	 * them: a slug the user defined in the email's own global styles (`custom`) beats the theme's
+	 * (`theme`), which beats core's (`default`). Without `custom` a color the user picked in the
+	 * editor would not resolve here even though the editor shows it.
+	 *
+	 * Returns an empty string for a slug no origin defines, so callers skip the declaration instead
+	 * of emitting the slug as a color. A value that is already a literal color passes through.
+	 *
+	 * @param array  $settings   Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
+	 */
+	public static function resolve_color_from_palette( array $settings, string $color_slug ): string {
+		foreach ( self::palette_definitions( $settings ) as $color_definition ) {
+			if ( isset( $color_definition['slug'], $color_definition['color'] ) && $color_definition['slug'] === $color_slug ) {
+				return strtolower( (string) $color_definition['color'] );
+			}
+		}
+
+		return self::is_color_literal( $color_slug ) ? $color_slug : '';
 	}
 
 	/**

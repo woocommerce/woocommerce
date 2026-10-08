@@ -213,7 +213,7 @@ class Theme_Controller {
 			$css_presets .= ".has-{$font_size['slug']}-font-size { font-size: {$font_size['size']}; } \n";
 		}
 		// Color palette classes.
-		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'] ?? array(), $email_theme_settings['color']['palette']['default'] ?? array() );
+		$color_definitions = Styles_Helper::palette_definitions( $email_theme_settings );
 		foreach ( $color_definitions as $color ) {
 			$css_presets .= ".has-{$color['slug']}-color { color: {$color['color']}; } \n";
 			$css_presets .= ".has-{$color['slug']}-background-color { background-color: {$color['color']}; } \n";
@@ -310,14 +310,7 @@ class Theme_Controller {
 	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
-		$settings          = $this->get_settings();
-		$color_definitions = array_merge( $settings['color']['palette']['theme'] ?? array(), $settings['color']['palette']['default'] ?? array() );
-		foreach ( $color_definitions as $color_definition ) {
-			if ( $color_definition['slug'] === $color_slug ) {
-				return strtolower( $color_definition['color'] );
-			}
-		}
-		return Styles_Helper::is_color_literal( $color_slug ) ? $color_slug : '';
+		return Styles_Helper::resolve_color_from_palette( $this->get_settings(), $color_slug );
 	}
 
 	/**
