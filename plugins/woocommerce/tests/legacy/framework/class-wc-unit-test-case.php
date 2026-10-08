@@ -179,10 +179,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Tear down test case.
 	 *
 	 * The cart contents, the cart context, the queued notices, the cached country
-	 * locale, and the customer's shipping address all live on the WC() singletons,
-	 * which neither the per-test database rollback nor the hook restore resets, so
-	 * clear them here or they leak into every later test in the process. The same
-	 * goes for the REQUEST_URI that go_to() sets.
+	 * locale, the loaded shipping methods, and the customer's shipping address all
+	 * live on the WC() singletons, which neither the per-test database rollback nor the
+	 * hook restore resets, so clear them here or they leak into every later test in the
+	 * process. The same goes for the REQUEST_URI that go_to() sets.
 	 *
 	 * @since 11.1.0
 	 */
@@ -232,6 +232,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// cache it produced.
 			WC()->countries->locale = array();
 		}
+
+		// WC_Shipping keeps the methods it loaded, including ones a test's filters or zones
+		// added. Drop the list so the next use loads it again.
+		WC()->shipping()->unregister_shipping_methods();
 
 		if ( $this->customer_at_setup ) {
 			foreach ( $this->customer_shipping_at_setup as $key => $value ) {
