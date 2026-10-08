@@ -228,7 +228,8 @@ describe( 'TemplateCanvasAffordance', () => {
 			)?.textContent ?? '';
 
 		expect( css ).toContain( 'border-inline-end' );
-		expect( css ).not.toMatch( /border-(left|right)/ );
+		expect( css ).not.toContain( 'border-left' );
+		expect( css ).not.toContain( 'border-right' );
 	} );
 
 	it( 'shows the toolbar after the template area is selected', async () => {
