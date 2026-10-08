@@ -33,6 +33,13 @@ class AbilityFields {
 	private static array $fields = array();
 
 	/**
+	 * Value that a get_callback returns to leave its attribute out.
+	 *
+	 * @var object|null
+	 */
+	private static ?object $omit = null;
+
+	/**
 	 * Register a field that the abilities of an object type return under `extensions`.
 	 *
 	 * Several extensions can add fields to the same object type, so prefix the
@@ -47,9 +54,11 @@ class AbilityFields {
 	 *     Field arguments.
 	 *
 	 *     @type array    $schema       JSON schema of the value. Its `title` is the label clients show.
-	 *     @type callable $get_callback Receives the object and returns the value, or null to leave the
-	 *                                  attribute out. It reads the object it is given, not the database,
-	 *                                  because an ability can format an object before it is saved.
+	 *     @type callable $get_callback Receives the object and returns the value, or AbilityFields::omit()
+	 *                                  to leave the attribute out. A null is a value, so a schema that
+	 *                                  allows it must say so, such as `array( 'integer', 'null' )`. It
+	 *                                  reads the object it is given, not the database, because an
+	 *                                  ability can format an object before it is saved.
 	 * }
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
@@ -66,6 +75,17 @@ class AbilityFields {
 	}
 
 	/**
+	 * Value that a get_callback returns to leave its attribute out of the output.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return object
+	 */
+	public static function omit(): object {
+		return self::$omit ??= new \stdClass();
+	}
+
+	/**
 	 * Fields of an object type, keyed by attribute.
 	 *
 	 * @param string $object_type Object type.
@@ -77,7 +97,7 @@ class AbilityFields {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions`. A field that reads null or throws is left out, and the key is left out
+	 * `extensions`. A field that returns omit() or throws is left out, and the key is left out
 	 * when no field has a value or the feature is off.
 	 *
 	 * @internal
@@ -95,7 +115,7 @@ class AbilityFields {
 		$values = array();
 		foreach ( self::get( $object_type ) as $attribute => $field ) {
 			try {
-				$value = isset( $field['get_callback'] ) ? call_user_func( $field['get_callback'], $subject ) : null;
+				$value = isset( $field['get_callback'] ) ? call_user_func( $field['get_callback'], $subject ) : self::omit();
 			} catch ( \Throwable $e ) {
 				wc_get_logger()->error(
 					sprintf( 'Ability field "%s" of "%s" failed: %s', $attribute, $object_type, $e->getMessage() ),
@@ -103,7 +123,7 @@ class AbilityFields {
 				);
 				continue;
 			}
-			if ( null !== $value ) {
+			if ( self::omit() !== $value ) {
 				$values[ $attribute ] = $value;
 			}
 		}

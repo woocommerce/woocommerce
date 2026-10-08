@@ -97,7 +97,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				'schema'       => self::CODE_SCHEMA,
 				'get_callback' => static function ( \WC_Product $product ) {
 					$code = $product->get_meta( '_test_code' );
-					return '' === $code ? null : $code;
+					return '' === $code ? AbilityFields::omit() : $code;
 				},
 			)
 		);
@@ -150,7 +150,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the registered field values under extensions, and leave out an object whose fields read null.
+	 * @testdox Should return the registered field values under extensions, and leave out an object whose fields return omit().
 	 */
 	public function test_product_reads_return_extension_values(): void {
 		$with_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen with code' ) );
@@ -322,6 +322,31 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$output = AbilityFields::add_to_output( array(), 'order', $order );
 
 		$this->assertSame( array( 'test_note' => 'order-' . $order->get_id() ), $output['extensions'] );
+	}
+
+	/**
+	 * @testdox Should return a null field value under extensions.
+	 */
+	public function test_field_that_returns_null_is_kept(): void {
+		AbilityFields::register(
+			'order',
+			'test_empty',
+			array(
+				'schema'       => array( 'type' => array( 'string', 'null' ) ),
+				'get_callback' => '__return_null',
+			)
+		);
+		$order = \WC_Helper_Order::create_order();
+
+		$output = AbilityFields::add_to_output( array(), 'order', $order );
+
+		$this->assertSame(
+			array(
+				'test_note'  => 'order-' . $order->get_id(),
+				'test_empty' => null,
+			),
+			$output['extensions']
+		);
 	}
 
 	/**
