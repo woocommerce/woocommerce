@@ -123,6 +123,25 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it tells a literal color from a palette slug.
+	 */
+	public function testItIdentifiesColorLiterals(): void {
+		$this->assertTrue( Styles_Helper::is_color_literal( '#abcdef' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '#abc' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'rgb(1, 2, 3)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'rgba(1, 2, 3, 0.5)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'hsl(1, 2%, 3%)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'var(--wp--preset--color--base)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '  #abcdef  ' ) );
+
+		// A bare identifier cannot be told apart from a palette slug, so it is not a literal.
+		$this->assertFalse( Styles_Helper::is_color_literal( 'theme-4' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'primary' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'red' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( '' ) );
+	}
+
+	/**
 	 * Test it gets normalized block styles with color translations.
 	 */
 	public function testItGetsNormalizedBlockStylesWithColorTranslations(): void {
@@ -161,6 +180,55 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 			),
 			'border'  => array(
 				'color' => '#0000ff',
+			),
+			'spacing' => array(
+				'padding' => '10px',
+			),
+		);
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * Test that a color slug the palette cannot resolve produces no declaration.
+	 *
+	 * A block written under another theme can name a slug this email's palette lacks. Emitting the
+	 * slug as the value (background-color: theme-4) is invalid CSS that mail clients drop, so a
+	 * button can lose its background and keep its text color. Omitting the declaration instead lets
+	 * the surrounding theme color show through, which is what the editor already previews.
+	 */
+	public function testItOmitsUnresolvedColorSlugsFromNormalizedBlockStyles(): void {
+		$block_attributes = array(
+			'backgroundColor' => 'theme-4',
+			'textColor'       => 'primary',
+			'borderColor'     => 'theme-9',
+			'style'           => array(
+				'spacing' => array(
+					'padding' => '10px',
+				),
+			),
+		);
+
+		/**
+		 * Rendering_Context mock for using in test.
+		 *
+		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
+		 */
+		$rendering_context = $this->createMock( Rendering_Context::class );
+		$rendering_context->method( 'translate_slug_to_color' )
+			->willReturnMap(
+				array(
+					array( 'primary', '#00ff00' ),
+					array( 'theme-4', '' ),
+					array( 'theme-9', '' ),
+				)
+			);
+
+		$result = Styles_Helper::get_normalized_block_styles( $block_attributes, $rendering_context );
+
+		$expected = array(
+			'color'   => array(
+				'text' => '#00ff00',
 			),
 			'spacing' => array(
 				'padding' => '10px',

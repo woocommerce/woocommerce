@@ -150,6 +150,29 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a slug the palette does not define translates to an empty string.
+	 *
+	 * Returning the slug would put it in the stylesheet as the color (background-color: theme-4),
+	 * which mail clients drop, losing the block's color entirely.
+	 */
+	public function testItReturnsNoColorForUnknownSlug(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
+		$this->assertSame( '', $this->theme_controller->translate_slug_to_color( 'theme-4' ) );
+	}
+
+	/**
+	 * Test that a literal color passes through untranslated.
+	 *
+	 * Color block attributes usually hold a slug, but they can carry a literal color, and callers
+	 * rely on handing one to this method unchanged.
+	 */
+	public function testItPassesLiteralColorsThrough(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
+		$this->assertSame( '#012345', $this->theme_controller->translate_slug_to_color( '#012345' ) );
+		$this->assertSame( 'rgba(1, 2, 3, 0.5)', $this->theme_controller->translate_slug_to_color( 'rgba(1, 2, 3, 0.5)' ) );
+	}
+
+	/**
 	 * Test if the theme controller loads custom user theme
 	 */
 	public function testItLoadsCustomUserTheme(): void {

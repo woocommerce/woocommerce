@@ -258,6 +258,13 @@ class Table extends Abstract_Block_Renderer {
 
 		if ( ! empty( $block_attributes['borderColor'] ) ) {
 			$border_color = $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] );
+
+			// An unresolved slug translates to an empty string, which sanitize_color() would turn into
+			// black. Treat it as no border color so the table keeps the theme's.
+			if ( '' === $border_color ) {
+				return null;
+			}
+
 			return Html_Processing_Helper::sanitize_color( $border_color );
 		}
 
