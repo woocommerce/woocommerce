@@ -372,8 +372,6 @@ final class Plans {
 			 * throws here, which refuses every plan write, so update such callbacks together
 			 * with this engine version.
 			 *
-			 * @since 0.1.0
-			 *
 			 * @param WP_Error $errors Error collector.
 			 * @param PlanView $plan   The would-be plan.
 			 * @param string   $extension_slug Owning extension slug.
