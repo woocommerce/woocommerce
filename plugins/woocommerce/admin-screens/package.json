@@ -4,6 +4,7 @@
 	"scripts": {
 		"build": "rm -rf build ../assets/client/routes && mkdir -p ../assets/client/routes && ln -s ../assets/client/routes build && wp-build",
 		"lint": "eslint . && tsc --project tsconfig.json",
+		"test:js": "jest --config ./jest.config.js",
 		"watch:build": "rm -rf build ../assets/client/routes && mkdir -p ../assets/client/routes && ln -s ../assets/client/routes build && wp-build --watch"
 	},
 	"config": {
@@ -13,23 +14,47 @@
 				"changes": [
 					"**/*.{ts,tsx,mjs,json}"
 				]
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"**/*.{ts,tsx,js,scss,json}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	},
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",
+		"@wordpress/api-fetch": "catalog:wp-min",
+		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/core-data": "catalog:wp-min",
+		"@wordpress/data": "catalog:wp-min",
+		"@wordpress/dataviews": "19.1.0",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/route": "catalog:wp-min",
+		"@wordpress/url": "catalog:wp-min",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},
 	"devDependencies": {
+		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@woocommerce/eslint-config": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/build": "catalog:tooling",
 		"eslint": "^10.0.0",
+		"jest": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
+		"ts-jest": "29.1.x",
 		"typescript": "5.7.x"
 	},
 	"browserslist": [

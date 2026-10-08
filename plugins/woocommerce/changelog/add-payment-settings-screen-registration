@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Let payment gateways register experimental settings screens with the Fields API; no merchant-facing change.
+
