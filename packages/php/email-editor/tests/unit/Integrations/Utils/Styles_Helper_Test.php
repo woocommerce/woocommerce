@@ -368,11 +368,11 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a palette entry with no usable slug is dropped rather than reaching a caller.
+	 * Test a palette entry without a usable slug and color is dropped rather than reaching a caller.
 	 *
 	 * The palette arrives through a filter, and callers read `slug` and `color` directly.
 	 */
-	public function testItDropsPaletteEntriesWithoutAStringSlug(): void {
+	public function testItDropsUnusablePaletteEntries(): void {
 		$settings = array(
 			'color' => array(
 				'palette' => array(
@@ -381,6 +381,15 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 						array(
 							'slug'  => 123,
 							'color' => '#bbbbbb',
+						),
+						array( 'slug' => 'no-color' ),
+						array(
+							'slug'  => 'empty-color',
+							'color' => '   ',
+						),
+						array(
+							'slug'  => 'array-color',
+							'color' => array( '#dddddd' ),
 						),
 						'not-an-array',
 						array(
@@ -396,6 +405,37 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertSame( array( 'usable' ), array_column( $definitions, 'slug' ) );
 		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'usable' ) );
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'no-color' ) );
+	}
+
+	/**
+	 * Test an incomplete higher-priority entry does not shut out an origin that defines the slug.
+	 *
+	 * Claiming the slug on the first entry that merely names it would discard the `default` color
+	 * here, losing a color the palette does define.
+	 */
+	public function testItPrefersALowerPriorityOriginOverAColorlessDuplicate(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'default' => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#aaaaaa',
+						),
+					),
+					'custom'  => array(
+						array( 'slug' => 'shared' ),
+					),
+				),
+			),
+		);
+
+		$definitions = Styles_Helper::palette_definitions( $settings );
+
+		$this->assertCount( 1, $definitions );
+		$this->assertSame( '#aaaaaa', $definitions[0]['color'] );
+		$this->assertSame( '#aaaaaa', Styles_Helper::resolve_color_from_palette( $settings, 'shared' ) );
 	}
 
 	/**
