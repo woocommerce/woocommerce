@@ -60,8 +60,11 @@ test( 'renders available shipping rates', async () => {
 		/>
 	);
 
+	// The space between the symbol and the amount is a jsdom artifact: it joins
+	// text across elements with a space when computing the accessible name.
+	// Real browsers report "Flat rate $10.00".
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Flat rate $10.00',
+		name: 'Flat rate $ 10.00',
 	} );
 
 	expect( firstRate ).toBeInTheDocument();
@@ -69,7 +72,9 @@ test( 'renders available shipping rates', async () => {
 	expect( firstRate ).toBeChecked();
 
 	expect(
-		screen.getByRole( 'radio', { name: 'Flat rate (premium) $15.00' } )
+		screen.getByRole( 'radio', {
+			name: 'Flat rate (premium) $ 15.00',
+		} )
 	).toBeInTheDocument();
 	expect( selectShippingRate ).toHaveBeenCalledTimes( 1 );
 	expect( selectShippingRate ).toHaveBeenCalledWith( 'flat_rate:1', 0 );
@@ -110,7 +115,7 @@ test( 'skips mount selection when disabled but still handles user selection', as
 	await act( async () => {
 		await userEvent.click(
 			screen.getByRole( 'radio', {
-				name: 'Flat rate (premium) $15.00',
+				name: 'Flat rate (premium) $ 15.00',
 			} )
 		);
 	} );
@@ -147,10 +152,10 @@ test( 'changes rate selection locally and informs API about it', async () => {
 	);
 
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Flat rate $10.00',
+		name: 'Flat rate $ 10.00',
 	} );
 	const secondRate = screen.getByRole( 'radio', {
-		name: 'Flat rate (premium) $15.00',
+		name: 'Flat rate (premium) $ 15.00',
 	} );
 
 	expect( firstRate ).toBeInTheDocument();
@@ -210,10 +215,10 @@ test( 'upstream rate selection updates are properly reflected in local state', a
 	);
 
 	const firstRate = await screen.findByRole( 'radio', {
-		name: 'Flat rate $10.00',
+		name: 'Flat rate $ 10.00',
 	} );
 	const secondRate = screen.getByRole( 'radio', {
-		name: 'Flat rate (premium) $15.00',
+		name: 'Flat rate (premium) $ 15.00',
 	} );
 
 	expect( firstRate ).toBeInTheDocument();
@@ -289,7 +294,7 @@ test( 'Core clears a rejected selection so the shopper can retry it', async () =
 			noResultsMessage={ <span>No rates</span> }
 		/>
 	);
-	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $10.00' } );
+	const flatRate = screen.getByRole( 'radio', { name: 'Flat rate $ 10.00' } );
 	expect( flatRate ).toBeChecked();
 
 	// Pickup is filtered out of Shipping, leaving no visible selected rate after rollback.

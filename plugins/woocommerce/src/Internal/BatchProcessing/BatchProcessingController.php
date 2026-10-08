@@ -21,6 +21,8 @@
 
 namespace Automattic\WooCommerce\Internal\BatchProcessing;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+
 /**
  * Class BatchProcessingController
  *
@@ -380,7 +382,7 @@ class BatchProcessingController {
 			$time += apply_filters( 'woocommerce_batch_processor_watchdog_delay_seconds', HOUR_IN_SECONDS );
 		}
 
-		if ( ! as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		if ( ! ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
 			as_schedule_single_action(
 				$time,
 				self::WATCHDOG_ACTION_NAME,
@@ -559,14 +561,14 @@ class BatchProcessingController {
 
 	/**
 	 * Check if a batch processing action is already scheduled for a given processor.
-	 * Differs from `as_has_scheduled_action` in that this excludes actions in progress.
+	 * Pending and in-progress actions both count as scheduled.
 	 *
 	 * @param string $processor_class_name Fully qualified class name of the batch processor.
 	 *
 	 * @return bool True if a batch processing action is already scheduled for the processor.
 	 */
 	public function is_scheduled( string $processor_class_name ): bool {
-		return as_has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		return ActionSchedulerUtil::has_scheduled_action( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
 	}
 
 	/**
@@ -846,21 +848,35 @@ class BatchProcessingController {
 			return;
 		}
 
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action') ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-
-		if ( call_user_func( $has_scheduled_action, self::WATCHDOG_ACTION_NAME ) ) {
+		// Everything below reads "not scheduled" as grounds for recording a failure against a processor
+		// and eventually dropping it from the queue. Action Scheduler being unloaded also reads as
+		// "not scheduled", so bail rather than dismantle the queue over a missing dependency.
+		if ( ! ActionSchedulerUtil::can_check_scheduled_actions() ) {
 			return;
 		}
 
-		/*
-		 * Sanitize before array_diff()/array_filter(): array_diff() string-casts its operands (fatal on an object
-		 * entry in PHP 8) and is_scheduled() is typed string, so a corrupted option must be reduced to class-name
-		 * strings first.
-		 */
-		$enqueued_processors    = $this->sanitize_processor_list( $this->get_enqueued_processors() );
-		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
+		// Normalize corrupted option values before passing processor names to is_scheduled().
+		$enqueued_processors = $this->sanitize_processor_list( $this->get_enqueued_processors() );
+		if ( empty( $enqueued_processors ) ) {
+			return;
+		}
+
+		$watchdog_scheduled = $this->run_scheduler_lookup( fn() => ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) );
+		if ( false !== $watchdog_scheduled ) {
+			return;
+		}
+
+		$unscheduled_processors = array();
+		foreach ( $enqueued_processors as $processor ) {
+			$is_scheduled = $this->run_scheduler_lookup( fn() => $this->is_scheduled( $processor ) );
+			// A failed lookup is not evidence of a failed processor. Finish all checks before changing state.
+			if ( null === $is_scheduled ) {
+				return;
+			}
+			if ( ! $is_scheduled ) {
+				$unscheduled_processors[] = $processor;
+			}
+		}
 
 		foreach ( $unscheduled_processors as $processor ) {
 			try {
@@ -880,5 +896,31 @@ class BatchProcessingController {
 				$this->schedule_batch_processing( $processor, true );
 			}
 		}
+	}
+
+	/**
+	 * Run an Action Scheduler lookup, distinguishing "not scheduled" from a failed database query.
+	 *
+	 * Action Scheduler returns the same value for both, so the database state is checked directly. $wpdb->last_error
+	 * only counts when the lookup ran a query: otherwise (e.g. a custom store that bypasses $wpdb) it is left over
+	 * from an earlier, unrelated query.
+	 *
+	 * @param callable $lookup Callback performing the lookup.
+	 * @return bool|null The lookup result, or null if the lookup failed.
+	 */
+	private function run_scheduler_lookup( callable $lookup ): ?bool {
+		global $wpdb;
+
+		$queries_before = $wpdb->num_queries;
+		$result         = (bool) $lookup();
+		$query_failed   = $wpdb->num_queries > $queries_before && ! empty( $wpdb->last_error );
+
+		// When reconnecting after a lost connection fails, wpdb::query() returns false without an error but discards
+		// the connection handle. A later query can reconnect, so state changes would succeed on top of this failed read.
+		if ( $query_failed || empty( $wpdb->dbh ) ) {
+			return null;
+		}
+
+		return $result;
 	}
 }

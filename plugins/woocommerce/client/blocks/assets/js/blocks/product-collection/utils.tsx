@@ -79,8 +79,7 @@ export function setQueryAttribute(
 ) {
 	const currentBlock = select( blockEditorStore ).getBlock( block.clientId );
 	const currentAttributes = currentBlock?.attributes as
-		| ProductCollectionAttributes
-		| undefined;
+		ProductCollectionAttributes | undefined;
 	const query = currentAttributes?.query || block.attributes.query;
 
 	block.setAttributes( {

@@ -27,9 +27,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 .wc-addons-wrap {
 
 	.marketplace-header {
-		background-image: url("../images/marketplace-header-bg@2x.png");
-		background-position: right;
-		background-size: cover;
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
@@ -1360,6 +1357,11 @@ table.wc_status_table--tools {
 	th {
 		padding: 2em;
 	}
+
+	// Keep a row linked to with #tool_{id} clear of the fixed admin bar.
+	tr {
+		scroll-margin-block-start: 50px;
+	}
 }
 
 .taxonomy-product_cat {
@@ -2276,8 +2278,20 @@ ul.wc_coupon_list_block {
 	}
 }
 
+// The order screens are registered as embedded WooCommerce Admin pages, so they
+// get even 20px gutters from `.woocommerce-admin-page` / `.woocommerce-embed-page`.
+// This screen isn't embedded, so it falls back to WordPress' lopsided `.wrap`
+// margins. Drop the 2px start margin so both gutters come from `#wpcontent`.
+body.woocommerce_page_wc-customer-stock-notifications {
+
+	.wrap {
+		margin-inline-start: 0;
+	}
+}
+
 body.post-type-shop_order,
-body.woocommerce_page_wc-orders {
+body.woocommerce_page_wc-orders,
+body.woocommerce_page_wc-customer-stock-notifications {
 
 	.order_actions {
 		display: flex;
@@ -2300,17 +2314,20 @@ body.woocommerce_page_wc-orders {
 				padding: 16px 12px;
 			}
 
-			// Save row: keep the legacy trash link in its usual position while
-			// clearing old button margins that overflow under WP 7.0 sizing.
+			// Save row: pin the submit button to the end so it stays there when the
+			// trash link is absent (the create screen) or hidden (no delete
+			// permission), and let the trash link push itself to the start. Old
+			// button margins that overflow under WP 7.0 sizing are cleared.
 			&.wide:has(.save_order) {
 				display: flex;
 				align-items: center;
-				justify-content: space-between;
+				justify-content: flex-end;
 				gap: 8px;
 
 				#delete-action {
 					line-height: 40px;
 					text-align: left;
+					margin-inline-end: auto;
 					float: none;
 
 					&:not(:has(*)) {
@@ -2320,7 +2337,6 @@ body.woocommerce_page_wc-orders {
 
 				.save_order {
 					flex-shrink: 0;
-					margin: 0 0 0 auto;
 					float: none;
 				}
 			}
@@ -2338,6 +2354,10 @@ body.woocommerce_page_wc-orders {
 					flex: 1;
 					min-width: 0; // prevent flex blow-out on long option labels.
 					width: auto;
+					// WordPress caps selects at 400px on small screens. The order
+					// screens escape that through `.meta-box-sortables select`,
+					// which screens without sortable meta boxes never match.
+					max-width: 100%;
 					box-sizing: border-box;
 					float: none;
 				}
@@ -3900,7 +3920,8 @@ ul.order_notes {
 
 	#add_order_note {
 		width: 100%;
-		height: 60px;
+		min-height: 60px;
+		field-sizing: content;
 	}
 
 	.order_note_visibility {
@@ -4806,10 +4827,8 @@ table.wc_shipping {
 		animation-fill-mode: none;
 		animation-play-state: running;
 		animation-name: components-button__busy-animation;
-		// stylelint-disable property-no-unknown -- scroll-driven animation properties, newer than stylelint 14's property list.
 		animation-timeline: auto;
 		animation-range-start: normal;
-		// stylelint-enable property-no-unknown
 		color: #757575;
 	}
 }
@@ -7128,6 +7147,23 @@ img.help_tip {
 	}
 }
 
+.wc-product-customs {
+
+	.woocommerce_options_panel & > h4 {
+		padding-inline: 12px;
+	}
+
+	// Leave room for the error tip under the description, the last field in the Shipping panel, which the panel wrapper would otherwise clip.
+	#shipping_product_data & {
+		padding-block-end: 4em;
+	}
+
+	.woocommerce_variation & {
+		border-top: 1px solid #eee;
+		margin-top: 12px;
+	}
+}
+
 .woocommerce_variable_attributes {
 	background-color: #fdfdfd;
 	border-top: 1px solid #eee;
@@ -9175,7 +9211,8 @@ table.bar_chart {
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
-	&.woocommerce_page_wc-orders {
+	&.woocommerce_page_wc-orders,
+	&.woocommerce_page_wc-customer-stock-notifications {
 
 		.postbox,
 		#postdivrich {
@@ -9417,9 +9454,11 @@ table.bar_chart {
 .woocommerce-progress-form-wrapper,
 .woocommerce-exporter-wrapper,
 .woocommerce-importer-wrapper {
-	text-align: center;
-	max-width: 710px;
-	margin: 40px auto;
+
+	@media screen and (min-width: 783px) {
+		max-width: 710px;
+		margin: 40px auto;
+	}
 
 	.error {
 		text-align: left;
@@ -9550,13 +9589,13 @@ table.bar_chart {
 			display: none;
 		}
 
-		.woocommerce-importer-options th,
-		.woocommerce-importer-options td,
-		.woocommerce-exporter-options th,
-		.woocommerce-exporter-options td {
-			vertical-align: top;
+		.form-table.woocommerce-importer-options th,
+		.form-table.woocommerce-importer-options td,
+		.form-table.woocommerce-exporter-options th,
+		.form-table.woocommerce-exporter-options td {
+			vertical-align: middle;
 			line-height: 1.75em;
-			padding: 0 0 24px 0;
+			padding: 0 0 24px;
 
 			label {
 				color: #555;
@@ -9605,10 +9644,13 @@ table.bar_chart {
 			}
 		}
 
-		.woocommerce-exporter-options th,
-		.woocommerce-importer-options th {
-			width: 35%;
-			padding-right: 20px;
+		@media screen and (min-width: 783px) {
+
+			.form-table.woocommerce-exporter-options th,
+			.form-table.woocommerce-importer-options th {
+				width: 35%;
+				padding-right: 24px;
+			}
 		}
 
 		progress {

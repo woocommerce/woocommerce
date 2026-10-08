@@ -109,8 +109,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
-		$this->skip_on_php_8_1();
-
 		$this->_setRole( 'administrator' );
 
 		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
@@ -143,12 +141,80 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Skip the current test on PHP 8.1 and higher.
-	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 * @testdox Saving a new shipping class with a blank slug generates and returns its persisted slug.
 	 */
-	protected function skip_on_php_8_1() {
-		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
-			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+	public function test_shipping_classes_save_changes_generates_slug(): void {
+		$had_current_tab          = array_key_exists( 'current_tab', $GLOBALS );
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_tab     = $GLOBALS['current_tab'] ?? null;
+		$original_current_section = $GLOBALS['current_section'] ?? null;
+		$name                     = 'Poster Pack ' . wp_unique_id();
+		$expected_slug            = sanitize_title( $name );
+		$description              = 'Posters, stickers, and other flat items.';
+
+		try {
+			$this->_setRole( 'administrator' );
+			$_POST    = array(
+				'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
+				'changes'                   => array(
+					'new-row' => array(
+						'newRow'      => true,
+						'name'        => $name,
+						'slug'        => '',
+						'description' => $description,
+					),
+				),
+			);
+			$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+			// WC_Shipping::get_shipping_classes() memoizes into a public property that nothing
+			// resets, so a warm cache would omit the new term from the response.
+			WC_Shipping::instance()->shipping_classes = array();
+
+			$response = $this->do_ajax( 'woocommerce_shipping_classes_save_changes' );
+			$this->assertTrue( $response['success'] ?? false, 'The registered AJAX action should report success.' );
+
+			$term = get_term_by( 'slug', $expected_slug, 'product_shipping_class' );
+			$this->assertInstanceOf( WP_Term::class, $term, 'The blank-slug request should create a shipping-class term.' );
+			if ( ! $term instanceof WP_Term ) {
+				throw new RuntimeException( 'The shipping-class term could not be reloaded.' );
+			}
+			$term_id = $term->term_id;
+
+			$this->assertSame( $name, $term->name );
+			$this->assertSame( $description, $term->description );
+
+			$response_rows = $response['data']['shipping_classes'] ?? array();
+			$matching_rows = array_values(
+				array_filter(
+					$response_rows,
+					static fn ( array $row ): bool => (int) ( $row['term_id'] ?? 0 ) === $term_id
+				)
+			);
+			$this->assertCount( 1, $matching_rows, 'The AJAX response should contain the new shipping class exactly once.' );
+			$this->assertSame( $expected_slug, $matching_rows[0]['slug'] );
+			$this->assertSame( $name, $matching_rows[0]['name'] );
+			$this->assertSame( $description, $matching_rows[0]['description'] );
+		} finally {
+			// Only state the base lifecycle does not own is restored here.
+			// `WP_Ajax_UnitTestCase::tear_down()` clears `$_POST` and the current
+			// user, `clean_up_global_scope()` clears `$_REQUEST` before the next
+			// test, and the transaction rollback removes the term. What survives
+			// is the shipping class list, which `WC_Shipping` memoizes on a public
+			// property, and the two settings globals the handler assigns before it
+			// fires `woocommerce_update_options`.
+			WC_Shipping::instance()->shipping_classes = array();
+
+			if ( $had_current_tab ) {
+				$GLOBALS['current_tab'] = $original_current_tab;
+			} else {
+				unset( $GLOBALS['current_tab'] );
+			}
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
 		}
 	}
 
@@ -1801,13 +1867,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Update order review reports errors separately from the legacy result and preserves reload behavior.
 	 * @dataProvider update_order_review_notice_cases_provider
 	 *
-	 * @param array[] $notices                Notices to add during the checkout update.
-	 * @param string  $expected_result        Expected legacy AJAX result, which only reports whether a notice was rendered.
-	 * @param bool    $expected_has_errors    Expected error flag.
-	 * @param bool    $reload_checkout        Whether the callback requests a checkout reload.
-	 * @param bool    $suppress_notice_output Whether a filter empties `woocommerce_notice_types`, the way Funnel Builder does on AJAX requests.
+	 * @param array[]       $notices             Notices to add during the checkout update.
+	 * @param string        $expected_result     Expected legacy AJAX result, which only reports whether a notice was rendered.
+	 * @param bool          $expected_has_errors Expected error flag.
+	 * @param bool          $reload_checkout     Whether the callback requests a checkout reload.
+	 * @param string[]|null $rendered_types      Notice types a `woocommerce_notice_types` filter keeps, or null for no filter. An empty list suppresses every notice, the way Funnel Builder does on AJAX requests.
+	 * @param bool          $as_iterator         Whether the filter returns the types as an `ArrayIterator` instead of an array.
 	 */
-	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, bool $suppress_notice_output = false ): void {
+	public function test_update_order_review_classifies_notices( array $notices, string $expected_result, bool $expected_has_errors, bool $reload_checkout, ?array $rendered_types = null, bool $as_iterator = false ): void {
 		$product            = null;
 		$original_post      = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
 		$original_customer  = clone WC()->customer;
@@ -1843,8 +1910,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			};
 			add_action( 'woocommerce_checkout_update_order_review', $callback, 10, 1 );
 
-			if ( $suppress_notice_output ) {
-				add_filter( 'woocommerce_notice_types', '__return_empty_array' );
+			if ( null !== $rendered_types ) {
+				add_filter(
+					'woocommerce_notice_types',
+					static function () use ( $rendered_types, $as_iterator ) {
+						return $as_iterator ? new ArrayIterator( $rendered_types ) : $rendered_types;
+					}
+				);
 			}
 
 			$_POST = array(
@@ -1862,10 +1934,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$this->assertArrayHasKey( '.woocommerce-checkout-review-order-table', $response['fragments'], 'The order review fragment should remain present.' );
 			$this->assertArrayHasKey( '.woocommerce-checkout-payment', $response['fragments'], 'The checkout payment fragment should remain present.' );
 
-			if ( $reload_checkout || $suppress_notice_output || empty( $notices ) ) {
+			if ( $reload_checkout || array() === $rendered_types || empty( $notices ) ) {
 				$this->assertSame( '', $response['messages'], 'The response should carry no rendered notices.' );
 			} else {
 				foreach ( $notices as $notice ) {
+					if ( null !== $rendered_types && ! in_array( $notice['type'], $rendered_types, true ) ) {
+						$this->assertStringNotContainsString( $notice['message'], $response['messages'], 'The response should leave out notice types the filter removed.' );
+						continue;
+					}
 					$this->assertStringContainsString( $notice['message'], $response['messages'], 'The response should retain each rendered notice message.' );
 					$this->assertStringContainsString( $notice['class'], $response['messages'], 'The response should retain each rendered notice type.' );
 				}
@@ -1893,7 +1969,8 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * The legacy result stays `failure` whenever a notice was rendered, whatever its type, so only
 	 * the error flag tells a real failure apart from a success or info notice. Both report what
-	 * rendered, so a queued error that a filter keeps off the page counts for neither.
+	 * rendered, so a queued error that a filter keeps off the page counts for neither, even when
+	 * the filter still lets other notice types through.
 	 *
 	 * @return array[]
 	 */
@@ -1981,6 +2058,38 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				'success',
 				false,
 				false,
+				array(),
+			),
+			'error notice kept off the page beside a success notice' => array(
+				array(
+					array(
+						'type'    => 'success',
+						'message' => 'Coupon applied.',
+						'class'   => 'woocommerce-message',
+					),
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				false,
+				false,
+				array( 'success', 'notice' ),
+			),
+			'error notice through a filter returning an iterator' => array(
+				array(
+					array(
+						'type'    => 'error',
+						'message' => 'A checkout error occurred.',
+						'class'   => 'woocommerce-error',
+					),
+				),
+				'failure',
+				true,
+				false,
+				array( 'error', 'success', 'notice' ),
 				true,
 			),
 		);
@@ -2516,6 +2625,160 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Adding a product uses the unsaved editor tax location without saving the order address.
+	 * @dataProvider add_order_item_editor_tax_location_cases
+	 *
+	 * @param string $tax_based_on Whether taxes use the billing or shipping address.
+	 * @param bool   $has_customer Whether the order has a customer with a saved base-country address.
+	 */
+	public function test_add_order_item_uses_unsaved_tax_location( string $tax_based_on, bool $has_customer ): void {
+		$this->_setRole( 'administrator' );
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', $tax_based_on );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+
+		$order = wc_create_order();
+		if ( $has_customer ) {
+			$customer = WC_Helper_Customer::create_customer( 'tax-location-customer', wp_generate_password(), 'tax-location@example.com' );
+			$customer->set_billing_country( 'BE' );
+			$customer->save();
+			$order->set_customer_id( $customer->get_id() );
+			$order->save();
+		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = 'NL';
+		$_POST['state']    = '';
+		$_POST['postcode'] = '';
+		$_POST['city']     = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.09, (float) $item->get_total(), 0.0001, 'The line price should exclude the editor location tax rate.' );
+		$this->assertSame( '', $stored_order->get_billing_country(), 'The unsaved billing country must not be persisted.' );
+		$this->assertSame( '', $stored_order->get_shipping_country(), 'The unsaved shipping country must not be persisted.' );
+	}
+
+	/**
+	 * Editor address cases for the Add product request.
+	 *
+	 * @return array
+	 */
+	public function add_order_item_editor_tax_location_cases(): array {
+		return array(
+			'billing guest'    => array( 'billing', false ),
+			'billing customer' => array( 'billing', true ),
+			'shipping guest'   => array( 'shipping', false ),
+		);
+	}
+
+	/**
+	 * @testdox Adding a product with no editor country uses the assigned customer's tax location.
+	 */
+	public function test_add_order_item_without_editor_country_uses_customer_tax_location(): void {
+		$this->_setRole( 'administrator' );
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'NL' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product  = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+		$customer = WC_Helper_Customer::create_customer( 'tax-fallback-customer', wp_generate_password(), 'tax-fallback@example.com' );
+		$customer->set_billing_country( 'BE' );
+		$customer->save();
+
+		$order = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.06, (float) $item->get_total(), 0.0001, 'The net price should use the customer’s Belgian rate rather than the Dutch base rate.' );
+	}
+
+	/**
 	 * @testdox save_order_items rejects a negative quantity and leaves the stored item untouched.
 	 */
 	public function test_save_order_items_rejects_negative_quantity() {
@@ -2648,6 +2911,119 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertIsArray( $response, 'The include search should return a result set.' );
 		$this->assertArrayHasKey( $product_one->get_id(), $response, 'The included product must be part of the results.' );
 		$this->assertArrayNotHasKey( $product_two->get_id(), $response, 'A product outside the include allowlist must not be part of the results.' );
+	}
+
+	/**
+	 * @testdox An expired checkout session should return its notice inside the shared notices wrapper.
+	 */
+	public function test_update_order_review_expired_wraps_notice(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			WC()->cart->empty_cart();
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The expired checkout update should return a JSON array.' );
+			$this->assertArrayHasKey( 'form.woocommerce-checkout', $response['fragments'] );
+			$this->assertMatchesRegularExpression(
+				'#^<div class="woocommerce-notices-wrapper">\s*<(ul|div) class="[^"]*(woocommerce-error|is-error)[^"]*"[^>]*>.*Sorry, your session has expired\..*</div>$#s',
+				$response['fragments']['form.woocommerce-checkout'],
+				'The replacement fragment should be the expired notice inside the notices wrapper.'
+			);
+		} finally {
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A rejected checkout update nonce should ask for one reload, then show the expired notice.
+	 */
+	public function test_update_order_review_reloads_once_for_rejected_nonce(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+			unset( WC()->session->reload_checkout_for_nonce );
+
+			$_POST = array(
+				'security'  => 'stale-nonce',
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertSame( array( 'reload' => true ), $response, 'The first rejected nonce should only ask the checkout to reload.' );
+			$this->assertTrue( WC()->session->get( 'reload_checkout_for_nonce' ), 'The session should remember that a reload was requested.' );
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The second rejected nonce should return a JSON array.' );
+			$this->assertArrayNotHasKey( 'reload', $response, 'A second rejected nonce should not reload again.' );
+			$this->assertStringContainsString( 'Sorry, your session has expired.', $response['fragments']['form.woocommerce-checkout'], 'A second rejected nonce should show the expired notice.' );
+		} finally {
+			unset( WC()->session->reload_checkout_for_nonce );
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A rejected checkout update nonce should show the expired notice when the guest has no session to remember the reload.
+	 */
+	public function test_update_order_review_skips_reload_without_session(): void {
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+		$original_session = WC()->session;
+
+		try {
+			wp_set_current_user( 0 );
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+
+			$this->assertFalse( WC()->session->has_session(), 'The guest should start without a cookie-backed session.' );
+
+			$_POST = array(
+				'security'  => 'stale-nonce',
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The rejected nonce should return a JSON array.' );
+			$this->assertArrayNotHasKey( 'reload', $response, 'Without a session the checkout should not be asked to reload.' );
+			$this->assertStringContainsString( 'Sorry, your session has expired.', $response['fragments']['form.woocommerce-checkout'], 'Without a session the expired notice should show.' );
+		} finally {
+			WC()->session = $original_session;
+			$_POST        = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A checkout update with a valid nonce should clear the pending nonce reload flag.
+	 */
+	public function test_update_order_review_valid_nonce_clears_reload_flag(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+			);
+
+			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertNull( WC()->session->get( 'reload_checkout_for_nonce' ), 'A valid nonce should let a later stale page reload again.' );
+		} finally {
+			unset( WC()->session->reload_checkout_for_nonce );
+			$_POST = $original_post;
+		}
 	}
 
 	/**

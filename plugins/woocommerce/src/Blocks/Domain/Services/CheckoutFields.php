@@ -453,7 +453,12 @@ class CheckoutFields {
 			return false;
 		}
 
-		return $this->get_field_type( $options )->validate_options( $options );
+		$field_type = $this->get_field_type( $options );
+		if ( isset( $options['validation'] ) && is_array( $options['validation'] ) ) {
+			$options['validation'] = $field_type->prepare_validation_schema( $options['validation'] );
+		}
+
+		return $field_type->validate_options( $options );
 	}
 
 	/**
@@ -567,20 +572,6 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Validates a value against the constraints of its field type.
-	 *
-	 * This runs for every field regardless of the validate_callback it was registered with, so type level
-	 * constraints cannot be bypassed by supplying a custom callback.
-	 *
-	 * @param array $field       The field.
-	 * @param mixed $field_value The value of the field.
-	 * @return WP_Error|null Error if the value is not valid for the field type, null otherwise.
-	 */
-	private function validate_field_type( $field, $field_value ) {
-		return $this->get_field_type( $field )->validate( $field_value, $field );
-	}
-
-	/**
 	 * Validate an additional field.
 	 *
 	 * @since 8.6.0
@@ -598,7 +589,9 @@ class CheckoutFields {
 				return $errors;
 			}
 
-			$type_error = $this->validate_field_type( $field, $field_value );
+			// Type level constraints run for every field regardless of the validate_callback it was
+			// registered with, so they cannot be bypassed by supplying a custom callback.
+			$type_error = $this->get_field_type( $field )->validate( $field_value, $field );
 
 			if ( is_wp_error( $type_error ) ) {
 				$errors->merge_from( $type_error );
@@ -930,7 +923,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Get additional fields for an order.
+	 * Get saved additional fields for an order without applying checkout defaults.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $location The location to get fields for (address|contact|order).
@@ -940,21 +933,13 @@ class CheckoutFields {
 	 */
 	public function get_order_additional_fields_with_values( WC_Order $order, string $location, string $group = 'other', string $context = 'edit' ) {
 
-		// Because the Additional Checkout Fields API only applies to orders created with Store API, we should not
-		// return any values unless it was created using Store API. This is mainly to prevent "empty" checkbox values
-		// from being shown on the order confirmation page for orders placed using the shortcode. It's rare that this
-		// will happen but not impossible.
-		if ( 'store-api' !== $order->get_created_via() ) {
-			return [];
-		}
-
 		$location           = $this->prepare_location_name( $location );
 		$group              = $this->prepare_group_name( $group );
 		$fields             = $this->get_fields_for_location( $location );
 		$fields_with_values = [];
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $this->get_field_from_object( $field_key, $order, $group );
+			$value = $this->get_field_from_object( $field_key, $order, $group, false );
 
 			if ( '' === $value || null === $value ) {
 				continue;
@@ -993,6 +978,17 @@ class CheckoutFields {
 	 */
 	public function prepare_form_field( array $form_field ): array {
 		return $this->get_field_type( $form_field )->prepare_form_field( $form_field );
+	}
+
+	/**
+	 * Applies type-specific keywords to a field's REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_field_value_schema( array $field_schema, array $field ): array {
+		return $this->get_field_type( $field )->prepare_value_schema( $field_schema, $field );
 	}
 
 	/**

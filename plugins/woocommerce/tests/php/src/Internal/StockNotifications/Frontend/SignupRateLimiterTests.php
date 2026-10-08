@@ -13,13 +13,6 @@ use WC_Unit_Test_Case;
 class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 	/**
-	 * The System Under Test.
-	 *
-	 * @var SignupRateLimiter
-	 */
-	private $sut;
-
-	/**
 	 * The server values seen before the test replaced them.
 	 *
 	 * @var array<string, string|null>
@@ -38,8 +31,6 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.10';
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
-
-		$this->sut = new SignupRateLimiter();
 	}
 
 	/**
@@ -65,45 +56,45 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	 * @testdox Should not rate limit the first attempt.
 	 */
 	public function test_first_attempt_is_not_rate_limited(): void {
-		$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A first sign-up attempt should go through' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A first sign-up attempt should go through' );
 	}
 
 	/**
 	 * @testdox Should rate limit a repeated attempt from the same e-mail address.
 	 */
 	public function test_repeated_attempt_is_rate_limited(): void {
-		$this->assertTrue( $this->sut->apply( 'shopper@example.com' ), 'The rate limit should be applied' );
+		$this->assertTrue( SignupRateLimiter::apply( 'shopper@example.com' ), 'The rate limit should be applied' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A repeated sign-up attempt should be rate limited' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A repeated sign-up attempt should be rate limited' );
 	}
 
 	/**
 	 * @testdox Should treat e-mail addresses that differ only in case and whitespace as the same.
 	 */
 	public function test_email_is_normalized(): void {
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( '  SHOPPER@Example.com ' ), 'The e-mail address should be normalized before hashing' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( '  SHOPPER@Example.com ' ), 'The e-mail address should be normalized before hashing' );
 	}
 
 	/**
 	 * @testdox Should rate limit another e-mail address coming from the same IP address.
 	 */
 	public function test_other_email_from_same_ip_is_rate_limited(): void {
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'Sign-ups should also be rate limited per IP address' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'Sign-ups should also be rate limited per IP address' );
 	}
 
 	/**
 	 * @testdox Should not rate limit another e-mail address coming from another IP address.
 	 */
 	public function test_other_email_from_other_ip_is_not_rate_limited(): void {
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'A different client signing up with a different e-mail address should not be held back' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'A different client signing up with a different e-mail address should not be held back' );
 	}
 
 	/**
@@ -112,12 +103,12 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_email_limit_is_independent_of_the_client_limit(): void {
 		$this->set_delays( 0, 600 );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'The same e-mail address should be rate limited from any IP address' );
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'With the per-IP limit off, another e-mail address should go through' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'The same e-mail address should be rate limited from any IP address' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'With the per-IP limit off, another e-mail address should go through' );
 	}
 
 	/**
@@ -126,13 +117,13 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_client_limit_is_independent_of_the_email_limit(): void {
 		$this->set_delays( 30, 0 );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'The same client should be rate limited whichever e-mail address it uses' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'The same client should be rate limited whichever e-mail address it uses' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'With the per-e-mail limit off, another client should go through' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'With the per-e-mail limit off, another client should go through' );
 	}
 
 	/**
@@ -143,8 +134,8 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$queries = $this->record_queries(
 			function () {
-				$this->assertTrue( $this->sut->apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
-				$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A zero delay should let every attempt through' );
+				$this->assertTrue( SignupRateLimiter::apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
+				$this->assertFalse( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A zero delay should let every attempt through' );
 			}
 		);
 
@@ -159,9 +150,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_numeric_string_delays_are_applied(): void {
 		$this->set_delays( '90', '90' );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A numeric string delay should be coerced to an integer and applied' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A numeric string delay should be coerced to an integer and applied' );
 	}
 
 	/**
@@ -170,11 +161,11 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_forwarded_header_is_ignored_by_default(): void {
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.5';
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'A spoofable header should not be used to key the rate limit' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'A spoofable header should not be used to key the rate limit' );
 	}
 
 	/**
@@ -185,15 +176,15 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$this->set_options( array( 'proxy_support' => true ) );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'A store behind a proxy should key the rate limit on the forwarded address' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'A store behind a proxy should key the rate limit on the forwarded address' );
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.6';
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'guest@example.com' ), 'Another forwarded address should not be held back' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'guest@example.com' ), 'Another forwarded address should not be held back' );
 	}
 
 	/**
@@ -204,10 +195,10 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$this->set_options( array( 'proxy_support' => true ) );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'An unresolved IP address should not be rate limited' );
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'The per-e-mail limit should still apply' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'An unresolved IP address should not be rate limited' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'The per-e-mail limit should still apply' );
 	}
 
 	/**
@@ -218,8 +209,8 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$queries = $this->record_queries(
 			function () {
-				$this->assertTrue( $this->sut->apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
-				$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A disabled limiter should let every attempt through' );
+				$this->assertTrue( SignupRateLimiter::apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
+				$this->assertFalse( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A disabled limiter should let every attempt through' );
 			}
 		);
 
@@ -234,9 +225,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_unrecognized_enabled_option_falls_back_to_the_default(): void {
 		$this->set_options( array( 'enabled' => 'ture' ) );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A value that spells no boolean should fall back to the default rather than switch the limiter off' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A value that spells no boolean should fall back to the default rather than switch the limiter off' );
 	}
 
 	/**
@@ -255,12 +246,12 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 			2
 		);
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ) );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ) );
 		$this->assertSame( array(), $fired, 'The action should not fire for an attempt that goes through' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ) );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ) );
 		$this->assertCount( 1, $fired, 'The action should fire once for a refused attempt' );
 		$this->assertStringStartsWith( 'stock_notifications_signup_email_', $fired[0][0], 'The action should receive the ID of the limit that was hit' );
 		$this->assertSame( 'shopper@example.com', $fired[0][1], 'The action should receive the e-mail address' );
@@ -272,15 +263,15 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_logged_in_user_is_keyed_on_user_id_not_ip(): void {
 		wp_set_current_user( $this->factory->user->create() );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.20';
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'The same logged-in user should be rate limited even from another IP address' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'The same logged-in user should be rate limited even from another IP address' );
 
 		wp_set_current_user( 0 );
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'guest@example.com' ), 'A guest on that IP address should not be held back by the logged-in user limit' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'guest@example.com' ), 'A guest on that IP address should not be held back by the logged-in user limit' );
 	}
 
 	/**
@@ -289,11 +280,11 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_other_logged_in_user_from_same_ip_is_not_rate_limited(): void {
 		wp_set_current_user( $this->factory->user->create() );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
 		wp_set_current_user( $this->factory->user->create() );
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'A different logged-in user on the same IP address should not be held back' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'A different logged-in user on the same IP address should not be held back' );
 	}
 
 	/**
@@ -306,9 +297,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		wp_set_current_user( $this->factory->user->create() );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'other@example.com' ), 'A logged-in user should be rate limited regardless of whether the IP address resolves' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'A logged-in user should be rate limited regardless of whether the IP address resolves' );
 	}
 
 	/**
@@ -329,7 +320,7 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 		add_filter( 'query', $filter );
 
 		try {
-			$applied = $this->sut->apply( 'shopper@example.com' );
+			$applied = SignupRateLimiter::apply( 'shopper@example.com' );
 		} finally {
 			$wpdb->suppress_errors( $suppress );
 		}
@@ -337,8 +328,8 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', $filter );
 
 		$this->assertFalse( $applied, 'A sign-up attempt whose limits cannot be stored should not be let through' );
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'The per-IP limit should have been rolled back' );
-		$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'The limit that could not be stored should have been cleared' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'The per-IP limit should have been rolled back' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'The limit that could not be stored should have been cleared' );
 	}
 
 	/**
@@ -347,9 +338,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_non_array_options_fall_back_to_defaults(): void {
 		$this->set_options( 'nope' );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'Non-array options should fall back to the defaults, which still rate limit' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'Non-array options should fall back to the defaults, which still rate limit' );
 	}
 
 	/**
@@ -360,8 +351,8 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$queries = $this->record_queries(
 			function () {
-				$this->assertTrue( $this->sut->apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
-				$this->assertFalse( $this->sut->is_rate_limited( 'shopper@example.com' ), 'A negative delay should let every attempt through' );
+				$this->assertTrue( SignupRateLimiter::apply( 'shopper@example.com' ), 'A disabled limiter should report success' );
+				$this->assertFalse( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'A negative delay should let every attempt through' );
 			}
 		);
 
@@ -376,9 +367,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_non_numeric_delays_fall_back_to_defaults(): void {
 		$this->set_delays( false, array( 30 ) );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'Non-numeric delays should fall back to the defaults, which still rate limit' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'Non-numeric delays should fall back to the defaults, which still rate limit' );
 	}
 
 	/**
@@ -387,7 +378,7 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 	public function test_object_delay_does_not_fatal(): void {
 		$this->set_delays( new \stdClass(), new \stdClass() );
 
-		$this->assertTrue( $this->sut->apply( 'shopper@example.com' ), 'An object delay should not cause a fatal error' );
+		$this->assertTrue( SignupRateLimiter::apply( 'shopper@example.com' ), 'An object delay should not cause a fatal error' );
 	}
 
 	/**
@@ -399,9 +390,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$this->set_delays( 30, 0 );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertFalse( $this->sut->is_rate_limited( 'other@example.com' ), 'With no resolvable client address, the per-client limit should not apply' );
+		$this->assertFalse( SignupRateLimiter::is_rate_limited( 'other@example.com' ), 'With no resolvable client address, the per-client limit should not apply' );
 	}
 
 	/**
@@ -413,9 +404,9 @@ class SignupRateLimiterTests extends WC_Unit_Test_Case {
 
 		$this->set_delays( 30, 180 );
 
-		$this->sut->apply( 'shopper@example.com' );
+		SignupRateLimiter::apply( 'shopper@example.com' );
 
-		$this->assertTrue( $this->sut->is_rate_limited( 'shopper@example.com' ), 'The per-e-mail limit should still apply when the client address cannot be resolved' );
+		$this->assertTrue( SignupRateLimiter::is_rate_limited( 'shopper@example.com' ), 'The per-e-mail limit should still apply when the client address cannot be resolved' );
 	}
 
 	/**

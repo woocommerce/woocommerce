@@ -385,8 +385,7 @@ class ListTable extends \WP_List_Table {
 		}
 
 		if ( ! empty( $_GET['customer_stock_notifications_customer_filter'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$filter                = absint( wp_unslash( $_GET['customer_stock_notifications_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_args['user_id'] = array( $filter );
+			$query_args['user_id'] = absint( wp_unslash( $_GET['customer_stock_notifications_customer_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		$query_args['return'] = 'objects';

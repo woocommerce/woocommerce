@@ -24,6 +24,26 @@ class ProductUtil {
 	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
 
 	/**
+	 * Get a product ID from a product, post, or numeric value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $product Product instance, post instance, or numeric ID.
+	 * @return int Product ID, or 0 when no ID is available.
+	 */
+	public function get_product_id( $product ): int {
+		if ( is_numeric( $product ) ) {
+			return (int) $product;
+		} elseif ( $product instanceof \WC_Product ) {
+			return (int) $product->get_id();
+		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
+			return (int) $product->ID;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
@@ -72,7 +92,7 @@ class ProductUtil {
 	 * Delete the transients related to a specific product.
 	 * If the product is a variation, delete the transients for the parent too.
 	 *
-	 * @param WC_Product|int $product_or_id The product or the product id.
+	 * @param \WC_Product|int $product_or_id The product or the product id.
 	 * @return void
 	 */
 	public function delete_product_specific_transients( $product_or_id ) {

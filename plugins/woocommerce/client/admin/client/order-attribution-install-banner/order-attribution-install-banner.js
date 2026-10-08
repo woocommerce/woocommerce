@@ -47,7 +47,6 @@ const WC_ANALYTICS_ORDER_ATTRIBUTION_ADMIN_URL =
  * @param {string}  props.buttonText   The text for the button.
  *
  * @return {JSX.Element} The rendered component.
- *
  */
 export const OrderAttributionInstallBanner = ( {
 	bannerImage = null,

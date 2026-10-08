@@ -28,7 +28,7 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 				step: 'installPlugin',
 				pluginData: {
 					resource: 'url',
-					url: 'https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-3.0.0/woocommerce-beta-tester.zip',
+					url: 'https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-4.0.0/woocommerce-beta-tester.zip',
 				},
 				options: {
 					activate: true,

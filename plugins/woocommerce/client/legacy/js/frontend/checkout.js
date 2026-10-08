@@ -594,7 +594,7 @@ jQuery( function ( $ ) {
 						pattern = new RegExp(
 							// eslint-disable-next-line max-len
 							/^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[0-9a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i
-						); // eslint-disable-line max-len
+						);  
 
 						if ( ! pattern.test( $this.val() ) ) {
 							$this.attr( 'aria-invalid', 'true' );
@@ -602,7 +602,7 @@ jQuery( function ( $ ) {
 								.removeClass( 'woocommerce-validated' )
 								.addClass(
 									'woocommerce-invalid woocommerce-invalid-email'
-								); // eslint-disable-line max-len
+								);  
 							validated = false;
 						}
 					}
@@ -637,7 +637,7 @@ jQuery( function ( $ ) {
 						.removeClass(
 							'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone'
 						)
-						.addClass( 'woocommerce-validated' ); // eslint-disable-line max-len
+						.addClass( 'woocommerce-validated' );  
 				}
 			}
 		},
@@ -876,10 +876,10 @@ jQuery( function ( $ ) {
 					// Add notices returned by this event.
 					if ( rendersNotices ) {
 						$form.prepend(
-							'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
+							'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
 								data.messages +
 								'</div>'
-						); // eslint-disable-line max-len
+						);  
 					} else if ( data && 'failure' === data.result ) {
 						// A response that reports a notice without carrying one: render it as-is.
 						$form.prepend( data );
@@ -1099,7 +1099,7 @@ jQuery( function ( $ ) {
 									'<div class="woocommerce-error">' +
 										wc_checkout_params.i18n_checkout_error +
 										'</div>'
-								); // eslint-disable-line max-len
+								);  
 							}
 						}
 					},
@@ -1140,10 +1140,10 @@ jQuery( function ( $ ) {
 				'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message, .is-error, .is-success'
 			).remove();
 			wc_checkout_form.$checkout_form.prepend(
-				'<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
+				'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
 					error_message +
 					'</div>'
-			); // eslint-disable-line max-len
+			);  
 			wc_checkout_form.$checkout_form
 				.removeClass( 'processing' )
 				.unblock();

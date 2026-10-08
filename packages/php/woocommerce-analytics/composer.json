@@ -3,14 +3,15 @@
 	"description": "Enhanced analytics for WooCommerce users.",
 	"type": "jetpack-library",
 	"license": "GPL-2.0-or-later",
-	"version": "0.17.0",
+	"version": "0.18.0",
 	"require": {
 		"php": ">=7.4",
 		"automattic/jetpack-assets": "^4.3 || ^5.0",
 		"automattic/jetpack-connection": "^8.1 || ^9.0",
 		"automattic/jetpack-constants": "^3.0 || ^4.0",
 		"automattic/jetpack-device-detection": "^3.4 || ^4.0",
-		"automattic/block-delimiter": "^0.3 || ^0.4"
+		"automattic/block-delimiter": "^0.3 || ^0.4",
+		"automattic/tracks-shared-utils": "^1.0"
 	},
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^4.0.0",

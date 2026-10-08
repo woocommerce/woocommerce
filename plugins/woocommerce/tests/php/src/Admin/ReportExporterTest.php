@@ -138,14 +138,62 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 		$expired     = $this->create_export( 'wc-orders-report-export-expired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
 		$fresh       = $this->create_export( 'wc-orders-report-export-fresh', "3,4\n", ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS );
 
+		ReportExporter::update_export_percentage_complete( 'orders', 'expired', 100 );
+		ReportExporter::update_export_percentage_complete( 'orders', 'fresh', 100 );
+
 		ReportExporter::delete_expired_exports();
 
 		$this->assertFileDoesNotExist( $reports_dir . $expired, 'An expired export should be deleted.' );
 		$this->assertFileDoesNotExist( $reports_dir . $expired . '.headers', 'An expired export header row should be deleted too.' );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'expired' ), 'An expired export should not keep its progress option around.' );
 		$this->assertFileExists( $reports_dir . $fresh, 'An export inside the retention period should be kept.' );
 		$this->assertFileExists( $reports_dir . $fresh . '.headers', 'An export header row inside the retention period should be kept.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'fresh' ), 'An export inside the retention period should keep its progress.' );
 		$this->assertFileExists( $reports_dir . '.htaccess', 'Cleanup should not touch the directory guards.' );
 		$this->assertFileExists( $reports_dir . 'index.html', 'Cleanup should not touch the directory guards.' );
+	}
+
+	/**
+	 * @testdox Daily cleanup drops the progress of an expired export of an extension's report type.
+	 */
+	public function test_cleanup_deletes_the_progress_of_an_extension_report_type(): void {
+		$this->create_export( 'wc-stock_notifications-report-export-expired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+		ReportExporter::update_export_percentage_complete( 'stock_notifications', 'expired', 100 );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'stock_notifications', 'expired' ), 'Report types registered by extensions are not limited to letters.' );
+	}
+
+	/**
+	 * @testdox Daily cleanup deletes the option every export used to share once its exports can no longer be downloaded.
+	 */
+	public function test_cleanup_deletes_the_shared_status_option_once_its_exports_are_gone(): void {
+		$reports_dir = ReportCSVExporter::get_reports_directory();
+		$expired     = $this->create_export( 'wc-orders-report-export-legacyexpired', "1,2\n", ReportExporter::EXPORT_RETENTION_PERIOD + HOUR_IN_SECONDS );
+		$fresh       = $this->create_export( 'wc-orders-report-export-legacyfresh', "3,4\n", ReportExporter::EXPORT_RETENTION_PERIOD - HOUR_IN_SECONDS );
+
+		update_option(
+			ReportExporter::EXPORT_STATUS_OPTION,
+			array(
+				'orders:legacyexpired' => 100,
+				'orders:legacyfresh'   => 100,
+				'orders:neverwritten'  => 0,
+			)
+		);
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFileDoesNotExist( $reports_dir . $expired );
+		$this->assertFileExists( $reports_dir . $fresh );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'legacyfresh' ), 'The shared option must stay while one of its exports can still be downloaded.' );
+
+		wp_delete_file( $reports_dir . $fresh );
+		wp_delete_file( $reports_dir . $fresh . '.headers' );
+
+		ReportExporter::delete_expired_exports();
+
+		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'The shared option should be deleted once none of its exports has a file left.' );
 	}
 
 	/**
@@ -496,6 +544,44 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Progress is stored and read back whatever length the export ID has.
+	 *
+	 * The export ID is filterable and unbounded, while option names are limited to 191 characters.
+	 */
+	public function test_export_progress_survives_a_long_export_id(): void {
+		global $wpdb;
+
+		$export_id = str_repeat( 'jane.doe-orders-2026-01-01-to-2026-03-31-', 5 );
+
+		ReportExporter::update_export_percentage_complete( 'orders', $export_id, 100 );
+
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:' . $export_id );
+
+		$this->assertLessThanOrEqual( 191, strlen( $option ) );
+		$this->assertSame( '100', $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $option ) ), 'The row should be stored under the full name.' );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', $export_id ) );
+	}
+
+	/**
+	 * @testdox An export queued before each export had its own option is still emailed from the shared one.
+	 */
+	public function test_export_queued_before_per_export_options_is_emailed(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$mailer  = tests_retrieve_phpmailer_instance();
+
+		update_option( ReportExporter::EXPORT_STATUS_OPTION, array( 'products:legacy' => 100 ) );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'products', 'legacy' ), 'Progress saved in the shared option should still be read.' );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'products', 'other' ), 'The shared option should only answer for exports it holds.' );
+
+		ReportExporter::email_report_download_link( $user_id, 'legacy', 'products' );
+
+		$sent = end( $mailer->mock_sent );
+		$this->assertIsArray( $sent, 'An export finished before the update should still be emailed after it.' );
+		$this->assertStringContainsString( 'filename=wc-products-report-export-legacy', $sent['body'] );
+	}
+
+	/**
 	 * Email the download link for a finished export and return the message that went out.
 	 *
 	 * Dispatched through the hook Action Scheduler fires, so the number of arguments a queued
@@ -537,5 +623,37 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			has_action( 'admin_init', array( ReportExporter::class, 'download_export_file' ) ),
 			'The download handler should be registered.'
 		);
+	}
+
+	/**
+	 * @testdox Export progress is saved outside the autoloaded options.
+	 */
+	public function test_export_progress_is_not_autoloaded(): void {
+		global $wpdb;
+
+		ReportExporter::update_export_percentage_complete( 'orders', 'current', 50 );
+
+		$option = ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:current' );
+
+		$this->assertArrayNotHasKey( $option, wp_load_alloptions(), 'A persistent object cache can write stale copies of the autoloaded options back, so export progress must not live there.' );
+		$this->assertSame( 'off', $wpdb->get_var( $wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", $option ) ) );
+		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'orders', 'current' ) );
+	}
+
+	/**
+	 * @testdox Each export's progress is stored on its own, so saving one export cannot drop another's.
+	 */
+	public function test_export_progress_is_stored_per_export(): void {
+		ReportExporter::update_export_percentage_complete( 'orders', 'first', 100 );
+		ReportExporter::update_export_percentage_complete( 'orders', 'second', 10 );
+
+		// Read back from the database, as the email action and the status endpoint do from their own request.
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:first' ), 'options' );
+		wp_cache_delete( ReportExporter::EXPORT_STATUS_OPTION . '_' . md5( 'orders:second' ), 'options' );
+
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'orders', 'first' ), 'Saving a later export must leave an earlier export finished.' );
+		$this->assertSame( 10, ReportExporter::get_export_percentage_complete( 'orders', 'second' ) );
+		$this->assertFalse( ReportExporter::get_export_percentage_complete( 'orders', 'unknown' ), 'An export that was never queued has no progress.' );
+		$this->assertFalse( get_option( ReportExporter::EXPORT_STATUS_OPTION ), 'Progress must not be written to the option every export used to share.' );
 	}
 }

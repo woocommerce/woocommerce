@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
@@ -106,30 +107,17 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Convert a failure during cart session loading into a client-safe error response.
 	 *
-	 * The original error is logged rather than returned, so nothing internal reaches the client.
+	 * Error details are returned only to managers when debug details are enabled.
 	 *
 	 * @param  \Throwable $error The error that occurred while loading the cart session.
 	 * @return \WP_REST_Response The error response to return to the client.
 	 */
 	protected function get_cart_session_error_response( \Throwable $error ) {
-		wc_get_logger()->error(
-			sprintf(
-				'Store API could not load the cart session: %1$s in %2$s:%3$d',
-				$error->getMessage(),
-				$error->getFile(),
-				$error->getLine()
-			),
-			array(
-				'source'    => 'store-api',
-				'exception' => $error,
-			)
-		);
-
 		return $this->error_to_response(
-			$this->get_route_error_response(
-				'woocommerce_rest_unknown_server_error',
-				__( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
-				500
+			UnexpectedErrorResponse::create(
+				$error,
+				sprintf( '%s while loading the cart session', static::class ),
+				__( 'The cart could not be loaded. Please try again.', 'woocommerce' )
 			)
 		);
 	}
@@ -162,11 +150,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 			} catch ( \Exception $error ) {
 				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+			} catch ( \Throwable $error ) {
+				$response = UnexpectedErrorResponse::create( $error, static::class );
 			}
 		}
 
-		// For update requests, this will recalculate cart totals and sync draft orders with the current cart.
-		if ( $this->is_update_request( $request ) ) {
+		// For successful update requests, recalculate cart totals and sync draft orders with the current cart.
+		if ( $this->is_update_request( $request ) && ! is_wp_error( $response ) ) {
 			$this->cart_updated( $request );
 		}
 
@@ -193,7 +183,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'User-ID', get_current_user_id() );
 		$response->header( 'Cache-Control', 'no-store' );
 
-		if ( WC()->cart instanceof \WC_Cart ) {
+		if ( WC()->cart instanceof \WC_Cart && \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
 			$response->header( 'Cart-Token', $this->get_cart_token() );
 			$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
 		}
@@ -204,19 +194,34 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Load the cart session before handling responses.
 	 *
+	 * @throws \RuntimeException When a previous cart session load failed.
+	 * @throws \Throwable When the cart cannot be loaded or normalized.
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->has_cart_token( $request ) ) {
-			// Overrides the core session class.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return SessionHandler::class;
-				}
-			);
+		if ( WC()->cart instanceof \WC_Cart && ! \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
+			throw new \RuntimeException( 'The cart is unavailable after its session failed to load.' );
 		}
-		$this->cart_controller->load_cart();
+
+		try {
+			if ( $this->has_cart_token( $request ) ) {
+				// Overrides the core session class.
+				add_filter(
+					'woocommerce_session_handler',
+					function () {
+						return SessionHandler::class;
+					}
+				);
+			}
+			$this->cart_controller->load_cart();
+		} catch ( \Throwable $error ) {
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
+			throw $error;
+		}
+
 		$this->cart_controller->normalize_cart();
 	}
 

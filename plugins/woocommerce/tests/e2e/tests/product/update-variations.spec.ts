@@ -378,6 +378,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			await page
 				.locator( '#field_to_edit' )
 				.selectOption( 'toggle_downloadable' );
+			await expect(
+				page.locator(
+					'#woocommerce-product-data .blockUI.blockOverlay'
+				)
+			).toBeHidden();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
@@ -744,7 +749,11 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await gotToVariationsTab( page );
 
 		await test.step( 'Wait for block overlay to disappear.', async () => {
-			await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
+			await expect(
+				page.locator(
+					'#woocommerce-product-data .blockUI.blockOverlay'
+				)
+			).toBeHidden();
 		} );
 
 		await test.step( 'Select variation defaults', async () => {

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use WP_Query;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
  * Utility methods used for the Product Collection block.
@@ -69,7 +70,7 @@ class Utils {
 	 * @return array Returns the constructed WP_Query arguments.
 	 */
 	public static function get_query_vars( $block, $page ) {
-		if ( ! empty( $block->context['query'] ) && empty( $block->context['query']['inherit'] ) ) {
+		if ( ! empty( $block->context['query'] ) && ! $block->context['query']['inherit'] ) {
 			return build_query_vars_from_query_block( $block, $page );
 		}
 
@@ -78,8 +79,8 @@ class Utils {
 	}
 
 	/**
-	 * Remove matching tax or meta query clauses and prune empty groups.
-	 * Preserve all values in the remaining clauses.
+	 * Remove query array from tax or meta query by searching for arrays that
+	 * contain exact key => value pair.
 	 *
 	 * @param array  $queries tax_query or meta_query.
 	 * @param string $key     Array key to search for.
@@ -93,27 +94,70 @@ class Utils {
 		}
 
 		foreach ( $queries as $query_key => $query ) {
-			if ( ! is_array( $query ) ) {
-				continue;
-			}
-
 			if ( isset( $query[ $key ] ) && $query[ $key ] === $value ) {
 				unset( $queries[ $query_key ] );
-				continue;
 			}
 
-			// Leaf values can contain arrays and falsy values that must remain unchanged.
-			if ( isset( $query['taxonomy'] ) || isset( $query['key'] ) || array_key_exists( 'terms', $query ) || array_key_exists( 'value', $query ) ) {
-				continue;
-			}
-
-			$queries[ $query_key ] = self::remove_query_array( $query, $key, $value );
-			if ( empty( $queries[ $query_key ] ) ) {
-				unset( $queries[ $query_key ] );
+			if ( isset( $query['relation'] ) || ! isset( $query[ $key ] ) ) {
+				$queries[ $query_key ] = self::remove_query_array( $query, $key, $value );
 			}
 		}
 
-		return 1 === count( $queries ) && isset( $queries['relation'] ) ? array() : $queries;
+		return self::remove_empty_array_recursive( $queries );
+	}
+
+	/**
+	 * Whether the cart is initialized and available for reading.
+	 *
+	 * @return bool
+	 */
+	private static function is_cart_available() {
+		return isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
+	}
+
+	/**
+	 * Get the unique product IDs of the items currently in the cart.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int[] Product IDs, or an empty array when the cart is unavailable.
+	 */
+	public static function get_cart_product_ids() {
+		if ( ! self::is_cart_available() ) {
+			return array();
+		}
+
+		$items = array();
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( ! isset( $cart_item['product_id'] ) ) {
+				continue;
+			}
+
+			$items[] = absint( $cart_item['product_id'] );
+		}
+
+		return ArrayUtil::unique_truthy_values( $items );
+	}
+
+	/**
+	 * Get a `cart` location context built from the current cart contents.
+	 *
+	 * Used when an ancestor block provides a `cart` product reference for a
+	 * Product Collection (e.g. the Mini-Cart overlay), independently of the
+	 * page the block is rendered on.
+	 *
+	 * When the cart is unavailable this still returns a cart location, with
+	 * an empty product list.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array The cart location context.
+	 */
+	public static function get_cart_location_context() {
+		return array(
+			'type'       => 'cart',
+			'sourceData' => array( 'productIds' => self::get_cart_product_ids() ),
+		);
 	}
 
 	/**
@@ -160,20 +204,11 @@ class Utils {
 			$current_page       = $wp_query->get_queried_object();
 			$has_cart_block     = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
 			$has_checkout_block = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/checkout' );
-			$is_cart_available  = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
+			$is_cart_available  = self::is_cart_available();
 
 			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {
-				$type  = 'cart';
-				$items = array();
-				foreach ( WC()->cart->get_cart() as $cart_item ) {
-					if ( ! isset( $cart_item['product_id'] ) ) {
-						continue;
-					}
-
-					$items[] = absint( $cart_item['product_id'] );
-				}
-				$items       = array_unique( array_filter( $items ) );
-				$source_data = array( 'productIds' => $items );
+				$type        = 'cart';
+				$source_data = array( 'productIds' => self::get_cart_product_ids() );
 
 			} elseif ( is_product_taxonomy() ) {
 
@@ -202,5 +237,20 @@ class Utils {
 		);
 
 		return $context;
+	}
+
+	/**
+	 * Remove falsy item from array, recursively.
+	 *
+	 * @param array $array The input array to filter.
+	 */
+	private static function remove_empty_array_recursive( $array ) {
+		$array = array_filter( $array );
+		foreach ( $array as $key => $item ) {
+			if ( is_array( $item ) ) {
+				$array[ $key ] = self::remove_empty_array_recursive( $item );
+			}
+		}
+		return $array;
 	}
 }
