@@ -231,7 +231,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name
 		? // translators: %s is the product name.
-		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+			sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
 		: '';
 	const anchorProps = {
 		href: showProductLink ? product?.permalink : undefined,

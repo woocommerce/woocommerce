@@ -2,6 +2,7 @@
  * External packages
  */
 const path = require( 'path' );
+const { resolveFromNodeModules } = require( './lib/resolve-from-node-modules' );
 
 // These modules need to be transformed because they are not transpiled to CommonJS.
 // The top-level keys are the names of the packages and the values are the file
@@ -37,14 +38,17 @@ const mapWpModules = [
 	'@wordpress/html-entities',
 	'@wordpress/notices',
 ];
+// The project's own copy wins; this package's copy (declared in its
+// package.json) is the fallback, so the version never depends on what pnpm
+// hoisted. See lib/resolve-from-node-modules.js.
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
-	try {
-		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module, {
-			paths: [ process.cwd() ],
-		} );
-	} catch ( error ) {
-		// If the module is not found, no need to add it to the mapper.
+	// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
+	const resolved = resolveFromNodeModules( module, [
+		process.cwd(),
+		__dirname,
+	] );
+	if ( resolved ) {
+		acc[ `^${ module }$` ] = resolved;
 	}
 	return acc;
 }, {} );
