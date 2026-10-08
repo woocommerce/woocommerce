@@ -165,7 +165,7 @@ class BlockPatterns {
 		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
 
 		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
-			$is_path_modified = (int) ( $pattern_data['timestamp'] ?? null ) !== (int) @filemtime( $this->patterns_path );
+			$is_path_modified = (int) ( $pattern_data['timestamp'] ?? null ) !== (int) @filemtime( $this->patterns_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
 			if ( ! $is_path_modified ) {
 				return $pattern_data['patterns'];
 			}
@@ -182,7 +182,7 @@ class BlockPatterns {
 	private function set_pattern_cache( array $patterns ) {
 		$pattern_data = array(
 			'version'   => WOOCOMMERCE_VERSION,
-			'timestamp' => (int) @filemtime( $this->patterns_path ),
+			'timestamp' => (int) @filemtime( $this->patterns_path ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
 			'patterns'  => $patterns,
 		);
 
