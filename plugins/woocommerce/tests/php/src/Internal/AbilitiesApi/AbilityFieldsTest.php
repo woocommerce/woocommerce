@@ -849,6 +849,23 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expect a product value in the undo when its name differs from its input field.
+	 */
+	public function test_product_update_undo_expects_renamed_values(): void {
+		$product = \WC_Helper_Product::create_external_product();
+
+		$summary = wp_get_ability( 'woocommerce/product-update' )->dry_run(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'affiliate',
+				'external_url'       => 'https://example.com/new',
+			)
+		);
+
+		$this->assertSame( array( 'product_url' => 'https://example.com/new' ), $summary['undo']['input']['expected'] );
+	}
+
+	/**
 	 * @testdox Should refuse a write whose expected values are outdated, and save nothing.
 	 */
 	public function test_write_with_outdated_expected_values_returns_409(): void {

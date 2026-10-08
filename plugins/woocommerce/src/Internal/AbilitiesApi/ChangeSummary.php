@@ -47,13 +47,17 @@ final class ChangeSummary {
 	 * The changes of the fields that an input sets: its top-level keys and the
 	 * attributes under its `extensions`.
 	 *
-	 * @param array $changes Changes, as changes() returns them.
-	 * @param array $input   Ability input.
+	 * @param array                 $changes Changes, as changes() returns them.
+	 * @param array                 $input   Ability input.
+	 * @param array<string, string> $names   Value names keyed by input field, for the fields whose names differ.
 	 * @return array
 	 */
-	public static function requested( array $changes, array $input ): array {
+	public static function requested( array $changes, array $input, array $names = array() ): array {
 		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
 		unset( $input['id'], $input['expected'], $input['extensions'] );
+		foreach ( array_intersect_key( $names, $input ) as $field => $name ) {
+			$input[ $name ] = $input[ $field ];
+		}
 
 		return array_values(
 			array_filter(

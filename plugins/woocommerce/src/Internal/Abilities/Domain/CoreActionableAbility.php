@@ -102,6 +102,16 @@ final class CoreActionableAbility extends ActionableAbility {
 	}
 
 	/**
+	 * The names of the values whose input fields have another name.
+	 *
+	 * @return array<string, string>
+	 */
+	public function get_value_names(): array {
+		$definition = $this->definition();
+		return method_exists( $definition, 'get_value_names' ) ? $definition::get_value_names() : array();
+	}
+
+	/**
 	 * The dry run: the steps of a field change without the save, or the description of an action.
 	 *
 	 * @param array $input Valid ability input.

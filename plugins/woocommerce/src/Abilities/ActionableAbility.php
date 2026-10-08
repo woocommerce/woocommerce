@@ -119,6 +119,18 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * The names of the values that get_values() returns, keyed by input field,
+	 * for the input fields whose values have another name.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array<string, string>
+	 */
+	public function get_value_names(): array {
+		return array();
+	}
+
+	/**
 	 * The values of the object that a dry run compares, keyed by name.
 	 *
 	 * @since 11.3.0
@@ -259,7 +271,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$changes = ChangeSummary::changes( $type, $before, $this->read( $subject ) );
-		$undo    = null === $undo ? null : self::prepare_undo( $undo, ChangeSummary::requested( $changes, $input ) );
+		$undo    = null === $undo ? null : self::prepare_undo( $undo, ChangeSummary::requested( $changes, $input, $this->get_value_names() ) );
 
 		return array(
 			'ability'      => $this->get_name(),

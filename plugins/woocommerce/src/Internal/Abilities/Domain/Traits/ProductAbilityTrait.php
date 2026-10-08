@@ -196,6 +196,18 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * The names of the product values whose input fields have another name.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function get_value_names(): array {
+		return array(
+			'external_url'     => 'product_url',
+			'grouped_products' => 'children',
+		);
+	}
+
+	/**
 	 * Get product mutation field schemas for a set of fields.
 	 *
 	 * @param array<int, string> $fields Field names.
