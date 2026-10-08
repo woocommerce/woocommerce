@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
@@ -15,6 +16,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  * Tests for the AddToCartWithOptions block type
  */
 class AddToCartWithOptions extends \WP_UnitTestCase {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Initiate the mock object.
@@ -22,7 +24,19 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		AddToCartWithOptionsMocks::register_all();
+		// The blocks are not registered on `init`, because `init` runs with a classic theme.
+		$this->replace_block_types( AddToCartWithOptionsMocks::get_mock_classes() );
+	}
+
+	/**
+	 * Put back the block types setUp() replaced.
+	 */
+	protected function tearDown(): void {
+		try {
+			$this->restore_block_types();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
