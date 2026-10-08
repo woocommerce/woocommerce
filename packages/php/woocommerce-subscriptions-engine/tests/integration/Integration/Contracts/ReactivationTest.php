@@ -17,13 +17,10 @@ use DomainException;
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Reactivation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -59,26 +56,7 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	 * Create a monthly plan and return its id.
 	 */
 	private function make_monthly_plan(): int {
-		return $this->make_plan( 'month' );
-	}
-
-	/**
-	 * Create a plan on the given cadence period and return its id.
-	 *
-	 * @param string $period Billing period slug: day/week/month/year.
-	 */
-	private function make_plan( string $period ): int {
-		$plan = Plan::create(
-			array(
-				'name'           => ucfirst( $period ) . 'ly',
-				'billing_policy' => new BillingPolicy( $period, 1, null, null, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
-
-		return (int) $plan->get_id();
+		return $this->make_plan();
 	}
 
 	/**
@@ -227,7 +205,17 @@ class ReactivationTest extends EngineIntegrationTestCase {
 	public function test_reactivate_floors_past_due_at_now_when_the_roll_cap_exhausts(): void {
 		// Daily cadence, held ~6.5 years past due: more rolls than the cap allows, so
 		// the date is floored at `$now` - never returned still in the past.
-		$id = $this->seed_on_hold( '2020-01-01 00:00:00', $this->make_plan( 'day' ) );
+		$id = $this->seed_on_hold(
+			'2020-01-01 00:00:00',
+			$this->make_plan(
+				array(
+					'billing_policy' => array(
+						'period'   => 'day',
+						'interval' => 1,
+					),
+				)
+			)
+		);
 
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-07-06 00:00:00' ) );
 
@@ -241,6 +229,116 @@ class ReactivationTest extends EngineIntegrationTestCase {
 		$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 09:30:00' ) );
 
 		$this->assertSame( '2026-04-15 09:30:00', $this->reload( $id )->get_next_payment_gmt() );
+	}
+
+	/**
+	 * @dataProvider provide_unusable_live_billing_payloads
+	 *
+	 * @param array<string, mixed>|null $billing The live plan's billing payload.
+	 */
+	public function test_reactivate_floors_past_due_at_now_when_the_live_billing_is_unusable( ?array $billing ): void {
+		$plan_id = $this->make_plan( array( 'billing_policy' => $billing ) );
+		$id      = $this->seed_on_hold( '2026-02-01 00:00:00', $plan_id );
+
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array(
+				'contract_id' => $id,
+				'plan_id'     => $plan_id,
+			),
+			function () use ( $id ): void {
+				$this->sut->reactivate( $this->reload( $id ), $this->utc( '2026-04-15 09:30:00' ) );
+			}
+		);
+
+		$this->assertSame( '2026-04-15 09:30:00', $this->reload( $id )->get_next_payment_gmt() );
+		$this->assertNotEmpty( $warnings, 'A null or unusable live billing payload is logged with the contract and plan.' );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>|null}>
+	 */
+	public function provide_unusable_live_billing_payloads(): array {
+		return array(
+			'null payload'     => array( null ),
+			'missing interval' => array( array( 'period' => 'month' ) ),
+			'unknown period'   => array(
+				array(
+					'period'   => 'decade',
+					'interval' => 1,
+				),
+			),
+			'zero interval'    => array(
+				array(
+					'period'   => 'month',
+					'interval' => 0,
+				),
+			),
+		);
+	}
+
+	/**
+	 * A snapshot policy with no usable cadence falls through to the live plan (logged),
+	 * the same as renewal, instead of throwing out of the forward roll.
+	 *
+	 * @dataProvider provide_unusable_snapshot_billing_payloads
+	 *
+	 * @param array<string, mixed>      $snapshot_billing The snapshot's billing payload.
+	 * @param array<string, mixed>|null $live_billing     The live plan's billing payload.
+	 * @param string                    $expected_next    The expected next payment.
+	 */
+	public function test_reactivate_falls_back_to_the_live_plan_when_the_snapshot_billing_is_unusable( array $snapshot_billing, ?array $live_billing, string $expected_next ): void {
+		$id = $this->seed_on_hold( '2026-02-01 00:00:00', $this->make_plan( array( 'billing_policy' => $live_billing ) ) );
+
+		$contract = $this->reload( $id );
+		$contract->set_plan_snapshot(
+			PlanSnapshot::from_array(
+				array(
+					'selling_plan_id' => $contract->get_selling_plan_id(),
+					'billing_policy'  => $snapshot_billing,
+				)
+			)
+		);
+
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $id ),
+			function () use ( $contract ): void {
+				$this->assertTrue( $this->sut->reactivate( $contract, $this->utc( '2026-04-15 09:30:00' ) ) );
+			}
+		);
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( $expected_next, $stored->get_next_payment_gmt() );
+		$this->assertNotEmpty( $warnings, 'An unusable snapshot billing payload is logged.' );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: array<string, mixed>|null, 2: string}>
+	 */
+	public function provide_unusable_snapshot_billing_payloads(): array {
+		$monthly = array(
+			'period'   => 'month',
+			'interval' => 1,
+		);
+		$decade  = array(
+			'period'   => 'decade',
+			'interval' => 1,
+		);
+		$zero    = array(
+			'period'   => 'month',
+			'interval' => 0,
+		);
+		$rolled  = '2026-05-01 00:00:00';
+		$floored = '2026-04-15 09:30:00';
+
+		return array(
+			'unknown period, live monthly'     => array( $decade, $monthly, $rolled ),
+			'zero interval, live monthly'      => array( $zero, $monthly, $rolled ),
+			'unknown period, live unusable'    => array( $decade, $zero, $floored ),
+			'zero interval, live null payload' => array( $zero, null, $floored ),
+		);
 	}
 
 	public function test_reactivate_leaves_a_null_next_payment_null(): void {

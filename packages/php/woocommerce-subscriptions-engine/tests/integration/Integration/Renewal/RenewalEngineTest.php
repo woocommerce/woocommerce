@@ -16,9 +16,10 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
@@ -28,6 +29,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalIntent
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine
@@ -105,27 +107,23 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		return $order instanceof WC_Order ? $order : null;
 	}
 
-	private function make_plan( ?int $max_cycles = null ): int {
-		return (int) $this->make_plan_object( $max_cycles )->get_id();
-	}
-
 	/**
-	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
+	 * Create a monthly plan and return its view (the sign-up helper needs the plan).
 	 *
 	 * @param int|null $max_cycles Maximum billing cycles, or null for open-ended.
 	 */
-	private function make_plan_object( ?int $max_cycles = null ): Plan {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, $max_cycles, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
+	private function make_plan_view( ?int $max_cycles = null ): PlanView {
+		return $this->plan_view(
+			$this->make_plan(
+				array(
+					'billing_policy' => array(
+						'period'     => 'month',
+						'interval'   => 1,
+						'max_cycles' => $max_cycles,
+					),
+				)
 			)
 		);
-		( new PlanRepository() )->insert( $plan );
-
-		return $plan;
 	}
 
 	/**
@@ -137,7 +135,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract( string $gateway, ?int $max_cycles = null ): Contract {
-		$plan = $this->make_plan_object( $max_cycles );
+		$plan = $this->make_plan_view( $max_cycles );
 
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
@@ -447,7 +445,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_object() );
+		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_view() );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -654,6 +652,175 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox the scheduled scan parks a contract without a snapshot whose live plan billing payload is null, does not parse, or has no usable cadence.
+	 *
+	 * @dataProvider provide_unusable_live_billing_payloads
+	 *
+	 * @param array<string, mixed>|null $billing The live plan's billing payload.
+	 */
+	public function test_scheduled_renewal_parks_a_contract_whose_live_billing_is_unusable( ?array $billing ): void {
+		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
+
+		$plan_id     = $this->make_plan();
+		$order       = $this->make_origin_order();
+		$contract    = $this->make_contract( $plan_id, $order->get_id() );
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$repo = new ContractRepository();
+		$repo->append_cycle(
+			Cycle::create(
+				array(
+					'contract_id'    => $contract_id,
+					'sequence_no'    => 1,
+					'count'          => 1,
+					'status'         => new CycleStatus( CycleStatus::BILLED ),
+					'starts_at_gmt'  => '2026-01-15 00:00:00',
+					'ends_at_gmt'    => '2026-02-15 00:00:00',
+					'expected_total' => '19.99',
+					'currency'       => 'USD',
+				)
+			)
+		);
+
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$plan_id,
+				array(
+					'extension_slug' => self::PLAN_OWNER,
+					'billing_policy' => $billing,
+				)
+			)
+		);
+
+		$result   = null;
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array(
+				'contract_id' => $contract_id,
+				'plan_id'     => $plan_id,
+			),
+			function () use ( &$result, $contract_id ): void {
+				$result = $this->run_scheduled_renewal( $contract_id );
+			}
+		);
+
+		$this->assertNull( $result );
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$reloaded = $repo->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $reloaded );
+		$this->assertNull( $reloaded->get_next_payment_gmt(), 'The contract is parked out of the due set.' );
+		$this->assertNotEmpty( $warnings, 'A null or unusable live billing payload is logged with the contract and plan.' );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>|null}>
+	 */
+	public function provide_unusable_live_billing_payloads(): array {
+		return array(
+			'null payload'     => array( null ),
+			'missing interval' => array( array( 'period' => 'month' ) ),
+			'unknown period'   => array(
+				array(
+					'period'   => 'decade',
+					'interval' => 1,
+				),
+			),
+			'zero interval'    => array(
+				array(
+					'period'   => 'month',
+					'interval' => 0,
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox the scheduled scan falls back to the live plan when the snapshot billing has no usable cadence, and parks when neither is usable.
+	 *
+	 * @dataProvider provide_unusable_snapshot_billing_payloads
+	 *
+	 * @param array<string, mixed>      $snapshot_billing The snapshot's billing payload.
+	 * @param array<string, mixed>|null $live_billing     The live plan's billing payload.
+	 * @param string|null               $expected_next    The next payment after the run; null when parked.
+	 */
+	public function test_scheduled_renewal_reads_an_unusable_snapshot_billing_through_the_live_plan( array $snapshot_billing, ?array $live_billing, ?string $expected_next ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+
+		$plan  = $this->make_plan_view();
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( self::GATEWAY_APPROVING );
+		$order->set_total( '19.99' );
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		$order->save();
+
+		$contract_id = $this->sign_up_from_order( $order, $plan );
+		$this->seed_plan_snapshot(
+			$contract_id,
+			array(
+				'selling_plan_id' => $plan->get_id(),
+				'name'            => $plan->get_name(),
+				'billing_policy'  => $snapshot_billing,
+			)
+		);
+		$this->assertInstanceOf(
+			PlanView::class,
+			Plans::update(
+				$plan->get_id(),
+				array(
+					'extension_slug' => self::PLAN_OWNER,
+					'billing_policy' => $live_billing,
+				)
+			)
+		);
+
+		$result   = null;
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $contract_id ),
+			function () use ( &$result, $contract_id ): void {
+				$result = $this->run_scheduled_renewal( $contract_id );
+			}
+		);
+
+		$this->assertNotEmpty( $warnings, 'An unusable snapshot billing payload is logged.' );
+		$this->assertSame( $expected_next, $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+		if ( null === $expected_next ) {
+			$this->assertNull( $result );
+			$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ), 'A parked contract bills nothing.' );
+		} else {
+			$this->assertInstanceOf( WC_Order::class, $result, 'The renewal bills on the live cadence.' );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: array<string, mixed>|null, 2: string|null}>
+	 */
+	public function provide_unusable_snapshot_billing_payloads(): array {
+		$monthly = array(
+			'period'   => 'month',
+			'interval' => 1,
+		);
+		$decade  = array(
+			'period'   => 'decade',
+			'interval' => 1,
+		);
+		$zero    = array(
+			'period'   => 'month',
+			'interval' => 0,
+		);
+
+		return array(
+			'unknown period, live monthly'  => array( $decade, $monthly, '2026-03-15 00:00:00' ),
+			'zero interval, live monthly'   => array( $zero, $monthly, '2026-03-15 00:00:00' ),
+			'unknown period, live unusable' => array( $decade, $zero, null ),
+			'zero interval, live null'      => array( $zero, null, null ),
+		);
+	}
+
+	/**
 	 * @testdox the scheduled scan resumes a stalled renewal whose order was saved but never charged.
 	 *
 	 * A run that claimed cycle 2 pending and saved its renewal order, then crashed before the
@@ -849,6 +1016,21 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => $status ), array( 'id' => $contract_id ) );
+	}
+
+	/**
+	 * Store a plan snapshot row and point the contract at it.
+	 *
+	 * @param int                  $contract_id Stored contract id.
+	 * @param array<string, mixed> $payload     Plan snapshot payload.
+	 */
+	private function seed_plan_snapshot( int $contract_id, array $payload ): void {
+		$contract = $this->reload_contract( $contract_id );
+		$snapshot = PlanSnapshot::from_array( $payload );
+		$contract->set_plan_snapshot_id(
+			( new SnapshotStore() )->insert( $contract_id, SnapshotStore::TYPE_PLAN, $snapshot->get_selling_plan_id(), $snapshot->to_payload(), $snapshot->get_schema_version() )
+		);
+		( new ContractRepository() )->update_fields( $contract, array( 'plan_snapshot_id' ) );
 	}
 
 	/**
@@ -1802,16 +1984,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract_with_line_item( string $gateway, ?array $pricing_policy, $quantity = 2 ): Contract {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
-				'pricing_policy' => $pricing_policy,
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
+		$plan = $this->plan_view( $this->make_plan( array( 'pricing_policy' => $pricing_policy ) ) );
 
 		$product = new \WC_Product_Simple();
 		$product->set_name( 'Monthly Filters' );
