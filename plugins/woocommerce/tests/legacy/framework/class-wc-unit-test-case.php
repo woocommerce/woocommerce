@@ -139,12 +139,38 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Register post types before each test.
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
+		$this->unregister_stale_attribute_taxonomies();
 
 		CodeHacker::reset_hacks();
 
 		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
+	}
+
+	/**
+	 * Unregister pa_* taxonomies, and drop their $wc_product_attributes entries, once the attribute row is gone.
+	 *
+	 * The per-test rollback deletes the attribute rows a test created but leaves the taxonomies registered,
+	 * and WC_Post_Types::register_taxonomies() does not rebuild them after bootstrap.
+	 */
+	private function unregister_stale_attribute_taxonomies(): void {
+		global $wpdb, $wc_product_attributes;
+
+		// Read the table directly: wc_get_attribute_taxonomies() would fill the attribute cache before the test runs.
+		$attribute_taxonomies = array_map(
+			'wc_attribute_taxonomy_name',
+			$wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" )
+		);
+
+		// Use the registry keys: a renamed attribute's taxonomy object can keep its old name.
+		foreach ( array_keys( get_taxonomies() ) as $taxonomy ) {
+			if ( 0 === strpos( $taxonomy, 'pa_' ) && ! in_array( $taxonomy, $attribute_taxonomies, true ) ) {
+				unregister_taxonomy( $taxonomy );
+			}
+		}
+
+		$wc_product_attributes = array_intersect_key( (array) $wc_product_attributes, array_flip( $attribute_taxonomies ) );
 	}
 
 	/**

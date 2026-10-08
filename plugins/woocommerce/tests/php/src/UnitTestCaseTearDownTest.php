@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests;
 
 /**
- * Tests that WC_Unit_Test_Case clears the WC() singleton state that neither the per-test
- * database rollback nor the hook restore covers.
+ * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton state that survives the
+ * parent teardown, and the attribute taxonomies the rollback leaves registered.
  *
- * This drives clear_wc_singleton_state() directly rather than dirtying state in one test and
+ * This drives the cleanup methods directly rather than dirtying state in one test and
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
  * the suite with --order-by=random or reverse and the assertion half runs first, passes
  * against state nothing has dirtied yet, and stops covering anything without ever going red.
@@ -69,5 +69,26 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
+	}
+
+	/**
+	 * @testdox Setup unregisters pa_* taxonomies that have no attribute row and keeps the ones that do.
+	 */
+	public function test_setup_drops_attribute_taxonomies_without_an_attribute_row(): void {
+		global $wc_product_attributes;
+
+		$kept   = \WC_Helper_Product::create_attribute( 'kept_with_a_row', array() )['attribute_taxonomy'];
+		$leaked = 'pa_leaked_without_a_row';
+		register_taxonomy( $leaked, 'product' );
+		$wc_product_attributes[ $leaked ] = (object) array( 'attribute_name' => 'leaked_without_a_row' );
+
+		$method = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'unregister_stale_attribute_taxonomies' );
+		$method->setAccessible( true );
+		$method->invoke( $this );
+
+		$this->assertFalse( taxonomy_exists( $leaked ), 'A pa_* taxonomy with no attribute row should be unregistered.' );
+		$this->assertArrayNotHasKey( $leaked, $wc_product_attributes, 'An attribute with no row should leave $wc_product_attributes.' );
+		$this->assertTrue( taxonomy_exists( $kept ), 'A pa_* taxonomy with an attribute row should stay registered.' );
+		$this->assertArrayHasKey( $kept, $wc_product_attributes, 'An attribute with a row should stay in $wc_product_attributes.' );
 	}
 }
