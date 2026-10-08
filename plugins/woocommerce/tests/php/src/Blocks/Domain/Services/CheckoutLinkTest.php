@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 
 /**
@@ -80,9 +79,9 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$_GET['coupon']   = 'test-coupon';
 		CouponHelper::create_coupon( 'test-coupon' );
 
-		$service = $this->get_checkout_link_service();
+		$sut = $this->get_checkout_link_service();
 
-		$url                  = $service->get_checkout_link_test();
+		$url                  = $sut->get_checkout_link_test();
 		$cart_by_product      = [];
 		$expected_product_ids = [
 			$legacy_product->get_id(),
@@ -123,7 +122,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	public function test_escaped_product_data_delimiters_are_preserved(): void {
 		$_GET['products'] = '123:1:ratio=10~:20~,wide~;special:note=a~,b~;c:d';
 
-		$service = new class() extends CheckoutLink {
+		$sut = new class() extends CheckoutLink {
 			/**
 			 * Get parsed checkout-link products for testing.
 			 *
@@ -148,7 +147,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 					'cart_item_data' => [ 'note' => 'a,b;c:d' ],
 				],
 			],
-			$service->get_products_test(),
+			$sut->get_products_test(),
 			'Escaped delimiters should be treated as data rather than checkout-link separators.'
 		);
 	}
@@ -163,9 +162,9 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$_GET['products'] = '999999';
 
-		$service = $this->get_checkout_link_service();
+		$sut = $this->get_checkout_link_service();
 
-		$service->get_checkout_link_test();
+		$sut->get_checkout_link_test();
 
 		$this->assertTrue( WC()->cart->is_empty(), 'An unresolved numeric ID must not add a product with the same numeric SKU.' );
 	}
@@ -221,21 +220,30 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Keeps the cart page error when a product that needs options is not published.
+	 * @testdox Keeps the cart page error when the $unpublished product that needs options is not published.
+	 *
+	 * @testWith ["parent", "draft"]
+	 *           ["variation", "private"]
+	 *
+	 * @param string $unpublished Which product to unpublish: the parent or the variation.
+	 * @param string $status      The unpublished status to set.
 	 */
-	public function test_unpublished_product_that_needs_options_redirects_to_cart(): void {
+	public function test_unpublished_product_that_needs_options_redirects_to_cart( string $unpublished, string $status ): void {
 		$variable_product = \WC_Helper_Product::create_variation_product();
 		$any_variation    = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE SMALL' ) );
+		$product          = 'parent' === $unpublished ? $variable_product : $any_variation;
 
-		$variable_product->set_status( ProductStatus::DRAFT );
-		$variable_product->save();
+		$product->set_status( $status );
+		$product->save();
 
 		$_GET['products'] = (string) $any_variation->get_id();
 
 		$url = $this->get_checkout_link_service()->get_checkout_link_test();
 
-		$this->assertStringStartsWith( wc_get_cart_url(), $url, 'An unpublished product page should not be used as the redirect.' );
-		$this->assertStringContainsString( 'wc_error=', $url, 'The add to cart error should still be shown.' );
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+		$this->assertStringNotContainsString( 'attribute_pa_size', $url, 'An unpublished product page should not be used as the redirect.' );
+		$this->assertStringContainsString( 'Missing variation data', $query['wc_error'] ?? '', 'The add to cart error should still be shown.' );
 	}
 
 	/**

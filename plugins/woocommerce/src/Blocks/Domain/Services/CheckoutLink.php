@@ -348,7 +348,7 @@ class CheckoutLink {
 		$is_variation   = $product instanceof \WC_Product_Variation;
 		$parent_product = $is_variation ? wc_get_product( $product->get_parent_id() ) : $product;
 
-		if ( ! $parent_product || ProductStatus::PUBLISH !== $parent_product->get_status() ) {
+		if ( ! $parent_product || ProductStatus::PUBLISH !== $parent_product->get_status() || ProductStatus::PUBLISH !== $product->get_status() ) {
 			return '';
 		}
 
