@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\CouponCodeMock;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
@@ -12,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
  * Tests for the CouponCode block type.
  */
 class CouponCodeTest extends \WP_UnitTestCase {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Mock instance of the CouponCode block.
@@ -28,27 +30,17 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	private Rendering_Context $rendering_context;
 
 	/**
-	 * The original block type registry entry for the CouponCode block.
-	 *
-	 * @var \WP_Block_Type|null
-	 */
-	private $original_block_type;
-
-	/**
 	 * Setup test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		$this->original_block_type = null;
-		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$this->original_block_type = $registry->get_registered( 'woocommerce/coupon-code' );
-			$registry->unregister( 'woocommerce/coupon-code' );
-		}
-
-		$this->mock = new CouponCodeMock();
+		$this->mock = $this->replace_block_type(
+			'woocommerce/coupon-code',
+			static function () {
+				return new CouponCodeMock();
+			}
+		);
 
 		$theme_controller        = Email_Editor_Container::container()->get( Theme_Controller::class );
 		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme(), array() );
@@ -58,17 +50,11 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$registry->unregister( 'woocommerce/coupon-code' );
+		try {
+			$this->restore_block_types();
+		} finally {
+			parent::tearDown();
 		}
-
-		if ( $this->original_block_type ) {
-			$registry->register( $this->original_block_type );
-		}
-
-		parent::tearDown();
 	}
 
 	/**
