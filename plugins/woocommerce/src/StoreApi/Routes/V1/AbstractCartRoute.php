@@ -151,7 +151,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			} catch ( \Exception $error ) {
 				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
 			} catch ( \Throwable $error ) {
-				return $this->add_response_headers( $this->error_to_response( UnexpectedErrorResponse::create( $error, static::class ) ) );
+				$response = UnexpectedErrorResponse::create( $error, static::class );
 			}
 		}
 
