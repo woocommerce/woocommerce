@@ -69,11 +69,30 @@ class Styles_Helper {
 	/**
 	 * Keywords that are color values rather than palette slugs.
 	 *
-	 * The CSS named colors, plus `transparent` and the CSS-wide keywords.
+	 * The CSS named colors, `transparent`, the CSS-wide keywords, and the compound CSS system
+	 * colors. The four single-word system colors (`canvas`, `field`, `mark`, `highlight`) are left
+	 * out on purpose: a system color can only reach a block attribute by hand-edited markup, since
+	 * the editor cannot produce one, while those four are plausible palette slug names. Treating
+	 * them as colors would render an unresolved slug in an OS color rather than the theme's.
 	 *
 	 * @var string[]
 	 */
 	private const COLOR_KEYWORDS = array(
+		'accentcolor',
+		'accentcolortext',
+		'activetext',
+		'buttonborder',
+		'buttonface',
+		'buttontext',
+		'canvastext',
+		'fieldtext',
+		'graytext',
+		'highlighttext',
+		'linktext',
+		'marktext',
+		'selecteditem',
+		'selecteditemtext',
+		'visitedtext',
 		'currentcolor',
 		'inherit',
 		'initial',
