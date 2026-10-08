@@ -100,9 +100,8 @@ class FilterPicker extends Component {
 		if ( prevQuery[ config.param ] !== nextQuery[ [ config.param ] ] ) {
 			const selectedFilter = this.getFilter();
 			if ( selectedFilter && selectedFilter.component === 'Search' ) {
-				/* eslint-disable react/no-did-update-set-state */
 				this.setState( { nav: selectedFilter.path || [] } );
-				/* eslint-enable react/no-did-update-set-state */
+
 				const { param: filterParam, getLabels } =
 					selectedFilter.settings;
 				getLabels( nextQuery[ filterParam ], nextQuery ).then(
