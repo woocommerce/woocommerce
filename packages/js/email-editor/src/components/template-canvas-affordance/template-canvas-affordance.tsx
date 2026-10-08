@@ -65,7 +65,7 @@ const CANVAS_STYLES = `
 .woocommerce-email-editor-template-area-affordance__frame:hover,
 .woocommerce-email-editor-template-area-affordance__frame:focus-visible,
 .woocommerce-email-editor-template-area-affordance__frame.is-active {
-	border-color: var(--wp-components-color-accent, #3858e9);
+	border-color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 	outline: none;
 }
 .woocommerce-email-editor-template-area-affordance__label {
@@ -84,16 +84,16 @@ const CANVAS_STYLES = `
 .woocommerce-email-editor-template-area-affordance__button.components-button {
 	border-radius: 0;
 	box-shadow: none;
-	color: var(--wp-components-color-accent, #3858e9);
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 	height: 48px;
 	padding: 0 18px;
 	white-space: nowrap;
 }
 .woocommerce-email-editor-template-area-affordance__button.components-button:hover:not(:disabled) {
-	color: var(--wp-components-color-accent, #3858e9);
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 }
 .woocommerce-email-editor-template-area-affordance__button.components-button:focus-visible {
-	box-shadow: inset 0 0 0 1.5px var(--wp-components-color-accent, #3858e9);
+	box-shadow: inset 0 0 0 1.5px var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 }
 `;
 

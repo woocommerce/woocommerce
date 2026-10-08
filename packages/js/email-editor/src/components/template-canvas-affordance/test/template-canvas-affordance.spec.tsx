@@ -183,6 +183,31 @@ describe( 'TemplateCanvasAffordance', () => {
 		);
 	} );
 
+	it( 'falls back to the admin theme color for the template area outline', async () => {
+		const iframe = addEditorCanvas();
+		setupUseSelectMock();
+
+		render( <TemplateCanvasAffordance /> );
+
+		await waitFor( () => {
+			expect(
+				iframe.contentDocument?.getElementById(
+					'woocommerce-email-editor-template-area-affordance-style'
+				)
+			).toBeInTheDocument();
+		} );
+
+		const css =
+			iframe.contentDocument?.getElementById(
+				'woocommerce-email-editor-template-area-affordance-style'
+			)?.textContent ?? '';
+
+		expect( css ).toContain( 'var(--wp-admin-theme-color, #3858e9)' );
+		expect( css ).not.toContain(
+			'var(--wp-components-color-accent, #3858e9)'
+		);
+	} );
+
 	it( 'shows the toolbar after the template area is selected', async () => {
 		const iframe = addEditorCanvas();
 		setupUseSelectMock();
