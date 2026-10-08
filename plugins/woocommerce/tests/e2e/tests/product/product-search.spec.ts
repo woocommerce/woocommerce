@@ -53,8 +53,9 @@ test.describe( 'Products > Search and View a product', () => {
 	test( 'can find and open a product from a partial search', async ( {
 		page,
 	} ) => {
+		// Search the second half of the name, which holds its random suffix, so
+		// products from other workers don't match.
 		const searchString = testProduct.name.substring(
-			0,
 			testProduct.name.length / 2
 		);
 

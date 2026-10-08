@@ -29,7 +29,7 @@ const returnToShopTemplate = SHOP_URL
 					},
 				],
 			],
-	  ]
+		]
 	: null;
 
 // Recent WordPress versions center headings through the typography support and no longer

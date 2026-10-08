@@ -76,7 +76,7 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
+		await userEvent.hover( delta );
 		await waitExpectTooltipToShow();
 
 		const tooltip = await screen.findByText( 'Previous year: 500.25' );
@@ -97,7 +97,7 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
+		await userEvent.hover( delta );
 		const tooltip = await screen.findByText( 'Previous year: $500.25' );
 
 		expect( tooltip ).toBeInTheDocument();
@@ -118,7 +118,7 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
+		await userEvent.hover( delta );
 		const tooltip = await screen.findByText( 'Previous year: 500' );
 		expect( tooltip ).toBeInTheDocument();
 
@@ -137,7 +137,7 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 		expectTooltipToBeHidden();
 
-		userEvent.hover( delta );
+		await userEvent.hover( delta );
 		const tooltip = await screen.findByText( 'Previous year: 0' );
 		await waitExpectTooltipToShow();
 		expect( tooltip ).toBeInTheDocument();

@@ -268,58 +268,58 @@ import { ActivityPanelSelectors } from './activity-panel/types';
 export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof SETTINGS_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof PLUGINS_STORE_NAME
-	? PluginSelectors
-	: T extends typeof ONBOARDING_STORE_NAME
-	? OnboardingSelectors
-	: T extends typeof PAYMENT_GATEWAYS_STORE_NAME
-	? PaymentSelectors
-	: T extends typeof PAYMENT_SETTINGS_STORE_NAME
-	? PaymentSettingsSelectors
-	: T extends typeof WOOPAYMENTS_ONBOARDING_STORE_NAME
-	? WooPaymentsOnboardingSelectors
-	: T extends typeof SHIPPING_METHODS_STORE_NAME
-	? ShippingMethodsSelectors
-	: T extends typeof USER_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof OPTIONS_STORE_NAME
-	? OptionsSelectors
-	: T extends typeof NAVIGATION_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof NOTES_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof REPORTS_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof ITEMS_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof COUNTRIES_STORE_NAME
-	? WPDataSelectors
-	: T extends typeof PRODUCTS_STORE_NAME
-	? ProductsSelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	? ProductAttributeSelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
-	? ProductShippingClassSelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
-	? ProductTagSelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
-	? ProductCategorySelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-	? ProductAttributeTermsSelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-	? ProductVariationSelectors
-	: T extends typeof ORDERS_STORE_NAME
-	? OrdersSelectors
-	: T extends typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
-	? ShippingZonesSelectors
-	: T extends typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
-	? TaxClassSelectors
-	: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
-	? ProductFormSelectors
-	: T extends typeof ACTIVITY_PANEL_STORE_NAME
-	? ActivityPanelSelectors
-	: never;
+		? WPDataSelectors
+		: T extends typeof PLUGINS_STORE_NAME
+			? PluginSelectors
+			: T extends typeof ONBOARDING_STORE_NAME
+				? OnboardingSelectors
+				: T extends typeof PAYMENT_GATEWAYS_STORE_NAME
+					? PaymentSelectors
+					: T extends typeof PAYMENT_SETTINGS_STORE_NAME
+						? PaymentSettingsSelectors
+						: T extends typeof WOOPAYMENTS_ONBOARDING_STORE_NAME
+							? WooPaymentsOnboardingSelectors
+							: T extends typeof SHIPPING_METHODS_STORE_NAME
+								? ShippingMethodsSelectors
+								: T extends typeof USER_STORE_NAME
+									? WPDataSelectors
+									: T extends typeof OPTIONS_STORE_NAME
+										? OptionsSelectors
+										: T extends typeof NAVIGATION_STORE_NAME
+											? WPDataSelectors
+											: T extends typeof NOTES_STORE_NAME
+												? WPDataSelectors
+												: T extends typeof REPORTS_STORE_NAME
+													? WPDataSelectors
+													: T extends typeof ITEMS_STORE_NAME
+														? WPDataSelectors
+														: T extends typeof COUNTRIES_STORE_NAME
+															? WPDataSelectors
+															: T extends typeof PRODUCTS_STORE_NAME
+																? ProductsSelectors
+																: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+																	? ProductAttributeSelectors
+																	: T extends typeof EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+																		? ProductShippingClassSelectors
+																		: T extends typeof EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME
+																			? ProductTagSelectors
+																			: T extends typeof EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME
+																				? ProductCategorySelectors
+																				: T extends typeof EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+																					? ProductAttributeTermsSelectors
+																					: T extends typeof EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
+																						? ProductVariationSelectors
+																						: T extends typeof ORDERS_STORE_NAME
+																							? OrdersSelectors
+																							: T extends typeof EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
+																								? ShippingZonesSelectors
+																								: T extends typeof EXPERIMENTAL_TAX_CLASSES_STORE_NAME
+																									? TaxClassSelectors
+																									: T extends typeof EXPERIMENTAL_PRODUCT_FORM_STORE_NAME
+																										? ProductFormSelectors
+																										: T extends typeof ACTIVITY_PANEL_STORE_NAME
+																											? ActivityPanelSelectors
+																											: never;
 
 export interface WCDataSelector {
 	< T extends WCDataStoreName >( storeName: T ): WCSelectorType< T >;
