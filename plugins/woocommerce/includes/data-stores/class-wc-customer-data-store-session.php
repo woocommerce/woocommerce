@@ -55,6 +55,16 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	);
 
 	/**
+	 * Session keys that are not saved to the user, so a newer user record cannot make them stale.
+	 *
+	 * @var string[]
+	 */
+	protected $session_only_keys = array(
+		'is_vat_exempt',
+		'calculated_shipping',
+	);
+
+	/**
 	 * Update the session. Note, this does not persist the data to the DB.
 	 *
 	 * @param WC_Customer $customer Customer object.
@@ -108,16 +118,23 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		$data = (array) WC()->session->get( 'customer' );
 
 		/**
-		 * There is a valid session if $data is not empty, and the ID matches the logged in user ID.
+		 * The session belongs to this customer if $data is not empty, and the ID matches the logged in user ID.
 		 *
-		 * If the user object has been updated since the session was created (based on date_modified) we should not load the session - data should be reloaded.
+		 * If the user object has been updated since the session was created (based on date_modified), values that are also saved
+		 * to the user are reloaded from there instead. Session-only values are still applied, since the user has no newer copy.
 		 *
 		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
 		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
-		if ( isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
+		$is_same_customer = isset( $data['id'] ) && $data['id'] === (string) $customer->get_id();
+		$is_current       = $is_same_customer && isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' );
+
+		if ( $is_same_customer ) {
 			foreach ( $this->session_keys as $session_key ) {
 				if ( in_array( $session_key, array( 'id', 'date_modified' ), true ) ) {
+					continue;
+				}
+				if ( ! $is_current && ! in_array( $session_key, $this->session_only_keys, true ) ) {
 					continue;
 				}
 				$function_key = $session_key;

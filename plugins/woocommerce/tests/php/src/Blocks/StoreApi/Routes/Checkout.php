@@ -3405,6 +3405,40 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox A logged in customer's VAT exemption should survive a failed checkout that saves their account.
+	 */
+	public function test_failed_checkout_keeps_logged_in_customer_vat_exemption() {
+		$customer_id = \WC_Helper_Customer::create_customer( 'vat_exempt_retry', 'password', 'vat-exempt-retry@example.com' )->get_id();
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+		WC()->customer = new \WC_Customer( $customer_id, true );
+		WC()->customer->set_is_vat_exempt( true );
+		WC()->customer->save();
+
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Payment declined.', 400 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$this->assertEquals( 400, $response->get_status(), 'Checkout should fail per the forced-failure hook.' );
+
+		// The session customer is saved on shutdown in a real request.
+		WC()->customer->save();
+
+		$this->assertNotSame(
+			(string) WC()->session->get( 'customer' )['date_modified'],
+			(string) ( new \WC_Customer( $customer_id ) )->get_date_modified( 'edit' ),
+			'Checkout should have saved the account, leaving the session snapshot behind it.'
+		);
+
+		$reloaded_customer = new \WC_Customer( $customer_id, true );
+		$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so the retry is not charged tax.' );
+		$this->assertSame( '123 Test St', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request
