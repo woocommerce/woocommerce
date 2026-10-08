@@ -300,6 +300,8 @@ class MiniCart extends AbstractBlock {
 
 		// The view script module is deliberately not declared in block.json, so it is only
 		// enqueued here and never on the cart and checkout pages handled above.
+		// Classic WordPress scripts cannot be imported into script modules, so expose wp-hooks through its global.
+		wp_enqueue_script( 'wp-hooks' );
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
 		// Enqueue all integration scripts registered for this block.

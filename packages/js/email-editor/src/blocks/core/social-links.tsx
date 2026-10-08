@@ -116,7 +116,7 @@ const disableIconColor =
 		}
 		// we are doing this because we don't want to show the icon color picker in the social links block (we can't change png image color)
 		// and there isn't a great way to remove the icon color from the core block attributes
-		// eslint-disable-next-line @wordpress/i18n-text-domain -- using core label.
+
 		const labelText = __( 'Icon color' );
 		const customCss = `
 		.block-editor-tools-panel-color-gradient-settings__item:has([title="${ labelText }"]) {

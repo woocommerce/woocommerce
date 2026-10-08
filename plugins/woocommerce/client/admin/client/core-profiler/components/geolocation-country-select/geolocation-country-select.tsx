@@ -67,8 +67,8 @@ export const GeolocationCountrySelect = ( {
 	useEffect( () => {
 		const overruled = Boolean(
 			geolocatedLocation &&
-				getCountry( selectedCountry?.key ) !==
-					getCountry( geolocationMatch?.key )
+			getCountry( selectedCountry?.key ) !==
+				getCountry( geolocationMatch?.key )
 		);
 
 		setGeolocationOverruled( overruled );

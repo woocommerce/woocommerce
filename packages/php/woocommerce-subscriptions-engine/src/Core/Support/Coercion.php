@@ -1,9 +1,8 @@
 <?php
 /**
- * ScalarCoercion - shared helpers coercing untyped (mixed) values from storage rows
- * or argument maps into declared scalar types. Each guards before casting (a blind
- * cast on an array/object would warn or fatal) and returns a default when the value
- * is not coercible. WordPress-free Core zone.
+ * Coercion - shared helpers coercing untyped (mixed) values from storage rows or
+ * argument maps into declared scalar and array shapes. Each guards before casting
+ * and falls back when the value is not coercible. WordPress-free Core zone.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Support
  */
@@ -15,11 +14,11 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Support;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Scalar coercion helpers for hydration boundaries.
+ * Scalar and array coercion helpers for hydration and argument boundaries.
  *
  * @internal Engine implementation detail. Not part of the supported extension API.
  */
-final class ScalarCoercion {
+final class Coercion {
 
 	/**
 	 * Static helper only.
@@ -98,5 +97,80 @@ final class ScalarCoercion {
 	 */
 	public static function coerce_float( $value, float $fallback = 0.0 ): float {
 		return is_numeric( $value ) ? (float) $value : $fallback;
+	}
+
+	/**
+	 * Re-key an array as string-keyed, recovering `array<string, mixed>` from an
+	 * `int|string`-keyed array.
+	 *
+	 * @param array<int|string, mixed> $value Array to re-key.
+	 * @return array<string, mixed>
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	public static function coerce_string_keyed( array $value ): array {
+		$result = array();
+		foreach ( $value as $key => $entry ) {
+			$result[ (string) $key ] = $entry;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Coerce a value to a string-keyed array, or null when it is not an array. Only the
+	 * declared type changes: PHP keeps an integer-like key as an int, so a list stays a list.
+	 *
+	 * @param mixed $value The raw value.
+	 * @return array<string, mixed>|null
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	public static function coerce_nullable_string_keyed( $value ): ?array {
+		return is_array( $value ) ? self::coerce_string_keyed( $value ) : null;
+	}
+
+	/**
+	 * Coerce a value to a list of string-keyed rows. A non-array yields an empty
+	 * list; non-array rows are skipped.
+	 *
+	 * @param mixed $value The raw value.
+	 * @return array<int, array<string, mixed>>
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	public static function coerce_list_of_arrays( $value ): array {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$rows = array();
+		foreach ( $value as $row ) {
+			if ( is_array( $row ) ) {
+				$rows[] = self::coerce_string_keyed( $row );
+			}
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Coerce a value to a string-keyed map of string-keyed entries. A non-array
+	 * yields an empty map; non-array entries are skipped.
+	 *
+	 * @param mixed $value The raw value.
+	 * @return array<string, array<string, mixed>>
+	 * @internal Engine implementation detail. Not part of the supported extension API.
+	 */
+	public static function coerce_map_of_arrays( $value ): array {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$map = array();
+		foreach ( $value as $key => $entry ) {
+			if ( is_array( $entry ) ) {
+				$map[ (string) $key ] = self::coerce_string_keyed( $entry );
+			}
+		}
+
+		return $map;
 	}
 }
