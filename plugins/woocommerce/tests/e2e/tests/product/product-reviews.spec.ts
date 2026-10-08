@@ -144,36 +144,57 @@ test.describe( 'Product Reviews', () => {
 			const moderated = reviews[ 0 ];
 			const trashed = reviews[ 1 ];
 
+			// What each row action posts to admin-ajax.php, and the comment_approved
+			// value the response reports once the action succeeds.
+			const moderationActions = {
+				Unapprove: {
+					fields: { action: 'dim-comment', new: 'unapproved' },
+					status: '0',
+				},
+				Approve: {
+					fields: { action: 'dim-comment', new: 'approved' },
+					status: '1',
+				},
+				Spam: {
+					fields: { action: 'delete-comment', spam: '1' },
+					status: 'spam',
+				},
+				Trash: {
+					fields: { action: 'delete-comment', trash: '1' },
+					status: 'trash',
+				},
+			};
+
 			const rowFor = ( id: number ) => page.locator( `#comment-${ id }` );
 			const moderate = async (
 				id: number,
-				action: 'Unapprove' | 'Approve' | 'Spam' | 'Trash'
+				action: keyof typeof moderationActions
 			) => {
-				const expectedFields = {
-					id: `${ id }`,
-					...{
-						Unapprove: { action: 'dim-comment', new: 'unapproved' },
-						Approve: { action: 'dim-comment', new: 'approved' },
-						Spam: { action: 'delete-comment', spam: '1' },
-						Trash: { action: 'delete-comment', trash: '1' },
-					}[ action ],
-				};
-				const response = page.waitForResponse( ( candidate ) => {
-					if ( ! candidate.url().includes( 'admin-ajax.php' ) ) {
-						return false;
-					}
-					const fields = new URLSearchParams(
-						candidate.request().postData() ?? ''
-					);
-					return Object.entries( expectedFields ).every(
-						( [ key, value ] ) => fields.get( key ) === value
-					);
-				} );
+				const { fields, status } = moderationActions[ action ];
+				const expectedFields = { id: String( id ), ...fields };
+
 				await rowFor( id ).hover();
-				await rowFor( id )
-					.getByRole( 'button', { name: action } )
-					.click();
-				expect( ( await response ).ok() ).toBe( true );
+				const [ response ] = await Promise.all( [
+					page.waitForResponse( ( candidate ) => {
+						if ( ! candidate.url().includes( 'admin-ajax.php' ) ) {
+							return false;
+						}
+						const posted = new URLSearchParams(
+							candidate.request().postData() ?? ''
+						);
+						return Object.entries( expectedFields ).every(
+							( [ key, value ] ) => posted.get( key ) === value
+						);
+					} ),
+					rowFor( id )
+						.getByRole( 'button', { name: action } )
+						.click(),
+				] );
+				// admin-ajax.php reports failures with HTTP 200 too, so check the
+				// status the handler sends back rather than the response code.
+				expect( await response.text() ).toContain(
+					`<status><![CDATA[${ status }]]></status>`
+				);
 			};
 
 			await test.step( 'unapprove, then approve again', async () => {
