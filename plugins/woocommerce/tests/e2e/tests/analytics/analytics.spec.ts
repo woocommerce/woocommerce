@@ -746,23 +746,28 @@ test(
 		// `performance-indicators` has no browser owner otherwise. The Jest
 		// suite mocks `@woocommerce/date` wholesale and answers from a fixture
 		// keyed on its own `appendTimestamp` stub, so a renamed endpoint or a
-		// broken date boundary cannot turn it red. Matching on the default
-		// Month to date range makes a wrong `after` or `before` time out here.
+		// broken date boundary cannot turn it red. Month to date runs from the
+		// first of the month up to now. The tiles send `before` as the current
+		// time and can ask again up to 23:59:59 on a re-render, so require any
+		// `before` today that is no earlier than the moment this test started.
 		const now = new Date();
+		const today = toUtcDate( now );
 		const expectedAfter = `${ toUtcDate(
 			new Date( Date.UTC( now.getUTCFullYear(), now.getUTCMonth(), 1 ) )
 		) }T00:00:00`;
-		const expectedBefore = `${ toUtcDate( now ) }T23:59:59`;
+		const startedAt = now.toISOString().slice( 0, 19 );
 
 		const indicatorsResponse = page.waitForResponse( ( response ) => {
 			const requestUrl = new URL( response.url() );
+			const before = requestUrl.searchParams.get( 'before' ) ?? '';
 
 			return (
 				requestUrl.pathname.endsWith(
 					'/wc-analytics/reports/performance-indicators'
 				) &&
 				requestUrl.searchParams.get( 'after' ) === expectedAfter &&
-				requestUrl.searchParams.get( 'before' ) === expectedBefore &&
+				before.startsWith( `${ today }T` ) &&
+				before >= startedAt &&
 				response.ok()
 			);
 		} );
