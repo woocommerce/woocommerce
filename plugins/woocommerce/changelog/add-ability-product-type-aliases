@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add AbilityProductTypes::register(). With ability contracts on, an extension can add a product type alias, so the product abilities create, update and query products of its type.

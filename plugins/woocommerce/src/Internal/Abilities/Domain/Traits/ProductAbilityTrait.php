@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFields;
+use Automattic\WooCommerce\Abilities\AbilityProductTypes;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -313,6 +314,11 @@ trait ProductAbilityTrait {
 			return 'grouped';
 		}
 
+		$alias = AbilityProductTypes::get_alias_for( $product );
+		if ( null !== $alias ) {
+			return $alias;
+		}
+
 		return new \WP_Error(
 			'woocommerce_product_type_unsupported',
 			__( 'Product type is not supported by this ability.', 'woocommerce' ),
@@ -333,7 +339,8 @@ trait ProductAbilityTrait {
 	 * Get product type alias configuration.
 	 *
 	 * The keys are agent-facing product type aliases. Each config maps the alias to a
-	 * WooCommerce product class plus the fields that can be applied to it.
+	 * WooCommerce product class plus the fields that can be applied to it. With ability
+	 * contracts on, the aliases that extensions register follow the Core aliases.
 	 *
 	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props?: array<string, mixed>}>
 	 */
@@ -344,7 +351,7 @@ trait ProductAbilityTrait {
 			array( 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' )
 		);
 
-		return array(
+		$configs = array(
 			'physical'  => array(
 				'wc_type'       => ProductType::SIMPLE,
 				'fields'        => $simple_fields,
@@ -404,6 +411,8 @@ trait ProductAbilityTrait {
 				),
 			),
 		);
+
+		return $configs + AbilityProductTypes::get_all();
 	}
 
 	/**

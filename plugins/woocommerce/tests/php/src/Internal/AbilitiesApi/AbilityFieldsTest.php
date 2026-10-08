@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFields;
+use Automattic\WooCommerce\Abilities\AbilityProductTypes;
 
 /**
  * Extension fields in the output of the product and order abilities.
@@ -236,6 +237,148 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create and update products of a product type alias that an extension registers.
+	 */
+	public function test_registered_product_type_alias_creates_and_updates_products(): void {
+		$this->register_membership_alias();
+		$existing = $this->create_membership_product( 'Gold membership' );
+
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'               => 'Silver membership',
+				'product_type_alias' => 'membership',
+				'regular_price'      => '30',
+			)
+		);
+		$priced  = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $existing->get_id(),
+				'product_type_alias' => 'membership',
+				'regular_price'      => '45',
+			)
+		);
+		$renamed = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $existing->get_id(),
+				'name' => 'Platinum membership',
+			)
+		);
+		wp_cache_flush();
+		$saved = wc_get_product( $existing->get_id() );
+
+		$this->assertNotWPError( $created );
+		$this->assertInstanceOf( TestMembershipProduct::class, wc_get_product( $created['product']['id'] ) );
+		$this->assertSame( '30', $created['product']['regular_price'] );
+		$this->assertNotWPError( $priced );
+		$this->assertNotWPError( $renamed );
+		$this->assertInstanceOf( TestMembershipProduct::class, $saved );
+		$this->assertSame( '45', $saved->get_regular_price() );
+		$this->assertSame( 'Platinum membership', $saved->get_name() );
+	}
+
+	/**
+	 * @testdox Should find the products of a registered alias in a query by that alias.
+	 */
+	public function test_query_by_registered_alias_finds_its_products(): void {
+		$this->register_membership_alias();
+		$membership = $this->create_membership_product( 'Query membership' );
+		\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Query pen' ) );
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'search'             => 'Query',
+				'product_type_alias' => 'membership',
+			)
+		);
+
+		$this->assertSame( array( $membership->get_id() ), array_column( $result['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a field that the registered alias does not accept.
+	 */
+	public function test_registered_alias_refuses_fields_it_does_not_accept(): void {
+		$this->register_membership_alias();
+		$product = $this->create_membership_product( 'Gold membership' );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'membership',
+				'stock_quantity'     => 5,
+			)
+		);
+
+		$this->assertWPError( $result );
+	}
+
+	/**
+	 * @testdox Should ignore a registered alias with the feature off.
+	 */
+	public function test_registered_alias_is_ignored_with_the_feature_off(): void {
+		$this->register_membership_alias();
+		$product = $this->create_membership_product( 'Gold membership' );
+		$this->set_feature( false );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Platinum membership',
+			)
+		);
+		$schema = wp_json_encode( wp_get_ability( 'woocommerce/product-create' )->get_input_schema() );
+
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		$this->assertStringNotContainsString( '"membership"', $schema );
+	}
+
+	/**
+	 * @testdox Should refuse to register an alias that Core already has, or a config without a type and fields.
+	 */
+	public function test_register_refuses_a_core_alias_and_an_incomplete_config(): void {
+		$this->setExpectedIncorrectUsage( AbilityProductTypes::class . '::register' );
+		AbilityProductTypes::register(
+			'physical',
+			array(
+				'wc_type' => 'membership',
+				'fields'  => array( 'name' ),
+			)
+		);
+		AbilityProductTypes::register( 'membership', array( 'fields' => array( 'name' ) ) );
+
+		$this->assertSame( array(), AbilityProductTypes::get_all() );
+	}
+
+	/**
+	 * Register the membership alias and the abilities again, so their schemas list it.
+	 */
+	private function register_membership_alias(): void {
+		AbilityProductTypes::register(
+			'membership',
+			array(
+				'wc_type'       => 'membership',
+				'fields'        => array( 'name', 'regular_price', 'sale_price' ),
+				'product_props' => array( 'virtual' => true ),
+			)
+		);
+	}
+
+	/**
+	 * A saved product of the membership type. It registers the abilities again, so the output schema lists the type.
+	 *
+	 * @param string $name Product name.
+	 * @return \WC_Product
+	 */
+	private function create_membership_product( string $name ): \WC_Product {
+		add_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10, 2 );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => $name ) );
+		wp_set_object_terms( $product->get_id(), 'membership', 'product_type' );
+		wp_cache_flush();
+		$this->set_feature( true );
+		return wc_get_product( $product->get_id() );
+	}
+
+	/**
 	 * Use TestMembershipProduct for the membership product type.
 	 *
 	 * @internal
@@ -424,5 +567,8 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$reported = new \ReflectionProperty( AbilityFields::class, 'reported' );
 		$reported->setAccessible( true );
 		$reported->setValue( null, array() );
+		$aliases = new \ReflectionProperty( AbilityProductTypes::class, 'aliases' );
+		$aliases->setAccessible( true );
+		$aliases->setValue( null, array() );
 	}
 }
