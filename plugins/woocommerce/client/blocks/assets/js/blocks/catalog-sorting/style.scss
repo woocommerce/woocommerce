@@ -4,14 +4,18 @@
 	}
 
 	label {
-		margin-right: 0.25rem;
-		margin-bottom: 0;
+		margin: 0;
+		margin-inline-end: 0.25rem;
 		vertical-align: middle;
 	}
 
 	select.orderby {
 		field-sizing: content;
 		font-size: inherit;
+		font-family: inherit;
+		font-weight: inherit;
+		font-style: inherit;
+		letter-spacing: inherit;
 		vertical-align: middle;
 	}
 

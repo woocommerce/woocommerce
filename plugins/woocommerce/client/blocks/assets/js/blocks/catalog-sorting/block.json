@@ -11,7 +11,14 @@
 			"background": false
 		},
 		"typography": {
-			"fontSize": true
+			"fontSize": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalLetterSpacing": true
+		},
+		"spacing": {
+			"margin": true
 		}
 	},
 	"viewScriptModule": "woocommerce/catalog-sorting",
