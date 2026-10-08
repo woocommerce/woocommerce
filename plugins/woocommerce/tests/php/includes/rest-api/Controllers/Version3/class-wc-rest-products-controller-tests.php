@@ -365,6 +365,29 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox SKU search works when another filter joins the lookup table under a different alias.
+	 */
+	public function test_search_sku_with_differently_aliased_lookup_join(): void {
+		global $wpdb;
+
+		add_filter(
+			'posts_join',
+			static function ( $join ) use ( $wpdb ) {
+				return $join . " LEFT JOIN {$wpdb->wc_product_meta_lookup} ext ON {$wpdb->posts}.ID = ext.product_id ";
+			},
+			5
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params( array( 'search_sku' => 'waffle-2' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The request should succeed.' );
+		$this->assertSame( '', $wpdb->last_error, 'The SKU search query should remain valid.' );
+		$this->assertSame( array( self::$products[2]->get_id() ), wp_list_pluck( $response->get_data(), 'id' ), 'The matching product should be returned.' );
+	}
+
+	/**
 	 * Test that using the `search` and `search_sku` parameters together only matches when both match.
 	 *
 	 * @return void
