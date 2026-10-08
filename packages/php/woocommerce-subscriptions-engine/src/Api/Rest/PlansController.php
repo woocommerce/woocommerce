@@ -307,7 +307,7 @@ final class PlansController extends WP_REST_Controller {
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
-			return $this->invalid_fields_error();
+			return $this->invalid_error( $e->getMessage() );
 		} catch ( RuntimeException $e ) {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_create_failed' );
 		}
@@ -340,7 +340,7 @@ final class PlansController extends WP_REST_Controller {
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
-			return $this->invalid_fields_error();
+			return $this->invalid_error( $e->getMessage() );
 		} catch ( RuntimeException $e ) {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_update_failed' );
 		}
@@ -576,16 +576,6 @@ final class PlansController extends WP_REST_Controller {
 			$code,
 			__( 'The plan could not be saved.', 'woocommerce-subscriptions-engine' ),
 			array( 'status' => 500 )
-		);
-	}
-
-	/**
-	 * Error for plan fields the facade refused: an empty name, an unregistered status,
-	 * or a policy that is not a JSON object or null.
-	 */
-	private function invalid_fields_error(): WP_Error {
-		return $this->invalid_error(
-			__( 'Invalid plan fields: the name must not be empty, the status must be a registered plan status, and each policy must be a JSON object or null.', 'woocommerce-subscriptions-engine' )
 		);
 	}
 

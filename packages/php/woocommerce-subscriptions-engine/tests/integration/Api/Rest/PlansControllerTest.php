@@ -332,7 +332,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$patched_data = $this->response_data( $patched );
 		$this->assertSame( $patch_code, $patched_data['code'] );
 		$this->assertIsString( $patched_data['message'] );
-		$this->assertStringNotContainsString( 'Plans:', $patched_data['message'], 'REST errors use the controller message, not the facade text.' );
+		if ( 'woocommerce_subscriptions_engine_invalid_plan' === $patch_code ) {
+			$this->assertStringContainsString( 'pricing_policy', $patched_data['message'], 'REST errors carry the facade message, which names the invalid field.' );
+		}
 
 		// The rejected writes left the plan untouched and created nothing.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
@@ -351,6 +353,26 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			'list'   => array( array( array( 'type' => 'bogo' ) ), 'woocommerce_subscriptions_engine_invalid_plan', 'woocommerce_subscriptions_engine_invalid_plan' ),
 			'string' => array( 'bogo', 'rest_invalid_param', 'woocommerce_subscriptions_engine_invalid_plan' ),
 		);
+	}
+
+	public function test_update_rejects_an_empty_name_with_a_message_naming_the_field(): void {
+		wp_set_current_user( $this->admin_id );
+		$id = $this->create_plan( 'Monthly' );
+
+		$patched = $this->request(
+			'PATCH',
+			self::BASE . '/' . $id,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+			)
+		);
+
+		$this->assertSame( 400, $patched->get_status() );
+		$data = $this->response_data( $patched );
+		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $data['code'] );
+		$this->assertIsString( $data['message'] );
+		$this->assertStringContainsString( 'name', $data['message'] );
 	}
 
 	public function test_validate_action_receives_errors_a_plan_view_and_slug(): void {
