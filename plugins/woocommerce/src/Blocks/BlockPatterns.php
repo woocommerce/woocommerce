@@ -101,6 +101,7 @@ class BlockPatterns {
 				continue;
 			}
 
+			// Performance note: don't add file_exists, the transient is path mtime aware and delivers relevant results.
 			$pattern_path        = $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source']   = $pattern_path;
 			$pattern['filePath'] = $pattern_path;
