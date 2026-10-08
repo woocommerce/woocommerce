@@ -198,8 +198,9 @@ class WC_Admin_Addons {
 
 		// get_sections() returns false when the request fails, and the filter can return anything.
 		$sections         = self::get_sections();
+		$sections         = is_array( $sections ) ? $sections : array();
 		$allowed_sections = array();
-		foreach ( is_array( $sections ) ? $sections : array() as $section_object ) {
+		foreach ( $sections as $section_object ) {
 			if ( is_object( $section_object ) && isset( $section_object->slug ) && is_string( $section_object->slug ) ) {
 				$allowed_sections[] = $section_object->slug;
 			}
