@@ -195,8 +195,7 @@ jobs:
       # IS available) would have to repeat the path on every step that needs it.
       # The file's presence is what triggers the annotation, so it must mean exactly
       # "phpcs failed": if another linter ever emits a checkstyle report, it needs
-      # its own variable and file, never this one. eslint-branch.sh does the same with
-      # an ESLint JSON report for the 'Lint: JS inline annotations' step.
+      # its own variable and file, never this one.
       - name: 'Set the lint report paths'
         run: |
           echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
@@ -234,11 +233,8 @@ jobs:
             cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
           fi
 
-      # The JS counterpart of the step above, kept as its own step so its findings
-      # get their own ~10 error and ~10 warning annotations instead of sharing them
-      # with PHPCS. ESLint 10 has no checkstyle formatter, so jq turns the JSON report
-      # into workflow commands directly. ESLint reports absolute paths; annotations
-      # need them relative to the repository root.
+      # A separate step so JS findings don't share PHPCS's annotation limit. ESLint 10
+      # has no checkstyle formatter for cs2pr, so jq converts its JSON report instead.
       - name: 'Lint: JS inline annotations'
         if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
         run: |
