@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests;
 
 /**
- * Tests that WC_Unit_Test_Case clears the WC() singleton state that neither the per-test
- * database rollback nor the hook restore covers.
+ * Tests the state cleanup in WC_Unit_Test_Case: the WC() singleton state that survives the
+ * parent teardown, and the attribute taxonomies the rollback leaves registered.
  *
- * This drives clear_wc_singleton_state() directly rather than dirtying state in one test and
+ * This drives the cleanup methods directly rather than dirtying state in one test and
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
  * the suite with --order-by=random or reverse and the assertion half runs first, passes
  * against state nothing has dirtied yet, and stops covering anything without ever going red.
@@ -72,33 +72,23 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Setup drops a pa_* taxonomy and $wc_product_attributes entry whose attribute row is gone, and keeps the ones with a row.
+	 * @testdox Setup unregisters pa_* taxonomies that have no attribute row and keeps the ones that do.
 	 */
 	public function test_setup_drops_attribute_taxonomies_without_an_attribute_row(): void {
 		global $wc_product_attributes;
 
-		$previous_attributes = $wc_product_attributes;
-		$kept                = \WC_Helper_Product::create_attribute( 'kept_with_a_row', array() )['attribute_taxonomy'];
-		$leaked              = 'pa_leaked_without_a_row';
+		$kept   = \WC_Helper_Product::create_attribute( 'kept_with_a_row', array() )['attribute_taxonomy'];
+		$leaked = 'pa_leaked_without_a_row';
 		register_taxonomy( $leaked, 'product' );
 		$wc_product_attributes[ $leaked ] = (object) array( 'attribute_name' => 'leaked_without_a_row' );
 
-		try {
-			$method = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'unregister_stale_attribute_taxonomies' );
-			$method->setAccessible( true );
-			$method->invoke( $this );
+		$method = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'unregister_stale_attribute_taxonomies' );
+		$method->setAccessible( true );
+		$method->invoke( $this );
 
-			$this->assertFalse( taxonomy_exists( $leaked ), 'A pa_* taxonomy with no attribute row should be unregistered.' );
-			$this->assertArrayNotHasKey( $leaked, $wc_product_attributes, 'An attribute with no row should leave $wc_product_attributes.' );
-			$this->assertTrue( taxonomy_exists( $kept ), 'A pa_* taxonomy with an attribute row should stay registered.' );
-			$this->assertArrayHasKey( $kept, $wc_product_attributes, 'An attribute with a row should stay in $wc_product_attributes.' );
-		} finally {
-			$wc_product_attributes = $previous_attributes; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global this test changed.
-			foreach ( array( $kept, $leaked ) as $taxonomy ) {
-				if ( taxonomy_exists( $taxonomy ) ) {
-					unregister_taxonomy( $taxonomy );
-				}
-			}
-		}
+		$this->assertFalse( taxonomy_exists( $leaked ), 'A pa_* taxonomy with no attribute row should be unregistered.' );
+		$this->assertArrayNotHasKey( $leaked, $wc_product_attributes, 'An attribute with no row should leave $wc_product_attributes.' );
+		$this->assertTrue( taxonomy_exists( $kept ), 'A pa_* taxonomy with an attribute row should stay registered.' );
+		$this->assertArrayHasKey( $kept, $wc_product_attributes, 'An attribute with a row should stay in $wc_product_attributes.' );
 	}
 }

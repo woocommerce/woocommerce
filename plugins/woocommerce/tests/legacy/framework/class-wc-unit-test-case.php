@@ -149,10 +149,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Unregister the pa_* taxonomies, and drop the $wc_product_attributes entries, whose attribute rows are gone.
+	 * Unregister pa_* taxonomies, and drop their $wc_product_attributes entries, once the attribute row is gone.
 	 *
-	 * WC_Post_Types::register_taxonomies() only runs once per process, and the rollback deletes the attribute rows a test created
-	 * without touching either, so a later test would otherwise see attributes that no longer exist.
+	 * The per-test rollback deletes the attribute rows a test created but leaves the taxonomies registered,
+	 * and WC_Post_Types::register_taxonomies() does not rebuild them after bootstrap.
 	 */
 	private function unregister_stale_attribute_taxonomies(): void {
 		global $wpdb, $wc_product_attributes;
@@ -163,6 +163,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			$wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" )
 		);
 
+		// Use the registry keys: a renamed attribute's taxonomy object can keep its old name.
 		foreach ( array_keys( get_taxonomies() ) as $taxonomy ) {
 			if ( 0 === strpos( $taxonomy, 'pa_' ) && ! in_array( $taxonomy, $attribute_taxonomies, true ) ) {
 				unregister_taxonomy( $taxonomy );
