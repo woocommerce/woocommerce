@@ -157,6 +157,19 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertTrue( Styles_Helper::is_color_literal( 'rebeccapurple' ) );
 		$this->assertTrue( Styles_Helper::is_color_literal( 'RED' ) );
 
+		// Compound CSS system colors.
+		$this->assertTrue( Styles_Helper::is_color_literal( 'buttontext' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'canvastext' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'linktext' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'accentcolor' ) );
+
+		// The four single-word system colors stay out, because they are plausible palette slugs and
+		// nothing in the editor can produce them as colors. See self::COLOR_KEYWORDS.
+		$this->assertFalse( Styles_Helper::is_color_literal( 'canvas' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'field' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'mark' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'highlight' ) );
+
 		// An identifier that is not a color is a slug nothing defines.
 		$this->assertFalse( Styles_Helper::is_color_literal( 'theme-4' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( 'primary' ) );
@@ -232,6 +245,78 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 
 		// A CSS named color no palette defines renders as that color rather than being dropped.
 		$this->assertSame( 'blue', Styles_Helper::resolve_color_from_palette( $settings, 'blue' ) );
+	}
+
+	/**
+	 * Color slug values observed on real emails, and what each should resolve to.
+	 *
+	 * Seeded from a read-only sample of sent newsletters whose blocks name a color slug, which is
+	 * what caught the CSS-named-color regression that syntax review did not. The point of the table
+	 * is to keep answering "does this still match real data?" rather than "did we think of every
+	 * CSS color syntax?" -- so append to it when a new value turns up in the wild, rather than
+	 * reasoning about whether the matcher covers its shape.
+	 *
+	 * `null` means the value must resolve to nothing, so the caller omits the declaration and the
+	 * block keeps the surrounding theme color.
+	 *
+	 * @return array<string, array{string, string|null}>
+	 */
+	public function observedColorSlugProvider(): array {
+		return array(
+			// Theme palette slugs left behind by a theme switch, or from a palette the email does
+			// not carry. These are the values the fix exists for.
+			'theme palette slug'          => array( 'theme-4', null ),
+			'semantic slug'               => array( 'primary', null ),
+			'semantic slug, foreground'   => array( 'foreground', null ),
+			'hyphenated gray slug'        => array( 'dark-gray', null ),
+			'hyphenated gray slug, light' => array( 'light-gray', null ),
+
+			// Slugs that happen to be CSS color names, with no palette entry behind them. These
+			// rendered as valid CSS before the fix, so dropping them is a visible regression.
+			'named color, gray'           => array( 'gray', 'gray' ),
+			'named color, blue'           => array( 'blue', 'blue' ),
+			'named color, green'          => array( 'green', 'green' ),
+			'named color, orange'         => array( 'orange', 'orange' ),
+
+			// Literal colors, which reach these attributes too and must pass through untouched.
+			'hex'                         => array( '#abcdef', '#abcdef' ),
+			'rgb'                         => array( 'rgb(1, 2, 3)', 'rgb(1, 2, 3)' ),
+			'preset variable'             => array( 'var(--wp--preset--color--base)', 'var(--wp--preset--color--base)' ),
+		);
+	}
+
+	/**
+	 * Test every observed slug value resolves the way it should against a palette that defines none of them.
+	 *
+	 * @dataProvider observedColorSlugProvider
+	 *
+	 * @param string      $value    Value of a color block attribute.
+	 * @param string|null $expected Expected color, or null when nothing should be emitted.
+	 */
+	public function testItResolvesObservedColorSlugs( string $value, ?string $expected ): void {
+		// A palette that defines none of the values above, standing in for an email whose theme has
+		// changed since the post was written.
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'theme' => array(
+						array(
+							'slug'  => 'base',
+							'color' => '#ffffff',
+						),
+						array(
+							'slug'  => 'contrast',
+							'color' => '#000000',
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertSame(
+			null === $expected ? '' : $expected,
+			Styles_Helper::resolve_color_from_palette( $settings, $value )
+		);
 	}
 
 	/**
