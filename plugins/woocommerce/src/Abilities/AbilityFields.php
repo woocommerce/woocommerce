@@ -57,6 +57,10 @@ class AbilityFields {
 			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array.', '11.3.0' );
 			return;
 		}
+		if ( isset( $args['get_callback'] ) && ! is_callable( $args['get_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
 
 		self::$fields[ $object_type ][ $attribute ] = $args;
 	}
@@ -73,7 +77,7 @@ class AbilityFields {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions`. A field that reads null is left out, and the key is left out
+	 * `extensions`. A field that reads null or throws is left out, and the key is left out
 	 * when no field has a value or the feature is off.
 	 *
 	 * @internal
@@ -90,7 +94,15 @@ class AbilityFields {
 
 		$values = array();
 		foreach ( self::get( $object_type ) as $attribute => $field ) {
-			$value = isset( $field['get_callback'] ) ? call_user_func( $field['get_callback'], $subject ) : null;
+			try {
+				$value = isset( $field['get_callback'] ) ? call_user_func( $field['get_callback'], $subject ) : null;
+			} catch ( \Throwable $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Ability field "%s" of "%s" failed: %s', $attribute, $object_type, $e->getMessage() ),
+					array( 'source' => 'ability-fields' )
+				);
+				continue;
+			}
 			if ( null !== $value ) {
 				$values[ $attribute ] = $value;
 			}

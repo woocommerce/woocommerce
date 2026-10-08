@@ -286,6 +286,45 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a field whose get_callback is not callable.
+	 */
+	public function test_field_with_uncallable_get_callback_is_refused(): void {
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Abilities\AbilityFields::register' );
+
+		AbilityFields::register(
+			'product',
+			'test_bad',
+			array(
+				'schema'       => self::CODE_SCHEMA,
+				'get_callback' => 'not_a_function',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'test_bad', AbilityFields::get( 'product' ) );
+	}
+
+	/**
+	 * @testdox Should leave out a field whose get_callback throws, and keep the other fields.
+	 */
+	public function test_field_that_throws_is_left_out(): void {
+		AbilityFields::register(
+			'order',
+			'test_broken',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static function () {
+					throw new \RuntimeException( 'Broken' );
+				},
+			)
+		);
+		$order = \WC_Helper_Order::create_order();
+
+		$output = AbilityFields::add_to_output( array(), 'order', $order );
+
+		$this->assertSame( array( 'test_note' => 'order-' . $order->get_id() ), $output['extensions'] );
+	}
+
+	/**
 	 * Set the feature and register the abilities again.
 	 *
 	 * @param bool $enabled Whether the feature is on.
