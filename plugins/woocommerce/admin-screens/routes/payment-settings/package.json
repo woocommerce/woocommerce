@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/settings-route",
+	"name": "@woocommerce/payment-settings",
 	"private": true,
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",

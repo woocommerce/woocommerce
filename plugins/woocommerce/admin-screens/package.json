@@ -17,7 +17,7 @@
 		}
 	},
 	"dependencies": {
-		"@woocommerce/settings-route": "workspace:*"
+		"@woocommerce/payment-settings": "workspace:*"
 	},
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
