@@ -147,10 +147,22 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertTrue( Styles_Helper::is_color_literal( 'currentColor' ) );
 		$this->assertTrue( Styles_Helper::is_color_literal( 'inherit' ) );
 
-		// A bare identifier cannot be told apart from a palette slug, so it is not a literal.
+		// CSS named colors. Real emails use these as color slugs with no palette entry behind them,
+		// and they rendered as valid CSS before the palette lookup started dropping unmatched slugs.
+		$this->assertTrue( Styles_Helper::is_color_literal( 'blue' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'gray' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'green' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'orange' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'lightgray' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'rebeccapurple' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'RED' ) );
+
+		// An identifier that is not a color is a slug nothing defines.
 		$this->assertFalse( Styles_Helper::is_color_literal( 'theme-4' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( 'primary' ) );
-		$this->assertFalse( Styles_Helper::is_color_literal( 'red' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'foreground' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'dark-gray' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'light-gray' ) );
 		$this->assertFalse( Styles_Helper::is_color_literal( '' ) );
 	}
 
@@ -217,6 +229,32 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '#012345', Styles_Helper::resolve_color_from_palette( $settings, '#012345' ) );
 		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( array(), 'theme-4' ) );
 		$this->assertSame( '#012345', Styles_Helper::resolve_color_from_palette( array(), '#012345' ) );
+
+		// A CSS named color no palette defines renders as that color rather than being dropped.
+		$this->assertSame( 'blue', Styles_Helper::resolve_color_from_palette( $settings, 'blue' ) );
+	}
+
+	/**
+	 * Test a palette entry wins over a CSS color of the same name.
+	 *
+	 * This is why treating a named color as a literal is safe: the lookup searches every origin
+	 * first, so a theme that names a swatch `blue` still gets its own color.
+	 */
+	public function testItPrefersAPaletteEntryOverASameNamedCssColor(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'theme' => array(
+						array(
+							'slug'  => 'blue',
+							'color' => '#0000AA',
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertSame( '#0000aa', Styles_Helper::resolve_color_from_palette( $settings, 'blue' ) );
 	}
 
 	/**

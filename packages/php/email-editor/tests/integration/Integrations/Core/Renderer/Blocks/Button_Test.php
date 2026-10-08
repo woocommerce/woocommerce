@@ -101,6 +101,39 @@ class Button_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test an unresolvable background color slug falls back to the theme's button color.
+	 */
+	public function testItFallsBackToThemeColorForUnresolvableBackgroundSlug(): void {
+		$this->parsed_button['attrs']['backgroundColor'] = 'theme-4';
+		unset( $this->parsed_button['attrs']['style']['color']['background'] );
+
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
+
+		// The slug never reaches the markup as a color, and nothing claims a background is set.
+		$this->assertStringNotContainsString( 'theme-4', $output );
+		$this->assertStringNotContainsString( 'background-color:;', $output );
+	}
+
+	/**
+	 * Test the cell's class attribute has no stray leading space.
+	 *
+	 * The cell's class list is the style engine's class names joined to the block's own. With no
+	 * background color to resolve the style engine contributes none, which used to leave
+	 * `class=" wp-block-button"`.
+	 */
+	public function testItRendersCellClassWithoutLeadingSpace(): void {
+		$this->parsed_button['attrs']['backgroundColor'] = 'theme-4';
+
+		// No color styles at all, so the style engine contributes no class names. With a text color
+		// set it emits `has-text-color` and the leading space cannot occur.
+		unset( $this->parsed_button['attrs']['style']['color'] );
+
+		$output = $this->button_renderer->render( $this->parsed_button['innerHTML'], $this->parsed_button, $this->rendering_context );
+
+		$this->assertStringNotContainsString( 'class=" ', $output );
+	}
+
+	/**
 	 * Test it renders colors
 	 */
 	public function testItRendersColors(): void {
