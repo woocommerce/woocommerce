@@ -19,6 +19,7 @@ const singletonWpModules = [
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
+	'@wordpress/hooks',
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
@@ -133,7 +134,6 @@ module.exports = {
 		'<rootDir>/vendor/',
 		'<rootDir>/tests/',
 	],
-	roots: [ '<rootDir>', '<rootDir>/../legacy/js' ],
 	resolver: '<rootDir>/tests/js/scripts/resolver.js',
 	transform: {
 		'^.+\\.(js|ts|tsx)$': '<rootDir>/tests/js/scripts/babel-transformer.js',

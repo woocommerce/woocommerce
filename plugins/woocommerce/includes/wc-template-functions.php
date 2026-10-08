@@ -4292,7 +4292,8 @@ function wc_display_product_attributes( $product ) {
 				$value_name = esc_html( $attribute_value->name );
 
 				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
-					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+					$term_link = get_term_link( $attribute_value->term_id, $attribute->get_name() );
+					$values[]  = is_wp_error( $term_link ) ? $value_name : '<a href="' . esc_url( $term_link ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
 				}
@@ -4576,7 +4577,7 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_na
 			$value = rawurldecode( (string) $value );
 
 			// Check the display value against the title.
-			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name ) ) {
+			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name, $cart_item['data'] ) ) {
 				continue;
 			}
 
