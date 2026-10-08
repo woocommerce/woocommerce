@@ -90,7 +90,8 @@ export const getScreenFromPath = ( path = getPath() ) => {
  * @return {Set<number>} List of IDs converted to a set of integers.
  */
 export function getSetOfIdsFromQuery( queryString = '' ) {
-	return new Set( // Return only unique ids.
+	return new Set(
+		// Return only unique ids.
 		queryString
 			.split( ',' )
 			.map( ( id ) => parseInt( id, 10 ) )

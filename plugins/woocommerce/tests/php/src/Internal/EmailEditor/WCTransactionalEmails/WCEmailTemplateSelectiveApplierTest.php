@@ -44,6 +44,10 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
+		// Eagerly boot \WC_Emails so the \WC_Email class is autoloaded before any
+		// test reflects on it via getMockBuilder() / onlyMethods().
+		\WC_Emails::instance();
+
 		$this->fixtures_base = __DIR__ . '/fixtures/';
 		$this->posts_manager = WCTransactionalEmailPostsManager::get_instance();
 

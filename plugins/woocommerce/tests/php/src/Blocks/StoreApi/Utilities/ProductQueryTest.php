@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
- * Unit tests for the ProductQuery::get_last_modified() caching behavior.
+ * Unit tests for the ProductQuery class.
  */
 class ProductQueryTest extends \WC_Unit_Test_Case {
 
@@ -213,5 +213,93 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $second_result );
 		$this->assertNotFalse( wp_cache_get( 'last_modified', 'wc_products' ) );
+	}
+
+	/**
+	 * @testdox Slug filters containing double quotes are safely prepared when NO_BACKSLASH_ESCAPES is enabled.
+	 */
+	public function test_slug_filter_with_double_quote_is_prepared_with_no_backslash_escapes(): void {
+		global $wpdb;
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name' => 'Slug filter product',
+				'slug' => 'slug-filter-product',
+			)
+		);
+		$sql_mode = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+
+		try {
+			$wpdb->query( "SET SESSION sql_mode = 'NO_BACKSLASH_ESCAPES'" );
+			$this->assertSame( 'NO_BACKSLASH_ESCAPES', $wpdb->get_var( 'SELECT @@SESSION.sql_mode' ), 'The test requires NO_BACKSLASH_ESCAPES.' );
+			$matching_ids = $this->get_product_ids_for_slug_filter( $product->get_slug() . '"' );
+			$last_error   = $wpdb->last_error;
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $sql_mode ) );
+		}
+
+		$this->assertSame( '', $last_error, 'The slug filter query should remain valid SQL.' );
+		$this->assertNotContains( $product->get_id(), $matching_ids, 'The slug value must be matched literally.' );
+	}
+
+	/**
+	 * @testdox Slug filters support single and comma-separated values when NO_BACKSLASH_ESCAPES is enabled.
+	 */
+	public function test_slug_filter_supports_valid_values_with_no_backslash_escapes(): void {
+		global $wpdb;
+
+		$fixtures = new FixtureData();
+		$product1 = $fixtures->get_simple_product(
+			array(
+				'name' => 'First slug filter product',
+				'slug' => 'first-slug-filter-product',
+			)
+		);
+		$product2 = $fixtures->get_simple_product(
+			array(
+				'name' => 'Second slug filter product',
+				'slug' => 'second-slug-filter-product',
+			)
+		);
+		$sql_mode = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+
+		try {
+			$wpdb->query( "SET SESSION sql_mode = 'NO_BACKSLASH_ESCAPES'" );
+			$single_slug_ids   = $this->get_product_ids_for_slug_filter( $product1->get_slug() );
+			$multiple_slug_ids = $this->get_product_ids_for_slug_filter( $product1->get_slug() . ',' . $product2->get_slug() );
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $sql_mode ) );
+		}
+
+		$this->assertSame( array( $product1->get_id() ), $single_slug_ids, 'A single slug should return the matching product.' );
+		$this->assertEqualsCanonicalizing(
+			array( $product1->get_id(), $product2->get_id() ),
+			$multiple_slug_ids,
+			'Comma-separated slugs should return all matching products.'
+		);
+	}
+
+	/**
+	 * Get product IDs matched by a Store API slug filter.
+	 *
+	 * @param string $slug_filter Slug filter value.
+	 * @return int[]
+	 */
+	private function get_product_ids_for_slug_filter( string $slug_filter ): array {
+		global $wpdb;
+
+		$wp_query = new \WP_Query();
+		$wp_query->set( 'slug', $slug_filter );
+		$clauses = $this->product_query->add_query_clauses(
+			array(
+				'join'  => '',
+				'where' => '',
+			),
+			$wp_query
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- The slug query clause is prepared by ProductQuery.
+		return array_map( 'intval', $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product'{$clauses['where']}" ) );
 	}
 }

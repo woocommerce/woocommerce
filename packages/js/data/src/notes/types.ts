@@ -11,20 +11,10 @@ export type NoteAction = {
 };
 
 export type NoteStatus =
-	| 'pending'
-	| 'unactioned'
-	| 'actioned'
-	| 'snoozed'
-	| 'sent';
+	'pending' | 'unactioned' | 'actioned' | 'snoozed' | 'sent';
 
 export type NoteType =
-	| 'error'
-	| 'warning'
-	| 'update'
-	| 'info'
-	| 'marketing'
-	| 'survey'
-	| 'email';
+	'error' | 'warning' | 'update' | 'info' | 'marketing' | 'survey' | 'email';
 
 // [Notes.php](https://github.com/woocommerce/woocommerce/blob/af97aaf41067bcd0b7ff12df9b6169f97c326c0f/plugins/woocommerce/src/Admin/API/Notes.php#L706-L822)
 export type Note = {

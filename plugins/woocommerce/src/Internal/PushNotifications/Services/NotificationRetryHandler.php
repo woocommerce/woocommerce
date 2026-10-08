@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Exception;
 
 /**
@@ -56,6 +55,26 @@ class NotificationRetryHandler {
 	);
 
 	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
+	 * Initialize injected dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationStepLogger $step_logger The step logger.
+	 *
+	 * @since 11.3.0
+	 */
+	final public function init( NotificationStepLogger $step_logger ): void {
+		$this->step_logger = $step_logger;
+	}
+
+	/**
 	 * Registers the ActionScheduler hook for retry jobs.
 	 *
 	 * @return void
@@ -89,14 +108,18 @@ class NotificationRetryHandler {
 		$next_attempt = max( 0, $current_attempt ) + 1;
 
 		if ( $next_attempt > self::MAX_RETRIES || ! isset( self::BACKOFF_SCHEDULE[ $next_attempt ] ) ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'exhausted',
+				'error',
 				sprintf(
 					'Push notification permanently failed after %d attempts (type=%s, resource_id=%d).',
 					$next_attempt,
 					$notification->get_type(),
 					$notification->get_resource_id()
 				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array( 'attempt' => $current_attempt )
 			);
 			$notification->reset_processing_meta();
 			return;
@@ -105,7 +128,11 @@ class NotificationRetryHandler {
 		$delay = $retry_after ?? self::BACKOFF_SCHEDULE[ $next_attempt ];
 
 		if ( $delay > self::MAX_RETRY_DELAY ) {
-			wc_get_logger()->warning(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'delay_too_long',
+				'warning',
 				sprintf(
 					'Push notification dropped: retry delay %ds exceeds maximum %ds (type=%s, resource_id=%d).',
 					$delay,
@@ -113,7 +140,10 @@ class NotificationRetryHandler {
 					$notification->get_type(),
 					$notification->get_resource_id()
 				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array(
+					'attempt' => $current_attempt,
+					'delay'   => $delay,
+				)
 			);
 			$notification->reset_processing_meta();
 			return;
@@ -147,17 +177,33 @@ class NotificationRetryHandler {
 		);
 
 		if ( ! $action_id ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'schedule_failed',
+				'error',
 				sprintf(
 					'Push notification retry could not be scheduled (type=%s, resource_id=%d, attempt=%d).',
 					$notification->get_type(),
 					$notification->get_resource_id(),
 					$next_attempt
 				),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array( 'attempt' => $current_attempt )
 			);
 			$notification->reset_processing_meta();
+			return;
 		}
+
+		$this->step_logger->log_notification_step(
+			$notification,
+			'retry',
+			'scheduled',
+			array(
+				'attempt'      => $current_attempt,
+				'next_attempt' => $next_attempt,
+				'delay'        => $delay,
+			)
+		);
 	}
 
 	/**
@@ -188,9 +234,16 @@ class NotificationRetryHandler {
 				) + $extra
 			);
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_unattributed_failure(
+				'retry',
+				'invalid_notification',
+				'error',
 				sprintf( 'Retry failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+					'attempt'     => $attempt,
+				)
 			);
 			return;
 		}
@@ -202,9 +255,13 @@ class NotificationRetryHandler {
 				$attempt
 			);
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'exception',
+				'error',
 				sprintf( 'Retry failed: %s', $e->getMessage() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
+				array( 'attempt' => $attempt )
 			);
 			$this->schedule( $notification, null, $attempt );
 		}

@@ -566,6 +566,39 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should count notifications when the database runs with ONLY_FULL_GROUP_BY.
+	 */
+	public function test_query_notifications_with_return_type_count_under_only_full_group_by(): void {
+		global $wpdb;
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->save();
+
+		$notification_2 = new Notification();
+		$notification_2->set_product_id( 1 );
+		$notification_2->set_user_id( 2 );
+		$notification_2->save();
+
+		$original_sql_mode = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+		$wpdb->query( "SET SESSION sql_mode = 'ONLY_FULL_GROUP_BY'" );
+
+		try {
+			$count = $this->data_store->query(
+				array(
+					'return'   => 'count',
+					'order_by' => array( 'id' => 'DESC' ),
+				)
+			);
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $original_sql_mode ) );
+		}
+
+		$this->assertSame( 2, $count, 'The count should ignore order_by instead of failing the query' );
+	}
+
+	/**
 	 * Test querying notifications with a return type of ids.
 	 */
 	public function test_query_notifications_with_return_type_ids() {

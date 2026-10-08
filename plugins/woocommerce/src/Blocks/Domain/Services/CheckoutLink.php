@@ -88,30 +88,123 @@ class CheckoutLink {
 	/**
 	 * Get the products from the checkout link.
 	 *
-	 * @return array The products (keys) and their quantities (values).
+	 * Products use the format `id-or-sku:quantity:variation-data:cart-item-data`. Quantity and both data groups are optional,
+	 * while an empty variation group separates cart item data. Multiple key-value pairs within a data group use semicolons.
+	 * Prefix numeric SKUs with `sku=`. Delimiters within identifiers, keys, or values must be escaped with a tilde.
+	 *
+	 * @return array[] Array of product data formatted for CartController::add_to_cart().
 	 */
 	protected function get_products_from_checkout_link() {
-		$raw_products = array_filter( explode( ',', wc_clean( wp_unslash( $_GET['products'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$products     = [];
+		$products_query = wp_unslash( $_GET['products'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		foreach ( $raw_products as $product_id_qty ) {
-			if ( strpos( $product_id_qty, ':' ) !== false ) {
-				list( $product_id, $qty ) = explode( ':', $product_id_qty );
-			} else {
-				$product_id = $product_id_qty;
-				$qty        = 1;
-			}
-			$product_id = absint( $product_id );
-			$qty        = absint( $qty );
+		if ( ! is_string( $products_query ) ) {
+			return [];
+		}
 
-			if ( ! $product_id || ! $qty ) {
+		$products_query = sanitize_text_field( $products_query );
+		$raw_products   = array_filter( $this->split_escaped( $products_query, ',' ) );
+		$products       = [];
+
+		foreach ( $raw_products as $raw_product ) {
+			$segments           = $this->split_escaped( $raw_product, ':', 4 );
+			$product_identifier = $segments[0] ?? '';
+			$quantity           = '' !== ( $segments[1] ?? '' ) ? absint( $segments[1] ) : 1;
+			$variation_data     = $this->parse_product_data( $segments[2] ?? '' );
+			$cart_item_data     = $this->parse_product_data( $segments[3] ?? '' );
+
+			if ( ! $product_identifier || ! $quantity ) {
 				continue;
 			}
 
-			$products[ $product_id ] = $qty;
+			if ( 0 === strpos( $product_identifier, 'sku=' ) ) {
+				$product_id = wc_get_product_id_by_sku( substr( $product_identifier, 4 ) );
+			} elseif ( is_numeric( $product_identifier ) ) {
+				$product_id = absint( $product_identifier );
+			} else {
+				$product_id = wc_get_product_id_by_sku( $product_identifier );
+			}
+
+			if ( ! $product_id ) {
+				continue;
+			}
+
+			$variation = array_map(
+				function ( $key, $value ) {
+					return [
+						'attribute' => $key,
+						'value'     => $value,
+					];
+				},
+				array_keys( $variation_data ),
+				$variation_data
+			);
+
+			$products[] = [
+				'id'             => $product_id,
+				'quantity'       => $quantity,
+				'variation'      => $variation,
+				'cart_item_data' => $cart_item_data,
+			];
 		}
 
 		return $products;
+	}
+
+	/**
+	 * Parse a semicolon-separated list of key-value pairs.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param string $raw_data Raw product data from the checkout link.
+	 * @return array<string, string> Sanitized product data.
+	 */
+	protected function parse_product_data( $raw_data ) {
+		$data = [];
+
+		foreach ( $this->split_escaped( $raw_data, ';' ) as $pair ) {
+			if ( false === strpos( $pair, '=' ) ) {
+				continue;
+			}
+
+			list( $key, $value ) = explode( '=', $pair, 2 );
+			$key                 = sanitize_key( $key );
+
+			if ( '' !== $key ) {
+				$data[ $key ] = sanitize_text_field( $value );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Split a string on unescaped delimiters.
+	 *
+	 * @param string $value     Value to split.
+	 * @param string $delimiter Single-character delimiter.
+	 * @param int    $limit     Maximum number of returned segments.
+	 * @return string[] Split values with delimiter escapes removed.
+	 */
+	private function split_escaped( $value, $delimiter, $limit = PHP_INT_MAX ) {
+		$segments = [ '' ];
+		$index    = 0;
+		$length   = strlen( $value );
+
+		for ( $position = 0; $position < $length; ++$position ) {
+			$character = $value[ $position ];
+
+			if ( '~' === $character && $position + 1 < $length && $delimiter === $value[ $position + 1 ] ) {
+				$segments[ $index ] .= $delimiter;
+				++$position;
+			} elseif ( $delimiter === $character && count( $segments ) < $limit ) {
+				$segments[] = '';
+				++$index;
+			} else {
+				$segments[ $index ] .= $character;
+			}
+		}
+
+		return $segments;
 	}
 
 	/**
@@ -136,14 +229,9 @@ class CheckoutLink {
 		$products   = $this->get_products_from_checkout_link();
 		$errors     = new \WP_Error();
 
-		foreach ( $products as $product_id => $qty ) {
+		foreach ( $products as $product_data ) {
 			try {
-				$controller->add_to_cart(
-					[
-						'id'       => $product_id,
-						'quantity' => $qty,
-					]
-				);
+				$controller->add_to_cart( $product_data );
 			} catch ( \Exception $e ) {
 				$errors->add( 'error', $e->getMessage() );
 			}

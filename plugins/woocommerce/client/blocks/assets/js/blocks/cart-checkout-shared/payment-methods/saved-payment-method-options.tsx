@@ -166,7 +166,7 @@ const SavedPaymentMethodOptions = () => {
 					// @ts-ignore - we know for sure that the savedTokenComponent is not null or undefined at this point.
 					paymentMethods[ activePaymentMethod ].savedTokenComponent,
 					{ token: activeSavedToken, ...paymentMethodInterface }
-			  )
+				)
 			: null;
 
 	return options.length > 0 ? (

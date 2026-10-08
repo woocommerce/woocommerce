@@ -209,12 +209,12 @@ export type ItemInfer< T > = Partial<
 	T extends 'categories'
 		? CategoryItem
 		: T extends 'products'
-		? ProductItem
-		: T extends 'customers'
-		? CustomerItem
-		: T extends 'leaderboards'
-		? LeaderboardItem
-		: never
+			? ProductItem
+			: T extends 'customers'
+				? CustomerItem
+				: T extends 'leaderboards'
+					? LeaderboardItem
+					: never
 > & {
 	id: ItemID;
 };

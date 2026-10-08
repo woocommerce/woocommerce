@@ -34,12 +34,12 @@ export const getHeadingElementStyles = (
 				defaultStyleObject,
 				styles.elements?.heading || {},
 				styles.elements?.[ headingLevel ] || {},
-		  ] ) as EmailStyles )
+			] ) as EmailStyles )
 		: ( {
 				...defaultStyleObject,
 				...( styles.elements?.heading || {} ),
 				...( styles.elements?.[ headingLevel ] || {} ),
-		  } as EmailStyles );
+			} as EmailStyles );
 
 export const getElementStyles = (
 	styles: EmailStyles,

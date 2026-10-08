@@ -1,7 +1,7 @@
 <?php
 /**
  * Integration tests for the Hold contract operation: ACTIVE -> ON_HOLD, the
- * next-payment date preserved, and the held action fired.
+ * next-due moment disarmed (kept as the hold anchor), and the held action fired.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -16,6 +16,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold
@@ -39,24 +40,36 @@ class HoldTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Seed a contract at a status with a future next-payment date.
+	 * Seed a contract at a status with a next-payment date (a future one by default).
 	 *
-	 * @param string $status Contract status.
+	 * @param string      $status       Contract status.
+	 * @param string|null $next_payment Next-payment GMT string, or null.
 	 */
-	private function seed( string $status ): int {
+	private function seed( string $status, ?string $next_payment = '2099-01-01 00:00:00' ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
 				'selling_plan_id'  => 1,
 				'start_gmt'        => '2026-01-01 00:00:00',
-				'next_payment_gmt' => '2099-01-01 00:00:00',
+				'next_payment_gmt' => $next_payment,
 				'billing_total'    => '19.99',
 			)
 		);
 
 		return $this->contracts->insert( $contract );
+	}
+
+	/**
+	 * The stored hold anchor for a contract ('' when absent).
+	 *
+	 * @param int $id Contract id.
+	 * @return mixed
+	 */
+	private function anchor( int $id ) {
+		return $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true );
 	}
 
 	public function test_hold_suspends_billing_by_moving_to_on_hold(): void {
@@ -65,16 +78,63 @@ class HoldTest extends EngineIntegrationTestCase {
 		$result = $this->sut->hold( $this->reload( $id ) );
 
 		$this->assertTrue( $result );
-		// No charge while held: the contract is on hold, and the batch due scan only bills active contracts.
+		// No charge while held: hold disarms the next-due moment the batch due scan keys on.
 		$this->assertSame( ContractStatus::ON_HOLD, $this->reload( $id )->get_status() );
 	}
 
-	public function test_hold_keeps_the_next_payment_for_a_later_reactivate(): void {
+	public function test_hold_clears_the_next_payment_and_keeps_the_anchor(): void {
 		$id = $this->seed( ContractStatus::ACTIVE );
 
 		$this->sut->hold( $this->reload( $id ) );
 
-		$this->assertSame( '2099-01-01 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
+		$held = $this->reload( $id );
+		$this->assertNull( $held->get_next_payment_gmt() );
+		$this->assertSame( '2099-01-01 00:00:00', $this->anchor( $id ) );
+	}
+
+	public function test_hold_without_a_next_payment_stores_no_anchor(): void {
+		$id = $this->seed( ContractStatus::ACTIVE, null );
+
+		$this->sut->hold( $this->reload( $id ) );
+
+		$held = $this->reload( $id );
+		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
+		$this->assertNull( $held->get_next_payment_gmt() );
+		$this->assertSame( '', $this->anchor( $id ) );
+	}
+
+	public function test_hold_on_an_on_hold_contract_is_an_idempotent_no_op(): void {
+		$id = $this->seed( ContractStatus::ACTIVE );
+		$this->sut->hold( $this->reload( $id ) );
+
+		$fired = 0;
+		add_action(
+			Hold::CONTRACT_HELD_ACTION,
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+
+		// A second hold must not wipe the anchor stashed by the first.
+		$this->assertTrue( $this->sut->hold( $this->reload( $id ) ) );
+
+		$held = $this->reload( $id );
+		$this->assertSame( 1, $fired );
+		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
+		$this->assertNull( $held->get_next_payment_gmt() );
+		$this->assertSame( '2099-01-01 00:00:00', $this->anchor( $id ) );
+	}
+
+	public function test_the_anchor_survives_a_whole_contract_update(): void {
+		$id = $this->seed( ContractStatus::ACTIVE );
+		$this->sut->hold( $this->reload( $id ) );
+
+		$held = $this->reload( $id );
+		$held->set_end_gmt( '2099-12-31 00:00:00' );
+		$this->contracts->update( $held );
+
+		$this->assertSame( '2099-01-01 00:00:00', $this->anchor( $id ) );
+		$this->assertSame( '2099-01-01 00:00:00', Hold::read_anchor( $this->contracts, $id ) );
 	}
 
 	public function test_hold_fires_the_held_action(): void {
@@ -110,11 +170,61 @@ class HoldTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	/**
+	 * The anchor is stored and read back before the hold disarms the contract, so a failed
+	 * meta write aborts the hold with nothing disarmed instead of leaving a held contract
+	 * that reactivation could not re-arm.
+	 */
+	public function test_hold_aborts_without_disarming_when_the_anchor_cannot_be_stored(): void {
+		$id         = $this->seed( ContractStatus::ACTIVE );
+		$meta_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$break      = static function ( string $query ) use ( $meta_table ): string {
+			return 0 === strpos( $query, "INSERT INTO `{$meta_table}`" ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+
+		try {
+			$this->sut->hold( $this->reload( $id ) );
+			$this->fail( 'Expected the hold to abort when the anchor cannot be stored.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'anchor could not be stored', $e->getMessage() );
+		} finally {
+			remove_filter( 'query', $break );
+		}
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( '2099-01-01 00:00:00', $stored->get_next_payment_gmt(), 'The next-due moment was not disarmed.' );
+	}
+
 	public function test_hold_rejects_a_cancelled_contract(): void {
 		$id = $this->seed( ContractStatus::CANCELLED );
 
 		$this->expectException( DomainException::class );
 		$this->sut->hold( $this->reload( $id ) );
+	}
+
+	public function test_hold_rejects_a_pending_cancellation_contract(): void {
+		$id = $this->seed( ContractStatus::PENDING_CANCELLATION );
+
+		$this->expectException( DomainException::class );
+		$this->sut->hold( $this->reload( $id ) );
+	}
+
+	public function test_hold_rejects_an_unregistered_stored_status(): void {
+		global $wpdb;
+
+		$id = $this->seed( ContractStatus::ACTIVE );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
+
+		try {
+			$this->sut->hold( $this->reload( $id ) );
+			$this->fail( 'Expected a DomainException for an unregistered stored status.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( 'legacy-paused', $this->reload( $id )->get_status() );
+			$this->assertSame( '2099-01-01 00:00:00', $this->reload( $id )->get_next_payment_gmt() );
+		}
 	}
 
 	/**

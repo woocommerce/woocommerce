@@ -518,4 +518,40 @@ class MiniCart extends \WP_UnitTestCase {
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
+
+	/**
+	 * @testdox Should not enqueue the view script module when rendered on the cart or checkout page.
+	 *
+	 * @testWith [ "woocommerce_is_cart" ]
+	 *           [ "woocommerce_is_checkout" ]
+	 *
+	 * @param string $page_filter Conditional filter forcing the cart or checkout context.
+	 */
+	public function test_view_script_module_is_not_enqueued_on_cart_and_checkout_pages( string $page_filter ): void {
+		wp_dequeue_script_module( 'woocommerce/mini-cart' );
+		add_filter( $page_filter, '__return_true' );
+
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		$this->assertNotContains( 'woocommerce/mini-cart', $this->get_enqueued_script_module_ids(), 'View script module should not be enqueued on the cart and checkout pages.' );
+	}
+
+	/**
+	 * @testdox Should not declare a view script module so WordPress never enqueues it automatically.
+	 */
+	public function test_view_script_module_is_not_declared_on_the_block_type(): void {
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
+
+		$this->assertSame( array(), $block_type->view_script_module_ids, 'The view script module must only be enqueued explicitly from render().' );
+	}
+
+	/**
+	 * Return the identifiers of the currently enqueued script modules.
+	 *
+	 * @return string[]
+	 */
+	private function get_enqueued_script_module_ids(): array {
+		return wp_script_modules()->get_queue();
+	}
 }

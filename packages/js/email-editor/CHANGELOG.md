@@ -2,6 +2,19 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.5.0) - 2026-10-05 
+
+-   Patch - Add space between the Background panel’s color option and the email client compatibility warning. [#69366]
+-   Minor - Fix the template selector layout with Gutenberg 23.9+ by giving it its own styles and using Tabs from @wordpress/ui for the category list [#68551]
+-   Patch - Hide the “Content” section in the Email tab of the email editor sidebar, as it only listed the email body. [#69337]
+-   Patch - Limit the email Styles sidebar font sizes to px, so the sizes you pick show correctly in email clients. [#68978]
+-   Patch - Remove the view-post link from the notice shown after saving an email in the email editor [#68944]
+-   Patch - Report the same wording when saving the email design from either the editor or the template itself [#68944]
+-   Patch - Show "Email design updated." when saving an email template opened from inside the email editor [#69035]
+-   Patch - Show the email editor save notice in the site language instead of the untranslated post wording [#68944]
+-   Minor - Move react and react-dom from direct dependencies to peer and dev dependencies. [#69171]
+-   Patch - Remove the duplicated personalization tag chip styles from the sidebar stylesheet. [#68501]
+
 ## [2.4.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.4.1) - 2026-09-03 
 
 -   Patch - Render the compact back button on WordPress 7.1 again, where the header sizes the back button column by its content [#68017]

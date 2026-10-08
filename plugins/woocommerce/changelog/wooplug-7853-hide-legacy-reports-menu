@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Hide the legacy Reports menu on new stores; it still shows when Analytics is off or an extension adds legacy reports.

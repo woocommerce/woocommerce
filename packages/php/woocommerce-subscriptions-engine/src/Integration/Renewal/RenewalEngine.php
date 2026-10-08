@@ -31,7 +31,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use InvalidArgumentException;
 use Throwable;
 use WC_Order;
 use WC_Order_Item_Product;
@@ -40,13 +39,11 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Renewal\RenewalCalculator;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PricingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -210,17 +207,20 @@ final class RenewalEngine {
 	 *
 	 * The structural invariants it does enforce keep the money-path safe whatever the caller:
 	 * it skips (logging, never throwing - a scheduled action would retry a permanent condition
-	 * forever) when the contract is gone, gateway-scheduled, or inactive, and refuses a cycle
-	 * that is neither the head nor its immediate successor (no billing a gap). The claim is the
+	 * forever) when the contract is gone, gateway-scheduled, or not active, and refuses a cycle
+	 * that is neither the head nor its immediate successor (no billing a gap). The non-active
+	 * skip never parks: the engine does not clear the next-due moment of a contract whose
+	 * status it did not set. The claim is the
 	 * concurrency gate: appending the successor collides on `UNIQUE(contract_id, kind, count)`
 	 * and the head is reclaimed only through the lease compare-and-set, so a cycle is charged at
 	 * most once even under overlapping runs. Order reconciliation follows the claim, so the
 	 * cycle chain - not the mutable order - is the idempotency authority.
 	 *
-	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no chain, an
-	 * unresolvable plan, a non-adjacent count, a gateway that cannot charge renewals) so the
-	 * caller can park; returns null for an idempotent no-op (a live claim, an already-settled
-	 * cycle, an unbuildable order).
+	 * Throws {@see RenewalNotProcessable} for a pre-flight impossibility (no currency, no
+	 * chain, an unresolvable plan, a non-adjacent count, a gateway that cannot charge
+	 * renewals) so the scheduled caller can park and a manual caller can return null; returns
+	 * null for an idempotent no-op (a non-active contract, a live claim, an already-settled
+	 * cycle, an unbuildable order). A contract without a customer renews as a guest order.
 	 *
 	 * @param RenewalIntent     $intent The contract and cycle count to bill.
 	 * @param DateTimeImmutable $now    The processing moment (the lease clock for a claim).
@@ -254,6 +254,10 @@ final class RenewalEngine {
 			return null;
 		}
 
+		// Interim: moves out of the engine with the renewal flow.
+		// The due scan already selects only active contracts; a manual or racing caller that
+		// reaches a non-active one is skipped without parking, so its next-due moment is left
+		// for whichever flow set its status.
 		if ( ContractStatus::ACTIVE !== $contract->get_status() ) {
 			wc_get_logger()->info(
 				sprintf( 'RenewalEngine::process(): contract %d is %s, not active - skipping renewal. No order created.', $contract_id, $contract->get_status() ),
@@ -264,6 +268,13 @@ final class RenewalEngine {
 				)
 			);
 			return null;
+		}
+
+		// A renewal input an extension may not have supplied yet: without it no order can
+		// be built, so the scheduled caller parks the contract out of the due set. A null
+		// customer is not one: the renewal order is built as a guest order.
+		if ( null === $contract->get_currency() ) {
+			throw new RenewalNotProcessable( 'the contract has no currency' );
 		}
 
 		// Pre-flight capability gate, ahead of the claim so an unchargeable renewal never
@@ -353,6 +364,13 @@ final class RenewalEngine {
 			// reclaimed stall resuming an earlier attempt - already announced its creation, so
 			// re-firing would double one-time side effects (customer emails, analytics).
 			if ( $order_created ) {
+				/**
+				 * Fires after a renewal order is created, before it is charged.
+				 * Fires immediately after the write, not after a surrounding transaction commits.
+				 *
+				 * @param WC_Order $renewal_order The new renewal order.
+				 * @param Contract $contract      The contract being renewed.
+				 */
 				do_action( self::RENEWAL_ORDER_CREATED_ACTION, $renewal_order, $contract );
 			}
 			$this->attempt_charge( $renewal_order, $contract );
@@ -369,9 +387,12 @@ final class RenewalEngine {
 	/**
 	 * Resolve the billing policy the next cycle bills under, from the contract's own plan
 	 * snapshot - the live source of truth, so a contract updated since an earlier cycle bills
-	 * on its current terms. Falls back to the contract's selling plan when it carries no
-	 * snapshot, and returns null when neither resolves (a deleted plan) so the caller skips
-	 * gracefully rather than mis-billing.
+	 * on its current terms. Falls back to parsing the live selling plan's billing payload when
+	 * the contract carries no snapshot, or one whose billing policy is absent or unusable (that
+	 * case is logged), and returns null when neither resolves (a deleted plan, or a live
+	 * billing payload that is null, does not parse or has no usable cadence; the payload
+	 * cases are logged) so the caller parks the contract rather than mis-billing or
+	 * retrying every tick.
 	 *
 	 * @param Contract $contract The contract being renewed.
 	 * @return BillingPolicy|null The billing policy, or null when unresolvable.
@@ -379,73 +400,62 @@ final class RenewalEngine {
 	private function resolve_billing_policy( Contract $contract ): ?BillingPolicy {
 		$snapshot = $this->resolve_plan_snapshot( $contract );
 		if ( $snapshot instanceof PlanSnapshot ) {
-			$payload = $snapshot->to_array();
-			if ( isset( $payload['billing_policy'] ) && is_array( $payload['billing_policy'] ) ) {
-				try {
-					return BillingPolicy::from_array( self::string_keyed( $payload['billing_policy'] ) );
-				} catch ( \DomainException $e ) {
-					// A corrupt stored policy must not crash the scheduled run; fall through to the
-					// live plan below so the renewal can still resolve on current terms.
-					wc_get_logger()->warning(
-						sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
-						array(
-							'source'      => self::LOG_SOURCE,
-							'contract_id' => (int) $contract->get_id(),
-						)
-					);
+			try {
+				$policy = $snapshot->read_billing_policy();
+				if ( null !== $policy ) {
+					return $policy;
 				}
+			} catch ( \DomainException $e ) {
+				// A corrupt stored policy must not crash the scheduled run; fall through to the
+				// live plan below so the renewal can still resolve on current terms.
+				wc_get_logger()->warning(
+					sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot billing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => (int) $contract->get_id(),
+					)
+				);
 			}
 		}
 
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
-		return $plan instanceof Plan ? $plan->get_billing_policy() : null;
-	}
-
-	/**
-	 * Resolve the pricing policy the next cycle bills under - snapshot first, live
-	 * plan fallback, the same resolution order as {@see self::resolve_billing_policy()}.
-	 *
-	 * The snapshot's explicit `pricing_policy => null` means the frozen terms carry
-	 * no price adjustments, and is honored as null (a plan edited to gain a discount
-	 * after signup does not retroactively change the contract's terms). A snapshot
-	 * with NO `pricing_policy` key predates the key (or the contract has no
-	 * snapshot at all): those fall back to the live selling plan, as does an
-	 * unreadable stored policy. A null resolution means "no adjustments" - it never
-	 * blocks the renewal.
-	 *
-	 * @param Contract $contract The contract being renewed.
-	 * @return PricingPolicy|null The pricing policy, or null when none applies.
-	 */
-	private function resolve_pricing_policy( Contract $contract ): ?PricingPolicy {
-		$snapshot = $this->resolve_plan_snapshot( $contract );
-		if ( $snapshot instanceof PlanSnapshot ) {
-			$payload = $snapshot->to_array();
-			if ( array_key_exists( 'pricing_policy', $payload ) ) {
-				$stored = $payload['pricing_policy'];
-				if ( null === $stored ) {
-					// The frozen terms explicitly carry no pricing policy.
-					return null;
-				}
-				if ( is_array( $stored ) ) {
-					try {
-						return PricingPolicy::from_array( self::string_keyed( $stored ) );
-					} catch ( InvalidArgumentException $e ) {
-						// A corrupt stored policy must not crash the scheduled run; fall through
-						// to the live plan below so the renewal still resolves on current terms.
-						wc_get_logger()->warning(
-							sprintf( 'RenewalEngine: contract %d has an unreadable plan-snapshot pricing policy; falling back to the live plan. %s', (int) $contract->get_id(), $e->getMessage() ),
-							array(
-								'source'      => self::LOG_SOURCE,
-								'contract_id' => (int) $contract->get_id(),
-							)
-						);
-					}
-				}
-			}
+		$plan_id = $contract->get_selling_plan_id();
+		if ( null === $plan_id ) {
+			return null;
 		}
 
-		$plan = $this->plans->find( $contract->get_selling_plan_id() );
-		return $plan instanceof Plan ? $plan->get_pricing_policy() : null;
+		$plan = $this->plans->find( $plan_id );
+		if ( null === $plan ) {
+			return null;
+		}
+
+		$billing = $plan->get_billing_policy();
+		if ( null === $billing ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine: contract %d has a live plan %d with no billing policy; the renewal cannot be processed.', (int) $contract->get_id(), (int) $plan_id ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
+			return null;
+		}
+
+		try {
+			return BillingPolicy::from_array( $billing );
+		} catch ( \DomainException $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'RenewalEngine: contract %d has an unreadable live plan billing policy; the renewal cannot be processed. %s', (int) $contract->get_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => (int) $contract->get_id(),
+					'plan_id'     => (int) $plan_id,
+				)
+			);
+
+			return null;
+		}
 	}
 
 	/**
@@ -492,7 +502,7 @@ final class RenewalEngine {
 				'count'             => $cycle_count,
 				'period_start'      => $head->get_ends_at_gmt(),
 				'expected_total'    => $contract->get_billing_total(),
-				'currency'          => $contract->get_currency(),
+				'currency'          => (string) $contract->get_currency(),
 				'extension_slug'    => $contract->get_extension_slug(),
 				'plan_snapshot_id'  => $contract->get_plan_snapshot_id(),
 				'items_snapshot_id' => $contract->get_items_snapshot_id(),
@@ -559,7 +569,7 @@ final class RenewalEngine {
 			return null;
 		}
 
-		if ( $head->get_status()->equals( CycleStatus::pending() ) && $this->lease_has_expired( $head, $now ) ) {
+		if ( $head->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) && $this->lease_has_expired( $head, $now ) ) {
 			// Crash recovery, race-safe: only the caller whose CAS UPDATE matches the
 			// still-expired row reclaims it; a concurrent worker that already extended the
 			// lease leaves this caller matching zero rows, so it skips.
@@ -591,7 +601,7 @@ final class RenewalEngine {
 
 		// Admin retry: flip a failed head back to pending and re-attempt its charge. Scheduled
 		// selection never routes a failed head here; only a manual trigger does.
-		if ( $head->get_status()->equals( CycleStatus::failed() ) ) {
+		if ( $head->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) ) {
 			// Race-safe: only the caller whose CAS UPDATE matches the still-failed row wins.
 			if ( $this->contracts->reclaim_failed_cycle( (int) $head->get_id(), self::LEASE_TTL_SECONDS ) ) {
 				wc_get_logger()->info(
@@ -680,7 +690,7 @@ final class RenewalEngine {
 			return;
 		}
 
-		$contract_id = ScalarCoercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
+		$contract_id = Coercion::coerce_int( $order->get_meta( OrderLinkage::META_CONTRACT_ID ) );
 		if ( $contract_id <= 0 ) {
 			return;
 		}
@@ -771,7 +781,7 @@ final class RenewalEngine {
 			}
 			// Sync the entity with the row the CAS just wrote, for the action payload.
 			$cycle->set_order_id( $order->get_id() );
-			$cycle->set_status( CycleStatus::billed() );
+			$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
 			$cycle->set_claimed_until_gmt( null );
 
 			// Advance to the period actually billed (this cycle's end), not a recomputed one;
@@ -800,6 +810,7 @@ final class RenewalEngine {
 
 			/**
 			 * Fires after a renewal cycle is billed and the contract schedule advanced.
+			 * Fires immediately after the write, not after a surrounding transaction commits.
 			 *
 			 * @param Contract $contract The renewed contract.
 			 * @param Cycle    $cycle    The newly-billed cycle.
@@ -815,7 +826,7 @@ final class RenewalEngine {
 				return;
 			}
 			$cycle->set_order_id( $order->get_id() );
-			$cycle->set_status( CycleStatus::failed() );
+			$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
 			$cycle->set_reason( 'gateway-charge-failed' );
 			$cycle->set_claimed_until_gmt( null );
 
@@ -849,14 +860,6 @@ final class RenewalEngine {
 	 * renewal relation meta (contract id + chargeable number) so charge observers and the
 	 * order-to-cycle mapping can find it.
 	 *
-	 * BOGO materialization: when the contract's pricing policy grants bonus units for this
-	 * cycle ({@see PricingPolicy::calculate_bonus_quantity()}), each line's quantity is
-	 * raised to paid + bonus while its stored subtotal/total strings - and the cycle's
-	 * `expected_total`, applied below as the price authority - stay untouched: the benefit
-	 * is in-kind, never a price change. Renewal orders only: the ORIGIN order (cycle 1) is
-	 * built by the consumer's checkout, so first-cycle BOGO materialization on the initial
-	 * order is the consumer's job, not the engine's.
-	 *
 	 * Created draft-first: the order starts as `checkout-draft`, is linked onto the claimed
 	 * cycle (`order_id`), and only then becomes `pending`. A crash mid-way therefore leaves
 	 * either a linked draft the resume path promotes, or an unlinked draft that fires no emails
@@ -873,7 +876,7 @@ final class RenewalEngine {
 
 		$renewal_order = wc_create_order(
 			array(
-				'customer_id' => $contract->get_customer_id(),
+				'customer_id' => (int) $contract->get_customer_id(),
 				'status'      => OrderStatus::CHECKOUT_DRAFT,
 				'created_via' => 'woocommerce_subscriptions_engine_renewal',
 			)
@@ -892,7 +895,7 @@ final class RenewalEngine {
 
 		$instrument = $contract->get_payment_instrument();
 
-		$renewal_order->set_currency( $contract->get_currency() );
+		$renewal_order->set_currency( (string) $contract->get_currency() );
 		if ( null !== $instrument->get_gateway() ) {
 			$renewal_order->set_payment_method( (string) $instrument->get_gateway() );
 		}
@@ -911,11 +914,6 @@ final class RenewalEngine {
 			$renewal_order->set_shipping_address( $addresses['shipping'] );
 		}
 
-		// The pricing policy the cycle bills under (frozen snapshot first, live plan
-		// fallback), for in-kind BOGO bonus units. Null resolves to "no bonus" - a
-		// missing policy never skips a renewal.
-		$pricing_policy = $this->resolve_pricing_policy( $contract );
-
 		// Only the contract's recurring line items - the origin order's one-time cart items are
 		// deliberately excluded so a mixed checkout cannot leak onto a renewal. A line for a
 		// since-deleted product makes WC_Order_Item_Product::set_product_id() throw; treat the
@@ -923,24 +921,13 @@ final class RenewalEngine {
 		// as a permanent failure that retries forever.
 		try {
 			foreach ( $contract->get_items() as $item ) {
-				$paid_quantity = max( 1, self::item_int( $item, 'quantity' ) );
-				$quantity      = $paid_quantity;
-				if ( null !== $pricing_policy ) {
-					// The quantity bump lands while the line is built, BEFORE add_item();
-					// set_total( $expected_total ) below stays the price authority, which
-					// BOGO never moves (money-neutral: the stored subtotal/total strings
-					// keep pricing the paid units only).
-					$bonus = $pricing_policy->calculate_bonus_quantity( (float) $paid_quantity, $count );
-					if ( $bonus > 0 ) {
-						$quantity = $paid_quantity + (int) round( $bonus );
-					}
-				}
-
 				$line = new WC_Order_Item_Product();
 				$line->set_name( self::item_string( $item, 'item_name' ) );
 				$line->set_product_id( self::item_int( $item, 'product_id' ) );
 				$line->set_variation_id( self::item_int( $item, 'variation_id' ) );
-				$line->set_quantity( $quantity );
+				// Stored quantity as is (zero and fractional included); the woocommerce_stock_amount
+				// filter decides precision.
+				$line->set_quantity( self::item_string( $item, 'quantity' ) ); // @phpstan-ignore argument.type (docblock-only int; fractional quantities are valid)
 				$line->set_subtotal( self::item_string( $item, 'subtotal' ) );
 				$line->set_total( self::item_string( $item, 'total' ) );
 				$renewal_order->add_item( $line );
@@ -1027,20 +1014,6 @@ final class RenewalEngine {
 	private static function item_int( array $item, string $key ): int {
 		$value = $item[ $key ] ?? null;
 		return is_numeric( $value ) ? (int) $value : 0;
-	}
-
-	/**
-	 * Coerce a decoded array to a string-keyed array for the typed value-object factories.
-	 *
-	 * @param array<mixed, mixed> $value The decoded array.
-	 * @return array<string, mixed>
-	 */
-	private static function string_keyed( array $value ): array {
-		$out = array();
-		foreach ( $value as $key => $item ) {
-			$out[ (string) $key ] = $item;
-		}
-		return $out;
 	}
 
 	/**
@@ -1160,19 +1133,22 @@ final class RenewalEngine {
 	 * vanished mid-park, a write error) must not stall the rest of the batch. On failure the
 	 * contract simply stays due and the park is re-attempted next tick.
 	 *
+	 * Only an active contract is parked: one that stopped being active since it was selected
+	 * already left the due set, and its next-due moment belongs to whoever changed its status.
+	 *
 	 * @param int $contract_id The contract to remove from the due set.
 	 */
 	public function park( int $contract_id ): void {
 		try {
 			$contract = $this->contracts->find( $contract_id );
-			if ( null === $contract ) {
+			if ( null === $contract || ContractStatus::ACTIVE !== $contract->get_status() ) {
 				return;
 			}
 
 			$contract->set_next_payment_gmt( null );
-			// Conditioned on the status just read: a lifecycle transition racing the
-			// park must not be clobbered - the contract is out of the due set either way.
-			$this->contracts->update_if_status( $contract, $contract->get_status() );
+			// Conditioned on active: a status change racing the park must not be
+			// clobbered, nor have its next-due moment cleared.
+			$this->contracts->update_if_status( $contract, ContractStatus::ACTIVE );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'RenewalEngine::park(): failed to park contract %d - %s', $contract_id, $e->getMessage() ),

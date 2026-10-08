@@ -611,6 +611,47 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a review eagerly populates the verified-owner meta at creation time, not lazily during response preparation.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $include_verified Whether to include the verified parameter in the request.
+	 */
+	public function test_create_item_populates_verified_meta( bool $include_verified ): void {
+		$product = ProductHelper::create_simple_product();
+		$order   = OrderHelper::create_order( 0, $product );
+		$order->set_billing_email( 'jane.smith@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Stub prepare_item_for_response so it cannot backfill the meta as a side effect.
+		$sut = new class() extends WC_REST_Product_Reviews_Controller {
+			public function prepare_item_for_response( $review, $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return rest_ensure_response( array( 'id' => (int) $review->comment_ID ) );
+			}
+		};
+
+		$body = array(
+			'product_id'     => $product->get_id(),
+			'review'         => $include_verified ? 'Verified by the caller.' : 'Great product, would buy again.',
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+			'rating'         => 5,
+		);
+		if ( $include_verified ) {
+			$body['verified'] = true;
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+
+		$response = $sut->create_item( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '1', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta must be populated eagerly at creation time.' );
+	}
+
+	/**
 	 * Creates two products and a review that can be moved between them.
 	 *
 	 * @param int $rating Rating for the review.

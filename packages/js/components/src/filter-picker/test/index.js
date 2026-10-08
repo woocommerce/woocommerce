@@ -29,9 +29,9 @@ describe( 'FilterPicker', () => {
 	describe( "when a config is given with a filter with `component: 'Search'`", () => {
 		let config;
 		let warn;
-		const openDropdown = ( { queryAllByRole } ) => {
+		const openDropdown = async ( { queryAllByRole } ) => {
 			// The main dropdown does not have its role defined, so we need to dig deeper into actual internals.
-			userEvent.click( queryAllByRole( 'button' )[ 0 ] );
+			await userEvent.click( queryAllByRole( 'button' )[ 0 ] );
 		};
 		const getLastSearchProps = () =>
 			Search.mock.calls.slice( -1 )[ 0 ][ 0 ];
@@ -87,7 +87,7 @@ describe( 'FilterPicker', () => {
 
 			// Emulate filter dropdown being opened.
 			// The main dropdown does not have its role defined, so we need to dig deeper into actual internals.
-			userEvent.click( queryAllByRole( 'button' )[ 0 ] );
+			await userEvent.click( queryAllByRole( 'button' )[ 0 ] );
 
 			// Check that the given component was rendered, without checking its behavior/internals/implementation details.
 			//

@@ -113,7 +113,7 @@ const Block = ( {
 									)
 							),
 					};
-			  } )
+				} )
 			: shippingRates;
 	}, [ shippingRates, isCollectable ] );
 

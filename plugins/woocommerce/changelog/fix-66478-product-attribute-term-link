@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product pages from crashing when an attribute archive link is unavailable.

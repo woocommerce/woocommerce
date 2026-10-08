@@ -91,7 +91,9 @@ describe( 'Tracking clicks in shippingBanner', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect( recordEvent ).toHaveBeenCalledWith(
@@ -122,7 +124,7 @@ describe( 'Tracking clicks in shippingBanner', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'link', { name: /WooCommerce Shipping/ } )
 		);
 
@@ -151,7 +153,7 @@ describe( 'Tracking clicks in shippingBanner', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'Close Print Label Banner.' } )
 		);
 
@@ -199,7 +201,7 @@ describe( 'Create shipping label button', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
@@ -228,7 +230,7 @@ describe( 'Create shipping label button', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
@@ -256,7 +258,7 @@ describe( 'Create shipping label button', () => {
 		expect( reloadButton ).toBeInTheDocument();
 		expect( reloadButton ).not.toHaveClass( 'is-busy' );
 
-		userEvent.click( reloadButton );
+		await userEvent.click( reloadButton );
 
 		expect( window.location.reload ).toHaveBeenCalledWith( true );
 	} );
@@ -280,7 +282,7 @@ describe( 'Create shipping label button', () => {
 			/>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
@@ -326,7 +328,7 @@ describe( 'Create shipping label button', () => {
 			</Fragment>
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
@@ -430,7 +432,7 @@ describe( 'Create shipping label button', () => {
 		);
 
 		// Initiate the loading of WCS assets on first click.
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', {
 				name: actionButtonLabel,
 			} )
@@ -483,7 +485,9 @@ describe( 'In the process of installing, activating, loading assets for WooComme
 			getByRole( 'button', { name: 'Close Print Label Banner.' } )
 		).toBeEnabled();
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -538,7 +542,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -573,7 +579,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -609,7 +617,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -642,7 +652,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -677,7 +689,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -708,7 +722,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -741,7 +757,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -755,7 +773,7 @@ describe( 'Setup error message', () => {
 		).not.toHaveClass( 'is-busy' );
 	} );
 
-	it( 'should not set busy state when isRequesting is true', () => {
+	it( 'should not set busy state when isRequesting is true', async () => {
 		const actionButtonLabel = 'Create shipping label';
 		const installPluginsMock = jest.fn();
 
@@ -773,7 +791,9 @@ describe( 'Setup error message', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		expect(
 			getByRole( 'button', { name: actionButtonLabel } )
@@ -817,7 +837,9 @@ describe( 'Setup error message', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () =>
 			expect(
@@ -924,7 +946,9 @@ describe( 'If incompatible WCS&T is active', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: actionButtonLabel } )
+		);
 
 		await waitFor( () => {
 			expect( installPlugins ).toHaveBeenCalledWith( [ wcsPluginSlug ] );
@@ -940,7 +964,7 @@ describe( 'If incompatible WCS&T is active', () => {
 		const reloadButton = await waitFor( () =>
 			getByRole( 'button', { name: 'Reload page' } )
 		);
-		userEvent.click( reloadButton );
+		await userEvent.click( reloadButton );
 
 		expect( window.location.reload ).toHaveBeenCalledWith( true );
 	} );

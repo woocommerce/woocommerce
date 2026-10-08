@@ -20,7 +20,9 @@
 	}
 
 	.wc-block-components-checkout-order-summary__title {
-		margin-top: $gap;
+		@include breakpoint(">782px") {
+			margin-top: $gap;
+		}
 		display: flex;
 		justify-content: space-between;
 		align-items: center;

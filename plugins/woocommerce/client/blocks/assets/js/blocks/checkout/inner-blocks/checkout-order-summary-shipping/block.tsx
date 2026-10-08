@@ -48,11 +48,11 @@ const Block = ( {
 							? __(
 									'No available delivery option',
 									'woocommerce'
-							  )
+								)
 							: __(
 									'Enter address to calculate',
 									'woocommerce'
-							  ) }
+								) }
 					</span>
 				}
 			/>

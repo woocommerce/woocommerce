@@ -138,7 +138,7 @@ const getLayoutAttribute = (
 	return postTemplateHasSupportForGridView
 		? mapLayoutPropertiesFromPostTemplateToProductCollection(
 				postTemplateLayout
-		  )
+			)
 		: attributes.displayLayout;
 };
 

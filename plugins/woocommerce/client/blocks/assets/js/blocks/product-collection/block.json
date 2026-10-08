@@ -75,7 +75,11 @@
 		"forcePageReload": "forcePageReload",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
-	"usesContext": [ "templateSlug", "postId" ],
+	"usesContext": [
+		"templateSlug",
+		"postId",
+		"woocommerce/productCollection/referenceType"
+	],
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,

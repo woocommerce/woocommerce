@@ -175,7 +175,7 @@ export function useApplyUpdate(
 					: __(
 							'Update applied · customizations preserved',
 							'woocommerce'
-					  );
+						);
 				void createSuccessNotice( successMessage, {
 					type: 'snackbar',
 					actions: [

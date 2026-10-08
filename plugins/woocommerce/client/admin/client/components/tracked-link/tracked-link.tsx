@@ -77,7 +77,7 @@ export const TrackedLink = ( {
 									? `${ linkText } (${ __(
 											'opens in a new tab',
 											'woocommerce'
-									  ) })`
+										) })`
 									: undefined
 							}
 						/>

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Show each KOMOJU payment method's own name and description on the Payments settings page, instead of identical rows.

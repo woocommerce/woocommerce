@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
+import { tags, locks } from '../../fixtures/fixtures';
 import { setOption, deleteOption } from '../../utils/options';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
@@ -15,7 +15,10 @@ let page: Page;
 
 test.describe(
 	'Analytics Settings - Scheduled Import',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+	{
+		tag: [ tags.PAYMENTS, tags.SERVICES ],
+		lock: locks.ANALYTICS_IMPORT_MODE,
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 

@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
@@ -84,6 +85,36 @@ class WC_REST_Product_Reviews_V2_Controller_Test extends WC_REST_Unit_Test_case 
 
 		$this->assertSame( 200, $zero_response->get_status() );
 		$this->assertSame( 3, (int) get_comment_meta( $review_id, 'rating', true ) );
+	}
+
+	/**
+	 * @testdox Creating a review eagerly populates the verified-owner meta at creation time, not lazily during response preparation.
+	 */
+	public function test_create_item_populates_verified_meta(): void {
+		$product = ProductHelper::create_simple_product();
+		$order   = OrderHelper::create_order( 0, $product );
+		$order->set_billing_email( 'jane.smith@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Stub prepare_item_for_response so it cannot backfill the meta as a side effect.
+		$sut = new class() extends WC_REST_Product_Reviews_V2_Controller {
+			public function prepare_item_for_response( $review, $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return rest_ensure_response( array( 'id' => (int) $review->comment_ID ) );
+			}
+		};
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() . '/reviews' );
+		$request->set_param( 'product_id', $product->get_id() );
+		$request->set_param( 'review', 'Great product, would buy again.' );
+		$request->set_param( 'name', 'Jane Smith' );
+		$request->set_param( 'email', 'jane.smith@example.org' );
+		$request->set_param( 'rating', 5 );
+
+		$response = $sut->create_item( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '1', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta must be populated eagerly at creation time.' );
 	}
 
 	/**

@@ -11,14 +11,20 @@ import ListOrdered from 'gridicons/dist/list-ordered';
 /**
  * Internal dependencies
  */
-const LazyDashboardCharts = lazy( () =>
-	import( /* webpackChunkName: "dashboard-charts" */ './dashboard-charts' )
+const LazyDashboardCharts = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "dashboard-charts" */ './dashboard-charts'
+		)
 );
-const LazyLeaderboards = lazy( () =>
-	import( /* webpackChunkName: "leaderboards" */ './leaderboards' )
+const LazyLeaderboards = lazy(
+	() => import( /* webpackChunkName: "leaderboards" */ './leaderboards' )
 );
-const LazyStorePerformance = lazy( () =>
-	import( /* webpackChunkName: "store-performance" */ './store-performance' )
+const LazyStorePerformance = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "store-performance" */ './store-performance'
+		)
 );
 
 const DashboardCharts = ( props ) => (

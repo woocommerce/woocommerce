@@ -75,7 +75,6 @@ const trackSetRenderingMode = ( renderingMode: string ) => {
 		return;
 	}
 	const isPreviewDropdownOpened = !! document.querySelector(
-		// eslint-disable-next-line @wordpress/i18n-text-domain
 		`[aria-label="${ __( 'View options' ) }"]`
 	);
 	// We want to track the event only from the dropdown.
