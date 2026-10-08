@@ -1402,7 +1402,7 @@ Display the number of products on the archive page or search result page.
 
 - **Name:** woocommerce/product-results-count
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, textAlign)
 
 ## Product Reviews - woocommerce/product-reviews
 
