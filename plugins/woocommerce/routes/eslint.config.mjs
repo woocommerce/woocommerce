@@ -23,7 +23,7 @@ const escalateWarnings = ( config ) =>
 						value === 'warn' ? 'error' : value,
 					] )
 				),
-		  }
+			}
 		: config;
 
 // Only the rule sets: the preset already registers the plugin and parser.
