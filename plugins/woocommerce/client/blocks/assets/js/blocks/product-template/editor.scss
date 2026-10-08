@@ -3,9 +3,7 @@
 		overflow-x: hidden;
 	}
 
-	ul.wc-block-product-template {
-		padding-left: 0;
-		margin-left: 0;
+	:where(ul.wc-block-product-template) {
 		list-style: none;
 	}
 }
