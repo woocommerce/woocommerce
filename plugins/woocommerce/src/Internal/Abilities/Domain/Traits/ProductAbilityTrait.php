@@ -142,49 +142,68 @@ trait ProductAbilityTrait {
 	 */
 	private static function get_product_mutation_field_schemas(): array {
 		return array(
-			'name'              => array( 'type' => 'string' ),
-			'sku'               => array( 'type' => 'string' ),
+			'name'              => array(
+				'title' => __( 'Name', 'woocommerce' ),
+				'type'  => 'string',
+			),
+			'sku'               => array(
+				'title' => __( 'SKU', 'woocommerce' ),
+				'type'  => 'string',
+			),
 			'regular_price'     => array(
+				'title'       => __( 'Regular price', 'woocommerce' ),
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
 				'pattern'     => self::get_product_price_input_pattern(),
 			),
 			'sale_price'        => array(
+				'title'       => __( 'Sale price', 'woocommerce' ),
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
 				'pattern'     => self::get_product_price_input_pattern(),
 			),
 			'description'       => array(
+				'title'       => __( 'Description', 'woocommerce' ),
 				'type'        => 'string',
 				'description' => __( 'Product description content. Safe HTML is allowed.', 'woocommerce' ),
 			),
 			'short_description' => array(
+				'title'       => __( 'Short description', 'woocommerce' ),
 				'type'        => 'string',
 				'description' => __( 'Short product description content. Safe HTML is allowed.', 'woocommerce' ),
 			),
 			'status'            => array(
-				'type' => 'string',
-				'enum' => self::get_product_mutation_status_slugs(),
+				'title' => __( 'Status', 'woocommerce' ),
+				'type'  => 'string',
+				'enum'  => self::get_product_mutation_status_slugs(),
 			),
-			'manage_stock'      => array( 'type' => 'boolean' ),
+			'manage_stock'      => array(
+				'title' => __( 'Manage stock', 'woocommerce' ),
+				'type'  => 'boolean',
+			),
 			'stock_quantity'    => array(
+				'title'       => __( 'Stock quantity', 'woocommerce' ),
 				'type'        => self::get_product_stock_quantity_schema_type(),
 				'description' => __( 'Available stock quantity when product-level stock management is used.', 'woocommerce' ),
 			),
 			'stock_status'      => array(
-				'type' => 'string',
-				'enum' => array_keys( wc_get_product_stock_status_options() ),
+				'title' => __( 'Stock status', 'woocommerce' ),
+				'type'  => 'string',
+				'enum'  => array_keys( wc_get_product_stock_status_options() ),
 			),
 			'external_url'      => array(
+				'title'       => __( 'Product URL', 'woocommerce' ),
 				'type'        => 'string',
 				'description' => __( 'External destination URL for affiliate products.', 'woocommerce' ),
 				'format'      => 'uri',
 			),
 			'button_text'       => array(
+				'title'       => __( 'Button text', 'woocommerce' ),
 				'type'        => 'string',
 				'description' => __( 'Button text for affiliate products.', 'woocommerce' ),
 			),
 			'grouped_products'  => array(
+				'title'       => __( 'Grouped products', 'woocommerce' ),
 				'type'        => 'array',
 				'description' => __( 'Product IDs to include as children of a grouped product.', 'woocommerce' ),
 				'items'       => array(

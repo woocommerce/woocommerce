@@ -131,6 +131,29 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * The labels of the values that get_values() returns, keyed by name, for
+	 * `changes[].label` in a dry run. By default, the `title` of each input
+	 * schema property, also in `oneOf` branches.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array<string, string>
+	 */
+	public function get_labels(): array {
+		$schema = $this->get_input_schema();
+		$names  = $this->get_value_names();
+		$labels = array();
+		foreach ( array_merge( array( $schema ), $schema['oneOf'] ?? array() ) as $branch ) {
+			foreach ( $branch['properties'] ?? array() as $field => $property ) {
+				if ( isset( $property['title'] ) ) {
+					$labels[ $names[ $field ] ?? $field ] = (string) $property['title'];
+				}
+			}
+		}
+		return $labels;
+	}
+
+	/**
 	 * The values of the object that a dry run compares, keyed by name.
 	 *
 	 * @since 11.3.0
@@ -270,7 +293,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $rejected;
 		}
 
-		$changes = ChangeSummary::changes( $type, $before, $this->read( $subject ) );
+		$changes = ChangeSummary::changes( $type, $before, $this->read( $subject ), $this->get_labels() );
 		$undo    = null === $undo ? null : self::prepare_undo( $undo, ChangeSummary::requested( $changes, $input, $this->get_value_names() ) );
 
 		return array(

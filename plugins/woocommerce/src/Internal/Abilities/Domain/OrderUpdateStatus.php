@@ -257,11 +257,13 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 					'minimum' => 1,
 				),
 				'status' => array(
+					'title'       => __( 'Status', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Order status slug without the wc- prefix.', 'woocommerce' ),
 					'enum'        => self::get_allowed_order_status_slugs(),
 				),
 				'note'   => array(
+					'title'       => __( 'Note', 'woocommerce' ),
 					'type'        => 'string',
 					'description' => __( 'Optional status change note. Safe HTML is allowed. Use the woocommerce/order-add-note ability for notes without a status change.', 'woocommerce' ),
 				),
@@ -271,11 +273,13 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 		);
 		if ( AbilityContracts::is_enabled() ) {
 			$schema['properties']['date_paid']      = array(
+				'title'       => __( 'Date paid', 'woocommerce' ),
 				'type'        => array( 'string', 'null' ),
 				'format'      => 'date-time',
 				'description' => __( 'Optional. Date the order was paid, or null for none. The undo of a status change sets it back.', 'woocommerce' ),
 			);
 			$schema['properties']['date_completed'] = array(
+				'title'       => __( 'Date completed', 'woocommerce' ),
 				'type'        => array( 'string', 'null' ),
 				'format'      => 'date-time',
 				'description' => __( 'Optional. Date the order was completed, or null for none. The undo of a status change sets it back.', 'woocommerce' ),

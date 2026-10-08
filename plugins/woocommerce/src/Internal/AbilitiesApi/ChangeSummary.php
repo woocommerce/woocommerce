@@ -23,18 +23,19 @@ final class ChangeSummary {
 	 * Each leaf value that differs, with its dotted path and label. Lists of
 	 * the same length are compared entry by entry, other lists as one value.
 	 *
-	 * @param string $object_type Object type, for the labels of extension fields.
-	 * @param array  $before      Values before the change.
-	 * @param array  $after       Values after the change.
+	 * @param string                $object_type Object type, for the labels of extension fields.
+	 * @param array                 $before      Values before the change.
+	 * @param array                 $after       Values after the change.
+	 * @param array<string, string> $labels      Labels of the object values keyed by path.
 	 * @return array<int, array{field: string, label: string, before: mixed, after: mixed}>
 	 */
-	public static function changes( string $object_type, array $before, array $after ): array {
+	public static function changes( string $object_type, array $before, array $after, array $labels = array() ): array {
 		$fields = AbilityFields::get( $object_type );
 		return array_map(
-			static function ( array $change ) use ( $fields ): array {
+			static function ( array $change ) use ( $fields, $labels ): array {
 				return array(
 					'field'  => $change['field'],
-					'label'  => self::label( $change['field'], $fields ),
+					'label'  => self::label( $change['field'], $fields, $labels ),
 					'before' => $change['before'],
 					'after'  => $change['after'],
 				);
@@ -192,16 +193,17 @@ final class ChangeSummary {
 
 	/**
 	 * The label of a changed value: the schema `title` of an extension field,
-	 * else its attribute, else the path.
+	 * else its attribute, else the label of the object value, else the path.
 	 *
 	 * @param string                              $field  Dotted path.
 	 * @param array<string, array<string, mixed>> $fields Extension fields keyed by attribute.
+	 * @param array<string, string>               $labels Labels of the object values keyed by path.
 	 * @return string
 	 */
-	private static function label( string $field, array $fields ): string {
+	private static function label( string $field, array $fields, array $labels ): string {
 		$path = explode( '.', $field );
 		if ( 'extensions' !== $path[0] || ! isset( $path[1] ) ) {
-			return $field;
+			return $labels[ $field ] ?? $field;
 		}
 		return (string) ( $fields[ $path[1] ]['schema']['title'] ?? $path[1] );
 	}

@@ -721,7 +721,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 			array(
 				array(
 					'field'  => 'name',
-					'label'  => 'name',
+					'label'  => 'Name',
 					'before' => 'Pen',
 					'after'  => 'Pencil',
 				),
@@ -755,6 +755,30 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				'test_color' => null,
 			),
 			$summary['undo']['input']['extensions']
+		);
+	}
+
+	/**
+	 * @testdox Should label a Core value in a dry run when its name differs from its input field.
+	 */
+	public function test_product_update_dry_run_labels_renamed_core_values(): void {
+		$product = \WC_Helper_Product::create_external_product();
+
+		$summary = wp_get_ability( 'woocommerce/product-update' )->dry_run(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'affiliate',
+				'external_url'       => 'https://example.com/new',
+				'regular_price'      => '20',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'regular_price' => 'Regular price',
+				'product_url'   => 'Product URL',
+			),
+			array_column( $summary['changes'], 'label', 'field' )
 		);
 	}
 
@@ -920,7 +944,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 			array(
 				array(
 					'field'  => 'status',
-					'label'  => 'status',
+					'label'  => 'Status',
 					'before' => 'pending',
 					'after'  => 'on-hold',
 				),
