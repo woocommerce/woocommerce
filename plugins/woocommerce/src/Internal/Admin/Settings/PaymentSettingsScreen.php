@@ -38,6 +38,8 @@ final class PaymentSettingsScreen {
 
 	/**
 	 * Register hooks.
+	 *
+	 * @internal
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'handle_init' ) );
