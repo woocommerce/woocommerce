@@ -521,6 +521,43 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Applying a coupon records usage on an order type that has no billing email.
+	 * See: https://github.com/woocommerce/woocommerce/issues/30922.
+	 */
+	public function test_apply_coupon_records_usage_on_order_type_without_billing_email() {
+		$coupon_code = 'coupon_test_usage_without_billing_email';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$refund = $this->create_line_item_refund( 1 );
+
+		// Give the order type a customer ID and a tax location so apply_coupon() reaches the
+		// usage-recording step, where get_user_id() is 0 and there is no get_billing_email().
+		$order = new class( $refund->get_id() ) extends WC_Order_Refund {
+			// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+			public function get_customer_id( $context = 'view' ) {
+				return 1;
+			}
+
+			protected function get_tax_location( $args = array() ) {
+				return wp_parse_args(
+					$args,
+					array(
+						'country'  => '',
+						'state'    => '',
+						'postcode' => '',
+						'city'     => '',
+					)
+				);
+			}
+			// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+		};
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
 	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
 	 */
 	public function test_remove_coupon_fires_order_removed_coupon_hook() {
