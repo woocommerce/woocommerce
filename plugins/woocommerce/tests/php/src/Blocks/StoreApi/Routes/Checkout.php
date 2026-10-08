@@ -930,6 +930,53 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Address values should round-trip through the cart response and checkout without HTML encoding.
+	 */
+	public function test_address_values_round_trip_without_html_encoding(): void {
+		$billing_address             = $this->get_fallback_billing_address();
+		$billing_address['company']  = 'AT&T';
+		$shipping_address            = $this->get_fallback_shipping_address();
+		$shipping_address['company'] = "St John's";
+
+		$update_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$update_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$update_request->set_body_params(
+			array(
+				'billing_address'  => (object) $billing_address,
+				'shipping_address' => (object) $shipping_address,
+			)
+		);
+
+		$update_response = rest_get_server()->dispatch( $update_request );
+		$this->assertSame( 200, $update_response->get_status(), print_r( $update_response->get_data(), true ) );
+		$cart_data                 = $update_response->get_data();
+		$response_billing_address  = (array) $cart_data['billing_address'];
+		$response_shipping_address = (array) $cart_data['shipping_address'];
+
+		$this->assertSame( 'AT&T', $response_billing_address['company'] );
+		$this->assertSame( "St John's", $response_shipping_address['company'] );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$checkout_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$checkout_request->set_body_params(
+			array(
+				'billing_address'  => (object) $response_billing_address,
+				'shipping_address' => (object) $response_shipping_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+		$this->assertSame( 200, $checkout_response->get_status(), print_r( $checkout_response->get_data(), true ) );
+
+		$order = wc_get_order( $checkout_response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertSame( 'AT&T', $order->get_billing_company( 'edit' ) );
+		$this->assertSame( "St John's", $order->get_shipping_company( 'edit' ) );
+	}
+
+	/**
 	 * When the cart needs shipping and the request omits the shipping address, the billing address is used as the
 	 * shipping address.
 	 *
@@ -2393,6 +2440,58 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Pay for Order should store and return address fields as plain text without HTML encoding.
+	 */
+	public function test_checkout_order_address_values_round_trip_without_html_encoding(): void {
+		$order                       = \WC_Helper_Order::create_order( 0 );
+		$billing_address             = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => 'AT&T',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'email'      => $order->get_billing_email(),
+			'phone'      => '555-32123',
+		);
+		$shipping_address            = $billing_address;
+		$shipping_address['company'] = "St John's";
+		unset( $shipping_address['email'] );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => $billing_address,
+				'shipping_address' => $shipping_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+
+		$response_billing_address  = (array) $data['billing_address'];
+		$response_shipping_address = (array) $data['shipping_address'];
+		$this->assertSame( 'AT&T', $response_billing_address['company'] );
+		$this->assertSame( "St John's", $response_shipping_address['company'] );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'AT&T', $stored_order->get_billing_company( 'edit' ) );
+		$this->assertSame( "St John's", $stored_order->get_shipping_company( 'edit' ) );
+	}
+
+	/**
 	 * @testdox Existing order payment should not persist address data when country validation fails.
 	 */
 	public function test_checkout_order_does_not_persist_invalid_country_address() {
@@ -2512,6 +2611,48 @@ class Checkout extends \WP_Test_REST_TestCase {
 			$this->assertNotContains( $code, $codes );
 			$this->assertEquals( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
 		}
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
+	 */
+	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order_id = 0;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( &$order_id ) {
+				$order->set_status( OrderStatus::CANCELLED );
+				$order->save();
+				$order_id = $order->get_id();
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_payment_required', $response->get_data()['code'] );
+		$this->assertSame( 'This order cannot be completed without payment. Please try again.', $response->get_data()['message'] );
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should have created an order before refusing to complete it.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertSame( OrderStatus::CANCELLED, $order->get_status(), 'The order should remain cancelled.' );
+		$this->assertNull( $order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to waive payment for a pending non-zero order.
+	 */
+	public function test_checkout_allows_waived_payment_for_pending_non_zero_order(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'success', $response->get_data()['payment_result']['payment_status'] );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertTrue( $order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
 	}
 
 	/**

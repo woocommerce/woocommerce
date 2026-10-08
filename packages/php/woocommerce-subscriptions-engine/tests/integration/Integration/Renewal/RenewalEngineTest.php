@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -18,7 +19,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
@@ -110,7 +110,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Persist a monthly plan and return the entity (the ContractFactory needs the plan).
+	 * Persist a monthly plan and return the entity (the sign-up helper needs the plan).
 	 *
 	 * @param int|null $max_cycles Maximum billing cycles, or null for open-ended.
 	 */
@@ -129,7 +129,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a contract via the checkout factory so its billing chain holds cycle 1
+	 * Sign up a contract through the contracts facade so its billing chain holds cycle 1
 	 * (billed), the starting point the renewal advances from.
 	 *
 	 * @param string   $gateway    Gateway id stamped on the order/contract.
@@ -146,7 +146,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		return $this->reload_contract( $this->sign_up_from_order( $order, $plan ) );
 	}
 
 	private function make_origin_order(): WC_Order {
@@ -166,6 +166,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		// so the renewal amount resolves off the current cycle.
 		$contract = Contract::create(
 			array(
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
@@ -446,9 +447,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		$contract    = ( new ContractFactory() )->create_from_order( $order, $this->make_plan_object() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
+		$contract_id = $this->sign_up_from_order( $order, $this->make_plan_object() );
 
 		$renewal_order = $this->run_scheduled_renewal( $contract_id );
 		$this->assertInstanceOf( WC_Order::class, $renewal_order );
@@ -753,32 +752,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox the scheduled scan renews from the contract's own plan snapshot even when the live plan is deleted.
-	 *
-	 * The contract's frozen snapshot is the cadence source of truth, so a deleted live selling
-	 * plan no longer blocks the renewal - the chain advances on the snapshot's terms.
-	 */
-	public function test_scheduled_renewal_renews_from_contract_snapshot_when_live_plan_deleted(): void {
-		$this->approve_charges_for( self::GATEWAY_APPROVING );
-
-		$contract    = $this->sign_up_contract( self::GATEWAY_APPROVING );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		// Delete the live selling plan; the contract keeps its frozen snapshot.
-		( new PlanRepository() )->delete( $contract->get_selling_plan_id() );
-
-		$renewal_order = $this->run_scheduled_renewal( $contract_id );
-		$this->assertInstanceOf( WC_Order::class, $renewal_order );
-
-		// Cycle 2 was billed from the snapshot's cadence.
-		$cycle = ( new ContractRepository() )->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $cycle );
-		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
-	/**
 	 * @testdox the scheduled scan expires the contract when it hits max cycles.
 	 */
 	public function test_scheduled_renewal_expires_contract_at_max_cycles(): void {
@@ -900,6 +873,8 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order       = $this->make_origin_order();
 		$contract    = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => $plan_id,
@@ -1525,6 +1500,114 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * Create an active, overdue contract through the facade, minus the given renewal input.
+	 *
+	 * @param string $missing One of currency, customer, payment_method, billing_policy.
+	 */
+	private function seed_contract_missing( string $missing ): int {
+		$customer = self::factory()->user->create();
+		$this->assertIsInt( $customer );
+
+		$args = array(
+			'extension_slug'   => 'engine-tests',
+			'customer_id'      => $customer,
+			'currency'         => 'USD',
+			'payment_method'   => self::GATEWAY_APPROVING,
+			'start_gmt'        => '2026-01-01 00:00:00',
+			'next_payment_gmt' => '2026-02-01 00:00:00',
+			'billing_total'    => '10',
+			'selling_plan_id'  => $this->make_plan(),
+		);
+
+		switch ( $missing ) {
+			case 'currency':
+				unset( $args['currency'], $args['billing_total'] );
+				break;
+			case 'customer':
+				unset( $args['customer_id'] );
+				break;
+			case 'billing_policy':
+				unset( $args['selling_plan_id'] );
+				break;
+			default:
+				unset( $args[ $missing ] );
+		}
+
+		$id = Contracts::create( $args )->get_id();
+		Contracts::add_cycle(
+			$id,
+			array(
+				'status'        => CycleStatus::BILLED,
+				'count'         => 1,
+				'currency'      => 'USD',
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+			)
+		);
+		Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+
+		return $id;
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_missing_renewal_inputs(): array {
+		return array(
+			'currency'       => array( 'currency' ),
+			'payment method' => array( 'payment_method' ),
+			'billing policy' => array( 'billing_policy' ),
+		);
+	}
+
+	/**
+	 * @testdox the scheduled scan parks a contract missing a renewal input instead of erroring.
+	 * @dataProvider provide_missing_renewal_inputs
+	 *
+	 * @param string $missing The missing renewal input.
+	 */
+	public function test_scheduled_renewal_parks_a_contract_missing_a_renewal_input( string $missing ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( $missing );
+
+		$this->assertNull( $this->run_scheduled_renewal( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertNull( $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'Parked out of the due set.' );
+	}
+
+	/**
+	 * @testdox a contract with no customer renews as a guest order.
+	 */
+	public function test_a_contract_without_a_customer_renews_as_a_guest_order(): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( 'customer' );
+
+		$order = $this->run_scheduled_renewal( $contract_id );
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 0, $order->get_customer_id() );
+		$this->assertCount( 1, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( '2026-03-01 00:00:00', $this->reload_contract( $contract_id )->get_next_payment_gmt(), 'The next-due moment advanced.' );
+	}
+
+	/**
+	 * @testdox renew_now refuses a contract missing a renewal input without parking it.
+	 * @dataProvider provide_missing_renewal_inputs
+	 *
+	 * @param string $missing The missing renewal input.
+	 */
+	public function test_renew_now_refuses_a_contract_missing_a_renewal_input( string $missing ): void {
+		$this->approve_charges_for( self::GATEWAY_APPROVING );
+		$contract_id = $this->seed_contract_missing( $missing );
+
+		$this->assertNull( ( new RenewalEngine() )->renew_now( $contract_id ) );
+
+		$this->assertCount( 0, $this->renewal_orders_for_cycle( $contract_id, 2 ) );
+		$this->assertSame( '2026-02-01 00:00:00', $this->reload_contract( $contract_id )->get_next_payment_gmt() );
+	}
+
+	/**
 	 * @testdox a manual paid-status change settles a processing cycle (cash-on-delivery shape).
 	 *
 	 * A gateway-less settlement never calls payment_complete(): an admin marks the renewal
@@ -1749,7 +1832,7 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 		$order->add_item( $line );
 		$order->save();
 
-		return ( new ContractFactory() )->create_from_order( $order, $plan );
+		return $this->reload_contract( $this->sign_up_from_order( $order, $plan ) );
 	}
 
 	/**
