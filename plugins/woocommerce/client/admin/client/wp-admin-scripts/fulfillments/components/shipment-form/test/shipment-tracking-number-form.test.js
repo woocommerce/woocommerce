@@ -139,12 +139,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 			// Check for the error container with proper ARIA attributes
 			const errorContainer = screen.getByRole( 'alert' );
 			expect( errorContainer ).toBeInTheDocument();
-			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+
 			expect( errorContainer.getAttribute( 'id' ) ).toMatch(
 				/^tracking-number-error/
 			);
 			// role="alert" implicitly sets aria-live="assertive", so explicit aria-live should not be present
-			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+
 			expect( errorContainer ).not.toHaveAttribute( 'aria-live' );
 
 			// Check that the error message is within the error label component
@@ -152,7 +152,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 				'No information found for this tracking number. Check the number or enter the details manually.',
 				{ selector: '.woocommerce-fulfillment-error-label__text' }
 			);
-			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+
 			expect( errorLabel ).toBeInTheDocument();
 		} );
 	} );

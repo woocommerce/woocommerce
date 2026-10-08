@@ -97,9 +97,9 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	/**
-	 * @testdox get_billing_policy reconstructs the frozen cadence from the payload.
+	 * @testdox read_billing_policy reconstructs the frozen cadence from the payload.
 	 */
-	public function test_get_billing_policy_reconstructs_the_frozen_cadence(): void {
+	public function test_read_billing_policy_reconstructs_the_frozen_cadence(): void {
 		$snapshot = PlanSnapshot::from_array(
 			array(
 				'selling_plan_id' => 7,
@@ -114,7 +114,7 @@ class PlanSnapshotTest extends TestCase {
 			)
 		);
 
-		$policy = $snapshot->get_billing_policy();
+		$policy = $snapshot->read_billing_policy();
 
 		$this->assertInstanceOf( BillingPolicy::class, $policy );
 		$this->assertSame( 'month', $policy->get_period() );
@@ -123,26 +123,95 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	/**
-	 * @testdox get_billing_policy is null when the payload carries no billing policy.
+	 * @testdox read_billing_policy throws for a structurally-invalid stored policy.
 	 */
-	public function test_get_billing_policy_is_null_when_absent(): void {
-		$snapshot = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
-
-		$this->assertNull( $snapshot->get_billing_policy() );
-	}
-
-	/**
-	 * @testdox get_billing_policy degrades to null for a structurally-invalid stored policy.
-	 */
-	public function test_get_billing_policy_is_null_for_an_unreadable_policy(): void {
-		// `interval` missing: BillingPolicy::from_array() would throw; the accessor swallows
-		// it and degrades to "no cadence" rather than fataling the read.
+	public function test_read_billing_policy_throws_for_an_unreadable_policy(): void {
+		// `interval` missing: BillingPolicy::from_array() refuses it.
 		$snapshot = PlanSnapshot::from_array(
 			array(
 				'billing_policy' => array( 'period' => 'month' ),
 			)
 		);
 
-		$this->assertNull( $snapshot->get_billing_policy() );
+		$this->expectException( DomainException::class );
+		$snapshot->read_billing_policy();
+	}
+
+	/**
+	 * @testdox read_billing_policy throws for a policy with no usable cadence ($label).
+	 *
+	 * @testWith ["unknown period", "decade", 1]
+	 *           ["zero interval", "month", 0]
+	 *           ["negative interval", "week", -2]
+	 *
+	 * @param string $label    Case label.
+	 * @param string $period   Stored period.
+	 * @param int    $interval Stored interval.
+	 */
+	public function test_a_policy_without_a_usable_cadence_is_not_read( string $label, string $period, int $interval ): void {
+		unset( $label );
+		$snapshot = PlanSnapshot::from_array(
+			array(
+				'billing_policy' => array(
+					'period'   => $period,
+					'interval' => $interval,
+				),
+			)
+		);
+
+		$this->expectException( DomainException::class );
+		$snapshot->read_billing_policy();
+	}
+
+	/**
+	 * @testdox read_billing_policy is null when the payload carries no billing policy.
+	 */
+	public function test_read_billing_policy_is_null_when_absent(): void {
+		$this->assertNull( PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) )->read_billing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy returns the frozen payload exactly as captured.
+	 */
+	public function test_get_pricing_policy_returns_the_payload_as_captured(): void {
+		$payload  = array(
+			'policies'   => array(
+				array(
+					'type'  => 'tiered',
+					'value' => '7.5',
+				),
+			),
+			'custom_key' => array( 'nested' => true ),
+		);
+		$snapshot = PlanSnapshot::from_array( array( 'pricing_policy' => $payload ) );
+
+		$this->assertSame( $payload, $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy is null when the key is absent.
+	 */
+	public function test_get_pricing_policy_is_null_when_absent(): void {
+		$snapshot = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
+
+		$this->assertNull( $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy is null when the key is explicitly null.
+	 */
+	public function test_get_pricing_policy_is_null_when_explicitly_null(): void {
+		$snapshot = PlanSnapshot::from_array( array( 'pricing_policy' => null ) );
+
+		$this->assertNull( $snapshot->get_pricing_policy() );
+	}
+
+	/**
+	 * @testdox get_pricing_policy is null when the stored value is not an array.
+	 */
+	public function test_get_pricing_policy_is_null_for_a_non_array(): void {
+		$snapshot = PlanSnapshot::from_array( array( 'pricing_policy' => 'bogo' ) );
+
+		$this->assertNull( $snapshot->get_pricing_policy() );
 	}
 }

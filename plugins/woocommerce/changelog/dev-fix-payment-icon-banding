@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Fix banding in two payment icons compressed earlier; no merchant-facing change.

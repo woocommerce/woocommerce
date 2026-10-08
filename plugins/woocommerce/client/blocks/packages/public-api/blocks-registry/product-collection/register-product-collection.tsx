@@ -464,7 +464,7 @@ export const __experimentalRegisterProductCollection = (
 										setPreviewState,
 										initialPreviewState,
 									},
-							  }
+								}
 							: {} ) }
 						usesReference={ usesReference }
 					/>

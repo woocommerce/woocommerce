@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add WPDS design token fallbacks to built CSS with the `@wordpress/theme` PostCSS plugin.
