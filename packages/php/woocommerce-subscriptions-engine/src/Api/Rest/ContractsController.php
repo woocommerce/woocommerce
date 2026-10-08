@@ -503,12 +503,11 @@ final class ContractsController extends WP_REST_Controller {
 
 	/**
 	 * The resolved args schemas as discovery shows them: schema keywords and `required` only,
-	 * the way the WordPress REST index describes route args.
+	 * the way the WordPress REST index describes route args. An object, so no args encodes as `{}`.
 	 *
 	 * @param array<string, array<string, mixed>> $properties Property schemas.
-	 * @return array<string, array<string, mixed>>
 	 */
-	private function get_args_for_response( array $properties ): array {
+	private function get_args_for_response( array $properties ): object {
 		$keywords = array_flip( rest_get_allowed_schema_keywords() );
 		$args     = array();
 		foreach ( $properties as $name => $property ) {
@@ -516,7 +515,7 @@ final class ContractsController extends WP_REST_Controller {
 			$args[ $name ]['required'] = ! empty( $property['required'] );
 		}
 
-		return $args;
+		return (object) $args;
 	}
 
 	/**

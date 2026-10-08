@@ -387,13 +387,13 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( $this->create_user( 'administrator' ) );
 
 		$actions = $this->response_data( $this->list_actions( $contract->get_id() ) )['actions'];
-		$this->assertSame(
+		$this->assertEquals(
 			array(
 				array(
 					'action'         => 'cancel',
 					'extension_slug' => self::EXTENSION_SLUG,
 					'description'    => '',
-					'args'           => array(
+					'args'           => (object) array(
 						'at_period_end' => array(
 							'type'     => 'boolean',
 							'default'  => true,
@@ -486,19 +486,20 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$response = $this->list_actions( $contract->get_id() );
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame(
+		$this->assertEquals(
 			array(
 				'actions' => array(
 					array(
 						'action'         => 'pause',
 						'extension_slug' => self::EXTENSION_SLUG,
 						'description'    => 'Pause deliveries.',
-						'args'           => array(),
+						'args'           => new \stdClass(),
 					),
 				),
 			),
 			$response->get_data()
 		);
+		$this->assertStringContainsString( '"args":{}', (string) wp_json_encode( $response->get_data() ), 'No args encode as an empty JSON object.' );
 		$this->assertSame( array( 'actions' => array() ), $this->list_actions( $contract->get_id(), 'resume' )->get_data() );
 		$this->assertSame( 404, $this->list_actions( $contract->get_id(), 'refund' )->get_status() );
 		$this->assertSame( 404, $this->list_actions( $contract->get_id(), 'unknown' )->get_status() );
