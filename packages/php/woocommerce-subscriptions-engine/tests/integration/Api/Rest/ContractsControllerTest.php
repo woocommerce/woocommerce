@@ -104,6 +104,25 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * A contract without addresses encodes them as an empty JSON object.
+	 */
+	public function test_get_encodes_no_addresses_as_an_object(): void {
+		$contract = Contracts::create(
+			array(
+				'extension_slug' => 'test-extension',
+				'status'         => 'active',
+				'customer_id'    => 7,
+				'currency'       => 'EUR',
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$response = $this->get( $contract->get_id() );
+
+		$this->assertStringContainsString( '"addresses":{}', (string) wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
 	 * An unknown id is a 404.
 	 */
 	public function test_get_unknown_contract_is_not_found(): void {

@@ -318,6 +318,9 @@ final class ContractsController extends WP_REST_Controller {
 			'items'                => $item->get_items() ?? array(),
 			'addresses'            => $item->get_addresses() ?? array(),
 		);
+		if ( array() === $data['addresses'] ) {
+			$data['addresses'] = new \stdClass(); // Encodes as `{}`.
+		}
 
 		$data = $this->add_additional_fields_to_object( $data, $request );
 		$data = $this->filter_response_by_context( $data, Coercion::coerce_string( $request->get_param( 'context' ), 'view' ) );
