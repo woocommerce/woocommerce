@@ -302,7 +302,7 @@ describe( 'ProductCard product preview experiment', () => {
 	const productUrl = 'https://woocommerce.com/products/test-extension/';
 
 	beforeEach( () => {
-		jest.mocked( queueRecordEvent ).mockClear();
+		jest.mocked( recordEvent ).mockClear();
 	} );
 
 	it.each( [
@@ -386,7 +386,7 @@ describe( 'ProductCard product preview experiment', () => {
 			// fireEvent returns false when the click's default action was prevented.
 			expect( fireEvent.click( link ) ).toBe( opensProductPage );
 			expect(
-				jest.mocked( queueRecordEvent ).mock.calls[ 0 ][ 1 ]
+				jest.mocked( recordEvent ).mock.calls[ 0 ][ 1 ]
 					?.preview_variation
 			).toBe( tag );
 			expect( link ).toHaveAttribute(
