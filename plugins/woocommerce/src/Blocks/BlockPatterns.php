@@ -94,25 +94,14 @@ class BlockPatterns {
 			return;
 		}
 
-		$patterns = $this->get_block_patterns();
-		foreach ( $patterns as $pattern ) {
+		foreach ( $this->get_block_patterns() as $pattern ) {
 			// The pattern list can come from a stale or malformed site transient, so make sure the source is a
 			// usable string before dereferencing it, to avoid a PHP warning when building the path.
 			if ( empty( $pattern['source'] ) || ! is_string( $pattern['source'] ) ) {
 				continue;
 			}
 
-			$pattern_path = $this->patterns_path . '/' . $pattern['source'];
-
-			// The pattern list can come from a stale cache, so confirm the file
-			// still exists before registering it with a `filePath`. Without
-			// inline content, core would otherwise emit an undefined-content
-			// warning when it tries to load a missing file on demand. This
-			// mirrors core's own `_register_theme_block_patterns()` guard.
-			if ( ! file_exists( $pattern_path ) ) {
-				continue;
-			}
-
+			$pattern_path        = $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source']   = $pattern_path;
 			$pattern['filePath'] = $pattern_path;
 
