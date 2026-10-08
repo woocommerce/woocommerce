@@ -553,6 +553,12 @@ test(
 		await expect(
 			summaryTile( page, 'Net sales', '$1,229.30' )
 		).toBeVisible();
+		await expect(
+			summaryTile( page, 'Average order value', '$122.93' )
+		).toBeVisible();
+		await expect(
+			summaryTile( page, 'Average items per order', '11' )
+		).toBeVisible();
 	}
 );
 
