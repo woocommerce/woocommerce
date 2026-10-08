@@ -1023,8 +1023,11 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	$current_action = current_action();
 	$is_deleting    = in_array( $current_action, array( 'woocommerce_before_delete_order', 'before_delete_post' ), true );
 
-	if ( in_array( $current_action, array( 'before_delete_post', 'trashed_post', 'untrashed_post' ), true ) && ! in_array( get_post_type( $order_id ), wc_get_order_types( 'order-count' ), true ) ) {
-		return;
+	if ( in_array( $current_action, array( 'before_delete_post', 'trashed_post', 'untrashed_post' ), true ) ) {
+		// With HPOS authoritative, the order hooks cover every path and a post with this ID is only a backup.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() || ! in_array( get_post_type( $order_id ), wc_get_order_types( 'order-count' ), true ) ) {
+			return;
+		}
 	}
 
 	// Both delete hooks can fire for one order, and a deleted order keeps no flag to show it was released.

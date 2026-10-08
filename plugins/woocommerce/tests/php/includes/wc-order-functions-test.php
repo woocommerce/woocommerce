@@ -1075,4 +1075,31 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		unset( $wc_order_types['shop_order_custom'] );
 		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
 	}
+
+	/**
+	 * @testdox Should leave coupon usage unchanged when a backup post of a recorded HPOS order is deleted or trashed.
+	 */
+	public function test_post_hooks_on_a_backup_post_leave_hpos_order_coupon_usage_unchanged() {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Only applies when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'backup-post-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_order' ), array( 'ID' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		$this->assertSame( 'shop_order', get_post_type( $order->get_id() ) );
+
+		do_action( 'trashed_post', $order->get_id() );
+		do_action( 'untrashed_post', $order->get_id() );
+		do_action( 'before_delete_post', $order->get_id(), get_post( $order->get_id() ) );
+
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( wc_get_order( $order->get_id() )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
 }
