@@ -48,6 +48,7 @@ class WCAdminAssets {
 	public function __construct() {
 		Features::get_instance();
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_deprecated_scripts_and_styles' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ), 15 );
@@ -61,6 +62,13 @@ class WCAdminAssets {
 	 */
 	public static function get_path( $ext ) {
 		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+	}
+
+	/**
+	 * Registers deprecated scripts and styles.
+	 */
+	public static function register_deprecated_scripts_and_styles() {
+		wp_register_style( 'wc-admin-layout', false );
 	}
 
 	/**
