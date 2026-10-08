@@ -46,6 +46,13 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	private $original_action_counts = array();
 
 	/**
+	 * ID of the order that loads as a subscription.
+	 *
+	 * @var int
+	 */
+	private $subscription_id = 0;
+
+	/**
 	 * Create immutable class fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
@@ -134,6 +141,8 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$this->unregister_abilities();
 		$this->reset_fields();
 		remove_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10 );
+		remove_filter( 'woocommerce_order_class', array( $this, 'subscription_order_class' ), 10 );
+		remove_filter( 'product_type_selector', array( $this, 'add_membership_type' ) );
 		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', 'no' );
 
 		foreach ( $this->original_action_counts as $action => $original_count ) {
@@ -236,6 +245,93 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create, filter and update products of a simple-based type that an extension adds.
+	 */
+	public function test_product_type_an_extension_adds_is_created_filtered_and_updated(): void {
+		add_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10, 2 );
+		add_filter( 'product_type_selector', array( $this, 'add_membership_type' ) );
+		$this->set_feature( true );
+
+		$created  = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'product_type_alias' => 'membership',
+				'name'               => 'Gold membership',
+				'regular_price'      => '10',
+			)
+		);
+		$query    = wp_get_ability( 'woocommerce/products-query' );
+		$filtered = $query->execute( array( 'product_type_alias' => 'membership' ) );
+		$updated  = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $created['product']['id'],
+				'product_type_alias' => 'membership',
+				'regular_price'      => '12',
+			)
+		);
+		$alias    = $query->get_input_schema()['properties']['product_type_alias'];
+
+		$this->assertSame( 'membership', $created['product']['type'] );
+		$this->assertSame( array( $created['product']['id'] ), array_column( $filtered['products'], 'id' ) );
+		$this->assertSame( '12', $updated['product']['regular_price'] );
+		$this->assertContains( 'membership', $alias['enum'] );
+		$this->assertStringContainsString( 'membership: Membership', $alias['description'] );
+	}
+
+	/**
+	 * @testdox Should refuse an order type that is not an order, such as a subscription, and change nothing.
+	 */
+	public function test_order_abilities_refuse_order_types_that_are_not_orders(): void {
+		$order                 = \WC_Helper_Order::create_order();
+		$this->subscription_id = \WC_Helper_Order::create_order()->get_id();
+		add_filter( 'woocommerce_order_class', array( $this, 'subscription_order_class' ), 10, 3 );
+
+		$refused  = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $this->subscription_id,
+				'note' => 'Hi',
+			)
+		);
+		$accepted = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Hi',
+			)
+		);
+
+		$this->assertWPError( $refused );
+		$this->assertSame( 'woocommerce_order_type_unsupported', $refused->get_error_code() );
+		$this->assertEmpty( wc_get_order_notes( array( 'order_id' => $this->subscription_id ) ) );
+		$this->assertSame( $order->get_id(), $accepted['order']['id'] );
+	}
+
+	/**
+	 * Use TestSubscriptionOrder for the subscription order.
+	 *
+	 * @internal
+	 *
+	 * @param string $classname Order class.
+	 * @param string $order_type Order type.
+	 * @param int    $order_id   Order ID.
+	 * @return string
+	 */
+	public function subscription_order_class( $classname, $order_type, $order_id ) {
+		return $this->subscription_id === (int) $order_id ? TestSubscriptionOrder::class : $classname;
+	}
+
+	/**
+	 * Add the membership product type.
+	 *
+	 * @internal
+	 *
+	 * @param array<string, string> $types Product types and their labels.
+	 * @return array<string, string>
+	 */
+	public function add_membership_type( $types ) {
+		$types['membership'] = 'Membership';
+		return $types;
+	}
+
+	/**
 	 * Use TestMembershipProduct for the membership product type.
 	 *
 	 * @internal
@@ -252,6 +348,8 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	 * @testdox Should not change the abilities with the feature off.
 	 */
 	public function test_output_does_not_change_with_the_feature_off(): void {
+		add_filter( 'woocommerce_product_class', array( $this, 'membership_product_class' ), 10, 2 );
+		add_filter( 'product_type_selector', array( $this, 'add_membership_type' ) );
 		$this->set_feature( false );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$product->update_meta_data( '_test_code', 'A1' );
@@ -268,6 +366,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		)['orders'];
 
 		$this->assertArrayNotHasKey( 'extensions', $query->get_output_schema()['properties']['products']['items']['properties'] );
+		$this->assertNotContains( 'membership', $query->get_input_schema()['properties']['product_type_alias']['enum'] );
 		$this->assertArrayNotHasKey( 'extensions', $products[0] );
 		$this->assertArrayNotHasKey( 'extensions', $orders[0] );
 		$this->assertArrayNotHasKey( 'extensions', $orders[0]['line_items'][0] );

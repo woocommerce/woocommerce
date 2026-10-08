@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+With the experimental ability contracts feature on, the product abilities accept product types that extensions add on a simple, external or grouped product, and the order abilities refuse order types that are not orders, such as subscriptions.

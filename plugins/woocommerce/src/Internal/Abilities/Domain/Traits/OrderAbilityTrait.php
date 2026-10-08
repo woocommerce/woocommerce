@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Abilities\AbilityFields;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -168,6 +169,18 @@ trait OrderAbilityTrait {
 				'woocommerce_order_not_found',
 				__( 'Order not found.', 'woocommerce' ),
 				array( 'status' => 404 )
+			);
+		}
+
+		if ( AbilityContracts::is_enabled() && 'shop_order' !== $order->get_type() ) {
+			return new \WP_Error(
+				'woocommerce_order_type_unsupported',
+				sprintf(
+					/* translators: %s: order type, such as shop_subscription. */
+					__( 'This ability supports orders only. The ID belongs to a "%s".', 'woocommerce' ),
+					$order->get_type()
+				),
+				array( 'status' => 400 )
 			);
 		}
 

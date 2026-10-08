@@ -127,9 +127,11 @@ trait ProductAbilityTrait {
 	private static function get_product_type_alias_schema( ?string $product_type_alias = null ): array {
 		return array(
 			'type'        => 'string',
-			'description' => __(
-				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.',
-				'woocommerce'
+			'description' => self::add_extension_product_type_descriptions(
+				__(
+					'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.',
+					'woocommerce'
+				)
 			),
 			'enum'        => null === $product_type_alias ? self::get_supported_product_type_aliases() : array( $product_type_alias ),
 		);
@@ -313,6 +315,10 @@ trait ProductAbilityTrait {
 			return 'grouped';
 		}
 
+		if ( isset( self::get_extension_product_type_configs()[ $product->get_type() ] ) ) {
+			return $product->get_type();
+		}
+
 		return new \WP_Error(
 			'woocommerce_product_type_unsupported',
 			__( 'Product type is not supported by this ability.', 'woocommerce' ),
@@ -335,9 +341,78 @@ trait ProductAbilityTrait {
 	 * The keys are agent-facing product type aliases. Each config maps the alias to a
 	 * WooCommerce product class plus the fields that can be applied to it.
 	 *
-	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props?: array<string, mixed>}>
+	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props?: array<string, mixed>, description?: string}>
 	 */
 	private static function get_product_type_alias_configs(): array {
+		return array_merge( self::get_core_product_type_alias_configs(), self::get_extension_product_type_configs() );
+	}
+
+	/**
+	 * Get the configuration of the product types that extensions add, keyed by
+	 * product type. A type whose class extends a simple, external or grouped
+	 * product takes that Core alias's fields, and matches every product of its
+	 * type. A simple-based type keeps its own virtual and downloadable values.
+	 *
+	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, description: string}>
+	 */
+	private static function get_extension_product_type_configs(): array {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return array();
+		}
+
+		$core_configs = self::get_core_product_type_alias_configs();
+		$core_types   = array_column( $core_configs, 'wc_type' );
+		$bases        = array(
+			'physical'  => \WC_Product_Simple::class,
+			'affiliate' => \WC_Product_External::class,
+			'grouped'   => \WC_Product_Grouped::class,
+		);
+		$configs      = array();
+
+		foreach ( wc_get_product_types() as $product_type => $label ) {
+			if ( ! is_string( $product_type ) || in_array( $product_type, $core_types, true ) ) {
+				continue;
+			}
+
+			$classname = \WC_Product_Factory::get_product_classname( 0, $product_type );
+
+			foreach ( $bases as $alias => $base_class ) {
+				if ( is_string( $classname ) && is_a( $classname, $base_class, true ) ) {
+					$configs[ $product_type ] = array(
+						'wc_type'       => $product_type,
+						'fields'        => $core_configs[ $alias ]['fields'],
+						'product_props' => 'physical' === $alias ? array() : $core_configs[ $alias ]['product_props'],
+						'description'   => wp_strip_all_tags( (string) $label ),
+					);
+					break;
+				}
+			}
+		}
+
+		return $configs;
+	}
+
+	/**
+	 * Add the descriptions of the product types that extensions register to a
+	 * product type alias description.
+	 *
+	 * @param string $description Description of the Core aliases.
+	 * @return string
+	 */
+	protected static function add_extension_product_type_descriptions( string $description ): string {
+		foreach ( self::get_extension_product_type_configs() as $product_type => $config ) {
+			$description .= sprintf( ' %s: %s', $product_type, $config['description'] );
+		}
+
+		return $description;
+	}
+
+	/**
+	 * Get the configuration of Core's product type aliases.
+	 *
+	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props?: array<string, mixed>}>
+	 */
+	private static function get_core_product_type_alias_configs(): array {
 		$common_fields = self::get_common_product_mutation_fields();
 		$simple_fields = array_merge(
 			$common_fields,
@@ -839,7 +914,15 @@ trait ProductAbilityTrait {
 				'hide_empty' => false,
 			)
 		);
-		return array_values( array_unique( array_merge( $types, is_array( $terms ) ? $terms : array() ) ) );
+		return array_values(
+			array_unique(
+				array_merge(
+					$types,
+					is_array( $terms ) ? $terms : array(),
+					array_keys( self::get_extension_product_type_configs() )
+				)
+			)
+		);
 	}
 
 	/**
