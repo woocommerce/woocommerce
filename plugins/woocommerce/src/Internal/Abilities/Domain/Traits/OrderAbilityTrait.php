@@ -166,6 +166,18 @@ trait OrderAbilityTrait {
 			);
 		}
 
+		if ( 'shop_order' !== $order->get_type() ) {
+			return new \WP_Error(
+				'woocommerce_order_type_unsupported',
+				sprintf(
+					/* translators: %s: order type, such as shop_subscription. */
+					__( 'This ability supports orders only. The ID belongs to a "%s".', 'woocommerce' ),
+					$order->get_type()
+				),
+				array( 'status' => 400 )
+			);
+		}
+
 		return $order;
 	}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+The order abilities refuse order types that are not orders, such as subscriptions, instead of changing them as plain orders.

@@ -1826,6 +1826,52 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse an order type that is not an order, such as a subscription, and change nothing.
+	 */
+	public function test_order_abilities_refuse_order_types_that_are_not_orders(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$subscription              = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$this->created_order_ids[] = $subscription->get_id();
+		$subscription_id           = $subscription->get_id();
+		$subscription_class        = static function ( $classname, $order_type, $order_id ) use ( $subscription_id ) {
+			return $subscription_id === (int) $order_id ? TestSubscriptionOrder::class : $classname;
+		};
+		add_filter( 'woocommerce_order_class', $subscription_class, 10, 3 );
+
+		$results  = array(
+			wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $subscription_id ) ),
+			wp_get_ability( 'woocommerce/order-add-note' )->execute(
+				array(
+					'id'   => $subscription_id,
+					'note' => 'Hi',
+				)
+			),
+			wp_get_ability( 'woocommerce/order-update-status' )->execute(
+				array(
+					'id'     => $subscription_id,
+					'status' => 'completed',
+				)
+			),
+		);
+		$accepted = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Hi',
+			)
+		);
+		remove_filter( 'woocommerce_order_class', $subscription_class, 10 );
+
+		foreach ( $results as $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_order_type_unsupported', $result->get_error_code() );
+		}
+		$this->assertEmpty( wc_get_order_notes( array( 'order_id' => $subscription_id ) ) );
+		$this->assertSame( $subscription->get_status(), wc_get_order( $subscription_id )->get_status() );
+		$this->assertNotWPError( $accepted );
+	}
+
+	/**
 	 * @testdox Should query orders by billing email and include line items when requested.
 	 */
 	public function test_orders_query_filters_by_billing_email_with_line_items(): void {
