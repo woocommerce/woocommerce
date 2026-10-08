@@ -78,20 +78,22 @@ class ArgumentValidatorTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_invalid_values(): array {
 		return array(
-			'currency'        => array( 'validate_currency', array( 'eur' ), '"currency" must be null or a three-letter uppercase ISO-4217 code.' ),
-			'string'          => array( 'validate_string', array( 'status', 5 ), '"status" must be a string.' ),
-			'nullable string' => array( 'validate_nullable_string', array( 'title', 5 ), '"title" must be null or a string.' ),
-			'nullable id'     => array( 'validate_nullable_id', array( 'order_id', 0 ), '"order_id" must be null or a positive integer.' ),
-			'nullable date'   => array( 'validate_nullable_date', array( 'start_gmt', '2026-02-30 00:00:00' ), '"start_gmt" must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string.' ),
-			'money'           => array( 'validate_money', array( 'tax_total', 'ten' ), '"tax_total" must be a number or a numeric string.' ),
-			'list of arrays'  => array( 'validate_list_of_arrays', array( 'items', array( 'a' => array() ) ), '"items" must be a list of arrays.' ),
-			'negative int'    => array( 'validate_non_negative_int', array( 'offset', -1 ), '"offset" must be a non-negative integer.' ),
-			'id list entry'   => array( 'validate_id_list', array( 'ids', array( 3, 0 ) ), '"ids" must be a list of positive integers.' ),
-			'id list null'    => array( 'validate_id_list', array( 'ids', array( null ) ), '"ids" must be a list of positive integers.' ),
-			'id list map'     => array( 'validate_id_list', array( 'ids', array( 'a' => 3 ) ), '"ids" must be a list of positive integers.' ),
-			'string list'     => array( 'validate_string_list', array( 'status', array( 'active', '' ) ), '"status" must be a non-empty string or a list of them.' ),
-			'string list int' => array( 'validate_string_list', array( 'status', 5 ), '"status" must be a non-empty string or a list of them.' ),
-			'nullable array'  => array( 'validate_nullable_array', array( 'billing_policy', 'monthly' ), '"billing_policy" must be null or an array.' ),
+			'currency'         => array( 'validate_currency', array( 'eur' ), '"currency" must be null or a three-letter uppercase ISO-4217 code.' ),
+			'string'           => array( 'validate_string', array( 'status', 5 ), '"status" must be a string.' ),
+			'nullable string'  => array( 'validate_nullable_string', array( 'title', 5 ), '"title" must be null or a string.' ),
+			'nullable id'      => array( 'validate_nullable_id', array( 'order_id', 0 ), '"order_id" must be null or a positive integer.' ),
+			'nullable date'    => array( 'validate_nullable_date', array( 'start_gmt', '2026-02-30 00:00:00' ), '"start_gmt" must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string.' ),
+			'money'            => array( 'validate_money', array( 'tax_total', 'ten' ), '"tax_total" must be a number or a numeric string.' ),
+			'list of arrays'   => array( 'validate_list_of_arrays', array( 'items', array( 'a' => array() ) ), '"items" must be a list of arrays.' ),
+			'negative int'     => array( 'validate_non_negative_int', array( 'offset', -1 ), '"offset" must be a non-negative integer.' ),
+			'id list entry'    => array( 'validate_id_list', array( 'ids', array( 3, 0 ) ), '"ids" must be a list of positive integers.' ),
+			'id list null'     => array( 'validate_id_list', array( 'ids', array( null ) ), '"ids" must be a list of positive integers.' ),
+			'id list map'      => array( 'validate_id_list', array( 'ids', array( 'a' => 3 ) ), '"ids" must be a list of positive integers.' ),
+			'id newline'       => array( 'validate_nullable_id', array( 'order_id', "5\n" ), '"order_id" must be null or a positive integer.' ),
+			'currency newline' => array( 'validate_currency', array( "EUR\n" ), '"currency" must be null or a three-letter uppercase ISO-4217 code.' ),
+			'string list'      => array( 'validate_string_list', array( 'status', array( 'active', '' ) ), '"status" must be a non-empty string or a list of them.' ),
+			'string list int'  => array( 'validate_string_list', array( 'status', 5 ), '"status" must be a non-empty string or a list of them.' ),
+			'nullable array'   => array( 'validate_nullable_array', array( 'billing_policy', 'monthly' ), '"billing_policy" must be null or an array.' ),
 		);
 	}
 

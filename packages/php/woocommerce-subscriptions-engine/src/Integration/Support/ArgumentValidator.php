@@ -60,7 +60,7 @@ final class ArgumentValidator {
 	 * @throws InvalidArgumentException If the value is not null or a three-letter uppercase code.
 	 */
 	public static function validate_currency( $value ): ?string {
-		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}$/', $value ) ) ) {
+		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}\z/', $value ) ) ) {
 			throw new InvalidArgumentException( '"currency" must be null or a three-letter uppercase ISO-4217 code.' );
 		}
 
@@ -345,7 +345,7 @@ final class ArgumentValidator {
 	 * @return mixed
 	 */
 	private static function cast_digit_string( $value ) {
-		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
+		if ( is_string( $value ) && ctype_digit( $value ) ) {
 			return (int) $value;
 		}
 
