@@ -60,7 +60,9 @@ const Edit = ( props: EditProps ) => {
 	const items = useMemo( () => {
 		return Object.entries( stockStatusOptions )
 			.filter( ( [ key ] ) => {
-				if ( ! hideEmpty ) return true;
+				if ( ! hideEmpty ) {
+					return true;
+				}
 				const count =
 					filteredCounts?.stock_status_counts?.find(
 						( item ) => item.status === key

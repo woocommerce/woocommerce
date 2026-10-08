@@ -137,8 +137,7 @@ export const ImportCSVItem = {
 };
 
 export type SponsoredProductPlacementType =
-	| typeof PrintfulAdvertProductPlacement
-	| typeof ImportCSVItem;
+	typeof PrintfulAdvertProductPlacement | typeof ImportCSVItem;
 
 export type ProductType =
 	| ( typeof productTypes )[ number ]

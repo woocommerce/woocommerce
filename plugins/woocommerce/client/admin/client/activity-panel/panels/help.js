@@ -328,7 +328,7 @@ function getListItems( props ) {
 	let validatedItems = Array.isArray( filteredItems )
 		? filteredItems.filter(
 				( item ) => item instanceof Object && item.title && item.link
-		  )
+			)
 		: [];
 
 	// Default empty array to the generic docs link.

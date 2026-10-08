@@ -114,9 +114,9 @@ export default function AutoUpdateStatus( props: {
 			.then( () => {
 				const announcement = enabled
 					? /* translators: %s is the product name. */
-					  __( 'Auto-updates enabled for %s.', 'woocommerce' )
+						__( 'Auto-updates enabled for %s.', 'woocommerce' )
 					: /* translators: %s is the product name. */
-					  __( 'Auto-updates disabled for %s.', 'woocommerce' );
+						__( 'Auto-updates disabled for %s.', 'woocommerce' );
 
 				speak( sprintf( announcement, subscription.product_name ) );
 
@@ -139,7 +139,7 @@ export default function AutoUpdateStatus( props: {
 					: __(
 							'Auto-updates could not be disabled.',
 							'woocommerce'
-					  );
+						);
 
 				// The endpoint answers with wp_send_json_error(), which nests the reason under data.
 				const reason = error?.data?.message;

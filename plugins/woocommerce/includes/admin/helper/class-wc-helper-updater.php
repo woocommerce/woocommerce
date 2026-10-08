@@ -1014,8 +1014,8 @@ class WC_Helper_Updater {
 	/**
 	 * Validates cached update data and checks if it matches the expected hash.
 	 *
-	 * Ensures the cached data is properly structured and corresponds to the current
-	 * payload to prevent fatal errors and avoid stale cache returns.
+	 * Ensures the cached data is properly structured, corresponds to the current
+	 * payload, and was not expired by a refresh, to avoid fatal errors and stale cache returns.
 	 *
 	 * @since 10.3.6
 	 *
@@ -1024,7 +1024,7 @@ class WC_Helper_Updater {
 	 * @return bool True if the data is valid and hash matches, false otherwise.
 	 */
 	private static function should_use_cached_update_data( $data, $hash ) {
-		if ( ! is_array( $data ) ) {
+		if ( ! is_array( $data ) || ! empty( $data['expired'] ) || ! self::is_fresh_update_data( $data ) ) {
 			return false;
 		}
 
@@ -1040,18 +1040,59 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Whether cached update data is recent enough to use without a new check. The cache is kept
+	 * for a week so a failed check has something to fall back on, but it's only fresh for 12 hours.
+	 *
+	 * @param array $data The cached update data.
+	 * @return bool
+	 */
+	private static function is_fresh_update_data( array $data ): bool {
+		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 12 * HOUR_IN_SECONDS;
+	}
+
+	/**
 	 * Extract the products from a cached update-check payload.
 	 *
-	 * Used on the paths that serve the previous cache rather than a fresh
-	 * response — while rate limited, and on the rate-limited response itself.
+	 * Used while backing off and when the update check fails. The server-side `autoupdate`
+	 * decisions are kept only when the cache is fresh and was made for the current payload.
 	 *
-	 * @param mixed $data The data retrieved from the transient, of any shape.
+	 * @param mixed  $data The data retrieved from the transient, of any shape.
+	 * @param string $hash The hash of the current payload.
 	 * @return array The cached products, or an empty array when there are none.
 	 */
-	private static function get_cached_products( $data ) {
-		return ( is_array( $data ) && isset( $data['products'] ) && is_array( $data['products'] ) )
-			? $data['products']
-			: array();
+	private static function get_cached_products( $data, string $hash ) {
+		if ( ! is_array( $data ) || ! isset( $data['products'] ) || ! is_array( $data['products'] ) ) {
+			return array();
+		}
+
+		$products = $data['products'];
+		if ( isset( $data['hash'] ) && is_string( $data['hash'] ) && hash_equals( $hash, $data['hash'] ) && self::is_fresh_update_data( $data ) ) {
+			return $products;
+		}
+
+		foreach ( $products as $product_id => $product ) {
+			if ( is_array( $product ) ) {
+				unset( $products[ $product_id ]['autoupdate'] );
+			}
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Whether a failed update check may succeed if retried. Only a rejected connection is not:
+	 * a 401 or 403, or a WP_Error for missing local credentials.
+	 *
+	 * @param array|WP_Error $request       The update-check response.
+	 * @param int            $response_code The HTTP status code, 0 when there is none.
+	 * @return bool
+	 */
+	private static function is_temporary_failure( $request, int $response_code ): bool {
+		if ( is_wp_error( $request ) ) {
+			return 'authentication' !== $request->get_error_code();
+		}
+
+		return ! in_array( $response_code, array( 401, 403 ), true );
 	}
 
 	/**
@@ -1081,14 +1122,14 @@ class WC_Helper_Updater {
 			return $data['products'];
 		}
 
-		// If a previous update-check was rate limited (HTTP 429), honor the
-		// server's reset window and skip the remote call until it passes. This
-		// backoff is independent of the payload hash above, so a changed payload
-		// (or a flushed cache) can't slip past it — but clicking the Marketplace
-		// "Refresh" button bypasses and clears it. Return the last cached
-		// products, if any, rather than an empty set.
+		/*
+		 * After a failed or rate-limited update-check, skip the remote call until the
+		 * backoff window passes. This check ignores the payload hash, so a changed
+		 * payload or flushed cache can't slip past it, but the Marketplace "Refresh"
+		 * button clears it. Return the last cached products, if any.
+		 */
 		if ( WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ) ) {
-			return self::get_cached_products( $data );
+			return self::get_cached_products( $data, $hash );
 		}
 
 		$cached_data = $data;
@@ -1126,24 +1167,25 @@ class WC_Helper_Updater {
 		}
 
 		$response_code = (int) wp_remote_retrieve_response_code( $request );
-		if ( 200 !== $response_code ) {
+		$products      = 200 === $response_code ? json_decode( wp_remote_retrieve_body( $request ), true ) : null;
+		if ( ! is_array( $products ) ) {
 			$data['errors'][] = 'http-error';
 
-			// Respect server-side rate limiting: on a 429, record the reset window so
-			// we hold off on further update-check calls until then, and return the
-			// previously cached products without touching the cache. Caching this
-			// empty result for 12 hours would outlive the reset window, and it would
-			// discard the very products the backoff branch above serves while we wait.
-			if ( 429 === $response_code && is_array( $request ) ) {
-				WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
+			// On an outage (including a 200 that isn't JSON), leave the cache untouched and back off, so a failed check doesn't hide extension updates for 12 hours.
+			if ( self::is_temporary_failure( $request, $response_code ) ) {
+				if ( 429 === $response_code && is_array( $request ) ) {
+					WC_Helper_API_Backoff::record_from_response( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, $request );
+				} else {
+					WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+				}
 
-				return self::get_cached_products( $cached_data );
+				return self::get_cached_products( $cached_data, $hash );
 			}
 		} else {
-			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
+			$data['products'] = $products;
 		}
 
-		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
+		set_transient( $cache_key, $data, WEEK_IN_SECONDS );
 		return $data['products'];
 	}
 
@@ -1159,7 +1201,7 @@ class WC_Helper_Updater {
 			return $count;
 		}
 
-		// Don't fetch any new data since this function in high-frequency.
+		// This runs often, so it only counts from cached data; a cache that's stale or expired by a refresh triggers one update check here.
 		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
 			return 0;
 		}
@@ -1285,6 +1327,21 @@ class WC_Helper_Updater {
 	 */
 	public static function flush_updates_cache() {
 		delete_transient( '_woocommerce_helper_updates' );
+		self::expire_updates_cache();
+	}
+
+	/**
+	 * Forces a fresh update check while keeping the cached products, so they are still served if that check fails.
+	 *
+	 * @since 11.3.0
+	 */
+	public static function expire_updates_cache(): void {
+		$data = get_transient( '_woocommerce_helper_updates' );
+		if ( is_array( $data ) && isset( $data['hash'] ) ) {
+			$data['expired'] = true;
+			set_transient( '_woocommerce_helper_updates', $data, WEEK_IN_SECONDS );
+		}
+
 		delete_transient( '_woocommerce_helper_updates_count' );
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'update_themes' );

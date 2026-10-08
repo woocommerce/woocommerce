@@ -44,10 +44,8 @@ interface CrudStoreParams<
 }
 
 export const createCrudDataStore = <
-	Actions extends Record<
-		string,
-		( ...args: AnyArguments ) => unknown
-	> = Record< string, ( ...args: AnyArguments ) => unknown >,
+	Actions extends Record< string, ( ...args: AnyArguments ) => unknown > =
+		Record< string, ( ...args: AnyArguments ) => unknown >,
 	Selectors = unknown,
 >( {
 	storeName,
