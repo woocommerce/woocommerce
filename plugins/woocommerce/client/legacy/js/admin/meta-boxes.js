@@ -101,21 +101,31 @@ jQuery( function ( $ ) {
 		keepAlive: true,
 	} );
 
-	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function () {
-		var metabox = $( this ).parent( '.wc-metabox' );
+	$( '.wc-metaboxes-wrapper' ).on(
+		'click',
+		'.wc-metabox > h3',
+		function ( event ) {
+			// Like the slideToggle handler below, clicks on form inputs or the sort
+			// handle inside the h3 should not toggle the metabox state.
+			if ( $( event.target ).filter( ':input, option, .sort' ).length ) {
+				return;
+			}
 
-		if ( metabox.hasClass( 'closed' ) ) {
-			metabox.removeClass( 'closed' );
-		} else {
-			metabox.addClass( 'closed' );
-		}
+			var metabox = $( this ).parent( '.wc-metabox' );
 
-		if ( metabox.hasClass( 'open' ) ) {
-			metabox.removeClass( 'open' );
-		} else {
-			metabox.addClass( 'open' );
+			if ( metabox.hasClass( 'closed' ) ) {
+				metabox.removeClass( 'closed' );
+			} else {
+				metabox.addClass( 'closed' );
+			}
+
+			if ( metabox.hasClass( 'open' ) ) {
+				metabox.removeClass( 'open' );
+			} else {
+				metabox.addClass( 'open' );
+			}
 		}
-	} );
+	);
 
 	// Tabbed Panels
 	$( document.body )
@@ -163,17 +173,29 @@ jQuery( function ( $ ) {
 			$( this ).next( '.wc-metabox-content' ).stop().slideToggle();
 		} )
 		.on( 'click', '.expand_all', function () {
-			$( this )
-				.closest( '.wc-metaboxes-wrapper' )
+			var $wrapper = $( this ).closest( '.wc-metaboxes-wrapper' );
+
+			$wrapper
 				.find( '.wc-metabox > .wc-metabox-content' )
 				.show();
+			// Keep the metabox state classes in sync with the content, so the
+			// open/close arrows match what is on screen.
+			$wrapper
+				.find( '.wc-metabox' )
+				.removeClass( 'closed' )
+				.addClass( 'open' );
 			return false;
 		} )
 		.on( 'click', '.close_all', function () {
-			$( this )
-				.closest( '.wc-metaboxes-wrapper' )
+			var $wrapper = $( this ).closest( '.wc-metaboxes-wrapper' );
+
+			$wrapper
 				.find( '.wc-metabox > .wc-metabox-content' )
 				.hide();
+			$wrapper
+				.find( '.wc-metabox' )
+				.removeClass( 'open' )
+				.addClass( 'closed' );
 			return false;
 		} );
 	$( '.wc-metabox.closed' ).each( function () {

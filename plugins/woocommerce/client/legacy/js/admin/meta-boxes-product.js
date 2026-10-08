@@ -548,6 +548,17 @@ jQuery( function ( $ ) {
 			}
 		} );
 
+		// WP core's postboxes module binds a direct click.postboxes handler on every
+		// '.postbox .handlediv' that exists at page load. Attribute rows are postboxes,
+		// so on saved rows that handler toggles the 'closed' class on top of the
+		// delegated h3 toggles in meta-boxes.js, and clicks on the arrow leave the
+		// arrow out of sync with the row content. Rows added after page load never
+		// get core's handler and already behave correctly. Drop core's binding so
+		// every row runs only the WooCommerce toggle.
+		$product_attributes
+			.find( '.woocommerce_attribute > h3 > .handlediv' )
+			.off( 'click.postboxes' );
+
 		const woocommerce_attribute_items = $product_attributes
 			.find( '.woocommerce_attribute' )
 			.get();
