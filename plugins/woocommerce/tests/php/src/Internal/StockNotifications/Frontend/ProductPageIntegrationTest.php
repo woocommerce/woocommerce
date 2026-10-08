@@ -35,13 +35,19 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// The blocks are not registered on `init` because `init` runs with a classic theme.
-		// Other test classes may have registered them already.
-		if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options' ) ) {
-			new AddToCartWithOptionsMock();
-			new AddToCartWithOptionsQuantitySelectorMock();
-			new AddToCartWithOptionsVariationSelectorMock();
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
+		// Other test classes register some of these, so register only the missing ones.
+		$mocks    = array(
+			'add-to-cart-with-options'                    => AddToCartWithOptionsMock::class,
+			'add-to-cart-with-options-quantity-selector'  => AddToCartWithOptionsQuantitySelectorMock::class,
+			'add-to-cart-with-options-variation-selector' => AddToCartWithOptionsVariationSelectorMock::class,
+			'add-to-cart-with-options-variation-selector-attribute' => AddToCartWithOptionsVariationSelectorAttributeMock::class,
+			'add-to-cart-with-options-variation-selector-attribute-name' => AddToCartWithOptionsVariationSelectorAttributeNameMock::class,
+		);
+		$registry = \WP_Block_Type_Registry::get_instance();
+		foreach ( $mocks as $block_name => $mock_class ) {
+			if ( ! $registry->is_registered( 'woocommerce/' . $block_name ) ) {
+				new $mock_class();
+			}
 		}
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );

@@ -39,16 +39,22 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		if ( ! self::$are_blocks_registered ) {
 			// We need to register the blocks after set up. They are no registered
 			// on `init` because `init` is called with a classic theme.
-			new AddToCartWithOptionsMock();
-			new AddToCartWithOptionsQuantitySelectorMock();
-			new AddToCartWithOptionsGroupedProductSelectorMock();
-			new AddToCartWithOptionsGroupedProductItemMock();
-			new AddToCartWithOptionsGroupedProductItemSelectorMock();
-			new AddToCartWithOptionsVariationSelectorMock();
-			// The VariationSelectorAttribute tests may have registered these already.
-			if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options-variation-selector-attribute' ) ) {
-				new AddToCartWithOptionsVariationSelectorAttributeMock();
-				new AddToCartWithOptionsVariationSelectorAttributeNameMock();
+			// Other test classes register some of these, so register only the missing ones.
+			$mocks    = array(
+				'add-to-cart-with-options' => AddToCartWithOptionsMock::class,
+				'add-to-cart-with-options-quantity-selector' => AddToCartWithOptionsQuantitySelectorMock::class,
+				'add-to-cart-with-options-grouped-product-selector' => AddToCartWithOptionsGroupedProductSelectorMock::class,
+				'add-to-cart-with-options-grouped-product-item' => AddToCartWithOptionsGroupedProductItemMock::class,
+				'add-to-cart-with-options-grouped-product-item-selector' => AddToCartWithOptionsGroupedProductItemSelectorMock::class,
+				'add-to-cart-with-options-variation-selector' => AddToCartWithOptionsVariationSelectorMock::class,
+				'add-to-cart-with-options-variation-selector-attribute' => AddToCartWithOptionsVariationSelectorAttributeMock::class,
+				'add-to-cart-with-options-variation-selector-attribute-name' => AddToCartWithOptionsVariationSelectorAttributeNameMock::class,
+			);
+			$registry = \WP_Block_Type_Registry::get_instance();
+			foreach ( $mocks as $block_name => $mock_class ) {
+				if ( ! $registry->is_registered( 'woocommerce/' . $block_name ) ) {
+					new $mock_class();
+				}
 			}
 
 			self::$are_blocks_registered = true;
