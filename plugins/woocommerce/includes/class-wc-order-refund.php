@@ -130,6 +130,19 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the customer ID of the parent order.
+	 *
+	 * @since 11.3.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return int
+	 */
+	public function get_customer_id( $context = 'view' ) {
+		$parent_order = wc_get_order( $this->get_parent_id() );
+
+		return $parent_order && is_callable( array( $parent_order, 'get_customer_id' ) ) ? $parent_order->get_customer_id( $context ) : 0;
+	}
+
+	/**
 	 * Get formatted refunded amount.
 	 *
 	 * @since 2.4
