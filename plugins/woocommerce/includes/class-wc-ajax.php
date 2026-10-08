@@ -1215,9 +1215,13 @@ class WC_AJAX {
 		$items = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$items_to_add = isset( $_POST['data'] ) ? array_filter( wp_unslash( (array) $_POST['data'] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$tax_location = array();
+		foreach ( array( 'country', 'state', 'postcode', 'city' ) as $key ) {
+			$tax_location[ $key ] = isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? wc_strtoupper( sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) ) : '';
+		}
 
 		try {
-			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
+			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -1230,11 +1234,12 @@ class WC_AJAX {
 	 * @param int          $order_id     ID of order to add items to.
 	 * @param string|array $items        Existing items in order. Empty string if no items to add.
 	 * @param array        $items_to_add Array of items to add.
+	 * @param array        $tax_location Tax location entered in the order editor, if available.
 	 *
 	 * @return array     Fragments to render and notes HTML.
 	 * @throws Exception When unable to add item.
 	 */
-	private static function maybe_add_order_item( $order_id, $items, $items_to_add ) {
+	private static function maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location = array() ) {
 		try {
 			$order = wc_get_order( $order_id );
 
@@ -1287,7 +1292,14 @@ class WC_AJAX {
 					// The message is shown in a JS alert, not rendered as HTML.
 					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
-				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
+				$item_id                 = $order->add_product(
+					$product,
+					$qty,
+					array(
+						'order'        => $order,
+						'tax_location' => $tax_location,
+					)
+				);
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();

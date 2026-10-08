@@ -215,8 +215,7 @@ export function TemplateCanvasAffordance() {
 			onNavigateToEntityRecord:
 				// @ts-expect-error onNavigateToEntityRecord is provided through email editor settings.
 				editorSettings?.onNavigateToEntityRecord as
-					| NavigateToEntityRecord
-					| undefined,
+					NavigateToEntityRecord | undefined,
 			template: select( storeName ).getCurrentTemplate(),
 		};
 	}, [] );

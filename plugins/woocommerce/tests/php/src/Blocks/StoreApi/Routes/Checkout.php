@@ -2614,6 +2614,48 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
+	 */
+	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order_id = 0;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( &$order_id ) {
+				$order->set_status( OrderStatus::CANCELLED );
+				$order->save();
+				$order_id = $order->get_id();
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_payment_required', $response->get_data()['code'] );
+		$this->assertSame( 'This order cannot be completed without payment. Please try again.', $response->get_data()['message'] );
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should have created an order before refusing to complete it.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertSame( OrderStatus::CANCELLED, $order->get_status(), 'The order should remain cancelled.' );
+		$this->assertNull( $order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to waive payment for a pending non-zero order.
+	 */
+	public function test_checkout_allows_waived_payment_for_pending_non_zero_order(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'success', $response->get_data()['payment_result']['payment_status'] );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertTrue( $order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
 	 * Helper method to register custom order status.
 	 *
 	 * @param string $status_name             Custom status name to register.
@@ -3756,9 +3798,24 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox A failure while the order is still a draft releases the stock it had reserved.
+	 * Failures an extension can raise while the order is still a draft.
+	 *
+	 * @return array<string, array{\Throwable}>
 	 */
-	public function test_failure_before_the_order_leaves_draft_releases_held_stock() {
+	public function provider_draft_order_failures() {
+		return array(
+			'ordinary exception' => array( new \Exception( 'Extension failed while the order was still a draft.' ) ),
+			'engine error'       => array( new \TypeError( 'Extension raised an engine error while the order was still a draft.' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A failure while the order is still a draft releases the stock it had reserved: $_dataName.
+	 * @dataProvider provider_draft_order_failures
+	 *
+	 * @param \Throwable $failure The failure raised while the order is still a draft.
+	 */
+	public function test_failure_before_the_order_leaves_draft_releases_held_stock( \Throwable $failure ) {
 		// Its own product rather than a class fixture, so enabling stock management here cannot
 		// leak into the other tests in this class.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -3782,7 +3839,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$state_at_failure = null;
 		add_action(
 			'woocommerce_blocks_checkout_order_processed',
-			function () use ( &$state_at_failure, $product ) {
+			function () use ( &$state_at_failure, $product, $failure ) {
 				$draft_ids = wc_get_orders(
 					array(
 						'limit'  => 1,
@@ -3795,7 +3852,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
 					'status' => $draft_ids ? wc_get_order( $draft_ids[0] )->get_status() : 'none',
 				);
-				throw new \Exception( 'Extension failed while the order was still a draft.' );
+				throw $failure;
 			}
 		);
 
@@ -3816,11 +3873,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox An Error raised before any payment was taken still surfaces instead of being swallowed.
+	 * @testdox An Error raised before any payment was taken is reported as a failed checkout.
 	 */
 	public function test_error_raised_before_payment_is_not_converted_into_a_successful_checkout() {
 		// No payment_complete() here: the order is still awaiting payment when this lands, so the
-		// recovery path must not claim it, and an Error must keep behaving as it did before.
+		// recovery path must not claim it, and the Error must reach the client as a failure.
 		add_action(
 			'woocommerce_rest_checkout_process_payment_with_context',
 			function () {
@@ -3831,14 +3888,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 			998
 		);
 
-		$caught = null;
-		try {
-			rest_get_server()->dispatch( $this->build_checkout_post_request() );
-		} catch ( \Throwable $error ) {
-			$caught = $error;
-		}
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
 
-		$this->assertInstanceOf( \Error::class, $caught, 'An Error with no payment taken must surface rather than be reported as a successful checkout.' );
+		$this->assertSame( 500, $response->get_status(), 'An Error with no payment taken must be reported as a failed checkout: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 
 		$orders = wc_get_orders(
 			array(

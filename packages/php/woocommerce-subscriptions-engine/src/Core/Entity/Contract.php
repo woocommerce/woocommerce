@@ -16,7 +16,7 @@
  * `origin_order_id` is an optional extension fact. Customer, currency, selling plan and
  * start are optional until the extension supplies them; a new contract defaults to
  * `draft`. Timestamps are GMT strings; money totals are decimal-safe strings on the
- * storage scale; the payment instrument is exposed as an {@see InstrumentRef}.
+ * storage scale; the payment instrument is exposed as a {@see PaymentInstrumentRef}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -28,7 +28,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 defined( 'ABSPATH' ) || exit;
@@ -469,16 +469,16 @@ final class Contract {
 	/**
 	 * The payment instrument as an immutable reference.
 	 */
-	public function get_payment_instrument(): InstrumentRef {
-		return new InstrumentRef( $this->payment_token_id, $this->payment_method, $this->payment_method_title );
+	public function get_payment_instrument(): PaymentInstrumentRef {
+		return new PaymentInstrumentRef( $this->payment_token_id, $this->payment_method, $this->payment_method_title );
 	}
 
 	/**
 	 * Set the payment instrument from an immutable reference.
 	 *
-	 * @param InstrumentRef $instrument Payment instrument reference.
+	 * @param PaymentInstrumentRef $instrument Payment instrument reference.
 	 */
-	public function set_payment_instrument( InstrumentRef $instrument ): void {
+	public function set_payment_instrument( PaymentInstrumentRef $instrument ): void {
 		$this->payment_token_id     = $instrument->get_token_id();
 		$this->payment_method       = $instrument->get_gateway();
 		$this->payment_method_title = $instrument->get_title();
