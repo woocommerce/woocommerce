@@ -195,9 +195,12 @@ jobs:
       # IS available) would have to repeat the path on every step that needs it.
       # The file's presence is what triggers the annotation, so it must mean exactly
       # "phpcs failed": if another linter ever emits a checkstyle report, it needs
-      # its own variable and file, never this one.
-      - name: 'Set the PHPCS report path'
-        run: echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
+      # its own variable and file, never this one. eslint-branch.sh does the same with
+      # an ESLint JSON report for the 'Lint: JS inline annotations' step.
+      - name: 'Set the lint report paths'
+        run: |
+          echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
+          echo "WC_ESLINT_JSON_FILE=$RUNNER_TEMP/eslint.json" >> "$GITHUB_ENV"
 
       - name: 'Lint'
         id: 'lint'
@@ -229,6 +232,36 @@ jobs:
             warnings=$(grep -c 'severity="warning"' "$WC_PHPCS_CHECKSTYLE_FILE" || true)
             echo "PHPCS reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
             cs2pr "$WC_PHPCS_CHECKSTYLE_FILE" || true
+          fi
+
+      # The JS counterpart of the step above, kept as its own step so its findings
+      # get their own ~10 error and ~10 warning annotations instead of sharing them
+      # with PHPCS. ESLint 10 has no checkstyle formatter, so jq turns the JSON report
+      # into workflow commands directly. ESLint reports absolute paths; annotations
+      # need them relative to the repository root.
+      - name: 'Lint: JS inline annotations'
+        if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
+        run: |
+          if [[ ! -s "$WC_ESLINT_JSON_FILE" ]]; then
+            echo 'No ESLint report to annotate.'
+          elif ! jq -e 'type == "array"' "$WC_ESLINT_JSON_FILE" > /dev/null 2>&1; then
+            echo 'The ESLint report exists but is not an ESLint JSON report; skipping annotations. First lines:'
+            head -n5 "$WC_ESLINT_JSON_FILE"
+          else
+            errors=$(jq '[.[].errorCount] | add // 0' "$WC_ESLINT_JSON_FILE")
+            warnings=$(jq '[.[].warningCount] | add // 0' "$WC_ESLINT_JSON_FILE")
+            echo "ESLint reported ${errors} error(s) and ${warnings} warning(s). GitHub may render only the first ~10 of each inline; the full readable report is in the Lint step's log."
+            jq -r --arg root "$GITHUB_WORKSPACE/" '
+              def data: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+              def prop: data | gsub(":"; "%3A") | gsub(","; "%2C");
+              .[] | (.filePath | ltrimstr($root)) as $file | .messages[]
+              | "::\(if .severity == 2 then "error" else "warning" end) file=\($file | prop)"
+                + (if .line then ",line=\(.line)" else "" end)
+                + (if .column then ",col=\(.column)" else "" end)
+                + (if .endLine then ",endLine=\(.endLine)" else "" end)
+                + (if .endColumn then ",endColumn=\(.endColumn)" else "" end)
+                + ",title=\((.ruleId // "ESLint") | prop)::\(.message | data)"
+            ' "$WC_ESLINT_JSON_FILE"
           fi
 
   woocommerce-plugin-build-artifact:
