@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Build aggregate inner blocks manifest for better blocks initialization performance.
