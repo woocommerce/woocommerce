@@ -455,6 +455,72 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for refund coupon tests.
+	 *
+	 * @return array
+	 */
+	public function provide_refund_parent_customer_ids(): array {
+		return array(
+			'guest parent order'      => array( 0 ),
+			'registered parent order' => array( 1 ),
+		);
+	}
+
+	/**
+	 * Create a refund for one line item of a new order.
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 * @return WC_Order_Refund
+	 */
+	private function create_line_item_refund( int $customer_id ): WC_Order_Refund {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$item  = current( $order->get_items() );
+
+		return wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => $item->get_quantity(),
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox A coupon can be applied to a refund.
+	 * @dataProvider provide_refund_parent_customer_ids
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 */
+	public function test_apply_coupon_on_refund( int $customer_id ) {
+		$coupon_code = 'coupon_test_refund_' . $customer_id;
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$refund = $this->create_line_item_refund( $customer_id );
+
+		$result = $refund->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $refund->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * @testdox A refund reports the customer ID of its parent order.
+	 * See: https://github.com/woocommerce/woocommerce/issues/30922.
+	 * @dataProvider provide_refund_parent_customer_ids
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 */
+	public function test_refund_get_customer_id_returns_parent_customer_id( int $customer_id ) {
+		$refund = $this->create_line_item_refund( $customer_id );
+
+		$this->assertSame( $customer_id, $refund->get_customer_id() );
+	}
+
+	/**
 	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
 	 */
 	public function test_remove_coupon_fires_order_removed_coupon_hook() {
