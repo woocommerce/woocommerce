@@ -48,7 +48,7 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"@wordpress/prettier-config": "4.49.0",
+		"@wordpress/prettier-config": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",
 		"@wordpress/theme": "catalog:wp-bundled",
 		"babel-loader": "9.2.x",

@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\DeliveryPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -177,16 +177,16 @@ final class Plan {
 
 		return new self(
 			null,
-			ScalarCoercion::coerce_string( $args['name'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $args['description'] ?? null ),
+			Coercion::coerce_string( $args['name'] ?? null ),
+			Coercion::coerce_nullable_string( $args['description'] ?? null ),
 			$billing_policy,
 			$delivery_policy,
 			$pricing_policy,
-			ScalarCoercion::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
-			ScalarCoercion::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
-			ScalarCoercion::coerce_int( $args['sort_order'] ?? null, 0 ),
-			ScalarCoercion::coerce_nullable_string( $args['merchant_code'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $args['extension_slug'] ?? null )
+			Coercion::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
+			Coercion::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
+			Coercion::coerce_int( $args['sort_order'] ?? null, 0 ),
+			Coercion::coerce_nullable_string( $args['merchant_code'] ?? null ),
+			Coercion::coerce_nullable_string( $args['extension_slug'] ?? null )
 		);
 	}
 
@@ -203,17 +203,17 @@ final class Plan {
 		$pricing_policy = self::assert_object_or_null( $row['pricing_policy'] ?? null );
 
 		return new self(
-			isset( $row['id'] ) ? ScalarCoercion::coerce_int( $row['id'] ) : null,
-			ScalarCoercion::coerce_string( $row['name'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $row['description'] ?? null ),
+			isset( $row['id'] ) ? Coercion::coerce_int( $row['id'] ) : null,
+			Coercion::coerce_string( $row['name'] ?? null ),
+			Coercion::coerce_nullable_string( $row['description'] ?? null ),
 			BillingPolicy::from_array( is_array( $row['billing_policy'] ?? null ) ? $row['billing_policy'] : array() ),
 			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
 			$pricing_policy,
-			ScalarCoercion::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
-			ScalarCoercion::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
-			ScalarCoercion::coerce_int( $row['sort_order'] ?? null, 0 ),
-			ScalarCoercion::coerce_nullable_string( $row['merchant_code'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $row['extension_slug'] ?? null )
+			Coercion::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
+			Coercion::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
+			Coercion::coerce_int( $row['sort_order'] ?? null, 0 ),
+			Coercion::coerce_nullable_string( $row['merchant_code'] ?? null ),
+			Coercion::coerce_nullable_string( $row['extension_slug'] ?? null )
 		);
 	}
 

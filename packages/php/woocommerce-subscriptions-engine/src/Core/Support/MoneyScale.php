@@ -42,6 +42,6 @@ final class MoneyScale {
 	 * @internal Engine implementation detail. Not part of the supported extension API.
 	 */
 	public static function normalize_money( $value ): string {
-		return number_format( ScalarCoercion::coerce_float( $value ?? '0' ), 8, '.', '' );
+		return number_format( Coercion::coerce_float( $value ?? '0' ), 8, '.', '' );
 	}
 }

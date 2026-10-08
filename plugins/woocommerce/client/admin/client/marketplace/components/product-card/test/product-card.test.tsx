@@ -32,7 +32,7 @@ jest.mock( '@woocommerce/data', () => ( {
 /**
  * Internal dependencies
  */
-import ProductCard from '../product-card';
+import ProductCard, { ProductCardProps } from '../product-card';
 import { MarketplaceContext } from '../../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../../contexts/types';
 import {
@@ -51,6 +51,7 @@ const context = {
 			tooltip: 'Verified against WooCommerce standards.',
 		},
 	},
+	productPreviewVariation: null,
 } as unknown as MarketplaceContextType;
 
 const product: Product = {
@@ -76,7 +77,8 @@ const product: Product = {
 function renderCard(
 	cardType: ProductCardType,
 	productOverrides: Partial< Product > = {},
-	contextOverrides: Partial< MarketplaceContextType > = {}
+	contextOverrides: Partial< MarketplaceContextType > = {},
+	cardProps: Partial< ProductCardProps > = {}
 ) {
 	return render(
 		<MarketplaceContext.Provider
@@ -87,6 +89,7 @@ function renderCard(
 				product={ { ...product, ...productOverrides } }
 				cardType={ cardType }
 				tracksData={ { position: 1 } }
+				{ ...cardProps }
 			/>
 		</MarketplaceContext.Provider>
 	);
@@ -290,16 +293,107 @@ describe( 'ProductCard click tracking', () => {
 	} );
 
 	it( 'records the click once when the card opens a preview modal', () => {
-		clickCard(
-			{},
-			{
-				iamSettings: {
-					...context.iamSettings,
-					product_previews: 'modal',
-				},
-			}
-		);
+		clickCard( {}, { productPreviewVariation: 'treatment' } );
 
 		expect( cardClickEvents() ).toHaveLength( 1 );
 	} );
+} );
+
+describe( 'ProductCard product preview experiment', () => {
+	const productUrl = 'https://woocommerce.com/products/test-extension/';
+
+	beforeEach( () => {
+		jest.mocked( queueRecordEvent ).mockClear();
+	} );
+
+	it.each( [
+		{
+			name: 'opens the preview instead of the product page in the treatment arm',
+			variation: 'treatment',
+			opensProductPage: false,
+			tag: 'treatment',
+		},
+		{
+			name: 'opens the product page in the control arm',
+			variation: 'control',
+			opensProductPage: true,
+			tag: 'control',
+		},
+		{
+			name: 'leaves the card untagged until the assignment loads',
+			variation: null,
+			opensProductPage: true,
+			tag: undefined,
+		},
+		{
+			name: 'follows the WooCommerce.com setting when the store has no assignment',
+			variation: null,
+			productPreviews: 'modal' as const,
+			opensProductPage: false,
+			tag: undefined,
+		},
+		{
+			name: 'ignores the WooCommerce.com setting in the control arm',
+			variation: 'control',
+			productPreviews: 'modal' as const,
+			opensProductPage: true,
+			tag: 'control',
+		},
+		{
+			name: 'keeps business service cards out of the experiment',
+			variation: 'treatment',
+			type: ProductType.businessService,
+			opensProductPage: true,
+			tag: undefined,
+		},
+		{
+			name: 'keeps theme cards out of the experiment',
+			variation: 'treatment',
+			cardProps: { type: ProductType.theme },
+			opensProductPage: true,
+			tag: undefined,
+		},
+		{
+			name: 'keeps the small cards in install modals out of the experiment',
+			variation: 'treatment',
+			cardProps: { small: true },
+			opensProductPage: true,
+			tag: undefined,
+		},
+	] )(
+		'$name',
+		( {
+			variation,
+			productPreviews,
+			type = ProductType.extension,
+			cardProps = {},
+			opensProductPage,
+			tag,
+		} ) => {
+			const view = renderCard(
+				ProductCardType.regular,
+				{ url: productUrl, type },
+				{
+					productPreviewVariation: variation,
+					iamSettings: {
+						...context.iamSettings,
+						product_previews: productPreviews,
+					},
+				},
+				cardProps
+			);
+			const link = view.getByRole( 'link' );
+
+			// fireEvent returns false when the click's default action was prevented.
+			expect( fireEvent.click( link ) ).toBe( opensProductPage );
+			expect(
+				jest.mocked( queueRecordEvent ).mock.calls[ 0 ][ 1 ]
+					?.preview_variation
+			).toBe( tag );
+			expect( link ).toHaveAttribute(
+				'href',
+				tag ? `${ productUrl }?utm_term=${ tag }` : productUrl
+			);
+		}
+	);
 } );

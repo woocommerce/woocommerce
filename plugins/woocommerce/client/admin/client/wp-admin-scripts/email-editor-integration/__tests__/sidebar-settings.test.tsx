@@ -98,8 +98,8 @@ import { modifySidebar } from '../sidebar_settings';
 
 const defaultWooCommerceData: WooCommerceData = {
 	recipient: 'merchant@example.com',
-	cc: null,
-	bcc: null,
+	cc: '',
+	bcc: '',
 	preheader: 'Order update preview',
 	email_type: 'new_order',
 	subject: 'New order',
@@ -314,14 +314,14 @@ describe( 'Email editor sidebar settings', () => {
 		mockEntityState.woocommerceData = {
 			...defaultWooCommerceData,
 			recipient: null,
-			cc: null,
-			bcc: null,
+			cc: '',
+			bcc: '',
 		};
 		mockEntityState.editedWooCommerceData = {
 			...defaultWooCommerceData,
 			recipient: null,
-			cc: null,
-			bcc: null,
+			cc: '',
+			bcc: '',
 			unrelated_setting: 'preserved',
 		};
 		const { rerender, SidebarSettings, EmailStatus } = renderSettings( {

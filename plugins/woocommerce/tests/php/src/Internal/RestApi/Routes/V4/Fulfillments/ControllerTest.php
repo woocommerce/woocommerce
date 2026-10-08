@@ -577,4 +577,103 @@ class ControllerTest extends WC_Unit_Test_Case {
 			$overrides
 		);
 	}
+
+	/**
+	 * Create a second customer who owns a fresh order and fulfillment.
+	 *
+	 * @return array{user_id:int, order:WC_Order, fulfillment:Fulfillment}
+	 */
+	private function create_other_customer_with_fulfillment(): array {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order   = WC_Helper_Order::create_order( $user_id );
+		$ff      = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => $order->get_id() ) );
+
+		return array(
+			'user_id'     => $user_id,
+			'order'       => $order,
+			'fulfillment' => $ff,
+		);
+	}
+
+	/**
+	 * @testdox The item route checks the fulfillment's own order when an order_id is passed.
+	 */
+	public function test_item_route_checks_fulfillment_order_when_order_id_given(): void {
+		$other_customer = $this->create_other_customer_with_fulfillment();
+		wp_set_current_user( $other_customer['user_id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_query_params( array( 'order_id' => $other_customer['order']->get_id() ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_api_v4_fulfillments_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The item route checks the fulfillment's own order when no order_id is passed.
+	 */
+	public function test_item_route_checks_fulfillment_order_without_order_id(): void {
+		$other_customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $other_customer_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox A customer can read the fulfillment on their own order.
+	 */
+	public function test_customer_can_read_own_fulfillment(): void {
+		wp_set_current_user( self::$customer_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $this->test_fulfillment->get_id(), $response->get_data()['id'] );
+	}
+
+	/**
+	 * @testdox The collection read checks the order_id order only.
+	 */
+	public function test_collection_read_ignores_fulfillment_id_param(): void {
+		$other_customer = $this->create_other_customer_with_fulfillment();
+		wp_set_current_user( $other_customer['user_id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$request->set_query_params(
+			array(
+				'order_id'       => $this->test_order->get_id(),
+				'fulfillment_id' => $other_customer['fulfillment']->get_id(),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox The item route returns the fulfillment named in the URL.
+	 */
+	public function test_item_route_uses_fulfillment_id_from_url(): void {
+		$other_customer = $this->create_other_customer_with_fulfillment();
+		wp_set_current_user( $other_customer['user_id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $other_customer['fulfillment']->get_id() );
+		$request->set_query_params( array( 'fulfillment_id' => $this->test_fulfillment->get_id() ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$data = $response->get_data();
+		$this->assertNotEquals(
+			$this->test_fulfillment->get_id(),
+			$data['id'] ?? null,
+			'The item route should return the fulfillment from the URL, not the fulfillment_id query param.'
+		);
+		if ( 200 === $response->get_status() ) {
+			$this->assertEquals( $other_customer['fulfillment']->get_id(), $data['id'] );
+		}
+	}
 }
