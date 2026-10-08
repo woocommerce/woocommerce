@@ -120,13 +120,12 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		/**
 		 * The session belongs to this customer if $data is not empty, and the ID matches the logged in user ID.
 		 *
-		 * If the user object has been updated since the session was created (based on date_modified), values that are also saved
-		 * to the user are reloaded from there instead. Session-only values are still applied, since the user has no newer copy.
-		 *
 		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
 		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
 		if ( isset( $data['id'] ) && $data['id'] === (string) $customer->get_id() ) {
+			// If the user was saved after this session was (e.g. by checkout), the session's copies of saved fields such as
+			// addresses are out of date, so only apply the session-only values. The user has no copy of those to fall back on.
 			$is_current = isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' );
 
 			foreach ( $is_current ? $this->session_keys : $this->session_only_keys as $session_key ) {
