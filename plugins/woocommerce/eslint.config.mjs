@@ -35,7 +35,7 @@ export default [
 		'client/blocks/**',
 		'client/legacy/**',
 		'includes/gateways/**',
-		'routes/**',
+		'admin-screens/**',
 	] ),
 	/*
 	 * The eslintrc this replaces declared neither `extends` nor `root`: it

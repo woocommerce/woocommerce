@@ -10,7 +10,7 @@
 /node_modules/
 /patches/
 /playwright-report/
-/routes/
+/admin-screens/
 /storybook/
 /tests/
 /test-results/

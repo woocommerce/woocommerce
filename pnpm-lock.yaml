@@ -2527,15 +2527,15 @@ importers:
       '@woocommerce/admin-library':
         specifier: workspace:*
         version: link:client/admin
+      '@woocommerce/admin-screens':
+        specifier: workspace:*
+        version: link:admin-screens
       '@woocommerce/block-library':
         specifier: workspace:*
         version: link:client/blocks
       '@woocommerce/classic-assets':
         specifier: workspace:*
         version: link:client/legacy
-      '@woocommerce/settings-route':
-        specifier: workspace:*
-        version: link:routes/settings
     devDependencies:
       '@babel/cli':
         specifier: catalog:tooling
@@ -2573,9 +2573,6 @@ importers:
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
-      '@wordpress/build':
-        specifier: catalog:tooling
-        version: 0.24.0(@babel/core@7.25.7)(@wordpress/private-apis@1.48.1)(@wordpress/route@0.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@wordpress/theme@2.3.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3)))
       '@wordpress/e2e-test-utils-playwright':
         specifier: catalog:wp-min
         version: 1.33.2(patch_hash=0a3df7448f0a035981fcb1ecddf9c699450bcfe7c1f6c334d6cdfea5db1e0d52)(@playwright/test@1.63.0)
@@ -2751,6 +2748,53 @@ importers:
       uglify-js:
         specifier: ^3.17.4
         version: 3.19.3
+
+  plugins/woocommerce/admin-screens:
+    dependencies:
+      '@woocommerce/settings-route':
+        specifier: workspace:*
+        version: link:routes/settings
+    devDependencies:
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.63.0
+        version: 8.64.0(@typescript-eslint/parser@8.64.0(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3))(eslint@10.7.0(jiti@2.6.1))(typescript@5.7.3)
+      '@woocommerce/eslint-config':
+        specifier: workspace:*
+        version: link:../../../tools/eslint-config
+      '@wordpress/browserslist-config':
+        specifier: next
+        version: 6.55.1-next.v.202609171837.0
+      '@wordpress/build':
+        specifier: catalog:tooling
+        version: 0.24.0(@babel/core@7.29.7)(@wordpress/private-apis@1.48.1)(@wordpress/route@0.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@wordpress/theme@2.3.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3)))
+      eslint:
+        specifier: ^10.0.0
+        version: 10.7.0(jiti@2.6.1)
+      typescript:
+        specifier: 5.7.x
+        version: 5.7.3
+
+  plugins/woocommerce/admin-screens/routes/settings:
+    dependencies:
+      '@wordpress/admin-ui':
+        specifier: catalog:wp-bundled
+        version: 2.4.1(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/i18n':
+        specifier: catalog:wp-min
+        version: 6.6.1
+      '@wordpress/route':
+        specifier: catalog:wp-min
+        version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: 18.3.x
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.x
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: 18.3.x
+        version: 18.3.28
 
   plugins/woocommerce/client/admin:
     dependencies:
@@ -3856,28 +3900,6 @@ importers:
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
-
-  plugins/woocommerce/routes/settings:
-    dependencies:
-      '@wordpress/admin-ui':
-        specifier: catalog:wp-bundled
-        version: 2.4.1(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
-      '@wordpress/i18n':
-        specifier: catalog:wp-min
-        version: 6.6.1
-      '@wordpress/route':
-        specifier: catalog:wp-min
-        version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react:
-        specifier: 18.3.x
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.x
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/react':
-        specifier: 18.3.x
-        version: 18.3.28
 
   tools/code-analyzer:
     dependencies:
@@ -9174,6 +9196,10 @@ packages:
     resolution: {integrity: sha512-/siYL1d2O/evfWkXIDuhIVfHHBYE0T8hiD4JD8xm6JGe9Z2zHikveVT/AvJZrIzUBJknEIADyFE+cXimk97GkA==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
 
+  '@wordpress/browserslist-config@6.55.1-next.v.202609171837.0':
+    resolution: {integrity: sha512-GSXmW3M4/CmeiNWJpV5ryC/kcMWlC9haKpegIqlVogt/MpfXtaTArkZRLcccjUiWPHP6eAUpPn+MHig80W3njg==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+
   '@wordpress/browserslist-config@6.56.0':
     resolution: {integrity: sha512-/gdTZapH6cV2iu+glSvM6IjYjS6kLtRlmjlNENqn03Isc8V1cSyWZWZ4vlq2i41uwqGoDObu4DdlmTBWS+g4Cg==}
     engines: {node: '>=18.12.0'}
@@ -11298,11 +11324,6 @@ packages:
     resolution: {integrity: sha512-5T6P4xPgpp0YDFvSWwEZ4NoE3aM4QBQXDzmVbraCkFj8zHM+mba8SyqB5DbZWyR7mYHo6Y7BdQo3MoA4m0TeQg==}
     engines: {node: '>=0.10.0'}
 
-  baseline-browser-mapping@2.10.43:
-    resolution: {integrity: sha512-AjYpR78kDWAY3Efj+cDTFH9t9SCoL7OoTp1BOb0mQV7S+6CiLwnWM3FyxhJtdPufDFKzmCSFoUncKjWgJEZTCQ==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
   baseline-browser-mapping@2.11.27:
     resolution: {integrity: sha512-ElY12DaROGuan+lMmZ8Cvo/ZUbXPe7Enc/9VU/b1T3Kp4dwytRcNdR8DoSJN5SNJT/CuvcCA0DHDVmMOCePdRQ==}
     engines: {node: '>=6.0.0'}
@@ -11530,9 +11551,6 @@ packages:
 
   caniuse-lite@1.0.30001788:
     resolution: {integrity: sha512-6q8HFp+lOQtcf7wBK+uEenxymVWkGKkjFpCvw5W25cmMwEDU45p1xQFBQv8JDlMMry7eNxyBaR+qxgmTUZkIRQ==}
-
-  caniuse-lite@1.0.30001805:
-    resolution: {integrity: sha512-52noaS3DubycKSXaU30TwPGIp+POyQSUVa5jBEq3vkRkY0kjyb3LQgvhU6WGyCcyXqVLWO0Cw0Q6BSdD0kUfVA==}
 
   caniuse-lite@1.0.30001815:
     resolution: {integrity: sha512-uDybUEyfgbyJJ93J1vikTylBX31AkdVYeVPeffMQpf8XN7hSfr0oZOn4VFOIMNvtU5+rHvC5Udg2TgtJKHm23Q==}
@@ -12710,9 +12728,6 @@ packages:
     resolution: {integrity: sha512-UaaM14yby8U3k02ihS1Bmj5Kz2d7CCQM1scxpgs4Mhkq8F1wR2gl3+Ts4h5Ne4Mnt7M9m4Dw7jsuMr3+xO4vZA==}
     engines: {node: '>=0.12.18'}
     hasBin: true
-
-  electron-to-chromium@1.5.389:
-    resolution: {integrity: sha512-cEto7aeOqBfU1D+c5py5pE+ooscKE75JifxLBdFUZsqAxRS6y7kebtxAZvICszSl05gPjYHDTjY+lXpyGvpJbg==}
 
   electron-to-chromium@1.5.449:
     resolution: {integrity: sha512-dKeYk/3SFQz+nXi5whp3OuJzeWABEG4zCtkWJ9+Vby1E1iFM2y0gElRtQvNXRPJTsj8WAF4HMP7hvP790QtJ9g==}
@@ -15864,10 +15879,6 @@ packages:
 
   node-pty@0.9.0:
     resolution: {integrity: sha512-MBnCQl83FTYOu7B4xWw10AW77AAh7ThCE1VXEv+JeWj8mSpGo+0bwgsV+b23ljBFwEM9OmsOv3kM27iUPPm84g==, tarball: https://registry.npmjs.org/node-pty/-/node-pty-0.9.0.tgz}
-
-  node-releases@2.0.51:
-    resolution: {integrity: sha512-wRNIrw4DmVLKQlbgOMdkMx27Wrpzes2hh5Jtbi2bjPd+4wJstWIqP5A+lscnqbm0xxmT5Bpg8Lec5ItEBwx6BQ==}
-    engines: {node: '>=18'}
 
   node-releases@2.0.57:
     resolution: {integrity: sha512-kQK9LGGFiHtrWiNhZtA7Qbw17AQz+dmsEKODRIVTXA9+e5MS/2gZEBhYJt13GrAz5/IOZKddH/0Z3TP/Zgo+yw==}
@@ -19251,12 +19262,6 @@ packages:
   unzip-response@2.0.1:
     resolution: {integrity: sha512-N0XH6lqDtFH84JxptQoZYmloF4nzrQqqrAymNj+/gW60AO2AZgOcf4O/nUXJcYfyQkqvMo9lSupBZmmgvuVXlw==}
     engines: {node: '>=4'}
-
-  update-browserslist-db@1.2.3:
-    resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
-    hasBin: true
-    peerDependencies:
-      browserslist: '>= 4.21.0'
 
   update-browserslist-db@1.3.3:
     resolution: {integrity: sha512-pJ2sYawQS0R/WI928Gj5GlPhTGzbMelq0+4INtSYNDV9ErKJcX6xjGWkoG/VnB3dpUm00zALaqkrUD77pO5TDQ==}
@@ -26526,7 +26531,7 @@ snapshots:
       '@babel/plugin-transform-runtime': 7.25.7(@babel/core@7.25.7)
       '@babel/preset-env': 7.25.7(@babel/core@7.25.7)
       '@babel/preset-typescript': 7.25.7(@babel/core@7.25.7)
-      '@wordpress/browserslist-config': 6.43.1-next.v.202604091042.0
+      '@wordpress/browserslist-config': 6.56.0
       '@wordpress/warning': 3.51.0
       browserslist: 4.28.6
       core-js: 3.49.0
@@ -26896,7 +26901,7 @@ snapshots:
       '@wordpress/escape-html': 3.50.0
       '@wordpress/hooks': 4.50.0
       '@wordpress/html-entities': 4.50.0
-      '@wordpress/i18n': 6.23.0
+      '@wordpress/i18n': 6.30.0
       '@wordpress/icons': 11.8.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/interactivity': 6.48.1
       '@wordpress/interactivity-router': 2.44.0
@@ -27042,9 +27047,11 @@ snapshots:
 
   '@wordpress/browserslist-config@6.51.0': {}
 
+  '@wordpress/browserslist-config@6.55.1-next.v.202609171837.0': {}
+
   '@wordpress/browserslist-config@6.56.0': {}
 
-  '@wordpress/build@0.24.0(@babel/core@7.25.7)(@wordpress/private-apis@1.48.1)(@wordpress/route@0.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@wordpress/theme@2.3.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3)))':
+  '@wordpress/build@0.24.0(@babel/core@7.29.7)(@wordpress/private-apis@1.48.1)(@wordpress/route@0.22.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@wordpress/theme@2.3.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3)))':
     dependencies:
       '@emotion/babel-plugin': 11.13.5
       '@wordpress/browserslist-config': 6.56.0
@@ -27056,7 +27063,7 @@ snapshots:
       chokidar: 4.0.3
       cssnano: 6.1.2(postcss@8.5.26)
       esbuild: 0.27.7
-      esbuild-plugin-babel: 0.2.3(@babel/core@7.25.7)
+      esbuild-plugin-babel: 0.2.3(@babel/core@7.29.7)
       esbuild-sass-plugin: 3.7.0(esbuild@0.27.7)(sass-embedded@1.100.0)
       fast-glob: 3.3.3
       moment-timezone: 0.5.48
@@ -29210,7 +29217,7 @@ snapshots:
       '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/element': 6.45.0
       '@wordpress/html-entities': 4.50.0
-      '@wordpress/i18n': 6.23.0
+      '@wordpress/i18n': 6.30.0
       '@wordpress/icons': 11.8.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/latex-to-mathml': 1.16.0
       '@wordpress/private-apis': 1.48.1
@@ -29855,7 +29862,7 @@ snapshots:
       '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/element': 6.45.0
       '@wordpress/html-entities': 4.50.0
-      '@wordpress/i18n': 6.23.0
+      '@wordpress/i18n': 6.30.0
       '@wordpress/icons': 11.8.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/notices': 5.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/private-apis': 1.48.1
@@ -30282,7 +30289,7 @@ snapshots:
       '@wordpress/deprecated': 4.50.0
       '@wordpress/element': 6.45.0
       '@wordpress/escape-html': 3.50.0
-      '@wordpress/i18n': 6.23.0
+      '@wordpress/i18n': 6.30.0
       '@wordpress/keycodes': 4.50.0(@types/react@18.3.28)
       colord: 2.9.3
       memize: 2.1.1
@@ -30643,7 +30650,7 @@ snapshots:
       '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/deprecated': 4.50.0
       '@wordpress/element': 6.45.0
-      '@wordpress/i18n': 6.23.0
+      '@wordpress/i18n': 6.30.0
       '@wordpress/url': 4.48.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -32092,8 +32099,6 @@ snapshots:
       mixin-deep: 1.3.2
       pascalcase: 0.1.1
 
-  baseline-browser-mapping@2.10.43: {}
-
   baseline-browser-mapping@2.11.27: {}
 
   basic-ftp@5.3.1: {}
@@ -32233,11 +32238,11 @@ snapshots:
 
   browserslist@4.28.6:
     dependencies:
-      baseline-browser-mapping: 2.10.43
-      caniuse-lite: 1.0.30001805
-      electron-to-chromium: 1.5.389
-      node-releases: 2.0.51
-      update-browserslist-db: 1.2.3(browserslist@4.28.6)
+      baseline-browser-mapping: 2.11.27
+      caniuse-lite: 1.0.30001815
+      electron-to-chromium: 1.5.449
+      node-releases: 2.0.57
+      update-browserslist-db: 1.3.3(browserslist@4.28.6)
 
   browserslist@4.29.3:
     dependencies:
@@ -32404,8 +32409,6 @@ snapshots:
   caniuse-lite@1.0.30001146: {}
 
   caniuse-lite@1.0.30001788: {}
-
-  caniuse-lite@1.0.30001805: {}
 
   caniuse-lite@1.0.30001815: {}
 
@@ -33645,8 +33648,6 @@ snapshots:
 
   ejs@6.0.1: {}
 
-  electron-to-chromium@1.5.389: {}
-
   electron-to-chromium@1.5.449: {}
 
   email-addresses@5.0.0: {}
@@ -33850,9 +33851,9 @@ snapshots:
       es6-promise: 4.2.8
     optional: true
 
-  esbuild-plugin-babel@0.2.3(@babel/core@7.25.7):
+  esbuild-plugin-babel@0.2.3(@babel/core@7.29.7):
     dependencies:
-      '@babel/core': 7.25.7
+      '@babel/core': 7.29.7
 
   esbuild-sass-plugin@3.7.0(esbuild@0.27.7)(sass-embedded@1.100.0):
     dependencies:
@@ -37680,8 +37681,6 @@ snapshots:
       nan: 2.26.2
     optional: true
 
-  node-releases@2.0.51: {}
-
   node-releases@2.0.57: {}
 
   node-stream-zip@1.15.0: {}
@@ -41471,15 +41470,15 @@ snapshots:
   unzip-response@2.0.1:
     optional: true
 
-  update-browserslist-db@1.2.3(browserslist@4.28.6):
-    dependencies:
-      browserslist: 4.28.6
-      escalade: 3.2.0
-      picocolors: 1.1.1
-
   update-browserslist-db@1.3.3(browserslist@4.28.2):
     dependencies:
       browserslist: 4.28.2
+      escalade: 3.2.0
+      picocolors: 1.1.1
+
+  update-browserslist-db@1.3.3(browserslist@4.28.6):
+    dependencies:
+      browserslist: 4.28.6
       escalade: 3.2.0
       picocolors: 1.1.1
 
