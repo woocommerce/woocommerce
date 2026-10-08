@@ -10,9 +10,10 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 use Automattic\WooCommerce\Abilities\AbilityFields;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 
 /**
- * Extension fields in the output of the product and order abilities.
+ * Extension fields in the output and the writes of the product and order abilities.
  */
 class AbilityFieldsTest extends \WC_Unit_Test_Case {
 
@@ -24,6 +25,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
+		'test/subscription-cancel',
 	);
 
 	private const CODE_SCHEMA = array(
@@ -94,11 +96,39 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 			'product',
 			'test_code',
 			array(
-				'schema'       => self::CODE_SCHEMA,
-				'get_callback' => static function ( \WC_Product $product ) {
+				'schema'          => self::CODE_SCHEMA,
+				'get_callback'    => static function ( \WC_Product $product ) {
 					$code = $product->get_meta( '_test_code' );
 					return '' === $code ? null : $code;
 				},
+				'update_callback' => static function ( $value, \WC_Product $product ) {
+					if ( 'reject' === $value ) {
+						return new \WP_Error( 'test_code_rejected', 'Rejected.' );
+					}
+					$product->update_meta_data( '_test_code', $value );
+				},
+			)
+		);
+		AbilityFields::register(
+			'product',
+			'test_color',
+			array(
+				'schema'          => array( 'type' => 'string' ),
+				'get_callback'    => static function ( \WC_Product $product ) {
+					$color = $product->get_meta( '_test_color' );
+					return '' === $color ? null : $color;
+				},
+				'update_callback' => static function ( $value, \WC_Product $product ) {
+					$product->update_meta_data( '_test_color', $value );
+				},
+			)
+		);
+		AbilityFields::register(
+			'product',
+			'test_label',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => '__return_null',
 			)
 		);
 		AbilityFields::register(
@@ -108,6 +138,20 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 				'schema'       => array( 'type' => 'string' ),
 				'get_callback' => static function ( \WC_Order $order ) {
 					return 'order-' . $order->get_id();
+				},
+			)
+		);
+		AbilityFields::register(
+			'order',
+			'test_ref',
+			array(
+				'schema'          => array( 'type' => 'string' ),
+				'get_callback'    => static function ( \WC_Order $order ) {
+					$ref = $order->get_meta( '_test_ref' );
+					return '' === $ref ? null : $ref;
+				},
+				'update_callback' => static function ( $value, \WC_Order $order ) {
+					$order->update_meta_data( '_test_ref', $value );
 				},
 			)
 		);
@@ -389,6 +433,316 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should save a product update with Core fields and two extensions' fields one time.
+	 */
+	public function test_product_update_with_extension_fields_saves_once(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$saves   = new \MockAction();
+		add_action( 'woocommerce_update_product', array( $saves, 'action' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'test_code'  => 'A1',
+					'test_color' => 'red',
+				),
+			)
+		);
+		$saved  = wc_get_product( $product->get_id() );
+
+		$this->assertSame( 1, $saves->get_call_count() );
+		$this->assertSame( 'Pencil', $saved->get_name() );
+		$this->assertSame( 'A1', $saved->get_meta( '_test_code' ) );
+		$this->assertSame( 'red', $saved->get_meta( '_test_color' ) );
+		$this->assertSame(
+			array(
+				'test_code'  => 'A1',
+				'test_color' => 'red',
+			),
+			$result['product']['extensions']
+		);
+	}
+
+	/**
+	 * @testdox Should save a product create with Core fields and two extensions' fields one time.
+	 */
+	public function test_product_create_with_extension_fields_saves_once(): void {
+		$creates = new \MockAction();
+		$updates = new \MockAction();
+		add_action( 'woocommerce_new_product', array( $creates, 'action' ) );
+		add_action( 'woocommerce_update_product', array( $updates, 'action' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'       => 'Mug',
+				'extensions' => array(
+					'test_code'  => 'M1',
+					'test_color' => 'blue',
+				),
+			)
+		);
+		$saved  = wc_get_product( $result['product']['id'] );
+
+		$this->assertSame( 1, $creates->get_call_count() + $updates->get_call_count() );
+		$this->assertSame( 'Mug', $saved->get_name() );
+		$this->assertSame( 'M1', $saved->get_meta( '_test_code' ) );
+		$this->assertSame( 'blue', $saved->get_meta( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should save an order status update with an extension field one time.
+	 */
+	public function test_order_status_update_with_extension_field_saves_once(): void {
+		$order = \WC_Helper_Order::create_order();
+		$saves = new \MockAction();
+		add_action( 'woocommerce_update_order', array( $saves, 'action' ) );
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'on-hold',
+				'extensions' => array( 'test_ref' => 'R1' ),
+			)
+		);
+		$saved  = wc_get_order( $order->get_id() );
+
+		$this->assertSame( 1, $saves->get_call_count() );
+		$this->assertSame( 'on-hold', $saved->get_status() );
+		$this->assertSame( 'R1', $saved->get_meta( '_test_ref' ) );
+		$this->assertSame( 'R1', $result['order']['extensions']['test_ref'] );
+	}
+
+	/**
+	 * @testdox Should save nothing when a field or a validator rejects the change.
+	 * @dataProvider rejected_extensions_provider
+	 *
+	 * @param array  $extensions Extension values.
+	 * @param string $code       Expected error code.
+	 */
+	public function test_rejected_change_saves_nothing( array $extensions, string $code ): void {
+		AbilityFields::register_validator(
+			'product',
+			static function ( \WC_Product $product ) {
+				return 'blocked' === $product->get_meta( '_test_color' )
+					? new \WP_Error( 'test_color_blocked', 'Blocked.' )
+					: null;
+			}
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$saves   = new \MockAction();
+		add_action( 'woocommerce_update_product', array( $saves, 'action' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => $extensions,
+			)
+		);
+		$saved  = wc_get_product( $product->get_id() );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $code, $result->get_error_code() );
+		$this->assertSame( 0, $saves->get_call_count() );
+		$this->assertSame( 'Pen', $saved->get_name() );
+		$this->assertSame( '', $saved->get_meta( '_test_code' ) );
+		$this->assertSame( '', $saved->get_meta( '_test_color' ) );
+	}
+
+	/**
+	 * Extension values that a field or a validator rejects.
+	 *
+	 * @return array<string, array{0: array, 1: string}>
+	 */
+	public function rejected_extensions_provider(): array {
+		return array(
+			'field rejects'           => array(
+				array(
+					'test_color' => 'red',
+					'test_code'  => 'reject',
+				),
+				'test_code_rejected',
+			),
+			'validator rejects'       => array(
+				array(
+					'test_code'  => 'A1',
+					'test_color' => 'blocked',
+				),
+				'test_color_blocked',
+			),
+			'value fails the schema'  => array( array( 'test_code' => 5 ), 'ability_invalid_input' ),
+			'field cannot be written' => array( array( 'test_label' => 'x' ), 'woocommerce_ability_field_invalid' ),
+			'field is unknown'        => array( array( 'test_unknown' => 'x' ), 'woocommerce_ability_field_invalid' ),
+		);
+	}
+
+	/**
+	 * @testdox Should let an order validator refuse a subscription status change and name the ability to use.
+	 */
+	public function test_order_validator_refuses_subscription_status_change(): void {
+		AbilityFields::register_validator(
+			'order',
+			static function ( \WC_Order $order ) {
+				if ( $order instanceof TestSubscriptionOrder && array_key_exists( 'status', $order->get_changes() ) ) {
+					return new \WP_Error( 'test_use_subscriptions_cancel', 'Use `subscriptions/cancel` to cancel a subscription.' );
+				}
+				return null;
+			}
+		);
+		$subscription_id = \WC_Helper_Order::create_order()->get_id();
+		$order_id        = \WC_Helper_Order::create_order()->get_id();
+		add_filter(
+			'woocommerce_order_class',
+			static function ( $classname, $order_type, $id ) use ( $subscription_id ) {
+				return $subscription_id === $id ? TestSubscriptionOrder::class : $classname;
+			},
+			10,
+			3
+		);
+		$this->register_test_ability( 'test/subscription-cancel', TestCancelSubscriptionAbility::class );
+		$update_status = wp_get_ability( 'woocommerce/order-update-status' );
+
+		$refused   = $update_status->execute(
+			array(
+				'id'     => $subscription_id,
+				'status' => 'cancelled',
+			)
+		);
+		$after     = wc_get_order( $subscription_id )->get_status();
+		$order     = $update_status->execute(
+			array(
+				'id'     => $order_id,
+				'status' => 'cancelled',
+			)
+		);
+		$cancelled = wp_get_ability( 'test/subscription-cancel' )->execute( array( 'id' => $subscription_id ) );
+
+		$this->assertWPError( $refused );
+		$this->assertSame( 'Use `subscriptions/cancel` to cancel a subscription.', $refused->get_error_message() );
+		$this->assertSame( 'pending', $after );
+		$this->assertSame( 'cancelled', $order['order']['status'] );
+		$this->assertSame( array( 'status' => 'cancelled' ), $cancelled );
+		$this->assertSame( 'cancelled', wc_get_order( $subscription_id )->get_status() );
+	}
+
+	/**
+	 * @testdox Should return the same write results with the feature on and off.
+	 */
+	public function test_writes_return_the_same_results_with_the_feature_on_and_off(): void {
+		$results = array();
+		foreach ( array( false, true ) as $enabled ) {
+			$this->set_feature( $enabled );
+			$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+			$order   = \WC_Helper_Order::create_order();
+
+			$results[ $enabled ? 'on' : 'off' ] = array(
+				'created'    => $this->without_ids(
+					wp_get_ability( 'woocommerce/product-create' )->execute(
+						array(
+							'name'          => 'Mug',
+							'regular_price' => '5',
+						)
+					)['product']
+				),
+				'updated'    => $this->without_ids(
+					wp_get_ability( 'woocommerce/product-update' )->execute(
+						array(
+							'id'                 => $product->get_id(),
+							'product_type_alias' => 'virtual',
+							'name'               => 'Pencil',
+						)
+					)['product']
+				),
+				'no_fields'  => wp_get_ability( 'woocommerce/product-update' )->execute( array( 'id' => $product->get_id() ) )->get_error_code(),
+				'status'     => $this->without_ids(
+					wp_get_ability( 'woocommerce/order-update-status' )->execute(
+						array(
+							'id'     => $order->get_id(),
+							'status' => 'completed',
+							'note'   => 'Done',
+						)
+					)['order']
+				),
+				'notes'      => count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) ),
+				'unchanged'  => wp_get_ability( 'woocommerce/order-update-status' )->execute(
+					array(
+						'id'     => $order->get_id(),
+						'status' => 'completed',
+					)
+				)->get_error_code(),
+				'actionable' => wp_get_ability( 'woocommerce/order-update-status' ) instanceof ActionableAbility,
+			);
+		}
+
+		$this->assertFalse( $results['off']['actionable'] );
+		$this->assertTrue( $results['on']['actionable'] );
+		unset( $results['off']['actionable'], $results['on']['actionable'] );
+		$this->assertSame( $results['off'], $results['on'] );
+	}
+
+	/**
+	 * @testdox Should refuse a field whose update_callback is not callable.
+	 */
+	public function test_field_with_uncallable_update_callback_is_refused(): void {
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Abilities\AbilityFields::register' );
+
+		AbilityFields::register(
+			'product',
+			'test_bad',
+			array(
+				'schema'          => self::CODE_SCHEMA,
+				'get_callback'    => '__return_true',
+				'update_callback' => 'not_a_function',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'test_bad', AbilityFields::get( 'product' ) );
+	}
+
+	/**
+	 * Remove the keys that differ between two objects with the same data.
+	 *
+	 * @param array $output Formatted object.
+	 * @return array
+	 */
+	private function without_ids( array $output ): array {
+		return array_diff_key(
+			$output,
+			array_flip( array( 'id', 'slug', 'sku', 'permalink', 'extensions', 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) )
+		);
+	}
+
+	/**
+	 * Register a test ability.
+	 *
+	 * @param string $name          Ability name.
+	 * @param string $ability_class Ability class.
+	 */
+	private function register_test_ability( string $name, string $ability_class ): void {
+		$callback = static function () use ( $name, $ability_class ) {
+			wp_register_ability(
+				$name,
+				array(
+					'label'               => 'Test',
+					'description'         => 'Test ability.',
+					'category'            => 'woocommerce',
+					'ability_class'       => $ability_class,
+					'permission_callback' => '__return_true',
+					'input_schema'        => array(
+						'type'       => 'object',
+						'properties' => array( 'id' => array( 'type' => 'integer' ) ),
+					),
+				)
+			);
+		};
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' );
+		remove_action( 'wp_abilities_api_init', $callback );
+	}
+
+	/**
 	 * Set the feature and register the abilities again.
 	 *
 	 * @param bool $enabled Whether the feature is on.
@@ -415,7 +769,7 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Drop every registered field.
+	 * Drop every registered field and validator.
 	 */
 	private function reset_fields(): void {
 		$fields = new \ReflectionProperty( AbilityFields::class, 'fields' );
@@ -424,5 +778,8 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 		$reported = new \ReflectionProperty( AbilityFields::class, 'reported' );
 		$reported->setAccessible( true );
 		$reported->setValue( null, array() );
+		$validators = new \ReflectionProperty( AbilityFields::class, 'validators' );
+		$validators->setAccessible( true );
+		$validators->setValue( null, array() );
 	}
 }

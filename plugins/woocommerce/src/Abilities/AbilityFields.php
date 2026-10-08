@@ -16,10 +16,11 @@ defined( 'ABSPATH' ) || exit;
  * register_rest_field() does for the REST API. An extension registers a field
  * with register(). An ability that formats an object of that type adds the
  * field values under `extensions`, keyed by attribute, and lists the fields in
- * its output schema.
+ * its output schema. An ActionableAbility writes the `extensions` input to the
+ * fields and runs the validators that register_validator() adds.
  *
- * The public contract is register(). The read side that Core's abilities call
- * is internal and may change.
+ * The public contract is register() and register_validator(). The
+ * methods that Core's abilities call are internal and may change.
  *
  * @since 11.3.0
  */
@@ -31,6 +32,13 @@ class AbilityFields {
 	 * @var array<string, array<string, array<string, mixed>>>
 	 */
 	private static array $fields = array();
+
+	/**
+	 * Validators keyed by object type.
+	 *
+	 * @var array<string, array<int, callable>>
+	 */
+	private static array $validators = array();
 
 	/**
 	 * Fields already reported for a value that does not match the schema, keyed by object type and attribute.
@@ -59,6 +67,10 @@ class AbilityFields {
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
 	 *                                  keeps it. It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
+	 *     @type callable $update_callback Optional. Receives the value and the object, and changes the object
+	 *                                     in memory. It returns a WP_Error to reject the value, and then
+	 *                                     nothing is saved. It must not save, send email or make HTTP
+	 *                                     requests. A field without it cannot be written.
 	 * }
 	 */
 	public static function register( string $object_type, string $attribute, array $args ): void {
@@ -70,8 +82,27 @@ class AbilityFields {
 			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
 			return;
 		}
+		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
 
 		self::$fields[ $object_type ][ $attribute ] = $args;
+	}
+
+	/**
+	 * Register a validator that runs on every change of an object type, after
+	 * the ability and the fields change the object and before it is saved.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string   $object_type Object type that an ActionableAbility changes, for example `product` or `order`.
+	 * @param callable $callback    Receives the changed object, which is not saved yet. It returns a WP_Error
+	 *                              to reject the change, and then nothing is saved. The error message can
+	 *                              name the ability to use instead. It must not change or save the object.
+	 */
+	public static function register_validator( string $object_type, callable $callback ): void {
+		self::$validators[ $object_type ][] = $callback;
 	}
 
 	/**
@@ -120,6 +151,129 @@ class AbilityFields {
 			$output['extensions'] = $values;
 		}
 		return $output;
+	}
+
+	/**
+	 * Write extension values to an object in memory with the update_callback
+	 * of each field. Nothing happens when the feature is off.
+	 *
+	 * @internal
+	 *
+	 * @param string               $object_type Object type.
+	 * @param object               $subject     Object to change.
+	 * @param array<string, mixed> $values      Values keyed by attribute.
+	 * @return \WP_Error|null A WP_Error when a value is rejected.
+	 */
+	public static function update( string $object_type, $subject, array $values ): ?\WP_Error {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return null;
+		}
+
+		$fields = self::get( $object_type );
+		foreach ( $values as $attribute => $value ) {
+			if ( ! isset( $fields[ $attribute ]['update_callback'] ) ) {
+				return new \WP_Error(
+					'woocommerce_ability_field_invalid',
+					/* translators: %s: Attribute under extensions. */
+					sprintf( __( 'The extension field "%s" cannot be written.', 'woocommerce' ), $attribute ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$valid = rest_validate_value_from_schema( $value, $fields[ $attribute ]['schema'], 'extensions.' . $attribute );
+			if ( is_wp_error( $valid ) ) {
+				return self::with_status( $valid );
+			}
+
+			$updated = call_user_func( $fields[ $attribute ]['update_callback'], $value, $subject );
+			if ( is_wp_error( $updated ) ) {
+				return self::with_status( $updated );
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Run the validators of an object type on a changed object. Nothing
+	 * happens when the feature is off.
+	 *
+	 * @internal
+	 *
+	 * @param string $object_type Object type.
+	 * @param object $subject     Changed object.
+	 * @return \WP_Error|null A WP_Error when a validator rejects the change.
+	 */
+	public static function validate( string $object_type, $subject ): ?\WP_Error {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return null;
+		}
+
+		foreach ( self::$validators[ $object_type ] ?? array() as $validator ) {
+			$valid = call_user_func( $validator, $subject );
+			if ( is_wp_error( $valid ) ) {
+				return self::with_status( $valid );
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Add the `extensions` property to an input schema when the feature is on.
+	 * It lists the fields that can be written, in each `oneOf` branch when the
+	 * schema has them.
+	 *
+	 * @internal
+	 *
+	 * @param array<string, mixed> $schema      Input schema.
+	 * @param string               $object_type Object type.
+	 * @return array<string, mixed>
+	 */
+	public static function add_to_input_schema( array $schema, string $object_type ): array {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $schema;
+		}
+
+		$extensions = array(
+			'type'        => 'object',
+			'description' => __( 'Values to write to the fields that extensions add, keyed by attribute.', 'woocommerce' ),
+		);
+		$fields     = array_filter(
+			self::get( $object_type ),
+			static function ( array $field ): bool {
+				return isset( $field['update_callback'] );
+			}
+		);
+		if ( ! empty( $fields ) ) {
+			$extensions['properties'] = array_map(
+				static function ( array $field ): array {
+					return $field['schema'];
+				},
+				$fields
+			);
+		}
+
+		if ( isset( $schema['oneOf'] ) ) {
+			foreach ( $schema['oneOf'] as $index => $branch ) {
+				$schema['oneOf'][ $index ]['properties']['extensions'] = $extensions;
+			}
+		} else {
+			$schema['properties']['extensions'] = $extensions;
+		}
+		return $schema;
+	}
+
+	/**
+	 * Give an error the 400 status when it has none.
+	 *
+	 * @param \WP_Error $error Error.
+	 * @return \WP_Error
+	 */
+	private static function with_status( \WP_Error $error ): \WP_Error {
+		$data = $error->get_error_data();
+		if ( ! isset( $data['status'] ) ) {
+			$error->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+		}
+		return $error;
 	}
 
 	/**

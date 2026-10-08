@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CoreActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
@@ -15,6 +16,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -136,7 +138,12 @@ class AbilitiesLoader {
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
 
-			$registered_ability = wp_register_ability( $ability_name, $class_name::get_registration_args() );
+			$args = $class_name::get_registration_args();
+			if ( $is_core_ability && AbilityContracts::is_enabled() && isset( CoreActionableAbility::DEFINITIONS[ $ability_name ] ) ) {
+				$args['ability_class'] = CoreActionableAbility::class;
+			}
+
+			$registered_ability = wp_register_ability( $ability_name, $args );
 
 			if ( $is_core_ability && null !== $registered_ability ) {
 				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
