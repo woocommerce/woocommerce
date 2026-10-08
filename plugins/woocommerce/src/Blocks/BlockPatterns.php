@@ -164,7 +164,10 @@ class BlockPatterns {
 		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
 
 		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
-			return $pattern_data['patterns'];
+			$is_path_modified = ( $pattern_data['timestamp'] ?? null ) === @filemtime( $this->patterns_path );
+			if ( ! $is_path_modified ) {
+				return $pattern_data['patterns'];
+			}
 		}
 
 		return false;
@@ -177,8 +180,9 @@ class BlockPatterns {
 	 */
 	private function set_pattern_cache( array $patterns ) {
 		$pattern_data = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => $patterns,
+			'version'   => WOOCOMMERCE_VERSION,
+			'timestamp' => @filemtime( $this->patterns_path ),
+			'patterns'  => $patterns,
 		);
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, MONTH_IN_SECONDS );
