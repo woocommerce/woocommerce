@@ -445,4 +445,28 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 
 		$this->assertFloatEquals( 12.0, (float) $val, null, 'The fee should be a percentage of cost, with the weight added on top.' );
 	}
+
+	/**
+	 * A plain amount is stored dot-decimal whichever separator the merchant typed, so the value
+	 * that reaches evaluate_cost() is the one PHP can read. setUp() puts the store on a comma
+	 * decimal separator and a dot thousand separator, which is where the forms differ.
+	 *
+	 * The three rows are three different routes through the sanitiser: a value that is already
+	 * dot-decimal is taken as it stands, one written in the store's own separators is converted,
+	 * and one carrying a thousand separator has that removed rather than read as a decimal point.
+	 *
+	 * @testdox sanitize_cost() stores a plain amount dot-decimal whichever separator was typed.
+	 *
+	 * @testWith ["10.5", "10.5"]
+	 *           ["10,5", "10.5"]
+	 *           ["1.000,50", "1000.50"]
+	 *
+	 * @param string $typed    What the merchant entered.
+	 * @param string $expected What should be stored.
+	 */
+	public function test_sanitize_cost_stores_a_plain_amount_dot_decimal( string $typed, string $expected ): void {
+		$result = $this->call_sanitize_cost->call( $this->sut, $typed );
+
+		$this->assertSame( $expected, trim( $result ), 'Entered as "' . $typed . '" on a comma-decimal store.' );
+	}
 }

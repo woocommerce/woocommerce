@@ -141,4 +141,69 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->variation->is_viewable(), 'A variation whose parent is a draft is viewable by admins.' );
 		$this->assertFalse( $this->variation->is_publicly_viewable(), 'A variation whose parent is a draft is never publicly viewable.' );
 	}
+
+	/**
+	 * @testdox Should inherit customs values only in view context and restore inheritance after clearing an override.
+	 * @testWith ["customs_commodity_code", "010203", "040506"]
+	 *           ["customs_country_of_origin", "RO", "US"]
+	 *           ["customs_description", "Cotton shirt", "Linen shirt"]
+	 * @param string $field Property name.
+	 * @param string $inherited Parent value.
+	 * @param string $override Variation value.
+	 */
+	public function test_customs_variation_inheritance( string $field, string $inherited, string $override ): void {
+		$this->parent_product->{"set_$field"}( $inherited );
+		$this->parent_product->save();
+		$variation_id = $this->variation->get_id();
+		$sut          = new WC_Product_Variation( $variation_id );
+
+		$this->assertSame( $inherited, $sut->{"get_$field"}(), 'Unset variations should inherit the parent in view context.' );
+		$this->assertNull( $sut->{"get_$field"}( 'edit' ), 'Edit context should expose the raw variation override.' );
+
+		$sut->{"set_$field"}( $override );
+		$sut->save();
+		$sut = new WC_Product_Variation( $variation_id );
+		$this->assertSame( $override, $sut->{"get_$field"}(), 'A persisted variation override should take precedence.' );
+		$this->assertSame( $override, $sut->{"get_$field"}( 'edit' ), 'The variation override should be available in edit context.' );
+
+		$sut->{"set_$field"}( " \t" );
+		$sut->save();
+		$sut = new WC_Product_Variation( $variation_id );
+		$this->assertSame( $inherited, $sut->{"get_$field"}(), 'Clearing an override should restore inheritance.' );
+		$this->assertNull( $sut->{"get_$field"}( 'edit' ), 'A cleared override should remain null after reloading.' );
+		$this->assertFalse( metadata_exists( 'post', $variation_id, '_' . $field ), 'An inherited value should not be saved on the variation.' );
+	}
+
+	/**
+	 * @testdox Should let the resolved $field filter change the inherited parent value.
+	 * @testWith ["woocommerce_product_variation_get_customs_country_of_origin", "customs_country_of_origin", "RO", "US"]
+	 * @param string $hook Filter name.
+	 * @param string $field Customs prop name.
+	 * @param string $inherited Parent value.
+	 * @param string $filtered Value returned by the filter.
+	 */
+	public function test_customs_inherited_value_can_be_filtered( string $hook, string $field, string $inherited, string $filtered ): void {
+		$this->parent_product->{"set_$field"}( $inherited );
+		$this->parent_product->save();
+		$sut = new WC_Product_Variation( $this->variation->get_id() );
+
+		$this->assertSame( $inherited, $sut->{"get_$field"}(), 'View context should return the parent value.' );
+
+		add_filter( $hook, fn( $value ) => $inherited === $value ? $filtered : $value );
+
+		$this->assertSame( $filtered, $sut->{"get_$field"}(), 'The filter should be able to change the inherited value.' );
+		$this->assertNull( $sut->{"get_$field"}( 'edit' ), 'Edit context should not be filtered or inherited.' );
+	}
+
+	/**
+	 * @testdox Should hydrate missing parent customs data as null.
+	 */
+	public function test_customs_missing_parent_data_is_null(): void {
+		$sut = new WC_Product_Variation( $this->variation->get_id() );
+
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $field ) {
+			$this->assertNull( $sut->{"get_$field"}(), "Missing parent $field should not become an empty string." );
+			$this->assertNull( $sut->get_parent_data()[ $field ], "Hydrated parent $field should be null." );
+		}
+	}
 }

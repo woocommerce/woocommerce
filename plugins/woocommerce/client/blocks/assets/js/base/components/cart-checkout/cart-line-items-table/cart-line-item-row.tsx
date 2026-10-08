@@ -147,7 +147,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		// Prepare props to pass to the applyCheckoutFilter filter.
 		// We need to pluck out receiveCart.
-		// eslint-disable-next-line no-unused-vars
+
 		const { receiveCart, ...cart } = useStoreCart();
 		const arg = useMemo(
 			() => ( {
@@ -417,7 +417,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 										: __(
 												'Save for later',
 												'woocommerce'
-										  ) }
+											) }
 								</button>
 							</div>
 						) }
