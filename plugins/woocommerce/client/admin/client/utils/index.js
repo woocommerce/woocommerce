@@ -203,3 +203,5 @@ export function createDeprecatedPropertiesProxy(
 		},
 	} );
 }
+
+debugger;
