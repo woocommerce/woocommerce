@@ -5,7 +5,7 @@
  * Extensions create, update and read plans through explicit argument arrays: the engine records
  * the payloads it is given and interprets none of them. It checks integrity only (a
  * non-empty name, a registered status, object-shaped policies), then lets the plan's
- * owner validate the write through `woocommerce_subscriptions_engine_validate_plan`.
+ * owning extension validate the write through `woocommerce_subscriptions_engine_validate_plan`.
  * Any caller may read any plan; an update names the plan's owning extension and never
  * reaches a plan of another one (authorization is the caller's concern). Reads return
  * read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
@@ -47,7 +47,7 @@ final class Plans {
 
 	/**
 	 * Keys accepted by {@see self::create()} and {@see self::update()}, as a key map. The
-	 * `extension_slug` sets the owner on create and scopes the write on update; it is never
+	 * `extension_slug` sets the owning extension on create and scopes the write on update; it is never
 	 * written on update. The other keys are the plan fields.
 	 *
 	 * @var array<string, true>
@@ -84,7 +84,7 @@ final class Plans {
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw RuntimeException indirectly, through validate_with_owner() and the repository.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw RuntimeException indirectly, through validate_with_extension() and the repository.
 	/**
 	 * Create a plan.
 	 *
@@ -94,10 +94,10 @@ final class Plans {
 	 *                                   extension), `name` (required, non-empty), `status` (a
 	 *                                   registered plan status, default `active`), and
 	 *                                   `billing_policy`, `pricing_policy`, `delivery_policy`
-	 *                                   (string-keyed arrays the owner interprets, or null).
+	 *                                   (string-keyed arrays the owning extension interprets, or null).
 	 * @return PlanView The new plan, built from the written fields (no re-read).
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid, or a
-	 *                                  {@see PlanValidationException} when the owner refuses the plan.
+	 *                                  {@see PlanValidationException} when the owning extension refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): PlanView {
@@ -118,7 +118,7 @@ final class Plans {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		self::validate_with_owner( $plan );
+		self::validate_with_extension( $plan );
 
 		( new PlanRepository() )->insert( $plan );
 
@@ -126,10 +126,10 @@ final class Plans {
 	}
 
 	/**
-	 * Write the given fields to an existing plan of the given owner.
+	 * Write the given fields to an existing plan of the given extension.
 	 *
 	 * Takes the keys of {@see self::create()}. `extension_slug` is required, as on create,
-	 * but here it is the owner scope, never a written field (a plan's owner never changes):
+	 * but here it scopes the write to that extension and is never written (a plan's extension never changes):
 	 * the plan is read and written only where its row carries that slug, so a plan of
 	 * another extension reads as missing and is never written. Only the columns of the
 	 * present plan fields are written, so fields a concurrent writer changed in between
@@ -145,10 +145,10 @@ final class Plans {
 	 *                                      and the fields to write.
 	 * @return PlanView|null The row as read before the write plus the written fields (a column
 	 *                       another writer changed meanwhile may be stale here, not in storage);
-	 *                       null when no plan of that owner has the id (also when it is
+	 *                       null when no plan of that extension has the id (also when it is
 	 *                       deleted before the write).
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid, or a
-	 *                                  {@see PlanValidationException} when the owner refuses the plan.
+	 *                                  {@see PlanValidationException} when the owning extension refuses the plan.
 	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
@@ -168,7 +168,7 @@ final class Plans {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		self::validate_with_owner( $plan );
+		self::validate_with_extension( $plan );
 
 		$fields = array_keys( $filtered_args );
 		if ( array() === $fields ) {
@@ -345,22 +345,22 @@ final class Plans {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * Let the plan's owner validate the would-be plan before it is written.
+	 * Let the plan's extension validate the would-be plan before it is written.
 	 *
 	 * @param Plan $plan The would-be plan (unsaved on create).
 	 * @throws PlanValidationException If a callback added errors.
 	 * @throws RuntimeException If a callback threw.
 	 */
-	private static function validate_with_owner( Plan $plan ): void {
-		$errors = new WP_Error();
-		$owner  = (string) $plan->get_extension_slug();
+	private static function validate_with_extension( Plan $plan ): void {
+		$errors         = new WP_Error();
+		$extension_slug = (string) $plan->get_extension_slug();
 
 		try {
 			/**
 			 * Fires before every plan write (PHP facade or REST), on create and on update,
-			 * including status-only updates, so the plan's owner can refuse it.
+			 * including status-only updates, so the plan's extension can refuse it.
 			 *
-			 * Add errors to $errors to refuse the write; act only on your own $owner slug.
+			 * Add errors to $errors to refuse the write; act only on your own $extension_slug.
 			 * The view is the would-be state after the write (its id is 0 on create) and is
 			 * read-only.
 			 *
@@ -373,15 +373,15 @@ final class Plans {
 			 *
 			 * @param WP_Error $errors Error collector.
 			 * @param PlanView $plan   The would-be plan.
-			 * @param string   $owner  Owning extension slug.
+			 * @param string   $extension_slug Owning extension slug.
 			 */
-			do_action( 'woocommerce_subscriptions_engine_validate_plan', $errors, PlanView::from_plan( $plan ), $owner );
+			do_action( 'woocommerce_subscriptions_engine_validate_plan', $errors, PlanView::from_plan( $plan ), $extension_slug );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
-				sprintf( 'Plans: plan validation for extension "%s" (plan %s) threw: %s', $owner, null === $plan->get_id() ? 'new' : (string) $plan->get_id(), $e->getMessage() ),
+				sprintf( 'Plans: plan validation for extension "%s" (plan %s) threw: %s', $extension_slug, null === $plan->get_id() ? 'new' : (string) $plan->get_id(), $e->getMessage() ),
 				array(
 					'source'         => self::LOG_SOURCE,
-					'extension_slug' => $owner,
+					'extension_slug' => $extension_slug,
 					'plan_id'        => $plan->get_id(),
 				)
 			);

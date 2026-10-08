@@ -81,11 +81,11 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Fetch a plan by id, in any status, of any owner or (when given) only of the given owner.
+	 * Fetch a plan by id, in any status, of any extension or (when given) only of the given extension.
 	 *
 	 * @param int         $id             Plan id.
-	 * @param string|null $extension_slug Owning extension slug to scope the read to; null reads any owner.
-	 * @return Plan|null Hydrated plan, or null if not found (also when it belongs to another owner).
+	 * @param string|null $extension_slug Owning extension slug to scope the read to; null reads any extension.
+	 * @return Plan|null Hydrated plan, or null if not found (also when it belongs to another extension).
 	 */
 	public function find( int $id, ?string $extension_slug = null ): ?Plan {
 		global $wpdb;
@@ -191,15 +191,15 @@ final class PlanRepository {
 	/**
 	 * Write only the given columns of an existing plan's row (plus its update time, stamped
 	 * back onto the entity), so columns a concurrent writer changed in between keep its
-	 * values. The write is scoped to the plan's owner: it matches the row by id and the
-	 * entity's extension slug, so a row of another owner is never written. Plan meta is
-	 * never touched. Existence (by id and owner) is checked only when the write changes
+	 * values. The write is scoped to the plan's extension: it matches the row by id and the
+	 * entity's extension slug, so a row of another extension is never written. Plan meta is
+	 * never touched. Existence (by id and extension slug) is checked only when the write changes
 	 * nothing. Opens no transaction: a caller's transaction covers the write.
 	 *
 	 * @param Plan               $plan   Plan to read the values from. Must have an id and an extension slug.
 	 * @param array<int, string> $fields Columns to write: `name`, `status`, `billing_policy`,
 	 *                                   `pricing_policy`, `delivery_policy`.
-	 * @return bool False when no row of the plan's owner has its id (nothing is written).
+	 * @return bool False when no row of the plan's extension has its id (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable column.
 	 * @throws \RuntimeException If the plan has no id or no extension slug, or the update fails.
 	 */
@@ -241,7 +241,7 @@ final class PlanRepository {
 			throw new \RuntimeException( sprintf( 'Failed to update plan %d: %s', (int) $id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		// Zero changed rows: no row of this owner, or identical values written within the same second.
+		// Zero changed rows: no row of this extension, or identical values written within the same second.
 		if ( 0 === $updated && ! $this->exists( $id, $extension_slug ) ) {
 			return false;
 		}
@@ -252,10 +252,10 @@ final class PlanRepository {
 	}
 
 	/**
-	 * Whether a plan row exists, of any owner or (when given) of the given owner.
+	 * Whether a plan row exists, of any extension or (when given) of the given extension.
 	 *
 	 * @param int         $id             Plan id.
-	 * @param string|null $extension_slug Owning extension slug to scope the check to; null checks any owner.
+	 * @param string|null $extension_slug Owning extension slug to scope the check to; null checks any extension.
 	 */
 	public function exists( int $id, ?string $extension_slug = null ): bool {
 		global $wpdb;

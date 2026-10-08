@@ -335,7 +335,7 @@ final class PlansController extends WP_REST_Controller {
 		$args['extension_slug'] = $extension_slug;
 
 		try {
-			// A plan of another extension reads as missing: the facade scopes the update to the owner.
+			// A plan of another extension reads as missing: the facade scopes the update to the request's extension slug.
 			$plan = Plans::update( Coercion::coerce_int( $request->get_param( 'id' ) ), $args );
 		} catch ( PlanValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );

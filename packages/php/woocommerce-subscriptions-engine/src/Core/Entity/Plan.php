@@ -45,7 +45,7 @@ final class Plan {
 	private $status;
 
 	/**
-	 * Owning extension slug, or null until owner semantics are assigned.
+	 * Owning extension slug.
 	 *
 	 * @var string|null
 	 */

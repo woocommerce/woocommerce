@@ -1,6 +1,6 @@
 <?php
 /**
- * PlanValidationException - a plan write refused by the owner's plan validation.
+ * PlanValidationException - a plan write refused by the owning extension's plan validation.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */

@@ -483,7 +483,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox update without a valid extension slug throws and leaves the plan unchanged.
 	 * @dataProvider provide_invalid_update_scopes
 	 *
-	 * @param array<string, mixed> $args Update args without a valid owner scope.
+	 * @param array<string, mixed> $args Update args without a valid extension slug.
 	 */
 	public function test_update_without_a_valid_extension_slug_throws( array $args ): void {
 		$id     = $this->create();
@@ -500,7 +500,7 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update under another extension slug returns null, leaves the plan unchanged and never asks the owner to validate.
+	 * @testdox update under another extension slug returns null, leaves the plan unchanged and never asks that extension to validate.
 	 */
 	public function test_update_under_another_extension_slug_returns_null_and_writes_nothing(): void {
 		$id     = $this->create();
@@ -621,7 +621,7 @@ class PlansTest extends EngineIntegrationTestCase {
 
 		$id = $this->create();
 
-		// A concurrent writer renames the plan while the owner validates a status change.
+		// A concurrent writer renames the plan while the extension validates a status change.
 		add_action(
 			self::HOOK,
 			static function () use ( $wpdb, $id ): void {
@@ -666,7 +666,7 @@ class PlansTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertInstanceOf( PlanView::class, Plans::update( $id, array( 'extension_slug' => self::OWNER ) ) );
-		$this->assertSame( 1, $validated, 'An empty update still runs the owner validation.' );
+		$this->assertSame( 1, $validated, 'An empty update still runs the extension validation.' );
 		$this->assertSame( '2020-01-01 00:00:00', $this->stored( $id )->get_date_updated_gmt(), 'An empty update writes nothing.' );
 
 		$this->assertInstanceOf(
@@ -689,8 +689,8 @@ class PlansTest extends EngineIntegrationTestCase {
 		$seen = array();
 		add_action(
 			self::HOOK,
-			static function ( $errors, $plan, $owner ) use ( &$seen ): void {
-				$seen[] = array( $errors, $plan, $owner );
+			static function ( $errors, $plan, $extension_slug ) use ( &$seen ): void {
+				$seen[] = array( $errors, $plan, $extension_slug );
 			},
 			10,
 			3

@@ -455,7 +455,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	/**
 	 * @dataProvider provide_rejecting_errors
 	 *
-	 * @param array<string, mixed> $data            Error data the owner adds.
+	 * @param array<string, mixed> $data            Error data the extension adds.
 	 * @param int                  $expected_status Expected response status.
 	 */
 	public function test_validate_action_error_rejects_create_and_update( array $data, int $expected_status ): void {
@@ -465,7 +465,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		add_action(
 			'woocommerce_subscriptions_engine_validate_plan',
 			static function ( WP_Error $errors ) use ( $data ): void {
-				$errors->add( 'owner_rejected', 'No.', $data );
+				$errors->add( 'extension_rejected', 'No.', $data );
 			}
 		);
 
@@ -483,7 +483,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertSame( $expected_status, $created->get_status() );
-		$this->assertSame( 'owner_rejected', $this->response_data( $created )['code'] );
+		$this->assertSame( 'extension_rejected', $this->response_data( $created )['code'] );
 
 		$patched = $this->request(
 			'PATCH',
@@ -495,7 +495,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assertSame( $expected_status, $patched->get_status() );
-		$this->assertSame( 'owner_rejected', $this->response_data( $patched )['code'] );
+		$this->assertSame( 'extension_rejected', $this->response_data( $patched )['code'] );
 
 		remove_all_actions( 'woocommerce_subscriptions_engine_validate_plan' );
 

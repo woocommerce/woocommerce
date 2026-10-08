@@ -198,21 +198,21 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find scoped to an extension slug reads only that owner's plan.
+	 * @testdox find scoped to an extension slug reads only that extension's plan.
 	 */
-	public function test_find_scoped_to_an_extension_slug_reads_only_that_owners_plan(): void {
+	public function test_find_scoped_to_an_extension_slug_reads_only_that_extensions_plan(): void {
 		$repo = new PlanRepository();
 		$id   = $this->insert_plan( $repo, 'Owned' );
 
 		$this->assertInstanceOf( Plan::class, $repo->find( $id, 'lite' ) );
-		$this->assertNull( $repo->find( $id, 'other-extension' ), 'A plan of another owner reads as missing.' );
-		$this->assertInstanceOf( Plan::class, $repo->find( $id ), 'An unscoped read finds any owner.' );
+		$this->assertNull( $repo->find( $id, 'other-extension' ), 'A plan of another extension reads as missing.' );
+		$this->assertInstanceOf( Plan::class, $repo->find( $id ), 'An unscoped read finds a plan of any extension.' );
 	}
 
 	/**
-	 * @testdox update_fields writes nothing and returns false when the row belongs to another owner.
+	 * @testdox update_fields writes nothing and returns false when the row belongs to another extension.
 	 */
-	public function test_update_fields_writes_nothing_to_a_row_of_another_owner(): void {
+	public function test_update_fields_writes_nothing_to_a_row_of_another_extension(): void {
 		global $wpdb;
 
 		$repo = new PlanRepository();
@@ -220,13 +220,13 @@ class PlanRepositoryTest extends EngineIntegrationTestCase {
 		$plan = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $plan );
 
-		// The row moves to another owner after the entity was read.
+		// The row moves to another extension after the entity was read.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $wpdb->prefix . 'wc_selling_plans', array( 'extension_slug' => 'other-extension' ), array( 'id' => $id ) );
 		$before = $repo->find( $id );
 		$this->assertInstanceOf( Plan::class, $before );
 
-		// Identical values: the row exists by id, but not for this owner, so it is not "unchanged".
+		// Identical values: the row exists by id, but not for this extension, so it is not "unchanged".
 		$this->assertFalse( $repo->update_fields( $plan, array( 'name' ) ) );
 
 		$plan->set_name( 'Renamed' );

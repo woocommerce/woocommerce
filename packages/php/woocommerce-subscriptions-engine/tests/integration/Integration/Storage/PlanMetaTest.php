@@ -310,9 +310,9 @@ class PlanMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox a wrong-owner delete keeps the plan and its meta.
+	 * @testdox a delete under another extension slug keeps the plan and its meta.
 	 */
-	public function test_a_wrong_owner_delete_keeps_the_plan_and_its_meta(): void {
+	public function test_a_delete_under_another_extension_slug_keeps_the_plan_and_its_meta(): void {
 		$this->sut->add_meta( $this->id, 'note', 'kept' );
 
 		$this->assertFalse( $this->sut->delete( $this->id, 'another-extension' ) );
