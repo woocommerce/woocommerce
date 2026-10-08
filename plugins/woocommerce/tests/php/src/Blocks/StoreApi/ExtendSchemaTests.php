@@ -41,6 +41,9 @@ class ExtendSchemaTests extends TestCase {
 		$this->dummy       = function () {
 			return null;
 		};
+
+		// ExtendSchema only rethrows callback errors for admins with WP_DEBUG on; logged out is the production path.
+		wp_set_current_user( 0 );
 	}
 
 	/**
@@ -96,5 +99,119 @@ class ExtendSchemaTests extends TestCase {
 			)
 		);
 		$this->mock_extend->get_update_callback( 'nonexistent-plugin' );
+	}
+
+	/**
+	 * @testdox A namespace whose data callback throws gets an empty payload, not the previous namespace's data.
+	 */
+	public function test_get_endpoint_data_does_not_leak_data_between_namespaces() {
+		$this->register_endpoint_data(
+			'first-plugin',
+			function () {
+				return array( 'token' => 'abc' );
+			}
+		);
+		$this->register_endpoint_data(
+			'second-plugin',
+			function () {
+				throw new \Exception( 'Callback failed.' );
+			}
+		);
+
+		$data = $this->mock_extend->get_endpoint_data( 'cart' );
+
+		$this->assertSame( array( 'token' => 'abc' ), $data->{'first-plugin'} );
+		$this->assertSame( array(), $data->{'second-plugin'}, 'A failed namespace must not receive another namespace\'s data' );
+	}
+
+	/**
+	 * @testdox The first namespace gets an empty payload when its data callback throws.
+	 */
+	public function test_get_endpoint_data_when_the_first_namespace_throws() {
+		$this->register_endpoint_data(
+			'first-plugin',
+			function () {
+				throw new \Exception( 'Callback failed.' );
+			}
+		);
+		$this->register_endpoint_data(
+			'second-plugin',
+			function () {
+				return array( 'token' => 'abc' );
+			}
+		);
+
+		$data = $this->mock_extend->get_endpoint_data( 'cart' );
+
+		$this->assertSame( array(), $data->{'first-plugin'} );
+		$this->assertSame( array( 'token' => 'abc' ), $data->{'second-plugin'} );
+	}
+
+	/**
+	 * @testdox A namespace whose schema callback throws gets empty properties, not the previous namespace's schema.
+	 */
+	public function test_get_endpoint_schema_does_not_leak_schema_between_namespaces() {
+		$this->register_endpoint_data(
+			'first-plugin',
+			null,
+			function () {
+				return array( 'token' => array( 'type' => 'string' ) );
+			}
+		);
+		$this->register_endpoint_data(
+			'second-plugin',
+			null,
+			function () {
+				throw new \Exception( 'Callback failed.' );
+			}
+		);
+
+		$schema = $this->mock_extend->get_endpoint_schema( 'cart' );
+
+		$this->assertSame( array( 'token' => array( 'type' => 'string' ) ), $schema->{'first-plugin'}['properties'] );
+		$this->assertSame( array(), $schema->{'second-plugin'}['properties'], 'A failed namespace must not receive another namespace\'s schema' );
+	}
+
+	/**
+	 * @testdox The first namespace gets empty properties when its schema callback throws.
+	 */
+	public function test_get_endpoint_schema_when_the_first_namespace_throws() {
+		$this->register_endpoint_data(
+			'first-plugin',
+			null,
+			function () {
+				throw new \Exception( 'Callback failed.' );
+			}
+		);
+		$this->register_endpoint_data(
+			'second-plugin',
+			null,
+			function () {
+				return array( 'token' => array( 'type' => 'string' ) );
+			}
+		);
+
+		$schema = $this->mock_extend->get_endpoint_schema( 'cart' );
+
+		$this->assertSame( array(), $schema->{'first-plugin'}['properties'] );
+		$this->assertSame( array( 'token' => array( 'type' => 'string' ) ), $schema->{'second-plugin'}['properties'] );
+	}
+
+	/**
+	 * Registers cart endpoint data for a namespace.
+	 *
+	 * @param string        $plugin_namespace Plugin namespace.
+	 * @param callable|null $data_callback    Callback returning endpoint data.
+	 * @param callable|null $schema_callback  Callback returning endpoint schema.
+	 */
+	private function register_endpoint_data( $plugin_namespace, $data_callback = null, $schema_callback = null ) {
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'        => 'cart',
+				'namespace'       => $plugin_namespace,
+				'data_callback'   => $data_callback,
+				'schema_callback' => $schema_callback,
+			)
+		);
 	}
 }

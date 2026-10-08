@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * ProductCategories class.
  */
@@ -87,15 +85,14 @@ class ProductCategories extends AbstractDynamicBlock {
 			}
 		}
 
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes(
-			$attributes,
-			array( 'line_height', 'text_color', 'font_size', 'extra_classes' )
-		);
+		$classes = $this->get_container_classes( $attributes );
+		// The editor wrapper already applies block supports and Global Styles.
+		// Replace this workaround when Gutenberg exposes HtmlRenderer: https://github.com/WordPress/gutenberg/pull/74228.
+		$wrapper_attributes = ! empty( $attributes['isPreview'] )
+			? 'class="' . esc_attr( $classes ) . '"'
+			: get_block_wrapper_attributes( array( 'class' => $classes ) );
 
-		$classes = $this->get_container_classes( $attributes ) . ' ' . $classes_and_styles['classes'];
-		$styles  = $classes_and_styles['styles'];
-
-		$output  = '<div class="wp-block-woocommerce-product-categories ' . esc_attr( $classes ) . '" style="' . esc_attr( $styles ) . '">';
+		$output  = '<div ' . $wrapper_attributes . '>';
 		$output .= ! empty( $attributes['isDropdown'] ) ? $this->renderDropdown( $categories, $attributes, $uid ) : $this->renderList( $categories, $attributes, $uid );
 		$output .= '</div>';
 
@@ -339,14 +336,10 @@ class ProductCategories extends AbstractDynamicBlock {
 	protected function renderListItems( $categories, $attributes, $uid, $depth = 0 ) {
 		$output = '';
 
-		$link_color_class_and_style = StyleAttributesUtils::get_link_color_class_and_style( $attributes );
-
-		$link_color_style = isset( $link_color_class_and_style['style'] ) ? $link_color_class_and_style['style'] : '';
-
 		foreach ( $categories as $category ) {
 			$output .= '
 				<li class="wc-block-product-categories-list-item">
-					<a style="' . esc_attr( $link_color_style ) . '" href="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">'
+					<a href="' . esc_attr( get_term_link( $category->term_id, 'product_cat' ) ) . '">'
 						. $this->get_image_html( $category, $attributes )
 						. '<span class="wc-block-product-categories-list-item__name">' . esc_html( $category->name ) . '</span>'
 					. '</a>'

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Schema\EmailsSettingsSchema;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
@@ -311,6 +312,57 @@ class EmailsSettingsControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 		$this->assertEmpty( $data );
+	}
+
+	/**
+	 * @testdox Cc/Bcc sent for an email that does not support them are dropped, while other emails still accept them.
+	 */
+	public function test_update_item_drops_cc_bcc_for_email_without_cc_bcc_support() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_value      = $features_controller->feature_is_enabled( 'email_improvements' );
+		$features_controller->change_feature_enable( 'email_improvements', true );
+		$this->prev_options['woocommerce_customer_reset_password_settings'] = get_option( 'woocommerce_customer_reset_password_settings', null );
+		delete_option( 'woocommerce_customer_reset_password_settings' );
+		wp_set_current_user( self::$user_id );
+
+		$response = $this->put_values( self::SAMPLE_EMAIL_ID, array( 'cc' => 'copy@example.com' ) );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'copy@example.com', $response->get_data()['values']['cc'], 'Control: an email that supports Cc must still accept it' );
+
+		$response = $this->put_values(
+			'customer_reset_password',
+			array(
+				'subject' => 'Reset subject',
+				'cc'      => 'cc@example.com',
+				'bcc'     => 'copy@example.com',
+			)
+		);
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'Reset subject', $data['values']['subject'] );
+		$this->assertArrayNotHasKey( 'cc', $data['values'] );
+		$this->assertArrayNotHasKey( 'bcc', $data['values'] );
+		$settings = get_option( 'woocommerce_customer_reset_password_settings', array() );
+		$this->assertEquals( 'Reset subject', $settings['subject'] );
+		$this->assertArrayNotHasKey( 'cc', $settings );
+		$this->assertArrayNotHasKey( 'bcc', $settings );
+
+		$features_controller->change_feature_enable( 'email_improvements', $original_value );
+	}
+
+	/**
+	 * Dispatch a PUT request updating the given values of an email.
+	 *
+	 * @param string $email_id Email ID.
+	 * @param array  $values   Settings values to update.
+	 * @return \WP_REST_Response
+	 */
+	private function put_values( string $email_id, array $values ) {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/emails/' . $email_id );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'values' => $values ) ) );
+		return $this->server->dispatch( $request );
 	}
 
 	/**
