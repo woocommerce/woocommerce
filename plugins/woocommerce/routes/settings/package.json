@@ -5,8 +5,8 @@
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/route": "catalog:wp-min",
-		"react": "18.3.1",
-		"react-dom": "18.3.1"
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x"

@@ -3869,10 +3869,10 @@ importers:
         specifier: catalog:wp-min
         version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
-        specifier: 18.3.1
+        specifier: 18.3.x
         version: 18.3.1
       react-dom:
-        specifier: 18.3.1
+        specifier: 18.3.x
         version: 18.3.1(react@18.3.1)
     devDependencies:
       '@types/react':
