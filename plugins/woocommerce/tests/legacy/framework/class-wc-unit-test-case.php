@@ -49,14 +49,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_depth = 0;
 
 	/**
-	 * The customer WC() held when the test started.
-	 *
-	 * @var WC_Customer|null
-	 */
-	private $customer_before_test = null;
-
-	/**
-	 * That customer's shipping address when the test started, keyed by prop name without the "shipping_" prefix.
+	 * The shipping address of WC()->customer at setUp(), keyed without the "shipping_" prefix.
 	 *
 	 * @var array<string, string>
 	 */
@@ -160,18 +153,16 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
-		$this->customer_before_test                  = WC()->customer instanceof WC_Customer ? WC()->customer : null;
-		$this->customer_shipping_address_before_test = $this->customer_before_test ? $this->customer_before_test->get_shipping( 'edit' ) : array();
+		$this->customer_shipping_address_before_test = WC()->customer instanceof WC_Customer ? WC()->customer->get_shipping( 'edit' ) : array();
 	}
 
 	/**
 	 * Tear down test case.
 	 *
 	 * The cart contents, the cart context, the queued notices, the cached country
-	 * locale, and the customer's shipping address all live on the WC() singletons,
-	 * which neither the per-test database rollback nor the hook restore resets, so
-	 * clear them here or they leak into every later test in the process. The shipping
-	 * address goes back to what it was when the test started rather than being cleared.
+	 * locale, and the customer's shipping address live on the WC() singletons, which
+	 * neither the per-test database rollback nor the hook restore resets. Reset them
+	 * here or they leak into every later test.
 	 *
 	 * @since 11.1.0
 	 */
@@ -221,12 +212,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			WC()->countries->locale = array();
 		}
 
-		if ( $this->customer_before_test ) {
-			// Tests set a shipping address on the customer to get shipping rates. Write it
-			// back onto the customer the test started with, even if the test swapped
-			// WC()->customer for another one.
+		if ( WC()->customer instanceof WC_Customer ) {
 			foreach ( $this->customer_shipping_address_before_test as $key => $value ) {
-				$this->customer_before_test->{"set_shipping_{$key}"}( $value );
+				WC()->customer->{"set_shipping_{$key}"}( $value );
 			}
 		}
 	}

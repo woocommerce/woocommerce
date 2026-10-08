@@ -73,7 +73,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
 		);
-		// Start each test from a customer without a shipping location.
 		WC()->customer->set_shipping_postcode( '' );
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
