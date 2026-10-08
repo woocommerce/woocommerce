@@ -2,6 +2,9 @@
  * External dependencies
  */
 import { renderHook, act } from '@testing-library/react';
+import { select } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
+import { validationStore } from '@woocommerce/block-data';
 import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
 /**
@@ -34,6 +37,12 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 	beforeEach( () => {
 		// Reset any request handlers that were added in individual tests
 		server.resetHandlers();
+		// The middleware that adds these to apiFetch is not loaded under Jest,
+		// and processHeadersOnFetch logs console.error when they are missing.
+		// @ts-expect-error setNonce exists but is not typed
+		apiFetch.setNonce = jest.fn();
+		// @ts-expect-error setCartHash exists but is not typed
+		apiFetch.setCartHash = jest.fn();
 	} );
 
 	describe( 'applyCoupon API calls', () => {
@@ -77,6 +86,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 										shipping_address: {},
 										billing_address: {},
 									},
+									headers: {},
 								},
 							],
 						} );
@@ -135,7 +145,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						capturedRequests.push( requestData );
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -184,7 +196,7 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			} );
 		} );
 
-		it( 'handles API errors correctly without breaking', async () => {
+		it( 'rejects with the server message and leaves the validation store empty', async () => {
 			// Track the request details
 			let capturedRequest: CapturedRequest = {
 				url: '',
@@ -224,11 +236,15 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				useStoreCartCoupons( 'wc/checkout' )
 			);
 
-			// Apply invalid coupon - should not throw error
+			// The failure is reported to the caller, not to the validation store.
 			await act( async () => {
-				const success = await result.current.applyCoupon( 'INVALID' );
-				expect( success ).toBe( false );
+				await expect(
+					result.current.applyCoupon( 'INVALID' )
+				).rejects.toThrow( 'Coupon "INVALID" does not exist!' );
 			} );
+			expect( select( validationStore ).hasValidationErrors() ).toBe(
+				false
+			);
 
 			// Verify the API call was still made
 			expect( capturedRequest ).not.toBeNull();
@@ -261,7 +277,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -305,7 +323,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -356,7 +376,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -403,7 +425,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -444,7 +468,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						capturedRequests.push( requestData );
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -504,7 +530,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -543,7 +571,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 						};
 
 						return HttpResponse.json( {
-							responses: [ { status: 200, body: {} } ],
+							responses: [
+								{ status: 200, body: {}, headers: {} },
+							],
 						} );
 					}
 				)
@@ -590,12 +620,15 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 				useStoreCartCoupons( 'wc/checkout' )
 			);
 
-			// Should not throw error even on network failure
+			// A network failure is reported the same way as a rejected coupon.
 			await act( async () => {
-				const success =
-					await result.current.applyCoupon( 'NETWORK_FAIL' );
-				expect( success ).toBe( false );
+				await expect(
+					result.current.applyCoupon( 'NETWORK_FAIL' )
+				).rejects.toThrow();
 			} );
+			expect( select( validationStore ).hasValidationErrors() ).toBe(
+				false
+			);
 
 			expect( capturedRequest ).not.toBeNull();
 			expect( capturedRequest.url ).toContain( '/wc/store/v1/batch' );
