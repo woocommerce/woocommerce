@@ -527,6 +527,31 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The update endpoint schema does not expose the route-derived identity fields as writable.
+	 */
+	public function test_update_fulfillment_schema_excludes_identity_fields(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'endpoints', $data );
+		$put_endpoint = array_filter(
+			$data['endpoints'],
+			function ( $endpoint ) {
+				return in_array( 'PUT', $endpoint['methods'], true );
+			}
+		);
+		$this->assertNotEmpty( $put_endpoint );
+		$put_endpoint = reset( $put_endpoint );
+		$this->assertArrayHasKey( 'args', $put_endpoint );
+		$this->assertArrayNotHasKey( 'entity_id', $put_endpoint['args'], 'A fulfillment cannot be reparented on edit, so entity_id must not be a writable update field.' );
+		$this->assertArrayNotHasKey( 'entity_type', $put_endpoint['args'], 'A fulfillment cannot be reparented on edit, so entity_type must not be a writable update field.' );
+		$this->assertArrayHasKey( 'status', $put_endpoint['args'], 'Mutable fields such as status must remain writable on edit.' );
+	}
+
+	/**
 	 * Test error response format
 	 */
 	public function test_error_response_format() {

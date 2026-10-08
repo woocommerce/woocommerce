@@ -224,6 +224,21 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Pick the fields a write request is allowed to change from the body.
+	 *
+	 * Identity fields (id, entity_id, entity_type) and raw storage props are controller-owned,
+	 * so they are dropped here and never reach set_props() where they could redirect the write.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array<string, mixed> $params The request body params.
+	 * @return array<string, mixed> The mutable subset of the params.
+	 */
+	private function mutable_request_props( array $params ): array {
+		return array_intersect_key( $params, array_flip( array( 'status', 'is_fulfilled' ) ) );
+	}
+
+	/**
 	 * Get the fulfillments for the order.
 	 *
 	 * @since 10.1.0
@@ -294,12 +309,11 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Create a new fulfillment.
 		try {
 			$fulfillment = new Fulfillment();
-			$params      = $request->get_json_params();
-			$fulfillment->set_props( $params );
-			// Identity is assigned by the controller, never taken from the request body. Force a new row
-			// (so a nested props/id payload cannot turn create into an update) and the routed order. This
-			// runs before metadata is applied so the metadata attaches to the new fulfillment, not a
-			// fulfillment id smuggled through the body.
+			$params      = (array) $request->get_json_params();
+			// Only mutable fields come from the body. Identity (id, entity_id, entity_type) and raw storage
+			// props are controller-owned and set below, so a body cannot turn create into an update or
+			// attach the fulfillment to another entity.
+			$fulfillment->set_props( $this->mutable_request_props( $params ) );
 			$fulfillment->set_id( 0 );
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( "$order_id" );
@@ -424,17 +438,18 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$previous_status = $fulfillment->get_status() ?? 'unfulfilled';
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
-			$fulfillment->set_props( $request->get_json_params() );
-			// Identity comes only from the route. Re-pin it after applying the body so that no field,
-			// including a nested props/props_from_storage payload, can redirect the write to another row
-			// or reparent the fulfillment to another entity.
+			$params = (array) $request->get_json_params();
+			// Only mutable fields come from the body. Identity comes from the route and is set explicitly
+			// below, so no field (including a props/props_from_storage payload) can redirect the write to
+			// another row or move the fulfillment to another order.
+			$fulfillment->set_props( $this->mutable_request_props( $params ) );
 			$fulfillment->set_id( $fulfillment_id );
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( (string) $order_id );
 			$next_state = $fulfillment->get_is_fulfilled();
 
-			if ( isset( $request->get_json_params()['meta_data'] ) ) {
-				$meta_data       = $request->get_json_params()['meta_data'];
+			if ( isset( $params['meta_data'] ) ) {
+				$meta_data       = $params['meta_data'];
 				$normalized_keys = $this->apply_request_meta_data( $meta_data, $fulfillment );
 
 				// Remove meta keys not in the request. Skip if all entries were malformed

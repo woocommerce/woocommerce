@@ -361,22 +361,22 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_create_fulfillment_ignores_body_id(): void {
 		wp_set_current_user( 1 );
 
-		$order_a = WC_Helper_Order::create_order();
-		$order_b = WC_Helper_Order::create_order();
-		$victim  = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+		$order_a           = WC_Helper_Order::create_order();
+		$order_b           = WC_Helper_Order::create_order();
+		$other_fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments' );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'id'           => $victim->get_id(),
+					'id'           => $other_fulfillment->get_id(),
 					'status'       => 'unfulfilled',
 					'is_fulfilled' => false,
 					'meta_data'    => array(
 						array(
 							'id'    => 0,
-							'key'   => 'smuggled_create_meta',
+							'key'   => 'request_create_meta',
 							'value' => 'new_fulfillment',
 						),
 						array(
@@ -398,15 +398,19 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
 
 		$created = $response->get_data();
-		$this->assertNotEquals( $victim->get_id(), $created['id'], 'Create must insert a new fulfillment, not reuse the id from the body.' );
+		$this->assertNotEquals( $other_fulfillment->get_id(), $created['id'], 'Create must insert a new fulfillment, not reuse the id from the body.' );
 		$this->assertEquals( (string) $order_a->get_id(), (string) $created['entity_id'], 'The new fulfillment must belong to the routed order.' );
 
 		$response_meta_keys = wp_list_pluck( $created['meta_data'], 'key' );
-		$this->assertContains( 'smuggled_create_meta', $response_meta_keys, 'Request metadata must be applied to the new fulfillment.' );
+		$this->assertContains( 'request_create_meta', $response_meta_keys, 'Request metadata must be applied to the new fulfillment.' );
 		$this->assertNotContains( 'test_meta_key', $response_meta_keys, 'The new fulfillment must not inherit metadata from the fulfillment whose id was supplied in the body.' );
 
-		$victim_reloaded = new Fulfillment( $victim->get_id() );
-		$this->assertSame( (string) $order_b->get_id(), $victim_reloaded->get_entity_id(), 'The fulfillment whose id was supplied in the body must be untouched.' );
+		// The metadata must persist on the saved row, not just appear in the response.
+		$created_reloaded = new Fulfillment( (int) $created['id'] );
+		$this->assertSame( 'new_fulfillment', $created_reloaded->get_meta( 'request_create_meta' ), 'Request metadata must be saved on the new fulfillment row.' );
+
+		$other_reloaded = new Fulfillment( $other_fulfillment->get_id() );
+		$this->assertSame( (string) $order_b->get_id(), $other_reloaded->get_entity_id(), 'The fulfillment whose id was supplied in the body must be untouched.' );
 	}
 
 	/**
@@ -1016,21 +1020,21 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update targeted by the route must succeed.' );
 
-		$victim = new Fulfillment( $fulfillment_b->get_id() );
+		$other_reloaded = new Fulfillment( $fulfillment_b->get_id() );
 		$this->assertSame(
 			(string) $order_b->get_id(),
-			$victim->get_entity_id(),
+			$other_reloaded->get_entity_id(),
 			'A body id must not redirect the update onto a different fulfillment row.'
 		);
 		$this->assertNotSame(
 			'fulfilled',
-			$victim->get_status(),
+			$other_reloaded->get_status(),
 			'A body id must not change the other fulfillment status.'
 		);
 	}
 
 	/**
-	 * @testdox The v3 update route resolves the order from the URL and ignores a spoofed order_id in the body.
+	 * @testdox The v3 update route resolves the order from the URL and ignores a different order_id in the body.
 	 */
 	public function test_update_fulfillment_ignores_body_order_id(): void {
 		wp_set_current_user( 1 );
@@ -1064,13 +1068,13 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update must resolve order_id from the URL, not the spoofable body param.' );
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update must resolve order_id from the URL, not from the body param.' );
 
 		$reloaded = new Fulfillment( $fulfillment->get_id() );
 		$this->assertSame(
 			(string) $order_a->get_id(),
 			$reloaded->get_entity_id(),
-			'A spoofed order_id in the body must not change which order the fulfillment belongs to.'
+			'A different order_id in the body must not change which order the fulfillment belongs to.'
 		);
 	}
 
@@ -1112,15 +1116,15 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update targeted by the route must succeed.' );
 
-		$victim = new Fulfillment( $fulfillment_b->get_id() );
+		$other_reloaded = new Fulfillment( $fulfillment_b->get_id() );
 		$this->assertSame(
 			(string) $order_b->get_id(),
-			$victim->get_entity_id(),
+			$other_reloaded->get_entity_id(),
 			'A nested props.id must not redirect the update onto a different fulfillment row.'
 		);
 		$this->assertNotSame(
 			'fulfilled',
-			$victim->get_status(),
+			$other_reloaded->get_status(),
 			'A nested props.id must not change the other fulfillment status.'
 		);
 	}
@@ -1170,6 +1174,72 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			(string) $order_a->get_id(),
 			$reloaded->get_entity_id(),
 			'A props_from_storage payload must not reparent the fulfillment to another order.'
+		);
+	}
+
+	/**
+	 * @testdox The v3 update route ignores a props_from_storage id in the body and reports the routed fulfillment id everywhere.
+	 */
+	public function test_update_fulfillment_ignores_props_from_storage_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a           = WC_Helper_Order::create_order();
+		$order_b           = WC_Helper_Order::create_order();
+		$fulfillment_a     = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+		$other_fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+
+		$hook_id = null;
+		add_action(
+			'woocommerce_fulfillment_after_update',
+			function ( $fulfillment ) use ( &$hook_id ) {
+				$hook_id = $fulfillment->get_id();
+			}
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment_a->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'props_from_storage' => array( 'id' => $other_fulfillment->get_id() ),
+					'status'             => 'fulfilled',
+					'is_fulfilled'       => true,
+					'meta_data'          => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame(
+			$fulfillment_a->get_id(),
+			$data['id'],
+			'The response must report the routed fulfillment id, not an id supplied through props_from_storage.'
+		);
+		$this->assertSame(
+			$fulfillment_a->get_id(),
+			$hook_id,
+			'The after_update hook must receive the routed fulfillment, not the id supplied through props_from_storage.'
+		);
+
+		$other_reloaded = new Fulfillment( $other_fulfillment->get_id() );
+		$this->assertNotSame(
+			'fulfilled',
+			$other_reloaded->get_status(),
+			'The other fulfillment must not be modified.'
 		);
 	}
 
