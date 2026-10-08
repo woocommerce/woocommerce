@@ -170,17 +170,17 @@ class NumberFilter extends Component< NumberFilterProps > {
 		const labelFormat =
 			filter.rule === 'lessthan'
 				? /* translators: Sentence fragment, "maximum amount" refers to a numeric value the field must be less than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-				  _x(
+					_x(
 						'%(field)s maximum amount',
 						'maximum value input',
 						'woocommerce'
-				  )
+					)
 				: /* translators: Sentence fragment, "minimum amount" refers to a numeric value the field must be more than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-				  _x(
+					_x(
 						'%(field)s minimum amount',
 						'minimum value input',
 						'woocommerce'
-				  );
+					);
 
 		return this.getFormControl( {
 			type: inputType,

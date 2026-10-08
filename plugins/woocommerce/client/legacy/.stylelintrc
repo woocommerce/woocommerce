@@ -2,11 +2,13 @@
 # configs in client/blocks and packages/js/email-editor. Read the notes before
 # "aligning" any of these with the preset.
 {
-	"extends": "@wordpress/stylelint-config/scss",
+	"extends": "@wordpress/stylelint-config/scss-stylistic",
 
 	# Vendored upstream file; 159 violations we do not own. This is the single
 	# authoritative exclusion, so a direct `stylelint` run skips it too.
 	"ignoreFiles": [ "css/select2.scss" ],
+
+	"reportNeedlessDisables": true,
 
 	"rules": {
 		# The icon fonts have no generic fallback by design.
@@ -19,10 +21,9 @@
 
 		# The preset says "never". Several backgrounds here are base64/SVG data
 		# URIs containing spaces, quotes and "<", which cannot legally be
-		# unquoted. The rule is report-only (no "fixable" in its stylelint 14
-		# meta), so "never" would not rewrite them, it would just report 41
-		# violations we would then have to blanket-disable. "always" states the
-		# safe policy once instead.
+		# unquoted. The rule is fixable since stylelint 16, so "never" would
+		# also make `lint:fix` try to rewrite them. "always" states the safe
+		# policy once instead.
 		"function-url-quotes": "always",
 
 		# The preset allows only px for line-height. This code uses px, em, rem
@@ -32,33 +33,32 @@
 		"declaration-property-unit-allowed-list": null,
 
 		# 57 hits, all comments; the preset only checks those and already
-		# ignores URLs. Off because the rule is on its way out and nothing else
-		# here enforces a column limit: stylelint 16 deleted it with the rest
-		# of the stylistic rules (client/blocks is already there), client/admin
+		# ignores URLs. Off because nothing else here enforces a column limit:
+		# client/blocks does not load the stylistic rules at all, client/admin
 		# and packages/js/email-editor both switch it off, .markdownlint.json
 		# sets MD013 to 9999, and there is no PHPCS LineLength override. Two of
 		# the hits could not comply anyway: a stylelint-disable directive has to
 		# stay on one line, and our longest suppressed rule name puts it at 80
 		# characters before the "--" justification starts.
-		"max-line-length": null,
+		"@stylistic/max-line-length": null,
 
-		# 30927 hits. Satisfying it means reordering the legacy cascade, which
+		# 2316 hits. Satisfying it means reordering the legacy cascade, which
 		# changes rendering. Not realistically fixable here.
 		"no-descending-specificity": null,
 
-		# 51 hits — tractable, unlike the rule above, but merging duplicate
+		# 50 hits — tractable, unlike the rule above, but merging duplicate
 		# blocks moves declarations earlier in the cascade and can change
 		# rendering, so each one needs checking. Deferred, not impossible.
 		"no-duplicate-selectors": null,
 
-		# 50 hits, all deprecated global colour functions: darken (28),
-		# lighten (13), desaturate (8), adjust-hue (1). They still work with the
-		# Dart Sass version we resolve today, but Dart Sass has them slated for
-		# removal and `sass` is a caret range here, so a fresh install can start
-		# warning without a code change. This is a forward-compat cliff rather
-		# than a style nit. Clearing it requires migrating to the Sass module
-		# system (sass:color) and is tracked separately; do that before bumping
-		# Sass.
+		# 51 hits, all deprecated global colour functions: darken (28),
+		# lighten (13), desaturate (8), adjust-hue (1), lightness (1). They still
+		# work with the Dart Sass version we resolve today, but Dart Sass has
+		# them slated for removal and `sass` is a caret range here, so a fresh
+		# install can start warning without a code change. This is a
+		# forward-compat cliff rather than a style nit. Clearing it requires
+		# migrating to the Sass module system (sass:color) and is tracked
+		# separately; do that before bumping Sass.
 		"scss/no-global-function-names": null,
 
 		# Legacy selectors are a theming contract that third-party themes

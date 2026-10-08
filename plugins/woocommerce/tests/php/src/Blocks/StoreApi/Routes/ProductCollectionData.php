@@ -197,6 +197,88 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Store API counts and attribute filtering follow the lookup option.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $lookup_enabled Whether lookup filtering is enabled.
+	 */
+	public function test_attribute_counts_follow_lookup_option( bool $lookup_enabled ): void {
+		update_option( 'woocommerce_attribute_lookup_enabled', $lookup_enabled ? 'yes' : 'no' );
+		$fixtures  = new FixtureData();
+		$attribute = $this->create_product_attribute( 'size', array( 'xs', 's' ) );
+		$product   = $fixtures->get_variable_product( array(), array( $attribute ) );
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_size' => 's-slug' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore::class )->create_data_for_product( wc_get_product( $product->get_id() ) );
+
+		$response = $this->dispatch_collection_data_request(
+			array(
+				'calculate_attribute_counts' => array(
+					array(
+						'taxonomy'   => 'pa_size',
+						'query_type' => 'or',
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$counts = wp_list_pluck( $response->get_data()['attribute_counts'], 'count', 'term' );
+		$this->assertSame( $lookup_enabled ? 0 : 1, $counts[ term_exists( 'xs', 'pa_size' )['term_id'] ] ?? 0 );
+
+		$cases = array(
+			array(
+				'slug'     => array( 'xs-slug' ),
+				'operator' => 'in',
+				'matches'  => ! $lookup_enabled,
+			),
+			array(
+				'slug'     => array( 'xs-slug' ),
+				'operator' => 'not_in',
+				'matches'  => $lookup_enabled,
+			),
+			array(
+				'term_id'  => array( $attribute['term_ids'][1] ),
+				'operator' => 'in',
+				'matches'  => true,
+			),
+			array(
+				'slug'     => array( 'xs-slug', 's-slug' ),
+				'operator' => 'and',
+				'matches'  => ! $lookup_enabled,
+			),
+			array(
+				'slug'     => array( 'unknown' ),
+				'operator' => 'in',
+				'matches'  => false,
+			),
+			array(
+				'slug'     => array( 'unknown' ),
+				'operator' => 'not_in',
+				'matches'  => true,
+			),
+			array(
+				'slug'     => array( 's-slug', 'unknown' ),
+				'operator' => 'and',
+				'matches'  => false,
+			),
+		);
+		foreach ( $cases as $case ) {
+			$matches = $case['matches'];
+			unset( $case['matches'] );
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'include', array( $product->get_id() ) );
+			$request->set_param( 'attributes', array( array_merge( array( 'attribute' => 'pa_size' ), $case ) ) );
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $matches ? array( $product->get_id() ) : array(), wp_list_pluck( $response->get_data(), 'id' ), wp_json_encode( $case ) );
+		}
+	}
+
+	/**
 	 * @testdox OR attribute counts remove the counted facet while preserving price filters.
 	 */
 	public function test_attribute_count_matrix(): void {

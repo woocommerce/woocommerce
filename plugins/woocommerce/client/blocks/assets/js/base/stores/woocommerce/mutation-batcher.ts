@@ -202,7 +202,9 @@ export function createMutationQueue< TState, TMeta = unknown >(
 	) {
 		responses.forEach( ( itemResponse, index ) => {
 			const requestId = requestIds[ index ];
-			if ( ! requestId ) return;
+			if ( ! requestId ) {
+				return;
+			}
 
 			const isSuccess =
 				itemResponse.status >= 200 && itemResponse.status < 300;
@@ -246,7 +248,9 @@ export function createMutationQueue< TState, TMeta = unknown >(
 			const requests = requestIds
 				.map( ( id ) => {
 					const tracked = trackedRequests.get( id );
-					if ( ! tracked ) return null;
+					if ( ! tracked ) {
+						return null;
+					}
 					return {
 						path: tracked.request.path,
 						method: tracked.request.method,

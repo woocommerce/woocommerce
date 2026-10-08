@@ -42,10 +42,10 @@ export const Skeleton = ( {
 				? {
 						'aria-live': 'polite',
 						'aria-label': ariaMessage,
-				  }
+					}
 				: {
 						'aria-hidden': 'true',
-				  } ) }
+					} ) }
 			style={ {
 				width,
 				height,
