@@ -70,4 +70,18 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			'The filtered locale should not still be cached.'
 		);
 	}
+
+	/**
+	 * @testdox The customer's shipping address goes back to what it was when the test started.
+	 */
+	public function test_clear_wc_singleton_state_restores_the_customer_shipping_address(): void {
+		$before = WC()->customer->get_shipping( 'edit' );
+
+		WC()->customer->set_shipping_location( 'NZ', 'AUK', '1010', 'Auckland' );
+		WC()->customer->set_shipping_address_1( '1 Leaked Street' );
+
+		$this->clear_wc_singleton_state();
+
+		$this->assertSame( $before, WC()->customer->get_shipping( 'edit' ), 'The shipping address should be back to what the test started with.' );
+	}
 }
