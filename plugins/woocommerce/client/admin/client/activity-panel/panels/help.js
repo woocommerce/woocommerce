@@ -6,7 +6,7 @@ import { Text } from '@woocommerce/experimental';
 import { withSelect } from '@wordpress/data';
 import { Fragment, useEffect } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
-import { Icon, chevronRight, page } from '@wordpress/icons';
+import { Icon, page } from '@wordpress/icons';
 import { partial } from 'lodash';
 import { List, Section } from '@woocommerce/components';
 import {
@@ -351,7 +351,6 @@ function getListItems( props ) {
 			</Text>
 		),
 		before: <Icon icon={ page } />,
-		after: <Icon icon={ chevronRight } />,
 		linkType: item.linkType ?? 'external',
 		target: item.target ?? '_blank',
 		href: item.link,
