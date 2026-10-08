@@ -123,6 +123,25 @@ export async function loadDefinition(
 }
 
 /**
+ * Turn a rejection into an Error. apiFetch rejects with a plain `{ code, message }` object.
+ */
+export function toError( error: unknown ): Error {
+	if ( error instanceof Error ) {
+		return error;
+	}
+	if (
+		typeof error === 'object' &&
+		error !== null &&
+		'message' in error &&
+		typeof error.message === 'string' &&
+		error.message !== ''
+	) {
+		return new Error( error.message );
+	}
+	return new Error( __( 'Unable to load settings.', 'woocommerce' ) );
+}
+
+/**
  * Load a screen's definition once, reporting a failed request as an error.
  */
 export function useScreenDefinition( screen: PaymentSettingsScreen ) {
@@ -141,12 +160,7 @@ export function useScreenDefinition( screen: PaymentSettingsScreen ) {
 			},
 			( error: unknown ) => {
 				if ( current ) {
-					setState( {
-						error:
-							error instanceof Error
-								? error
-								: new Error( String( error ) ),
-					} );
+					setState( { error: toError( error ) } );
 				}
 			}
 		);

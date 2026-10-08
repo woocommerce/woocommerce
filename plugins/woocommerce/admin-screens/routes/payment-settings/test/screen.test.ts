@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { applyFieldModules } from '../screen';
+import { applyFieldModules, toError } from '../screen';
 import type { FieldsResponse } from '../screen';
 
 const response: FieldsResponse = {
@@ -65,5 +65,28 @@ describe( 'applyFieldModules', () => {
 		);
 
 		expect( fields[ 1 ]?.description ).toBeUndefined();
+	} );
+} );
+
+describe( 'toError', () => {
+	it( 'keeps an Error as it is', () => {
+		const error = new Error( 'Network error' );
+		expect( toError( error ) ).toBe( error );
+	} );
+
+	it( 'uses the message of a REST error object', () => {
+		expect(
+			toError( {
+				code: 'rest_forbidden',
+				message: 'Sorry, you are not allowed to do that.',
+			} ).message
+		).toBe( 'Sorry, you are not allowed to do that.' );
+	} );
+
+	it( 'falls back to a generic message for anything else', () => {
+		expect( toError( 'oops' ).message ).toBe( 'Unable to load settings.' );
+		expect( toError( { code: 'no_message' } ).message ).toBe(
+			'Unable to load settings.'
+		);
 	} );
 } );
