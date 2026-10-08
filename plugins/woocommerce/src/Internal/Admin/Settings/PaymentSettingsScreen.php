@@ -66,7 +66,7 @@ final class PaymentSettingsScreen {
 	 *
 	 * It needs the feature flag, WordPress's View Config and Fields APIs, and the build output.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @return bool
 	 */
