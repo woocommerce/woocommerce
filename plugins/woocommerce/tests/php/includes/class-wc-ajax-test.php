@@ -2634,18 +2634,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	public function test_add_order_item_uses_unsaved_tax_location( string $tax_based_on, bool $has_customer ): void {
 		$this->_setRole( 'administrator' );
 
-		$original_options = array();
-		foreach ( array( 'woocommerce_calc_taxes', 'woocommerce_prices_include_tax', 'woocommerce_default_country', 'woocommerce_tax_based_on' ) as $option ) {
-			$original_options[ $option ] = get_option( $option );
-		}
-
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_default_country', 'BE' );
 		update_option( 'woocommerce_tax_based_on', $tax_based_on );
 		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
 
-		$base_rate   = WC_Tax::_insert_tax_rate(
+		WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'BE',
 				'tax_rate'          => '6.0000',
@@ -2654,7 +2649,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				'tax_rate_class'    => '',
 			)
 		);
-		$editor_rate = WC_Tax::_insert_tax_rate(
+		WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'NL',
 				'tax_rate'          => '9.0000',
@@ -2664,55 +2659,45 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			)
 		);
 
-		try {
-			$product = WC_Helper_Product::create_simple_product(
-				true,
-				array(
-					'regular_price' => '24',
-					'price'         => '24',
-				)
-			);
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
 
-			$order = wc_create_order();
-			if ( $has_customer ) {
-				$customer = WC_Helper_Customer::create_customer( 'tax-location-customer', wp_generate_password(), 'tax-location@example.com' );
-				$customer->set_billing_country( 'BE' );
-				$customer->save();
-				$order->set_customer_id( $customer->get_id() );
-				$order->save();
-			}
-
-			$_POST['order_id'] = $order->get_id();
-			$_POST['security'] = wp_create_nonce( 'order-item' );
-			$_POST['data']     = array(
-				array(
-					'id'  => $product->get_id(),
-					'qty' => 1,
-				),
-			);
-			$_POST['country']  = 'NL';
-			$_POST['state']    = '';
-			$_POST['postcode'] = '';
-			$_POST['city']     = '';
-
-			$response = $this->do_ajax( 'woocommerce_add_order_item' );
-
-			$this->assertTrue( $response['success'], 'The product should be added successfully.' );
-			$stored_order = wc_get_order( $order->get_id() );
-			$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
-			$item = current( $stored_order->get_items() );
-			$this->assertEqualsWithDelta( 24 / 1.09, (float) $item->get_total(), 0.0001, 'The line price should exclude the editor location tax rate.' );
-			$this->assertSame( '', $stored_order->get_billing_country(), 'The unsaved billing country must not be persisted.' );
-			$this->assertSame( '', $stored_order->get_shipping_country(), 'The unsaved shipping country must not be persisted.' );
-		} finally {
-			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-			WC_Tax::_delete_tax_rate( $base_rate );
-			WC_Tax::_delete_tax_rate( $editor_rate );
-			foreach ( $original_options as $option => $value ) {
-				update_option( $option, $value );
-			}
-			unset( $_POST['order_id'], $_POST['security'], $_POST['data'], $_POST['country'], $_POST['state'], $_POST['postcode'], $_POST['city'] );
+		$order = wc_create_order();
+		if ( $has_customer ) {
+			$customer = WC_Helper_Customer::create_customer( 'tax-location-customer', wp_generate_password(), 'tax-location@example.com' );
+			$customer->set_billing_country( 'BE' );
+			$customer->save();
+			$order->set_customer_id( $customer->get_id() );
+			$order->save();
 		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = 'NL';
+		$_POST['state']    = '';
+		$_POST['postcode'] = '';
+		$_POST['city']     = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.09, (float) $item->get_total(), 0.0001, 'The line price should exclude the editor location tax rate.' );
+		$this->assertSame( '', $stored_order->get_billing_country(), 'The unsaved billing country must not be persisted.' );
+		$this->assertSame( '', $stored_order->get_shipping_country(), 'The unsaved shipping country must not be persisted.' );
 	}
 
 	/**
