@@ -289,12 +289,14 @@ class Styles_Helper {
 	 * a single entry per slug is what keeps the two agreeing, and it emits no redundant CSS for the
 	 * inliner to carry.
 	 *
-	 * An entry without a string slug is dropped. The palette reaches here through the
+	 * An entry is dropped unless it carries both a string slug and a non-empty string color, and an
+	 * incomplete entry does not claim its slug, so a lower-priority origin that defines the same
+	 * slug properly still wins it. The palette reaches here through the
 	 * `woocommerce_email_editor_theme_json` filter, and callers read `slug` and `color` directly, so
 	 * a malformed entry would otherwise be a PHP warning on every render.
 	 *
 	 * @param array $settings Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
-	 * @return array Flat list of color definitions, one per slug.
+	 * @return array Flat list of color definitions, one per slug, each with a usable slug and color.
 	 */
 	public static function palette_definitions( array $settings ): array {
 		$palette = $settings['color']['palette'] ?? array();
@@ -308,12 +310,22 @@ class Styles_Helper {
 
 		$by_slug = array();
 		foreach ( $definitions as $definition ) {
-			if ( ! is_array( $definition ) || ! isset( $definition['slug'] ) || ! is_string( $definition['slug'] ) ) {
+			if ( ! is_array( $definition ) ) {
 				continue;
 			}
+
+			$slug  = $definition['slug'] ?? null;
+			$color = $definition['color'] ?? null;
+
+			// Both have to be usable before the entry can claim the slug. An entry that names a slug
+			// but carries no color would otherwise shut out an origin that defines it properly.
+			if ( ! is_string( $slug ) || '' === $slug || ! is_string( $color ) || '' === trim( $color ) ) {
+				continue;
+			}
+
 			// First origin wins, so a slug already seen is a lower-priority duplicate.
-			if ( ! array_key_exists( $definition['slug'], $by_slug ) ) {
-				$by_slug[ $definition['slug'] ] = $definition;
+			if ( ! array_key_exists( $slug, $by_slug ) ) {
+				$by_slug[ $slug ] = $definition;
 			}
 		}
 
@@ -337,7 +349,7 @@ class Styles_Helper {
 	 */
 	public static function resolve_color_from_palette( array $settings, string $color_slug ): string {
 		foreach ( self::palette_definitions( $settings ) as $color_definition ) {
-			if ( isset( $color_definition['color'] ) && $color_definition['slug'] === $color_slug ) {
+			if ( $color_definition['slug'] === $color_slug ) {
 				return strtolower( (string) $color_definition['color'] );
 			}
 		}
