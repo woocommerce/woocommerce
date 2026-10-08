@@ -45,7 +45,7 @@ add_action(
 
 					$params = $request->get_json_params();
 					$params = is_array( $params ) ? $params : $request->get_body_params();
-					if ( isset( $params['email'] ) && '' !== $params['email'] && ! is_email( $params['email'] ) ) {
+					if ( isset( $params['email'] ) && ( ! is_string( $params['email'] ) || ( '' !== $params['email'] && ! is_email( $params['email'] ) ) ) ) {
 						return new WP_Error( 'invalid_email', 'The support email is not a valid email address.', array( 'status' => 400 ) );
 					}
 					foreach ( array_keys( $defaults ) as $key ) {
