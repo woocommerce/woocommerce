@@ -10,7 +10,7 @@ jest.mock( '@wordpress/url', () => ( { getPath: jest.fn() } ) );
 // tests/js/config/global-mocks.js mocks isEditor to always return false, so use
 // the real implementation here.
 const { isEditor } =
-	jest.requireActual< typeof import('../is-editor') >( '../is-editor' );
+	jest.requireActual< typeof import( '../is-editor' ) >( '../is-editor' );
 
 const mockGetPath = getPath as jest.Mock;
 const mockSelect = select as jest.Mock;

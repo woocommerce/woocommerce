@@ -20,8 +20,7 @@ export const isEditor = (): boolean => {
 	}
 
 	const editorSelectors = select( 'core/editor' ) as unknown as
-		| { getCurrentPostId?: () => number | null | undefined }
-		| undefined;
+		{ getCurrentPostId?: () => number | null | undefined } | undefined;
 
 	return !! editorSelectors?.getCurrentPostId?.();
 };
