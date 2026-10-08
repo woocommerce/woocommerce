@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Block_Template;
 use WP_Post;
 use WP_Theme_JSON;
@@ -299,8 +300,14 @@ class Theme_Controller {
 	/**
 	 * Translate color slug to color.
 	 *
-	 * @param string $color_slug Color slug.
-	 * @return string
+	 * Returns an empty string when the palette has no such slug, so callers skip the declaration
+	 * instead of emitting the slug as a color. A slug can be missing because the post was written
+	 * under a different theme, or because it came from a palette the email does not carry.
+	 *
+	 * A value that is already a literal color passes through untranslated.
+	 *
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
 		$settings          = $this->get_settings();
@@ -310,7 +317,7 @@ class Theme_Controller {
 				return strtolower( $color_definition['color'] );
 			}
 		}
-		return $color_slug;
+		return Styles_Helper::is_color_literal( $color_slug ) ? $color_slug : '';
 	}
 
 	/**

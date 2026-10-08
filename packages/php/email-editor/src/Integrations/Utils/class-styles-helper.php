@@ -67,6 +67,21 @@ class Styles_Helper {
 	}
 
 	/**
+	 * Whether a value is already a literal CSS color rather than a palette slug.
+	 *
+	 * Color block attributes such as `backgroundColor` normally hold a palette slug, but they can
+	 * carry a literal color instead, in which case there is nothing to translate. Only unambiguous
+	 * literal forms count: a bare identifier such as `red` cannot be told apart from a slug, so it
+	 * is treated as a slug.
+	 *
+	 * @param string $value Value of a color block attribute.
+	 * @return bool
+	 */
+	public static function is_color_literal( string $value ): bool {
+		return 1 === preg_match( '/^(#|rgba?\(|hsla?\(|var\()/i', trim( $value ) );
+	}
+
+	/**
 	 * Get normalized block styles by translating color slugs to actual color values.
 	 *
 	 * This method handles the normalization of color-related attributes like backgroundColor,

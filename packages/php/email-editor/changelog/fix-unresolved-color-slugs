@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a block's color when its palette slug is missing, instead of losing the color entirely.
