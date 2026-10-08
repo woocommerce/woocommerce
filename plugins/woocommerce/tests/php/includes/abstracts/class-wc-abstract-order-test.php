@@ -540,12 +540,23 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		// Give the order type a customer ID and a tax location so apply_coupon() reaches the
 		// usage-recording step, where get_user_id() is 0 and there is no get_billing_email().
-		//phpcs:disable Squiz.Commenting
 		$order = new class( $refund->get_id() ) extends WC_Order_Refund {
+			/**
+			 * Return a registered customer ID, so apply_coupon() skips the guest usage check.
+			 *
+			 * @param string $context What the value is for.
+			 * @return int
+			 */
 			public function get_customer_id( $context = 'view' ) {
 				return 1;
 			}
 
+			/**
+			 * Return an empty tax location, as this order type has no billing or shipping getters.
+			 *
+			 * @param array $args Override the location.
+			 * @return array
+			 */
 			protected function get_tax_location( $args = array() ) {
 				return wp_parse_args(
 					$args,
@@ -558,7 +569,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				);
 			}
 		};
-		//phpcs:enable Squiz.Commenting
 
 		$result = $order->apply_coupon( $coupon_code );
 
@@ -574,13 +584,17 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::create_coupon( $coupon_code );
 
 		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
-		//phpcs:disable Squiz.Commenting
 		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+			/**
+			 * Report that coupon usage has not been recorded for the order yet.
+			 *
+			 * @param WC_Abstract_Order $order Order object.
+			 * @return bool
+			 */
 			public function get_recorded_coupon_usage_counts( $order ) {
 				return false;
 			}
 		};
-		//phpcs:enable Squiz.Commenting
 		add_filter(
 			'woocommerce_data_stores',
 			function ( $stores ) use ( $data_store ) {
@@ -590,14 +604,29 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		);
 
 		// Only the tax location is provided, since the abstract builds it from billing and shipping getters.
-		//phpcs:disable Squiz.Commenting
 		$order = new class() extends WC_Abstract_Order {
+			/**
+			 * Data store registered for this order type above.
+			 *
+			 * @var string
+			 */
 			protected $data_store_name = 'test-custom-order';
 
+			/**
+			 * Get the order type.
+			 *
+			 * @return string
+			 */
 			public function get_type() {
 				return 'test_custom_order';
 			}
 
+			/**
+			 * Return an empty tax location, as this order type has no billing or shipping getters.
+			 *
+			 * @param array $args Override the location.
+			 * @return array
+			 */
 			protected function get_tax_location( $args = array() ) {
 				return wp_parse_args(
 					$args,
@@ -610,7 +639,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				);
 			}
 		};
-		//phpcs:enable Squiz.Commenting
 		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
 		$order->save();
 
