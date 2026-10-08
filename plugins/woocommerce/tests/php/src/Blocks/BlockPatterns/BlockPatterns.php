@@ -171,6 +171,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		$this->block_patterns->register_block_patterns();
 
+		sort( $registered_sources );
 		$this->assertSame( array( 'mock-footer.php', 'mock-header.php' ), $registered_sources, 'Only real pattern files are registered, ghost entry is excluded.' );
 	}
 

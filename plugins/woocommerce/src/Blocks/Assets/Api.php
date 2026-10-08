@@ -147,7 +147,7 @@ class Api {
 	 *
 	 * @return string
 	 */
-	public function generate_block_metadata_path( $block_name, $path ) {
+	public function generate_block_metadata_path( $block_name, $path = '' ) {
 		return $this->package->get_path( 'assets/client/blocks/' . $path . $block_name . '/block.json' );
 	}
 
