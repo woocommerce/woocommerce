@@ -707,8 +707,8 @@ Visually highlight a product category and encourage prompt action.
 
 - **Name:** woocommerce/featured-category
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
-- **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
+- **Supports:** align (full, wide), allowedBlocks, anchor, ariaLabel, color (background, gradients, link, text, ~~enableContrastChecker~~), dimensions (aspectRatio, minHeight), filter (duotone), interactivity (clientNavigation), shadow, spacing (blockGap, margin, padding), typography (), ~~html~~
+- **Attributes:** alt, anchor, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory, verticalAlignment
 
 ## Featured Product - woocommerce/featured-product
 
@@ -716,8 +716,8 @@ Highlight a product or variation.
 
 - **Name:** woocommerce/featured-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
-- **Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
+- **Supports:** align (full, wide), allowedBlocks, anchor, ariaLabel, color (background, gradients, link, text, ~~enableContrastChecker~~), dimensions (aspectRatio, minHeight), filter (duotone), interactivity (clientNavigation), multiple, shadow, spacing (blockGap, margin, padding), typography (), ~~html~~
+- **Attributes:** alt, anchor, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId, verticalAlignment
 
 ## Filter Block - woocommerce/filter-wrapper
 
@@ -1041,8 +1041,8 @@ Show all product categories as a list or dropdown.
 
 - **Name:** woocommerce/product-categories
 - **Category:** woocommerce
-- **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, showChildrenOnly
+- **Supports:** align (full, wide), color (background, gradients, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, isPreview, showChildrenOnly
 
 ## Products by Category - woocommerce/product-category
 
@@ -1191,7 +1191,7 @@ Displays an on-sale badge if the product is on-sale.
 - **Category:** woocommerce-product-elements
 - **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 - **Supports:** align, color (background, gradients, text, ~~link~~), email, interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** productId
+- **Attributes:** badgeContent, prefix, productId, saleText, suffix
 
 ## Product SKU - woocommerce/product-sku
 
@@ -1278,7 +1278,7 @@ Display filter options as chips.
 - **Name:** woocommerce/product-filter-chips
 - **Category:** woocommerce
 - **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status, woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, spacing (padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
+- **Supports:** interactivity, layout (default, ~~allowEditing~~, ~~allowInheriting~~, ~~allowJustification~~, ~~allowOrientation~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), spacing (blockGap, padding), typography (fontSize), woocommerce (innerBlockDisplayStyle)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
 ## Clear filters - woocommerce/product-filter-clear-button
@@ -1622,7 +1622,7 @@ Display a single product of your choice with full control over its presentation.
 
 - **Name:** woocommerce/single-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), interactivity
+- **Supports:** align (full, wide), color (background, gradients, ~~text~~), interactivity, listView, shadow, spacing (margin, padding)
 - **Attributes:** productId
 
 ## Filter by Stock Controls - woocommerce/stock-filter

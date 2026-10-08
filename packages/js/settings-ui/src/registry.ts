@@ -179,7 +179,7 @@ export const resolveFieldComponent = (
 		? findInMatchingRegistrations(
 				context,
 				( registration ) => registration.components?.[ componentName ]
-		  )
+			)
 		: undefined;
 
 	const resolvedComponent =
@@ -196,7 +196,7 @@ export const resolveFieldComponent = (
 			? findInMatchingRegistrations(
 					context,
 					( registration ) => registration.typeRenderers?.number
-			  )
+				)
 			: undefined );
 
 	if ( resolvedComponent ) {

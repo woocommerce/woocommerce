@@ -17,8 +17,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use DomainException;
-use InvalidArgumentException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -98,7 +97,7 @@ final class PlanSnapshot {
 	 * A weak link back to the source plan; a missing key surfaces here as null.
 	 */
 	public function get_selling_plan_id(): ?int {
-		return isset( $this->data['selling_plan_id'] ) ? ScalarCoercion::coerce_int( $this->data['selling_plan_id'] ) : null;
+		return isset( $this->data['selling_plan_id'] ) ? Coercion::coerce_int( $this->data['selling_plan_id'] ) : null;
 	}
 
 	/**
@@ -128,29 +127,16 @@ final class PlanSnapshot {
 	}
 
 	/**
-	 * The frozen pricing policy, reconstructed from the snapshot payload.
+	 * The frozen pricing payload captured at signup, returned as captured. The
+	 * owning extension interprets it. Null when absent, explicitly null, or not an
+	 * array.
 	 *
-	 * Sourced from the `pricing_policy` entry captured at signup, NOT the live plan -
-	 * the same frozen-terms contract as {@see self::get_billing_policy()}. Returns
-	 * null when the payload carries no pricing policy (the plan had none at signup,
-	 * or the snapshot predates the key) or an unreadable one, so a caller degrades
-	 * to "no price adjustments" rather than fataling.
+	 * @return array<string, mixed>|null
 	 */
-	public function get_pricing_policy(): ?PricingPolicy {
+	public function get_pricing_policy(): ?array {
 		$policy = $this->data['pricing_policy'] ?? null;
-		if ( ! is_array( $policy ) ) {
-			return null;
-		}
 
-		try {
-			return PricingPolicy::from_array( self::string_keyed( $policy ) );
-		} catch ( InvalidArgumentException $e ) {
-			// A structurally-invalid stored policy degrades to "no price adjustments"
-			// rather than fataling the read (same fail-soft rationale as the billing
-			// accessor); snapshots this engine writes always carry a valid policy.
-			unset( $e );
-			return null;
-		}
+		return is_array( $policy ) ? self::string_keyed( $policy ) : null;
 	}
 
 	/**

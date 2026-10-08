@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore cross-sells and upsells in the Mini Cart and keep them up to date as shoppers add or remove products.

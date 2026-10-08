@@ -26,6 +26,10 @@ import {
 import { appendURLParams } from '../../utils/functions';
 import ProductPreviewModal from '../product-preview-modal/product-preview-modal';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
+import {
+	PRODUCT_PREVIEW_TREATMENT,
+	PRODUCT_PREVIEW_VARIATION_PARAM,
+} from '../../utils/product-preview-experiment';
 export interface ProductCardProps {
 	type?: string;
 	product?: Product;
@@ -79,11 +83,17 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 
 	const isTheme = type === ProductType.theme;
 	const isBusinessService = type === ProductType.businessService;
-	const { iamSettings } = useContext( MarketplaceContext );
+	const { iamSettings, productPreviewVariation } =
+		useContext( MarketplaceContext );
+	// Themes, business services and the small cards in install modals never show the preview, so their clicks stay out of the experiment.
+	const canShowPreview = ! isTheme && ! isBusinessService && ! props.small;
+	const previewVariation = canShowPreview ? productPreviewVariation : null;
+	// Stores outside the experiment follow the WooCommerce.com setting.
 	const shouldShowPreview =
-		iamSettings?.product_previews === 'modal' &&
-		! isTheme &&
-		! isBusinessService;
+		canShowPreview &&
+		( previewVariation
+			? previewVariation === PRODUCT_PREVIEW_TREATMENT
+			: iamSettings?.product_previews === 'modal' );
 	// Business service cards use a layout with no slot for the badge.
 	const showsQualityBadge =
 		! isLoading &&
@@ -185,12 +195,19 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 	);
 
 	const productUrl = () => {
+		const params: Array< [ string, string ] > = [];
 		if ( query.ref ) {
-			return appendURLParams( product.url, [
-				[ 'utm_content', query.ref ],
+			params.push( [ 'utm_content', query.ref ] );
+		}
+		if ( previewVariation ) {
+			params.push( [
+				PRODUCT_PREVIEW_VARIATION_PARAM,
+				previewVariation,
 			] );
 		}
-		return product.url;
+		return params.length
+			? appendURLParams( product.url, params )
+			: product.url;
 	};
 
 	const handleCardClick = () => {
@@ -200,6 +217,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 			vendor: product.vendorName,
 			product_type: type,
 			has_quality_badge: showsQualityBadge,
+			...( previewVariation && { preview_variation: previewVariation } ),
 		} );
 
 		if ( shouldShowPreview ) {
@@ -431,6 +449,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 					onClose={ handleModalClose }
 					productId={ product.id as number }
 					triggerRef={ linkRef }
+					variation={ previewVariation }
 				/>
 			) }
 		</>
