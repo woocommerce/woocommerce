@@ -106,7 +106,7 @@ export function CustomerFeedbackModal( {
 						label: __( 'Strongly Agree', 'woocommerce' ),
 						value: '5',
 					},
-			  ];
+				];
 
 	const [ firstQuestionScore, setFirstQuestionScore ] = useState(
 		defaultScore || NaN
