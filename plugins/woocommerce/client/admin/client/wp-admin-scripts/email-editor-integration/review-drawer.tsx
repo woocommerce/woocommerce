@@ -127,7 +127,7 @@ const ConflictsGroup = ( {
 								conflict.block,
 								conflict.occurrence,
 								conflict.total
-						  )
+							)
 						: conflict.block;
 
 				return (
@@ -275,7 +275,7 @@ const AutoResolvedGroup = ( {
 								entry.block,
 								entry.occurrence,
 								entry.total
-						  )
+							)
 						: entry.block;
 				return (
 					<AutoResolvedItem
@@ -458,9 +458,9 @@ export const ReviewDrawer = ( {
 
 	const totalChanges = summary
 		? summary.copy_changes.length +
-		  summary.added_blocks.length +
-		  summary.removed_blocks.length +
-		  summary.structural_changes.length
+			summary.added_blocks.length +
+			summary.removed_blocks.length +
+			summary.structural_changes.length
 		: 0;
 
 	const subtitle = sprintf(

@@ -187,7 +187,7 @@ const StoreNotices = ( {
 											'Please fix the following errors before continuing',
 											uniqueNotices.length,
 											'woocommerce'
-									  )
+										)
 									: ''
 							}
 						>

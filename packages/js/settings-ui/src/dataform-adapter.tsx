@@ -149,7 +149,7 @@ const createIsVisible = (
 			? valueMatchesVisibilityRule(
 					item[ visibility.controller ],
 					visibility.value
-			  )
+				)
 			: true;
 	};
 };
@@ -286,7 +286,7 @@ export const buildDataFormField = (
 					help,
 					help ? ' ' : null,
 					disabledTooltip
-			  )
+				)
 			: help;
 
 	const field: Field< SettingsValues > = {
