@@ -2,7 +2,7 @@
 
 If your extension adds cart items that belong to another cart item, such as the contents of a bundle or a product add-on, you can mark them as children of that parent item. Store API cart-item responses then include the parent's key in the readonly `parent_item_key` field.
 
-Blocks use this field to treat child items as part of their parent. For example, the product button's "X in cart" count leaves child items out, so adding a bundle doesn't make the products inside it look like they were added on their own.
+Blocks will use this field to treat child items as part of their parent. For example, in the Add to cart with options block, the product button's "X in cart" count leaves child items out, so adding a bundle doesn't make the products inside it look like they were added on their own.
 
 WooCommerce never marks an item as a child by itself. Your extension decides which items are children.
 
@@ -60,7 +60,8 @@ If the parent and child are added in separate requests, store the parent key som
 
 WooCommerce only returns a parent key while that parent item is in the cart. If the shopper removes the parent, or it's dropped from the cart, the child's `parent_item_key` becomes `null`. The child stays in the cart and counts as a standalone item again.
 
-You don't need to clean anything up. Your filter can keep returning the stored key, and WooCommerce handles the rest.
+You don't need to clear the stored key. Your filter can keep returning the stored key, and WooCommerce handles the rest.
+If child items shouldn't be sold without their parent, remove them when the parent is removed.
 
 ## Related documentation
 
