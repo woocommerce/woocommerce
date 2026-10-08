@@ -22,14 +22,21 @@ See the [generated filter reference](https://github.com/woocommerce/woocommerce/
 
 ## Example
 
-This example adds a parent item, stores its key in the child's cart item data, and returns that key from the filter.
+This example gives the parent its own cart item data so it won't merge with the same product added separately. It stores the parent's key in the child's cart item data and returns that key from the filter.
 
 ```php
 <?php
 const MY_EXTENSION_PARENT_ITEM_KEY = '_my_extension_parent_item_key';
+const MY_EXTENSION_IS_PARENT_ITEM = '_my_extension_is_parent_item';
 
 function my_extension_add_parent_and_child( int $parent_product_id, int $child_product_id ): void {
-	$parent_item_key = WC()->cart->add_to_cart( $parent_product_id, 1 );
+	$parent_item_key = WC()->cart->add_to_cart(
+		$parent_product_id,
+		1,
+		0,
+		array(),
+		array( MY_EXTENSION_IS_PARENT_ITEM => true )
+	);
 
 	if ( ! $parent_item_key ) {
 		return;
