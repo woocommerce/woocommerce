@@ -204,7 +204,7 @@ function ResizableFrame( {
 
 	const resizeHandler = (
 		/* Disable reason: role="separator" does in fact support aria-valuenow */
-		/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */
+
 		<motion.button
 			key="handle"
 			role="separator"
@@ -248,8 +248,9 @@ function ResizableFrame( {
 			variants={ frameAnimationVariants }
 			animate={ isFullWidth ? 'fullWidth' : 'default' }
 			onAnimationComplete={ ( definition ) => {
-				if ( definition === 'fullWidth' )
+				if ( definition === 'fullWidth' ) {
 					setFrameSize( { width: '100%', height: '100%' } );
+				}
 			} }
 			transition={ frameTransition }
 			size={ frameSize }

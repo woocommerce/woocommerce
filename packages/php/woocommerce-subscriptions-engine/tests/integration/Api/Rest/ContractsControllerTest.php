@@ -86,6 +86,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	private function seed( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'       => 'engine-tests',
 				'customer_id'          => $customer_id,
 				'status'               => $status,
 				'currency'             => 'USD',

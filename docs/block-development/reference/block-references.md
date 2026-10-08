@@ -396,7 +396,7 @@ Displays the current category description.
 
 - **Name:** woocommerce/category-description
 - **Category:** woocommerce
-- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Supports:** color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
 - **Attributes:** textAlign
 
 ## Product Category Title - woocommerce/category-title
@@ -405,7 +405,7 @@ Displays the current category title and lets permitted users edit it.
 
 - **Name:** woocommerce/category-title
 - **Category:** woocommerce
-- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Supports:** color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
 - **Attributes:** isLink, level, linkTarget, rel, textAlign
 
 ## Checkout - woocommerce/checkout
@@ -707,8 +707,8 @@ Visually highlight a product category and encourage prompt action.
 
 - **Name:** woocommerce/featured-category
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
-- **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
+- **Supports:** align (full, wide), allowedBlocks, anchor, ariaLabel, color (background, gradients, link, text, ~~enableContrastChecker~~), dimensions (aspectRatio, minHeight), filter (duotone), interactivity (clientNavigation), shadow, spacing (blockGap, margin, padding), typography (), ~~html~~
+- **Attributes:** alt, anchor, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory, verticalAlignment
 
 ## Featured Product - woocommerce/featured-product
 
@@ -716,8 +716,8 @@ Highlight a product or variation.
 
 - **Name:** woocommerce/featured-product
 - **Category:** woocommerce
-- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
-- **Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
+- **Supports:** align (full, wide), allowedBlocks, anchor, ariaLabel, color (background, gradients, link, text, ~~enableContrastChecker~~), dimensions (aspectRatio, minHeight), filter (duotone), interactivity (clientNavigation), multiple, shadow, spacing (blockGap, margin, padding), typography (), ~~html~~
+- **Attributes:** alt, anchor, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId, verticalAlignment
 
 ## Filter Block - woocommerce/filter-wrapper
 
@@ -1041,8 +1041,8 @@ Show all product categories as a list or dropdown.
 
 - **Name:** woocommerce/product-categories
 - **Category:** woocommerce
-- **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
-- **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, showChildrenOnly
+- **Supports:** align (full, wide), color (background, gradients, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, isPreview, showChildrenOnly
 
 ## Products by Category - woocommerce/product-category
 
