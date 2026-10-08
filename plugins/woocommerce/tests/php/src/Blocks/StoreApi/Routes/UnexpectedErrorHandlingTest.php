@@ -142,33 +142,29 @@ class UnexpectedErrorHandlingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve the existing ordinary exception response for the $route_kind route.
-	 * @testWith ["abstract"]
-	 *           ["cart"]
-	 *           ["checkout"]
-	 *           ["batch"]
+	 * Dispatchers for each route kind, each throwing the given failure during dispatch.
 	 *
-	 * @param string $route_kind Which route fixture to dispatch through.
+	 * @return array<string, array{\Closure}>
 	 */
-	public function test_ordinary_exception_response_is_unchanged( string $route_kind ): void {
-		$failure = new \RuntimeException( 'Fixture ordinary exception.' );
-		switch ( $route_kind ) {
-			case 'cart':
-				$route = $this->create_cart_route( $failure );
-				break;
-			case 'checkout':
-				$route = $this->create_checkout_route( $failure );
-				break;
-			case 'batch':
-				$route = null;
-				break;
-			default:
-				$route = $this->create_abstract_route( $failure );
-		}
+	public function provider_route_dispatchers(): array {
+		$request = static fn() => new WP_REST_Request( 'GET', '/unexpected-error-fixture' );
 
-		$response = $route
-			? $route->get_response( new WP_REST_Request( 'GET', '/unexpected-error-fixture' ) )
-			: $this->dispatch_batch_route( $failure );
+		return array(
+			'abstract' => array( static fn( self $test, \Throwable $failure ) => $test->create_abstract_route( $failure )->get_response( $request() ) ),
+			'cart'     => array( static fn( self $test, \Throwable $failure ) => $test->create_cart_route( $failure )->get_response( $request() ) ),
+			'checkout' => array( static fn( self $test, \Throwable $failure ) => $test->create_checkout_route( $failure )->get_response( $request() ) ),
+			'batch'    => array( static fn( self $test, \Throwable $failure ) => $test->dispatch_batch_route( $failure ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should preserve the existing ordinary exception response for the $_dataName route.
+	 * @dataProvider provider_route_dispatchers
+	 *
+	 * @param \Closure $dispatch Dispatches a request whose route throws the given failure.
+	 */
+	public function test_ordinary_exception_response_is_unchanged( \Closure $dispatch ): void {
+		$response = $dispatch( $this, new \RuntimeException( 'Fixture ordinary exception.' ) );
 
 		$this->assertSame( 500, $response->get_status(), 'Ordinary exception responses should keep status 500.' );
 		$this->assertSame(
