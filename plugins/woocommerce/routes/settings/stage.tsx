@@ -5,16 +5,9 @@ import { Page } from '@wordpress/admin-ui';
 import { __ } from '@wordpress/i18n';
 import { useParams } from '@wordpress/route';
 
-// useParams() is untyped without a registered router, so narrow it here.
-function getPageParam( params: unknown ): string {
-	if ( typeof params === 'object' && params !== null && 'page' in params ) {
-		return typeof params.page === 'string' ? params.page : '';
-	}
-	return '';
-}
-
 function SettingsStage() {
-	const page = getPageParam( useParams( { strict: false } ) );
+	// useParams() is untyped without a registered router.
+	const { page }: { page?: string } = useParams( { strict: false } );
 
 	return (
 		<Page
