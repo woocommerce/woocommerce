@@ -465,12 +465,16 @@ class WC_Tracker {
 	private static function get_wordpress_info() {
 		$wp_data = array();
 
-		$memory = wc_let_to_num( WP_MEMORY_LIMIT );
+		$memory = wp_convert_hr_to_bytes( WP_MEMORY_LIMIT );
 
 		if ( function_exists( 'memory_get_usage' ) ) {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- False positive.
-			$system_memory = wc_let_to_num( @ini_get( 'memory_limit' ) );
-			$memory        = max( $memory, $system_memory );
+			$system_memory = wp_convert_hr_to_bytes( @wc_get_container()->get( LegacyProxy::class )->call_function( 'ini_get', 'memory_limit' ) );
+			// Use 32G for no limit (-1), matching the system status REST API.
+			if ( -1 === $system_memory ) {
+				$system_memory = 32 * GB_IN_BYTES;
+			}
+			$memory = max( $memory, $system_memory );
 		}
 
 		// WordPress 5.5+ environment type specification.
