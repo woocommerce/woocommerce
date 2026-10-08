@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\CheckoutMock;
  *
  * @since $VID:$
  */
-class Checkout extends \WP_UnitTestCase {
+class Checkout extends \WC_Unit_Test_Case {
 	/**
 	 * @var AssetDataRegistryMock The asset data registry mock.
 	 */
@@ -43,7 +43,7 @@ class Checkout extends \WP_UnitTestCase {
 	 * @return void
 	 * @throws \Exception If the API class is not registered with container.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->asset_api            = Package::container()->get( API::class );
@@ -61,7 +61,7 @@ class Checkout extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		parent::tearDown();
 		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 
