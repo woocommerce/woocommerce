@@ -48,7 +48,6 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected $display_cart_prices_including_tax = false;
 
-
 	/**
 	 * Block Hook API placements.
 	 *
@@ -304,7 +303,9 @@ class MiniCart extends AbstractBlock {
 			$wrapper_classes          = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 			$wrapper_styles           = $classes_styles['styles'];
 			// Pre-render the template part so nested blocks enqueue their assets before the overlay is printed in wp_footer.
-			$template_part_contents           = $this->get_and_render_template_part_contents();
+			$template_part_contents           = $this->get_template_part_contents( false );
+			$template_part_contents           = $this->render_template_part_contents( $template_part_contents );
+			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
@@ -442,7 +443,8 @@ class MiniCart extends AbstractBlock {
 	 * @return void
 	 */
 	public function render_mini_cart_overlay() {
-		$template_part_contents = $this->get_and_render_template_part_contents();
+		$template_part_contents = $this->get_template_part_contents( false );
+		$template_part_contents = $this->render_template_part_contents( $template_part_contents );
 		ob_start();
 		?>
 		<div
@@ -476,18 +478,6 @@ class MiniCart extends AbstractBlock {
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_interactivity_process_directives( ob_get_clean() );
-	}
-
-	/**
-	 * Resolve and render the mini-cart template part, caching the result for reuse as underlying operations for better performance.
-	 *
-	 * @return string The rendered template part contents.
-	 */
-	private function get_and_render_template_part_contents() {
-		static $contents = null;
-		$contents = $contents ?? $this->render_template_part_contents( $this->get_template_part_contents( false ) );
-
-		return $contents;
 	}
 
 	/**
@@ -756,5 +746,4 @@ class MiniCart extends AbstractBlock {
 	public function should_not_render_mini_cart( array $attributes ) {
 		return isset( $attributes['cartAndCheckoutRenderStyle'] ) && 'hidden' !== $attributes['cartAndCheckoutRenderStyle'];
 	}
-
 }

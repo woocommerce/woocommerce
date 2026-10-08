@@ -56,7 +56,6 @@ for ( const targetManifest of findManifests( targetDirectory ) ) {
 // The full build writes a metadata collection that overrides the individual block.json files at
 // registration time; a stale one would mask the fresh copies until the next build, so drop it too.
 fs.rmSync( path.join( targetDirectory, 'blocks-json.php' ), { force: true } );
-fs.rmSync( path.join( targetDirectory, 'inner-blocks', 'blocks-json.php' ), { force: true } );
 
 for ( const sourceManifest of sourceManifests ) {
 	const metadata = JSON.parse( fs.readFileSync( sourceManifest, 'utf8' ) );

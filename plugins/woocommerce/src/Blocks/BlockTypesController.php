@@ -238,9 +238,7 @@ final class BlockTypesController {
 		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $blocks_meta_path ) ) {
 			add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10, 4 );
 
-			// Performance note: the aggregate manifests are lazily loaded by PHP (faster parsing, backed by OPcache).
 			wp_register_block_metadata_collection( $blocks_path, $blocks_meta_path );
-			wp_register_block_metadata_collection( $blocks_path . 'inner-blocks/', $blocks_path . 'inner-blocks/blocks-json.php' );
 
 			remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10 );
 		}
