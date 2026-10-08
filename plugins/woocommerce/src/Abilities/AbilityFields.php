@@ -66,7 +66,7 @@ class AbilityFields {
 			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array.', '11.3.0' );
 			return;
 		}
-		if ( isset( $args['get_callback'] ) && ! is_callable( $args['get_callback'] ) ) {
+		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
 			return;
 		}
@@ -115,7 +115,7 @@ class AbilityFields {
 		$values = array();
 		foreach ( self::get( $object_type ) as $attribute => $field ) {
 			try {
-				$value = isset( $field['get_callback'] ) ? call_user_func( $field['get_callback'], $subject ) : self::omit();
+				$value = call_user_func( $field['get_callback'], $subject );
 			} catch ( \Throwable $e ) {
 				wc_get_logger()->error(
 					sprintf( 'Ability field "%s" of "%s" failed: %s', $attribute, $object_type, $e->getMessage() ),
