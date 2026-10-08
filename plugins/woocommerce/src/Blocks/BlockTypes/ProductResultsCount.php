@@ -39,7 +39,7 @@ class ProductResultsCount extends AbstractBlock {
 		woocommerce_result_count();
 		$product_results_count = ob_get_clean();
 
-		$classes = 'woocommerce wc-block-product-results-count wp-block-woocommerce-product-results-count';
+		$classes = 'woocommerce wc-block-product-results-count';
 		if ( ! empty( $attributes['fontSize'] ) ) {
 			// Preserve the legacy class for backward compatibility.
 			$classes .= ' has-font-size';
