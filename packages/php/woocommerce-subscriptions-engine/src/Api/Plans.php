@@ -46,31 +46,20 @@ defined( 'ABSPATH' ) || exit;
 final class Plans {
 
 	/**
-	 * The plan fields {@see self::create()} and {@see self::update()} write, as a key map.
+	 * Keys accepted by {@see self::create()} and {@see self::update()}, as a key map. The
+	 * `extension_slug` sets the owner on create and scopes the write on update; it is never
+	 * written on update. The other keys are the plan fields.
 	 *
 	 * @var array<string, true>
 	 */
 	private const PLAN_KEYS = array(
+		'extension_slug'  => true,
 		'name'            => true,
 		'status'          => true,
 		'billing_policy'  => true,
 		'pricing_policy'  => true,
 		'delivery_policy' => true,
 	);
-
-	/**
-	 * Keys accepted by {@see self::create()}: the plan fields plus the owning `extension_slug`.
-	 *
-	 * @var array<string, true>
-	 */
-	private const CREATE_KEYS = array( 'extension_slug' => true ) + self::PLAN_KEYS;
-
-	/**
-	 * Keys accepted by {@see self::update()}: the plan fields plus the owner scope `extension_slug`.
-	 *
-	 * @var array<string, true>
-	 */
-	private const UPDATE_KEYS = array( 'extension_slug' => true ) + self::PLAN_KEYS;
 
 	/**
 	 * Keys accepted by {@see self::list()}, as a key map.
@@ -112,7 +101,7 @@ final class Plans {
 	 * @throws RuntimeException If a validation callback throws or the insert fails.
 	 */
 	public static function create( array $args ): PlanView {
-		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
+		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		unset( $filtered_args['extension_slug'] );
 
@@ -163,7 +152,7 @@ final class Plans {
 	 * @throws RuntimeException If a validation callback throws or the update fails.
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
-		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::UPDATE_KEYS );
+		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 		$extension_slug = ArgumentValidator::validate_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		unset( $filtered_args['extension_slug'] );
 
