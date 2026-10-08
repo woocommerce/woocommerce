@@ -1,4 +1,4 @@
-Significance: major
+Significance: minor
 Type: dev
 
-Remove the empty wc-admin-layout stylesheet; extensions must remove dependencies on this style handle.
+Remove the empty wc-admin-layout stylesheet.
