@@ -48,8 +48,7 @@ export const shippingAddressHasValidationErrors = () => {
 };
 
 export type BaseAddressKey =
-	| keyof CartBillingAddress
-	| keyof CartShippingAddress;
+	keyof CartBillingAddress | keyof CartShippingAddress;
 
 /**
  * Normalizes address values before push.

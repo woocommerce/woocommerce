@@ -60,7 +60,7 @@ export const ExperimentalListItem = ( {
 				onKeyDown: ( e: React.KeyboardEvent< HTMLElement > ) =>
 					handleKeyDown( e, otherProps.onClick ),
 				tabIndex: 0,
-		  }
+			}
 		: {};
 
 	const tagClasses = clsx( {

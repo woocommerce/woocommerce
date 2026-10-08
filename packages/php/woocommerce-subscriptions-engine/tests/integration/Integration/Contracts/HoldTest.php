@@ -48,6 +48,7 @@ class HoldTest extends EngineIntegrationTestCase {
 	private function seed( string $status, ?string $next_payment = '2099-01-01 00:00:00' ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -59,6 +60,16 @@ class HoldTest extends EngineIntegrationTestCase {
 		);
 
 		return $this->contracts->insert( $contract );
+	}
+
+	/**
+	 * The stored hold anchor for a contract ('' when absent).
+	 *
+	 * @param int $id Contract id.
+	 * @return mixed
+	 */
+	private function anchor( int $id ) {
+		return $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true );
 	}
 
 	public function test_hold_suspends_billing_by_moving_to_on_hold(): void {
@@ -78,7 +89,7 @@ class HoldTest extends EngineIntegrationTestCase {
 
 		$held = $this->reload( $id );
 		$this->assertNull( $held->get_next_payment_gmt() );
-		$this->assertSame( '2099-01-01 00:00:00', $held->get_meta()[ Hold::ANCHOR_META_KEY ] ?? null );
+		$this->assertSame( '2099-01-01 00:00:00', $this->anchor( $id ) );
 	}
 
 	public function test_hold_without_a_next_payment_stores_no_anchor(): void {
@@ -89,7 +100,7 @@ class HoldTest extends EngineIntegrationTestCase {
 		$held = $this->reload( $id );
 		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
 		$this->assertNull( $held->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $held->get_meta() );
+		$this->assertSame( '', $this->anchor( $id ) );
 	}
 
 	public function test_hold_on_an_on_hold_contract_is_an_idempotent_no_op(): void {
@@ -111,7 +122,19 @@ class HoldTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $fired );
 		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
 		$this->assertNull( $held->get_next_payment_gmt() );
-		$this->assertSame( '2099-01-01 00:00:00', $held->get_meta()[ Hold::ANCHOR_META_KEY ] ?? null );
+		$this->assertSame( '2099-01-01 00:00:00', $this->anchor( $id ) );
+	}
+
+	public function test_the_anchor_survives_a_whole_contract_update(): void {
+		$id = $this->seed( ContractStatus::ACTIVE );
+		$this->sut->hold( $this->reload( $id ) );
+
+		$held = $this->reload( $id );
+		$held->set_end_gmt( '2099-12-31 00:00:00' );
+		$this->contracts->update( $held );
+
+		$this->assertSame( '2099-01-01 00:00:00', $this->anchor( $id ) );
+		$this->assertSame( '2099-01-01 00:00:00', Hold::read_anchor( $this->contracts, $id ) );
 	}
 
 	public function test_hold_fires_the_held_action(): void {

@@ -66,7 +66,8 @@ final class Cancellation {
 	 * Cancel `$contract`: move it to cancelled, disarm its next-due moment, and close any
 	 * mid-charge cycle.
 	 *
-	 * Only an active, on-hold or pending-cancellation contract can be cancelled; cancelling an
+	 * Only a draft, active, on-hold or pending-cancellation contract can be cancelled (a draft is
+	 * never armed, so there is no due moment to disarm); cancelling an
 	 * already cancelled contract is an idempotent no-op that still succeeds and fires the
 	 * action. Any other status - including one that is not registered - raises a
 	 * `DomainException`. The next-payment date and any hold anchor are cleared so the due scan
@@ -86,15 +87,14 @@ final class Cancellation {
 		}
 
 		$previous   = $contract->get_status();
-		$cancelable = array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD, ContractStatus::PENDING_CANCELLATION, ContractStatus::CANCELLED );
+		$cancelable = array( ContractStatus::DRAFT, ContractStatus::ACTIVE, ContractStatus::ON_HOLD, ContractStatus::PENDING_CANCELLATION, ContractStatus::CANCELLED );
 		if ( ! in_array( $previous, $cancelable, true ) ) {
-			throw new \DomainException( 'Cancellation::cancel(): only an active, on-hold or pending-cancellation contract can be cancelled.' );
+			throw new \DomainException( 'Cancellation::cancel(): only a draft, active, on-hold or pending-cancellation contract can be cancelled.' );
 		}
 
 		if ( ContractStatus::CANCELLED !== $previous ) {
 			$contract->set_status( ContractStatus::CANCELLED );
 			$contract->set_next_payment_gmt( null );
-			$contract->set_meta( Hold::ANCHOR_META_KEY, null );
 		}
 
 		// Compare-and-set on the status read above: a concurrent transition (another
@@ -102,6 +102,10 @@ final class Cancellation {
 		// than be clobbered.
 		if ( ! $this->contracts->update_if_status( $contract, $previous ) ) {
 			throw new \DomainException( 'Cancellation::cancel(): the contract state changed concurrently; nothing was written.' );
+		}
+
+		if ( ContractStatus::CANCELLED !== $previous ) {
+			Hold::clear_anchor( $this->contracts, $id );
 		}
 
 		// Close a charge caught mid-flight: a still-pending head cycle is cancelled so no stale
@@ -113,7 +117,7 @@ final class Cancellation {
 		}
 
 		/**
-		 * Fires after a contract is cancelled.
+		 * Fires after a contract is cancelled. Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The cancelled contract.
 		 */
@@ -163,13 +167,12 @@ final class Cancellation {
 			// up to (not through) it. A held contract's moment lives in the hold anchor.
 			$period_end = $contract->get_next_payment_gmt();
 			if ( null === $period_end && ContractStatus::ON_HOLD === $previous ) {
-				$period_end = Hold::read_anchor( $contract );
+				$period_end = Hold::read_anchor( $this->contracts, $id );
 			}
 			if ( null === $contract->get_end_gmt() && null !== $period_end ) {
 				$contract->set_end_gmt( $period_end );
 			}
 
-			$contract->set_meta( Hold::ANCHOR_META_KEY, null );
 			$contract->set_next_payment_gmt( null );
 		}
 
@@ -179,8 +182,13 @@ final class Cancellation {
 			throw new \DomainException( 'Cancellation::cancel_at_period_end(): the contract state changed concurrently; nothing was written.' );
 		}
 
+		if ( ContractStatus::PENDING_CANCELLATION !== $previous ) {
+			Hold::clear_anchor( $this->contracts, $id );
+		}
+
 		/**
 		 * Fires after a contract is set to wind down at the end of the current period.
+		 * Fires immediately after the write, not after a surrounding transaction commits.
 		 *
 		 * @param Contract $contract The pending-cancellation contract.
 		 */

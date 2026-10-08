@@ -4,7 +4,7 @@
 import { renderHook } from '@testing-library/react-hooks/dom';
 import { waitFor } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
-import 'whatwg-fetch'; /* eslint-disable-line import/no-unresolved */ /* To make sure Response is available */
+import 'whatwg-fetch'; /* To make sure Response is available */
 
 /**
  * Internal dependencies

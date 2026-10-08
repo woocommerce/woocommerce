@@ -17,7 +17,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use DomainException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,7 +97,7 @@ final class PlanSnapshot {
 	 * A weak link back to the source plan; a missing key surfaces here as null.
 	 */
 	public function get_selling_plan_id(): ?int {
-		return isset( $this->data['selling_plan_id'] ) ? ScalarCoercion::coerce_int( $this->data['selling_plan_id'] ) : null;
+		return isset( $this->data['selling_plan_id'] ) ? Coercion::coerce_int( $this->data['selling_plan_id'] ) : null;
 	}
 
 	/**
