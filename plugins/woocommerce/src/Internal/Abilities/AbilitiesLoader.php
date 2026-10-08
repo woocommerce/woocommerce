@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Internal\Abilities\Domain\AbstractChangeAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\CoreActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
@@ -141,6 +142,9 @@ class AbilitiesLoader {
 			$args = $class_name::get_registration_args();
 			if ( $is_core_ability && AbilityContracts::is_enabled() && isset( CoreActionableAbility::DEFINITIONS[ $ability_name ] ) ) {
 				$args['ability_class'] = CoreActionableAbility::class;
+				if ( is_a( CoreActionableAbility::DEFINITIONS[ $ability_name ], AbstractChangeAbility::class, true ) ) {
+					unset( $args['execute_callback'] );
+				}
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );

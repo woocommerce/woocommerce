@@ -162,6 +162,59 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
+	 * The status update that sets the status back.
+	 *
+	 * @param \WC_Order $subject Order before the change.
+	 * @param array     $input   Ability input.
+	 * @return array{ability: string, input: array}
+	 */
+	public static function undo( $subject, array $input ): ?array {
+		return array(
+			'ability' => self::get_name(),
+			'input'   => array(
+				'id'     => $subject->get_id(),
+				'status' => $subject->get_status(),
+			),
+		);
+	}
+
+	/**
+	 * The enabled emails that the status change sends.
+	 *
+	 * @param \WC_Order $subject Order before the change.
+	 * @param array     $input   Ability input.
+	 * @return string[]
+	 */
+	public static function side_effects( $subject, array $input ): array {
+		$to    = OrderUtil::remove_status_prefix( sanitize_key( (string) ( $input['status'] ?? '' ) ) );
+		$hooks = array(
+			"woocommerce_order_status_{$subject->get_status()}_to_{$to}_notification",
+			"woocommerce_order_status_{$to}_notification",
+		);
+
+		$effects = array();
+		foreach ( WC()->mailer()->get_emails() as $email ) {
+			if ( ! $email->is_enabled() ) {
+				continue;
+			}
+			foreach ( $hooks as $hook ) {
+				if ( false !== has_action( $hook, array( $email, 'trigger' ) ) ) {
+					$effects[] = sprintf(
+						$email->is_customer_email()
+							/* translators: %s: Email title, such as Completed order. */
+							? __( 'Sends the "%s" email to the customer.', 'woocommerce' )
+							/* translators: %s: Email title, such as New order. */
+							: __( 'Sends the "%s" email to the store.', 'woocommerce' ),
+						$email->get_title()
+					);
+					break;
+				}
+			}
+		}
+		return $effects;
+	}
+
+	/**
 	 * The ability output for the saved order.
 	 *
 	 * @param \WC_Order $subject Saved order.

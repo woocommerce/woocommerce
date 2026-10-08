@@ -57,6 +57,28 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	abstract public static function prepare_response( $subject ): array;
 
 	/**
+	 * The ability call that undoes the change, read from the object before the change, or null.
+	 *
+	 * @param object $subject Object before the change.
+	 * @param array  $input   Ability input.
+	 * @return array{ability: string, input: array}|null
+	 */
+	public static function undo( $subject, array $input ): ?array {
+		return null;
+	}
+
+	/**
+	 * Sentences that describe what the save does beyond the object.
+	 *
+	 * @param object $subject Object before the change.
+	 * @param array  $input   Ability input.
+	 * @return string[]
+	 */
+	public static function side_effects( $subject, array $input ): array {
+		return array();
+	}
+
+	/**
 	 * Run the change.
 	 *
 	 * @param array $input Ability input.

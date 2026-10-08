@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ActionableAbility::dry_run(). With ability contracts on, product create, product update, order status update and order add note say what they will do without doing it, including the extension fields, the side effects and the undo call. A write with outdated expected values returns a 409 and saves nothing.

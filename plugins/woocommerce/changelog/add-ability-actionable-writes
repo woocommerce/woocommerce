@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add ActionableAbility and AbilityFields::register_validator(). With ability contracts on, product create, product update and order status update write the extension fields and save the object one time. A database write, email or HTTP request before the save makes the change fail, and nothing is saved.
+Add ActionableAbility and AbilityFields::register_validator(). With ability contracts on, product create, product update and order status update write the extension fields and save the object one time.

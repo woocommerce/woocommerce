@@ -117,8 +117,8 @@ class AbilityFields {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions`. A field that throws or returns a value that its schema does not allow is left out, and the key is left out
-	 * when no field has a value or the feature is off.
+	 * `extensions`. The key is left out when no field has a value or the
+	 * feature is off.
 	 *
 	 * @internal
 	 *
@@ -128,8 +128,27 @@ class AbilityFields {
 	 * @return array<string, mixed>
 	 */
 	public static function add_to_output( array $output, string $object_type, $subject ): array {
+		$values = self::get_values( $object_type, $subject );
+		if ( ! empty( $values ) ) {
+			$output['extensions'] = $values;
+		}
+		return $output;
+	}
+
+	/**
+	 * The field values of an object, keyed by attribute. A field that throws or
+	 * returns a value that its schema does not allow is left out. Nothing is
+	 * returned when the feature is off.
+	 *
+	 * @internal
+	 *
+	 * @param string $object_type Object type.
+	 * @param object $subject     Object to read.
+	 * @return array<string, mixed>
+	 */
+	public static function get_values( string $object_type, $subject ): array {
 		if ( ! AbilityContracts::is_enabled() ) {
-			return $output;
+			return array();
 		}
 
 		$values = array();
@@ -147,10 +166,32 @@ class AbilityFields {
 				$values[ $attribute ] = $value;
 			}
 		}
-		if ( ! empty( $values ) ) {
-			$output['extensions'] = $values;
+		return $values;
+	}
+
+	/**
+	 * Whether a value matches its field schema. A value other than null that
+	 * does not match is logged and reported one time for each field.
+	 *
+	 * @param string $object_type Object type.
+	 * @param string $attribute   Attribute.
+	 * @param mixed  $value       Value that the get_callback returned.
+	 * @return bool
+	 */
+	private static function matches_schema( string $object_type, string $attribute, $value ): bool {
+		$valid = rest_validate_value_from_schema( $value, self::$fields[ $object_type ][ $attribute ]['schema'], $attribute );
+		if ( true === $valid ) {
+			return true;
 		}
-		return $output;
+		if ( null === $value || isset( self::$reported[ $object_type . '.' . $attribute ] ) ) {
+			return false;
+		}
+
+		self::$reported[ $object_type . '.' . $attribute ] = true;
+		$message = sprintf( 'Ability field "%s" of "%s" was left out because its value does not match its schema: %s', $attribute, $object_type, $valid->get_error_message() );
+		wc_get_logger()->error( $message, array( 'source' => 'ability-fields' ) );
+		wc_doing_it_wrong( __CLASS__ . '::register', $message, '11.3.0' );
+		return false;
 	}
 
 	/**
@@ -274,31 +315,6 @@ class AbilityFields {
 			$error->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
 		}
 		return $error;
-	}
-
-	/**
-	 * Whether a value matches its field schema. A value other than null that
-	 * does not match is logged and reported one time for each field.
-	 *
-	 * @param string $object_type Object type.
-	 * @param string $attribute   Attribute.
-	 * @param mixed  $value       Value that the get_callback returned.
-	 * @return bool
-	 */
-	private static function matches_schema( string $object_type, string $attribute, $value ): bool {
-		$valid = rest_validate_value_from_schema( $value, self::$fields[ $object_type ][ $attribute ]['schema'], $attribute );
-		if ( true === $valid ) {
-			return true;
-		}
-		if ( null === $value || isset( self::$reported[ $object_type . '.' . $attribute ] ) ) {
-			return false;
-		}
-
-		self::$reported[ $object_type . '.' . $attribute ] = true;
-		$message = sprintf( 'Ability field "%s" of "%s" was left out because its value does not match its schema: %s', $attribute, $object_type, $valid->get_error_message() );
-		wc_get_logger()->error( $message, array( 'source' => 'ability-fields' ) );
-		wc_doing_it_wrong( __CLASS__ . '::register', $message, '11.3.0' );
-		return false;
 	}
 
 	/**

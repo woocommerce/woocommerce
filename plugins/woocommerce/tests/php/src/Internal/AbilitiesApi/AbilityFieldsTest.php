@@ -683,115 +683,297 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should save nothing when a step before the save tries a side effect.
-	 * @dataProvider side_effect_provider
-	 *
-	 * @param callable $side_effect Code that a validator runs.
+	 * @testdox Should describe a product update with Core and extension fields in a dry run, and save nothing.
 	 */
-	public function test_side_effect_before_the_save_saves_nothing( callable $side_effect ): void {
-		AbilityFields::register_validator( 'product', $side_effect );
+	public function test_product_update_dry_run_describes_the_change_and_saves_nothing(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A0' );
+		$product->save();
+		$saves = new \MockAction();
+		add_action( 'woocommerce_update_product', array( $saves, 'action' ) );
 
-		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+		$summary = wp_get_ability( 'woocommerce/product-update' )->dry_run(
 			array(
 				'id'         => $product->get_id(),
 				'name'       => 'Pencil',
-				'extensions' => array( 'test_code' => 'A1' ),
+				'extensions' => array(
+					'test_code'  => 'A1',
+					'test_color' => 'red',
+				),
 			)
 		);
 		wp_cache_flush();
 		$saved = wc_get_product( $product->get_id() );
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_side_effect', $result->get_error_code() );
+		$this->assertSame( 0, $saves->get_call_count() );
 		$this->assertSame( 'Pen', $saved->get_name() );
-		$this->assertSame( '', $saved->get_meta( '_test_code' ) );
-		$this->assertFalse( get_option( 'test_side_effect' ) );
-	}
-
-	/**
-	 * Code that tries a side effect.
-	 *
-	 * @return array<string, array{0: callable}>
-	 */
-	public function side_effect_provider(): array {
-		return array(
-			'saves the product'    => array(
-				static function ( \WC_Product $product ) {
-					$product->save();
-				},
+		$this->assertSame( 'A0', $saved->get_meta( '_test_code' ) );
+		$this->assertSame( '', $saved->get_meta( '_test_color' ) );
+		$this->assertSame( 'woocommerce/product-update', $summary['ability'] );
+		$this->assertSame( 'product', $summary['object_type'] );
+		$this->assertSame( $product->get_id(), $summary['object_id'] );
+		$this->assertSame( 'Pen', $summary['object_label'] );
+		$this->assertSame(
+			array(
+				array(
+					'field'  => 'name',
+					'label'  => 'name',
+					'before' => 'Pen',
+					'after'  => 'Pencil',
+				),
+				array(
+					'field'  => 'extensions.test_code',
+					'label'  => 'Test code',
+					'before' => 'A0',
+					'after'  => 'A1',
+				),
+				array(
+					'field'  => 'extensions.test_color',
+					'label'  => 'test_color',
+					'before' => null,
+					'after'  => 'red',
+				),
 			),
-			'writes an option'     => array(
-				static function () {
-					update_option( 'test_side_effect', 'yes' );
-				},
-			),
-			'sends an email'       => array(
-				static function () {
-					wp_mail( 'jane@example.com', 'Hi', 'Hi' );
-				},
-			),
-			'makes an HTTP call'   => array(
-				static function () {
-					wp_remote_get( 'https://example.com' );
-				},
-			),
-			'throws after a write' => array(
-				static function () {
-					update_option( 'test_side_effect', 'yes' );
-					throw new \RuntimeException( 'Broken' );
-				},
-			),
+			$summary['changes']
 		);
+		$this->assertSame(
+			array(
+				'name'                  => 'Pen',
+				'extensions.test_code'  => 'A0',
+				'extensions.test_color' => null,
+			),
+			$summary['expected']
+		);
+		$this->assertSame( array(), $summary['side_effects'] );
+		$this->assertNull( $summary['undo'] );
 	}
 
 	/**
-	 * @testdox Should save nothing when a plugin writes from a hook that the order status change fires.
+	 * @testdox Should refuse a write whose expected values are outdated, and save nothing.
 	 */
-	public function test_hook_listener_that_writes_during_a_status_change_saves_nothing(): void {
+	public function test_write_with_outdated_expected_values_returns_409(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$input   = array(
+			'id'   => $product->get_id(),
+			'name' => 'Pencil',
+		);
+
+		$summary = $ability->dry_run( $input );
+		$other   = wc_get_product( $product->get_id() );
+		$other->set_name( 'Marker' );
+		$other->save();
+		$stale  = $ability->execute( array_merge( $input, array( 'expected' => $summary['expected'] ) ) );
+		$after  = wc_get_product( $product->get_id() )->get_name();
+		$fresh  = $ability->dry_run( $input );
+		$result = $ability->execute( array_merge( $input, array( 'expected' => $fresh['expected'] ) ) );
+
+		$this->assertWPError( $stale );
+		$this->assertSame( 'woocommerce_ability_stale', $stale->get_error_code() );
+		$this->assertSame( 409, $stale->get_error_data()['status'] );
+		$this->assertSame( 'Marker', $after );
+		$this->assertSame( 'Pencil', $result['product']['name'] );
+	}
+
+	/**
+	 * @testdox Should describe an order status update, its undo and what it does before the save in a dry run, and change nothing.
+	 */
+	public function test_order_status_dry_run_describes_undo_and_side_effects(): void {
 		$order = \WC_Helper_Order::create_order();
+		add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( WC()->mailer()->get_emails()['WC_Email_Customer_On_Hold_Order'], 'trigger' ), 10, 2 );
 		add_action(
 			'woocommerce_order_edit_status',
 			static function () {
 				update_option( 'test_side_effect', 'yes' );
 			}
 		);
-
-		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'cancelled',
-			)
+		$ability = wp_get_ability( 'woocommerce/order-update-status' );
+		$input   = array(
+			'id'     => $order->get_id(),
+			'status' => 'on-hold',
 		);
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_side_effect', $result->get_error_code() );
-		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
-		$this->assertFalse( get_option( 'test_side_effect' ) );
+		$summary  = $ability->dry_run( $input );
+		$dry      = array( wc_get_order( $order->get_id() )->get_status(), get_option( 'test_side_effect' ) );
+		$executed = $ability->execute( $input );
+		$undone   = wp_get_ability( $summary['undo']['ability'] )->execute( $summary['undo']['input'] );
+
+		$this->assertSame( array( 'pending', false ), $dry );
+		$this->assertSame(
+			array(
+				array(
+					'field'  => 'status',
+					'label'  => 'status',
+					'before' => 'pending',
+					'after'  => 'on-hold',
+				),
+			),
+			$summary['changes']
+		);
+		$this->assertSame(
+			array(
+				'ability' => 'woocommerce/order-update-status',
+				'input'   => array(
+					'id'       => $order->get_id(),
+					'status'   => 'pending',
+					'expected' => array( 'status' => 'on-hold' ),
+				),
+			),
+			$summary['undo']
+		);
+		$this->assertContains( 'Sends the "Order on-hold" email to the customer.', $summary['side_effects'] );
+		$this->assertContains( 'Writes to the database before the save.', $summary['side_effects'] );
+		$this->assertSame( 'on-hold', $executed['order']['status'] );
+		$this->assertSame( 'yes', get_option( 'test_side_effect' ) );
+		$this->assertSame( 'pending', $undone['order']['status'] );
 	}
 
 	/**
-	 * @testdox Should allow log and transient writes before the save.
+	 * @testdox Should report and drop an email or an HTTP request before the save in a dry run, and allow log and transient writes.
+	 * @dataProvider dry_run_side_effect_provider
+	 *
+	 * @param callable    $side_effect Code that a validator runs.
+	 * @param string|null $reported    Expected side effect, or null for none.
 	 */
-	public function test_log_and_transient_writes_are_allowed(): void {
-		AbilityFields::register_validator(
-			'product',
-			static function () {
-				set_transient( 'test_side_effect', 'yes' );
-				wc_get_logger()->info( 'Checked.', array( 'source' => 'test' ) );
-			}
-		);
+	public function test_dry_run_drops_and_reports_side_effects( callable $side_effect, ?string $reported ): void {
+		AbilityFields::register_validator( 'product', $side_effect );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$http    = new \MockAction();
+		add_action( 'http_api_debug', array( $http, 'action' ) );
+		reset_phpmailer_instance();
 
-		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+		$summary = wp_get_ability( 'woocommerce/product-update' )->dry_run(
 			array(
 				'id'   => $product->get_id(),
 				'name' => 'Pencil',
 			)
 		);
 
-		$this->assertSame( 'Pencil', $result['product']['name'] );
-		$this->assertSame( 'yes', get_transient( 'test_side_effect' ) );
+		$this->assertSame( null === $reported ? array() : array( $reported ), $summary['side_effects'] );
+		$this->assertFalse( tests_retrieve_phpmailer_instance()->get_sent() );
+		$this->assertSame( 0, $http->get_call_count() );
+	}
+
+	/**
+	 * Code that a step runs before the save.
+	 *
+	 * @return array<string, array{0: callable, 1: string|null}>
+	 */
+	public function dry_run_side_effect_provider(): array {
+		return array(
+			'email'     => array(
+				static function () {
+					wp_mail( 'jane@example.com', 'Hi', 'Hi' );
+				},
+				'Sends an email before the save.',
+			),
+			'HTTP'      => array(
+				static function () {
+					wp_remote_get( 'https://example.com/hook' );
+				},
+				'Makes an HTTP request to example.com before the save.',
+			),
+			'log'       => array(
+				static function () {
+					wc_get_logger()->info( 'Checked.', array( 'source' => 'test' ) );
+				},
+				null,
+			),
+			'transient' => array(
+				static function () {
+					set_transient( 'test_side_effect', 'yes' );
+				},
+				null,
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should return the same rejection from a dry run and a write.
+	 */
+	public function test_dry_run_rejection_matches_the_write(): void {
+		AbilityFields::register_validator(
+			'product',
+			static function () {
+				return new \WP_Error( 'test_rejected', 'Rejected.' );
+			}
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$input   = array(
+			'id'   => $product->get_id(),
+			'name' => 'Pencil',
+		);
+
+		$this->assertSame( 'test_rejected', $ability->dry_run( $input )->get_error_code() );
+		$this->assertSame( 'test_rejected', $ability->execute( $input )->get_error_code() );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should describe an order note in a dry run, and add no note.
+	 */
+	public function test_order_add_note_dry_run_describes_the_note_and_adds_none(): void {
+		$order = \WC_Helper_Order::create_order();
+		$notes = count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+
+		$private  = wp_get_ability( 'woocommerce/order-add-note' )->dry_run(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Packed',
+			)
+		);
+		$customer = wp_get_ability( 'woocommerce/order-add-note' )->dry_run(
+			array(
+				'id'            => $order->get_id(),
+				'note'          => 'Shipped',
+				'customer_note' => true,
+			)
+		);
+
+		$this->assertSame( $notes, count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) ) );
+		$this->assertSame(
+			array(
+				'ability'      => 'woocommerce/order-add-note',
+				'object_type'  => 'order',
+				'object_id'    => $order->get_id(),
+				'object_label' => null,
+				'changes'      => array(),
+				'expected'     => array(),
+				'side_effects' => array( 'Adds the private note "Packed".' ),
+				'undo'         => null,
+			),
+			$private
+		);
+		$this->assertSame( array( 'Adds the note "Shipped" and emails it to the customer.' ), $customer['side_effects'] );
+	}
+
+	/**
+	 * @testdox Should mark the abilities that have a dry run, and check input and permissions first.
+	 */
+	public function test_dry_run_is_marked_and_checks_input_and_permissions(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+
+		$invalid = $ability->dry_run(
+			array(
+				'id'      => $product->get_id(),
+				'unknown' => 'x',
+			)
+		);
+		wp_set_current_user( 0 );
+		$denied = $ability->dry_run(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		foreach ( array( 'woocommerce/product-create', 'woocommerce/product-update', 'woocommerce/order-update-status', 'woocommerce/order-add-note' ) as $name ) {
+			$this->assertTrue( wp_get_ability( $name )->get_meta()['woocommerce']['dry_run'] ?? false, $name );
+		}
+		$this->assertSame( 'ability_invalid_input', $invalid->get_error_code() );
+		$this->assertSame( 'ability_invalid_permissions', $denied->get_error_code() );
 	}
 
 	/**

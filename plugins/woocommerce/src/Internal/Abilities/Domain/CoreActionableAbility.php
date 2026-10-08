@@ -17,11 +17,13 @@ defined( 'ABSPATH' ) || exit;
 final class CoreActionableAbility extends ActionableAbility {
 
 	/**
-	 * Definition classes keyed by ability name.
+	 * Definition classes keyed by ability name. A field change extends
+	 * AbstractChangeAbility. An action describes its dry run with describe().
 	 *
-	 * @var array<string, class-string<AbstractChangeAbility>>
+	 * @var array<string, class-string>
 	 */
 	public const DEFINITIONS = array(
+		'woocommerce/order-add-note'      => OrderAddNote::class,
 		'woocommerce/order-update-status' => OrderUpdateStatus::class,
 		'woocommerce/product-create'      => ProductCreate::class,
 		'woocommerce/product-update'      => ProductUpdate::class,
@@ -78,9 +80,42 @@ final class CoreActionableAbility extends ActionableAbility {
 	}
 
 	/**
+	 * The ability call that undoes the change.
+	 *
+	 * @param object $subject Object before the change.
+	 * @param array  $input   Ability input.
+	 * @return array{ability: string, input: array}|null
+	 */
+	public function undo( $subject, array $input ): ?array {
+		return $this->definition()::undo( $subject, $input );
+	}
+
+	/**
+	 * What the save does beyond the object.
+	 *
+	 * @param object $subject Object before the change.
+	 * @param array  $input   Ability input.
+	 * @return string[]
+	 */
+	public function side_effects( $subject, array $input ): array {
+		return $this->definition()::side_effects( $subject, $input );
+	}
+
+	/**
+	 * The dry run: the steps of a field change without the save, or the description of an action.
+	 *
+	 * @param array $input Valid ability input.
+	 * @return array|\WP_Error
+	 */
+	protected function do_dry_run( array $input ) {
+		$definition = $this->definition();
+		return is_a( $definition, AbstractChangeAbility::class, true ) ? parent::do_dry_run( $input ) : $definition::describe( $input );
+	}
+
+	/**
 	 * Definition class of the ability.
 	 *
-	 * @return class-string<AbstractChangeAbility>
+	 * @return class-string
 	 */
 	private function definition(): string {
 		return self::DEFINITIONS[ $this->get_name() ];

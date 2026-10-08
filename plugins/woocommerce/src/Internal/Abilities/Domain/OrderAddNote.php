@@ -110,6 +110,56 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * Object type that the ability changes.
+	 *
+	 * @return string
+	 */
+	public static function get_object_type(): string {
+		return 'order';
+	}
+
+	/**
+	 * The dry run: the note that execute() adds, without adding it.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function describe( array $input ) {
+		$order = self::get_order_from_input( $input );
+
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		$note = isset( $input['note'] ) ? trim( wp_kses_post( (string) $input['note'] ) ) : '';
+
+		if ( '' === $note ) {
+			return new \WP_Error(
+				'woocommerce_order_note_required',
+				__( 'Order note is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return array(
+			'ability'      => self::get_name(),
+			'object_type'  => self::get_object_type(),
+			'object_id'    => $order->get_id(),
+			'object_label' => null,
+			'changes'      => array(),
+			'expected'     => array(),
+			'side_effects' => array(
+				(bool) ( $input['customer_note'] ?? false )
+					/* translators: %s: Order note. */
+					? sprintf( __( 'Adds the note "%s" and emails it to the customer.', 'woocommerce' ), $note )
+					/* translators: %s: Order note. */
+					: sprintf( __( 'Adds the private note "%s".', 'woocommerce' ), $note ),
+			),
+			'undo'         => null,
+		);
+	}
+
+	/**
 	 * Get the ability input schema.
 	 *
 	 * @return array
