@@ -63,7 +63,6 @@ class Checkout extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 
 		// A test registers a CheckoutMock block type, and the block type registry outlives a test.
 		if ( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/checkout-mock' ) ) {
@@ -137,7 +136,6 @@ class Checkout extends \WC_Unit_Test_Case {
 
 		$data_from_registry = $this->registry->get();
 		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
-		wp_delete_post( $page_id );
 	}
 
 	/**
