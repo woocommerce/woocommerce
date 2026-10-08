@@ -3,7 +3,7 @@
  */
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { queueRecordEvent } from '@woocommerce/tracks';
+import { recordEvent } from '@woocommerce/tracks';
 
 jest.mock( '@woocommerce/navigation', () => ( {
 	getNewPath: jest.fn( () => '/new-path' ),
@@ -13,7 +13,6 @@ jest.mock( '@woocommerce/navigation', () => ( {
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
-	queueRecordEvent: jest.fn(),
 } ) );
 
 // The preview modal loads its own data; these tests only care about the card.
@@ -221,7 +220,7 @@ describe( 'ProductCard sponsored label', () => {
 
 describe( 'ProductCard click tracking', () => {
 	beforeEach( () => {
-		jest.mocked( queueRecordEvent ).mockClear();
+		jest.mocked( recordEvent ).mockClear();
 	} );
 
 	function clickCard(
@@ -239,7 +238,7 @@ describe( 'ProductCard click tracking', () => {
 
 	// A click records exactly one event, and the mock is cleared before each test.
 	function cardClickEvents() {
-		return jest.mocked( queueRecordEvent ).mock.calls;
+		return jest.mocked( recordEvent ).mock.calls;
 	}
 
 	it( 'reports the badge when the card shows one', () => {
@@ -303,7 +302,7 @@ describe( 'ProductCard product preview experiment', () => {
 	const productUrl = 'https://woocommerce.com/products/test-extension/';
 
 	beforeEach( () => {
-		jest.mocked( queueRecordEvent ).mockClear();
+		jest.mocked( recordEvent ).mockClear();
 	} );
 
 	it.each( [
@@ -387,7 +386,7 @@ describe( 'ProductCard product preview experiment', () => {
 			// fireEvent returns false when the click's default action was prevented.
 			expect( fireEvent.click( link ) ).toBe( opensProductPage );
 			expect(
-				jest.mocked( queueRecordEvent ).mock.calls[ 0 ][ 1 ]
+				jest.mocked( recordEvent ).mock.calls[ 0 ][ 1 ]
 					?.preview_variation
 			).toBe( tag );
 			expect( link ).toHaveAttribute(
