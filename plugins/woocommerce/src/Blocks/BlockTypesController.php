@@ -233,13 +233,13 @@ final class BlockTypesController {
 	 * registration without affecting functionality.
 	 */
 	public function register_block_metadata() {
-		$blocks_path      = WC_ABSPATH . 'assets/client/blocks/';
-		$blocks_meta_path = $blocks_path . 'blocks-json.php';
-		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $blocks_meta_path ) ) {
+		$meta_file_path = WC_ABSPATH . 'assets/client/blocks/blocks-json.php';
+		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $meta_file_path ) ) {
 			add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10, 4 );
-
-			wp_register_block_metadata_collection( $blocks_path, $blocks_meta_path );
-
+			wp_register_block_metadata_collection(
+				WC_ABSPATH . 'assets/client/blocks/',
+				$meta_file_path
+			);
 			remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10 );
 		}
 	}
