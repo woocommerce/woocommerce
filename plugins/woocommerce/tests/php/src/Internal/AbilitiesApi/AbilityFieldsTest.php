@@ -471,6 +471,25 @@ class AbilityFieldsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should cast a value that matches the field schema to the schema type.
+	 */
+	public function test_field_value_is_cast_to_its_schema_type(): void {
+		AbilityFields::register(
+			'order',
+			'test_count',
+			array(
+				'schema'       => array( 'type' => 'integer' ),
+				'get_callback' => static fn() => '12',
+			)
+		);
+		$order = \WC_Helper_Order::create_order();
+
+		$output = AbilityFields::add_to_output( array(), 'order', $order );
+
+		$this->assertSame( 12, $output['extensions']['test_count'] );
+	}
+
+	/**
 	 * @testdox Should leave out, log and report a value that does not match the field schema, and keep the output valid.
 	 */
 	public function test_field_value_that_does_not_match_its_schema_is_left_out(): void {
