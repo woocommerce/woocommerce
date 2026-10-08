@@ -24,6 +24,7 @@ declare global {
 				string,
 				FulfillmentStatusProps
 			>;
+			local_pickup_method_ids?: string[];
 		};
 	}
 }

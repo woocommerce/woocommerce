@@ -437,6 +437,7 @@ class FulfillmentsRenderer {
 			'currency_symbols'           => get_woocommerce_currency_symbols(),
 			'fulfillment_statuses'       => FulfillmentUtils::get_fulfillment_statuses(),
 			'order_fulfillment_statuses' => FulfillmentUtils::get_order_fulfillment_statuses(),
+			'local_pickup_method_ids'    => \Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils::get_local_pickup_method_ids(),
 		);
 
 		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );

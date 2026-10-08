@@ -29,7 +29,16 @@ import ShipmentViewer from '../shipment-form/shipment-viewer';
 import ShipmentForm from '../shipment-form';
 import { ShipmentFormProvider } from '../../context/shipment-form-context';
 import MetadataViewer from '../metadata-viewer';
-import { getFulfillmentLockState } from '../../utils/fulfillment-utils';
+import {
+	getFulfillmentLockState,
+	getFulfillmentPickupLocation,
+} from '../../utils/fulfillment-utils';
+import PickupInformation from '../pickup-information';
+import {
+	PickedUpButton,
+	ReadyForPickupButton,
+} from '../action-buttons/pickup-buttons';
+import { FULFILLMENT_STATUS_READY_FOR_PICKUP } from '../../data/constants';
 import LockLabel from '../user-interface/lock-label';
 
 interface FulfillmentEditorProps {
@@ -64,6 +73,9 @@ export default function FulfillmentEditor( {
 	);
 
 	const fulfillmentLockState = getFulfillmentLockState( fulfillment );
+	const pickupLocation = getFulfillmentPickupLocation( fulfillment );
+	const isReadyForPickup =
+		fulfillment.status === FULFILLMENT_STATUS_READY_FOR_PICKUP;
 
 	// Reset error when order changes
 	useEffect( () => {
@@ -96,12 +108,15 @@ export default function FulfillmentEditor( {
 	}, [ isEditing, expanded ] );
 
 	const handleChevronClick = () => {
-		if ( isEditing ) return;
+		if ( isEditing ) {
+			return;
+		}
 		if (
 			itemsNotInAnyFulfillment.length === 0 &&
 			fulfillments.length === 1
-		)
+		) {
 			return;
+		}
 		if ( ! expanded ) {
 			onExpand();
 		} else {
@@ -177,20 +192,32 @@ export default function FulfillmentEditor( {
 							}
 						>
 							<ItemSelector editMode={ isEditing } />
-							{ isEditing && <ShipmentForm /> }
+							{ pickupLocation && (
+								<PickupInformation
+									location={ pickupLocation }
+								/>
+							) }
+							{ ! pickupLocation && isEditing && (
+								<ShipmentForm />
+							) }
+							{ ! pickupLocation && ! isEditing && (
+								<ShipmentViewer />
+							) }
 							{ ! isEditing && (
-								<>
-									<ShipmentViewer />
-									<MetadataViewer
-										fulfillment={ fulfillment }
-									/>
-								</>
+								<MetadataViewer fulfillment={ fulfillment } />
 							) }
-							{ ( ( fulfillment.is_fulfilled && isEditing ) ||
-								( ! fulfillment.is_fulfilled &&
-									! isEditing ) ) && (
-								<CustomerNotificationBox type="update" />
-							) }
+							{ pickupLocation &&
+								! fulfillment.is_fulfilled &&
+								! isReadyForPickup &&
+								! isEditing && (
+									<CustomerNotificationBox type="pickup" />
+								) }
+							{ ! pickupLocation &&
+								( ( fulfillment.is_fulfilled && isEditing ) ||
+									( ! fulfillment.is_fulfilled &&
+										! isEditing ) ) && (
+									<CustomerNotificationBox type="update" />
+								) }
 							{ fulfillmentLockState.isLocked ? (
 								<div className="woocommerce-fulfillment-item-lock-container">
 									<LockLabel
@@ -206,11 +233,30 @@ export default function FulfillmentEditor( {
 													setIsEditing( true );
 												} }
 											/>
-											{ ! fulfillment.is_fulfilled && (
-												<FulfillItemsButton
-													setError={ setError }
-												/>
-											) }
+											{ ! fulfillment.is_fulfilled &&
+												! pickupLocation && (
+													<FulfillItemsButton
+														setError={ setError }
+													/>
+												) }
+											{ ! fulfillment.is_fulfilled &&
+												pickupLocation &&
+												! isReadyForPickup && (
+													<ReadyForPickupButton
+														setError={ setError }
+													/>
+												) }
+											{ ! fulfillment.is_fulfilled &&
+												pickupLocation && (
+													<PickedUpButton
+														variant={
+															isReadyForPickup
+																? 'primary'
+																: 'secondary'
+														}
+														setError={ setError }
+													/>
+												) }
 										</>
 									) : (
 										<>
