@@ -492,9 +492,19 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$webhook->deliver( $product->get_id() );
-		$webhook->deliver( $product->get_id() );
+		// The old delivery ID came from the current second, so this only proves something when
+		// both deliveries are sent within the same second. Try again if the clock ticks over.
+		$attempts = 0;
+		do {
+			$delivery_ids = array();
+			$started      = time();
+			$webhook->deliver( $product->get_id() );
+			$webhook->deliver( $product->get_id() );
+			$same_second = time() === $started;
+			++$attempts;
+		} while ( ! $same_second && $attempts < 5 );
 
+		$this->assertTrue( $same_second, 'Both deliveries should be sent within the same second.' );
 		$this->assertCount( 2, $delivery_ids, 'Both deliveries should have been sent.' );
 		$this->assertNotSame( $delivery_ids[0], $delivery_ids[1], 'Deliveries sent in the same second must not share a delivery ID.' );
 		foreach ( $delivery_ids as $delivery_id ) {
