@@ -84,6 +84,18 @@ class WooSubscriptionsNotesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not rewrite an expired note whose Renew Subscription URL is already current.
+	 */
+	public function test_up_to_date_expired_note_is_not_rewritten(): void {
+		$this->sut->add_or_update_subscription_expired( $this->get_expired_subscription( 105 ) );
+		$action_id = $this->get_note_action( 105, 'renew-subscription' )->id;
+
+		$this->sut->add_or_update_subscription_expired( $this->get_expired_subscription( 105 ) );
+
+		$this->assertSame( $action_id, $this->get_note_action( 105, 'renew-subscription' )->id, 'An expired note with the current URL should not be rewritten' );
+	}
+
+	/**
 	 * @testdox Should leave the Renew Subscription URL empty when the subscription has no product page.
 	 */
 	public function test_expired_note_without_product_page_has_empty_action_url(): void {

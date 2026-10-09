@@ -415,6 +415,7 @@ class WooSubscriptionsNotes {
 	private static function has_action_url( Note $note, string $action_name, string $url ): bool {
 		foreach ( (array) $note->get_actions() as $action ) {
 			if ( isset( $action->name, $action->query ) && $action_name === $action->name ) {
+				// Note::add_action() stores the URL through esc_url_raw(), so compare against the same form.
 				return esc_url_raw( $url ) === $action->query;
 			}
 		}
