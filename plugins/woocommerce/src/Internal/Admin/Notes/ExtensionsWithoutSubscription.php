@@ -21,6 +21,11 @@ class ExtensionsWithoutSubscription {
 	const NOTE_NAME = 'wc-admin-extensions-without-subscription';
 
 	/**
+	 * Option holding when the note last fetched the subscription list from WooCommerce.com.
+	 */
+	const LAST_FETCH_OPTION_KEY = 'woocommerce_admin-extensions-without-subscription-last-fetch';
+
+	/**
 	 * Hook the note refresh.
 	 *
 	 * @since 11.3.0
@@ -39,7 +44,7 @@ class ExtensionsWithoutSubscription {
 			return;
 		}
 
-		$plugins = self::get_plugins();
+		$plugins = self::get_plugins( self::may_fetch() );
 
 		// Leave the note as it is while the subscription list can't be trusted.
 		if ( null === $plugins ) {
@@ -106,15 +111,48 @@ class ExtensionsWithoutSubscription {
 	}
 
 	/**
+	 * Whether this page load may fetch the subscription list from WooCommerce.com.
+	 *
+	 * The fetch blocks the page, so a connected store without a cached list gets one a day, or one
+	 * right after it connects. Any other refresh reads the cache, so it's free to run every time.
+	 *
+	 * @return bool
+	 */
+	private static function may_fetch(): bool {
+		if ( ! class_exists( 'WC_Helper' ) ) {
+			return false;
+		}
+
+		if ( ! \WC_Helper::is_site_connected() || \WC_Helper::has_cached_subscriptions() ) {
+			return true;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read only, the same signal WooSubscriptionsNotes uses.
+		if ( isset( $_GET['wc-helper-status'] ) ) {
+			return true;
+		}
+
+		$now = time();
+		if ( (int) get_option( self::LAST_FETCH_OPTION_KEY, 0 ) + DAY_IN_SECONDS > $now ) {
+			return false;
+		}
+
+		update_option( self::LAST_FETCH_OPTION_KEY, $now, false );
+
+		return true;
+	}
+
+	/**
 	 * Active WooCommerce.com extensions without a subscription, or null when that can't be known.
 	 *
+	 * @param bool $fetch Whether the subscription list may be fetched from WooCommerce.com when it isn't cached.
 	 * @return array|null
 	 */
-	private static function get_plugins(): ?array {
+	private static function get_plugins( bool $fetch = true ): ?array {
 		if ( ! class_exists( 'WC_Helper_Updater' ) ) {
 			return null;
 		}
 
-		return \WC_Helper_Updater::get_plugins_without_subscription();
+		return \WC_Helper_Updater::get_plugins_without_subscription( $fetch );
 	}
 }

@@ -45,6 +45,11 @@ class WC_Helper {
 	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
 
 	/**
+	 * Transient holding the connected user's subscriptions, see get_subscriptions().
+	 */
+	private const CACHE_KEY_SUBSCRIPTIONS = '_woocommerce_helper_subscriptions';
+
+	/**
 	 * Transient holding the last failed Helper API subscriptions response, so the
 	 * failure can be surfaced to the merchant instead of rendering as an empty
 	 * subscription list.
@@ -2101,6 +2106,17 @@ class WC_Helper {
 	}
 
 	/**
+	 * Whether the subscription list is cached, so get_subscriptions() won't call WooCommerce.com.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public static function has_cached_subscriptions(): bool {
+		return is_array( get_transient( self::CACHE_KEY_SUBSCRIPTIONS ) );
+	}
+
+	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
@@ -2108,7 +2124,7 @@ class WC_Helper {
 	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_subscriptions() {
-		$cache_key = '_woocommerce_helper_subscriptions';
+		$cache_key = self::CACHE_KEY_SUBSCRIPTIONS;
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
 			if ( is_array( $data ) ) {
@@ -3054,7 +3070,7 @@ class WC_Helper {
 	 * @return void
 	 */
 	public static function _flush_subscriptions_cache() {
-		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( self::CACHE_KEY_SUBSCRIPTIONS );
 	}
 
 	/**

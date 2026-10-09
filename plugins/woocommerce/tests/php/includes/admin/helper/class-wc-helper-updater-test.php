@@ -2377,6 +2377,44 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Plugins without a subscription is null when fetching is not allowed and the list isn't cached.
+	 */
+	public function test_plugins_without_subscription_is_null_without_cache_when_fetching_is_not_allowed(): void {
+		$this->mock_active_woo_plugin();
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'site_id'             => 45,
+				'access_token'        => 'token',
+				'access_token_secret' => 'secret',
+			)
+		);
+		delete_transient( '_woocommerce_helper_subscriptions' );
+		$fail = function () {
+			$this->fail( 'No request should be made when fetching is not allowed.' );
+		};
+		add_filter( 'pre_http_request', $fail );
+
+		try {
+			$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription( false ), 'Without the list the answer is unknown.' );
+		} finally {
+			remove_filter( 'pre_http_request', $fail );
+		}
+	}
+
+	/**
+	 * @testdox Plugins without a subscription reads the cached list when fetching is not allowed.
+	 */
+	public function test_plugins_without_subscription_reads_the_cache_when_fetching_is_not_allowed(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array() );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription( false );
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A cached list answers without a request.' );
+	}
+
+	/**
 	 * Makes WC_Helper::get_local_woo_plugins() report a single active Woo plugin.
 	 *
 	 * @return string The plugin file name.

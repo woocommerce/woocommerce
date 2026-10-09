@@ -509,13 +509,16 @@ class WC_Helper_Updater {
 	 *
 	 * A connected store uses the same check as the Plugins screen "Subscribe" notice. A store that
 	 * isn't connected has no subscription for any of them. Returns null when an active plugin needs
-	 * checking but a connected store's last subscriptions fetch failed (for example, rate limited).
+	 * checking but the subscription list is unknown: the last fetch failed (for example, rate limited),
+	 * or it isn't cached and $fetch is false.
 	 *
 	 * @since 11.3.0
 	 *
+	 * @param bool $fetch Whether to fetch the subscription list from WooCommerce.com when it isn't cached.
+	 *                    False keeps this call local; a page that can't afford to block passes it.
 	 * @return array|null Plugin data from WC_Helper::get_local_woo_plugins(), keyed by plugin file.
 	 */
-	public static function get_plugins_without_subscription(): ?array {
+	public static function get_plugins_without_subscription( bool $fetch = true ): ?array {
 		$plugins = array_filter(
 			WC_Helper::get_local_woo_plugins(),
 			static function ( $plugin_file ) {
@@ -527,6 +530,10 @@ class WC_Helper_Updater {
 
 		if ( empty( $plugins ) || ! WC_Helper::is_site_connected() ) {
 			return $plugins;
+		}
+
+		if ( ! $fetch && ! WC_Helper::has_cached_subscriptions() ) {
+			return null;
 		}
 
 		$plugins = array_filter(

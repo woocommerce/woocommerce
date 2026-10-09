@@ -169,6 +169,19 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_cached_subscriptions is true only while a subscription list is cached.
+	 */
+	public function test_has_cached_subscriptions_reflects_the_transient(): void {
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'No transient means no cached list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', 'corrupted_string_data', HOUR_IN_SECONDS );
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'A corrupted transient is not a usable list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', array(), HOUR_IN_SECONDS );
+		$this->assertTrue( WC_Helper::has_cached_subscriptions(), 'An empty list is still a cached list.' );
+	}
+
+	/**
 	 * @testdox get_subscriptions should return valid cached array without modification.
 	 */
 	public function test_get_subscriptions_returns_valid_cached_array(): void {
