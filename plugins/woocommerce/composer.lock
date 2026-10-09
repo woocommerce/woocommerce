@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d04c0430452f13dd4fe7bc11bce08ce8",
+    "content-hash": "0bf669ed0ac3006265cec84e601d50c4",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1399,16 +1399,16 @@
         },
         {
             "name": "wordpress/mcp-adapter",
-            "version": "v0.3.0",
+            "version": "v0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/mcp-adapter.git",
-                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63"
+                "reference": "1a0f9ab868e34b4375be42e873f60765e6632505"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/653ca8d95180b25809b1a1dc489d8305ec5beb63",
-                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63",
+                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/1a0f9ab868e34b4375be42e873f60765e6632505",
+                "reference": "1a0f9ab868e34b4375be42e873f60765e6632505",
                 "shasum": ""
             },
             "require": {
@@ -1489,7 +1489,7 @@
                 "issues": "https://github.com/wordpress/mcp-adapter/issues",
                 "source": "https://github.com/wordpress/mcp-adapter"
             },
-            "time": "2025-11-06T14:56:51+00:00"
+            "time": "2025-12-09T06:56:51+00:00"
         }
     ],
     "packages-dev": [
