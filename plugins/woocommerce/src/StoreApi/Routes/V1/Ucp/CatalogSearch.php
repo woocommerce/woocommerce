@@ -318,6 +318,8 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 */
 	private function store_api_request( array $params ): \WP_REST_Request {
 		/**
+		 * Typed for static analysis; WP_REST_Request is generic in the stubs.
+		 *
 		 * @var \WP_REST_Request<array<string, mixed>> $request
 		 */
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
