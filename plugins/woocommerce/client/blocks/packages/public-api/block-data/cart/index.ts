@@ -77,15 +77,12 @@ window.addEventListener( 'load', () => {
 // Pushes changes whenever the store is updated.
 subscribe( pushChanges, store );
 
-// Emits event to sync iAPI store.
-let previousCart: object | null = null;
+// Emits event to sync iAPI store. Comparing against the initial cart means the first cart change is synced too, for
+// example an extension cart update on a Mini-Cart page where nothing has read the cart yet.
+let previousCart: object = config.initialState.cartData;
 subscribe( () => {
 	const cartData = select( STORE_KEY ).getCartData();
-	if (
-		getTriggerStoreSyncEvent() === true &&
-		previousCart !== null &&
-		previousCart !== cartData
-	) {
+	if ( getTriggerStoreSyncEvent() === true && previousCart !== cartData ) {
 		window.dispatchEvent(
 			// Question: What are the usual names for WooCommerce events?
 			new CustomEvent( 'wc-blocks_store_sync_required', {
