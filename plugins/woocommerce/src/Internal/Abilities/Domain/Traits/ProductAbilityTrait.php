@@ -815,7 +815,7 @@ trait ProductAbilityTrait {
 			'date_modified_gmt' => wc_rest_prepare_date_response( $product->get_date_modified() ),
 		);
 
-		return AbilityExtensions::add_to_output( $data, 'product', $product );
+		return AbilityExtensions::add_fields_to_object( $data, 'product', $product );
 	}
 
 	/**
@@ -824,7 +824,7 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_output_schema(): array {
-		return AbilityExtensions::add_to_schema(
+		return AbilityExtensions::add_fields_schema(
 			array(
 				'type'                 => 'object',
 				'properties'           => array(
