@@ -55,6 +55,9 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		};
 		add_action( 'woocommerce_before_cart_emptied', $cart_emptied_callback );
 
+		WC()->shipping()->load_shipping_methods();
+		$this->assertIsArray( WC()->shipping()->shipping_methods, 'The shipping methods should be loaded.' );
+
 		// What tearDown() runs before handing off to the parent.
 		$this->clear_wc_singleton_state();
 		remove_action( 'woocommerce_before_cart_emptied', $cart_emptied_callback );
@@ -66,6 +69,7 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( WC()->cart->is_empty(), 'The cart should have been emptied.' );
 		$this->assertSame( 'shortcode', WC()->cart->cart_context, 'The cart context should be back to shortcode.' );
 		$this->assertSame( 0, wc_notice_count(), 'The notice queue should have been cleared.' );
+		$this->assertNull( WC()->shipping()->shipping_methods, 'The loaded shipping methods should have been dropped.' );
 		$this->assertFalse( $clear_persistent_cart, 'Teardown should leave persistent cart cleanup to the database rollback.' );
 		$this->assertSame( $shipping_at_setup, WC()->customer->get_shipping( 'edit' ), 'The customer shipping address should be back to what it was at setUp().' );
 		$this->assertNotSame(

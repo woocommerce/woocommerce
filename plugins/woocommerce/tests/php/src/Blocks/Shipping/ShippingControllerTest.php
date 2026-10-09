@@ -89,10 +89,8 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 
 		try {
 			$woocommerce = $this->backup_wc;
-			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
-			// and register a lone pickup method on the shared WC_Shipping. Undo both.
+			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton.
 			unset( WC()->shipping );
-			WC()->shipping()->unregister_shipping_methods();
 		} finally {
 			parent::tearDown();
 		}

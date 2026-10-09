@@ -30,13 +30,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	private ShippingMethodSchema $schema;
 
 	/**
-	 * Created shipping zones for cleanup.
-	 *
-	 * @var array
-	 */
-	private array $created_zones = array();
-
-	/**
 	 * Created user ID for testing purposes.
 	 *
 	 * @var int
@@ -73,23 +66,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Cleanup after test.
-	 */
-	public function tearDown(): void {
-		// Clean up created zones.
-		foreach ( $this->created_zones as $zone ) {
-			$zone->delete();
-		}
-		$this->created_zones = array();
-
-		// A test loads a custom method into the shared WC_Shipping list. The hook restore drops
-		// its filter but not the loaded list, so reset the list to load again on next use.
-		WC()->shipping()->unregister_shipping_methods();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Cleanup after class.
 	 */
 	public static function tearDownAfterClass(): void {
@@ -112,8 +88,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$zone->set_zone_name( $name );
 		$zone->set_locations( $locations );
 		$zone->save();
-
-		$this->created_zones[] = $zone;
 
 		return $zone;
 	}
