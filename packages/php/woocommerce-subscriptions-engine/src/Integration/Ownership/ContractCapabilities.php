@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Maps the contract capabilities: the contract's customer needs `read`, anyone else
  * `manage_woocommerce`. Checked as `current_user_can( $capability, $contract )` with a
- * `ContractView`; anything else is refused. Extensions adjust each one through the standard
- * `map_meta_cap` / `user_has_cap` filters.
+ * `ContractView`; anything else is refused. The mapping runs first (priority 0), so extensions
+ * adjust each capability with `map_meta_cap` at the default priority, or with `user_has_cap`.
  */
 final class ContractCapabilities {
 
@@ -33,10 +33,10 @@ final class ContractCapabilities {
 	public const MANAGE = 'manage_subscription_contract';
 
 	/**
-	 * Hook the mapping.
+	 * Hook the mapping ahead of other `map_meta_cap` filters, so theirs build on it.
 	 */
 	public static function register_hooks(): void {
-		add_filter( 'map_meta_cap', array( self::class, 'map_meta_cap' ), 10, 4 );
+		add_filter( 'map_meta_cap', array( self::class, 'map_meta_cap' ), 0, 4 );
 	}
 
 	/**

@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities
@@ -56,6 +57,29 @@ class ContractCapabilitiesTest extends EngineIntegrationTestCase {
 
 		$this->assertFalse( user_can( $administrator_id, 'manage_subscription_contract', $contract->get_id() ) );
 		$this->assertFalse( user_can( $administrator_id, 'manage_subscription_contract' ) );
+	}
+
+	/**
+	 * An extension's `map_meta_cap` filter at the default priority builds on the mapping, whichever
+	 * was hooked first.
+	 */
+	public function test_extensions_override_the_mapping_at_the_default_priority(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$deny_owner  = static function ( $caps, $cap ) {
+			return 'manage_subscription_contract' === $cap && array( 'read' ) === $caps ? array( 'do_not_allow' ) : $caps;
+		};
+
+		remove_filter( 'map_meta_cap', array( ContractCapabilities::class, 'map_meta_cap' ), 0 );
+		add_filter( 'map_meta_cap', $deny_owner, 10, 2 );
+		ContractCapabilities::register_hooks();
+
+		try {
+			$this->assertFalse( user_can( $customer_id, 'manage_subscription_contract', $contract ) );
+			$this->assertTrue( user_can( $customer_id, 'read_subscription_contract', $contract ) );
+		} finally {
+			remove_filter( 'map_meta_cap', $deny_owner, 10 );
+		}
 	}
 
 	/**

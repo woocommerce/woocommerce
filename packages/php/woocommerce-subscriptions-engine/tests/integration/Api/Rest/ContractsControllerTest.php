@@ -221,7 +221,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * The customer preset lets the contract's customer run the action: the callback gets the
+	 * `manage_subscription_contract` lets the contract's customer run the action: the callback gets the
 	 * contract and the validated args, and the response is the resulting id and status.
 	 */
 	public function test_customer_runs_an_action_on_their_contract(): void {
