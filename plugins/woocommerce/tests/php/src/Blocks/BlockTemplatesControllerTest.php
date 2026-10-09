@@ -208,7 +208,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 				'tagName' => 'div',
 			),
 		);
-		$result = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
+		$result       = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
 
 		remove_filter( 'render_block', $filter, 10 );
 
