@@ -165,7 +165,9 @@ class BlockPatterns {
 		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
 
 		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
-			$is_path_modified = (int) ( $pattern_data['timestamp'] ?? null ) !== (int) @filemtime( $this->patterns_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
+			// If cluster node provisioned individually (not a shared mount), the last one updated with refresh the transient.
+			// If current node lags behind update shortly, it shouldn't update the transient - picking the lead-updated version.
+			$is_path_modified = (int) @filemtime( $this->patterns_path ) > (int) ( $pattern_data['timestamp'] ?? 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
 			if ( ! $is_path_modified ) {
 				return $pattern_data['patterns'];
 			}
