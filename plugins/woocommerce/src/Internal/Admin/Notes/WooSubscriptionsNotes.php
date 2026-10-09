@@ -356,7 +356,7 @@ class WooSubscriptionsNotes {
 		$note = $this->find_note_for_product_id( $product_id );
 		if ( $note ) {
 			$note_content_data = $note->get_content_data();
-			if ( $note_content_data->expired && $this->has_action_url( $note, 'renew-subscription', $renew_url ) ) {
+			if ( $note_content_data->expired && self::has_action_url( $note, 'renew-subscription', $renew_url ) ) {
 				// We've already got a full fledged expired note for this. Bail.
 				// Expired notes' content don't change with time.
 				return;
@@ -412,7 +412,7 @@ class WooSubscriptionsNotes {
 	 * @param string $url         The expected action URL.
 	 * @return bool
 	 */
-	private function has_action_url( Note $note, string $action_name, string $url ): bool {
+	private static function has_action_url( Note $note, string $action_name, string $url ): bool {
 		foreach ( (array) $note->get_actions() as $action ) {
 			if ( isset( $action->name, $action->query ) && $action_name === $action->name ) {
 				return esc_url_raw( $url ) === $action->query;
