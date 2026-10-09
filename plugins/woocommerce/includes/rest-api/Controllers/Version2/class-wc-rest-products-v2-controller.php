@@ -1675,6 +1675,91 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Save an object data.
+	 *
+	 * Extends the parent to keep variations in sync when a variable product is moved
+	 * into or out of the trash through a status update.
+	 *
+	 * @since 11.3.0
+	 * @param WP_REST_Request<array<string, mixed>> $request  Full details about the request.
+	 * @param bool                                  $creating If is creating a new object.
+	 * @return WC_Data|WP_Error
+	 */
+	protected function save_object( $request, $creating = false ) {
+		$previous_status = null;
+
+		if ( ! $creating && isset( $request['status'] ) ) {
+			$existing_product = $this->get_object( (int) $request['id'] );
+
+			if ( $existing_product instanceof WC_Product_Variable && 0 !== $existing_product->get_id() ) {
+				$previous_status = $existing_product->get_status( 'edit' );
+			}
+		}
+
+		$object = parent::save_object( $request, $creating );
+
+		if ( is_wp_error( $object ) ) {
+			return $object;
+		}
+
+		$this->maybe_sync_variable_product_trash_status( $object, $previous_status );
+
+		return $object;
+	}
+
+	/**
+	 * Sync trash state when a variable product status update enters or leaves trash.
+	 *
+	 * The parent status is written via wp_update_post(), which neither records the trash
+	 * bookkeeping meta nor cascades to variations the way wp_trash_post() does. Mirror that
+	 * behavior here so the parent and its variations are purged and restored together.
+	 *
+	 * @param WC_Data     $product         Product object.
+	 * @param string|null $previous_status Product status before the REST update.
+	 * @return void
+	 */
+	private function maybe_sync_variable_product_trash_status( $product, $previous_status ): void {
+		if ( null === $previous_status || ! $product instanceof WC_Product_Variable ) {
+			return;
+		}
+
+		$current_status = $product->get_status( 'edit' );
+
+		if ( $previous_status === $current_status ) {
+			return;
+		}
+
+		$product_id = $product->get_id();
+
+		/**
+		 * Variable product data store.
+		 *
+		 * @var WC_Product_Variable_Data_Store_Interface $data_store
+		 */
+		$data_store = WC_Data_Store::load( 'product-variable' );
+
+		if ( ProductStatus::TRASH === $current_status ) {
+			// With the trash disabled, wp_trash_post() permanently deletes posts; never destroy variations on a status update.
+			if ( ! EMPTY_TRASH_DAYS ) {
+				return;
+			}
+
+			add_post_meta( $product_id, '_wp_trash_meta_status', $previous_status, true );
+			add_post_meta( $product_id, '_wp_trash_meta_time', time(), true );
+
+			$data_store->delete_variations( $product_id, false );
+			return;
+		}
+
+		if ( ProductStatus::TRASH === $previous_status ) {
+			delete_post_meta( $product_id, '_wp_trash_meta_status' );
+			delete_post_meta( $product_id, '_wp_trash_meta_time' );
+
+			$data_store->untrash_variations( $product_id );
+		}
+	}
+
+	/**
 	 * Clear caches here so in sync with any new variations/children.
 	 *
 	 * @param WC_Data $object Object data.
