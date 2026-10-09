@@ -819,9 +819,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			$hpos_order->add_meta_data( $meta->key, $meta->value );
 		}
 
-		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
-		$hpos_order->save_meta_data();
-		remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		$skip_save = fn() => false;
+		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $skip_save );
+		try {
+			$hpos_order->save_meta_data();
+		} finally {
+			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $skip_save );
+		}
 
 		$db_rows = $this->get_db_rows_for_order( $hpos_order, 'update', true );
 		foreach ( $db_rows as $db_update ) {
@@ -2959,7 +2963,16 @@ FROM $order_meta_table
 			$order->delete_meta_data( '_wp_trash_meta_status' );
 			$order->delete_meta_data( '_wp_trash_meta_time' );
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
-			$order->save_meta_data();
+
+			// The order was just saved. If the clock has moved on to a new second, a meta change triggers another
+			// save() that fires 'woocommerce_update_order', which a restore must not do.
+			$skip_save = fn() => false;
+			add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $skip_save );
+			try {
+				$order->save_meta_data();
+			} finally {
+				remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $skip_save );
+			}
 
 			return true;
 		}
