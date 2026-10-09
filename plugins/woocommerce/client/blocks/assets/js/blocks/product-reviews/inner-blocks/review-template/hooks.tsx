@@ -115,7 +115,7 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 		defaultCommentsPage: defaultPage,
 	} = useSelect( ( select ) => {
 		const { getSettings } = select( blockEditorStore ) as unknown as {
-			getSettings(): {
+			getSettings: () => {
 				// eslint-disable-next-line @typescript-eslint/naming-convention
 				__experimentalDiscussionSettings: {
 					pageComments: boolean;
@@ -153,7 +153,7 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 					post: postId,
 					per_page: perPage,
 					page,
-			  }
+				}
 			: null;
 	}, [ page, queryArgs, postId, perPage ] );
 };
@@ -176,7 +176,7 @@ export const useCommentTree = (
 					children: Array.isArray( children )
 						? children.map( ( child ) => ( {
 								commentId: child.id,
-						  } ) )
+							} ) )
 						: [],
 				};
 			}

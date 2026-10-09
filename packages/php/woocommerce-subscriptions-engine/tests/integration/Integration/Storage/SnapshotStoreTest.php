@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore;
 
@@ -78,10 +78,10 @@ class SnapshotStoreTest extends EngineIntegrationTestCase {
 
 		$row = $this->snapshot_row( $id );
 		$this->assertNotNull( $row );
-		$this->assertSame( '100', ScalarCoercion::coerce_string( $row['contract_id'] ?? null ) );
+		$this->assertSame( '100', Coercion::coerce_string( $row['contract_id'] ?? null ) );
 		$this->assertSame( SnapshotStore::TYPE_PLAN, $row['snapshot_type'] );
-		$this->assertSame( '7', ScalarCoercion::coerce_string( $row['parent_id'] ?? null ) );
-		$this->assertSame( '2', ScalarCoercion::coerce_string( $row['schema_version'] ?? null ) );
+		$this->assertSame( '7', Coercion::coerce_string( $row['parent_id'] ?? null ) );
+		$this->assertSame( '2', Coercion::coerce_string( $row['schema_version'] ?? null ) );
 	}
 
 	/**
@@ -109,7 +109,7 @@ class SnapshotStoreTest extends EngineIntegrationTestCase {
 		$row = $this->snapshot_row( $id );
 
 		$this->assertNotNull( $row );
-		$this->assertSame( $payload, json_decode( ScalarCoercion::coerce_string( $row['payload'] ?? null ), true ) );
+		$this->assertSame( $payload, json_decode( Coercion::coerce_string( $row['payload'] ?? null ), true ) );
 	}
 
 	/**
