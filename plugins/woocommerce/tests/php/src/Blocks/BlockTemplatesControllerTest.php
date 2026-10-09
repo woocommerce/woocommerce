@@ -197,9 +197,9 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		$this->create_template_part( 'test-filtered-part', BlockTemplateUtils::PLUGIN_SLUG );
 		$this->flush_block_template_caches();
 
-		$block_filter = static fn( $block ) => array_merge_recursive( $block, ( 'core/template-part' === ( $block['blockName'] ?? null ) ? array( 'attrs' => array( 'className' => 'injected-by-filter' ) ) : array() )  );
-		add_filter( 'render_block_data', $block_filter, 10, 1 );
+		$block_filter  = static fn( $block ) => array_merge_recursive( $block, ( 'core/template-part' === ( $block['blockName'] ?? null ) ? array( 'attrs' => array( 'className' => 'injected-by-filter' ) ) : array() ) );
 		$output_filter = static fn( $content, $block ) => $content . ( 'core/template-part' === ( $block['blockName'] ?? null ) ? '<!-- filtered -->' : '' );
+		add_filter( 'render_block_data', $block_filter, 10, 1 );
 		add_filter( 'render_block', $output_filter, 10, 2 );
 		add_filter( 'render_block_core/template-part', $output_filter, 10, 2 );
 
