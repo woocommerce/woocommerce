@@ -56,6 +56,13 @@ class WC_Shipping {
 	private $shipping_packages_filter_cache_key = null;
 
 	/**
+	 * Last filtered shipping packages for cache-hit reuse.
+	 *
+	 * @var array
+	 */
+	private $shipping_packages_filter_cache = array();
+
+	/**
 	 * The single instance of the class
 	 *
 	 * @var WC_Shipping
@@ -260,16 +267,17 @@ class WC_Shipping {
 	 * @return array Array of calculated packages.
 	 */
 	public function calculate_shipping( $packages = array() ) {
+		$this->packages = array();
+
 		if ( ! $this->enabled || empty( $packages ) ) {
-			$this->packages                           = array();
 			$this->shipping_packages_filter_cache_key = null;
+			$this->shipping_packages_filter_cache     = array();
 			return $this->packages;
 		}
 
 		// Calculate costs for passed packages.
-		$calculated_packages = array();
 		foreach ( $packages as $package_key => $package ) {
-			$calculated_packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
+			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
 		}
 
 		/**
@@ -283,15 +291,16 @@ class WC_Shipping {
 		 * @param bool  $enabled  Whether to cache the filtered packages. Default false.
 		 * @param array $packages The calculated packages before filtering.
 		 */
-		$cache_enabled = 'yes' !== get_option( 'woocommerce_shipping_debug_mode', 'no' ) && (bool) apply_filters( 'woocommerce_shipping_packages_cache_enabled', false, $calculated_packages );
+		$cache_enabled = 'yes' !== get_option( 'woocommerce_shipping_debug_mode', 'no' ) && (bool) apply_filters( 'woocommerce_shipping_packages_cache_enabled', false, $this->packages );
 		$cache_key     = null;
 
 		if ( $cache_enabled ) {
-			$encoded_packages = wp_json_encode( $calculated_packages );
+			$encoded_packages = wp_json_encode( $this->packages );
 			$cache_key        = false === $encoded_packages ? null : md5( $encoded_packages );
 		}
 
 		if ( null !== $cache_key && $cache_key === $this->shipping_packages_filter_cache_key ) {
+			$this->packages = $this->shipping_packages_filter_cache;
 			return $this->packages;
 		}
 
@@ -306,9 +315,10 @@ class WC_Shipping {
 		 *
 		 * @param array $packages The array of packages after shipping costs are calculated.
 		 */
-		$this->packages = array_filter( (array) apply_filters( 'woocommerce_shipping_packages', $calculated_packages ) );
+		$this->packages = array_filter( (array) apply_filters( 'woocommerce_shipping_packages', $this->packages ) );
 
 		$this->shipping_packages_filter_cache_key = $cache_key;
+		$this->shipping_packages_filter_cache     = $this->packages;
 
 		return $this->packages;
 	}
@@ -501,6 +511,7 @@ class WC_Shipping {
 		unset( WC()->session->chosen_shipping_methods );
 		$this->packages                           = array();
 		$this->shipping_packages_filter_cache_key = null;
+		$this->shipping_packages_filter_cache     = array();
 	}
 
 	/**

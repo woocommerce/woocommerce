@@ -382,6 +382,44 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Package calculation exposes the packages completed so far through get_packages().
+	 */
+	public function test_calculate_shipping_exposes_in_progress_packages(): void {
+		$observed_packages = array();
+		$packages          = array(
+			'first'  => array(
+				'package_id' => 'first',
+				'rates'      => array(),
+			),
+			'second' => array(
+				'package_id' => 'second',
+				'rates'      => array(),
+			),
+		);
+		$this->sut         = $this->getMockBuilder( WC_Shipping::class )
+			->onlyMethods( array( 'calculate_shipping_for_package' ) )
+			->getMock();
+		$this->sut->method( 'calculate_shipping_for_package' )
+			->willReturnCallback(
+				function ( $package ) use ( &$observed_packages ) {
+					$observed_packages[] = $this->sut->get_packages();
+					return $package;
+				}
+			);
+
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame(
+			array(
+				array(),
+				array( 'first' => $packages['first'] ),
+			),
+			$observed_packages,
+			'Callbacks should see only packages completed before the current package.'
+		);
+	}
+
+	/**
 	 * @testdox The shipping packages filter result is memoized when caching is explicitly enabled.
 	 */
 	public function test_calculate_shipping_memoizes_packages_filter_when_enabled(): void {
