@@ -2,10 +2,8 @@
  * @jest-environment jest-fixed-jsdom
  */
 
-// Apostrophe-bearing coupon fixtures. `billing_email` is the field from the
-// original report, and the coupon endpoints post it from the checkout page.
-const COUPON_CODE = "SAVE'10";
-const BILLING_EMAIL = "o'brien@example.com";
+const COUPON_CODE = 'SAVE10';
+const BILLING_EMAIL = 'shopper@example.com';
 
 describe( 'createCheckoutPlaceOrderApi', () => {
 	let $allNotices;
@@ -37,11 +35,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		capturedApi = null;
 		capturedAjaxRequests = [];
 		serializedCheckoutData =
-			"billing_email=shopper'o%40example.test" +
-			'&company=Rock+%26+Roll' +
-			'&items%5B%5D=one' +
-			"&delivery'note=Recipient's+door" +
-			'&reference=already%27encoded';
+			'billing_email=shopper%40example.com&company=Rock+%26+Roll';
 		let hiddenInvalidCount = 0;
 		setHiddenInvalidCount = ( count ) => {
 			hiddenInvalidCount = count;
@@ -268,15 +262,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			entry.handler.call( element, { preventDefault: jest.fn() } );
 		};
 
-		// update_order_review sends these as siblings of post_data, so they have
-		// to carry apostrophes for the test to prove the whole body is encoded.
+		// update_order_review reads these as siblings of post_data. Country and
+		// state are left out, as if removed with woocommerce_billing_fields.
 		const addressFieldValues = {
-			'#billing_country': 'US',
-			'#billing_state': "O'State",
 			':input#billing_postcode': '12345',
-			'#billing_city': "O'Fallon",
-			':input#billing_address_1': "123 O'Brien Ave",
-			':input#billing_address_2': "Apt O'2",
+			'#billing_city': 'Springfield',
+			':input#billing_address_1': '123 Main St',
 		};
 
 		// The coupon form is bound directly at init(), so it needs a stable mock
@@ -374,31 +365,6 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		jQueryMock.ajax = jest.fn( ( options ) => {
 			capturedAjaxRequests.push( options );
 			return { abort: jest.fn() };
-		} );
-		jQueryMock.param = jest.fn( ( object ) => {
-			const parts = [];
-			const add = ( key, value ) => {
-				parts.push(
-					encodeURIComponent( key ) +
-						'=' +
-						encodeURIComponent(
-							value === null || value === undefined ? '' : value
-						)
-				);
-			};
-			const buildParams = ( prefix, value ) => {
-				if ( value !== null && typeof value === 'object' ) {
-					Object.keys( value ).forEach( ( key ) =>
-						buildParams( prefix + '[' + key + ']', value[ key ] )
-					);
-					return;
-				}
-				add( prefix, value );
-			};
-			Object.keys( object ).forEach( ( key ) =>
-				buildParams( key, object[ key ] )
-			);
-			return parts.join( '&' ).split( '%20' ).join( '+' );
 		} );
 		jQueryMock.ajaxSetup = jest.fn();
 		jQueryMock.isEmptyObject = jest.fn( ( value ) => {
@@ -530,7 +496,9 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		} );
 	} );
 
-	describe( 'Checkout form serialization', () => {
+	// Request bodies keep the 11.1 shape: data objects for the AJAX endpoints, so
+	// $.ajax() drops undefined (removed) fields and prefilters see an object.
+	describe( 'Checkout request data', () => {
 		beforeEach( () => {
 			jest.useFakeTimers();
 		} );
@@ -540,14 +508,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			jest.useRealTimers();
 		} );
 
-		const expectedSerializedData =
-			'billing_email=shopper%27o%40example.test' +
-			'&company=Rock+%26+Roll' +
-			'&items%5B%5D=one' +
-			'&delivery%27note=Recipient%27s+door' +
-			'&reference=already%27encoded';
-
-		test( 'should encode apostrophes in update order review data', () => {
+		test( 'should send update order review data as an object', () => {
 			mockBody.trigger( 'update_checkout', [
 				{ update_shipping_method: false },
 			] );
@@ -558,42 +519,34 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 
 			expect( request ).toBeDefined();
-			expect( request.data ).not.toContain( "'" );
-
-			// Address fields travel outside post_data and must be encoded too.
-			expect( request.data ).toContain( 'city=O%27Fallon' );
-			expect( request.data ).toContain( 'address=123+O%27Brien+Ave' );
-			expect( request.data ).toContain( 'state=O%27State' );
-
-			// The whole body is encoded, so post_data survives the outer layer
-			// byte-for-byte and raw-string consumers see what serialize() produced.
-			const postData = new URLSearchParams( request.data ).get(
-				'post_data'
+			expect( typeof request.data ).toBe( 'object' );
+			expect( request.data ).toEqual(
+				expect.objectContaining( {
+					city: 'Springfield',
+					post_data: serializedCheckoutData,
+				} )
 			);
-			expect( postData ).toBe( serializedCheckoutData );
+			expect( request.data.country ).toBeUndefined();
+			expect( request.data.state ).toBeUndefined();
 		} );
 
-		test( 'should encode apostrophes in final checkout data', () => {
+		test( 'should send the serialized form when placing an order', () => {
 			const submitRegistration = $form.on.mock.calls.find(
 				( call ) => call[ 0 ] === 'submit'
 			);
 			expect( submitRegistration ).toBeDefined();
 
 			submitRegistration[ 1 ].call( $form );
+
 			const request = capturedAjaxRequests.find(
 				( options ) => options.url === '/?wc-ajax=checkout'
 			);
 
 			expect( request ).toBeDefined();
-			expect( request.data ).toBe( expectedSerializedData );
+			expect( request.data ).toBe( serializedCheckoutData );
 		} );
-	} );
 
-	// The coupon endpoints are the fourth and third of the four request bodies
-	// routed through encodeApostrophes(). No fake timers here: neither handler
-	// schedules one unless its success callback runs, which these never do.
-	describe( 'Coupon request serialization', () => {
-		test( 'should encode apostrophes in apply coupon data', () => {
+		test( 'should send apply coupon data as an object', () => {
 			const submitRegistration = $couponForm.on.mock.calls.find(
 				( call ) => call[ 0 ] === 'submit'
 			);
@@ -606,14 +559,15 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 
 			expect( request ).toBeDefined();
-			expect( request.data ).not.toContain( "'" );
-
-			const body = new URLSearchParams( request.data );
-			expect( body.get( 'coupon_code' ) ).toBe( COUPON_CODE );
-			expect( body.get( 'billing_email' ) ).toBe( BILLING_EMAIL );
+			expect( request.data ).toEqual(
+				expect.objectContaining( {
+					coupon_code: COUPON_CODE,
+					billing_email: BILLING_EMAIL,
+				} )
+			);
 		} );
 
-		test( 'should encode apostrophes in remove coupon data', () => {
+		test( 'should send remove coupon data as an object', () => {
 			triggerDelegatedBodyEvent(
 				'click',
 				'.woocommerce-remove-coupon',
@@ -625,12 +579,12 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 
 			expect( request ).toBeDefined();
-			expect( request.data ).not.toContain( "'" );
-			expect( new URLSearchParams( request.data ).get( 'coupon' ) ).toBe(
-				COUPON_CODE
+			expect( request.data ).toEqual(
+				expect.objectContaining( { coupon: COUPON_CODE } )
 			);
 		} );
 	} );
+
 	// update_order_review keeps `result` as the legacy "a notice was rendered" signal, so
 	// notices are rendered for every result and only `has_errors` clears the existing ones,
 	// revalidates the form fields, and scrolls. Responses without the flag fall back to `result`.

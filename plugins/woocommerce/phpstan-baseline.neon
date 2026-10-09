@@ -10273,18 +10273,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Class WP_Error referenced with incorrect case\: WP_ERROR\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -16731,13 +16719,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
@@ -31510,12 +31498,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks-footer-pixel.php
 
 		-
-			message: '#^Binary operation "\." between array\|string and ''\://'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/tracks/class-wc-tracks.php
-
-		-
 			message: '#^Method WC_Tracks\:\:track_woocommerce_allow_tracking_toggled\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -35124,7 +35106,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -49900,12 +49882,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50340,18 +50316,6 @@ parameters:
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
-			message: '#^Static property Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:\$cart is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/Blocks/BlockTypes/ProductButton.php
 
@@ -51719,12 +51683,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$dimensions of function wc_format_dimensions expects array, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
@@ -62449,12 +62407,6 @@ parameters:
 			path: src/Internal/ProductFilters/QueryClauses.php
 
 		-
-			message: '#^Variable \$term_ids in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\TaxonomyHierarchyData\:\:build_term_tree\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -69316,18 +69268,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQuery\:\:prepare_objects_query\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Offset ''tax_query'' does not exist on non\-empty\-array\<''date_query''\|''fields''\|''ignore_sticky_posts''\|''max_price''\|''min_price''\|''offset''\|''order''\|''orderby''\|''paged''\|''post__in''\|''post__not_in''\|''post_parent__in''\|''post_parent__not_in''\|''post_status''\|''post_type''\|''posts_per_page''\|''search''\|''sku''\|''slug''\|''stock_status'', mixed\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Offset ''tax_query'' on non\-empty\-array\<''date_query''\|''fields''\|''ignore_sticky_posts''\|''max_price''\|''min_price''\|''offset''\|''order''\|''orderby''\|''paged''\|''post__in''\|''post__not_in''\|''post_parent__in''\|''post_parent__not_in''\|''post_status''\|''post_type''\|''posts_per_page''\|''search''\|''sku''\|''slug''\|''stock_status'', mixed\> in empty\(\) does not exist\.$#'
-			identifier: empty.offset
-			count: 2
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-

@@ -20,7 +20,7 @@ const completer: AutoCompleter = {
 					search,
 					searchby: 'username',
 					per_page: 10,
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/customers', query ),

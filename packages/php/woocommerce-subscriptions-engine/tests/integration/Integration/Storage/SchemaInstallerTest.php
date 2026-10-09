@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -26,6 +26,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	public function table_provider(): array {
 		return array(
 			array( SchemaInstaller::TABLE_PLANS ),
+			array( SchemaInstaller::TABLE_PLAN_META ),
 			array( SchemaInstaller::TABLE_CONTRACTS ),
 			array( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 			array( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ),
@@ -101,18 +102,56 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'extension_slug', $column );
 	}
 
-	public function test_plans_table_has_status_and_sort_order_columns(): void {
+	/**
+	 * @testdox The plans table keeps status, drops the retired columns, and has a nullable billing_policy.
+	 */
+	public function test_plans_table_columns_after_the_records_rework(): void {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$status = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'status' ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sort_order = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'sort_order' ) );
+		$this->assertTrue( $this->has_column( $table, 'status' ), 'Expected plans.status.' );
 
-		$this->assertSame( 'status', $status );
-		$this->assertSame( 'sort_order', $sort_order );
+		foreach ( array( 'description', 'category', 'sort_order', 'merchant_code', 'inventory_policy' ) as $column ) {
+			$this->assertFalse( $this->has_column( $table, $column ), "Did not expect plans.{$column}." );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'billing_policy' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a plans.billing_policy column.' );
+		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected plans.billing_policy to be NULLable.' );
+	}
+
+	/**
+	 * @testdox The plans table is indexed by (extension_slug, status) and carries no retired indexes.
+	 */
+	public function test_plans_table_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'extension_status', $indexes );
+		$this->assertSame( array( 'extension_slug', 'status' ), $this->index_columns( $table, 'extension_status' ) );
+
+		foreach ( array( 'category', 'status_sort', 'extension_merchant_code' ) as $index ) {
+			$this->assertNotContains( $index, $indexes, "Did not expect the plans {$index} index." );
+		}
+	}
+
+	/**
+	 * @testdox Plan meta carries the HPOS-style key/value indexes.
+	 */
+	public function test_plan_meta_has_hpos_style_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'meta_key_value', $indexes );
+		$this->assertContains( 'plan_meta_key_value', $indexes );
+		$this->assertSame( array( 'meta_key', 'meta_value' ), $this->index_columns( $table, 'meta_key_value' ) );
+		$this->assertSame(
+			array( 'plan_id', 'meta_key', 'meta_value' ),
+			$this->index_columns( $table, 'plan_meta_key_value' )
+		);
 	}
 
 	public function test_contracts_table_has_extension_slug_column(): void {
@@ -234,17 +273,60 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The due_contract index keys the dispatcher scan as (status, next_payment_gmt).
+	 * @testdox The due_owner index keys the dispatcher scan as (extension_slug, next_payment_gmt).
 	 */
-	public function test_contracts_due_contract_index_keys_the_dispatcher_scan(): void {
+	public function test_contracts_due_owner_index_keys_the_dispatcher_scan(): void {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// The dispatcher scans status=active AND next_payment_gmt <= now; the status-first
-		// column order is load-bearing for the index, so assert it exactly.
-		$this->assertContains( 'due_contract', $this->index_names( $table ) );
+		// The dispatcher scans extension_slug IN (registered owners) AND next_payment_gmt <= now;
+		// the owner-first column order is load-bearing for the index, so assert it exactly.
+		// The retired due_contract index is not asserted absent: dbDelta never drops an index,
+		// so it lingers on any reused database until the tables are recreated.
+		$this->assertContains( 'due_owner', $this->index_names( $table ) );
 		$this->assertSame(
-			array( 'status', 'next_payment_gmt' ),
-			$this->index_columns( $table, 'due_contract' )
+			array( 'extension_slug', 'next_payment_gmt' ),
+			$this->index_columns( $table, 'due_owner' )
+		);
+	}
+
+	/**
+	 * @testdox The schema version is 2.6.0 (plans as records, plan meta table).
+	 */
+	public function test_schema_version_is_2_6_0(): void {
+		$this->assertSame( '2.6.0', SchemaInstaller::get_version() );
+	}
+
+	/**
+	 * @testdox Contract identity columns are nullable until the extension supplies them.
+	 */
+	public function test_contracts_identity_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		foreach ( array( 'customer_id', 'currency', 'selling_plan_id', 'start_gmt' ) as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a contracts.{$column} column." );
+			$this->assertSame( 'YES', $row['Null'] ?? null, "Expected contracts.{$column} to be NULLable." );
+		}
+	}
+
+	/**
+	 * @testdox Contract meta carries the HPOS-style key/value indexes and no contract_key index.
+	 */
+	public function test_contract_meta_has_hpos_style_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'meta_key_value', $indexes );
+		$this->assertContains( 'contract_meta_key_value', $indexes );
+		$this->assertNotContains( 'contract_key', $indexes );
+		$this->assertSame( array( 'meta_key', 'meta_value' ), $this->index_columns( $table, 'meta_key_value' ) );
+		$this->assertSame(
+			array( 'contract_id', 'meta_key', 'meta_value' ),
+			$this->index_columns( $table, 'contract_meta_key_value' )
 		);
 	}
 
@@ -492,7 +574,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$names = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$names[] = ScalarCoercion::coerce_string( $row['Key_name'] ?? null );
+				$names[] = Coercion::coerce_string( $row['Key_name'] ?? null );
 			}
 		}
 
@@ -516,8 +598,8 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		usort(
 			$rows,
 			static function ( $a, $b ): int {
-				$a_seq = is_array( $a ) ? ScalarCoercion::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
-				$b_seq = is_array( $b ) ? ScalarCoercion::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
+				$a_seq = is_array( $a ) ? Coercion::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
+				$b_seq = is_array( $b ) ? Coercion::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
 
 				return $a_seq <=> $b_seq;
 			}
@@ -526,7 +608,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$columns = array();
 		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$columns[] = ScalarCoercion::coerce_string( $row['Column_name'] ?? null );
+				$columns[] = Coercion::coerce_string( $row['Column_name'] ?? null );
 			}
 		}
 
@@ -552,7 +634,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		foreach ( $rows as $row ) {
 			// Non_unique = 0 marks a UNIQUE index.
-			if ( is_array( $row ) && '0' !== ScalarCoercion::coerce_string( $row['Non_unique'] ?? null ) ) {
+			if ( is_array( $row ) && '0' !== Coercion::coerce_string( $row['Non_unique'] ?? null ) ) {
 				return false;
 			}
 		}

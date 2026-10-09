@@ -35,7 +35,7 @@ const Wrapper = ( {
 	children: React.ReactChildren;
 } ): React.ReactNode => {
 	// we need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const checkoutExtensionData = useCheckoutExtensionData();
 	const validation = useValidation();

@@ -25,19 +25,22 @@ export default function useAsyncFilter< T >( {
 	const handleInputChange = useCallback(
 		function handleInputChangeCallback( value?: string ) {
 			if ( typeof filter === 'function' ) {
-				if ( typeof onFilterStart === 'function' )
+				if ( typeof onFilterStart === 'function' ) {
 					onFilterStart( value );
+				}
 
 				setIsFetching( true );
 
 				filter( value )
 					.then( ( filteredItems ) => {
-						if ( typeof onFilterEnd === 'function' )
+						if ( typeof onFilterEnd === 'function' ) {
 							onFilterEnd( filteredItems, value );
+						}
 					} )
 					.catch( ( error: Error ) => {
-						if ( typeof onFilterError === 'function' )
+						if ( typeof onFilterError === 'function' ) {
 							onFilterError( error, value );
+						}
 					} )
 					.finally( () => {
 						setIsFetching( false );
@@ -64,10 +67,10 @@ export default function useAsyncFilter< T >( {
 }
 
 export type UseAsyncFilterInput< T > = {
-	filter( value?: string ): Promise< T[] >;
-	onFilterStart?( value?: string ): void;
-	onFilterEnd?( filteredItems: T[], value?: string ): void;
-	onFilterError?( error: Error, value?: string ): void;
+	filter: ( value?: string ) => Promise< T[] >;
+	onFilterStart?: ( value?: string ) => void;
+	onFilterEnd?: ( filteredItems: T[], value?: string ) => void;
+	onFilterError?: ( error: Error, value?: string ) => void;
 	debounceTime?: number;
 };
 

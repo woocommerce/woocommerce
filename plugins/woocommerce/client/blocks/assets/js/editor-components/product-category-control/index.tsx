@@ -81,7 +81,7 @@ const ProductCategoryControl = ( {
 					),
 					accessibleName,
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %1$s is the item name, %2$d is the count of products for the item. */
 					_n(
@@ -92,7 +92,7 @@ const ProductCategoryControl = ( {
 					),
 					accessibleName,
 					item.details?.count || 0
-			  );
+				);
 
 		const listItemCountLabel = showReviewCount
 			? sprintf(
@@ -104,7 +104,7 @@ const ProductCategoryControl = ( {
 						'woocommerce'
 					),
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %d is the count of products. */
 					_n(
@@ -114,7 +114,7 @@ const ProductCategoryControl = ( {
 						'woocommerce'
 					),
 					item.details?.count || 0
-			  );
+				);
 
 		return (
 			<SearchListItem

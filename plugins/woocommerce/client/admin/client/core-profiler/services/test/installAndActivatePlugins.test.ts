@@ -27,27 +27,39 @@ describe( 'pluginInstallerMachine', () => {
 		jest.resetAllMocks();
 	} );
 
-	it.each( [
-		[ 'mailpoet:alt', 'mailpoet', 4000 ],
-		[ 'woocommerce-services:tax', 'woocommerce-services', 0 ],
+	it.each< [ string, string, number, number ] >( [
+		[ 'woocommerce-services:tax', 'woocommerce-services', 4000, 4000 ],
+		[ 'woocommerce-services', 'woocommerce-services', 4000, 4000 ],
+		[ 'mailpoet', 'mailpoet', 4000, 4000 ],
+		[ 'mailpoet:alt', 'mailpoet', 4000, 4000 ],
+		[ 'woocommerce-services:tax', 'unrelated-plugin', 4000, 0 ],
+		[ 'woocommerce-services:shipping', 'woocommerce-services', 4000, 4000 ],
+		[ 'woocommerce-services:shipping', 'unrelated-plugin', 4000, 0 ],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'woocommerce-paypal-payments',
+			4000,
+			4000,
+		],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'unrelated-plugin',
+			4000,
+			0,
+		],
 	] )(
-		'preserves trunk installation timing for %s',
-		async ( plugin, slug, installTime ) => {
-			const machineUnderTest = pluginInstallerMachine.provide( {
+		'records %s duration from %s without changing its key',
+		async ( plugin, slug, duration, expectedDuration ) => {
+			const machine = pluginInstallerMachine.provide( {
 				...mockConfig,
 				actors: {
 					installPlugin: fromPromise( async () => ( {
-						data: {
-							install_time: { [ slug ]: 4000 },
-						},
+						data: { install_time: { [ slug ]: duration } },
 					} ) ),
 				},
 			} );
-			const service = createActor( machineUnderTest, {
-				input: {
-					selectedPlugins: [ plugin ],
-					pluginsAvailable: [],
-				},
+			const service = createActor( machine, {
+				input: { selectedPlugins: [ plugin ], pluginsAvailable: [] },
 			} ).start();
 
 			try {
@@ -56,7 +68,7 @@ describe( 'pluginInstallerMachine', () => {
 				);
 
 				expect( snapshot.context.installedPlugins ).toEqual( [
-					{ plugin, installTime },
+					{ plugin, installTime: expectedDuration },
 				] );
 			} finally {
 				service.stop();

@@ -60,7 +60,7 @@ const activeFiltersStore = {
 };
 
 // Compile-time protocol conformance check.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+
 activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { state, actions } = store<

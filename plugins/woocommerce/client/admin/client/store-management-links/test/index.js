@@ -70,11 +70,11 @@ describe( 'getLinkTypeAndHref', () => {
 } );
 
 describe( 'StoreManagementLinks', () => {
-	it( 'records a track when a link is clicked', () => {
+	it( 'records a track when a link is clicked', async () => {
 		const { queryByText } = render( <StoreManagementLinks /> );
 		const linkDetails = getItemsByCategory( 'fakeUrl' )[ 0 ].items[ 0 ];
 
-		userEvent.click( queryByText( linkDetails.title ) );
+		await userEvent.click( queryByText( linkDetails.title ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith( 'home_quick_links_click', {
 			task_name: linkDetails.listItemTag,

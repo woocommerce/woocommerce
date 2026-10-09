@@ -120,7 +120,7 @@ export const BankAccountModal = ( {
 						: __(
 								'Add your bank account details.',
 								'woocommerce'
-						  ) }
+							) }
 				</p>
 
 				<SelectControl
