@@ -22,13 +22,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $original_get = array();
 
 	/**
-	 * Original request URI.
-	 *
-	 * @var string|null
-	 */
-	private ?string $original_request_uri = null;
-
-	/**
 	 * Original POST data.
 	 *
 	 * @var array<string,mixed>
@@ -55,8 +48,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
-
 		$this->original_get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -77,12 +68,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 		$this->reset_cancel_order_handled_flag();
 
-		$_GET = $this->original_get;
-		if ( null === $this->original_request_uri ) {
-			unset( $_SERVER['REQUEST_URI'] );
-		} else {
-			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
-		}
+		$_GET     = $this->original_get;
 		$_POST    = $this->original_post;
 		$_REQUEST = $this->original_request;
 
