@@ -462,9 +462,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
 		}
-		$initialized = new \ReflectionProperty( AbilitiesLoader::class, 'extensions_initialized' );
-		$initialized->setAccessible( true );
-		$initialized->setValue( null, false );
 
 		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
 			if ( class_exists( $registry ) ) {
