@@ -546,8 +546,6 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 			$response->get_data()
 		);
 		$this->assertStringContainsString( '"args":{}', (string) wp_json_encode( $response->get_data() ), 'No args encode as an empty JSON object.' );
-		$this->assertSame( array( 'actions' => array() ), $this->list_actions( $contract->get_id(), 'resume' )->get_data() );
-		$this->assertSame( array( 'actions' => array() ), $this->list_actions( $contract->get_id(), 'unknown' )->get_data() );
 		$this->assertSame( 404, $this->list_actions( 999999 )->get_status() );
 	}
 
@@ -664,16 +662,10 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	/**
 	 * GET the action list.
 	 *
-	 * @param int         $contract_id Contract id.
-	 * @param string|null $action      Optional action filter.
+	 * @param int $contract_id Contract id.
 	 */
-	private function list_actions( int $contract_id, ?string $action = null ): WP_REST_Response {
-		$request = new WP_REST_Request( 'GET', self::BASE . '/' . $contract_id . '/action' );
-		if ( null !== $action ) {
-			$request->set_query_params( array( 'action' => $action ) );
-		}
-
-		return rest_get_server()->dispatch( $request );
+	private function list_actions( int $contract_id ): WP_REST_Response {
+		return rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/' . $contract_id . '/action' ) );
 	}
 
 	/**

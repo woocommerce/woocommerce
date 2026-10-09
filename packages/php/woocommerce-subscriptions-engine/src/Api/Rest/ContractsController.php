@@ -116,12 +116,6 @@ final class ContractsController extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_actions' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-					'args'                => array(
-						'action' => array(
-							'description' => __( 'Only list this action.', 'woocommerce-subscriptions-engine' ),
-							'type'        => 'string',
-						),
-					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -193,18 +187,9 @@ final class ContractsController extends WP_REST_Controller {
 			return $this->get_not_found_error();
 		}
 
-		$extension_slug = (string) $contract->get_extension_slug();
-		$action         = $request->get_param( 'action' );
-		if ( null === $action ) {
-			$definitions = ContractActionRegistry::get_for_extension( $extension_slug );
-		} else {
-			$definition  = is_string( $action ) ? ContractActionRegistry::get( $extension_slug, $action ) : null;
-			$definitions = null === $definition ? array() : array( $definition );
-		}
-
 		$actions = array();
 		try {
-			foreach ( $definitions as $definition ) {
+			foreach ( ContractActionRegistry::get_for_extension( (string) $contract->get_extension_slug() ) as $definition ) {
 				if ( ! ContractActionRegistry::is_available( $definition, $contract ) ) {
 					continue;
 				}
