@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { MenuGroup, MenuItem } from '@wordpress/components';
 import { check } from '@wordpress/icons';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useMemo } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { onboardingStore, TaskListType, TaskType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -23,6 +23,10 @@ import { Task } from './components/task';
 import { TasksPlaceholder } from './components/placeholder';
 import { TaskList } from './components/task-list';
 import { getAdminSetting } from '~/utils/admin-settings';
+import {
+	applyMarketplaceTaskVariation,
+	useMarketplaceTaskVariation,
+} from './marketplace-task-experiment';
 
 export type TaskListsProps = {
 	query: { task?: string };
@@ -42,6 +46,22 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 			taskLists: select( onboardingStore ).getTaskLists(),
 		};
 	}, [] );
+
+	const { isLoading: isLoadingVariation, variation } =
+		useMarketplaceTaskVariation( {
+			taskLists,
+			isReady: ! task && ! isResolving,
+		} );
+
+	const taskListsWithVariation = useMemo(
+		() =>
+			isResolving
+				? []
+				: taskLists.map( ( taskList: TaskListType ) =>
+						applyMarketplaceTaskVariation( taskList, variation )
+				  ),
+		[ isResolving, taskLists, variation ]
+	);
 
 	const getCurrentTask = () => {
 		if ( ! task ) {
@@ -97,13 +117,13 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 			? SetupTaskListPlaceholder
 			: TasksPlaceholder;
 
-	if ( isResolving ) {
+	if ( isResolving || isLoadingVariation ) {
 		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
 	return (
 		<>
-			{ taskLists
+			{ taskListsWithVariation
 				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
