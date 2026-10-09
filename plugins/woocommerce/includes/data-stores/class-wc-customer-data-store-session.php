@@ -115,7 +115,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
 		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
-		if ( isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
+		$is_same_customer = isset( $data['id'] ) && $data['id'] === (string) $customer->get_id();
+
+		if ( $is_same_customer && isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
 			foreach ( $this->session_keys as $session_key ) {
 				if ( in_array( $session_key, array( 'id', 'date_modified' ), true ) ) {
 					continue;
@@ -139,7 +141,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					}
 				}
 			}
-		} else {
+		} elseif ( ! $is_same_customer ) {
+			// Only for a new session or a login. When the account changed during this session, for example after placing
+			// an order whose payment then failed, the account already holds the shipping address the shopper chose.
 			$this->maybe_default_shipping_to_billing( $customer );
 		}
 		$this->set_defaults( $customer );
@@ -149,7 +153,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Copies the billing address over the shipping address when the "Shipping destination" setting defaults to billing.
 	 *
-	 * Only called when there is no valid session snapshot, so an address the shopper set during the session is kept.
+	 * Only called when the session doesn't belong to this customer yet, so an address the shopper set during the session is kept.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 * @return void

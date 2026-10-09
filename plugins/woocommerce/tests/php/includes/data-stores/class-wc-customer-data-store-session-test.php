@@ -406,6 +406,49 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the account's shipping address when the account changed during the session, as after a failed payment.
+	 */
+	public function test_account_shipping_address_is_kept_when_account_changed_during_the_session(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_billing_account_changed' );
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_shipping_address_1( 'Keizersgracht 100' );
+		$session_customer->set_shipping_city( 'Rotterdam' );
+		$session_customer->save();
+
+		// Placing an order writes the chosen shipping address to the account before payment runs.
+		$account_customer = new WC_Customer( $customer_id );
+		$account_customer->set_shipping_address_1( 'Keizersgracht 100' );
+		$account_customer->set_shipping_city( 'Rotterdam' );
+		$account_customer->save();
+		// The save can land in the same second as the session snapshot, so move the modified date on explicitly.
+		update_user_meta( $customer_id, 'last_update', (string) ( time() + 60 ) );
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Keizersgracht 100', $reloaded_customer->get_shipping_address_1(), 'The shipping address saved on the account during the session should be kept' );
+		$this->assertSame( 'Rotterdam', $reloaded_customer->get_shipping_city(), 'The shipping city saved on the account during the session should be kept' );
+	}
+
+	/**
+	 * @testdox Should default the shipping address to the billing address when a guest session logs in.
+	 */
+	public function test_shipping_address_defaults_to_billing_address_when_a_guest_session_logs_in(): void {
+		update_option( 'woocommerce_ship_to_destination', 'billing' );
+		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_billing_login' );
+
+		$guest_customer = new WC_Customer( 0, true );
+		$guest_customer->set_billing_country( 'NL' );
+		$guest_customer->save();
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Stationsplein 23', $customer->get_shipping_address_1(), 'The shipping street should be taken from the billing address after login' );
+		$this->assertSame( 'Amsterdam', $customer->get_shipping_city(), 'The shipping city should be taken from the billing address after login' );
+	}
+
+	/**
 	 * @testdox Should copy additional address field values from billing to shipping, even before the fields are registered.
 	 */
 	public function test_shipping_address_defaults_to_billing_including_additional_address_fields(): void {
