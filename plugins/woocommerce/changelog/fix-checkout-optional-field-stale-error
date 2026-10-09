@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Checkout block blocking orders with an outdated error on an optional address field, such as state/county.
