@@ -347,6 +347,7 @@ class StepLogQuery {
 	private function query( array $sources, int $from, int $to, int $limit, ?callable $expand = null ): array {
 		$rows         = array();
 		$covered_from = $from;
+		$has_more     = false;
 
 		foreach ( $sources as $source ) {
 			/*
@@ -356,6 +357,7 @@ class StepLogQuery {
 			 */
 			$result       = $this->read( $source, $from, $to, $limit, $expand );
 			$covered_from = max( $covered_from, $result['covered_from'] );
+			$has_more     = $has_more || $result['has_more'];
 			$rows         = array_merge( $rows, $result['rows'] );
 		}
 
@@ -370,7 +372,7 @@ class StepLogQuery {
 			}
 		);
 
-		list( $rows, $next_to ) = self::take_page( $rows, $limit );
+		list( $rows, $next_to ) = self::take_page( $rows, $limit, $has_more );
 
 		return array(
 			'rows'         => array_map( array( self::class, 'format_row' ), $rows ),
@@ -407,12 +409,13 @@ class StepLogQuery {
 	 * the next read. Where the limit falls inside a second the page carries
 	 * every row of that second and may exceed the limit.
 	 *
-	 * @param array $rows  Rows, newest first.
-	 * @param int   $limit Rows to return, before the whole-second rule.
+	 * @param array $rows     Rows, newest first.
+	 * @param int   $limit    Rows to return, before the whole-second rule.
+	 * @param bool  $has_more Whether a reader stopped with older rows unread, which it only does once it holds the limit.
 	 * @return array{0: list<array>, 1: int|null} The page, and the `to` for the next page or null.
 	 */
-	private static function take_page( array $rows, int $limit ): array {
-		if ( count( $rows ) <= $limit ) {
+	private static function take_page( array $rows, int $limit, bool $has_more ): array {
+		if ( count( $rows ) <= $limit && ! $has_more ) {
 			return array( array_values( $rows ), null );
 		}
 
@@ -426,7 +429,7 @@ class StepLogQuery {
 			++$next;
 		}
 
-		return array( $page, isset( $rows[ $next ] ) ? $boundary - 1 : null );
+		return array( $page, ( isset( $rows[ $next ] ) || $has_more ) ? $boundary - 1 : null );
 	}
 
 	/**
@@ -437,7 +440,7 @@ class StepLogQuery {
 	 * @param int           $to     Latest timestamp, inclusive.
 	 * @param int           $limit  The fewest rows the reader collects before stopping.
 	 * @param callable|null $expand Called with each row, returning a row per result it should produce.
-	 * @return array{rows: array, covered_from: int}
+	 * @return array{rows: array, covered_from: int, has_more: bool}
 	 */
 	private function read( string $source, int $from, int $to, int $limit, ?callable $expand ): array {
 		$handler = LoggingUtil::get_default_handler();
@@ -453,20 +456,42 @@ class StepLogQuery {
 		return array(
 			'rows'         => array(),
 			'covered_from' => $to,
+			'has_more'     => false,
 		);
 	}
 
 	/**
 	 * Counts rows per step and outcome, as `step:outcome` keys.
 	 *
+	 * A failure is logged twice, as an error line and as an `info` step line, so
+	 * each step line cancels one error line for the same notification, step and
+	 * outcome, and the failure counts once.
+	 *
 	 * @param array $rows The rows.
 	 * @return array<string, int>
 	 */
 	private static function count_outcomes( array $rows ): array {
+		$step_lines = array();
+
+		foreach ( $rows as $row ) {
+			$failure = self::get_failure_key( $row );
+
+			if ( null !== $failure && 'info' === $row['level'] ) {
+				$step_lines[ $failure ] = ( $step_lines[ $failure ] ?? 0 ) + 1;
+			}
+		}
+
 		$counts = array();
 
 		foreach ( $rows as $row ) {
 			if ( ! isset( $row['context']['step'], $row['context']['outcome'] ) ) {
+				continue;
+			}
+
+			$failure = self::get_failure_key( $row );
+
+			if ( null !== $failure && 'info' !== $row['level'] && ( $step_lines[ $failure ] ?? 0 ) > 0 ) {
+				--$step_lines[ $failure ];
 				continue;
 			}
 
@@ -475,6 +500,20 @@ class StepLogQuery {
 		}
 
 		return $counts;
+	}
+
+	/**
+	 * Names the notification, step and outcome a row records.
+	 *
+	 * @param array $row The row.
+	 * @return string|null Null for a row that names no notification, such as a batch line.
+	 */
+	private static function get_failure_key( array $row ): ?string {
+		$context = $row['context'] ?? array();
+
+		return isset( $context['identifier'], $context['step'], $context['outcome'] )
+			? $context['identifier'] . '|' . $context['step'] . '|' . $context['outcome']
+			: null;
 	}
 
 	/**

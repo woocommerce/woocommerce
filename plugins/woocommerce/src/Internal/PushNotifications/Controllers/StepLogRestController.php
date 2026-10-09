@@ -6,21 +6,18 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\Jetpack\Connection\Rest_Authentication;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\StepLogQuery;
 use Automattic\WooCommerce\Internal\PushNotifications\Traits\AuthorizesPushNotificationRequests;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
  * Read-only REST endpoints through which Mission Control reads the push
- * notification step log: the journey of one notification, and the attempts
- * made against one device or one user's devices.
+ * notification step log: everything recorded on the store, the journey of one
+ * notification, and the attempts made against one device or one user's devices.
  *
  * Only WPCOM can call these. Every response carries the store's logging state
  * and the earliest time the read covered, so a screen with no rows can say why.
@@ -210,6 +207,8 @@ class StepLogRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return WP_REST_Response
+	 *
+	 * @since 11.3.0
 	 */
 	protected function get_notification( WP_REST_Request $request ): WP_REST_Response {
 		list( $from, $to ) = $this->get_range( $request );
@@ -231,6 +230,8 @@ class StepLogRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return WP_REST_Response
+	 *
+	 * @since 11.3.0
 	 */
 	protected function get_site( WP_REST_Request $request ): WP_REST_Response {
 		list( $from, $to ) = $this->get_range( $request );
@@ -244,6 +245,8 @@ class StepLogRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return WP_REST_Response
+	 *
+	 * @since 11.3.0
 	 */
 	protected function get_token( WP_REST_Request $request ): WP_REST_Response {
 		list( $from, $to ) = $this->get_range( $request );
@@ -257,6 +260,8 @@ class StepLogRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return WP_REST_Response
+	 *
+	 * @since 11.3.0
 	 */
 	protected function get_user( WP_REST_Request $request ): WP_REST_Response {
 		list( $from, $to ) = $this->get_range( $request );

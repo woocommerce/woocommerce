@@ -779,7 +779,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return only the given user's token IDs, oldest first.
+	 * @testdox Should return only the given user's token IDs, most recently modified first.
 	 */
 	public function test_get_token_ids_for_user_returns_only_that_users_tokens(): void {
 		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
@@ -788,8 +788,10 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$first      = $data_store->create( $this->token_data_for( $admin_id ) );
 		$data_store->create( $this->token_data_for( $manager_id ) );
 		$second = $data_store->create( $this->token_data_for( $admin_id ) );
+		$this->set_token_dates( $first->get_id(), '2026-01-01 00:00:00', '2026-01-01 00:00:00' );
+		$this->set_token_dates( $second->get_id(), '2026-01-01 00:00:00', '2026-02-01 00:00:00' );
 
-		$this->assertSame( array( $first->get_id(), $second->get_id() ), $data_store->get_token_ids_for_user( $admin_id ) );
+		$this->assertSame( array( $second->get_id(), $first->get_id() ), $data_store->get_token_ids_for_user( $admin_id ) );
 		$this->assertSame( array(), $data_store->get_token_ids_for_user( 999999 ) );
 	}
 

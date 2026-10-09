@@ -38,14 +38,14 @@ class StepLogTableReader {
 	 *
 	 * Rows are turned into what the caller wants as each one is read, and the
 	 * scan stops once it holds enough, so a short page does not walk the whole
-	 * row budget.
+	 * row budget. `has_more` says whether it stopped with older windows unread.
 	 *
 	 * @param string        $source The log source, e.g. `push-notifications-store-order`.
 	 * @param int           $from   Earliest timestamp to include, inclusive.
 	 * @param int           $to     Latest timestamp to include, inclusive.
 	 * @param int           $limit  The fewest rows to collect before stopping.
 	 * @param callable|null $expand Called with each row, returning a row per result it should produce.
-	 * @return array{rows: array<int, array{timestamp: int, level: string, message: string, context: array|null, raw: string|null}>, covered_from: int}
+	 * @return array{rows: array<int, array{timestamp: int, level: string, message: string, context: array|null, raw: string|null}>, covered_from: int, has_more: bool}
 	 *
 	 * @since 11.3.0
 	 */
@@ -59,6 +59,7 @@ class StepLogTableReader {
 		$upper        = $max_id;
 		$examined     = 0;
 		$covered_from = $from;
+		$has_more     = false;
 
 		while ( $upper > 0 && $examined < self::MAX_ROWS_EXAMINED ) {
 			$lower = max( 0, $upper - self::WINDOW_SIZE );
@@ -100,6 +101,7 @@ class StepLogTableReader {
 			 */
 			if ( count( $rows ) >= $limit ) {
 				$covered_from = null === $oldest ? $from : $oldest;
+				$has_more     = $upper > 0 && $covered_from > $from;
 				break;
 			}
 
@@ -124,6 +126,7 @@ class StepLogTableReader {
 		return array(
 			'rows'         => $rows,
 			'covered_from' => $covered_from,
+			'has_more'     => $has_more,
 		);
 	}
 

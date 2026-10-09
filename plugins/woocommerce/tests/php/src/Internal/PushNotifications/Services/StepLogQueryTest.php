@@ -128,6 +128,7 @@ class StepLogQueryTest extends WC_Unit_Test_Case {
 				return array(
 					'rows'         => array(),
 					'covered_from' => $from,
+					'has_more'     => false,
 				);
 			}
 		);
@@ -397,6 +398,7 @@ class StepLogQueryTest extends WC_Unit_Test_Case {
 			array(
 				'rows'         => array(),
 				'covered_from' => 0,
+				'has_more'     => false,
 			)
 		);
 
@@ -413,18 +415,59 @@ class StepLogQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should offer the next page when one reader stopped at the limit, even with no row left over.
+	 */
+	public function test_a_reader_that_stopped_at_the_limit_still_gives_a_cursor(): void {
+		$this->reader_rows_from(
+			function ( string $source ) {
+				return 'push-notifications-store-order' === $source
+					? array(
+						$this->aggregate_row( 180, 'store_order', 42, 'recipients', 'resolved', array( 'token_ids' => array( 4412 ) ) ),
+						$this->aggregate_row( 170, 'store_order', 41, 'recipients', 'resolved', array( 'token_ids' => array( 4412 ) ) ),
+					)
+					: array();
+			},
+			null,
+			array( 'push-notifications-store-order' )
+		);
+
+		$result = $this->sut->for_token( 4412, 100, 200, 2 );
+
+		$this->assertCount( 2, $result['rows'] );
+		$this->assertSame( 169, $result['next_to'], 'The cursor should start one second before the oldest row on the page.' );
+	}
+
+	/**
+	 * @testdox Should count a failure once when both its error line and its step line are on the page.
+	 */
+	public function test_a_failure_logged_twice_counts_once(): void {
+		$this->file_reader_returns(
+			array(
+				array( 'push-notifications-store-order', 100, 200, array( $this->row( 160, 'store_order', 42, 'dispatched', 'request_failed' ) ) ),
+				array( 'push_notifications', 100, 200, array( $this->row( 160, 'store_order', 42, 'dispatched', 'request_failed', 'error' ) ) ),
+			)
+		);
+
+		$result = $this->sut->for_notification( 'store_order', 42, 100, 200, 100 );
+
+		$this->assertCount( 2, $result['rows'], 'Both lines should still be returned.' );
+		$this->assertSame( 1, $result['counts']['dispatched:request_failed'] );
+	}
+
+	/**
 	 * Makes a reader answer from a function of source to rows, applying the
 	 * expansion and returning the coverage a real reader now returns.
 	 *
-	 * @param callable        $rows_for_source Called with a source, returning its rows.
-	 * @param MockObject|null $reader          The reader to stub, defaulting to the file reader.
+	 * @param callable        $rows_for_source   Called with a source, returning its rows.
+	 * @param MockObject|null $reader            The reader to stub, defaulting to the file reader.
+	 * @param string[]        $sources_with_more Sources whose reader reports it stopped at the limit.
 	 * @return void
 	 */
-	private function reader_rows_from( callable $rows_for_source, $reader = null ): void {
+	private function reader_rows_from( callable $rows_for_source, $reader = null, array $sources_with_more = array() ): void {
 		$reader = $reader ?? $this->file_reader;
 
 		$reader->method( 'read' )->willReturnCallback(
-			function ( string $source, int $from, int $to, int $limit = PHP_INT_MAX, ?callable $expand = null ) use ( $rows_for_source ): array {
+			function ( string $source, int $from, int $to, int $limit = PHP_INT_MAX, ?callable $expand = null ) use ( $rows_for_source, $sources_with_more ): array {
 				$rows = array();
 
 				foreach ( $rows_for_source( $source ) as $row ) {
@@ -441,6 +484,7 @@ class StepLogQueryTest extends WC_Unit_Test_Case {
 				return array(
 					'rows'         => $rows,
 					'covered_from' => $from,
+					'has_more'     => in_array( $source, $sources_with_more, true ),
 				);
 			}
 		);
@@ -479,6 +523,7 @@ class StepLogQueryTest extends WC_Unit_Test_Case {
 				return array(
 					'rows'         => $rows,
 					'covered_from' => $from,
+					'has_more'     => false,
 				);
 			}
 		);

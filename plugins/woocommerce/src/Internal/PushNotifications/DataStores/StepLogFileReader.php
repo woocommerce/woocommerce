@@ -35,23 +35,26 @@ class StepLogFileReader {
 	 * rows, so a short page over a long range does not open every day's files.
 	 * Rows are turned into what the caller wants as each line is read, and the
 	 * set is trimmed after every file, so neither the range nor one large file
-	 * decides how much is held at once.
+	 * decides how much is held at once. `has_more` says whether that left older
+	 * lines unread.
 	 *
 	 * @param string        $source The log source, e.g. `push-notifications-store-order`.
 	 * @param int           $from   Earliest timestamp to include, inclusive.
 	 * @param int           $to     Latest timestamp to include, inclusive.
 	 * @param int           $limit  The fewest rows to collect before stopping.
 	 * @param callable|null $expand Called with each row, returning a row per result it should produce.
-	 * @return array{rows: array<int, array{timestamp: int, level: string, message: string, context: array|null, raw: string|null}>, covered_from: int}
+	 * @return array{rows: array<int, array{timestamp: int, level: string, message: string, context: array|null, raw: string|null}>, covered_from: int, has_more: bool}
 	 *
 	 * @since 11.3.0
 	 */
 	public function read( string $source, int $from, int $to, int $limit = PHP_INT_MAX, ?callable $expand = null ): array {
 		$directory    = Settings::get_log_directory( false );
+		$days         = self::get_days( $from, $to );
 		$rows         = array();
 		$covered_from = $to;
+		$has_more     = false;
 
-		foreach ( self::get_days( $from, $to ) as $day ) {
+		foreach ( $days as $index => $day ) {
 			$covered_from = max( $from, $day );
 
 			foreach ( self::get_filenames( $source, $day ) as $filename ) {
@@ -86,7 +89,9 @@ class StepLogFileReader {
 
 				$file->close_stream();
 
-				$rows = self::keep_newest( $rows, $limit );
+				$kept     = self::keep_newest( $rows, $limit );
+				$has_more = $has_more || count( $kept ) < count( $rows );
+				$rows     = $kept;
 			}
 
 			/*
@@ -96,6 +101,7 @@ class StepLogFileReader {
 			 * rule needs.
 			 */
 			if ( count( $rows ) >= $limit ) {
+				$has_more = $has_more || isset( $days[ $index + 1 ] );
 				break;
 			}
 		}
@@ -105,6 +111,7 @@ class StepLogFileReader {
 		return array(
 			'rows'         => $rows,
 			'covered_from' => $covered_from,
+			'has_more'     => $has_more,
 		);
 	}
 

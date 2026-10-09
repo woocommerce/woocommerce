@@ -4,9 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
-use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\StepLogFileReader;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 
 /**
@@ -29,10 +30,22 @@ class StepLogFileReaderTest extends WC_Unit_Test_Case {
 	private $handler;
 
 	/**
+	 * A temporary log folder, so the tests never touch the site's own log files.
+	 *
+	 * @var string
+	 */
+	private $log_directory;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->log_directory = trailingslashit( sys_get_temp_dir() ) . 'wc-step-log-' . wp_generate_uuid4() . '/';
+		wp_mkdir_p( $this->log_directory );
+		Constants::set_constant( 'WC_LOG_DIR_CUSTOM', true );
+		Constants::set_constant( 'WC_LOG_DIR', $this->log_directory );
 
 		$this->sut     = new StepLogFileReader();
 		$this->handler = new LogHandlerFileV2();
@@ -42,11 +55,13 @@ class StepLogFileReaderTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		foreach ( glob( Settings::get_log_directory() . 'push-*.log' ) as $file ) {
-			wp_delete_file( $file );
+		try {
+			Constants::clear_single_constant( 'WC_LOG_DIR_CUSTOM' );
+			Constants::clear_single_constant( 'WC_LOG_DIR' );
+			FilesystemUtil::get_wp_filesystem_direct()->rmdir( $this->log_directory, true );
+		} finally {
+			parent::tearDown();
 		}
-
-		parent::tearDown();
 	}
 
 	/**
@@ -101,6 +116,7 @@ class StepLogFileReaderTest extends WC_Unit_Test_Case {
 			$result['covered_from'],
 			'Coverage should start at the newest day, since the older one was never opened.'
 		);
+		$this->assertTrue( $result['has_more'], 'The unread day may hold older lines.' );
 	}
 
 	/**
