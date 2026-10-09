@@ -3,7 +3,7 @@
  */
 import {
 	debounce,
-	addressFieldsForShippingRates,
+	isAddressFieldForShippingRates,
 } from '@woocommerce/base-utils';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
@@ -132,6 +132,20 @@ const getDirtyPropsToValidate = (
 	);
 };
 
+const isShippingRatesUpdateQueued = () =>
+	select( cartStore ).getCartMeta().isShippingRatesUpdateQueued;
+
+/**
+ * Updates the queued shipping rates flag, skipping the dispatch when it is unchanged.
+ */
+const setShippingRatesUpdateQueued = ( isQueued: boolean ) => {
+	if ( isShippingRatesUpdateQueued() !== isQueued ) {
+		dispatch( cartStore ).__internalSetShippingRatesUpdateQueued(
+			isQueued
+		);
+	}
+};
+
 /**
  * Function to dispatch an update to the server.
  */
@@ -156,6 +170,7 @@ const updateCustomerData = (): void => {
 
 	if ( ! needsPush ) {
 		localState.doingPush = false;
+		setShippingRatesUpdateQueued( false );
 		return;
 	}
 
@@ -173,12 +188,13 @@ const updateCustomerData = (): void => {
 		} )
 	) {
 		localState.doingPush = false;
+		setShippingRatesUpdateQueued( false );
 		return;
 	}
 
 	const haveAddressFieldsForShippingRatesChanged =
-		localState.dirtyProps.shippingAddress.some( ( field ) =>
-			addressFieldsForShippingRates.includes( field as string )
+		localState.dirtyProps.shippingAddress.some(
+			isAddressFieldForShippingRates
 		);
 
 	dispatch( cartStore )
@@ -203,6 +219,9 @@ const updateCustomerData = (): void => {
 			localState.doingPush = false;
 			processErrorResponse( response );
 		} );
+
+	// Cleared once the request has started, so the shipping rates loading state takes over without a gap.
+	setShippingRatesUpdateQueued( false );
 };
 
 /**
@@ -237,6 +256,16 @@ export const pushChanges = ( debounced = true ): void => {
 
 	if ( isShallowEqual( localState.customerData, customerData ) ) {
 		return;
+	}
+
+	if (
+		! isShippingRatesUpdateQueued() &&
+		getDirtyKeys(
+			localState.customerData.shippingAddress,
+			customerData.shippingAddress
+		).some( isAddressFieldForShippingRates )
+	) {
+		setShippingRatesUpdateQueued( true );
 	}
 
 	if ( ! debounced ) {

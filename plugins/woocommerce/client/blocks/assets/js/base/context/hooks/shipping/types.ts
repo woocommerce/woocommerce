@@ -8,6 +8,8 @@ export interface ShippingData {
 	hasCalculatedShipping: Cart[ 'hasCalculatedShipping' ];
 	shippingRates: Cart[ 'shippingRates' ];
 	isLoadingRates: boolean;
+	// True from a shipping address change that affects the rates until the server has returned rates for it.
+	isShippingRatesStale: boolean;
 	selectedRates: Record< string, string | unknown >;
 	// Returns a function that accepts a shipping rate ID and a package ID.
 	selectShippingRate: (
