@@ -387,7 +387,7 @@ Enable customers to change the sorting order of the products.
 
 - **Name:** woocommerce/catalog-sorting
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity, typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity, spacing (margin, padding), typography (fontSize, textAlign)
 - **Attributes:** fontSize, useLabel
 
 ## Product Category Description - woocommerce/category-description
