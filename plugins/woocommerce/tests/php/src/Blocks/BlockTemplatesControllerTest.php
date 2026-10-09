@@ -189,6 +189,50 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox render_block filter fires for WooCommerce template parts so third-party code can modify output.
+	 */
+	public function test_render_block_filter_fires_for_woocommerce_template_part(): void {
+		$this->sut->init();
+
+		$this->create_template_part( 'test-filtered-part', BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$filter = static fn( $content, $block ) => $content . ( 'core/template-part' === ( $block['blockName'] ?? null ) ? '<!-- filtered -->' : '' );
+		add_filter( 'render_block', $filter, 10, 2 );
+
+		$parsed_block = array(
+			'blockName' => 'core/template-part',
+			'attrs'     => array(
+				'theme'   => 'woocommerce/woocommerce',
+				'slug'    => 'test-filtered-part',
+				'tagName' => 'div',
+			),
+		);
+		$result = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
+
+		remove_filter( 'render_block', $filter, 10 );
+
+		$expected = '<div class="wp-block-template-part"><p class="wp-block-paragraph">Test</p></div><!-- filtered -->';
+		$this->assertSame( $expected, $result, 'render_block filter output should be included in the rendered content.' );
+	}
+
+	/**
+	 * @testdox WooCommerce template part with className renders it in the wrapper.
+	 */
+	public function test_woocommerce_template_part_renders_classname_in_wrapper(): void {
+		$this->sut->init();
+
+		$this->create_template_part( 'test-classed-part', BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$markup = '<!-- wp:template-part {"slug":"test-classed-part","theme":"woocommerce/woocommerce","className":"my-custom-class"} /-->';
+		$output = do_blocks( $markup );
+
+		$expected = '<div class="my-custom-class wp-block-template-part"><p class="wp-block-paragraph">Test</p></div>';
+		$this->assertSame( $expected, $output, 'Custom className should appear in the rendered wrapper.' );
+	}
+
+	/**
 	 * Clears template ID caches so newly created posts are visible.
 	 */
 	private function flush_block_template_caches(): void {
