@@ -7,7 +7,9 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsRenderer;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AmazonLogisticsShippingProvider;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\DHLShippingProvider;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use WC_Order;
@@ -393,6 +395,85 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'wc-admin-fulfillments-js', $output );
 		$this->assertStringContainsString( 'var wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * @testdox Should list only unrecognized shipping providers under the "Other" filter.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $is_known_providers Whether the known shipping provider list is populated.
+	 */
+	public function test_other_shipping_provider_filter_excludes_fulfillments_without_a_provider( bool $is_known_providers ): void {
+		add_filter(
+			'woocommerce_fulfillment_shipping_providers',
+			static function () use ( $is_known_providers ): array {
+				return $is_known_providers ? array( DHLShippingProvider::class ) : array();
+			},
+			999
+		);
+
+		$unknown_provider_order_id = $this->create_order_with_shipment_provider( 'totally-unknown-carrier' );
+		$empty_provider_order_id   = $this->create_order_with_shipment_provider( '' );
+		$known_provider_order_id   = $this->create_order_with_shipment_provider( 'dhl' );
+
+		$_GET['shipping_provider'] = '__other__';
+		$args                      = $this->renderer->filter_orders_by_shipping_provider( array() );
+		unset( $_GET['shipping_provider'] );
+
+		$this->assertContains(
+			$unknown_provider_order_id,
+			$args['post__in'],
+			'A provider outside the known list should match the "Other" filter'
+		);
+		$this->assertNotContains(
+			$empty_provider_order_id,
+			$args['post__in'],
+			'A fulfillment saved without a shipping provider should not match the "Other" filter'
+		);
+
+		if ( $is_known_providers ) {
+			$this->assertNotContains(
+				$known_provider_order_id,
+				$args['post__in'],
+				'A known provider should not match the "Other" filter'
+			);
+		} else {
+			$this->assertContains(
+				$known_provider_order_id,
+				$args['post__in'],
+				'With no known providers, any non-empty provider should match the "Other" filter'
+			);
+		}
+	}
+
+	/**
+	 * Create an order with a single fulfillment carrying the given shipping provider.
+	 *
+	 * @param string $shipment_provider The provider key to store on the fulfillment.
+	 * @return int The order ID.
+	 */
+	private function create_order_with_shipment_provider( string $shipment_provider ): int {
+		$order = OrderHelper::create_order( get_current_user_id() );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => WC_Order::class,
+				'entity_id'   => (string) $order->get_id(),
+				'status'      => 'fulfilled',
+			),
+			array(
+				'_shipment_provider' => $shipment_provider,
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		return $order->get_id();
 	}
 
 	/**
