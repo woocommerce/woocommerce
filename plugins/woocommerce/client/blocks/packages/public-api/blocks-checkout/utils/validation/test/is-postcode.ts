@@ -199,7 +199,7 @@ describe( 'isPostcode', () => {
 
 		// Argentina uses the fallback too. The legacy four digit codes are
 		// still in everyday use next to the lettered format; postcode-validator
-		// 3.10 started rejecting them and merchants lost orders (WOOPLUG-7949).
+		// 3.10 started rejecting them.
 		[ true, '1213', 'AR' ],
 		[ true, '7540', 'AR' ],
 		[ true, 'C1213', 'AR' ],
