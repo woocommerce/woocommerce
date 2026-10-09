@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve labels for saved payment methods without card details in Checkout and My Account.
