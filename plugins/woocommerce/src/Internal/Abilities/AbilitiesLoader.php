@@ -62,6 +62,13 @@ class AbilitiesLoader {
 	private static array $registered_core_abilities = array();
 
 	/**
+	 * Query var that holds the extension filter clauses of a list ability.
+	 *
+	 * @internal
+	 */
+	public const EXTENSION_QUERY_VAR = 'woocommerce_ability_extension_args';
+
+	/**
 	 * Initialize ability registration hooks.
 	 *
 	 * @internal
@@ -82,10 +89,36 @@ class AbilitiesLoader {
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
 
 		AbilitiesRestBridge::init();
 
 		self::$initialized = true;
+	}
+
+	/**
+	 * Add the extension filter clauses of a list ability to its WP_Query arguments.
+	 *
+	 * The posts storage ignores a meta_query argument, so a list ability puts the
+	 * clauses in the EXTENSION_QUERY_VAR query var. Other queries do not have it,
+	 * so a query that a hook runs inside the ability's query stays the same.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $wp_query_args WP_Query arguments.
+	 * @param array $query_vars    Query vars of wc_get_products() or wc_get_orders().
+	 * @return array
+	 */
+	public static function add_extension_query_args( $wp_query_args, $query_vars ) {
+		if ( empty( $query_vars[ self::EXTENSION_QUERY_VAR ] ) || ! is_array( $wp_query_args ) ) {
+			return $wp_query_args;
+		}
+
+		unset( $wp_query_args[ self::EXTENSION_QUERY_VAR ] );
+		return array_merge_recursive( $wp_query_args, $query_vars[ self::EXTENSION_QUERY_VAR ] );
 	}
 
 	/**

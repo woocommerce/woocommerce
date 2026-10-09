@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add AbilityExtensions::register_query_filter(). With the experimental ability contracts feature on, the product and order list abilities accept extension filters under filters.extensions.<namespace>.<filter>.

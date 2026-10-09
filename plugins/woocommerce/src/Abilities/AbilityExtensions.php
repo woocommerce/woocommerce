@@ -21,6 +21,8 @@ defined( 'ABSPATH' ) || exit;
  * An ActionableAbility writes the same `extensions` input to the fields that
  * have an `update_callback`, runs the validators of the resource, and saves
  * the object one time.
+ * An extension also registers a query filter, which the list ability of the
+ * resource accepts under `filters.extensions.<namespace>.<filter>`.
  *
  * The API is experimental while the `ability_contracts` feature exists.
  *
@@ -48,6 +50,18 @@ class AbilityExtensions {
 	 * @var array<string, bool>
 	 */
 	private static array $reported = array();
+
+	/**
+	 * Query filters keyed by resource, then namespace, then filter name.
+	 *
+	 * @var array<string, array<string, array<string, array<string, mixed>>>>
+	 */
+	private static array $filters = array();
+
+	/**
+	 * Query arguments that a filter callback can return.
+	 */
+	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query' );
 
 	/**
 	 * Register a field that the abilities of a resource return under `extensions.<namespace>.<field>`.
@@ -78,18 +92,7 @@ class AbilityExtensions {
 	 * }
 	 */
 	public static function register_field( array $args ): void {
-		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
-			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
-				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
-				return;
-			}
-		}
-		if ( ! is_array( $args['schema'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array.', '11.3.0' );
-			return;
-		}
-		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
+		if ( ! self::has_valid_args( __METHOD__, $args, 'field', 'get_callback' ) ) {
 			return;
 		}
 		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
@@ -147,6 +150,136 @@ class AbilityExtensions {
 		}
 
 		self::$validators[ $args['resource'] ][] = $args;
+	}
+
+	/**
+	 * Register a filter that the list ability of a resource accepts under `filters.extensions.<namespace>.<filter>`.
+	 *
+	 * Call it inside the `woocommerce_ability_extensions_init` action.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Filter arguments.
+	 *
+	 *     @type string   $resource  Resource that the list ability returns: `product` or `order`.
+	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
+	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
+	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
+	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
+	 *                               a `meta_query`, and for products also a `tax_query`. Core adds each one
+	 *                               to the query with AND. Return a WP_Error to refuse the value.
+	 * }
+	 */
+	public static function register_query_filter( array $args ): void {
+		if ( ! in_array( $args['resource'] ?? null, array( 'product', 'order' ), true ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "resource" argument must be "product" or "order".', '11.3.0' );
+			return;
+		}
+		if ( ! self::has_valid_args( __METHOD__, $args, 'filter', 'callback' ) ) {
+			return;
+		}
+		if ( isset( self::$filters[ $args['resource'] ][ $args['namespace'] ][ $args['filter'] ] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The filter "%s.%s" of "%s" is already registered.', $args['namespace'], $args['filter'], $args['resource'] ), '11.3.0' );
+			return;
+		}
+
+		self::$filters[ $args['resource'] ][ $args['namespace'] ][ $args['filter'] ] = $args;
+	}
+
+	/**
+	 * Add the `filters.extensions` property to the input schema of a list
+	 * ability, when the feature is on and the resource has filters. It does
+	 * not allow other filters, because a filter that the query ignores
+	 * returns wrong results.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array<string, mixed> $schema        Input schema.
+	 * @param string               $resource_name Resource.
+	 * @return array<string, mixed>
+	 */
+	public static function add_query_filters_schema( array $schema, string $resource_name ): array {
+		if ( empty( self::$filters[ $resource_name ] ) || ! AbilityContracts::is_enabled() ) {
+			return $schema;
+		}
+
+		$extensions = array(
+			'type'                 => 'object',
+			'description'          => __( 'Filters that extensions add, keyed by extension namespace, then filter.', 'woocommerce' ),
+			'properties'           => array(),
+			'additionalProperties' => false,
+		);
+		foreach ( self::$filters[ $resource_name ] as $namespace => $filters ) {
+			$extensions['properties'][ $namespace ] = array(
+				'type'                 => 'object',
+				'properties'           => array_map(
+					static function ( array $args ): array {
+						return $args['schema'];
+					},
+					$filters
+				),
+				'additionalProperties' => false,
+			);
+		}
+		$schema['properties']['filters'] = array(
+			'type'                 => 'object',
+			'properties'           => array( 'extensions' => $extensions ),
+			'additionalProperties' => false,
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the query arguments of the filters in the input of a list ability.
+	 * Each key holds one clause for each filter, so `array_merge_recursive()`
+	 * adds them to WP_Query or wc_get_orders() arguments with AND.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string               $resource_name Resource.
+	 * @param array<string, mixed> $input         Ability input.
+	 * @return array<string, array>|\WP_Error The error of a filter that refused its value or failed.
+	 */
+	public static function get_query_args( string $resource_name, array $input ) {
+		$query_args = array();
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $query_args;
+		}
+
+		foreach ( self::$filters[ $resource_name ] ?? array() as $namespace => $filters ) {
+			foreach ( $filters as $filter => $args ) {
+				if ( ! is_array( $input['filters']['extensions'][ $namespace ] ?? null ) || ! array_key_exists( $filter, $input['filters']['extensions'][ $namespace ] ) ) {
+					continue;
+				}
+
+				$value = rest_sanitize_value_from_schema( $input['filters']['extensions'][ $namespace ][ $filter ], $args['schema'], $filter );
+				try {
+					$clauses = call_user_func( $args['callback'], $value );
+				} catch ( \Throwable $e ) {
+					wc_get_logger()->error(
+						sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ),
+						array( 'source' => 'ability-extensions' )
+					);
+					$clauses = null;
+				}
+				if ( is_wp_error( $clauses ) ) {
+					return $clauses;
+				}
+				if ( ! is_array( $clauses ) || ! empty( array_diff_key( $clauses, array_flip( self::QUERY_ARG_KEYS ) ) ) ) {
+					return new \WP_Error(
+						'woocommerce_ability_extension_filter_failed',
+						/* translators: %s: filter name, such as subscriptions.subscribable. */
+						sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $namespace . '.' . $filter ),
+						array( 'status' => 500 )
+					);
+				}
+				foreach ( $clauses as $key => $clause ) {
+					$query_args[ $key ][] = $clause;
+				}
+			}
+		}
+		return $query_args;
 	}
 
 	/**
@@ -276,5 +409,32 @@ class AbilityExtensions {
 		wc_get_logger()->error( $message, array( 'source' => 'ability-extensions' ) );
 		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.3.0' );
 		return false;
+	}
+
+	/**
+	 * Whether the arguments of a registration are valid. Reports the first argument that is not.
+	 *
+	 * @param string $method       Method that registers.
+	 * @param array  $args         Registration arguments.
+	 * @param string $name_key     Argument that names the field or filter.
+	 * @param string $callback_key Argument that holds the callback.
+	 * @return bool
+	 */
+	private static function has_valid_args( string $method, array $args, string $name_key, string $callback_key ): bool {
+		foreach ( array( 'resource', 'namespace', $name_key ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( $method, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
+				return false;
+			}
+		}
+		if ( ! is_array( $args['schema'] ?? null ) ) {
+			wc_doing_it_wrong( $method, 'The "schema" argument must be an array.', '11.3.0' );
+			return false;
+		}
+		if ( ! is_callable( $args[ $callback_key ] ?? null ) ) {
+			wc_doing_it_wrong( $method, sprintf( 'The "%s" argument must be callable.', $callback_key ), '11.3.0' );
+			return false;
+		}
+		return true;
 	}
 }

@@ -11,11 +11,16 @@ use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Namespaced extension fields in the product and order abilities, read and written through the REST route.
  */
 class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
+
+	use HPOSToggleTrait;
 
 	private const CODE_SCHEMA = array(
 		'type'  => 'string',
@@ -84,6 +89,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		wp_set_current_user( self::$administrator_id );
 		$this->set_feature( true );
 		add_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_fields' ) );
+		add_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_filters' ) );
 	}
 
 	/**
@@ -97,6 +103,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			remove_action( $hook, $callback, $priority );
 		}
 		$this->test_actions = array();
+		remove_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_filters' ) );
 		$this->set_feature( false );
 		$this->reset_registries();
 		wp_set_current_user( 0 );
@@ -191,6 +198,292 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Register a product filter and an order filter, the way an extension does inside woocommerce_ability_extensions_init.
+	 *
+	 * @internal
+	 */
+	public function register_test_filters(): void {
+		AbilityExtensions::register_query_filter(
+			array(
+				'resource'  => 'product',
+				'namespace' => 'test-ext',
+				'filter'    => 'has_code',
+				'schema'    => array( 'type' => 'boolean' ),
+				'callback'  => static function ( bool $has_code ) {
+					return array(
+						'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							array(
+								'key'     => '_test_code',
+								'compare' => $has_code ? 'EXISTS' : 'NOT EXISTS',
+							),
+						),
+					);
+				},
+			)
+		);
+		AbilityExtensions::register_query_filter(
+			array(
+				'resource'  => 'product',
+				'namespace' => 'test-ext',
+				'filter'    => 'category',
+				'schema'    => array( 'type' => 'string' ),
+				'callback'  => static function ( string $slug ) {
+					return array(
+						'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+							array(
+								'taxonomy' => 'product_cat',
+								'field'    => 'slug',
+								'terms'    => $slug,
+							),
+						),
+					);
+				},
+			)
+		);
+		AbilityExtensions::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'test-ext',
+				'filter'    => 'tag',
+				'schema'    => array( 'type' => 'string' ),
+				'callback'  => static function ( string $tag ) {
+					if ( 'bad' === $tag ) {
+						return new \WP_Error( 'test_bad_tag', 'Bad tag.', array( 'status' => 400 ) );
+					}
+					return array(
+						'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							array(
+								'key'   => '_test_tag',
+								'value' => $tag,
+							),
+						),
+					);
+				},
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should return only the products that match an extension filter sent as a query string, with correct pagination.
+	 */
+	public function test_product_filter_returns_matching_products(): void {
+		$with_code = array();
+		foreach ( array( 'A1', 'A2', 'A3' ) as $code ) {
+			$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen ' . $code ) );
+			$product->update_meta_data( '_test_code', $code );
+			$product->save();
+			$with_code[] = $product->get_id();
+		}
+		$without_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
+		$filters      = array( 'extensions' => array( 'test-ext' => array( 'has_code' => 'true' ) ) );
+
+		$page_one = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'search'   => 'Pen',
+				'per_page' => 2,
+				'filters'  => $filters,
+			)
+		);
+		$page_two = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'search'   => 'Pen',
+				'per_page' => 2,
+				'page'     => 2,
+				'filters'  => $filters,
+			)
+		);
+		$plain    = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'search'  => 'Pen',
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => 'false' ) ) ),
+			)
+		);
+
+		$this->assertSame( 2, $page_one['total_pages'] );
+		$this->assertEqualsCanonicalizing( $with_code, array_merge( array_column( $page_one['products'], 'id' ), array_column( $page_two['products'], 'id' ) ) );
+		$this->assertSame( array( $without_code->get_id() ), array_column( $plain['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should add a tax_query filter to Core's own product type clauses with AND.
+	 */
+	public function test_product_tax_filter_adds_to_core_clauses(): void {
+		$category = wp_insert_term( 'Gifts', 'product_cat' )['term_id'];
+		$simple   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen simple' ) );
+		$external = \WC_Helper_Product::create_external_product();
+		foreach ( array( $simple, $external ) as $product ) {
+			$product->set_category_ids( array( $category ) );
+			$product->save();
+		}
+		\WC_Helper_Product::create_external_product();
+
+		$output = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'product_type_alias' => 'affiliate',
+				'filters'            => array( 'extensions' => array( 'test-ext' => array( 'category' => 'gifts' ) ) ),
+			)
+		);
+
+		$this->assertSame( array( $external->get_id() ), array_column( $output['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should not filter a product query that a hook runs inside the ability's query.
+	 */
+	public function test_product_filter_does_not_reach_a_nested_query(): void {
+		$with_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen coded' ) );
+		$with_code->update_meta_data( '_test_code', 'A1' );
+		$with_code->save();
+		$without_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
+		$nested       = null;
+		$run_nested   = static function ( $wp_query_args ) use ( &$nested ) {
+			if ( null === $nested ) {
+				$nested = array();
+				$nested = wc_get_products(
+					array(
+						'limit'  => -1,
+						'return' => 'ids',
+					)
+				);
+			}
+			return $wp_query_args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $run_nested, 5 );
+
+		$output = $this->run_ability(
+			'woocommerce/products-query',
+			array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => 'true' ) ) ) )
+		);
+
+		remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $run_nested, 5 );
+		$this->assertSame( array( $with_code->get_id() ), array_column( $output['products'], 'id' ) );
+		$this->assertContains( $without_code->get_id(), $nested );
+	}
+
+	/**
+	 * @testdox Should return only the orders that match an extension filter, with HPOS and with posts storage, with and without sync.
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 * @param bool $sync Whether HPOS and posts storage sync.
+	 */
+	public function test_order_filter_returns_matching_orders( bool $hpos, bool $sync ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		if ( $hpos ) {
+			$this->setup_cot();
+		} else {
+			$this->toggle_cot_feature_and_usage( false );
+		}
+		if ( $sync ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+
+		try {
+			$tagged = array();
+			foreach ( array( 'gift', 'gift', 'plain' ) as $tag ) {
+				$order = \WC_Helper_Order::create_order();
+				$order->update_meta_data( '_test_tag', $tag );
+				$order->save();
+				if ( 'gift' === $tag ) {
+					$tagged[] = $order->get_id();
+				}
+			}
+
+			$output = $this->run_ability(
+				'woocommerce/orders-query',
+				array(
+					'per_page' => 1,
+					'filters'  => array( 'extensions' => array( 'test-ext' => array( 'tag' => 'gift' ) ) ),
+				)
+			);
+
+			$this->assertSame( $hpos, OrderUtil::custom_orders_table_usage_is_enabled() );
+			$this->assertSame( $sync, OrderUtil::is_custom_order_tables_in_sync() );
+			$this->assertSame( 2, $output['total_pages'] );
+			$this->assertContains( $output['orders'][0]['id'], $tagged );
+		} finally {
+			if ( $hpos ) {
+				$this->clean_up_cot_setup();
+			}
+			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should list the filters in the input schemas, and refuse a filter that is not registered.
+	 */
+	public function test_input_schemas_list_filters_and_refuse_unknown_ones(): void {
+		$products = $this->get_input_schema( 'woocommerce/products-query' )['properties']['filters']['properties']['extensions'];
+		$orders   = $this->get_input_schema( 'woocommerce/orders-query' )['properties']['filters']['properties']['extensions'];
+
+		$response = $this->run_ability_response(
+			'woocommerce/orders-query',
+			array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'unknown' => 'x' ) ) ) )
+		);
+
+		$this->assertSame( array( 'type' => 'boolean' ), $products['properties']['test-ext']['properties']['has_code'] );
+		$this->assertSame( array( 'type' => 'string' ), $orders['properties']['test-ext']['properties']['tag'] );
+		$this->assertSame( 400, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Should return the error of a filter that refuses its value, or that returns arguments Core does not support.
+	 */
+	public function test_a_filter_that_refuses_or_fails_returns_an_error(): void {
+		add_action(
+			'woocommerce_ability_extensions_init',
+			static function () {
+				AbilityExtensions::register_query_filter(
+					array(
+						'resource'  => 'order',
+						'namespace' => 'test-ext',
+						'filter'    => 'broken',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static fn() => array( 'post__in' => array( 1 ) ),
+					)
+				);
+			}
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/orders-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tag' => 'bad' ) ) ) ) );
+		$failed  = $this->run_ability_response( 'woocommerce/orders-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'broken' => true ) ) ) ) );
+
+		$this->assertSame( 'test_bad_tag', $refused->get_data()['code'] );
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $failed->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should refuse a filter on a resource that has no list ability.
+	 */
+	public function test_a_filter_on_an_unsupported_resource_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_query_filter' );
+
+		AbilityExtensions::register_query_filter(
+			array(
+				'resource'  => 'order_item',
+				'namespace' => 'test-ext',
+				'filter'    => 'gift',
+				'schema'    => array( 'type' => 'boolean' ),
+				'callback'  => '__return_empty_array',
+			)
+		);
+
+		$this->assertSame( array(), AbilityExtensions::get_query_args( 'order_item', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'gift' => true ) ) ) ) ) );
 	}
 
 	/**
@@ -293,6 +586,8 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		)['orders'];
 
 		$this->assertSame( 0, did_action( 'woocommerce_ability_extensions_init' ) );
+		$this->assertArrayNotHasKey( 'filters', $this->get_input_schema( 'woocommerce/products-query' )['properties'] );
+		$this->assertSame( 400, $this->run_ability_response( 'woocommerce/products-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => true ) ) ) ) )->get_status() );
 		$this->assertArrayNotHasKey( 'extensions', $this->get_output_schema( 'woocommerce/products-query' )['properties']['products']['items']['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $products[0] );
 		$this->assertArrayNotHasKey( 'extensions', $orders[0] );
@@ -1022,6 +1317,16 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Read an ability's input schema through the REST route.
+	 *
+	 * @param string $name Ability name.
+	 * @return array
+	 */
+	private function get_input_schema( string $name ): array {
+		return $this->get_ability( $name )['input_schema'];
+	}
+
+	/**
 	 * Read an ability through the REST route.
 	 *
 	 * @param string $name Ability name.
@@ -1049,7 +1354,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported', 'validators' ) as $property ) {
+		foreach ( array( 'fields', 'reported', 'validators', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
