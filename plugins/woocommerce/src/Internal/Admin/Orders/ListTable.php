@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
+use WP_Post_Type;
 use WP_Screen;
 
 /**
@@ -323,23 +324,32 @@ class ListTable extends WP_List_Table {
 	protected function get_bulk_actions() {
 		$selected_status = $this->order_query_args['status'] ?? false;
 
-		if ( ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return array();
 		}
+
+		// Hide the destructive actions from roles that cannot delete orders.
+		$can_delete_orders = $this->current_user_can_delete_orders();
 
 		if ( array( 'trash' ) === $selected_status ) {
 			$actions = array(
 				'untrash' => __( 'Restore', 'woocommerce' ),
-				'delete'  => __( 'Delete permanently', 'woocommerce' ),
 			);
+
+			if ( $can_delete_orders ) {
+				$actions['delete'] = __( 'Delete permanently', 'woocommerce' );
+			}
 		} else {
 			$actions = array(
 				'mark_processing' => __( 'Change status to processing', 'woocommerce' ),
 				'mark_on-hold'    => __( 'Change status to on-hold', 'woocommerce' ),
 				'mark_completed'  => __( 'Change status to completed', 'woocommerce' ),
 				'mark_cancelled'  => __( 'Change status to cancelled', 'woocommerce' ),
-				'trash'           => __( 'Move to Trash', 'woocommerce' ),
 			);
+
+			if ( $can_delete_orders ) {
+				$actions['trash'] = __( 'Move to Trash', 'woocommerce' );
+			}
 		}
 
 		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
@@ -347,6 +357,20 @@ class ListTable extends WP_List_Table {
 		}
 
 		return $actions;
+	}
+
+	/**
+	 * Whether the current user can delete orders of this list table's type.
+	 *
+	 * Checks the `delete_others_posts` primitive (such as `delete_others_shop_orders`)
+	 * because that is what per-order `delete_post` checks resolve to: orders have no
+	 * meaningful author, so they are treated as belonging to someone else for every
+	 * user but ID 1.
+	 *
+	 * @return bool
+	 */
+	private function current_user_can_delete_orders(): bool {
+		return $this->wp_post_type && current_user_can( $this->wp_post_type->cap->delete_others_posts );
 	}
 
 	/**
@@ -820,7 +844,9 @@ class ListTable extends WP_List_Table {
 			}
 		}
 
-		if ( $this->is_trash && $this->has_items() && current_user_can( 'edit_others_shop_orders' ) ) {
+		// Emptying the trash permanently deletes orders, so it needs the delete capability too.
+		if ( $this->is_trash && $this->has_items() && $this->wp_post_type
+			&& current_user_can( $this->wp_post_type->cap->edit_others_posts ) && $this->current_user_can_delete_orders() ) {
 			submit_button( __( 'Empty Trash', 'woocommerce' ), 'apply', 'delete_all', false );
 		}
 
@@ -1434,8 +1460,21 @@ class ListTable extends WP_List_Table {
 	public function handle_bulk_actions() {
 		$action = $this->current_action();
 
-		if ( ! $action || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+		if ( ! $action || ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return;
+		}
+
+		/*
+		 * Checked here, before the nonce check and with no side effects, so the capability applies
+		 * however the request was assembled: the bulk UI, the Empty Trash button, or a crafted POST.
+		 * Failing loudly matches how wp-admin/edit.php handles the equivalent bulk actions.
+		 */
+		if ( in_array( $action, array( 'trash', 'delete', 'delete_all' ), true ) && ! $this->current_user_can_delete_orders() ) {
+			if ( 'trash' === $action ) {
+				wp_die( esc_html__( 'Sorry, you are not allowed to move these orders to the Trash.', 'woocommerce' ) );
+			}
+
+			wp_die( esc_html__( 'Sorry, you are not allowed to delete these orders.', 'woocommerce' ) );
 		}
 
 		check_admin_referer( 'bulk-orders' );
@@ -1593,6 +1632,9 @@ class ListTable extends WP_List_Table {
 	/**
 	 * Handles bulk trashing of orders.
 	 *
+	 * IDs that do not resolve to an order of this list table's type are skipped: the
+	 * `woocommerce_bulk_action_ids` filter can introduce arbitrary IDs into the list.
+	 *
 	 * @param int[] $ids Order IDs to be trashed.
 	 * @param bool  $force_delete When set, the order will be completed deleted. Otherwise, it will be trashed.
 	 *
@@ -1603,10 +1645,15 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			$order = wc_get_order( $id );
+
+			if ( ! $order instanceof WC_Order || $order->get_type() !== $this->order_type ) {
+				continue;
+			}
+
 			$order->delete( $force_delete );
 			$updated_order = wc_get_order( $id );
 
-			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
+			if ( $force_delete ? false === $updated_order : ( $updated_order && OrderStatus::TRASH === $updated_order->get_status() ) ) {
 				++$changed;
 			}
 		}
