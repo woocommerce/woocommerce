@@ -77,7 +77,7 @@ const productButtonStore = {
 			);
 
 			const selectedAttributes = productsState.productVariationInContext
-				? formContext?.selectedAttributes ?? []
+				? ( formContext?.selectedAttributes ?? [] )
 				: undefined;
 
 			return getInCartQuantity( wooState.cart?.items ?? [], {
