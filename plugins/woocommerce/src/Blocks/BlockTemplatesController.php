@@ -67,7 +67,7 @@ class BlockTemplatesController {
 				if ( $template_part && ! empty( $template_part->content ) ) {
 					$content = do_blocks( $template_part->content );
 
-					// Set block-support context so get_block_wrapper_attributes resolves this block's attributes, not a parent's.
+					// Correctness: set block-support context so get_block_wrapper_attributes resolves this block's attributes, not a parent's.
 					list( $previous_block, \WP_Block_Supports::$block_to_render )     = array( \WP_Block_Supports::$block_to_render, $parsed_block );
 					list( $wrapper_attributes, \WP_Block_Supports::$block_to_render ) = array( get_block_wrapper_attributes(), $previous_block );
 
