@@ -449,6 +449,31 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Identifier-free Product nodes are associated with the product that generated them.
+	 */
+	public function test_output_structured_data_distinguishes_identifier_free_products(): void {
+		$product       = WC_Helper_Product::create_simple_product();
+		$other_product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		add_filter(
+			'woocommerce_structured_data_product',
+			static function ( $markup ) {
+				unset( $markup['@id'], $markup['url'] );
+				return $markup;
+			}
+		);
+
+		$this->structured_data->generate_product_data( $other_product );
+		$this->output_footer_structured_data();
+		$this->assertCount( 2, $this->structured_data->get_data(), 'An unrelated Product node must not suppress the queried product.' );
+		$this->assertSame( $product->get_name(), $this->structured_data->get_data()[1]['name'] );
+
+		$this->output_footer_structured_data();
+		$this->assertCount( 2, $this->structured_data->get_data(), 'The queried product must not be generated twice.' );
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void

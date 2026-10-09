@@ -33,6 +33,13 @@ class WC_Structured_Data {
 	private $_data = array();
 
 	/**
+	 * Product IDs associated with generated nodes, indexed by position in $_data.
+	 *
+	 * @var array
+	 */
+	private $product_data_ids = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -56,10 +63,11 @@ class WC_Structured_Data {
 	 *
 	 * @param  array $data  Structured data. The `@type` value accepts a string or an array of strings.
 	 *                      Every type must contain 1 to 20 ASCII letters; any invalid array member rejects the node.
-	 * @param  bool  $reset Unset data (default: false).
+	 * @param  bool  $reset      Unset data (default: false).
+	 * @param  int   $product_id Product ID for generated Product data (default: 0).
 	 * @return bool
 	 */
-	public function set_data( $data, $reset = false ) {
+	public function set_data( $data, $reset = false, $product_id = 0 ) {
 		if ( isset( $data['@type'] ) && is_array( $data['@type'] ) ) {
 			if ( empty( $data['@type'] ) ) {
 				return false;
@@ -78,9 +86,13 @@ class WC_Structured_Data {
 
 		if ( $reset && isset( $this->_data ) ) {
 			unset( $this->_data );
+			$this->product_data_ids = array();
 		}
 
 		$this->_data[] = $data;
+		if ( $product_id && in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) ) {
+			$this->product_data_ids[ array_key_last( $this->_data ) ] = $product_id;
+		}
 
 		return true;
 	}
@@ -188,11 +200,14 @@ class WC_Structured_Data {
 	 */
 	public function output_structured_data() {
 		if ( 'wp_footer' === current_action() && is_product() && false !== has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
-			$permalink        = get_permalink( get_queried_object_id() );
+			$product_id       = get_queried_object_id();
+			$permalink        = get_permalink( $product_id );
 			$has_product_data = false;
-			foreach ( $this->get_data() as $data ) {
+			foreach ( $this->get_data() as $index => $data ) {
 				$is_product         = in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true );
-				$is_current_product = ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink;
+				$is_current_product = isset( $this->product_data_ids[ $index ] )
+					? $this->product_data_ids[ $index ] === $product_id
+					: ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink;
 				if ( $is_product && $is_current_product ) {
 					$has_product_data = true;
 					break;
@@ -200,7 +215,7 @@ class WC_Structured_Data {
 			}
 
 			if ( ! $has_product_data ) {
-				$product = wc_get_product( get_queried_object_id() );
+				$product = wc_get_product( $product_id );
 				if ( $product ) {
 					$this->generate_product_data( $product );
 				}
@@ -568,7 +583,14 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		/**
+		 * Filters structured data for a product.
+		 *
+		 * @since 3.0.0
+		 * @param array      $markup  Product structured data.
+		 * @param WC_Product $product Product being described.
+		 */
+		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ), false, $product->get_id() );
 	}
 
 	/**
