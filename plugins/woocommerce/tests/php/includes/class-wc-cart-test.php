@@ -693,22 +693,15 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_cart_item_backorder_notification', $capture, 10, 4 );
 
-		try {
-			list( $cart_item_key ) = $this->add_variation_to_cart( $product, $variation );
+		list( $cart_item_key ) = $this->add_variation_to_cart( $product, $variation );
 
-			$html = wc_get_template_html( 'cart/cart.php' );
+		$html = wc_get_template_html( 'cart/cart.php' );
 
-			$this->assertSame( $product->get_id(), $received[0], 'The product ID argument stays the parent ID for backward compatibility.' );
-			$this->assertIsArray( $received[1], 'The cart item should be passed to the filter.' );
-			$this->assertSame( $variation->get_id(), $received[1]['variation_id'] );
-			$this->assertSame( $cart_item_key, $received[2] );
-			$this->assertStringContainsString( 'Variation ' . $variation->get_id() . ' ships later', $html );
-		} finally {
-			remove_filter( 'woocommerce_cart_item_backorder_notification', $capture, 10 );
-			WC()->cart->empty_cart();
-			$variation->delete( true );
-			$product->delete( true );
-		}
+		$this->assertSame( $product->get_id(), $received[0], 'The product ID argument stays the parent ID for backward compatibility.' );
+		$this->assertIsArray( $received[1], 'The cart item should be passed to the filter.' );
+		$this->assertSame( $variation->get_id(), $received[1]['variation_id'] );
+		$this->assertSame( $cart_item_key, $received[2] );
+		$this->assertStringContainsString( 'Variation ' . $variation->get_id() . ' ships later', $html );
 	}
 
 	/**
