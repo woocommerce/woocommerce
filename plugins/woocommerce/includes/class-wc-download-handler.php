@@ -814,14 +814,38 @@ class WC_Download_Handler {
 	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
 	 */
 	private static function clean_buffers() {
-		if ( ob_get_level() ) {
-			$levels = ob_get_level();
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		foreach ( array_reverse( ob_get_status( true ) ) as $buffer ) {
+			$flags = $buffer['flags'];
+
+			if ( $flags & PHP_OUTPUT_HANDLER_REMOVABLE ) {
+				ob_end_clean();
+				continue;
 			}
-		} else {
-			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+			// This buffer can't be removed, and the ones below it can't be reached, so the file has to go through them.
+			if ( $flags & PHP_OUTPUT_HANDLER_CLEANABLE ) {
+				ob_clean();
+			}
+
+			return;
 		}
+	}
+
+	/**
+	 * Send the output so far to the web server.
+	 *
+	 * PHP's flush() only pushes its own write buffer, so a remaining output buffer has to be flushed into it first.
+	 * Only call this after file data has been output: some servers send the headers on flush(), and a read that
+	 * fails before any data must still be able to send an error page instead.
+	 */
+	private static function flush_output(): void {
+		$buffer = ob_get_status();
+
+		if ( $buffer && ( $buffer['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) ) {
+			ob_flush();
+		}
+
+		flush();
 	}
 
 	/**
@@ -918,12 +942,11 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$output_sent = $output_sent || '' !== $chunk;
-				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
+				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
 
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
+				if ( '' !== $chunk ) {
+					$output_sent = true;
+					self::flush_output();
 				}
 			}
 		} else {
@@ -936,10 +959,9 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$output_sent = $output_sent || '' !== $chunk;
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
+				if ( '' !== $chunk ) {
+					$output_sent = true;
+					self::flush_output();
 				}
 			}
 		}
