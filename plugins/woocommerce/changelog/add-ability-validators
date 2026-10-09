@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add AbilityExtensions::register_validator() to the experimental ability contracts feature. A validator can refuse a product or order change before the one save.
