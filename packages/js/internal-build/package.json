@@ -28,6 +28,9 @@
 		"./style-build": {
 			"require": "./src/style-build/index.cjs"
 		},
+		"./webpack-optimization": {
+			"require": "./src/webpack-optimization/index.cjs"
+		},
 		"./configs/tsconfig.json": "./configs/tsconfig.json",
 		"./type-overrides/*": "./type-overrides/*",
 		"./styles/*": "./styles/*"
@@ -37,6 +40,7 @@
 		"build-types",
 		"configs",
 		"src/style-build",
+		"src/webpack-optimization",
 		"styles",
 		"type-overrides",
 		"scripts"
@@ -69,6 +73,7 @@
 		"postcss-loader": "4.3.x",
 		"rtlcss": "4.3.x",
 		"sass-loader": "10.5.x",
+		"terser-webpack-plugin": "5.4.0",
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {
