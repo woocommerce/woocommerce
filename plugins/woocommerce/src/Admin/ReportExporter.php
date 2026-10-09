@@ -212,13 +212,16 @@ class ReportExporter {
 	 * @return void
 	 */
 	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = false, $num_batches = 0 ) {
-		$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
+		$exporter = self::get_page_exporter( $page_number, $export_id, $report_type, $report_args );
 
 		// An export queued before 11.3.0 queued all its pages at once, and its email with them.
 		if ( ! $num_batches ) {
+			$exporter->generate_file();
 			self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
 			return;
 		}
+
+		$written = $exporter->write_page();
 
 		// Without Action Scheduler the other pages run here, in a loop rather than one nested call per page.
 		/**
@@ -227,23 +230,23 @@ class ReportExporter {
 		 * @since 4.0.0
 		 */
 		if ( ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false ) ) {
-			while ( $page_number < $num_batches ) {
+			while ( $written && $page_number < $num_batches ) {
 				++$page_number;
-				$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
+				$exporter = self::get_page_exporter( $page_number, $export_id, $report_type, $report_args );
+				$written  = $exporter->write_page();
 			}
 		}
 
-		if ( $page_number < $num_batches ) {
+		if ( $written && $page_number < $num_batches ) {
 			self::update_export_percentage_complete( $report_type, $export_id, (int) floor( $page_number / $num_batches * 100 ) );
 			self::queue_next_page( array( $page_number + 1, $export_id, $report_type, $report_args, $email_user_id, $num_batches ) );
 			return;
 		}
 
-		// The parent only writes the headers row file when the rows it counted on this page add up to 100%,
-		// which they do not when rows are added to the report during the export.
-		if ( ! $exporter->write_headers_row_file() ) {
+		// A page that was not written stops the export here, or it would be marked complete with rows missing.
+		if ( ! $written || ! $exporter->write_headers_row_file() ) {
 			wc_get_logger()->warning(
-				sprintf( 'The %1$s report export %2$s did not finish: its file is missing or not writable.', $report_type, $export_id ),
+				sprintf( 'The %1$s report export %2$s did not finish: its file could not be written on page %3$d of %4$d.', $report_type, $export_id, $page_number, $num_batches ),
 				array( 'source' => 'report-csv-exporter' )
 			);
 
@@ -258,21 +261,20 @@ class ReportExporter {
 	}
 
 	/**
-	 * Write one page of an export to the export file.
+	 * Get the exporter that writes one page of an export to the export file.
 	 *
 	 * @param int    $page_number Page number.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
-	 * @return ReportCSVExporter The exporter that wrote the page.
+	 * @return ReportCSVExporter
 	 */
-	private static function write_export_page( $page_number, $export_id, $report_type, $report_args ) {
+	private static function get_page_exporter( $page_number, $export_id, $report_type, $report_args ) {
 		// The arguments come from a scheduled action, so they are whatever it was queued with.
 		$report_args = is_array( $report_args ) ? $report_args : array();
 
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
-		$exporter->generate_file();
 
 		return $exporter;
 	}

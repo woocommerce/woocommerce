@@ -355,6 +355,21 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Write one page of an export that write_headers_row_file() finishes.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @return bool Whether the page's rows were written.
+	 */
+	public function write_page() {
+		$written = $this->generate_file();
+
+		$this->delete_headers_row_file();
+
+		return $written;
+	}
+
+	/**
 	 * Write the headers row file, which is what marks an export complete and downloadable.
 	 *
 	 * Not written when the export file is missing or not writable, since the parent skips a page's rows on the same check.
@@ -372,7 +387,26 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 
 		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
-		return false !== @file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		if ( strlen( $header ) !== @file_put_contents( $this->get_headers_row_file_path(), $header ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			$this->delete_headers_row_file();
+
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Delete the headers row file, so the export is not downloadable.
+	 *
+	 * @return void
+	 */
+	private function delete_headers_row_file() {
+		$headers_path = $this->get_headers_row_file_path();
+
+		if ( file_exists( $headers_path ) ) {
+			wp_delete_file( $headers_path );
+		}
 	}
 
 	/**

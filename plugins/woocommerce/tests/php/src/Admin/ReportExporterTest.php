@@ -42,10 +42,13 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	private $pages_run = 0;
 
 	/**
-	 * Remove files and the scheduler queue, which the database transaction does not roll back.
+	 * Remove files, the scheduler queue and the REST server, which the database transaction does not roll back.
 	 */
 	public function tearDown(): void {
 		try {
+			// An export creates the REST server, and its report routes load from hooks that the parent removes after each test.
+			$this->clear_rest_server();
+
 			foreach ( $this->paths as $path ) {
 				if ( file_exists( $path ) ) {
 					wp_delete_file( $path );
@@ -930,6 +933,80 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 			preg_grep( '/^warning: The stock report export lostfile did not finish/', $logged ),
 			'The unfinished export must be logged, since the scheduler records its last page as complete.'
 		);
+	}
+
+	/**
+	 * @testdox An export stops at a page whose rows could not be written, so it is not marked complete with rows missing.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $inline Whether the pages run in one request, without Action Scheduler.
+	 */
+	public function test_export_stops_at_a_page_that_could_not_be_written( bool $inline ): void {
+		if ( $inline ) {
+			add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		}
+		reset_phpmailer_instance();
+
+		// The report is read once to count its rows when the export is queued, then once per page.
+		// The file is gone when page 2 is written, and back in time for page 3.
+		$path  = $this->export_path( 'failedpage' );
+		$reads = 0;
+		add_filter(
+			'woocommerce_export_report_data_endpoint',
+			static function ( $endpoint ) use ( $path, &$reads ) {
+				++$reads;
+
+				if ( 3 === $reads ) {
+					wp_delete_file( $path );
+				} elseif ( 4 === $reads ) {
+					file_put_contents( $path, '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				}
+
+				return $endpoint;
+			}
+		);
+
+		$this->queue_stock_export( 'failedpage' );
+		$this->run_queued_pages();
+
+		$this->assertFileDoesNotExist( $path, 'No page may run after the one that could not be written.' );
+		$this->assertFileDoesNotExist( $path . '.headers' );
+		$this->assertNotSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'failedpage' ) );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+		$this->assertEmpty( tests_retrieve_phpmailer_instance()->mock_sent );
+	}
+
+	/**
+	 * @testdox An export is not downloadable before its last page when rows are removed from the report while its pages run.
+	 */
+	public function test_export_is_not_downloadable_early_when_rows_are_removed_during_the_export(): void {
+		$this->queue_stock_export( 'shrank' );
+		$this->run_queued_pages( 1 );
+
+		// Page 2 now ends on the last of 4 rows, which the parent exporter reads as 100%.
+		$removed = wc_get_products(
+			array(
+				'limit'  => 3,
+				'return' => 'ids',
+			)
+		);
+		foreach ( $removed as $product_id ) {
+			wp_delete_post( $product_id, true );
+		}
+
+		$this->run_queued_pages( 1 );
+
+		$exporter = new ReportCSVExporter();
+		$exporter->set_filename( 'wc-stock-report-export-shrank' );
+
+		$this->assertFalse( $exporter->export_file_exists(), 'Only the last page may write the headers row file.' );
+		$this->assertSame( 50, ReportExporter::get_export_percentage_complete( 'stock', 'shrank' ) );
+
+		$this->run_queued_pages();
+
+		$this->assertTrue( $exporter->export_file_exists() );
+		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'shrank' ) );
 	}
 
 	/**
