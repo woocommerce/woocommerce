@@ -276,6 +276,21 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
+	 * Output a button that copies the adjacent formatted address to the clipboard.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $label Accessible label for the button.
+	 */
+	private static function output_copy_address_button( string $label ): void {
+		?>
+		<button type="button" class="wc-order-copy-address" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>">
+			<span class="screen-reader-text"><?php echo esc_html( $label ); ?></span>
+		</button>
+		<?php
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.
@@ -508,10 +523,23 @@ class WC_Meta_Box_Order_Data {
 						</p>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
+					<?php
+					$user = Users::get_user_in_current_site( $order->get_user_id() );
+
+					$details_not_available_message = __( 'Details are not available for this customer as this user does not exist in the current site.', 'woocommerce' );
+					// If the user is not a guest and is not a valid user in the current site, details are not available.
+					$customer_details_unavailable = $order->get_user_id() !== 0 && is_wp_error( $user );
+					$billing_address              = $customer_details_unavailable ? '' : $order->get_formatted_billing_address();
+					?>
 					<div class="order_data_column order_data_column_billing">
 						<h3>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+							<?php
+							if ( $billing_address ) {
+								self::output_copy_address_button( __( 'Copy billing address to clipboard', 'woocommerce' ) );
+							}
+							?>
 							<span>
 								<a href="#" class="load_customer_billing" style="display:none;"><?php esc_html_e( 'Load billing address', 'woocommerce' ); ?></a>
 							</span>
@@ -519,15 +547,11 @@ class WC_Meta_Box_Order_Data {
 						<div class="address">
 							<?php
 							// Display values.
-							$user = Users::get_user_in_current_site( $order->get_user_id() );
-
-							$details_not_available_message = __( 'Details are not available for this customer as this user does not exist in the current site.', 'woocommerce' );
-							// If the user is not a guest and is not a valid user in the current site, print details not available.
-							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+							if ( $customer_details_unavailable ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								if ( $order->get_formatted_billing_address() ) {
-									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
+								if ( $billing_address ) {
+									echo '<p class="wc-order-formatted-address">' . wp_kses( $billing_address, array( 'br' => array() ) ) . '</p>';
 								} else {
 									echo '<p class="none_set">' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
@@ -649,10 +673,37 @@ class WC_Meta_Box_Order_Data {
 						</div>
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
+					<?php
+					$hide_core_shipping_details = false;
+					$shipping_address           = '';
+
+					if ( ! $customer_details_unavailable ) {
+						$hide_core_shipping_details = 'store-api' === $order->get_created_via()
+							&& self::order_has_no_shipping( $order )
+							&& self::order_has_only_virtual_products( $order )
+							&& self::order_shipping_matches_billing( $order );
+
+						/**
+						 * Filters whether billing-derived shipping details are hidden in the order admin summary.
+						 *
+						 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
+						 * @param WC_Order $order                      Order object.
+						 *
+						 * @since 11.1.0
+						 */
+						$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
+						$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
+					}
+					?>
 					<div class="order_data_column order_data_column_shipping">
 						<h3>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+							<?php
+							if ( $shipping_address ) {
+								self::output_copy_address_button( __( 'Copy shipping address to clipboard', 'woocommerce' ) );
+							}
+							?>
 							<span>
 								<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
 								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php esc_html_e( 'Copy billing address', 'woocommerce' ); ?></a>
@@ -661,28 +712,11 @@ class WC_Meta_Box_Order_Data {
 						<div class="address">
 							<?php
 							// Display values.
-							// If the user is not a guest and is not a valid user in the current site, print details not available.
-							if ( $order->get_user_id() !== 0 && is_wp_error( $user ) ) {
+							if ( $customer_details_unavailable ) {
 								echo '<p>' . esc_html( $details_not_available_message ) . '</p>';
 							} else {
-								$hide_core_shipping_details = 'store-api' === $order->get_created_via()
-									&& self::order_has_no_shipping( $order )
-									&& self::order_has_only_virtual_products( $order )
-									&& self::order_shipping_matches_billing( $order );
-
-								/**
-								 * Filters whether billing-derived shipping details are hidden in the order admin summary.
-								 *
-								 * @param bool     $hide_core_shipping_details Whether core shipping details are hidden.
-								 * @param WC_Order $order                      Order object.
-								 *
-								 * @since 11.1.0
-								 */
-								$hide_core_shipping_details = apply_filters( 'woocommerce_hide_order_admin_shipping_details', $hide_core_shipping_details, $order );
-								$shipping_address           = $hide_core_shipping_details ? '' : $order->get_formatted_shipping_address();
-
 								if ( $shipping_address ) {
-									echo '<p>' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
+									echo '<p class="wc-order-formatted-address">' . wp_kses( $shipping_address, array( 'br' => array() ) ) . '</p>';
 								} else {
 									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}

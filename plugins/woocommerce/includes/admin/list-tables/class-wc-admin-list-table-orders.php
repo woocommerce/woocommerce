@@ -452,6 +452,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'actions_html'               => self::get_order_preview_actions_html( $order ),
 				'ship_to_billing'            => wc_ship_to_billing_address_only(),
 				'needs_shipping'             => $order->needs_shipping_address(),
+				'has_billing_address'        => (bool) $billing_address,
+				'has_shipping_address'       => (bool) $shipping_address,
 				'formatted_billing_address'  => $billing_address ? $billing_address : __( 'N/A', 'woocommerce' ),
 				'formatted_shipping_address' => $shipping_address ? $shipping_address : __( 'N/A', 'woocommerce' ),
 				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
