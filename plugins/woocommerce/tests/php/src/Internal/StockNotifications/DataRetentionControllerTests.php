@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
@@ -78,6 +79,19 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 		);
 		$schedule = wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK );
 		$this->assertFalse( $schedule );
+	}
+
+	/**
+	 * Test that an already stored negative threshold turns the cleanup off and unschedules the daily task.
+	 */
+	public function test_negative_threshold_is_treated_as_zero() {
+		update_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', 30 );
+		$this->assertEquals( 'daily', wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ) );
+
+		update_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', '-5' );
+
+		$this->assertSame( 0, Config::get_unverified_deletion_days_threshold() );
+		$this->assertFalse( wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ) );
 	}
 
 	/**

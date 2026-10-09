@@ -37,14 +37,14 @@ class DataRetentionController {
 	/**
 	 * Responds to changes in the option for deleting unverified notifications.
 	 * If the new value is numeric and greater than zero, it schedules a daily task.
-	 * If the new value is not numeric or is empty, it clears the scheduled tasks.
+	 * If the new value is not numeric, or is zero or less, it clears the scheduled tasks.
 	 *
 	 * @param mixed $unused The old option value or option name (not used in this function).
 	 * @param mixed $new_option_value The new value of the option.
 	 * @return void
 	 */
 	public function schedule_or_unschedule_daily_task( $unused, $new_option_value ): void {
-		if ( ! is_numeric( $new_option_value ) || empty( $new_option_value ) ) {
+		if ( ! is_numeric( $new_option_value ) || (int) $new_option_value <= 0 ) {
 			$this->clear_daily_task();
 			return;
 		}

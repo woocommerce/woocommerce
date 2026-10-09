@@ -26,6 +26,8 @@ class SettingsController {
 		// Add the My Account endpoint setting to the Advanced tab.
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_my_account_endpoint_setting' ), 100, 2 );
 
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'sanitize_unverified_deletion_days_threshold' ) );
+
 		// The product edit hooks stay admin-only: process_product_object() reads $_POST and
 		// checks an admin nonce, so it must not run for cron or CLI code that fires the hook.
 		if ( ! is_admin() ) {
@@ -174,11 +176,15 @@ class SettingsController {
 				),
 
 				array(
-					'title'   => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
-					'desc'    => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce' ),
-					'id'      => 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
-					'default' => Config::get_unverified_deletion_days_threshold(),
-					'type'    => 'number',
+					'title'             => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
+					'desc'              => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce' ),
+					'id'                => 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
+					'default'           => Config::get_unverified_deletion_days_threshold(),
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'min'  => 0,
+						'step' => 1,
+					),
 				),
 
 				array(
@@ -200,6 +206,26 @@ class SettingsController {
 		$settings = array_merge( $settings, $stock_notification_settings );
 
 		return $settings;
+	}
+
+	/**
+	 * Store negative values of the unverified sign-up deletion threshold as 0, which turns the cleanup off.
+	 *
+	 * An empty value is kept as is, since it also means off.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $value The value about to be saved.
+	 * @return mixed
+	 */
+	public function sanitize_unverified_deletion_days_threshold( $value ) {
+		if ( null === $value || '' === $value ) {
+			return $value;
+		}
+
+		return max( 0, (int) $value );
 	}
 
 	/**
