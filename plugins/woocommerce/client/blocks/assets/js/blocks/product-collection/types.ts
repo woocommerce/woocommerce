@@ -125,6 +125,15 @@ export interface ProductCollectionQuery {
 	 */
 	productReferenceType?: 'cart' | 'order' | null;
 	relatedBy?: RelatedBy | undefined;
+	/**
+	 * Products per page for an archive rendered with the "Default" query type.
+	 *
+	 * Read on the server when the archive's main query is built, so the
+	 * template sizes its own pages and pagination, the results count and the
+	 * filter blocks all agree with the collection. Undefined means the store
+	 * default applies.
+	 */
+	archivePerPage?: number | undefined;
 }
 
 export type RelatedBy = {

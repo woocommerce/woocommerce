@@ -582,5 +582,60 @@ test.describe( 'Product Collection', () => {
 				'option update woocommerce_default_catalog_orderby menu_order'
 			);
 		} );
+
+		test( 'products per page can be set on the archive template and the whole page follows it', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.goToEditorTemplate();
+			await pageObject.focusProductCollection();
+
+			const sidebarSettings = pageObject.locateSidebarSettings();
+			const queryTypeLocator = sidebarSettings.getByLabel(
+				SELECTORS.usePageContextControl
+			);
+			await expect(
+				queryTypeLocator.getByLabel( 'Default' )
+			).toBeChecked();
+
+			// With the Default query type the control edits the template's page size.
+			const productsPerPageInput = sidebarSettings.getByRole(
+				'spinbutton',
+				{ name: 'Products per page' }
+			);
+			await expect( productsPerPageInput ).toBeVisible();
+
+			await productsPerPageInput.fill( '5' );
+			await pageObject.refreshLocators( 'editor' );
+			await expect( pageObject.products ).toHaveCount( 5 );
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+			await pageObject.goToProductCatalogFrontend();
+
+			// The archive main query is sized by the template, so the blocks that
+			// read it agree: five products, a pagination, and a matching results count.
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.pagination ).toBeVisible();
+			await expect(
+				page.locator( '.wc-block-product-results-count' )
+			).toHaveText( /Showing 1[-–]5 of \d+ results/ );
+
+			// Resetting the control hands the page size back to the store setting.
+			await pageObject.goToEditorTemplate();
+			await pageObject.focusProductCollection();
+			const resetSidebar = pageObject.locateSidebarSettings();
+			await resetSidebar
+				.getByRole( 'button', { name: 'Settings options' } )
+				.click();
+			await page.getByRole( 'menuitem', { name: 'Reset all' } ).click();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+			await pageObject.goToProductCatalogFrontend();
+			await expect( pageObject.products ).not.toHaveCount( 5 );
+		} );
 	} );
 } );
