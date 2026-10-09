@@ -33,6 +33,20 @@ class WC_Structured_Data {
 	private $_data = array();
 
 	/**
+	 * Product IDs associated with generated nodes, indexed by position in $_data.
+	 *
+	 * @var array
+	 */
+	private $product_data_ids = array();
+
+	/**
+	 * Product ID being added by generate_product_data().
+	 *
+	 * @var int
+	 */
+	private $generating_product_id = 0;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -78,9 +92,13 @@ class WC_Structured_Data {
 
 		if ( $reset && isset( $this->_data ) ) {
 			unset( $this->_data );
+			$this->product_data_ids = array();
 		}
 
 		$this->_data[] = $data;
+		if ( $this->generating_product_id && in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) ) {
+			$this->product_data_ids[ array_key_last( $this->_data ) ] = $this->generating_product_id;
+		}
 
 		return true;
 	}
@@ -187,6 +205,29 @@ class WC_Structured_Data {
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 */
 	public function output_structured_data() {
+		if ( 'wp_footer' === current_action() && is_product() && false !== has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
+			$product_id       = get_queried_object_id();
+			$permalink        = get_permalink( $product_id );
+			$has_product_data = false;
+			foreach ( $this->get_data() as $index => $data ) {
+				$is_product         = in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true );
+				$is_current_product = isset( $this->product_data_ids[ $index ] )
+					? $this->product_data_ids[ $index ] === $product_id
+					: ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink;
+				if ( $is_product && $is_current_product ) {
+					$has_product_data = true;
+					break;
+				}
+			}
+
+			if ( ! $has_product_data ) {
+				$product = wc_get_product( $product_id );
+				if ( $product ) {
+					$this->generate_product_data( $product );
+				}
+			}
+		}
+
 		$types = $this->get_data_type_for_page();
 		$data  = $this->get_structured_data( $types );
 
@@ -226,7 +267,7 @@ class WC_Structured_Data {
 			global $product;
 		}
 
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! is_a( $product, 'WC_Product' ) || '' !== $product->get_post_password() ) {
 			return;
 		}
 
@@ -548,7 +589,20 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		/**
+		 * Filters structured data for a product.
+		 *
+		 * @since 3.0.0
+		 * @param array      $markup  Product structured data.
+		 * @param WC_Product $product Product being described.
+		 */
+		$markup                      = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
+		$this->generating_product_id = $product->get_id();
+		try {
+			$this->set_data( $markup );
+		} finally {
+			$this->generating_product_id = 0;
+		}
 	}
 
 	/**
