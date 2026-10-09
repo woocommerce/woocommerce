@@ -96,7 +96,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						replaceBlock,
 						selectBlock,
 					} );
-					createInfoNotice(
+					void createInfoNotice(
 						__(
 							'Template transformed into blocks!',
 							'woocommerce'
@@ -106,11 +106,10 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 								{
 									label: __( 'Undo', 'woocommerce' ),
 									onClick: () => {
-										const clientIds = pickBlockClientIds(
-											getBlocks()
-										);
+										const clientIds =
+											pickBlockClientIds( getBlocks() );
 
-										replaceBlocks(
+										void replaceBlocks(
 											clientIds,
 											createBlock(
 												'core/group',
@@ -181,6 +180,8 @@ const Edit = ( {
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
 	const blockProps = useBlockProps();
+	const { __unstableMarkNextChangeAsNotPersistent } =
+		useDispatch( blockEditorStore );
 	const { currentPostId } = useSelect( ( sel ) => {
 		return {
 			currentPostId: sel( CORE_EDITOR_STORE )?.getCurrentPostId?.() ?? 0,
@@ -202,14 +203,27 @@ const Edit = ( {
 	const templatePlaceholder = templateDetails?.placeholder ?? 'fallback';
 	const templateType = templateDetails?.type ?? 'fallback';
 
-	useEffect(
-		() =>
+	useEffect( () => {
+		const nextTemplate = templateSlug ?? attributes.template;
+		const nextAlign = attributes.align ?? 'wide';
+
+		if (
+			nextTemplate !== attributes.template ||
+			nextAlign !== attributes.align
+		) {
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
-				template: templateSlug ?? attributes.template,
-				align: attributes.align ?? 'wide',
-			} ),
-		[ attributes.align, attributes.template, setAttributes ]
-	);
+				template: nextTemplate,
+				align: nextAlign,
+			} );
+		}
+	}, [
+		attributes.align,
+		attributes.template,
+		setAttributes,
+		templateSlug,
+		__unstableMarkNextChangeAsNotPersistent,
+	] );
 
 	const { getDescription, getSkeleton, blockifyConfig } =
 		conversionConfig[ templateType ];

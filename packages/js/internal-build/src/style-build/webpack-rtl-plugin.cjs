@@ -13,8 +13,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const rtlcss = require( 'rtlcss' );
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 const pluginName = 'WebpackRTLPlugin';
+const cssRe = /\.css(?:$|\?)/;
 
 class WebpackRTLPlugin {
 	constructor( options ) {
@@ -28,7 +30,23 @@ class WebpackRTLPlugin {
 	}
 
 	apply( compiler ) {
+		const filenameSuffix = this.options.filenameSuffix || '-rtl$&';
+
 		compiler.hooks.thisCompilation.tap( pluginName, ( compilation ) => {
+			// WordPress only swaps in RTL files for stylesheets it enqueues, not lazy chunks.
+			// `data-href` keeps the LTR URL so the runtime can still find the loaded tag.
+			if ( ! this.options.inPlace ) {
+				MiniCssExtractPlugin.getCompilationHooks(
+					compilation
+				).beforeTagInsert.tap(
+					pluginName,
+					( source, { tag, href } ) =>
+						`${ source }\nif (document.dir === "rtl") { ${ tag }.setAttribute("data-href", ${ href }); ${ tag }.href = ${ href }.replace(${ cssRe }, ${ JSON.stringify(
+							filenameSuffix
+						) }); }`
+				);
+			}
+
 			compilation.hooks.processAssets.tapPromise(
 				{
 					name: pluginName,
@@ -36,7 +54,6 @@ class WebpackRTLPlugin {
 						.PROCESS_ASSETS_STAGE_DERIVED,
 				},
 				async ( assets ) => {
-					const cssRe = /\.css(?:$|\?)/;
 					return Promise.all(
 						[ ...compilation.chunks ]
 							.flatMap( ( chunk ) =>
@@ -55,10 +72,33 @@ class WebpackRTLPlugin {
 									}
 								}
 
+								/*
+								 * In-place mode rewrites the original stylesheet to
+								 * RTL rather than emitting a separate `-rtl.css`
+								 * sibling, so an existing (LTR) `<link>` renders RTL.
+								 * Storybook uses this for its RTL preview, where the
+								 * content-hashed chunk filenames can't be predicted
+								 * to swap a link. Skips the sibling/caching path.
+								 */
+								if ( this.options.inPlace ) {
+									const rtlSource = rtlcss.process(
+										assets[ asset ].source(),
+										this.options.options,
+										this.options.plugins
+									);
+									compilation.updateAsset(
+										asset,
+										new compiler.webpack.sources.RawSource(
+											rtlSource
+										)
+									);
+									return;
+								}
+
 								// Compute the filename
 								const filename = asset.replace(
 									cssRe,
-									this.options.filenameSuffix || '-rtl$&'
+									filenameSuffix
 								);
 								const assetInstance = assets[ asset ];
 								chunk.files.add( filename );

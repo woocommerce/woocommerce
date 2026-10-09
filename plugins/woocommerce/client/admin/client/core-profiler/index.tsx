@@ -249,7 +249,9 @@ const handleCoreProfilerCompletedSteps = assign( {
 } );
 
 const getCurrentUserEmail = fromPromise( async () => {
-	const currentUser = await resolveSelect( userStore ).getCurrentUser();
+	const currentUser = ( await resolveSelect(
+		userStore
+	).getCurrentUser() ) as WCUser | undefined;
 	return currentUser?.email;
 } );
 
@@ -323,9 +325,7 @@ const handleGeolocation = assign( {
 const redirectToWooHome = raise( { type: 'REDIRECT_TO_WOO_HOME' } );
 
 const exitToWooHome = fromPromise( async () => {
-	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
-		await dispatch( onboardingStore ).coreProfilerCompleted();
-	}
+	await dispatch( onboardingStore ).coreProfilerCompleted();
 	window.location.href = getNewPath( {}, '/', {} );
 } );
 
@@ -339,7 +339,9 @@ const getPluginNameParam = (
 		} )?.requires_jpc;
 	} );
 
-	return JpcRequiredPlugins.join( ',' );
+	return JpcRequiredPlugins.map( ( key ) => key.replace( ':alt', '' ) ).join(
+		','
+	);
 };
 
 const redirectToJetpackAuthPage = ( {
@@ -409,7 +411,7 @@ const updateTrackingOption = fromPromise(
 		} );
 
 		const trackingValue = input.optInDataSharing ? 'yes' : 'no';
-		dispatch( settingOptionsStore ).saveSetting(
+		void dispatch( settingOptionsStore ).saveSetting(
 			'advanced',
 			'woocommerce_allow_tracking',
 			trackingValue
@@ -543,12 +545,11 @@ const preFetchGetPlugins = fromPromise( async () =>
 );
 
 const getPlugins = fromPromise( async () => {
-	dispatch( onboardingStore ).invalidateResolutionForStoreSelector(
+	void dispatch( onboardingStore ).invalidateResolutionForStoreSelector(
 		'getFreeExtensions'
 	);
-	const extensionsBundles = await resolveSelect(
-		onboardingStore
-	).getFreeExtensions();
+	const extensionsBundles =
+		await resolveSelect( onboardingStore ).getFreeExtensions();
 	return (
 		extensionsBundles.find(
 			( bundle ) => bundle.key === 'obw/core-profiler'
@@ -587,7 +588,7 @@ const updateQueryStep = ( _: unknown, params: { step: CoreProfilerStep } ) => {
 
 const updateProfilerCompletedSteps = fromPromise(
 	async ( { input }: { input: { step: CoreProfilerStep } } ) => {
-		dispatch( onboardingStore ).updateCoreProfilerStep( input.step );
+		void dispatch( onboardingStore ).updateCoreProfilerStep( input.step );
 	}
 );
 
@@ -1463,11 +1464,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					} ),
 					invoke: {
 						src: fromPromise( () => {
-							dispatch( onboardingStore ).updateProfileItems( {
-								is_plugins_page_skipped: true,
-								skipped: false,
-								completed: true,
-							} );
+							void dispatch( onboardingStore ).updateProfileItems(
+								{
+									is_plugins_page_skipped: true,
+									skipped: false,
+									completed: true,
+								}
+							);
 							return promiseDelay( 3000 );
 						} ),
 						onDone: [ { actions: [ 'redirectToWooHome' ] } ],
@@ -1576,7 +1579,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 												event.payload.installationCompletedResult.installedPlugins.map(
 													(
 														extension: InstalledPlugin
-													) => extension.plugin
+													) =>
+														extension.plugin.replace(
+															':alt',
+															''
+														)
 												),
 											completed: true,
 										} );
@@ -1657,13 +1664,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				sendToJetpackAuthPage: {
 					invoke: {
 						src: fromPromise( async () => {
-							if (
-								window.wcAdminFeatures[ 'launch-your-store' ]
-							) {
-								await dispatch(
-									onboardingStore
-								).coreProfilerCompleted();
-							}
+							await dispatch(
+								onboardingStore
+							).coreProfilerCompleted();
 							return await resolveSelect(
 								onboardingStore
 							).getJetpackAuthUrl( {
@@ -1822,7 +1825,6 @@ export const CoreProfilerController = ( {
 				},
 				userHasNoInstallPluginsPermission: ( { context } ) => {
 					return (
-						// @ts-expect-error TODO: react-18-upgrade: This comparison appears to be unintentional because the types 'string | undefined' and 'boolean' have no overlap.ts(2367). Need to check if this is a valid comparison.
 						context?.currentUser?.capabilities.install_plugins !==
 						true
 					);
@@ -1837,7 +1839,6 @@ export const CoreProfilerController = ( {
 		inspect: xstateV5Inspector,
 	} );
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< ComponentMeta >(
 			currentState?.getMeta() ?? undefined

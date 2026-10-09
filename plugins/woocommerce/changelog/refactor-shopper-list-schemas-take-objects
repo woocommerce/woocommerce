@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Pass ShopperList and ShopperListItem objects directly to their Store API schemas instead of round-tripping through to_array(); no JSON response shape change.

@@ -23,6 +23,9 @@ The product variations API allows you to create, view, update, and delete indivi
 | `permalink`             | string          | Variation URL. `READ-ONLY`                                                            |
 | `sku`                   | string          | Unique identifier.                                                                                                  |
 | `global_unique_id`      | string          | GTIN, UPC, EAN or ISBN. A global unique identifier for the variation.                                               |
+| `customs_commodity_code` | string, null | Customs code containing 6–14 digits after spaces and punctuation are removed. The default `view` context returns the parent value when the variation has none; `context=edit` returns the stored value, `null` when inherited. |
+| `customs_country_of_origin` | string, null | Two-letter ISO country of origin code. The default `view` context returns the parent value when the variation has none; `context=edit` returns the stored value, `null` when inherited. |
+| `customs_description` | string, null | Plain-text customs description, up to 35 characters, without emoji or special symbols such as `™`. The default `view` context returns the parent value when the variation has none; `context=edit` returns the stored value, `null` when inherited. |
 | `price`                 | string          | Current variation price. `READ-ONLY`                                                  |
 | `regular_price`         | string          | Variation regular price.                                                                                            |
 | `sale_price`            | string          | Variation sale price.                                                                                               |
@@ -312,6 +315,8 @@ This API lets you retrieve and view a specific product variation by ID.
 ```http
 GET /wp-json/wc/v3/products/<product_id>/variations/<id>
 ```
+
+Optional query parameter: `image_size` (string). Use a specific registered image size for returned variation image `src`. Falls back to the full size when the requested size is not registered. Default is `full`.
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -689,6 +694,7 @@ woocommerce.get("products/22/variations").parsed_response
 | `stock_status`   | string  | Limit result set to products with specified stock status. Options: `instock`, `outofstock` and `onbackorder`.                                                                                                                                                               |
 | `virtual`        | boolean | Limit result set to virtual product variations                                                                                                                                                                                                                              |
 | `downloadable`   | boolean | Limit result set to downloadable product variations.                                                                                                                                                                                                                        |
+| `image_size`     | string  | Use a specific registered image size for the returned variation image `src`. Falls back to the full size if the requested size is not registered. Default is `full`.                                                                                                        |
 
 ## Update a product variation
 

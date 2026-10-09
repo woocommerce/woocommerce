@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Promote the post-sign-in confirmation to a third step in the mobile-app modal flow. Once the QR code is exchanged the modal advances past the magic-link section and FAQ to a dedicated "Signed in successfully" step with a larger heading, the device summary, and a primary "Revoke access" button that opens a confirmation dialog before deleting the Application Password.

@@ -32,6 +32,7 @@ import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-
  * Internal dependencies
  */
 import './style.scss';
+import { isExpandedOrDescendantIsExpanded } from '../search-list-control/utils';
 
 interface ProductControlProps {
 	/**
@@ -116,7 +117,23 @@ const ProductControl = (
 	const renderItemWithVariations = (
 		args: RenderItemArgs< ProductResponseItem >
 	) => {
-		const { item, search, depth = 0, isSelected, onSelect } = args;
+		const {
+			item,
+			search,
+			depth = 0,
+			isSelected,
+			onSelect,
+			useExpandedPanelId,
+		} = args;
+		const [ expandedPanelId, setExpandedPanelId ] = useExpandedPanelId ?? [
+			null,
+
+			() => {},
+		];
+		const isExpanded = isExpandedOrDescendantIsExpanded(
+			item,
+			expandedPanelId
+		);
 		const variationsCount =
 			item.details?.variations && Array.isArray( item.details.variations )
 				? item.details.variations.length
@@ -149,6 +166,9 @@ const ProductControl = (
 					onSelect={ () => {
 						return () => {
 							onSelect( item )();
+							if ( ! isExpanded ) {
+								setExpandedPanelId( item.id );
+							}
 						};
 					} }
 					isLoading={ isLoading || variationsLoading }
@@ -158,7 +178,7 @@ const ProductControl = (
 									/* translators: %1$d is the number of variations of a product product. */
 									__( '%1$d variations', 'woocommerce' ),
 									item.details?.variations.length
-							  )
+								)
 							: null
 					}
 					name={ `products-${ instanceId }` }
@@ -175,7 +195,7 @@ const ProductControl = (
 									),
 									item.name,
 									item.details?.variations.length
-							  )
+								)
 							: undefined
 					}
 				/>
@@ -191,7 +211,7 @@ const ProductControl = (
 						name: item.details?.variation as string,
 					},
 					'aria-label': `${ item.breadcrumbs[ 0 ] }: ${ item.details?.variation }`,
-			  };
+				};
 
 		return (
 			<SearchListItem

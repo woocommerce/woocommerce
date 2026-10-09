@@ -21,7 +21,7 @@ import { useState, useRef, useEffect } from '@wordpress/element';
 export function useObservedViewport< T extends HTMLElement >(): [
 	React.Ref< T >,
 	{ height: number; width: number },
-	{ height: number; width: number }
+	{ height: number; width: number },
 ] {
 	const [ observedElement, setObservedElement ] = useState( {
 		height: 0,

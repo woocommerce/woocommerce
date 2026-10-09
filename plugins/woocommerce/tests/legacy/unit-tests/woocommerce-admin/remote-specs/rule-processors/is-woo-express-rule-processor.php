@@ -17,11 +17,18 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_IsWooExpressRuleProcessor extend
 	 * Set Up Before Class.
 	 */
 	public static function setUpBeforeClass(): void {
-		/**
-		 * Fake function wc_calypso_bridge_is_woo_express_plan so that we can test the processor.
-		 */
-		function wc_calypso_bridge_is_woo_express_plan() {
-			return apply_filters( 'test_wc_calypso_bridge_is_woo_express_plan', true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		parent::setUpBeforeClass();
+
+		// Declaring a function is irreversible and process-wide, so guard it: without this a
+		// second declaration is a fatal error, whether it comes from this class running twice
+		// in a process or from the real WC Calypso Bridge plugin being loaded alongside it.
+		if ( ! function_exists( 'wc_calypso_bridge_is_woo_express_plan' ) ) {
+			/**
+			 * Fake function wc_calypso_bridge_is_woo_express_plan so that we can test the processor.
+			 */
+			function wc_calypso_bridge_is_woo_express_plan() {
+				return apply_filters( 'test_wc_calypso_bridge_is_woo_express_plan', true );
+			}
 		}
 	}
 
@@ -95,9 +102,13 @@ class WC_Admin_Tests_RemoteSpecs_RuleProcessors_IsWooExpressRuleProcessor extend
 	 * @group fast
 	 */
 	public function test_is_trial_plan() {
-		/** Fake function wc_calypso_bridge_is_woo_express_trial_plan. */
-		function wc_calypso_bridge_is_woo_express_trial_plan() {
-			return true;
+		// Guarded because this one sits in a test method: adding a data provider here would
+		// run it more than once and the redeclaration would be fatal.
+		if ( ! function_exists( 'wc_calypso_bridge_is_woo_express_trial_plan' ) ) {
+			/** Fake function wc_calypso_bridge_is_woo_express_trial_plan. */
+			function wc_calypso_bridge_is_woo_express_trial_plan() {
+				return true;
+			}
 		}
 
 		$processor = new IsWooExpressRuleProcessor();

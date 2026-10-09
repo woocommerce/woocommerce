@@ -3,10 +3,9 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
-import { ExternalLink, Icon, ToggleControl } from '@wordpress/components';
-import { info as infoIcon } from '@wordpress/icons';
-import { useEffect, useRef } from '@wordpress/element';
-import { speak } from '@wordpress/a11y';
+import { ToggleControl } from '@wordpress/components';
+import { useRef } from '@wordpress/element';
+import { Notice } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -77,18 +76,10 @@ export const PaymentMethodListItem = ( {
 	// Prioritize the prop if provided, otherwise use the internal ref state.
 	const baseVisibility =
 		initialVisibilityStatus !== undefined
-			? initialVisibilityStatus ?? false
-			: shouldRenderInMainListRef.current ?? false;
+			? ( initialVisibilityStatus ?? false )
+			: ( shouldRenderInMainListRef.current ?? false );
 
 	const shouldRender = isExpanded || baseVisibility;
-
-	// Announce notice to screen readers when the method is toggled on.
-	const isEnabled = paymentMethodsState[ method.id ] ?? false;
-	useEffect( () => {
-		if ( isEnabled && method.notice?.message ) {
-			speak( method.notice.message, 'polite' );
-		}
-	}, [ isEnabled, method.notice?.message ] );
 
 	if ( ! shouldRender ) {
 		return null;
@@ -124,7 +115,7 @@ export const PaymentMethodListItem = ( {
 							</span>
 							<span
 								className="woocommerce-list__item-content"
-								// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 								dangerouslySetInnerHTML={ sanitizeHTML(
 									decodeEntities( method.description )
 								) }
@@ -156,7 +147,7 @@ export const PaymentMethodListItem = ( {
 								</span>
 								<span
 									className="woocommerce-list__item-content"
-									// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 									dangerouslySetInnerHTML={ sanitizeHTML(
 										decodeEntities( method.description )
 									) }
@@ -176,7 +167,7 @@ export const PaymentMethodListItem = ( {
 								</span>
 								<span
 									className="woocommerce-list__item-content"
-									// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 									dangerouslySetInnerHTML={ sanitizeHTML(
 										decodeEntities(
 											method.extraDescription ?? ''
@@ -209,26 +200,31 @@ export const PaymentMethodListItem = ( {
 			</div>
 			{ method.notice?.message &&
 				( paymentMethodsState[ method.id ] ?? false ) && (
-					<div
+					<Notice.Root
 						className="woocommerce-list__item-notice-info"
 						data-testid="payment-method-notice-info"
+						intent="info"
+						spokenMessage={ decodeEntities(
+							method.notice.message
+						) }
 					>
-						<Icon icon={ infoIcon } size={ 24 } />
-						<p>
-							{ method.notice.message }
-							{ method.notice.link_url &&
-								method.notice.link_text && (
-									<>
-										{ ' ' }
-										<ExternalLink
-											href={ method.notice.link_url }
-										>
-											{ method.notice.link_text }
-										</ExternalLink>
-									</>
-								) }
-						</p>
-					</div>
+						<Notice.Description>
+							{ decodeEntities( method.notice.message ) }
+						</Notice.Description>
+						{ method.notice.link_url && method.notice.link_text && (
+							<Notice.Actions>
+								<Notice.ActionLink
+									href={ method.notice.link_url }
+									openInNewTab
+									rel="noopener noreferrer"
+								>
+									{ decodeEntities(
+										method.notice.link_text
+									) }
+								</Notice.ActionLink>
+							</Notice.Actions>
+						) }
+					</Notice.Root>
 				) }
 		</div>
 	);

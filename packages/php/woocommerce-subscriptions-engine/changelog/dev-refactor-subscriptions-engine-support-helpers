@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Convert internal scalar and money support helpers from traits to static classes

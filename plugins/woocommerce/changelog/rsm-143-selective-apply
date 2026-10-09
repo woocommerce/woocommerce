@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add selective apply + undo REST endpoints for block email template updates.

@@ -10,9 +10,9 @@ WooCommerce is open-source software that welcomes community contributions. To he
 
 ## Before you submit
 
-1. **Link to a related issue** - If one exists, reference it in your PR. If you're proposing a new feature or significant change, [open an issue](https://github.com/woocommerce/woocommerce/issues/new/choose) first to discuss it.
+1. **Link to a related issue** - If one exists, reference it in your PR. Before starting work, comment on the issue (particularly when it already has an assignee) to avoid duplicate effort and check that it's been triaged by the maintainers. If you're proposing a new feature or significant change, [open an issue](https://github.com/woocommerce/woocommerce/issues/new/choose) first to discuss it.
 
-2. **Run tests locally** - Som of the CI workflows are not automatically triggered for community contributions, so please verify your changes pass relevant tests and linting locally before submitting.
+2. **Run tests locally** - Some of the CI workflows are not automatically triggered for community contributions, so please verify your changes pass relevant tests and linting locally before submitting.
 
 3. **Consolidate related changes** - If you have multiple similar fixes (e.g., typos, documentation updates), combine them into a single PR when appropriate.
 
@@ -38,7 +38,7 @@ After you submit a PR that meets these requirements:
 
 1. A maintainer will triage your PR
 2. You may receive additional feedback or change requests
-3. Once approved, your PR will be merged into an upcoming release
+3. Once approved by a maintainer (see [review requirements](/docs/contribution/contributing/deciding-pr-high-impact#review-requirements)), your PR will be merged into an upcoming release
 
 If your PR needs changes, we'll add a `needs: author feedback` label. Please respond to feedback promptly to keep your contribution moving forward, as stale PRs with that label are automatically closed after a period of time.
 

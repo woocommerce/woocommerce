@@ -7,7 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
@@ -72,10 +72,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 				return;
 			}
 
-			$button_link           = $this->get_button_link( $task );
-			$completed_tasks_count = $this->get_completed_tasks_count();
-			$step_number           = $this->get_completed_tasks_count() + 1;
-			$tasks_count           = count( $this->get_tasks() );
+			$button_link            = $this->get_button_link( $task );
+			$task_header            = $this->get_task_header( $task );
+			$task_is_in_progress    = $task->is_in_progress();
+			$task_in_progress_label = $task_is_in_progress ? $task->in_progress_label() : '';
+			$completed_tasks_count  = $this->get_completed_tasks_count();
+			$step_number            = $completed_tasks_count + 1;
+			$tasks_count            = count( $this->get_tasks() );
 
 			// Given 'r' (circle element's r attr), dashoffset = ((100-$desired_percentage)/100) * PI * (r*2).
 			$progress_percentage = ( $completed_tasks_count / $tasks_count ) * 100;
@@ -83,6 +86,34 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 			$circle_dashoffset   = ( ( 100 - $progress_percentage ) / 100 ) * ( pi() * ( $circle_r * 2 ) );
 
 			include __DIR__ . '/views/html-admin-dashboard-setup.php';
+		}
+
+		/**
+		 * Get dashboard widget header data for a task.
+		 *
+		 * @param Task $task Task.
+		 * @return array
+		 */
+		private function get_task_header( $task ) {
+			$asset_url = WC()->plugin_url() . '/assets/';
+			$task_json = $task->get_json();
+
+			$image_url = method_exists( $task, 'get_image_url' ) ? (string) $task->get_image_url() : '';
+			$image_alt = method_exists( $task, 'get_image_alt' ) ? (string) $task->get_image_alt() : '';
+
+			// Fallback to the generic WooCommerce setup illustration.
+			if ( '' === $image_url ) {
+				$image_url = $asset_url . 'images/dashboard-widget-setup.png';
+				$image_alt = __( 'WooCommerce setup illustration', 'woocommerce' );
+			}
+
+			return array(
+				'title'        => $task->get_title(),
+				'content'      => $task_json['content'] ?? '',
+				'button_label' => $task_json['actionLabel'] ?? $task->get_title(),
+				'image_url'    => $image_url,
+				'image_alt'    => $image_alt,
+			);
 		}
 
 		/**
@@ -165,7 +196,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		/**
 		 * Get the next task.
 		 *
-		 * @return array|null
+		 * @return Task|null
 		 */
 		private function get_next_task() {
 			foreach ( $this->get_tasks() as $task ) {
@@ -183,11 +214,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * @return bool
 		 */
 		public function should_display_widget() {
-			if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\Features' ) || ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
+			if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
 				return false;
 			}
 
-			if ( ! Features::is_enabled( 'onboarding' ) || ! WC()->is_wc_admin_active() ) {
+			if ( ! WC()->is_wc_admin_active() ) {
 				return false;
 			}
 

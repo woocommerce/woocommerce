@@ -106,21 +106,22 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$order_id    = absint( $request['id'] );
-		$this->order = wc_get_order( $order_id );
+		$order_id = absint( $request['id'] );
+		$order    = wc_get_order( $order_id );
 
-		if ( ! $this->order || ! $this->order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
 				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
+		$this->order = $order;
 
 		/**
 		 * Process request data.
 		 *
-		 * Note: Customer data is persisted from the request first so that OrderController::update_addresses_from_cart
-		 * uses the up to date customer address.
+		 * The order address is validated before anything is persisted, so a rejected request
+		 * cannot mutate the existing order or the customer record.
 		 */
 		$this->update_billing_address( $request );
 		$this->update_order_from_request( $request );
@@ -140,9 +141,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		$this->order_controller->validate_existing_order_before_payment( $this->order );
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway. Do not use this action for payment-completion logic or to
+		 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
+		 * woocommerce_order_status_completed instead.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -151,8 +155,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
-
+		 * @example docs/examples/checkout-order-processed.md
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
@@ -186,32 +190,39 @@ class CheckoutOrder extends AbstractCartRoute {
 	protected function cart_updated( \WP_REST_Request $request ) {}
 
 	/**
-	 * Updates the current customer session using data from the request (e.g. address data).
+	 * Applies the billing and shipping address from the request to the order and customer.
 	 *
-	 * Address session data is synced to the order itself later on by OrderController::update_order_from_cart()
+	 * The address is set on the order and validated before anything is persisted, so a rejected
+	 * request cannot mutate the order or the customer. wc()->customer is saved on shutdown (see
+	 * WooCommerce::initialize_cart()), so its address fields are only set once validation passes.
+	 *
+	 * @throws RouteException When the order address fails validation.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function update_billing_address( \WP_REST_Request $request ) {
 		$customer = wc()->customer;
-		$billing  = $request['billing_address'];
-		$shipping = $request['shipping_address'];
 
 		// Billing address is a required field.
+		$billing = $request['billing_address'];
+
+		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
+		$shipping = $request['shipping_address'] ?? $billing;
+
+		$this->order->set_billing_address( $billing );
+		$this->order->set_shipping_address( $shipping );
+		$this->order_controller->validate_existing_order_before_update( $this->order );
+
+		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
 			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
 				$customer->{"set_billing_$key"}( $value );
 			}
 		}
 
-		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
-		$shipping_address_values = $shipping ?? $billing;
-
-		foreach ( $shipping_address_values as $key => $value ) {
+		foreach ( $shipping as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
-			} elseif ( 'phone' === $key ) {
-				$customer->update_meta_data( 'shipping_phone', $value );
 			}
 		}
 
@@ -226,9 +237,6 @@ class CheckoutOrder extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_checkout_update_customer_from_request', $customer, $request );
 
 		$customer->save();
-
-		$this->order->set_billing_address( $billing );
-		$this->order->set_shipping_address( $shipping );
 		$this->order->save();
 		$this->order->calculate_totals();
 	}
@@ -241,12 +249,10 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways      = WC()->payment_gateways->get_available_payment_gateways();
-		$request_payment_method  = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-		$requires_payment_method = $this->order->needs_payment();
+		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $requires_payment_method ) {
+			if ( $this->order->needs_payment() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					__( 'No payment method provided.', 'woocommerce' ),
@@ -255,6 +261,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			throw new RouteException(

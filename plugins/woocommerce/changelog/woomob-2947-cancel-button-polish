@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Polish the QR number-match cancel control: replace the single red link with a row that pairs descriptive text ("I don't recognise this device") with a secondary "Cancel login" button, and re-center the tile row so it visually aligns with the heading on both modal and standalone surfaces.

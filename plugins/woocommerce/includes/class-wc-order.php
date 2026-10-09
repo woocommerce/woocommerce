@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -222,7 +223,7 @@ class WC_Order extends WC_Abstract_Order {
 		$tax_string      = '';
 
 		// Tax for inclusive prices.
-		if ( wc_tax_enabled() && 'incl' === $tax_display ) {
+		if ( wc_tax_enabled() && TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			$tax_string_array = array();
 			$tax_totals       = $this->get_tax_totals();
 
@@ -2088,7 +2089,7 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			$comment_author        = __( 'WooCommerce', 'woocommerce' );
 			$comment_author_email  = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
-			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // WPCS: input var ok.
+			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com';
 			$comment_author_email  = sanitize_email( $comment_author_email );
 		}
 		$commentdata = apply_filters(

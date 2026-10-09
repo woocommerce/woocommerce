@@ -4,6 +4,24 @@
  * Tests relating to the WC_Customer_Data_Store_Session class.
  */
 class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		WC()->session->set( 'customer', null );
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		WC()->session->set( 'customer', null );
+		wp_set_current_user( 0 );
+		parent::tearDown();
+	}
+
 	/**
 	 * Ensure that the country and state shipping address fields only inherit
 	 * the corresponding billing address values if a shipping address is not set.
@@ -63,6 +81,97 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		$session_data = WC()->session->get_session_data();
 
 		$this->assertArrayNotHasKey( 'customer', $session_data );
+	}
+
+	/**
+	 * @testdox Should override a persisted billing field with an empty value stored in the session.
+	 */
+	public function test_empty_session_value_overrides_persisted_billing_field(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'session_empty_billing', 'password', 'session-empty-billing@example.com' )->get_id();
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_billing_address_2( '' );
+		$session_customer->save();
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( '', $reloaded_customer->get_billing_address_2(), 'A billing field emptied in the session should not be restored from the persisted customer data' );
+	}
+
+	/**
+	 * @testdox Should leave persisted values untouched for keys that are absent from the session data.
+	 */
+	public function test_keys_absent_from_session_data_keep_persisted_values(): void {
+		$customer_id   = WC_Helper_Customer::create_customer( 'session_absent_keys', 'password', 'session-absent-keys@example.com' )->get_id();
+		$date_modified = (string) ( new WC_Customer( $customer_id ) )->get_date_modified( 'edit' );
+
+		WC()->session->set(
+			'customer',
+			array(
+				'id'            => (string) $customer_id,
+				'date_modified' => $date_modified,
+				'first_name'    => 'Session-Name',
+			)
+		);
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Session-Name', $customer->get_billing_first_name(), 'Keys present in the session data should be applied' );
+		$this->assertSame( 'Apt 1', $customer->get_shipping_address_2(), 'Keys absent from the session data should keep the persisted values' );
+	}
+
+	/**
+	 * @testdox Should ignore the session data entirely when the date modified does not match the persisted customer.
+	 */
+	public function test_stale_session_data_is_ignored(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'session_stale_data', 'password', 'session-stale-data@example.com' )->get_id();
+
+		WC()->session->set(
+			'customer',
+			array(
+				'id'                 => (string) $customer_id,
+				'date_modified'      => 'stale-date',
+				'address_2'          => '',
+				'shipping_address_2' => '',
+			)
+		);
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'Apt 1', $customer->get_billing_address_2(), 'Stale session data should not override the persisted billing values' );
+		$this->assertSame( 'Apt 1', $customer->get_shipping_address_2(), 'Stale session data should not override the persisted shipping values' );
+	}
+
+	/**
+	 * @testdox Should fall back to the default location when the billing country is emptied in the session.
+	 */
+	public function test_emptied_billing_country_falls_back_to_default_location(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'session_empty_country', 'password', 'session-empty-country@example.com' )->get_id();
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_billing_country( '' );
+		$session_customer->save();
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+		$default_location  = wc_get_customer_default_location();
+
+		$this->assertSame( $default_location['country'], $reloaded_customer->get_billing_country(), 'An emptied billing country should be replaced with the default location country' );
+	}
+
+	/**
+	 * @testdox Should fall back to the account email when the billing email is emptied in the session for a logged in user.
+	 */
+	public function test_emptied_billing_email_falls_back_to_account_email_for_logged_in_user(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'session_empty_email', 'password', 'session-empty-email@example.com' )->get_id();
+		wp_set_current_user( $customer_id );
+
+		$session_customer = new WC_Customer( $customer_id, true );
+		$session_customer->set_billing_email( '' );
+		$session_customer->save();
+
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+
+		$this->assertSame( 'session-empty-email@example.com', $reloaded_customer->get_billing_email(), 'An emptied billing email should be replaced with the account email for logged in users' );
 	}
 
 	/**
@@ -171,5 +280,62 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		$customer->set_billing_country( $location['country'] );
 		$customer->set_billing_state( $location['state'] );
 		return $customer;
+	}
+
+	/**
+	 * Ensure that empty string values can be persisted in customer session.
+	 */
+	public function test_empty_field_can_be_persisted_in_session() {
+		WC()->session->init();
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'test@example.com' );
+		$customer->set_shipping_address_2( 'Apt 1' );
+		$customer->save();
+
+		// Session says address_2 is now empty (user cleared it).
+		WC()->session->set(
+			'customer',
+			array(
+				'id'                 => (string) $customer->get_id(),
+				'date_modified'      => (string) $customer->get_date_modified( 'edit' ),
+				'shipping_address_2' => '',
+			)
+		);
+
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->read( $customer );
+
+		$this->assertSame( '', $customer->get_shipping_address_2() );
+	}
+
+	/**
+	 * Ensure backslashes in customer fields survive a session save/read round-trip.
+	 *
+	 * Covers the multi-request flow where one request stores the address in the session and a
+	 * follow-up request reads it back: the session store must not wp_unslash() the data on read, or
+	 * real backslashes the buyer typed get stripped (session data is stored raw, never magic-quoted).
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/65900
+	 */
+	public function test_backslashes_survive_session_round_trip() {
+		WC()->session->init();
+
+		$customer = new WC_Customer();
+		$customer->set_email( 'backslash@example.com' );
+		$customer->set_shipping_address_1( 'Apt 4\\B' );
+		$customer->set_shipping_city( 'C:\\Users' );
+		$customer->save();
+
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->save_to_session( $customer );
+
+		// Overwrite in memory, then read back from the session as the next request would.
+		$customer->set_shipping_address_1( 'overwritten' );
+		$customer->set_shipping_city( 'overwritten' );
+		$data_store->read( $customer );
+
+		$this->assertSame( 'Apt 4\\B', $customer->get_shipping_address_1(), 'Backslashes in the shipping address should survive the session round-trip.' );
+		$this->assertSame( 'C:\\Users', $customer->get_shipping_city(), 'Backslashes in the shipping city should survive the session round-trip.' );
 	}
 }

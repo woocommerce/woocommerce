@@ -59,8 +59,7 @@ export interface ReviewObject {
 }
 
 export interface ReviewObjectUpdate
-	extends Partial< Omit< ReviewObject, 'id' > >,
-		Pick< ReviewObject, 'id' > {}
+	extends Partial< Omit< ReviewObject, 'id' > >, Pick< ReviewObject, 'id' > {}
 
 export interface ReviewsState {
 	reviews: {
@@ -77,7 +76,7 @@ export interface ReviewsState {
 	};
 }
 
-export interface ReviewsQueryParams {
+export type ReviewsQueryParams = {
 	/** Scope under which the request is made; determines fields present in response. */
 	context?: 'view' | 'edit';
 	/** Current page of the collection. */
@@ -112,4 +111,4 @@ export interface ReviewsQueryParams {
 	status?: 'all' | 'hold' | 'approved' | 'spam' | 'trash';
 
 	_embed?: number;
-}
+};

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product data and Coupon data tabs: restore a visible keyboard focus indicator. The tabs previously suppressed the WordPress core focus ring without providing a replacement, leaving keyboard users without a perceivable indicator (WCAG 2.4.7, 2.4.11, 1.4.1).

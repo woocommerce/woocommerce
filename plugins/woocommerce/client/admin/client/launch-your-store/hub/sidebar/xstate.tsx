@@ -146,9 +146,8 @@ export const getWooPaymentsStatus = async () => {
 	}
 
 	// Check the gateway is installed
-	const paymentGateways: PaymentGateway[] = await resolveSelect(
-		paymentGatewaysStore
-	).getPaymentGateways();
+	const paymentGateways: PaymentGateway[] =
+		await resolveSelect( paymentGatewaysStore ).getPaymentGateways();
 	const enabledPaymentGateways = paymentGateways.filter(
 		( gateway ) => gateway.enabled
 	);
@@ -160,9 +159,8 @@ export const getWooPaymentsStatus = async () => {
 };
 
 export const getSiteCachedStatus = async () => {
-	const settings = await resolveSelect( settingsStore ).getSettings(
-		'wc_admin'
-	);
+	const settings =
+		await resolveSelect( settingsStore ).getSettings( 'wc_admin' );
 
 	// if store URL exists, check both storeUrl and siteUrl otherwise only check siteUrl
 	// we want to check both because there's a chance that caching is especially disabled for woocommerce pages, e.g WPEngine

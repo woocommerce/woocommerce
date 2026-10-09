@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { PluginDocumentSettingPanel, ErrorBoundary } from '@wordpress/editor';
 
 /**

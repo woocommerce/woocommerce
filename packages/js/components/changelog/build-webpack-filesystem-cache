@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Improve build time for components by using webpack filesystem cache.

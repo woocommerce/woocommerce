@@ -32,3 +32,8 @@ i18n/languages/woocommerce.pot
 
 # Environment files
 .wp-env.override.json
+.wp-env.test.override.json
+.wp-env.e2e.override.json
+
+# phpcs-changed cache (written when lint-branch.sh runs with --cache; see WC_PHPCS_CHECKSTYLE_FILE)
+.phpcs-changed-cache

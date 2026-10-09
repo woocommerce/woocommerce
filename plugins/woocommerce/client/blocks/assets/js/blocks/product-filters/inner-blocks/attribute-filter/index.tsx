@@ -40,11 +40,8 @@ registerBlockType( metadata, {
 			),
 			description: sprintf(
 				// translators: %s is the attribute label.
-				__(
-					`Enable customers to filter the product collection by selecting one or more %s attributes.`,
-					'woocommerce'
-				),
-				attribute.attribute_label
+				__( 'Let shoppers filter products by %s.', 'woocommerce' ),
+				attribute.attribute_label.toLocaleLowerCase()
 			),
 			attributes: {
 				attributeId: parseInt( attribute.attribute_id, 10 ),

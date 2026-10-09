@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -30,6 +31,59 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 
 $active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
 $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
+
+$additional_tax_classes_limit     = 10;
+$additional_tax_classes           = $settings['additional_tax_classes'] ?? array();
+$additional_tax_classes           = is_array( $additional_tax_classes ) ? array_values( array_filter( $additional_tax_classes, 'is_string' ) ) : array();
+$displayed_additional_tax_classes = array_slice( $additional_tax_classes, 0, $additional_tax_classes_limit );
+$remaining_additional_tax_classes = max( 0, count( $additional_tax_classes ) - $additional_tax_classes_limit );
+$additional_tax_classes_display   = implode( ', ', $displayed_additional_tax_classes );
+
+if ( $remaining_additional_tax_classes ) {
+	$additional_tax_classes_display .= ', ' . sprintf(
+		/* translators: %d: number of additional tax classes not shown. */
+		__( 'and %d more', 'woocommerce' ),
+		$remaining_additional_tax_classes
+	);
+}
+
+$countries                  = WC()->countries->get_countries();
+$store_base_country         = $settings['store_base_country'];
+$store_base_country_display = isset( $countries[ $store_base_country ] ) ? $store_base_country . ' - ' . $countries[ $store_base_country ] : $store_base_country;
+$states                     = WC()->countries->get_states( $store_base_country );
+$store_base_state           = $settings['store_base_state'] ?? '';
+$store_base_state_display   = is_array( $states ) && isset( $states[ $store_base_state ] ) ? $states[ $store_base_state ] . ' (' . $store_base_state . ')' : $store_base_state;
+
+$tax_based_on_labels  = array(
+	TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
+	TaxBasedOn::BILLING  => __( 'Customer billing address', 'woocommerce' ),
+	TaxBasedOn::BASE     => __( 'Shop base address', 'woocommerce' ),
+);
+$tax_based_on_display = $tax_based_on_labels[ $settings['tax_based_on'] ] ?? $settings['tax_based_on'];
+
+$shipping_tax_class_labels  = array( 'inherit' => __( 'Based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options();
+$shipping_tax_class_display = $shipping_tax_class_labels[ $settings['shipping_tax_class'] ] ?? $settings['shipping_tax_class'];
+
+$tax_display_labels = array(
+	TaxDisplayMode::INCLUSIVE => __( 'Inclusive', 'woocommerce' ),
+	TaxDisplayMode::EXCLUSIVE => __( 'Exclusive', 'woocommerce' ),
+);
+$tax_display_shop   = $tax_display_labels[ $settings['tax_display_shop'] ] ?? $settings['tax_display_shop'];
+$tax_display_cart   = $tax_display_labels[ $settings['tax_display_cart'] ] ?? $settings['tax_display_cart'];
+
+$tax_total_display_labels = array(
+	'single'   => __( 'Single total', 'woocommerce' ),
+	'itemized' => __( 'Itemized', 'woocommerce' ),
+);
+$tax_total_display        = $tax_total_display_labels[ $settings['tax_total_display'] ] ?? $settings['tax_total_display'];
+
+$default_customer_location_labels = array(
+	DefaultCustomerAddress::NO_DEFAULT       => __( 'No location by default', 'woocommerce' ),
+	DefaultCustomerAddress::BASE             => __( 'Shop country/region', 'woocommerce' ),
+	DefaultCustomerAddress::GEOLOCATION      => __( 'Geolocate', 'woocommerce' ),
+	DefaultCustomerAddress::GEOLOCATION_AJAX => __( 'Geolocate (with page caching support)', 'woocommerce' ),
+);
+$default_customer_location        = $default_customer_location_labels[ $settings['default_customer_location'] ] ?? $settings['default_customer_location'];
 
 // Include necessary WordPress file to use get_plugin_data().
 if ( ! function_exists( 'get_plugin_data' ) ) {
@@ -83,17 +137,17 @@ if ( file_exists( $plugin_path ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="WordPress address (URL)"><?php esc_html_e( 'WordPress address (URL)', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The root URL of your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The root URL of your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['site_url'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Site address (URL)"><?php esc_html_e( 'Site address (URL)', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The homepage URL of your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The homepage URL of your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['home_url'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( ! empty( $wc_version ) ? $wc_version : $environment['version'] ); ?></td>
 
 		</tr>
@@ -119,7 +173,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Log Directory Writable"><?php esc_html_e( 'Log directory writable', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['log_directory_writable'] ) {
@@ -139,7 +193,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Version"><?php esc_html_e( 'WordPress version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WordPress installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WordPress installed on your site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				$latest_version = get_transient( 'woocommerce_system_status_wp_version_check' );
@@ -167,12 +221,12 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Multisite"><?php esc_html_e( 'WordPress multisite', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); ?></td>
 			<td><?php echo ( $environment['wp_multisite'] ) ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Memory Limit"><?php esc_html_e( 'WordPress memory limit', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['wp_memory_limit'] < 67108864 ) {
@@ -186,7 +240,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php esc_html_e( 'WordPress debug mode', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php if ( $environment['wp_debug_mode'] ) : ?>
 					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
@@ -197,7 +251,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Cron"><?php esc_html_e( 'WordPress cron', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php if ( $environment['wp_cron'] ) : ?>
 					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
@@ -208,12 +262,12 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="WP Environment Type"><?php esc_html_e( 'Environment type', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current environment type set for this site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current environment type set for this site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['wp_environment_type'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php esc_html_e( 'Language', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['language'] ); ?></td>
 		</tr>
 		<tr>
@@ -238,17 +292,17 @@ if ( file_exists( $plugin_path ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="Server Info"><?php esc_html_e( 'Server info', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Information about the web server that is currently hosting your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Information about the web server that is currently hosting your site.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $environment['server_info'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Server Architecture"><?php esc_html_e( 'Server architecture', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Information about the operating system your server is running.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Information about the operating system your server is running.', 'woocommerce' ) ); ?></td>
 			<td><?php echo ! empty( $environment['server_architecture'] ) ? esc_html( $environment['server_architecture'] ) : esc_html__( 'Unable to determine server architecture.  Please ask your hosting provider for this information.', 'woocommerce' ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="PHP Version"><?php esc_html_e( 'PHP version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php echo '<mark class="yes">' . esc_html( $environment['php_version'] ) . '</mark>'; ?>
 			</td>
@@ -256,27 +310,27 @@ if ( file_exists( $plugin_path ) ) {
 		<?php if ( function_exists( 'ini_get' ) ) : ?>
 			<tr>
 				<td data-export-label="PHP Post Max Size"><?php esc_html_e( 'PHP post max size', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The largest filesize that can be contained in one post.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The largest filesize that can be contained in one post.', 'woocommerce' ) ); ?></td>
 				<td><?php echo esc_html( size_format( $environment['php_post_max_size'] ) ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Time Limit"><?php esc_html_e( 'PHP time limit', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The amount of time (in seconds) that your site will spend on a single operation before timing out (to avoid server lockups)', 'woocommerce' ) ); ?></td>
 				<td><?php echo esc_html( $environment['php_max_execution_time'] ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="PHP Max Input Vars"><?php esc_html_e( 'PHP max input vars', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The maximum number of variables your server can use for a single function to avoid overloads.', 'woocommerce' ) ); ?></td>
 				<td><?php echo esc_html( $environment['php_max_input_vars'] ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="cURL Version"><?php esc_html_e( 'cURL version', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of cURL installed on your server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of cURL installed on your server.', 'woocommerce' ) ); ?></td>
 				<td><?php echo esc_html( $environment['curl_version'] ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php esc_html_e( 'SUHOSIN installed', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); ?></td>
 				<td><?php echo $environment['suhosin_installed'] ? '<span class="dashicons dashicons-yes"></span>' : '&ndash;'; ?></td>
 			</tr>
 		<?php endif; ?>
@@ -287,7 +341,7 @@ if ( file_exists( $plugin_path ) ) {
 			?>
 			<tr>
 				<td data-export-label="MySQL Version"><?php esc_html_e( 'MySQL version', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 					if ( version_compare( $environment['mysql_version'], '5.6', '<' ) && ! strstr( $environment['mysql_version_string'], 'MariaDB' ) ) {
@@ -302,12 +356,12 @@ if ( file_exists( $plugin_path ) ) {
 		<?php endif; ?>
 		<tr>
 			<td data-export-label="Max Upload Size"><?php esc_html_e( 'Max upload size', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The largest filesize that can be uploaded to your WordPress installation.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( size_format( $environment['max_upload_size'] ) ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Default Timezone is UTC"><?php esc_html_e( 'Default timezone is UTC', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The default timezone for your server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The default timezone for your server.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( 'UTC' !== $environment['default_timezone'] ) {
@@ -321,7 +375,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="fsockopen/cURL"><?php esc_html_e( 'fsockopen/cURL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['fsockopen_or_curl_enabled'] ) {
@@ -334,7 +388,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="SoapClient"><?php esc_html_e( 'SoapClient', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['soapclient_enabled'] ) {
@@ -348,7 +402,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="DOMDocument"><?php esc_html_e( 'DOMDocument', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['domdocument_enabled'] ) {
@@ -362,7 +416,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="GZip"><?php esc_html_e( 'GZip', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['gzip_enabled'] ) {
@@ -376,7 +430,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Multibyte String"><?php esc_html_e( 'Multibyte string', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Multibyte String (mbstring) is used to convert character encoding, like for emails or converting characters to lowercase.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Multibyte String (mbstring) is used to convert character encoding, like for emails or converting characters to lowercase.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['mbstring_enabled'] ) {
@@ -390,7 +444,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Remote Post"><?php esc_html_e( 'Remote post', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['remote_post_successful'] ) {
@@ -404,7 +458,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Remote Get"><?php esc_html_e( 'Remote get', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $environment['remote_get_successful'] ) {
@@ -462,7 +516,7 @@ if ( file_exists( $plugin_path ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="WC Database Version"><?php esc_html_e( 'WooCommerce database version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The database version for WooCommerce. This should be the same as your WooCommerce version.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The database version for WooCommerce. This should be the same as your WooCommerce version.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $database['wc_database_version'] ); ?></td>
 		</tr>
 		<tr>
@@ -575,7 +629,7 @@ if ( file_exists( $plugin_path ) ) {
 	<tbody>
 		<tr>
 			<td data-export-label="Secure connection (HTTPS)"><?php esc_html_e( 'Secure connection (HTTPS)', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the connection to your store secure?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the connection to your store secure?', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php if ( $security['secure_connection'] ) : ?>
 					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
@@ -591,7 +645,7 @@ if ( file_exists( $plugin_path ) ) {
 		</tr>
 		<tr>
 			<td data-export-label="Hide errors from visitors"><?php esc_html_e( 'Hide errors from visitors', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php if ( $security['hide_errors'] ) : ?>
 					<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>
@@ -691,37 +745,37 @@ if ( 0 < $mu_plugins_count ) :
 	<tbody>
 		<tr>
 			<td data-export-label="Force SSL"><?php esc_html_e( 'Force SSL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); ?></td>
 			<td><?php echo $settings['force_ssl'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency"><?php esc_html_e( 'Currency', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'What currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'What currency prices are listed at in the catalog and which currency gateways will take payments in.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $settings['currency'] ); ?> (<?php echo esc_html( $settings['currency_symbol'] ); ?>)</td>
 		</tr>
 		<tr>
 			<td data-export-label="Currency Position"><?php esc_html_e( 'Currency position', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The position of the currency symbol.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The position of the currency symbol.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $settings['currency_position'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Thousand Separator"><?php esc_html_e( 'Thousand separator', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The thousand separator of displayed prices.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The thousand separator of displayed prices.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $settings['thousand_separator'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Decimal Separator"><?php esc_html_e( 'Decimal separator', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The decimal separator of displayed prices.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The decimal separator of displayed prices.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $settings['decimal_separator'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Number of Decimals"><?php esc_html_e( 'Number of decimals', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The number of decimal points shown in displayed prices.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The number of decimal points shown in displayed prices.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $settings['number_of_decimals'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Taxonomies: Product Types"><?php esc_html_e( 'Taxonomies: Product types', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'A list of taxonomy terms that can be used in regard to order/product statuses.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				$display_terms = array();
@@ -734,7 +788,7 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 		<tr>
 			<td data-export-label="Taxonomies: Product Visibility"><?php esc_html_e( 'Taxonomies: Product visibility', 'woocommerce' ); ?></td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'A list of taxonomy terms used for product visibility.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'A list of taxonomy terms used for product visibility.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				$display_terms = array();
@@ -747,12 +801,12 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 		<tr>
 			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); ?></td>
 			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Enforce Approved Product Download Directories"><?php esc_html_e( 'Enforce Approved Product Download Directories', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site enforcing the use of Approved Product Download Directories?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site enforcing the use of Approved Product Download Directories?', 'woocommerce' ) ); ?></td>
 			<td><?php echo $settings['enforce_approved_download_dirs'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 
@@ -778,6 +832,85 @@ if ( 0 < $mu_plugins_count ) :
 			<td><?php echo esc_html( implode( ', ', $settings['enabled_features'] ) ); ?></td>
 		</tr>
 
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="Tax Settings"><h2><?php esc_html_e( 'Tax settings', 'woocommerce' ); ?></h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td data-export-label="Enable tax rates and calculations"><?php esc_html_e( 'Enable tax rates and calculations', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are tax rates and calculations enabled?', 'woocommerce' ) ); ?></td>
+			<td><mark class="<?php echo esc_attr( $settings['taxes_enabled'] ? 'yes' : 'no' ); ?>"><?php echo $settings['taxes_enabled'] ? esc_html__( 'Enabled', 'woocommerce' ) : esc_html__( 'Disabled', 'woocommerce' ); ?></mark></td>
+		</tr>
+		<tr>
+			<td data-export-label="Prices include tax"><?php esc_html_e( 'Prices include tax', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether product prices are currently treated as including or excluding tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['prices_include_tax'] ? esc_html__( 'Inclusive', 'woocommerce' ) : esc_html__( 'Exclusive', 'woocommerce' ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Calculate tax based on"><?php esc_html_e( 'Calculate tax based on', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The address type WooCommerce uses to calculate tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_based_on_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Shipping tax class"><?php esc_html_e( 'Shipping tax class', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The tax class WooCommerce uses for shipping.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $shipping_tax_class_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Rounding"><?php esc_html_e( 'Rounding', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether tax is rounded per line or at subtotal level.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['tax_round_at_subtotal'] ? esc_html__( 'At subtotal level', 'woocommerce' ) : esc_html__( 'Per line', 'woocommerce' ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Additional tax classes"><?php esc_html_e( 'Additional tax classes', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Additional tax classes configured for products. The list is truncated when more than 10 classes are configured.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $additional_tax_classes_display ? esc_html( $additional_tax_classes_display ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Display prices in the shop"><?php esc_html_e( 'Display prices in the shop', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether shop prices are displayed including or excluding tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_display_shop ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Display prices during cart and checkout"><?php esc_html_e( 'Display prices during cart and checkout', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether cart and checkout prices are displayed including or excluding tax.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_display_cart ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Price display suffix"><?php esc_html_e( 'Price display suffix', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Text displayed after product prices.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['price_display_suffix'] ? esc_html( $settings['price_display_suffix'] ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Display tax totals"><?php esc_html_e( 'Display tax totals', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether tax totals are displayed as a single total or itemized.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $tax_total_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Tax rates"><?php esc_html_e( 'Tax rates', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The number of configured tax rates.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( number_format_i18n( $settings['tax_rate_count'] ) ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base country"><?php esc_html_e( 'Store base country', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The country configured as the store base location.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $store_base_country_display ); ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base state"><?php esc_html_e( 'Store base state', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The state or region configured as the store base location.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $store_base_state_display ? esc_html( $store_base_state_display ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Default customer location"><?php esc_html_e( 'Default customer location', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The location WooCommerce assumes for a customer before an address is provided.', 'woocommerce' ) ); ?></td>
+			<td><?php echo esc_html( $default_customer_location ); ?></td>
+		</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -867,14 +1000,14 @@ if ( 0 < $mu_plugins_count ) :
 				// Shortcode and block check.
 				if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
 					/* Translators: %1$s: shortcode text, %2$s: block slug. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>';
 					$found_error = true;
 				}
 
 				// Warn merchants if both the shortcode and block are present, which will be a confusing shopper experience.
 				if ( $_page['shortcode_present'] && $_page['block_present'] ) {
 					/* Translators: %1$s: shortcode text, %2$s: block slug. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page contains both the %1$s shortcode and the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page contains both the %1$s shortcode and the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) . '</mark>';
 					$found_error = true;
 				}
 			}
@@ -922,12 +1055,12 @@ if ( 0 < $mu_plugins_count ) :
 	<tbody>
 		<tr>
 			<td data-export-label="Name"><?php esc_html_e( 'Name', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The name of the current active theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The name of the current active theme.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $theme['name'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Version"><?php esc_html_e( 'Version', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The installed version of the current active theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The installed version of the current active theme.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( version_compare( $theme['version'], $theme['version_latest'], '<' ) ) {
@@ -941,12 +1074,12 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 		<tr>
 			<td data-export-label="Author URL"><?php esc_html_e( 'Author URL', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The theme developers URL.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The theme developers URL.', 'woocommerce' ) ); ?></td>
 			<td><?php echo esc_html( $theme['author_url'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Child Theme"><?php esc_html_e( 'Child theme', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $theme['is_child_theme'] ) {
@@ -961,12 +1094,12 @@ if ( 0 < $mu_plugins_count ) :
 		<?php if ( $theme['is_child_theme'] ) : ?>
 			<tr>
 				<td data-export-label="Parent Theme Name"><?php esc_html_e( 'Parent theme name', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The name of the parent theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The name of the parent theme.', 'woocommerce' ) ); ?></td>
 				<td><?php echo esc_html( $theme['parent_name'] ); ?></td>
 			</tr>
 			<tr>
 				<td data-export-label="Parent Theme Version"><?php esc_html_e( 'Parent theme version', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The installed version of the parent theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The installed version of the parent theme.', 'woocommerce' ) ); ?></td>
 				<td>
 					<?php
 					echo esc_html( $theme['parent_version'] );
@@ -979,14 +1112,14 @@ if ( 0 < $mu_plugins_count ) :
 			</tr>
 			<tr>
 				<td data-export-label="Parent Theme Author URL"><?php esc_html_e( 'Parent theme author URL', 'woocommerce' ); ?>:</td>
-				<td class="help"><?php echo wc_help_tip( esc_html__( 'The parent theme developers URL.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+				<td class="help"><?php echo wc_help_tip( esc_html__( 'The parent theme developers URL.', 'woocommerce' ) ); ?></td>
 				<td><?php echo esc_html( $theme['parent_author_url'] ); ?></td>
 			</tr>
 		<?php endif ?>
 		<?php if ( isset( $theme['is_block_theme'] ) ) : ?>
 		<tr>
 			<td data-export-label="Theme type"><?php esc_html_e( 'Theme type', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether the current active theme is a block theme or a classic theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether the current active theme is a block theme or a classic theme.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( $theme['is_block_theme'] ) {
@@ -1000,7 +1133,7 @@ if ( 0 < $mu_plugins_count ) :
 		<?php endif ?>
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php esc_html_e( 'WooCommerce support', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
 				if ( ! $theme['has_woocommerce_support'] ) {

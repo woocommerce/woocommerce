@@ -31,7 +31,7 @@ URL="http://localhost:${WORDPRESS_PORT}"
 
 if $(wp core is-installed);
 then
-    echo "Wordpress is already installed..."
+    echo "WordPress is already installed..."
 else
     declare -p WORDPRESS_TITLE >/dev/null
     declare -p WORDPRESS_LOGIN >/dev/null

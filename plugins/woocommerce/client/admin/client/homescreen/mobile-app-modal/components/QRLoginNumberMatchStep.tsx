@@ -192,7 +192,7 @@ export const QRLoginNumberMatchStep = ( {
 							/* translators: %d: seconds remaining before the challenge expires. */
 							__( 'Expires in %ds', 'woocommerce' ),
 							secondsRemaining
-					  ) }
+						) }
 			</p>
 
 			{ errorMessage && (
@@ -215,7 +215,7 @@ export const QRLoginNumberMatchStep = ( {
 						);
 						// Empty string is treated by the server as a non-matching
 						// pick — same one-strike rejection path as a wrong tap.
-						handleChoose( '' );
+						void handleChoose( '' );
 					} }
 				>
 					{ inFlight && pendingChoice === '' ? (

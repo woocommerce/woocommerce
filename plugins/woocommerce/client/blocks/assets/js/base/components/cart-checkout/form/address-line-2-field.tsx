@@ -84,7 +84,7 @@ const AddressLine2Field = ( {
 						className="wc-block-components-address-form__address_2-hidden-input"
 						aria-hidden="true"
 						aria-label={ field.label }
-						autoComplete={ field.autocomplete }
+						autoComplete={ props?.autoComplete }
 						id={ props?.id }
 						value={ value }
 						onChange={ ( event ) =>

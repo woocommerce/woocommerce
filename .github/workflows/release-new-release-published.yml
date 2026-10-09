@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   # Jobs to run after a pre-release is published (triggered by the "prereleased" GH event).
   generate-release-commits-and-contributors:
@@ -21,10 +24,11 @@ jobs:
   notify-release-published:
     name: 'Notify in Slack when a new (pre)release is published'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     steps:
       - name: 'Checkout repository'
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: trunk
           sparse-checkout: |
@@ -81,6 +85,7 @@ jobs:
   update-global-changelog:
     name: 'Update changelog.txt after any stable release'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-beta' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     permissions:
       contents: write
@@ -101,7 +106,7 @@ jobs:
             exit 1
           fi
       - name: 'Fetch latest changelog.txt and changelog script'
-        uses: 'actions/checkout@v4'
+        uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
         with:
           ref: trunk
           sparse-checkout: |
@@ -142,3 +147,82 @@ jobs:
             --reviewer "${{ github.actor }}" \
             --label "Release" \
             --milestone "$milestone"
+
+  bump-min-security-support-version:
+    name: 'Bump the minimum security-support version after a new major release'
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'published' && endsWith(inputs.release_tag_name, '.0') }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: 'Checkout trunk'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: trunk
+          sparse-checkout: |
+            /docs/contribution/releases/security-support.md
+          sparse-checkout-cone-mode: false
+
+      - name: 'Bump the minimum security-support version and open a PR'
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag_name }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # This job only runs for tag X.Y.0 (see the job-level `if`). The minimum
+          # supported version always sits 2.0 behind it (e.g. 11.0 -> 9.0).
+          main_version="${RELEASE_TAG%.0}"
+          min_version=$(echo "$main_version - 2.0" | bc)
+
+          file="docs/contribution/releases/security-support.md"
+          current_version=$(grep -oP '(?<=current stable WooCommerce version is )[0-9]+\.[0-9]+' "$file")
+
+          if [[ -z "$current_version" ]]; then
+            echo "::error::Could not find the currently documented version in $file. The sentence this automation matches on may have changed - update this workflow."
+            exit 1
+          fi
+
+          # Guard against a delayed or replayed release event moving the version backwards.
+          if [[ "$main_version" == "$current_version" ]] || ! printf '%s\n%s\n' "$current_version" "$main_version" | sort -C -V; then
+            echo "$file already reflects $current_version, which is not older than $main_version. Nothing to do."
+            exit 0
+          fi
+
+          sed -i -E "s/(current stable WooCommerce version is )[0-9]+\.[0-9]+(, that means version \*\*)[0-9]+\.[0-9]+( and newer\*\*)/\1$main_version\2$min_version\3/" "$file"
+
+          if ! grep -q "current stable WooCommerce version is $main_version, that means version \*\*$min_version and newer\*\*" "$file"; then
+            echo "::error::Could not update the minimum supported version in $file. The sentence this automation matches on may have changed - update the sed pattern in this workflow."
+            exit 1
+          fi
+
+          git config --global user.name "woocommercebot"
+          git config --global user.email "woocommercebot@users.noreply.github.com"
+
+          # Branch name hardcoded (per release) to avoid duplicate PRs on reruns.
+          branch_name="bump-min-security-support-version-$RELEASE_TAG"
+          git checkout -b "$branch_name"
+          git commit --all --message "Bump the minimum security-support version to $min_version"
+          git push --force origin "$branch_name"
+
+          pr_title="Bump the minimum security-support version to $min_version"
+          pr_body="WooCommerce $main_version just shipped, so per the [security patch support policy](https://developer.woocommerce.com/docs/contribution/releases/security-support/) (last 21 major versions) the minimum supported version bumps to **$min_version**.
+
+          ---
+          _Auto-generated by the \`release-new-release-published.yml\` workflow after $RELEASE_TAG was published._"
+
+          # Update the PR if one is already open for this branch, otherwise create it.
+          pr_number=$(gh pr list --head "$branch_name" --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [[ -n "$pr_number" ]]; then
+            gh pr edit "$pr_number" --title "$pr_title" --body "$pr_body"
+          else
+            gh pr create \
+              --title "$pr_title" \
+              --body "$pr_body" \
+              --base trunk \
+              --head "$branch_name" \
+              --reviewer "${{ github.actor }}" \
+              --label "Release" \
+              --milestone "$RELEASE_TAG"
+          fi

@@ -64,6 +64,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	protected $product_ids_to_export = array();
 
 	/**
+	 * Rows on this page that the paginated query did not return.
+	 *
+	 * @var int
+	 */
+	protected $rows_outside_query = 0;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -172,6 +179,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 
+		$default_columns['customs_commodity_code']    = __( 'Commodity code (HS code)', 'woocommerce' );
+		$default_columns['customs_country_of_origin'] = __( 'Country of origin', 'woocommerce' );
+		$default_columns['customs_description']       = __( 'Customs description', 'woocommerce' );
+
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
 			$default_columns['cogs_value'] = __( 'Cost of goods', 'woocommerce' );
 		}
@@ -225,14 +236,17 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		$products = wc_get_products( $args );
 
-		$this->total_rows  = $products->total;
-		$this->row_data    = array();
-		$variable_products = array();
+		$this->total_rows         = $products->total;
+		$this->row_data           = array();
+		$this->rows_outside_query = 0;
+		$variable_products        = array();
+		$include_variations       = ! isset( $args['type'] ) || in_array( ProductType::VARIATION, (array) $args['type'], true );
 
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
 			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
-			if ( ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
+			if ( $include_variations &&
+				( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
 				$product->is_type( ProductType::VARIABLE ) &&
 				! in_array( $product->get_id(), $variable_products, true ) ) {
 				$variable_products[] = $product->get_id();
@@ -259,9 +273,28 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 				foreach ( $products as $product ) {
 					$this->row_data[] = $this->generate_row_data( $product );
+					++$this->rows_outside_query;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get total percentage complete.
+	 *
+	 * Variations appended after the paginated query are written on this page, but total_rows does not include them. Leave them out of this calculation so the export finishes at 100 instead of stopping early or requesting pages forever.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function get_percent_complete() {
+		if ( 0 === $this->total_rows ) {
+			return 100;
+		}
+
+		$exported = parent::get_total_exported() - $this->rows_outside_query;
+
+		return (int) floor( ( max( 0, $exported ) / $this->total_rows ) * 100 );
 	}
 
 	/**
@@ -332,6 +365,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			ProductStatus::DRAFT   => -1,
 			ProductStatus::PRIVATE => 0,
 			ProductStatus::PUBLISH => 1,
+			ProductStatus::PENDING => 2,
 		);
 
 		// Fix display for variations when parent product is a draft.
@@ -711,7 +745,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
 						if ( $attribute->is_taxonomy() ) {
-							$terms  = $attribute->get_terms();
+							$terms  = (array) $attribute->get_terms();
 							$values = array();
 
 							foreach ( $terms as $term ) {

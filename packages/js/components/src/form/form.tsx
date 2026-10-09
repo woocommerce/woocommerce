@@ -16,7 +16,9 @@ import { ChangeEvent, useRef } from 'react';
 import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
+import _toPath from 'lodash/toPath';
 import _isEqual from 'lodash/isEqual';
+import _isSymbol from 'lodash/isSymbol';
 import _omit from 'lodash/omit';
 
 /**
@@ -41,6 +43,39 @@ function isChangeEvent< T >(
 	return ( value as ChangeEvent< HTMLInputElement > ).target !== undefined;
 }
 
+// Path segments lodash refuses to write through.
+const UNWRITABLE_KEYS = [ '__proto__', 'constructor', 'prototype' ];
+
+// Copied from lodash's private isKey(), the check setWith() uses to decide
+// whether a name is one literal key or a path to split. A name is a key when
+// it is not a dotted or balanced-bracket path, or when the object holds it.
+// The one deviation is the last term, which drops lodash's Object() wrapper
+// around the object, since the only caller always passes a plain object.
+const PLAIN_KEY = /^\w*$/;
+const DEEP_PATH = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
+
+function isKey( name: unknown, object: object ): boolean {
+	if ( Array.isArray( name ) ) {
+		return false;
+	}
+	const type = typeof name;
+	if (
+		type === 'number' ||
+		type === 'symbol' ||
+		type === 'boolean' ||
+		name === null ||
+		name === undefined ||
+		_isSymbol( name )
+	) {
+		return true;
+	}
+	return (
+		PLAIN_KEY.test( name as string ) ||
+		! DEEP_PATH.test( name as string ) ||
+		( name as PropertyKey ) in object
+	);
+}
+
 /**
  * A form component to handle form state and provide input helper props.
  */
@@ -49,6 +84,9 @@ function FormComponent< Values extends Record< string, any > = any >(
 	{
 		children,
 		onSubmit = () => {},
+		// Keep these defaults inline: setValues depends on them, so hoisting them
+		// to module constants would make setValue/setValues referentially stable
+		// for consumers that omit the props and change when dependent effects run.
 		onChange = () => {},
 		onChanges = () => {},
 		...props
@@ -59,8 +97,11 @@ function FormComponent< Values extends Record< string, any > = any >(
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
 	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );
+	// The latest logical values, advanced synchronously on every write so
+	// same-stack writes build on each other instead of on the last render.
+	const pendingValuesRef = useRef( initialValues.current );
 	const [ values, setValuesInternal ] = useState< Values >(
-		props.initialValues ?? ( {} as Values )
+		initialValues.current
 	);
 	const [ errors, setErrors ] = useState< FormErrors< Values > >(
 		props.errors || {}
@@ -94,6 +135,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 	) => void = ( newInitialValues, newTouchedFields = {}, newErrors = {} ) => {
 		const newValues = newInitialValues ?? initialValues.current ?? {};
 		initialValues.current = newValues;
+		pendingValuesRef.current = newValues;
 		setValuesInternal( newValues );
 		setTouched( newTouchedFields );
 		setErrors( newErrors );
@@ -110,7 +152,8 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 	const setValues = useCallback(
 		( valuesToSet: Values ) => {
-			const newValues = { ...values, ...valuesToSet };
+			const newValues = { ...pendingValuesRef.current, ...valuesToSet };
+			pendingValuesRef.current = newValues;
 			setValuesInternal( newValues );
 
 			validate( newValues, ( newErrors ) => {
@@ -136,7 +179,12 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 				const isValid = ! Object.keys( newErrors || {} ).length;
 				const nameValuePairs = [];
-				for ( const key in valuesToSet ) {
+				// Report the keys the merge above actually took, which is the
+				// own enumerable ones. A `for...in` here would also walk the
+				// prototype chain and report fields the form never stored.
+				// The `|| {}` leaves a nullish patch a no-op, which is what
+				// the spread above and the previous `for...in` both did.
+				for ( const key of Object.keys( valuesToSet || {} ) ) {
 					const nameValuePair = {
 						name: key,
 						value: valuesToSet[ key ],
@@ -158,15 +206,41 @@ function FormComponent< Values extends Record< string, any > = any >(
 				}
 			} );
 		},
-		[ values, validate, onChange, props.onChangeCallback ]
+		[ validate, onChange, onChanges, props.onChangeCallback ]
 	);
 
 	const setValue = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		( name: keyof Values, value: any ) => {
-			setValues( _setWith( { ...values }, name, value, _clone ) );
+			const newValues = { ...pendingValuesRef.current };
+			// Resolve the name the way setWith() does. Wrapping a literal key in
+			// an array keeps toPath() from splitting it, and setWith() gets the
+			// same segments so the entry read below is the one the write landed on.
+			const segments = isKey( name, newValues )
+				? _toPath( [ name ] )
+				: _toPath( name );
+
+			// lodash writes nothing for an empty path and drops a write whose
+			// path steps through one of these keys. Drop both here too, so
+			// setValues never adds a key the write did not make, such as an
+			// inherited value.
+			if (
+				! segments.length ||
+				segments.some( ( segment ) =>
+					UNWRITABLE_KEYS.includes( segment )
+				)
+			) {
+				return;
+			}
+
+			_setWith( newValues, segments, value, _clone );
+			// Hand setValues only the entry this write touched so it reports one
+			// change: a literal key is its own only segment, and a path reports
+			// under its top-level key.
+			const key = segments[ 0 ];
+			setValues( { [ key ]: newValues[ key ] } as Values );
 		},
-		[ values, validate, onChange, props.onChangeCallback ]
+		[ setValues ]
 	);
 
 	const handleChange = useCallback(
@@ -177,7 +251,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 			// Handle native events.
 			if ( isChangeEvent( value ) && value.target ) {
 				if ( value.target.type === 'checkbox' ) {
-					setValue( name, ! _get( values, name ) );
+					setValue( name, ! _get( pendingValuesRef.current, name ) );
 				} else {
 					setValue( name, value.target.value );
 				}
@@ -331,7 +405,7 @@ function FormComponent< Values extends Record< string, any > = any >(
 
 const Form = forwardRef( FormComponent ) as <
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	Values extends Record< string, any >
+	Values extends Record< string, any >,
 >(
 	props: PropsWithChildrenFunction<
 		FormProps< Values >,

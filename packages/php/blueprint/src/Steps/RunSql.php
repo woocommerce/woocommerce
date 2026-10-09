@@ -2,12 +2,26 @@
 
 namespace Automattic\WooCommerce\Blueprint\Steps;
 
+use Automattic\WooCommerce\Blueprint\Util;
+
 /**
  * Class RunSql
  *
  * @package Automattic\WooCommerce\Blueprint\Steps
  */
 class RunSql extends Step {
+	/**
+	 * Placeholder for the database table prefix.
+	 *
+	 * Exported SQL uses this placeholder in place of the source site's table
+	 * prefix. When the Blueprint is imported, the placeholder is replaced with
+	 * the importing site's prefix, so Blueprints remain portable across sites
+	 * that use different database table prefixes.
+	 *
+	 * @var string
+	 */
+	public const TABLE_PREFIX_PLACEHOLDER = '{WC_BLUEPRINT_TABLE_PREFIX}';
+
 	/**
 	 * Sql code to run.
 	 *
@@ -31,6 +45,24 @@ class RunSql extends Step {
 	public function __construct( string $sql, $name = 'schema.sql' ) {
 		$this->sql  = $sql;
 		$this->name = $name;
+	}
+
+	/**
+	 * Build a RunSql step for a database row, using the portable table-prefix
+	 * placeholder in place of the live database prefix.
+	 *
+	 * Pass the unprefixed table name (e.g. 'woocommerce_shipping_zones'). The
+	 * placeholder is prepended for you, so exported SQL stays portable across
+	 * sites with different table prefixes. On import, ImportRunSql resolves the
+	 * placeholder back to the importing site's prefix.
+	 *
+	 * @param array  $row   Row data keyed by column name.
+	 * @param string $table Unprefixed table name.
+	 * @param string $type  One of insert, insert ignore, replace into.
+	 * @return self
+	 */
+	public static function from_table_row( array $row, string $table, string $type = 'replace into' ): self {
+		return new self( (string) Util::array_to_insert_sql( $row, self::TABLE_PREFIX_PLACEHOLDER . $table, $type ) );
 	}
 
 	/**

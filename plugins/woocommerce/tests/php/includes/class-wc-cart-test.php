@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Cart.
  */
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -12,6 +13,21 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Stores arguments received by the woocommerce_add_to_cart_quantity filter.
+	 *
+	 * @var array
+	 */
+	protected $add_to_cart_quantity_filter_args = array();
+
+	/**
+	 * Customer shipping address to restore after a test that changes it, keyed by prop name.
+	 *
+	 * @var array<string, string>|null
+	 */
+	private $original_shipping_address = null;
+
 	/**
 	 * Called before every test.
 	 */
@@ -27,9 +43,25 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+
+		if ( null !== $this->original_shipping_address ) {
+			WC()->customer->set_props( $this->original_shipping_address );
+			$this->original_shipping_address = null;
+			// The checkout fields were built while the test's filters were attached.
+			$this->clear_checkout_fields();
+		}
+
+		// The parent teardown only clears chosen_shipping_methods, through
+		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
+		// make later shipping calculations fail on a missing package hash, so clear them
+		// here, where a failing assertion cannot skip it.
+		foreach ( array( 'shipping_method_counts', 'previous_shipping_methods', 'shipping_for_package_0', 'shipping_for_package_1', 'chosen_shipping_methods' ) as $key ) {
+			WC()->session->set( $key, null );
+		}
+
+		remove_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10 );
 	}
 
 	/**
@@ -46,9 +78,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 
-		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Sold individually variable product' );
+		$variable_product->set_attributes(
+			array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small' ) ) )
+		);
 		$variable_product->set_sold_individually( true );
 		$variable_product->save();
+		WC_Helper_Product::create_product_variation_object(
+			$variable_product->get_id(),
+			'SOLD INDIVIDUALLY VARIATION ' . microtime(),
+			10,
+			array( 'pa_size' => 'small' )
+		);
+		$variable_product = new WC_Product_Variable( $variable_product->get_id() );
 
 		$variation_ids = $variable_product->get_children();
 		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );
@@ -215,6 +258,453 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should preserve zero variation attributes when adding a variation directly by ID.
+	 */
+	public function test_add_variation_to_the_cart_directly_by_id_preserves_zero_attributes(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable product with zero attribute' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'length' );
+		$attribute->set_options( array( '0', '1' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'length' => '0' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $variation->get_id(), 1 );
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $product->get_id(), $cart_item['product_id'], 'The cart item should use the parent product ID.' );
+		$this->assertSame( $variation->get_id(), $cart_item['variation_id'], 'The cart item should use the variation ID.' );
+		$this->assertSame(
+			array( 'attribute_length' => '0' ),
+			$cart_item['variation'],
+			'The zero variation attribute should be preserved in cart item data.'
+		);
+
+		$variation->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Cart item product names include selected Any variation attributes.
+	 *
+	 * @dataProvider selected_any_variation_name_provider
+	 *
+	 * @param string                $product_name      Product name.
+	 * @param array<string, string> $stored_attributes Stored variation attributes.
+	 * @param string                $expected_name     Expected contextual cart item name.
+	 */
+	public function test_cart_item_product_name_includes_selected_any_variation_attributes( string $product_name, array $stored_attributes, string $expected_name ): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes( $product_name, $stored_attributes );
+		$option_filter_calls         = 0;
+		$option_filter               = function ( $value ) use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return 'Filtered ' . $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+			$name                = WC()->cart->get_item_product_name( $cart_item );
+
+			$this->assertSame( $expected_name, $name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ) );
+			$this->assertSame( 0, $option_filter_calls );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides stored variation attribute shapes for contextual name cases.
+	 *
+	 * @return array<string, array{string, array<string, string>, string}>
+	 */
+	public static function selected_any_variation_name_provider(): array {
+		return array(
+			'one fixed, one Any' => array(
+				'Cart Any Product',
+				array(
+					'pa_size'   => 'huge',
+					'pa_number' => '',
+				),
+				'Cart Any Product - huge, 1',
+			),
+			'all Any'            => array(
+				'shirt',
+				array(
+					'pa_size'   => '',
+					'pa_number' => '',
+				),
+				'shirt - huge, 1',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Cart item product names honor swapped product objects and non-variation items.
+	 */
+	public function test_cart_item_product_name_honors_swapped_products_and_non_variations(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+
+		try {
+			$cart_item = array(
+				'data'      => $simple,
+				'variation' => array(),
+			);
+
+			$this->assertSame( $simple->get_name(), WC()->cart->get_item_product_name( $cart_item ) );
+
+			$swapped = new WC_Product_Simple();
+			$swapped->set_name( 'Swapped Display Product' );
+
+			$this->assertSame( 'Swapped Display Product', WC()->cart->get_item_product_name( $cart_item, $swapped ) );
+			$this->assertSame( '', WC()->cart->get_item_product_name( array() ) );
+		} finally {
+			$simple->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item names preserve filtered custom Any attribute labels without duplicate metadata.
+	 */
+	public function test_cart_item_name_preserves_filtered_custom_any_attribute_labels(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Custom Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		// For custom attributes, core passes wc_attribute_taxonomy_name( 'attribute_finish' ) as the
+		// attribute name, so the filter sees "pa_attribute_finish" rather than "finish".
+		$filter_option_name = function ( $value, $term, $attribute_name ) {
+			unset( $term );
+
+			return 'pa_attribute_finish' === $attribute_name && 'gloss' === $value ? 'Polished' : $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $filter_option_name, 10, 3 );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'gloss' ),
+		);
+
+		$rendered_name = WC()->cart->get_item_product_name( $cart_item );
+
+		$this->assertSame( 'Custom Any Product - Polished', $rendered_name );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $rendered_name ) ) );
+
+		$cart_item['variation']['attribute_finish'] = 'Black & White';
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Custom Any Product - Black &amp; White' ) ) );
+
+		$variation->set_name( 'Custom Any Product - Black & White' );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, false ) ) );
+	}
+
+	/**
+	 * @testdox Two-argument cart item formatting preserves selected Any variation metadata.
+	 */
+	public function test_formatted_cart_item_data_preserves_selected_any_value_when_product_name_is_omitted(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Legacy Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+		$option_filter_calls    = 0;
+		$option_filter          = function () use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return 'Filtered ' . $option_filter_calls;
+		};
+		$attribute_filter_calls = 0;
+		$attribute_filter       = function ( $is_in_name ) use ( &$attribute_filter_calls ) {
+			++$attribute_filter_calls;
+
+			return $is_in_name;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+		add_filter( 'woocommerce_is_attribute_in_product_name', $attribute_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame( 'finish: Filtered 1', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		$this->assertSame( 1, $option_filter_calls );
+		$this->assertSame( 1, $attribute_filter_calls );
+	}
+
+	/**
+	 * @testdox Cart item formatting omits custom Any metadata when filtered display values cannot be rendered.
+	 * @dataProvider unrenderable_variation_option_label_provider
+	 *
+	 * @param mixed $filtered_value Filtered variation option label.
+	 */
+	public function test_formatted_cart_item_data_omits_unrenderable_custom_any_metadata( $filtered_value ): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Unrenderable Any Product' );
+		$variation->set_attributes( array( 'finish' => '' ) );
+
+		$option_filter = static function () use ( $filtered_value ) {
+			return $filtered_value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'gloss' ),
+		);
+
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+	}
+
+	/**
+	 * Provides filtered variation option labels that cannot be rendered.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function unrenderable_variation_option_label_provider(): array {
+		return array(
+			'false'            => array( false ),
+			'non-scalar array' => array( array( 'unexpected' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Cart item formatting skips non-scalar variation values before term lookups and option filters.
+	 * @dataProvider non_scalar_variation_value_provider
+	 *
+	 * @param mixed $raw_value Raw cart variation value.
+	 */
+	public function test_formatted_cart_item_data_skips_non_scalar_variation_values( $raw_value ): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Non-scalar Variation Product',
+			array( 'pa_size' => '' )
+		);
+
+		$option_filter_calls = 0;
+		$option_filter       = function ( $value ) use ( &$option_filter_calls ) {
+			++$option_filter_calls;
+
+			return $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $option_filter );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array(
+				'attribute_pa_size' => $raw_value,
+				'attribute_finish'  => $raw_value,
+			),
+		);
+
+		try {
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+			$this->assertSame( 0, $option_filter_calls );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides non-scalar cart variation values.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function non_scalar_variation_value_provider(): array {
+		return array(
+			'array'  => array( array( 'gloss' ) ),
+			'object' => array( new stdClass() ),
+		);
+	}
+
+	/**
+	 * @testdox Cart item formatting decodes taxonomy term entities when checking the rendered product name for duplicate metadata.
+	 */
+	public function test_formatted_cart_item_data_decodes_taxonomy_term_entities_for_name_comparison(): void {
+		$taxonomy = 'pa_encoded_finish';
+		$term     = false;
+
+		register_taxonomy( $taxonomy, array( 'product' ) );
+
+		try {
+			$term = wp_insert_term( 'Black & White', $taxonomy, array( 'slug' => 'black-white' ) );
+			$this->assertNotWPError( $term );
+
+			$variation = new WC_Product_Variation();
+			$variation->set_name( 'Encoded Any Product' );
+			$variation->set_attributes( array( $taxonomy => '' ) );
+
+			$cart_item = array(
+				'data'      => $variation,
+				'variation' => array( 'attribute_' . $taxonomy => 'black-white' ),
+			);
+
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Encoded Any Product - Black & White' ) ) );
+		} finally {
+			if ( is_array( $term ) ) {
+				wp_delete_term( $term['term_id'], $taxonomy );
+			}
+
+			unregister_taxonomy( $taxonomy );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata decodes URL-encoded custom attribute values for the name comparison and for display.
+	 */
+	public function test_formatted_cart_item_data_decodes_url_encoded_custom_values(): void {
+		// A fixed attribute whose stored value carries a percent escape. wc_get_formatted_variation()
+		// decodes it when generating the variation title, so the cart value must be decoded to match.
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Encoded Fixed Product - Black White' );
+		$variation->set_attributes( array( 'finish' => 'Black%20White' ) );
+
+		$cart_item = array(
+			'data'      => $variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame(
+			'',
+			trim( wc_get_formatted_cart_item_data( $cart_item, true, $variation->get_name() ) ),
+			'A decoded value already shown in the name must not be repeated as metadata.'
+		);
+
+		$this->assertSame(
+			'finish: Black White',
+			trim( wc_get_formatted_cart_item_data( $cart_item, true, 'Encoded Fixed Product' ) ),
+			'A value missing from the name must display decoded, matching how the name renders it.'
+		);
+
+		// The same normalisation applies to a selected "Any" value reaching the cart.
+		$any_variation = new WC_Product_Variation();
+		$any_variation->set_name( 'Encoded Any Product' );
+		$any_variation->set_attributes( array( 'finish' => '' ) );
+
+		$any_cart_item = array(
+			'data'      => $any_variation,
+			'variation' => array( 'attribute_finish' => 'Black%20White' ),
+		);
+
+		$this->assertSame( 'Encoded Any Product - Black White', WC()->cart->get_item_product_name( $any_cart_item ) );
+		$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $any_cart_item, true, 'Encoded Any Product - Black White' ) ) );
+	}
+
+	/**
+	 * @testdox Cart item metadata omits fixed taxonomy attributes already shown in the variation name.
+	 */
+	public function test_formatted_cart_item_data_omits_metadata_for_fixed_taxonomy_attributes(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Cart Fixed Taxonomy Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+			)
+		);
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true ) ) );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata keeps an attribute whose value only appears in the parent product name.
+	 */
+	public function test_formatted_cart_item_data_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Huge"
+		// and the "huge" size must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Huge',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			list( , $cart_item ) = $this->add_variation_to_cart(
+				$product,
+				$variation,
+				array(
+					'attribute_pa_size'   => 'huge',
+					'attribute_pa_number' => '1',
+					'attribute_pa_colour' => 'black',
+				)
+			);
+
+			$this->assertSame( 'Vienna Huge', WC()->cart->get_item_product_name( $cart_item ) );
+			$this->assertSame(
+				"size: huge\nnumber: 1\ncolour: black",
+				trim( wc_get_formatted_cart_item_data( $cart_item, true ) )
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
+	 */
+	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Cart Replaced Name Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$replace_name = function () {
+			return 'Custom cart label';
+		};
+		add_filter( 'woocommerce_cart_item_name', $replace_name, 20 );
+
+		try {
+			list( $cart_item_key, $cart_item ) = $this->add_variation_to_cart( $product, $variation );
+
+			$name = WC()->cart->get_item_product_name( $cart_item );
+			/**
+			 * This filter is documented in woocommerce/templates/cart/cart.php.
+			 *
+			 * @since 2.1.0
+			 */
+			$rendered_name = apply_filters( 'woocommerce_cart_item_name', $name, $cart_item, (string) $cart_item_key );
+
+			$this->assertSame( 'Custom cart label', $rendered_name );
+			$this->assertSame( 'Cart Replaced Name Product - huge, 1', $name );
+			$this->assertSame( '', trim( wc_get_formatted_cart_item_data( $cart_item, true, $name ) ), 'Dedup must key on the template-provided name, not on name-filter output.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -535,6 +1025,377 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox show_shipping() does not recurse when an address field filter recalculates the cart totals.
+	 *
+	 * @dataProvider provide_address_field_filters
+	 *
+	 * @param string $hook Address field filter that recalculates the totals.
+	 */
+	public function test_show_shipping_does_not_recurse_when_an_address_field_filter_recalculates_totals( string $hook ): void {
+		$this->add_product_for_an_address_without_postcode();
+		$calls = 0;
+		add_filter(
+			$hook,
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				// Stop a runaway recursion well above the bounded count, so a regression fails the assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+
+		$result = WC()->cart->show_shipping();
+
+		$this->assertLessThanOrEqual( 10, $calls, "The {$hook} filter should not run again for every nested shipping check." );
+		$this->assertFalse( $result, 'A missing postcode should still hide shipping costs.' );
+	}
+
+	/**
+	 * Address field filters that run while show_shipping() reads the shipping address fields.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_address_field_filters(): array {
+		return array(
+			'default address fields' => array( 'woocommerce_default_address_fields' ),
+			'shipping fields'        => array( 'woocommerce_shipping_fields' ),
+			'billing fields'         => array( 'woocommerce_billing_fields' ),
+		);
+	}
+
+	/**
+	 * @testdox show_shipping() reads filtered fields for one nested call, then uses the country locale to stop further nesting.
+	 */
+	public function test_show_shipping_limits_nested_field_reads_before_checking_the_country_locale(): void {
+		$this->add_product_for_an_address_without_postcode();
+		$answers = array();
+		$level   = 1;
+		$calls   = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$answers, &$level, &$calls ) {
+				$fields['shipping_postcode']['required'] = false;
+				// Stop a runaway recursion so a regression fails an assertion instead of exhausting the process.
+				if ( ++$calls <= 30 ) {
+					$nested_level = ++$level;
+					$answer       = WC()->cart->show_shipping();
+					--$level;
+					$answers[ $nested_level ][] = $answer;
+				}
+				return $fields;
+			}
+		);
+
+		$answers[1] = WC()->cart->show_shipping();
+
+		$this->assertTrue( $answers[1], 'The outer call should apply the shipping fields filter that makes the postcode optional.' );
+		$this->assertSame( array( true ), array_unique( $answers[2] ), 'A call nested once should read the same fields and answer like the outer call.' );
+		$this->assertSame( array( false ), array_unique( $answers[3] ), 'A call nested twice should require the postcode, as the US locale does.' );
+		$this->assertArrayNotHasKey( 4, $answers, 'The nesting should stop at the call that checks the country locale.' );
+	}
+
+	/**
+	 * @testdox show_shipping() keeps the totals it found when a guarded field filter recalculates them for an address without a city.
+	 */
+	public function test_show_shipping_keeps_the_totals_when_a_guarded_field_filter_recalculates_them(): void {
+		$this->add_product_for_an_address_without_postcode();
+		WC()->cart->get_customer()->set_shipping_postcode( '10001' );
+		WC()->cart->get_customer()->set_shipping_city( '' );
+		add_filter(
+			'woocommerce_default_address_fields',
+			function ( $fields ) {
+				static $calculating = false;
+				// Recalculate once per nesting chain, as extensions that read the cart total from a field filter do.
+				if ( ! $calculating ) {
+					$calculating = true;
+					WC()->cart->calculate_totals();
+					$calculating = false;
+				}
+				return $fields;
+			}
+		);
+		WC()->cart->calculate_totals();
+		$shipping_total = (float) WC()->cart->get_shipping_total();
+
+		$result = WC()->cart->show_shipping();
+
+		$this->assertGreaterThan( 0.0, $shipping_total, 'The classic check does not require a city, so the flat rate should be charged.' );
+		$this->assertTrue( $result, 'The classic check does not require a city.' );
+		$this->assertSame( $shipping_total, (float) WC()->cart->get_shipping_total(), 'The recalculation inside show_shipping() should keep the shipping total.' );
+		$this->assertSame( (float) WC()->cart->get_subtotal() + $shipping_total, (float) WC()->cart->get_total( 'edit' ), 'The total should still include shipping.' );
+	}
+
+	/**
+	 * @testdox show_shipping() leaves totals that match its answer when a field filter recalculates them and makes the postcode optional.
+	 */
+	public function test_show_shipping_leaves_totals_that_match_its_answer_when_a_field_filter_recalculates_them(): void {
+		$this->add_product_for_an_address_without_postcode();
+		$calls = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				$fields['shipping_postcode']['required'] = false;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+		WC()->cart->calculate_totals();
+
+		$result = WC()->cart->show_shipping();
+
+		$this->assertTrue( $result, 'The shipping fields filter makes the postcode optional.' );
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The recalculation inside show_shipping() should keep shipping calculated.' );
+		$this->assertGreaterThan( 0.0, (float) WC()->cart->get_shipping_total(), 'The recalculation inside show_shipping() should keep the flat rate.' );
+		$this->assertSame( (float) WC()->cart->get_subtotal() + (float) WC()->cart->get_shipping_total(), (float) WC()->cart->get_total( 'edit' ), 'The total should include shipping.' );
+	}
+
+	/**
+	 * @testdox show_shipping() reads the address fields again after a call that ran a nested check.
+	 */
+	public function test_show_shipping_reads_the_address_fields_again_after_a_nested_check(): void {
+		$this->add_product_for_an_address_without_postcode();
+		$ran_nested_check = false;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$ran_nested_check ) {
+				if ( ! $ran_nested_check ) {
+					$ran_nested_check = true;
+					WC()->cart->show_shipping();
+				}
+				return $fields;
+			}
+		);
+		WC()->cart->show_shipping();
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) {
+				$fields['shipping_postcode']['required'] = false;
+				return $fields;
+			}
+		);
+
+		$result = WC()->cart->show_shipping();
+
+		$this->assertTrue( $result, 'A later call should apply a shipping fields filter that makes the postcode optional.' );
+	}
+
+	/**
+	 * @testdox calculate_totals() leaves out shipping that a nested totals calculation added while the Store API checked shipping.
+	 */
+	public function test_calculate_totals_leaves_out_shipping_added_by_a_nested_calculation(): void {
+		$this->add_product_for_an_address_without_postcode();
+		WC()->cart->cart_context = 'store-api';
+		$calls                   = 0;
+		add_filter(
+			'woocommerce_default_address_fields',
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 10 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+		// Build the country locale during the calculation, as the first shipping check of a request does.
+		WC()->countries->locale = array();
+
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'A missing postcode should keep shipping uncalculated.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_total(), 'A missing postcode should leave the shipping total at zero.' );
+		$this->assertSame( (float) WC()->cart->get_subtotal(), (float) WC()->cart->get_total( 'edit' ), 'The total should not include shipping.' );
+	}
+
+	/**
+	 * @testdox calculate_shipping() clears shipping totals before reading address fields and after a field filter changes them.
+	 */
+	public function test_calculate_shipping_clears_totals_around_the_address_field_filters(): void {
+		$this->add_product_for_an_address_without_postcode();
+		WC()->cart->set_shipping_total( 9 );
+		WC()->cart->set_shipping_tax( 2 );
+		WC()->cart->set_shipping_taxes( array( 1 => 2 ) );
+		$before_filter = null;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$before_filter ) {
+				if ( null === $before_filter ) {
+					$before_filter = array( (float) WC()->cart->get_shipping_total(), (float) WC()->cart->get_shipping_tax(), WC()->cart->get_shipping_taxes() );
+				}
+				// Represent shipping state left by an extension's totals calculation inside the field filter.
+				WC()->cart->set_shipping_total( 5 );
+				WC()->cart->set_shipping_tax( 1 );
+				WC()->cart->set_shipping_taxes( array( 1 => 1 ) );
+				return $fields;
+			}
+		);
+
+		$result = WC()->cart->calculate_shipping();
+
+		$this->assertSame( array( 0.0, 0.0, array() ), $before_filter, 'Address field filters should start with cleared shipping totals and taxes.' );
+		$this->assertSame( array(), $result, 'A missing postcode should leave no calculated shipping methods.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_total(), 'Rejected shipping should clear the total left by the filter.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_tax(), 'Rejected shipping should clear the tax left by the filter.' );
+		$this->assertSame( array(), WC()->cart->get_shipping_taxes(), 'Rejected shipping should clear the tax breakdown left by the filter.' );
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'A missing postcode should keep shipping uncalculated.' );
+	}
+
+	/**
+	 * @testdox calculate_totals() leaves out shipping that a nested check allowed while the address fields still require a postcode.
+	 */
+	public function test_calculate_totals_leaves_out_shipping_that_a_nested_check_allowed(): void {
+		$this->add_product_for_an_address_without_postcode();
+		// The AE locale makes the postcode optional, so the innermost nested check, which reads the locale, allows shipping.
+		WC()->cart->get_customer()->set_shipping_country( 'AE' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Dubai' );
+		$calls = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				$fields['shipping_postcode']['required'] = true;
+				// The AE locale also hides the postcode, and show_shipping() skips a hidden field, so show it.
+				$fields['shipping_postcode']['hidden'] = false;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'A postcode that the shipping fields require should keep shipping uncalculated.' );
+		$this->assertSame( 0.0, (float) WC()->cart->get_shipping_total(), 'A postcode that the shipping fields require should leave the shipping total at zero.' );
+	}
+
+	/**
+	 * @testdox calculate_totals() charges shipping when the shipping fields make the postcode optional, even though a nested check requires it.
+	 */
+	public function test_calculate_totals_charges_shipping_when_the_fields_make_the_postcode_optional(): void {
+		$this->add_product_for_an_address_without_postcode();
+		$calls = 0;
+		add_filter(
+			'woocommerce_shipping_fields',
+			function ( $fields ) use ( &$calls ) {
+				++$calls;
+				$fields['shipping_postcode']['required'] = false;
+				// Stop a runaway recursion so a regression fails an assertion below instead of exhausting the process.
+				if ( $calls <= 30 ) {
+					WC()->cart->calculate_totals();
+				}
+				return $fields;
+			}
+		);
+
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'An optional postcode should let shipping be calculated.' );
+		$this->assertGreaterThan( 0.0, (float) WC()->cart->get_shipping_total(), 'An optional postcode should charge the flat rate.' );
+	}
+
+	/**
+	 * Add a product to the cart and give the customer a US shipping address without a postcode, with shipping costs hidden until an address is entered.
+	 */
+	private function add_product_for_an_address_without_postcode(): void {
+		$this->add_product_for_a_us_address_missing( 'postcode' );
+		$this->clear_checkout_fields();
+	}
+
+	/**
+	 * Clear the checkout fields that WC_Checkout keeps after first building them, so the next read builds them through the filters again.
+	 */
+	private function clear_checkout_fields(): void {
+		$fields = new ReflectionProperty( WC_Checkout::class, 'fields' );
+		$fields->setAccessible( true );
+		$fields->setValue( WC()->checkout(), null );
+	}
+
+	/**
+	 * @testdox show_shipping() in the classic cart does not wait for an address field that the country locale hides.
+	 *
+	 * @testWith [ "postcode" ]
+	 *           [ "state" ]
+	 *
+	 * @param string $field Address field the locale hides while it stays required.
+	 */
+	public function test_show_shipping_skips_an_address_field_the_locale_hides( string $field ): void {
+		$this->hide_us_address_field_in_locale( $field, true );
+		$this->add_product_for_a_us_address_missing( $field );
+
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( WC()->cart->show_shipping(), "A hidden {$field} should not hold back shipping." );
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), "A hidden {$field} should let shipping be calculated." );
+		$this->assertGreaterThan( 0.0, (float) WC()->cart->get_shipping_total(), "A hidden {$field} should still charge the flat rate." );
+	}
+
+	/**
+	 * @testdox show_shipping() in the classic cart still requires an address field whose hidden flag is not exactly true.
+	 *
+	 * @testWith [ "postcode", "yes" ]
+	 *           [ "postcode", 1 ]
+	 *           [ "state", "yes" ]
+	 *           [ "state", 1 ]
+	 *
+	 * @param string $field  Address field the locale flags as hidden.
+	 * @param mixed  $hidden Hidden flag the locale sets on the field.
+	 */
+	public function test_show_shipping_requires_a_field_whose_hidden_flag_is_not_exactly_true( string $field, $hidden ): void {
+		$this->hide_us_address_field_in_locale( $field, $hidden );
+		$this->add_product_for_a_us_address_missing( $field );
+
+		$this->assertFalse( WC()->cart->show_shipping(), "The classic checkout only treats hidden => true as hidden, so the {$field} stays required." );
+	}
+
+	/**
+	 * Hide a US address field in the country locale while leaving it required.
+	 *
+	 * @param string $field  Address field key, without the type prefix.
+	 * @param mixed  $hidden Value for the hidden flag.
+	 */
+	private function hide_us_address_field_in_locale( string $field, $hidden ): void {
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) use ( $field, $hidden ) {
+				$locale['US'][ $field ]['hidden'] = $hidden;
+				return $locale;
+			}
+		);
+		WC()->countries->locale = array();
+	}
+
+	/**
+	 * Add a product to the cart and give the customer a US shipping address without the given field, with shipping costs hidden until an address is entered.
+	 *
+	 * @param string $missing_field Address field to leave empty: 'postcode' or 'state'.
+	 */
+	private function add_product_for_a_us_address_missing( string $missing_field ): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$customer                        = WC()->cart->get_customer();
+		$this->original_shipping_address = array(
+			'shipping_country'  => $customer->get_shipping_country(),
+			'shipping_state'    => $customer->get_shipping_state(),
+			'shipping_city'     => $customer->get_shipping_city(),
+			'shipping_postcode' => $customer->get_shipping_postcode(),
+		);
+		$customer->set_shipping_country( 'US' );
+		$customer->set_shipping_city( 'New York' );
+		$customer->set_shipping_state( 'state' === $missing_field ? '' : 'NY' );
+		$customer->set_shipping_postcode( 'postcode' === $missing_field ? '' : '10001' );
+	}
+
+	/**
 	 * Test show_shipping for countries with various state/postcode requirement.
 	 */
 	public function test_show_shipping_for_countries_different_shipping_requirements() {
@@ -841,6 +1702,286 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		$order->delete( true );
+	}
+
+	/**
+	 * Set up a stock-managed product with exactly one unit, held by a separate unpaid order.
+	 *
+	 * Mirrors the state an abandoned checkout leaves behind: the last unit is reserved by an
+	 * order that belongs to the shopper's own session.
+	 *
+	 * @return array{0: WC_Product, 1: WC_Order} The product and the order holding its stock.
+	 */
+	private function create_last_unit_product_held_by_order(): array {
+		$product       = $this->create_stock_managed_product( 1 );
+		$holding_order = $this->create_order_holding_stock( $product, 1 );
+
+		// Sanity check: the separate order really holds the only unit.
+		$this->assertEquals( 1, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		return array( $product, $holding_order );
+	}
+
+	/**
+	 * Create a simple product that manages stock, with no backorders.
+	 *
+	 * @param int $stock_quantity How many units the product has in stock.
+	 * @return WC_Product The product.
+	 */
+	private function create_stock_managed_product( int $stock_quantity ): WC_Product {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+		// ReserveStock is only enabled once the reserved-stock table has shipped (schema >= 430).
+		update_option( 'woocommerce_schema_version', 430 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( $stock_quantity );
+		$product->set_backorders( 'no' );
+		$product->set_stock_status( 'instock' );
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Create an unpaid order that holds a quantity of a product, as an in-progress checkout does.
+	 *
+	 * @param WC_Product $product  The product to hold stock for.
+	 * @param int        $quantity How many units the order holds.
+	 * @return WC_Order The order holding the stock.
+	 */
+	private function create_order_holding_stock( WC_Product $product, int $quantity ): WC_Order {
+		$holding_order = WC_Helper_Order::create_order();
+		$holding_order->remove_order_items();
+		$holding_order->add_product( wc_get_product( $product->get_id() ), $quantity );
+		$holding_order->set_status( OrderStatus::PENDING );
+		$holding_order->save();
+
+		( new ReserveStock() )->reserve_stock_for_order( $holding_order, 60 );
+
+		return $holding_order;
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when their own hold is tracked by store_api_draft_order and order_awaiting_payment is boolean false (Cause A: payment_complete() writes false, not unset).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_when_awaiting_payment_is_false() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// The draft pointer correctly identifies the shopper's own holding order...
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		// ...but a completed payment earlier in the session left this as boolean false rather than unsetting it.
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'A boolean-false order_awaiting_payment must fall through to the store_api_draft_order pointer, not skip it.'
+		);
+	}
+
+	/**
+	 * @testdox check_cart_item_stock does not block the shopper when only store_api_draft_order identifies their own hold (baseline fallback, no order_awaiting_payment set).
+	 */
+	public function test_check_cart_item_stock_not_blocked_by_own_hold_via_draft_fallback() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', $holding_order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', null );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock uses order_awaiting_payment to exclude the shopper's own hold when it holds a real order id.
+	 */
+	public function test_check_cart_item_stock_uses_order_awaiting_payment_when_set() {
+		list( $product, $holding_order ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', $holding_order->get_id() );
+
+		$this->assertTrue( WC()->cart->check_cart_item_stock() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock still blocks when a live hold is NOT identified as the shopper's own (oversell safety: the fix must not relax holds it cannot attribute to this session).
+	 */
+	public function test_check_cart_item_stock_blocks_when_hold_is_not_the_shoppers_own() {
+		list( $product ) = $this->create_last_unit_product_held_by_order();
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Session points at neither the holding order nor any awaiting order.
+		WC()->session->set( 'store_api_draft_order', 0 );
+		WC()->session->set( 'order_awaiting_payment', false );
+
+		$result = WC()->cart->check_cart_item_stock();
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertContains( 'out-of-stock', $result->get_error_codes() );
+	}
+
+	/**
+	 * @testdox check_cart_item_stock prefers order_awaiting_payment over store_api_draft_order when both point at a live hold (the classic checkout order wins).
+	 */
+	public function test_check_cart_item_stock_prefers_order_awaiting_payment_over_draft_order() {
+		// Three units in stock: the classic checkout order holds two of them, the draft order holds one.
+		$product       = $this->create_stock_managed_product( 3 );
+		$classic_order = $this->create_order_holding_stock( $product, 2 );
+		$draft_order   = $this->create_order_holding_stock( $product, 1 );
+
+		// Sanity check: between them, the two orders hold all three units.
+		$this->assertEquals( 3, wc_get_held_stock_quantity( wc_get_product( $product->get_id() ), 0 ) );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		WC()->session->set( 'order_awaiting_payment', $classic_order->get_id() );
+		WC()->session->set( 'store_api_draft_order', $draft_order->get_id() );
+
+		/*
+		 * Excluding the classic order leaves one unit held, so the two units in the cart fit into
+		 * the three in stock. Excluding the draft order instead would leave two units held and
+		 * block the cart, so this assertion only holds while order_awaiting_payment takes priority.
+		 */
+		$this->assertTrue(
+			WC()->cart->check_cart_item_stock(),
+			'order_awaiting_payment must take priority over store_api_draft_order when both hold stock.'
+		);
+	}
+
+	/**
+	 * @testdox Should clear the cart after payment when the order cart hash matches.
+	 */
+	public function test_clear_cart_after_payment_clears_cart_when_order_cart_hash_matches(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( WC()->cart->get_cart_hash() );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the paid order matches the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should not clear the cart after payment when the order cart hash differs.
+	 */
+	public function test_clear_cart_after_payment_keeps_cart_when_order_cart_hash_differs(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			wc_clear_cart_after_payment();
+
+			$this->assertFalse( WC()->cart->is_empty(), 'Cart should not be emptied when the paid order does not match the current cart hash.' );
+		} finally {
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
+	 */
+	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {
+		global $wp;
+
+		$previous_query_vars = $wp->query_vars;
+		$previous_order_key  = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserving request state for test cleanup.
+		$order               = null;
+		$filter              = function ( $should_clear_cart_after_payment ) {
+			$this->assertFalse( $should_clear_cart_after_payment, 'The filter should receive the final value after the cart hash check.' );
+			return true;
+		};
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_cart_hash( 'different-cart-hash' );
+			$order->save();
+
+			$wp->query_vars['order-received'] = $order->get_id();
+			$_GET['key']                      = $order->get_order_key();
+
+			add_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+
+			wc_clear_cart_after_payment();
+
+			$this->assertTrue( WC()->cart->is_empty(), 'Cart should be emptied when the filter overrides the final value.' );
+		} finally {
+			remove_filter( 'woocommerce_should_clear_cart_after_payment', $filter );
+			$wp->query_vars = $previous_query_vars;
+
+			if ( null === $previous_order_key ) {
+				unset( $_GET['key'] );
+			} else {
+				$_GET['key'] = $previous_order_key;
+			}
+
+			if ( $order instanceof WC_Order ) {
+				WC_Helper_Order::delete_order( $order->get_id() );
+			}
+		}
 	}
 
 	/**
@@ -1415,5 +2556,214 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );
 		$product->delete( true );
+	}
+
+
+	/**
+	 * Capture all arguments passed to the filter without modifying the quantity.
+	 *
+	 * @param int $quantity       The quantity to add to cart.
+	 * @param int $product_id     The parent product ID.
+	 * @param int $variation_id   The variation ID being added.
+	 *
+	 * @return int
+	 */
+	public function capture_add_to_cart_quantity_filter_args( $quantity, $product_id, $variation_id ) {
+		$this->add_to_cart_quantity_filter_args = func_get_args();
+		return $quantity;
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive variation_id when a variable product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		// Create a variable product and pick the first available variation to add.
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = $variations[0];
+
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			$variation['attributes']
+		);
+
+		// Ensure all 3 arguments were passed before accessing individual indexes.
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive 0 as variation_id when a simple product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_zero_variation_id_for_simple_product() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 3 );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->assertCount( 3, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 3 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
+		$this->assertEquals( 0, $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * Applying the same coupon a second time returns false and leaves the discount total unchanged.
+	 */
+	public function test_apply_same_coupon_twice_returns_false() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		WC()->cart->empty_cart();
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) );
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'dup-coupon',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$first = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$discount_after_first = WC()->cart->get_discount_total();
+
+		$second = WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( $first, 'first application should succeed' );
+		$this->assertFalse( $second, 'second application of same coupon should be rejected' );
+		$this->assertEqualsWithDelta( $discount_after_first, WC()->cart->get_discount_total(), 0.001, 'discount total should be unchanged after rejected re-application' );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox The mini-cart template renders selected Any values in the name exactly once.
+	 */
+	public function test_mini_cart_template_renders_selected_any_values_once(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Mini Cart Any Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+
+			ob_start();
+			woocommerce_mini_cart();
+			$html = ob_get_clean();
+
+			$this->assertStringContainsString( 'Mini Cart Any Product - huge, 1', $html, 'The merged name must render.' );
+			$this->assertStringNotContainsString( '<dl class="variation"', $html, 'No variation meta list must render for values already in the name.' );
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Adds a variation to the cart, asserting success.
+	 *
+	 * @param WC_Product $product    Variable product.
+	 * @param WC_Product $variation  Variation to add.
+	 * @param array      $attributes Selected variation attributes.
+	 * @return array The cart item key and cart item: array( string, array ).
+	 */
+	private function add_variation_to_cart( $product, $variation, array $attributes = array(
+		'attribute_pa_size'   => 'huge',
+		'attribute_pa_number' => '1',
+	) ): array {
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+
+		return array( (string) $cart_item_key, WC()->cart->get_cart_item( (string) $cart_item_key ) );
+	}
+
+	/**
+	 * @testdox Should add only selected grouped children with their submitted quantities.
+	 */
+	public function test_add_to_cart_action_handles_grouped_product_quantities(): void {
+		$first_child = WC_Helper_Product::create_simple_product();
+		$first_child->set_name( 'First grouped child' );
+		$first_child->save();
+
+		$skipped_child = WC_Helper_Product::create_simple_product();
+		$skipped_child->set_name( 'Skipped grouped child' );
+		$skipped_child->save();
+
+		$single_child = WC_Helper_Product::create_simple_product();
+		$single_child->set_name( 'Sold individually grouped child' );
+		$single_child->set_sold_individually( true );
+		$single_child->save();
+
+		$grouped_product = new WC_Product_Grouped();
+		$grouped_product->set_name( 'Grouped request product' );
+		$grouped_product->set_children(
+			array(
+				$first_child->get_id(),
+				$skipped_child->get_id(),
+				$single_child->get_id(),
+			)
+		);
+		$grouped_product->save();
+
+		$original_redirect = get_option( 'woocommerce_cart_redirect_after_add' );
+
+		try {
+			update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+			WC()->cart->empty_cart();
+
+			$grouped_quantities = array(
+				$first_child->get_id()   => 2,
+				$skipped_child->get_id() => 0,
+				$single_child->get_id()  => 1,
+			);
+
+			$_REQUEST['add-to-cart'] = $grouped_product->get_id();
+			$_REQUEST['quantity']    = $grouped_quantities;
+			$_POST['quantity']       = $grouped_quantities;
+
+			WC_Form_Handler::add_to_cart_action( false );
+
+			$cart_quantities = array();
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$cart_quantities[ $cart_item['product_id'] ] = (int) $cart_item['quantity'];
+			}
+
+			$this->assertSame(
+				array(
+					$first_child->get_id()  => 2,
+					$single_child->get_id() => 1,
+				),
+				$cart_quantities,
+				'Only positive grouped child quantities should be added to the cart.'
+			);
+			$this->assertArrayNotHasKey( $skipped_child->get_id(), $cart_quantities, 'A zero-quantity grouped child should be skipped.' );
+			$this->assertArrayNotHasKey( $grouped_product->get_id(), $cart_quantities, 'The grouped parent should not become a cart line.' );
+		} finally {
+			unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+			update_option( 'woocommerce_cart_redirect_after_add', $original_redirect );
+			WC()->cart->empty_cart();
+			$grouped_product->delete( true );
+			$single_child->delete( true );
+			$skipped_child->delete( true );
+			$first_child->delete( true );
+		}
 	}
 }

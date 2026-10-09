@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Icon, warning } from '@wordpress/icons';
+import { Icon, cautionFilled, info } from '@wordpress/icons';
 
 export const setupErrorTypes = {
 	DOWNLOAD: 'download',
@@ -20,7 +20,24 @@ const setupErrorDescriptions = {
 	[ setupErrorTypes.START ]: __( 'start', 'woocommerce' ),
 };
 
-export default function SetupNotice( { isSetupError, errorReason } ) {
+export default function SetupNotice( {
+	isSetupError,
+	errorReason,
+	infoMessage,
+} ) {
+	if ( infoMessage ) {
+		return (
+			<div className="wc-admin-shipping-banner-install-info">
+				<Icon icon={ info } className="info-icon" />
+				{ infoMessage }
+			</div>
+		);
+	}
+
+	if ( ! isSetupError ) {
+		return null;
+	}
+
 	const getErrorMessage = ( errorType ) => {
 		// Default to 'set up' description if the error type somehow doesn't exist.
 		const description =
@@ -38,13 +55,9 @@ export default function SetupNotice( { isSetupError, errorReason } ) {
 		);
 	};
 
-	if ( ! isSetupError ) {
-		return null;
-	}
-
 	return (
 		<div className="wc-admin-shipping-banner-install-error">
-			<Icon icon={ warning } className="warning-icon" />
+			<Icon icon={ cautionFilled } className="warning-icon" />
 			{ getErrorMessage( errorReason ) }
 		</div>
 	);

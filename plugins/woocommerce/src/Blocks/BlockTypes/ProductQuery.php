@@ -77,7 +77,7 @@ class ProductQuery extends AbstractBlock {
 			2
 		);
 		add_filter(
-			'render_block',
+			'render_block_core/query',
 			array( $this, 'enqueue_styles' ),
 			10,
 			2
@@ -140,8 +140,7 @@ class ProductQuery extends AbstractBlock {
 			$post_template_has_support_for_grid_view
 		);
 
-		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Query::product_query().
 		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 	}
 
@@ -165,7 +164,7 @@ class ProductQuery extends AbstractBlock {
 	 * @return string The block content.
 	 */
 	public function enqueue_styles( string $block_content, array $block ) {
-		if ( 'core/query' === $block['blockName'] && self::is_woocommerce_variation( $block ) ) {
+		if ( self::is_woocommerce_variation( $block ) ) {
 			wp_enqueue_style( 'wc-blocks-style-product-query' );
 		}
 

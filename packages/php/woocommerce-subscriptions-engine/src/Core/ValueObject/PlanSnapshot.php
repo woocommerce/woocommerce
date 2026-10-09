@@ -1,0 +1,152 @@
+<?php
+/**
+ * PlanSnapshot - an immutable, point-in-time copy of the plan terms a cycle was
+ * billed under. Companion to {@see ItemsSnapshot}, referenced by cycles by id.
+ *
+ * NOT content-addressed: identical consecutive plan terms are shared by copy-forward,
+ * so this VO carries no canonicalization or hashing. The typed in-memory form; the
+ * Integration binding serializes via {@see self::to_payload()} and reconstructs via
+ * {@see self::from_payload()}. `schema_version` is the payload-FORMAT version (how to
+ * parse/upcast), not the plan's content version. WordPress-free Core zone.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
+
+use DomainException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * PlanSnapshot value object.
+ *
+ * Immutable. Construct via {@see self::from_array()} (typed data) or
+ * {@see self::from_payload()} (a serialized payload).
+ */
+final class PlanSnapshot {
+
+	/**
+	 * The plan terms payload, as stored on the snapshot row.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $data;
+
+	/**
+	 * Payload-format version, recorded on the snapshot row. NOT the plan's content
+	 * version.
+	 *
+	 * @var int
+	 */
+	private $schema_version;
+
+	/**
+	 * Use {@see self::from_array()} or {@see self::from_payload()}.
+	 *
+	 * @param array<string, mixed> $data           Plan terms payload.
+	 * @param int                  $schema_version Payload-format version.
+	 * @throws DomainException If the schema version is not positive.
+	 */
+	private function __construct( array $data, int $schema_version ) {
+		if ( $schema_version < 1 ) {
+			throw new DomainException(
+				sprintf( 'PlanSnapshot: schema_version must be 1 or greater, got %d.', $schema_version )
+			);
+		}
+
+		$this->data           = $data;
+		$this->schema_version = $schema_version;
+	}
+
+	/**
+	 * Build a plan snapshot from a payload array.
+	 *
+	 * @param array<string, mixed> $data           Plan terms payload.
+	 * @param int                  $schema_version Payload-format version. Defaults to 1.
+	 * @throws DomainException If the schema version is not positive.
+	 */
+	public static function from_array( array $data, int $schema_version = 1 ): self {
+		return new self( $data, $schema_version );
+	}
+
+	/**
+	 * Reconstruct a plan snapshot from a serialized payload. Companion to
+	 * {@see self::to_payload()}.
+	 *
+	 * @param array<string, mixed> $payload        Serialized plan terms payload.
+	 * @param int                  $schema_version Payload-format version the payload was written in.
+	 * @throws DomainException If the schema version is not positive.
+	 */
+	public static function from_payload( array $payload, int $schema_version = 1 ): self {
+		return new self( $payload, $schema_version );
+	}
+
+	/**
+	 * Payload-format version (NOT the plan's content version).
+	 */
+	public function get_schema_version(): int {
+		return $this->schema_version;
+	}
+
+	/**
+	 * The id of the plan these terms were snapshotted from, or null when absent.
+	 * A weak link back to the source plan; a missing key surfaces here as null.
+	 */
+	public function get_selling_plan_id(): ?int {
+		return isset( $this->data['selling_plan_id'] ) ? Coercion::coerce_int( $this->data['selling_plan_id'] ) : null;
+	}
+
+	/**
+	 * The frozen billing cadence captured at signup, parsed with the engine's renewal
+	 * rule ({@see BillingPolicy::from_array()}), so it holds after
+	 * the source plan is edited or deleted. Null when the payload carries no billing
+	 * policy array; throws when one is present but unusable, so a caller can log why
+	 * before falling back.
+	 *
+	 * @throws DomainException If the stored policy does not parse or has no usable cadence.
+	 */
+	public function read_billing_policy(): ?BillingPolicy {
+		$policy = $this->data['billing_policy'] ?? null;
+		if ( ! is_array( $policy ) ) {
+			return null;
+		}
+
+		return BillingPolicy::from_array( Coercion::coerce_string_keyed( $policy ) );
+	}
+
+	/**
+	 * The frozen pricing payload captured at signup, returned as captured. The
+	 * owning extension interprets it. Null when absent, explicitly null, or not an
+	 * array.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function get_pricing_policy(): ?array {
+		$policy = $this->data['pricing_policy'] ?? null;
+
+		return is_array( $policy ) ? Coercion::coerce_string_keyed( $policy ) : null;
+	}
+
+	/**
+	 * The plan terms payload, in its original key order.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function to_array(): array {
+		return $this->data;
+	}
+
+	/**
+	 * The serialized payload for storage: the plan terms as given, no
+	 * canonicalization (dedup is by copy-forward, not a content hash).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function to_payload(): array {
+		return $this->data;
+	}
+}

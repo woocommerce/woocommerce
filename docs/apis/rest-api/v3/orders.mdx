@@ -101,6 +101,7 @@ The orders API allows you to create, view, update, and delete individual, or a b
 | -------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
 | `id`           | integer | Item ID. `READ-ONLY`                                                                    |
 | `name`         | string  | Product name.                                                                                                         |
+| `parent_name`  | string or null | Parent product name if the product is a variation; otherwise `null`.                                              |
 | `product_id`   | integer | Product ID.                                                                                                           |
 | `variation_id` | integer | Variation ID, if applicable.                                                                                          |
 | `quantity`     | integer | Quantity ordered.                                                                                                     |
@@ -112,7 +113,16 @@ The orders API allows you to create, view, update, and delete individual, or a b
 | `taxes`        | array   | Line taxes. See [Order - Tax lines properties](#order---tax-lines-properties) `READ-ONLY` |
 | `meta_data`    | array   | Meta data. See [Order - Meta data properties](#order---meta-data-properties)                                            |
 | `sku`          | string  | Product SKU. `READ-ONLY`                                                                |
+| `global_unique_id` | string or null | Product GTIN, UPC, EAN or ISBN. An empty string if not set, or `null` if the product no longer exists. `READ-ONLY` |
 | `price`        | string  | Product price. `READ-ONLY`                                                              |
+| `image`        | object  | Main product image. See [Order - Line item image properties](#order---line-item-image-properties). `READ-ONLY` |
+
+### Order - Line item image properties
+
+| Attribute | Type | Description |
+| --------- | ---- | ----------- |
+| `id` | integer or string | Image attachment ID, returned as an integer or numeric string. An empty string or `0` if no image is set; `0` if the product no longer exists. `READ-ONLY` |
+| `src` | string or boolean | Full-size image URL. An empty string if no image is set or the product no longer exists, or `false` if the attachment cannot be resolved. `READ-ONLY` |
 
 ### Order - Tax lines properties
 
@@ -1507,6 +1517,19 @@ woocommerce.put("orders/727", data).parsed_response
 
   </TabItem>
 </Tabs>
+
+### Remove a coupon from an order
+
+To remove an applied coupon, update the order with a `coupon_lines` array containing every coupon code that should remain. Any applied coupon omitted from the array is removed from the order. For example, if the order has `10per` and `20off`, this request removes `20off`:
+
+```shell
+curl -X PUT https://example.com/wp-json/wc/v3/orders/727 \
+	-u consumer_key:consumer_secret \
+	-H "Content-Type: application/json" \
+	-d '{"coupon_lines":[{"code":"10per"}]}'
+```
+
+To remove all applied coupons, send `{"coupon_lines":[]}`. Coupon line IDs are read-only; do not send an ID with a null code to remove a coupon. This changes the coupons applied to the order, not the coupon codes available in the store.
 
 ## Delete an order
 

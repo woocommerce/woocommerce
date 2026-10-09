@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Interactivity API hydration warning on shopper-collection rows for items without product variations.

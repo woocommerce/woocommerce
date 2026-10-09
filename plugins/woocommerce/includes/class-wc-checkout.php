@@ -9,8 +9,11 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,6 +22,17 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Checkout {
 	use CogsAwareTrait;
+
+	/**
+	 * Checkout/order-level shipping fields that should not be persisted as generic meta.
+	 *
+	 * @var string[]
+	 */
+	private const SHIPPING_FIELDS_EXCLUDED_FROM_META = array(
+		'shipping_method',
+		'shipping_total',
+		'shipping_tax',
+	);
 
 	/**
 	 * The single instance of the class.
@@ -255,18 +269,27 @@ class WC_Checkout {
 				'shipping_'
 			),
 			'account'  => array(),
-			'order'    => array(
-				'order_comments' => array(
-					'type'        => 'textarea',
-					'class'       => array( 'notes' ),
-					'label'       => __( 'Order notes', 'woocommerce' ),
-					'placeholder' => esc_attr__(
-						'Notes about your order, e.g. special notes for delivery.',
-						'woocommerce'
-					),
-				),
-			),
+			'order'    => array(),
 		);
+
+		/**
+		 * Controls whether the order notes field is added to the checkout.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param bool $enabled Whether the order notes field is enabled.
+		 */
+		if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
+			$this->fields['order']['order_comments'] = array(
+				'type'        => 'textarea',
+				'class'       => array( 'notes' ),
+				'label'       => __( 'Order notes', 'woocommerce' ),
+				'placeholder' => esc_attr__(
+					'Notes about your order, e.g. special notes for delivery.',
+					'woocommerce'
+				),
+			);
+		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
@@ -420,19 +443,15 @@ class WC_Checkout {
 				'billing'  => true,
 			);
 
-			$shipping_fields = array(
-				'shipping_method' => true,
-				'shipping_total'  => true,
-				'shipping_tax'    => true,
-			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
 					// Store custom fields prefixed with either shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
-					if ( ! isset( $shipping_fields[ $key ] ) ) {
-						$order->update_meta_data( '_' . $key, $value );
-					}
+				} elseif (
+					isset( $fields_prefix[ current( explode( '_', $key ) ) ] )
+					&& ! in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true )
+				) {
+					$order->update_meta_data( '_' . $key, $value );
 				}
 			}
 
@@ -546,6 +565,8 @@ class WC_Checkout {
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			$variation = is_array( $values['variation'] ?? null ) ? $values['variation'] : array();
+
 			/**
 			 * Filter hook to get initial item object.
 			 *
@@ -558,7 +579,7 @@ class WC_Checkout {
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
-					'variation'    => $values['variation'],
+					'variation'    => $variation,
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
 					'subtotal_tax' => $values['line_subtotal_tax'],
@@ -572,7 +593,7 @@ class WC_Checkout {
 			if ( $product ) {
 				$item->set_props(
 					array(
-						'name'         => $product->get_name(),
+						'name'         => wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation ),
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
@@ -607,12 +628,13 @@ class WC_Checkout {
 			$item->legacy_fee_key = $fee_key; // @deprecated 4.4.0 For legacy actions.
 			$item->set_props(
 				array(
-					'name'      => $fee->name,
-					'tax_class' => $fee->taxable ? $fee->tax_class : 0,
-					'amount'    => $fee->amount,
-					'total'     => $fee->total,
-					'total_tax' => $fee->tax,
-					'taxes'     => array(
+					'name'       => $fee->name,
+					'tax_class'  => $fee->taxable ? $fee->tax_class : '',
+					'tax_status' => $fee->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE,
+					'amount'     => $fee->amount,
+					'total'      => $fee->total,
+					'total_tax'  => $fee->tax,
+					'taxes'      => array(
 						'total' => $fee->tax_data,
 					),
 				)
@@ -680,7 +702,10 @@ class WC_Checkout {
 	 * @param WC_Cart  $cart  Cart instance.
 	 */
 	public function create_order_tax_lines( &$order, $cart ) {
-		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $tax_rate_id ) {
+		$tax_rate_ids     = array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() );
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( $tax_rate_ids );
+
+		foreach ( $tax_rate_ids as $tax_rate_id ) {
 			/**
 			 * Controls the zero rate tax ID.
 			 *
@@ -691,16 +716,17 @@ class WC_Checkout {
 			 * @param string $tax_rate_id The ID of the zero rate tax.
 			 */
 			if ( $tax_rate_id && apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) !== $tax_rate_id ) {
-				$item = new WC_Order_Item_Tax();
+				$tax_rate_object_or_id = $tax_rate_objects[ $tax_rate_id ] ?? $tax_rate_id;
+				$item                  = new WC_Order_Item_Tax();
 				$item->set_props(
 					array(
 						'rate_id'            => $tax_rate_id,
 						'tax_total'          => $cart->get_tax_amount( $tax_rate_id ),
 						'shipping_tax_total' => $cart->get_shipping_tax_amount( $tax_rate_id ),
-						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_id ),
-						'label'              => WC_Tax::get_rate_label( $tax_rate_id ),
-						'compound'           => WC_Tax::is_compound( $tax_rate_id ),
-						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_id ),
+						'rate_code'          => WC_Tax::get_rate_code( $tax_rate_object_or_id ),
+						'label'              => WC_Tax::get_rate_label( $tax_rate_object_or_id ),
+						'compound'           => WC_Tax::is_compound( $tax_rate_object_or_id ),
+						'rate_percent'       => WC_Tax::get_rate_percent_value( $tax_rate_object_or_id ),
 					)
 				);
 
@@ -847,6 +873,37 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Get the country to validate a fieldset's fields against.
+	 *
+	 * Uses the posted country when the fieldset has one. Only 'billing' and 'shipping' have a customer
+	 * country to fall back on, and only once the customer object is set up, so every other fieldset,
+	 * including those registered through the 'woocommerce_checkout_fields' filter, is validated without
+	 * country specific rules instead of fataling on an undefined method.
+	 *
+	 * @param  string $fieldset_key Fieldset key.
+	 * @param  array  $data         An array of posted data.
+	 * @return string Country code, or an empty string when it can't be determined.
+	 */
+	private function get_fieldset_country( $fieldset_key, $data ) {
+		if ( isset( $data[ $fieldset_key . '_country' ] ) ) {
+			return $data[ $fieldset_key . '_country' ];
+		}
+
+		if ( ! WC()->customer instanceof WC_Customer ) {
+			return '';
+		}
+
+		switch ( $fieldset_key ) {
+			case 'shipping':
+				return WC()->customer->get_shipping_country();
+			case 'billing':
+				return WC()->customer->get_billing_country();
+			default:
+				return '';
+		}
+	}
+
+	/**
 	 * Validates the posted checkout data based on field properties.
 	 *
 	 * @since  3.0.0
@@ -864,7 +921,7 @@ class WC_Checkout {
 				if ( ! isset( $data[ $key ] ) ) {
 					continue;
 				}
-				$required    = ! empty( $field['required'] );
+				$required    = ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false );
 				$format      = array_filter( isset( $field['validate'] ) ? (array) $field['validate'] : array() );
 				$field_label = isset( $field['label'] ) ? $field['label'] : '';
 
@@ -887,7 +944,7 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'postcode', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country      = $this->get_fieldset_country( $fieldset_key, $data );
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
@@ -905,10 +962,11 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
+					$country = $this->get_fieldset_country( $fieldset_key, $data );
 					// This is a safe sanitize to prevent copy-paste issues with invisible chars. Won't ensure validation.
 					$data[ $key ] = wc_remove_non_displayable_chars( $data[ $key ] );
 
-					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ], $country ) ) {
 						/* translators: %s: phone number */
 						$errors->add( $key . '_validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ), array( 'id' => $key ) );
 					}
@@ -926,7 +984,7 @@ class WC_Checkout {
 				}
 
 				if ( '' !== $data[ $key ] && in_array( 'state', $format, true ) ) {
-					$country      = isset( $data[ $fieldset_key . '_country' ] ) ? $data[ $fieldset_key . '_country' ] : WC()->customer->{"get_{$fieldset_key}_country"}();
+					$country      = $this->get_fieldset_country( $fieldset_key, $data );
 					$valid_states = WC()->countries->get_states( $country );
 
 					if ( ! empty( $valid_states ) && is_array( $valid_states ) && count( $valid_states ) > 0 ) {
@@ -1143,10 +1201,21 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
+	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			throw new Exception( esc_html__( 'Unable to process this order. Please try again.', 'woocommerce' ) );
+		}
+
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
+			throw new Exception( esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ) );
+		}
+
 		$order->payment_complete();
 		wc_empty_cart();
 
@@ -1252,7 +1321,10 @@ class WC_Checkout {
 					$customer->{"set_{$key}"}( $value );
 
 					// Store custom fields prefixed with either shipping_ or billing_.
-				} elseif ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) ) {
+				} elseif (
+					( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
+					&& ! in_array( $key, self::SHIPPING_FIELDS_EXCLUDED_FROM_META, true )
+				) {
 					$customer->update_meta_data( $key, $value );
 				}
 			}
@@ -1377,6 +1449,18 @@ class WC_Checkout {
 					array( 'order_object' => $order )
 				);
 
+				/**
+				 * Fires after the checkout creates the order, but before payment is processed.
+				 *
+				 * Do not use this action for payment-completion logic or to call WC_Order::payment_complete().
+				 * Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
+				 *
+				 * @since 1.1.0
+				 *
+				 * @param int                      $order_id    Order ID.
+				 * @param array                    $posted_data Posted checkout data.
+				 * @param WC_Order|WC_Order_Refund $order       Order object.
+				 */
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				wc_log_order_step(

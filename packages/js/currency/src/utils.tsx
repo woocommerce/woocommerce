@@ -153,7 +153,8 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 		const { priceFormat, symbol, code } = currency;
 
-		// eslint-disable-next-line @wordpress/valid-sprintf
+		// @ts-expect-error priceFormat is dynamic, but is expected to include placeholders for the currency and amount.
+
 		return sprintf( priceFormat, useCode ? code : symbol, formattedNumber );
 	}
 

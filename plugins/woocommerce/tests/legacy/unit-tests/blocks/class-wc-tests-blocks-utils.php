@@ -73,6 +73,51 @@ class WC_Test_Blocks_Utils extends WC_Unit_Test_Case {
 
 	/**
 	 * @group block-utils
+	 * Test: has_block_in_page detects block nested multiple levels deep.
+	 */
+	public function test_has_block_in_page_detects_block_nested_multiple_levels_deep() {
+		$page = array(
+			'name'    => 'checkout-page-deep',
+			'title'   => 'Checkout Deep',
+			'content' => '<!-- wp:group -->
+				<!-- wp:columns -->
+					<!-- wp:column -->
+						<!-- wp:woocommerce/checkout -->
+						<!-- /wp:woocommerce/checkout -->
+					<!-- /wp:column -->
+				<!-- /wp:columns -->
+			<!-- /wp:group -->',
+		);
+
+		$page_id = wc_create_page( $page['name'], '', $page['title'], $page['content'] );
+
+		$this->assertTrue( WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/checkout' ) );
+	}
+
+	/**
+	 * @group block-utils
+	 * Test: has_block_in_page returns false when nested block is not present.
+	 */
+	public function test_has_block_in_page_returns_false_when_nested_block_not_present() {
+		$page = array(
+			'name'    => 'checkout-page-no-block',
+			'title'   => 'Checkout No Block',
+			'content' => '<!-- wp:columns -->
+				<!-- wp:column -->
+					<!-- wp:paragraph -->
+					<p>Some text</p>
+					<!-- /wp:paragraph -->
+				<!-- /wp:column -->
+			<!-- /wp:columns -->',
+		);
+
+		$page_id = wc_create_page( $page['name'], '', $page['title'], $page['content'] );
+
+		$this->assertFalse( WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/checkout' ) );
+	}
+
+	/**
+	 * @group block-utils
 	 * Test: get_all_blocks_from_page.
 	 *
 	 */
@@ -87,19 +132,19 @@ class WC_Test_Blocks_Utils extends WC_Unit_Test_Case {
 
 		$expected = array(
 			0 => array(
-				'blockName' => 'core/heading',
-				'attrs' => array(),
-				'innerBlocks' => array(),
-				'innerHTML' => '<h2>test1</h2>',
+				'blockName'    => 'core/heading',
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '<h2>test1</h2>',
 				'innerContent' => array(
 					0 => '<h2>test1</h2>',
 				),
 			),
 			1 => array(
-				'blockName' => 'core/heading',
-				'attrs' => array(),
-				'innerBlocks' => array(),
-				'innerHTML' => '<h1>test2</h1>',
+				'blockName'    => 'core/heading',
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '<h1>test2</h1>',
 				'innerContent' => array(
 					0 => '<h1>test2</h1>',
 				),

@@ -31,6 +31,9 @@ Object.defineProperty( window, 'location', {
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn().mockReturnValue( {
+		createNotice: jest.fn(),
+	} ),
 	useSelect: jest.fn().mockImplementation( ( callback ) =>
 		callback( () => ( {
 			getInstalledPlugins: () => [],
@@ -47,10 +50,6 @@ jest.mock( '../use-create-product-by-type', () => ( {
 	useCreateProductByType: jest
 		.fn()
 		.mockReturnValue( { createProductByType: jest.fn() } ),
-} ) );
-
-jest.mock( '~/utils/features', () => ( {
-	isFeatureEnabled: jest.fn(),
 } ) );
 
 global.fetch = jest.fn().mockImplementation( () =>
@@ -73,11 +72,6 @@ describe( 'Products', () => {
 
 		// Reset location.href
 		mockLocation.href = '';
-
-		// @ts-expect-error -- partial mock
-		window.wcAdminFeatures = {
-			printful: true,
-		};
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -109,7 +103,7 @@ describe( 'Products', () => {
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
 	} );
 
-	it( 'clicking on suggested product should fire event tasklist_add_product with method: product_template, tasklist_product_template_selection with is_suggested:true and task_completion_time', () => {
+	it( 'clicking on suggested product should fire event tasklist_add_product with method: product_template, tasklist_product_template_selection with is_suggested:true and task_completion_time', async () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
 			profile: {
 				product_types: [ 'downloads' ],
@@ -117,7 +111,7 @@ describe( 'Products', () => {
 		} ) );
 		const { getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'menuitem', {
 				name: 'Digital product A digital product like service, downloadable book, music or video.',
 			} )
@@ -152,7 +146,7 @@ describe( 'Products', () => {
 
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'View more product types' } )
 		);
 
@@ -163,7 +157,7 @@ describe( 'Products', () => {
 			);
 		} );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'menuitem', {
 				name: 'Grouped product A collection of related products.',
 			} )
@@ -202,7 +196,7 @@ describe( 'Products', () => {
 
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'View more product types' } )
 		);
 
@@ -220,19 +214,19 @@ describe( 'Products', () => {
 		const fetchMock = jest.spyOn( global, 'fetch' );
 		const { queryByText, getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'View more product types' } )
 		);
 		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
 		await waitFor( () =>
 			expect( queryByText( confirmModalText ) ).toBeInTheDocument()
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'Import sample products' } )
 		);
 		await waitFor( () =>
@@ -253,19 +247,19 @@ describe( 'Products', () => {
 	it( 'should close the confirmation modal when the cancel button is clicked', async () => {
 		const { queryByText, getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'View more product types' } )
 		);
 		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
 		await waitFor( () =>
 			expect( queryByText( confirmModalText ) ).toBeInTheDocument()
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Cancel' } ) );
+		await userEvent.click( getByRole( 'button', { name: 'Cancel' } ) );
 		expect( queryByText( confirmModalText ) ).not.toBeInTheDocument();
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_cancel_load_sample_products_click'
@@ -281,10 +275,10 @@ describe( 'Products', () => {
 		).toBeGreaterThanOrEqual( 1 );
 	} );
 
-	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
+	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the WooCommerce Marketplace link', async () => {
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
+		await userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_add_product_visit_marketplace_click',
@@ -293,9 +287,6 @@ describe( 'Products', () => {
 	} );
 
 	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
-		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
-		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
-
 		mockLocation.href = 'test';
 		Object.defineProperty( global.window, 'location', {
 			value: mockLocation,
@@ -303,7 +294,7 @@ describe( 'Products', () => {
 
 		const { getByText } = render( <Products /> );
 
-		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
+		await userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 		);
@@ -336,25 +327,6 @@ describe( 'Products', () => {
 					isPluginsRequesting: () => false,
 				} ) )
 			);
-
-			const { queryByText } = render( <Products /> );
-
-			await waitFor( () => {
-				expect(
-					queryByText( 'Print-on-demand products' )
-				).not.toBeInTheDocument();
-			} );
-		} );
-
-		it( 'should hide Printful banner when feature is disabled', async () => {
-			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
-				callback( () => ( {
-					getInstalledPlugins: () => [],
-					isPluginsRequesting: () => false,
-				} ) )
-			);
-
-			window.wcAdminFeatures.printful = false;
 
 			const { queryByText } = render( <Products /> );
 

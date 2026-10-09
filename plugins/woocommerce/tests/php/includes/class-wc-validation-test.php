@@ -10,6 +10,60 @@
  */
 class WC_Validation_Test extends \WC_Unit_Test_Case {
 	/**
+	 * Data provider for test_is_phone().
+	 */
+	public function data_provider_test_is_phone(): array {
+		return array(
+			array( true, '+00 000 00 00 000', null ),
+			array( true, '+00-000-00-00-000', null ),
+			array( true, '(000) 00 00 000', null ),
+			array( true, '+00.000.00.00.000', null ),
+			array( false, '+00 aaa dd ee fff', null ),
+		);
+	}
+
+	/**
+	 * Test phone validation (default behaviour).
+	 *
+	 * @dataProvider data_provider_test_is_phone
+	 *
+	 * @param bool        $expected Expected result.
+	 * @param string      $phone    Phone number to validate.
+	 * @param string|null $country  Country code.
+	 */
+	public function test_is_phone( bool $expected, string $phone, ?string $country ): void {
+		$this->assertSame( $expected, WC_Validation::is_phone( $phone, $country ) );
+	}
+
+	/**
+	 * The woocommerce_validate_phone filter can override the validation result.
+	 */
+	public function test_is_phone_filter_can_override_result(): void {
+		$callback = function ( $valid, $phone, $country ) {
+			if ( 'IR' === $country ) {
+				$phone = str_replace(
+					array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ),
+					range( 0, 9 ),
+					$phone
+				);
+
+				return (bool) preg_match( '/^(0|0098|\+98)?(9\d{9}|[1-8]\d{9,10})$/', $phone );
+			}
+
+			return $valid;
+		};
+
+		add_filter( 'woocommerce_validate_phone', $callback, 10, 3 );
+		try {
+			$this->assertTrue( WC_Validation::is_phone( '+۹۸۹۱۵۱۱۱۲۲۳۳', 'IR' ) );
+			$this->assertTrue( WC_Validation::is_phone( '۰۰۹۸۹۱۵۱۱۱۲۲۳۳', 'IR' ) );
+			$this->assertTrue( WC_Validation::is_phone( '۰۹۱۵۱۱۱۲۲۳۳', 'IR' ) );
+		} finally {
+			remove_filter( 'woocommerce_validate_phone', $callback, 10 );
+		}
+	}
+
+	/**
 	 * Data provider for test_is_postcode().
 	 */
 	public function data_provider_test_is_postcode(): array {
@@ -33,7 +87,38 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( false, '948A', 'LI' ),
 		);
 
-		return array_merge( $cz, $se, $li );
+		$lv = array(
+			array( true, 'LV-1050', 'LV' ),
+			array( true, 'lv-1050', 'LV' ),
+			array( true, '1050', 'LV' ),
+			array( false, 'LV-0123', 'LV' ),
+			array( false, 'LV-105', 'LV' ),
+			array( false, '10500', 'LV' ),
+			array( false, 'ZZ-1050', 'LV' ),
+			array( false, 'LV-ABCD', 'LV' ),
+			array( false, "LV-1050\n", 'LV' ),
+			// The country prefix without a separator, as produced by wc_normalize_postcode().
+			array( true, 'LV1050', 'LV' ),
+			array( true, 'lv1050', 'LV' ),
+			array( false, 'LV0123', 'LV' ),
+			array( false, "LV1050\n", 'LV' ),
+			// A space is accepted as the prefix separator, but only a literal space.
+			array( true, 'LV 1050', 'LV' ),
+			array( true, 'lv 1050', 'LV' ),
+			array( false, "LV\n1050", 'LV' ),
+			array( false, "LV\t1050", 'LV' ),
+			// At most one separator, and only a hyphen or a space.
+			array( false, 'LV--1050', 'LV' ),
+			array( false, 'LV  1050', 'LV' ),
+			array( false, 'LV_1050', 'LV' ),
+			// The bounds of the four digit range, and trailing characters.
+			array( true, '9999', 'LV' ),
+			array( false, '0999', 'LV' ),
+			array( false, 'LV-1050x', 'LV' ),
+			array( false, 'LV-1050 ', 'LV' ),
+		);
+
+		return array_merge( $cz, $se, $li, $lv );
 	}
 
 	/**
@@ -47,5 +132,52 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_postcode( bool $expected, string $postcode, string $country ): void {
 		$this->assertSame( $expected, WC_Validation::is_postcode( $postcode, $country ) );
+	}
+
+	/**
+	 * The woocommerce_validate_postcode filter can still override a shared rule.
+	 */
+	public function test_postcode_filter_can_override_shared_rule(): void {
+		$callback = static function ( $valid, $postcode, $country ) {
+			return 'US' === $country && 'ABCDE' === $postcode ? true : $valid;
+		};
+
+		add_filter( 'woocommerce_validate_postcode', $callback, 10, 3 );
+		try {
+			$this->assertTrue( WC_Validation::is_postcode( 'ABCDE', 'US' ) );
+		} finally {
+			remove_filter( 'woocommerce_validate_postcode', $callback, 10 );
+		}
+	}
+
+	/**
+	 * Both postcode validators must produce the same result for the shared
+	 * compatibility contract.
+	 *
+	 * @dataProvider data_provider_postcode_validation_parity
+	 *
+	 * @param bool   $expected Expected result.
+	 * @param string $postcode Postcode to validate.
+	 * @param string $country  Country code.
+	 */
+	public function test_postcode_validation_parity( bool $expected, string $postcode, string $country ): void {
+		$this->assertSame( $expected, WC_Validation::is_postcode( $postcode, $country ) );
+	}
+
+	/**
+	 * Loads the fixture list also exercised by the Blocks validator.
+	 *
+	 * @return array<int, array{bool, string, string}>
+	 */
+	public function data_provider_postcode_validation_parity(): array {
+		$fixture_path = WC_ABSPATH . 'client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json';
+		$fixtures     = json_decode( (string) file_get_contents( $fixture_path ), true, 512, JSON_THROW_ON_ERROR ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local test fixture.
+
+		return array_map(
+			static function ( array $fixture ): array {
+				return array( $fixture['expected'], $fixture['postcode'], $fixture['country'] );
+			},
+			$fixtures
+		);
 	}
 }

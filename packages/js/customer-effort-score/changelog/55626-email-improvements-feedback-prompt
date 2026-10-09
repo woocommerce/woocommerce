@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix "description" prop ignored in CustomerEffortScoreModalContainer

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Honor the configured product count color for the Mini Cart badge on the frontend when using the Interactivity API.

@@ -124,25 +124,6 @@ function sanitizeBranchName( branch ) {
 	return branch.replace( /[^a-zA-Z0-9-]/g, '-' );
 }
 
-/**
- * Computes the median number from an array numbers.
- *
- * @param {number[]} array
- *
- * @return {number|undefined} Median value or undefined if array empty.
- */
-function median( array ) {
-	if ( ! array || ! array.length ) return undefined;
-
-	const numbers = [ ...array ].sort( ( a, b ) => a - b );
-	const middleIndex = Math.floor( numbers.length / 2 );
-
-	if ( numbers.length % 2 === 0 ) {
-		return ( numbers[ middleIndex - 1 ] + numbers[ middleIndex ] ) / 2;
-	}
-	return numbers[ middleIndex ];
-}
-
 module.exports = {
 	askForConfirmation,
 	readJSONFile,
@@ -150,5 +131,4 @@ module.exports = {
 	getFilesFromDir,
 	logAtIndent,
 	sanitizeBranchName,
-	median
 };

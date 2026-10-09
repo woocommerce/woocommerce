@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { addons } from '@storybook/manager-api';
-import { themes } from '@storybook/theming';
+import { addons } from 'storybook/manager-api';
+import { themes } from 'storybook/theming';
 
 /**
  * Internal dependencies
@@ -16,7 +16,6 @@ addons.setConfig( {
 			'components',
 			'experimental',
 			'onboarding',
-			'product-editor',
 			'woocommerce-admin',
 		],
 	},

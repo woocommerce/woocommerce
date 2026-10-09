@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -34,6 +36,22 @@ class POSProductVisibilitySync {
 	 */
 	public function register_hooks(): void {
 		add_action( 'woocommerce_new_product_variation', array( $this, 'inherit_parent_pos_visibility' ), 10, 2 );
+	}
+
+	/**
+	 * Whether POS visibility can be managed for the given product.
+	 *
+	 * Only simple and variable products that are not downloadable support the
+	 * "Available for POS" option; this is the single definition used by both the
+	 * product data meta box UI and the save logic.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @param \WC_Product $product The product to check.
+	 * @return bool True if the product type supports POS visibility.
+	 */
+	public function is_product_supported( \WC_Product $product ): bool {
+		return $product->is_type( array( ProductType::SIMPLE, ProductType::VARIABLE ) ) && ! $product->is_downloadable();
 	}
 
 	/**

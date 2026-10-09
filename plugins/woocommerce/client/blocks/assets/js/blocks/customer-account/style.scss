@@ -61,7 +61,21 @@
 		text-decoration: underline;
 	}
 
+	:where(.wc-block-customer-account__visual + .label) {
+		padding-left: em($gap-smallest);
+	}
+
+	:where(.wc-block-customer-account__visual > svg),
 	.wc-block-customer-account__account-icon {
+		display: block;
+		width: em($grid-unit-30);
+		height: em($grid-unit-30);
+	}
+
+	:where(.wc-block-customer-account__avatar) {
+		border-radius: 50%;
+		display: block;
+		object-fit: cover;
 		width: em($grid-unit-30);
 		height: em($grid-unit-30);
 	}

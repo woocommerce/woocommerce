@@ -14,6 +14,19 @@ import { CurrencyContext } from '@woocommerce/currency';
  */
 import { getTaxCode } from './utils';
 import ReportTable from '../../components/report-table';
+
+/**
+ * Whether a taxable amount was recorded for a report row. A zero base under a non-zero tax
+ * marks a row recorded before that base existed (or a manual tax line) - unknown, not zero.
+ *
+ * @param {number|undefined} amount Taxable amount.
+ * @param {number}           tax    Tax charged on that amount.
+ * @return {boolean} True when the amount is known.
+ */
+function hasTaxableAmount( amount, tax ) {
+	return amount !== undefined && ! ( amount === 0 && tax !== 0 );
+}
+
 class TaxesReportTable extends Component {
 	constructor() {
 		super();
@@ -54,6 +67,21 @@ class TaxesReportTable extends Component {
 				isSortable: true,
 			},
 			{
+				label: __( 'Taxable amount', 'woocommerce' ),
+				key: 'taxable_amount',
+				isSortable: true,
+			},
+			{
+				label: __( 'Order gross', 'woocommerce' ),
+				key: 'order_taxable_amount',
+				isSortable: true,
+			},
+			{
+				label: __( 'Shipping gross', 'woocommerce' ),
+				key: 'shipping_taxable_amount',
+				isSortable: true,
+			},
+			{
 				label: __( 'Orders', 'woocommerce' ),
 				key: 'orders_count',
 				required: true,
@@ -71,6 +99,17 @@ class TaxesReportTable extends Component {
 			getCurrencyConfig,
 		} = this.context;
 
+		const renderTaxableAmount = ( amount, taxCharged ) =>
+			hasTaxableAmount( amount, taxCharged )
+				? {
+						display: renderCurrency( amount ),
+						value: getCurrencyFormatDecimal( amount ),
+					}
+				: {
+						display: __( 'N/A', 'woocommerce' ),
+						value: '',
+					};
+
 		return map( taxes, ( tax ) => {
 			const { query } = this.props;
 			const {
@@ -80,6 +119,9 @@ class TaxesReportTable extends Component {
 				tax_rate_id: taxRateId,
 				total_tax: totalTax,
 				shipping_tax: shippingTax,
+				taxable_amount: taxableAmount,
+				order_taxable_amount: orderTaxableAmount,
+				shipping_taxable_amount: shippingTaxableAmount,
 			} = tax;
 			const taxCode = getTaxCode( tax );
 
@@ -119,6 +161,9 @@ class TaxesReportTable extends Component {
 					display: renderCurrency( shippingTax ),
 					value: getCurrencyFormatDecimal( shippingTax ),
 				},
+				renderTaxableAmount( taxableAmount, totalTax ),
+				renderTaxableAmount( orderTaxableAmount, orderTax ),
+				renderTaxableAmount( shippingTaxableAmount, shippingTax ),
 				{
 					display: formatValue(
 						getCurrencyConfig(),

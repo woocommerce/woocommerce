@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Docs-only change. No plugin code impact.
-
-Document new gallery_image_ids field on /wc/v3/products/<product_id>/variations endpoint (added in #64524).

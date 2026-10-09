@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Always show the QR direct login as the primary path in the mobile app modal, with the WordPress.com magic link available as a secondary CTA when the user has a linked WordPress.com account.

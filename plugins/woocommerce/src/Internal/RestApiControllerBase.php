@@ -156,7 +156,6 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 			$data['exception_message'] = $exception->getMessage();
 			$data['exception_trace']   = (array) $exception->getTrace();
 		}
-		$data['exception_message'] = $exception->getMessage();
 
 		return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
 	}

@@ -8,14 +8,18 @@ on:
                 description: 'The version number for the release'
                 required: true
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
     release:
         name: Run release scripts
         runs-on: ubuntu-latest
+        timeout-minutes: 15
         permissions:
             contents: write
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -30,7 +34,7 @@ jobs:
 
             - name: Create release
               id: create_release
-              uses: woocommerce/action-gh-release@master
+              uses: woocommerce/action-gh-release@54f9238879c14da9f633f4d693c7c08ea2d1c39c # master
               with:
                   tag_name: wc-beta-tester-${{ inputs.version }}
                   name: WooCommerce Beta Tester Release ${{ inputs.version }}

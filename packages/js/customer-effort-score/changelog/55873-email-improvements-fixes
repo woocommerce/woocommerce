@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix CES options being on two rows when scrollbar is visible

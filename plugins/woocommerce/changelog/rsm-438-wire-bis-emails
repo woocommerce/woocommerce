@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Wire verification and confirmation emails for the Back in Stock Notifications alpha: dispatch the verify email when double opt-in is required on signup, dispatch the confirmation email on successful verification, add a rate-limited frontend resend endpoint, fix the admin Resend verification button to actually send, and apply standard UTM parameters to all notification email links.

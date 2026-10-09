@@ -8,8 +8,9 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+
 /**
  * WCAdminAssets Class.
  */
@@ -47,6 +48,7 @@ class WCAdminAssets {
 	public function __construct() {
 		Features::get_instance();
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_deprecated_scripts_and_styles' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ), 15 );
@@ -60,6 +62,16 @@ class WCAdminAssets {
 	 */
 	public static function get_path( $ext ) {
 		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+	}
+
+	/**
+	 * Registers deprecated scripts and styles.
+	 *
+	 * @return void
+	 */
+	public static function register_deprecated_scripts_and_styles() {
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( 'wc-admin-layout', false );
 	}
 
 	/**
@@ -88,10 +100,12 @@ class WCAdminAssets {
 	public static function get_url( $file, $ext ) {
 		$suffix = '';
 
-		// Potentially enqueue minified JavaScript.
+		// Potentially enqueue minified JavaScript, but only if the minified file exists.
+		// Core builds do not ship minified JS files, so this also guards against the
+		// 'minified-js' feature being force-enabled (e.g. via WooCommerce Beta Tester).
 		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+			$suffix       = self::should_use_minified_js_file( $script_debug ) && is_readable( WC_ADMIN_ABSPATH . self::get_path( $ext ) . $file . '.min.' . $ext ) ? '.min' : '';
 		}
 
 		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
@@ -250,8 +264,11 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
-			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
+			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
+			$design_tokens_handle     = $this->get_design_tokens_handle();
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
+			$this->register_style( 'settings-embed', 'style', array( 'wp-components', $design_tokens_handle ) );
+			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
 		// Preload our assets.
@@ -313,9 +330,7 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
-			'wc-block-templates',
-			'wc-experimental-products-app',
-			'wc-settings-ui-sdk',
+			'wc-settings-ui',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -331,10 +346,9 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
-			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
-			'wc-settings-ui-sdk',
+			'wc-settings-ui',
 			WC_ADMIN_APP,
 		);
 
@@ -379,16 +393,7 @@ class WCAdminAssets {
 		// Register the CSS styles.
 		$styles = array(
 			array(
-				'handle' => 'wc-admin-layout',
-			),
-			array(
 				'handle' => 'wc-components',
-			),
-			array(
-				'handle' => 'wc-block-templates',
-			),
-			array(
-				'handle' => 'wc-experimental-products-app',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',
@@ -398,10 +403,17 @@ class WCAdminAssets {
 			),
 			array(
 				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+				'dependencies' => array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
 			),
 			array(
 				'handle' => 'wc-onboarding',
+			),
+			array(
+				'handle'       => 'wc-settings-ui',
+				'dependencies' => array( 'wp-components' ),
+			),
+			array(
+				'handle' => 'wc-design-tokens',
 			),
 		);
 
@@ -436,102 +448,52 @@ class WCAdminAssets {
 	 * @return array
 	 */
 	private function get_settings_ui_script_dependencies(): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'settings-ui' ) || ! current_user_can( 'manage_woocommerce' ) ) {
-			return array();
-		}
-
-		$settings_ui_page = $this->get_current_settings_ui_page();
-		if ( ! $settings_ui_page ) {
-			return array();
-		}
-
-		$extension_handles = array();
 		try {
-			$extension_handles = $settings_ui_page->get_script_handles( $this->get_current_settings_section() );
+			if ( ! class_exists( SettingsUIRequestContext::class ) ) {
+				return array();
+			}
+
+			$context = SettingsUIRequestContext::get_current();
+			if ( ! $context || $context->has_script_handles_failed() ) {
+				return array();
+			}
+
+			$dependencies = array_merge(
+				array( 'wc-settings-ui' ),
+				$context->get_script_handles()
+			);
+
+			return array_values( array_unique( $dependencies ) );
 		} catch ( \Throwable $e ) {
-			if ( $e instanceof \Exception ) {
-				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__ );
-			}
+			return array();
 		}
-
-		/**
-		 * Extension-provided handles may violate the interface contract.
-		 *
-		 * @var mixed[] $extension_handles
-		 */
-		$dependencies = array_merge(
-			array( 'wc-settings-ui-sdk' ),
-			array_filter(
-				$extension_handles,
-				static function ( $script_handle ): bool {
-					return is_string( $script_handle ) && '' !== $script_handle;
-				}
-			)
-		);
-
-		return array_values( array_unique( $dependencies ) );
 	}
 
 	/**
-	 * Get the settings UI adapter for the current settings tab.
+	 * Get the handle of the WordPress Design System tokens stylesheet.
 	 *
-	 * @return SettingsUIPageInterface|null
+	 * Uses the `wp-theme` style registered by WordPress 7.1+ or the Gutenberg plugin when available,
+	 * and falls back to the copy of the tokens bundled with WooCommerce otherwise. The caller lists
+	 * the handle as a style dependency, so WordPress enqueues it.
+	 *
+	 * @return string The style handle.
 	 */
-	private function get_current_settings_ui_page(): ?SettingsUIPageInterface {
-		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
-			return null;
-		}
-
-		$current_tab = $this->get_current_settings_tab();
-		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
-			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
-				continue;
-			}
-
-			$settings_ui_page = $settings_page->get_settings_ui_page();
-			return $settings_ui_page instanceof SettingsUIPageInterface ? $settings_ui_page : null;
-		}
-
-		return null;
+	private function get_design_tokens_handle(): string {
+		// The bundled fallback (and the `design-tokens` wp-admin-script) can be removed once WP 7.1 is the minimum supported version.
+		return wp_style_is( 'wp-theme', 'registered' ) ? 'wp-theme' : 'wc-design-tokens';
 	}
 
 	/**
-	 * Get the current WooCommerce settings tab.
+	 * Enqueue the Settings UI package style when its runtime dependency resolves.
 	 *
-	 * @return string
+	 * @param array $dependencies Resolved Settings UI script dependencies.
 	 */
-	private function get_current_settings_tab(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['tab'] ) ) {
-			return 'general';
+	private function enqueue_settings_ui_style( array $dependencies ): void {
+		if ( ! in_array( 'wc-settings-ui', $dependencies, true ) || ! wp_style_is( 'wc-settings-ui', 'registered' ) ) {
+			return;
 		}
 
-		$tab = wp_unslash( $_GET['tab'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( ! is_string( $tab ) ) {
-			return 'general';
-		}
-
-		$tab = sanitize_title( $tab );
-		return '' !== $tab ? $tab : 'general';
-	}
-
-	/**
-	 * Get the current WooCommerce settings section.
-	 *
-	 * @return string
-	 */
-	private function get_current_settings_section(): string {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( ! isset( $_GET['section'] ) ) {
-			return '';
-		}
-
-		$section = wp_unslash( $_GET['section'] );
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return is_string( $section ) ? sanitize_title( $section ) : '';
+		wp_enqueue_style( 'wc-settings-ui' );
 	}
 
 	/**
@@ -545,7 +507,6 @@ class WCAdminAssets {
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
-				'wc-experimental-products-app',
 				'wc-navigation',
 				// NOTE: This should be removed when Gutenberg is updated and
 				// the notices package is removed from WooCommerce Admin.
@@ -554,7 +515,6 @@ class WCAdminAssets {
 				'wc-date',
 				'wc-components',
 				'wc-tracks',
-				'wc-block-templates',
 			);
 			foreach ( $handles_for_injection as $handle ) {
 				$script = $wp_scripts->query( $handle, 'registered' );

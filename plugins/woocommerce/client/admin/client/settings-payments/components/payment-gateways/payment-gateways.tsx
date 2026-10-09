@@ -187,7 +187,7 @@ export const PaymentGateways = ( {
 						options={ countryOptions }
 						onChange={ ( currentSelectedCountry: string ) => {
 							// Save selected country and refresh the store by invalidating getPaymentProviders.
-							apiFetch( {
+							void apiFetch( {
 								path:
 									WC_ADMIN_NAMESPACE +
 									'/settings/payments/country',
@@ -206,10 +206,11 @@ export const PaymentGateways = ( {
 									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
 										currentSelectedCountry;
 								}
-								invalidateMainStore( 'getPaymentProviders', [
-									currentSelectedCountry,
-								] );
-								invalidateWooPaymentsOnboardingStore(
+								void invalidateMainStore(
+									'getPaymentProviders',
+									[ currentSelectedCountry ]
+								);
+								void invalidateWooPaymentsOnboardingStore(
 									'getOnboardingData',
 									[]
 								);

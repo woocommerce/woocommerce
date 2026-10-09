@@ -11,7 +11,7 @@ import { findBlock } from '@woocommerce/utils';
 /**
  * Internal dependencies
  */
-import { replaceBlockWithProductGallery } from '../../../product-gallery/edit-utils';
+import { upgradeToBlockifiedProductGallery } from '../../../product-elements-blocks/product-image-gallery/edit-utils';
 
 export const UpgradeProductImageGallery = () => {
 	const [ productImageGalleryBlock, setProductImageGalleryBlock ] =
@@ -49,11 +49,15 @@ export const UpgradeProductImageGallery = () => {
 			isDismissible={ false }
 			actionLabel={ buttonLabel }
 			onActionClick={ () => {
-				replaceBlockWithProductGallery(
-					productImageGalleryBlock.clientId
-				);
-				setProductImageGalleryBlock( null );
+				if (
+					upgradeToBlockifiedProductGallery(
+						productImageGalleryBlock.clientId
+					)
+				) {
+					setProductImageGalleryBlock( null );
+				}
 			} }
+			status="warning"
 		>
 			{ notice }
 		</UpgradeDowngradeNotice>

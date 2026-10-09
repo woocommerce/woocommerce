@@ -51,12 +51,15 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
-		"lint:lang:js": "eslint src"
+		"lint:fix:lang:style": "stylelint 'styles/**/*.scss' --fix",
+		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'styles/**/*.scss'"
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
-		"@wordpress/base-styles": "catalog:wp-min",
-		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
+		"@wordpress/base-styles": "catalog:wp-bundled",
+		"@wordpress/postcss-plugins-preset": "catalog:tooling",
+		"@wordpress/theme": "catalog:wp-bundled",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",
 		"esbuild": "^0.24.0",
@@ -69,20 +72,22 @@
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {
-		"@types/wordpress__block-editor": "14.21.8",
+		"@types/wordpress__block-editor": "15.0.6",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/core-data": "7.19.6",
-		"@wordpress/data": "10.19.2",
-		"@wordpress/editor": "14.19.7",
-		"@wordpress/notices": "5.19.2",
-		"eslint": "^8.55.0",
+		"@wordpress/core-data": "7.33.9",
+		"@wordpress/data": "10.33.1",
+		"@wordpress/editor": "14.33.11",
+		"@wordpress/notices": "5.33.1",
+		"eslint": "^10.0.0",
+		"stylelint": "catalog:tooling",
 		"typescript": "5.7.x"
 	},
 	"config": {
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,jsx,ts,tsx,cjs}"
+				"changes": "{src/**/*.{js,jsx,ts,tsx,cjs},styles/**/*.scss}"
 			}
 		}
 	}

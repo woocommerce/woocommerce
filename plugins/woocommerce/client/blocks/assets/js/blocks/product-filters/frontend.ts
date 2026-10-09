@@ -2,12 +2,12 @@
  * External dependencies
  */
 import * as iAPI from '@wordpress/interactivity';
+import type { SelectableItemsParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
-import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
 import type {
 	ActiveFilterItem,
 	FilterItemFields,
@@ -15,10 +15,12 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { reload } from '../../utils/navigation';
+import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
 const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
-const BLOCK_NAME = 'woocommerce/product-filters';
+const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -77,28 +79,34 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 const productFiltersStore = {
 	state: {
 		get params() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
 			const params: Record< string, string > = {};
 
 			function addParam( key: string, value: string ) {
-				if ( key in params && params[ key ].length > 0 )
+				if ( key in params && params[ key ].length > 0 ) {
 					return ( params[ key ] = `${ params[ key ] },${ value }` );
+				}
 				params[ key ] = value;
 			}
 
 			const config = getConfig( BLOCK_NAME );
 			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
 
-			activeFilters.forEach( ( filter ) => {
+			state.activeFilters.forEach( ( filter ) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
-				if ( ! value ) return;
+				if ( ! value ) {
+					return;
+				}
 
 				if ( type === 'price' ) {
 					const [ min, max ] = value.split( '|' );
-					if ( min ) params.min_price = min;
-					if ( max ) params.max_price = max;
+					if ( min ) {
+						params.min_price = min;
+					}
+					if ( max ) {
+						params.max_price = max;
+					}
 				}
 
 				if ( type === 'status' ) {
@@ -148,7 +156,9 @@ const productFiltersStore = {
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 			const items = server.items;
-			if ( ! Array.isArray( items ) ) return [];
+			if ( ! Array.isArray( items ) ) {
+				return [];
+			}
 			return items.map( ( item ) => ( {
 				...item,
 				selected: state.activeFilters.some(
@@ -178,6 +188,11 @@ const productFiltersStore = {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
 		},
+		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
+			if ( event.target === event.currentTarget ) {
+				actions.closeOverlay();
+			}
+		},
 		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
 			if ( context.isOverlayOpened && event.key === 'Escape' ) {
@@ -198,8 +213,10 @@ const productFiltersStore = {
 				itemArg && ! ( itemArg instanceof Event )
 					? itemArg
 					: context.item;
-			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
-			const isSelected = context.activeFilters.some(
+			if ( ! item || ! isValidFilterOptionItem( item ) ) {
+				return;
+			}
+			const isSelected = state.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
 			);
 			if ( isSelected ) {
@@ -207,7 +224,7 @@ const productFiltersStore = {
 			} else {
 				selectFilter( item );
 			}
-			actions.navigate();
+			void actions.navigate();
 		},
 		*navigate() {
 			const context = getServerContext
@@ -255,11 +272,11 @@ const productFiltersStore = {
 					: config?.forcePageReload;
 
 			if ( forcePageReload ) {
-				window.location.assign( url.href );
+				reload( url.href );
 				return;
 			}
 
-			const routerModule: typeof import('@wordpress/interactivity-router') =
+			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
 				yield import( '@wordpress/interactivity-router' );
 
 			yield routerModule.actions.navigate( url.href );
@@ -268,7 +285,9 @@ const productFiltersStore = {
 	callbacks: {
 		initColors: () => {
 			const el = getElement();
-			if ( ! el.ref ) return;
+			if ( ! el.ref ) {
+				return;
+			}
 
 			const style = el.ref.style;
 			const hasBg = style.getPropertyValue(
@@ -302,11 +321,21 @@ const productFiltersStore = {
 				document.body.style.overflow = 'auto';
 			}
 		},
+		syncActiveFiltersWithServer: () => {
+			if ( ! getServerContext ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const serverContext = getServerContext< ProductFiltersContext >();
+
+			context.activeFilters = Array.isArray( serverContext.activeFilters )
+				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+				: [];
+		},
 	},
 };
 
 // Compile-time protocol conformance check.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;

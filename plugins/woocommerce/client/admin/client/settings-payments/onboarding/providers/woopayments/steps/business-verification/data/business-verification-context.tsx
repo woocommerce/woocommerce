@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { isNil, omitBy } from 'lodash';
 
 /**
@@ -16,16 +16,29 @@ const useBusinessVerificationContextValue = (
 	const [ errors, setErrors ] = useState( {} as OnboardingFields );
 	const [ touched, setTouched ] = useState( {} as OnboardingFields );
 
+	const updateData = useCallback(
+		( value: Record< string, string | undefined > ) => {
+			setData( ( prev ) => ( { ...prev, ...value } ) );
+		},
+		[]
+	);
+	const updateErrors = useCallback(
+		( value: Record< string, string | undefined > ) => {
+			setErrors( ( prev ) => omitBy( { ...prev, ...value }, isNil ) );
+		},
+		[]
+	);
+	const updateTouched = useCallback( ( value: Record< string, boolean > ) => {
+		setTouched( ( prev ) => ( { ...prev, ...value } ) );
+	}, [] );
+
 	return {
 		data,
-		setData: ( value: Record< string, string | undefined > ) =>
-			setData( ( prev ) => ( { ...prev, ...value } ) ),
+		setData: updateData,
 		errors,
-		setErrors: ( value: Record< string, string | undefined > ) =>
-			setErrors( ( prev ) => omitBy( { ...prev, ...value }, isNil ) ),
+		setErrors: updateErrors,
 		touched,
-		setTouched: ( value: Record< string, boolean > ) =>
-			setTouched( ( prev ) => ( { ...prev, ...value } ) ),
+		setTouched: updateTouched,
 	};
 };
 

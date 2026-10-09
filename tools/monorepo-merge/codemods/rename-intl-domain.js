@@ -1,14 +1,9 @@
 export const parser = 'tsx';
 
-const i18nFunctionsToRename = [
-    '__',
-    '_n',
-    '_x'
-]
-
+const i18nFunctionsToRename = [ '__', '_n', '_x' ];
 
 const isFunctionNamed = ( path, names ) => {
-	return names.includes(path.value.callee.name);
+	return names.includes( path.value.callee.name );
 };
 
 export default function transformer( file, api ) {

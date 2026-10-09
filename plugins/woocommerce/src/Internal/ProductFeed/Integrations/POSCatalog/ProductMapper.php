@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
-use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductMapperInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Mapping\ProductShapeMapperInterface;
 use WC_Product;
 use WC_REST_Products_Controller;
 use WC_REST_Product_Variations_Controller;
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 10.5.0
  */
-class ProductMapper implements ProductMapperInterface {
+class ProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Fields to include in the product mapping.
 	 *

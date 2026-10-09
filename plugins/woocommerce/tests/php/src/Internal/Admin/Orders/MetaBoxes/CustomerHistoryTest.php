@@ -3,9 +3,13 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
-use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -13,7 +17,6 @@ use WC_Unit_Test_Case;
  * Tests for the CustomerHistory class.
  */
 class CustomerHistoryTest extends WC_Unit_Test_Case {
-	use HPOSToggleTrait;
 
 	/**
 	 * The System Under Test.
@@ -23,12 +26,70 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Whether HPOS should be restored after this test.
+	 *
+	 * @var bool
+	 */
+	private bool $restore_hpos_after_test = false;
+
+	/**
+	 * Callback registering the long custom status, kept for removal in tearDown.
+	 *
+	 * @var callable|null
+	 */
+	private $add_long_status_callback = null;
+
+	/**
+	 * Filters added during a test, as [ tag, callback ] pairs, removed in tearDown().
+	 *
+	 * @var array[]
+	 */
+	private $added_filters = array();
+
+	/**
+	 * Previous HPOS state.
+	 *
+	 * @var bool
+	 */
+	private static bool $hpos_prev_state;
+
+	/**
+	 * Set up class fixtures.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		self::$hpos_prev_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::create_order_custom_table_if_not_exist();
+
+		if ( ! self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+		}
+	}
+
+	/**
+	 * Tear down class fixtures.
+	 */
+	public static function tearDownAfterClass(): void {
+		self::clear_hpos_orders();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() !== self::$hpos_prev_state ) {
+			OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		}
+
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->setup_cot();
 		$this->sut = new CustomerHistory();
 	}
 
@@ -36,7 +97,22 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$this->clean_up_cot_setup();
+		if ( $this->restore_hpos_after_test ) {
+			OrderHelper::toggle_cot_feature_and_usage( true );
+			$this->restore_hpos_after_test = false;
+		}
+
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		foreach ( $this->added_filters as $added_filter ) {
+			remove_filter( $added_filter[0], $added_filter[1] );
+		}
+		$this->added_filters = array();
+		if ( null !== $this->add_long_status_callback ) {
+			remove_filter( 'wc_order_statuses', $this->add_long_status_callback );
+			unset( $GLOBALS['wp_post_statuses']['wc-competition-completed'] );
+			$this->add_long_status_callback = null;
+		}
+		remove_filter( 'woocommerce_order_class', array( AdminOrder::class, 'order_class_name' ) );
 		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
@@ -45,8 +121,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders (HPOS).
 	 */
 	public function test_registered_customer_with_multiple_orders(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order1 = WC_Helper_Order::create_order( $customer_id );
@@ -72,8 +146,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should fetch data correctly for a guest customer matched by billing email (HPOS).
 	 */
 	public function test_guest_customer_by_email(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$email = 'guest-test@example.com';
 
 		$order1 = WC_Helper_Order::create_order( 0 );
@@ -101,8 +173,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed (HPOS).
 	 */
 	public function test_excluded_statuses_not_counted(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order_good = WC_Helper_Order::create_order( $customer_id );
@@ -153,8 +223,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should show zero data for guest order with no billing email (HPOS).
 	 */
 	public function test_guest_with_no_email_shows_zero(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$order = WC_Helper_Order::create_order( 0 );
 		$order->set_billing_email( '' );
 		$order->set_status( 'completed' );
@@ -172,8 +240,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should show zero data when no matching orders exist for the customer (HPOS).
 	 */
 	public function test_no_matching_orders_shows_zero(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order = WC_Helper_Order::create_order( $customer_id );
@@ -189,11 +255,74 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not count orders in an excluded custom status whose slug exceeds the 20-char storage limit (HPOS).
+	 */
+	public function test_excluded_long_custom_status_not_counted(): void {
+		list( $order_good, $long_status ) = $this->create_orders_with_long_custom_status();
+
+		update_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled', $long_status ) );
+
+		ob_start();
+		$this->sut->output( $order_good );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should only count the completed order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should only sum spend from the completed order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*100\.00/', $output, 'Should show average order value of 100' );
+	}
+
+	/**
+	 * @testdox Should count orders in a non-excluded custom status whose slug exceeds the 20-char storage limit (HPOS).
+	 */
+	public function test_non_excluded_long_custom_status_counted(): void {
+		list( $order_good ) = $this->create_orders_with_long_custom_status();
+
+		ob_start();
+		$this->sut->output( $order_good );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should count both orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*150\.00/', $output, 'Should sum spend from both orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*75\.00/', $output, 'Should show average order value of 75' );
+	}
+
+	/**
+	 * Creates a completed order and an order in a custom status whose slug is stored truncated.
+	 *
+	 * @return array{0: \WC_Order, 1: string} The completed order and the custom status slug.
+	 */
+	private function create_orders_with_long_custom_status(): array {
+		// Core warns when saving a status longer than the 20-char column; that
+		// truncated storage is the exact scenario under test.
+		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+
+		$long_status = 'competition-completed';
+		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
+		$this->add_long_status_callback = function ( $statuses ) use ( $long_status ) {
+			$statuses[ 'wc-' . $long_status ] = 'Competition Completed';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $this->add_long_status_callback );
+
+		$customer_id = $this->factory->user->create();
+
+		$order_good = WC_Helper_Order::create_order( $customer_id );
+		$order_good->set_status( 'completed' );
+		$order_good->set_total( 100 );
+		$order_good->save();
+
+		$order_custom = WC_Helper_Order::create_order( $customer_id );
+		$order_custom->set_status( $long_status );
+		$order_custom->set_total( 50 );
+		$order_custom->save();
+
+		return array( $order_good, $long_status );
+	}
+
+	/**
 	 * @testdox Should deduct partial refund from total spend (HPOS).
 	 */
 	public function test_partial_refund_deducted_from_total_spend(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order = WC_Helper_Order::create_order( $customer_id );
@@ -222,8 +351,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should deduct full refund from total spend (HPOS).
 	 */
 	public function test_full_refund_deducted_from_total_spend(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order1 = WC_Helper_Order::create_order( $customer_id );
@@ -257,8 +384,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should deduct refund from guest order total spend (HPOS).
 	 */
 	public function test_guest_order_refund_deducted_from_total_spend(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$email = 'guest-refund@example.com';
 
 		$order = WC_Helper_Order::create_order( 0 );
@@ -287,8 +412,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should only count orders for the specific registered customer, not other customers (HPOS).
 	 */
 	public function test_registered_customer_isolation(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_a = $this->factory->user->create();
 		$customer_b = $this->factory->user->create();
 
@@ -326,8 +449,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Should only count orders for the specific guest email, not other guest emails (HPOS).
 	 */
 	public function test_guest_customer_email_isolation(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$email_a = 'guest-a@example.com';
 		$email_b = 'guest-b@example.com';
 
@@ -368,8 +489,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Tooltip should list default excluded statuses (pending payment, failed, cancelled).
 	 */
 	public function test_tooltip_shows_default_excluded_statuses(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order = WC_Helper_Order::create_order( $customer_id );
@@ -386,11 +505,64 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tooltip should fall back to default excluded statuses when the default-statuses filter returns a non-array.
+	 */
+	public function test_tooltip_falls_back_when_default_excluded_statuses_filter_returns_non_array(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should still mention "pending payment"' );
+		$this->assertStringContainsString( 'failed', $output, 'Tooltip should still mention "failed"' );
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should still mention "cancelled"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect a custom status added by the default-statuses filter when the option was never saved.
+	 */
+	public function test_tooltip_reflects_default_excluded_statuses_filter(): void {
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		$add_label  = function ( $statuses ) {
+			$statuses['wc-custom-excluded'] = 'Custom Excluded';
+			return $statuses;
+		};
+		$add_custom = function ( $statuses ) {
+			$statuses[] = 'custom-excluded';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_label );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $add_custom );
+		$this->added_filters[] = array( 'wc_order_statuses', $add_label );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $add_custom );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'custom excluded', $output, 'Tooltip should mention the status added by the default-statuses filter.' );
+	}
+
+	/**
 	 * @testdox Tooltip should reflect custom excluded statuses option.
 	 */
 	public function test_tooltip_reflects_custom_option(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		update_option( 'woocommerce_excluded_report_order_statuses', array( 'cancelled' ) );
 
 		$customer_id = $this->factory->user->create();
@@ -414,8 +586,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Tooltip should reflect statuses added via filter.
 	 */
 	public function test_tooltip_reflects_filter(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$add_on_hold = function ( $statuses ) {
 			$statuses[] = 'on-hold';
 			return $statuses;
@@ -441,8 +611,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Tooltip should not display internal statuses like auto-draft, trash, or checkout-draft.
 	 */
 	public function test_tooltip_excludes_internal_statuses(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$customer_id = $this->factory->user->create();
 
 		$order = WC_Helper_Order::create_order( $customer_id );
@@ -461,8 +629,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Tooltip should not display checkout-draft even when it is added via filter.
 	 */
 	public function test_tooltip_excludes_checkout_draft_status(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		$add_checkout_draft = function ( $statuses ) {
 			$statuses[] = 'checkout-draft';
 			return $statuses;
@@ -488,8 +654,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox Tooltip should show generic message when all statuses are removed from exclusion.
 	 */
 	public function test_tooltip_shows_no_exclusion_message_when_all_statuses_removed(): void {
-		$this->toggle_cot_feature_and_usage( true );
-
 		add_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
 
 		$customer_id = $this->factory->user->create();
@@ -512,7 +676,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * @testdox CPT fallback should render correct customer history from analytics tables.
 	 */
 	public function test_cpt_fallback_renders_with_analytics_data(): void {
-		$this->toggle_cot_feature_and_usage( false );
+		$this->use_cpt_orders();
 
 		\WC_Helper_Reports::reset_stats_dbs();
 
@@ -541,5 +705,123 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * @testdox CPT fallback should render customer history from a base WC_Order without logging warnings.
+	 */
+	public function test_cpt_fallback_renders_with_base_order(): void {
+		$this->use_cpt_orders();
+
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->never() )->method( 'warning' );
+
+		$inject_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $inject_logger );
+
+		$this->assertInstanceOf( \WC_Order::class, $order, 'Test should pass a base order to the metabox' );
+		$this->assertNotInstanceOf( AdminOrder::class, $order, 'Test should not pass the admin override order to the metabox' );
+
+		ob_start();
+		try {
+			$this->sut->output( $order );
+			$output = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $inject_logger );
+		}
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * @testdox CPT fallback should not duplicate a guest customer without an email address.
+	 */
+	public function test_cpt_fallback_does_not_duplicate_guest_without_email(): void {
+		global $wpdb;
+
+		$this->use_cpt_orders();
+		$this->assertFalse( OrderUtil::custom_orders_table_usage_is_enabled(), 'Test should use CPT order storage.' );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_first_name( 'Guest' );
+		$order->set_billing_last_name( 'Customer' );
+		$order->set_billing_email( '' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->save();
+
+		$this->assertSame( '', $order->get_billing_email( 'edit' ), 'Test order should not have a billing email.' );
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		$new_customer_fired = 0;
+		$new_customer_id    = null;
+		$callback           = static function ( $customer_id ) use ( &$new_customer_fired, &$new_customer_id ) {
+			++$new_customer_fired;
+			$new_customer_id = $customer_id;
+		};
+		add_action( 'woocommerce_analytics_new_customer', $callback );
+
+		try {
+			ob_start();
+			try {
+				$this->sut->output( $order );
+				$this->sut->output( $order );
+				$output = (string) ob_get_contents();
+			} finally {
+				ob_end_clean();
+			}
+
+			$customer_lookup_table = CustomersDataStore::get_db_table_name();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
+			$customers_after_render     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$customer_lookup_table}" );
+			$new_customers_after_render = $new_customer_fired;
+
+			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+			$this->assertSame( 1, $new_customer_fired, 'The first import should fire the new-customer action once.' );
+			$this->assertSame( (int) CustomersDataStore::get_existing_customer_id_from_order( $order ), $new_customer_id, 'The action should receive the analytics customer ID linked to the order.' );
+
+			ob_start();
+			try {
+				$this->sut->output( $order );
+				$this->sut->output( $order );
+			} finally {
+				ob_end_clean();
+			}
+			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
+			$customers_after_import = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$customer_lookup_table}" );
+		} finally {
+			remove_action( 'woocommerce_analytics_new_customer', $callback );
+		}
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template.' );
+		$this->assertSame( 0, $customers_after_render, 'Rendering customer history should not create an analytics customer.' );
+		$this->assertSame( 0, $new_customers_after_render, 'Rendering customer history should not fire the new-customer action.' );
+		$this->assertSame( 1, $customers_after_import, 'Repeated views and imports should reuse the analytics customer.' );
+		$this->assertSame( 1, $new_customer_fired, 'Repeated views and imports should not fire the new-customer action again.' );
+	}
+
+	/**
+	 * Switches the order data store to CPT for fallback coverage.
+	 */
+	private function use_cpt_orders(): void {
+		$this->restore_hpos_after_test = true;
+		OrderHelper::toggle_cot_feature_and_usage( false );
 	}
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Relax MCP `outputSchema` published for REST-derived abilities so `structuredContent` validates in MCP clients (Cursor, Claude Desktop): strip `format: date-time` and `format: uri` (WooCommerce REST dates omit timezone and URI fields can be empty), and widen every declared scalar `type` to the full JSON type union plus `null` so fields whose declared type disagrees with the controller's actual response — including ones returned as arrays or objects, like `meta_data[].display_value` — still validate.

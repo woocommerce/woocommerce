@@ -197,11 +197,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		}
 
 		$states = array();
-		foreach ( WC()->countries->get_allowed_country_states() as $label ) {
-			foreach ( $label as $code => $state ) {
+		foreach ( WC()->countries->get_allowed_country_states() as $country_code => $country_states ) {
+			foreach ( $country_states as $code => $state ) {
 				$states[] = array(
-					'value' => $code,
-					'label' => esc_js( html_entity_decode( $state ) ),
+					'value'   => $code,
+					'label'   => esc_js( html_entity_decode( $state, ENT_QUOTES ) ),
+					'country' => $country_code,
 				);
 			}
 		}

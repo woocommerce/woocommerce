@@ -18,7 +18,6 @@ import {
 	// @ts-ignore
 	BlockContextProvider,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { createBlocksFromInnerBlocksTemplate } from '@wordpress/blocks';
 
 /**
@@ -42,7 +41,7 @@ const LayoutEditor = ( {
 	const { replaceInnerBlocks } = useDispatch( 'core/block-editor' );
 
 	const resetInnerBlocks = useCallback( () => {
-		replaceInnerBlocks(
+		void replaceInnerBlocks(
 			clientId,
 			createBlocksFromInnerBlocksTemplate( DEFAULT_INNER_BLOCKS ),
 			false

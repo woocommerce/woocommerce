@@ -4,14 +4,13 @@
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import { format } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import TimelineGroup from './timeline-group';
-import { sortByDateUsing, groupItemsUsing } from './util';
+import { formatTimelineDate, sortByDateUsing, groupItemsUsing } from './util';
 
 const Timeline = ( {
 	className = '',
@@ -22,6 +21,7 @@ const Timeline = ( {
 	dateFormat = __( 'F j, Y', 'woocommerce' ),
 	/* translators: PHP clock format string used to display times, see php.net/date. */
 	clockFormat = __( 'g:ia', 'woocommerce' ),
+	timezone = 'browser',
 } ) => {
 	const timelineClassName = clsx( 'woocommerce-timeline', className );
 
@@ -39,7 +39,7 @@ const Timeline = ( {
 	const addGroupTitles = ( group ) => {
 		return {
 			...group,
-			title: format( dateFormat, group.date ),
+			title: formatTimelineDate( dateFormat, group.date, timezone ),
 		};
 	};
 
@@ -47,7 +47,7 @@ const Timeline = ( {
 		<div className={ timelineClassName }>
 			<ul>
 				{ items
-					.reduce( groupItemsUsing( groupBy ), [] )
+					.reduce( groupItemsUsing( groupBy, timezone ), [] )
 					.map( addGroupTitles )
 					.sort( sortByDateUsing( orderBy ) )
 					.map( ( group ) => (
@@ -56,6 +56,7 @@ const Timeline = ( {
 							group={ group }
 							orderBy={ orderBy }
 							clockFormat={ clockFormat }
+							timezone={ timezone }
 						/>
 					) ) }
 			</ul>
@@ -116,6 +117,10 @@ Timeline.propTypes = {
 	 * The PHP clock format string used to format times, see php.net/date.
 	 */
 	clockFormat: PropTypes.string,
+	/**
+	 * Defines whether dates are grouped and displayed using the browser timezone or the WordPress site timezone.
+	 */
+	timezone: PropTypes.oneOf( [ 'browser', 'site' ] ),
 };
 
 export { orderByOptions, groupByOptions } from './util';

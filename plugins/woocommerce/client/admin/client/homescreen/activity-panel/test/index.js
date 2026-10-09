@@ -47,11 +47,9 @@ jest.mock( '../panels', () => {
 	};
 } );
 
-// Mock the orders and order statuses.
+// Mock the order statuses.
 jest.mock( '../orders/utils', () => {
 	return {
-		getLowStockCount: jest.fn().mockImplementation( () => 0 ),
-		getUnreadOrders: jest.fn().mockImplementation( () => 100 ),
 		getOrderStatuses: jest.fn().mockImplementation( () => [ 'status' ] ),
 	};
 } );
@@ -87,12 +85,12 @@ describe( 'ActivityPanel', () => {
 		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
 	} );
 
-	it( 'should record activity_panel_open Tracks event when panel is opened', () => {
+	it( 'should record activity_panel_open Tracks event when panel is opened', async () => {
 		useSelect.mockReturnValue( {
 			isTaskListHidden: false,
 		} );
 		const { getByText } = render( <ActivityPanel /> );
-		userEvent.click( getByText( 'custom-panel-2' ) );
+		await userEvent.click( getByText( 'custom-panel-2' ) );
 		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
 			tab: 'custom-panel-2',
 		} );

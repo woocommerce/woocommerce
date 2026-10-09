@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
@@ -169,10 +168,13 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 								onChange={ setRemoveTestOrder }
 							/>
 							<p>
-								{ __(
-									'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
-									'woocommerce'
-								) }
+								{
+									// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+									__(
+										'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
+										'woocommerce'
+									)
+								}
 							</p>
 						</ItemGroup>
 					</>

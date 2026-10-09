@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Promote the simple-product offer's price and currency to the top of the JSON-LD offer so Google Search Console accepts the structured data.

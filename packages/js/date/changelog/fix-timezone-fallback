@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix getStoreTimeZoneMoment() to check wcSettings.admin.timeZone when wcSettings.timeZone is not set

@@ -6,9 +6,14 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Throwable;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
@@ -36,6 +41,13 @@ class PendingNotificationStore {
 	private InternalNotificationDispatcher $dispatcher;
 
 	/**
+	 * The push tokens data store.
+	 *
+	 * @var PushTokensDataStore
+	 */
+	private PushTokensDataStore $data_store;
+
+	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -50,16 +62,44 @@ class PendingNotificationStore {
 	private bool $shutdown_registered = false;
 
 	/**
+	 * Notification types that have already recorded that the store holds no tokens.
+	 *
+	 * A bulk stock write fires a notification per product and the answer is the
+	 * same for all of them, so one line per type answers the whole request.
+	 * Keyed by type rather than a single flag, because each type writes to its
+	 * own log source and a type that recorded nothing would read as never
+	 * having been triggered.
+	 *
+	 * @var array<string, true>
+	 */
+	private array $logged_no_tokens = array();
+
+	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
+	 * @param InternalNotificationDispatcher $dispatcher  The dispatcher to use on shutdown.
+	 * @param PushTokensDataStore            $data_store  The push tokens data store.
+	 * @param NotificationStepLogger         $step_logger The step logger.
 	 *
 	 * @since 10.7.0
 	 */
-	final public function init( InternalNotificationDispatcher $dispatcher ): void {
-		$this->dispatcher = $dispatcher;
+	final public function init(
+		InternalNotificationDispatcher $dispatcher,
+		PushTokensDataStore $data_store,
+		NotificationStepLogger $step_logger
+	): void {
+		$this->dispatcher  = $dispatcher;
+		$this->data_store  = $data_store;
+		$this->step_logger = $step_logger;
 	}
 
 	/**
@@ -78,9 +118,12 @@ class PendingNotificationStore {
 	/**
 	 * Adds a notification to the pending store.
 	 *
-	 * Duplicate notifications (same type and resource ID) within a single
-	 * request are silently ignored. The shutdown hook is registered on the
-	 * first call.
+	 * A duplicate (same type and resource ID) within a single request is not
+	 * added again, and is recorded as `triggered: duplicate_in_request` so a
+	 * reader can tell it apart from one that never arrived. The shutdown hook
+	 * is registered on the first call.
+	 *
+	 * Notifications are dropped when no push token is registered, so neither the safety net job nor the loopback request is created for a send that has no recipient.
 	 *
 	 * @param Notification $notification The notification to add.
 	 * @return void
@@ -92,15 +135,35 @@ class PendingNotificationStore {
 			return;
 		}
 
+		if ( ! $this->data_store->has_tokens() ) {
+			$type = $notification->get_type();
+
+			if ( ! isset( $this->logged_no_tokens[ $type ] ) ) {
+				$this->step_logger->log_notification_step( $notification, 'triggered', 'no_tokens' );
+				$this->logged_no_tokens[ $type ] = true;
+			}
+
+			return;
+		}
+
 		$key = $notification->get_identifier();
 
 		if ( isset( $this->pending[ $key ] ) ) {
+			$this->step_logger->log_notification_step( $notification, 'triggered', 'duplicate_in_request' );
 			return;
 		}
 
 		$this->pending[ $key ] = $notification;
 
-		$this->schedule_safety_net( $notification );
+		// Capture the trigger time now, but persist it on shutdown (see
+		// dispatch_all()). Writing here would land inside the order-creation
+		// call stack, where an HPOS meta save can escalate into a full
+		// $order->save() on an order whose line items have not been written yet.
+		$notification->set_triggered_at( time() );
+
+		$fallback = $this->schedule_safety_net( $notification );
+
+		$this->step_logger->log_notification_step( $notification, 'triggered', 'queued', array( 'fallback' => $fallback ) );
 
 		if ( ! $this->shutdown_registered ) {
 			add_action( 'shutdown', array( $this, 'dispatch_all' ) );
@@ -115,40 +178,40 @@ class PendingNotificationStore {
 	 * guarantees the notification is still processed.
 	 *
 	 * @param Notification $notification The notification to schedule.
-	 * @return void
+	 * @return string `scheduled`, `already_scheduled`, or `schedule_failed` when Action Scheduler refused the job.
 	 *
 	 * @since 10.7.0
 	 */
-	private function schedule_safety_net( Notification $notification ): void {
-		$data        = $notification->to_array();
-		$type        = $data['type'];
-		$resource_id = $data['resource_id'];
-		unset( $data['type'], $data['resource_id'] );
+	private function schedule_safety_net( Notification $notification ): string {
+		// Canonical, identity-keyed args shared with NotificationProcessor::cancel_safety_net().
+		// Action Scheduler matches stored args by exact equality, so both sides must derive
+		// them from the same place; see Notification::get_safety_net_args().
+		$args = $notification->get_safety_net_args();
 
-		// Pass `type` and `resource_id` positionally and bundle any subclass-specific
-		// extras (event_type, stock_quantity_at_trigger, etc.) into a single array
-		// argument so the safety-net callback signature stays stable as new
-		// notification subclasses add fields to to_array().
-		$args = array( $type, $resource_id, $data );
-
-		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
-			return;
+		if ( ActionSchedulerUtil::has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
+			return 'already_scheduled';
 		}
 
-		as_schedule_single_action(
+		// Action Scheduler returns 0 rather than throwing when it cannot store
+		// the job, and a notification whose fallback was never scheduled has
+		// nothing to catch it if the loopback does not arrive.
+		$action_id = as_schedule_single_action(
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
 			$args,
 			NotificationProcessor::ACTION_SCHEDULER_GROUP,
 			true
 		);
+
+		return $action_id > 0 ? 'scheduled' : 'schedule_failed';
 	}
 
 	/**
 	 * Dispatches all pending notifications via InternalNotificationDispatcher.
 	 *
-	 * Called on shutdown. Sends all pending notifications through the
-	 * InternalNotificationDispatcher, then clears the store.
+	 * Called on shutdown. Records each notification's trigger time, sends all
+	 * pending notifications through the InternalNotificationDispatcher, then
+	 * clears the store.
 	 *
 	 * @return void
 	 *
@@ -159,10 +222,89 @@ class PendingNotificationStore {
 			return;
 		}
 
-		$this->dispatcher->dispatch( array_values( $this->pending ) );
+		$this->record_trigger_times();
+
+		$this->dispatcher->dispatch( $this->sort_with_new_orders_first( array_values( $this->pending ) ) );
 
 		$this->enabled = false;
 		$this->pending = array();
+	}
+
+	/**
+	 * Persists each pending notification's trigger time to its resource.
+	 *
+	 * Runs on shutdown rather than at trigger time so the write stays out of
+	 * the order-creation call stack. WordPress fires `shutdown` on fatal errors
+	 * too, so the only requests that lose the value are those killed outright
+	 * (OOM, SIGKILL), the same requests the safety net exists for, and where
+	 * the payload falls back to the current time.
+	 *
+	 * The recorded time stays that of the first trigger. Core fires the stock
+	 * hooks on every reduction past the threshold, not only on the crossing, so
+	 * a product that keeps selling while its notification is in flight would
+	 * otherwise drag its own recorded time forward and understate its delivery
+	 * age. The sent marker is checked as well because a send clears the trigger
+	 * time, so a repeat trigger after one would recreate a value that nothing
+	 * clears again.
+	 *
+	 * Failures are caught so that a third-party handler on the resource's save
+	 * hooks cannot stop the dispatch below from running.
+	 *
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	private function record_trigger_times(): void {
+		foreach ( $this->pending as $notification ) {
+			try {
+				if ( $notification->has_meta( NotificationProcessor::SENT_META_KEY )
+					|| $notification->has_meta( NotificationProcessor::TRIGGERED_META_KEY ) ) {
+					continue;
+				}
+
+				$notification->write_meta(
+					NotificationProcessor::TRIGGERED_META_KEY,
+					$notification->get_triggered_at()
+				);
+			} catch ( Throwable $e ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'Failed to record push notification trigger time (type=%s, resource_id=%d): %s',
+						$notification->get_type(),
+						$notification->get_resource_id(),
+						$e->getMessage()
+					),
+					array( 'source' => PushNotifications::FEATURE_NAME )
+				);
+			}
+		}
+	}
+
+	/**
+	 * Moves new order notifications to the front of the batch.
+	 *
+	 * Android only plays a sound for the first notification of a burst, and
+	 * stock is reduced before the order notification is queued, so the order
+	 * must go first for its sound to play.
+	 *
+	 * @param Notification[] $notifications The notifications about to be dispatched.
+	 * @return Notification[]
+	 *
+	 * @since 11.3.0
+	 */
+	private function sort_with_new_orders_first( array $notifications ): array {
+		$new_orders = array();
+		$others     = array();
+
+		foreach ( $notifications as $notification ) {
+			if ( NewOrderNotification::TYPE === $notification->get_type() ) {
+				$new_orders[] = $notification;
+			} else {
+				$others[] = $notification;
+			}
+		}
+
+		return array_merge( $new_orders, $others );
 	}
 
 	/**

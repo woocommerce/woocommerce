@@ -49,21 +49,11 @@ class WC_Shipping {
 	public $packages = array();
 
 	/**
-	 * Combined hash of the packages the `woocommerce_shipping_packages` filter was last run for. Used to
-	 * skip re-running that (potentially expensive) filter when the packages have not changed within the
-	 * same request.
+	 * Cache key for the last `woocommerce_shipping_packages` filter result.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
-	private $shipping_packages_filter_hash = '';
-
-	/**
-	 * Hash of the package most recently processed by calculate_shipping_for_package(). Collected by
-	 * calculate_shipping() to build the combined hash above without re-hashing the packages.
-	 *
-	 * @var string
-	 */
-	private $last_calculated_package_hash = '';
+	private $shipping_packages_filter_cache_key = null;
 
 	/**
 	 * The single instance of the class
@@ -271,28 +261,37 @@ class WC_Shipping {
 	 */
 	public function calculate_shipping( $packages = array() ) {
 		if ( ! $this->enabled || empty( $packages ) ) {
-			$this->packages                      = array();
-			$this->shipping_packages_filter_hash = '';
+			$this->packages                           = array();
+			$this->shipping_packages_filter_cache_key = null;
 			return $this->packages;
 		}
 
-		// Calculate costs for passed packages. Per-package rates are cached in the session keyed by a
-		// package hash, so this loop is cheap when nothing has changed (see calculate_shipping_for_package()).
+		// Calculate costs for passed packages.
 		$calculated_packages = array();
-		$package_hashes      = array();
 		foreach ( $packages as $package_key => $package ) {
 			$calculated_packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
-			$package_hashes[ $package_key ]      = $this->last_calculated_package_hash;
 		}
 
-		// The loop above is cheap, but the `woocommerce_shipping_packages` filter below can be expensive for
-		// some extensions and calculate_shipping() runs several times per request (cart totals, fragments,
-		// Store API, etc.). Reuse the per-package hashes already computed above to skip the filter when the
-		// packages are unchanged since the last call within this request, returning the previously filtered
-		// (and possibly reorganized) result. See WOOPLUG-6486 / #63920.
-		$packages_hash = md5( implode( '', $package_hashes ) );
+		/**
+		 * Filters whether the shipping packages filter result may be cached for the current request.
+		 *
+		 * Enable this only when every callback on `woocommerce_shipping_packages` depends solely on the
+		 * calculated packages. The filter continues to run on every call by default.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param bool  $enabled  Whether to cache the filtered packages. Default false.
+		 * @param array $packages The calculated packages before filtering.
+		 */
+		$cache_enabled = 'yes' !== get_option( 'woocommerce_shipping_debug_mode', 'no' ) && (bool) apply_filters( 'woocommerce_shipping_packages_cache_enabled', false, $calculated_packages );
+		$cache_key     = null;
 
-		if ( ! empty( $this->packages ) && $packages_hash === $this->shipping_packages_filter_hash && 'yes' !== get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
+		if ( $cache_enabled ) {
+			$encoded_packages = wp_json_encode( $calculated_packages );
+			$cache_key        = false === $encoded_packages ? null : md5( $encoded_packages );
+		}
+
+		if ( null !== $cache_key && $cache_key === $this->shipping_packages_filter_cache_key ) {
 			return $this->packages;
 		}
 
@@ -309,7 +308,7 @@ class WC_Shipping {
 		 */
 		$this->packages = array_filter( (array) apply_filters( 'woocommerce_shipping_packages', $calculated_packages ) );
 
-		$this->shipping_packages_filter_hash = $packages_hash;
+		$this->shipping_packages_filter_cache_key = $cache_key;
 
 		return $this->packages;
 	}
@@ -343,9 +342,6 @@ class WC_Shipping {
 	 * @return array|bool
 	 */
 	public function calculate_shipping_for_package( $package = array(), $package_key = 0 ) {
-		// Reset the tracked hash so calculate_shipping() reads a stable value even for invalid packages.
-		$this->last_calculated_package_hash = '';
-
 		// If shipping is disabled or the package is invalid, return false.
 		if ( ! $this->enabled || empty( $package ) ) {
 			return false;
@@ -357,21 +353,12 @@ class WC_Shipping {
 		// local pickup rates here however since those are not shipped.
 		$is_shippable = $this->is_package_shippable( $package );
 
-		// Check if we need to recalculate shipping for this package.
-		$package_to_hash = $package;
-
-		// Remove data objects so hashes are consistent.
-		foreach ( $package_to_hash['contents'] as $item_id => $item ) {
-			unset( $package_to_hash['contents'][ $item_id ]['data'] );
-		}
-
 		// Get rates stored in the WC session data for this package.
 		$wc_session_key = 'shipping_for_package_' . $package_key;
 		$stored_rates   = WC()->session->get( $wc_session_key );
 
 		// Calculate the hash for this package so we can tell if it's changed since last calculation.
-		$package_hash                       = 'wc_ship_' . md5( wp_json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
-		$this->last_calculated_package_hash = $package_hash;
+		$package_hash = $this->get_package_hash( $package );
 
 		if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 			foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
@@ -457,6 +444,46 @@ class WC_Shipping {
 	}
 
 	/**
+	 * Generate the shipping-rate cache hash for a package.
+	 *
+	 * @param array $package_to_hash Package of cart items.
+	 * @return string
+	 */
+	private function get_package_hash( array $package_to_hash ): string {
+		/**
+		 * Filters package fields that should not affect the shipping-rate cache hash.
+		 *
+		 * @since 11.0.0
+		 *
+		 * @param array $ignored_fields Package field names ignored while generating the cache hash.
+		 * @param array $package        Package of cart items.
+		 */
+		$ignored_fields = apply_filters(
+			'woocommerce_shipping_package_hash_ignored_fields',
+			array(
+				'subtotal',
+				'total',
+				'package_id',
+				'package_name',
+				'rates',
+				'package_index',
+			),
+			$package_to_hash
+		);
+
+		foreach ( array_unique( array_filter( (array) $ignored_fields, 'is_string' ) ) as $field ) {
+			unset( $package_to_hash[ $field ] );
+		}
+
+		// Remove data objects so hashes are consistent.
+		foreach ( (array) ( $package_to_hash['contents'] ?? array() ) as $item_id => $item ) {
+			unset( $package_to_hash['contents'][ $item_id ]['data'] );
+		}
+
+		return 'wc_ship_' . md5( wp_json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
+	}
+
+	/**
 	 * Get packages.
 	 *
 	 * @return array
@@ -472,8 +499,8 @@ class WC_Shipping {
 	 */
 	public function reset_shipping() {
 		unset( WC()->session->chosen_shipping_methods );
-		$this->packages                      = array();
-		$this->shipping_packages_filter_hash = '';
+		$this->packages                           = array();
+		$this->shipping_packages_filter_cache_key = null;
 	}
 
 	/**

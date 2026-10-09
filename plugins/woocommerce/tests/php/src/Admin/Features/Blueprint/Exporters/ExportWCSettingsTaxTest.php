@@ -130,6 +130,57 @@ class ExportWCSettingsTaxTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that exported SQL uses the table prefix placeholder instead of the
+	 * local database prefix, so Blueprints import on sites with a different prefix.
+	 */
+	public function test_exported_sql_uses_table_prefix_placeholder() {
+		global $wpdb;
+
+		$custom_tax_class = WC_Tax::create_tax_class( 'placeholder-test' );
+		$this->assertIsArray( $custom_tax_class );
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '4.0000',
+				'tax_rate_name'     => 'Placeholder Rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 0,
+				'tax_rate_class'    => $custom_tax_class['slug'],
+			)
+		);
+
+		$setting_options_mock = $this->getMockBuilder( \Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions::class )
+			->disableOriginalConstructor()
+			->getMock();
+		$setting_options_mock->method( 'get_page_options' )->willReturn( array() );
+
+		$exporter = new ExportWCSettingsTax( $setting_options_mock );
+		$steps    = $exporter->export();
+
+		$run_sql_step_found = false;
+
+		foreach ( $steps as $step ) {
+			if ( $step instanceof RunSql ) {
+				$run_sql_step_found = true;
+				$sql_content        = $step->prepare_json_array()['sql']['contents'];
+
+				$this->assertStringContainsString( RunSql::TABLE_PREFIX_PLACEHOLDER, $sql_content );
+				// The literal local prefix must not be baked into the table name.
+				$this->assertStringNotContainsString( 'replace into `' . $wpdb->prefix, $sql_content );
+			}
+		}
+
+		$this->assertTrue( $run_sql_step_found, 'At least one RunSql step should be exported' );
+
+		WC_Tax::_delete_tax_rate( $tax_rate_id );
+		WC_Tax::delete_tax_class_by( 'slug', $custom_tax_class['slug'] );
+	}
+
+	/**
 	 * Test export works when no custom tax classes exist.
 	 */
 	public function test_export_with_no_custom_tax_classes() {

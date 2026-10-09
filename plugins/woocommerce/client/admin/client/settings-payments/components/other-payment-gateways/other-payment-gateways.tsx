@@ -291,14 +291,26 @@ export const OtherPaymentGateways = ( {
 
 									// By default, the CTA is to install a plugin.
 									let ctaLabel = isCurrentlyBusy
-										? __( 'Installing', 'woocommerce' )
-										: __( 'Install', 'woocommerce' );
+										? __< string >(
+												'Installing',
+												'woocommerce'
+											)
+										: __< string >(
+												'Install',
+												'woocommerce'
+											);
 
 									// If the plugin is already installed, the CTA is to activate it.
 									if ( isPluginAlreadyInstalled ) {
 										ctaLabel = isCurrentlyBusy
-											? __( 'Activating', 'woocommerce' )
-											: __( 'Activate', 'woocommerce' );
+											? __< string >(
+													'Activating',
+													'woocommerce'
+												)
+											: __< string >(
+													'Activate',
+													'woocommerce'
+												);
 									}
 
 									return (
@@ -349,11 +361,11 @@ export const OtherPaymentGateways = ( {
 																extension.plugin
 																	.status ===
 																	'not_installed'
-																	? extension
+																	? ( extension
 																			._links
 																			?.attach
 																			?.href ??
-																			null
+																			null )
 																	: null,
 																'wc_settings_payments__other_payment_options'
 															)

@@ -111,3 +111,11 @@
 	align-items: center;
 	display: flex;
 }
+
+.woocommerce-settings-historical-data__failed-orders {
+	margin: $gap 0 0;
+
+	.components-notice__content > p {
+		margin-top: 0;
+	}
+}

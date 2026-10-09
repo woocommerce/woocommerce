@@ -42,13 +42,15 @@ export function PopularPresets( props: ProductQueryBlock ) {
 				hideLabelFromVision={ true }
 				label={ __( 'Choose among these pre-sets', 'woocommerce' ) }
 				onChange={ ( option ) => {
-					if ( ! option.selectedItem?.key ) return;
+					if ( ! option.selectedItem?.key ) {
+						return;
+					}
 
 					const [ orderBy, order ] = option.selectedItem?.key?.split(
 						'/'
 					) as [
 						ProductQueryBlockQuery[ 'orderBy' ],
-						ProductQueryBlockQuery[ 'order' ]
+						ProductQueryBlockQuery[ 'order' ],
 					];
 
 					setQueryAttribute( props, { order, orderBy } );

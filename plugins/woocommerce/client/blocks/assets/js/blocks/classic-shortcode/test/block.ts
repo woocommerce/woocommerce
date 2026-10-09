@@ -13,11 +13,11 @@ import '../';
 import '../../cart';
 import '../../checkout';
 import '../../product-new';
-import '../../../atomic/blocks/product-elements/sale-badge/index';
-import '../../../atomic/blocks/product-elements/image/index';
-import '../../../atomic/blocks/product-elements/price/index';
-import '../../../atomic/blocks/product-elements/button/index';
-import '../../../atomic/blocks/product-elements/title/index';
+import '../../product-elements-blocks/sale-badge/index';
+import '../../product-elements-blocks/image/index';
+import '../../product-elements-blocks/price/index';
+import '../../product-elements-blocks/button/index';
+import '../../product-elements-blocks/title/index';
 import '../../product-template/index.tsx';
 import '../../product-collection/index.tsx';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
@@ -39,10 +39,6 @@ describe( 'Classic Shortcode block', () => {
 		} );
 
 		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
-
-		// wp-6.8: @wordpress/block-editor's RichText fires an internal
-		// __unstableUseRichText deprecation via @wordpress/deprecated.
-		expect( console ).toHaveWarned();
 	} );
 	test( 'can convert to Checkout block', async () => {
 		await setup( { shortcode: 'checkout' } );

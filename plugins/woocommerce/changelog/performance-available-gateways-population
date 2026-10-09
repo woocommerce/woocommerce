@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Reduce variability in payment gateway is_available implementations.
