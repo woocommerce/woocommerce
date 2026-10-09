@@ -52,6 +52,24 @@ test.describe( 'Template priority', () => {
 			isTaxonomyTemplate: true,
 			identifiableText: 'Showing all 9 results',
 		},
+		{
+			// Products by Category and Products by Tag both set
+			// `is_taxonomy_template`, so `register_block_template()` skips them and
+			// they inherit `AbstractTemplateWithFallback::template_hierarchy()`.
+			// Products by Attribute, the taxonomy template the migration kept in the
+			// browser, is registered and overrides that method — a different code
+			// path. Tag is covered here so neither inheriting template depends on
+			// the one that does not share their implementation.
+			path: '/product-tag/recommended/',
+			templateName: 'Products by Tag',
+			templatePath: 'taxonomy-product_tag',
+			fallbackTemplate: {
+				templateName: 'Product Catalog',
+				templatePath: 'archive-product',
+			},
+			isTaxonomyTemplate: true,
+			identifiableText: 'Showing all 2 results',
+		},
 	];
 
 	templatesToTest.forEach( ( testData ) => {
@@ -87,6 +105,20 @@ test.describe( 'Template priority', () => {
 				await expect(
 					page.getByText( 'Custom template' )
 				).toBeHidden();
+
+				// Check which template actually answered. `identifiableText`
+				// renders the same whether the theme's template is used or
+				// ignored in favour of WooCommerce's own, so without this the
+				// step stayed green in exactly the failure it exists to catch.
+				// Every template in the fixture theme carries this marker.
+				await expect(
+					page
+						.getByText(
+							`${ testData.templateName } template loaded from theme`
+						)
+						.first()
+				).toBeVisible();
+
 				await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 			} );
 
