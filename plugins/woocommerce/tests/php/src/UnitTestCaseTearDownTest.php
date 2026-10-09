@@ -74,4 +74,18 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			'The filtered locale should not still be cached.'
 		);
 	}
+
+	/**
+	 * The REQUEST_URI that go_to() sets does not outlive the test.
+	 */
+	public function test_restore_request_uri_undoes_go_to(): void {
+		$request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+		$this->go_to( home_url( '/?product=leaked-product' ) );
+		$this->assertSame( '/?product=leaked-product', $_SERVER['REQUEST_URI'], 'go_to() should set REQUEST_URI.' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+		$this->restore_request_uri();
+
+		$this->assertSame( $request_uri_at_setup, $_SERVER['REQUEST_URI'] ?? null, 'REQUEST_URI should be back to what it was at setUp().' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	}
 }
