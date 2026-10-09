@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update wordpress/mcp-adapter to 0.4.1, so MCP clients get the error message of a failed ability call.
