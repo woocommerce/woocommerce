@@ -198,7 +198,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list the fields of each namespace in the output schemas.
+	 * @testdox Should list the fields of each namespace in the output schemas, and add nothing for a resource with no fields.
 	 */
 	public function test_output_schemas_list_fields_by_namespace(): void {
 		$products = $this->get_output_schema( 'woocommerce/products-query' )['properties']['products']['items']['properties']['extensions'];
@@ -210,6 +210,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( self::CODE_SCHEMA, $product['properties']['test-ext']['properties']['code'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['extensions']['properties']['test-ext']['properties']['note'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['line_items']['items']['properties']['extensions']['properties']['test-ext']['properties']['gift'] );
+		$this->assertSame( array( 'type' => 'object' ), AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'customer' ) );
 	}
 
 	/**
