@@ -53,13 +53,6 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	private $money;
 
 	/**
-	 * Published variation counts for the response being built, keyed by product id.
-	 *
-	 * @var array
-	 */
-	private $variation_counts = array();
-
-	/**
 	 * Products whose variant list was cut short, keyed by product id.
 	 *
 	 * @var array
@@ -87,9 +80,8 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Start a new response, clearing per-response state.
 	 */
 	public function begin_response(): void {
-		$this->variation_counts = array();
-		$this->truncations      = array();
-		$this->variant_budget   = self::MAX_VARIANTS_PER_RESPONSE;
+		$this->truncations    = array();
+		$this->variant_budget = self::MAX_VARIANTS_PER_RESPONSE;
 	}
 
 	/**
@@ -109,21 +101,11 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Map a page of products, skipping those with no catalog variant.
 	 *
-	 * @param array $products WooCommerce products or IDs.
+	 * @param array $products WooCommerce products.
 	 * @return array
 	 */
 	public function map_products( array $products ): array {
 		$this->begin_response();
-
-		// Resolve eligibility for the whole page in one aggregate query, so the
-		// per-product check below never hydrates variations.
-		$variable_ids = array();
-		foreach ( $products as $product ) {
-			if ( $product instanceof \WC_Product_Variable ) {
-				$variable_ids[] = (int) $product->get_id();
-			}
-		}
-		$this->variation_counts = $this->published_variation_counts( $variable_ids );
 
 		$mapped = array();
 
@@ -132,7 +114,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				continue;
 			}
 
-			if ( ! $this->has_catalog_variants( $product, $this->variation_counts ) ) {
+			if ( ! $this->has_catalog_variants( $product ) ) {
 				continue;
 			}
 
@@ -308,84 +290,19 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * would violate the catalog `product` schema (`variants` requires
 	 * `minItems: 1`), so it is excluded from listings and treated as not found on
 	 * detail lookups. Simple products always qualify; a variable product needs at
-	 * least one published variation.
+	 * least one visible variation: enabled and, when the store hides out-of-stock
+	 * items, in stock. That is the set the storefront and the Store API offer, read
+	 * through the data store's cached children list.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
-	 * @param array|null  $variation_counts Precomputed result of published_variation_counts()
-	 *                                      covering this product's id. When null, the
-	 *                                      single-product query is run.
 	 * @return bool
 	 */
-	public function has_catalog_variants( \WC_Product $product, ?array $variation_counts = null ): bool {
+	public function has_catalog_variants( \WC_Product $product ): bool {
 		if ( ! $product instanceof \WC_Product_Variable ) {
 			return true;
 		}
 
-		$product_id = (int) $product->get_id();
-
-		if ( null === $variation_counts ) {
-			$variation_counts = $this->published_variation_counts( array( $product_id ) );
-		}
-
-		return isset( $variation_counts[ $product_id ] ) && $variation_counts[ $product_id ] > 0;
-	}
-
-	/**
-	 * Count the published variations of each given variable product, in one query.
-	 *
-	 * Backs both catalog eligibility ({@see self::has_catalog_variants()}) and the
-	 * truncation totals. Aggregated in SQL: `GROUP BY post_parent` returns one row
-	 * per product, where counting WP_Query rows in PHP would materialize one row
-	 * per variation.
-	 *
-	 * @param array $variable_ids Variable product ids.
-	 * @return array Map of product id => published variation count, containing only ids that
-	 *               have at least one.
-	 */
-	public function published_variation_counts( array $variable_ids ): array {
-		global $wpdb;
-
-		$variable_ids = array_values( array_unique( array_map( 'intval', $variable_ids ) ) );
-
-		// Guard the empty set explicitly: an empty `IN ()` is a SQL syntax error,
-		// and must not be allowed to degrade into an unfiltered variation scan.
-		if ( empty( $variable_ids ) ) {
-			return array();
-		}
-
-		$placeholders = implode( ',', array_fill( 0, count( $variable_ids ), '%d' ) );
-
-		// The `IN` list is built from a generated `%d` run and passed to prepare()
-		// as values, so every id is still prepared — the sniffs cannot see through
-		// the interpolation. Not cached: the count must reflect variations
-		// published since the last request, and the query is one grouped row read
-		// per request.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT post_parent, COUNT(*) AS total
-				 FROM {$wpdb->posts}
-				 WHERE post_type = 'product_variation'
-				 AND post_status = 'publish'
-				 AND post_parent IN ({$placeholders})
-				 GROUP BY post_parent",
-				$variable_ids
-			),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-
-		if ( ! is_array( $rows ) ) {
-			return array();
-		}
-
-		$counts = array();
-
-		foreach ( $rows as $row ) {
-			$counts[ (int) $row['post_parent'] ] = (int) $row['total'];
-		}
-
-		return $counts;
+		return ! empty( $product->get_visible_children() );
 	}
 
 	/**
@@ -525,7 +442,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			return array( $this->build_simple_variant( $product, $currency ) );
 		}
 
-		$children = array_map( 'intval', $product->get_children() );
+		$children = array_map( 'intval', $product->get_visible_children() );
 		$required = array_values( array_intersect( $children, array_map( 'intval', $required_variation_ids ) ) );
 
 		if ( $only_required && ! empty( $required ) ) {
@@ -572,7 +489,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			}
 
 			$variation = wc_get_product( $variation_id );
-			if ( ! $variation instanceof \WC_Product_Variation || 'publish' !== $variation->get_status() ) {
+			if ( ! $variation instanceof \WC_Product_Variation ) {
 				continue;
 			}
 
@@ -585,11 +502,11 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Note that a product's variant list came back short, for the caller to report.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @param int         $returned Number of variants actually built.
+	 * @param \WC_Product_Variable $product WooCommerce variable product.
+	 * @param int                  $returned Number of variants actually built.
 	 */
-	private function record_truncation( \WC_Product $product, int $returned ): void {
-		$total = $this->published_variation_count( $product );
+	private function record_truncation( \WC_Product_Variable $product, int $returned ): void {
+		$total = count( $product->get_visible_children() );
 
 		if ( $returned >= $total ) {
 			return;
@@ -600,22 +517,6 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			'returned' => $returned,
 			'total'    => $total,
 		);
-	}
-
-	/**
-	 * Published variation count for one product, reusing the page-wide counts.
-	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @return int
-	 */
-	private function published_variation_count( \WC_Product $product ): int {
-		$product_id = (int) $product->get_id();
-
-		if ( ! isset( $this->variation_counts[ $product_id ] ) ) {
-			$this->variation_counts += $this->published_variation_counts( array( $product_id ) );
-		}
-
-		return isset( $this->variation_counts[ $product_id ] ) ? $this->variation_counts[ $product_id ] : 0;
 	}
 
 	/**
@@ -920,7 +821,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 
 		$variants = array();
 
-		foreach ( $product->get_children() as $child_id ) {
+		foreach ( $product->get_visible_children() as $child_id ) {
 			// Same output bound as build_variants(). Matching is on hydrated
 			// attributes, so a selection matching nothing still walks every
 			// child — bounding that needs the match pushed into the query.
@@ -930,7 +831,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			}
 
 			$variation = wc_get_product( $child_id );
-			if ( ! $variation instanceof \WC_Product_Variation || 'publish' !== $variation->get_status() ) {
+			if ( ! $variation instanceof \WC_Product_Variation ) {
 				continue;
 			}
 

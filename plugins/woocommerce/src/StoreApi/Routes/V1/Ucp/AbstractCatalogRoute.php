@@ -169,12 +169,6 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 		$variation_id = 0;
 
 		if ( $product instanceof \WC_Product_Variation ) {
-			// An unpublished variation is not purchasable, so naming one is a miss
-			// even when its parent is otherwise fine.
-			if ( 'publish' !== $product->get_status() ) {
-				return null;
-			}
-
 			$variation_id = (int) $product->get_id();
 			$product      = wc_get_product( $product->get_parent_id() );
 		}
@@ -188,6 +182,13 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 		}
 
 		if ( ! $this->mapper()->has_catalog_variants( $product ) ) {
+			return null;
+		}
+
+		// A named variation the storefront would not offer — disabled, or out of
+		// stock while the store hides out-of-stock items — is a miss even when
+		// its parent is otherwise fine.
+		if ( $variation_id > 0 && ( ! $product instanceof \WC_Product_Variable || ! in_array( $variation_id, array_map( 'intval', $product->get_visible_children() ), true ) ) ) {
 			return null;
 		}
 

@@ -40,25 +40,26 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A variable product with no published variation cannot satisfy the catalog schema,
+	 * A variable product with no enabled variation cannot satisfy the catalog schema,
 	 * which requires at least one variant, so it must be reported as ineligible.
 	 *
-	 * @testdox A variable product with no published variation should not be catalog-eligible.
+	 * @testdox A variable product with no enabled variation should not be catalog-eligible.
 	 */
-	public function test_variable_product_without_published_variations_is_ineligible(): void {
+	public function test_variable_product_without_enabled_variations_is_ineligible(): void {
 		$mapper   = new UcpProductMapper( 'USD' );
 		$variable = WC_Helper_Product::create_variation_product();
 
 		$this->assertTrue( $mapper->has_catalog_variants( $variable ) );
 
+		// Disabling a variation sets it private; saving through the CRUD layer
+		// invalidates the parent's cached children list.
 		foreach ( $variable->get_children() as $child_id ) {
-			wp_update_post(
-				array(
-					'ID'          => $child_id,
-					'post_status' => 'draft',
-				)
-			);
+			$variation = wc_get_product( $child_id );
+			$variation->set_status( 'private' );
+			$variation->save();
 		}
+
+		$variable = wc_get_product( $variable->get_id() );
 
 		$this->assertFalse( $mapper->has_catalog_variants( $variable ) );
 		$this->assertSame( array(), $mapper->map_products( array( $variable ) ) );
