@@ -373,6 +373,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( doing_action( 'save_post' ) ) {
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
 				clean_post_cache( $product->get_id() );
+				$product->set_date_modified( $this->string_to_timestamp( $post_data['post_modified_gmt'] ) );
 			} else {
 				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
 
@@ -385,17 +386,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 
 		} else { // Only update post modified time to record this save event.
+			$post_modified_gmt = current_time( 'mysql', 1 );
 			$GLOBALS['wpdb']->update(
 				$GLOBALS['wpdb']->posts,
 				array(
 					'post_modified'     => current_time( 'mysql' ),
-					'post_modified_gmt' => current_time( 'mysql', 1 ),
+					'post_modified_gmt' => $post_modified_gmt,
 				),
 				array(
 					'ID' => $product->get_id(),
 				)
 			);
 			clean_post_cache( $product->get_id() );
+			$product->set_date_modified( $this->string_to_timestamp( $post_modified_gmt ) );
 		}
 
 		$this->update_post_meta( $product );

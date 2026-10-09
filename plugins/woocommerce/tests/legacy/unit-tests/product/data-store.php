@@ -327,6 +327,57 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving an existing product puts the stored modified date on the object, also when the post is written directly.
+	 */
+	public function test_product_update_syncs_date_modified_on_direct_post_writes(): void {
+		global $wpdb;
+
+		$product_id      = WC_Helper_Product::create_simple_product()->get_id();
+		$age_product     = function () use ( $wpdb, $product_id ) {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_modified'     => '2020-01-01 00:00:00',
+					'post_modified_gmt' => '2020-01-01 00:00:00',
+				),
+				array( 'ID' => $product_id )
+			);
+			clean_post_cache( $product_id );
+		};
+		$stored_modified = function () use ( $product_id ) {
+			return wc_string_to_timestamp( get_post_field( 'post_modified_gmt', $product_id ) );
+		};
+		$object_modified = function ( WC_Product $product ) {
+			$date_modified = $product->get_date_modified( 'edit' );
+			return $date_modified ? $date_modified->getTimestamp() : null;
+		};
+
+		$age_product();
+		$product = new WC_Product_Simple( $product_id );
+		$product->set_regular_price( '12' );
+		$product->save();
+
+		$this->assertNotSame( wc_string_to_timestamp( '2020-01-01 00:00:00' ), $stored_modified(), 'A meta-only save should record the save time' );
+		$this->assertSame( $stored_modified(), $object_modified( $product ), 'A meta-only save should put the stored modified date on the object' );
+
+		$age_product();
+		$product           = new WC_Product_Simple( $product_id );
+		$save_in_save_post = function ( $post_id ) use ( $product, $product_id ) {
+			if ( $product_id === $post_id ) {
+				$product->set_menu_order( 3 );
+				$product->save();
+			}
+		};
+		add_action( 'save_post', $save_in_save_post );
+		do_action( 'save_post', $product_id, get_post( $product_id ), true );
+		remove_action( 'save_post', $save_in_save_post );
+
+		$this->assertSame( 3, (int) get_post_field( 'menu_order', $product_id ), 'The save inside save_post should be stored' );
+		$this->assertSame( $stored_modified(), $object_modified( $product ), 'A save inside save_post should put the stored modified date on the object' );
+		$this->assertSame( array(), $product->get_changes(), 'A saved product should have no pending changes' );
+	}
+
+	/**
 	 * Test reading a product.
 	 *
 	 * @since 3.0.0
