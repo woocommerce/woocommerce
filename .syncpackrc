@@ -472,6 +472,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "admin-screens temporarily pins DataViews 19.1.0 for the payment settings screen",
+			"dependencies": [
+				"@wordpress/dataviews"
+			],
+			"packages": [
+				"@woocommerce/admin-screens"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* dependencies that WooCommerce bundles instead of externalizing to WordPress",
 			"dependencyTypes": [
 				"prod",
