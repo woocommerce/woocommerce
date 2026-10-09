@@ -4140,15 +4140,12 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 	$order_ids = $wpdb->get_col(
 		$wpdb->prepare(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
-			"SELECT order_id FROM {$stats_table} WHERE order_id > %d ORDER BY order_id ASC LIMIT %d",
-			(int) get_option( $last_id_option, 0 ),
-			500
+			"SELECT order_id FROM {$stats_table} WHERE order_id > %d ORDER BY order_id ASC LIMIT 500",
+			(int) get_option( $last_id_option, 0 )
 		)
 	);
 
-	$error = $wpdb->last_error;
-
-	if ( '' === $error && $order_ids ) {
+	if ( '' === $wpdb->last_error && $order_ids ) {
 		$id_list = implode( ',', array_map( 'absint', $order_ids ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names and the id list are code-defined.
@@ -4159,18 +4156,14 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 				SET stats.payment_method = orders.payment_method
 				WHERE stats.order_id IN ({$id_list})
 				AND stats.payment_method IS NULL
-				AND orders.payment_method IS NOT NULL
 				AND orders.payment_method != ''";
 		} else {
-			$from_orders = $wpdb->prepare(
-				"UPDATE {$stats_table} stats
-				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = %s
+			$from_orders = "UPDATE {$stats_table} stats
+				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = '_payment_method'
 				SET stats.payment_method = meta.meta_value
 				WHERE stats.order_id IN ({$id_list})
 				AND stats.payment_method IS NULL
-				AND meta.meta_value != ''",
-				'_payment_method'
-			);
+				AND meta.meta_value != ''";
 		}
 
 		// A refund holds no payment method of its own, so it takes the refunded order's. That order has the lower id, so its row is already filled.
@@ -4182,24 +4175,19 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 			AND refunds.payment_method IS NULL
 			AND parents.payment_method IS NOT NULL";
 
-		foreach ( array( $from_orders, $from_parents ) as $query ) {
-			if ( false === $wpdb->query( $query ) ) {
-				$error = $wpdb->last_error;
-				break;
-			}
-		}
+		$updated = false !== $wpdb->query( $from_orders ) && false !== $wpdb->query( $from_parents );
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
-		if ( '' === $error ) {
+		if ( $updated ) {
 			update_option( $last_id_option, (int) end( $order_ids ), false );
 
 			return true;
 		}
 	}
 
-	if ( '' !== $error ) {
+	if ( '' !== $wpdb->last_error ) {
 		wc_get_logger()->error(
-			sprintf( 'Stopped backfilling the Analytics payment method: %s', $error ),
+			sprintf( 'Stopped backfilling the Analytics payment method: %s', $wpdb->last_error ),
 			array( 'source' => 'wc-updater' )
 		);
 	}

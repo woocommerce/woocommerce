@@ -443,7 +443,7 @@ class Controller extends GenericController implements ExportableInterface {
 			return '';
 		}
 
-		$gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array();
+		$gateways = WC()->payment_gateways()->payment_gateways();
 		$title    = isset( $gateways[ $payment_method ] ) ? $gateways[ $payment_method ]->get_method_title() : '';
 
 		return $title ? $title : $payment_method;
