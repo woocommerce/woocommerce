@@ -4,6 +4,7 @@
 import {
 	BlockAttributes,
 	BlockVariation,
+	getBlockVariations,
 	registerBlockType,
 	registerBlockVariation,
 	unregisterBlockType,
@@ -12,6 +13,7 @@ import {
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
 import { CORE_EDITOR_STORE } from '@woocommerce/utils';
+
 import { isEmpty } from '@woocommerce/types';
 
 /**
@@ -38,8 +40,10 @@ type ProductBlockSettings = {
  * @property {ProductBlockSettings}        productBlockSettings - Product block settings
  */
 type ProductBlockConfig< T extends BlockAttributes > = ProductBlockSettings & {
-	blockName: string;
-	settings: Partial< BlockConfiguration< T > >;
+	metadata: BlockConfiguration< T > & {
+		name: string;
+		variations?: BlockVariation< BlockAttributes >[] | undefined;
+	};
 };
 
 /**
@@ -128,7 +132,8 @@ export class BlockRegistrationManager {
 				// Register only blocks available in post editor
 				this.blocks.forEach( ( config ) => {
 					if ( config.isAvailableOnPostEditor ) {
-						const key = config.variationName || config.blockName;
+						const key =
+							config.variationName || config.metadata.name;
 						if ( ! this.hasAttemptedRegistration( key ) ) {
 							this.registerBlock( config );
 						}
@@ -216,20 +221,20 @@ export class BlockRegistrationManager {
 	private unregisterBlock< T extends BlockAttributes >(
 		config: ProductBlockConfig< T >
 	): void {
-		const { blockName, isVariationBlock, variationName } = config;
+		const { metadata, isVariationBlock, variationName } = config;
 
 		try {
 			if ( isVariationBlock && variationName ) {
-				unregisterBlockVariation( blockName, variationName );
+				unregisterBlockVariation( metadata.name, variationName );
 				this.attemptedRegisteredBlocks.delete( variationName );
 			} else {
-				unregisterBlockType( blockName );
-				this.attemptedRegisteredBlocks.delete( blockName );
+				unregisterBlockType( metadata.name );
+				this.attemptedRegisteredBlocks.delete( metadata.name );
 			}
 		} catch ( error ) {
 			// eslint-disable-next-line no-console
 			console.debug(
-				`Failed to unregister block ${ blockName }:`,
+				`Failed to unregister block ${ metadata.name }:`,
 				error
 			);
 		}
@@ -247,8 +252,7 @@ export class BlockRegistrationManager {
 		config: ProductBlockConfig< T >
 	): void {
 		const {
-			blockName,
-			settings,
+			metadata,
 			isVariationBlock,
 			variationName,
 			isAvailableOnPostEditor,
@@ -256,7 +260,7 @@ export class BlockRegistrationManager {
 
 		try {
 			// Check if block is already registered
-			const key = variationName || blockName;
+			const key = variationName || metadata.name;
 			if ( this.hasAttemptedRegistration( key ) ) {
 				return;
 			}
@@ -269,31 +273,53 @@ export class BlockRegistrationManager {
 			}
 
 			if ( isVariationBlock ) {
-				registerBlockVariation(
-					blockName,
-					settings as BlockVariation< BlockAttributes >
-				);
+				registerBlockVariation( metadata.name, {
+					...metadata,
+					name: variationName || metadata.name,
+				} as BlockVariation< BlockAttributes > );
 			} else {
-				const ancestor = isEmpty( settings?.ancestor )
+				const ancestor = isEmpty( metadata?.ancestor )
 					? [ 'woocommerce/single-product' ]
-					: settings?.ancestor;
+					: metadata?.ancestor;
 
 				// Only remove ancestor if we're in site editor AND in single-product template
 				const shouldRemoveAncestor =
 					editSiteStore &&
 					this.currentTemplateId?.includes( 'single-product' );
 
-				// @ts-expect-error - blockName can be either string or object
-				registerBlockType( blockName, {
+				const {
+					title,
+					description,
+					keywords,
+					styles,
+					variations,
+					...settings
+				} = metadata;
+
+				const registeredBlock = registerBlockType( metadata, {
 					...settings,
 					ancestor: shouldRemoveAncestor ? undefined : ancestor,
+				} );
+
+				this.blocks.set( key, {
+					...config,
+					metadata: {
+						...metadata,
+						title: registeredBlock?.title ?? metadata.title,
+						description:
+							registeredBlock?.description ??
+							metadata.description,
+					},
 				} );
 			}
 
 			this.attemptedRegisteredBlocks.add( key );
 		} catch ( error ) {
 			// eslint-disable-next-line no-console
-			console.error( `Failed to register block ${ blockName }:`, error );
+			console.error(
+				`Failed to register block ${ metadata.name }:`,
+				error
+			);
 		}
 	}
 
@@ -307,11 +333,20 @@ export class BlockRegistrationManager {
 	public registerBlockConfig< T extends BlockAttributes >(
 		config: ProductBlockConfig< T >
 	): void {
-		const key = config.variationName || config.blockName;
+		const key = config.variationName || config.metadata.name;
 		this.blocks.set( key, config as ProductBlockConfig< BlockAttributes > );
 		this.registerBlock( config );
 	}
 }
+/**
+ * Checks that block metadata includes a non-empty name.
+ *
+ * @param metadata - Block metadata to validate.
+ */
+const hasBlockName = < T extends BlockAttributes >(
+	metadata: BlockConfiguration< T >
+): metadata is BlockConfiguration< T > & { name: string } =>
+	typeof metadata?.name === 'string';
 
 /**
  * Registers a block type specifically for WooCommerce product templates and optionally makes it available
@@ -335,8 +370,8 @@ export class BlockRegistrationManager {
  * the block available in regular post editing contexts as well where ancestor constraints are enforced.
  *
  * @template T Extends BlockAttributes to define the block's attribute types
- * @param {string | Partial<BlockConfiguration<T>>}               blockNameOrMetadata - Either a string block name or block metadata object
- * @param {ProductBlockRegistrationConfig<BlockConfiguration<T>>} [settings]          - Optional settings for block registration
+ * @param {BlockConfiguration<T>}                                 metadata   - Block metadata and runtime settings
+ * @param {ProductBlockRegistrationConfig<BlockConfiguration<T>>} [settings] - Optional settings for block registration
  * @return {void}
  *
  * @example
@@ -353,15 +388,10 @@ export class BlockRegistrationManager {
  * ```
  */
 export const registerProductBlockType = < T extends BlockAttributes >(
-	blockNameOrMetadata: string | Partial< BlockConfiguration< T > >,
+	metadata: BlockConfiguration< T >,
 	settings?: ProductBlockRegistrationConfig< BlockConfiguration< T > >
 ): void => {
-	const blockName =
-		typeof blockNameOrMetadata === 'string'
-			? blockNameOrMetadata
-			: blockNameOrMetadata.name;
-
-	if ( ! blockName ) {
+	if ( ! hasBlockName( metadata ) ) {
 		// eslint-disable-next-line no-console
 		console.error(
 			'registerProductBlockType: Block name is required for registration'
@@ -369,31 +399,11 @@ export const registerProductBlockType = < T extends BlockAttributes >(
 		return;
 	}
 
-	// If blockNameOrMetadata is an object, use all its properties except 'name' as settings
-	const metaDataWithoutName =
-		typeof blockNameOrMetadata === 'string'
-			? {}
-			: ( ( { name, ...metadata } ) => metadata )( blockNameOrMetadata );
-
-	// Extract settings without custom properties
-	const {
-		isVariationBlock,
-		variationName,
-		isAvailableOnPostEditor,
-		...settingsWithoutCustomProperties
-	} = {
-		...metaDataWithoutName,
-		...( settings || {} ),
-	};
-
 	const internalConfig: ProductBlockConfig< T > = {
-		blockName,
-		settings: {
-			...settingsWithoutCustomProperties,
-		} as BlockConfiguration< T >,
-		isVariationBlock: isVariationBlock ?? false,
-		variationName: variationName ?? undefined,
-		isAvailableOnPostEditor: isAvailableOnPostEditor ?? false,
+		metadata,
+		isVariationBlock: settings?.isVariationBlock ?? false,
+		variationName: settings?.variationName ?? undefined,
+		isAvailableOnPostEditor: settings?.isAvailableOnPostEditor ?? false,
 	};
 
 	BlockRegistrationManager.getInstance().registerBlockConfig(

@@ -54,8 +54,12 @@ type RegisterProductBlockType =
 
 const blockSettings = {
 	title: 'Test product block',
-	category: 'woocommerce',
-} as Partial< BlockConfiguration >;
+	category: 'text',
+	apiVersion: 3,
+	attributes: {},
+	edit: () => null,
+	save: () => null,
+} satisfies BlockConfiguration;
 
 const loadRegistrationFunction = (): RegisterProductBlockType => {
 	let registerProductBlockType: RegisterProductBlockType | undefined;
@@ -76,7 +80,7 @@ const loadRegistrationFunction = (): RegisterProductBlockType => {
 describe( 'registerProductBlockType', () => {
 	beforeEach( () => {
 		jest.resetModules();
-		jest.clearAllMocks();
+		jest.resetAllMocks();
 		mockPostType = 'post';
 		mockTemplateSlug = '';
 		mockIsSiteEditor = false;
@@ -94,19 +98,29 @@ describe( 'registerProductBlockType', () => {
 	it( 'registers only post-editor-enabled blocks with the Single Product ancestor', () => {
 		const registerProductBlockType = loadRegistrationFunction();
 
-		registerProductBlockType( 'woocommerce/post-enabled', {
-			...blockSettings,
-			isAvailableOnPostEditor: true,
-		} );
-		registerProductBlockType( 'woocommerce/post-disabled', {
-			...blockSettings,
-			isAvailableOnPostEditor: false,
-		} );
+		registerProductBlockType(
+			{
+				...blockSettings,
+				name: 'woocommerce/post-enabled',
+			},
+			{
+				isAvailableOnPostEditor: true,
+			}
+		);
+		registerProductBlockType(
+			{
+				...blockSettings,
+				name: 'woocommerce/post-disabled',
+			},
+			{
+				isAvailableOnPostEditor: false,
+			}
+		);
 		mockContextSubscription();
 
 		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 1 );
 		expect( mockRegisterBlockType ).toHaveBeenCalledWith(
-			'woocommerce/post-enabled',
+			expect.objectContaining( { name: 'woocommerce/post-enabled' } ),
 			expect.objectContaining( {
 				ancestor: [ 'woocommerce/single-product' ],
 			} )
@@ -120,15 +134,17 @@ describe( 'registerProductBlockType', () => {
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 
-		registerProductBlockType(
-			'woocommerce/site-editor-block',
-			blockSettings
-		);
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/site-editor-block',
+		} );
 		mockContextSubscription();
 
 		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 1 );
 		expect( mockRegisterBlockType ).toHaveBeenCalledWith(
-			'woocommerce/site-editor-block',
+			expect.objectContaining( {
+				name: 'woocommerce/site-editor-block',
+			} ),
 			expect.objectContaining( {
 				ancestor: [ 'woocommerce/single-product' ],
 			} )
@@ -142,14 +158,14 @@ describe( 'registerProductBlockType', () => {
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 
-		registerProductBlockType(
-			'woocommerce/transition-block',
-			blockSettings
-		);
-		registerProductBlockType(
-			'woocommerce/transition-block',
-			blockSettings
-		);
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/transition-block',
+		} );
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/transition-block',
+		} );
 		mockContextSubscription();
 
 		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 1 );
@@ -163,7 +179,7 @@ describe( 'registerProductBlockType', () => {
 		);
 		expect( mockRegisterBlockType ).toHaveBeenNthCalledWith(
 			2,
-			'woocommerce/transition-block',
+			expect.objectContaining( { name: 'woocommerce/transition-block' } ),
 			expect.objectContaining( { ancestor: undefined } )
 		);
 
@@ -178,12 +194,111 @@ describe( 'registerProductBlockType', () => {
 		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 3 );
 		expect( mockRegisterBlockType ).toHaveBeenNthCalledWith(
 			3,
-			'woocommerce/transition-block',
+			expect.objectContaining( { name: 'woocommerce/transition-block' } ),
 			expect.objectContaining( {
 				ancestor: [ 'woocommerce/single-product' ],
 			} )
 		);
 	} );
+
+	it.each( [ 'coming-soon', 'single-product' ] )(
+		'preserves server translations when starting in the %s template and switching templates',
+		( initialTemplate ) => {
+			mockPostType = 'wp_template';
+			mockTemplateSlug = `woocommerce//${ initialTemplate }`;
+			mockIsSiteEditor = true;
+			const blockName = 'woocommerce/translated-product';
+			const translatedSettings = {
+				title: 'Prezzo prodotto',
+				description: 'Mostra il prezzo di un prodotto.',
+				keywords: [ 'prezzo' ],
+				styles: [ { name: 'default', label: 'Predefinito' } ],
+				variations: [ { name: 'sale', title: 'In offerta' } ],
+			};
+			jest.dontMock( '@wordpress/data' );
+			jest.dontMock( '@wordpress/blocks' );
+			const actualData = jest.requireActual( '@wordpress/data' );
+			const actualBlocks = jest.requireActual( '@wordpress/blocks' );
+			expect(
+				jest
+					.requireActual( '@wordpress/i18n' )
+					._x( 'Product Price', 'block title', 'woocommerce' )
+			).toBe( 'Product Price' );
+			actualBlocks.unstable__bootstrapServerSideBlockDefinitions( {
+				[ blockName ]: {
+					...blockSettings,
+					...translatedSettings,
+				},
+			} );
+
+			jest.doMock( '@wordpress/data', () => {
+				const managerData = getDataMock();
+				return {
+					...actualData,
+					subscribe: managerData.subscribe,
+					select: ( store: string ) =>
+						store === 'core/editor' || store === 'core/edit-site'
+							? managerData.select( store )
+							: actualData.select( store ),
+				};
+			} );
+			jest.doMock( '@wordpress/blocks', () => {
+				mockRegisterBlockType.mockImplementation(
+					actualBlocks.registerBlockType
+				);
+				mockUnregisterBlockType.mockImplementation(
+					actualBlocks.unregisterBlockType
+				);
+				return {
+					...actualBlocks,
+					registerBlockType: mockRegisterBlockType,
+					unregisterBlockType: mockUnregisterBlockType,
+				};
+			} );
+
+			const registerProductBlockType = loadRegistrationFunction();
+			const metadata = {
+				...blockSettings,
+				name: blockName,
+				textdomain: 'woocommerce',
+				title: 'Product Price',
+				description: 'Display the price of a product.',
+				keywords: [ 'price' ],
+				styles: [ { name: 'default', label: 'Default' } ],
+				variations: [ { name: 'sale', title: 'On sale' } ],
+			};
+			registerProductBlockType( metadata );
+			mockContextSubscription();
+			registerProductBlockType( { ...metadata } );
+
+			const { getBlockType } = jest.requireMock( '@wordpress/blocks' );
+			for ( const template of [
+				'single-product',
+				'coming-soon',
+				'single-product',
+			] ) {
+				mockTemplateSlug = `woocommerce//${ template }`;
+				mockTemplateSubscription();
+				expect( getBlockType( blockName ) ).toEqual(
+					expect.objectContaining( {
+						...translatedSettings,
+						variations: [
+							expect.objectContaining(
+								translatedSettings.variations[ 0 ]
+							),
+						],
+						edit: metadata.edit,
+						save: metadata.save,
+						ancestor:
+							template === 'single-product'
+								? undefined
+								: [ 'woocommerce/single-product' ],
+					} )
+				);
+			}
+			expect( metadata.title ).toBe( 'Product Price' );
+		}
+	);
 
 	it( 're-registers variations when the template context changes', () => {
 		mockPostType = 'wp_template';
@@ -191,14 +306,17 @@ describe( 'registerProductBlockType', () => {
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 		const variationSettings = {
-			name: 'related-products',
 			title: 'Related products',
 			isVariationBlock: true,
 			variationName: 'related-products',
 		};
 
 		registerProductBlockType(
-			'woocommerce/product-query',
+			{
+				...blockSettings,
+				name: 'woocommerce/product-query',
+				title: 'Related products',
+			},
 			variationSettings
 		);
 		mockContextSubscription();

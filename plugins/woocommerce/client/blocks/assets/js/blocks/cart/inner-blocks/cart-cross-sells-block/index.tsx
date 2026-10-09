@@ -35,9 +35,7 @@ export const createCrossSellsProductCollection = () => {
 };
 
 // @ts-expect-error - blockName can be either string or object
-registerBlockType( 'woocommerce/cart-cross-sells-block', {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
