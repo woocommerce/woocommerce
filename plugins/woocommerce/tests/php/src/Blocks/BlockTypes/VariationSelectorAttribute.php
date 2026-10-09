@@ -6,8 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use WC_Unit_Test_Case;
 
 /**
@@ -16,24 +15,15 @@ use WC_Unit_Test_Case;
 class VariationSelectorAttribute extends WC_Unit_Test_Case {
 
 	/**
-	 * Tracks whether blocks have been registered.
-	 *
-	 * @var bool
-	 */
-	protected static $are_blocks_registered = false;
-
-	/**
 	 * Register blocks required for do_blocks tests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		if ( ! self::$are_blocks_registered && ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options-variation-selector-attribute' ) ) {
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-		}
-
-		self::$are_blocks_registered = true;
+		AddToCartWithOptionsMocks::register(
+			'add-to-cart-with-options-variation-selector-attribute',
+			'add-to-cart-with-options-variation-selector-attribute-name'
+		);
 	}
 
 	/**
