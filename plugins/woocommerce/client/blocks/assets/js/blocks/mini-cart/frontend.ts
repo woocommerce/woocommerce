@@ -164,7 +164,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 	container
 		? Array.from(
 				container.querySelectorAll< HTMLElement >( focusableSelectors )
-		  ).filter( ( el ) => el.offsetParent !== null )
+			).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
@@ -223,10 +223,10 @@ store< MiniCart >(
 
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
+						parseInt(
 							woocommerceState.cart.totals.total_items_tax,
 							10
-					  )
+						)
 					: parseInt( woocommerceState.cart.totals.total_items, 10 );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
@@ -725,7 +725,7 @@ const { state: cartItemState } = store(
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
+						parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
 				const price = formatPriceWithCurrency(
@@ -775,16 +775,18 @@ const { state: cartItemState } = store(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
-							filterName: 'showRemoveItemLink',
-							defaultValue: true,
-							extensions: cartItemState.cartItem.extensions,
-							arg: {
-								context: 'cart',
-								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
-							},
-					  } )
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'showRemoveItemLink',
+								defaultValue: true,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						)
 					: true;
 			},
 

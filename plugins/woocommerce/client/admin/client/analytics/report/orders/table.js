@@ -273,6 +273,7 @@ class OrdersReportTable extends Component {
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 			{
+				// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 				label: _n(
 					' Customer',
 					' Customers',

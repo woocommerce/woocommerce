@@ -147,7 +147,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 												{ typeof item.label === 'string'
 													? decodeHtmlEntities(
 															item.label
-													  )
+														)
 													: item.label }
 											</span>
 											{ item.count !== undefined && (
