@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -137,9 +138,27 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['date_query'][] = $modified_date_query;
 		}
 
-		$results = wc_get_orders( $args );
-		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
-		$orders  = array_values(
+		$extension_args = AbilityExtensions::get_query_args( 'order', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		// The posts storage does not support a meta_query argument, so the clauses go into the WP_Query arguments.
+		$add_extension_args = static function ( array $query_args ) use ( $extension_args ): array {
+			return array_merge_recursive( $query_args, $extension_args );
+		};
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$args = $add_extension_args( $args );
+		} else {
+			add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $add_extension_args );
+		}
+		try {
+			$results = wc_get_orders( $args );
+		} finally {
+			remove_filter( 'woocommerce_order_data_store_cpt_get_orders_query', $add_extension_args );
+		}
+		$orders = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
+		$orders = array_values(
 			array_filter(
 				$orders,
 				static function ( $order ): bool {
@@ -147,7 +166,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				}
 			)
 		);
-		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
+		$pages  = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
 		return array(
 			'orders'      => array_map(
@@ -182,7 +201,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
@@ -267,6 +286,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return AbilityExtensions::add_query_filters_schema( $schema, 'order' );
 	}
 
 	/**

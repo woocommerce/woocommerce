@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -127,7 +128,21 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['s'] = wc_clean( $input['search'] );
 		}
 
-		$results  = wc_get_products( $args );
+		$extension_args = AbilityExtensions::get_query_args( 'product', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		// wc_get_products() ignores a meta_query argument, so the clauses go into the WP_Query arguments.
+		$add_extension_args = static function ( array $wp_query_args ) use ( $extension_args ): array {
+			return array_merge_recursive( $wp_query_args, $extension_args );
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $add_extension_args );
+		try {
+			$results = wc_get_products( $args );
+		} finally {
+			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $add_extension_args );
+		}
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 
@@ -164,7 +179,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
@@ -207,5 +222,6 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return AbilityExtensions::add_query_filters_schema( $schema, 'product' );
 	}
 }
