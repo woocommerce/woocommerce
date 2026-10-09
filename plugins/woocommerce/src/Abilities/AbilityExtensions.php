@@ -94,23 +94,23 @@ class AbilityExtensions {
 	 * @since 11.3.0
 	 *
 	 * @param array<string, mixed> $output   Formatted object.
-	 * @param string               $resource Resource.
+	 * @param string               $resource_name Resource.
 	 * @param object               $subject  Object to read.
 	 * @return array<string, mixed>
 	 */
-	public static function add_to_output( array $output, string $resource, $subject ): array {
+	public static function add_to_output( array $output, string $resource_name, $subject ): array {
 		if ( ! AbilityContracts::is_enabled() ) {
 			return $output;
 		}
 
 		$extensions = array();
-		foreach ( self::$fields[ $resource ] ?? array() as $namespace => $fields ) {
+		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
 					wc_get_logger()->error(
-						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $namespace, $field, $resource, $e->getMessage() ),
+						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $namespace, $field, $resource_name, $e->getMessage() ),
 						array( 'source' => 'ability-extensions' )
 					);
 					continue;
@@ -134,10 +134,10 @@ class AbilityExtensions {
 	 * @since 11.3.0
 	 *
 	 * @param array<string, mixed> $schema   Object schema.
-	 * @param string               $resource Resource.
+	 * @param string               $resource_name Resource.
 	 * @return array<string, mixed>
 	 */
-	public static function add_to_schema( array $schema, string $resource ): array {
+	public static function add_to_schema( array $schema, string $resource_name ): array {
 		if ( ! AbilityContracts::is_enabled() ) {
 			return $schema;
 		}
@@ -146,7 +146,7 @@ class AbilityExtensions {
 			'type'        => 'object',
 			'description' => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
 		);
-		foreach ( self::$fields[ $resource ] ?? array() as $namespace => $fields ) {
+		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
 			$extensions['properties'][ $namespace ] = array(
 				'type'       => 'object',
 				'properties' => array_map(
