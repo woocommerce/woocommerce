@@ -48,11 +48,11 @@ final class ContractsController extends WP_REST_Controller {
 	private $rest_permissions;
 
 	/**
-	 * Action resolutions per request, so the callback reuses what the permission check read.
+	 * Run resolutions per request, so the callback reuses what the permission check read.
 	 *
-	 * @var SplObjectStorage<WP_REST_Request, array{contract: ContractView, actions: array<int, ContractActionDefinition>}|WP_Error>
+	 * @var SplObjectStorage<WP_REST_Request, array{contract: ContractView, definition: ContractActionDefinition}|WP_Error>
 	 */
-	private $resolved_actions;
+	private $resolved_runs;
 
 	/**
 	 * Build the controller.
@@ -61,7 +61,7 @@ final class ContractsController extends WP_REST_Controller {
 		$this->namespace        = self::REST_NAMESPACE;
 		$this->rest_base        = self::REST_BASE;
 		$this->rest_permissions = new RESTPermissions();
-		$this->resolved_actions = new SplObjectStorage();
+		$this->resolved_runs    = new SplObjectStorage();
 	}
 
 	/**
@@ -115,7 +115,7 @@ final class ContractsController extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_actions' ),
-					'permission_callback' => array( $this, 'actions_permissions_check' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'action' => array(
 							'description' => __( 'Only list this action.', 'woocommerce-subscriptions-engine' ),
@@ -126,7 +126,7 @@ final class ContractsController extends WP_REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'run_action' ),
-					'permission_callback' => array( $this, 'actions_permissions_check' ),
+					'permission_callback' => array( $this, 'run_action_permissions_check' ),
 					'args'                => array(
 						'action'         => array(
 							'description' => __( 'Action to run.', 'woocommerce-subscriptions-engine' ),
@@ -163,39 +163,48 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Logged-in users with at least one permitted action on the contract. Anything else that is
-	 * not a 401 is the same 404, so a caller cannot probe for contracts it may not act on.
+	 * Check whether the current user may run the requested action on the contract. Anything
+	 * that is not a 401 is the same 404, so a caller cannot probe for contracts it may not act on.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
 	 */
-	public function actions_permissions_check( $request ) {
+	public function run_action_permissions_check( $request ) {
 		$logged_in = $this->rest_permissions->require_logged_in_permission();
 		if ( true !== $logged_in ) {
 			return $logged_in;
 		}
 
-		$resolved = $this->resolve_permitted_actions( $request );
+		$resolved = $this->resolve_run( $request );
 
 		return $resolved instanceof WP_Error ? $resolved : true;
 	}
 
 	/**
-	 * List the permitted actions that are available for the contract now, with their resolved args.
+	 * List the actions the contract's owner registered that are available for it now, with their
+	 * resolved args.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_actions( $request ) {
-		$resolved = $this->resolve_permitted_actions( $request );
-		if ( $resolved instanceof WP_Error ) {
-			return $resolved;
+		$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		if ( null === $contract ) {
+			return $this->get_not_found_error();
 		}
 
-		$contract = $resolved['contract'];
-		$actions  = array();
+		$extension_slug = (string) $contract->get_extension_slug();
+		$action         = $request->get_param( 'action' );
+		if ( null === $action ) {
+			$definitions = ContractActionRegistry::get_for_extension( $extension_slug );
+		} else {
+			$definition  = is_string( $action ) ? ContractActionRegistry::get( $extension_slug, $action ) : null;
+			$definitions = null === $definition ? array() : array( $definition );
+		}
+
+		$actions = array();
 		try {
-			foreach ( $resolved['actions'] as $definition ) {
+			foreach ( $definitions as $definition ) {
 				if ( ! ContractActionRegistry::is_available( $definition, $contract ) ) {
 					continue;
 				}
@@ -222,13 +231,13 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function run_action( $request ) {
-		$resolved = $this->resolve_permitted_actions( $request );
+		$resolved = $this->resolve_run( $request );
 		if ( $resolved instanceof WP_Error ) {
 			return $resolved;
 		}
 
 		$contract   = $resolved['contract'];
-		$definition = $resolved['actions'][0];
+		$definition = $resolved['definition'];
 		try {
 			if ( ! ContractActionRegistry::is_available( $definition, $contract ) ) {
 				return new WP_Error(
@@ -278,11 +287,7 @@ final class ContractsController extends WP_REST_Controller {
 	public function get_item( $request ) {
 		$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
 		if ( null === $contract ) {
-			return new WP_Error(
-				'woocommerce_subscriptions_engine_contract_not_found',
-				__( 'Contract not found.', 'woocommerce-subscriptions-engine' ),
-				array( 'status' => 404 )
-			);
+			return $this->get_not_found_error();
 		}
 
 		return $this->prepare_item_for_response( $contract, $request );
@@ -388,72 +393,58 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * The contract and the actions the current user may run on it (all, or the requested one),
+	 * The contract and the requested action, once the current user is permitted to run it;
 	 * resolved once per request. Unknown contract, wrong `extension_slug`, unknown action and
 	 * no permission are the same 404.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return array{contract: ContractView, actions: array<int, ContractActionDefinition>}|WP_Error
+	 * @return array{contract: ContractView, definition: ContractActionDefinition}|WP_Error
 	 */
-	private function resolve_permitted_actions( WP_REST_Request $request ) {
-		if ( ! isset( $this->resolved_actions[ $request ] ) ) {
+	private function resolve_run( WP_REST_Request $request ) {
+		if ( ! isset( $this->resolved_runs[ $request ] ) ) {
 			try {
-				$this->resolved_actions[ $request ] = $this->get_permitted_actions( $request );
+				$this->resolved_runs[ $request ] = $this->get_permitted_run( $request );
 			} catch ( Throwable $e ) {
-				$this->resolved_actions[ $request ] = $this->get_action_failed_error( $e, $request );
+				$this->resolved_runs[ $request ] = $this->get_action_failed_error( $e, $request );
 			}
 		}
 
-		return $this->resolved_actions[ $request ];
+		return $this->resolved_runs[ $request ];
 	}
 
 	/**
-	 * Read the contract and filter its owner's actions down to the permitted ones.
+	 * Read the contract and the requested action of its owner, and check the user may run it.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return array{contract: ContractView, actions: array<int, ContractActionDefinition>}|WP_Error
+	 * @return array{contract: ContractView, definition: ContractActionDefinition}|WP_Error
 	 */
-	private function get_permitted_actions( WP_REST_Request $request ) {
-		$not_found = new WP_Error(
-			'woocommerce_subscriptions_engine_contract_not_found',
-			__( 'Contract not found.', 'woocommerce-subscriptions-engine' ),
-			array( 'status' => 404 )
-		);
-
+	private function get_permitted_run( WP_REST_Request $request ) {
 		$contract       = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
-		$extension_slug = null === $contract ? null : $contract->get_extension_slug();
-		if ( null === $contract || null === $extension_slug ) {
-			return $not_found;
+		$extension_slug = $request->get_param( 'extension_slug' );
+		$action         = $request->get_param( 'action' );
+		if ( null === $contract || ! is_string( $extension_slug ) || $contract->get_extension_slug() !== $extension_slug || ! is_string( $action ) ) {
+			return $this->get_not_found_error();
 		}
 
-		$is_run = 'POST' === $request->get_method();
-		if ( $is_run && $request->get_param( 'extension_slug' ) !== $extension_slug ) {
-			return $not_found;
-		}
-
-		// Only discovery lists every action; a run always names exactly one.
-		$action = $request->get_param( 'action' );
-		if ( ! $is_run && null === $action ) {
-			$definitions = ContractActionRegistry::get_for_extension( $extension_slug );
-		} else {
-			$definition  = is_string( $action ) ? ContractActionRegistry::get( $extension_slug, $action ) : null;
-			$definitions = null === $definition ? array() : array( $definition );
-		}
-
-		$permitted = array();
-		foreach ( $definitions as $candidate ) {
-			if ( ContractActionRegistry::is_permitted( $candidate, $contract, $request ) ) {
-				$permitted[] = $candidate;
-			}
-		}
-
-		if ( array() === $permitted ) {
-			return $not_found;
+		$definition = ContractActionRegistry::get( $extension_slug, $action );
+		if ( null === $definition || ! ContractActionRegistry::is_permitted( $definition, $contract, $request ) ) {
+			return $this->get_not_found_error();
 		}
 
 		return array(
-			'contract' => $contract,
-			'actions'  => $permitted,
+			'contract'   => $contract,
+			'definition' => $definition,
+		);
+	}
+
+	/**
+	 * The 404 for an unknown contract, also returned for a contract or action the caller may not see.
+	 */
+	private function get_not_found_error(): WP_Error {
+		return new WP_Error(
+			'woocommerce_subscriptions_engine_contract_not_found',
+			__( 'Contract not found.', 'woocommerce-subscriptions-engine' ),
+			array( 'status' => 404 )
 		);
 	}
 

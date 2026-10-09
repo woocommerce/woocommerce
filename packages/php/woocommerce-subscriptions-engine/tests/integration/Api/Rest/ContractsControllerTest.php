@@ -191,10 +191,12 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$request->set_url_params( array( 'id' => (string) $contract->get_id() ) );
 		$request->set_body_params( array( 'extension_slug' => self::EXTENSION_SLUG ) );
 
-		$result = ( new ContractsController() )->actions_permissions_check( $request );
+		$result = ( new ContractsController() )->run_action_permissions_check( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 404, $result->get_error_data()['status'] ?? null );
+		$error_data = $result->get_error_data();
+		$this->assertIsArray( $error_data );
+		$this->assertSame( 404, $error_data['status'] ?? null );
 		$this->assertSame( array(), $this->calls );
 	}
 
@@ -512,15 +514,14 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Discovery lists the permitted actions available now; `?action=` narrows to one.
+	 * Discovery lists the owner's available actions to a store manager, whatever their permission.
 	 */
-	public function test_discovery_lists_permitted_available_actions(): void {
-		$customer_id = $this->create_user( 'customer' );
-		$contract    = $this->create_contract( $customer_id );
+	public function test_discovery_lists_available_actions(): void {
+		$contract = $this->create_contract( $this->create_user( 'customer' ) );
 		$this->register_action( 'pause', 'customer', array( 'description' => 'Pause deliveries.' ) );
 		$this->register_action( 'resume', 'customer', array( 'is_available' => '__return_false' ) );
-		$this->register_action( 'refund', 'manager' );
-		wp_set_current_user( $customer_id );
+		$this->register_action( 'refund', '__return_false' );
+		wp_set_current_user( $this->create_user( 'administrator' ) );
 
 		$response = $this->list_actions( $contract->get_id() );
 
@@ -534,26 +535,32 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 						'description'    => 'Pause deliveries.',
 						'args'           => new \stdClass(),
 					),
+					array(
+						'action'         => 'refund',
+						'extension_slug' => self::EXTENSION_SLUG,
+						'description'    => '',
+						'args'           => new \stdClass(),
+					),
 				),
 			),
 			$response->get_data()
 		);
 		$this->assertStringContainsString( '"args":{}', (string) wp_json_encode( $response->get_data() ), 'No args encode as an empty JSON object.' );
 		$this->assertSame( array( 'actions' => array() ), $this->list_actions( $contract->get_id(), 'resume' )->get_data() );
-		$this->assertSame( 404, $this->list_actions( $contract->get_id(), 'refund' )->get_status() );
-		$this->assertSame( 404, $this->list_actions( $contract->get_id(), 'unknown' )->get_status() );
+		$this->assertSame( array( 'actions' => array() ), $this->list_actions( $contract->get_id(), 'unknown' )->get_data() );
+		$this->assertSame( 404, $this->list_actions( 999999 )->get_status() );
 	}
 
 	/**
-	 * Discovery is a 404 for an unknown contract and for one the caller has no permitted action on.
+	 * Discovery needs a store manager, like the contract read.
 	 */
-	public function test_discovery_hides_contracts_the_caller_cannot_act_on(): void {
+	public function test_discovery_requires_a_store_manager(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
 		$this->register_action( 'pause', 'customer' );
-		$foreign = $this->create_contract( $this->create_user( 'customer' ) );
-		wp_set_current_user( $this->create_user( 'customer' ) );
+		wp_set_current_user( $customer_id );
 
-		$this->assertSame( 404, $this->list_actions( 999999 )->get_status() );
-		$this->assertSame( 404, $this->list_actions( $foreign->get_id() )->get_status() );
+		$this->assertSame( 403, $this->list_actions( $contract->get_id() )->get_status() );
 	}
 
 	/**
