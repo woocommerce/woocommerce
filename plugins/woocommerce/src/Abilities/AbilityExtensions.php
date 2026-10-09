@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * `woocommerce_ability_extensions_init` action. An ability that formats an
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
+ * An ActionableAbility writes the same `extensions` input to the fields that
+ * have an `update_callback`, and saves the object one time.
  *
  * The API is experimental while the `ability_contracts` feature exists.
  *
@@ -58,6 +60,13 @@ class AbilityExtensions {
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
 	 *                                  keeps it. It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
+	 *     @type callable $update_callback Optional. Receives the object and the value, and changes the object
+	 *                                     in memory. It returns a WP_Error to reject the value, and then
+	 *                                     nothing is saved. A field without it cannot be written. Rules:
+	 *                                     1. It only sets values in memory. It does not save, send email
+	 *                                        or make HTTP requests.
+	 *                                     2. It receives the value already cast to the field schema.
+	 *                                     3. A null value deletes the value of the field.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -73,6 +82,10 @@ class AbilityExtensions {
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
+		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -160,6 +173,128 @@ class AbilityExtensions {
 		}
 		$schema['properties']['extensions'] = $extensions;
 		return $schema;
+	}
+
+	/**
+	 * Write `extensions.<namespace>.<field>` input values to an object in memory
+	 * with the update_callback of each field. Every value is checked and cast to
+	 * its field schema before the first callback runs. A null value is passed
+	 * as is, to delete the value. Nothing happens when the feature is off.
+	 *
+	 * @internal
+	 *
+	 * @param array<string, mixed> $values        Values keyed by namespace, then field.
+	 * @param string               $resource_name Resource.
+	 * @param object               $subject       Object to change.
+	 * @return \WP_Error|null A WP_Error when a value is rejected.
+	 */
+	public static function update_fields_for_object( array $values, string $resource_name, $subject ): ?\WP_Error {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return null;
+		}
+
+		$updates = array();
+		foreach ( $values as $namespace => $fields ) {
+			foreach ( (array) $fields as $field => $value ) {
+				$args = self::$fields[ $resource_name ][ $namespace ][ $field ] ?? array();
+				if ( ! isset( $args['update_callback'] ) ) {
+					return new \WP_Error(
+						'woocommerce_ability_field_not_writable',
+						/* translators: 1: Extension namespace. 2: Field name. */
+						sprintf( __( 'The extension field "%1$s.%2$s" cannot be written.', 'woocommerce' ), $namespace, $field ),
+						array( 'status' => 400 )
+					);
+				}
+				if ( null !== $value ) {
+					$param = 'extensions.' . $namespace . '.' . $field;
+					$valid = rest_validate_value_from_schema( $value, $args['schema'], $param );
+					if ( is_wp_error( $valid ) ) {
+						return self::with_status( $valid );
+					}
+					$value = rest_sanitize_value_from_schema( $value, $args['schema'], $param );
+				}
+				$updates[] = array( $args['update_callback'], $value );
+			}
+		}
+
+		foreach ( $updates as list( $callback, $value ) ) {
+			$updated = call_user_func( $callback, $subject, $value );
+			if ( is_wp_error( $updated ) ) {
+				return self::with_status( $updated );
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Add the `extensions` property to an input schema when the feature is on.
+	 * It lists the fields that have an update_callback, and allows null for
+	 * each one. A schema with `oneOf` gets the property in each branch.
+	 *
+	 * @internal
+	 *
+	 * @param array<string, mixed> $schema        Input schema.
+	 * @param string               $resource_name Resource.
+	 * @return array<string, mixed>
+	 */
+	public static function add_fields_input_schema( array $schema, string $resource_name ): array {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $schema;
+		}
+
+		$extensions = array(
+			'type'                 => 'object',
+			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
+			'additionalProperties' => false,
+		);
+		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+			$writable = array_filter(
+				$fields,
+				static function ( array $args ): bool {
+					return isset( $args['update_callback'] );
+				}
+			);
+			if ( empty( $writable ) ) {
+				continue;
+			}
+			$extensions['properties'][ $namespace ] = array(
+				'type'                 => 'object',
+				'properties'           => array_map(
+					static function ( array $args ): array {
+						$field_schema = $args['schema'];
+						if ( isset( $field_schema['type'] ) ) {
+							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
+						}
+						return $field_schema;
+					},
+					$writable
+				),
+				'additionalProperties' => false,
+			);
+		}
+
+		if ( isset( $schema['oneOf'] ) ) {
+			foreach ( array_keys( $schema['oneOf'] ) as $index ) {
+				$schema['oneOf'][ $index ]['properties']['extensions'] = $extensions;
+			}
+		} else {
+			$schema['properties']['extensions'] = $extensions;
+		}
+		return $schema;
+	}
+
+	/**
+	 * Give an error the 400 status when it has none.
+	 *
+	 * @param \WP_Error $error Error.
+	 * @return \WP_Error
+	 */
+	private static function with_status( \WP_Error $error ): \WP_Error {
+		$data = $error->get_error_data();
+		if ( ! isset( $data['status'] ) ) {
+			$error->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
+		}
+		return $error;
 	}
 
 	/**
