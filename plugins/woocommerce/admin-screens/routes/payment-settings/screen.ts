@@ -16,6 +16,7 @@ export interface PaymentSettingsScreen {
 	id: string;
 	title: string;
 	entity: { kind: string; name: string; baseURL: string };
+	classicUrl: string | null;
 }
 
 export interface ScreenDefinition {
