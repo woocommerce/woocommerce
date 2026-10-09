@@ -16,6 +16,8 @@ Use the `woocommerce_store_api_cart_item_parent_item_key` filter. It runs for ea
 
 For a child item your extension added, return the parent's cart item key. This is the key that `WC()->cart->add_to_cart()` returned when the parent was added, not a product ID. Your extension needs to store it, usually in the child's cart item data.
 
+WooCommerce returns `null` instead if the key you return is the item's own key, because an item can't be its own parent.
+
 For any other item, return `$parent_item_key` unchanged so you don't erase a parent declared by another extension.
 
 See the [generated filter reference](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_store_api_cart_item_parent_item_key) for the full signature.

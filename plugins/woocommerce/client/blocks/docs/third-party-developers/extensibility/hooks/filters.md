@@ -1748,7 +1748,7 @@ apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', string|null $p
 
 ### Description
 
-Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the current cart also becomes null. A line with no declared parent counts as a standalone line. Callbacks that declare no parent for a line should return the value unchanged.
+Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the current cart, or the line's own key, also becomes null. A line with no declared parent counts as a standalone line. Callbacks that declare no parent for a line should return the value unchanged.
 
 ### Parameters
 

@@ -500,6 +500,29 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox The parent item key filter cannot declare a cart line as its own parent.
+	 */
+	public function test_parent_item_key_is_null_when_key_is_the_line_own_key(): void {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart_item  = current( WC()->cart->get_cart() );
+
+		add_filter(
+			'woocommerce_store_api_cart_item_parent_item_key',
+			static function ( $parent_item_key, $cart_item, $cart_item_key ) {
+				unset( $parent_item_key, $cart_item ); // Avoid parameter not used PHPCS errors.
+				return $cart_item_key;
+			},
+			10,
+			3
+		);
+
+		$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
+
+		$this->assertNull( $response->get_data()['parent_item_key'] );
+	}
+
+	/**
 	 * `raw_key` gives extensions a name to match on that is never translated.
 	 *
 	 * @testdox Cart item_data publishes raw_key and it matches the schema.

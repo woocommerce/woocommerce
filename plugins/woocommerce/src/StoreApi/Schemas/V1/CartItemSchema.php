@@ -118,8 +118,8 @@ class CartItemSchema extends ItemSchema {
 		 * Filter to declare the parent cart item of a cart line.
 		 *
 		 * Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the
-		 * current cart also becomes null. A line with no declared parent counts as a standalone line. Callbacks that
-		 * declare no parent for a line should return the value unchanged.
+		 * current cart, or the line's own key, also becomes null. A line with no declared parent counts as a standalone
+		 * line. Callbacks that declare no parent for a line should return the value unchanged.
 		 *
 		 * @since 11.3.0
 		 * @see https://github.com/woocommerce/woocommerce/blob/trunk/docs/apis/store-api/extending-store-api/extend-store-api-parent-item.md
@@ -131,7 +131,7 @@ class CartItemSchema extends ItemSchema {
 		 */
 		$parent_item_key = apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', null, $cart_item, $cart_item['key'] );
 
-		if ( ! is_string( $parent_item_key ) || '' === $parent_item_key ) {
+		if ( ! is_string( $parent_item_key ) || '' === $parent_item_key || $cart_item['key'] === $parent_item_key ) {
 			return null;
 		}
 
