@@ -2143,6 +2143,9 @@ class WC_Helper {
 
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$is_ajax     = false !== stripos( $request_uri, 'admin-ajax.php' );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only labels the request; the ajax handler checks its own nonce.
+			$ajax_action = $is_ajax ? sanitize_text_field( wp_unslash( $_REQUEST['action'] ?? '' ) ) : '';
 			$source      = '';
 			if ( WC_Helper_API_Backoff::is_refresh_request() ) :
 				$source = 'refresh-button';
@@ -2152,7 +2155,9 @@ class WC_Helper {
 				$source = 'plugins';
 			elseif ( false !== stripos( $request_uri, 'wc-admin' ) ) :
 				$source = 'inbox-notes';
-			elseif ( false !== stripos( $request_uri, 'admin-ajax.php' ) ) :
+			elseif ( 'woocommerce_load_status_widget' === $ajax_action ) :
+				$source = 'dashboard-widget';
+			elseif ( $is_ajax ) :
 				$source = 'heartbeat-api';
 			elseif ( false !== stripos( $request_uri, 'installer' ) ) :
 				$source = 'wccom-site-installer';

@@ -362,6 +362,51 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_subscriptions labels the request with the screen it comes from.
+	 * @testWith ["/wp-admin/admin-ajax.php", "woocommerce_load_status_widget", "dashboard-widget"]
+	 *           ["/wp-admin/admin-ajax.php", "heartbeat", "heartbeat-api"]
+	 *           ["/wp-admin/admin.php?page=wc-admin", "", "inbox-notes"]
+	 *
+	 * @param string $request_uri The request URI.
+	 * @param string $action      The ajax action, if any.
+	 * @param string $expected    The source label the request should carry.
+	 */
+	public function test_get_subscriptions_labels_the_request_source( string $request_uri, string $action, string $expected ): void {
+		$previous_uri           = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		if ( '' !== $action ) {
+			$_REQUEST['action'] = $action;
+		}
+		$requested_url = '';
+		$capture       = static function ( $preempt, $args, $url ) use ( &$requested_url ) {
+			$requested_url = $url;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $capture, 9, 3 );
+
+		try {
+			$this->fetch_subscriptions_with_response(
+				array(
+					'response' => array( 'code' => 200 ),
+					'body'     => '[]',
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $capture, 9 );
+			unset( $_REQUEST['action'] );
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		parse_str( (string) wp_parse_url( $requested_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( $expected, $query['source'] ?? '', 'The source label is what WooCommerce.com attributes the request to.' );
+	}
+
+	/**
 	 * Run get_subscriptions() against a mocked Helper API response.
 	 *
 	 * @param array|WP_Error $response    The response pre_http_request should return.
