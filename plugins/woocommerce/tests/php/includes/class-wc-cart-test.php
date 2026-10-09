@@ -671,6 +671,40 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The cart template passes the cart item and its key to the backorder notification filter, so callbacks can tell variations apart.
+	 */
+	public function test_cart_template_passes_cart_item_to_backorder_notification_filter(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Backorder Variation Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 0 );
+		$variation->set_backorders( 'notify' );
+		$variation->save();
+
+		$received = array();
+		$capture  = function ( $notification, $product_id, $cart_item = null, $cart_item_key = null ) use ( &$received ) {
+			$received = array( $product_id, $cart_item, $cart_item_key );
+			return '<p class="backorder_notification">Variation ' . ( $cart_item['variation_id'] ?? 'unknown' ) . ' ships later</p>';
+		};
+		add_filter( 'woocommerce_cart_item_backorder_notification', $capture, 10, 4 );
+
+		list( $cart_item_key ) = $this->add_variation_to_cart( $product, $variation );
+
+		$html = wc_get_template_html( 'cart/cart.php' );
+
+		$this->assertSame( $product->get_id(), $received[0], 'The product ID argument stays the parent ID for backward compatibility.' );
+		$this->assertIsArray( $received[1], 'The cart item should be passed to the filter.' );
+		$this->assertSame( $variation->get_id(), $received[1]['variation_id'] );
+		$this->assertSame( $cart_item_key, $received[2] );
+		$this->assertStringContainsString( 'Variation ' . $variation->get_id() . ' ships later', $html );
+	}
+
+	/**
 	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
 	 */
 	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {
