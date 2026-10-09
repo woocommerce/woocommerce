@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow turning off "Stock notifications" for a product that has never had the setting changed.
