@@ -682,5 +682,4 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			),
 		);
 	}
-
 }
