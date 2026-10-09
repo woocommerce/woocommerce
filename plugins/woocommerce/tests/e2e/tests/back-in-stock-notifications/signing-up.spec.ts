@@ -76,9 +76,9 @@ test.describe(
 				await page.goto( product.permalink );
 				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 				await expect(
-					page.getByRole( 'heading', {
-						name: /Want to be notified when this product is back in stock\?/i,
-					} )
+					page.getByText(
+						/Want to be notified when this product is back in stock\?/i
+					)
 				).toHaveCount( 0 );
 			} );
 		} );
@@ -101,7 +101,7 @@ test.describe(
 				await page.goto( product.permalink );
 
 				await expect(
-					page.getByRole( 'heading', {
+					page.getByRole( 'form', {
 						name: /Want to be notified when this product is back in stock\?/i,
 					} )
 				).toBeVisible();
