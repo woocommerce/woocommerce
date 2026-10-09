@@ -489,7 +489,7 @@ class DataUtils {
 	 * Check a line refund against the original line and previous refunds.
 	 *
 	 * Both refund paths use this limit. The computed path passes a tax-inclusive
-	 * amount; the explicit wc/v3 path passes its supplied refund_total.
+	 * amount; the explicit wc/v3 path passes its tax-inclusive gross amount.
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Fee|WC_Order_Item_Shipping $item                  Original order item.
 	 * @param float                                                          $refund_total          Requested line item refund amount.
@@ -498,8 +498,17 @@ class DataUtils {
 	 */
 	public function validate_refund_line_total( $item, float $refund_total, float $already_refunded_total ) {
 		$price_decimals      = wc_get_price_decimals();
-		$item_total_with_tax = abs( (float) $item->get_total() + (float) $item->get_total_tax() );
+		$signed_line_total   = (float) $item->get_total() + (float) $item->get_total_tax();
+		$item_total_with_tax = abs( $signed_line_total );
 		$abs_refund_total    = abs( $refund_total );
+
+		if ( $refund_total * $signed_line_total < 0 ) {
+			return new WP_Error(
+				'invalid_refund_total',
+				__( 'Refund total has the wrong sign for this line item.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
 
 		// Mirror the preview path's three distinct over-refund errors (same
 		// codes, messages, and 422 status) so create and preview reject the

@@ -495,13 +495,20 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				}
 			}
 			$line_total += $gross_refund_total;
-			if ( 0.0 === $gross_refund_total ) {
+			if ( 0.0 === $gross_refund_total && 0.0 === (float) $line['refund_total'] ) {
 				continue;
 			}
 
 			$item = $order->get_item( $item_id );
 			if ( ! $item instanceof WC_Order_Item_Product && ! $item instanceof WC_Order_Item_Fee && ! $item instanceof WC_Order_Item_Shipping ) {
 				return new WP_Error( 'woocommerce_rest_line_item_not_found', __( 'Line item not found.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+
+			if ( (float) $line['refund_total'] * ( (float) $item->get_total() + (float) $item->get_total_tax() ) < 0 ) {
+				return new WP_Error( 'woocommerce_rest_invalid_refund_total', __( 'Refund total has the wrong sign for this line item.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			if ( 0.0 === $gross_refund_total ) {
+				continue;
 			}
 
 			if ( null === $refund_data ) {
