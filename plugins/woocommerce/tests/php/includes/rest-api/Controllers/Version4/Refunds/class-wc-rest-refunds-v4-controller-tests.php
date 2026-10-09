@@ -5,10 +5,10 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 
 /**
  * Refunds Controller tests for V4 REST API.

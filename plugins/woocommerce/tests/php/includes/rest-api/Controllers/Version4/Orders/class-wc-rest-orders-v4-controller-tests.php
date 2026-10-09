@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderCouponS
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 
 /**
  * Orders Controller tests for V4 REST API.

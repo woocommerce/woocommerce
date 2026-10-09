@@ -12,8 +12,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApiParameterUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
 /**
@@ -333,8 +333,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * Get the shared refund calculation engine.
 	 *
 	 * DataUtils is the calculation/validation engine shared with the wc/v4
-	 * refunds endpoints (the V4 segment in its namespace is historical); using
-	 * it here keeps wc/v3 and wc/v4 refund math identical.
+	 * refunds endpoints; using it here keeps wc/v3 and wc/v4 refund math
+	 * identical.
 	 *
 	 * @return DataUtils
 	 */
@@ -391,8 +391,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		// The opt-in compute_totals mode routes through the shared wc/v4 refund
-		// calculation pipeline. It is a separate path so that requests without the
+		// The opt-in compute_totals mode routes through the shared refund engine
+		// (DataUtils). It is a separate path so that requests without the
 		// flag behave exactly as before, including degenerate forms such as
 		// quantity-only line items producing a 0.00 refund. The schema declares
 		// compute_totals as boolean with a false default, so the REST layer has
