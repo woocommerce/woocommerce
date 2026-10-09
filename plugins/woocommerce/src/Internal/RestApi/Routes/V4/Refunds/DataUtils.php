@@ -500,7 +500,7 @@ class DataUtils {
 		$price_decimals      = wc_get_price_decimals();
 		$signed_line_total   = (float) $item->get_total() + (float) $item->get_total_tax();
 		$item_total_with_tax = abs( $signed_line_total );
-		$abs_refund_total    = abs( $refund_total );
+		$abs_refund_total    = NumberUtil::round( abs( $refund_total ), $price_decimals );
 
 		if ( $refund_total * $signed_line_total < 0 ) {
 			return new WP_Error(
@@ -1175,7 +1175,7 @@ class DataUtils {
 				}
 
 				$item_total_with_tax = abs( $signed_line_total );
-				$abs_refund_total    = abs( $refund_total );
+				$abs_refund_total    = NumberUtil::round( abs( $refund_total ), $price_decimals );
 				if ( $abs_refund_total > NumberUtil::round( $item_total_with_tax, $price_decimals ) ) {
 					return new WP_Error(
 						'refund_total_exceeds_line',

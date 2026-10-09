@@ -1051,6 +1051,78 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox A full-line refund with higher-precision tax is accepted at currency precision.
+	 */
+	public function test_unflagged_high_precision_tax_full_refund(): void {
+		$previous = get_option( 'woocommerce_tax_round_at_subtotal' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+		try {
+			$rate_id  = $this->create_tax_rate( 8.333 );
+			$order    = $this->create_order_with_product_and_tax( 10.00, 1, $rate_id, 0.8333 );
+			$item_id  = $this->get_first_line_item_id( $order );
+			$response = $this->do_create_request(
+				$order->get_id(),
+				array(
+					'amount'     => '10.83',
+					'line_items' => array(
+						array(
+							'id'           => $item_id,
+							'refund_total' => 10,
+							'refund_tax'   => array(
+								array(
+									'id'           => $rate_id,
+									'refund_total' => 0.8333,
+								),
+							),
+						),
+					),
+				)
+			);
+			$this->assertSame( 201, $response->get_status() );
+			$this->assertSame( '10.83', $response->get_data()['amount'] );
+
+			$partial_order = $this->create_order_with_product_and_tax( 10.00, 1, $rate_id, 0.8333 );
+			$partial_id    = $this->get_first_line_item_id( $partial_order );
+			$first         = $this->do_create_request(
+				$partial_order->get_id(),
+				array(
+					'amount'     => '5',
+					'line_items' => array(
+						array(
+							'id'           => $partial_id,
+							'refund_total' => 5,
+						),
+					),
+				)
+			);
+			$this->assertSame( 201, $first->get_status() );
+
+			$remaining = $this->do_create_request(
+				$partial_order->get_id(),
+				array(
+					'amount'     => '5.83',
+					'line_items' => array(
+						array(
+							'id'           => $partial_id,
+							'refund_total' => 5,
+							'refund_tax'   => array(
+								array(
+									'id'           => $rate_id,
+									'refund_total' => 0.8333,
+								),
+							),
+						),
+					),
+				)
+			);
+			$this->assertSame( 201, $remaining->get_status() );
+			$this->assertCount( 2, wc_get_order( $partial_order->get_id() )->get_refunds() );
+		} finally {
+			update_option( 'woocommerce_tax_round_at_subtotal', $previous );
+		}
+	}
+
+	/**
 	 * @testdox The compute_totals parameter is declared in the create schema with a false default.
 	 */
 	public function test_compute_totals_declared_in_schema(): void {
