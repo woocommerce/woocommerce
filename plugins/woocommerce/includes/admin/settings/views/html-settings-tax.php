@@ -18,10 +18,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <h3>
 	<?php
+	/** @var string $current_class_name Name of the tax class being edited, or an empty string for the standard class. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 	/* translators: %s: tax rate */
 	printf(
 		__( '"%s" tax rates', 'woocommerce' ),
-		$current_class ? esc_html( $current_class ) : __( 'Standard', 'woocommerce' )
+		'' !== $current_class_name ? esc_html( $current_class_name ) : esc_html__( 'Standard', 'woocommerce' )
 	);
 	?>
 </h3>
