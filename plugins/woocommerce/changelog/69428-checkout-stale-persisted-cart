@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show the cart the store holds on the Cart and Checkout blocks, instead of an outdated copy saved in the browser.
+Fix the Cart and Checkout blocks showing an outdated cart, such as the wrong shipping method, on sites that delay scripts.
