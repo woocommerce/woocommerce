@@ -544,4 +544,22 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $expected, trim( $result ), 'Entered as "' . $typed . '" on a comma-decimal store.' );
 	}
+
+	/**
+	 * @testdox A thousand-separated flat rate cost evaluates to its real amount, never to free.
+	 */
+	public function test_evaluate_cost_thousand_separated_amount_is_not_free(): void {
+		$sanitized = $this->call_sanitize_cost->call( $this->sut, '1.000,50' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			$sanitized,
+			array(
+				'qty'  => 1,
+				'cost' => 0,
+			)
+		);
+
+		$this->assertEquals( 1000.50, $val, 'A thousand-separated cost must charge its real amount, not fall back to free.' );
+	}
 }
