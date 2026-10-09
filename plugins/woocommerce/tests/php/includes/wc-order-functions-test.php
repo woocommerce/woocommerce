@@ -606,4 +606,29 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			'An unattributed refund should stay unattributed after a round trip through the data store.'
 		);
 	}
+
+	/**
+	 * @testdox Should show an order note's time in the current site timezone after the timezone changes.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/48953
+	 */
+	public function test_wc_get_order_note_uses_current_site_timezone(): void {
+		update_option( 'timezone_string', 'America/New_York' );
+		$note_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => WC_Helper_Order::create_order()->get_id(),
+				'comment_type'     => 'order_note',
+				'comment_content'  => 'Order status changed from Pending payment to Completed.',
+				'comment_approved' => 1,
+				'comment_date'     => '2024-06-28 11:34:05',
+				'comment_date_gmt' => '2024-06-28 15:34:05',
+			)
+		);
+
+		update_option( 'timezone_string', 'Asia/Tokyo' );
+		$note = wc_get_order_note( $note_id );
+
+		$this->assertSame( strtotime( '2024-06-28 15:34:05 UTC' ), $note->date_created->getTimestamp(), 'The note should keep the moment it was created.' );
+		$this->assertSame( '2024-06-29 00:34:05', $note->date_created->date( 'Y-m-d H:i:s' ), 'The note should be shown in the new site timezone.' );
+	}
 }
