@@ -125,8 +125,10 @@ class ProductWalker {
 	): self {
 		$query_args = array_merge(
 			array(
-				'status' => array( 'publish' ),
-				'return' => 'objects',
+				'status'  => array( 'publish' ),
+				'return'  => 'objects',
+				'orderby' => 'ID', // IDs are reliable, dates can break pagination.
+				'order'   => 'ASC',
 			),
 			$integration->get_product_feed_query_args()
 		);
