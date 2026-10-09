@@ -10,10 +10,10 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 
 	private const ACCESS_TOKEN_SECRET = 'test-access-token-secret';
 
-	private const SERVER_KEYS = array( 'REQUEST_URI', 'REQUEST_METHOD', 'HTTP_HOST', 'HTTP_AUTHORIZATION', 'HTTP_X_WOO_SIGNATURE' );
+	private const SERVER_KEYS = array( 'REQUEST_METHOD', 'HTTP_HOST', 'HTTP_AUTHORIZATION', 'HTTP_X_WOO_SIGNATURE' );
 
 	/**
-	 * $_SERVER values the test overwrites, as they were before it ran.
+	 * $_SERVER values the test overwrites, as they were before it ran. WC_Unit_Test_Case restores REQUEST_URI.
 	 *
 	 * @var array<string, mixed>
 	 */
