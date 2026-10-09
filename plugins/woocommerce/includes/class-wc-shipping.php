@@ -295,8 +295,7 @@ class WC_Shipping {
 		$cache_key     = null;
 
 		if ( $cache_enabled ) {
-			$encoded_packages = wp_json_encode( $this->packages );
-			$cache_key        = false === $encoded_packages ? null : md5( $encoded_packages );
+			$cache_key = $this->get_shipping_packages_filter_cache_key( $this->packages );
 		}
 
 		if ( null !== $cache_key && $cache_key === $this->shipping_packages_filter_cache_key ) {
@@ -321,6 +320,32 @@ class WC_Shipping {
 		$this->shipping_packages_filter_cache     = $this->packages;
 
 		return $this->packages;
+	}
+
+	/**
+	 * Get a cache key that includes mutable data objects visible to package filters.
+	 *
+	 * @param array $packages Calculated shipping packages.
+	 * @return string|null
+	 */
+	private function get_shipping_packages_filter_cache_key( array $packages ): ?string {
+		foreach ( $packages as $package_key => $package ) {
+			foreach ( (array) ( $package['contents'] ?? array() ) as $item_key => $item ) {
+				$data_object = $item['data'] ?? null;
+
+				if ( $data_object instanceof WC_Data ) {
+					$packages[ $package_key ]['contents'][ $item_key ]['data'] = array(
+						'class' => get_class( $data_object ),
+						'data'  => array_replace_recursive( $data_object->get_data(), $data_object->get_changes() ),
+					);
+				} elseif ( is_object( $data_object ) && ! $data_object instanceof JsonSerializable ) {
+					return null;
+				}
+			}
+		}
+
+		$encoded_packages = wp_json_encode( $packages );
+		return false === $encoded_packages ? null : md5( $encoded_packages );
 	}
 
 	/**

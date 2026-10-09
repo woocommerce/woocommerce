@@ -529,6 +529,32 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Changing product data invalidates the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_product_data_changes(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->set_weight( '1' );
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$product->set_weight( '2' );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Mutable product data should invalidate the memo.' );
+	}
+
+	/**
 	 * @testdox Shipping debug mode bypasses the shipping packages filter memo.
 	 */
 	public function test_calculate_shipping_does_not_memoize_in_debug_mode(): void {
