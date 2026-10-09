@@ -1074,6 +1074,1339 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a non-array state.productScopes is treated as no record, so productId still resolves from the declared context.
+	 * @dataProvider provider_object_shape
+	 * @param mixed $malformed The one shape that can fail this read without the guard.
+	 */
+	public function test_product_scope_survives_non_array_product_scopes( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'productScopes' => $malformed ) );
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => 42,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( 42, $envelope['productId']() );
+		$this->assertNull( $envelope['baseProduct']() );
+	}
+
+	/**
+	 * @testdox state.productScope.scopeName falls back to _default when the declared context's scopeName is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_key
+	 * @param mixed $malformed A shape that cannot be used as an array offset.
+	 */
+	public function test_scope_name_falls_back_to_default_when_not_usable_as_key( $malformed ): void {
+		$this->push_woocommerce_context( array( 'scopeName' => $malformed ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( '_default', $envelope['scopeName']() );
+	}
+
+	/**
+	 * @testdox a non-array state.template is treated as absent, so productId falls back to its default instead of fataling.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_survives_non_array_template( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'template' => $malformed ) );
+
+		$this->push_woocommerce_context( array() );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( 0, $envelope['productId']() );
+	}
+
+	/**
+	 * @testdox productId falls through to state.template when the declared context's productId is not usable as an array key.
+	 * @dataProvider provider_shapes_not_usable_as_key
+	 * @param mixed $malformed A shape that cannot be used as an array offset.
+	 */
+	public function test_product_id_falls_through_to_template_when_context_value_is_not_usable_as_key( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'template' => array( 'productId' => 42 ) ) );
+
+		$this->push_woocommerce_context( array( 'productId' => $malformed ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( 42, $envelope['productId']() );
+	}
+
+	/**
+	 * @testdox productId falls back to its default when state.template's productId is not usable as an array key and the context declares none.
+	 * @dataProvider provider_shapes_not_usable_as_key
+	 * @param mixed $malformed A shape that cannot be used as an array offset.
+	 */
+	public function test_product_id_falls_back_to_default_when_template_value_is_not_usable_as_key( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'template' => array( 'productId' => $malformed ) ) );
+
+		$this->push_woocommerce_context( array() );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( 0, $envelope['productId']() );
+	}
+
+	/**
+	 * @testdox a non-array draftCartItem on the productScopes record is treated as absent, so productId and variation resolve from the declared context.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_survives_non_array_draft_cart_item( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'draftCartItem' => $malformed ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => 42,
+				'variation' => array(),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( 42, $envelope['productId']() );
+		$this->assertSame( array(), $envelope['variation']() );
+	}
+
+	/**
+	 * @testdox a draftCartItem.id that is not usable as an array key falls through to the declared context's productId.
+	 * @dataProvider provider_shapes_not_usable_as_key
+	 * @param mixed $malformed A shape that cannot be used as an array offset.
+	 */
+	public function test_draft_cart_item_id_falls_through_when_not_usable_as_key( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'draftCartItem' => array( 'id' => $malformed ) ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => 42,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( 42, $envelope['productId']() );
+		$this->assertSame( 42, $envelope['draftCartItem']()['id'] );
+	}
+
+	/**
+	 * @testdox a draftCartItem.variation that is not an array falls through to the declared context's variation.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_draft_cart_item_variation_falls_through_when_not_an_array( $malformed ): void {
+		$selected = array(
+			array(
+				'attribute' => 'colour',
+				'value'     => 'red',
+			),
+		);
+
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'productScopes' => array(
+					'my-scope' => array( 'draftCartItem' => array( 'variation' => $malformed ) ),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'scopeName' => 'my-scope',
+				'productId' => 42,
+				'variation' => $selected,
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertSame( $selected, $envelope['variation']() );
+		$this->assertSame( $selected, $envelope['draftCartItem']()['variation'] );
+	}
+
+	/**
+	 * @testdox a non-array state.productVariations is treated as absent, so no variation resolves and no fatal error is raised.
+	 * @dataProvider provider_object_and_string_shapes
+	 * @param mixed $malformed A shape that can fail this read without the guard.
+	 */
+	public function test_product_scope_survives_non_array_product_variations( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array( 1 => array( 'id' => 1 ) ),
+				'productVariations' => $malformed,
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 1 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+
+		$resolved = $envelope['product']();
+		$this->assertSame( 1, $resolved['id'] );
+	}
+
+	/**
+	 * @testdox a non-array state.products is treated as absent, so baseProduct and product resolve to null instead of fataling.
+	 * @dataProvider provider_object_and_string_shapes
+	 * @param mixed $malformed A shape that can fail this read without the guard.
+	 */
+	public function test_product_scope_survives_non_array_products( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'products' => $malformed ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 1 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['baseProduct']() );
+		$this->assertNull( $envelope['product']() );
+	}
+
+	/**
+	 * @testdox a non-array state.cart is treated as no cart lines, so cartItem resolves to null instead of fataling.
+	 * @dataProvider provider_object_shape
+	 * @param mixed $malformed The one shape that can fail this read without the guard.
+	 */
+	public function test_cart_item_survives_non_array_cart( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'cart' => $malformed ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 1 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a non-array state.cart.items is treated as no cart lines, so cartItem resolves to null instead of fataling.
+	 * @dataProvider provider_object_shape
+	 * @param mixed $malformed The one shape that can fail this read without the guard.
+	 */
+	public function test_cart_item_survives_non_array_cart_items( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'cart' => array( 'items' => $malformed ) ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 1 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a productVariations entry that is not itself an array is treated as no direct variation, falling back to a regular product lookup for the same id.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_survives_non_array_direct_variation_entry( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array( 5 => array( 'id' => 5 ) ),
+				'productVariations' => array( 5 => $malformed ),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+
+		$resolved = $envelope['product']();
+		$this->assertSame( 5, $resolved['id'], 'Should fall back to the regular product with the same id.' );
+	}
+
+	/**
+	 * @testdox a direct variation's parent field that is not usable as an array key leaves baseProduct null without affecting productVariation or product.
+	 * @dataProvider provider_shapes_not_usable_as_key
+	 * @param mixed $malformed A shape that cannot be used as an array offset.
+	 */
+	public function test_direct_variation_survives_malformed_parent( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array( 'id' => 1 ),
+				),
+				'productVariations' => array(
+					20 => array(
+						'id'     => 20,
+						'parent' => $malformed,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 20 ) );
+
+		$envelope = $this->get_product_scope();
+
+		// products[1] is loaded so that, for the float row, truncating
+		// 1.5 to 1 would resolve it as a wrong baseProduct instead of null.
+		$this->assertNull( $envelope['baseProduct']() );
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( 20, $resolved_variation['id'] );
+	}
+
+	/**
+	 * @testdox a products entry that is not itself an array leaves baseProduct, productVariation and product all null instead of fataling.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_product_scope_survives_non_array_base_product_entry( $malformed ): void {
+		wp_interactivity_state( $this->data_namespace, array( 'products' => array( 7 => $malformed ) ) );
+
+		$this->push_woocommerce_context( array( 'productId' => 7 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['baseProduct']() );
+		$this->assertNull( $envelope['productVariation']() );
+		$this->assertNull( $envelope['product']() );
+	}
+
+	/**
+	 * @testdox a base product whose attributes field is not an array still matches a variation summary, falling back to comparing the raw selected label.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_variation_matching_survives_non_array_product_attributes( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'attributes' => $malformed,
+						'variations' => array(
+							array(
+								'id'         => 2,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( 2, $resolved_variation['id'] );
+	}
+
+	/**
+	 * @testdox a base product whose variations field is not an array leaves productVariation null, with product falling back to baseProduct.
+	 * @dataProvider provider_non_iterable_shapes
+	 * @param mixed $malformed A shape that fails foreach without the guard; an object is excluded, since foreach over an object is legal.
+	 */
+	public function test_variation_matching_survives_non_array_variations_list( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products' => array(
+					1 => array(
+						'id'         => 1,
+						'variations' => $malformed,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+
+		$resolved_product = $envelope['product']();
+		$this->assertSame( 1, $resolved_product['id'] );
+	}
+
+	/**
+	 * @testdox a variation summary whose attributes field is not an array does not match, and resolution continues to the next summary.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_variation_matching_skips_summary_with_non_array_attributes( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'variations' => array(
+							array(
+								'id'         => 99,
+								'attributes' => $malformed,
+							),
+							array(
+								'id'         => 2,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( 2, $resolved_variation['id'], 'Should skip the malformed summary and match the next one.' );
+	}
+
+	/**
+	 * @testdox a matched variation summary whose id is not usable as an array key resolves productVariation to null.
+	 * @dataProvider provider_shapes_not_usable_as_key
+	 * @param mixed $malformed A shape that cannot be used as an array offset.
+	 */
+	public function test_variation_matching_survives_summary_id_not_usable_as_key( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					5 => array(
+						'id'         => 5,
+						'variations' => array(
+							array(
+								'id'         => $malformed,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					1 => array(
+						'id'     => 1,
+						'parent' => 5,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 5,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		// productVariations[1] is loaded, and the base product's own id (5)
+		// is deliberately different, so that for the float row, truncating
+		// 1.5 to 1 would resolve it as a wrong match instead of null.
+		$this->assertNull( $envelope['productVariation']() );
+	}
+
+	/**
+	 * @testdox a matched variation summary whose id resolves to a non-array productVariations entry resolves productVariation to null.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_variation_matching_survives_non_array_matched_variation_entry( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'variations' => array(
+							array(
+								'id'         => 2,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array( 2 => $malformed ),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['productVariation']() );
+	}
+
+	/**
+	 * @testdox a malformed variation-summary attribute entry, selection entry, or one of their name/attribute/value fields, does not match a real selection, without fataling.
+	 * @dataProvider provider_malformed_variation_matching_fields
+	 * @param mixed $candidate_attribute The candidate summary's single attribute entry.
+	 * @param mixed $selection_entry     The declared selection's single entry.
+	 */
+	public function test_variation_matching_survives_malformed_single_field( $candidate_attribute, $selection_entry ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'variations' => array(
+							array(
+								'id'         => 2,
+								'attributes' => array( $candidate_attribute ),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array( $selection_entry ),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull(
+			$envelope['productVariation'](),
+			'productVariations[2] is loaded, so a false match would resolve to that variation instead of null.'
+		);
+	}
+
+	/**
+	 * Each row keeps the candidate attribute and the selection entry
+	 * well-formed except at the one malformed field the row names, so a
+	 * false match points at exactly that field's guard.
+	 *
+	 * @return array<string, array{0: mixed, 1: mixed}>
+	 */
+	public function provider_malformed_variation_matching_fields(): array {
+		$attribute       = array(
+			'name'  => 'colour',
+			'value' => 'red',
+		);
+		$selection       = array(
+			'attribute' => 'colour',
+			'value'     => 'red',
+		);
+		$non_array_entry = (object) array( 'k' => 'v' );
+
+		return array(
+			'attribute entry'     => array( $non_array_entry, $selection ),
+			'selection entry'     => array( $attribute, $non_array_entry ),
+			'attribute name'      => array(
+				array(
+					'name'  => array( 'colour' ),
+					'value' => 'red',
+				),
+				$selection,
+			),
+			'attribute value'     => array(
+				array(
+					'name'  => 'colour',
+					'value' => array( 'red' ),
+				),
+				$selection,
+			),
+			'selection attribute' => array(
+				$attribute,
+				array(
+					'attribute' => array( 'colour' ),
+					'value'     => 'red',
+				),
+			),
+			'selection value'     => array(
+				$attribute,
+				array(
+					'attribute' => 'colour',
+					'value'     => array( 'red' ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox term slug resolution treats a product attribute whose name is not a string as not matching, without fataling.
+	 */
+	public function test_term_slug_resolution_survives_non_string_attribute_name(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'attributes' => array(
+							array(
+								'name'  => array( 'colour' ),
+								'terms' => array(
+									array(
+										'name' => 'Red',
+										'slug' => 'red',
+									),
+								),
+							),
+						),
+						'variations' => array(
+							array(
+								'id'         => 2,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'Red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'Red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		// No product attribute matches, so the slug falls back to the raw
+		// label 'Red', which still equals the selection's value.
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( 2, $resolved_variation['id'] );
+	}
+
+	/**
+	 * @testdox term slug resolution treats a matching product attribute's terms field as empty when it is not an array, without fataling.
+	 */
+	public function test_term_slug_resolution_survives_non_array_terms(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'attributes' => array(
+							array(
+								'name'  => 'colour',
+								'terms' => 'not-an-array',
+							),
+						),
+						'variations' => array(
+							array(
+								'id'         => 2,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'Red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'Red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( 2, $resolved_variation['id'] );
+	}
+
+	/**
+	 * @testdox term slug resolution falls back to the raw label when the matching term's slug is not a string, instead of fataling on its string return type.
+	 */
+	public function test_term_slug_resolution_survives_non_string_slug(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'attributes' => array(
+							array(
+								'name'  => 'colour',
+								'terms' => array(
+									array(
+										'name' => 'Red',
+										'slug' => array( 'red' ),
+									),
+								),
+							),
+						),
+						'variations' => array(
+							array(
+								'id'         => 2,
+								'attributes' => array(
+									array(
+										'name'  => 'colour',
+										'value' => 'Red',
+									),
+								),
+							),
+						),
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'Red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$resolved_variation = $envelope['productVariation']();
+		$this->assertIsArray( $resolved_variation );
+		$this->assertSame( 2, $resolved_variation['id'], 'A non-string slug falls back to the raw label, which still equals the selection.' );
+	}
+
+	/**
+	 * @testdox a cart line that is not itself an array is skipped, and a well-formed line later in the list still matches.
+	 * @dataProvider provider_object_shape
+	 * @param mixed $malformed The one shape that can fail this read without the guard.
+	 */
+	public function test_cart_item_survives_non_array_line( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						$malformed,
+						array(
+							'key'  => 'line-1',
+							'id'   => 5,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5 ) );
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox cartItem-by-key matching survives a cart line that is not itself an array, still finding a well-formed line later in the list.
+	 */
+	public function test_cart_item_by_key_survives_non_array_line(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						(object) array( 'k' => 'v' ),
+						array(
+							'key' => 'line-2',
+							'id'  => 5,
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'cartItemKey' => 'line-2' ) );
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-2', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a variation-typed cart line whose variation field is not an array is skipped instead of fataling on count().
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_cart_item_survives_non_array_line_variation( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 2,
+							'type'      => 'variation',
+							'variation' => $malformed,
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 2,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a cart line whose id is an object does not fatal on the int cast, and the line is skipped as not matching.
+	 */
+	public function test_cart_item_survives_object_line_id(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => (object) array( 'k' => 'v' ),
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox cartItem falls back to pairing on the scope's productId, without fataling, when the resolved product's own id is not usable as an array key.
+	 */
+	public function test_cart_item_survives_resolved_product_id_not_usable_as_key(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products' => array(
+					5 => array( 'id' => (object) array( 'k' => 'v' ) ),
+				),
+				'cart'     => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => 5,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5 ) );
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item, 'An id that is not usable as an array key falls back to the scope productId, the same as a missing id.' );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox variation cart-item matching survives a non-array state.productVariations or state.products, falling back to comparing the raw selected label.
+	 * @dataProvider provider_object_shape
+	 * @param mixed $malformed The one shape that can fail this read without the guard.
+	 */
+	public function test_cart_item_variation_matching_survives_non_array_lookup_maps( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'productVariations' => $malformed,
+				'products'          => $malformed,
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 2,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 2,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item, 'Should still match by falling back to the raw label when the parent lookup maps are unreadable.' );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox cart-item variation matching survives a parent product whose attributes field is not an array, falling back to the raw label.
+	 * @dataProvider provider_non_array_shapes
+	 * @param mixed $malformed A shape that is not an array.
+	 */
+	public function test_cart_item_variation_matching_survives_non_array_parent_attributes( $malformed ): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'products'          => array(
+					1 => array(
+						'id'         => 1,
+						'attributes' => $malformed,
+					),
+				),
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 2,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 2,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope  = $this->get_product_scope();
+		$cart_item = $envelope['cartItem']();
+
+		$this->assertIsArray( $cart_item );
+		$this->assertSame( 'line-1', $cart_item['key'] );
+	}
+
+	/**
+	 * @testdox a cart line whose variation entry is not an array is treated as carrying no attribute or value, so the line does not match.
+	 */
+	public function test_cart_item_variation_matching_survives_non_array_entry(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 2,
+							'type'      => 'variation',
+							'variation' => array( (object) array( 'k' => 'v' ) ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 2,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a malformed entry in the declared variation selection does not fatal while matching a cart line's attributes.
+	 */
+	public function test_cart_item_variation_matching_survives_non_array_selection_entry(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => 2,
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 2,
+				'variation' => array( (object) array( 'k' => 'v' ) ),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox cart-item matching skips a line whose id is not usable as an array key, instead of matching it against a scope with no product.
+	 */
+	public function test_cart_item_variation_matching_survives_line_id_not_usable_as_key(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'productVariations' => array(
+					2 => array(
+						'id'     => 2,
+						'parent' => 1,
+					),
+				),
+				'cart'              => array(
+					'items' => array(
+						array(
+							'key'       => 'line-1',
+							'id'        => array( 'not-usable-as-key' ),
+							'type'      => 'variation',
+							'variation' => array(
+								array(
+									'attribute' => 'colour',
+									'value'     => 'Red',
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context(
+			array(
+				'productId' => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'colour',
+						'value'     => 'Red',
+					),
+				),
+			)
+		);
+
+		$envelope = $this->get_product_scope();
+
+		// productId 1 resolves the same as the malformed line id's own int
+		// cast ((int) array( 'not-usable-as-key' ) is 1), so this line
+		// would otherwise pass every other check and match.
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * @testdox a cart line id of 5.5 does not match productId 5 after an int cast, since a non-integral float is not usable as an array key.
+	 */
+	public function test_cart_item_skips_line_with_non_integer_float_id(): void {
+		wp_interactivity_state(
+			$this->data_namespace,
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'key'  => 'line-1',
+							'id'   => 5.5,
+							'type' => 'simple',
+						),
+					),
+				),
+			)
+		);
+
+		$this->push_woocommerce_context( array( 'productId' => 5 ) );
+
+		$envelope = $this->get_product_scope();
+
+		$this->assertNull( $envelope['cartItem']() );
+	}
+
+	/**
+	 * Shapes that fail is_array(): a string, a bool, an int and an object,
+	 * chosen so each fails PHP's array checks or casts differently.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_non_array_shapes(): array {
+		return array(
+			'string' => array( 'not-an-array' ),
+			'bool'   => array( true ),
+			'int'    => array( 42 ),
+			'object' => array( (object) array( 'k' => 'v' ) ),
+		);
+	}
+
+	/**
+	 * Shapes that fail foreach() without the guard: a string, a bool and
+	 * an int all raise a "foreach() argument must be of type array|object"
+	 * warning. An object is excluded — foreach over an object legally
+	 * iterates its public properties, so it cannot fail this read.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_non_iterable_shapes(): array {
+		return array(
+			'string' => array( 'not-an-array' ),
+			'bool'   => array( true ),
+			'int'    => array( 42 ),
+		);
+	}
+
+	/**
+	 * The one shape that can fail a read used only as `$x[ $key ] ?? $fallback`:
+	 * a string, a bool or an int base all resolve the fallback under `??`
+	 * with no diagnostic, but an object base raises a PHP Error even under
+	 * `??`.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_object_shape(): array {
+		return array(
+			'object' => array( (object) array( 'k' => 'v' ) ),
+		);
+	}
+
+	/**
+	 * The shapes that can fail products/productVariations without the
+	 * guard: an object base raises a PHP Error even under `??`, and a
+	 * string base indexed by a small int id reads a character instead of
+	 * falling back, which a downstream is_array() check must still catch.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_object_and_string_shapes(): array {
+		return array(
+			'string' => array( 'not-an-array' ),
+			'object' => array( (object) array( 'k' => 'v' ) ),
+		);
+	}
+
+	/**
+	 * Shapes that fail is_usable_as_array_key(): using any of them as an
+	 * array offset raises a PHP Error, except the float, whose only
+	 * legal offset use is a deprecated implicit conversion.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function provider_shapes_not_usable_as_key(): array {
+		return array(
+			'array'  => array( array( 'x' ) ),
+			'object' => array( (object) array( 'k' => 'v' ) ),
+			'float'  => array( 1.5 ),
+		);
+	}
+
+	/**
 	 * Build the `productScope` envelope from the current interactivity
 	 * state, registering the closure first when no loader call has done so.
 	 *
