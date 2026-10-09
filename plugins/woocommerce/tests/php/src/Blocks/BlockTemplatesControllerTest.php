@@ -205,14 +205,14 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 			'attrs'     => array(
 				'theme'   => 'woocommerce/woocommerce',
 				'slug'    => 'test-filtered-part',
-				'tagName' => 'div',
+				'tagName' => 'span',
 			),
 		);
 		$result       = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
 
 		remove_filter( 'render_block', $filter, 10 );
 
-		$expected = '<div class="wp-block-template-part"><p class="wp-block-paragraph">Test</p></div><!-- filtered -->';
+		$expected = '<span class="wp-block-template-part"><p class="wp-block-paragraph">Test</p></span><!-- filtered -->';
 		$this->assertSame( $expected, $result, 'render_block filter output should be included in the rendered content.' );
 	}
 
