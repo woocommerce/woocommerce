@@ -19,7 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  * An ActionableAbility writes the same `extensions` input to the fields that
- * have an `update_callback`, and saves the object one time.
+ * have an `update_callback`, runs the validators of the resource, and saves
+ * the object one time.
  *
  * The API is experimental while the `ability_contracts` feature exists.
  *
@@ -33,6 +34,13 @@ class AbilityExtensions {
 	 * @var array<string, array<string, array<string, array<string, mixed>>>>
 	 */
 	private static array $fields = array();
+
+	/**
+	 * Validators keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $validators = array();
 
 	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
@@ -94,6 +102,51 @@ class AbilityExtensions {
 		}
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+	}
+
+	/**
+	 * Register a validator that can refuse a change to an object of a resource.
+	 *
+	 * Call it inside the `woocommerce_ability_extensions_init` action. Validators
+	 * run only when the `ability_contracts` feature is on.
+	 *
+	 * Use a field `update_callback` to refuse a bad value of one field. It runs
+	 * only when the input sends that field. Use a validator to refuse a change as
+	 * a whole. It runs on every change of the resource, also when the input sends
+	 * no extension fields. For example, a validator refuses a status change of an
+	 * order that is a subscription.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Validator arguments.
+	 *
+	 *     @type string   $resource  Resource that an ActionableAbility changes, `product` or `order`.
+	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
+	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
+	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
+	 *                               change, and then nothing is saved. The error gets the namespace in its
+	 *                               data, and the 400 status when it has no status. Its message can name the
+	 *                               ability or screen to use instead. Rules:
+	 *                               1. It only reads. It does not change the object, save, send email or
+	 *                                  make HTTP requests.
+	 *                               2. It checks the ability name when the extension's own abilities
+	 *                                  change the same resource.
+	 * }
+	 */
+	public static function register_validator( array $args ): void {
+		foreach ( array( 'resource', 'namespace' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
+				return;
+			}
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.3.0' );
+			return;
+		}
+
+		self::$validators[ $args['resource'] ][] = $args;
 	}
 
 	/**
@@ -185,6 +238,18 @@ class AbilityExtensions {
 	 */
 	public static function get_fields( string $resource_name ): array {
 		return self::$fields[ $resource_name ] ?? array();
+	}
+
+	/**
+	 * Validators of a resource.
+	 *
+	 * @internal
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_validators( string $resource_name ): array {
+		return self::$validators[ $resource_name ] ?? array();
 	}
 
 	/**
