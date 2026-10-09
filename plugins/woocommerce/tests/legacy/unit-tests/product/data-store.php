@@ -94,6 +94,126 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a product syncs the slug and modified date WordPress generates, so renaming the same object keeps its permalink.
+	 */
+	public function test_product_create_syncs_generated_post_fields(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Hydration test product' );
+		$product->save();
+
+		$this->assertSame( 'hydration-test-product', $product->get_slug(), 'The generated slug should be on the saved object' );
+		$date_modified = $product->get_date_modified();
+		$this->assertSame( strtotime( get_post_field( 'post_modified_gmt', $product->get_id() ) ), $date_modified ? $date_modified->getTimestamp() : null, 'The modified date should be on the saved object' );
+		$this->assertSame( array(), $product->get_changes(), 'A saved product should have no pending changes' );
+
+		$product->set_name( 'Renamed hydration test product' );
+		$product->save();
+
+		$this->assertSame( 'hydration-test-product', get_post_field( 'post_name', $product->get_id() ), 'Renaming the saved object should not change its permalink' );
+	}
+
+	/**
+	 * @testdox Creating a product syncs post fields changed by woocommerce_new_product_data before woocommerce_new_product fires, and later saves keep them.
+	 */
+	public function test_product_create_syncs_filtered_post_fields(): void {
+		$filter_post_data = function ( $data ) {
+			$data['post_title']     = 'Filtered title';
+			$data['post_name']      = 'filtered-slug';
+			$data['post_excerpt']   = 'Filtered summary.';
+			$data['menu_order']     = 7;
+			$data['comment_status'] = 'closed';
+			return $data;
+		};
+		$created_values   = array();
+		$capture_created  = function ( $product_id, $created_product ) use ( &$created_values ) {
+			$created_values = array(
+				'name'              => $created_product->get_name( 'edit' ),
+				'slug'              => $created_product->get_slug( 'edit' ),
+				'short_description' => $created_product->get_short_description( 'edit' ),
+				'menu_order'        => $created_product->get_menu_order( 'edit' ),
+				'reviews_allowed'   => $created_product->get_reviews_allowed( 'edit' ),
+				'regular_price'     => $created_product->get_regular_price( 'edit' ),
+			);
+		};
+		add_filter( 'woocommerce_new_product_data', $filter_post_data );
+		add_action( 'woocommerce_new_product', $capture_created, 10, 2 );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Input title' );
+		$product->set_short_description( 'Input summary.' );
+		$product->set_reviews_allowed( true );
+		$product->set_regular_price( '42' );
+		$product->save();
+
+		remove_filter( 'woocommerce_new_product_data', $filter_post_data );
+
+		$expected = array(
+			'name'              => 'Filtered title',
+			'slug'              => 'filtered-slug',
+			'short_description' => 'Filtered summary.',
+			'menu_order'        => 7,
+			'reviews_allowed'   => false,
+			'regular_price'     => '42',
+		);
+		$this->assertSame( $expected, $created_values, 'woocommerce_new_product should receive the persisted values' );
+
+		$product->set_menu_order( 8 );
+		$product->save();
+
+		$product_id = $product->get_id();
+		$this->assertSame( 'Filtered title', get_post_field( 'post_title', $product_id ), 'A later save should not restore the pre-filter title' );
+		$this->assertSame( 'filtered-slug', get_post_field( 'post_name', $product_id ), 'A later save should not clear the filtered slug' );
+		$this->assertSame( 'Filtered summary.', get_post_field( 'post_excerpt', $product_id ), 'A later save should not restore the pre-filter summary' );
+		$this->assertSame( 'closed', get_post_field( 'comment_status', $product_id ), 'A later save should not reopen reviews' );
+	}
+
+	/**
+	 * @testdox Creating a product does not replay the read lifecycle on the saved object, so woocommerce_product_read callbacks cannot leave it dirty.
+	 */
+	public function test_product_create_does_not_run_read_callbacks_on_saved_object(): void {
+		$product        = new WC_Product_Simple();
+		$adjust_on_read = function ( $product_id, $read_product ) use ( &$product ) {
+			if ( $read_product === $product ) {
+				$read_product->set_regular_price( '90' );
+			}
+		};
+		add_action( 'woocommerce_product_read', $adjust_on_read, 10, 2 );
+
+		$product->set_regular_price( '100' );
+		$product->save();
+
+		$this->assertSame( '100', $product->get_regular_price( 'edit' ), 'Read callbacks should not change the saved object' );
+		$this->assertSame( array(), $product->get_changes(), 'A saved product should have no pending changes' );
+	}
+
+	/**
+	 * @testdox Creating a product keeps the caller's attribute objects and their extra data, so a later save does not drop it.
+	 */
+	public function test_product_create_keeps_attribute_objects_and_extra_data(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Material' );
+		$attribute->set_options( array( 'Wool' ) );
+		$attribute->set_extra_data( 'label', 'Box label' );
+
+		$product = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$this->assertSame( $attribute, $product->get_attributes()['material'], 'The saved object should keep the caller-provided attribute object' );
+
+		$attributes = $product->get_attributes();
+		$size       = new WC_Product_Attribute();
+		$size->set_name( 'Size' );
+		$size->set_options( array( 'S' ) );
+		$attributes[] = $size;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$stored = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$this->assertSame( 'Box label', $stored['material']['label'] ?? null, 'A later save should keep stored attribute extra data' );
+	}
+
+	/**
 	 * Test reading a product.
 	 *
 	 * @since 3.0.0
