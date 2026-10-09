@@ -169,7 +169,7 @@ class BlockPatterns {
 			// If cluster nodes are provisioned individually (not a shared mount), the last one updated will refresh the transient.
 			// If the current node lags behind the update briefly, it reuses the lead node's version instead of overwriting it.
 			$cached_timestamp = (int) ( $pattern_data['timestamp'] ?? 0 );
-			if ( $cached_timestamp >= $path_timestamp) {
+			if ( $cached_timestamp >= $path_timestamp ) {
 				return array( $pattern_data['patterns'], $path_timestamp );
 			}
 		}
