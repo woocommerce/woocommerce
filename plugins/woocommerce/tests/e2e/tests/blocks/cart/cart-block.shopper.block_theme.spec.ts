@@ -123,11 +123,17 @@ test.describe( 'Shopper → Cart block', () => {
 		expect( hoodiePriceText ).toBe( '$50.00' );
 	} );
 
-	test( 'User can view empty cart message and can add products to cart', async ( {
+	test( 'User sees the empty cart after removing an item and can add a product again', async ( {
 		frontendUtils,
 		page,
 	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
+
+		await page
+			.getByLabel( `Remove ${ REGULAR_PRICED_PRODUCT_NAME } from cart` )
+			.click();
 
 		// Verify cart is empty
 		await expect(
