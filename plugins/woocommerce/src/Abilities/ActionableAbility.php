@@ -172,9 +172,9 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		foreach ( $updates as $param => list( $callback, $value ) ) {
-			$updated = call_user_func( $callback, $subject, $value );
-			if ( is_wp_error( $updated ) ) {
-				return self::with_data( $updated, array( 'field' => $param ) );
+			$rejected = self::run_callback( $callback, array( $subject, $value ), array( 'field' => $param ) );
+			if ( null !== $rejected ) {
+				return $rejected;
 			}
 		}
 		return null;
@@ -188,12 +188,35 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	private function validate( $subject ): ?\WP_Error {
 		foreach ( AbilityExtensions::get_validators( $this->get_resource() ) as $args ) {
-			$valid = call_user_func( $args['callback'], $subject, $this );
-			if ( is_wp_error( $valid ) ) {
-				return self::with_data( $valid, array( 'namespace' => $args['namespace'] ) );
+			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
+			if ( null !== $rejected ) {
+				return $rejected;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Run an extension callback. A WP_Error that it returns, or an exception
+	 * that it throws, becomes an error with the given data. An exception keeps
+	 * its message and gets the 500 status.
+	 *
+	 * @param callable             $callback Field update_callback or validator.
+	 * @param array                $args     Callback arguments.
+	 * @param array<string, mixed> $data     Data that names the field or the namespace.
+	 * @return \WP_Error|null
+	 */
+	private static function run_callback( callable $callback, array $args, array $data ): ?\WP_Error {
+		try {
+			$result = call_user_func_array( $callback, $args );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Ability extension "%s" failed: %s', implode( '', $data ), $e->getMessage() ),
+				array( 'source' => 'ability-extensions' )
+			);
+			$result = new \WP_Error( 'woocommerce_ability_extension_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+		return is_wp_error( $result ) ? self::with_data( $result, $data ) : null;
 	}
 
 	/**

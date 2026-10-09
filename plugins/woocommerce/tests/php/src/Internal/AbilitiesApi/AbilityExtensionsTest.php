@@ -44,6 +44,13 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private $original_init_count;
 
 	/**
+	 * Actions that a test added, removed in tearDown.
+	 *
+	 * @var array<int, array{0: string, 1: callable, 2: int}>
+	 */
+	private $test_actions = array();
+
+	/**
 	 * Create immutable class fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
@@ -86,6 +93,10 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		global $wp_actions;
 
 		remove_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_fields' ) );
+		foreach ( $this->test_actions as list( $hook, $callback, $priority ) ) {
+			remove_action( $hook, $callback, $priority );
+		}
+		$this->test_actions = array();
 		$this->set_feature( false );
 		$this->reset_registries();
 		wp_set_current_user( 0 );
@@ -595,30 +606,8 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should let an ActionableAbility of an extension accept the writable fields with no extra code.
 	 */
 	public function test_an_extension_actionable_ability_writes_the_fields(): void {
-		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
-		$register = static function () {
-			wp_register_ability(
-				'test-ext/product-rename',
-				array(
-					'label'               => 'Rename product',
-					'description'         => 'Renames a product.',
-					'category'            => 'woocommerce',
-					'input_schema'        => array(
-						'type'                 => 'object',
-						'properties'           => array(
-							'id'   => array( 'type' => 'integer' ),
-							'name' => array( 'type' => 'string' ),
-						),
-						'additionalProperties' => false,
-					),
-					'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
-					'permission_callback' => '__return_true',
-					'ability_class'       => TestProductRenameAbility::class,
-					'meta'                => array( 'show_in_rest' => true ),
-				)
-			);
-		};
-		add_action( 'wp_abilities_api_init', $register, 20 );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_rename_ability();
 
 		$schema = $this->get_ability( 'test-ext/product-rename' )['input_schema']['properties']['extensions'];
 		$output = $this->run_ability(
@@ -630,7 +619,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		remove_action( 'wp_abilities_api_init', $register, 20 );
 		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
 		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
@@ -695,18 +683,16 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$order->update_meta_data( '_test_locked', 'yes' );
 		$order->save();
 		$ability = null;
-		AbilityExtensions::register_validator(
-			array(
-				'resource'  => 'order',
-				'namespace' => 'test-ext',
-				'callback'  => static function ( \WC_Order $subject, \WP_Ability $current ) use ( &$ability ) {
-					$ability = $current->get_name();
-					if ( 'yes' === $subject->get_meta( '_test_locked' ) && 'completed' === $subject->get_status() ) {
-						return new \WP_Error( 'test_locked', 'Use test-ext/order-unlock first.' );
-					}
-					return null;
-				},
-			)
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $subject, \WP_Ability $current ) use ( &$ability ) {
+				$ability = $current->get_name();
+				if ( 'yes' === $subject->get_meta( '_test_locked' ) && 'completed' === $subject->get_status() ) {
+					return new \WP_Error( 'test_locked', 'Use test-ext/order-unlock first.' );
+				}
+				return null;
+			}
 		);
 		$changes = did_action( 'woocommerce_order_status_changed' );
 
@@ -739,17 +725,15 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_a_validator_sees_the_changed_product(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
-		AbilityExtensions::register_validator(
-			array(
-				'resource'  => 'product',
-				'namespace' => 'other_ext',
-				'callback'  => static function ( \WC_Product $subject ) {
-					if ( 'Pencil' === $subject->get_name() && 'red' === $subject->get_meta( '_test_color' ) ) {
-						return new \WP_Error( 'test_red_pencil', 'No red pencils.', array( 'status' => 409 ) );
-					}
-					return null;
-				},
-			)
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) {
+				if ( 'Pencil' === $subject->get_name() && 'red' === $subject->get_meta( '_test_color' ) ) {
+					return new \WP_Error( 'test_red_pencil', 'No red pencils.', array( 'status' => 409 ) );
+				}
+				return null;
+			}
 		);
 
 		$response = $this->run_ability_response(
@@ -766,6 +750,95 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'other_ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 'Pen', $saved->get_name() );
 		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should run a validator in an ActionableAbility of an extension, with that ability.
+	 */
+	public function test_a_validator_runs_in_an_extension_actionable_ability(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_rename_ability();
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject, \WP_Ability $ability ) {
+				return 'test-ext/product-rename' === $ability->get_name()
+					? new \WP_Error( 'test_rename_refused', 'Rename refused.' )
+					: null;
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'test-ext/product-rename',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'test_rename_refused', $response->get_data()['code'] );
+		$this->assertSame( 'other_ext', $response->get_data()['data']['namespace'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should return the message and the field or namespace when an update_callback or a validator throws, and save nothing.
+	 */
+	public function test_a_callback_that_throws_returns_a_clear_error(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->add_test_action(
+			'woocommerce_ability_extensions_init',
+			static function () {
+				AbilityExtensions::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'test-ext',
+						'field'           => 'broken',
+						'schema'          => array( 'type' => 'string' ),
+						'get_callback'    => '__return_null',
+						'update_callback' => static function () {
+							throw new \RuntimeException( 'Field broke.' );
+						},
+					)
+				);
+			}
+		);
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) {
+				if ( 'Boom' === $subject->get_name() ) {
+					throw new \RuntimeException( 'Validator broke.' );
+				}
+				return null;
+			}
+		);
+
+		$field     = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array( 'test-ext' => array( 'broken' => 'x' ) ),
+			)
+		);
+		$validator = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Boom',
+			)
+		);
+
+		$this->assertSame( 500, $field->get_status() );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $field->get_data()['code'] );
+		$this->assertSame( 'Field broke.', $field->get_data()['message'] );
+		$this->assertSame( 'extensions.test-ext.broken', $field->get_data()['data']['field'] );
+		$this->assertSame( 500, $validator->get_status() );
+		$this->assertSame( 'Validator broke.', $validator->get_data()['message'] );
+		$this->assertSame( 'other_ext', $validator->get_data()['data']['namespace'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
 	/**
@@ -815,6 +888,72 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEmpty( AbilityExtensions::get_validators( 'order' ) );
+	}
+
+	/**
+	 * Add an action that tearDown removes.
+	 *
+	 * @param string   $hook     Action name.
+	 * @param callable $callback Callback.
+	 * @param int      $priority Priority.
+	 */
+	private function add_test_action( string $hook, callable $callback, int $priority = 10 ): void {
+		add_action( $hook, $callback, $priority );
+		$this->test_actions[] = array( $hook, $callback, $priority );
+	}
+
+	/**
+	 * Register a validator inside woocommerce_ability_extensions_init, the way an extension does.
+	 *
+	 * @param string   $resource_name       Resource.
+	 * @param string   $extension_namespace Extension namespace.
+	 * @param callable $callback            Validator.
+	 */
+	private function register_validator( string $resource_name, string $extension_namespace, callable $callback ): void {
+		$this->add_test_action(
+			'woocommerce_ability_extensions_init',
+			static function () use ( $resource_name, $extension_namespace, $callback ) {
+				AbilityExtensions::register_validator(
+					array(
+						'resource'  => $resource_name,
+						'namespace' => $extension_namespace,
+						'callback'  => $callback,
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Register test-ext/product-rename, an ActionableAbility of an extension.
+	 */
+	private function register_rename_ability(): void {
+		$this->add_test_action(
+			'wp_abilities_api_init',
+			static function () {
+				wp_register_ability(
+					'test-ext/product-rename',
+					array(
+						'label'               => 'Rename product',
+						'description'         => 'Renames a product.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'                 => 'object',
+							'properties'           => array(
+								'id'   => array( 'type' => 'integer' ),
+								'name' => array( 'type' => 'string' ),
+							),
+							'additionalProperties' => false,
+						),
+						'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
+						'permission_callback' => '__return_true',
+						'ability_class'       => TestProductRenameAbility::class,
+						'meta'                => array( 'show_in_rest' => true ),
+					)
+				);
+			},
+			20
+		);
 	}
 
 	/**
