@@ -91,7 +91,9 @@
 		flex-direction: column;
 		height: fit-content;
 		overflow-y: auto;
-		overscroll-behavior: none;
+		// On desktop the body never overflows, so let the wheel chain to the scrolling panel.
+		// Page scroll is still blocked by the drawer's overscroll-behavior-y and, on mobile, body overflow: hidden.
+		overscroll-behavior: auto;
 	}
 }
 
