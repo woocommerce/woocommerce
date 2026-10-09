@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix incorrect conditional that could cause filenames to be rewritten for non-downloadable product uploads.
