@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.2.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -130,7 +130,18 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 						// Backorder notification.
 						if ( $_product->backorders_require_notification() && $_product->is_on_backorder( $cart_item['quantity'] ) ) {
-							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_backorder_notification', '<p class="backorder_notification">' . esc_html__( 'Available on backorder', 'woocommerce' ) . '</p>', $product_id ) );
+							/**
+							 * Filter the backorder notification shown for a cart item.
+							 *
+							 * @param string $notification  The backorder notification HTML.
+							 * @param int    $product_id    The product ID. For a variation, this is the parent product ID.
+							 * @param array  $cart_item     The cart item data, including `variation_id` and the product in `data`.
+							 * @param string $cart_item_key Unique key for the cart item.
+							 *
+							 * @since 3.4.0
+							 * @since 11.3.0 Added the `$cart_item` and `$cart_item_key` parameters.
+							 */
+							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_backorder_notification', '<p class="backorder_notification">' . esc_html__( 'Available on backorder', 'woocommerce' ) . '</p>', $product_id, $cart_item, $cart_item_key ) );
 						}
 						?>
 						</td>
