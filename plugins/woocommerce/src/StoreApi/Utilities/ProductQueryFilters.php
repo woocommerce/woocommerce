@@ -59,6 +59,9 @@ class ProductQueryFilters {
 		if ( 'yes' === $hide_outofstock_items ) {
 			unset( $stock_status_options[ ProductStockStatus::OUT_OF_STOCK ] );
 		}
+		if ( empty( $stock_status_options ) ) {
+			return array();
+		}
 
 		add_filter( 'posts_clauses', array( $product_query, 'add_query_clauses' ), 10, 2 );
 		add_filter( 'posts_pre_query', '__return_empty_array' );
@@ -75,40 +78,28 @@ class ProductQueryFilters {
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
 		$stock_status_counts = array();
+		$selects             = array();
+		$statuses            = array();
+		foreach ( $stock_status_options as $index => $status ) {
+			$escaped_status = esc_sql( $status );
+			$selects[]      = "COUNT( DISTINCT CASE WHEN postmeta.meta_value = '{$escaped_status}' THEN posts.ID END ) as status_{$index}";
+			$statuses[]     = "'{$escaped_status}'";
+		}
 
-		foreach ( $stock_status_options as $status ) {
-			$stock_status_count_sql = $this->generate_stock_status_count_query( $status, $product_query_sql, $stock_status_options );
-
-			$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
-			$stock_status_counts[ $status ] = $result->status_count;
+		$stock_status_count_sql = '
+			SELECT ' . implode( ', ', $selects ) . "
+			FROM {$wpdb->posts} as posts
+			INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+				AND postmeta.meta_key = '_stock_status'
+				AND postmeta.meta_value IN ( " . implode( ', ', $statuses ) . " )
+			WHERE posts.ID IN ( {$product_query_sql} )
+		";
+		$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
+		foreach ( $stock_status_options as $index => $status ) {
+			$stock_status_counts[ $status ] = $result->{"status_{$index}"};
 		}
 
 		return $stock_status_counts;
-	}
-
-	/**
-	 * Generate calculate query by stock status.
-	 *
-	 * @param string $status status to calculate.
-	 * @param string $product_query_sql product query for current filter state.
-	 * @param array  $stock_status_options available stock status options.
-	 *
-	 * @return false|string
-	 */
-	private function generate_stock_status_count_query( $status, $product_query_sql, $stock_status_options ) {
-		if ( ! in_array( $status, $stock_status_options, true ) ) {
-			return false;
-		}
-		global $wpdb;
-		$status = esc_sql( $status );
-		return "
-			SELECT COUNT( DISTINCT posts.ID ) as status_count
-			FROM {$wpdb->posts} as posts
-			INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-            AND postmeta.meta_key = '_stock_status'
-            AND postmeta.meta_value = '{$status}'
-			WHERE posts.ID IN ( {$product_query_sql} )
-		";
 	}
 
 	/**
