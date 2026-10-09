@@ -70,7 +70,7 @@ test.describe( 'Payment Gateways API tests', () => {
 					enabled: true,
 					method_title: 'Direct bank transfer',
 					method_description:
-						'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+						'Accept offline bank-to-bank and wire transfer payments such as BACS, SEPA, and SWIFT.',
 					method_supports: [ 'products' ],
 					settings: {
 						title: {
@@ -247,7 +247,7 @@ test.describe( 'Payment Gateways API tests', () => {
 				enabled: true,
 				method_title: 'Direct bank transfer',
 				method_description:
-					'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+					'Accept offline bank-to-bank and wire transfer payments such as BACS, SEPA, and SWIFT.',
 				method_supports: [ 'products' ],
 				settings: {
 					title: {
