@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { store, getContext } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce';
+import type { WooCommerceStore } from '@woocommerce/stores/woocommerce';
 import type { ProductResponseItem } from '@woocommerce/types';
 import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 
@@ -102,15 +104,24 @@ const normalizeAttributeName = ( name: string ): string =>
 const attributeNamesMatch = ( a: string, b: string ): boolean =>
 	normalizeAttributeName( a ) === normalizeAttributeName( b );
 
+// Catalog data lives in `woocommerce`; import it by module id so it isn't
+// bundled twice.
+const { state: wooState } = store< WooCommerceStore >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
 /**
  * The woocommerce/products store.
  *
- * Server-hydrated cache of product and variation data in Store API format
- * (`ProductResponseItem`). PHP loaders populate `products` / `productVariations`;
- * derived getters below resolve the "current" product from either global state
- * or per-element context. These getters are mirrored in PHP
- * (see ProductsStore::register_getters) so directive bindings like
- * `state.productInContext.sku` resolve during SSR as well as on the client.
+ * A view over the unified `woocommerce` store's catalog data: `products`
+ * and `productVariations` read straight from it, and the derived getters
+ * below resolve the "current" product from either global state or
+ * per-element context declared on this namespace. These getters are
+ * mirrored in PHP (see ProductsStore::register_getters) so directive
+ * bindings like `state.productInContext.sku` resolve during SSR as well as
+ * on the client.
  *
  * See ./README.md for the complete model, loaders, and consumer patterns.
  */
@@ -118,8 +129,12 @@ const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
 	{
 		state: {
-			products: {},
-			productVariations: {},
+			get products(): Record< number, ProductResponseItem > {
+				return wooState.products;
+			},
+			get productVariations(): Record< number, ProductResponseItem > {
+				return wooState.productVariations;
+			},
 			findProduct( {
 				id,
 				selectedAttributes,
@@ -127,12 +142,12 @@ const { state: productsState } = store< ProductsStore >(
 				id: number;
 				selectedAttributes?: SelectedAttributes[] | null;
 			} ): ProductResponseItem | null {
-				const variation = productsState.productVariations[ id ];
+				const variation = wooState.productVariations[ id ];
 				if ( variation ) {
 					return variation;
 				}
 
-				const product = productsState.products[ id ];
+				const product = wooState.products[ id ];
 
 				if ( ! product ) {
 					return null;
@@ -171,8 +186,7 @@ const { state: productsState } = store< ProductsStore >(
 				}
 
 				return (
-					productsState.productVariations[ matchedVariation.id ] ??
-					null
+					wooState.productVariations[ matchedVariation.id ] ?? null
 				);
 			},
 
@@ -188,7 +202,7 @@ const { state: productsState } = store< ProductsStore >(
 				if ( ! productId ) {
 					return null;
 				}
-				return productsState.products[ productId ] ?? null;
+				return wooState.products[ productId ] ?? null;
 			},
 
 			get productVariationInContext(): ProductResponseItem | null {
@@ -202,7 +216,7 @@ const { state: productsState } = store< ProductsStore >(
 				if ( ! variationId ) {
 					return null;
 				}
-				return productsState.productVariations[ variationId ] ?? null;
+				return wooState.productVariations[ variationId ] ?? null;
 			},
 
 			get productInContext(): ProductResponseItem | null {

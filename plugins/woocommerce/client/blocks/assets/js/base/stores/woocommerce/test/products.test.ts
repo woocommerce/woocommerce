@@ -7,8 +7,13 @@ import type { ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import type { ProductsStore } from '../products';
+import type { CatalogState } from '../types';
 
-let mockRegisteredStore: {
+let mockRegisteredWooStore: {
+	state: CatalogState;
+} | null = null;
+
+let mockRegisteredProductsStore: {
 	state: ProductsStore[ 'state' ];
 } | null = null;
 
@@ -17,13 +22,20 @@ let mockStoreState: ProductsStore[ 'state' ];
 let mockContext: { productId?: number; variationId?: number | null } | null =
 	null;
 
+const getMockWooState = (): CatalogState => {
+	if ( mockRegisteredWooStore === null ) {
+		throw new Error( 'Expected the woocommerce store to be registered.' );
+	}
+	return mockRegisteredWooStore.state;
+};
+
 const getMockStoreState = (): ProductsStore[ 'state' ] => {
-	if ( mockRegisteredStore === null ) {
+	if ( mockRegisteredProductsStore === null ) {
 		throw new Error(
 			'Expected woocommerce/products store to be registered.'
 		);
 	}
-	return mockRegisteredStore.state;
+	return mockRegisteredProductsStore.state;
 };
 
 const mockProduct = {
@@ -40,17 +52,32 @@ jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		store: jest.fn( ( namespace, definition ) => {
+			if ( namespace === 'woocommerce' ) {
+				// The alias reads the catalog data from here, the same way
+				// the real unified store backs it.
+				mockRegisteredWooStore ??= {
+					state: {
+						products: {} as Record< number, ProductResponseItem >,
+						productVariations: {} as Record<
+							number,
+							ProductResponseItem
+						>,
+					},
+				};
+				if ( definition?.state ) {
+					Object.defineProperties(
+						mockRegisteredWooStore.state,
+						Object.getOwnPropertyDescriptors( definition.state )
+					);
+				}
+				return mockRegisteredWooStore;
+			}
 			if ( namespace === 'woocommerce/products' ) {
 				// Simulate server-hydrated state merged with client definition.
 				// Getters from definition.state are preserved, and productId /
 				// variationId are added as plain values (simulating
 				// wp_interactivity_state hydration).
 				const stateBase = {
-					products: {} as Record< number, ProductResponseItem >,
-					productVariations: {} as Record<
-						number,
-						ProductResponseItem
-					>,
 					productId: 0,
 					variationId: null as number | null,
 				};
@@ -59,10 +86,10 @@ jest.mock(
 				);
 				Object.defineProperties( stateBase, descriptors );
 
-				mockRegisteredStore = {
+				mockRegisteredProductsStore = {
 					state: stateBase as ProductsStore[ 'state' ],
 				};
-				return mockRegisteredStore;
+				return mockRegisteredProductsStore;
 			}
 			return {};
 		} ),
@@ -73,15 +100,16 @@ jest.mock(
 
 describe( 'woocommerce/products store – product context derived state', () => {
 	beforeEach( () => {
-		mockRegisteredStore = null;
+		mockRegisteredWooStore = null;
+		mockRegisteredProductsStore = null;
 		mockContext = null;
 
 		jest.isolateModules( () => require( '../products' ) );
 		mockStoreState = getMockStoreState();
 
-		// Hydrate products and variations after store is created.
-		mockStoreState.products = { 42: mockProduct };
-		mockStoreState.productVariations = { 99: mockVariation };
+		// Hydrate the unified store's catalog data, which the alias reads.
+		getMockWooState().products = { 42: mockProduct };
+		getMockWooState().productVariations = { 99: mockVariation };
 	} );
 
 	it( 'has writable productId and variationId state', () => {

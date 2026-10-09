@@ -8,17 +8,20 @@ use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
 
 /**
- * Shared store that hydrates the `woocommerce/products` Interactivity API
- * store with product and variation data in Store API format.
+ * Shared store that hydrates the unified `woocommerce` Interactivity API
+ * store with product and variation data in Store API format, and exposes
+ * that data to the `woocommerce/products` namespace as a view.
  *
  * The store exposes two planes:
- * - Raw data (`products`, `productVariations`) populated by the `load_*`
- *   methods below, each keyed by ID.
+ * - Raw data (`products`, `productVariations`) — populated into the
+ *   `woocommerce` namespace by the `load_*` methods below, each keyed by
+ *   ID.
  * - Selection (`productId`, `variationId`) — set by callers via
- *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) —
- *   plus the derived getters (`mainProductInContext`,
- *   `productVariationInContext`, `productInContext`) registered by
- *   `register_getters()`.
+ *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) on
+ *   the `woocommerce/products` namespace — plus the derived getters
+ *   (`mainProductInContext`, `productVariationInContext`,
+ *   `productInContext`), also registered on `woocommerce/products` by
+ *   `register_getters()`, which read the raw data from `woocommerce`.
  *
  * The derived getters are mirrored in the JS store
  * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
@@ -40,7 +43,14 @@ class ProductsStore {
 	private static string $consent_statement = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * The namespace for the store.
+	 * The namespace the raw product and variation data is seeded into.
+	 *
+	 * @var string
+	 */
+	private static string $data_namespace = 'woocommerce';
+
+	/**
+	 * The namespace for the selection state and derived getters.
 	 *
 	 * @var string
 	 */
@@ -96,7 +106,9 @@ class ProductsStore {
 	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
 	 * directives referencing state.mainProductInContext /
 	 * state.productVariationInContext / state.productInContext resolve
-	 * during SSR. Because they read from
+	 * during SSR. They resolve the selection from `woocommerce/products`
+	 * but read the raw product and variation data from `woocommerce`, the
+	 * namespace `load_*` seeds it into. Because they read from
 	 * wp_interactivity_state() at call time, they only need to be
 	 * registered once regardless of how many products are added.
 	 *
@@ -123,7 +135,9 @@ class ProductsStore {
 						return null;
 					}
 
-					return $state['products'][ $product_id ] ?? null;
+					$data = wp_interactivity_state( self::$data_namespace );
+
+					return $data['products'][ $product_id ] ?? null;
 				},
 				'productVariationInContext' => function () {
 					$context      = wp_interactivity_get_context();
@@ -136,7 +150,9 @@ class ProductsStore {
 						return null;
 					}
 
-					return $state['productVariations'][ $variation_id ] ?? null;
+					$data = wp_interactivity_state( self::$data_namespace );
+
+					return $data['productVariations'][ $variation_id ] ?? null;
 				},
 				'productInContext'          => function () {
 					$state    = wp_interactivity_state( self::$store_namespace );
@@ -177,7 +193,7 @@ class ProductsStore {
 		self::$products[ $product_id ] = $response['body'] ?? array();
 		self::register_getters();
 		wp_interactivity_state(
-			self::$store_namespace,
+			self::$data_namespace,
 			array( 'products' => array( $product_id => self::$products[ $product_id ] ) )
 		);
 
@@ -234,7 +250,7 @@ class ProductsStore {
 		self::$products = array_replace( self::$products, $keyed_products );
 		self::register_getters();
 		wp_interactivity_state(
-			self::$store_namespace,
+			self::$data_namespace,
 			array( 'products' => $keyed_products )
 		);
 
@@ -274,7 +290,7 @@ class ProductsStore {
 		self::$product_variations = array_replace( self::$product_variations, $keyed_variations );
 		self::register_getters();
 		wp_interactivity_state(
-			self::$store_namespace,
+			self::$data_namespace,
 			array( 'productVariations' => $keyed_variations )
 		);
 
