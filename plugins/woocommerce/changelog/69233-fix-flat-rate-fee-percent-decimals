@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the decimals of flat rate fee percentages and minimum or maximum fees on stores that use a comma as the decimal separator.
