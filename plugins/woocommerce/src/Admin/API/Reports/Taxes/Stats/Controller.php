@@ -76,6 +76,8 @@ class Controller extends GenericStatsController {
 		$args['orderby']             = $request['orderby'];
 		$args['order']               = $request['order'];
 		$args['taxes']               = (array) $request['taxes'];
+		$args['location_includes']   = $request['location_includes'];
+		$args['location_excludes']   = $request['location_excludes'];
 		$args['segmentby']           = $request['segmentby'];
 		$args['fields']              = $request['fields'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
@@ -185,8 +187,8 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+		$params                      = parent::get_collection_params();
+		$params['orderby']['enum']   = $this->apply_custom_orderby_filters(
 			array(
 				'date',
 				'items_sold',
@@ -195,7 +197,7 @@ class Controller extends GenericStatsController {
 				'products_count',
 			)
 		);
-		$params['taxes']           = array(
+		$params['taxes']             = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -204,7 +206,17 @@ class Controller extends GenericStatsController {
 				'type' => 'integer',
 			),
 		);
-		$params['segmentby']       = array(
+		$params['location_includes'] = array(
+			'description'       => __( 'Includes tax rates by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['location_excludes'] = array(
+			'description'       => __( 'Excludes tax rates by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['segmentby']         = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(

@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Extension } from '@woocommerce/data';
 
 /**
@@ -10,63 +9,66 @@ import { Extension } from '@woocommerce/data';
  */
 import { computePluginsSelection, joinWithAnd, Plugins } from '../Plugins';
 
-const getPluginCheckbox = ( name: string ) => {
-	const card = screen
-		.getByRole( 'heading', { level: 3, name } )
-		.closest( '.woocommerce-profiler-plugins-plugin-card' );
-
-	expect( card ).not.toBeNull();
-
-	return within( card! ).getByRole( 'checkbox' );
-};
+const installationError = ( plugin: string ) => ( {
+	plugin,
+	error: 'Installation failed',
+	errorDetails: {
+		data: {
+			code: 'some_error_code',
+			data: {
+				status: 400,
+			},
+		},
+	},
+} );
 
 describe( 'Plugins Component', () => {
 	const mockSendEvent = jest.fn();
 	const mockContext = {
 		pluginsAvailable: [
 			{
-				slug: 'woocommerce-payments',
-				name: 'WooPayments',
-				label: 'WooPayments',
+				slug: 'plugin1',
+				name: 'Plugin 1',
+				label: 'Plugin 1',
 				is_activated: false,
 				description: '',
-				key: 'woocommerce-payments',
+				key: 'plugin1',
 				image_url: '',
 				manage_url: '',
 				is_built_by_wc: false,
 				is_visible: true,
 			},
 			{
-				slug: 'google-listings-and-ads',
-				name: 'Google for WooCommerce',
-				label: 'Google for WooCommerce',
-				is_activated: false,
-				description: '',
-				key: 'google-listings-and-ads',
-				image_url: '',
-				manage_url: '',
-				is_built_by_wc: false,
-				is_visible: true,
-			},
-			{
-				slug: 'jetpack',
-				name: 'Jetpack',
-				label: 'Jetpack',
+				slug: 'plugin2',
+				name: 'Plugin 2',
+				label: 'Plugin 2',
 				is_activated: true,
 				description: '',
-				key: 'jetpack',
+				key: 'plugin2',
 				image_url: '',
 				manage_url: '',
 				is_built_by_wc: false,
 				is_visible: true,
 			},
 			{
-				slug: 'mailpoet',
-				name: 'MailPoet',
-				label: 'MailPoet',
+				slug: 'plugin3',
+				name: 'Plugin 3',
+				label: 'Plugin 3',
 				is_activated: false,
 				description: '',
-				key: 'mailpoet:alt',
+				key: 'plugin3',
+				image_url: '',
+				manage_url: '',
+				is_built_by_wc: false,
+				is_visible: true,
+			},
+			{
+				slug: 'plugin4',
+				name: 'Plugin 4',
+				label: 'Plugin 4',
+				is_activated: false,
+				description: '',
+				key: 'plugin4',
 				image_url: '',
 				manage_url: '',
 				is_built_by_wc: false,
@@ -77,9 +79,13 @@ describe( 'Plugins Component', () => {
 		pluginsInstallationErrors: [],
 	};
 	const navigationProgress = 80;
-	beforeEach( () => {
-		mockSendEvent.mockClear();
-	} );
+	const altPlugin = {
+		...mockContext.pluginsAvailable[ 3 ],
+		key: 'plugin5:alt',
+		slug: 'plugin5',
+		name: 'Plugin 5',
+		label: 'Plugin 5',
+	};
 
 	it( 'renders correctly', () => {
 		render(
@@ -94,17 +100,13 @@ describe( 'Plugins Component', () => {
 				/No commitment required – you can remove them at any time/
 			)
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole( 'heading', { level: 3, name: 'WooPayments' } )
-		).toBeInTheDocument();
-		expect(
-			screen.getByText( 'Google for WooCommerce' )
-		).toBeInTheDocument();
-		expect( screen.getByText( 'Jetpack' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'MailPoet' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Plugin 1' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Plugin 2' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Plugin 3' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Plugin 4' ) ).toBeInTheDocument();
 	} );
 
-	it( 'selects each default inactive recommendation', () => {
+	it( 'handles plugin selection', () => {
 		render(
 			<Plugins
 				context={ mockContext }
@@ -112,52 +114,83 @@ describe( 'Plugins Component', () => {
 				navigationProgress={ navigationProgress }
 			/>
 		);
+		const checkboxLabel = screen.getByText( 'Plugin 1' );
+		fireEvent.click( checkboxLabel ); // because the checkbox is enabled by default, let's uncheck it
+		fireEvent.click( checkboxLabel ); // then check it
+		const checkboxLabel3 = screen.getByText( 'Plugin 3' );
+		fireEvent.click( checkboxLabel3 );
+		const checkboxLabel4 = screen.getByText( 'Plugin 4' ); // attempt to uncheck 4, but it shouldn't do anything since it is already unchecked
+		fireEvent.click( checkboxLabel4 );
+		const installButton = screen.getByText( 'Continue' );
+		fireEvent.click( installButton );
 
-		expect( getPluginCheckbox( 'WooPayments' ) ).toBeChecked();
-		expect( getPluginCheckbox( 'Google for WooCommerce' ) ).toBeChecked();
-		expect( getPluginCheckbox( 'MailPoet' ) ).toBeChecked();
-		expect(
-			screen
-				.getByText( 'Jetpack' )
-				.closest( '.woocommerce-profiler-plugins-plugin-card' )
-		).toHaveClass( 'is-installed' );
+		expect( mockSendEvent ).toHaveBeenCalledWith( {
+			type: 'PLUGINS_INSTALLATION_REQUESTED',
+			payload: {
+				pluginsSelected: [ 'plugin1' ],
+				pluginsShown: [ 'plugin1', 'plugin2', 'plugin3', 'plugin4' ],
+				pluginsUnselected: [ 'plugin3', 'plugin4' ],
+			},
+		} );
 	} );
 
-	it( 'completes without selecting when every plugin is installed', async () => {
+	it( 'handles case where all plugins are already installed', () => {
 		render(
 			<Plugins
 				context={ {
 					...mockContext,
 					pluginsAvailable: mockContext.pluginsAvailable.map(
-						( plugin ) => ( { ...plugin, is_activated: true } )
+						( plugin ) => ( {
+							...plugin,
+							is_activated: true,
+						} )
 					),
 				} }
 				sendEvent={ mockSendEvent }
 				navigationProgress={ navigationProgress }
 			/>
 		);
-
+		const plugin1Card = screen
+			.getByText( 'Plugin 1' )
+			.closest( '.woocommerce-profiler-plugins-plugin-card' );
+		expect( plugin1Card ).toHaveClass( 'is-installed' );
+		expect( plugin1Card ).toHaveTextContent( 'Installed' );
 		expect(
 			screen
-				.getByRole( 'heading', { level: 3, name: 'WooPayments' } )
+				.getByText( 'Plugin 2' )
 				.closest( '.woocommerce-profiler-plugins-plugin-card' )
 		).toHaveTextContent( 'Installed' );
-
-		await userEvent.click( screen.getByText( 'Continue' ) );
-
+		const continueButton = screen.getByText( 'Continue' );
+		fireEvent.click( continueButton );
 		expect( mockSendEvent ).toHaveBeenCalledWith( {
 			type: 'PLUGINS_PAGE_COMPLETED_WITHOUT_SELECTING_PLUGINS',
 		} );
 	} );
 
-	it( 'retries the previous selection after an installation error', async () => {
+	it( 'initialises with all plugins selected when there were no errors previously', () => {
+		render(
+			<Plugins
+				context={ mockContext }
+				sendEvent={ mockSendEvent }
+				navigationProgress={ navigationProgress }
+			/>
+		);
+		const checkboxLabels = screen.getAllByRole( 'checkbox' );
+		expect( checkboxLabels ).toHaveLength( 3 );
+		checkboxLabels.forEach( ( checkbox ) => {
+			expect( checkbox ).toBeChecked();
+		} );
+	} );
+
+	it( 'initialises with the previous selection correctly when there were errors previously', () => {
 		render(
 			<Plugins
 				context={ {
 					...mockContext,
+					pluginsAvailable: [ ...mockContext.pluginsAvailable ],
 					pluginsInstallationErrors: [
 						{
-							plugin: 'woocommerce-payments',
+							plugin: 'plugin4',
 							error: 'Installation failed',
 							errorDetails: {
 								data: {
@@ -169,72 +202,102 @@ describe( 'Plugins Component', () => {
 							},
 						},
 					],
-					pluginsSelected: [ 'woocommerce-payments', 'mailpoet:alt' ],
+					pluginsSelected: [ 'plugin4' ],
 				} }
 				sendEvent={ mockSendEvent }
 				navigationProgress={ navigationProgress }
 			/>
 		);
-
 		expect(
 			screen.getByText(
 				/Oops! We encountered a problem while installing/
 			)
 		).toBeInTheDocument();
-		expect( getPluginCheckbox( 'WooPayments' ) ).toBeChecked();
-		expect(
-			getPluginCheckbox( 'Google for WooCommerce' )
-		).not.toBeChecked();
-		expect( getPluginCheckbox( 'MailPoet' ) ).toBeChecked();
-
-		await userEvent.click( screen.getByText( 'Please try again' ) );
-
-		expect( mockSendEvent ).toHaveBeenCalledWith( {
-			type: 'PLUGINS_INSTALLATION_REQUESTED',
-			payload: {
-				pluginsShown: [
-					'woocommerce-payments',
-					'google-listings-and-ads',
-					'jetpack',
-					'mailpoet',
-				],
-				pluginsSelected: [ 'woocommerce-payments', 'mailpoet' ],
-				pluginsUnselected: [ 'google-listings-and-ads' ],
-			},
-		} );
+		const checkbox1 = screen
+			.getByText( 'Plugin 1' )
+			.closest( '.woocommerce-profiler-plugins-plugin-card' )
+			?.querySelector( 'input[type="checkbox"]' );
+		expect( checkbox1 ).not.toBeChecked();
+		const checkbox3 = screen
+			.getByText( 'Plugin 3' )
+			.closest( '.woocommerce-profiler-plugins-plugin-card' )
+			?.querySelector( 'input[type="checkbox"]' );
+		expect( checkbox3 ).not.toBeChecked();
+		const checkbox4 = screen
+			// use role because error message also contains the plugin name
+			.getByRole( 'heading', { level: 3, name: 'Plugin 4' } )
+			.closest( '.woocommerce-profiler-plugins-plugin-card' )
+			?.querySelector( 'input[type="checkbox"]' );
+		expect( checkbox4 ).toBeChecked();
 	} );
 
-	it( 'submits normalized shown, selected, and unselected plugin keys', async () => {
-		render(
+	it( 'keeps an :alt-keyed plugin selected when retrying after an installation error', () => {
+		const context = {
+			...mockContext,
+			pluginsAvailable: [ ...mockContext.pluginsAvailable, altPlugin ],
+		};
+		const { unmount } = render(
 			<Plugins
-				context={ mockContext }
+				context={ context }
 				sendEvent={ mockSendEvent }
 				navigationProgress={ navigationProgress }
 			/>
 		);
+		fireEvent.click( screen.getByText( 'Continue' ) );
+		const { pluginsSelected } =
+			mockSendEvent.mock.calls[ mockSendEvent.mock.calls.length - 1 ][ 0 ]
+				.payload;
+		unmount();
 
-		await userEvent.click( getPluginCheckbox( 'MailPoet' ) );
-		await userEvent.click( screen.getByText( 'Continue' ) );
-
-		expect( mockSendEvent ).toHaveBeenCalledWith( {
-			type: 'PLUGINS_INSTALLATION_REQUESTED',
-			payload: {
-				pluginsShown: [
-					'woocommerce-payments',
-					'google-listings-and-ads',
-					'jetpack',
-					'mailpoet',
-				],
-				pluginsSelected: [
-					'woocommerce-payments',
-					'google-listings-and-ads',
-				],
-				pluginsUnselected: [ 'mailpoet' ],
-			},
-		} );
+		// The state machine stores the submitted selection and returns to this page on errors.
+		render(
+			<Plugins
+				context={ {
+					...context,
+					pluginsSelected,
+					pluginsInstallationErrors: [
+						installationError( 'plugin5:alt' ),
+					],
+				} }
+				sendEvent={ mockSendEvent }
+				navigationProgress={ navigationProgress }
+			/>
+		);
+		const checkbox5 = screen
+			.getByRole( 'heading', { level: 3, name: 'Plugin 5' } )
+			.closest( '.woocommerce-profiler-plugins-plugin-card' )
+			?.querySelector( 'input[type="checkbox"]' );
+		expect( checkbox5 ).toBeChecked();
 	} );
 
-	it( 'handles skip action', async () => {
+	it( 'names an :alt-keyed plugin in the installation error banner', () => {
+		render(
+			<Plugins
+				context={ {
+					...mockContext,
+					pluginsAvailable: [
+						...mockContext.pluginsAvailable,
+						altPlugin,
+					],
+					pluginsInstallationErrors: [
+						installationError( 'plugin5:alt' ),
+					],
+					pluginsSelected: [ 'plugin5:alt' ],
+				} }
+				sendEvent={ mockSendEvent }
+				navigationProgress={ navigationProgress }
+			/>
+		);
+		expect(
+			screen.getByText(
+				/Oops! We encountered a problem while installing/
+			)
+		).toHaveTextContent(
+			'Oops! We encountered a problem while installing Plugin 5.'
+		);
+	} );
+
+	it( 'handles skip action', () => {
 		render(
 			<Plugins
 				context={ mockContext }
@@ -243,7 +306,7 @@ describe( 'Plugins Component', () => {
 			/>
 		);
 		const skipButton = screen.getByText( 'Skip this step' );
-		await userEvent.click( skipButton );
+		fireEvent.click( skipButton );
 		expect( mockSendEvent ).toHaveBeenCalledWith( {
 			type: 'PLUGINS_PAGE_SKIPPED',
 		} );
@@ -257,6 +320,24 @@ describe( 'computePluginsSelection', () => {
 		{ key: 'plugin3', is_activated: false },
 	];
 
+	it( 'preserves Tax and alternate selection keys while normalizing shown slugs', () => {
+		const plugins = [
+			{ key: 'woocommerce-services:tax', is_activated: false },
+			{ key: 'mailpoet:alt', is_activated: false },
+		] as Extension[];
+
+		const result = computePluginsSelection( plugins, new Set( plugins ) );
+
+		expect( result.selectedPluginKeys ).toEqual( [
+			'woocommerce-services:tax',
+			'mailpoet:alt',
+		] );
+		expect( result.pluginsShown ).toEqual( [
+			'woocommerce-services:tax',
+			'mailpoet',
+		] );
+	} );
+
 	it( 'correctly computes selection when no plugins are selected', () => {
 		const selectedPlugins = new Set< Extension >();
 		const result = computePluginsSelection(
@@ -267,7 +348,7 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
 			pluginsUnselected: [ 'plugin1', 'plugin3' ],
-			selectedPluginSlugs: [],
+			selectedPluginKeys: [],
 		} );
 	} );
 
@@ -284,7 +365,7 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
 			pluginsUnselected: [],
-			selectedPluginSlugs: [ 'plugin1', 'plugin3' ],
+			selectedPluginKeys: [ 'plugin1', 'plugin3' ],
 		} );
 	} );
 
@@ -300,7 +381,33 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [ 'plugin1', 'plugin2', 'plugin3' ],
 			pluginsUnselected: [ 'plugin3' ],
-			selectedPluginSlugs: [ 'plugin1' ],
+			selectedPluginKeys: [ 'plugin1' ],
+		} );
+	} );
+
+	it( 'keeps the full key of a selected :alt plugin and reports its slug to Tracks', () => {
+		const selectedPlugins = new Set< Extension >( [
+			{ key: 'plugin4:alt' } as Extension,
+		] );
+		const result = computePluginsSelection(
+			[
+				...mockPluginsAvailable,
+				{ key: 'plugin4:alt', is_activated: false },
+				{ key: 'plugin5:alt', is_activated: false },
+			] as Extension[],
+			selectedPlugins
+		);
+
+		expect( result ).toEqual( {
+			pluginsShown: [
+				'plugin1',
+				'plugin2',
+				'plugin3',
+				'plugin4',
+				'plugin5',
+			],
+			pluginsUnselected: [ 'plugin1', 'plugin3', 'plugin5' ],
+			selectedPluginKeys: [ 'plugin4:alt' ],
 		} );
 	} );
 
@@ -311,7 +418,7 @@ describe( 'computePluginsSelection', () => {
 		expect( result ).toEqual( {
 			pluginsShown: [],
 			pluginsUnselected: [],
-			selectedPluginSlugs: [],
+			selectedPluginKeys: [],
 		} );
 	} );
 } );

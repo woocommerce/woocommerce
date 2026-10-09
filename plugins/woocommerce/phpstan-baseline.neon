@@ -2749,12 +2749,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Cannot access property \$post_title on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Cannot call method remove_help_tabs\(\) on WP_Screen\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -10279,18 +10273,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Class WP_Error referenced with incorrect case\: WP_ERROR\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -10644,7 +10626,6 @@ parameters:
 			count: 1
 			path: includes/class-wc-comments.php
 
-
 		-
 			message: '#^Method WC_Countries\:\:country_dropdown_options\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -10898,12 +10879,6 @@ parameters:
 			path: includes/class-wc-customer.php
 
 		-
-			message: '#^Method WC_Data_Store\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
 			message: '#^Method WC_Data_Store\:\:delete\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10924,12 +10899,6 @@ parameters:
 		-
 			message: '#^Method WC_Data_Store\:\:read_multiple\(\) has parameter \$objects with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/class-wc-data-store.php
-
-		-
-			message: '#^Method WC_Data_Store\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-data-store.php
 
@@ -16558,13 +16527,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -16682,12 +16651,6 @@ parameters:
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Return type \(void\) of method Abstract_WC_Order_Data_Store_CPT\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:delete_metadata\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -16715,12 +16678,6 @@ parameters:
 			message: '#^Method Abstract_WC_Order_Item_Type_Data_Store\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: includes/data-stores/abstract-wc-order-item-type-data-store.php
-
-		-
-			message: '#^Method Abstract_WC_Order_Item_Type_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
 			path: includes/data-stores/abstract-wc-order-item-type-data-store.php
 
 		-
@@ -16762,13 +16719,13 @@ parameters:
 		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
@@ -16781,18 +16738,6 @@ parameters:
 			message: '#^Method WC_Coupon_Data_Store_CPT\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
-
-		-
-			message: '#^Method WC_Coupon_Data_Store_CPT\:\:delete\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
-
-		-
-			message: '#^Method WC_Coupon_Data_Store_CPT\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
 			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
 
 		-
@@ -16828,12 +16773,6 @@ parameters:
 		-
 			message: '#^Method WC_Customer_Data_Store_Session\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-customer-data-store-session.php
-
-		-
-			message: '#^Method WC_Customer_Data_Store_Session\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/data-stores/class-wc-customer-data-store-session.php
 
@@ -16876,18 +16815,6 @@ parameters:
 		-
 			message: '#^Method WC_Customer_Data_Store\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-customer-data-store.php
-
-		-
-			message: '#^Method WC_Customer_Data_Store\:\:delete\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: includes/data-stores/class-wc-customer-data-store.php
-
-		-
-			message: '#^Method WC_Customer_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/data-stores/class-wc-customer-data-store.php
 
@@ -17540,20 +17467,8 @@ parameters:
 			path: includes/data-stores/class-wc-order-refund-data-store-cpt.php
 
 		-
-			message: '#^Return type \(void\) of method WC_Order_Refund_Data_Store_CPT\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: includes/data-stores/class-wc-order-refund-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Payment_Token_Data_Store\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-payment-token-data-store.php
-
-		-
-			message: '#^Method WC_Payment_Token_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/data-stores/class-wc-payment-token-data-store.php
 
@@ -17633,18 +17548,6 @@ parameters:
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
-			message: '#^Method WC_Product_Data_Store_CPT\:\:delete\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
-			message: '#^Method WC_Product_Data_Store_CPT\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
@@ -17897,12 +17800,6 @@ parameters:
 			message: '#^Parameter \#1 \$str of function strtoupper expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 3
-			path: includes/data-stores/class-wc-shipping-zone-data-store.php
-
-		-
-			message: '#^Return type \(void\) of method WC_Shipping_Zone_Data_Store\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
 			path: includes/data-stores/class-wc-shipping-zone-data-store.php
 
 		-
@@ -18749,24 +18646,6 @@ parameters:
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
 			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Cannot call method get_billing_email\(\) on object\|true\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Cannot call method get_billing_first_name\(\) on object\|true\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Cannot call method get_billing_last_name\(\) on object\|true\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: includes/emails/class-wc-email.php
 
 		-
@@ -30611,12 +30490,6 @@ parameters:
 			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
 
 		-
-			message: '#^Function remove_shortcode invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
-
-		-
 			message: '#^Method WC_Shipping_Flat_Rate\:\:calculate_shipping\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -31623,12 +31496,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/tracks/class-wc-tracks-footer-pixel.php
-
-		-
-			message: '#^Binary operation "\." between array\|string and ''\://'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/tracks/class-wc-tracks.php
 
 		-
 			message: '#^Method WC_Tracks\:\:track_woocommerce_allow_tracking_toggled\(\) has no return type specified\.$#'
@@ -35239,7 +35106,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -35803,12 +35670,6 @@ parameters:
 		-
 			message: '#^Action callback returns array but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/wccom-site/class-wc-wccom-site.php
-
-		-
-			message: '#^Method WC_WCCOM_Site\:\:authenticate_wccom\(\) should return int\|false but returns WP_User\.$#'
-			identifier: return.type
 			count: 1
 			path: includes/wccom-site/class-wc-wccom-site.php
 
@@ -44867,18 +44728,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
 
 		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:delete_meta\(\) should be compatible with return type \(array\) of method WC_Object_Data_Store_Interface\:\:delete_meta\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
 			message: '#^Call to function is_object\(\) with ''''\|''0''\|array will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
@@ -46231,12 +46080,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Notes\\DataStore\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/Notes/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Notes\\DataStore\:\:delete\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: src/Admin/Notes/DataStore.php
 
@@ -49301,12 +49144,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AllReviews.php
 
 		-
-			message: '#^Return type \(null\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AtomicBlock\:\:get_block_type_editor_script\(\) should be compatible with return type \(array\|string\) of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:get_block_type_editor_script\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Blocks/BlockTypes/AtomicBlock.php
-
-		-
 			message: '#^Cannot access property \$term_id on WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -50045,12 +49882,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''bdi'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50485,18 +50316,6 @@ parameters:
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
-			message: '#^Static property Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:\$cart is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/Blocks/BlockTypes/ProductButton.php
 
@@ -51869,12 +51688,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
 			message: '#^Parameter \#1 \$weight of function wc_format_weight expects float, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -52663,12 +52476,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutLink\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/CheckoutLink.php
-
-		-
-			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Domain/Services/CheckoutLink.php
 
@@ -60089,6 +59896,18 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
+			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
 			message: '#^Cannot call method get_download_permissions_granted\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -60542,18 +60361,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Return type \(bool\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:delete_meta\(\) should be compatible with return type \(array\) of method WC_Object_Data_Store_Interface\:\:delete_meta\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Variable \$ids in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
@@ -60770,12 +60577,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
 		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableRefundDataStore\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
 			message: '#^Binary operation "\." between ''\\'''' and non\-empty\-array\|string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -60862,18 +60663,6 @@ parameters:
 		-
 			message: '#^Parameter &\$notification by\-ref type of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:update_meta\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, WC_Data given\.$#'
 			identifier: parameterByRef.type
-			count: 1
-			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
-
-		-
-			message: '#^Return type \(bool\) of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:delete_meta\(\) should be compatible with return type \(array\) of method WC_Object_Data_Store_Interface\:\:delete_meta\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
-
-		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
 			count: 1
 			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
 
@@ -62092,7 +61881,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, \(int\|string\) given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/ProductAttributesLookup/Filterer.php
 
 		-
@@ -62612,19 +62401,7 @@ parameters:
 			path: src/Internal/ProductFilters/QueryClauses.php
 
 		-
-			message: '#^Variable \$chosen_attributes in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
 			message: '#^Variable \$stock_statuses in empty\(\) always exists and is not falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
-			message: '#^Variable \$term_ids in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
 			path: src/Internal/ProductFilters/QueryClauses.php
@@ -66728,12 +66505,6 @@ parameters:
 			path: src/Internal/Utilities/PluginInstaller.php
 
 		-
-			message: '#^Parameter \$product_or_id of method Automattic\\WooCommerce\\Internal\\Utilities\\ProductUtil\:\:delete_product_specific_transients\(\) has invalid type Automattic\\WooCommerce\\Internal\\Utilities\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Utilities/ProductUtil.php
-
-		-
 			message: '#^Cannot assign offset ''drive'' to array\<null\>\|string\.$#'
 			identifier: offsetAssign.dimType
 			count: 1
@@ -68342,18 +68113,6 @@ parameters:
 			path: src/StoreApi/Schemas/ExtendSchema.php
 
 		-
-			message: '#^Variable \$data might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
-			message: '#^Variable \$schema might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: src/StoreApi/Schemas/ExtendSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractAddressSchema\:\:sanitize_callback\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -69482,30 +69241,6 @@ parameters:
 			path: src/StoreApi/Utilities/PaymentUtils.php
 
 		-
-			message: '#^Call to method get_id\(\) on an unknown class WC_Token\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\PaymentUtils\:\:get_saved_payment_methods\(\) should return array but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
-			message: '#^Parameter \$token of method Automattic\\WooCommerce\\StoreApi\\Utilities\\PaymentUtils\:\:include_token_id_with_payment_methods\(\) has invalid type WC_Token\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/StoreApi/Utilities/PaymentUtils.php
-
-		-
 			message: '#^Binary operation "/" between int\|string and \(float\|int\) results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -69536,18 +69271,6 @@ parameters:
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-
-			message: '#^Offset ''tax_query'' does not exist on non\-empty\-array\<''date_query''\|''fields''\|''ignore_sticky_posts''\|''max_price''\|''min_price''\|''offset''\|''order''\|''orderby''\|''paged''\|''post__in''\|''post__not_in''\|''post_parent__in''\|''post_parent__not_in''\|''post_status''\|''post_type''\|''posts_per_page''\|''search''\|''sku''\|''slug''\|''stock_status'', mixed\>\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Offset ''tax_query'' on non\-empty\-array\<''date_query''\|''fields''\|''ignore_sticky_posts''\|''max_price''\|''min_price''\|''offset''\|''order''\|''orderby''\|''paged''\|''post__in''\|''post__not_in''\|''post_parent__in''\|''post_parent__not_in''\|''post_status''\|''post_type''\|''posts_per_page''\|''search''\|''sku''\|''slug''\|''stock_status'', mixed\> in empty\(\) does not exist\.$#'
-			identifier: empty.offset
-			count: 2
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -69556,7 +69279,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, list\<array\|string\> given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-

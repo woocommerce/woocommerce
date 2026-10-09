@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Split the taxable amount of the Analytics Taxes report into Order gross and Shipping gross columns.

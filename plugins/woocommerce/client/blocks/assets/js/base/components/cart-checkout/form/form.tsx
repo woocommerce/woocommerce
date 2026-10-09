@@ -410,7 +410,7 @@ const Form = <
 								field.key in values
 									? ( values[
 											field.key as keyof T
-									  ] as string )
+										] as string )
 									: ''
 							}
 							onChange={ ( newValue: string ) => {
@@ -451,7 +451,7 @@ const Form = <
 											/>
 										</span>
 									),
-							  }
+								}
 							: {} ) }
 						ariaDescribedBy={ ariaDescribedBy }
 						value={

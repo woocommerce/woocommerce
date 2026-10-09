@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -12,6 +15,15 @@ use WC_Unit_Test_Case;
  * Tests for the NewOrderNotification class.
  */
 class NewOrderNotificationTest extends WC_Unit_Test_Case {
+
+	/**
+	 * A fixed trigger time and its expected ISO 8601 rendering. Asserting
+	 * against a literal keeps the test from recomputing the expected value with
+	 * the same `gmdate()` call the payload uses.
+	 */
+	private const TRIGGERED_AT     = 1700000000;
+	private const TRIGGERED_AT_ISO = '2023-11-14T22:13:20+00:00';
+
 	/**
 	 * @testdox Should return a payload with all required keys for an existing order.
 	 */
@@ -92,15 +104,42 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when order total exceeds min_amount.
+	 * @testdox Should use the recorded trigger time for the payload timestamp.
 	 */
-	public function test_should_send_to_user_when_order_total_above_threshold(): void {
+	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$order->update_meta_data( NotificationProcessor::TRIGGERED_META_KEY, (string) self::TRIGGERED_AT );
+		$order->save_meta_data();
+
+		$payload = $notification->to_payload();
+
+		$this->assertSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the current time when no trigger time is recorded.
+	 */
+	public function test_to_payload_timestamp_falls_back_to_current_time(): void {
+		$order        = WC_Helper_Order::create_order();
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$payload = $notification->to_payload();
+
+		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return null when order total exceeds min_amount.
+	 */
+	public function test_suppression_reason_when_order_total_above_threshold(): void {
 		$order = $this->create_order_with_total( 100 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => 50,
@@ -110,15 +149,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when order total equals min_amount.
+	 * @testdox get_suppression_reason should return null when order total equals min_amount.
 	 */
-	public function test_should_send_to_user_when_order_total_equals_threshold(): void {
+	public function test_suppression_reason_when_order_total_equals_threshold(): void {
 		$order = $this->create_order_with_total( 50 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => 50,
@@ -128,15 +167,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when order total is below min_amount.
+	 * @testdox get_suppression_reason should return a reason when order total is below min_amount.
 	 */
 	public function test_should_not_send_to_user_when_order_total_below_threshold(): void {
 		$order = $this->create_order_with_total( 30 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => 50,
@@ -146,15 +185,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when min_amount is null (no threshold).
+	 * @testdox get_suppression_reason should return null when min_amount is null (no threshold).
 	 */
-	public function test_should_send_to_user_when_min_amount_is_null(): void {
+	public function test_suppression_reason_when_min_amount_is_null(): void {
 		$order = $this->create_order_with_total( 1 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user(
+		$this->assertNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => true,
 					'min_amount' => null,
@@ -164,15 +203,15 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return false when notification is disabled, regardless of amount.
+	 * @testdox get_suppression_reason should return a reason when notification is disabled, regardless of amount.
 	 */
 	public function test_should_not_send_to_user_when_disabled(): void {
 		$order = $this->create_order_with_total( 1000 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertFalse(
-			$notification->should_send_to_user(
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
 				array(
 					'enabled'    => false,
 					'min_amount' => null,
@@ -182,16 +221,66 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_send_to_user should return true when min_amount key is missing (backwards compat).
+	 * @testdox get_suppression_reason should return null when min_amount key is missing (backwards compat).
 	 */
-	public function test_should_send_to_user_when_min_amount_missing(): void {
+	public function test_suppression_reason_when_min_amount_missing(): void {
 		$order = $this->create_order_with_total( 1 );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 
-		$this->assertTrue(
-			$notification->should_send_to_user( array( 'enabled' => true ) )
+		$this->assertNull(
+			$notification->get_suppression_reason( array( 'enabled' => true ) )
 		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the type toggle when it is off, before any amount check.
+	 */
+	public function test_get_suppression_reason_type_disabled_wins(): void {
+		$order        = $this->create_order_with_total( 10 );
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => false,
+				'min_amount' => 50,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the minimum amount when the order total is below it.
+	 */
+	public function test_get_suppression_reason_below_min_amount(): void {
+		$order        = $this->create_order_with_total( 10 );
+		$notification = new NewOrderNotification( $order->get_id() );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'min_amount' => 50,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::BELOW_MIN_AMOUNT, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should report a missing order when it cannot be loaded.
+	 */
+	public function test_get_suppression_reason_order_missing(): void {
+		$notification = new NewOrderNotification( 999999 );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'min_amount' => 50,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::ORDER_MISSING, $reason );
 	}
 
 	/**

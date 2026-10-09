@@ -97,7 +97,7 @@ jobs:
               - '.github/workflows/scripts/docs-link-check-policy-test.sh'
               - '.github/workflows/scripts/install-lychee.sh'
             needs-syncpack-validation:
-              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)'
+              - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
@@ -584,7 +584,7 @@ jobs:
       matrix:
         report: ${{ fromJSON( needs.project-jobs.outputs.report-jobs ) }}
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
 
@@ -662,6 +662,25 @@ jobs:
               .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
               .write();
 
+      - name: 'Download merged artifact'
+        if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ runner.temp }}/merged-artifact
+
+      - name: 'Upload CTRF report'
+        if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ORG_A8C_TEST_REPORTS_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ORG_A8C_TEST_REPORTS_S3_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+          S3_ROOT: ${{ secrets.ORG_A8C_TEST_REPORTS_S3_ROOT }}
+          SOURCE_PATH: ${{ runner.temp }}/merged-artifact
+        run: |
+          aws s3 cp "$SOURCE_PATH" "${S3_ROOT%/}/reports/ctrf/woocommerce/" \
+            --recursive --exclude '*' --include 'ctrf-report-*.json' --no-progress
+
   validate-syncpack:
     name: 'Validate dependencies version'
     if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-syncpack-validation == 'true' }}
@@ -674,6 +693,15 @@ jobs:
     steps:
       - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
 
+      - name: 'Validate - Node version sources agree'
+        run: |
+          nvmrc="$(tr -d 'v[:space:]' < .nvmrc)"
+          workspace="$(sed -nE "s/^useNodeVersion:[[:space:]]*['\"]?([^'\"#[:space:]]+).*/\1/p" pnpm-workspace.yaml)"
+          if [ -z "$nvmrc" ] || [ -z "$workspace" ] || [ "$nvmrc" != "$workspace" ]; then
+            echo "::error::.nvmrc ($nvmrc) and useNodeVersion in pnpm-workspace.yaml ($workspace) must name the same Node version."
+            exit 1
+          fi
+
       - name: 'Setup - node'
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -683,10 +711,11 @@ jobs:
         run: npm install -g syncpack@15.3.3
 
       - name: 'Validate - mismatches'
+        id: syncpack
         run: syncpack lint
 
       - name: 'Validate - prompt mitigation on failed validation'
-        if: failure()
+        if: ${{ !cancelled() && steps.syncpack.outcome == 'failure' }}
         run: |
           echo "Dependency version mismatch detected. This can usually be fixed automatically by updating the dependency version in \`.syncpackrc\` or \`pnpm-workspace.yaml\`, then running: \`pnpm sync-dependencies\`"
           exit 1

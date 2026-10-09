@@ -172,7 +172,7 @@ class ShippingRates extends Component {
 				method: 'POST',
 				path: shippingMethod
 					? // Update the first existing method if one exists, otherwise create a new one.
-					  `/wc/v3/shipping/zones/${ zone.id }/methods/${ shippingMethod.instance_id }`
+						`/wc/v3/shipping/zones/${ zone.id }/methods/${ shippingMethod.instance_id }`
 					: `/wc/v3/shipping/zones/${ zone.id }/methods`,
 				data: {
 					method_id: methodType,
@@ -244,7 +244,7 @@ class ShippingRates extends Component {
 				shippingMethods.length && shippingMethods[ 0 ].settings.cost
 					? this.getFormattedRate(
 							shippingMethods[ 0 ].settings.cost.value
-					  )
+						)
 					: formatDecimalString( 0 );
 			values[ `${ zone.id }_rate` ] = rate;
 

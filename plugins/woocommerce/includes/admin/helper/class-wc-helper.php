@@ -1290,7 +1290,8 @@ class WC_Helper {
 		do_action( 'woocommerce_helper_subscriptions_refresh' );
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		// Keep the cached updates so they're still listed if the forced check fails.
+		WC_Helper_Updater::expire_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
 
 		// A manual refresh resets any rate-limit backoff so the subsequent
@@ -1681,7 +1682,7 @@ class WC_Helper {
 	/**
 	 * Get subscription state of a given product ID.
 	 *
-	 * @since TBD
+	 * @since 9.2.0
 	 *
 	 * @param int $product_id The product id.
 	 *
@@ -3289,6 +3290,8 @@ class WC_Helper {
 		}
 
 		self::_flush_subscriptions_cache();
+		// A backoff from the pre-connect (public) update-check shouldn't block the first authenticated one.
+		WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
 	}

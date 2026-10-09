@@ -10,28 +10,28 @@ import {
 } from '@wordpress/global-styles-engine';
 import {
 	FontSizePicker,
-	__experimentalToolsPanel as ToolsPanel, // eslint-disable-line
-	__experimentalToolsPanelItem as ToolsPanelItem, // eslint-disable-line
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-// eslint-disable-next-line
+
 import {
 	useSettings,
 	// We can remove the ts-expect-error comments once the types are available.
 	// @see packages/block-editor/src/components/index.js
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalFontAppearanceControl as FontAppearanceControl, // eslint-disable-line
+	__experimentalFontAppearanceControl as FontAppearanceControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalLetterSpacingControl as LetterSpacingControl, // eslint-disable-line
+	__experimentalLetterSpacingControl as LetterSpacingControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalFontFamilyControl as FontFamilyControl, // eslint-disable-line
+	__experimentalFontFamilyControl as FontFamilyControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
 	LineHeightControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalTextDecorationControl as TextDecorationControl, // eslint-disable-line
+	__experimentalTextDecorationControl as TextDecorationControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalTextTransformControl as TextTransformControl, // eslint-disable-line
+	__experimentalTextTransformControl as TextTransformControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients, // eslint-disable-line
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
 } from '@wordpress/block-editor';
 
 /**
@@ -70,6 +70,7 @@ export function TypographyElementPanel( {
 		'typography.fontSizes',
 		'typography.fontFamilies'
 	);
+	const [ availableUnits ] = useSettings( 'spacing.units' ) as [ string[] ];
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
@@ -123,7 +124,7 @@ export function TypographyElementPanel( {
 				{ settings: theme?.settings },
 				'',
 				userTextColor
-		  )
+			)
 		: undefined;
 
 	const hasTextColor = () => !! userTextColor;
@@ -165,7 +166,7 @@ export function TypographyElementPanel( {
 						undefined,
 						'color.text',
 						newValue
-				  );
+					);
 		updateElementStyleProp( [ 'color', 'text' ], encodedValue );
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_text_color',
@@ -338,6 +339,7 @@ export function TypographyElementPanel( {
 						value={ fontSize }
 						onChange={ setFontSize }
 						fontSizes={ fontSizes }
+						units={ availableUnits }
 						disableCustomFontSizes={ false }
 						withReset={ false }
 						withSlider
