@@ -134,6 +134,32 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Price bounds are taken in minor units and applied against the stored price.
+	 */
+	public function test_search_price_filter_takes_minor_units(): void {
+		list( $older, $newest ) = self::$product_ids;
+
+		// Both fixtures carry the "UCP" prefix, so the query scopes the assertions to them.
+		$above = $this->post(
+			'/catalog/search',
+			array(
+				'query'   => 'UCP',
+				'filters' => array( 'price' => array( 'min' => 1000 ) ),
+			)
+		)->get_data();
+		$this->assertSame( array( (string) $newest ), wp_list_pluck( $above['products'], 'id' ) );
+
+		$below = $this->post(
+			'/catalog/search',
+			array(
+				'query'   => 'UCP',
+				'filters' => array( 'price' => array( 'max' => 1000 ) ),
+			)
+		)->get_data();
+		$this->assertSame( array( (string) $older ), wp_list_pluck( $below['products'], 'id' ) );
+	}
+
+	/**
 	 * Lookup resolves both product IDs and SKUs, and reports misses as messages.
 	 */
 	public function test_lookup_resolves_ids_and_skus(): void {

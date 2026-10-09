@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
 /**
@@ -26,7 +28,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 	/**
 	 * Maximum accepted length of the free-text `query`, in bytes.
 	 *
-	 * The term reaches a `LIKE` scan over post titles and content, so its length
+	 * The term reaches a `LIKE` scan over product titles and SKUs, so its length
 	 * is paid per row examined.
 	 */
 	const MAX_QUERY_LENGTH = 256;
@@ -110,33 +112,12 @@ class CatalogSearch extends AbstractCatalogRoute {
 		$limit  = isset( $pagination['limit'] ) ? min( max( (int) $pagination['limit'], 1 ), 100 ) : 10;
 		$offset = $this->decode_cursor( isset( $pagination['cursor'] ) ? (string) $pagination['cursor'] : '' );
 
-		$query_args = array(
-			'status'     => 'publish',
-			'limit'      => $limit + 1,
-			'offset'     => $offset,
-			'orderby'    => 'date',
-			'order'      => 'DESC',
-			'visibility' => 'catalog',
-		);
+		$results = $this->query_products( $this->store_api_params( $query, $filters, $limit, $offset ) );
+		$mapped  = $this->mapper()->map_products( $results['objects'] );
 
-		if ( '' !== $query ) {
-			$query_args['s'] = $query;
-		}
+		$pagination_result = array( 'has_next_page' => $offset + $limit < $results['total'] );
 
-		// Page and total come from one bounded query; the total is never obtained
-		// by materializing every matching product ID.
-		$search_result = $this->query_products_with_total( $this->apply_query_filters( $query_args, $filters ) );
-		$products      = $search_result['products'];
-
-		$has_next_page = count( $products ) > $limit;
-		if ( $has_next_page ) {
-			array_pop( $products );
-		}
-
-		$mapped            = $this->mapper()->map_products( $products );
-		$pagination_result = array( 'has_next_page' => $has_next_page );
-
-		if ( $has_next_page ) {
+		if ( $pagination_result['has_next_page'] ) {
 			$pagination_result['cursor'] = $this->encode_cursor( $offset + $limit );
 		}
 
@@ -144,7 +125,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 		// Cleaning them up is an expensive operation which opens the door for DOS-attacks,
 		// so we don't do it. Instead, we report the inflated total count, and let the client
 		// sort out the mismatch.
-		$pagination_result['total_count'] = $search_result['total'];
+		$pagination_result['total_count'] = $results['total'];
 
 		$response = array(
 			'ucp'        => $this->ucp_metadata(),
@@ -234,178 +215,112 @@ class CatalogSearch extends AbstractCatalogRoute {
 	}
 
 	/**
-	 * Apply catalog filters to product query arguments.
+	 * Translate the UCP search body into Store API product collection parameters.
 	 *
-	 * @param array $query_args Current query arguments.
-	 * @param array $filters Request filters.
-	 * @return array Query arguments, plus a `meta_query` key the caller injects separately.
+	 * Price bounds pass through unchanged: both UCP and the Store API take them in
+	 * minor units, and ProductQuery converts them to the store's decimals and
+	 * adjusts them for the shop's tax display mode itself.
+	 *
+	 * @param string $query Free-text search term.
+	 * @param array  $filters Request filters.
+	 * @param int    $limit Page size.
+	 * @param int    $offset Offset of the first result.
+	 * @return array
 	 */
-	private function apply_query_filters( array $query_args, array $filters ): array {
-		if ( ! empty( $filters['categories'] ) && is_array( $filters['categories'] ) ) {
-			// Deduplicate and cap: one request must not drive an unbounded number
-			// of term lookups on an unauthenticated endpoint.
-			$category_refs = array_slice( array_unique( $filters['categories'] ), 0, self::MAX_CATEGORY_FILTERS );
+	private function store_api_params( string $query, array $filters, int $limit, int $offset ): array {
+		$params = array(
+			'orderby'            => 'date',
+			'order'              => 'desc',
+			'per_page'           => $limit,
+			'offset'             => $offset,
+			'catalog_visibility' => CatalogVisibility::CATALOG,
+		);
 
-			$slugs = array();
-			foreach ( $category_refs as $category_ref ) {
-				$category_ref = (string) $category_ref;
-				// WC_Product_Query's `category` argument matches term SLUGS, not
-				// ids — an id array silently matches nothing. Resolve id refs to
-				// their slug and validate that slug refs exist.
-				$term = ctype_digit( $category_ref )
-					? get_term_by( 'id', (int) $category_ref, 'product_cat' )
-					: get_term_by( 'slug', $category_ref, 'product_cat' );
-				if ( $term instanceof \WP_Term ) {
-					$slugs[] = $term->slug;
-				}
-			}
+		if ( '' !== $query ) {
+			$params['search'] = $query;
+		}
+
+		if ( ! empty( $filters['categories'] ) && is_array( $filters['categories'] ) ) {
+			$slugs = $this->resolve_category_slugs( $filters['categories'] );
 
 			if ( ! empty( $slugs ) ) {
-				$query_args['category'] = $slugs;
+				$params['category'] = $slugs;
 			}
 		}
 
-		$price_clause = $this->build_price_clause( isset( $filters['price'] ) && is_array( $filters['price'] ) ? $filters['price'] : array() );
-		if ( null !== $price_clause ) {
-			$query_args['meta_query'] = $price_clause; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		}
-
-		return $query_args;
-	}
-
-	/**
-	 * Build the `_price` meta_query clause for a UCP price filter.
-	 *
-	 * `min_price`/`max_price` are not valid WC_Product_Query vars and are silently
-	 * discarded, and WC_Product_Query also drops any `meta_query` passed as a query
-	 * var, so the clause is injected at query time instead (see run_product_query()).
-	 * UCP filter values arrive in minor units; they are converted to the store's
-	 * decimal price units — the format `_price` is stored in — before comparing.
-	 *
-	 * @param array $price Price filter, `{ min?, max? }` in minor units.
-	 * @return array|null
-	 */
-	private function build_price_clause( array $price ) {
-		$has_min = isset( $price['min'] );
-		$has_max = isset( $price['max'] );
-
-		if ( ! $has_min && ! $has_max ) {
-			return null;
-		}
-
-		$clause  = array(
-			'key'  => '_price',
-			'type' => 'DECIMAL(10,2)',
-		);
-		$decimal = static function ( $minor_units ) {
-			return absint( $minor_units ) / ( 10 ** wc_get_price_decimals() );
-		};
-
-		if ( $has_min && $has_max ) {
-			$clause['value']   = array( $decimal( $price['min'] ), $decimal( $price['max'] ) );
-			$clause['compare'] = 'BETWEEN';
-		} elseif ( $has_min ) {
-			$clause['value']   = $decimal( $price['min'] );
-			$clause['compare'] = '>=';
-		} else {
-			$clause['value']   = $decimal( $price['max'] );
-			$clause['compare'] = '<=';
-		}
-
-		return $clause;
-	}
-
-	/**
-	 * Query WooCommerce products together with the total number of matches.
-	 *
-	 * The total is WP_Query's `found_posts`, exposed as `total` by the data store
-	 * under `paginate`, so no query here exceeds the requested page size.
-	 *
-	 * @param array $args WC_Product_Query arguments.
-	 * @return array `{ products, total }`.
-	 */
-	private function query_products_with_total( array $args ): array {
-		$page = $this->run_paginated_query( $args );
-
-		// `found_posts` is only computed when the page returned rows, so a cursor
-		// past the end reports 0. Recount from the start with a single-row query.
-		// An empty page at offset 0 really is empty, so it needs no recount.
-		if ( empty( $page['products'] ) && ! empty( $args['offset'] ) ) {
-			$count_args           = $args;
-			$count_args['limit']  = 1;
-			$count_args['offset'] = 0;
-			$count_args['return'] = 'ids';
-
-			$count         = $this->run_paginated_query( $count_args );
-			$page['total'] = $count['total'];
-		}
-
-		return $page;
-	}
-
-	/**
-	 * Run a paginated WC_Product_Query and normalize its result.
-	 *
-	 * @param array $args WC_Product_Query arguments.
-	 * @return array `{ products, total }`.
-	 */
-	private function run_paginated_query( array $args ): array {
-		$args['paginate'] = true;
-
-		$result = $this->run_product_query( $args );
-
-		// Fall back to the page itself when a filter or replacement data store
-		// returns a plain array instead of the documented object.
-		if ( is_object( $result ) ) {
-			$result   = (array) $result;
-			$products = isset( $result['products'] ) && is_array( $result['products'] ) ? $result['products'] : array();
-
-			return array(
-				'products' => $products,
-				'total'    => isset( $result['total'] ) ? max( 0, (int) $result['total'] ) : count( $products ),
-			);
-		}
-
-		$products = is_array( $result ) ? $result : array();
-
-		return array(
-			'products' => $products,
-			'total'    => count( $products ),
-		);
-	}
-
-	/**
-	 * Run a single WC_Product_Query, injecting the private `_price` clause.
-	 *
-	 * @param array $args WC_Product_Query arguments, optionally carrying `meta_query`.
-	 * @return array|object Raw data store result.
-	 */
-	private function run_product_query( array $args ) {
-		// A `_price` meta_query clause cannot be passed through WC_Product_Query as a
-		// query var (its data store drops the `meta_query` key), so inject it via the
-		// data store filter for the duration of this single query only.
-		$price_clause = $args['meta_query'] ?? null;
-		unset( $args['meta_query'] );
-
-		$filter = null;
-		if ( is_array( $price_clause ) ) {
-			$filter = static function ( $wp_query_args ) use ( $price_clause ) {
-				if ( ! isset( $wp_query_args['meta_query'] ) || ! is_array( $wp_query_args['meta_query'] ) ) {
-					$wp_query_args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		if ( isset( $filters['price'] ) && is_array( $filters['price'] ) ) {
+			foreach ( array( 'min', 'max' ) as $bound ) {
+				if ( isset( $filters['price'][ $bound ] ) ) {
+					$params[ $bound . '_price' ] = (int) $filters['price'][ $bound ];
 				}
-				$wp_query_args['meta_query'][] = $price_clause;
-				return $wp_query_args;
-			};
-			add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $filter );
-		}
-
-		try {
-			return ( new \WC_Product_Query( $args ) )->get_products();
-		} finally {
-			if ( null !== $filter ) {
-				remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $filter );
 			}
 		}
+
+		return $params;
+	}
+
+	/**
+	 * Resolve category references to the term slugs ProductQuery filters on.
+	 *
+	 * ProductQuery types a category list from its first element, so a request
+	 * mixing ids and slugs is normalized to slugs here. The list is deduplicated
+	 * and capped: one request must not drive an unbounded number of term lookups
+	 * on an unauthenticated endpoint.
+	 *
+	 * @param array $references Category term ids or slugs.
+	 * @return array
+	 */
+	private function resolve_category_slugs( array $references ): array {
+		$slugs = array();
+
+		foreach ( array_slice( array_unique( $references ), 0, self::MAX_CATEGORY_FILTERS ) as $reference ) {
+			$reference = (string) $reference;
+			$term      = ctype_digit( $reference )
+				? get_term_by( 'id', (int) $reference, 'product_cat' )
+				: get_term_by( 'slug', $reference, 'product_cat' );
+
+			if ( $term instanceof \WP_Term ) {
+				$slugs[] = $term->slug;
+			}
+		}
+
+		return $slugs;
+	}
+
+	/**
+	 * Run the Store API product query, recounting when the cursor is past the end.
+	 *
+	 * `found_posts` is only computed when the page returned rows, and ProductQuery's
+	 * own recount keys off `page` rather than `offset`, so an empty page at a non-zero
+	 * offset is recounted here with a single-row query from the start.
+	 *
+	 * @param array $params Store API product collection parameters.
+	 * @return array `{ objects, total }`.
+	 */
+	private function query_products( array $params ): array {
+		$product_query = new ProductQuery();
+		$results       = $product_query->get_objects( $this->store_api_request( $params ) );
+
+		if ( empty( $results['objects'] ) && ! empty( $params['offset'] ) ) {
+			$params['offset']   = 0;
+			$params['per_page'] = 1;
+			$results['total']   = $product_query->get_results( $this->store_api_request( $params ) )['total'];
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Wrap collection parameters in the request object ProductQuery reads.
+	 *
+	 * @param array $params Store API product collection parameters.
+	 * @return \WP_REST_Request
+	 */
+	private function store_api_request( array $params ): \WP_REST_Request {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_query_params( $params );
+
+		return $request;
 	}
 
 	/**
