@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Encode apostrophes in classic cart and checkout requests without dropping removed address fields or breaking plugins that inspect the request data.
