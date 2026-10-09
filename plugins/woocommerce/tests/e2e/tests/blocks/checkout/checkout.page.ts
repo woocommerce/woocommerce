@@ -174,28 +174,6 @@ export class CheckoutPage {
 		}
 	}
 
-	async fillAdditionalInformation(
-		email: string,
-		additionalFields: { label: string; value: string }[]
-	) {
-		await this.page.getByLabel( 'Email address' ).fill( email );
-
-		// Rest of additional data passed in from the overrideData object.
-		for ( const { label, value } of additionalFields ) {
-			const field = this.page.getByLabel( label );
-
-			const tagName = await field.evaluate( ( element ) =>
-				element.tagName.toLowerCase()
-			);
-
-			if ( tagName === 'select' ) {
-				await field.selectOption( value );
-			} else {
-				await field.fill( value );
-			}
-		}
-	}
-
 	/**
 	 * Blurs the current input and waits for the checkout to finish any loading or calculating.
 	 */
