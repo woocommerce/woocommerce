@@ -170,6 +170,25 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox WooCommerce template part is resolvable through get_block_template.
+	 */
+	public function test_woocommerce_template_part_renders_content(): void {
+		$this->create_template_part( 'test-woo-part', BlockTemplateUtils::PLUGIN_SLUG );
+		$this->flush_block_template_caches();
+
+		$template_part = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//test-woo-part', 'wp_template_part' );
+		$this->assertSame( '<!-- wp:paragraph --><p>Test</p><!-- /wp:paragraph -->', $template_part->content ?? null, 'Template part should contain the expected content.' );
+	}
+
+	/**
+	 * @testdox Missing WooCommerce template part resolves to null.
+	 */
+	public function test_missing_woocommerce_template_part_resolves_to_null(): void {
+		$template_part = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//non-existent-part-' . uniqid(), 'wp_template_part' );
+		$this->assertNull( $template_part, 'Missing template part should resolve to null.' );
+	}
+
+	/**
 	 * Clears template ID caches so newly created posts are visible.
 	 */
 	private function flush_block_template_caches(): void {
