@@ -93,6 +93,11 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertTrue( $order->apply_coupon( $coupon ), 'The percentage coupon should apply successfully.' );
 
 		foreach ( array( 'applied', 'recalculated' ) as $operation ) {
+			if ( 'recalculated' === $operation ) {
+				$order = wc_get_order( $order->get_id() );
+				$order->recalculate_coupons();
+			}
+
 			$coupon_items = $order->get_items( 'coupon' );
 			$coupon_item  = reset( $coupon_items );
 			$this->assertEquals( 20, $coupon_item->get_discount(), "The $operation coupon should discount the net subtotal by 20%." );
@@ -100,9 +105,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			$this->assertEquals( 20, $order->get_discount_total(), "The $operation order should retain the complete discount." );
 			$this->assertEquals( $is_exempt ? 0 : 4, $order->get_discount_tax(), "The $operation order discount tax should match the coupon." );
 			$this->assertEquals( $is_exempt ? 80 : 96, $order->get_total(), "The $operation order should have the correct discounted total." );
-
-			$order = wc_get_order( $order->get_id() );
-			$order->recalculate_coupons();
 		}
 	}
 
