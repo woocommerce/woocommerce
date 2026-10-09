@@ -80,6 +80,24 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The payment method export column should fall back to the stored id for an installed gateway without a title.
+	 */
+	public function test_payment_method_export_column_falls_back_to_the_stored_id_without_a_title(): void {
+		add_filter(
+			'woocommerce_gateway_method_title',
+			function ( $title, $gateway ) {
+				return 'bacs' === $gateway->id ? '' : $title;
+			},
+			10,
+			2
+		);
+
+		$export_item = $this->sut->prepare_item_for_export( $this->get_item( array(), 'bacs' ) );
+
+		$this->assertSame( 'bacs', $export_item['payment_method'] );
+	}
+
+	/**
 	 * @testdox The payment method export column should be empty for an order placed without a gateway.
 	 */
 	public function test_payment_method_export_column_is_empty_without_a_gateway(): void {
