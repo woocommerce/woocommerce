@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the 11.2.0 database update from removing variation images that match the parent product's featured image.
