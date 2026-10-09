@@ -396,7 +396,7 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return array{contract: ContractView, actions: array<int, ContractActionDefinition>}|WP_Error
 	 */
 	private function resolve_permitted_actions( WP_REST_Request $request ) {
-		if ( ! $this->resolved_actions->contains( $request ) ) {
+		if ( ! isset( $this->resolved_actions[ $request ] ) ) {
 			try {
 				$this->resolved_actions[ $request ] = $this->get_permitted_actions( $request );
 			} catch ( Throwable $e ) {
