@@ -82,8 +82,8 @@ class PushNotifications {
 		wc_get_container()->get( UserDataCleanupService::class )->register();
 
 		// Registered ahead of the enablement check so the token list can still be
-		// read on a store that has been switched off. The write routes stay gated
-		// in their permission callbacks, as does everything below.
+		// read on a store that has been switched off. The controller registers the
+		// write routes only while the module is enabled, like everything below.
 		( new PushTokenRestController() )->register();
 
 		if ( ! $this->should_be_enabled() ) {

@@ -805,6 +805,48 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return tokens most recently registered first, whatever order they were created in.
+	 */
+	public function test_get_tokens_for_roles_orders_by_last_registration(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$created_first = $this->create_push_token_for_user( $data_store, $admin_id );
+		$created_last  = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$this->set_token_dates( $created_first->get_id(), '2026-01-01 00:00:00', '2026-03-01 00:00:00' );
+		$this->set_token_dates( $created_last->get_id(), '2026-02-01 00:00:00', '2026-02-01 00:00:00' );
+
+		$tokens = ( new PushTokensDataStore() )->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame(
+			array( $created_first->get_id(), $created_last->get_id() ),
+			array_map( fn ( PushToken $token ) => $token->get_id(), $tokens )
+		);
+	}
+
+	/**
+	 * @testdox Should order tokens by GMT registration time when local time runs backwards at a daylight saving change.
+	 */
+	public function test_get_tokens_for_roles_orders_by_gmt_across_daylight_saving_change(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$registered_earlier = $this->create_push_token_for_user( $data_store, $admin_id );
+		$registered_later   = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$this->set_token_dates( $registered_earlier->get_id(), '2026-10-01 00:00:00', '2026-10-25 00:30:00', '2026-10-25 01:30:00' );
+		$this->set_token_dates( $registered_later->get_id(), '2026-10-01 00:00:00', '2026-10-25 01:10:00', '2026-10-25 01:10:00' );
+
+		$tokens = ( new PushTokensDataStore() )->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame(
+			array( $registered_later->get_id(), $registered_earlier->get_id() ),
+			array_map( fn ( PushToken $token ) => $token->get_id(), $tokens )
+		);
+	}
+
+	/**
 	 * @testdox Should return empty array when no users have the specified role.
 	 */
 	public function test_get_tokens_for_roles_returns_empty_when_no_users_have_role(): void {
@@ -967,6 +1009,143 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the real totals when the requested page is past the last one.
+	 */
+	public function test_get_tokens_for_roles_reports_totals_for_a_page_past_the_end(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+		$wanted     = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 3, 10, array( 'device_uuid' => $wanted->get_device_uuid() ) );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+	}
+
+	/**
+	 * @testdox Should treat a per page of zero as one when the requested page is past the last one, as WP_Query does.
+	 */
+	public function test_get_tokens_for_roles_reports_totals_for_a_page_past_the_end_with_zero_per_page(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 2, 0 );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+	}
+
+	/**
+	 * @testdox Should return only the given user's tokens when filtered by user ID.
+	 */
+	public function test_get_tokens_for_roles_filters_by_user_id(): void {
+		$first_admin_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store      = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $second_admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'user_id' => $second_admin_id ) );
+
+		$this->assertCount( 1, $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $second_admin_id, $result['tokens'][0]->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should return nothing when the filtered user does not have a matching role, even if they own tokens.
+	 */
+	public function test_get_tokens_for_roles_user_id_filter_cannot_widen_the_role_check(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $subscriber_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'user_id' => $subscriber_id ) );
+
+		$this->assertSame( array(), $result['tokens'] );
+		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
+	 * @testdox Should return only the matching device's token when filtered by device UUID.
+	 */
+	public function test_get_tokens_for_roles_filters_by_device_uuid(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $admin_id );
+		$wanted = $this->create_push_token_for_user( $data_store, $admin_id );
+
+		$result = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'device_uuid' => $wanted->get_device_uuid() ) );
+
+		$this->assertCount( 1, $result['tokens'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $wanted->get_id(), $result['tokens'][0]->get_id() );
+	}
+
+	/**
+	 * @testdox Should require both filters to match when both are given.
+	 */
+	public function test_get_tokens_for_roles_combines_user_id_and_device_uuid_filters(): void {
+		$first_admin_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store      = new PushTokensDataStore();
+
+		$first_admin_token = $this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $second_admin_id );
+
+		$mismatch = $data_store->get_tokens_for_roles(
+			array( 'administrator' ),
+			1,
+			10,
+			array(
+				'user_id'     => $second_admin_id,
+				'device_uuid' => $first_admin_token->get_device_uuid(),
+			)
+		);
+		$match    = $data_store->get_tokens_for_roles(
+			array( 'administrator' ),
+			1,
+			10,
+			array(
+				'user_id'     => $first_admin_id,
+				'device_uuid' => $first_admin_token->get_device_uuid(),
+			)
+		);
+
+		$this->assertSame( 0, $mismatch['total'] );
+		$this->assertSame( 1, $match['total'] );
+		$this->assertSame( $first_admin_token->get_id(), $match['tokens'][0]->get_id() );
+	}
+
+	/**
+	 * @testdox Should not serve a filtered call from the cache of an unfiltered one in the same request.
+	 */
+	public function test_get_tokens_for_roles_caches_filtered_and_unfiltered_results_separately(): void {
+		$first_admin_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$second_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store      = new PushTokensDataStore();
+
+		$this->create_push_token_for_user( $data_store, $first_admin_id );
+		$this->create_push_token_for_user( $data_store, $second_admin_id );
+
+		$unfiltered = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10 );
+		$filtered   = $data_store->get_tokens_for_roles( array( 'administrator' ), 1, 10, array( 'user_id' => $first_admin_id ) );
+
+		$this->assertSame( 2, $unfiltered['total'] );
+		$this->assertSame( 1, $filtered['total'] );
+	}
+
+	/**
 	 * @testdox Should not run any user query when no tokens exist.
 	 */
 	public function test_get_tokens_for_roles_skips_user_query_when_no_tokens_exist(): void {
@@ -1011,6 +1190,31 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		foreach ( $includes as $include ) {
 			$this->assertNotEmpty( $include, 'User queries on this path must be restricted to token owners: an unrestricted role__in query scans the capabilities meta of every user and does not scale on large sites.' );
 		}
+	}
+
+	/**
+	 * Sets the date a token was first registered and the date it was last registered.
+	 *
+	 * @param int         $post_id        The token's post ID.
+	 * @param string      $created        The first registration date, as GMT.
+	 * @param string      $modified       The last registration date, as GMT.
+	 * @param string|null $modified_local The last registration date in site time, defaulting to $modified.
+	 */
+	private function set_token_dates( int $post_id, string $created, string $modified, ?string $modified_local = null ): void {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_date'         => $created,
+				'post_date_gmt'     => $created,
+				'post_modified'     => $modified_local ?? $modified,
+				'post_modified_gmt' => $modified,
+			),
+			array( 'ID' => $post_id )
+		);
+
+		clean_post_cache( $post_id );
 	}
 
 	/**

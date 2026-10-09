@@ -345,6 +345,26 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Search should include private products for users who can read them but not edit them.
+	 */
+	public function test_search_products_includes_private_products_for_users_who_can_read_them(): void {
+		$product = $this->create_search_test_product( 'Searchable private product', 'private' );
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertNotContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should not be returned to users who cannot read private products' );
+
+		wp_get_current_user()->add_cap( 'read_private_products' );
+
+		$this->assertTrue( current_user_can( 'read_private_products' ), 'The user under test should be able to read private products' );
+		$this->assertFalse( current_user_can( 'edit_private_products' ), 'Granting read access should leave the user unable to edit private products' );
+
+		$this->assertContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should be returned to users who can read private products but not edit them' );
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void

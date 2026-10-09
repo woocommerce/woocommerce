@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-shipping-address-block",
-	"version": "1.0.0",
 	"title": "Shipping Address",
 	"description": "Collect your customer's shipping address.",
 	"category": "woocommerce",

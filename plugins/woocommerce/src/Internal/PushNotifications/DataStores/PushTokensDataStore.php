@@ -35,6 +35,15 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
+	 * Memoized count_tokens() result for this request. The step log puts it on
+	 * every notification's recipients line, and one request can carry thousands
+	 * of notifications.
+	 *
+	 * @var int|null
+	 */
+	private ?int $token_count = null;
+
+	/**
 	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
 	 *
 	 * @var bool|null
@@ -121,7 +130,8 @@ class PushTokensDataStore {
 
 		$push_token->set_id( $id );
 
-		$this->has_tokens = null;
+		$this->has_tokens  = null;
+		$this->token_count = null;
 
 		return $push_token;
 	}
@@ -286,6 +296,7 @@ class PushTokensDataStore {
 
 		// Anything read earlier in this request now includes deleted tokens.
 		$this->tokens_by_roles_cache = array();
+		$this->token_count           = null;
 
 		return $deleted;
 	}
@@ -433,11 +444,41 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Counts every push token on the store, whatever the owner's role.
+	 *
+	 * Registration requires one of the roles that receive push notifications,
+	 * so no token starts out ineligible. A user can lose the role afterwards
+	 * though, and their token stays, which is the difference between this count
+	 * and what get_tokens_for_roles() returns.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function count_tokens(): int {
+		if ( null !== $this->token_count ) {
+			return $this->token_count;
+		}
+
+		global $wpdb;
+
+		$this->token_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->token_count;
+	}
+
+	/**
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
-	 * flat array (cached per-request). When $page and $per_page are
-	 * provided, returns a paginated result with total counts.
+	 * flat array (cached per-request), most recently registered first. When
+	 * $page and $per_page are provided, returns a paginated result with total
+	 * counts, ordered by ID so a re-registration cannot move a token between
+	 * pages.
 	 *
 	 * The eligible-user lookup is restricted to users that actually own
 	 * push tokens, so the role check runs against a handful of IDs instead
@@ -447,13 +488,17 @@ class PushTokensDataStore {
 	 * @param string[] $roles    The roles to query tokens for.
 	 * @param int|null $page     Optional page number (1-based).
 	 * @param int|null $per_page Optional number of tokens per page.
+	 * @param array    $filters  Optional exact-match filters: `user_id` (int) and `device_uuid` (string).
+	 * @phpstan-param array{user_id?: int|null, device_uuid?: string|null} $filters
 	 * @return PushToken[]|array{tokens: PushToken[], total: int, total_pages: int}
 	 *
 	 * @since 10.7.0
 	 */
-	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null ) {
-		$paginate  = null !== $page && null !== $per_page;
-		$cache_key = $paginate ? implode( ',', $roles ) . ":$page:$per_page" : implode( ',', $roles );
+	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null, array $filters = array() ) {
+		$paginate    = null !== $page && null !== $per_page;
+		$user_id     = empty( $filters['user_id'] ) ? null : (int) $filters['user_id'];
+		$device_uuid = empty( $filters['device_uuid'] ) ? null : (string) $filters['device_uuid'];
+		$cache_key   = implode( ',', $roles ) . ":$page:$per_page:$user_id:$device_uuid";
 
 		$empty_result = $paginate
 			? array(
@@ -474,12 +519,16 @@ class PushTokensDataStore {
 		global $wpdb;
 
 		// Exactly this SQL to leverage the wp_posts type_status_author index; low token cardinality keeps it fast at any store size.
-		$users_with_tokens = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
-				PushToken::POST_TYPE
-			)
-		);
+		$sql  = "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'";
+		$args = array( PushToken::POST_TYPE );
+
+		if ( null !== $user_id ) {
+			$sql   .= ' AND post_author = %d';
+			$args[] = $user_id;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is built from literals above and every value goes through a placeholder.
+		$users_with_tokens = $wpdb->get_col( $wpdb->prepare( $sql, ...$args ) );
 
 		// An empty include must short-circuit: WP_User_Query would ignore it and scan all users by role.
 		$user_ids = empty( $users_with_tokens ) ? array() : get_users(
@@ -509,6 +558,17 @@ class PushTokensDataStore {
 			$query_args['order']   = 'ASC';
 		}
 
+		if ( null !== $device_uuid ) {
+			// Bounded by author__in, so the meta join only sees this store's own tokens.
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_args['meta_query'] = array(
+				array(
+					'key'   => 'device_uuid',
+					'value' => $device_uuid,
+				),
+			);
+		}
+
 		$query = new WP_Query( $query_args );
 
 		/**
@@ -520,8 +580,26 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
-			return $this->tokens_by_roles_cache[ $cache_key ];
+			$result = $empty_result;
+
+			// WP_Query skips counting when a page comes back empty, so a page past the end would otherwise report no matches.
+			if ( $paginate && $page > 1 ) {
+				$count_query = new WP_Query(
+					array_merge(
+						$query_args,
+						array(
+							'paged'          => 1,
+							'posts_per_page' => 1,
+						)
+					)
+				);
+
+				$result['total']       = (int) $count_query->found_posts;
+				$result['total_pages'] = (int) ceil( $result['total'] / max( 1, $per_page ) );
+			}
+
+			$this->tokens_by_roles_cache[ $cache_key ] = $result;
+			return $result;
 		}
 
 		_prime_post_caches( $post_ids, false, true );
@@ -541,6 +619,17 @@ class PushTokensDataStore {
 					)
 				);
 			}
+		}
+
+		if ( ! $paginate ) {
+			/**
+			 * Sorted on the GMT date because WP_Query can only order by the local
+			 * `post_modified`, which runs backwards across a daylight saving change.
+			 */
+			usort(
+				$tokens,
+				fn ( PushToken $a, PushToken $b ) => array( $b->get_last_confirmed_at_gmt(), $b->get_id() ) <=> array( $a->get_last_confirmed_at_gmt(), $a->get_id() )
+			);
 		}
 
 		$result = $paginate
