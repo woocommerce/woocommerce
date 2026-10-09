@@ -777,6 +777,33 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	}
 
 	/**
+	 * @testdox Adding a billing email to a guest order that counted a coupon without one records the email for that coupon.
+	 */
+	public function test_update_order_adding_email_to_order_counted_without_identity_records_identity() {
+		$order = OrderHelper::create_order( 0 );
+		CouponHelper::create_coupon( 'v2-usage-a' );
+		$order->set_billing_email( '' );
+		$order->apply_coupon( 'v2-usage-a' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$coupon_id = wc_get_coupon_id_by_code( 'v2-usage-a' );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$this->assertEmpty( get_post_meta( $coupon_id, '_used_by', false ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'billing'      => array( 'email' => 'new@example.com' ),
+				'coupon_lines' => array( array( 'id' => $this->get_coupon_item_id( wc_get_order( $order->get_id() ), 'v2-usage-a' ) ) ),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v2-usage-a' ) );
+		$this->assertSame( array( 'new@example.com' ), get_post_meta( $coupon_id, '_used_by', false ) );
+	}
+
+	/**
 	 * @testdox A failed batch item does not leak its coupon codes into the next item.
 	 */
 	public function test_orders_batch_failed_item_does_not_leak_coupon_codes() {

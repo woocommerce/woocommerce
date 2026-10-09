@@ -146,7 +146,7 @@ class CouponsController {
 			}
 		}
 
-		if ( '' !== $previous_usage_identity && $previous_usage_identity !== $used_by ) {
+		if ( $previous_usage_identity !== $used_by ) {
 			foreach ( array_intersect_key( $current, $previous ) as $code ) {
 				$coupon = new \WC_Coupon( $code );
 				if ( $coupon->get_id() ) {
