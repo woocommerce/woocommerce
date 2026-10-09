@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow parent and variation SKUs to be updated together in a CSV import
