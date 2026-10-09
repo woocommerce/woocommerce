@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Card } from '@wordpress/components';
 import clsx from 'clsx';
-import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
+import { ExtraProperties, recordEvent } from '@woocommerce/tracks';
 import { useQuery } from '@woocommerce/navigation';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useState, useContext, useRef } from '@wordpress/element';
@@ -157,7 +157,7 @@ function ProductCard( props: ProductCardProps ): React.JSX.Element {
 
 		data.tab = query.tab || 'discover';
 
-		queueRecordEvent( event, data );
+		recordEvent( event, data );
 	}
 
 	const screenReaderText = (
