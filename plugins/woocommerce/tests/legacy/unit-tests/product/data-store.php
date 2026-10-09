@@ -214,6 +214,55 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving a product without categories puts the stored default category on the saved object.
+	 */
+	public function test_product_save_without_categories_sets_default_category_on_object(): void {
+		$default_category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Default hydration category',
+			)
+		);
+		$other_category_id   = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Hats',
+			)
+		);
+		add_filter(
+			'pre_option_default_product_cat',
+			function () use ( $default_category_id ) {
+				return $default_category_id;
+			}
+		);
+		$created_category_ids = null;
+		add_action(
+			'woocommerce_new_product',
+			function ( $product_id, $product ) use ( &$created_category_ids ) {
+				$created_category_ids = $product->get_category_ids( 'edit' );
+			},
+			10,
+			2
+		);
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Uncategorized hat' );
+		$product->save();
+
+		$this->assertSame( array( $default_category_id ), $product->get_category_ids( 'edit' ), 'The saved object should have the default category that was stored' );
+		$this->assertSame( array( $default_category_id ), $created_category_ids, 'woocommerce_new_product should receive the stored categories' );
+		$this->assertSame( array(), $product->get_changes(), 'A saved product should have no pending changes' );
+
+		$product->set_category_ids( array( $other_category_id ) );
+		$product->save();
+		$product->set_category_ids( array() );
+		$product->save();
+
+		$this->assertSame( array( $default_category_id ), $product->get_category_ids( 'edit' ), 'Clearing the categories should leave the stored default category on the object' );
+		$this->assertSame( array( $default_category_id ), wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) ), 'The default category should be stored' );
+	}
+
+	/**
 	 * Test reading a product.
 	 *
 	 * @since 3.0.0
