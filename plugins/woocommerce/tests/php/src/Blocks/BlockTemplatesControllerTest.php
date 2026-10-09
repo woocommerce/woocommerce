@@ -189,7 +189,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox render_block filter fires for WooCommerce template parts so third-party code can modify output.
+	 * @testdox BC filters (render_block_data, render_block, render_block_core/template-part) fire for WooCommerce template parts.
 	 */
 	public function test_render_block_filter_fires_for_woocommerce_template_part(): void {
 		$this->sut->init();
@@ -197,9 +197,11 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		$this->create_template_part( 'test-filtered-part', BlockTemplateUtils::PLUGIN_SLUG );
 		$this->flush_block_template_caches();
 
-		$filter = static fn( $content, $block ) => $content . ( 'core/template-part' === ( $block['blockName'] ?? null ) ? '<!-- filtered -->' : '' );
-		add_filter( 'render_block', $filter, 10, 2 );
-		add_filter( 'render_block_core/template-part', $filter, 10, 2 );
+		$block_filter = static fn( $block ) => array_merge_recursive( $block, ( 'core/template-part' === ( $block['blockName'] ?? null ) ? array( 'attrs' => array( 'className' => 'injected-by-filter' ) ) : array() )  );
+		add_filter( 'render_block_data', $block_filter, 10, 1 );
+		$output_filter = static fn( $content, $block ) => $content . ( 'core/template-part' === ( $block['blockName'] ?? null ) ? '<!-- filtered -->' : '' );
+		add_filter( 'render_block', $output_filter, 10, 2 );
+		add_filter( 'render_block_core/template-part', $output_filter, 10, 2 );
 
 		$parsed_block = array(
 			'blockName' => 'core/template-part',
@@ -211,11 +213,12 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		);
 		$result       = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
 
-		remove_filter( 'render_block', $filter, 10 );
-		remove_filter( 'render_block_core/template-part', $filter, 10 );
+		remove_filter( 'render_block_data', $block_filter, 10 );
+		remove_filter( 'render_block', $output_filter, 10 );
+		remove_filter( 'render_block_core/template-part', $output_filter, 10 );
 
-		$expected = '<span class="wp-block-template-part"><p class="wp-block-paragraph">Test</p></span><!-- filtered --><!-- filtered -->';
-		$this->assertSame( $expected, $result, 'Both render_block and render_block_core/template-part filter output should be included.' );
+		$expected = '<span class="injected-by-filter wp-block-template-part"><p class="wp-block-paragraph">Test</p></span><!-- filtered --><!-- filtered -->';
+		$this->assertSame( $expected, $result, 'render_block_data, render_block, and render_block_core/template-part filter output should all be included.' );
 	}
 
 	/**
