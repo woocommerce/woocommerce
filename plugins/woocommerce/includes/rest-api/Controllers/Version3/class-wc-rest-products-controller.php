@@ -453,22 +453,25 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			// += is array-union-by-key and mis-combines with include/exclude; intersect post__in, merge post__not_in.
-			if ( 'post__in' === $on_sale_key ) {
-				$args['post__in'] = empty( $args['post__in'] )
-					? $on_sale_ids
-					: array_values( array_intersect( $args['post__in'], $on_sale_ids ) );
-				if ( empty( $args['post__in'] ) ) {
-					$args['post__in'] = array( 0 );
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
 				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
 			} else {
-				$args['post__not_in'] = array_values( array_merge( (array) $args['post__not_in'], $on_sale_ids ) );
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
 			}
 		}
 

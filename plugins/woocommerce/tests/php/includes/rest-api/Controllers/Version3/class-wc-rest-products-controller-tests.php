@@ -373,6 +373,65 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The on_sale filter must not return products that are on sale when on_sale=false is combined with include.
+	 *
+	 * @return void
+	 */
+	public function test_on_sale_false_filter_combined_with_include() {
+		$on_sale = WC_Helper_Product::create_simple_product();
+		$on_sale->set_regular_price( 100 );
+		$on_sale->set_sale_price( 50 );
+		$on_sale->save();
+
+		$regular = WC_Helper_Product::create_simple_product();
+		$regular->set_regular_price( 100 );
+		$regular->save();
+
+		delete_transient( 'wc_products_onsale' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'on_sale' => false,
+				'include' => array( $regular->get_id(), $on_sale->get_id() ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $regular->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+	}
+
+	/**
+	 * The exclude filter must still apply when on_sale=true.
+	 *
+	 * @return void
+	 */
+	public function test_on_sale_true_filter_combined_with_exclude() {
+		$on_sale = WC_Helper_Product::create_simple_product();
+		$on_sale->set_regular_price( 100 );
+		$on_sale->set_sale_price( 50 );
+		$on_sale->save();
+
+		$excluded = WC_Helper_Product::create_simple_product();
+		$excluded->set_regular_price( 100 );
+		$excluded->set_sale_price( 50 );
+		$excluded->save();
+
+		delete_transient( 'wc_products_onsale' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'on_sale' => true,
+				'exclude' => array( $excluded->get_id() ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array( $on_sale->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+	}
+
+	/**
 	 * Test that the `search_sku` parameter does partial matching in the product SKU, but not the name.
 	 *
 	 * @return void
