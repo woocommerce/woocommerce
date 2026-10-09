@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Webflow;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformMapperInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -374,8 +376,8 @@ class WebflowMapper implements PlatformMapperInterface {
 			'sale_price'     => null,
 			'manage_stock'   => false,
 			'stock_quantity' => null,
-			'stock_status'   => 'instock',
-			'tax_status'     => 'taxable',
+			'stock_status'   => ProductStockStatus::IN_STOCK,
+			'tax_status'     => ProductTaxStatus::TAXABLE,
 		);
 
 		if ( empty( $skus ) ) {
@@ -486,8 +488,8 @@ class WebflowMapper implements PlatformMapperInterface {
 				'sale_price'        => null,
 				'manage_stock'      => false,
 				'stock_quantity'    => null,
-				'stock_status'      => 'instock',
-				'tax_status'        => 'taxable',
+				'stock_status'      => ProductStockStatus::IN_STOCK,
+				'tax_status'        => ProductTaxStatus::TAXABLE,
 				'attributes'        => array(),
 				'image_original_id' => null,
 				'menu_order'        => $menu_order,
@@ -673,7 +675,7 @@ class WebflowMapper implements PlatformMapperInterface {
 			return array(
 				'manage_stock'   => false,
 				'stock_quantity' => null,
-				'stock_status'   => 'instock',
+				'stock_status'   => ProductStockStatus::IN_STOCK,
 			);
 		}
 
@@ -682,7 +684,7 @@ class WebflowMapper implements PlatformMapperInterface {
 			return array(
 				'manage_stock'   => false,
 				'stock_quantity' => null,
-				'stock_status'   => 'instock',
+				'stock_status'   => ProductStockStatus::IN_STOCK,
 			);
 		}
 
@@ -690,7 +692,7 @@ class WebflowMapper implements PlatformMapperInterface {
 		return array(
 			'manage_stock'   => true,
 			'stock_quantity' => $quantity,
-			'stock_status'   => $quantity > 0 ? 'instock' : 'outofstock',
+			'stock_status'   => $quantity > 0 ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK,
 		);
 	}
 
