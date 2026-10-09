@@ -314,9 +314,12 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * Wrap collection parameters in the request object ProductQuery reads.
 	 *
 	 * @param array $params Store API product collection parameters.
-	 * @return \WP_REST_Request
+	 * @return \WP_REST_Request<array<string, mixed>>
 	 */
 	private function store_api_request( array $params ): \WP_REST_Request {
+		/**
+		 * @var \WP_REST_Request<array<string, mixed>> $request
+		 */
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
 		$request->set_query_params( $params );
 
