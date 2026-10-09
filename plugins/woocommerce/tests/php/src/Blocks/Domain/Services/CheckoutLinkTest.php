@@ -79,18 +79,9 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		$_GET['coupon']   = 'test-coupon';
 		CouponHelper::create_coupon( 'test-coupon' );
 
-		$service = new class() extends CheckoutLink {
-			/**
-			 * Get the checkout link for testing.
-			 *
-			 * @return string The checkout link.
-			 */
-			public function get_checkout_link_test() {
-				return parent::get_checkout_link();
-			}
-		};
+		$sut = $this->get_checkout_link_service();
 
-		$url                  = $service->get_checkout_link_test();
+		$url                  = $sut->get_checkout_link_test();
 		$cart_by_product      = [];
 		$expected_product_ids = [
 			$legacy_product->get_id(),
@@ -131,7 +122,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	public function test_escaped_product_data_delimiters_are_preserved(): void {
 		$_GET['products'] = '123:1:ratio=10~:20~,wide~;special:note=a~,b~;c:d';
 
-		$service = new class() extends CheckoutLink {
+		$sut = new class() extends CheckoutLink {
 			/**
 			 * Get parsed checkout-link products for testing.
 			 *
@@ -156,7 +147,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 					'cart_item_data' => [ 'note' => 'a,b;c:d' ],
 				],
 			],
-			$service->get_products_test(),
+			$sut->get_products_test(),
 			'Escaped delimiters should be treated as data rather than checkout-link separators.'
 		);
 	}
@@ -171,7 +162,97 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$_GET['products'] = '999999';
 
-		$service = new class() extends CheckoutLink {
+		$sut = $this->get_checkout_link_service();
+
+		$sut->get_checkout_link_test();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'An unresolved numeric ID must not add a product with the same numeric SKU.' );
+	}
+
+	/**
+	 * @testdox Redirects to the product page with known attributes preselected when a variation has an "Any" attribute.
+	 */
+	public function test_variation_with_any_attribute_redirects_to_product_page(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$any_variation    = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE SMALL' ) );
+
+		$_GET['products'] = $any_variation->get_id() . ':2:pa_colour=red';
+
+		$url = $this->get_checkout_link_service()->get_checkout_link_test();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'A variation with a missing "Any" attribute should not be added to the cart.' );
+		$this->assertStringStartsWith( $variable_product->get_permalink(), $url, 'The shopper should be sent to the product page.' );
+
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'small', $query['attribute_pa_size'] ?? null, 'Attributes set by the variation should be preselected.' );
+		$this->assertSame( 'red', $query['attribute_pa_colour'] ?? null, 'Attributes passed in the link should be preselected.' );
+		$this->assertArrayNotHasKey( 'attribute_pa_number', $query, 'The missing attribute should be left for the shopper to choose.' );
+
+		$notices = wc_get_notices( 'error' );
+		$notice  = $query['wc_error'] ?? ( $notices[0]['notice'] ?? '' );
+
+		$this->assertStringContainsString( 'Choose options for', $notice, 'The shopper should be told to choose the missing options.' );
+	}
+
+	/**
+	 * @testdox Adds resolvable products and redirects to the first product that needs options.
+	 */
+	public function test_resolvable_products_are_added_when_another_needs_options(): void {
+		$simple_product   = \WC_Helper_Product::create_simple_product();
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$any_variation    = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE BLUE ANY NUMBER' ) );
+		$second_variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE LARGE' ) );
+
+		$_GET['products'] = implode( ',', [ (string) $simple_product->get_id(), (string) $any_variation->get_id(), (string) $second_variation->get_id() ] );
+
+		$url = $this->get_checkout_link_service()->get_checkout_link_test();
+
+		$this->assertSame( [ $simple_product->get_id() ], array_values( wp_list_pluck( WC()->cart->get_cart(), 'product_id' ) ), 'Only the resolvable product should be added to the cart.' );
+		$this->assertStringStartsWith( $variable_product->get_permalink(), $url, 'The shopper should be sent to the first product that needs options.' );
+		$this->assertStringContainsString( 'attribute_pa_colour=blue', $url, 'Attributes of the first product that needs options should be preselected.' );
+		$this->assertStringContainsString( 'session=', $url, 'Guests should keep the cart through the session token.' );
+
+		$notices = wc_get_notices( 'error' );
+
+		$this->assertCount( 1, $notices, 'One notice should list every product that needs options.' );
+		$this->assertStringContainsString( 'to add them to your cart', $notices[0]['notice'], 'The notice should cover both products.' );
+	}
+
+	/**
+	 * @testdox Keeps the cart page error when the $unpublished product that needs options is not published.
+	 *
+	 * @testWith ["parent", "draft"]
+	 *           ["variation", "private"]
+	 *
+	 * @param string $unpublished Which product to unpublish: the parent or the variation.
+	 * @param string $status      The unpublished status to set.
+	 */
+	public function test_unpublished_product_that_needs_options_redirects_to_cart( string $unpublished, string $status ): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$any_variation    = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE SMALL' ) );
+		$product          = 'parent' === $unpublished ? $variable_product : $any_variation;
+
+		$product->set_status( $status );
+		$product->save();
+
+		$_GET['products'] = (string) $any_variation->get_id();
+
+		$url = $this->get_checkout_link_service()->get_checkout_link_test();
+
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+		$this->assertStringNotContainsString( 'attribute_pa_size', $url, 'An unpublished product page should not be used as the redirect.' );
+		$this->assertStringContainsString( 'Missing variation data', $query['wc_error'] ?? '', 'The add to cart error should still be shown.' );
+	}
+
+	/**
+	 * Get a checkout link service that exposes the checkout link for testing.
+	 *
+	 * @return CheckoutLink
+	 */
+	private function get_checkout_link_service() {
+		return new class() extends CheckoutLink {
 			/**
 			 * Get the checkout link for testing.
 			 *
@@ -181,9 +262,5 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 				return parent::get_checkout_link();
 			}
 		};
-
-		$service->get_checkout_link_test();
-
-		$this->assertTrue( WC()->cart->is_empty(), 'An unresolved numeric ID must not add a product with the same numeric SKU.' );
 	}
 }

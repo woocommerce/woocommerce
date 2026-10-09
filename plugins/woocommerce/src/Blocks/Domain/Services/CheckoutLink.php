@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
@@ -225,30 +227,64 @@ class CheckoutLink {
 	 * @return string The checkout link.
 	 */
 	protected function get_checkout_link() {
-		$controller = new CartController();
-		$products   = $this->get_products_from_checkout_link();
-		$errors     = new \WP_Error();
+		$controller    = new CartController();
+		$products      = $this->get_products_from_checkout_link();
+		$errors        = new \WP_Error();
+		$needs_options = [];
+		$options_url   = '';
 
 		foreach ( $products as $product_data ) {
 			try {
 				$controller->add_to_cart( $product_data );
 			} catch ( \Exception $e ) {
-				$errors->add( 'error', $e->getMessage() );
+				// Variations with an "Any" attribute need the shopper to choose a value, so send them to the product page.
+				$product             = $this->is_missing_variation_data_error( $e ) ? wc_get_product( $product_data['id'] ) : null;
+				$product_options_url = $product ? $this->get_product_options_url( $product, $product_data['variation'] ) : '';
+
+				if ( ! $product || ! $product_options_url ) {
+					$errors->add( 'error', $e->getMessage() );
+					continue;
+				}
+
+				/* translators: %s: product name */
+				$needs_options[] = sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), esc_html( $product->get_name() ) );
+
+				if ( '' === $options_url ) {
+					$options_url = $product_options_url;
+				}
 			}
 		}
 
-		// Nothing was added to the cart. We need to redirect to the cart page with an error notice. Since guests may not
-		// have a session, add the notice in the query string.
-		if ( wc()->cart->is_empty() ) {
-			$errors->add( 'error', __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' ) );
+		if ( $needs_options ) {
+			$errors->add(
+				'checkout_link_needs_options',
+				sprintf(
+					/* translators: %s: comma-separated list of product names */
+					_n( 'Choose options for %s to add it to your cart.', 'Choose options for %s to add them to your cart.', count( $needs_options ), 'woocommerce' ),
+					wc_format_list_of_items( $needs_options )
+				)
+			);
+		}
 
-			if ( ! wc()->session->has_session() ) {
-				return add_query_arg( 'wc_error', rawurlencode( $errors->get_error_message() ), wc_get_cart_url() );
+		// Nothing was added to the cart. Redirect to the product page if options are needed, otherwise the cart page, with
+		// an error notice. Since guests may not have a session, add the notice in the query string.
+		if ( wc()->cart->is_empty() ) {
+			if ( $options_url ) {
+				$redirect_url = $options_url;
+				$notice_code  = 'checkout_link_needs_options';
 			} else {
-				$this->add_error_notices( $errors );
+				$redirect_url = wc_get_cart_url();
+				$notice_code  = 'error';
+				$errors->add( 'error', __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' ) );
 			}
 
-			return wc_get_cart_url();
+			if ( ! wc()->session->has_session() ) {
+				return add_query_arg( 'wc_error', rawurlencode( $errors->get_error_message( $notice_code ) ), $redirect_url );
+			}
+
+			$this->add_error_notices( $errors );
+
+			return $redirect_url;
 		}
 
 		// Apply coupon if provided.
@@ -265,7 +301,7 @@ class CheckoutLink {
 		// Add error notices to the cart. This requires a session otherwise the notices will not be displayed.
 		$this->add_error_notices( $errors );
 
-		$redirect_url = wc_get_checkout_url();
+		$redirect_url = $options_url ? $options_url : wc_get_checkout_url();
 
 		// Preserve the query string--pass it to the checkout page.
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
@@ -286,5 +322,59 @@ class CheckoutLink {
 		}
 
 		return $redirect_url;
+	}
+
+	/**
+	 * Check if an add to cart error was caused by missing variation attributes.
+	 *
+	 * @param \Exception $exception The add to cart exception.
+	 * @return bool
+	 */
+	private function is_missing_variation_data_error( \Exception $exception ) {
+		return $exception instanceof RouteException
+			&& in_array( $exception->getErrorCode(), [ 'woocommerce_rest_missing_variation_data', 'woocommerce_rest_missing_attributes' ], true );
+	}
+
+	/**
+	 * Get the product page URL where the shopper can choose the attributes missing from a checkout link.
+	 *
+	 * Attributes set by the variation, or passed in the link, are added to the URL so they are preselected.
+	 *
+	 * @param \WC_Product $product   The variable product or variation from the checkout link.
+	 * @param array[]     $variation Variation attributes parsed from the checkout link.
+	 * @return string The product page URL, or an empty string if the product page is not available.
+	 */
+	private function get_product_options_url( \WC_Product $product, array $variation ) {
+		$is_variation   = $product instanceof \WC_Product_Variation;
+		$parent_product = $is_variation ? wc_get_product( $product->get_parent_id() ) : $product;
+
+		if ( ! $parent_product || ProductStatus::PUBLISH !== $parent_product->get_status() || ProductStatus::PUBLISH !== $product->get_status() ) {
+			return '';
+		}
+
+		$selected  = $is_variation ? array_filter( $product->get_variation_attributes(), 'wc_array_filter_default_attributes' ) : [];
+		$requested = wp_list_pluck( $variation, 'value', 'attribute' );
+
+		foreach ( $parent_product->get_attributes() as $attribute ) {
+			if ( ! $attribute->get_variation() ) {
+				continue;
+			}
+
+			$attribute_name = $attribute->get_name();
+			$query_key      = wc_variation_attribute_name( $attribute_name );
+
+			foreach ( [ $query_key, $attribute_name, strtolower( wc_attribute_label( $attribute_name, $parent_product ) ) ] as $requested_key ) {
+				if ( isset( $requested[ $requested_key ] ) && '' !== $requested[ $requested_key ] ) {
+					$selected[ $query_key ] = $attribute->is_taxonomy() ? sanitize_title( $requested[ $requested_key ] ) : $requested[ $requested_key ];
+					break;
+				}
+			}
+		}
+
+		// Encode keys and values so add_query_arg() keeps them intact, matching WC_Product_Variation::get_permalink().
+		return add_query_arg(
+			array_combine( array_map( 'urlencode', array_keys( $selected ) ), array_map( 'urlencode', $selected ) ),
+			$parent_product->get_permalink()
+		);
 	}
 }
