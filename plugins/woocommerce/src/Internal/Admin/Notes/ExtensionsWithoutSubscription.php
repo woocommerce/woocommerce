@@ -22,6 +22,8 @@ class ExtensionsWithoutSubscription {
 
 	/**
 	 * Hook the note refresh.
+	 *
+	 * @since 11.3.0
 	 */
 	public function __construct() {
 		add_action( 'admin_head', array( $this, 'refresh_note' ) );
