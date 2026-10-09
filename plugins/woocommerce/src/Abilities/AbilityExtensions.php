@@ -129,7 +129,8 @@ class AbilityExtensions {
 	/**
 	 * Add the `extensions` property to an object schema when the feature is on.
 	 * It lists each namespace with its fields, and allows others, because a
-	 * field can be registered after the ability.
+	 * field can be registered after the ability. The schema stays unchanged when
+	 * no field is registered for the resource.
 	 *
 	 * @since 11.3.0
 	 *
@@ -138,7 +139,7 @@ class AbilityExtensions {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_schema( array $schema, string $resource_name ): array {
-		if ( ! AbilityContracts::is_enabled() ) {
+		if ( ! AbilityContracts::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
 			return $schema;
 		}
 
