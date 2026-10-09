@@ -75,6 +75,75 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should redirect a classic section GET request to its screen, passing other query arguments.
+	 */
+	public function test_redirects_classic_section_to_screen(): void {
+		$this->register_example_screen();
+
+		$url = $this->sut->get_classic_redirect_url(
+			array(
+				'page'    => 'wc-settings',
+				'tab'     => 'checkout',
+				'section' => 'Example_Gateway',
+				'method'  => 'apple_pay',
+			),
+			'GET'
+		);
+
+		$this->assertIsString( $url, 'The classic section should redirect' );
+		$this->assertStringContainsString( 'page=wc-payment-settings-wp-admin', $url );
+		$this->assertStringContainsString( 'p=' . rawurlencode( '/settings/example?method=apple_pay' ), $url );
+	}
+
+	/**
+	 * @testdox Should not redirect saves, marked classic requests or other pages.
+	 *
+	 * @dataProvider provide_requests_that_do_not_redirect
+	 *
+	 * @param array  $query  The query arguments.
+	 * @param string $method The request method.
+	 */
+	public function test_does_not_redirect( array $query, string $method ): void {
+		$this->register_example_screen();
+
+		$this->assertNull( $this->sut->get_classic_redirect_url( $query, $method ) );
+	}
+
+	/**
+	 * Requests that should keep the classic page.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provide_requests_that_do_not_redirect(): array {
+		$classic = array(
+			'page'    => 'wc-settings',
+			'tab'     => 'checkout',
+			'section' => 'example_gateway',
+		);
+		return array(
+			'save'              => array( $classic, 'POST' ),
+			'classic marker'    => array( array_merge( $classic, array( 'wc_classic_settings' => '1' ) ), 'GET' ),
+			'unknown section'   => array( array_merge( $classic, array( 'section' => 'other_gateway' ) ), 'GET' ),
+			'other tab'         => array( array_merge( $classic, array( 'tab' => 'shipping' ) ), 'GET' ),
+			'payments list tab' => array( array_diff_key( $classic, array( 'section' => '' ) ), 'GET' ),
+		);
+	}
+
+	/**
+	 * @testdox Should pass the classic settings URL, with the classic marker, to the screen.
+	 */
+	public function test_page_init_passes_classic_url(): void {
+		$this->register_example_screen();
+		$_GET['p'] = '/settings/example';
+
+		$this->sut->handle_page_init();
+
+		$data = implode( '', (array) wp_scripts()->get_data( 'wc-payment-settings-screen', 'before' ) );
+		$this->assertStringContainsString( 'section=example_gateway', $data );
+		$this->assertStringContainsString( 'wc_classic_settings=1', $data );
+	}
+
+	/**
 	 * Register an example screen through the filter.
 	 */
 	private function register_example_screen(): void {
@@ -84,9 +153,10 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 				$screens,
 				array(
 					'example' => array(
-						'title'     => 'Example settings',
-						'rest_path' => '/example/v1/settings',
-						'scripts'   => array( 'example-screen-script' ),
+						'title'           => 'Example settings',
+						'rest_path'       => '/example/v1/settings',
+						'scripts'         => array( 'example-screen-script' ),
+						'classic_section' => 'example_gateway',
 					),
 				)
 			)
