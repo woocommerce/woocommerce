@@ -18,9 +18,6 @@ class ProductQuery extends \WP_UnitTestCase {
 
 	/**
 	 * @testdox Should add Interactivity API context only to valid product loop items.
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_add_iapi_context_updates_only_valid_product_loop_items(): void {
 		$product_ids   = array();
@@ -613,6 +610,9 @@ class ProductQuery extends \WP_UnitTestCase {
 		$args    = array();
 		$request = $this->build_request();
 
+		// The term is created on install, so its id depends on what the site already holds.
+		$excluded_from_catalog = wc_get_product_visibility_term_ids()['exclude-from-catalog'];
+
 		$updated_query = $this->block_instance->update_rest_query( $args, $request );
 
 		$this->assertContainsEquals(
@@ -629,7 +629,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( 0 ),
+					'terms'    => array( $excluded_from_catalog ),
 					'operator' => 'NOT IN',
 				),
 			),
@@ -651,6 +651,9 @@ class ProductQuery extends \WP_UnitTestCase {
 		);
 		$stock_status = array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK );
 		$request      = $this->build_request( $on_sale, $attributes, $stock_status );
+
+		// The term is created on install, so its id depends on what the site already holds.
+		$excluded_from_catalog = wc_get_product_visibility_term_ids()['exclude-from-catalog'];
 
 		$updated_query = $this->block_instance->update_rest_query( $args, $request );
 
@@ -674,7 +677,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( 0 ),
+					'terms'    => array( $excluded_from_catalog ),
 					'operator' => 'NOT IN',
 				),
 			),
