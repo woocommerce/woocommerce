@@ -82,10 +82,10 @@ class BlockTemplatesController {
 	 * Renders the `core/template-part` block on the server.
 	 * Introduced because the core handling for template parts only supports templates from the current theme, not from a plugin.
 	 *
+	 * @deprecated 11.3.0
+	 *
 	 * @param array $attributes The block attributes.
 	 * @return string
-	 *@deprecated 11.3.0
-	 *
 	 */
 	public function render_woocommerce_template_part( $attributes ) {
 		// Superseded by pre_render_woocommerce_template_part. The old approach (add_plugin_templates_parts_support) replaced
