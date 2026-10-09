@@ -67,6 +67,310 @@ class Styles_Helper {
 	}
 
 	/**
+	 * Keywords that are color values rather than palette slugs.
+	 *
+	 * The CSS named colors, `transparent`, the CSS-wide keywords, and the compound CSS system
+	 * colors. The four single-word system colors (`canvas`, `field`, `mark`, `highlight`) are left
+	 * out on purpose: a system color can only reach a block attribute by hand-edited markup, since
+	 * the editor cannot produce one, while those four are plausible palette slug names. Treating
+	 * them as colors would render an unresolved slug in an OS color rather than the theme's.
+	 *
+	 * @var string[]
+	 */
+	private const COLOR_KEYWORDS = array(
+		'accentcolor',
+		'accentcolortext',
+		'activetext',
+		'buttonborder',
+		'buttonface',
+		'buttontext',
+		'canvastext',
+		'fieldtext',
+		'graytext',
+		'highlighttext',
+		'linktext',
+		'marktext',
+		'selecteditem',
+		'selecteditemtext',
+		'visitedtext',
+		'currentcolor',
+		'inherit',
+		'initial',
+		'revert',
+		'transparent',
+		'unset',
+		'aliceblue',
+		'antiquewhite',
+		'aqua',
+		'aquamarine',
+		'azure',
+		'beige',
+		'bisque',
+		'black',
+		'blanchedalmond',
+		'blue',
+		'blueviolet',
+		'brown',
+		'burlywood',
+		'cadetblue',
+		'chartreuse',
+		'chocolate',
+		'coral',
+		'cornflowerblue',
+		'cornsilk',
+		'crimson',
+		'cyan',
+		'darkblue',
+		'darkcyan',
+		'darkgoldenrod',
+		'darkgray',
+		'darkgreen',
+		'darkgrey',
+		'darkkhaki',
+		'darkmagenta',
+		'darkolivegreen',
+		'darkorange',
+		'darkorchid',
+		'darkred',
+		'darksalmon',
+		'darkseagreen',
+		'darkslateblue',
+		'darkslategray',
+		'darkslategrey',
+		'darkturquoise',
+		'darkviolet',
+		'deeppink',
+		'deepskyblue',
+		'dimgray',
+		'dimgrey',
+		'dodgerblue',
+		'firebrick',
+		'floralwhite',
+		'forestgreen',
+		'fuchsia',
+		'gainsboro',
+		'ghostwhite',
+		'gold',
+		'goldenrod',
+		'gray',
+		'green',
+		'greenyellow',
+		'grey',
+		'honeydew',
+		'hotpink',
+		'indianred',
+		'indigo',
+		'ivory',
+		'khaki',
+		'lavender',
+		'lavenderblush',
+		'lawngreen',
+		'lemonchiffon',
+		'lightblue',
+		'lightcoral',
+		'lightcyan',
+		'lightgoldenrodyellow',
+		'lightgray',
+		'lightgreen',
+		'lightgrey',
+		'lightpink',
+		'lightsalmon',
+		'lightseagreen',
+		'lightskyblue',
+		'lightslategray',
+		'lightslategrey',
+		'lightsteelblue',
+		'lightyellow',
+		'lime',
+		'limegreen',
+		'linen',
+		'magenta',
+		'maroon',
+		'mediumaquamarine',
+		'mediumblue',
+		'mediumorchid',
+		'mediumpurple',
+		'mediumseagreen',
+		'mediumslateblue',
+		'mediumspringgreen',
+		'mediumturquoise',
+		'mediumvioletred',
+		'midnightblue',
+		'mintcream',
+		'mistyrose',
+		'moccasin',
+		'navajowhite',
+		'navy',
+		'oldlace',
+		'olive',
+		'olivedrab',
+		'orange',
+		'orangered',
+		'orchid',
+		'palegoldenrod',
+		'palegreen',
+		'paleturquoise',
+		'palevioletred',
+		'papayawhip',
+		'peachpuff',
+		'peru',
+		'pink',
+		'plum',
+		'powderblue',
+		'purple',
+		'rebeccapurple',
+		'red',
+		'rosybrown',
+		'royalblue',
+		'saddlebrown',
+		'salmon',
+		'sandybrown',
+		'seagreen',
+		'seashell',
+		'sienna',
+		'silver',
+		'skyblue',
+		'slateblue',
+		'slategray',
+		'slategrey',
+		'snow',
+		'springgreen',
+		'steelblue',
+		'tan',
+		'teal',
+		'thistle',
+		'tomato',
+		'turquoise',
+		'violet',
+		'wheat',
+		'white',
+		'whitesmoke',
+		'yellow',
+		'yellowgreen',
+	);
+
+	/**
+	 * Whether a value is already a literal CSS color rather than a palette slug.
+	 *
+	 * Color block attributes such as `backgroundColor` normally hold a palette slug, but they can
+	 * carry a literal color instead, in which case there is nothing to translate: a hex value, any
+	 * functional notation (`rgb()`, `oklch()`, `var()`, and the rest), or a color keyword. A palette
+	 * slug cannot contain a bracket, so functional notation is safe to treat as a literal.
+	 *
+	 * A slug and a CSS named color look alike, but only callers that have already searched every
+	 * palette origin reach this check, and a palette entry wins there. So a theme that defines a
+	 * slug named `blue` still gets its own color, while a `blue` no palette defines renders as the
+	 * CSS color rather than being dropped. Anything else -- `theme-4`, `primary`, `dark-gray` --
+	 * is a slug nothing defines, and yields nothing.
+	 *
+	 * @param string $value Value of a color block attribute.
+	 * @return bool
+	 */
+	public static function is_color_literal( string $value ): bool {
+		$value = strtolower( trim( $value ) );
+
+		if ( in_array( $value, self::COLOR_KEYWORDS, true ) ) {
+			return true;
+		}
+
+		// A complete hex value: #rgb, #rgba, #rrggbb or #rrggbbaa. Matching a bare `#` or a stray
+		// `#zz` would emit exactly the kind of invalid declaration this whole check exists to stop.
+		if ( 1 === preg_match( '/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/', $value ) ) {
+			return true;
+		}
+
+		// Functional notation of any name, so CSS color functions need no list here. The closing
+		// bracket is required for the same reason as the hex digits above: `rgb(` is not a color.
+		return 1 === preg_match( '/^[a-z][a-z0-9-]*\(.*\)$/', $value );
+	}
+
+	/**
+	 * Every color a theme settings array defines, one entry per slug, highest priority origin first.
+	 *
+	 * `WP_Theme_JSON` keys the palette by origin and layers them so a later origin wins, so the
+	 * origins are flattened in reverse of that order and the first entry for a slug is the one that
+	 * should win.
+	 *
+	 * Several origins can define the same slug, and a duplicate means two things to two callers: a
+	 * lookup takes the first entry, while a stylesheet emits one rule per entry and the cascade
+	 * takes the last. That splits the color a block gets by the route it arrives through. Returning
+	 * a single entry per slug is what keeps the two agreeing, and it emits no redundant CSS for the
+	 * inliner to carry.
+	 *
+	 * An entry is dropped unless it carries both a string slug and a non-empty string color, and an
+	 * incomplete entry does not claim its slug, so a lower-priority origin that defines the same
+	 * slug properly still wins it. The palette reaches here through the
+	 * `woocommerce_email_editor_theme_json` filter, and callers read `slug` and `color` directly, so
+	 * a malformed entry would otherwise be a PHP warning on every render.
+	 *
+	 * @param array $settings Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
+	 * @return array Flat list of color definitions, one per slug, each with a usable slug and color.
+	 */
+	public static function palette_definitions( array $settings ): array {
+		$palette = $settings['color']['palette'] ?? array();
+
+		// Each origin is read defensively: the palette arrives through a filter, and a non-array
+		// origin is a TypeError in array_merge() rather than a warning, which would take the whole
+		// render down.
+		$definitions = array();
+		foreach ( array( 'custom', 'theme', 'blocks', 'default' ) as $origin ) {
+			if ( isset( $palette[ $origin ] ) && is_array( $palette[ $origin ] ) ) {
+				$definitions = array_merge( $definitions, $palette[ $origin ] );
+			}
+		}
+
+		$by_slug = array();
+		foreach ( $definitions as $definition ) {
+			if ( ! is_array( $definition ) ) {
+				continue;
+			}
+
+			$slug  = $definition['slug'] ?? null;
+			$color = $definition['color'] ?? null;
+
+			// Both have to be usable before the entry can claim the slug. An entry that names a slug
+			// but carries no color would otherwise shut out an origin that defines it properly.
+			if ( ! is_string( $slug ) || '' === $slug || ! is_string( $color ) || '' === trim( $color ) ) {
+				continue;
+			}
+
+			// First origin wins, so a slug already seen is a lower-priority duplicate.
+			if ( ! array_key_exists( $slug, $by_slug ) ) {
+				$by_slug[ $slug ] = $definition;
+			}
+		}
+
+		return array_values( $by_slug );
+	}
+
+	/**
+	 * Resolve a color slug against a theme settings array's palette.
+	 *
+	 * Every palette origin is searched, highest priority first, in the order `WP_Theme_JSON` layers
+	 * them: a slug the user defined in the email's own global styles (`custom`) beats the theme's
+	 * (`theme`), which beats core's (`default`). Without `custom` a color the user picked in the
+	 * editor would not resolve here even though the editor shows it.
+	 *
+	 * Returns an empty string for a slug no origin defines, so callers skip the declaration instead
+	 * of emitting the slug as a color. A value that is already a literal color passes through.
+	 *
+	 * @param array  $settings   Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
+	 */
+	public static function resolve_color_from_palette( array $settings, string $color_slug ): string {
+		foreach ( self::palette_definitions( $settings ) as $color_definition ) {
+			if ( $color_definition['slug'] === $color_slug ) {
+				return strtolower( (string) $color_definition['color'] );
+			}
+		}
+
+		// Trimmed, but deliberately not lowercased the way a palette color is: a custom property
+		// name inside `var()` is case-sensitive.
+		return self::is_color_literal( $color_slug ) ? trim( $color_slug ) : '';
+	}
+
+	/**
 	 * Get normalized block styles by translating color slugs to actual color values.
 	 *
 	 * This method handles the normalization of color-related attributes like backgroundColor,

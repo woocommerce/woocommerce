@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use WP_Block_Template;
 use WP_Post;
 use WP_Theme_JSON;
@@ -212,7 +213,7 @@ class Theme_Controller {
 			$css_presets .= ".has-{$font_size['slug']}-font-size { font-size: {$font_size['size']}; } \n";
 		}
 		// Color palette classes.
-		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'] ?? array(), $email_theme_settings['color']['palette']['default'] ?? array() );
+		$color_definitions = Styles_Helper::palette_definitions( $email_theme_settings );
 		foreach ( $color_definitions as $color ) {
 			$css_presets .= ".has-{$color['slug']}-color { color: {$color['color']}; } \n";
 			$css_presets .= ".has-{$color['slug']}-background-color { background-color: {$color['color']}; } \n";
@@ -299,18 +300,17 @@ class Theme_Controller {
 	/**
 	 * Translate color slug to color.
 	 *
-	 * @param string $color_slug Color slug.
-	 * @return string
+	 * Returns an empty string when the palette has no such slug, so callers skip the declaration
+	 * instead of emitting the slug as a color. A slug can be missing because the post was written
+	 * under a different theme, or because it came from a palette the email does not carry.
+	 *
+	 * A value that is already a literal color passes through untranslated.
+	 *
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
-		$settings          = $this->get_settings();
-		$color_definitions = array_merge( $settings['color']['palette']['theme'] ?? array(), $settings['color']['palette']['default'] ?? array() );
-		foreach ( $color_definitions as $color_definition ) {
-			if ( $color_definition['slug'] === $color_slug ) {
-				return strtolower( $color_definition['color'] );
-			}
-		}
-		return $color_slug;
+		return Styles_Helper::resolve_color_from_palette( $this->get_settings(), $color_slug );
 	}
 
 	/**
