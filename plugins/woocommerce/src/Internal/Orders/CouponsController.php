@@ -120,7 +120,7 @@ class CouponsController {
 	 * @since 11.3.0
 	 * @param \WC_Order $order                  The saved order, with its current coupons.
 	 * @param string[]  $previous_codes         Coupon codes the order had before the change.
-	 * @param string    $previous_usage_identity Value of get_usage_identity() before the change. Removed coupons release usage held under it.
+	 * @param string    $previous_usage_identity Value of get_usage_identity() before the change. Usage held under it is released for removed coupons and moved for kept ones.
 	 */
 	public function sync_usage_counts( \WC_Order $order, array $previous_codes, string $previous_usage_identity ): void {
 		/**
@@ -143,6 +143,16 @@ class CouponsController {
 			$coupon = new \WC_Coupon( $code );
 			if ( $coupon->get_id() ) {
 				$coupon->increase_usage_count( $used_by, $order );
+			}
+		}
+
+		if ( '' !== $previous_usage_identity && $previous_usage_identity !== $used_by ) {
+			foreach ( array_intersect_key( $current, $previous ) as $code ) {
+				$coupon = new \WC_Coupon( $code );
+				if ( $coupon->get_id() ) {
+					$coupon->decrease_usage_count( $previous_usage_identity );
+					$coupon->increase_usage_count( $used_by, $order );
+				}
 			}
 		}
 

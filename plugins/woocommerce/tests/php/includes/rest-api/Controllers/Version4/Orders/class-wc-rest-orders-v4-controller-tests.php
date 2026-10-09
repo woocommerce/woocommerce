@@ -2207,4 +2207,33 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
 	}
+
+	/**
+	 * @testdox Changing the billing email while keeping a counted coupon moves its usage to the new email.
+	 */
+	public function test_update_changing_email_keeps_coupon_and_moves_usage_identity(): void {
+		$order     = $this->create_order_with_counted_coupons( array( 'v4-usage-a' ) );
+		$coupon_id = wc_get_coupon_id_by_code( 'v4-usage-a' );
+		$this->assertContains( 'john.doe@example.com', get_post_meta( $coupon_id, '_used_by', false ) );
+
+		$response = $this->put_order(
+			$order->get_id(),
+			array(
+				'billing'      => array( 'email' => 'new@example.com' ),
+				'coupon_lines' => array( array( 'id' => $this->get_coupon_item_id( $order, 'v4-usage-a' ) ) ),
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$used_by = get_post_meta( $coupon_id, '_used_by', false );
+		$this->assertContains( 'new@example.com', $used_by );
+		$this->assertNotContains( 'john.doe@example.com', $used_by );
+
+		$response = $this->put_order( $order->get_id(), array( 'coupon_lines' => array() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $this->get_coupon_usage( 'v4-usage-a' ) );
+		$this->assertEmpty( get_post_meta( $coupon_id, '_used_by', false ) );
+	}
 }
