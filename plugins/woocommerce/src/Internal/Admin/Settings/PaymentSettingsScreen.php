@@ -109,8 +109,8 @@ class PaymentSettingsScreen {
 	/**
 	 * Get the screen URL for a classic settings section request, or null when it shouldn't redirect.
 	 *
-	 * Only GET requests redirect, so saving the classic page still works. Other query arguments
-	 * are passed to the screen's route.
+	 * Only GET requests redirect, so saving the classic page still works. A gateway can turn its own
+	 * query arguments into a sub-page path within the screen; the rest are passed to the route.
 	 *
 	 * @since 11.3.0
 	 *
@@ -131,14 +131,37 @@ class PaymentSettingsScreen {
 			return null;
 		}
 
-		$args = array();
-		foreach ( array_diff_key( $query, array_flip( array( 'page', 'tab', 'section' ) ) ) as $key => $value ) {
-			if ( is_string( $key ) && is_scalar( $value ) ) {
-				$args[ sanitize_key( $key ) ] = sanitize_text_field( (string) $value );
-			}
+		$args = self::sanitize_query_args( array_diff_key( $query, array_flip( array( 'page', 'tab', 'section' ) ) ) );
+
+		/**
+		 * Filters where a classic settings URL opens on its payment settings screen. Experimental: the format can change in any release.
+		 *
+		 * `path` is the sub-page to open within the screen (for example `woopay`, or `fraud-protection/rules` for a
+		 * nested one), and `args` are the query arguments passed to the route. A gateway can move its own arguments into the path.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param array  $location  The location, with `path` (empty for the main page) and `args`.
+		 * @param string $screen_id The screen ID.
+		 */
+		$location = apply_filters(
+			'woocommerce_experimental_payment_settings_classic_location',
+			array(
+				'path' => '',
+				'args' => $args,
+			),
+			$screen['id']
+		);
+
+		$path = is_array( $location ) && isset( $location['path'] ) && is_string( $location['path'] ) ? trim( $location['path'], '/' ) : '';
+		if ( '' !== $path && ! preg_match( '#^[a-z0-9_-]+(?:/[a-z0-9_-]+)*$#', $path ) ) {
+			$path = '';
+		}
+		if ( is_array( $location ) && isset( $location['args'] ) && is_array( $location['args'] ) ) {
+			$args = self::sanitize_query_args( $location['args'] );
 		}
 
-		$route = '/settings/' . $screen['id'] . ( $args ? '?' . http_build_query( $args ) : '' );
+		$route = '/settings/' . $screen['id'] . ( '' !== $path ? '/' . $path : '' ) . ( $args ? '?' . http_build_query( $args ) : '' );
 		return add_query_arg(
 			array(
 				'page' => self::PAGE_SLUG,
@@ -146,6 +169,23 @@ class PaymentSettingsScreen {
 			),
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Keep scalar query arguments with string keys, sanitized.
+	 *
+	 * @param array $query The query arguments.
+	 * @return array<string, string>
+	 */
+	private static function sanitize_query_args( array $query ): array {
+		$args = array();
+		foreach ( $query as $key => $value ) {
+			if ( is_string( $key ) && is_scalar( $value ) ) {
+				$args[ sanitize_key( $key ) ] = sanitize_text_field( (string) $value );
+			}
+		}
+
+		return $args;
 	}
 
 	/**
@@ -186,14 +226,21 @@ class PaymentSettingsScreen {
 			self::DATA_SCRIPT_HANDLE,
 			'window.wcPaymentSettingsScreen = ' . wp_json_encode(
 				array(
-					'id'         => $screen['id'],
-					'title'      => $screen['title'],
-					'entity'     => array(
+					'id'          => $screen['id'],
+					'title'       => $screen['title'],
+					'entity'      => array(
 						'kind'    => PaymentSettingsScreens::ENTITY_KIND,
 						'name'    => $screen['id'],
 						'baseURL' => $screen['rest_path'],
 					),
-					'classicUrl' => null === $screen['classic_section'] ? null : add_query_arg(
+					'paymentsUrl' => add_query_arg(
+						array(
+							'page' => 'wc-settings',
+							'tab'  => 'checkout',
+						),
+						admin_url( 'admin.php' )
+					),
+					'classicUrl'  => null === $screen['classic_section'] ? null : add_query_arg(
 						array(
 							'page'               => 'wc-settings',
 							'tab'                => 'checkout',
@@ -291,14 +338,14 @@ class PaymentSettingsScreen {
 	}
 
 	/**
-	 * Get the screen named in the route, such as `p=/settings/woopayments`.
+	 * Get the screen named in the route, such as `p=/settings/woopayments` or `p=/settings/woopayments/fraud-protection`.
 	 *
 	 * @return array{id: string, title: string, rest_path: string, scripts: string[], classic_section: string|null}|null
 	 */
 	private function get_requested_screen(): ?array {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only selects which screen to load.
 		$route = isset( $_GET['p'] ) && is_string( $_GET['p'] ) ? sanitize_text_field( wp_unslash( $_GET['p'] ) ) : '';
-		if ( ! preg_match( '#^/settings/([a-z0-9_-]+)/?(?:\?.*)?$#', $route, $matches ) ) {
+		if ( ! preg_match( '#^/settings/([a-z0-9_-]+)(?:/[^?]*)?(?:\?.*)?$#', $route, $matches ) ) {
 			return null;
 		}
 

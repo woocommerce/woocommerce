@@ -17,6 +17,8 @@ export interface PaymentSettingsScreen {
 	title: string;
 	entity: { kind: string; name: string; baseURL: string };
 	classicUrl: string | null;
+	/** The Payments settings page, which the breadcrumbs link back to. */
+	paymentsUrl: string;
 }
 
 export interface ScreenDefinition {

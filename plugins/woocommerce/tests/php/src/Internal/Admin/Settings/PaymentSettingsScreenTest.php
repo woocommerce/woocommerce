@@ -44,7 +44,8 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 	 * @testdox Should pass the requested screen to the route and load its scripts.
 	 *
 	 * @testWith ["/settings/example"]
-	 *           ["/settings/example?view=support"]
+	 *           ["/settings/example/advanced"]
+	 *           ["/settings/example/advanced/rules?method=apple_pay"]
 	 *
 	 * @param string $route The requested route.
 	 */
@@ -96,6 +97,47 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should open a classic section at the path a gateway maps its query arguments to.
+	 */
+	public function test_redirects_classic_section_to_filtered_path(): void {
+		$this->register_example_screen();
+		add_filter(
+			'woocommerce_experimental_payment_settings_classic_location',
+			function ( $location ) {
+				unset( $location['args']['panel'] );
+				$location['path'] = 'advanced/rules';
+				return $location;
+			}
+		);
+
+		$url = $this->sut->get_classic_redirect_url( $this->classic_query( array( 'panel' => 'advanced' ) ), 'GET' );
+
+		$this->assertStringContainsString( 'p=' . rawurlencode( '/settings/example/advanced/rules?method=apple_pay' ), (string) $url );
+	}
+
+	/**
+	 * @testdox Should ignore an invalid path from the classic location filter.
+	 *
+	 * @testWith ["../other"]
+	 *           ["advanced//rules"]
+	 *           ["Advanced/Rules"]
+	 *           [42]
+	 *
+	 * @param mixed $path The filtered path.
+	 */
+	public function test_ignores_invalid_filtered_path( $path ): void {
+		$this->register_example_screen();
+		add_filter(
+			'woocommerce_experimental_payment_settings_classic_location',
+			fn( $location ) => array_merge( $location, array( 'path' => $path ) )
+		);
+
+		$url = $this->sut->get_classic_redirect_url( $this->classic_query(), 'GET' );
+
+		$this->assertStringContainsString( 'p=' . rawurlencode( '/settings/example?method=apple_pay' ), (string) $url );
+	}
+
+	/**
 	 * @testdox Should not redirect saves, marked classic requests or other pages.
 	 *
 	 * @dataProvider provide_requests_that_do_not_redirect
@@ -141,6 +183,25 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 		$data = implode( '', (array) wp_scripts()->get_data( 'wc-payment-settings-screen', 'before' ) );
 		$this->assertStringContainsString( 'section=example_gateway', $data );
 		$this->assertStringContainsString( 'wc_classic_settings=1', $data );
+		$this->assertStringContainsString( '"paymentsUrl":', $data, 'The breadcrumbs should link back to the Payments page' );
+	}
+
+	/**
+	 * A classic section request for the example screen.
+	 *
+	 * @param array $extra Extra query arguments.
+	 * @return array<string, string>
+	 */
+	private function classic_query( array $extra = array() ): array {
+		return array_merge(
+			array(
+				'page'    => 'wc-settings',
+				'tab'     => 'checkout',
+				'section' => 'example_gateway',
+				'method'  => 'apple_pay',
+			),
+			$extra
+		);
 	}
 
 	/**
