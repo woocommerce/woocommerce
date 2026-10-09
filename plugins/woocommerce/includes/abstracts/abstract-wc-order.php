@@ -1740,7 +1740,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$order_data_store = $this->get_data_store();
-		if ( $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
+		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
 			$coupon->increase_usage_count( $used_by );
 		}
 

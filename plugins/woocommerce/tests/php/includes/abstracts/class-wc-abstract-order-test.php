@@ -595,15 +595,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	private function register_custom_order_data_store(): void {
 		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
 		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
-			/**
-			 * Report that coupon usage has not been recorded for the order yet.
-			 *
-			 * @param WC_Abstract_Order $order Order object.
-			 * @return bool
-			 */
-			public function get_recorded_coupon_usage_counts( $order ) {
-				return false;
-			}
 		};
 		add_filter(
 			'woocommerce_data_stores',

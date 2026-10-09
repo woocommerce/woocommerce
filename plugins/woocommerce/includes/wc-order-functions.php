@@ -1025,6 +1025,11 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
+	// Only order data stores can record coupon usage.
+	if ( ! $order->get_data_store()->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
+		return;
+	}
+
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
