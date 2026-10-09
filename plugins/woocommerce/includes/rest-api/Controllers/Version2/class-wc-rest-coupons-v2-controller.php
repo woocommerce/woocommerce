@@ -203,6 +203,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 			'minimum_amount'              => $data['minimum_amount'],
 			'maximum_amount'              => $data['maximum_amount'],
 			'email_restrictions'          => $data['email_restrictions'],
+			'auto_apply'                  => $data['auto_apply'],
 			'used_by'                     => $data['used_by'],
 			'meta_data'                   => $data['meta_data'],
 		);
@@ -528,6 +529,12 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 					'items'       => array(
 						'type' => 'string',
 					),
+					'context'     => array( 'view', 'edit' ),
+				),
+				'auto_apply'                  => array(
+					'description' => __( 'If true, this coupon is applied to the cart automatically when its conditions are met, and cannot be removed manually.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'used_by'                     => array(

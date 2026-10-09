@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide the remove button for auto-applied coupons in the Cart and Checkout blocks, since removing one just gets it re-added on the next totals recalculation.
