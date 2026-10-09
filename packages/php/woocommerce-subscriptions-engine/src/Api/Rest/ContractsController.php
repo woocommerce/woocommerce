@@ -297,12 +297,12 @@ final class ContractsController extends WP_REST_Controller {
 			'payment_method'       => $item->get_payment_method(),
 			'payment_method_title' => $item->get_payment_method_title(),
 			'payment_token_id'     => $item->get_payment_token_id(),
-			'start_gmt'            => $this->format_date( $item->get_start_gmt() ),
-			'next_payment_gmt'     => $this->format_date( $item->get_next_payment_gmt() ),
-			'last_payment_gmt'     => $this->format_date( $item->get_last_payment_gmt() ),
-			'last_attempt_gmt'     => $this->format_date( $item->get_last_attempt_gmt() ),
-			'trial_end_gmt'        => $this->format_date( $item->get_trial_end_gmt() ),
-			'end_gmt'              => $this->format_date( $item->get_end_gmt() ),
+			'start_gmt'            => wc_rest_prepare_date_response( $item->get_start_gmt() ),
+			'next_payment_gmt'     => wc_rest_prepare_date_response( $item->get_next_payment_gmt() ),
+			'last_payment_gmt'     => wc_rest_prepare_date_response( $item->get_last_payment_gmt() ),
+			'last_attempt_gmt'     => wc_rest_prepare_date_response( $item->get_last_attempt_gmt() ),
+			'trial_end_gmt'        => wc_rest_prepare_date_response( $item->get_trial_end_gmt() ),
+			'end_gmt'              => wc_rest_prepare_date_response( $item->get_end_gmt() ),
 			'schedule_source'      => $item->get_schedule_source(),
 			'billing_total'        => $item->get_billing_total(),
 			'discount_total'       => $item->get_discount_total(),
@@ -523,14 +523,5 @@ final class ContractsController extends WP_REST_Controller {
 			__( 'The action could not be completed.', 'woocommerce-subscriptions-engine' ),
 			array( 'status' => 500 )
 		);
-	}
-
-	/**
-	 * A stored GMT datetime in the WordPress REST date format, or null.
-	 *
-	 * @param string|null $date_gmt Stored `Y-m-d H:i:s` GMT datetime.
-	 */
-	private function format_date( ?string $date_gmt ): ?string {
-		return null === $date_gmt ? null : mysql_to_rfc3339( $date_gmt );
 	}
 }
