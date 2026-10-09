@@ -72,7 +72,7 @@ class BlockTemplatesController {
 
 					// Backward compatibility: pre_render_block skips core's render_block filter, re-apply it so extensions filtering template part output still work.
 					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
-					$block_content = apply_filters( 'render_block', $block_content, $parsed_block, new \WP_Block( $parsed_block ) );
+					$block_content = apply_filters( 'render_block', $block_content, $parsed_block, new \WP_Block( $parsed_block ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core filter.
 
 					return $block_content;
 				}
