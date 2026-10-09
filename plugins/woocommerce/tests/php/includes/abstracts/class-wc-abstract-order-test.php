@@ -521,6 +521,27 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A refund without a parent order uses the store base address as its tax location.
+	 */
+	public function test_refund_get_taxable_location_without_parent_returns_base_address() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$refund = new WC_Order_Refund();
+
+		$this->assertSame(
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94110',
+				'city'     => 'San Francisco',
+			),
+			$refund->get_taxable_location()
+		);
+	}
+
+	/**
 	 * @testdox A coupon can be applied to a custom order type that has no customer ID or billing email.
 	 */
 	public function test_apply_coupon_on_custom_order_type_without_customer() {
