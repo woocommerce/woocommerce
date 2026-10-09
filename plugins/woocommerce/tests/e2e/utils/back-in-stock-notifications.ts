@@ -42,9 +42,10 @@ export const BIS_FEATURE_OPTION =
 /**
  * Fail early, with the fix, when the env can't run these specs.
  *
- * Provisioned by `bin/test-env-setup.sh`, which only runs on env create or
- * `--update`. On a stale env the notification batches keep their one-minute
- * delay, so every spec fails as an unexplained timeout.
+ * Provisioned by `bin/env-provision.sh`, which restores a cached baseline unless
+ * the recipe changed or `env:e2e:rebuild` ran. On a stale env the notification
+ * batches keep their one-minute delay, so every spec fails as an unexplained
+ * timeout.
  */
 export async function assertBISEnvReady(): Promise< void > {
 	// wp-env prefixes its own lines onto stdout, so match rather than compare.
@@ -70,7 +71,7 @@ export async function assertBISEnvReady(): Promise< void > {
 
 		if ( ! expected.test( stdout ) ) {
 			throw new Error(
-				`Cannot run the Back in Stock Notifications specs: ${ problem }. Run \`pnpm env:e2e:start\` to re-provision the tests env.`
+				`Cannot run the Back in Stock Notifications specs: ${ problem }. Run \`pnpm env:e2e:rebuild\` to re-provision the tests env.`
 			);
 		}
 	}
