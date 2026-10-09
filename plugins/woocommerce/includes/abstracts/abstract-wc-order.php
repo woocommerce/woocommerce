@@ -1739,7 +1739,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$used_by = $this->get_billing_email();
 		}
 
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
 		$order_data_store = $this->get_data_store();
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
 			$coupon->increase_usage_count( $used_by );
 		}

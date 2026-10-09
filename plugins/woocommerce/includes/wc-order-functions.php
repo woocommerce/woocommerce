@@ -1025,8 +1025,15 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
+	/**
+	 * Data store wrapper.
+	 *
+	 * @var WC_Data_Store $data_store
+	 */
+	$data_store = $order->get_data_store();
+
 	// Only order data stores can record coupon usage.
-	if ( ! $order->get_data_store()->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
+	if ( ! $data_store->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
 		return;
 	}
 
