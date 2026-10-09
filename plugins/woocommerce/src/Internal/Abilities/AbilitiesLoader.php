@@ -32,13 +32,6 @@ class AbilitiesLoader {
 	private static bool $initialized = false;
 
 	/**
-	 * Whether the ability extensions init action has fired.
-	 *
-	 * @var bool
-	 */
-	private static bool $extensions_initialized = false;
-
-	/**
 	 * Canonical WooCommerce domain ability definition classes.
 	 *
 	 * @var array<int, class-string>
@@ -102,10 +95,9 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function init_extensions(): void {
-		if ( self::$extensions_initialized || ! AbilityContracts::is_enabled() ) {
+		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityContracts::is_enabled() ) {
 			return;
 		}
-		self::$extensions_initialized = true;
 
 		/**
 		 * Fires when extensions can register their fields with AbilityExtensions.
