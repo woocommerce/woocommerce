@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Session\SessionDataWriter;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
@@ -168,6 +169,7 @@ class WC_Session_Handler extends WC_Session {
 			// If there is no cookie, generate a new session/customer ID.
 			$this->_customer_id = $this->generate_customer_id();
 			$this->_data        = $this->get_session_data();
+			$this->set_loaded_session_snapshot( $this->_data );
 			return;
 		}
 
@@ -209,6 +211,7 @@ class WC_Session_Handler extends WC_Session {
 		$session_data                         = array_diff_key( $session_data, array( 'customer' => true ) );
 		$this->_data                          = $session_data;
 		$this->_dirty                         = true;
+		$this->set_loaded_session_snapshot( null );
 		$this->save_data();
 	}
 
@@ -222,6 +225,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_data        = $this->get_session( $guest_session_id, array() );
 		$this->_dirty       = true;
 		$this->_customer_id = $user_session_id;
+		$this->set_loaded_session_snapshot( null );
 		$this->save_data( $guest_session_id );
 
 		/**
@@ -269,6 +273,9 @@ class WC_Session_Handler extends WC_Session {
 		 * @return array Modified session data to be used for initialization.
 		 */
 		$this->_data = (array) apply_filters( 'woocommerce_restored_session_data', $session_data );
+
+		// Snapshot the unfiltered data, so changes made by the filter are saved like any other change.
+		$this->set_loaded_session_snapshot( $session_data );
 	}
 
 	/**
@@ -551,19 +558,19 @@ class WC_Session_Handler extends WC_Session {
 	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
-			global $wpdb;
-
-			$wpdb->query(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-					"INSERT INTO {$this->_table} (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
- 					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
-					$this->get_customer_id(),
-					maybe_serialize( $this->_data ),
-					$this->_session_expiration
-				)
+			// Writes only the keys this request changed, so changes other requests saved since it loaded are kept.
+			$saved_data = wc_get_container()->get( SessionDataWriter::class )->save(
+				$this->_table,
+				$this->get_customer_id(),
+				$this->_session_expiration,
+				$this->_data,
+				$this->get_loaded_session_snapshot()
 			);
-			wp_cache_set( $this->get_cache_prefix() . $this->get_customer_id(), $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+
+			wp_cache_set( $this->get_cache_prefix() . $this->get_customer_id(), $saved_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+
+			// Later saves in this request compare against this request's own data, so they merge again.
+			$this->set_loaded_session_snapshot( $this->_data );
 			$this->_dirty = false;
 
 			/**
@@ -601,6 +608,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_dirty       = false;
 		$this->_customer_id = $this->generate_customer_id();
 		$this->_has_cookie  = false;
+		$this->set_loaded_session_snapshot( null );
 	}
 
 	/**
