@@ -110,7 +110,7 @@ test.describe(
 				await page
 					.getByPlaceholder( 'wordpress@example.com' )
 					.fill( 'merchant@example.com' );
-				await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
+				await page.getByLabel( 'Get tips, discounts,' ).uncheck();
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 
@@ -274,7 +274,7 @@ test.describe(
 				await page
 					.getByPlaceholder( 'wordpress@example.com' )
 					.fill( 'merchant@example.com' );
-				await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
+				await page.getByLabel( 'Get tips, discounts,' ).uncheck();
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 
@@ -291,7 +291,7 @@ test.describe(
 					} )
 				).not.toBeAttached();
 
-				// select and install the rest of the extentions
+				// select and install the rest of the extensions
 				try {
 					await page
 						.getByText(

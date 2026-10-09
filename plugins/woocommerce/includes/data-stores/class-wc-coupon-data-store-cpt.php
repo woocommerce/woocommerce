@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -184,6 +186,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function update( &$coupon ) {
 		$coupon->save_meta_data();
+
 		$changes = $coupon->get_changes();
 
 		if ( array_intersect( array( 'code', 'description', 'date_created', 'date_modified', 'status' ), array_keys( $changes ) ) ) {
@@ -191,11 +194,14 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'post_title'        => $coupon->get_code( 'edit' ),
 				'post_excerpt'      => $coupon->get_description( 'edit' ),
 				'post_status'       => $coupon->get_status( 'edit' ),
-				'post_date'         => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() ),
-				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),
 				'post_modified_gmt' => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $coupon->get_date_modified( 'edit' )->getTimestamp() ) : current_time( 'mysql', 1 ),
 			);
+
+			if ( $coupon->get_date_created( 'edit' ) ) {
+				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getOffsetTimestamp() );
+				$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $coupon->get_date_created( 'edit' )->getTimestamp() );
+			}
 
 			/**
 			 * When updating this object, to prevent infinite loops, use $wpdb
@@ -217,10 +223,22 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$coupon->apply_changes();
 		delete_transient( 'rest_api_coupons_type_count' );
 
-		// The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not published, otherwise the coupon will remain available for use.
+		/*
+		 * The `coupon_id_from_code` entry in the object cache must not exist when the coupon is not
+		 * published, otherwise the coupon will remain available for use.
+		 *
+		 * This is not made redundant by CouponCodeLookupInvalidator's `transition_post_status`
+		 * listener. The `doing_action( 'save_post' )` branch above writes the status with $wpdb
+		 * directly, so that write fires no transition. Core already transitioned the post to the
+		 * status it saved just before `save_post`, but the CRUD can write a different one here (a
+		 * `save_post` callback setting the coupon to draft, say), and this covers the difference.
+		 *
+		 * The edit context is the code that was written to `post_title` above, and the one the
+		 * hooks invalidate from. The view context would run it through the
+		 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
+		 */
 		if ( 'publish' !== $coupon->get_status() ) {
-			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
+			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
 		}
 
 		do_action( 'woocommerce_update_coupon', $coupon->get_id(), $coupon );
@@ -251,8 +269,17 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		if ( $args['force_delete'] ) {
 			wp_delete_post( $id );
 
-			$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code, 'coupons' );
+			/*
+			 * The `deleted_post` listener of CouponCodeLookupInvalidator covers this for the core
+			 * data store, but it only invalidates published coupons, the only status that store
+			 * caches. A custom data store that resolves further statuses caches those too and skips
+			 * the read-time check, so this delete is what keeps its force deletes covered.
+			 *
+			 * The edit context is the code that was written to `post_title`, and the one the hooks
+			 * invalidate from. The view context would run it through the
+			 * `woocommerce_coupon_get_code` filter and could point the delete at another key.
+			 */
+			wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate( (string) $coupon->get_code( 'edit' ) );
 
 			$coupon->set_id( 0 );
 			do_action( 'woocommerce_delete_coupon', $id );

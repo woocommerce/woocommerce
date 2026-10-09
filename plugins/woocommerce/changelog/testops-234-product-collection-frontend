@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce Product Collection frontend E2E tests from 37 to 20; PHPUnit owns the renderer's state and route parity, Jest owns the editor contracts and the product template's request, and one new browser title keeps the empty-collection and No Results render.
+

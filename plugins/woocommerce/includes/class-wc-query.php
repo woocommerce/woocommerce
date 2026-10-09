@@ -8,7 +8,9 @@
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
 use Automattic\WooCommerce\Internal\ProductFilters\Params;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 defined( 'ABSPATH' ) || exit;
@@ -474,6 +476,7 @@ class WC_Query {
 	 * queries during rendering.
 	 *
 	 * @since 10.8.0
+	 * @internal
 	 *
 	 * @param array    $posts Posts from WP Query.
 	 * @param WP_Query $query Current query.
@@ -483,6 +486,48 @@ class WC_Query {
 		if ( 'product_query' === $query->get( 'wc_query' ) ) {
 			update_post_thumbnail_cache( $query );
 		}
+		return $posts;
+	}
+
+	/**
+	 * Prime transient option caches for variable products in bulk to avoid per-product queries during rendering.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param array    $posts Posts from WP Query.
+	 * @param WP_Query $query Current query.
+	 * @return array
+	 */
+	public function prime_variable_products_transients( $posts, $query ) {
+		if ( 'product_query' === $query->get( 'wc_query' ) && ! wp_using_ext_object_cache() ) {
+			$options = array();
+			// Performance note: post caches has been already primed, hence the loop operates on in-memory data.
+			foreach ( $posts as $post ) {
+				$terms = $post instanceof \WP_Post ? get_object_term_cache( $post->ID, 'product_type' ) : null;
+				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term ); // @phpstan-ignore instanceof.alwaysTrue (defensive checks against filters)
+				if ( ! empty( $terms ) && ProductType::VARIABLE === current( $terms )->slug ) {
+					$product_id = $post->ID;
+
+					// See also \WC_Product_Variable_Data_Store_CPT::read_product_data and sync with it when necessary.
+					$options[] = '_transient_wc_var_prices_' . $product_id;
+					$options[] = '_transient_timeout_wc_var_prices_' . $product_id;
+					$options[] = '_transient_wc_product_children_' . $product_id;
+					$options[] = '_transient_timeout_wc_product_children_' . $product_id;
+					$options[] = '_transient_wc_child_has_weight_' . $product_id;
+					$options[] = '_transient_timeout_wc_child_has_weight_' . $product_id;
+					$options[] = '_transient_wc_child_has_dimensions_' . $product_id;
+					$options[] = '_transient_timeout_wc_child_has_dimensions_' . $product_id;
+					$options[] = '_transient_wc_related_' . $product_id;
+					$options[] = '_transient_timeout_wc_related_' . $product_id;
+				}
+			}
+
+			if ( ! empty( $options ) ) {
+				wp_prime_option_caches( $options );
+			}
+		}
+
 		return $posts;
 	}
 
@@ -580,6 +625,17 @@ class WC_Query {
 		$q->set( 'post__in', array_unique( (array) apply_filters( 'loop_shop_post_in', array() ) ) );
 
 		// Work out how many products to query.
+		/**
+		 * Filters the number of products shown per page in a product loop.
+		 *
+		 * In WC_Query::product_query() this applies only when the query does not already
+		 * set posts_per_page. Other callers, such as the Product Collection block, apply it
+		 * unconditionally.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $per_page Products per page. Defaults to the store's columns times its rows setting.
+		 */
 		$q->set( 'posts_per_page', $q->get( 'posts_per_page' ) ? $q->get( 'posts_per_page' ) : apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 
 		// Store reference to this query.
@@ -589,6 +645,7 @@ class WC_Query {
 		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'prime_variable_products_transients' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -877,12 +934,7 @@ class WC_Query {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**

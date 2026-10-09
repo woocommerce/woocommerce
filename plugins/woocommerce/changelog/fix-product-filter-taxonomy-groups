@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return no products when a selected category or tag filter has no valid values.

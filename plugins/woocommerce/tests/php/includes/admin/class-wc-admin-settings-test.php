@@ -30,6 +30,32 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not use the global post as the selection when a searchable page setting is empty.
+	 */
+	public function test_empty_page_search_does_not_select_global_post(): void {
+		$GLOBALS['post'] = self::factory()->post->create_and_get( array( 'post_title' => 'Unrelated global post' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise the global-post fallback; parent teardown restores it.
+
+		$fields = array(
+			array(
+				'id'    => 'empty_page',
+				'type'  => 'single_select_page_with_search',
+				'value' => 0,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $fields );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$this->assertStringNotContainsString( 'Unrelated global post', $output );
+		$this->assertSame( 1, substr_count( $output, '<option ' ) );
+	}
+
+	/**
 	 * @testdox Should preserve percent-encoded sequences in password fields.
 	 */
 	public function test_save_fields_preserves_percent_encoded_chars_in_password_fields(): void {
@@ -338,6 +364,93 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $xpath->query( $radio . '/fieldset[@aria-labelledby="test_radio_setting-title"]' )->length );
 		$this->assertSame( 0, $xpath->query( $radio . '/fieldset/legend' )->length );
 		$this->assertSame( 2, $xpath->query( $radio . '//input[@type="radio"]' )->length );
+	}
+
+	/**
+	 * @testdox Should preserve supported checkbox description tooltip markup and remove unsupported markup.
+	 */
+	public function test_output_fields_normalizes_checkbox_description_tooltip_html(): void {
+		$options = array(
+			array(
+				'id'       => 'test_checkbox_tooltip',
+				'title'    => 'Checkbox title',
+				'type'     => 'checkbox',
+				'value'    => 'no',
+				'desc_tip' => true,
+				'desc'     => 'Use <strong>supported</strong> <em onclick="unsupported">formatting</em><script>unsupported</script><iframe src="https://example.com">unsupported</iframe>.',
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The checkbox setting output should be valid enough for DOM parsing.' );
+
+		$xpath       = new DOMXPath( $document );
+		$description = '//td[contains(concat(" ", normalize-space(@class), " "), " forminp-checkbox ")]/fieldset/p[contains(concat(" ", normalize-space(@class), " "), " description ")]';
+
+		$this->assertSame( 1, $xpath->query( $description . '//strong[normalize-space(.)="supported"]' )->length );
+		$this->assertSame( 1, $xpath->query( $description . '//em[normalize-space(.)="formatting"]' )->length );
+		$this->assertSame( 0, $xpath->query( $description . '//*[@onclick]' )->length );
+		$this->assertSame( 0, $xpath->query( $description . '//script | ' . $description . '//iframe' )->length );
+	}
+
+	/**
+	 * @testdox Should keep single-page-select attributes inside their rendered contexts.
+	 */
+	public function test_output_fields_escapes_single_select_page_attributes(): void {
+		$css   = "width: 12px;' onfocus='alert(1)";
+		$class = "safe-class' data-pwned='1";
+		$this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$options = array(
+			array(
+				'id'    => 'test_page_setting',
+				'title' => 'Page setting',
+				'type'  => 'single_select_page',
+				'value' => 0,
+				'css'   => $css,
+				'class' => $class,
+			),
+		);
+
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<table>' . $output . '</table>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The setting output should remain valid enough for DOM parsing.' );
+
+		$select = ( new DOMXPath( $document ) )->query( '//select[@id="test_page_setting"]' )->item( 0 );
+		$this->assertInstanceOf( DOMElement::class, $select );
+		$this->assertSame( $css, $select->getAttribute( 'style' ) );
+		$this->assertSame( $class, $select->getAttribute( 'class' ) );
+		$this->assertFalse( $select->hasAttribute( 'onfocus' ) );
+		$this->assertFalse( $select->hasAttribute( 'data-pwned' ) );
 	}
 
 	/**

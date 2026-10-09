@@ -70,12 +70,17 @@
 - [woocommerce_sortable_taxonomies](#woocommerce_sortable_taxonomies)
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
+- [woocommerce_store_api_cart_item_parent_item_key](#woocommerce_store_api_cart_item_parent_item_key)
+- [woocommerce_store_api_cart_item_quantity_validation](#woocommerce_store_api_cart_item_quantity_validation)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
+- [woocommerce_store_api_expose_error_details](#woocommerce_store_api_expose_error_details)
 - [`woocommerce_store_api_product_quantity_{$value_type}`](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_id](#woocommerce_store_api_rate_limit_id)
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
+- [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
 - [woocommerce_use_block_notices_in_classic_theme](#woocommerce_use_block_notices_in_classic_theme)
+- [woocommerce_valid_order_statuses_for_payment](#woocommerce_valid_order_statuses_for_payment)
 - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
 
 ---
@@ -564,7 +569,20 @@ apply_filters( 'woocommerce_blocks_hook_compatibility_additional_data', array $d
 
 ### Description
 
-Accepts an array of hooked data. The array should be in the following format: [ [ hook => `<hook-name>`, function => `<function-name>`, priority => `<priority>`, ], ... ] Where:
+Accepts an array of hooked data. The array should be in the following format:
+
+```text
+[
+  [
+    hook => <hook-name>,
+    function => <function-name>,
+    priority => <priority>,
+ ],
+ ...
+]
+```
+
+Where:
 
 - hook-name is the name of the hook that have the functions hooked to.
 - function-name is the hooked function name.
@@ -661,13 +679,13 @@ apply_filters( 'woocommerce_blocks_product_grid_is_cacheable', bool $is_cacheabl
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $is_cacheable | bool | The list of script dependencies. |
+| $is_cacheable | bool | Whether the product grid is cacheable. True to enable cache, false to disable. |
 | $query_args | array | Query args for the products query passed to BlocksWpQuery. |
 
 ### Returns
 
 
-`array` True to enable cache, false to disable cache.
+`bool` True to enable cache, false to disable cache.
 
 ### Source
 
@@ -1038,7 +1056,7 @@ apply_filters( 'woocommerce_get_default_value_for_{$key}', null $value, string $
 
 ### Source
 
-- [Blocks/Domain/Services/CheckoutFields.php](../../../../../../src/Blocks/Domain/Services/CheckoutFields.php)
+- [Blocks/Domain/Services/CheckoutFieldsStorage.php](../../../../../../src/Blocks/Domain/Services/CheckoutFieldsStorage.php)
 
 ---
 
@@ -1061,7 +1079,7 @@ apply_filters( 'woocommerce_get_default_value_for_{$missing_field}', null $value
 
 ### Source
 
-- [Blocks/Domain/Services/CheckoutFields.php](../../../../../../src/Blocks/Domain/Services/CheckoutFields.php)
+- [Blocks/Domain/Services/CheckoutFieldsStorage.php](../../../../../../src/Blocks/Domain/Services/CheckoutFieldsStorage.php)
 
 ---
 
@@ -1079,7 +1097,9 @@ apply_filters( 'woocommerce_get_item_data', array $item_data, array $cart_item )
 
 ### Description
 
-Filters the variation option name for custom option slugs.
+Allows extensions to attach their own name/value pairs to a cart item, which the Store API returns in the item's `item_data` field.
+
+Set `raw_key` so clients can find your entry without matching a translated label. Data you do not intend to display belongs in your `extensions` namespace.
 
 ### Parameters
 
@@ -1175,8 +1195,15 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 Allow filtering of the add to cart button arguments.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args' )
+apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
 ```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $args | array | Button arguments, with a `class` string and an `attributes` array. |
+| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
@@ -1452,17 +1479,17 @@ apply_filters( 'woocommerce_product_tabs', array $tabs )
 ## woocommerce_quantity_input_placeholder
 
 
-Filter the placeholder value allowed for the product.
+Filter the placeholder shown in the quantity input.
 
 ```php
-apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Product $product )
+apply_filters( 'woocommerce_quantity_input_placeholder', int $placeholder, \WC_Product $product )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $max_value | int | Maximum quantity value. |
+| $placeholder | int | Placeholder for the quantity input. |
 | $product | \WC_Product | Product object. |
 
 ### Source
@@ -1477,14 +1504,14 @@ apply_filters( 'woocommerce_quantity_input_placeholder', int $max_value, \WC_Pro
 Allows to check if WP_DEBUG mode is enabled before returning previous Exception.
 
 ```php
-apply_filters( 'woocommerce_return_previous_exceptions', bool $ )
+apply_filters( 'woocommerce_return_previous_exceptions', bool $return_previous_exceptions )
 ```
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $ | bool | The WP_DEBUG mode. |
+| $return_previous_exceptions | bool | Whether to include the previous exception. Defaults to the WP_DEBUG value. |
 
 ### Source
 
@@ -1589,7 +1616,7 @@ apply_filters( 'woocommerce_should_register_blocks', bool $should_register )
 
 ### Description
 
-Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation. Product and variation descriptions rendered through do_blocks are already handled on demand (see the woocommerce_short_description hook in Bootstrap), so this filter is only needed to opt back in when an extension renders WooCommerce blocks some other way in one of those contexts.
+Registration is skipped on known non-rendering contexts (the Store API and other WooCommerce REST namespaces, cron, AJAX, XML-RPC, favicon, robots.txt and XML sitemaps) as a performance optimisation. Product and variation descriptions rendered through do_blocks and emails rendered by the email editor are already handled on demand (see the woocommerce_short_description and woocommerce_email_editor_render_start hooks in Bootstrap), so this filter is only needed to opt back in when an extension renders WooCommerce blocks some other way in one of those contexts.
 
 ### Parameters
 
@@ -1711,6 +1738,77 @@ This hook allows the cart item images to be changed. This is specific to the car
 
 ---
 
+## woocommerce_store_api_cart_item_parent_item_key
+
+
+Filter to declare the parent cart item of a cart line.
+
+```php
+apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', string|null $parent_item_key, array $cart_item, string $cart_item_key )
+```
+
+### Description
+
+Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the current cart, or the line's own key, also becomes null. A line with no declared parent counts as a standalone line. Callbacks that declare no parent for a line should return the value unchanged.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $parent_item_key | string, null | Initially null; may be a value returned by an earlier callback. |
+| $cart_item | array | The raw cart item. |
+| $cart_item_key | string | The cart item key. |
+
+### Returns
+
+
+`string, null` The parent item key, or null when no parent is declared or it is not in the cart.
+
+### See
+
+- <https://github.com/woocommerce/woocommerce/blob/trunk/docs/apis/store-api/extending-store-api/extend-store-api-parent-item.md>
+
+### Source
+
+- [StoreApi/Schemas/V1/CartItemSchema.php](../../../../../../src/StoreApi/Schemas/V1/CartItemSchema.php)
+
+---
+
+## woocommerce_store_api_cart_item_quantity_validation
+
+
+Filters the validation result for a cart item quantity being updated via the Store API.
+
+```php
+apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true $valid, int|float $quantity, \WC_Product $product, array $cart_item )
+```
+
+### Description
+
+Return a \WP_Error to reject the new quantity; the Store API sends its code and message in a 400 response. Throwing a RouteException works too. Any other return value, including false, is ignored and the quantity is accepted. Notices added with wc_add_notice() are not read here. Core validation failures (min, max, multiple_of, read-only), and cart items whose data key is not a WC_Product, return early and never reach this filter.
+
+This does not run when a product is first added to the cart; use the woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is topped up, $quantity is the new total while $cart_item['quantity'] is still the pre-existing quantity.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $valid | true | Always true; core validation failures bypass this filter. |
+| $quantity | int, float | The new quantity, already normalized through wc_stock_amount(). |
+| $product | \WC_Product | The product object. |
+| $cart_item | array | Cart item. |
+
+### Returns
+
+
+`\WP_Error, true`
+
+### Source
+
+- [StoreApi/Utilities/QuantityLimits.php](../../../../../../src/StoreApi/Utilities/QuantityLimits.php)
+
+---
+
 ## woocommerce_store_api_disable_nonce_check
 
 
@@ -1739,6 +1837,36 @@ This can be used to disable the nonce check when testing API endpoints via a RES
 
 - [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 - [StoreApi/Routes/V1/ShopperListsNonceCheck.php](../../../../../../src/StoreApi/Routes/V1/ShopperListsNonceCheck.php)
+
+---
+
+## woocommerce_store_api_expose_error_details
+
+
+Filters whether unexpected Store API failures include the error message and exception class in the response.
+
+```php
+apply_filters( 'woocommerce_store_api_expose_error_details', bool $expose_error_details )
+```
+
+### Description
+
+Details are only ever sent to users who can manage WooCommerce; this filter cannot bypass that check. It defaults to WP_DEBUG so store staff can debug a production store without enabling debug mode site-wide.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $expose_error_details | bool | Whether to include the error message and exception class. Defaults to WP_DEBUG. |
+
+### Returns
+
+
+`bool`
+
+### Source
+
+- [StoreApi/Utilities/UnexpectedErrorResponse.php](../../../../../../src/StoreApi/Utilities/UnexpectedErrorResponse.php)
 
 ---
 
@@ -1821,13 +1949,39 @@ apply_filters( 'woocommerce_store_api_rate_limit_options', array $rate_limit_opt
 
 ---
 
+## woocommerce_thankyou_order_failed_text
+
+
+Filters the message shown when an order has failed.
+
+```php
+apply_filters( 'woocommerce_thankyou_order_failed_text', string $message, \WC_Order $order )
+```
+
+### Description
+
+Runs after the legacy order-received filter so callbacks can customize the final failed-order message.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $message | string | The failed order message. |
+| $order | \WC_Order | The failed order. |
+
+### Source
+
+- [Blocks/BlockTypes/OrderConfirmation/Status.php](../../../../../../src/Blocks/BlockTypes/OrderConfirmation/Status.php)
+
+---
+
 ## woocommerce_thankyou_order_received_title
 
 
 Filter the title shown after a checkout is complete.
 
 ```php
-apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_Order|false $order )
+apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_Order $order )
 ```
 
 ### Parameters
@@ -1835,7 +1989,7 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
 | $title | string | The title. |
-| $order | \WC_Order, false | The order created during checkout, or false if order data is not available. |
+| $order | \WC_Order | The order created during checkout. |
 
 ### Source
 
@@ -1866,6 +2020,32 @@ apply_filters( 'woocommerce_use_block_notices_in_classic_theme', bool $use_block
 ### Source
 
 - [Blocks/Domain/Services/Notices.php](../../../../../../src/Blocks/Domain/Services/Notices.php)
+
+---
+
+## woocommerce_valid_order_statuses_for_payment
+
+
+Filter the valid order statuses for payment.
+
+```php
+apply_filters( 'woocommerce_valid_order_statuses_for_payment', array $valid_order_statuses, \WC_Order $order )
+```
+
+### Description
+
+The same filter WC_Order::needs_payment() applies. A status a site declares payable counts as awaiting payment here too, so a failure while the order is in it is reported rather than recovered as one that took payment.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $valid_order_statuses | array | Array of valid order statuses for payment. |
+| $order | \WC_Order | Order object. |
+
+### Source
+
+- [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
 
 ---
 

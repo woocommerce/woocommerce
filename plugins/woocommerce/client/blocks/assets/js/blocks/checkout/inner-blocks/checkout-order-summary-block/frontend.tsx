@@ -6,15 +6,14 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
-import { useId, useState } from '@wordpress/element';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 /**
  * Internal dependencies
  */
 import { OrderMetaSlotFill, CheckoutOrderSummaryFill } from './slotfills';
-import { useContainerWidthContext } from '../../../../base/context';
 import { FormStepHeading } from '../../form-step';
+import { useOrderSummaryToggle } from './use-order-summary-toggle';
 
 const FrontendBlock = ( {
 	children,
@@ -24,31 +23,15 @@ const FrontendBlock = ( {
 	className?: string;
 } ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
-	const { isMedium, isSmall, isMobile } = useContainerWidthContext();
-	const [ isOpen, setIsOpen ] = useState( false );
+	const { isOpen, isLarge, ariaControlsId, toggleProps } =
+		useOrderSummaryToggle();
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	const ariaControlsId = useId();
 
-	const orderSummaryProps =
-		isMedium || isSmall || isMobile
-			? {
-					role: 'button',
-					onClick: () => setIsOpen( ! isOpen ),
-					'aria-expanded': isOpen,
-					'aria-controls': ariaControlsId,
-					tabIndex: 0,
-					onKeyDown: ( event: React.KeyboardEvent ) => {
-						if ( event.key === 'Enter' || event.key === ' ' ) {
-							setIsOpen( ! isOpen );
-						}
-					},
-			  }
-			: {};
-
-	// Render the summary once here in the block and once in the fill. The fill can be slotted once elsewhere. The fill is only
-	// rendered on small and mobile screens.
+	// Render the summary once here in the block and once in the fill, so the
+	// fill can be slotted elsewhere. Below the large breakpoint both render and
+	// the CSS decides which one is visible.
 	return (
 		<>
 			<div className={ className }>
@@ -59,7 +42,7 @@ const FrontendBlock = ( {
 							'is-open': isOpen,
 						}
 					) }
-					{ ...orderSummaryProps }
+					{ ...toggleProps }
 				>
 					<p
 						className="wc-block-components-checkout-order-summary__title-text"
@@ -96,9 +79,10 @@ const FrontendBlock = ( {
 					<OrderMetaSlotFill />
 				</div>
 			</div>
-			{ /* Render a second instance of the order summary in a different location for smaller screens
-			This prevents the fill from appearing on desktop before width data is available */ }
-			{ ( isMedium || isSmall || isMobile ) && (
+			{ /* Render a second instance of the order summary in a different location for smaller screens.
+			On large containers the CSS hides this fill, so rendering it while the
+			width is still unknown is safe. */ }
+			{ ! isLarge && (
 				<CheckoutOrderSummaryFill>
 					<div
 						className={ `${ className } checkout-order-summary-block-fill-wrapper` }

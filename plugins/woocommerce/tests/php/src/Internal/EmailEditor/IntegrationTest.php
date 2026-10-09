@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Package;
+use Automattic\WooCommerce\Internal\EmailEditor\PageRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use WC_Unit_Test_Case;
 
@@ -67,6 +68,7 @@ class IntegrationTest extends WC_Unit_Test_Case {
 
 		$this->posts_manager->clear_caches();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
+		unset( $GLOBALS['current_screen'] );
 
 		parent::tearDown();
 	}
@@ -565,6 +567,74 @@ class IntegrationTest extends WC_Unit_Test_Case {
 		if ( ! $dependency_check->are_dependencies_met() ) {
 			$this->markTestSkipped( 'The test environment does not fulfill minimal requirements for the block email editor.' );
 		}
+	}
+
+	/**
+	 * @testdox Should render the editor only once when the replace_editor filter re-enters during rendering.
+	 */
+	public function test_replace_editor_renders_only_once_on_reentry(): void {
+		$post = $this->create_woo_email_post( 'customer_processing_order', 'publish' );
+		set_current_screen( Integration::EMAIL_POST_TYPE );
+
+		// A fresh instance keeps the fake renderer and the tripped guard off the container-cached one.
+		$integration = new Integration();
+
+		$fake_renderer = new class() extends PageRenderer {
+			/**
+			 * Number of render() calls.
+			 *
+			 * @var int
+			 */
+			public int $render_calls = 0;
+
+			/**
+			 * Callback invoked from render() to simulate the re-entrant filter application.
+			 *
+			 * @var \Closure|null
+			 */
+			public ?\Closure $on_render = null;
+
+			/**
+			 * Constructor override skipping the container wiring.
+			 */
+			public function __construct() {
+			}
+
+			/**
+			 * Count render calls and re-enter like WP_Screen::get() does mid-render.
+			 */
+			public function render() {
+				++$this->render_calls;
+				if ( $this->on_render ) {
+					( $this->on_render )();
+				}
+			}
+		};
+
+		$renderer_property = new \ReflectionProperty( Integration::class, 'editor_page_renderer' );
+		$renderer_property->setAccessible( true );
+		$renderer_property->setValue( $integration, $fake_renderer );
+
+		// While render() runs, admin-header.php fires admin_enqueue_scripts, where a plugin
+		// calling WP_Screen::get() re-applies the `replace_editor` filter. Re-enter only
+		// once — like the real flow, where the second admin-header require is a no-op —
+		// so a broken guard fails the count assertion instead of recursing forever.
+		$has_reentered            = false;
+		$reentrant_result         = null;
+		$fake_renderer->on_render = function () use ( $integration, $post, &$has_reentered, &$reentrant_result ) {
+			if ( $has_reentered ) {
+				return;
+			}
+			$has_reentered    = true;
+			$reentrant_result = $integration->replace_editor( false, $post );
+		};
+
+		$this->assertTrue( $integration->replace_editor( false, $post ), 'The outer call must replace the editor' );
+		$this->assertTrue( $reentrant_result, 'The re-entrant call must still report the editor as replaced' );
+		$this->assertSame( 1, $fake_renderer->render_calls, 'The re-entrant call must not render the editor again' );
+
+		$ordinary_post = $this->factory()->post->create_and_get( array( 'post_type' => 'post' ) );
+		$this->assertFalse( $integration->replace_editor( false, $ordinary_post ), 'Posts of other types must keep the default editor after the guard trips' );
 	}
 
 	/**

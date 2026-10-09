@@ -7,7 +7,11 @@ import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
-import { searchItemsByString, itemsStore } from '@woocommerce/data';
+import {
+	searchItemsByString,
+	itemsStore,
+	usesServerSideSearch,
+} from '@woocommerce/data';
 import { AnalyticsError } from '@woocommerce/components';
 import {
 	CurrencyContext,
@@ -126,19 +130,25 @@ export default compose(
 		}
 
 		const report = getReportParam( props );
-		const searchWords = getSearchWords( query );
+
 		// Single category view in Categories Report uses the products endpoint, so search must also.
 		const mappedReport =
 			report === 'categories' && query.filter === 'single_category'
 				? 'products'
 				: report;
 
+		// Nothing to hydrate when the report endpoint resolves the search itself. The rest still
+		// need the term turned into a list of matching IDs, which is what caps them at 100.
+		if ( usesServerSideSearch( [ mappedReport ] ) ) {
+			return {};
+		}
+
 		const itemsSelector = select( itemsStore );
 
 		const itemsResult = searchItemsByString(
 			itemsSelector,
 			mappedReport,
-			searchWords,
+			getSearchWords( query ),
 			{
 				per_page: 100,
 			}

@@ -274,7 +274,7 @@ The Cart Item object of the filters above has the following keys:
 
 -   _backorders_allowed_ `boolean` - Whether backorders are allowed.
 -   _catalog_visibility_ `string` - The catalog visibility.
--   _decsription_ `string` - The cart item description.
+-   _description_ `string` - The cart item description.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _id_ `number` - The item ID.
 -   _images_ `array` - The item images array.
@@ -283,6 +283,7 @@ The Cart Item object of the filters above has the following keys:
 -   _low_stock_remaining_ `number` - The low stock remaining.
 -   _name_ `string` - The item name.
 -   _permalink_ `string` - The item permalink.
+-   _parent_item_key_ `string | null` - The parent cart item key, or `null` if the item has no parent in the cart.
 -   _prices_ `object` - The item prices object with the following keys:
     -   _currency_code_ `string` - The currency code.
     -   _currency_decimal_separator_ `string` - The currency decimal separator.

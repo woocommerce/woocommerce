@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use WC_Tax;
@@ -158,7 +159,9 @@ class ProductQuery implements QueryClausesGenerator {
 				}
 			}
 
-			if ( 1 < count( $att_queries ) ) {
+			if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) && 'product_variation' !== $args['post_type'] ) {
+				$args['attribute_lookup_query'] = $att_queries;
+			} elseif ( 1 < count( $att_queries ) ) {
 				// Add relation arg when using multiple attributes.
 				$relation    = $request->get_param( 'attribute_relation' ) && isset( $operator_mapping[ $request->get_param( 'attribute_relation' ) ] ) ? $operator_mapping[ $request->get_param( 'attribute_relation' ) ] : 'IN';
 				$tax_query[] = array(
@@ -172,18 +175,10 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Build tax_query if taxonomies are set.
 		if ( ! empty( $tax_query ) && 'product_variation' !== $args['post_type'] ) {
-			if ( ! empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // phpcs:ignore
-			} else {
-				$args['tax_query'] = $tax_query; // phpcs:ignore
-			}
+			$args['tax_query'] = $tax_query; // phpcs:ignore
 		} else {
-			// For product_variantions we need to convert the tax_query to a meta_query.
-			if ( ! empty( $args['tax_query'] ) ) {
-				$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_merge( $tax_query, $args['tax_query'] ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			} else {
-				$args['meta_query'] = $this->convert_tax_query_to_meta_query( $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			}
+			// For product_variations we need to convert the tax_query to a meta_query.
+			$args['meta_query'] = $this->convert_tax_query_to_meta_query( $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Filter featured.
@@ -198,13 +193,26 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
+				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
+			} else {
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
+			}
 		}
 
 		$catalog_visibility = $request->get_param( 'catalog_visibility' );
@@ -275,6 +283,10 @@ class ProductQuery implements QueryClausesGenerator {
 				$args['post__in'] = ! empty( $args['post__in'] )
 					? array_values( array_intersect( $args['post__in'], $related ) )
 					: array_values( $related );
+				// An empty intersection (no included product is related) must return no products, not all.
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
 			} else {
 				// No related products found, return empty result.
 				$args['post__in'] = array( 0 );
@@ -410,6 +422,64 @@ class ProductQuery implements QueryClausesGenerator {
 	}
 
 	/**
+	 * Apply attribute lookup filtering without depending on another query generator.
+	 *
+	 * Keep lookup eligibility aligned with ProductFilters\QueryClauses.
+	 *
+	 * @param array $args       Product query clauses.
+	 * @param array $attributes Attribute taxonomy queries.
+	 * @return array Updated clauses.
+	 */
+	private function add_attribute_lookup_clauses( array $args, array $attributes ): array {
+		global $wpdb;
+
+		$lookup_table    = wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
+		$in_stock_clause = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ? ' AND in_stock = 1' : '';
+		foreach ( $attributes as $attribute ) {
+			$term_field = 'term_id' === $attribute['field'] ? 'include' : 'slug';
+			$terms      = get_terms(
+				array(
+					'taxonomy'   => $attribute['taxonomy'],
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					$term_field  => $attribute['terms'],
+				)
+			);
+			if ( ! is_array( $terms ) || ( 'AND' === $attribute['operator'] && count( $terms ) !== count( array_unique( (array) $attribute['terms'] ) ) ) ) {
+				$args['where'] .= ' AND 1=0';
+				continue;
+			}
+			if ( empty( $terms ) ) {
+				$args['where'] .= 'NOT IN' === $attribute['operator'] ? '' : ' AND 1=0';
+				continue;
+			}
+			$term_ids = implode( ',', wp_parse_id_list( $terms ) );
+			$count    = count( $terms );
+
+			// Table names are internal; term IDs and counts are integers.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			if ( 'AND' === $attribute['operator'] && $count > 1 ) {
+				$query = "
+					SELECT product_or_parent_id FROM {$lookup_table}
+					WHERE is_variation_attribute = 0 {$in_stock_clause} AND term_id IN ({$term_ids})
+					GROUP BY product_id HAVING COUNT(product_id) = {$count}
+					UNION
+					SELECT product_or_parent_id FROM {$lookup_table}
+					WHERE is_variation_attribute = 1 {$in_stock_clause} AND term_id IN ({$term_ids})
+					GROUP BY product_or_parent_id HAVING COUNT(DISTINCT term_id) = {$count}
+				";
+			} else {
+				$query = "SELECT product_or_parent_id FROM {$lookup_table} WHERE term_id IN ({$term_ids}) {$in_stock_clause}";
+			}
+			$operator = 'NOT IN' === $attribute['operator'] ? 'NOT IN' : 'IN';
+			// The derived table makes the filtering subquery execute once.
+			$args['where'] .= " AND {$wpdb->posts}.ID {$operator} ( SELECT product_or_parent_id FROM ({$query}) attribute_lookup )";
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		}
+		return $args;
+	}
+
+	/**
 	 * Add in conditional search filters for products.
 	 *
 	 * @param array     $args Query args.
@@ -418,6 +488,10 @@ class ProductQuery implements QueryClausesGenerator {
 	 */
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
+
+		if ( $wp_query->get( 'attribute_lookup_query' ) ) {
+			$args = $this->add_attribute_lookup_clauses( $args, $wp_query->get( 'attribute_lookup_query' ) );
+		}
 
 		// SKU and slug lookups can return variations, so exclude any whose parent product is not published.
 		if ( in_array( 'product_variation', (array) $wp_query->get( 'post_type' ), true ) ) {
@@ -455,9 +529,11 @@ class ProductQuery implements QueryClausesGenerator {
 			if ( 1 < count( $slugs ) ) {
 				$slugs[] = $wp_query->get( 'slug' );
 			}
-			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
-			$post_name__in  = implode( '","', array_map( 'esc_sql', $slugs ) );
-			$args['where'] .= " AND $wpdb->posts.post_name IN (\"$post_name__in\")";
+			$args['join'] = $this->append_product_sorting_table_join( $args['join'] );
+
+			$placeholders = implode( ', ', array_fill( 0, count( $slugs ), '%s' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a safe string of %s tokens.
+			$args['where'] .= $wpdb->prepare( " AND $wpdb->posts.post_name IN ($placeholders)", $slugs );
 		}
 
 		if ( $wp_query->get( 'stock_status' ) ) {
@@ -624,11 +700,6 @@ class ProductQuery implements QueryClausesGenerator {
 	 * @return string
 	 */
 	protected function append_product_sorting_table_join( $sql ) {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 }

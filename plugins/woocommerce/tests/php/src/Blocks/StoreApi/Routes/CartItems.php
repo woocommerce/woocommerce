@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
 use WC_Logger;
 use WC_Logger_Interface;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -380,6 +382,249 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart lines include a null parent item key by default, declared in the schema as a readonly string or null.
+	 */
+	public function test_parent_item_key_is_null_by_default() {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$data       = $controller->prepare_item_for_response( current( WC()->cart->get_cart() ), new \WP_REST_Request() )->get_data();
+		$property   = $controller->get_item_schema()['properties']['parent_item_key'];
+
+		$this->assertArrayHasKey( 'parent_item_key', $data );
+		$this->assertNull( $data['parent_item_key'] );
+		$this->assertSame( array( 'string', 'null' ), $property['type'] );
+		$this->assertTrue( $property['readonly'] );
+	}
+
+	/**
+	 * @testdox The parent item key filter receives null, the raw cart line, and its key.
+	 */
+	public function test_parent_item_key_filter_receives_arguments() {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart_item  = current( WC()->cart->get_cart() );
+		$calls      = array();
+
+		add_filter(
+			'woocommerce_store_api_cart_item_parent_item_key',
+			function ( $parent_item_key, $cart_item, $cart_item_key ) use ( &$calls ) {
+				$calls[] = array( $parent_item_key, $cart_item, $cart_item_key );
+				return $parent_item_key;
+			},
+			10,
+			3
+		);
+
+		$controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
+
+		$this->assertSame( array( array( null, $cart_item, $cart_item['key'] ) ), $calls );
+	}
+
+	/**
+	 * @testdox Cart-item routes return null when the declared parent key is not in the cart.
+	 */
+	public function test_parent_item_key_is_null_when_key_is_not_in_cart() {
+		$parent_item_key_filter = static function () {
+			return 'not-a-cart-line-key';
+		};
+		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter );
+
+		try {
+			$cart_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+			$this->assertSame( 200, $cart_response->get_status() );
+			$cart_items = array_column( $cart_response->get_data()['items'], null, 'key' );
+			$this->assertArrayHasKey( $this->keys[0], $cart_items );
+			$this->assertNull( $cart_items[ $this->keys[0] ]['parent_item_key'] );
+
+			$items_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items' ) );
+			$this->assertSame( 200, $items_response->get_status() );
+			$items = array_column( $items_response->get_data(), null, 'key' );
+			$this->assertArrayHasKey( $this->keys[0], $items );
+			$this->assertNull( $items[ $this->keys[0] ]['parent_item_key'] );
+
+			$item_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items/' . $this->keys[0] ) );
+			$this->assertSame( 200, $item_response->get_status() );
+			$this->assertArrayHasKey( 'parent_item_key', $item_response->get_data() );
+			$this->assertNull( $item_response->get_data()['parent_item_key'] );
+		} finally {
+			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter );
+		}
+	}
+
+	/**
+	 * @testdox Cart-item responses use a null parent key when the session cart is unavailable.
+	 */
+	public function test_parent_item_key_is_null_when_session_cart_is_unavailable() {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart       = WC()->cart;
+		$cart_item  = current( $cart->get_cart() );
+		$filter     = function () {
+			return $this->keys[1];
+		};
+
+		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter );
+		WC()->cart = null;
+
+		try {
+			$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
+			$this->assertNull( $response->get_data()['parent_item_key'] );
+		} finally {
+			WC()->cart = $cart;
+			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $filter );
+		}
+	}
+
+	/**
+	 * @testdox The parent item key filter normalizes empty strings and non-string values to null.
+	 * @testWith ["", null]
+	 *           [42, null]
+	 *
+	 * @param mixed $filtered_value Value returned by the filter.
+	 * @param mixed $expected_value Value expected in the response.
+	 */
+	public function test_parent_item_key_filter_normalizes_empty_and_non_string_values( $filtered_value, $expected_value ) {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+
+		add_filter(
+			'woocommerce_store_api_cart_item_parent_item_key',
+			static function () use ( $filtered_value ) {
+				return $filtered_value;
+			}
+		);
+
+		$response = $controller->prepare_item_for_response( current( WC()->cart->get_cart() ), new \WP_REST_Request() );
+
+		$this->assertSame( $expected_value, $response->get_data()['parent_item_key'] );
+	}
+
+	/**
+	 * @testdox The parent item key filter cannot declare a cart line as its own parent.
+	 */
+	public function test_parent_item_key_is_null_when_key_is_the_line_own_key(): void {
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$cart_item  = current( WC()->cart->get_cart() );
+
+		add_filter(
+			'woocommerce_store_api_cart_item_parent_item_key',
+			static function ( $parent_item_key, $cart_item, $cart_item_key ) {
+				unset( $parent_item_key, $cart_item ); // Avoid parameter not used PHPCS errors.
+				return $cart_item_key;
+			},
+			10,
+			3
+		);
+
+		$response = $controller->prepare_item_for_response( $cart_item, new \WP_REST_Request() );
+
+		$this->assertNull( $response->get_data()['parent_item_key'] );
+	}
+
+	/**
+	 * `raw_key` gives extensions a name to match on that is never translated.
+	 *
+	 * @testdox Cart item_data publishes raw_key and it matches the schema.
+	 */
+	public function test_item_data_raw_key_is_published_and_matches_the_schema() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'raw_key' => 'gift_message',
+				'name'    => 'Gift message',
+				'value'   => 'Happy birthday',
+				'display' => 'Happy birthday!',
+			);
+
+			return $item_data;
+		};
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+			$controller = $routes->get( 'cart-items', 'v1' );
+			$cart       = WC()->cart->get_cart();
+			$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+
+			$entry = $response->get_data()['item_data'][0];
+			$this->assertSame( 'gift_message', $entry['raw_key'] );
+			$this->assertSame( 'Gift message', $entry['name'], 'The display label must be left alone.' );
+
+			$validate = new ValidateSchema( $controller->get_item_schema() );
+			$diff     = $validate->get_diff_from_object( $response->get_data() );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			$this->assertEmpty( $diff, print_r( $diff, true ) );
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+	}
+
+	/**
+	 * Extensions are told to keep `raw_key` to lowercase letters, digits, `_`, `-` and `/`.
+	 * This pins what they get if they do not.
+	 *
+	 * @testdox Cart item_data raw_key is entity-encoded like every other value.
+	 */
+	public function test_item_data_raw_key_is_entity_encoded() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'raw_key' => 'acme&co_gift',
+				'name'    => 'Gift message',
+				'value'   => 'Happy birthday',
+				'display' => 'Happy birthday!',
+			);
+
+			return $item_data;
+		};
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+			$controller = $routes->get( 'cart-items', 'v1' );
+			$cart       = WC()->cart->get_cart();
+			$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+
+			$this->assertSame( 'acme&amp;co_gift', $response->get_data()['item_data'][0]['raw_key'] );
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+	}
+
+	/**
+	 * Entries written before `raw_key` existed must keep working. No schema validation
+	 * here on purpose: the validator reports the fields such an entry omits.
+	 *
+	 * @testdox Cart item_data still passes through entries that set no raw_key.
+	 */
+	public function test_item_data_without_raw_key_is_unchanged() {
+		$filter = function ( $item_data ) {
+			$item_data[] = array(
+				'name'   => 'gifting_to_hidden',
+				'value'  => 'recipient@example.com',
+				'hidden' => true,
+			);
+
+			return $item_data;
+		};
+		add_filter( 'woocommerce_get_item_data', $filter );
+
+		try {
+			$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+			$controller = $routes->get( 'cart-items', 'v1' );
+			$cart       = WC()->cart->get_cart();
+			$response   = $controller->prepare_item_for_response( current( $cart ), new \WP_REST_Request() );
+
+			$entry = $response->get_data()['item_data'][0];
+			$this->assertArrayNotHasKey( 'raw_key', $entry, 'raw_key must not be invented.' );
+			$this->assertSame( 'gifting_to_hidden', $entry['name'] );
+			$this->assertSame( 'recipient@example.com', $entry['value'] );
+			$this->assertSame( '1', $entry['hidden'], 'hidden is string-coerced by wp_kses_post().' );
+		} finally {
+			remove_filter( 'woocommerce_get_item_data', $filter );
+		}
+	}
+
+	/**
 	 * Test schema matches responses.
 	 *
 	 * Tests schema of both products in cart to cover as much schema as possible.
@@ -408,6 +653,49 @@ class CartItems extends ControllerTestCase {
 		$this->assertEmpty( $diff, print_r( $diff, true ) );
 
 		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * The cart item schema must advertise cart-item extensions. It inherits the property from
+	 * ItemSchema, which sits below ProductSchema and so can pick up the wrong identifier.
+	 */
+	public function test_get_item_schema_advertises_cart_item_extensions() {
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'        => CartItemSchema::IDENTIFIER,
+				'namespace'       => 'cart_item_extension_namespace',
+				'schema_callback' => function () {
+					return array(
+						'cart_item_extension_key' => array(
+							'description' => 'Test key',
+							'type'        => 'boolean',
+						),
+					);
+				},
+			)
+		);
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'        => ProductSchema::IDENTIFIER,
+				'namespace'       => 'product_extension_namespace',
+				'schema_callback' => function () {
+					return array(
+						'product_extension_key' => array(
+							'description' => 'Test key',
+							'type'        => 'boolean',
+						),
+					);
+				},
+			)
+		);
+
+		$routes     = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller = $routes->get( 'cart-items', 'v1' );
+		$schema     = $controller->get_item_schema();
+		$extensions = (array) $schema['properties']['extensions']['properties'];
+
+		$this->assertArrayHasKey( 'cart_item_extension_namespace', $extensions, 'The cart item schema must advertise extensions registered against the cart-item endpoint.' );
+		$this->assertArrayNotHasKey( 'product_extension_namespace', $extensions, 'The cart item schema must not advertise extensions registered against the product endpoint.' );
 	}
 
 	/**

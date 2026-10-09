@@ -46,20 +46,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var array
 	 */
 	protected $data = array(
-		'parent_id'          => 0,
-		'status'             => '',
-		'currency'           => '',
-		'version'            => '',
-		'prices_include_tax' => false,
-		'date_created'       => null,
-		'date_modified'      => null,
-		'discount_total'     => 0,
-		'discount_tax'       => 0,
-		'shipping_total'     => 0,
-		'shipping_tax'       => 0,
-		'cart_tax'           => 0,
-		'total'              => 0,
-		'total_tax'          => 0,
+		'parent_id'      => 0,
+		'status'         => '',
+		'currency'       => '',
+		'version'        => '',
+		'date_created'   => null,
+		'date_modified'  => null,
+		'discount_total' => 0,
+		'discount_tax'   => 0,
+		'shipping_total' => 0,
+		'shipping_tax'   => 0,
+		'cart_tax'       => 0,
+		'total'          => 0,
+		'total_tax'      => 0,
 	);
 
 	/**
@@ -104,6 +103,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @var int
 	 */
 	protected $temp_item_id_counter = 0;
+
+	/**
+	 * Whether the data store supports deferred item deletion.
+	 *
+	 * @var bool|null Null until first checked.
+	 */
+	private $data_store_supports_deferred_item_deletion = null;
 
 	/**
 	 * Bulk order item types scheduled for deletion on save().
@@ -180,6 +186,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
 			$this->data['cogs_total_value'] = 0;
 		}
+
+		$this->data['prices_include_tax'] = 'yes' === get_option( 'woocommerce_prices_include_tax' );
 
 		parent::__construct( $order );
 
@@ -356,6 +364,54 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine whether the data store supports deferred item deletion.
+	 *
+	 * @return bool
+	 */
+	private function data_store_supports_deferred_item_deletion(): bool {
+		if ( null !== $this->data_store_supports_deferred_item_deletion ) {
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $data_store
+		 */
+		$data_store = $this->data_store;
+
+		if ( ! $data_store->has_callable( 'delete_items' ) ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
+
+		$data_store_class = $data_store->get_current_class_name();
+		$is_cpt_store     = is_a( $data_store_class, Abstract_WC_Order_Data_Store_CPT::class, true );
+
+		if ( ! $is_cpt_store ) {
+			// Standalone data stores opt in to deferred deletion by providing this optional method.
+			$this->data_store_supports_deferred_item_deletion = $data_store->has_callable( 'delete_items_by_ids' );
+			return $this->data_store_supports_deferred_item_deletion;
+		}
+
+		$delete_items_method = new ReflectionMethod( $data_store_class, 'delete_items' );
+		if ( Abstract_WC_Order_Data_Store_CPT::class === $delete_items_method->getDeclaringClass()->getName() ) {
+			$this->data_store_supports_deferred_item_deletion = true;
+			return true;
+		}
+
+		if ( ! $data_store->has_callable( 'delete_items_by_ids' ) ) {
+			$this->data_store_supports_deferred_item_deletion = false;
+			return false;
+		}
+
+		$delete_items_by_ids_method = new ReflectionMethod( $data_store_class, 'delete_items_by_ids' );
+
+		$this->data_store_supports_deferred_item_deletion = Abstract_WC_Order_Data_Store_CPT::class !== $delete_items_by_ids_method->getDeclaringClass()->getName();
+		return $this->data_store_supports_deferred_item_deletion;
 	}
 
 	/**
@@ -1055,18 +1111,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
-	 * The items are cleared from the in-memory order immediately, but the database
-	 * deletion is deferred until the next call to save(). This keeps the checkout
-	 * "resume order" flow atomic: if anything between here and save() throws, the
-	 * previously persisted items remain intact in the database. As a consequence,
-	 * the `woocommerce_removed_order_items` action now fires from save_items()
-	 * (after the actual DB delete completes) rather than synchronously from this
-	 * method — listeners that observe the persisted state continue to see it as
-	 * before, but listeners pairing pre/post on the same call stack will see
-	 * the post-hook fire at save() time.
+	 * The items are cleared from the in-memory order immediately, but core data stores defer
+	 * database deletion until the next call to save(). Custom stores overriding `delete_items()`
+	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
 	 * @param string|null $type Order item type. Default null (remove every type).
-	 * @throws Exception If persisted item IDs cannot be read.
+	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
@@ -1095,10 +1145,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_remove_order_items', $this, $type );
 
 		// Unsaved orders (id 0) have no persisted items — there's nothing to defer for deletion.
-		$has_persisted_items = $this->get_id() > 0;
+		$has_persisted_items  = $this->get_id() > 0;
+		$delete_synchronously = ! $this->data_store_supports_deferred_item_deletion();
+
+		if ( $delete_synchronously && $has_persisted_items ) {
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$this->data_store->delete_items( $this, $type );
+		}
 
 		if ( ! empty( $type ) ) {
-			if ( $has_persisted_items ) {
+			if ( $has_persisted_items && ! $delete_synchronously ) {
 				$item_ids = $this->get_persisted_item_ids( $type );
 
 				if ( $this->bulk_delete_all_items_pending ) {
@@ -1129,7 +1185,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->items[ $group ] = array();
 			}
 		} else {
-			if ( $has_persisted_items ) {
+			if ( $has_persisted_items && ! $delete_synchronously ) {
 				$item_ids = $this->get_persisted_item_ids();
 
 				foreach ( $this->item_ids_to_bulk_delete_by_type as $typed_item_ids ) {
@@ -1156,6 +1212,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $groups as $group ) {
 				$this->items[ $group ] = array();
 			}
+		}
+
+		if ( $delete_synchronously ) {
+			/**
+			 * This action is documented in save_items().
+			 *
+			 * @since 7.8.0
+			 */
+			do_action( 'woocommerce_removed_order_items', $this, $type );
 		}
 	}
 
@@ -1810,6 +1875,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
 				$this->recalculate_coupons();
 
+				/**
+				 * Action hook fired when a coupon is removed from an order.
+				 *
+				 * @param  WC_Coupon $coupon_object The removed coupon object.
+				 * @param  WC_Order  $order         The current order object.
+				 *
+				 * @since 10.8.0
+				 */
+				do_action( 'woocommerce_order_removed_coupon', $coupon_object, $this );
+
 				return true;
 			}
 		}
@@ -1918,15 +1993,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
-		$tax_location   = $this->get_tax_location();
-		$tax_location   = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
+		$is_vat_exempt  = $this->is_vat_exempt();
+
+		$tax_location = $this->get_tax_location();
+		$tax_location = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
 
 		if ( $item_discounts ) {
 			foreach ( $item_discounts as $item_id => $amount ) {
 				$item = $this->get_item( $item_id, false );
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
-				if ( $this->get_prices_include_tax() && wc_tax_enabled() && ProductTaxStatus::TAXABLE === $item->get_tax_status() ) {
+				if ( ! $is_vat_exempt && $this->get_prices_include_tax() && wc_tax_enabled() && ProductTaxStatus::TAXABLE === $item->get_tax_status() ) {
 					$taxes = WC_Tax::calc_tax( $amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), true );
 
 					// Use unrounded taxes so totals will be re-calculated accurately, like in cart.
@@ -1950,8 +2027,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
-		$tax_location      = $this->get_tax_location();
-		$tax_location      = array(
+		$is_vat_exempt     = $this->is_vat_exempt();
+
+		$tax_location = $this->get_tax_location();
+		$tax_location = array(
 			$tax_location['country'],
 			$tax_location['state'],
 			$tax_location['postcode'],
@@ -1982,7 +2061,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
 					$item = $this->get_item( $item_id, false );
 
-					if ( ProductTaxStatus::TAXABLE !== $item->get_tax_status() || ! wc_tax_enabled() ) {
+					if ( $is_vat_exempt || ProductTaxStatus::TAXABLE !== $item->get_tax_status() || ! wc_tax_enabled() ) {
 						continue;
 					}
 
@@ -2012,7 +2091,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.
-	 * @param  array      $args Args for the added product.
+	 * @param  array      $args Args for the added product, including an optional tax location for its price.
 	 * @return int
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
@@ -2021,8 +2100,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = wc_get_price_excluding_tax(
 				$product,
 				array(
-					'qty'   => $qty,
-					'order' => $order,
+					'qty'          => $qty,
+					'order'        => $order,
+					'tax_location' => ArrayUtil::get_value_or_default( $args, 'tax_location' ),
 				)
 			);
 
@@ -2238,6 +2318,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the filtered VAT exemption for this order.
+	 *
+	 * @return bool Whether the order is exempt from VAT.
+	 */
+	private function is_vat_exempt(): bool {
+		/**
+		 * Filters whether the order is exempt from VAT.
+		 *
+		 * @since 3.3.0
+		 * @since 11.3.0 Also applied to discounts.
+		 *
+		 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
+		 * @param WC_Abstract_Order $order         Order instance.
+		 */
+		return (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+	}
+
+	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * If by default the taxes are based on the shipping address and the current order doesn't
@@ -2264,7 +2362,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+		$is_vat_exempt = $this->is_vat_exempt();
 
 		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
@@ -3099,7 +3197,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 *
 		 * @param string   $total_html The formatted total COGS HTML.
 		 * @param float    $total      The total COGS value.
-		 * @param WC_Order $order      The order object.
+		 * @param WC_Abstract_Order $order The order object.
 		 */
 		return apply_filters(
 			'woocommerce_order_cogs_total_value_html',

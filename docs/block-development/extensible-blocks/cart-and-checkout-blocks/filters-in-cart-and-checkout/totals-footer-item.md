@@ -50,9 +50,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Total Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/5b2fb8ab-db84-4ed0-a676-d5203edc84d2) |![After applying the Total Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/07955eea-cb17-48e9-9cb5-6548dd6a3b24) |
+| Before | After |
+| :---: | :---: |
+| ![Before applying the Total Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/5b2fb8ab-db84-4ed0-a676-d5203edc84d2) | ![After applying the Total Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/07955eea-cb17-48e9-9cb5-6548dd6a3b24) |
 
 
 ## `totalValue`
@@ -95,9 +95,9 @@ registerCheckoutFilters( 'my-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Total Value filter](https://github.com/woocommerce/woocommerce/assets/3323310/4b788bdd-6fbd-406c-a9ad-4fb13f901c23) |![After applying the Total Value filter](https://github.com/woocommerce/woocommerce/assets/3323310/1b1b5f72-7f2f-4ee5-b2a4-1d8eb2208deb) |
+| Before | After |
+| :---: | :---: |
+| ![Before applying the Total Value filter](https://github.com/woocommerce/woocommerce/assets/3323310/4b788bdd-6fbd-406c-a9ad-4fb13f901c23) | ![After applying the Total Value filter](https://github.com/woocommerce/woocommerce/assets/3323310/1b1b5f72-7f2f-4ee5-b2a4-1d8eb2208deb) |
 
 
 ## Cart object
@@ -163,7 +163,7 @@ The Cart Item object of the filters above has the following keys:
 
 -   _backorders_allowed_ `boolean` - Whether backorders are allowed.
 -   _catalog_visibility_ `string` - The catalog visibility.
--   _decsription_ `string` - The cart item description.
+-   _description_ `string` - The cart item description.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _id_ `number` - The item ID.
 -   _images_ `array` - The item images array.
@@ -172,6 +172,7 @@ The Cart Item object of the filters above has the following keys:
 -   _low_stock_remaining_ `number` - The low stock remaining.
 -   _name_ `string` - The item name.
 -   _permalink_ `string` - The item permalink.
+-   _parent_item_key_ `string | null` - The parent cart item key, or `null` if the item has no parent in the cart.
 -   _prices_ `object` - The item prices object with the following keys:
     -   _currency_code_ `string` - The currency code.
     -   _currency_decimal_separator_ `string` - The currency decimal separator.

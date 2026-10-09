@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\TransientFiles;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use \DateTime;
 use \Exception;
 use \InvalidArgumentException;
@@ -370,7 +371,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @return bool True if the expired files cleanup action is currently scheduled, false otherwise.
 	 */
 	public function expired_files_cleanup_is_scheduled(): bool {
-		return as_has_scheduled_action( self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
+		return ActionSchedulerUtil::has_scheduled_action( self::CLEANUP_ACTION_NAME, array(), self::CLEANUP_ACTION_GROUP );
 	}
 
 	/**

@@ -832,6 +832,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Delete selected order items by ID.
 	 *
+	 * Custom order data stores that override this method opt in to deferred item deletion. The IDs are captured when items are removed and deleted during order save.
+	 *
 	 * @since 11.1.0
 	 *
 	 * @param WC_Order $order Order object.
@@ -1074,7 +1076,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$keys_to_delete = array_diff(
 			array_keys( $existing_meta_data ),
 			$this->internal_meta_keys,
-			array_keys( $this->get_internal_data_store_key_getters() )
+			array_keys( $this->get_internal_data_store_key_getters() ),
+			array(
+				// WordPress writes and manages this directly on the post while trashing.
+				'_wp_trash_meta_comments_status',
+			)
 		);
 
 		foreach ( $keys_to_delete as $meta_key ) {
