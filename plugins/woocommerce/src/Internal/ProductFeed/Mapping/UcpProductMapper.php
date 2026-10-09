@@ -348,8 +348,15 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		$short = $product->get_short_description();
 		$full  = $product->get_description();
 
+		// Entities would reach the agent literally, so decode after stripping tags.
+		$plain = html_entity_decode( wp_strip_all_tags( '' !== $short ? $short : $full ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+
+		// Decoded `&nbsp;` is U+00A0. Agents match on this text, so normalize it to a
+		// plain space rather than leaving a character that breaks string comparison.
+		$plain = str_replace( "\xc2\xa0", ' ', $plain );
+
 		return array(
-			'plain' => wp_strip_all_tags( '' !== $short ? $short : $full ),
+			'plain' => trim( $plain ),
 		);
 	}
 

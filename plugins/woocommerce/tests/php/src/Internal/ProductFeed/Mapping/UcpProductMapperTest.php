@@ -142,4 +142,34 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $list_prices[20000] );
 		$this->assertNull( $list_prices[30000] );
 	}
+
+	/**
+	 * `description.plain` is declared plain text, so entities left in it would
+	 * reach a shopper literally as `&nbsp;` or `&amp;`.
+	 *
+	 * @testdox A plain description should be decoded and free of HTML entities.
+	 */
+	public function test_description_decodes_html_entities(): void {
+		$product = WC_Helper_Product::create_simple_product( false );
+		$product->set_short_description( 'Rich &amp; smooth &mdash; 100&nbsp;% arabica <strong>bold</strong>' );
+		$product->save();
+
+		$mapped = ( new UcpProductMapper( 'USD' ) )->map_product( $product );
+
+		$this->assertSame( "Rich & smooth \u{2014} 100 % arabica bold", $mapped['description']['plain'] );
+		$this->assertStringNotContainsString( "\u{A0}", $mapped['description']['plain'] );
+	}
+
+	/**
+	 * @testdox A description of only non-breaking spaces should map to an empty string.
+	 */
+	public function test_description_of_entities_only_is_trimmed_to_empty(): void {
+		$product = WC_Helper_Product::create_simple_product( false );
+		$product->set_short_description( "&nbsp;\r\n\r\n&nbsp;" );
+		$product->save();
+
+		$mapped = ( new UcpProductMapper( 'USD' ) )->map_product( $product );
+
+		$this->assertSame( '', $mapped['description']['plain'] );
+	}
 }
