@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow null line item sku and global_unique_id in the orders REST schema so an order containing a deleted product can be updated with a payload read back from the API.
