@@ -20,7 +20,7 @@ use WP_REST_Request;
  * version-neutral Internal\RestApi\Refunds namespace. It still extends the V4
  * AbstractSchema, like the old class did, and reads its properties from the relocated class.
  *
- * @deprecated 11.2.0 Use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema instead.
+ * @deprecated 11.3.0 Use Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema instead.
  */
 class RefundPreviewSchema extends AbstractSchema {
 
@@ -39,7 +39,7 @@ class RefundPreviewSchema extends AbstractSchema {
 	 * @since 10.9.0
 	 */
 	public function get_item_schema_properties(): array {
-		return ( new RelocatedRefundPreviewSchema() )->get_item_schema_properties();
+		return wc_get_container()->get( RelocatedRefundPreviewSchema::class )->get_item_schema_properties();
 	}
 
 	// The next method always throws so its return type can never be reached.

@@ -23,6 +23,7 @@ use WP_Http;
  *
  * Class DataUtils
  *
+ * @since 11.3.0
  * @package Automattic\WooCommerce\Internal\RestApi\Refunds
  */
 class DataUtils {
