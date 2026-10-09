@@ -65,12 +65,15 @@ class BlockTemplatesController {
 			if ( isset( $attributes['theme'], $attributes['slug'] ) ) {
 				$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
 				if ( $template_part && ! empty( $template_part->content ) ) {
-					$content            = do_blocks( $template_part->content );
-					$wrapper_attributes = get_block_wrapper_attributes();
-					$html_tag           = $attributes['tagName'] ?? null;
-					$html_tag           = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
+					$content = do_blocks( $template_part->content );
+
+					// Set block-support context so get_block_wrapper_attributes resolves this block's attributes, not a parent's.
+					list( $previous_block, \WP_Block_Supports::$block_to_render )     = array( \WP_Block_Supports::$block_to_render, $parsed_block );
+					list( $wrapper_attributes, \WP_Block_Supports::$block_to_render ) = array( get_block_wrapper_attributes(), $previous_block );
 
 					// Backward compatibility: pre_render_block skips core's render_block filter, re-apply it so extensions filtering template part output still work.
+					$html_tag      = $attributes['tagName'] ?? null;
+					$html_tag      = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
 					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
 					$block_content = apply_filters( 'render_block', $block_content, $parsed_block, new \WP_Block( $parsed_block ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core filter.
 
