@@ -654,7 +654,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 * @covers WC_Form_Handler::add_to_cart_action()
 	 *
 	 * @param string $permalink_structure Permalink structure for the store.
-	 * @param string $requested_page      Page the request is for: 'own', 'other' or 'home'.
+	 * @param string $requested_page      Page the request is for: 'own', 'own-unslashed', 'other', 'home', or 'none' for no request URI.
 	 * @param bool   $expect_link         Whether the notice should link to the product.
 	 */
 	public function test_variable_product_notice_links_to_the_product_unless_on_its_page( string $permalink_structure, string $requested_page, bool $expect_link ): void {
@@ -667,13 +667,22 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 
 			if ( 'own' === $requested_page ) {
 				$requested_url = $product_url;
+			} elseif ( 'own-unslashed' === $requested_page ) {
+				// The handler runs before the canonical redirect adds the slash back.
+				$requested_url = untrailingslashit( $product_url );
 			} elseif ( 'other' === $requested_page ) {
 				$requested_url = get_permalink( WC_Helper_Product::create_variation_product()->get_id() );
-			} else {
+			} elseif ( 'home' === $requested_page ) {
 				$requested_url = home_url( '/' );
+			} else {
+				$requested_url = null;
 			}
 
-			$_SERVER['REQUEST_URI']  = wp_make_link_relative( $requested_url );
+			if ( null === $requested_url ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = wp_make_link_relative( $requested_url );
+			}
 			$_REQUEST['add-to-cart'] = $product->get_id();
 
 			WC_Form_Handler::add_to_cart_action();
@@ -704,6 +713,8 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 			'plain permalinks, home page'             => array( '', 'home', true ),
 			'pretty permalinks, own product page'     => array( '/%postname%/', 'own', false ),
 			'pretty permalinks, another product page' => array( '/%postname%/', 'other', true ),
+			'pretty permalinks, own page, no slash'   => array( '/%postname%/', 'own-unslashed', false ),
+			'no request URI'                          => array( '/%postname%/', 'none', true ),
 		);
 	}
 
