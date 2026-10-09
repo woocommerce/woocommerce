@@ -150,12 +150,15 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Store managers only.
+	 * Check whether the current user may read the contract.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
+		// Which contracts a customer may see, and which fields, is extension policy (Lite, for one,
+		// hides drafts), so customers are refused until extensions can register it, as they do for
+		// actions (WOOSUBS-2066).
 		return $this->rest_permissions->require_admin_permission();
 	}
 
