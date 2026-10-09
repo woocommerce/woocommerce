@@ -45,7 +45,6 @@ class WC_Structured_Data {
 
 		// Output structured data.
 		add_action( 'woocommerce_email_order_details', array( $this, 'output_email_structured_data' ), 30, 3 );
-		add_action( 'wp_footer', array( $this, 'maybe_generate_product_data' ), 9 );
 		add_action( 'wp_footer', array( $this, 'output_structured_data' ), 10 );
 	}
 
@@ -182,41 +181,32 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates product data when a single product template did not generate it.
-	 *
-	 * Hooked into `wp_footer` before structured data is output.
-	 *
-	 * @internal
-	 *
-	 * @return void
-	 */
-	public function maybe_generate_product_data() {
-		if ( ! is_product() || false === has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
-			return;
-		}
-
-		$permalink = get_permalink( get_queried_object_id() );
-		foreach ( $this->get_data() as $data ) {
-			$is_product         = in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true );
-			$is_current_product = ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink;
-			if ( $is_product && $is_current_product ) {
-				return;
-			}
-		}
-
-		$product = wc_get_product( get_queried_object_id() );
-		if ( $product ) {
-			$this->generate_product_data( $product );
-		}
-	}
-
-	/**
 	 * Sanitizes, encodes and outputs structured data.
 	 *
 	 * Hooked into `wp_footer` action hook.
 	 * Hooked into `woocommerce_email_order_details` action hook.
 	 */
 	public function output_structured_data() {
+		if ( 'wp_footer' === current_action() && is_product() && false !== has_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ) ) ) {
+			$permalink        = get_permalink( get_queried_object_id() );
+			$has_product_data = false;
+			foreach ( $this->get_data() as $data ) {
+				$is_product         = in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true );
+				$is_current_product = ( $data['@id'] ?? null ) === $permalink . '#product' || ( $data['url'] ?? null ) === $permalink;
+				if ( $is_product && $is_current_product ) {
+					$has_product_data = true;
+					break;
+				}
+			}
+
+			if ( ! $has_product_data ) {
+				$product = wc_get_product( get_queried_object_id() );
+				if ( $product ) {
+					$this->generate_product_data( $product );
+				}
+			}
+		}
+
 		$types = $this->get_data_type_for_page();
 		$data  = $this->get_structured_data( $types );
 

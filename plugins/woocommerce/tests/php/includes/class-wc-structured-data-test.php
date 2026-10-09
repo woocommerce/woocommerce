@@ -21,6 +21,17 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Outputs structured data through the footer hook.
+	 *
+	 * @return string
+	 */
+	private function output_footer_structured_data(): string {
+		ob_start();
+		do_action( 'wp_footer' );
+		return ob_get_clean();
+	}
+
+	/**
 	 * @testdox get_structured_data() preserves scalar @type grouping.
 	 */
 	public function test_get_structured_data_preserves_scalar_type_grouping(): void {
@@ -352,17 +363,32 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Product structured data is generated when the product template omits the summary action.
 	 */
-	public function test_maybe_generate_product_data_generates_missing_product_data(): void {
+	public function test_output_structured_data_generates_missing_product_data_in_footer(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->go_to( get_permalink( $product->get_id() ) );
 
-		$this->structured_data->maybe_generate_product_data();
+		$this->output_footer_structured_data();
 
 		$this->assertSame(
 			'Product',
 			$this->structured_data->get_data()[0]['@type'] ?? null,
 			'The queried product should have structured data even when the summary action did not run.'
 		);
+	}
+
+	/**
+	 * @testdox Direct output outside the footer does not generate product data.
+	 */
+	public function test_output_structured_data_does_not_generate_product_data_outside_footer(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		ob_start();
+		$this->structured_data->output_structured_data();
+		$output = ob_get_clean();
+
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Direct output must not generate product data outside the footer.' );
+		$this->assertStringNotContainsString( '"Product"', $output, 'Direct output must not include Product schema.' );
 	}
 
 	/**
@@ -375,7 +401,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->go_to( get_permalink( $product->get_id() ) );
 
 		$this->structured_data->generate_product_data( $product );
-		$this->structured_data->maybe_generate_product_data();
+		$this->output_footer_structured_data();
 
 		$this->assertSame( array(), $this->structured_data->get_data(), 'Password-protected products must not expose their details in structured data.' );
 	}
@@ -383,12 +409,12 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Removing the product summary callback also disables the footer fallback.
 	 */
-	public function test_maybe_generate_product_data_respects_removed_summary_callback(): void {
+	public function test_output_structured_data_respects_removed_summary_callback(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->go_to( get_permalink( $product->get_id() ) );
 		remove_action( 'woocommerce_single_product_summary', array( $this->structured_data, 'generate_product_data' ), 60 );
 
-		$this->structured_data->maybe_generate_product_data();
+		$this->output_footer_structured_data();
 
 		$this->assertSame( array(), $this->structured_data->get_data(), 'The fallback must respect extensions that disable product schema generation.' );
 	}
@@ -396,12 +422,12 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Product structured data is not duplicated when the product summary already generated it.
 	 */
-	public function test_maybe_generate_product_data_does_not_duplicate_existing_product_data(): void {
+	public function test_output_structured_data_does_not_duplicate_existing_product_data(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->go_to( get_permalink( $product->get_id() ) );
 		$this->structured_data->generate_product_data( $product );
 
-		$this->structured_data->maybe_generate_product_data();
+		$this->output_footer_structured_data();
 
 		$this->assertCount( 1, $this->structured_data->get_data(), 'The fallback should not duplicate existing product data.' );
 	}
@@ -409,13 +435,13 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Product structured data for another product does not prevent generating data for the queried product.
 	 */
-	public function test_maybe_generate_product_data_ignores_other_product_data(): void {
+	public function test_output_structured_data_ignores_other_product_data(): void {
 		$product       = WC_Helper_Product::create_simple_product();
 		$other_product = WC_Helper_Product::create_simple_product();
 		$this->go_to( get_permalink( $product->get_id() ) );
 		$this->structured_data->generate_product_data( $other_product );
 
-		$this->structured_data->maybe_generate_product_data();
+		$this->output_footer_structured_data();
 
 		$data = $this->structured_data->get_data();
 		$this->assertCount( 2, $data, 'The fallback should generate data for the queried product.' );
