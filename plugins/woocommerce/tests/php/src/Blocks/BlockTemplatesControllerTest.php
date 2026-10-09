@@ -191,7 +191,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox BC filters (render_block_data, render_block, render_block_core/template-part) fire for WooCommerce template parts.
 	 */
-	public function test_render_block_filter_fires_for_woocommerce_template_part(): void {
+	public function test_bc_filters_fire_for_woocommerce_template_part(): void {
 		$this->sut->init();
 
 		$this->create_template_part( 'test-filtered-part', BlockTemplateUtils::PLUGIN_SLUG );
