@@ -11,7 +11,7 @@ export const isExportRequesting = (
 ) => {
 	return Boolean(
 		state.requesting[ selector ] &&
-			state.requesting[ selector ][ hashExportArgs( selectorArgs ) ]
+		state.requesting[ selector ][ hashExportArgs( selectorArgs ) ]
 	);
 };
 

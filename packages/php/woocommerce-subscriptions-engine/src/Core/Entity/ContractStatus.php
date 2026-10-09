@@ -23,6 +23,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class ContractStatus {
 
+	public const DRAFT                = 'draft';
 	public const ACTIVE               = 'active';
 	public const ON_HOLD              = 'on-hold';
 	public const PENDING_CANCELLATION = 'pending-cancellation';
@@ -36,6 +37,7 @@ final class ContractStatus {
 	 */
 	public static function get_defaults(): array {
 		return array(
+			self::DRAFT,
 			self::ACTIVE,
 			self::ON_HOLD,
 			self::PENDING_CANCELLATION,

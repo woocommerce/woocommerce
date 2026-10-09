@@ -82,8 +82,7 @@ export interface PaymentState {
 	// Registered express payment methods are all express payment methods from the registry (before filtering).
 	registeredExpressPaymentMethods: PlainExpressPaymentMethods;
 	savedPaymentMethods:
-		| Record< string, SavedPaymentMethod[] >
-		| EmptyObjectType;
+		Record< string, SavedPaymentMethod[] > | EmptyObjectType;
 	paymentMethodData: Record< string, unknown >;
 	paymentResult: PaymentResult | null;
 	paymentMethodsInitialized: boolean;
