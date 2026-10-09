@@ -116,7 +116,7 @@ class BlockPatterns {
 	 * @return array Block pattern data.
 	 */
 	private function get_block_patterns() {
-		$pattern_data = $this->get_pattern_cache();
+		list( $pattern_data, $path_timestamp ) = $this->get_pattern_cache();
 
 		if ( is_array( $pattern_data ) ) {
 			return $pattern_data;
@@ -152,39 +152,41 @@ class BlockPatterns {
 			$patterns[]     = $data;
 		}
 
-		$this->set_pattern_cache( $patterns );
+		$this->set_pattern_cache( $patterns, $path_timestamp );
 		return $patterns;
 	}
 
 	/**
-	 * Gets block pattern cache.
+	 * Gets cache state details.
 	 *
-	 * @return array|false Returns an array of patterns if cache is found, otherwise false.
+	 * @return array{array|null,int}
 	 */
-	private function get_pattern_cache() {
-		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
+	private function get_pattern_cache(): array {
+		$path_timestamp = (int) @filemtime( $this->patterns_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
+		$pattern_data   = get_site_transient( 'woocommerce_blocks_patterns' );
 
 		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
 			// If cluster nodes are provisioned individually (not a shared mount), the last one updated will refresh the transient.
 			// If the current node lags behind the update briefly, it reuses the lead node's version instead of overwriting it.
-			$is_path_modified = (int) @filemtime( $this->patterns_path ) > (int) ( $pattern_data['timestamp'] ?? 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
-			if ( ! $is_path_modified ) {
-				return $pattern_data['patterns'];
+			$cached_timestamp = (int) ( $pattern_data['timestamp'] ?? 0 );
+			if ( $cached_timestamp >= $path_timestamp) {
+				return array( $pattern_data['patterns'], $path_timestamp );
 			}
 		}
 
-		return false;
+		return array( null, $path_timestamp );
 	}
 
 	/**
 	 * Sets block pattern cache.
 	 *
-	 * @param array $patterns Block patterns data to set in cache.
+	 * @param array $patterns  Block patterns data to set in cache.
+	 * @param int   $timestamp Directory mtime captured during cache check.
 	 */
-	private function set_pattern_cache( array $patterns ) {
+	private function set_pattern_cache( array $patterns, int $timestamp ) {
 		$pattern_data = array(
 			'version'   => WOOCOMMERCE_VERSION,
-			'timestamp' => (int) @filemtime( $this->patterns_path ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
+			'timestamp' => $timestamp,
 			'patterns'  => $patterns,
 		);
 
