@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\RestApi\Refunds;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Cache_Helper;
 use WC_Helper_Product;
 use WC_Order;
@@ -18,6 +19,8 @@ use WC_Unit_Test_Case;
  * DataUtilsTest class.
  */
 class DataUtilsTest extends WC_Unit_Test_Case {
+
+	use LoggerSpyTrait;
 
 	/**
 	 * DataUtils instance.
@@ -3377,6 +3380,124 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $result['taxes'] );
 		$this->assertEqualsWithDelta( 0.0, $result['total_tax'], 0.0001 );
 		$this->assertEqualsWithDelta( 25.00, $result['subtotal'], 0.0001 );
+	}
+
+	/**
+	 * Helper: create an order holding one product line item with zero original quantity.
+	 *
+	 * @return array{0: WC_Order, 1: WC_Order_Item_Product} The order and the item.
+	 */
+	private function create_order_with_zero_quantity_item(): array {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'quantity' => 0,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+		return array( $order, $item );
+	}
+
+	/**
+	 * @testdox Warnings from direct helper calls are logged under the default wc-v4-refunds source.
+	 */
+	public function test_direct_helper_warnings_use_default_log_source(): void {
+		list( $order, $item ) = $this->create_order_with_zero_quantity_item();
+
+		$this->data_utils->compute_line_item_refund_total( $item, 1 );
+
+		$this->assertLogged( 'warning', 'zero original quantity', array( 'source' => 'wc-v4-refunds' ) );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Helper: create a processing order holding one fee whose stored total and tax
+	 * nearly cancel (gross 0.01), so any split of it hits the unsplittable fallback.
+	 *
+	 * @return array{0: WC_Order, 1: WC_Order_Item_Fee} The order and the fee item.
+	 */
+	private function create_order_with_degenerate_fee(): array {
+		$order = wc_create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_total( 100.00 );
+		$fee->set_taxes(
+			array(
+				'total' => array( 1 => -99.99 ),
+			)
+		);
+		$fee->save();
+		$order->add_item( $fee );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_total( 0.01 );
+		$order->save();
+		return array( $order, $fee );
+	}
+
+	/**
+	 * @testdox The preview pipeline logs warnings under the caller's log source.
+	 */
+	public function test_preview_pipeline_threads_log_source(): void {
+		list( $order, $fee ) = $this->create_order_with_degenerate_fee();
+
+		$line_items = array(
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => 0.01,
+			),
+		);
+
+		$this->data_utils->compute_refund_preview_or_error( $order, $line_items, 'wc-rest-refunds' );
+
+		$this->assertLogged( 'warning', 'cannot split tax', array( 'source' => 'wc-rest-refunds' ) );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox The creation pipeline logs warnings under the caller's log source.
+	 */
+	public function test_creation_pipeline_threads_log_source(): void {
+		list( $order, $fee ) = $this->create_order_with_degenerate_fee();
+
+		$line_items = array(
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => 0.01,
+			),
+		);
+
+		$this->data_utils->prepare_refund_creation_or_error( $order, $line_items, false, null, 'wc-rest-refunds' );
+
+		$this->assertLogged( 'warning', 'cannot split tax', array( 'source' => 'wc-rest-refunds' ) );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox The log source is restored to the default after an entry-point call.
+	 */
+	public function test_log_source_restored_after_entry_point(): void {
+		list( $order, $fee ) = $this->create_order_with_degenerate_fee();
+
+		$line_items = array(
+			array(
+				'line_item_id' => $fee->get_id(),
+				'refund_total' => 0.01,
+			),
+		);
+
+		$this->data_utils->compute_refund_preview_or_error( $order, $line_items, 'wc-rest-refunds' );
+		$this->invoke_split_inclusive( 0.01, $fee );
+
+		$this->assertLogged( 'warning', 'cannot split tax', array( 'source' => 'wc-v4-refunds' ) );
+
+		$order->delete( true );
 	}
 
 	/**
