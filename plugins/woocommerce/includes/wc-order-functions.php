@@ -690,14 +690,93 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
-			// delete downloads that were refunded using order and product id, if present.
-			if ( ! empty( $refunded_order_and_products ) ) {
+			// Revoke or reduce the download permissions of refunded products.
+			if ( ! empty( $refunded_order_and_products ) && $order instanceof WC_Order ) {
 				$download_data_store = WC_Data_Store::load( 'customer-download' );
-				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
-					$downloads = $download_data_store->get_downloads( $refunded_order_and_product );
-					if ( ! empty( $downloads ) ) {
+
+				// Quantities refunded so far, per original order item. Refund items carry negative quantities.
+				$refunded_qty_by_item = array();
+				foreach ( $order->get_refunds() as $order_refund ) {
+					foreach ( $order_refund->get_items( 'line_item' ) as $refunded_item ) {
+						$original_item_id = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+						if ( $original_item_id ) {
+							$refunded_qty_by_item[ $original_item_id ] = ( $refunded_qty_by_item[ $original_item_id ] ?? 0 ) + (float) $refunded_item->get_quantity();
+						}
+					}
+				}
+
+				// Unrefunded quantity per product, across all line items of the order.
+				$remaining_qty = array();
+				foreach ( $order->get_items() as $order_item_id => $order_item ) {
+					if ( ! $order_item instanceof WC_Order_Item_Product ) {
+						continue;
+					}
+					$product_id                   = $order_item->get_product_id();
+					$remaining_qty[ $product_id ] = ( $remaining_qty[ $product_id ] ?? 0 ) + $order_item->get_quantity() + ( $refunded_qty_by_item[ $order_item_id ] ?? 0 );
+				}
+
+				// Quantity entered for this refund, per product. Zero for amount-only refunds.
+				$refunded_qty_by_product = array();
+				foreach ( $refunded_order_and_products as $refunded_item_id => $refunded_order_and_product ) {
+					$product_id                             = $refunded_order_and_product['product_id'];
+					$refunded_qty_by_product[ $product_id ] = ( $refunded_qty_by_product[ $product_id ] ?? 0 ) + (float) ( $args['line_items'][ $refunded_item_id ]['qty'] ?? 0 );
+				}
+
+				foreach ( $refunded_qty_by_product as $product_id => $refunded_qty ) {
+					// Only a quantity refund keeps the permissions; amount-only refunds always revoke.
+					$should_revoke = empty( $refunded_qty ) || ( $remaining_qty[ $product_id ] ?? 0 ) <= 0;
+
+					/**
+					 * Filters whether creating a refund should revoke the download permissions of a
+					 * refunded product on the order.
+					 *
+					 * @since 11.3.0
+					 *
+					 * @param bool            $should_revoke Whether the download permissions will be revoked.
+					 * @param int             $product_id    The id of the refunded product.
+					 * @param WC_Order        $order         The order the refund belongs to.
+					 * @param WC_Order_Refund $refund        The newly created refund.
+					 */
+					$should_revoke = apply_filters( 'woocommerce_refund_should_revoke_download_permissions', $should_revoke, $product_id, $order, $refund );
+
+					$downloads = $download_data_store->get_downloads(
+						array(
+							'order_id'   => $order->get_id(),
+							'product_id' => $product_id,
+						)
+					);
+					if ( empty( $downloads ) ) {
+						continue;
+					}
+
+					if ( $should_revoke ) {
 						foreach ( $downloads as $download ) {
 							$download_data_store->delete_by_id( $download->get_id() );
+						}
+						continue;
+					}
+
+					// Kept permissions of limited products lose the downloads of the refunded quantity.
+					$product        = wc_get_product( $product_id );
+					$download_limit = $product ? (int) $product->get_download_limit() : 0;
+					if ( $refunded_qty > 0 && $download_limit > 0 ) {
+						// Every order line holds its own permission row per file. The rows of one file share a single deduction.
+						$downloads_to_deduct = array();
+						foreach ( $downloads as $download ) {
+							if ( '' === $download->get_downloads_remaining() ) {
+								continue;
+							}
+							$download_id = $download->get_download_id();
+							if ( ! isset( $downloads_to_deduct[ $download_id ] ) ) {
+								$downloads_to_deduct[ $download_id ] = (int) ( $download_limit * $refunded_qty );
+							}
+							$deduction = min( (int) $download->get_downloads_remaining(), $downloads_to_deduct[ $download_id ] );
+							if ( $deduction <= 0 ) {
+								continue;
+							}
+							$download->set_downloads_remaining( (int) $download->get_downloads_remaining() - $deduction );
+							$download->save();
+							$downloads_to_deduct[ $download_id ] -= $deduction;
 						}
 					}
 				}
