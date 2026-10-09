@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Use the billing address as the default shipping address in the cart and checkout when the store is set to, and keep the address picked in the cart.
+Use the billing address as the default shipping address in the cart and checkout when the store is set to do so, and keep the address picked in the cart.
