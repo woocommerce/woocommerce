@@ -23,7 +23,7 @@ class WooSubscriptionsNotes {
 	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';
 	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 	const BUMP_THRESHOLDS         = array( 60, 45, 20, 7, 1 ); // days.
-	private const UTM_SOURCE      = 'inbox_notification';
+	private const UTM_SOURCE      = 'pu';
 
 	/**
 	 * Hook all the things.

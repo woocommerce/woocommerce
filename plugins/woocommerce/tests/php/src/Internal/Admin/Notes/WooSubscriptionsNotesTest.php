@@ -42,7 +42,7 @@ class WooSubscriptionsNotesTest extends WC_Unit_Test_Case {
 		$action = $this->get_note_action( 101, 'enable-autorenew' );
 
 		$this->assertSame(
-			'https://woocommerce.com/my-account/my-subscriptions/?utm_source=inbox_notification&utm_campaign=pu_inbox_enable_autorenew',
+			'https://woocommerce.com/my-account/my-subscriptions/?utm_source=pu&utm_campaign=pu_inbox_enable_autorenew',
 			$action->query,
 			'Enable Autorenew should link to My Subscriptions with the inbox UTM params'
 		);
@@ -57,7 +57,7 @@ class WooSubscriptionsNotesTest extends WC_Unit_Test_Case {
 		$action = $this->get_note_action( 102, 'renew-subscription' );
 
 		$this->assertSame(
-			'https://woocommerce.com/products/test-extension/?utm_source=inbox_notification&utm_campaign=pu_inbox_renew',
+			'https://woocommerce.com/products/test-extension/?utm_source=pu&utm_campaign=pu_inbox_renew',
 			$action->query,
 			'Renew Subscription should link to the product page with the inbox UTM params'
 		);
@@ -77,7 +77,7 @@ class WooSubscriptionsNotesTest extends WC_Unit_Test_Case {
 
 		$action = $this->get_note_action( 103, 'renew-subscription' );
 		$this->assertSame(
-			'https://woocommerce.com/products/test-extension/?utm_source=inbox_notification&utm_campaign=pu_inbox_renew',
+			'https://woocommerce.com/products/test-extension/?utm_source=pu&utm_campaign=pu_inbox_renew',
 			$action->query,
 			'A stale expired note should pick up the new action URL'
 		);
