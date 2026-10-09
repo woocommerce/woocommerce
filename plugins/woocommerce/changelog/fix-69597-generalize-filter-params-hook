@@ -1,0 +1,3 @@
+Significance: minor
+Type: dev
+Comment: Expose the full Product Filters parameter map; only taxonomy customization is supported.
