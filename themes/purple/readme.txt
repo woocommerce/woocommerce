@@ -23,9 +23,6 @@ Install and activate WooCommerce before activating the theme.
 == Changelog ==
 
 = 1.0.3 =
-* Improve Purple release review and notifications (#473)
-* Theme CI: read minimum WordPress version from theme metadata (#474)
-* Add Kirigami as repository code owners (#475)
 * Purple: declare WooCommerce 11.2 compatibility (#476)
 
 = 1.0.2 =
@@ -33,7 +30,7 @@ Install and activate WooCommerce before activating the theme.
 * Update several instances of the Search block with Product Search (#468)
 * Purple: give palette colors semantic names (#469)
 * Make Purple WooCommerce notices permanently dismissible (#471)
-* Update decrease header whitespace in several screens (#470)
+* Decrease header whitespace in several screens (#470)
 
 = 1.0.1 =
 * Remove the unregistered is-style-default class from Purple (#457)
