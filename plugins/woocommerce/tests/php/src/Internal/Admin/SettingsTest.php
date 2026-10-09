@@ -3,7 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use WC_Helper_Order;
 use WC_REST_Setting_Options_Controller;
 use WC_Unit_Test_Case;
 
@@ -333,21 +335,30 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The preloaded component settings list the installed payment gateways by title.
+	 * @testdox The preloaded component settings list the installed payment gateways by title, then any other gateway the stored orders were paid with, by id.
 	 */
-	public function test_component_settings_expose_payment_gateway_titles(): void {
+	public function test_component_settings_include_payment_gateways_that_are_no_longer_installed(): void {
+		foreach ( array( 'bacs', 'a_removed_gateway', '' ) as $payment_method ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method( $payment_method );
+			$order->save();
+			OrdersScheduler::import( $order->get_id() );
+		}
 		// Payment gateways are only injected on wc-admin pages; the base tearDown unsets the current screen.
 		set_current_screen( 'dashboard' );
 		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		try {
-			$settings = $this->sut->add_component_settings( array() );
+			$gateways = $this->sut->add_component_settings( array() )['paymentGateways'];
 		} finally {
 			unset( $_GET['page'] );
 		}
 
-		$this->assertSame( array_keys( WC()->payment_gateways()->payment_gateways() ), array_keys( $settings['paymentGateways'] ), 'Every installed gateway should be listed, in their order.' );
-		$this->assertSame( 'Direct bank transfer', $settings['paymentGateways']['bacs'], 'An installed gateway should be listed by its title.' );
+		$installed = array_keys( WC()->payment_gateways()->payment_gateways() );
+		$this->assertSame( $installed, array_slice( array_keys( $gateways ), 0, count( $installed ) ), 'The installed gateways should stay first, in their order.' );
+		$this->assertSame( 'Direct bank transfer', $gateways['bacs'], 'An installed gateway should keep its title.' );
+		$this->assertSame( 'a_removed_gateway', $gateways['a_removed_gateway'], 'A gateway that is gone should be listed under its id.' );
+		$this->assertArrayNotHasKey( '', $gateways, 'An order placed without a gateway should not add an empty option.' );
 	}
 
 	/**

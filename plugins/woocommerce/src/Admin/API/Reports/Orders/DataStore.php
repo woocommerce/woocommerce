@@ -172,6 +172,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
 		}
 
+		$payment_method_subquery = $this->get_payment_method_subquery( $query_args );
+		if ( $payment_method_subquery ) {
+			$where_subquery[] = $payment_method_subquery;
+		}
+
 		$refund_subquery = $this->get_refund_subquery( $query_args );
 		$this->subquery->add_sql_clause( 'from', $refund_subquery['from_clause'] );
 		if ( $refund_subquery['where_clause'] ) {
@@ -261,19 +266,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults = array_merge(
 			parent::get_default_query_vars(),
 			array(
-				'orderby'           => $this->date_column_name,
-				'product_includes'  => array(),
-				'product_excludes'  => array(),
-				'coupon_includes'   => array(),
-				'coupon_excludes'   => array(),
-				'tax_rate_includes' => array(),
-				'tax_rate_excludes' => array(),
-				'customer_type'     => null,
-				'status_is'         => array(),
-				'extended_info'     => false,
-				'refunds'           => null,
-				'order_includes'    => array(),
-				'order_excludes'    => array(),
+				'orderby'               => $this->date_column_name,
+				'product_includes'      => array(),
+				'product_excludes'      => array(),
+				'coupon_includes'       => array(),
+				'coupon_excludes'       => array(),
+				'tax_rate_includes'     => array(),
+				'tax_rate_excludes'     => array(),
+				'customer_type'         => null,
+				'payment_method_is'     => array(),
+				'payment_method_is_not' => array(),
+				'status_is'             => array(),
+				'extended_info'         => false,
+				'refunds'               => null,
+				'order_includes'        => array(),
+				'order_excludes'        => array(),
 			)
 		);
 
