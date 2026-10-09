@@ -23,8 +23,7 @@ class ClassAliasesTest extends WC_Unit_Test_Case {
 	public function test_old_data_utils_name_aliases_new_class(): void {
 		$this->assertTrue( class_exists( self::OLD_DATA_UTILS ), 'The old DataUtils FQCN should still autoload via its shim' );
 
-		$old_name = self::OLD_DATA_UTILS;
-		$this->assertInstanceOf( DataUtils::class, new $old_name(), 'An instance built from the old FQCN should be the relocated class' );
+		$this->assertSame( DataUtils::class, ( new \ReflectionClass( self::OLD_DATA_UTILS ) )->getName(), 'The old DataUtils FQCN should be an alias of the relocated class, not a subclass' );
 	}
 
 	/**
@@ -50,6 +49,27 @@ class ClassAliasesTest extends WC_Unit_Test_Case {
 
 		$this->expectException( \LogicException::class );
 		$schema->get_item_response( array(), new \WP_REST_Request() );
+	}
+
+	/**
+	 * @testdox A subclass of the old RefundPreviewSchema can add properties to the item schema.
+	 */
+	public function test_old_preview_schema_subclass_properties_reach_item_schema(): void {
+		$sut = new class() extends \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema {
+			/**
+			 * Adds one property to the inherited ones.
+			 *
+			 * @return array
+			 */
+			public function get_item_schema_properties(): array {
+				return parent::get_item_schema_properties() + array( 'extra' => array( 'type' => 'string' ) );
+			}
+		};
+
+		$properties = $sut->get_item_schema()['properties'];
+
+		$this->assertArrayHasKey( 'extra', $properties, 'A property added by a subclass should appear in the item schema' );
+		$this->assertArrayHasKey( 'total', $properties, 'The inherited properties should still be in the item schema' );
 	}
 
 	/**

@@ -391,8 +391,8 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		// The opt-in compute_totals mode routes through the shared wc/v4 refund
-		// calculation pipeline. It is a separate path so that requests without the
+		// The opt-in compute_totals mode routes through the shared refund engine
+		// (DataUtils). It is a separate path so that requests without the
 		// flag behave exactly as before, including degenerate forms such as
 		// quantity-only line items producing a 0.00 refund. The schema declares
 		// compute_totals as boolean with a false default, so the REST layer has

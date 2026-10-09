@@ -45,9 +45,7 @@ class RefundPreviewSchema extends AbstractSchema {
 	// The next method always throws so its return type can never be reached.
 	// phpcs:disable Squiz.Commenting.FunctionComment.InvalidNoReturn
 	/**
-	 * Not used. The refund preview controllers bypass prepare_item_for_response and
-	 * return the raw data array directly, so this method must never be invoked.
-	 * AbstractSchema requires it, but the body always throws.
+	 * AbstractSchema requires this method. It always throws, as the old class did.
 	 *
 	 * @param mixed           $item           Item data.
 	 * @param WP_REST_Request $request        Request object.
