@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60ed9225503f99d3adb184cf6d7223a5",
+    "content-hash": "e78b6681ee9e0c0a47559de3dd00738b",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -621,6 +621,50 @@
                 "source": "https://github.com/Automattic/jetpack-status/tree/v6.4.0"
             },
             "time": "2026-08-19T19:42:20+00:00"
+        },
+        {
+            "name": "automattic/tracks-shared-utils",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/tracks-shared-utils.git",
+                "reference": "6828997db5c76b1e810535c1d2729355b095aa91"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/tracks-shared-utils/zipball/6828997db5c76b1e810535c1d2729355b095aa91",
+                "reference": "6828997db5c76b1e810535c1d2729355b095aa91",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "phpcompatibility/php-compatibility": "^9.3",
+                "phpunit/phpunit": "^8.5 || ^9.6",
+                "squizlabs/php_codesniffer": "^3.7"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "php/src/functions.php"
+                ],
+                "psr-4": {
+                    "Automattic\\TracksSharedUtils\\": "php/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Shared allowlist and sanitization for URLs sent to Tracks.",
+            "homepage": "https://github.com/Automattic/tracks-shared-utils",
+            "support": {
+                "issues": "https://github.com/Automattic/tracks-shared-utils/issues",
+                "source": "https://github.com/Automattic/tracks-shared-utils"
+            },
+            "time": "2026-09-25T19:43:46+00:00"
         }
     ],
     "packages-dev": [

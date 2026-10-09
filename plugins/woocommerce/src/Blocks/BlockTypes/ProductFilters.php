@@ -233,6 +233,7 @@ CSS;
 
 		$wrapper_attributes = array(
 			'class'                         => implode( ' ', $wrapper_classes ),
+			'data-wp-router-region'         => $this->generate_navigation_id( $block ),
 			'data-wp-interactive'           => $this->get_full_block_name(),
 			'data-wp-init--colors'          => 'callbacks.initColors',
 			'data-wp-watch--active-filters' => 'callbacks.syncActiveFiltersWithServer',
@@ -244,11 +245,6 @@ CSS;
 			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
-		}
-
-		// Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
-		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
-			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
 		}
 
 		ob_start();

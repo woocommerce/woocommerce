@@ -31,7 +31,7 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 						d.date instanceof Date
 							? d.date
 							: moment( d.date ).toDate()
-				  )
+					)
 				: null
 		);
 

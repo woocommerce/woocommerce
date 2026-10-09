@@ -31,7 +31,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	/**
 	 * Holds the current order being processed.
 	 *
-	 * @var \WC_Order|null
+	 * @var \WC_Order
 	 */
 	private $order = null;
 
@@ -201,13 +201,12 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function update_billing_address( \WP_REST_Request $request ) {
-		$order    = $this->get_order_or_throw();
 		$customer = wc()->customer;
 
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		$this->order_controller->update_existing_order_addresses( $order, $billing, $request['shipping_address'] );
+		$this->order_controller->update_existing_order_addresses( $this->order, $billing, $request['shipping_address'] );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -216,7 +215,7 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 		}
 
-		foreach ( $order->get_address( 'shipping' ) as $key => $value ) {
+		foreach ( $this->order->get_address( 'shipping' ) as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
 			}
@@ -233,8 +232,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_checkout_update_customer_from_request', $customer, $request );
 
 		$customer->save();
-		$order->save();
-		$order->calculate_totals();
+		$this->order->save();
+		$this->order->calculate_totals();
 	}
 
 	/**
@@ -248,7 +247,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $this->get_order_or_throw()->needs_payment() ) {
+			if ( $this->order->needs_payment() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					__( 'No payment method provided.', 'woocommerce' ),
@@ -282,6 +281,6 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
-		$this->order_controller->sync_customer_data_with_order( $this->get_order_or_throw() );
+		$this->order_controller->sync_customer_data_with_order( $this->order );
 	}
 }
