@@ -185,6 +185,8 @@ const program = new Command( 'ci-jobs' )
 						testType,
 						optional,
 						usesSharedPluginBuild,
+						command,
+						testEnv,
 					} ) => ( {
 						name,
 						projectName,
@@ -192,6 +194,8 @@ const program = new Command( 'ci-jobs' )
 						testType,
 						optional,
 						usesSharedPluginBuild,
+						command,
+						testEnv,
 					} )
 				);
 			} );

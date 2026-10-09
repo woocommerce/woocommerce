@@ -1,0 +1,60 @@
+{
+  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup action in ci.yml (consumer). CI reads this file from trunk; a PR that changes it gets a full CI run. Who may publish is the allowlist compiled into gh local-ci, not this file.",
+  "version": 1,
+  "host": "github.com",
+  "repository": "woocommerce/woocommerce",
+  "app": { "clientId": "Iv23lix7ORqAqQLsB13K", "appId": 4830646 },
+  "baseBranch": "trunk",
+  "receiptPrefix": "local-ci/v1: ",
+
+  "enabled": true,
+
+  "plan": {
+    "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT.",
+    "command": [ "sh", "-c", "GITHUB_ACTIONS=true GITHUB_OUTPUT={out} pnpm utils ci-jobs --base-ref {mergeBase} --event pull_request" ],
+    "output": "github-output",
+    "fields": { "name": "name", "project": "projectName", "command": "command", "type": "testType" }
+  },
+
+  "eligible": [
+    {
+      "type": "unit",
+      "namePrefix": "JavaScript",
+      "prepare": {
+        "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=dependencies. Re-validate and update mirrors.sha256 when that action changes.",
+        "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
+        "clean": [ "plugins/woocommerce/assets/client/blocks" ],
+        "steps": [
+          [ "pnpm", "install", "{projects:--filter=%s...}", "--frozen-lockfile" ],
+          [ "pnpm", "--if-present", "--workspace-concurrency=Infinity", "--stream", "{projects:--filter=%s^...}", "/^build:project:.*$/" ]
+        ],
+        "mirrors": {
+          "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
+          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+        }
+      },
+      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. The pool runs up to 4 jobs, so 4 workers each fills 16 cores without oversubscribing; measured on admin-library (1648 tests): 2 workers 62 s, 4 workers 38 s, 8 workers 32 s.",
+      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=4" ]
+    },
+    {
+      "$comment": "Core plugin PHP cells only; grow `exclude` when packages/php/* gain unit:php jobs. The driver resolves each cell's PHP and WordPress versions from the planner itself. Opt-in: four cells run one after another, about 25 min.",
+      "type": "unit:php",
+      "exclude": [
+        "WP: pre-release",
+        "@woocommerce/blueprint",
+        "@woocommerce/email-editor-config",
+        "@automattic/woocommerce-subscriptions-engine",
+        "@automattic/woocommerce-analytics"
+      ],
+      "serial": "wp-env",
+      "enabledByDefault": false,
+      "prepare": {
+        "$comment": "Ports 92xx so the worktree's wp-env cells never collide with cells started from the developer's checkout.",
+        "env": { "TEST_PHP_CI_PORT_BASE": "92" }
+      },
+      "run": [ "bash", "bin/test-php-ci.sh", "--cell", "{name}" ]
+    }
+  ],
+
+  "lockfile": "pnpm-lock.yaml"
+}
