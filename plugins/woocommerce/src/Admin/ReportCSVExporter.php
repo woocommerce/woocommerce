@@ -357,14 +357,22 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	/**
 	 * Write the headers row file, which is what marks an export complete and downloadable.
 	 *
+	 * Not written when the export file is missing or not writable, since the parent skips a page's rows on the same check.
+	 *
 	 * @internal
 	 * @since 11.3.0
-	 * @return void
+	 * @return bool Whether the headers row file was written.
 	 */
 	public function write_headers_row_file() {
+		$file_path = $this->get_file_path();
+
+		if ( ! file_exists( $file_path ) || ! wp_is_writable( $file_path ) ) {
+			return false;
+		}
+
 		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
 
-		@file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		return false !== @file_put_contents( $this->get_headers_row_file_path(), $header ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 	}
 
 	/**

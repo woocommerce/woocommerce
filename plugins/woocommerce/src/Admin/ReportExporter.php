@@ -190,7 +190,8 @@ class ReportExporter {
 		$num_batches = (int) ceil( $total_rows / $batch_size );
 
 		if ( 0 < $num_batches ) {
-			$email_user_id = $send_email ? get_current_user_id() : 0;
+			// An export queued outside a user session has no user to email, but a filter on the email's recipient can still name one.
+			$email_user_id = $send_email ? get_current_user_id() : false;
 
 			// Only the first page is queued. Each page queues the next one, so the pages run one at a time and in order.
 			self::schedule_action( 'export_report', array( 1, $export_id, $report_type, $report_args, $email_user_id, $num_batches ) );
@@ -202,15 +203,15 @@ class ReportExporter {
 	/**
 	 * Process a report export action.
 	 *
-	 * @param int    $page_number Page number for this action.
-	 * @param string $export_id Unique ID for report (timestamp expected).
-	 * @param string $report_type Report type. E.g. 'customers'.
-	 * @param array  $report_args Report parameters, passed to data query.
-	 * @param int    $email_user_id Optional. User to email the download link to once the last page is written, or 0 for none.
-	 * @param int    $num_batches Optional. Number of pages in the export. Exports queued before 11.3.0 run without it.
+	 * @param int       $page_number Page number for this action.
+	 * @param string    $export_id Unique ID for report (timestamp expected).
+	 * @param string    $report_type Report type. E.g. 'customers'.
+	 * @param array     $report_args Report parameters, passed to data query.
+	 * @param int|false $email_user_id Optional. User to email the download link to once the last page is written, or false for no email.
+	 * @param int       $num_batches Optional. Number of pages in the export. Exports queued before 11.3.0 run without it.
 	 * @return void
 	 */
-	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = 0, $num_batches = 0 ) {
+	public static function export_report( $page_number, $export_id, $report_type, $report_args, $email_user_id = false, $num_batches = 0 ) {
 		$exporter = self::write_export_page( $page_number, $export_id, $report_type, $report_args );
 
 		// An export queued before 11.3.0 queued all its pages at once, and its email with them.
@@ -240,10 +241,18 @@ class ReportExporter {
 
 		// The parent only writes the headers row file when the rows it counted on this page add up to 100%,
 		// which they do not when rows are added to the report during the export.
-		$exporter->write_headers_row_file();
+		if ( ! $exporter->write_headers_row_file() ) {
+			wc_get_logger()->warning(
+				sprintf( 'The %1$s report export %2$s did not finish: its file is missing or not writable.', $report_type, $export_id ),
+				array( 'source' => 'report-csv-exporter' )
+			);
+
+			return;
+		}
+
 		self::update_export_percentage_complete( $report_type, $export_id, 100 );
 
-		if ( $email_user_id > 0 ) {
+		if ( false !== $email_user_id ) {
 			self::schedule_action( 'email_report_download_link', array( (int) $email_user_id, $export_id, $report_type, $report_args ) );
 		}
 	}
@@ -258,6 +267,9 @@ class ReportExporter {
 	 * @return ReportCSVExporter The exporter that wrote the page.
 	 */
 	private static function write_export_page( $page_number, $export_id, $report_type, $report_args ) {
+		// The arguments come from a scheduled action, so they are whatever it was queued with.
+		$report_args = is_array( $report_args ) ? $report_args : array();
+
 		$exporter = new ReportCSVExporter( $report_type, array_merge( $report_args, array( 'page' => $page_number ) ) );
 		$exporter->set_filename( self::get_export_filename( $report_type, $export_id ) );
 		$exporter->generate_file();

@@ -867,20 +867,84 @@ class ReportExporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An export schedules no email when it was not asked to be emailed, or when no user asked for it.
-	 * @testWith [false, true]
-	 *           [true, false]
-	 *
-	 * @param bool $send_email Whether the export is asked to be emailed.
-	 * @param bool $signed_in  Whether a merchant is signed in when the export is queued.
+	 * @testdox An export that was not asked to be emailed schedules no email.
 	 */
-	public function test_export_without_a_recipient_schedules_no_email( bool $send_email, bool $signed_in ): void {
-		$this->queue_stock_export( 'noemail', $send_email, $signed_in );
+	public function test_export_not_asked_to_be_emailed_schedules_no_email(): void {
+		$this->queue_stock_export( 'noemail', false );
 
 		$this->run_queued_pages();
 
 		$this->assertSame( 100, ReportExporter::get_export_percentage_complete( 'stock', 'noemail' ) );
 		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+	}
+
+	/**
+	 * @testdox An export queued outside a user session is still emailed, to the recipient a filter names.
+	 */
+	public function test_export_queued_outside_a_user_session_is_emailed_to_the_filtered_recipient(): void {
+		add_filter( 'woocommerce_email_recipient_admin_report_export_download', fn() => 'reports@example.org' );
+		reset_phpmailer_instance();
+
+		$this->queue_stock_export( 'nouser', true, false );
+		$this->run_queued_pages();
+
+		$emails = $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) );
+
+		$this->assertSame( array( array( 0, 'nouser', 'stock', array() ) ), $emails, 'The email action must still be scheduled, or the recipient filter never runs.' );
+
+		ReportExporter::email_report_download_link( ...$emails[0] );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+
+		$this->assertCount( 1, $mailer->mock_sent );
+		$this->assertSame( 'reports@example.org', $mailer->get_recipient( 'to' )->address );
+	}
+
+	/**
+	 * @testdox An export whose file is gone when the last page runs is not marked complete, and is not emailed.
+	 */
+	public function test_export_with_a_missing_file_is_not_finished(): void {
+		$logged = array();
+		add_filter(
+			'woocommerce_logger_log_message',
+			function ( $message, $level ) use ( &$logged ) {
+				$logged[] = $level . ': ' . $message;
+
+				return $message;
+			},
+			10,
+			2
+		);
+
+		$this->queue_stock_export( 'lostfile' );
+		$this->run_queued_pages( 3 );
+
+		wp_delete_file( $this->export_path( 'lostfile' ) );
+
+		$this->run_queued_pages();
+
+		$this->assertFileDoesNotExist( $this->export_path( 'lostfile' ) . '.headers', 'The headers row file marks an export downloadable, so it must not be written for rows that could not be.' );
+		$this->assertSame( 75, ReportExporter::get_export_percentage_complete( 'stock', 'lostfile' ) );
+		$this->assertCount( 0, $this->recorded_actions( ReportExporter::get_action( 'email_report_download_link' ) ) );
+		$this->assertNotEmpty(
+			preg_grep( '/^warning: The stock report export lostfile did not finish/', $logged ),
+			'The unfinished export must be logged, since the scheduler records its last page as complete.'
+		);
+	}
+
+	/**
+	 * @testdox A page queued without report arguments is still written.
+	 */
+	public function test_page_queued_without_report_args_is_written(): void {
+		$this->paths[] = $this->export_path( 'noargs' );
+		$this->paths[] = $this->export_path( 'noargs' ) . '.headers';
+
+		$this->act_as_reports_user();
+		WC_Helper_Product::create_simple_product();
+
+		ReportExporter::export_report( 1, 'noargs', 'stock', null );
+
+		$this->assertSame( $this->report_skus(), $this->exported_skus( 'noargs' ) );
 	}
 
 	/**
