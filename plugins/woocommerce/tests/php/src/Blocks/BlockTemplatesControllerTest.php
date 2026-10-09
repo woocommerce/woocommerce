@@ -199,6 +199,7 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 
 		$filter = static fn( $content, $block ) => $content . ( 'core/template-part' === ( $block['blockName'] ?? null ) ? '<!-- filtered -->' : '' );
 		add_filter( 'render_block', $filter, 10, 2 );
+		add_filter( 'render_block_core/template-part', $filter, 10, 2 );
 
 		$parsed_block = array(
 			'blockName' => 'core/template-part',
@@ -211,9 +212,10 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 		$result       = $this->sut->pre_render_woocommerce_template_part( null, $parsed_block );
 
 		remove_filter( 'render_block', $filter, 10 );
+		remove_filter( 'render_block_core/template-part', $filter, 10 );
 
-		$expected = '<span class="wp-block-template-part"><p class="wp-block-paragraph">Test</p></span><!-- filtered -->';
-		$this->assertSame( $expected, $result, 'render_block filter output should be included in the rendered content.' );
+		$expected = '<span class="wp-block-template-part"><p class="wp-block-paragraph">Test</p></span><!-- filtered --><!-- filtered -->';
+		$this->assertSame( $expected, $result, 'Both render_block and render_block_core/template-part filter output should be included.' );
 	}
 
 	/**
