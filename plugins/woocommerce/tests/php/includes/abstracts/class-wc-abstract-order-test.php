@@ -547,47 +547,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	public function test_apply_coupon_on_custom_order_type_without_customer() {
 		$coupon_code = 'coupon_test_custom_order_type';
 		WC_Helper_Coupon::create_coupon( $coupon_code );
-
-		$this->register_custom_order_data_store();
-
-		// Only the tax location is provided, since the abstract builds it from billing and shipping getters.
-		$order = new class() extends WC_Abstract_Order {
-			/**
-			 * Data store registered by register_custom_order_data_store().
-			 *
-			 * @var string
-			 */
-			protected $data_store_name = 'test-custom-order';
-
-			/**
-			 * Get the order type.
-			 *
-			 * @return string
-			 */
-			public function get_type() {
-				return 'test_custom_order';
-			}
-
-			/**
-			 * Return an empty tax location, as this order type has no billing or shipping getters.
-			 *
-			 * @param array $args Override the location.
-			 * @return array
-			 */
-			protected function get_tax_location( $args = array() ) {
-				return wp_parse_args(
-					$args,
-					array(
-						'country'  => '',
-						'state'    => '',
-						'postcode' => '',
-						'city'     => '',
-					)
-				);
-			}
-		};
-		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
-		$order->save();
+		$order = $this->create_custom_order();
 
 		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
 		$this->assertFalse( is_callable( array( $order, 'get_billing_email' ) ) );
@@ -599,9 +559,12 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Register the 'test-custom-order' data store used by custom order types in these tests.
+	 * Create and save a CustomerlessTestOrder with one line item.
+	 *
+	 * @param string|null $billing_email When set, the order type also has get_billing_email() returning this.
+	 * @return CustomerlessTestOrder
 	 */
-	private function register_custom_order_data_store(): void {
+	private function create_custom_order( ?string $billing_email = null ): CustomerlessTestOrder {
 		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
 		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
 		};
@@ -612,6 +575,34 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				return $stores;
 			}
 		);
+
+		if ( null === $billing_email ) {
+			$order = new CustomerlessTestOrder();
+		} else {
+			$order = new class() extends CustomerlessTestOrder {
+				/**
+				 * Billing email returned by get_billing_email().
+				 *
+				 * @var string
+				 */
+				public $test_billing_email = '';
+
+				/**
+				 * Get the billing email.
+				 *
+				 * @return string
+				 */
+				public function get_billing_email() {
+					return $this->test_billing_email;
+				}
+			};
+
+			$order->test_billing_email = $billing_email;
+		}
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		return $order;
 	}
 
 	/**
@@ -621,55 +612,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$coupon_code = 'coupon_test_custom_order_type_email_limit';
 		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code, array( 'usage_limit_per_user' => '1' ) );
 		$coupon->increase_usage_count( 'guest@example.com' );
-
-		$this->register_custom_order_data_store();
-
-		$order = new class() extends WC_Abstract_Order {
-			/**
-			 * Data store registered by register_custom_order_data_store().
-			 *
-			 * @var string
-			 */
-			protected $data_store_name = 'test-custom-order';
-
-			/**
-			 * Get the order type.
-			 *
-			 * @return string
-			 */
-			public function get_type() {
-				return 'test_custom_order';
-			}
-
-			/**
-			 * Get the billing email of a guest who has already used the coupon.
-			 *
-			 * @return string
-			 */
-			public function get_billing_email() {
-				return 'guest@example.com';
-			}
-
-			/**
-			 * Return an empty tax location, as this order type has no address getters.
-			 *
-			 * @param array $args Override the location.
-			 * @return array
-			 */
-			protected function get_tax_location( $args = array() ) {
-				return wp_parse_args(
-					$args,
-					array(
-						'country'  => '',
-						'state'    => '',
-						'postcode' => '',
-						'city'     => '',
-					)
-				);
-			}
-		};
-		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
-		$order->save();
+		$order = $this->create_custom_order( 'guest@example.com' );
 
 		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
 
