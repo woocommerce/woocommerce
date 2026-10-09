@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
 - [PHP Linting](#php-linting)
+- [PHP Static Analysis (PHPStan)](#php-static-analysis-phpstan)
 - [JavaScript Linting](#javascript-linting)
 - [Markdown Linting](#markdown-linting)
 - [Important Linting Guidelines](#important-linting-guidelines)
@@ -64,6 +65,22 @@ vendor/bin/phpcbf path/to/file.php
 # Show all violations (including warnings)
 vendor/bin/phpcs -s path/to/file.php
 ```
+
+## PHP Static Analysis (PHPStan)
+
+Run PHPStan on each modified PHP file, from the `plugins/woocommerce` directory:
+
+```bash
+composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
+```
+
+- Analyse only the files you changed. `pnpm phpstan` analyses the whole plugin and is slow.
+- Existing errors are suppressed by `phpstan-baseline.neon`, so a reported error is almost always introduced by your change.
+- **Never add entries to `phpstan-baseline.neon`.** Fix the code instead. If your change resolves a baselined error, remove that entry.
+- A common error on new methods is `missingType.return`. Add a return type (for example `: void`) or an `@return` tag.
+- For PHPStan-specific PHPDoc annotations and false positives, see `woocommerce-backend-dev/type-annotations.md`.
+
+In a new checkout or worktree, run `pnpm install` first. Its `postinstall` step runs `composer install`, which creates `vendor/` and installs `packages/action-scheduler`. The error `Path .../packages/action-scheduler does not exist` means that step has not run. Do not symlink `vendor/` from another checkout instead.
 
 ## JavaScript Linting
 
@@ -207,6 +224,7 @@ Before committing your changes:
 
 - [ ] Run `pnpm run lint:changes:branch:php`
 - [ ] Run `pnpm run lint:php:fix` if issues found
+- [ ] Run PHPStan on each modified PHP file
 - [ ] Run `pnpm run lint:changes:branch:js` if you modified JS files
 - [ ] Run `pnpm --filter=@woocommerce/block-library lint:js-fix` if you modified blocks JS/TS files
 - [ ] Review all automatic fixes with `git diff`
