@@ -1,35 +1,6 @@
 <?php
 /**
- * ContractsController - the authenticated `wc/v3` REST surface for the generic
- * contract lifecycle actions.
- *
- * Routes (namespace `wc/v3`, base `subscriptions-engine/contracts`):
- *
- *   POST /{id}/hold              Put an active contract on hold.
- *   POST /{id}/reactivate        Resume a held contract (next date recomputed forward).
- *   POST /{id}/cancel            Cancel. Body `{ at_period_end: bool }` - true winds the
- *                                contract down at the current period end, false cancels now.
- *
- * Actions only, deliberately: the engine exposes ONE implementation of the lifecycle
- * transitions (guards, ownership, conflict semantics) that every consumer calls rather
- * than re-implements - while READS for UI stay server-side, where each consumer shapes
- * its own view from the {@see Subscriptions} facade. There are no read routes here and
- * no view-model in the responses: an action responds with a minimal domain summary
- * (`id` + resulting `status` slug, e.g. cancel lands on `pending-cancellation` or
- * `cancelled` depending on the mode), so no consumer-specific presentation leaks into
- * the engine. The summary is ADDITIVE: fields may appear; consumers tolerate unknown
- * fields and must not assume the set is closed. A generic resource read API is a
- * planned follow-up alongside the read-model views, when a consumer needs it.
- *
- * Interim: moves out of the engine with the lifecycle flows (hold / reactivate /
- * cancel and their routes).
- *
- * Every route requires a logged-in user, enforced through the shared
- * {@see RESTPermissions} floor (core's cookie auth has already verified the REST nonce
- * `wp_rest` by then). Per-route, ownership is enforced with the asymmetric not-found
- * rule: a contract owned by another user returns 404 - IDENTICAL to an unknown id - so
- * a caller never confirms the existence of a contract the requester does not own
- * (anti-IDOR).
+ * REST controller for subscription engine contracts.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api\Rest
  */
@@ -38,29 +9,37 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
-use DomainException;
+use SplObjectStorage;
 use Throwable;
+use UnexpectedValueException;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\ContractActionRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST controller for the generic contract lifecycle actions.
+ * Contracts REST controller under `wc/v3/subscriptions-engine/contracts`: `GET /{id}` returns
+ * the stored contract to store managers; `GET|POST /{id}/action` lists and runs the actions
+ * the contract's owning extension registered through {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractActions}.
+ *
+ * @phpstan-import-type ContractActionDefinition from ContractActionRegistry
  */
 final class ContractsController extends WP_REST_Controller {
 
 	private const REST_NAMESPACE = 'wc/v3';
 
 	private const REST_BASE = 'subscriptions-engine/contracts';
+
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
 	 * REST permissions.
@@ -70,14 +49,28 @@ final class ContractsController extends WP_REST_Controller {
 	private $rest_permissions;
 
 	/**
-	 * Build the controller.
+	 * Read resolutions per request, so the callback reuses what the permission check read.
 	 *
-	 * @param RESTPermissions|null $rest_permissions REST permissions; default instance when omitted.
+	 * @var SplObjectStorage<WP_REST_Request, ContractView|WP_Error>
 	 */
-	public function __construct( ?RESTPermissions $rest_permissions = null ) {
+	private $resolved_reads;
+
+	/**
+	 * Run resolutions per request, so the callback reuses what the permission check read.
+	 *
+	 * @var SplObjectStorage<WP_REST_Request, array{contract: ContractView, definition: ContractActionDefinition}|WP_Error>
+	 */
+	private $resolved_runs;
+
+	/**
+	 * Build the controller.
+	 */
+	public function __construct() {
 		$this->namespace        = self::REST_NAMESPACE;
 		$this->rest_base        = self::REST_BASE;
-		$this->rest_permissions = $rest_permissions ?? new RESTPermissions();
+		$this->rest_permissions = new RESTPermissions();
+		$this->resolved_reads   = new SplObjectStorage();
+		$this->resolved_runs    = new SplObjectStorage();
 	}
 
 	/**
@@ -98,151 +91,252 @@ final class ContractsController extends WP_REST_Controller {
 	public function register_routes(): void {
 		register_rest_route(
 			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/(?P<id>[\d]+)/hold',
+			'/' . self::REST_BASE . '/(?P<id>[\d]+)',
 			array(
-				'args'   => $this->id_arg(),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'hold_item' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the contract.', 'woocommerce-subscriptions-engine' ),
+						'type'        => 'integer',
+					),
 				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/(?P<id>[\d]+)/reactivate',
-			array(
-				'args'   => $this->id_arg(),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'reactivate_item' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		register_rest_route(
-			self::REST_NAMESPACE,
-			'/' . self::REST_BASE . '/(?P<id>[\d]+)/cancel',
-			array(
-				'args'   => $this->id_arg(),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'cancel_item' ),
-					'permission_callback' => array( $this, 'permissions_check' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'at_period_end' => array(
-							'description'       => __( 'Whether to cancel at the end of the current billing period (true) or immediately (false).', 'woocommerce-subscriptions-engine' ),
-							'type'              => 'boolean',
-							'required'          => false,
-							'default'           => true,
-							'sanitize_callback' => 'rest_sanitize_boolean',
-							'validate_callback' => 'rest_validate_request_arg',
-						),
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NAMESPACE,
+			'/' . self::REST_BASE . '/(?P<id>[\d]+)/action',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the contract.', 'woocommerce-subscriptions-engine' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_actions' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'run_action' ),
+					'permission_callback' => array( $this, 'run_action_permissions_check' ),
+					'args'                => array(
+						'action'         => array(
+							'description' => __( 'Action to run.', 'woocommerce-subscriptions-engine' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'extension_slug' => array(
+							'description' => __( 'Slug of the extension that owns the contract and registered the action.', 'woocommerce-subscriptions-engine' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'action_args'    => array(
+							'description' => __( 'Arguments for the action, as its schema describes them.', 'woocommerce-subscriptions-engine' ),
+							'type'        => 'object',
+							'default'     => array(),
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
-	 * Permission callback for all routes: the shared logged-in floor.
-	 *
-	 * Any logged-in user passes; per-contract ownership is enforced by the route
-	 * handlers (the asymmetric 404).
+	 * Check whether the current user may read the contract. Anything that is not a 401 is the
+	 * same 404, so a caller cannot probe for contracts it may not read.
 	 *
 	 * @param WP_REST_Request $request Request.
-	 * @return true|WP_Error True when logged in, else a 401 error.
+	 * @return true|WP_Error
 	 */
-	public function permissions_check( $request ) {
-		return $this->rest_permissions->require_logged_in_permission();
+	public function get_item_permissions_check( $request ) {
+		$logged_in = $this->rest_permissions->require_logged_in_permission();
+		if ( true !== $logged_in ) {
+			return $logged_in;
+		}
+
+		$resolved = $this->resolve_read( $request );
+
+		return $resolved instanceof WP_Error ? $resolved : true;
 	}
 
 	/**
-	 * POST /{id}/hold.
+	 * Check whether the current user may run the requested action on the contract. Anything
+	 * that is not a 401 is the same 404, so a caller cannot probe for contracts it may not act on.
 	 *
-	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The domain summary, or an error.
+	 * @param WP_REST_Request $request Request.
+	 * @return true|WP_Error
 	 */
-	public function hold_item( $request ) {
-		return $this->run_action(
-			$request,
-			static function ( int $id ): void {
-				Subscriptions::hold( $id );
-			}
-		);
+	public function run_action_permissions_check( $request ) {
+		$logged_in = $this->rest_permissions->require_logged_in_permission();
+		if ( true !== $logged_in ) {
+			return $logged_in;
+		}
+
+		$resolved = $this->resolve_run( $request );
+
+		return $resolved instanceof WP_Error ? $resolved : true;
 	}
 
 	/**
-	 * POST /{id}/reactivate.
+	 * List the actions the contract's owner registered that are available for it now, with their
+	 * resolved args.
 	 *
-	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The domain summary, or an error.
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function reactivate_item( $request ) {
-		return $this->run_action(
-			$request,
-			static function ( int $id ): void {
-				Subscriptions::reactivate( $id );
-			}
-		);
-	}
+	public function get_actions( $request ) {
+		$contract = $this->resolve_read( $request );
+		if ( $contract instanceof WP_Error ) {
+			return $contract;
+		}
 
-	/**
-	 * POST /{id}/cancel - body `{ at_period_end: bool }` (default true).
-	 *
-	 * `at_period_end` true winds the contract down at the current period end (graceful);
-	 * false cancels immediately, reusing the shared {@see Subscriptions::cancel()}.
-	 *
-	 * @param WP_REST_Request $request The request.
-	 * @return WP_REST_Response|WP_Error The domain summary, or an error.
-	 */
-	public function cancel_item( $request ) {
-		// Boolean-typed, defaulted, and `rest_sanitize_boolean`-sanitized by the route
-		// schema, so it arrives as a real bool; the coercion path covers a caller
-		// invoking the method directly with a raw value.
-		$param         = $request->get_param( 'at_period_end' );
-		$at_period_end = is_bool( $param ) ? $param : rest_sanitize_boolean( Coercion::coerce_string( $param, 'true' ) );
-
-		return $this->run_action(
-			$request,
-			static function ( int $id ) use ( $at_period_end ): void {
-				if ( $at_period_end ) {
-					Subscriptions::cancel_at_period_end( $id );
-				} else {
-					Subscriptions::cancel( $id );
+		$actions = array();
+		try {
+			foreach ( ContractActionRegistry::get_for_extension( (string) $contract->get_extension_slug() ) as $definition ) {
+				if ( ! ContractActionRegistry::is_available( $definition, $contract ) ) {
+					continue;
 				}
+
+				$actions[] = array(
+					'action'         => $definition['action'],
+					'extension_slug' => $definition['extension_slug'],
+					'description'    => $definition['description'],
+					'args'           => $this->get_args_for_response( ContractActionRegistry::get_args_schema( $definition, $contract ) ),
+				);
 			}
-		);
+		} catch ( Throwable $e ) {
+			return $this->get_action_failed_error( $e, $request );
+		}
+
+		return rest_ensure_response( array( 'actions' => $actions ) );
 	}
 
 	/**
-	 * Serialize a contract as the action-response domain summary.
+	 * Run the action: 409 when it is not available, 400 for invalid `action_args`, then the
+	 * callback's result. A `WP_Error` passes through (status 400 unless it has one).
 	 *
-	 * Domain values only - the id and the resulting status slug - never labels,
-	 * formatted values, or other presentation: consumers own their view shaping.
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function run_action( $request ) {
+		$resolved = $this->resolve_run( $request );
+		if ( $resolved instanceof WP_Error ) {
+			return $resolved;
+		}
+
+		$contract   = $resolved['contract'];
+		$definition = $resolved['definition'];
+		try {
+			if ( ! ContractActionRegistry::is_available( $definition, $contract ) ) {
+				return new WP_Error(
+					'woocommerce_subscriptions_engine_action_not_available',
+					__( 'This action is not available for the contract.', 'woocommerce-subscriptions-engine' ),
+					array( 'status' => 409 )
+				);
+			}
+
+			$action_args = $this->get_validated_action_args( $request, ContractActionRegistry::get_args_schema( $definition, $contract ) );
+			if ( $action_args instanceof WP_Error ) {
+				return $action_args;
+			}
+
+			$result = ( $definition['callback'] )( $contract, $action_args );
+		} catch ( Throwable $e ) {
+			return $this->get_action_failed_error( $e, $request );
+		}
+
+		if ( $result instanceof ContractView ) {
+			return rest_ensure_response(
+				array(
+					'id'     => $result->get_id(),
+					'status' => $result->get_status(),
+				)
+			);
+		}
+
+		if ( $result instanceof WP_Error ) {
+			$error_data = $result->get_error_data();
+			if ( ! is_array( $error_data ) || ! isset( $error_data['status'] ) ) {
+				$result->add_data( array_merge( is_array( $error_data ) ? $error_data : array(), array( 'status' => 400 ) ) );
+			}
+
+			return $result;
+		}
+
+		return $this->get_action_failed_error( new UnexpectedValueException( 'The action callback must return a ContractView or a WP_Error.' ), $request );
+	}
+
+	/**
+	 * Get one contract with its items and addresses.
 	 *
-	 * @param ContractView    $item    Contract view.
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$contract = $this->resolve_read( $request );
+		if ( $contract instanceof WP_Error ) {
+			return $contract;
+		}
+
+		return $this->prepare_item_for_response( $contract, $request );
+	}
+
+	/**
+	 * The contract as response data. Dates are GMT, formatted like other WordPress REST dates.
+	 *
+	 * @param ContractView    $item    Contract.
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(
-			'id'     => (int) $item->get_id(),
-			'status' => $item->get_status(),
+			'id'                   => $item->get_id(),
+			'extension_slug'       => $item->get_extension_slug(),
+			'status'               => $item->get_status(),
+			'customer_id'          => $item->get_customer_id(),
+			'currency'             => $item->get_currency(),
+			'selling_plan_id'      => $item->get_selling_plan_id(),
+			'origin_order_id'      => $item->get_origin_order_id(),
+			'payment_method'       => $item->get_payment_method(),
+			'payment_method_title' => $item->get_payment_method_title(),
+			'payment_token_id'     => $item->get_payment_token_id(),
+			'start_gmt'            => wc_rest_prepare_date_response( $item->get_start_gmt() ),
+			'next_payment_gmt'     => wc_rest_prepare_date_response( $item->get_next_payment_gmt() ),
+			'last_payment_gmt'     => wc_rest_prepare_date_response( $item->get_last_payment_gmt() ),
+			'last_attempt_gmt'     => wc_rest_prepare_date_response( $item->get_last_attempt_gmt() ),
+			'trial_end_gmt'        => wc_rest_prepare_date_response( $item->get_trial_end_gmt() ),
+			'end_gmt'              => wc_rest_prepare_date_response( $item->get_end_gmt() ),
+			'schedule_source'      => $item->get_schedule_source(),
+			'billing_total'        => $item->get_billing_total(),
+			'discount_total'       => $item->get_discount_total(),
+			'shipping_total'       => $item->get_shipping_total(),
+			'tax_total'            => $item->get_tax_total(),
+			'items'                => $item->get_items() ?? array(),
+			'addresses'            => $item->get_addresses() ?? array(),
 		);
+		if ( array() === $data['addresses'] ) {
+			$data['addresses'] = new \stdClass(); // Encodes as `{}`.
+		}
 
 		$data = $this->add_additional_fields_to_object( $data, $request );
+		$data = $this->filter_response_by_context( $data, Coercion::coerce_string( $request->get_param( 'context' ), 'view' ) );
 
 		return rest_ensure_response( $data );
 	}
 
 	/**
-	 * Get item schema: the action-response domain summary.
+	 * Get the contract schema.
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -251,106 +345,216 @@ final class ContractsController extends WP_REST_Controller {
 			return $this->add_additional_fields_schema( $this->schema );
 		}
 
+		$properties = array(
+			'id'                   => array( 'integer', __( 'Unique identifier for the contract.', 'woocommerce-subscriptions-engine' ) ),
+			'extension_slug'       => array( array( 'string', 'null' ), __( 'Slug of the extension that owns the contract.', 'woocommerce-subscriptions-engine' ) ),
+			'status'               => array( 'string', __( 'Contract status slug.', 'woocommerce-subscriptions-engine' ) ),
+			'customer_id'          => array( array( 'integer', 'null' ), __( 'Customer user ID.', 'woocommerce-subscriptions-engine' ) ),
+			'currency'             => array( array( 'string', 'null' ), __( 'Currency code.', 'woocommerce-subscriptions-engine' ) ),
+			'selling_plan_id'      => array( array( 'integer', 'null' ), __( 'Plan ID.', 'woocommerce-subscriptions-engine' ) ),
+			'origin_order_id'      => array( array( 'integer', 'null' ), __( 'ID of the order the contract started from.', 'woocommerce-subscriptions-engine' ) ),
+			'payment_method'       => array( array( 'string', 'null' ), __( 'Payment gateway ID.', 'woocommerce-subscriptions-engine' ) ),
+			'payment_method_title' => array( array( 'string', 'null' ), __( 'Payment method title.', 'woocommerce-subscriptions-engine' ) ),
+			'payment_token_id'     => array( array( 'integer', 'null' ), __( 'Payment token ID.', 'woocommerce-subscriptions-engine' ) ),
+			'start_gmt'            => array( array( 'string', 'null' ), __( 'Start date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
+			'next_payment_gmt'     => array( array( 'string', 'null' ), __( 'Next-due moment, as GMT.', 'woocommerce-subscriptions-engine' ) ),
+			'last_payment_gmt'     => array( array( 'string', 'null' ), __( 'Last payment date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
+			'last_attempt_gmt'     => array( array( 'string', 'null' ), __( 'Last payment attempt date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
+			'trial_end_gmt'        => array( array( 'string', 'null' ), __( 'Trial end date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
+			'end_gmt'              => array( array( 'string', 'null' ), __( 'End date, as GMT.', 'woocommerce-subscriptions-engine' ) ),
+			'schedule_source'      => array( 'string', __( 'Who keeps the payment schedule.', 'woocommerce-subscriptions-engine' ) ),
+			'billing_total'        => array( 'string', __( 'Recurring total.', 'woocommerce-subscriptions-engine' ) ),
+			'discount_total'       => array( 'string', __( 'Recurring discount total.', 'woocommerce-subscriptions-engine' ) ),
+			'shipping_total'       => array( 'string', __( 'Recurring shipping total.', 'woocommerce-subscriptions-engine' ) ),
+			'tax_total'            => array( 'string', __( 'Recurring tax total.', 'woocommerce-subscriptions-engine' ) ),
+			'items'                => array( 'array', __( 'Line items.', 'woocommerce-subscriptions-engine' ) ),
+			'addresses'            => array( 'object', __( 'Billing and shipping addresses.', 'woocommerce-subscriptions-engine' ) ),
+		);
+
+		$schema_properties = array();
+		foreach ( $properties as $key => $property ) {
+			$schema_properties[ $key ] = array(
+				'description' => $property[1],
+				'type'        => $property[0],
+				'context'     => array( 'view' ),
+				'readonly'    => true,
+			);
+		}
+
 		$this->schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'subscription_engine_contract_action',
+			'title'      => 'subscription_engine_contract',
 			'type'       => 'object',
-			'properties' => array(
-				'id'     => array(
-					'description' => __( 'Unique identifier for the subscription contract.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'integer',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'status' => array(
-					'description' => __( 'Contract status after the action.', 'woocommerce-subscriptions-engine' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-			),
+			'properties' => $schema_properties,
 		);
 
 		return $this->add_additional_fields_schema( $this->schema );
 	}
 
 	/**
-	 * Run a lifecycle action behind the ownership guard, then return the domain
-	 * summary with the resulting status.
+	 * The contract, once the current user may read it (`read_subscription_contract`); resolved
+	 * once per request. Unknown and unreadable contracts are the same 404.
 	 *
-	 * A `DomainException` (an action whose preconditions the contract's current state does not meet) maps to
-	 * a 409 Conflict; any other failure maps to a 500. The ownership guard keeps the
-	 * asymmetric 404 for not-owned / unknown.
-	 *
-	 * @param WP_REST_Request $request The request (carries the id).
-	 * @param callable        $action  Runs the lifecycle action; receives the contract id.
-	 * @return WP_REST_Response|WP_Error
+	 * @param WP_REST_Request $request Request.
+	 * @return ContractView|WP_Error
 	 */
-	private function run_action( WP_REST_Request $request, callable $action ) {
-		$contract_id = Coercion::coerce_int( $request->get_param( 'id' ) );
-		$customer_id = get_current_user_id();
+	private function resolve_read( WP_REST_Request $request ) {
+		if ( ! isset( $this->resolved_reads[ $request ] ) ) {
+			$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
 
-		// Guard ownership before acting: the facade's ownership-checked read returns
-		// null for an unknown id and a foreign-owned contract alike, so both map to
-		// the same 404 (anti-IDOR).
-		if ( null === Contracts::get_for_customer( $contract_id, $customer_id ) ) {
-			return $this->not_found_error();
+			$this->resolved_reads[ $request ] = null !== $contract && current_user_can( ContractCapabilities::READ, $contract )
+				? $contract
+				: $this->get_not_found_error();
 		}
 
-		try {
-			$action( $contract_id );
-		} catch ( DomainException $e ) {
-			return new WP_Error(
-				'woocommerce_subscriptions_engine_illegal_action',
-				__( 'That action is not available for this subscription right now.', 'woocommerce-subscriptions-engine' ),
-				array( 'status' => 409 )
-			);
-		} catch ( Throwable $e ) {
-			return new WP_Error(
-				'woocommerce_subscriptions_engine_action_failed',
-				__( 'The subscription could not be updated. Please try again.', 'woocommerce-subscriptions-engine' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		// Re-read for the resulting status. The action already succeeded, so a row
-		// vanishing here is a server-side inconsistency - a 500, not a not-found.
-		$refreshed = Contracts::get_for_customer( $contract_id, $customer_id );
-		if ( null === $refreshed ) {
-			return new WP_Error(
-				'woocommerce_subscriptions_engine_refresh_failed',
-				__( 'The subscription was updated, but its refreshed state could not be loaded.', 'woocommerce-subscriptions-engine' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		return $this->prepare_item_for_response( $refreshed, $request );
+		return $this->resolved_reads[ $request ];
 	}
 
 	/**
-	 * The shared 404, identical for unknown and not-owned contracts.
+	 * The contract and the requested action, once the current user is permitted to run it;
+	 * resolved once per request. Unknown contract, wrong `extension_slug`, unknown action and
+	 * no permission are the same 404.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return array{contract: ContractView, definition: ContractActionDefinition}|WP_Error
 	 */
-	private function not_found_error(): WP_Error {
+	private function resolve_run( WP_REST_Request $request ) {
+		if ( ! isset( $this->resolved_runs[ $request ] ) ) {
+			try {
+				$this->resolved_runs[ $request ] = $this->get_permitted_run( $request );
+			} catch ( Throwable $e ) {
+				$this->resolved_runs[ $request ] = $this->get_action_failed_error( $e, $request );
+			}
+		}
+
+		return $this->resolved_runs[ $request ];
+	}
+
+	/**
+	 * Read the contract and the requested action of its owner, and check the user may run it.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return array{contract: ContractView, definition: ContractActionDefinition}|WP_Error
+	 */
+	private function get_permitted_run( WP_REST_Request $request ) {
+		$contract       = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+		$extension_slug = $request->get_param( 'extension_slug' );
+		$action         = $request->get_param( 'action' );
+		if ( null === $contract || ! is_string( $extension_slug ) || $contract->get_extension_slug() !== $extension_slug || ! is_string( $action ) ) {
+			return $this->get_not_found_error();
+		}
+
+		$definition = ContractActionRegistry::get( $extension_slug, $action );
+		if ( null === $definition || ! ContractActionRegistry::is_permitted( $definition, $contract, $request ) ) {
+			return $this->get_not_found_error();
+		}
+
+		return array(
+			'contract'   => $contract,
+			'definition' => $definition,
+		);
+	}
+
+	/**
+	 * The 404 for an unknown contract, also returned for a contract or action the caller may not see.
+	 */
+	private function get_not_found_error(): WP_Error {
 		return new WP_Error(
 			'woocommerce_subscriptions_engine_contract_not_found',
-			__( 'Subscription not found.', 'woocommerce-subscriptions-engine' ),
+			__( 'Contract not found.', 'woocommerce-subscriptions-engine' ),
 			array( 'status' => 404 )
 		);
 	}
 
 	/**
-	 * Route-level arg schema for the `{id}` path parameter.
+	 * Validate `action_args` against the action's property schemas: defaults filled in, unknown
+	 * keys dropped, a 400 when a value does not match.
 	 *
-	 * @return array<string, mixed>
+	 * @param WP_REST_Request                     $request    Request.
+	 * @param array<string, array<string, mixed>> $properties Property schemas.
+	 * @return array<string, mixed>|WP_Error
 	 */
-	private function id_arg(): array {
-		return array(
-			'id' => array(
-				'description'       => __( 'Unique identifier for the subscription contract.', 'woocommerce-subscriptions-engine' ),
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
+	private function get_validated_action_args( WP_REST_Request $request, array $properties ) {
+		$defaults = array();
+		foreach ( $properties as $name => $property ) {
+			if ( array_key_exists( 'default', $property ) ) {
+				$defaults[ $name ] = $property['default'];
+			}
+		}
+
+		$request_args = $request->get_param( 'action_args' );
+		$action_args  = ( is_array( $request_args ) ? $request_args : array() ) + $defaults;
+		$schema       = array(
+			'type'       => 'object',
+			'properties' => $properties,
+		);
+
+		$valid = rest_validate_value_from_schema( $action_args, $schema, 'action_args' );
+		if ( $valid instanceof WP_Error ) {
+			return $this->get_invalid_action_args_error( $valid );
+		}
+
+		$sanitized = rest_sanitize_value_from_schema( $action_args, $schema + array( 'additionalProperties' => false ), 'action_args' );
+		if ( $sanitized instanceof WP_Error ) {
+			return $this->get_invalid_action_args_error( $sanitized );
+		}
+
+		return is_array( $sanitized ) ? Coercion::coerce_string_keyed( $sanitized ) : array();
+	}
+
+	/**
+	 * The 400 for `action_args` that do not match the schema, carrying the schema error's message.
+	 *
+	 * @param WP_Error $error Schema validation or sanitization error.
+	 */
+	private function get_invalid_action_args_error( WP_Error $error ): WP_Error {
+		return new WP_Error(
+			'woocommerce_subscriptions_engine_invalid_action_args',
+			$error->get_error_message(),
+			array(
+				'status' => 400,
+				'reason' => $error->get_error_code(),
+			)
+		);
+	}
+
+	/**
+	 * The resolved args schemas as discovery shows them: schema keywords and `required` only,
+	 * the way the WordPress REST index describes route args. An object, so no args encodes as `{}`.
+	 *
+	 * @param array<string, array<string, mixed>> $properties Property schemas.
+	 */
+	private function get_args_for_response( array $properties ): object {
+		$keywords = array_flip( rest_get_allowed_schema_keywords() );
+		$args     = array();
+		foreach ( $properties as $name => $property ) {
+			$args[ $name ]             = array_intersect_key( $property, $keywords );
+			$args[ $name ]['required'] = ! empty( $property['required'] );
+		}
+
+		return (object) $args;
+	}
+
+	/**
+	 * Log an extension callback failure and return a generic 500.
+	 *
+	 * @param Throwable       $e       Failure.
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function get_action_failed_error( Throwable $e, WP_REST_Request $request ): WP_Error {
+		$contract_id = Coercion::coerce_int( $request->get_param( 'id' ) );
+		wc_get_logger()->error(
+			sprintf( 'ContractsController: contract action "%s" on contract %d failed: %s', Coercion::coerce_string( $request->get_param( 'action' ) ), $contract_id, $e->getMessage() ),
+			array(
+				'source'      => self::LOG_SOURCE,
+				'contract_id' => $contract_id,
+			)
+		);
+
+		return new WP_Error(
+			'woocommerce_subscriptions_engine_action_failed',
+			__( 'The action could not be completed.', 'woocommerce-subscriptions-engine' ),
+			array( 'status' => 500 )
 		);
 	}
 }

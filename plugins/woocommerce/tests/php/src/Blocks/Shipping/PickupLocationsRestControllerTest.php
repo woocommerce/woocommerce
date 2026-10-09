@@ -378,4 +378,50 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'alert(1)', $saved['cost'], 'Inline script payload must not survive cost sanitization.' );
 		$this->assertStringContainsString( '5 + 1.50', $saved['cost'], 'Math formula syntax must be preserved in cost — must not be coerced to float.' );
 	}
+
+	/**
+	 * Rate ids are the positions of the saved locations, so what a shopper's stored choice points
+	 * at depends on the array holding still. Switching a branch off through the settings screen
+	 * keeps it in the list, which is what keeps the branches either side of it where they were.
+	 *
+	 * @testdox Switching a location off leaves it in the list, so the others keep their positions.
+	 */
+	public function test_switching_a_location_off_keeps_the_list_in_place(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$branch = function ( string $name, bool $enabled ): array {
+			return array(
+				'name'    => $name,
+				'address' => array(
+					'address_1' => '1 Market St',
+					'city'      => 'San Francisco',
+					'state'     => 'CA',
+					'postcode'  => '94105',
+					'country'   => 'US',
+				),
+				'details' => '',
+				'enabled' => $enabled,
+			);
+		};
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_locations',
+			array(
+				$branch( 'Downtown', true ),
+				$branch( 'Airport', false ),
+				$branch( 'Harbour', true ),
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'pickup_location_pickup_locations' );
+
+		$this->assertCount( 3, $saved, 'A branch that was switched off is still a branch the merchant has.' );
+		$this->assertSame( 'Downtown', $saved[0]['name'], 'The branch before it should not have moved.' );
+		$this->assertSame( 'Airport', $saved[1]['name'], 'The closed branch should hold its own place.' );
+		$this->assertSame( 'Harbour', $saved[2]['name'], 'And the branch after it should not have moved up.' );
+		$this->assertFalse( $saved[1]['enabled'], 'It should be saved as closed rather than removed.' );
+	}
 }
