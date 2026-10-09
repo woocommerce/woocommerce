@@ -626,6 +626,26 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list the writable fields one time at the top level of the product input schemas.
+	 */
+	public function test_input_schemas_list_writable_fields_one_time(): void {
+		foreach ( array( 'woocommerce/product-create', 'woocommerce/product-update' ) as $name ) {
+			$schema     = $this->get_ability( $name )['input_schema'];
+			$extensions = $schema['properties']['extensions']['properties'];
+
+			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
+			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
+			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
+			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
+			foreach ( $schema['oneOf'] as $branch ) {
+				$this->assertSame( array( 'type' => 'object' ), $branch['properties']['extensions'] );
+			}
+		}
+		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
+		$this->assertSame( array( 'string', 'null' ), $order['properties']['extensions']['properties']['test-ext']['properties']['tag']['type'] );
+	}
+
+	/**
 	 * @testdox Should not accept extension fields in the write abilities with the feature off.
 	 */
 	public function test_writes_do_not_change_with_the_feature_off(): void {
@@ -649,6 +669,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertNotInstanceOf( ActionableAbility::class, wp_get_ability( 'woocommerce/product-update' ) );
+		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] ?? array() );
 		$this->assertArrayNotHasKey( 'extensions', $schema['oneOf'][0]['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
