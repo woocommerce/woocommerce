@@ -16,6 +16,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractActions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\ContractActionRegistry;
 
@@ -175,6 +176,25 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 401, $this->list_actions( $contract->get_id() )->get_status() );
 		$this->assertSame( 401, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+		$this->assertSame( array(), $this->calls );
+	}
+
+	/**
+	 * A run without an action is a 404 even past the route schema, never the first permitted action.
+	 */
+	public function test_run_without_an_action_resolves_nothing(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$this->register_action( 'pause', 'customer' );
+		wp_set_current_user( $customer_id );
+		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $contract->get_id() . '/action' );
+		$request->set_url_params( array( 'id' => (string) $contract->get_id() ) );
+		$request->set_body_params( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+
+		$result = ( new ContractsController() )->actions_permissions_check( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 404, $result->get_error_data()['status'] ?? null );
 		$this->assertSame( array(), $this->calls );
 	}
 

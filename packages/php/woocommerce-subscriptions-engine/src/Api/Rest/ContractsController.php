@@ -426,12 +426,14 @@ final class ContractsController extends WP_REST_Controller {
 			return $not_found;
 		}
 
-		if ( 'POST' === $request->get_method() && $request->get_param( 'extension_slug' ) !== $extension_slug ) {
+		$is_run = 'POST' === $request->get_method();
+		if ( $is_run && $request->get_param( 'extension_slug' ) !== $extension_slug ) {
 			return $not_found;
 		}
 
+		// Only discovery lists every action; a run always names exactly one.
 		$action = $request->get_param( 'action' );
-		if ( null === $action ) {
+		if ( ! $is_run && null === $action ) {
 			$definitions = ContractActionRegistry::get_for_extension( $extension_slug );
 		} else {
 			$definition  = is_string( $action ) ? ContractActionRegistry::get( $extension_slug, $action ) : null;
