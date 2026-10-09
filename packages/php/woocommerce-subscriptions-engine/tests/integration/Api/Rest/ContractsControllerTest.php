@@ -171,7 +171,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 * Anonymous callers get a 401 on both action routes.
 	 */
 	public function test_actions_require_a_logged_in_user(): void {
-		$this->register_action( 'pause', 'customer' );
+		$this->register_action( 'pause', 'manage_subscription_contract' );
 		$contract = $this->create_contract( $this->create_user( 'customer' ) );
 
 		$this->assertSame( 401, $this->list_actions( $contract->get_id() )->get_status() );
@@ -185,7 +185,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	public function test_run_without_an_action_resolves_nothing(): void {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
-		$this->register_action( 'pause', 'customer' );
+		$this->register_action( 'pause', 'manage_subscription_contract' );
 		wp_set_current_user( $customer_id );
 		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $contract->get_id() . '/action' );
 		$request->set_url_params( array( 'id' => (string) $contract->get_id() ) );
@@ -207,7 +207,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	public function test_customer_runs_an_action_on_their_contract(): void {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
-		$this->register_action( 'pause', 'customer', array( 'args' => array( 'note' => array( 'type' => 'string' ) ) ) );
+		$this->register_action( 'pause', 'manage_subscription_contract', array( 'args' => array( 'note' => array( 'type' => 'string' ) ) ) );
 		wp_set_current_user( $customer_id );
 
 		$response = $this->run_action( $contract->get_id(), 'pause', array( 'note' => 'Away' ) );
@@ -231,7 +231,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
 		$foreign     = $this->create_contract( $this->create_user( 'customer' ) );
-		$this->register_action( 'pause', 'customer' );
+		$this->register_action( 'pause', 'manage_subscription_contract' );
 		wp_set_current_user( $customer_id );
 
 		$responses = array(
@@ -254,7 +254,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 * Only the contract owner's action runs, even when another extension registered the same name.
 	 */
 	public function test_dispatches_only_to_the_contract_owner(): void {
-		$this->register_action( 'pause', 'manager' );
+		$this->register_action( 'pause', 'manage_woocommerce' );
 		ContractActions::register(
 			'other-extension',
 			'pause',
@@ -263,7 +263,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 					$this->calls[] = array( 'other-extension', $contract->get_id(), array() );
 					return $contract;
 				},
-				'permission' => 'manager',
+				'permission' => 'manage_woocommerce',
 			)
 		);
 		$contract = $this->create_contract( null, 'other-extension' );
@@ -275,12 +275,13 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * The manager preset admits store managers and hides the contract from its own customer.
+	 * A capability permission is checked for the current user: `manage_woocommerce` admits store
+	 * managers and hides the contract from its own customer.
 	 */
-	public function test_manager_preset(): void {
+	public function test_capability_permission(): void {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
-		$this->register_action( 'pause', 'manager' );
+		$this->register_action( 'pause', 'manage_woocommerce' );
 
 		wp_set_current_user( $customer_id );
 		$this->assertSame( 404, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
@@ -319,7 +320,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$contract = $this->create_contract( null );
 		$this->register_action(
 			'pause',
-			'manager',
+			'manage_woocommerce',
 			array(
 				'is_available' => static function ( ContractView $view ): bool {
 					return 'on-hold' !== $view->get_status();
@@ -344,7 +345,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$contract = $this->create_contract( null );
 		$this->register_action(
 			'cancel',
-			'manager',
+			'manage_woocommerce',
 			array(
 				'args' => array(
 					'at_period_end' => array(
@@ -413,7 +414,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		$contract = $this->create_contract( null );
 		$this->register_action(
 			'cancel',
-			'manager',
+			'manage_woocommerce',
 			array(
 				'args' => static function ( ContractView $view ): array {
 					return array(
@@ -462,7 +463,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 				'callback'   => static function (): WP_Error {
 					return new WP_Error( 'teapot', 'Short and stout.', array( 'status' => 418 ) );
 				},
-				'permission' => 'manager',
+				'permission' => 'manage_woocommerce',
 			)
 		);
 		ContractActions::register(
@@ -472,7 +473,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 				'callback'   => static function (): WP_Error {
 					return new WP_Error( 'refused', 'No.' );
 				},
-				'permission' => 'manager',
+				'permission' => 'manage_woocommerce',
 			)
 		);
 		wp_set_current_user( $this->create_user( 'administrator' ) );
@@ -499,10 +500,10 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 			'callback',
 			array(
 				'callback'   => $throw,
-				'permission' => 'manager',
+				'permission' => 'manage_woocommerce',
 			)
 		);
-		$this->register_action( 'availability', 'manager', array( 'is_available' => $throw ) );
+		$this->register_action( 'availability', 'manage_woocommerce', array( 'is_available' => $throw ) );
 		$this->register_action( 'permission', $throw );
 		wp_set_current_user( $this->create_user( 'administrator' ) );
 
@@ -518,8 +519,8 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 */
 	public function test_discovery_lists_available_actions(): void {
 		$contract = $this->create_contract( $this->create_user( 'customer' ) );
-		$this->register_action( 'pause', 'customer', array( 'description' => 'Pause deliveries.' ) );
-		$this->register_action( 'resume', 'customer', array( 'is_available' => '__return_false' ) );
+		$this->register_action( 'pause', 'manage_subscription_contract', array( 'description' => 'Pause deliveries.' ) );
+		$this->register_action( 'resume', 'manage_subscription_contract', array( 'is_available' => '__return_false' ) );
 		$this->register_action( 'refund', '__return_false' );
 		wp_set_current_user( $this->create_user( 'administrator' ) );
 
@@ -555,7 +556,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	public function test_discovery_requires_a_store_manager(): void {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
-		$this->register_action( 'pause', 'customer' );
+		$this->register_action( 'pause', 'manage_subscription_contract' );
 		wp_set_current_user( $customer_id );
 
 		$this->assertSame( 403, $this->list_actions( $contract->get_id() )->get_status() );
@@ -569,7 +570,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 		wp_set_current_user( $this->create_user( 'administrator' ) );
 		$this->assertSame( 404, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
 
-		$this->register_action( 'pause', 'manager' );
+		$this->register_action( 'pause', 'manage_woocommerce' );
 
 		$this->assertSame( 200, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
 	}

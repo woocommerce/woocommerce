@@ -46,7 +46,7 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 			'pause',
 			array(
 				'callback'   => $callback,
-				'permission' => 'customer',
+				'permission' => 'manage_subscription_contract',
 			)
 		);
 
@@ -55,7 +55,7 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 		$this->assertSame( self::EXTENSION_SLUG, $definition['extension_slug'] );
 		$this->assertSame( 'pause', $definition['action'] );
 		$this->assertSame( $callback, $definition['callback'] );
-		$this->assertSame( 'customer', $definition['permission'] );
+		$this->assertSame( 'manage_subscription_contract', $definition['permission'] );
 		$this->assertSame( '', $definition['description'] );
 		$this->assertSame( array(), $definition['args'] );
 		$this->assertNull( $definition['is_available'] );
@@ -141,7 +141,8 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 			'missing callback'          => array( self::EXTENSION_SLUG, 'pause', array( 'callback' => null ) ),
 			'non-callable callback'     => array( self::EXTENSION_SLUG, 'pause', array( 'callback' => 'not_a_function_anywhere' ) ),
 			'missing permission'        => array( self::EXTENSION_SLUG, 'pause', array( 'permission' => null ) ),
-			'unknown permission'        => array( self::EXTENSION_SLUG, 'pause', array( 'permission' => 'owner' ) ),
+			'empty permission'          => array( self::EXTENSION_SLUG, 'pause', array( 'permission' => ' ' ) ),
+			'non-callable permission'   => array( self::EXTENSION_SLUG, 'pause', array( 'permission' => 42 ) ),
 			'non-string description'    => array( self::EXTENSION_SLUG, 'pause', array( 'description' => 5 ) ),
 			'args not a schema map'     => array( self::EXTENSION_SLUG, 'pause', array( 'args' => array( 'type' => 'boolean' ) ) ),
 			'args a list'               => array( self::EXTENSION_SLUG, 'pause', array( 'args' => array( array( 'type' => 'boolean' ) ) ) ),
@@ -204,7 +205,7 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 	private function valid_args(): array {
 		return array(
 			'callback'   => array( $this, 'return_contract' ),
-			'permission' => 'manager',
+			'permission' => 'manage_woocommerce',
 		);
 	}
 

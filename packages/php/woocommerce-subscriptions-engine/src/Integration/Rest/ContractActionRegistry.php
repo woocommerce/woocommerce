@@ -21,19 +21,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal Written through {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractActions::register()} only, which validates every definition.
  *
- * @phpstan-type ContractActionDefinition array{extension_slug: string, action: string, callback: callable, permission: 'manager'|'customer'|callable, description: string, args: array<string, array<string, mixed>>|callable, is_available: callable|null}
+ * @phpstan-type ContractActionDefinition array{extension_slug: string, action: string, callback: callable, permission: string|callable, description: string, args: array<string, array<string, mixed>>|callable, is_available: callable|null}
  */
 final class ContractActionRegistry {
-
-	/**
-	 * Permission preset: the user can `manage_woocommerce`.
-	 */
-	public const PERMISSION_MANAGER = 'manager';
-
-	/**
-	 * Permission preset: the user is the contract's customer.
-	 */
-	public const PERMISSION_CUSTOMER = 'customer';
 
 	/**
 	 * Registered actions keyed by extension slug, then action.
@@ -93,13 +83,9 @@ final class ContractActionRegistry {
 	 */
 	public static function is_permitted( array $definition, ContractView $contract, WP_REST_Request $request ): bool {
 		$permission = $definition['permission'];
-		if ( self::PERMISSION_MANAGER === $permission ) {
-			// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers manage_woocommerce.
-			return current_user_can( 'manage_woocommerce' );
-		}
-
-		if ( self::PERMISSION_CUSTOMER === $permission ) {
-			return is_user_logged_in() && get_current_user_id() === $contract->get_customer_id();
+		if ( is_string( $permission ) ) {
+			// phpcs:ignore WordPress.WP.Capabilities.Undetermined -- the extension names the capability.
+			return current_user_can( $permission, $contract );
 		}
 
 		return true === $permission( $contract, $request );

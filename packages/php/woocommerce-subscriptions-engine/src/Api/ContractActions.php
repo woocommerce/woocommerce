@@ -18,8 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Public registration facade for contract actions.
  *
  * `wc/v3/subscriptions-engine/contracts/{id}/action` dispatches only to actions registered by
- * the contract's owning extension. The engine registers no actions; the permission presets
- * are opt-in. Register on or before `rest_api_init`. Final and static-only.
+ * the contract's owning extension. The engine registers no actions. Register on or before `rest_api_init`. Final and static-only.
  */
 final class ContractActions {
 
@@ -45,8 +44,9 @@ final class ContractActions {
 	 * @param string               $extension_slug Owning extension slug; matches the contracts' `extension_slug`.
 	 * @param string               $action         Action slug: lowercase letters, numbers, hyphens and underscores.
 	 * @param array<string, mixed> $args           `callback` (required): `callable( ContractView $contract, array $action_args ): ContractView|WP_Error`.
-	 *                                             `permission` (required): `'manager'` (`manage_woocommerce`), `'customer'`
-	 *                                             (the contract's customer), or `callable( ContractView $contract, WP_REST_Request $request ): bool`.
+	 *                                             `permission` (required): a capability, checked as `current_user_can( $permission, $contract )`
+	 *                                             with the `ContractView`, or a non-string `callable( ContractView $contract, WP_REST_Request $request ): bool`.
+	 *                                             `manage_subscription_contract` allows the contract's customer and store managers.
 	 *                                             `description` (string, default '').
 	 *                                             `args`: REST property schemas for `action_args` (`array<string, array>`),
 	 *                                             or `callable( ContractView $contract ): array` resolved per request.
@@ -75,8 +75,8 @@ final class ContractActions {
 			return;
 		}
 
-		if ( ! in_array( $permission, array( ContractActionRegistry::PERMISSION_MANAGER, ContractActionRegistry::PERMISSION_CUSTOMER ), true ) && ! is_callable( $permission ) ) {
-			self::reject( sprintf( 'Contract action "%s" needs a "permission" of "manager", "customer" or a callable.', $action ) );
+		if ( is_string( $permission ) ? '' === trim( $permission ) : ! is_callable( $permission ) ) {
+			self::reject( sprintf( 'Contract action "%s" needs a "permission" capability or callable.', $action ) );
 			return;
 		}
 
