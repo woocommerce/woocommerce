@@ -344,8 +344,11 @@ trait OrderAttributionMeta {
 		/**
 		 * Filter the label for the order origin.
 		 *
-		 * This label should have a %s placeholder for the formatted source to be inserted
-		 * via sprintf().
+		 * A label with a %s placeholder (any sprintf() string placeholder, or an escaped %%)
+		 * has the formatted source inserted via sprintf(). A label without one, including a
+		 * label with a lone percent sign, is used as the complete origin, which lets custom
+		 * source types show their own text instead of "Unknown". An empty label falls back
+		 * to the formatted source.
 		 *
 		 * @since 8.5.0
 		 *
@@ -362,8 +365,12 @@ trait OrderAttributionMeta {
 			$formatted_source
 		);
 
-		if ( false === strpos( $label, '%' ) ) {
-			return $formatted_source;
+		// Any sprintf() string placeholder (%s, %1$s, %10s, %-10s, %'.10s) or an escaped %% means the
+		// label is a format string, as every label was before plain labels were accepted. A lone
+		// percent sign is literal text: the space flag only counts when a width follows it, so
+		// "50% sale" is not a placeholder while "% 10s" still is.
+		if ( ! preg_match( '/(?<!%)(?:%%)*%(?:\d+\$)?(?:[-+0]|\'.| (?=\d))*\d*(?:\.\d+)?s|%%/', $label ) ) {
+			return '' === $label ? $formatted_source : $label;
 		}
 
 		return sprintf( $label, $formatted_source );
