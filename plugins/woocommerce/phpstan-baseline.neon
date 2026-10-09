@@ -23742,11 +23742,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-		-
-			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) should return array but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
 		-
 			message: '#^Method WC_REST_Product_Attributes_V1_Controller\:\:get_items_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -23826,11 +23821,6 @@ parameters:
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
-		-
-			message: '#^Return type \(array\) of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) should be compatible with return type \(WP_Error\|WP_REST_Response\) of method WP_REST_Controller\:\:get_items\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
 
 		-
 			message: '#^Cannot access property \$post_date_gmt on WP_Post\|null\.$#'
@@ -39129,11 +39119,6 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
-		-
-			message: '#^Access to offset ''search'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Access to offset ''slug'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
@@ -39165,23 +39150,8 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:register_routes\(\) has no return type specified\.$#'
@@ -39213,17 +39183,7 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \#1 \$request of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\) expects WP_REST_Request, Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \#2 \$request of method WC_REST_Product_Attributes_V1_Controller\:\:prepare_item_for_response\(\) expects WP_REST_Request, Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
@@ -39243,17 +39203,7 @@ parameters:
 			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
-		-
-			message: '#^Return type \(Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\) of method Automattic\\WooCommerce\\Admin\\API\\ProductAttributes\:\:get_items\(\) should be compatible with return type \(array\) of method WC_REST_Product_Attributes_V1_Controller\:\:get_items\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Admin/API/ProductAttributes.php
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Product_Categories_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 103 on line 5$#'
