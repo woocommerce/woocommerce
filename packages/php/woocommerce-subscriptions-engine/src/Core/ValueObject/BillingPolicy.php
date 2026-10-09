@@ -1,8 +1,16 @@
 <?php
 /**
- * BillingPolicy - typed value object for a plan's billing cadence and trial.
+ * BillingPolicy - an optional parser for a billing cadence and trial payload.
  *
- * Mirrors the `billing_policy` JSON column shape. Shape:
+ * An extension may use {@see self::from_array()} to parse its plan billing arrays. The
+ * engine stores plan policies opaquely and does not construct this on plan writes. It
+ * does read one payload with it: renewal parses a contract's plan snapshot
+ * `billing_policy`, and the live plan's `billing_policy` when the contract has no usable
+ * snapshot policy, both through {@see self::from_array()}, so a plan whose
+ * contracts the engine renews must store this shape there. A policy always has a
+ * usable cadence: construction refuses an unknown period or a non-positive interval.
+ * The array
+ * shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
  *     interval:       int,
@@ -24,7 +32,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -79,8 +87,15 @@ final class BillingPolicy {
 	 * @param int|null                              $min_cycles     Minimum cycles before cancellation is allowed.
 	 * @param int|null                              $max_cycles     Total cycles before the contract ends.
 	 * @param array{length: int, unit: string}|null $trial_duration Native trial; null if none.
+	 * @throws DomainException If the period is unknown, the interval is not positive, or the cycle bounds are invalid.
 	 */
 	public function __construct( string $period, int $interval, ?int $min_cycles, ?int $max_cycles, ?array $trial_duration ) {
+		if ( $interval <= 0 ) {
+			throw new DomainException(
+				sprintf( 'BillingPolicy: interval must be positive, got %d.', $interval )
+			);
+		}
+		$this->normalize_unit( $period, 'period' );
 		$this->validate_min_max_cycles( $min_cycles, $max_cycles );
 
 		$this->period         = $period;
@@ -93,7 +108,8 @@ final class BillingPolicy {
 	/**
 	 * Hydrate from the JSON-decoded `billing_policy` column shape.
 	 *
-	 * Missing nullable keys default to null. `period` and `interval` are required.
+	 * Missing nullable keys default to null. `period` and `interval` are required, and
+	 * must form a usable cadence (see the constructor).
 	 *
 	 * @param array<string, mixed> $data Decoded billing_policy row.
 	 * @throws DomainException If the data is not valid.
@@ -124,8 +140,8 @@ final class BillingPolicy {
 		return new self(
 			(string) $data['period'],
 			(int) $data['interval'],
-			ScalarCoercion::coerce_nullable_int( $data['min_cycles'] ?? null ),
-			ScalarCoercion::coerce_nullable_int( $data['max_cycles'] ?? null ),
+			Coercion::coerce_nullable_int( $data['min_cycles'] ?? null ),
+			Coercion::coerce_nullable_int( $data['max_cycles'] ?? null ),
 			$trial
 		);
 	}
@@ -176,19 +192,11 @@ final class BillingPolicy {
 	 *
 	 * @param DateTimeImmutable $anchor The moment the next cycle is computed from.
 	 * @return DateTimeImmutable The next renewal moment in UTC.
-	 * @throws DomainException If `period` is unknown or `interval` is not positive.
 	 */
 	public function compute_next_renewal_from( DateTimeImmutable $anchor ): DateTimeImmutable {
-		if ( $this->interval <= 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy::compute_next_renewal_from(): interval must be positive, got %d.', $this->interval )
-			);
-		}
+		$utc = $anchor->setTimezone( new DateTimeZone( 'UTC' ) );
 
-		$unit = $this->normalize_unit( $this->period, 'period' );
-		$utc  = $anchor->setTimezone( new DateTimeZone( 'UTC' ) );
-
-		return $utc->modify( sprintf( '+%d %s', $this->interval, $unit ) );
+		return $utc->modify( sprintf( '+%d %s', $this->interval, $this->period ) );
 	}
 
 	/**
@@ -200,7 +208,7 @@ final class BillingPolicy {
 	 *
 	 * @param DateTimeImmutable $contract_start Moment the contract was created.
 	 * @return DateTimeImmutable The first renewal moment in UTC.
-	 * @throws DomainException If trial length is not positive or trial unit is unknown.
+	 * @throws DomainException If the trial length is not positive or the trial unit is unknown.
 	 */
 	public function compute_first_renewal_from( DateTimeImmutable $contract_start ): DateTimeImmutable {
 		if ( null === $this->trial_duration ) {

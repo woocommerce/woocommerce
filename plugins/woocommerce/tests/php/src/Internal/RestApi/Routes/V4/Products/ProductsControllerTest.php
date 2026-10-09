@@ -1762,6 +1762,57 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The on_sale parameter combines with include and exclude.
+	 */
+	public function test_products_filter_by_on_sale_with_include_and_exclude(): void {
+		$on_sale_product   = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$excluded_product  = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$regular_product   = WC_Helper_Product::create_simple_product();
+		$included_products = array( $on_sale_product->get_id(), $regular_product->get_id() );
+
+		delete_transient( 'wc_products_onsale' );
+
+		$cases = array(
+			'on_sale=true with include'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'include' => $included_products,
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+			'on_sale=false with include' => array(
+				'params'   => array(
+					'on_sale' => false,
+					'include' => $included_products,
+				),
+				'expected' => array( $regular_product->get_id() ),
+			),
+			'on_sale=true with exclude'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'exclude' => array( $excluded_product->get_id() ),
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+		);
+
+		foreach ( $cases as $name => $case ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+			$request->set_query_params( $case['params'] );
+
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status(), $name );
+			$this->assertEquals( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
+		}
+
+		WC_Helper_Product::delete_product( $on_sale_product->get_id() );
+		WC_Helper_Product::delete_product( $excluded_product->get_id() );
+		WC_Helper_Product::delete_product( $regular_product->get_id() );
+		delete_transient( 'wc_products_onsale' );
+	}
+
+	/**
 	 * Create one product of each parent product type for type-filter tests.
 	 */
 	private function create_products_for_type_filtering(): void {

@@ -10,7 +10,10 @@ import { SelectControl } from '@wordpress/components';
 import { withSearchedBrands } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import clsx from 'clsx';
-import type { RenderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
+import type {
+	RenderItemArgs,
+	SearchListItem as SearchListItemProps,
+} from '@woocommerce/editor-components/search-list-control/types';
 import type {
 	ProductBrandResponseItem,
 	WithInjectedSearchedBrands,
@@ -21,7 +24,6 @@ import { convertProductBrandResponseItemToSearchItem } from '@woocommerce/utils'
  * Internal dependencies
  */
 import './style.scss';
-import type { SearchListItem as SearchListItemProps } from '../search-list-control/types';
 
 interface ProductBrandControlProps {
 	/**
@@ -80,7 +82,7 @@ const ProductBrandControl = ( {
 					),
 					accessibleName,
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %1$s is the item name, %2$d is the count of products for the item. */
 					_n(
@@ -91,7 +93,7 @@ const ProductBrandControl = ( {
 					),
 					accessibleName,
 					item.details?.count || 0
-			  );
+				);
 
 		const listItemCountLabel = showReviewCount
 			? sprintf(
@@ -103,7 +105,7 @@ const ProductBrandControl = ( {
 						'woocommerce'
 					),
 					item.details?.review_count || 0
-			  )
+				)
 			: sprintf(
 					/* translators: %d is the count of products. */
 					_n(
@@ -113,7 +115,7 @@ const ProductBrandControl = ( {
 						'woocommerce'
 					),
 					item.details?.count || 0
-			  );
+				);
 
 		return (
 			<SearchListItem

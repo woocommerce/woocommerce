@@ -14,8 +14,7 @@ type SchedulerImportStatus = {
 };
 
 export type ImportStatus =
-	| isImporting
-	| ( isImporting & SchedulerImportStatus );
+	isImporting | ( isImporting & SchedulerImportStatus );
 
 export type ImportStatusQuery = number;
 
