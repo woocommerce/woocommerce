@@ -3,7 +3,7 @@ Contributors: Automattic
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,12 @@ Purple requires:
 Install and activate WooCommerce before activating the theme.
 
 == Changelog ==
+
+= 1.0.3 =
+* Improve Purple release review and notifications (#473)
+* Theme CI: read minimum WordPress version from theme metadata (#474)
+* Add Kirigami as repository code owners (#475)
+* Purple: declare WooCommerce 11.2 compatibility (#476)
 
 = 1.0.2 =
 * Load fall back styles only in relevant WC versions (#460)
