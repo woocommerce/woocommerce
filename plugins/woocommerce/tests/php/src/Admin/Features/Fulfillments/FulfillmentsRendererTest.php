@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsRenderer;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AmazonLogisticsShippingProvider;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\DHLShippingProvider;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
@@ -404,9 +405,13 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * @param bool $is_known_providers Whether the known shipping provider list is populated.
 	 */
 	public function test_other_shipping_provider_filter_excludes_fulfillments_without_a_provider( bool $is_known_providers ): void {
-		if ( ! $is_known_providers ) {
-			add_filter( 'woocommerce_fulfillment_shipping_providers', '__return_empty_array', 999 );
-		}
+		add_filter(
+			'woocommerce_fulfillment_shipping_providers',
+			static function () use ( $is_known_providers ): array {
+				return $is_known_providers ? array( DHLShippingProvider::class ) : array();
+			},
+			999
+		);
 
 		$unknown_provider_order_id = $this->create_order_with_shipment_provider( 'totally-unknown-carrier' );
 		$empty_provider_order_id   = $this->create_order_with_shipment_provider( '' );
