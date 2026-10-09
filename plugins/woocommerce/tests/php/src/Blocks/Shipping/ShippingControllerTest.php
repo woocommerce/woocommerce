@@ -81,12 +81,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
 		);
-
-		// pickup_location is registered on woocommerce_load_shipping_methods; reload so it is
-		// present even if the methods were cached earlier (e.g. by the classic checkout).
-		WC()->shipping()->unregister_shipping_methods();
-		WC()->shipping()->load_shipping_methods();
-
 		WC()->customer->set_shipping_postcode( '' );
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
