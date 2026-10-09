@@ -61,7 +61,6 @@ class BlockTemplatesController {
 		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce
 		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead.
 		if ( null === $pre_render && 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
-
 			// BC (block_type_metadata_settings → pre_render_block migration): re-apply render_block() input filters.
 			// Skipped: enqueue_empty_block_content_assets (template parts always have content).
 			$parsed_block = apply_filters( 'render_block_data', $parsed_block, $parsed_block, null ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
