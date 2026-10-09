@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore how the classic checkout sends order review and coupon requests, so fields removed with checkout field filters are no longer sent as empty values.
