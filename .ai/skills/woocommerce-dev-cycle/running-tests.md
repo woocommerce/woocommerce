@@ -225,6 +225,17 @@ pnpm test:js -- status-badge.test.tsx
 pnpm test:js -- --coverage
 ```
 
+### Reproducing a CI failure
+
+CI installs the project's dependencies and builds the workspace packages it depends on before running the tests; a local `pnpm test:js` with stale or missing dependency builds can fail where CI passes, or pass where CI fails. Run the job the way CI runs it, from the repository root, after `nvm use` so Node matches `.nvmrc`:
+
+```bash
+pnpm test:js:ci @woocommerce/components
+pnpm test:js:ci @woocommerce/components -- --maxWorkers=4   # extra arguments go to the test runner
+```
+
+This runs `pnpm install --filter='<project>...' --frozen-lockfile`, the `build:project:*` scripts of the project's dependencies, then `CI=true GITHUB_ACTIONS=true pnpm --filter=<project> <command>`, echoing each command. The command is the project's unit job command from `config.ci.tests` in its `package.json` (`test:js` for most projects), so it reproduces any project's CI unit job, not only jest ones.
+
 ### Test File Locations
 
 - JavaScript/Jest tests: `client/admin/client/**/*.test.tsx` or `*.test.ts`
