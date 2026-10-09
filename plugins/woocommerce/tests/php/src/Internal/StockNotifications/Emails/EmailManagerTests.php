@@ -31,6 +31,13 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	private $sent_to = array();
 
 	/**
+	 * Captured `wp_mail()` message bodies.
+	 *
+	 * @var string[]
+	 */
+	private $sent_messages = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -57,7 +64,8 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
-		$this->sent_to = array();
+		$this->sent_to       = array();
+		$this->sent_messages = array();
 		$this->restore_stock_notifications_feature_option();
 		// Discard this test's `WC_Emails` build so later tests rebuild their own from
 		// whatever filters are active for them, rather than inheriting this test's list.
@@ -83,7 +91,8 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function capture_pre_wp_mail( $short_circuit, $atts ): bool {
 		unset( $short_circuit );
-		$recipients = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		$recipients            = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		$this->sent_messages[] = (string) ( $atts['message'] ?? '' );
 		foreach ( $recipients as $recipient ) {
 			$this->sent_to[ $recipient ] = true;
 		}
@@ -129,6 +138,37 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should build the $email_method action link on home_url() when WordPress core lives in a subdirectory.
+	 * @dataProvider provider_email_send_methods
+	 *
+	 * @param string $email_method EmailManager method that sends the email.
+	 */
+	public function test_email_action_link_uses_home_url_when_core_is_in_subdirectory( string $email_method ) {
+		add_filter( 'option_home', fn() => 'https://shop.example' );
+		add_filter( 'option_siteurl', fn() => 'https://shop.example/wp' );
+		$notification = $this->build_notification();
+
+		$this->sut->$email_method( $notification );
+
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertStringContainsString( 'https://shop.example/?email_link_action=', $this->sent_messages[0] );
+		$this->assertStringNotContainsString( 'https://shop.example/wp', $this->sent_messages[0] );
+	}
+
+	/**
+	 * EmailManager methods that send a BIS email with an action link.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_email_send_methods(): array {
+		return array(
+			'stock notification' => array( 'send_stock_notification_email' ),
+			'verify'             => array( 'send_verify_email' ),
+			'verified'           => array( 'send_verified_email' ),
+		);
 	}
 
 	/**
