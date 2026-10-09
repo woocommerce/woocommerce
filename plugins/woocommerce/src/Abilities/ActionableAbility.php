@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * An ability that changes one object and saves it one time. Register it with
  * a subclass as the `ability_class`. The execute callback loads the object,
  * changes it in memory, writes the `extensions` input with the fields that
- * AbilityExtensions::register_field() adds, and then saves it. A rejection
+ * AbilityExtensions::register_field() adds, runs the validators that
+ * AbilityExtensions::register_validator() adds, and then saves it. A rejection
  * from any step saves nothing.
  *
  * The input schema gets the `extensions` property of the resource, so the
@@ -103,10 +104,12 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $changed;
 		}
 
-		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-		$rejected   = $this->update_fields( $subject, $extensions );
-		if ( null !== $rejected ) {
-			return $rejected;
+		if ( AbilityContracts::is_enabled() ) {
+			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
+			$rejected   = $this->update_fields( $subject, $extensions ) ?? $this->validate( $subject );
+			if ( null !== $rejected ) {
+				return $rejected;
+			}
 		}
 
 		$saved = $this->save( $subject );
@@ -136,17 +139,13 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * Write `extensions.<namespace>.<field>` input values to the object in
 	 * memory with the update_callback of each field. Every value is checked and
 	 * cast to its field schema before the first callback runs. A null value is
-	 * passed as is, to delete the value. Nothing happens when the feature is off.
+	 * passed as is, to delete the value.
 	 *
 	 * @param \WC_Data             $subject Object to change.
 	 * @param array<string, mixed> $values  Values keyed by namespace, then field.
 	 * @return \WP_Error|null A WP_Error when a value is rejected.
 	 */
 	private function update_fields( $subject, array $values ): ?\WP_Error {
-		if ( ! AbilityContracts::is_enabled() ) {
-			return null;
-		}
-
 		$registered = AbilityExtensions::get_fields( $this->get_resource() );
 		$updates    = array();
 		foreach ( $values as $namespace => $fields ) {
@@ -164,21 +163,60 @@ abstract class ActionableAbility extends \WP_Ability {
 					$param = 'extensions.' . $namespace . '.' . $field;
 					$valid = rest_validate_value_from_schema( $value, $args['schema'], $param );
 					if ( is_wp_error( $valid ) ) {
-						return self::with_status( $valid );
+						return self::with_data( $valid, array( 'field' => $param ) );
 					}
 					$value = rest_sanitize_value_from_schema( $value, $args['schema'], $param );
 				}
-				$updates[] = array( $args['update_callback'], $value );
+				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args['update_callback'], $value );
 			}
 		}
 
-		foreach ( $updates as list( $callback, $value ) ) {
-			$updated = call_user_func( $callback, $subject, $value );
-			if ( is_wp_error( $updated ) ) {
-				return self::with_status( $updated );
+		foreach ( $updates as $param => list( $callback, $value ) ) {
+			$rejected = self::run_callback( $callback, array( $subject, $value ), array( 'field' => $param ) );
+			if ( null !== $rejected ) {
+				return $rejected;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Run the validators of the resource on the changed object.
+	 *
+	 * @param \WC_Data $subject Changed object.
+	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
+	 */
+	private function validate( $subject ): ?\WP_Error {
+		foreach ( AbilityExtensions::get_validators( $this->get_resource() ) as $args ) {
+			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
+			if ( null !== $rejected ) {
+				return $rejected;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Run an extension callback. A WP_Error that it returns, or an exception
+	 * that it throws, becomes an error with the given data. An exception keeps
+	 * its message and gets the 500 status.
+	 *
+	 * @param callable             $callback Field update_callback or validator.
+	 * @param array                $args     Callback arguments.
+	 * @param array<string, mixed> $data     Data that names the field or the namespace.
+	 * @return \WP_Error|null
+	 */
+	private static function run_callback( callable $callback, array $args, array $data ): ?\WP_Error {
+		try {
+			$result = call_user_func_array( $callback, $args );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Ability extension "%s" failed: %s', implode( '', $data ), $e->getMessage() ),
+				array( 'source' => 'ability-extensions' )
+			);
+			$result = new \WP_Error( 'woocommerce_ability_extension_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+		return is_wp_error( $result ) ? self::with_data( $result, $data ) : null;
 	}
 
 	/**
@@ -232,16 +270,15 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Give an error the 400 status when it has none.
+	 * Add data to an error, and the 400 status when it has none.
 	 *
-	 * @param \WP_Error $error Error.
+	 * @param \WP_Error            $error Error.
+	 * @param array<string, mixed> $data  Data to add.
 	 * @return \WP_Error
 	 */
-	private static function with_status( \WP_Error $error ): \WP_Error {
-		$data = $error->get_error_data();
-		if ( ! isset( $data['status'] ) ) {
-			$error->add_data( array_merge( is_array( $data ) ? $data : array(), array( 'status' => 400 ) ) );
-		}
+	private static function with_data( \WP_Error $error, array $data ): \WP_Error {
+		$current = $error->get_error_data();
+		$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ) );
 		return $error;
 	}
 }
