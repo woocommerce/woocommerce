@@ -60,7 +60,7 @@ catalogs:
     # https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
     wp-bundled:
         '@wordpress/admin-ui': 2.4.1
-        '@wordpress/dataviews': 10.1.7
+        '@wordpress/dataviews': 19.1.0
         '@wordpress/fields': 0.25.11
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 9.18.5
@@ -114,11 +114,6 @@ overrides:
     'minimatch@<3.1.4': 3.1.5
     react-resize-aware: 3.1.1
     sass: 1.69.5
-
-packageExtensions:
-    '@wordpress/dataviews@10.1.7':
-        dependencies:
-            uuid: ^9.0.1
 
 patchedDependencies:
     '@wordpress/edit-site@5.15.0': bin/patches/@wordpress__edit-site@5.15.0.patch
