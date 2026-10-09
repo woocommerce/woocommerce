@@ -509,6 +509,40 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a status that the order object does not accept, and keep the order status.
+	 */
+	public function test_order_status_update_refuses_a_status_the_order_does_not_accept(): void {
+		$order        = \WC_Helper_Order::create_order();
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Valid statuses without completed, as a subscription has.
+				 *
+				 * @return array
+				 */
+				protected function get_valid_statuses() {
+					return array_values( array_diff( parent::get_valid_statuses(), array( 'wc-completed' ) ) );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class );
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_order_status_invalid', $response->get_data()['code'] );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {

@@ -128,6 +128,15 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			true
 		);
 
+		if ( $status !== $subject->get_status() ) {
+			return new \WP_Error(
+				'woocommerce_order_status_invalid',
+				/* translators: %s: order status slug. */
+				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
+				array( 'status' => 400 )
+			);
+		}
+
 		return null;
 	}
 
