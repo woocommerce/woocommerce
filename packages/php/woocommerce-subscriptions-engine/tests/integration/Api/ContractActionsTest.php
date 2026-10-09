@@ -137,6 +137,7 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 			'empty extension slug'      => array( ' ', 'pause', array() ),
 			'action with capitals'      => array( self::EXTENSION_SLUG, 'Pause', array() ),
 			'action with a slash'       => array( self::EXTENSION_SLUG, 'pause/now', array() ),
+			'action with a newline'     => array( self::EXTENSION_SLUG, "pause\n", array() ),
 			'empty action'              => array( self::EXTENSION_SLUG, '', array() ),
 			'missing callback'          => array( self::EXTENSION_SLUG, 'pause', array( 'callback' => null ) ),
 			'non-callable callback'     => array( self::EXTENSION_SLUG, 'pause', array( 'callback' => 'not_a_function_anywhere' ) ),

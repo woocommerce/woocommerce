@@ -65,7 +65,7 @@ final class ContractActions {
 			return;
 		}
 
-		if ( 1 !== preg_match( '/^[a-z0-9_-]+$/', $action ) ) {
+		if ( '' === $action || sanitize_key( $action ) !== $action ) {
 			self::reject( sprintf( 'Contract action "%s" may only contain lowercase letters, numbers, hyphens and underscores.', $action ) );
 			return;
 		}
