@@ -22,15 +22,34 @@ _Example usage in WC Blocks:_ Mini-Cart block listens to this event to append it
 
 ### `wc-blocks_added_to_cart`
 
-This event is the equivalent to the jQuery event `added_to_cart` triggered by WooCommerce core. It indicates that the process of adding a product to the cart has finished with success.
+This native event has several producers. Its cadence and meaning depend on the path that dispatched it; it is not always a success acknowledgement and is not guaranteed to fire only once for an underlying action.
 
-_Example usage in WC Blocks:_ Cart and Mini-Cart blocks (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
+_Example usage in WC Blocks:_ Cart block (via the `useStoreCart()` hook) listen to this event to know if they need to update their contents.
 
-#### `detail` parameters
+#### Added-event paths
 
-| Parameter          | Type    | Default value | Description                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------ | ------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `preserveCartData` | boolean | `false`       | Whether Cart data in the store should be preserved. By default, it's `false` so any `wc-blocks_added_to_cart` event will invalidate cart data and blocks listening to it will refetch cart data again. However, if the code triggering the event already updates the store (ie: All Products block), it can set `preserveCartData: true` to avoid the other blocks refetching the data again. |
+| Path                                            | Trigger and cadence                                                                                                                                                              | Target and options                                                                                                    | `detail` and meaning                                                                                                          |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Interactivity API (iAPI) cart cycle             | Once after a settled mutation cycle that contains at least one successful add-origin mutation. It does not fire after an all-failed cycle or a successful remove-only cycle.     | `document.body`; bubbles; cancelable                                                                                  | `{ preserveCartData: true }`. This is an aggregate cycle signal, not an acknowledgement for a particular caller.              |
+| Classic `@wordpress/data` `addItemToCart` thunk | After each successful call. A caught API failure does not dispatch it.                                                                                                           | `document.body`; bubbles; cancelable                                                                                  | `{ preserveCartData: true }`.                                                                                                 |
+| Product-form processed response handler         | After the handler processes either a successful or an error HTTP response. An outer rejected fetch does not dispatch it.                                                         | `document.body`; bubbles; cancelable                                                                                  | `{ preserveCartData: true }`. Because processed error responses also dispatch it, this path does not uniformly prove success. |
+| jQuery `added_to_cart` bridges                  | Each active bridge registration translates every underlying jQuery event. The Cart and Mini-Cart registrations can both be active, so there is no global exactly-once guarantee. | `document.body`; the Cart registration does not bubble, the Mini-Cart registration bubbles, and neither is cancelable | `{}`. This path reports translation of the jQuery event rather than sharing the cadence or payload of the other paths.        |
+
+The direct iAPI, classic `@wordpress/data`, and product-form paths have this envelope:
+
+```javascript
+new CustomEvent( 'wc-blocks_added_to_cart', {
+	bubbles: true,
+	cancelable: true,
+	detail: { preserveCartData: true },
+} );
+```
+
+The jQuery bridges use the same event name and target with `detail: {}` and `cancelable: false`; only the Mini-Cart registration sets `bubbles: true`.
+
+For the iAPI path, a mutation cycle can contain work from unrelated callers. One successful add-origin mutation causes the single cycle event even when a sibling mutation from another caller fails. The failed caller still receives a failed `addCartItem` outcome. A successful keyed quantity update made through `addCartItem` also has add origin, so this event does not prove that a new cart line was created.
+
+`preserveCartData` tells listeners whether to retain current cart data. When it is `false`, listeners can invalidate and refetch cart data. Producers that have already updated the store set it to `true` to avoid an unnecessary refetch.
 
 ### `wc-blocks_removed_from_cart`
 
