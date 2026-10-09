@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ActionableAbility to the experimental ability contracts feature. With it on, product create, product update and order status update accept extension fields under extensions.<namespace>.<field>, and save Core and extension fields one time.

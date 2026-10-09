@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * `woocommerce_ability_extensions_init` action. An ability that formats an
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
+ * An ActionableAbility writes the same `extensions` input to the fields that
+ * have an `update_callback`, and saves the object one time.
  *
  * The API is experimental while the `ability_contracts` feature exists.
  *
@@ -58,6 +60,13 @@ class AbilityExtensions {
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
 	 *                                  keeps it. It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
+	 *     @type callable $update_callback Optional. Receives the object and the value, and changes the object
+	 *                                     in memory. It returns a WP_Error to reject the value, and then
+	 *                                     nothing is saved. A field without it cannot be written. Rules:
+	 *                                     1. It only sets values in memory. It does not save, send email
+	 *                                        or make HTTP requests.
+	 *                                     2. It receives the value already cast to the field schema.
+	 *                                     3. A null value deletes the value of the field.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -73,6 +82,10 @@ class AbilityExtensions {
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
+		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -160,6 +173,18 @@ class AbilityExtensions {
 		}
 		$schema['properties']['extensions'] = $extensions;
 		return $schema;
+	}
+
+	/**
+	 * Fields of a resource, keyed by namespace, then field.
+	 *
+	 * @internal
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<string, array<string, array<string, mixed>>>
+	 */
+	public static function get_fields( string $resource_name ): array {
+		return self::$fields[ $resource_name ] ?? array();
 	}
 
 	/**

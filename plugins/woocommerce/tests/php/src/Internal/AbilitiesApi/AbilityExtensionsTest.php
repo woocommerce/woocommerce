@@ -8,11 +8,12 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 /**
- * Namespaced extension fields in the output of the product and order abilities, read through the REST route.
+ * Namespaced extension fields in the product and order abilities, read and written through the REST route.
  */
 class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 
@@ -27,6 +28,13 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @var int
 	 */
 	private static $administrator_id;
+
+	/**
+	 * Values that the update callbacks received, keyed by field.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private static $received = array();
 
 	/**
 	 * Original init action count restored in tearDown.
@@ -65,6 +73,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 
 		AbilitiesLoader::init();
 		$this->reset_registries();
+		self::$received = array();
 		wp_set_current_user( self::$administrator_id );
 		$this->set_feature( true );
 		add_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_fields' ) );
@@ -141,6 +150,36 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				},
 			)
 		);
+		$writable = array(
+			array( 'product', 'test-ext', 'color', array( 'type' => 'string' ) ),
+			array( 'product', 'other_ext', 'count', array( 'type' => 'integer' ) ),
+			array( 'order', 'test-ext', 'tag', array( 'type' => 'string' ) ),
+		);
+		foreach ( $writable as list( $resource, $namespace, $field, $schema ) ) {
+			AbilityExtensions::register_field(
+				array(
+					'resource'        => $resource,
+					'namespace'       => $namespace,
+					'field'           => $field,
+					'schema'          => $schema,
+					'get_callback'    => static function ( \WC_Data $data ) use ( $field ) {
+						return $data->meta_exists( '_test_' . $field ) ? $data->get_meta( '_test_' . $field ) : null;
+					},
+					'update_callback' => static function ( \WC_Data $data, $value ) use ( $field ) {
+						self::$received[ $field ] = $value;
+						if ( 'reject' === $value || -1 === $value ) {
+							return new \WP_Error( 'test_rejected', 'Rejected.' );
+						}
+						if ( null === $value ) {
+							$data->delete_meta_data( '_test_' . $field );
+							return null;
+						}
+						$data->update_meta_data( '_test_' . $field, $value );
+						return null;
+					},
+				)
+			);
+		}
 	}
 
 	/**
@@ -408,6 +447,227 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should save a change to Core fields and the fields of two extensions one time, with each value cast to its schema.
+	 */
+	public function test_a_write_saves_core_and_extension_fields_one_time(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$saves   = did_action( 'woocommerce_update_product' );
+
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'test-ext'  => array( 'color' => 'red' ),
+					'other_ext' => array( 'count' => '12' ),
+				),
+			)
+		);
+
+		$saved = wc_get_product( $product->get_id() );
+		$this->assertSame( 1, did_action( 'woocommerce_update_product' ) - $saves );
+		$this->assertSame( 12, self::$received['count'] );
+		$this->assertSame( 'Pencil', $saved->get_name() );
+		$this->assertSame( 'red', $saved->get_meta( '_test_color' ) );
+		$this->assertSame( '12', (string) $saved->get_meta( '_test_count' ) );
+		$this->assertSame(
+			array(
+				'test-ext'  => array( 'color' => 'red' ),
+				'other_ext' => array( 'count' => 12 ),
+			),
+			$output['product']['extensions']
+		);
+	}
+
+	/**
+	 * @testdox Should accept extension fields in product create and order status update.
+	 */
+	public function test_product_create_and_order_status_update_write_fields(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'       => 'Mug',
+				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
+			)
+		);
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'tag' => 'vip' ) ),
+			)
+		);
+
+		$saved_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
+		$this->assertSame( 'completed', $saved_order->get_status() );
+		$this->assertSame( 'vip', $saved_order->get_meta( '_test_tag' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a status that the order object does not accept, and keep the order status.
+	 */
+	public function test_order_status_update_refuses_a_status_the_order_does_not_accept(): void {
+		$order        = \WC_Helper_Order::create_order();
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Valid statuses without completed, as a subscription has.
+				 *
+				 * @return array
+				 */
+				protected function get_valid_statuses() {
+					return array_values( array_diff( parent::get_valid_statuses(), array( 'wc-completed' ) ) );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class );
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_order_status_invalid', $response->get_data()['code'] );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
+	 */
+	public function test_a_rejected_value_saves_nothing(): void {
+		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$rejected = array(
+			array( 'other_ext' => array( 'count' => -1 ) ),
+			array( 'other_ext' => array( 'count' => 'many' ) ),
+			array( 'other_ext' => array( 'code' => 7 ) ),
+			array( 'unknown' => array( 'color' => 'red' ) ),
+		);
+
+		foreach ( $rejected as $extensions ) {
+			$response = $this->run_ability_response(
+				'woocommerce/product-update',
+				array(
+					'id'         => $product->get_id(),
+					'name'       => 'Pencil',
+					'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ) + $extensions,
+				)
+			);
+
+			$this->assertSame( 400, $response->get_status(), wp_json_encode( $extensions ) );
+		}
+		$saved = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Pen', $saved->get_name() );
+		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should delete the value of a field when the input value is null.
+	 */
+	public function test_a_null_value_deletes_the_field_value(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( '_test_color', 'red' );
+		$product->save();
+
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => array( 'color' => null ) ),
+			)
+		);
+
+		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_color' ) );
+		$this->assertArrayNotHasKey( 'extensions', $output['product'] );
+	}
+
+	/**
+	 * @testdox Should let an ActionableAbility of an extension accept the writable fields with no extra code.
+	 */
+	public function test_an_extension_actionable_ability_writes_the_fields(): void {
+		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$register = static function () {
+			wp_register_ability(
+				'test-ext/product-rename',
+				array(
+					'label'               => 'Rename product',
+					'description'         => 'Renames a product.',
+					'category'            => 'woocommerce',
+					'input_schema'        => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'   => array( 'type' => 'integer' ),
+							'name' => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
+					'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
+					'permission_callback' => '__return_true',
+					'ability_class'       => TestProductRenameAbility::class,
+					'meta'                => array( 'show_in_rest' => true ),
+				)
+			);
+		};
+		add_action( 'wp_abilities_api_init', $register, 20 );
+
+		$schema = $this->get_ability( 'test-ext/product-rename' )['input_schema']['properties']['extensions'];
+		$output = $this->run_ability(
+			'test-ext/product-rename',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array( 'test-ext' => array( 'color' => 'green' ) ),
+			)
+		);
+
+		remove_action( 'wp_abilities_api_init', $register, 20 );
+		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
+		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
+		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
+	}
+
+	/**
+	 * @testdox Should not accept extension fields in the write abilities with the feature off.
+	 */
+	public function test_writes_do_not_change_with_the_feature_off(): void {
+		$this->set_feature( false );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$schema   = $this->get_ability( 'woocommerce/product-update' )['input_schema'];
+		$rejected = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+			)
+		);
+		$output   = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertNotInstanceOf( ActionableAbility::class, wp_get_ability( 'woocommerce/product-update' ) );
+		$this->assertArrayNotHasKey( 'extensions', $schema['oneOf'][0]['properties'] );
+		$this->assertSame( 400, $rejected->get_status() );
+		$this->assertSame( 'Pencil', $output['product']['name'] );
+		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_color' ) );
+	}
+
+	/**
 	 * Run an ability through the REST route and return its output.
 	 *
 	 * @param string $name  Ability name.
@@ -415,6 +675,20 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	private function run_ability( string $name, array $input ): array {
+		$response = $this->run_ability_response( $name, $input );
+
+		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		return $response->get_data();
+	}
+
+	/**
+	 * Run an ability through the REST route.
+	 *
+	 * @param string $name  Ability name.
+	 * @param array  $input Ability input.
+	 * @return \WP_REST_Response
+	 */
+	private function run_ability_response( string $name, array $input ): \WP_REST_Response {
 		$readonly = ! empty( wp_get_ability( $name )->get_meta()['annotations']['readonly'] );
 		$request  = new \WP_REST_Request( $readonly ? 'GET' : 'POST', '/wp-abilities/v1/abilities/' . $name . '/run' );
 		if ( $readonly ) {
@@ -424,10 +698,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$request->set_body( wp_json_encode( array( 'input' => $input ) ) );
 		}
 
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
-		return $response->get_data();
+		return $this->server->dispatch( $request );
 	}
 
 	/**
@@ -437,10 +708,20 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	private function get_output_schema( string $name ): array {
+		return $this->get_ability( $name )['output_schema'];
+	}
+
+	/**
+	 * Read an ability through the REST route.
+	 *
+	 * @param string $name Ability name.
+	 * @return array
+	 */
+	private function get_ability( string $name ): array {
 		$response = $this->server->dispatch( new \WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/' . $name ) );
 
 		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
-		return $response->get_data()['output_schema'];
+		return $response->get_data();
 	}
 
 	/**

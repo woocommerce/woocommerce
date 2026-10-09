@@ -567,7 +567,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	private static function validate_product_fields_for_config( array $input, array $product_config ) {
-		$shared_fields          = array( 'id', 'product_type_alias' );
+		$shared_fields          = array( 'id', 'product_type_alias', 'extensions' );
 		$supported_fields       = array_merge( $shared_fields, $product_config['fields'] );
 		$unsupported_field_keys = array_diff( array_keys( $input ), $supported_fields );
 
