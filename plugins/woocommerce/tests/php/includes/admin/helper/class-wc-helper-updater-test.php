@@ -2358,6 +2358,25 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Plugins without a subscription is empty when no Woo plugin is active, even while the API is failing.
+	 */
+	public function test_plugins_without_subscription_is_empty_without_active_plugins_while_the_api_is_failing(): void {
+		$this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array() );
+		$this->set_connected_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 429,
+				'message' => 'Error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'With no active plugin to check, the empty list does not depend on the API.' );
+	}
+
+	/**
 	 * Makes WC_Helper::get_local_woo_plugins() report a single active Woo plugin.
 	 *
 	 * @return string The plugin file name.

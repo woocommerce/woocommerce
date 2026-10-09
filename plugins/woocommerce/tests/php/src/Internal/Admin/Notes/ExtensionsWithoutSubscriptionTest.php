@@ -140,6 +140,29 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should delete the note once no extension is active, even while the subscriptions fetch is failing.
+	 */
+	public function test_note_is_deleted_when_no_extension_is_active_while_the_api_is_failing(): void {
+		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
+		$this->sut->refresh_note();
+
+		$this->mock_active_woo_plugins( array() );
+		WC_Helper_Options::update( 'auth', array( 'access_token' => 'token' ) );
+		set_transient( '_woocommerce_helper_subscriptions', array(), HOUR_IN_SECONDS );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 429,
+				'message' => 'Rate limited',
+			),
+			HOUR_IN_SECONDS
+		);
+		$this->sut->refresh_note();
+
+		$this->assertFalse( ExtensionsWithoutSubscription::note_exists(), 'With no active extension, the note is obsolete whatever the subscription state.' );
+	}
+
+	/**
 	 * @testdox Should do nothing outside WooCommerce admin pages.
 	 */
 	public function test_note_is_not_added_outside_woocommerce_pages(): void {
