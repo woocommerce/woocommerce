@@ -652,6 +652,8 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provide_variable_product_notice_requests
 	 * @covers WC_Form_Handler::add_to_cart_action()
+	 * @covers WC_Form_Handler::add_to_cart_handler_variable()
+	 * @covers WC_Form_Handler::is_request_for_product_page()
 	 *
 	 * @param string $permalink_structure Permalink structure for the store.
 	 * @param string $requested_page      Page the request is for: 'own', 'own-unslashed', 'other', 'home', or 'none' for no request URI.
