@@ -39,7 +39,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
-		$csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$csv_file = __DIR__ . '/sample.csv';
 		$raw_data = array(
 			array(
 				'type'      => ProductType::VARIABLE,
@@ -101,7 +101,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 99 when it's >= 99.5% through the file.
 	 */
 	public function test_import_completion_issue_36618_lines_remaining() {
-		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$csv_file = __DIR__ . '/sample2.csv';
 		$args     = array(
 			'lines' => 200,
 		);
@@ -115,7 +115,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 100 when it's at the end of the file.
 	 */
 	public function test_import_completion_issue_36618_end_of_file() {
-		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$csv_file = __DIR__ . '/sample2.csv';
 		$args     = array(
 			'lines' => 201,
 		);
@@ -1859,5 +1859,181 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'ISO-8859-1 is converted'     => array( 'ISO-8859-1', "Caf\xE9", 'Café' ),
 			'Windows-1252 is converted'   => array( 'Windows-1252', "Caf\xE9", 'Café' ),
 		);
+	}
+
+	/**
+	 * @testdox CSV import creates products with normalized customs values.
+	 */
+	public function test_import_creates_customs_values(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code,country_of_origin,customs_description\nsimple,customs-create,Customs product,0901%210010,ro,\"Salt & pepper, 20%Acrylic\"\n" );
+
+		$this->assertEmpty( $result['failed'], 'Valid customs values should be imported.' );
+		$this->assertCount( 1, $result['imported'], 'The customs row should create one product.' );
+		$product = wc_get_product( $result['imported'][0] );
+		$this->assertSame( '0901210010', $product->get_customs_commodity_code( 'edit' ), 'Commodity codes should keep every digit and remove punctuation.' );
+		$this->assertSame( 'RO', $product->get_customs_country_of_origin( 'edit' ), 'Origin codes should be normalized.' );
+		$this->assertSame( 'Salt & pepper, 20%Acrylic', $product->get_customs_description( 'edit' ), 'The description should not be entity-encoded or lose percent sequences.' );
+	}
+
+	/**
+	 * @testdox Customs formatting callbacks can change the commodity code before it is validated.
+	 */
+	public function test_customs_formatting_callback_can_change_code(): void {
+		$received_code = null;
+		add_filter(
+			'woocommerce_product_importer_formatting_callbacks',
+			static function ( $callbacks, $importer ) use ( &$received_code ) {
+				$index               = array_search( 'customs_commodity_code', $importer->get_mapped_keys(), true );
+				$callbacks[ $index ] = static function ( $value ) use ( &$received_code ) {
+					$received_code = $value;
+					return '0201.10';
+				};
+				return $callbacks;
+			},
+			10,
+			2
+		);
+
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code\nsimple,customs-filtered,Customs product,0901%210010\n" );
+
+		$this->assertSame( '0901%210010', $received_code, 'Formatting callbacks should receive the raw cell value.' );
+		$this->assertEmpty( $result['failed'], 'A valid formatting callback result should be imported.' );
+		$this->assertCount( 1, $result['imported'], 'The filtered customs row should create one product.' );
+		$this->assertSame( '020110', wc_get_product( $result['imported'][0] )->get_customs_commodity_code( 'edit' ), 'The formatting callback result should still be honored and validated.' );
+	}
+
+	/**
+	 * @testdox Omitted CSV customs columns leave existing values unchanged.
+	 */
+	public function test_import_preserves_omitted_customs_values(): void {
+		$product = $this->create_product_with_customs();
+
+		$result = $this->import_customs_csv( "ID,Name,country_of_origin\n{$product->get_id()},Updated name,\n", array( 'update_existing' => true ) );
+
+		$this->assertSame( array( $product->get_id() ), $result['updated'], 'The row should update the existing product.' );
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Updated name', $product->get_name(), 'The row should update the product name.' );
+		$this->assertSame( '010121', $product->get_customs_commodity_code( 'edit' ), 'An omitted commodity code column must not change the stored value.' );
+		$this->assertNull( $product->get_customs_country_of_origin( 'edit' ), 'The blank mapped origin cell should clear the stored value.' );
+		$this->assertSame( 'Cotton shirt', $product->get_customs_description( 'edit' ), 'An omitted description column must not change the stored value.' );
+	}
+
+	/**
+	 * @testdox CSV customs descriptions escaped by the exporter are unescaped on import.
+	 */
+	public function test_import_unescapes_customs_description(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,customs_description\nsimple,customs-escaped,Customs product,'-Cotton shirt\n" );
+
+		$this->assertEmpty( $result['failed'], 'The escaped description should be imported.' );
+		$this->assertCount( 1, $result['imported'], 'The row should create one product.' );
+		$this->assertSame( '-Cotton shirt', wc_get_product( $result['imported'][0] )->get_customs_description( 'edit' ), 'The exporter escape prefix should be removed.' );
+	}
+
+	/**
+	 * @testdox Invalid customs data rejects the entire product update.
+	 * @testWith ["country_of_origin", "XX"]
+	 *
+	 * @param string $header Invalid customs column.
+	 * @param string $value Invalid value.
+	 */
+	public function test_invalid_customs_rejects_product_update( string $header, string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original name' );
+		$product->save();
+
+		$result = $this->import_customs_csv( "ID,Name,{$header}\n{$product->get_id()},Changed name,{$value}\n", array( 'update_existing' => true ) );
+
+		$this->assertEmpty( $result['updated'], 'An invalid customs row must not update the product.' );
+		$this->assertCount( 1, $result['failed'], 'Each invalid row should have an import error.' );
+		$this->assertNotEmpty( $result['failed'][0]->get_error_message(), 'The failed row should explain its invalid value.' );
+		$this->assertStringContainsString( (string) $product->get_id(), $result['failed'][0]->get_error_data()['row'], 'The error should identify the failed row.' );
+		$this->assertSame( 'Original name', wc_get_product( $product->get_id() )->get_name(), 'Other submitted fields must remain unchanged.' );
+	}
+
+	/**
+	 * @testdox Invalid customs rows are not saved and do not stop following valid rows.
+	 */
+	public function test_invalid_customs_row_does_not_stop_import(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code\nsimple,customs-invalid,Invalid customs,ABC123\nsimple,customs-valid,Valid customs,010121\n" );
+
+		$this->assertCount( 1, $result['failed'], 'The invalid row should be reported.' );
+		$this->assertCount( 1, $result['imported'], 'The following valid row should still import.' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'customs-invalid' ), 'The invalid row must not be saved.' );
+	}
+
+	/**
+	 * @testdox Invalid customs values added by the process item data filter reject the row.
+	 */
+	public function test_filtered_invalid_customs_rejects_row(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product' );
+		$product->save();
+		add_filter(
+			'woocommerce_product_import_process_item_data',
+			static function ( $data ) {
+				$data['customs_country_of_origin'] = 'XX';
+				return $data;
+			}
+		);
+
+		$result = $this->import_customs_csv( "ID,Name,country_of_origin\n{$product->get_id()},Changed product,US\n", array( 'update_existing' => true ) );
+
+		$this->assertCount( 1, $result['failed'], 'Invalid filtered customs data should reject the row.' );
+		$this->assertSame( 'Original product', wc_get_product( $product->get_id() )->get_name(), 'The original product name should remain unchanged.' );
+	}
+
+	/**
+	 * Create a simple product with every customs field set.
+	 *
+	 * @return WC_Product
+	 */
+	private function create_product_with_customs(): WC_Product {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_props(
+			array(
+				'customs_commodity_code'    => '010121',
+				'customs_country_of_origin' => 'RO',
+				'customs_description'       => 'Cotton shirt',
+			)
+		);
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Import a temporary CSV using the customs column mappings.
+	 *
+	 * @param string $csv CSV contents.
+	 * @param array  $args Import options.
+	 * @return array Import results.
+	 */
+	private function import_customs_csv( string $csv, array $args = array() ): array {
+		$file = get_temp_dir() . 'customs-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary CSV fixture.
+
+		try {
+			$sut = new WC_Product_CSV_Importer(
+				$file,
+				array_merge(
+					array(
+						'parse'   => true,
+						'mapping' => array(
+							'ID'                  => 'id',
+							'Type'                => 'type',
+							'SKU'                 => 'sku',
+							'Name'                => 'name',
+							'commodity_code'      => 'customs_commodity_code',
+							'country_of_origin'   => 'customs_country_of_origin',
+							'customs_description' => 'customs_description',
+						),
+					),
+					$args
+				)
+			);
+			return $sut->import();
+		} finally {
+			wp_delete_file( $file );
+		}
 	}
 }

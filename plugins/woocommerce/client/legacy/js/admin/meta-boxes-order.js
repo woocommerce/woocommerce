@@ -1314,6 +1314,14 @@ jQuery( function ( $ ) {
 					pagination = modal.find( '[data-wc-tax-rate-pagination]' ),
 					load_tax_rates;
 
+				modal.data( 'wc-existing-tax-rate-ids', $( '.order-tax-id' ).map( function() {
+					return String( $( this ).val() );
+				} ).get() );
+
+				if ( ! modal.data( 'wc-selected-tax-rate-id' ) ) {
+					modal.data( 'wc-selected-tax-rate-id', modal.data( 'wc-existing-tax-rate-ids' )[ 0 ] || '' );
+				}
+
 				// The modal template is filterable, so only wire the controls up when the
 				// elements this code depends on are actually present.
 				if ( ! form.length || ! search.length || ! results.length || ! pagination.length ) {
@@ -1346,6 +1354,16 @@ jQuery( function ( $ ) {
 					load_tax_rates( 1 );
 				} );
 
+				pagination.on( 'keydown', '.first-page, .prev-page, .next-page, .last-page', function( event ) {
+					if ( 13 !== event.which ) {
+						return;
+					}
+
+					event.preventDefault();
+					event.stopPropagation();
+					$( this ).trigger( 'click' );
+				} );
+
 				pagination.on( 'click', '.prev-page', function() {
 					var current_page = parseInt( pagination.data( 'page' ), 10 ) || 1;
 					load_tax_rates( Math.max( 1, current_page - 1 ) );
@@ -1376,10 +1394,45 @@ jQuery( function ( $ ) {
 
 				// Rows are re-rendered on every search, so delegate from the results table.
 				results.on( 'change', 'input[type="radio"][name="add_order_tax"]', function() {
+					modal.data( 'wc-selected-tax-rate-id', $( this ).val() );
 					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				} );
 
+				results.on( 'keydown', 'input[type="radio"][name="add_order_tax"]', function( event ) {
+					wc_meta_boxes_order_items.backbone.handle_tax_rate_result_tab_navigation( modal, event );
+				} );
+
+				results.on( 'keydown', '[data-wc-tax-rate-settings]', function( event ) {
+					if ( 13 !== event.which && 32 !== event.which ) {
+						return;
+					}
+
+					event.stopPropagation();
+
+					if ( 32 === event.which ) {
+						event.preventDefault();
+						this.click();
+					}
+				} );
+
 				load_tax_rates( 1 );
+			},
+
+			handle_tax_rate_result_tab_navigation: function( modal, event ) {
+				if ( 9 !== event.which || event.altKey || event.ctrlKey || event.metaKey ) {
+					return;
+				}
+
+				var radios = modal[ 0 ].querySelectorAll( 'input[type="radio"][name="add_order_tax"]' ),
+					current_index = Array.prototype.indexOf.call( radios, event.target ),
+					next_index = current_index + ( event.shiftKey ? -1 : 1 );
+
+				if ( -1 === current_index || next_index < 0 || next_index >= radios.length ) {
+					return;
+				}
+
+				event.preventDefault();
+				radios[ next_index ].focus();
 			},
 
 			search_tax_rates: function( modal, page, is_search ) {
@@ -1396,8 +1449,8 @@ jQuery( function ( $ ) {
 				modal.data( 'wc-tax-rate-request-id', request_id );
 				table_body.css( 'height', table_body.height() );
 
-				// Replacing the rows drops any selected rate, so re-evaluate the Add button
-				// before the request starts rather than leaving it enabled with no selection.
+				// Replacing the rows drops any visible selection, so re-evaluate the Add button
+				// before the request starts rather than leaving it enabled with no checked input.
 				table_body.html( wc_meta_boxes_order_items.backbone.tax_rate_status_row( status ) );
 				wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
 				pagination.find( '.button, .current-page' ).prop( 'disabled', true );
@@ -1448,9 +1501,12 @@ jQuery( function ( $ ) {
 			},
 
 			update_tax_rate_add_button: function( modal ) {
+				var checked_rate_id = modal.find( 'input[name="add_order_tax"]:checked' ).val(),
+					existing_tax_rate_ids = modal.data( 'wc-existing-tax-rate-ids' ) || [];
+
 				modal.find( '#btn-ok' ).prop(
 					'disabled',
-					! modal.find( 'input[name="add_order_tax"]:checked' ).length
+					! checked_rate_id || -1 !== $.inArray( String( checked_rate_id ), existing_tax_rate_ids )
 				);
 			},
 
@@ -1480,7 +1536,8 @@ jQuery( function ( $ ) {
 						$( '<p class="wc-tax-rate-empty-action"></p>' ).append(
 							$( '<a></a>', {
 								class: 'woocommerce-BlankState-cta button',
-								href:  wc_enhanced_select_params.tax_rates_settings_url
+								href:  wc_enhanced_select_params.tax_rates_settings_url,
+								'data-wc-tax-rate-settings': true
 							} ).text( wc_enhanced_select_params.i18n_tax_settings )
 						)
 					)
@@ -1494,13 +1551,13 @@ jQuery( function ( $ ) {
 						.replace( '%1$s', rate.tax_class || '' )
 						.replace( '%2$s', rate.rate_code || '' )
 						.replace( '%3$s', rate.rate_percent || '' ),
-					radio          = $( '<input />', {
-						type:               'radio',
-						id:                 input_id,
-						name:               'add_order_tax',
-						value:              rate.id,
-						'aria-describedby': description_id
-					} );
+						radio          = $( '<input />', {
+							type:               'radio',
+							id:                 input_id,
+							name:               'add_order_tax',
+							value:              rate.id,
+							'aria-describedby': description_id
+						} );
 
 				return $( '<tr></tr>' ).append(
 					$( '<td></td>' ).append(
@@ -1515,6 +1572,22 @@ jQuery( function ( $ ) {
 					$( '<td></td>' ).text( rate.rate_code ),
 					$( '<td></td>' ).text( rate.rate_percent )
 				);
+			},
+
+			restore_selected_tax_rate: function( modal ) {
+				var selected_rate_id = modal.data( 'wc-selected-tax-rate-id' ),
+					selected_input;
+
+				if ( ! selected_rate_id ) {
+					return;
+				}
+
+				selected_input = modal.find( 'input[name="add_order_tax"][value="' + selected_rate_id + '"]' );
+
+				if ( selected_input.length ) {
+					selected_input.prop( 'checked', true );
+					wc_meta_boxes_order_items.backbone.update_tax_rate_add_button( modal );
+				}
 			},
 
 			update_tax_rate_search_summary: function( modal, search_term ) {
@@ -1578,6 +1651,7 @@ jQuery( function ( $ ) {
 					$.each( results, function( index, rate ) {
 						table_body.append( wc_meta_boxes_order_items.backbone.tax_rate_result_row( rate ) );
 					} );
+					wc_meta_boxes_order_items.backbone.restore_selected_tax_rate( modal );
 					announcement = meta.displaying_num || '';
 				}
 
@@ -1628,12 +1702,12 @@ jQuery( function ( $ ) {
 			add_items: function( add_items ) {
 				wc_meta_boxes_order_items.block();
 
-				var data = {
+				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action   : 'woocommerce_add_order_item',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
 					data     : add_items
-				};
+				} );
 
 				// Check if items have changed, if so pass them through so we can save them before adding a new item.
 				if ( 'true' === $( 'button.cancel-action' ).attr( 'data-reload' ) ) {

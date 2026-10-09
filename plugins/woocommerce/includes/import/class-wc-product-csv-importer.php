@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -759,6 +760,22 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse a customs field.
+	 *
+	 * Skips wc_clean(), which would drop digits from codes such as "0901%210010" and encode a lone "<".
+	 * The product setters validate the value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string
+	 */
+	public function parse_customs_field( $value ) {
+		return $this->unescape_data( $value );
+	}
+
+	/**
 	 * Parse download file urls, we should allow shortcodes here.
 	 *
 	 * Allow shortcodes if present, otherwise esc_url the value.
@@ -908,6 +925,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'tax_status'        => array( $this, 'parse_tax_status_field' ),
 			'cogs_value'        => array( $this, 'parse_cogs_field' ),
 		);
+
+		foreach ( CustomsDataValidator::FIELDS as $customs_field ) {
+			$data_formatting[ $customs_field ] = array( $this, 'parse_customs_field' );
+		}
 
 		/**
 		 * Match special column names by prefix.

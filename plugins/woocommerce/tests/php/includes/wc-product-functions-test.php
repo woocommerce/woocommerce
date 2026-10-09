@@ -48,6 +48,39 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_formatted_variation() lists an attribute whose value only appears in the parent product name.
+	 */
+	public function test_wc_get_formatted_variation_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black"
+		// and the "black" colour must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+			$this->assertSame(
+				'size: huge, number: 1, colour: black',
+				wc_get_formatted_variation( $variation, true, true, true ),
+				'Every attribute is listed when the variation name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -1435,6 +1468,80 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', $original_base_country );
 		if ( ! $wc_tax_enabled ) {
 			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+	}
+
+	/**
+	 * @testdox Assigned-customer orders apply matched rates for the editor tax location and pass the order customer to the filter.
+	 */
+	public function test_wc_get_price_excluding_tax_editor_location_filters_customer_rates(): void {
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$customer = WC_Helper_Customer::create_customer();
+		$order    = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->set_billing_country( 'DE' );
+		$order->save();
+
+		$product = new WC_Product_Simple();
+		$product->set_price( 100 );
+		$product->set_tax_status( 'taxable' );
+
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$filter_calls = array();
+		$filter       = function ( $rates, $tax_class, $filtered_customer ) use ( &$filter_calls ) {
+			$filter_calls[] = array( $rates, $tax_class, $filtered_customer );
+			foreach ( $rates as &$rate ) {
+				$rate['rate'] = 25.0;
+			}
+			return $rates;
+		};
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $filter, 10, 3 );
+
+		try {
+			$net_price = wc_get_price_excluding_tax(
+				$product,
+				array(
+					'order'        => $order,
+					'tax_location' => array(
+						'country'  => 'FR',
+						'state'    => '',
+						'postcode' => '75001',
+						'city'     => 'Paris',
+					),
+				)
+			);
+
+			$this->assertCount( 1, $filter_calls, 'The matched rates filter should run for an assigned-customer order.' );
+			$this->assertSame( '', $filter_calls[0][1], 'The filter should receive the product tax class.' );
+			$this->assertInstanceOf( WC_Customer::class, $filter_calls[0][2] );
+			$this->assertSame( $customer->get_id(), $filter_calls[0][2]->get_id(), 'The filter should receive the order customer.' );
+			$this->assertArrayHasKey( $french_tax_rate_id, $filter_calls[0][0], 'The editor location should determine the matched rate.' );
+			$this->assertEquals( 80, $net_price, 'The filtered 25% rate should determine the net price.' );
+		} finally {
+			remove_filter( 'woocommerce_matched_rates', $filter );
+			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+			WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+			$order->delete( true );
+			wp_delete_user( $customer->get_id() );
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 		}
 	}
 
@@ -2852,5 +2959,26 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$cache_state_during_first_save['next_batch'],
 			'The next batch must not be primed while the first batch is processing.'
 		);
+	}
+
+	/**
+	 * @testdox wc_get_formatted_variation resolves taxonomy term slugs to human-readable names via the prefetch cache.
+	 */
+	public function test_wc_get_formatted_variation_resolves_taxonomy_term_names(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'Dark Blue', 'Light Green' ) );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'dark-blue' ) );
+		$variation->save();
+
+		$this->assertSame( 'color: Dark Blue', wc_get_formatted_variation( wc_get_product( $variation->get_id() ), true ) );
+
+		$product->delete( true );
 	}
 }

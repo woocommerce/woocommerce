@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Let the email template sync E2E helper plugin activate on PHP 7.4; test-only change.
+

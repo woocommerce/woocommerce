@@ -29,17 +29,17 @@ const TestComp = ( { callback }: { callback: ( link: string ) => void } ) => {
 };
 
 describe( 'useCallbackOnLinkClick hook', () => {
-	it( 'should call callback with link when inner anchor element is clicked', () => {
+	it( 'should call callback with link when inner anchor element is clicked', async () => {
 		const callback = jest.fn();
 		const { getByText } = render( <TestComp callback={ callback } /> );
-		userEvent.click( getByText( 'Link' ) );
+		await userEvent.click( getByText( 'Link' ) );
 		expect( callback ).toHaveBeenCalledWith( 'http://tosomewhere.com/' );
 	} );
 
-	it( 'should not call callback if click event target does not have an href', () => {
+	it( 'should not call callback if click event target does not have an href', async () => {
 		const callback = jest.fn();
 		const { getByText } = render( <TestComp callback={ callback } /> );
-		userEvent.click( getByText( 'Button' ) );
+		await userEvent.click( getByText( 'Button' ) );
 		expect( callback ).not.toHaveBeenCalled();
 	} );
 

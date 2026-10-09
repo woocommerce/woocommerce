@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use WP_Comment;
 
 defined( 'ABSPATH' ) || exit;
@@ -34,31 +35,33 @@ class NewReviewNotification extends Notification {
 	 * the threshold do not trigger a notification.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return false;
+	public function get_suppression_reason( $pref_value ): ?string {
+		$reason = parent::get_suppression_reason( $pref_value );
+
+		if ( null !== $reason ) {
+			return $reason;
 		}
 
 		if ( ! is_array( $pref_value ) || ! isset( $pref_value['max_rating'] ) ) {
-			return true;
+			return null;
 		}
 
 		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
 		if ( ! $comment instanceof WP_Comment ) {
-			return false;
+			return SuppressionReason::REVIEW_MISSING;
 		}
 
 		$rating = WC()->call_function( 'get_comment_meta', $this->get_resource_id(), 'rating', true );
 
 		if ( '' === $rating ) {
-			return true;
+			return null;
 		}
 
-		return (int) $rating <= (int) $pref_value['max_rating'];
+		return (int) $rating <= (int) $pref_value['max_rating'] ? null : SuppressionReason::ABOVE_MAX_RATING;
 	}
 
 	/**
@@ -80,7 +83,7 @@ class NewReviewNotification extends Notification {
 		return array(
 			'type'        => $this->get_type(),
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->get_triggered_timestamp(),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
 				/**
@@ -120,8 +123,18 @@ class NewReviewNotification extends Notification {
 	 *
 	 * @param string $key The meta key.
 	 */
-	public function write_meta( string $key ): void {
-		WC()->call_function( 'update_comment_meta', $this->get_resource_id(), $key, (string) time() );
+	public function read_meta( string $key ): string {
+		return (string) WC()->call_function( 'get_comment_meta', $this->get_resource_id(), $key, true );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string   $key       The meta key.
+	 * @param int|null $timestamp Unix timestamp to record. Defaults to the current time.
+	 */
+	public function write_meta( string $key, ?int $timestamp = null ): void {
+		WC()->call_function( 'update_comment_meta', $this->get_resource_id(), $key, (string) ( $timestamp ?? time() ) );
 	}
 
 	/**

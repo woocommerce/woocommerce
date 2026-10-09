@@ -4,9 +4,9 @@
 import { useSelect } from '@wordpress/data';
 import { useState, useMemo } from '@wordpress/element';
 import {
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalVStack as VStack, // eslint-disable-line
-	__unstableMotion as motion, // eslint-disable-line
+	__experimentalHStack as HStack,
+	__experimentalVStack as VStack,
+	__unstableMotion as motion,
 } from '@wordpress/components';
 
 /**
