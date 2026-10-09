@@ -61,6 +61,11 @@ class BlockTemplatesController {
 		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce
 		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead.
 		if ( null === $pre_render && 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
+
+			// BC (block_type_metadata_settings → pre_render_block migration): re-apply render_block() input filters.
+			$parsed_block = apply_filters( 'render_block_data', $parsed_block, $parsed_block, null ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			$context      = apply_filters( 'render_block_context', array(), $parsed_block, null ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
 			$attributes = $parsed_block['attrs'];
 			if ( isset( $attributes['theme'], $attributes['slug'] ) ) {
 				$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
@@ -75,9 +80,9 @@ class BlockTemplatesController {
 					$html_tag      = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
 					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
 
-					// BC: apply filters relevant to block_type_metadata_settings -> pre_render_block hook migration.
-					$block_instance = new \WP_Block( $parsed_block );
-					$block_content  = apply_filters( 'render_block', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core filter.
+					// BC (block_type_metadata_settings → pre_render_block migration): re-apply WP_Block::render() output filters.
+					$block_instance = new \WP_Block( $parsed_block, $context );
+					$block_content  = apply_filters( 'render_block', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 					$block_content  = apply_filters( 'render_block_core/template-part', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 					return $block_content;
