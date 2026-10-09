@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a new product's slug and other post fields in sync after saving, so editing it again no longer changes its permalink.
