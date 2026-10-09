@@ -1,6 +1,6 @@
 <?php
 /**
- * ContractCapabilities - the `manage_subscription_contract` meta capability.
+ * ContractCapabilities - the `read_subscription_contract` and `manage_subscription_contract` meta capabilities.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership
  */
@@ -15,12 +15,17 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Maps `manage_subscription_contract` for a contract: its customer needs `read`, anyone else
- * `manage_woocommerce`. Checked as `current_user_can( 'manage_subscription_contract', $contract )`
- * with a `ContractView`; anything else is refused. Extensions and roles adjust it through the
- * standard `map_meta_cap` / `user_has_cap` filters.
+ * Maps the contract capabilities: the contract's customer needs `read`, anyone else
+ * `manage_woocommerce`. Checked as `current_user_can( $capability, $contract )` with a
+ * `ContractView`; anything else is refused. Extensions adjust each one through the standard
+ * `map_meta_cap` / `user_has_cap` filters.
  */
 final class ContractCapabilities {
+
+	/**
+	 * Read one contract and the actions available for it.
+	 */
+	public const READ = 'read_subscription_contract';
 
 	/**
 	 * Manage one contract: run actions on it.
@@ -44,7 +49,7 @@ final class ContractCapabilities {
 	 * @return mixed
 	 */
 	public static function map_meta_cap( $caps, $cap, $user_id, $args ) {
-		if ( self::MANAGE !== $cap ) {
+		if ( self::READ !== $cap && self::MANAGE !== $cap ) {
 			return $caps;
 		}
 

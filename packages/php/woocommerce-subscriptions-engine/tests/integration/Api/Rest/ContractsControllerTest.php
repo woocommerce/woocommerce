@@ -136,21 +136,41 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Anonymous requests get a 401 and customers a 403, even for their own contract.
+	 * The contract's customer reads it; guests get a 401 and other customers the same 404 as an
+	 * unknown contract.
 	 */
-	public function test_get_requires_a_store_manager(): void {
+	public function test_get_needs_read_subscription_contract(): void {
 		$customer_id = $this->create_user( 'customer' );
-		$contract    = Contracts::create(
-			array(
-				'extension_slug' => 'test-extension',
-				'customer_id'    => $customer_id,
-			)
-		);
+		$contract    = $this->create_contract( $customer_id );
 
 		$this->assertSame( 401, $this->get( $contract->get_id() )->get_status() );
 
 		wp_set_current_user( $customer_id );
-		$this->assertSame( 403, $this->get( $contract->get_id() )->get_status() );
+		$this->assertSame( 200, $this->get( $contract->get_id() )->get_status() );
+
+		wp_set_current_user( $this->create_user( 'customer' ) );
+		$response = $this->get( $contract->get_id() );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_contract_not_found', $this->response_data( $response )['code'] );
+	}
+
+	/**
+	 * A `map_meta_cap` filter on the read capability decides the read.
+	 */
+	public function test_get_follows_read_subscription_contract_filters(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$deny        = static function ( $caps, $cap ) {
+			return 'read_subscription_contract' === $cap ? array( 'do_not_allow' ) : $caps;
+		};
+		add_filter( 'map_meta_cap', $deny, 20, 2 );
+		wp_set_current_user( $customer_id );
+
+		try {
+			$this->assertSame( 404, $this->get( $contract->get_id() )->get_status() );
+		} finally {
+			remove_filter( 'map_meta_cap', $deny, 20 );
+		}
 	}
 
 	/**
@@ -551,15 +571,25 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Discovery needs a store manager, like the contract read.
+	 * Discovery has the contract read's permission: its customer lists the actions, guests get a
+	 * 401 and other customers a 404.
 	 */
-	public function test_discovery_requires_a_store_manager(): void {
+	public function test_discovery_needs_read_subscription_contract(): void {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
-		$this->register_action( 'pause', 'manage_subscription_contract' );
-		wp_set_current_user( $customer_id );
+		$this->register_action( 'pause', 'manage_woocommerce' );
 
-		$this->assertSame( 403, $this->list_actions( $contract->get_id() )->get_status() );
+		$this->assertSame( 401, $this->list_actions( $contract->get_id() )->get_status() );
+
+		wp_set_current_user( $customer_id );
+		$response = $this->list_actions( $contract->get_id() );
+		$this->assertSame( 200, $response->get_status() );
+		$actions = $this->response_data( $response )['actions'];
+		$this->assertIsArray( $actions );
+		$this->assertSame( array( 'pause' ), array_column( $actions, 'action' ) );
+
+		wp_set_current_user( $this->create_user( 'customer' ) );
+		$this->assertSame( 404, $this->list_actions( $contract->get_id() )->get_status() );
 	}
 
 	/**

@@ -19,16 +19,22 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 class ContractCapabilitiesTest extends EngineIntegrationTestCase {
 
 	/**
-	 * The contract's customer and store managers may manage it; other customers and guests may not.
+	 * The contract's customer and store managers may read and manage it; other customers and
+	 * guests may not.
+	 *
+	 * @testWith ["read_subscription_contract"]
+	 *           ["manage_subscription_contract"]
+	 *
+	 * @param string $capability Capability.
 	 */
-	public function test_customer_and_store_managers_manage_the_contract(): void {
+	public function test_customer_and_store_managers_hold_the_capability( string $capability ): void {
 		$customer_id = $this->create_user( 'customer' );
 		$contract    = $this->create_contract( $customer_id );
 
-		$this->assertTrue( user_can( $customer_id, 'manage_subscription_contract', $contract ) );
-		$this->assertTrue( user_can( $this->create_user( 'shop_manager' ), 'manage_subscription_contract', $contract ) );
-		$this->assertFalse( user_can( $this->create_user( 'customer' ), 'manage_subscription_contract', $contract ) );
-		$this->assertFalse( user_can( 0, 'manage_subscription_contract', $contract ) );
+		$this->assertTrue( user_can( $customer_id, $capability, $contract ) );
+		$this->assertTrue( user_can( $this->create_user( 'shop_manager' ), $capability, $contract ) );
+		$this->assertFalse( user_can( $this->create_user( 'customer' ), $capability, $contract ) );
+		$this->assertFalse( user_can( 0, $capability, $contract ) );
 	}
 
 	/**

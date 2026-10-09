@@ -20,6 +20,7 @@ use WP_REST_Server;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\ContractActionRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
 
@@ -48,6 +49,13 @@ final class ContractsController extends WP_REST_Controller {
 	private $rest_permissions;
 
 	/**
+	 * Read resolutions per request, so the callback reuses what the permission check read.
+	 *
+	 * @var SplObjectStorage<WP_REST_Request, ContractView|WP_Error>
+	 */
+	private $resolved_reads;
+
+	/**
 	 * Run resolutions per request, so the callback reuses what the permission check read.
 	 *
 	 * @var SplObjectStorage<WP_REST_Request, array{contract: ContractView, definition: ContractActionDefinition}|WP_Error>
@@ -61,6 +69,7 @@ final class ContractsController extends WP_REST_Controller {
 		$this->namespace        = self::REST_NAMESPACE;
 		$this->rest_base        = self::REST_BASE;
 		$this->rest_permissions = new RESTPermissions();
+		$this->resolved_reads   = new SplObjectStorage();
 		$this->resolved_runs    = new SplObjectStorage();
 	}
 
@@ -144,16 +153,21 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check whether the current user may read the contract.
+	 * Check whether the current user may read the contract. Anything that is not a 401 is the
+	 * same 404, so a caller cannot probe for contracts it may not read.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		// Which contracts a customer may see, and which fields, is extension policy (Lite, for one,
-		// hides drafts), so customers are refused until extensions can register it, as they do for
-		// actions (WOOSUBS-2066).
-		return $this->rest_permissions->require_admin_permission();
+		$logged_in = $this->rest_permissions->require_logged_in_permission();
+		if ( true !== $logged_in ) {
+			return $logged_in;
+		}
+
+		$resolved = $this->resolve_read( $request );
+
+		return $resolved instanceof WP_Error ? $resolved : true;
 	}
 
 	/**
@@ -182,9 +196,9 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_actions( $request ) {
-		$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
-		if ( null === $contract ) {
-			return $this->get_not_found_error();
+		$contract = $this->resolve_read( $request );
+		if ( $contract instanceof WP_Error ) {
+			return $contract;
 		}
 
 		$actions = array();
@@ -270,9 +284,9 @@ final class ContractsController extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
-		if ( null === $contract ) {
-			return $this->get_not_found_error();
+		$contract = $this->resolve_read( $request );
+		if ( $contract instanceof WP_Error ) {
+			return $contract;
 		}
 
 		return $this->prepare_item_for_response( $contract, $request );
@@ -375,6 +389,25 @@ final class ContractsController extends WP_REST_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $this->schema );
+	}
+
+	/**
+	 * The contract, once the current user may read it (`read_subscription_contract`); resolved
+	 * once per request. Unknown and unreadable contracts are the same 404.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return ContractView|WP_Error
+	 */
+	private function resolve_read( WP_REST_Request $request ) {
+		if ( ! isset( $this->resolved_reads[ $request ] ) ) {
+			$contract = Contracts::get( Coercion::coerce_int( $request->get_param( 'id' ) ) );
+
+			$this->resolved_reads[ $request ] = null !== $contract && current_user_can( ContractCapabilities::READ, $contract )
+				? $contract
+				: $this->get_not_found_error();
+		}
+
+		return $this->resolved_reads[ $request ];
 	}
 
 	/**
