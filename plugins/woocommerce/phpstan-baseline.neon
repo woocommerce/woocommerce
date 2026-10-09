@@ -42190,18 +42190,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_oldest_orders\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$customer_id of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:set_customer_first_order\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
 			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|stdClass given\.$#'
 			identifier: argument.type
 			count: 1

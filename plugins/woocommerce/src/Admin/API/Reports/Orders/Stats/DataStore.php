@@ -20,6 +20,8 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use stdClass;
+use WC_Abstract_Order;
+use WC_DateTime;
 use WC_Order;
 use WC_Order_Refund;
 use Automattic\WooCommerce\Admin\Overrides\Order;
@@ -532,18 +534,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function update( $order ) {
 		global $wpdb;
-		$table_name = self::get_db_table_name();
 
-		if ( ! $order->get_id() || ! $order->get_date_created() ) {
+		$date_created = self::get_tracked_order_date_created( $order );
+		if ( ! $date_created ) {
 			return -1;
 		}
 
-		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
-		// Defense-in-depth: also checked in OrdersScheduler::import(), but
-		// update() can be called directly outside of the import flow.
-		if ( OrdersScheduler::is_test_order( $order ) ) {
-			return -1;
-		}
+		$data = self::build_order_stats_row( $order, $date_created, true );
 
 		$format = array(
 			'%d',
@@ -562,39 +559,134 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 		);
 
+		if ( self::stores_fulfillment_status( $order ) ) {
+			$format[] = '%s';
+		}
+
+		// Update or add the information to the DB.
+		$result = $wpdb->replace( self::get_db_table_name(), $data, $format );
+
+		/**
+		 * Fires when order's stats reports are updated.
+		 *
+		 * @param int $order_id Order ID.
+		 *
+		 * @since 4.0.0.
+		 */
+		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
+
+		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
+		return ( 1 === $result || 2 === $result );
+	}
+
+	/**
+	 * Get the wc_order_stats row for an order or refund, as update() writes it.
+	 *
+	 * Includes the `woocommerce_analytics_update_order_stats_data` filter and the refund adjustments.
+	 * Like update(), it adds the order's customer to the customer lookup table if missing, but it
+	 * leaves the stats rows of the customer's other orders unchanged. Customer fields use the saved order.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order|WC_Order_Refund $order Order or refund to build the row for.
+	 * @return array|false Row data keyed by column name, or false when the order is not tracked in analytics.
+	 */
+	public static function get_order_stats_row_data( $order ) {
+		$date_created = self::get_tracked_order_date_created( $order );
+		if ( ! $date_created ) {
+			return false;
+		}
+
+		$data = self::build_order_stats_row( $order, $date_created, false );
+
+		return is_array( $data ) ? $data : false;
+	}
+
+	/**
+	 * Get the creation date of an order or refund that analytics tracks.
+	 *
+	 * @param mixed $order Order or refund.
+	 * @return WC_DateTime|null Null for unsaved orders, orders without a creation date, and test orders.
+	 */
+	private static function get_tracked_order_date_created( $order ): ?WC_DateTime {
+		if ( ! $order instanceof WC_Abstract_Order || ! $order->get_id() ) {
+			return null;
+		}
+
+		$date_created = $order->get_date_created();
+		if ( ! $date_created ) {
+			return null;
+		}
+
+		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
+		// Defense-in-depth: also checked in OrdersScheduler::import(), but
+		// update() can be called directly outside of the import flow.
+		if ( OrdersScheduler::is_test_order( $order ) ) {
+			return null;
+		}
+
+		return $date_created;
+	}
+
+	/**
+	 * Build the stats row for an order or refund, running the order stats data filter.
+	 *
+	 * @param WC_Order|WC_Order_Refund $order        Order or refund.
+	 * @param WC_DateTime              $date_created The order's creation date.
+	 * @param bool                     $for_update   Whether update() will store the row. Only then does it fix up the
+	 *                                               returning-customer flags of the customer's other orders.
+	 * @return mixed Row data, or whatever the filter returned.
+	 */
+	private static function build_order_stats_row( $order, WC_DateTime $date_created, bool $for_update ) {
+		$customer_id = method_exists( $order, 'get_report_customer_id' ) ? $order->get_report_customer_id() : self::get_report_customer_id( $order );
+
+		if ( $for_update && method_exists( $order, 'is_returning_customer' ) ) {
+			$returning_customer = $order->is_returning_customer();
+		} elseif ( $order instanceof WC_Order_Refund ) {
+			// Refunds don't count towards returning customers.
+			$returning_customer = null;
+		} elseif ( $for_update ) {
+			$returning_customer = self::is_returning_customer( $order, $customer_id );
+		} else {
+			$returning_customer = self::get_returning_customer_status( $order, $customer_id )['is_returning'];
+		}
+
 		$data = array(
 			'order_id'           => $order->get_id(),
 			'parent_id'          => $order->get_parent_id(),
-			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+			'date_created'       => $date_created->date( 'Y-m-d H:i:s' ),
 			'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
 			'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
-			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
+			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ),
 			'num_items_sold'     => self::get_num_items_sold( $order ),
 			'total_sales'        => $order->get_total(),
 			'tax_total'          => $order->get_total_tax(),
 			'shipping_total'     => $order->get_shipping_total(),
 			'net_total'          => self::get_net_total( $order ),
 			'status'             => self::normalize_order_status( $order->get_status() ),
-			'customer_id'        => $order->get_report_customer_id(),
-			'returning_customer' => $order->is_returning_customer(),
+			'customer_id'        => $customer_id,
+			'returning_customer' => $returning_customer,
 		);
 
-		$order_fulfillment_status = '';
-		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
+		if ( self::stores_fulfillment_status( $order ) ) {
 			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
 			$data['fulfillment_status'] = ( 'no_fulfillments' !== $order_fulfillment_status ) ? $order_fulfillment_status : null;
-			$format[]                   = '%s';
 		}
 
 		/**
 		 * Filters order stats data.
 		 *
-		 * @param array $data Data written to order stats lookup table.
-		 * @param Order|OrderRefund $order  Order object.
+		 * @param array                    $data  Data written to order stats lookup table.
+		 * @param WC_Order|WC_Order_Refund $order Order object. The analytics import passes Overrides\Order or Overrides\OrderRefund.
 		 *
 		 * @since 4.0.0
 		 */
 		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
+
+		// update() has always passed a non-array result straight to $wpdb->replace(), so only the read path rejects it.
+		if ( ! $for_update && ! is_array( $data ) ) {
+			return false;
+		}
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
@@ -645,20 +737,38 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$data['date_paid']      = $parent_is_order && ! $parent_order->get_date_paid() ? null : $data['date_created'];
 		}
 
-		// Update or add the information to the DB.
-		$result = $wpdb->replace( $table_name, $data, $format );
+		return $data;
+	}
 
-		/**
-		 * Fires when order's stats reports are updated.
-		 *
-		 * @param int $order_id Order ID.
-		 *
-		 * @since 4.0.0.
-		 */
-		do_action( 'woocommerce_analytics_update_order_stats', $order->get_id() );
+	/**
+	 * Get the customer lookup ID for an order or refund, as Overrides\Order and Overrides\OrderRefund do.
+	 *
+	 * Used when the caller passes a plain order, since wc_get_order() only returns those classes once OrdersScheduler is set up.
+	 *
+	 * @param WC_Order|WC_Order_Refund $order Order or refund.
+	 * @return int|bool Customer ID, or false when there is none.
+	 */
+	private static function get_report_customer_id( $order ) {
+		if ( $order instanceof WC_Order_Refund ) {
+			$order = wc_get_order( $order->get_parent_id() );
+			if ( ! $order instanceof WC_Order ) {
+				return false;
+			}
+		}
 
-		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
-		return ( 1 === $result || 2 === $result );
+		return CustomersDataStore::get_or_create_customer_from_order( $order );
+	}
+
+	/**
+	 * Whether the order's row includes the fulfillment_status column.
+	 *
+	 * @param WC_Order|WC_Order_Refund $order Order or refund.
+	 * @return bool
+	 *
+	 * @phpstan-assert-if-true =WC_Order $order
+	 */
+	private static function stores_fulfillment_status( $order ): bool {
+		return FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order;
 	}
 
 	/**
@@ -777,8 +887,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Whether this refund is a single lump-sum refund for the full order (e.g. status set to refunded without line items).
 	 *
-	 * @param WC_Order_Refund|OrderRefund|Order $refund        Refund order.
-	 * @param WC_Order|Order                    $parent_order Parent order (not a refund).
+	 * @param WC_Order_Refund|WC_Order $refund        Refund order.
+	 * @param WC_Order|Order           $parent_order Parent order (not a refund).
 	 * @return bool
 	 */
 	protected static function should_split_full_refund_using_parent_order( $refund, $parent_order ) {
@@ -862,14 +972,36 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$customer_id = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_existing_customer_id_from_order( $order );
 		}
 
-		if ( ! $customer_id ) {
-			return false;
+		$status = self::get_returning_customer_status( $order, $customer_id );
+		if ( null !== $status['first_order_id'] ) {
+			self::set_customer_first_order( (int) $customer_id, $status['first_order_id'] );
 		}
+
+		return $status['is_returning'];
+	}
+
+	/**
+	 * Work out whether an order is from a returning customer, without changing any stats rows.
+	 *
+	 * @param WC_Order $order       Order.
+	 * @param int|bool $customer_id Customer ID.
+	 * @return array{is_returning: bool, first_order_id: int|null} The flag, and the order that is now the customer's first, if that changed.
+	 */
+	private static function get_returning_customer_status( $order, $customer_id ): array {
+		$not_returning = array(
+			'is_returning'   => false,
+			'first_order_id' => null,
+		);
+
+		if ( ! $customer_id ) {
+			return $not_returning;
+		}
+		$customer_id = (int) $customer_id;
 
 		$oldest_orders = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_oldest_orders( $customer_id );
 
 		if ( empty( $oldest_orders ) ) {
-			return false;
+			return $not_returning;
 		}
 
 		$first_order       = $oldest_orders[0];
@@ -890,8 +1022,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		if ( $is_older && ! in_array( $order_status, $excluded_statuses, true ) ) {
-			self::set_customer_first_order( $customer_id, $order->get_id() );
-			return false;
+			return array(
+				'is_returning'   => false,
+				'first_order_id' => (int) $order->get_id(),
+			);
 		}
 
 		// The current order is the oldest known order.
@@ -904,11 +1038,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$status_change = $second_order &&
 			in_array( $order_status, $excluded_statuses, true );
 		if ( $is_first_order && ( $date_change || $status_change ) ) {
-			self::set_customer_first_order( $customer_id, $second_order->order_id );
-			return true;
+			return array(
+				'is_returning'   => true,
+				'first_order_id' => (int) $second_order->order_id,
+			);
 		}
 
-		return (int) $order->get_id() !== (int) $first_order->order_id;
+		return array(
+			'is_returning'   => (int) $order->get_id() !== (int) $first_order->order_id,
+			'first_order_id' => null,
+		);
 	}
 
 	/**
