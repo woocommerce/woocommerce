@@ -37,6 +37,23 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove the block types test_block_should_have_data_attributes() registers, since the
+	 * block type registry outlives a test.
+	 */
+	public function tearDown(): void {
+		try {
+			$registry = \WP_Block_Type_Registry::get_instance();
+			foreach ( array( 'unrelated-namespace/unrelated-block-name', 'namespace/allowed-block-name', 'allowed-namespace/block-name', 'child-of-woo/block-name' ) as $block_name ) {
+				if ( $registry->is_registered( $block_name ) ) {
+					$registry->unregister( $block_name );
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * @testdox Should identify blocks that should have data attributes.
 	 */
 	public function test_block_should_have_data_attributes(): void {

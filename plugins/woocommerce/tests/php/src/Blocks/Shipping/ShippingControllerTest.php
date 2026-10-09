@@ -10,20 +10,13 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 /**
  * Unit tests for the PatternRegistry class.
  */
-class ShippingControllerTest extends \WP_UnitTestCase {
+class ShippingControllerTest extends \WC_Unit_Test_Case {
 	/**
 	 * The registry instance.
 	 *
 	 * @var ShippingController $controller
 	 */
 	private ShippingController $shipping_controller;
-
-	/**
-	 * The old checkout page ID.
-	 *
-	 * @var int $original_checkout_page_id
-	 */
-	private $original_checkout_page_id;
 
 	/**
 	 * The new checkout page ID.
@@ -52,7 +45,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Setup mock logger.
@@ -66,8 +59,7 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 		$this->backup_wc = WC();
 
 		// Local pickup only works with the checkout block.
-		$this->original_checkout_page_id = get_option( 'woocommerce_checkout_page_id' );
-		$this->block_checkout_page_id    = $this->factory->post->create(
+		$this->block_checkout_page_id = $this->factory->post->create(
 			array(
 				'post_type'    => 'page',
 				'post_title'   => 'Checkout',
@@ -92,14 +84,18 @@ class ShippingControllerTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		global $woocommerce;
 
-		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
-		wp_delete_post( $this->block_checkout_page_id );
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
-		$woocommerce = $this->backup_wc;
-		parent::tearDown();
+		try {
+			$woocommerce = $this->backup_wc;
+			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
+			// and register a lone pickup method on the shared WC_Shipping. Undo both.
+			unset( WC()->shipping );
+			WC()->shipping()->unregister_shipping_methods();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**

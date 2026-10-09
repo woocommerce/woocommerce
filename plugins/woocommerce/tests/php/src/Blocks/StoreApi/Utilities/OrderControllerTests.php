@@ -35,6 +35,9 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		// The per-test database rollback restores the option.
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
+		// The invalid-address tests need shipping rates for the cart, which ships to WC()->customer.
+		WC()->customer->set_shipping_location( 'US', 'CA' );
+
 		$this->sut = new class() extends OrderController {
 			/**
 			 * Check all required address fields are set and return errors if not. Parent is protected.

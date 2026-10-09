@@ -46,6 +46,9 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		wc_add_notice( 'Teardown coverage notice.' );
 		$this->assertSame( 1, wc_notice_count(), 'The notice should be queued.' );
 
+		$shipping_at_setup = WC()->customer->get_shipping( 'edit' );
+		WC()->customer->set_shipping_location( 'GB', '', 'LEAK 1', 'Leaked city' );
+
 		$clear_persistent_cart = null;
 		$cart_emptied_callback = function ( $should_clear_persistent_cart ) use ( &$clear_persistent_cart ) {
 			$clear_persistent_cart = $should_clear_persistent_cart;
@@ -64,10 +67,25 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'shortcode', WC()->cart->cart_context, 'The cart context should be back to shortcode.' );
 		$this->assertSame( 0, wc_notice_count(), 'The notice queue should have been cleared.' );
 		$this->assertFalse( $clear_persistent_cart, 'Teardown should leave persistent cart cleanup to the database rollback.' );
+		$this->assertSame( $shipping_at_setup, WC()->customer->get_shipping( 'edit' ), 'The customer shipping address should be back to what it was at setUp().' );
 		$this->assertNotSame(
 			self::LEAKED_LOCALE_LABEL,
 			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
+	}
+
+	/**
+	 * The REQUEST_URI that go_to() sets does not outlive the test.
+	 */
+	public function test_restore_request_uri_undoes_go_to(): void {
+		$request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+		$this->go_to( home_url( '/?product=leaked-product' ) );
+		$this->assertSame( '/?product=leaked-product', $_SERVER['REQUEST_URI'], 'go_to() should set REQUEST_URI.' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+		$this->restore_request_uri();
+
+		$this->assertSame( $request_uri_at_setup, $_SERVER['REQUEST_URI'] ?? null, 'REQUEST_URI should be back to what it was at setUp().' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	}
 }

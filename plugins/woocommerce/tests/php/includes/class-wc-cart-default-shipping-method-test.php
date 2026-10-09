@@ -40,16 +40,6 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		$this->zone->delete( true );
-		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
-		WC()->cart->cart_context = 'shortcode';
-		parent::tearDown();
-	}
-
-	/**
 	 * Build a test shipping package with the given rate keys.
 	 *
 	 * @param array $rate_keys e.g. ['flat_rate:1', 'local_pickup:1'].
