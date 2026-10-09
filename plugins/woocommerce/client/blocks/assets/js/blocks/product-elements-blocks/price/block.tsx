@@ -86,7 +86,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			? {
 					isAdmin,
 					product: productData,
-			  }
+				}
 			: undefined
 	);
 
@@ -164,7 +164,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 							product?.sale_price,
 							currency
 						),
-				  }
+					}
 				: {} ),
 			...( product?.regular_price
 				? {
@@ -172,7 +172,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 							product?.regular_price,
 							currency
 						),
-				  }
+					}
 				: {} ),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
@@ -186,7 +186,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 								product.max_price,
 								currency
 							),
-					  }
+						}
 					: null,
 		};
 	}
