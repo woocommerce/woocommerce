@@ -757,12 +757,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:decrease_usage_count\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Parameter \#1 \$value of method WC_Abstract_Order\:\:set_cart_tax\(\) expects string, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
