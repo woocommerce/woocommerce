@@ -173,11 +173,9 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			$product      = wc_get_product( $product->get_parent_id() );
 		}
 
-		if ( ! $product instanceof \WC_Product || 'publish' !== $product->get_status() ) {
-			return null;
-		}
-
-		if ( in_array( $product->get_catalog_visibility(), array( 'hidden', 'search' ), true ) ) {
+		// Catalog visibility as the storefront applies it: published, not hidden
+		// from the catalog, and in stock when the store hides out-of-stock items.
+		if ( ! $product instanceof \WC_Product || ! $product->is_visible() ) {
 			return null;
 		}
 

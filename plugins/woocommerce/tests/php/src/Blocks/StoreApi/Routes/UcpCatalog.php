@@ -182,6 +182,24 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Lookup follows the storefront's hide-out-of-stock setting.
+	 */
+	public function test_lookup_hides_out_of_stock_products_when_the_store_does(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'stock_status' => 'outofstock' ) );
+		$body    = array( 'ids' => array( (string) $product->get_id() ) );
+
+		$data = $this->post( '/catalog/lookup', $body )->get_data();
+		$this->assertFalse( $data['products'][0]['variants'][0]['availability']['available'] );
+
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$data = $this->post( '/catalog/lookup', $body )->get_data();
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+
+		$this->assertSame( array(), $data['products'] );
+		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
+	}
+
+	/**
 	 * A missing `ids` list is a UCP validation error, not a WordPress one.
 	 */
 	public function test_lookup_without_ids_returns_ucp_validation_error(): void {
