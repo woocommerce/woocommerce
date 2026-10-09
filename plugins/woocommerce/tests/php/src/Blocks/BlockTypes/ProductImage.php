@@ -320,12 +320,17 @@ class ProductImage extends \WP_UnitTestCase {
 	public function test_product_image_render_with_inner_blocks() {
 		$data = $this->create_product_with_image();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image --><div class="custom-inner-block">Custom content</div><!-- /wp:woocommerce/product-image --><!-- /wp:woocommerce/single-product -->' );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $data['product']->get_id() . '} --><!-- wp:woocommerce/product-image {"style":{"spacing":{"padding":{"top":"22px"}}}} --><div class="custom-inner-block">Custom content</div><!-- /wp:woocommerce/product-image --><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc-block-components-product-image', $markup );
-		$this->assertStringContainsString( 'wc-block-components-product-image__inner-container', $markup );
+		$this->assertStringContainsString( 'wc-block-components-product-image__inner-container" style="padding-top:22px;"', $markup );
 		$this->assertStringContainsString( 'custom-inner-block', $markup );
 		$this->assertStringContainsString( 'Custom content', $markup );
+
+		$markup_before_inner_container = strstr( $markup, 'wc-block-components-product-image__inner-container', true );
+
+		// Verify padding is not added to the wrapper.
+		$this->assertStringNotContainsString( 'padding-top:22px', $markup_before_inner_container );
 
 		// Clean up.
 		$data['product']->delete( true );
