@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -133,16 +134,9 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return $extension_args;
 		}
 
-		// wc_get_products() ignores a meta_query argument, so the clauses go into the WP_Query arguments.
-		$add_extension_args = static function ( array $wp_query_args ) use ( $extension_args ): array {
-			return array_merge_recursive( $wp_query_args, $extension_args );
-		};
-		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $add_extension_args );
-		try {
-			$results = wc_get_products( $args );
-		} finally {
-			remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $add_extension_args );
-		}
+		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
+
+		$results  = wc_get_products( $args );
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -175,6 +176,25 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		);
 		AbilityExtensions::register_query_filter(
 			array(
+				'resource'  => 'product',
+				'namespace' => 'test-ext',
+				'filter'    => 'category',
+				'schema'    => array( 'type' => 'string' ),
+				'callback'  => static function ( string $slug ) {
+					return array(
+						'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+							array(
+								'taxonomy' => 'product_cat',
+								'field'    => 'slug',
+								'terms'    => $slug,
+							),
+						),
+					);
+				},
+			)
+		);
+		AbilityExtensions::register_query_filter(
+			array(
 				'resource'  => 'order',
 				'namespace' => 'test-ext',
 				'filter'    => 'tag',
@@ -197,7 +217,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return only the products that match an extension filter, with correct pagination.
+	 * @testdox Should return only the products that match an extension filter sent as a query string, with correct pagination.
 	 */
 	public function test_product_filter_returns_matching_products(): void {
 		$with_code = array();
@@ -208,7 +228,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$with_code[] = $product->get_id();
 		}
 		$without_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
-		$filters      = array( 'extensions' => array( 'test-ext' => array( 'has_code' => true ) ) );
+		$filters      = array( 'extensions' => array( 'test-ext' => array( 'has_code' => 'true' ) ) );
 
 		$page_one = $this->run_ability(
 			'woocommerce/products-query',
@@ -231,7 +251,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce/products-query',
 			array(
 				'search'  => 'Pen',
-				'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => false ) ) ),
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => 'false' ) ) ),
 			)
 		);
 
@@ -241,19 +261,84 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return only the orders that match an extension filter, with HPOS and with posts storage.
-	 * @testWith [true]
-	 *           [false]
+	 * @testdox Should add a tax_query filter to Core's own product type clauses with AND.
+	 */
+	public function test_product_tax_filter_adds_to_core_clauses(): void {
+		$category = wp_insert_term( 'Gifts', 'product_cat' )['term_id'];
+		$simple   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen simple' ) );
+		$external = \WC_Helper_Product::create_external_product();
+		foreach ( array( $simple, $external ) as $product ) {
+			$product->set_category_ids( array( $category ) );
+			$product->save();
+		}
+		\WC_Helper_Product::create_external_product();
+
+		$output = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'product_type_alias' => 'affiliate',
+				'filters'            => array( 'extensions' => array( 'test-ext' => array( 'category' => 'gifts' ) ) ),
+			)
+		);
+
+		$this->assertSame( array( $external->get_id() ), array_column( $output['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should not filter a product query that a hook runs inside the ability's query.
+	 */
+	public function test_product_filter_does_not_reach_a_nested_query(): void {
+		$with_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen coded' ) );
+		$with_code->update_meta_data( '_test_code', 'A1' );
+		$with_code->save();
+		$without_code = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
+		$nested       = null;
+		$run_nested   = static function ( $wp_query_args ) use ( &$nested ) {
+			if ( null === $nested ) {
+				$nested = array();
+				$nested = wc_get_products(
+					array(
+						'limit'  => -1,
+						'return' => 'ids',
+					)
+				);
+			}
+			return $wp_query_args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $run_nested, 5 );
+
+		$output = $this->run_ability(
+			'woocommerce/products-query',
+			array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => 'true' ) ) ) )
+		);
+
+		remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $run_nested, 5 );
+		$this->assertSame( array( $with_code->get_id() ), array_column( $output['products'], 'id' ) );
+		$this->assertContains( $without_code->get_id(), $nested );
+	}
+
+	/**
+	 * @testdox Should return only the orders that match an extension filter, with HPOS and with posts storage, with and without sync.
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
 	 *
 	 * @param bool $hpos Whether HPOS is on.
+	 * @param bool $sync Whether HPOS and posts storage sync.
 	 */
-	public function test_order_filter_returns_matching_orders( bool $hpos ): void {
+	public function test_order_filter_returns_matching_orders( bool $hpos, bool $sync ): void {
 		$original = OrderUtil::custom_orders_table_usage_is_enabled();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		if ( $hpos ) {
 			$this->setup_cot();
 		} else {
 			$this->toggle_cot_feature_and_usage( false );
+		}
+		if ( $sync ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
 		}
 
 		try {
@@ -276,12 +361,14 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$this->assertSame( $hpos, OrderUtil::custom_orders_table_usage_is_enabled() );
+			$this->assertSame( $sync, OrderUtil::is_custom_order_tables_in_sync() );
 			$this->assertSame( 2, $output['total_pages'] );
 			$this->assertContains( $output['orders'][0]['id'], $tagged );
 		} finally {
 			if ( $hpos ) {
 				$this->clean_up_cot_setup();
 			}
+			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
 			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
