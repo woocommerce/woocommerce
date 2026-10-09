@@ -78,7 +78,7 @@ class BlockTemplatesController {
 					// BC: apply filters relevant to block_type_metadata_settings -> pre_render_block hook migration.
 					$block_instance = new \WP_Block( $parsed_block );
 					$block_content  = apply_filters( 'render_block', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core filter.
-					$block_content  = apply_filters( 'render_block_core/template-part', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress core filter.
+					$block_content  = apply_filters( 'render_block_core/template-part', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 					return $block_content;
 				}
