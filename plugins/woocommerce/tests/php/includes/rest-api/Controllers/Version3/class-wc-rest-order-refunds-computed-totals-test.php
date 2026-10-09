@@ -938,6 +938,31 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox A line item belonging to another order cannot be used to validate a refund.
+	 */
+	public function test_unflagged_foreign_order_item_is_rejected(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$foreign = $this->create_order_with_product( 20.00, 1 );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '5',
+				'line_items' => array(
+					array(
+						'id'           => $this->get_first_line_item_id( $foreign ),
+						'refund_total' => 5,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_line_item_not_found', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox Explicit fee and shipping refunds respect each line's original total.
 	 */
 	public function test_unflagged_fee_and_shipping_limits(): void {
