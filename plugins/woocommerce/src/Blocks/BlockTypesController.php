@@ -141,6 +141,8 @@ final class BlockTypesController {
 			return;
 		}
 
+		do_action( 'qm/start', 'BlockTypesController::register_blocks' );
+
 		// Set before registering rather than after, so a registration failure is not retried on a later call.
 		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
@@ -151,6 +153,8 @@ final class BlockTypesController {
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
+
+		do_action( 'qm/stop', 'BlockTypesController::register_blocks' );
 	}
 
 	/**
