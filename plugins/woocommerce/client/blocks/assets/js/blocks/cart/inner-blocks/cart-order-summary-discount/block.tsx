@@ -13,7 +13,7 @@ import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
 
 const DiscountSlotFill = (): JSX.Element => {
 	// Prepare props to pass to the ExperimentalOrderMeta slot fill. We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const discountsSlotFillProps = {
 		extensions,

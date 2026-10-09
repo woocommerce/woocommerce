@@ -14,9 +14,7 @@ import type {
 } from '@woocommerce/settings';
 
 export type WordCountType =
-	| 'words'
-	| 'characters_excluding_spaces'
-	| 'characters_including_spaces';
+	'words' | 'characters_excluding_spaces' | 'characters_including_spaces';
 
 export interface WcBlocksConfig {
 	pluginUrl: string;

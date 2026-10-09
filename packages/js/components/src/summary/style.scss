@@ -38,7 +38,7 @@ $border: $gray-200;
 	box-shadow: inset -1px -1px 0 $border;
 	width: 100%;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		& {
 			border-width: 0;
 		}
@@ -128,7 +128,7 @@ $border: $gray-200;
 		@include wrap-contents;
 	}
 
-	@include breakpoint( '>1440px' ) {
+	@include breakpoint( ">1440px" ) {
 		&.has-6-items {
 			@include make-cols( 6 );
 			@include wrap-contents;
@@ -141,7 +141,7 @@ $border: $gray-200;
 		}
 	}
 
-	@include breakpoint( '<1440px' ) {
+	@include breakpoint( "<1440px" ) {
 		&.has-4-items,
 		&.has-7-items,
 		&.has-8-items {
@@ -167,14 +167,14 @@ $border: $gray-200;
 		}
 	}
 
-	@include breakpoint( '<960px' ) {
+	@include breakpoint( "<960px" ) {
 		.woocommerce-summary__item {
 			// One-col layout for all items means right border is always "outer"
 			border-right-color: $border;
 		}
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		.woocommerce-summary__item-container {
 			margin-left: -16px;
 			margin-right: -16px;
@@ -216,7 +216,7 @@ $border: $gray-200;
 			display: block;
 		}
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			border-right: none;
 		}
 	}
@@ -263,6 +263,7 @@ $border: $gray-200;
 	background-color: #f8f9fa;
 	border-bottom: 1px solid $border;
 	border-right: 1px solid $border;
+	/* stylelint-disable-next-line declaration-property-unit-allowed-list */
 	line-height: 1.4em;
 	text-decoration: none;
 	color: $gray-900;
@@ -294,7 +295,8 @@ $border: $gray-200;
 	&.is-selected {
 		&:focus {
 			// !important to override button styles
-			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 0 0 $gray-700,
+			box-shadow: inset -1px -1px 0 $gray-700,
+ inset 1px 0 0 $gray-700,
 				inset 0 4px 0 var(--wp-admin-theme-color) !important;
 		}
 	}
@@ -304,7 +306,7 @@ $border: $gray-200;
 		width: 100%;
 		padding-right: 2 * $gap + 24px;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			border-right: none;
 		}
 	}
@@ -323,6 +325,7 @@ $border: $gray-200;
 
 	.woocommerce-summary__info-tooltip {
 		color: $gray-600;
+	/* stylelint-disable-next-line declaration-property-unit-allowed-list */
 		line-height: 1em;
 		margin-left: $gap-smallest;
 

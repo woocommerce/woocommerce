@@ -37,8 +37,7 @@
 }
 
 .wc-block-components-checkout-step--with-step-number
-	.wc-block-components-checkout-step__content
-	> :last-child {
+	.wc-block-components-checkout-step__content > :last-child {
 	margin-bottom: 0;
 }
 
@@ -49,8 +48,7 @@
 .wc-block-components-checkout-step__heading {
 	position: relative;
 
-	.wc-block-components-express-payment-continue-rule
-		+ .wc-block-components-checkout-step
+	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step
 		& {
 		margin-top: 0;
 	}
