@@ -340,95 +340,49 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The on_sale filter must combine with an include list correctly: a product that is not on sale
-	 * must not be returned when on_sale=true, even when it is in the include list.
-	 *
-	 * @return void
+	 * @testdox The on_sale parameter combines with include and exclude.
 	 */
-	public function test_on_sale_filter_combined_with_include() {
-		$on_sale = WC_Helper_Product::create_simple_product();
-		$on_sale->set_regular_price( 100 );
-		$on_sale->set_sale_price( 50 );
-		$on_sale->save();
-
-		$regular = WC_Helper_Product::create_simple_product();
-		$regular->set_regular_price( 100 );
-		$regular->save();
+	public function test_products_filter_by_on_sale_with_include_and_exclude(): void {
+		$on_sale_product   = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$excluded_product  = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$regular_product   = WC_Helper_Product::create_simple_product();
+		$included_products = array( $on_sale_product->get_id(), $regular_product->get_id() );
 
 		delete_transient( 'wc_products_onsale' );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params(
-			array(
-				'on_sale' => true,
-				'include' => array( $regular->get_id(), $on_sale->get_id() ),
-			)
+		$cases = array(
+			'on_sale=true with include'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'include' => $included_products,
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+			'on_sale=false with include' => array(
+				'params'   => array(
+					'on_sale' => false,
+					'include' => $included_products,
+				),
+				'expected' => array( $regular_product->get_id() ),
+			),
+			'on_sale=true with exclude'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'exclude' => array( $excluded_product->get_id() ),
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
 		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
 
-		$ids = wp_list_pluck( $response->get_data(), 'id' );
-		$this->assertContains( $on_sale->get_id(), $ids, 'The on-sale product should be returned.' );
-		$this->assertNotContains( $regular->get_id(), $ids, 'A product that is not on sale must not be returned when on_sale=true.' );
-	}
+		foreach ( $cases as $name => $case ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+			$request->set_query_params( $case['params'] );
 
-	/**
-	 * The on_sale filter must not return products that are on sale when on_sale=false is combined with include.
-	 *
-	 * @return void
-	 */
-	public function test_on_sale_false_filter_combined_with_include() {
-		$on_sale = WC_Helper_Product::create_simple_product();
-		$on_sale->set_regular_price( 100 );
-		$on_sale->set_sale_price( 50 );
-		$on_sale->save();
+			$response = $this->server->dispatch( $request );
 
-		$regular = WC_Helper_Product::create_simple_product();
-		$regular->set_regular_price( 100 );
-		$regular->save();
-
-		delete_transient( 'wc_products_onsale' );
-
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params(
-			array(
-				'on_sale' => false,
-				'include' => array( $regular->get_id(), $on_sale->get_id() ),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( $regular->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
-	}
-
-	/**
-	 * The exclude filter must still apply when on_sale=true.
-	 *
-	 * @return void
-	 */
-	public function test_on_sale_true_filter_combined_with_exclude() {
-		$on_sale = WC_Helper_Product::create_simple_product();
-		$on_sale->set_regular_price( 100 );
-		$on_sale->set_sale_price( 50 );
-		$on_sale->save();
-
-		$excluded = WC_Helper_Product::create_simple_product();
-		$excluded->set_regular_price( 100 );
-		$excluded->set_sale_price( 50 );
-		$excluded->save();
-
-		delete_transient( 'wc_products_onsale' );
-
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_query_params(
-			array(
-				'on_sale' => true,
-				'exclude' => array( $excluded->get_id() ),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( $on_sale->get_id() ), wp_list_pluck( $response->get_data(), 'id' ) );
+			$this->assertSame( 200, $response->get_status(), $name );
+			$this->assertSame( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
+		}
 	}
 
 	/**
