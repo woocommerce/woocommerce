@@ -474,6 +474,44 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Two-argument set_data() overrides remain compatible and avoid duplicate identifier-free Product nodes.
+	 */
+	public function test_product_data_with_two_argument_set_data_override(): void {
+		$sut     = new class() extends WC_Structured_Data {
+			/** @var int Number of times the overridden setter was called. */
+			public $set_data_calls = 0;
+
+			/**
+			 * Store structured data using the original public signature.
+			 *
+			 * @param array $data Structured data.
+			 * @param bool  $reset Whether to reset stored data.
+			 * @return bool
+			 */
+			public function set_data( $data, $reset = false ) {
+				++$this->set_data_calls;
+				return parent::set_data( $data, $reset );
+			}
+		};
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		add_filter(
+			'woocommerce_structured_data_product',
+			static function ( $markup ) {
+				unset( $markup['@id'], $markup['url'] );
+				return $markup;
+			}
+		);
+
+		$sut->generate_product_data( $product );
+		$this->output_footer_structured_data();
+
+		$this->assertCount( 1, $sut->get_data(), 'The overridden setter should not cause duplicate Product data.' );
+		$this->assertSame( 1, $sut->set_data_calls, 'The overridden setter should be called only once.' );
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void

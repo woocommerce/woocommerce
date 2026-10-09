@@ -40,6 +40,13 @@ class WC_Structured_Data {
 	private $product_data_ids = array();
 
 	/**
+	 * Product ID being added by generate_product_data().
+	 *
+	 * @var int
+	 */
+	private $generating_product_id = 0;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -63,11 +70,10 @@ class WC_Structured_Data {
 	 *
 	 * @param  array $data  Structured data. The `@type` value accepts a string or an array of strings.
 	 *                      Every type must contain 1 to 20 ASCII letters; any invalid array member rejects the node.
-	 * @param  bool  $reset      Unset data (default: false).
-	 * @param  int   $product_id Product ID for generated Product data (default: 0).
+	 * @param  bool  $reset Unset data (default: false).
 	 * @return bool
 	 */
-	public function set_data( $data, $reset = false, $product_id = 0 ) {
+	public function set_data( $data, $reset = false ) {
 		if ( isset( $data['@type'] ) && is_array( $data['@type'] ) ) {
 			if ( empty( $data['@type'] ) ) {
 				return false;
@@ -90,8 +96,8 @@ class WC_Structured_Data {
 		}
 
 		$this->_data[] = $data;
-		if ( $product_id && in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) ) {
-			$this->product_data_ids[ array_key_last( $this->_data ) ] = $product_id;
+		if ( $this->generating_product_id && in_array( 'product', array_map( 'strtolower', (array) $data['@type'] ), true ) ) {
+			$this->product_data_ids[ array_key_last( $this->_data ) ] = $this->generating_product_id;
 		}
 
 		return true;
@@ -590,7 +596,13 @@ class WC_Structured_Data {
 		 * @param array      $markup  Product structured data.
 		 * @param WC_Product $product Product being described.
 		 */
-		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ), false, $product->get_id() );
+		$markup                      = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
+		$this->generating_product_id = $product->get_id();
+		try {
+			$this->set_data( $markup );
+		} finally {
+			$this->generating_product_id = 0;
+		}
 	}
 
 	/**
