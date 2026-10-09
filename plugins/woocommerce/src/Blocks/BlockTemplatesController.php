@@ -70,7 +70,11 @@ class BlockTemplatesController {
 					$html_tag           = $attributes['tagName'] ?? null;
 					$html_tag           = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
 
-					return "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
+					// Backward compatibility: pre_render_block skips core's render_block filter, re-apply it so extensions filtering template part output still work.
+					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
+					$block_content = apply_filters( 'render_block', $block_content, $parsed_block, new \WP_Block( $parsed_block ) );
+
+					return $block_content;
 				}
 			}
 		}
