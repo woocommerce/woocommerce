@@ -43,7 +43,7 @@ final class ContractActions {
 	 * registered (the first registration is kept). Unknown keys raise a notice and are ignored.
 	 *
 	 * @param string               $extension_slug Owning extension slug; matches the contracts' `extension_slug`.
-	 * @param string               $action         Action slug, `[a-z0-9_-]+`.
+	 * @param string               $action         Action slug: lowercase letters, numbers, hyphens and underscores.
 	 * @param array<string, mixed> $args           `callback` (required): `callable( ContractView $contract, array $action_args ): ContractView|WP_Error`.
 	 *                                             `permission` (required): `'manager'` (`manage_woocommerce`), `'customer'`
 	 *                                             (the contract's customer), or `callable( ContractView $contract, WP_REST_Request $request ): bool`.
@@ -66,7 +66,7 @@ final class ContractActions {
 		}
 
 		if ( 1 !== preg_match( '/^[a-z0-9_-]+$/', $action ) ) {
-			self::reject( sprintf( 'Contract action "%s" must match [a-z0-9_-]+.', $action ) );
+			self::reject( sprintf( 'Contract action "%s" may only contain lowercase letters, numbers, hyphens and underscores.', $action ) );
 			return;
 		}
 
