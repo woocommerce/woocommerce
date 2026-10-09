@@ -642,6 +642,19 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_legacy'                    => false,
 			),
+			'ucp'                                  => array(
+				'name'                         => __( 'Universal Commerce Protocol', 'woocommerce' ),
+				'description'                  => __(
+					'Expose the catalog to AI shopping agents through UCP endpoints.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden: the flag is set by the integration that drives UCP, not by merchants.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'destroy-empty-sessions'               => array(
 				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
 				'description'                  => __(

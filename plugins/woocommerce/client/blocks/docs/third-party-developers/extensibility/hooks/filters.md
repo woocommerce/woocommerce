@@ -78,7 +78,6 @@
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
 - [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
-- [woocommerce_ucp_enabled](#woocommerce_ucp_enabled)
 - [woocommerce_use_block_notices_in_classic_theme](#woocommerce_use_block_notices_in_classic_theme)
 - [woocommerce_valid_order_statuses_for_payment](#woocommerce_valid_order_statuses_for_payment)
 - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
@@ -1958,27 +1957,6 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 ### Source
 
 - [Blocks/BlockTypes/OrderConfirmation/Status.php](../../../../../../src/Blocks/BlockTypes/OrderConfirmation/Status.php)
-
----
-
-## woocommerce_ucp_enabled
-
-
-Filters whether the UCP (Universal Commerce Protocol) routes are registered.
-
-```php
-apply_filters( 'woocommerce_ucp_enabled', bool $enabled )
-```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $enabled | bool | Whether the routes are registered. Default false. |
-
-### Source
-
-- [StoreApi/Utilities/UcpUtils.php](../../../../../../src/StoreApi/Utilities/UcpUtils.php)
 
 ---
 

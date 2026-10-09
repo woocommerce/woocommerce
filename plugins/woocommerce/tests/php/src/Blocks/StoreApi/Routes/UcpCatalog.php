@@ -64,10 +64,15 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Option behind the `ucp` feature.
+	 */
+	private const FEATURE_OPTION = 'woocommerce_feature_ucp_enabled';
+
+	/**
 	 * Enable the UCP routes before the REST server is built.
 	 */
 	protected function setUp(): void {
-		add_filter( 'woocommerce_ucp_enabled', '__return_true' );
+		update_option( self::FEATURE_OPTION, 'yes' );
 		parent::setUp();
 	}
 
@@ -75,7 +80,7 @@ class UcpCatalog extends ControllerTestCase {
 	 * Restore the default disabled state.
 	 */
 	protected function tearDown(): void {
-		remove_filter( 'woocommerce_ucp_enabled', '__return_true' );
+		delete_option( self::FEATURE_OPTION );
 		parent::tearDown();
 	}
 
@@ -98,7 +103,7 @@ class UcpCatalog extends ControllerTestCase {
 	 * The routes must not exist unless a site opts in.
 	 */
 	public function test_routes_are_not_registered_by_default(): void {
-		remove_filter( 'woocommerce_ucp_enabled', '__return_true' );
+		delete_option( self::FEATURE_OPTION );
 		$this->initialize_store_api_server();
 
 		foreach ( array( '/catalog/search', '/catalog/lookup', '/catalog/product' ) as $path ) {

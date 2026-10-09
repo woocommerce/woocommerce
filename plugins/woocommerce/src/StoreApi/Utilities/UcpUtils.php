@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 /**
  * Shared helpers for the UCP (Universal Commerce Protocol) routes.
  */
@@ -11,6 +13,11 @@ class UcpUtils {
 	 * UCP specification version these routes implement.
 	 */
 	const VERSION = '2026-04-08';
+
+	/**
+	 * Feature id gating the UCP routes, stored as `woocommerce_feature_ucp_enabled`.
+	 */
+	const FEATURE_ID = 'ucp';
 
 	/**
 	 * Capability served by `POST /catalog/search`.
@@ -28,14 +35,7 @@ class UcpUtils {
 	 * @return bool
 	 */
 	public static function is_enabled(): bool {
-		/**
-		 * Filters whether the UCP (Universal Commerce Protocol) routes are registered.
-		 *
-		 * @since 11.3.0
-		 *
-		 * @param bool $enabled Whether the routes are registered. Default false.
-		 */
-		return (bool) apply_filters( 'woocommerce_ucp_enabled', false );
+		return FeaturesUtil::feature_is_enabled( self::FEATURE_ID );
 	}
 
 	/**
