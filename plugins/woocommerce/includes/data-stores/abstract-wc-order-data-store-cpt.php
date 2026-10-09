@@ -922,10 +922,33 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		if ( ! empty( $type ) ) {
-			$wpdb->query( $wpdb->prepare( "DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $order_id, $type ) );
+			$itemmeta_deleted = $wpdb->query( $wpdb->prepare( "DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $order_id, $type ) );
+		} else {
+			$itemmeta_deleted = $wpdb->query( $wpdb->prepare( "DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $order_id ) );
+		}
+
+		/*
+		 * Deleting the item rows after the item meta deletion failed would orphan that meta, since
+		 * the rows it is joined against would be gone. Leaving both in place keeps the data
+		 * recoverable: a subsequent delete cleans up what this one could not.
+		 */
+		if ( false === $itemmeta_deleted ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Failed to delete order item meta for order %1$d, leaving the order items in place. Database error: %2$s',
+					$order_id,
+					$wpdb->last_error
+				),
+				array( 'source' => 'order-data-store' )
+			);
+
+			$this->clear_caches( $order );
+			return;
+		}
+
+		if ( ! empty( $type ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $order_id, $type ) );
 		} else {
-			$wpdb->query( $wpdb->prepare( "DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $order_id ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
 		}
 
