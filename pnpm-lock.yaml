@@ -1766,6 +1766,9 @@ importers:
       sass-loader:
         specifier: 10.5.x
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.24.2))
+      terser-webpack-plugin:
+        specifier: 5.4.0
+        version: 5.4.0(@swc/core@1.15.24)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.24.2))
       webpack-remove-empty-scripts:
         specifier: 1.0.x
         version: 1.0.4(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.24.2))
