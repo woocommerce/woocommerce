@@ -6,10 +6,12 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDat
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsRenderer;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AmazonLogisticsShippingProvider;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Helper_Order;
 use WC_Helper_Product;
 use WC_Order;
+use WP_Query;
 
 /**
  * Tests for Fulfillment object.
@@ -391,5 +393,285 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( 'wc-admin-fulfillments-js', $output );
 		$this->assertStringContainsString( 'var wcFulfillmentSettings', $output );
+	}
+
+	/**
+	 * @testdox Filtering by a specific provider returns only the orders whose fulfillment uses it.
+	 */
+	public function test_get_order_ids_matches_specific_provider(): void {
+		$this->seed_fulfillment( 101, 'acme-couriers' );
+		$this->seed_fulfillment( 102, 'other-co' );
+
+		$this->assertSame( array( 101 ), $this->get_order_ids( 'acme-couriers' ) );
+	}
+
+	/**
+	 * @testdox The filter finds an order whose provider was saved through the fulfillment CRUD path.
+	 */
+	public function test_get_order_ids_matches_provider_saved_through_crud(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+		$fulfillment->set_shipment_provider( 'acme-couriers' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->save();
+
+		$this->assertSame(
+			array( $order->get_id() ),
+			$this->get_order_ids( 'acme-couriers' ),
+			'The filter must match the provider meta the data store actually persists.'
+		);
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox A soft-deleted fulfillment is excluded from the provider filter.
+	 */
+	public function test_get_order_ids_excludes_soft_deleted_fulfillment(): void {
+		$this->seed_fulfillment( 103, 'acme-couriers' );
+		$this->seed_fulfillment( 104, 'acme-couriers', true );
+
+		$this->assertSame( array( 103 ), $this->get_order_ids( 'acme-couriers' ) );
+	}
+
+	/**
+	 * @testdox A fulfillment whose provider meta row is soft-deleted is excluded from the filter.
+	 */
+	public function test_get_order_ids_excludes_soft_deleted_meta(): void {
+		$this->seed_fulfillment( 105, 'acme-couriers' );
+		$this->seed_fulfillment( 106, 'acme-couriers', false, true );
+
+		$this->assertSame( array( 105 ), $this->get_order_ids( 'acme-couriers' ) );
+	}
+
+	/**
+	 * @testdox The __other__ sentinel returns orders whose provider is not a known built-in or custom key.
+	 */
+	public function test_get_order_ids_other_excludes_known_providers(): void {
+		// Register a known provider so the query uses the NOT IN branch rather than the
+		// empty-known-keys fallback, which would otherwise return every providered order.
+		$register_known = function ( array $providers ): array {
+			$providers[] = AmazonLogisticsShippingProvider::class;
+			return $providers;
+		};
+		add_filter( 'woocommerce_fulfillment_shipping_providers', $register_known );
+
+		try {
+			$this->seed_fulfillment( 201, 'amazon-logistics' );
+			$this->seed_fulfillment( 202, 'ghost-provider' );
+
+			$this->assertSame( array( 202 ), $this->get_order_ids( '__other__' ) );
+		} finally {
+			remove_filter( 'woocommerce_fulfillment_shipping_providers', $register_known );
+		}
+	}
+
+	/**
+	 * @testdox The HPOS orders query is filtered to the matching order ids when no post__in exists yet.
+	 */
+	public function test_filter_orders_sets_post_in_when_absent(): void {
+		$this->seed_fulfillment( 301, 'acme-couriers' );
+
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array() );
+				$this->assertSame( array( 301 ), $args['post__in'] );
+			}
+		);
+	}
+
+	/**
+	 * @testdox The HPOS filter intersects an existing post__in with the provider matches.
+	 */
+	public function test_filter_orders_intersects_existing_post_in(): void {
+		$this->seed_fulfillment( 401, 'acme-couriers' );
+		$this->seed_fulfillment( 402, 'acme-couriers' );
+
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array( 'post__in' => array( 401, 999 ) ) );
+				$this->assertSame( array( 401 ), array_values( $args['post__in'] ), 'Only the id present in both sets should remain.' );
+			}
+		);
+	}
+
+	/**
+	 * @testdox The HPOS filter returns a no-match sentinel when the provider has no orders.
+	 */
+	public function test_filter_orders_returns_zero_when_no_match(): void {
+		$this->with_provider_param(
+			'provider-with-no-orders',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array() );
+				$this->assertSame( array( 0 ), $args['post__in'], 'An unmatched provider should force an empty result set.' );
+			}
+		);
+	}
+
+	/**
+	 * @testdox The HPOS filter leaves the query arguments untouched when no provider is requested.
+	 */
+	public function test_filter_orders_is_noop_without_param(): void {
+		$original = array( 'post__in' => array( 7, 8 ) );
+
+		$this->assertSame( $original, $this->renderer->filter_orders_by_shipping_provider( $original ) );
+	}
+
+	/**
+	 * @testdox The legacy orders query is filtered to the matching order ids.
+	 */
+	public function test_filter_legacy_orders_sets_post_in(): void {
+		$this->seed_fulfillment( 501, 'acme-couriers' );
+
+		$query = new WP_Query();
+		$query->set( 'post_type', 'shop_order' );
+
+		$this->with_main_query(
+			$query,
+			function () use ( $query ) {
+				$this->with_provider_param(
+					'acme-couriers',
+					function () use ( $query ) {
+						$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
+						$this->assertSame( array( 501 ), $query->get( 'post__in' ) );
+					}
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox The legacy filter does nothing when the query is not the admin main orders query.
+	 */
+	public function test_filter_legacy_orders_skips_non_main_query(): void {
+		$this->seed_fulfillment( 601, 'acme-couriers' );
+
+		// A secondary query: not registered as the main query, so the guard must bail.
+		$query = new WP_Query();
+		$query->set( 'post_type', 'shop_order' );
+
+		// Set the admin screen so is_admin() passes and the bail is isolated to the is_main_query() guard.
+		$original_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		set_current_screen( 'edit-shop_order' );
+
+		try {
+			$this->with_provider_param(
+				'acme-couriers',
+				function () use ( $query ) {
+					$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
+					$this->assertEmpty( $query->get( 'post__in' ), 'A non-main query should not be filtered.' );
+				}
+			);
+		} finally {
+			if ( $original_screen ) {
+				$GLOBALS['current_screen'] = $original_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			} else {
+				unset( $GLOBALS['current_screen'] );
+			}
+		}
+	}
+
+	/**
+	 * Invoke the private provider-to-order-ids query.
+	 *
+	 * @param string $provider The provider key or the __other__ sentinel.
+	 * @return array<int> The matching order ids.
+	 */
+	private function get_order_ids( string $provider ): array {
+		$method = new \ReflectionMethod( FulfillmentsRenderer::class, 'get_order_ids_by_shipping_provider' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $this->renderer, $provider );
+	}
+
+	/**
+	 * Run a callback with the shipping_provider request parameter set, then restore it.
+	 *
+	 * @param string   $provider The provider value to place in the request.
+	 * @param callable $callback The assertions to run while the parameter is set.
+	 */
+	private function with_provider_param( string $provider, callable $callback ): void {
+		$_GET['shipping_provider'] = $provider;
+		try {
+			$callback();
+		} finally {
+			unset( $_GET['shipping_provider'] );
+		}
+	}
+
+	/**
+	 * Run a callback with the given query registered as the admin main orders query, then restore state.
+	 *
+	 * @param WP_Query $query    The query to treat as the main query.
+	 * @param callable $callback The assertions to run while the query is active.
+	 */
+	private function with_main_query( WP_Query $query, callable $callback ): void {
+		$original_main_query = $GLOBALS['wp_the_query'] ?? null;
+		$original_screen     = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+		// is_main_query() compares against $wp_the_query, and is_admin() reads the current screen;
+		// the test restores both in the finally block.
+		$GLOBALS['wp_the_query'] = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		set_current_screen( 'edit-shop_order' );
+		try {
+			$callback();
+		} finally {
+			$GLOBALS['wp_the_query'] = $original_main_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			if ( $original_screen ) {
+				$GLOBALS['current_screen'] = $original_screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			} else {
+				unset( $GLOBALS['current_screen'] );
+			}
+		}
+	}
+
+	/**
+	 * Insert a fulfillment referencing a provider slug, as the filter query expects.
+	 *
+	 * @param int    $entity_id     The order id the fulfillment belongs to.
+	 * @param string $provider_slug The provider slug the fulfillment references.
+	 * @param bool   $deleted       Whether the fulfillment row is soft-deleted.
+	 * @param bool   $meta_deleted  Whether the provider meta row is soft-deleted.
+	 */
+	private function seed_fulfillment( int $entity_id, string $provider_slug, bool $deleted = false, bool $meta_deleted = false ): void {
+		global $wpdb;
+		$now = current_time( 'mysql', true );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_fulfillments',
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $entity_id,
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => 0,
+				'date_updated' => $now,
+				'date_deleted' => $deleted ? $now : null,
+			)
+		);
+
+		// Column names of a custom fulfillments table, not a slow postmeta query.
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_fulfillment_meta',
+			array(
+				'fulfillment_id' => (int) $wpdb->insert_id,
+				'meta_key'       => '_shipment_provider', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'     => wp_json_encode( $provider_slug ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'date_updated'   => $now,
+				'date_deleted'   => $meta_deleted ? $now : null,
+			)
+		);
 	}
 }
