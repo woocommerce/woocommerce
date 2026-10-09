@@ -170,6 +170,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.2.1 2026-XX-XX =
+= 11.2.1 2026-10-09 =
+
+**WooCommerce**
+
+* Fix - Restore how the classic checkout sends order review and coupon requests, so fields removed with checkout field filters are no longer sent as empty values. [#69649](https://github.com/woocommerce/woocommerce/pull/69649)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
