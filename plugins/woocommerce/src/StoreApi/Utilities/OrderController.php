@@ -19,7 +19,7 @@ use Exception;
 class OrderController {
 
 	/**
-	 * Address fields that decides shipping rate and tax rate.
+	 * Address fields that shipping zones and tax rates match on. Other fields, like name or street, do not change the price.
 	 *
 	 * @see \WC_Shipping_Zones::get_zone_matching_package()
 	 * @see \WC_Tax::find_rates()
@@ -205,11 +205,11 @@ class OrderController {
 	 * @since 11.3.0
 	 *
 	 * @throws RouteException When an address is not valid or its location cannot change.
-	 * @param \WC_Order $order    Existing order.
-	 * @param array     $billing  New billing address.
-	 * @param array     $shipping New shipping address.
+	 * @param \WC_Order  $order    Existing order.
+	 * @param array      $billing  New billing address.
+	 * @param array|null $shipping New shipping address, or null to keep the order's.
 	 */
-	public function update_existing_order_addresses( \WC_Order $order, array $billing, array $shipping ): void {
+	public function update_existing_order_addresses( \WC_Order $order, array $billing, ?array $shipping ): void {
 		$old_shipping_location = self::get_shipping_location( $order );
 		$old_tax_location      = $order->get_taxable_location();
 		$old_states            = [
@@ -217,11 +217,19 @@ class OrderController {
 			'shipping' => $order->get_shipping_state(),
 		];
 
+		// Stores that ship to billing only always use billing, whatever the request sends.
+		// So does an order with no shipping address to keep.
+		if ( wc_ship_to_billing_address_only() || ( null === $shipping && ! $order->get_shipping_country() ) ) {
+			$shipping = $billing;
+		}
+
 		$order->set_billing_address( $billing );
-		$order->set_shipping_address( $shipping );
+		$order->set_shipping_address( $shipping ?? $order->get_address( 'shipping' ) );
 		$this->restore_state_names( $order, $old_states );
-		$this->validate_existing_order_before_update( $order );
-		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location );
+
+		$needs_shipping = $order->needs_shipping();
+		$this->validate_addresses( $order, $needs_shipping );
+		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location, $needs_shipping );
 	}
 
 	/**
@@ -234,7 +242,7 @@ class OrderController {
 	 * @return array
 	 */
 	private static function get_shipping_location( \WC_Order $order ): array {
-		return $order->get_address( '' !== $order->get_shipping_country() ? 'shipping' : 'billing' );
+		return $order->get_address( $order->get_shipping_country() ? 'shipping' : 'billing' );
 	}
 
 	/**
@@ -266,16 +274,16 @@ class OrderController {
 	 * @param \WC_Order $order                 Order with the new addresses set.
 	 * @param array     $old_shipping_location Location the order shipped to before the change.
 	 * @param array     $old_tax_location      Location the order was taxed on before the change.
+	 * @param bool      $needs_shipping        Whether the order needs shipping.
 	 */
-	private function validate_location_change( \WC_Order $order, array $old_shipping_location, array $old_tax_location ): void {
+	private function validate_location_change( \WC_Order $order, array $old_shipping_location, array $old_tax_location, bool $needs_shipping ): void {
 		// An order with no address has no shipping cost or tax tied to a location, e.g. an order created
 		// by a merchant and sent to the shopper to fill in for the first time, so any address is allowed.
 		if ( empty( $old_shipping_location['country'] ) ) {
 			return;
 		}
 
-		// needs_shipping() loads a product per line item, so run the cheap comparison first.
-		if ( self::locations_differ( $old_shipping_location, self::get_shipping_location( $order ) ) && $order->needs_shipping() ) {
+		if ( $needs_shipping && self::locations_differ( $old_shipping_location, self::get_shipping_location( $order ) ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_order_address_change_not_allowed',
 				esc_html__( 'Sorry, the shipping address on this order cannot be changed because the shipping cost was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),

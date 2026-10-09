@@ -207,12 +207,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		// Shipping field is optional, so we keep an order existing shipping address if it didn't come via the request.
-		// Unless we shipping to billing addresses, in that case, we match shipping to billing.
-		$keep_shipping = ! wc_ship_to_billing_address_only() && '' !== $order->get_shipping_country();
-		$shipping      = $request['shipping_address'] ?? ( $keep_shipping ? $order->get_address( 'shipping' ) : $billing );
-
-		$this->order_controller->update_existing_order_addresses( $order, $billing, $shipping );
+		$this->order_controller->update_existing_order_addresses( $order, $billing, $request['shipping_address'] );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -221,7 +216,7 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 		}
 
-		foreach ( $shipping as $key => $value ) {
+		foreach ( $order->get_address( 'shipping' ) as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
 			}
