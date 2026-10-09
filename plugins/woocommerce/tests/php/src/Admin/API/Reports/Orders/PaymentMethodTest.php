@@ -49,18 +49,6 @@ class PaymentMethodTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		foreach ( $this->orders as $order ) {
-			WC_Helper_Order::delete_order( $order->get_id() );
-		}
-		$this->orders = array();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox Syncing an order stores the gateway it was paid with.
 	 */
 	public function test_sync_stores_the_payment_method(): void {

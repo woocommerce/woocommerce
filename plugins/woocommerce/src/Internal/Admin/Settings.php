@@ -82,6 +82,20 @@ class Settings {
 	}
 
 	/**
+	 * Get the titles of the installed payment gateways, for the payment method column of the Orders report.
+	 *
+	 * @return array Payment gateway titles, keyed by gateway id.
+	 */
+	private function get_payment_gateway_titles() {
+		$titles = array();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$titles[ $gateway->id ] = $gateway->get_method_title();
+		}
+
+		return $titles;
+	}
+
+	/**
 	 * Validate a filtered list of default order statuses for display in the Settings UI.
 	 *
 	 * Drops slugs that are not registered or synced (they cannot be shown as checkboxes).
@@ -340,6 +354,7 @@ class Settings {
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
 			$settings['couponTypes']               = wc_get_coupon_types();
+			$settings['paymentGateways']           = $this->get_payment_gateway_titles();
 		}
 
 		// The separator used for attributes found in Variation titles.

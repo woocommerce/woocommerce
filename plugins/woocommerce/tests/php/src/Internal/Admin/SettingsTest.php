@@ -333,6 +333,33 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The preloaded component settings list the installed payment gateways by title.
+	 */
+	public function test_component_settings_expose_payment_gateway_titles(): void {
+		// Payment gateways are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$settings = $this->sut->add_component_settings( array() );
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$this->assertSame( array_keys( WC()->payment_gateways()->payment_gateways() ), array_keys( $settings['paymentGateways'] ), 'Every installed gateway should be listed, in their order.' );
+		$this->assertSame( 'Direct bank transfer', $settings['paymentGateways']['bacs'], 'An installed gateway should be listed by its title.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings leave the payment gateways out outside the wc-admin app, which is the only place that reads them.
+	 */
+	public function test_component_settings_leave_payment_gateways_out_outside_wc_admin(): void {
+		set_current_screen( 'dashboard' );
+
+		$this->assertArrayNotHasKey( 'paymentGateways', $this->sut->add_component_settings( array() ) );
+	}
+
+	/**
 	 * Get the resolved wc_admin group settings via the REST settings controller.
 	 *
 	 * @return array

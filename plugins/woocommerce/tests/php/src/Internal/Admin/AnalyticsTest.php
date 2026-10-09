@@ -825,23 +825,4 @@ class AnalyticsTest extends WC_Unit_Test_Case {
 		// The tool still offers to run, rather than reporting that nothing was found.
 		$this->assertStringContainsString( 'Check and fix', $this->get_tool()['button'] );
 	}
-
-	/**
-	 * @testdox The payment gateway settings list the installed gateways by title.
-	 */
-	public function test_payment_gateway_settings_list_the_installed_gateways_by_title(): void {
-		$_GET['page'] = 'wc-admin';
-
-		$gateways = $this->sut->add_payment_gateway_settings( array() )['paymentGateways'];
-
-		$this->assertSame( array_keys( WC()->payment_gateways()->payment_gateways() ), array_keys( $gateways ), 'Every installed gateway should be listed, in their order.' );
-		$this->assertSame( 'Direct bank transfer', $gateways['bacs'], 'An installed gateway should be listed by its title.' );
-	}
-
-	/**
-	 * @testdox The payment gateway settings are left out outside the wc-admin app, which is the only place that reads them.
-	 */
-	public function test_payment_gateway_settings_are_left_out_outside_wc_admin(): void {
-		$this->assertArrayNotHasKey( 'paymentGateways', $this->sut->add_payment_gateway_settings( array() ) );
-	}
 }
