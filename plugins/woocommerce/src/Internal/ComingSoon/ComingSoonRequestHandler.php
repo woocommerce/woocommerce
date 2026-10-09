@@ -251,7 +251,17 @@ class ComingSoonRequestHandler {
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {
-				if ( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] ) {
+				// Theme presets may omit the name or use another one, so also match the same font family and slug.
+				// Coming Soon patterns and saved templates use the bundled slugs, and need the theme to load the font files.
+				if (
+					( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] )
+					|| (
+						isset( $font['fontFamily'], $font['slug'] )
+						&& $font['fontFamily'] === $font_to_add['fontFamily']
+						&& $font['slug'] === $font_to_add['slug']
+						&& ! empty( $font['fontFace'] )
+					)
+				) {
 					$found = true;
 					break;
 				}
