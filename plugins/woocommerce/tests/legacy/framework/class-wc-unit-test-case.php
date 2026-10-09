@@ -49,6 +49,20 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_depth = 0;
 
 	/**
+	 * The WC()->customer instance at setUp(), whose shipping address teardown restores.
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $customer_at_setup;
+
+	/**
+	 * The shipping address of $customer_at_setup when the test started.
+	 *
+	 * @var array<string, string>
+	 */
+	private $customer_shipping_at_setup = array();
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
@@ -145,15 +159,20 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		if ( WC()->customer instanceof WC_Customer ) {
+			$this->customer_at_setup          = WC()->customer;
+			$this->customer_shipping_at_setup = WC()->customer->get_shipping( 'edit' );
+		}
 	}
 
 	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents, the cart context, the queued notices, and the cached country
-	 * locale all live on the WC() singletons, which neither the per-test database
-	 * rollback nor the hook restore resets, so clear them here or they leak into every
-	 * later test in the process.
+	 * The cart contents, the cart context, the queued notices, the cached country
+	 * locale, and the customer's shipping address all live on the WC() singletons,
+	 * which neither the per-test database rollback nor the hook restore resets, so
+	 * clear them here or they leak into every later test in the process.
 	 *
 	 * @since 11.1.0
 	 */
@@ -201,6 +220,12 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// value behind, because the hook restore removes the filter but not the
 			// cache it produced.
 			WC()->countries->locale = array();
+		}
+
+		if ( $this->customer_at_setup ) {
+			foreach ( $this->customer_shipping_at_setup as $key => $value ) {
+				$this->customer_at_setup->{"set_shipping_{$key}"}( $value );
+			}
 		}
 	}
 
