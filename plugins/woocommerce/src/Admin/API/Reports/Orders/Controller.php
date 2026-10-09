@@ -431,7 +431,7 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Get the merchant-facing title of a payment gateway, or its stored id when it is no longer installed.
+	 * Get the merchant-facing title of a payment gateway, or its stored id when it has no title or is no longer installed.
 	 *
 	 * @since 11.3.0
 	 *
@@ -444,8 +444,9 @@ class Controller extends GenericController implements ExportableInterface {
 		}
 
 		$gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array();
+		$title    = isset( $gateways[ $payment_method ] ) ? $gateways[ $payment_method ]->get_method_title() : '';
 
-		return isset( $gateways[ $payment_method ] ) ? $gateways[ $payment_method ]->get_method_title() : $payment_method;
+		return $title ? $title : $payment_method;
 	}
 
 	/**
