@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send the order.updated webhook and update the order's modified date when a refund is deleted from an order.

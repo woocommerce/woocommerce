@@ -165,6 +165,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private $legacy_proxy;
 
 	/**
+	 * IDs of orders whose child orders are being deleted along with them, keyed by order ID.
+	 *
+	 * @var array<int, true>
+	 */
+	private static $orders_deleting_children = array();
+
+	/**
 	 * Initialize the object.
 	 *
 	 * @internal
@@ -2792,13 +2799,29 @@ FROM $order_meta_table
 
 			$this->clear_cached_data( $child_order_ids );
 		} else {
-			foreach ( $child_order_ids as $child_order_id ) {
-				$child_order = wc_get_order( $child_order_id );
-				if ( $child_order ) {
-					$child_order->delete( true );
+			self::$orders_deleting_children[ $order->get_id() ] = true;
+			try {
+				foreach ( $child_order_ids as $child_order_id ) {
+					$child_order = wc_get_order( $child_order_id );
+					if ( $child_order ) {
+						$child_order->delete( true );
+					}
 				}
+			} finally {
+				unset( self::$orders_deleting_children[ $order->get_id() ] );
 			}
 		}
+	}
+
+	/**
+	 * Check whether an order is being deleted together with its child orders.
+	 *
+	 * @param int $order_id The order ID.
+	 *
+	 * @return bool True while the child orders of the order are being deleted.
+	 */
+	protected static function is_deleting_child_orders_of( int $order_id ): bool {
+		return isset( self::$orders_deleting_children[ $order_id ] );
 	}
 
 	/**

@@ -1023,6 +1023,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'order.updated'     => array(
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
+				'woocommerce_order_refund_deleted',
 			),
 			'order.deleted'     => array(
 				'wp_trash_post',
