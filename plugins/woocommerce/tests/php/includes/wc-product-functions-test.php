@@ -985,6 +985,83 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Stock lookup regeneration copies managed stock quantities and leaves unmanaged products alone.
+	 */
+	public function test_stock_lookup_regeneration_sets_quantities_from_managed_stock_meta(): void {
+		global $wpdb;
+
+		$stock_meta  = array(
+			'positive'                => array( '7.5' ),
+			'missing'                 => array(),
+			'unmanaged'               => array( '4' ),
+			'no_manage_meta'          => array( '5' ),
+			'duplicate_stock'         => array( '2', '9' ),
+			'duplicate_stock_reverse' => array( '9', '2' ),
+			'duplicate_manage'        => array( '-3' ),
+			'malformed'               => array( 'not-a-number' ),
+			'variation'               => array( '0.25' ),
+		);
+		$manage_meta = array(
+			'unmanaged'        => array( 'no' ),
+			'no_manage_meta'   => array(),
+			'duplicate_manage' => array( 'yes', 'no', 'yes' ),
+		);
+		$fixtures    = array();
+		foreach ( array_keys( $stock_meta ) as $case ) {
+			$fixtures[ $case ] = 'variation' === $case
+				? WC_Helper_Product::create_variation_product()->get_children()[0]
+				: WC_Helper_Product::create_simple_product()->get_id();
+		}
+
+		foreach ( $fixtures as $case => $product_id ) {
+			delete_post_meta( $product_id, '_manage_stock' );
+			delete_post_meta( $product_id, '_stock' );
+			foreach ( $manage_meta[ $case ] ?? array( 'yes' ) as $value ) {
+				add_post_meta( $product_id, '_manage_stock', $value );
+			}
+			foreach ( $stock_meta[ $case ] as $value ) {
+				add_post_meta( $product_id, '_stock', $value );
+			}
+			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
+		}
+
+		update_post_meta( $fixtures['unmanaged'], '_sold_individually', 'yes' );
+		update_post_meta( $fixtures['no_manage_meta'], '_sold_individually', 'yes' );
+
+		wc_update_product_lookup_tables_column( 'stock_quantity' );
+		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
+
+		$values = $this->read_stock_lookup_values( $fixtures );
+		$this->assertSame( 7.5, $values['positive'] );
+		$this->assertNull( $values['missing'], 'A managed product without stock meta gets NULL.' );
+		$this->assertSame( 99.0, $values['unmanaged'], 'A product with manage_stock set to no is left alone.' );
+		$this->assertSame( 99.0, $values['no_manage_meta'], 'A product without manage_stock meta is left alone.' );
+		$this->assertContains( $values['duplicate_stock'], array( 2.0, 9.0 ) );
+		$this->assertContains( $values['duplicate_stock_reverse'], array( 2.0, 9.0 ) );
+		$this->assertSame( -3.0, $values['duplicate_manage'] );
+		$this->assertNotSame( 99.0, $values['malformed'], 'A malformed stock value must not abort the statement.' );
+		$this->assertSame( 0.25, $values['variation'] );
+	}
+
+	/**
+	 * Read stock lookup values for a named product fixture.
+	 *
+	 * @param array<string, int> $fixtures Named product IDs.
+	 * @return array<string, float|null>
+	 */
+	private function read_stock_lookup_values( array $fixtures ): array {
+		global $wpdb;
+
+		$values = array();
+		foreach ( $fixtures as $case => $product_id ) {
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT stock_quantity FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product_id ), ARRAY_A );
+			$this->assertIsArray( $row, "Missing lookup row for {$case}." );
+			$values[ $case ] = null === $row['stock_quantity'] ? null : (float) $row['stock_quantity'];
+		}
+		return $values;
+	}
+
+	/**
 	 * @testdox Queued rating count batches do not run when reviews are disabled.
 	 * @testWith ["yes", 3, true]
 	 *           ["no", 1, false]
