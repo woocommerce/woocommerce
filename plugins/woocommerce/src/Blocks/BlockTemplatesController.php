@@ -63,6 +63,7 @@ class BlockTemplatesController {
 		if ( null === $pre_render && 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
 
 			// BC (block_type_metadata_settings → pre_render_block migration): re-apply render_block() input filters.
+			// Skipped: enqueue_empty_block_content_assets (template parts always have content).
 			$parsed_block = apply_filters( 'render_block_data', $parsed_block, $parsed_block, null ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			$context      = apply_filters( 'render_block_context', array(), $parsed_block, null ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
@@ -81,6 +82,7 @@ class BlockTemplatesController {
 					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
 
 					// BC (block_type_metadata_settings → pre_render_block migration): re-apply WP_Block::render() output filters.
+					// Skipped: interactivity_process_directives (template parts aren't interactive roots).
 					$block_instance = new \WP_Block( $parsed_block, $context );
 					$block_content  = apply_filters( 'render_block', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 					$block_content  = apply_filters( 'render_block_core/template-part', $block_content, $parsed_block, $block_instance ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment
