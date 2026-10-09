@@ -169,6 +169,19 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_cached_subscriptions is true only while a subscription list is cached.
+	 */
+	public function test_has_cached_subscriptions_reflects_the_transient(): void {
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'No transient means no cached list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', 'corrupted_string_data', HOUR_IN_SECONDS );
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'A corrupted transient is not a usable list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', array(), HOUR_IN_SECONDS );
+		$this->assertTrue( WC_Helper::has_cached_subscriptions(), 'An empty list is still a cached list.' );
+	}
+
+	/**
 	 * @testdox get_subscriptions should return valid cached array without modification.
 	 */
 	public function test_get_subscriptions_returns_valid_cached_array(): void {
@@ -346,6 +359,51 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
 			'Only a 429 should record a backoff window'
 		);
+	}
+
+	/**
+	 * @testdox get_subscriptions labels the request with the screen it comes from.
+	 * @testWith ["/wp-admin/admin-ajax.php", "woocommerce_load_status_widget", "dashboard-widget"]
+	 *           ["/wp-admin/admin-ajax.php", "heartbeat", "heartbeat-api"]
+	 *           ["/wp-admin/admin.php?page=wc-admin", "", "inbox-notes"]
+	 *
+	 * @param string $request_uri The request URI.
+	 * @param string $action      The ajax action, if any.
+	 * @param string $expected    The source label the request should carry.
+	 */
+	public function test_get_subscriptions_labels_the_request_source( string $request_uri, string $action, string $expected ): void {
+		$previous_uri           = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		if ( '' !== $action ) {
+			$_REQUEST['action'] = $action;
+		}
+		$requested_url = '';
+		$capture       = static function ( $preempt, $args, $url ) use ( &$requested_url ) {
+			$requested_url = $url;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $capture, 9, 3 );
+
+		try {
+			$this->fetch_subscriptions_with_response(
+				array(
+					'response' => array( 'code' => 200 ),
+					'body'     => '[]',
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $capture, 9 );
+			unset( $_REQUEST['action'] );
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		parse_str( (string) wp_parse_url( $requested_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( $expected, $query['source'] ?? '', 'The source label is what WooCommerce.com attributes the request to.' );
 	}
 
 	/**

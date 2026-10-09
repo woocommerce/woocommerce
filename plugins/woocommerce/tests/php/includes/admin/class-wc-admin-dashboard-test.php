@@ -82,6 +82,8 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_enable_reviews' );
 		delete_transient( 'wc_low_stock_count' );
 		delete_transient( 'wc_outofstock_count' );
+		// A static cache in WC_Helper, which no base class resets.
+		WC_Helper::flush_local_woo_products_cache();
 
 		parent::tearDown();
 	}
@@ -480,5 +482,86 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			$this->invoke_should_display_widget( $this->sut ),
 			'Widget should not display for users without proper capabilities'
 		);
+	}
+
+	/**
+	 * @testdox Status widget shows a row linking to My Subscriptions for extensions without a subscription.
+	 */
+	public function test_status_widget_shows_extensions_without_subscription_row(): void {
+		$this->mock_woo_extension_with_subscriptions( array() );
+
+		$html = $this->capture_extensions_without_subscription_row();
+
+		$this->assertStringContainsString( 'class="extensions-without-subscription"', $html, 'The row should render when an extension has no subscription.' );
+		$this->assertStringContainsString( '<strong>1 extension</strong> without a WooCommerce.com subscription', $html, 'The row should show the extension count.' );
+		$this->assertStringContainsString( 'tab=my-subscriptions', $html, 'The row should link to My Subscriptions.' );
+		$this->assertStringContainsString( 'utm_campaign=pu_dashboard_widget_purchase', $html, 'The link should carry the dashboard widget campaign.' );
+	}
+
+	/**
+	 * @testdox Status widget hides the extensions row when every extension has a subscription.
+	 */
+	public function test_status_widget_hides_extensions_row_when_all_are_subscribed(): void {
+		$this->mock_woo_extension_with_subscriptions(
+			array(
+				array(
+					'product_id'  => 123,
+					'connections' => array(),
+				),
+			)
+		);
+
+		$this->assertSame( '', $this->capture_extensions_without_subscription_row(), 'No row should render when nothing is missing a subscription.' );
+	}
+
+	/**
+	 * @testdox Status widget does not count inactive extensions without a subscription.
+	 */
+	public function test_status_widget_does_not_count_inactive_extensions(): void {
+		$this->mock_woo_extension_with_subscriptions( array(), false );
+
+		$this->assertSame( '', $this->capture_extensions_without_subscription_row(), 'An inactive extension should not be counted.' );
+	}
+
+	/**
+	 * Makes the store connected, with one installed Woo extension (product 123) and the given subscriptions.
+	 *
+	 * @param array $subscriptions Subscription records.
+	 * @param bool  $active        Whether the extension is active.
+	 * @return void
+	 */
+	private function mock_woo_extension_with_subscriptions( array $subscriptions, bool $active = true ): void {
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					'woo-test-plugin/woo-test-plugin.php' => array(
+						'Name'    => 'Woo Test Plugin',
+						'Version' => '1.0.0',
+						'Woo'     => '123:abc123',
+					),
+				),
+			),
+			'plugins'
+		);
+		WC_Helper::flush_local_woo_products_cache();
+		update_option( 'active_plugins', $active ? array( 'woo-test-plugin/woo-test-plugin.php' ) : array() );
+		WC_Helper_Options::update( 'auth', array( 'access_token' => 'token' ) );
+		set_transient( '_woocommerce_helper_subscriptions', $subscriptions, HOUR_IN_SECONDS );
+	}
+
+	/**
+	 * Invoke the private status_widget_extensions_without_subscription_row method and return its output.
+	 *
+	 * @return string
+	 */
+	private function capture_extensions_without_subscription_row(): string {
+		$method = new ReflectionMethod( WC_Admin_Dashboard::class, 'status_widget_extensions_without_subscription_row' );
+		$method->setAccessible( true );
+
+		ob_start();
+		$method->invoke( $this->sut );
+
+		return (string) ob_get_clean();
 	}
 }
