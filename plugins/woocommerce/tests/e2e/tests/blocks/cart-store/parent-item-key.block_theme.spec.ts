@@ -34,15 +34,29 @@ const readCartItems = async ( page: Page ): Promise< StoreApiCartItem[] > => {
 	return cart.items as StoreApiCartItem[];
 };
 
+/**
+ * Runs a WP-CLI `post list --format=ids` query that must match exactly one post
+ * and returns its ID. The ID is read from the last non-empty output line, so
+ * numbers printed by the wp-env wrapper can't be mistaken for it.
+ */
+const getSinglePostId = async ( command: string ): Promise< number > => {
+	const result = await wpCLI( command );
+	const lastLine =
+		result.stdout
+			.split( '\n' )
+			.map( ( line ) => line.trim() )
+			.filter( Boolean )
+			.pop() ?? '';
+	const postId = Number( lastLine );
+	expect( Number.isInteger( postId ) && postId > 0 ).toBe( true );
+	return postId;
+};
+
 /** Resolves a sample product by its WordPress post slug. */
-const getProductIdBySlug = async ( slug: string ): Promise< number > => {
-	const result = await wpCLI(
+const getProductIdBySlug = ( slug: string ): Promise< number > =>
+	getSinglePostId(
 		`post list --post_type=product --field=ID --name="${ slug }" --format=ids`
 	);
-	const productId = Number( result.stdout.match( /\d+/g )?.pop() );
-	expect( Number.isInteger( productId ) ).toBe( true );
-	return productId;
-};
 
 /** Adds Cap through the legacy URL and returns its session cart line. */
 const addCapToCart = async ( page: Page ) => {
@@ -153,13 +167,9 @@ test.describe( 'ProductButton in-cart count', () => {
 
 		await frontendUtils.emptyCart();
 
-		const variationResult = await wpCLI(
+		const variationId = await getSinglePostId(
 			'post list --post_type=product_variation --field=ID --name="Hoodie - Blue, Yes" --format=ids'
 		);
-		const variationId = Number(
-			variationResult.stdout.match( /\d+/g )?.pop()
-		);
-		expect( Number.isInteger( variationId ) ).toBe( true );
 
 		const capId = await getProductIdBySlug( 'cap' );
 		await page.goto( `/?add-to-cart=${ capId }` );
