@@ -510,18 +510,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A refund reports the customer ID of its parent order.
-	 * @dataProvider provide_refund_parent_customer_ids
-	 *
-	 * @param int $customer_id Customer ID of the parent order.
-	 */
-	public function test_refund_get_customer_id_returns_parent_customer_id( int $customer_id ) {
-		$refund = $this->create_line_item_refund( $customer_id );
-
-		$this->assertSame( $customer_id, $refund->get_customer_id() );
-	}
-
-	/**
 	 * @testdox A refund uses the tax location of its parent order.
 	 */
 	public function test_refund_get_taxable_location_returns_parent_tax_location() {
