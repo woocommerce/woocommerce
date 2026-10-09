@@ -4146,12 +4146,14 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 		)
 	);
 
-	if ( $order_ids ) {
+	$error = $wpdb->last_error;
+
+	if ( '' === $error && $order_ids ) {
 		$id_list = implode( ',', array_map( 'absint', $order_ids ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names and the id list are code-defined.
-		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$orders_table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
 			$from_orders  = "UPDATE {$stats_table} stats
 				JOIN {$orders_table} orders ON orders.id = stats.order_id
 				SET stats.payment_method = orders.payment_method
@@ -4180,7 +4182,6 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 			AND refunds.payment_method IS NULL
 			AND parents.payment_method IS NOT NULL";
 
-		$error = '';
 		foreach ( array( $from_orders, $from_parents ) as $query ) {
 			if ( false === $wpdb->query( $query ) ) {
 				$error = $wpdb->last_error;
@@ -4194,7 +4195,9 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 
 			return true;
 		}
+	}
 
+	if ( '' !== $error ) {
 		wc_get_logger()->error(
 			sprintf( 'Stopped backfilling the Analytics payment method: %s', $error ),
 			array( 'source' => 'wc-updater' )
@@ -4204,7 +4207,7 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 	delete_option( $last_id_option );
 
 	// The report rows cached before the column was filled would otherwise be served for a week.
-	\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+	wc_update_11201_invalidate_analytics_reports_cache();
 
 	return false;
 }
