@@ -406,24 +406,6 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let the shipping to billing default be disabled with a filter.
-	 */
-	public function test_shipping_to_billing_default_can_be_disabled_with_a_filter(): void {
-		update_option( 'woocommerce_ship_to_destination', 'billing' );
-		$customer_id = $this->create_customer_with_different_addresses( 'session_ship_to_billing_filtered' );
-
-		add_filter( 'woocommerce_customer_session_default_shipping_to_billing', '__return_false' );
-		try {
-			$customer = new WC_Customer( $customer_id, true );
-		} finally {
-			remove_filter( 'woocommerce_customer_session_default_shipping_to_billing', '__return_false' );
-		}
-
-		$this->assertSame( 'Brandarisstraat 2', $customer->get_shipping_address_1(), 'The filter should keep the saved shipping address' );
-		$this->assertSame( 'West-Terschelling', $customer->get_shipping_city(), 'The filter should keep the saved shipping city' );
-	}
-
-	/**
 	 * @testdox Should copy additional address field values from billing to shipping, even before the fields are registered.
 	 */
 	public function test_shipping_address_defaults_to_billing_including_additional_address_fields(): void {

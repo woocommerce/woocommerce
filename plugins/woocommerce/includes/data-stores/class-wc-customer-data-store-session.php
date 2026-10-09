@@ -155,18 +155,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @return void
 	 */
 	private function maybe_default_shipping_to_billing( $customer ): void {
-		$default_to_billing = 'shipping' !== get_option( 'woocommerce_ship_to_destination', 'billing' )
-			&& $this->billing_address_can_replace_shipping( $customer );
-
-		/**
-		 * Filters whether a customer loaded without a session snapshot gets their billing address as the shipping address.
-		 *
-		 * @since 11.3.0
-		 *
-		 * @param bool        $default_to_billing Whether the billing address is copied over the shipping address.
-		 * @param WC_Customer $customer           Customer object.
-		 */
-		if ( ! apply_filters( 'woocommerce_customer_session_default_shipping_to_billing', $default_to_billing, $customer ) ) {
+		if ( 'shipping' === get_option( 'woocommerce_ship_to_destination', 'billing' ) || ! $this->billing_address_can_replace_shipping( $customer ) ) {
 			return;
 		}
 
