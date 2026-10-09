@@ -497,7 +497,8 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 	} );
 
 	// Request bodies keep the 11.1 shape: data objects for the AJAX endpoints, so
-	// $.ajax() drops undefined (removed) fields and prefilters see an object.
+	// $.ajax() drops undefined (removed) fields and prefilters see an object. Each
+	// request opts in to the woocommerce.js apostrophe-encoding prefilter instead.
 	describe( 'Checkout request data', () => {
 		beforeEach( () => {
 			jest.useFakeTimers();
@@ -528,6 +529,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 			expect( request.data.country ).toBeUndefined();
 			expect( request.data.state ).toBeUndefined();
+			expect( request.wc_encode_apostrophes ).toBe( true );
 		} );
 
 		test( 'should send the serialized form when placing an order', () => {
@@ -544,6 +546,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 			expect( request ).toBeDefined();
 			expect( request.data ).toBe( serializedCheckoutData );
+			expect( request.wc_encode_apostrophes ).toBe( true );
 		} );
 
 		test( 'should send apply coupon data as an object', () => {
@@ -565,6 +568,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 					billing_email: BILLING_EMAIL,
 				} )
 			);
+			expect( request.wc_encode_apostrophes ).toBe( true );
 		} );
 
 		test( 'should send remove coupon data as an object', () => {
@@ -582,6 +586,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( request.data ).toEqual(
 				expect.objectContaining( { coupon: COUPON_CODE } )
 			);
+			expect( request.wc_encode_apostrophes ).toBe( true );
 		} );
 	} );
 

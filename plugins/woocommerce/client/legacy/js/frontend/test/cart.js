@@ -3,7 +3,8 @@
  */
 
 // Fixtures match jQuery 3 serialize(): encodeURIComponent per field, spaces as
-// %20, apostrophes literal. Typing %27 serializes as %2527.
+// %20, apostrophes literal. cart.js hands this to $.ajax() untouched and opts in
+// to the apostrophe encoding that the woocommerce.js prefilter applies.
 const CART_URL = 'https://example.test/cart/';
 const COUPON_CODE = "SAVE'10";
 
@@ -16,15 +17,6 @@ const SHIPPING_FORM_SERIALIZED =
 	'&_wp_http_referer=%2Fcart%2F' +
 	'&calc_shipping=x';
 
-const SHIPPING_FORM_ENCODED =
-	'calc_shipping_country=US' +
-	'&calc_shipping_state=O%27State' +
-	'&calc_shipping_postcode=63366' +
-	'&calc_shipping_city=O%27Fallon' +
-	'&woocommerce-shipping-calculator-nonce=abc123' +
-	'&_wp_http_referer=%2Fcart%2F' +
-	'&calc_shipping=x';
-
 const CART_FORM_SERIALIZED =
 	'cart%5Babc123%5D%5Bqty%5D=2' +
 	"&coupon_code=SAVE'10" +
@@ -33,20 +25,11 @@ const CART_FORM_SERIALIZED =
 	'&woocommerce-cart-nonce=abc123' +
 	'&_wp_http_referer=%2Fcart%2F';
 
-const CART_FORM_ENCODED =
-	'cart%5Babc123%5D%5Bqty%5D=2' +
-	'&coupon_code=SAVE%2710' +
-	'&order%27note=Leave%20at%20O%27Brien%27s%20door' +
-	'&reference=already%2527encoded' +
-	'&woocommerce-cart-nonce=abc123' +
-	'&_wp_http_referer=%2Fcart%2F';
-
 // quantity_update() appends a hidden update_cart input before serialize().
 const QUANTITY_FORM_SERIALIZED =
 	CART_FORM_SERIALIZED + '&update_cart=Update%20Cart';
-const QUANTITY_FORM_ENCODED = CART_FORM_ENCODED + '&update_cart=Update%20Cart';
 
-describe( 'cart.js request encoding', () => {
+describe( 'cart.js request data', () => {
 	let capturedAjaxRequests;
 	let documentHandlers;
 	let findDocumentHandler;
@@ -198,33 +181,7 @@ describe( 'cart.js request encoding', () => {
 			capturedAjaxRequests.push( options );
 			return { abort: jest.fn() };
 		} );
-		// Mirrors jQuery 3 param(): encodeURIComponent per field, spaces as %20,
-		// apostrophes literal. encodeApostrophes() then turns `'` into %27.
-		jQueryMock.param = jest.fn( ( object ) => {
-			const parts = [];
-			const add = ( key, value ) => {
-				parts.push(
-					encodeURIComponent( key ) +
-						'=' +
-						encodeURIComponent(
-							value === null || value === undefined ? '' : value
-						)
-				);
-			};
-			const buildParams = ( prefix, value ) => {
-				if ( value !== null && typeof value === 'object' ) {
-					Object.keys( value ).forEach( ( nestedKey ) =>
-						buildParams( prefix + '[' + nestedKey + ']', value[ nestedKey ] )
-					);
-					return;
-				}
-				add( prefix, value );
-			};
-			Object.keys( object ).forEach( ( key ) =>
-				buildParams( key, object[ key ] )
-			);
-			return parts.join( '&' );
-		} );
+		jQueryMock.param = jest.fn();
 
 		global.window.jQuery = jQueryMock;
 		global.window.$ = jQueryMock;
@@ -248,7 +205,13 @@ describe( 'cart.js request encoding', () => {
 		jest.clearAllMocks();
 	} );
 
-	test( 'should encode apostrophes in shipping calculator data', () => {
+	// Every request site passes the data to $.ajax() as jQuery would get it from
+	// the shopper (the serialized form, or the data object) and sets the
+	// wc_encode_apostrophes option, so the woocommerce.js prefilter encodes the
+	// apostrophes after jQuery has serialized the request. Passing objects keeps
+	// undefined fields out of the body and lets other prefilters read
+	// originalOptions.data.
+	test( 'should send the serialized shipping calculator form with the encoding opt-in', () => {
 		const submit = findDocumentHandler(
 			'submit',
 			'form.woocommerce-shipping-calculator'
@@ -262,17 +225,12 @@ describe( 'cart.js request encoding', () => {
 
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
-		expect( request.data ).not.toContain( "'" );
-		expect( request.data ).toBe( SHIPPING_FORM_ENCODED );
-
-		// Every value decodes back to what the shopper typed.
-		const body = new URLSearchParams( request.data );
-		expect( body.get( 'calc_shipping_city' ) ).toBe( "O'Fallon" );
-		expect( body.get( 'calc_shipping_state' ) ).toBe( "O'State" );
-		expect( body.get( 'calc_shipping' ) ).toBe( 'x' );
+		expect( request.data ).toBe( SHIPPING_FORM_SERIALIZED );
+		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( global.jQuery.param ).not.toHaveBeenCalled();
 	} );
 
-	test( 'should encode apostrophes in update cart data', () => {
+	test( 'should send the serialized cart form with the encoding opt-in', () => {
 		// update_cart() is reached through the wc_update_cart document event.
 		const updateCart = findDocumentHandler( 'wc_update_cart' );
 
@@ -282,17 +240,11 @@ describe( 'cart.js request encoding', () => {
 
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
-		expect( request.data ).not.toContain( "'" );
-		expect( request.data ).toBe( CART_FORM_ENCODED );
-
-		const body = new URLSearchParams( request.data );
-		expect( body.get( 'coupon_code' ) ).toBe( "SAVE'10" );
-		expect( body.get( 'cart[abc123][qty]' ) ).toBe( '2' );
-		expect( body.get( "order'note" ) ).toBe( "Leave at O'Brien's door" );
-		expect( body.get( 'reference' ) ).toBe( 'already%27encoded' );
+		expect( request.data ).toBe( CART_FORM_SERIALIZED );
+		expect( request.wc_encode_apostrophes ).toBe( true );
 	} );
 
-	test( 'should encode apostrophes in quantity update data', () => {
+	test( 'should send the serialized quantity update form with the encoding opt-in', () => {
 		// quantity_update() is reached through cart_submit() when the clicked
 		// submit button is the Update cart button.
 		clickedSubmitName = 'update_cart';
@@ -308,14 +260,11 @@ describe( 'cart.js request encoding', () => {
 
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
-		expect( request.data ).not.toContain( "'" );
-		expect( request.data ).toBe( QUANTITY_FORM_ENCODED );
-		const body = new URLSearchParams( request.data );
-		expect( body.get( 'coupon_code' ) ).toBe( "SAVE'10" );
-		expect( body.get( 'update_cart' ) ).toBe( 'Update Cart' );
+		expect( request.data ).toBe( QUANTITY_FORM_SERIALIZED );
+		expect( request.wc_encode_apostrophes ).toBe( true );
 	} );
 
-	test( 'should encode apostrophes in apply coupon data', () => {
+	test( 'should send apply coupon data as an object with the encoding opt-in', () => {
 		clickedSubmitName = 'apply_coupon';
 		const submit = findDocumentHandler( 'submit', '.woocommerce-cart-form' );
 		const evt = { preventDefault: jest.fn(), currentTarget: cartFormElement };
@@ -328,14 +277,16 @@ describe( 'cart.js request encoding', () => {
 			options.url.includes( 'apply_coupon' )
 		);
 		expect( request ).toBeDefined();
-		expect( request.data ).not.toContain( "'" );
-
-		const body = new URLSearchParams( request.data );
-		expect( body.get( 'coupon_code' ) ).toBe( COUPON_CODE );
-		expect( body.get( 'security' ) ).toBe( 'nonce' );
+		expect( typeof request.data ).toBe( 'object' );
+		expect( request.data ).toEqual( {
+			security: 'nonce',
+			coupon_code: COUPON_CODE,
+		} );
+		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( global.jQuery.param ).not.toHaveBeenCalled();
 	} );
 
-	test( 'should encode apostrophes in remove coupon data', () => {
+	test( 'should send remove coupon data as an object with the encoding opt-in', () => {
 		const click = findDocumentHandler( 'click', 'a.woocommerce-remove-coupon' );
 		const evt = {
 			preventDefault: jest.fn(),
@@ -350,9 +301,11 @@ describe( 'cart.js request encoding', () => {
 			options.url.includes( 'remove_coupon' )
 		);
 		expect( request ).toBeDefined();
-		expect( request.data ).not.toContain( "'" );
-		expect( new URLSearchParams( request.data ).get( 'coupon' ) ).toBe(
-			COUPON_CODE
-		);
+		expect( typeof request.data ).toBe( 'object' );
+		expect( request.data ).toEqual( {
+			security: 'nonce',
+			coupon: COUPON_CODE,
+		} );
+		expect( request.wc_encode_apostrophes ).toBe( true );
 	} );
 } );

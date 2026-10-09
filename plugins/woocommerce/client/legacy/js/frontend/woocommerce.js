@@ -1,4 +1,20 @@
 /* global Cookies */
+
+/**
+ * Encode apostrophes in the body of requests that opt in with the
+ * `wc_encode_apostrophes` option.
+ *
+ * jQuery leaves `'` alone when it serializes data, so bodies can reach the
+ * server with literal apostrophes that some WAF rules reject. Running as a
+ * prefilter lets jQuery serialize the request first, so removed (undefined)
+ * fields are dropped and other prefilters still see the data as it was given.
+ */
+jQuery.ajaxPrefilter( function ( options ) {
+	if ( options.wc_encode_apostrophes && 'string' === typeof options.data ) {
+		options.data = options.data.split( "'" ).join( '%27' );
+	}
+} );
+
 jQuery( function ( $ ) {
 	// Orderby
 	$( '.woocommerce-ordering' ).on( 'change', 'select.orderby', function () {
