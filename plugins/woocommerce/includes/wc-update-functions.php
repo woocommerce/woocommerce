@@ -4117,3 +4117,94 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 
 	return false;
 }
+
+/**
+ * Backfill the payment method on Analytics order stats rows written before the column existed.
+ *
+ * A database error is logged and stops the backfill without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is due, false when done or stopped.
+ */
+function wc_update_1130_backfill_order_stats_payment_method() {
+	global $wpdb;
+
+	$stats_table    = $wpdb->prefix . 'wc_order_stats';
+	$last_id_option = 'woocommerce_update_1130_last_payment_method_order_id';
+
+	if ( $stats_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats_table ) ) ) {
+		return false;
+	}
+
+	$order_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			"SELECT order_id FROM {$stats_table} WHERE order_id > %d ORDER BY order_id ASC LIMIT %d",
+			(int) get_option( $last_id_option, 0 ),
+			500
+		)
+	);
+
+	if ( $order_ids ) {
+		$id_list = implode( ',', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names and the id list are code-defined.
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
+			$from_orders  = "UPDATE {$stats_table} stats
+				JOIN {$orders_table} orders ON orders.id = stats.order_id
+				SET stats.payment_method = orders.payment_method
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND orders.payment_method IS NOT NULL
+				AND orders.payment_method != ''";
+		} else {
+			$from_orders = $wpdb->prepare(
+				"UPDATE {$stats_table} stats
+				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = %s
+				SET stats.payment_method = meta.meta_value
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND meta.meta_value != ''",
+				'_payment_method'
+			);
+		}
+
+		// A refund holds no payment method of its own, so it takes the refunded order's. That order has the lower id, so its row is already filled.
+		$from_parents = "UPDATE {$stats_table} refunds
+			JOIN {$stats_table} parents ON parents.order_id = refunds.parent_id
+			SET refunds.payment_method = parents.payment_method
+			WHERE refunds.order_id IN ({$id_list})
+			AND refunds.parent_id != 0
+			AND refunds.payment_method IS NULL
+			AND parents.payment_method IS NOT NULL";
+
+		$error = '';
+		foreach ( array( $from_orders, $from_parents ) as $query ) {
+			if ( false === $wpdb->query( $query ) ) {
+				$error = $wpdb->last_error;
+				break;
+			}
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( '' === $error ) {
+			update_option( $last_id_option, (int) end( $order_ids ), false );
+
+			return true;
+		}
+
+		wc_get_logger()->error(
+			sprintf( 'Stopped backfilling the Analytics payment method: %s', $error ),
+			array( 'source' => 'wc-updater' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The report rows cached before the column was filled would otherwise be served for a week.
+	\Automattic\WooCommerce\Admin\API\Reports\Cache::invalidate();
+
+	return false;
+}

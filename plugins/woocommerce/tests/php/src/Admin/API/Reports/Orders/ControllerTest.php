@@ -62,18 +62,47 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The payment method export column should hold the title of an installed gateway.
+	 */
+	public function test_payment_method_export_column_holds_the_gateway_title(): void {
+		$export_item = $this->sut->prepare_item_for_export( $this->get_item( array(), 'bacs' ) );
+
+		$this->assertSame( 'Direct bank transfer', $export_item['payment_method'] );
+	}
+
+	/**
+	 * @testdox The payment method export column should fall back to the stored id for a gateway that is gone.
+	 */
+	public function test_payment_method_export_column_falls_back_to_the_stored_id(): void {
+		$export_item = $this->sut->prepare_item_for_export( $this->get_item( array(), 'a_removed_gateway' ) );
+
+		$this->assertSame( 'a_removed_gateway', $export_item['payment_method'] );
+	}
+
+	/**
+	 * @testdox The payment method export column should be empty for an order placed without a gateway.
+	 */
+	public function test_payment_method_export_column_is_empty_without_a_gateway(): void {
+		$export_item = $this->sut->prepare_item_for_export( $this->get_item( array(), '' ) );
+
+		$this->assertSame( '', $export_item['payment_method'] );
+	}
+
+	/**
 	 * Build a report row carrying the given customer record.
 	 *
-	 * @param array $customer Customer record for the row.
+	 * @param array  $customer       Customer record for the row.
+	 * @param string $payment_method Payment gateway id for the row.
 	 * @return array
 	 */
-	private function get_item( array $customer ): array {
+	private function get_item( array $customer, string $payment_method = '' ): array {
 		return array(
 			'date'            => '2026-09-04 10:00:00',
 			'order_number'    => '123',
 			'total_formatted' => '10.00',
 			'status'          => OrderStatus::COMPLETED,
 			'customer_type'   => 'new',
+			'payment_method'  => $payment_method,
 			'num_items_sold'  => 1,
 			'net_total'       => 10.00,
 			'extended_info'   => array(
