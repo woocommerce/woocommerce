@@ -392,21 +392,22 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		if ( $product instanceof \WC_Product_Variable ) {
 			$prices       = $product->get_variation_prices( true );
 			$regular_list = isset( $prices['regular_price'] ) && is_array( $prices['regular_price'] ) ? $prices['regular_price'] : array();
-			$sale_list    = isset( $prices['sale_price'] ) && is_array( $prices['sale_price'] ) ? $prices['sale_price'] : array();
+			$price_list   = isset( $prices['price'] ) && is_array( $prices['price'] ) ? $prices['price'] : array();
 
-			if ( empty( $regular_list ) || empty( $sale_list ) ) {
+			if ( empty( $regular_list ) ) {
 				return null;
 			}
 
-			$has_sale = false;
-			foreach ( $sale_list as $sale_price ) {
-				if ( '' !== (string) $sale_price ) {
-					$has_sale = true;
+			// Compare against the effective prices so expired or scheduled sales are excluded.
+			$has_discount = false;
+			foreach ( $regular_list as $variation_id => $regular_price ) {
+				if ( isset( $price_list[ $variation_id ] ) && (float) $regular_price > (float) $price_list[ $variation_id ] ) {
+					$has_discount = true;
 					break;
 				}
 			}
 
-			if ( ! $has_sale ) {
+			if ( ! $has_discount ) {
 				return null;
 			}
 
@@ -605,9 +606,9 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 */
 	private function build_variant_list_price( \WC_Product $product, string $currency ) {
 		$regular_price = $product->get_regular_price();
-		$sale_price    = $product->get_sale_price();
 
-		if ( '' === $sale_price || '' === $regular_price || (float) $regular_price <= (float) $sale_price ) {
+		// Compare against the effective price so expired or scheduled sales are excluded.
+		if ( '' === $regular_price || (float) $regular_price <= (float) $product->get_price() ) {
 			return null;
 		}
 
