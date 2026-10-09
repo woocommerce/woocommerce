@@ -266,7 +266,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 						'type'       => 'object',
 						'properties' => array( 'id' => array( 'type' => 'integer' ) ),
 					),
-					'output_schema'       => AbilityExtensions::add_to_schema(
+					'output_schema'       => AbilityExtensions::add_fields_schema(
 						array(
 							'type'       => 'object',
 							'properties' => array( 'id' => array( 'type' => 'integer' ) ),
@@ -275,7 +275,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 					),
 					'execute_callback'    => static function ( array $input ) {
 						$product = wc_get_product( $input['id'] );
-						return AbilityExtensions::add_to_output( array( 'id' => $product->get_id() ), 'product', $product );
+						return AbilityExtensions::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product );
 					},
 					'permission_callback' => '__return_true',
 					'meta'                => array(
@@ -316,7 +316,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame(
 			array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ),
-			AbilityExtensions::add_to_output( array(), 'order', $order )['extensions']
+			AbilityExtensions::add_fields_to_object( array(), 'order', $order )['extensions']
 		);
 	}
 
@@ -352,7 +352,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		}
 		$order = \WC_Helper_Order::create_order();
 
-		$output = AbilityExtensions::add_to_output( array(), 'order', $order );
+		$output = AbilityExtensions::add_fields_to_object( array(), 'order', $order );
 
 		$this->assertSame(
 			array(

@@ -113,7 +113,7 @@ trait OrderAbilityTrait {
 				'line_items'           => array(
 					'type'        => 'array',
 					'description' => __( 'Order line items. Only present when include_line_items is true.', 'woocommerce' ),
-					'items'       => AbilityExtensions::add_to_schema(
+					'items'       => AbilityExtensions::add_fields_schema(
 						array(
 							'type'                 => 'object',
 							'properties'           => array(
@@ -133,7 +133,7 @@ trait OrderAbilityTrait {
 			),
 			'additionalProperties' => false,
 		);
-		return AbilityExtensions::add_to_schema( $schema, 'order' );
+		return AbilityExtensions::add_fields_schema( $schema, 'order' );
 	}
 
 	/**
@@ -225,7 +225,7 @@ trait OrderAbilityTrait {
 					continue;
 				}
 
-				$data['line_items'][] = AbilityExtensions::add_to_output(
+				$data['line_items'][] = AbilityExtensions::add_fields_to_object(
 					array(
 						'id'           => $item->get_id(),
 						'name'         => $item->get_name(),
@@ -241,6 +241,6 @@ trait OrderAbilityTrait {
 			}
 		}
 
-		return AbilityExtensions::add_to_output( $data, 'order', $order );
+		return AbilityExtensions::add_fields_to_object( $data, 'order', $order );
 	}
 }

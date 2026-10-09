@@ -98,7 +98,7 @@ class AbilityExtensions {
 	 * @param object               $subject  Object to read.
 	 * @return array<string, mixed>
 	 */
-	public static function add_to_output( array $output, string $resource_name, $subject ): array {
+	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
 		if ( ! AbilityContracts::is_enabled() ) {
 			return $output;
 		}
@@ -137,7 +137,7 @@ class AbilityExtensions {
 	 * @param string               $resource_name Resource.
 	 * @return array<string, mixed>
 	 */
-	public static function add_to_schema( array $schema, string $resource_name ): array {
+	public static function add_fields_schema( array $schema, string $resource_name ): array {
 		if ( ! AbilityContracts::is_enabled() ) {
 			return $schema;
 		}
