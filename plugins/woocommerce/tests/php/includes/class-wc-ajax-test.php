@@ -141,6 +141,71 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Removing a coupon via AJAX shows the coupon-removed message from WC_Coupon::get_coupon_message().
+	 */
+	public function test_remove_coupon_uses_coupon_removed_message(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'ajaxremove' );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		wc_clear_notices();
+
+		$response = $this->do_remove_coupon_request( $coupon->get_code() );
+
+		$this->assertStringContainsString( 'Coupon code removed successfully.', $response, 'The default coupon-removed message should be shown.' );
+		$this->assertStringNotContainsString( 'Coupon has been removed.', $response, 'The old hardcoded message should no longer be shown.' );
+		$this->assertNotContains( $coupon->get_code(), WC()->cart->get_applied_coupons(), 'The coupon should be removed from the cart.' );
+	}
+
+	/**
+	 * @testdox Removing a coupon via AJAX respects the woocommerce_coupon_message filter.
+	 */
+	public function test_remove_coupon_message_is_filterable(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'ajaxremovefiltered' );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		wc_clear_notices();
+
+		$filter_args = array();
+		$filter      = function ( $msg, $msg_code, $filtered_coupon ) use ( &$filter_args ) {
+			$filter_args = array( $msg_code, $filtered_coupon->get_code() );
+			return WC_Coupon::WC_COUPON_REMOVED === $msg_code ? 'Custom coupon removed message.' : $msg;
+		};
+		add_filter( 'woocommerce_coupon_message', $filter, 10, 3 );
+
+		try {
+			$response = $this->do_remove_coupon_request( $coupon->get_code() );
+		} finally {
+			remove_filter( 'woocommerce_coupon_message', $filter, 10 );
+		}
+
+		$this->assertStringContainsString( 'Custom coupon removed message.', $response, 'The filtered message should be shown.' );
+		$this->assertSame( array( WC_Coupon::WC_COUPON_REMOVED, $coupon->get_code() ), $filter_args, 'The filter should receive the removed code and the removed coupon.' );
+	}
+
+	/**
+	 * Runs the woocommerce_remove_coupon AJAX action and returns its output.
+	 *
+	 * @param string $coupon_code Coupon code to remove.
+	 * @return string
+	 */
+	private function do_remove_coupon_request( string $coupon_code ): string {
+		$_POST['security'] = wp_create_nonce( 'remove-coupon' );
+		$_POST['coupon']   = $coupon_code;
+
+		try {
+			$this->_handleAjax( 'woocommerce_remove_coupon' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			unset( $_POST['security'], $_POST['coupon'] );
+		}
+
+		return (string) $this->_last_response;
+	}
+
+	/**
 	 * @testdox Saving a new shipping class with a blank slug generates and returns its persisted slug.
 	 */
 	public function test_shipping_classes_save_changes_generates_slug(): void {
