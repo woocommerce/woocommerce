@@ -125,7 +125,10 @@ export async function loadDefinition(
 /**
  * Turn a rejection into an Error. apiFetch rejects with a plain `{ code, message }` object.
  */
-export function toError( error: unknown ): Error {
+export function toError(
+	error: unknown,
+	fallback: string = __( 'Unable to load settings.', 'woocommerce' )
+): Error {
 	if ( error instanceof Error ) {
 		return error;
 	}
@@ -138,7 +141,7 @@ export function toError( error: unknown ): Error {
 	) {
 		return new Error( error.message );
 	}
-	return new Error( __( 'Unable to load settings.', 'woocommerce' ) );
+	return new Error( fallback );
 }
 
 /**
