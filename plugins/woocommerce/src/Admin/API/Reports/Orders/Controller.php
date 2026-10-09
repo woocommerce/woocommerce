@@ -193,6 +193,12 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'payment_method'   => array(
+					'description' => __( 'Payment gateway ID the order was paid with.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'extended_info'    => array(
 					'products'    => array(
 						'type'        => 'array',
@@ -425,6 +431,24 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
+	 * Get the merchant-facing title of a payment gateway, or its stored id when it is no longer installed.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $payment_method Payment gateway id.
+	 * @return string
+	 */
+	protected function get_payment_method_title( $payment_method ) {
+		if ( ! $payment_method ) {
+			return '';
+		}
+
+		$gateways = WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array();
+
+		return isset( $gateways[ $payment_method ] ) ? $gateways[ $payment_method ]->get_method_title() : $payment_method;
+	}
+
+	/**
 	 * Get products column export value.
 	 *
 	 * @param array $products Products from report row.
@@ -468,10 +492,11 @@ class Controller extends GenericController implements ExportableInterface {
 			'status'          => __( 'Status', 'woocommerce' ),
 			'customer_name'   => __( 'Customer', 'woocommerce' ),
 			'customer_type'   => __( 'Customer type', 'woocommerce' ),
+			'payment_method'  => __( 'Payment method', 'woocommerce' ),
 			'products'        => __( 'Product(s)', 'woocommerce' ),
 			'num_items_sold'  => __( 'Items sold', 'woocommerce' ),
 			'coupons'         => __( 'Coupon(s)', 'woocommerce' ),
-			'net_total' 	  => __( 'Net Sales', 'woocommerce' ),
+			'net_total'       => __( 'Net Sales', 'woocommerce' ),
 			'attribution'     => __( 'Attribution', 'woocommerce' ),
 		);
 
@@ -501,10 +526,11 @@ class Controller extends GenericController implements ExportableInterface {
 			'status'          => $item['status'],
 			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'   => $item['customer_type'],
+			'payment_method'  => $this->get_payment_method_title( $item['payment_method'] ?? '' ),
 			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
-			'net_total' 	  => $item['net_total'],
+			'net_total'       => $item['net_total'],
 			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 
