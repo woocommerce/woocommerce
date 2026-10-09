@@ -82,15 +82,24 @@ class Settings {
 	}
 
 	/**
-	 * Get the titles of the installed payment gateways, for the payment method column of the Orders report.
+	 * Get the payment gateways for the Orders report payment method filter and column: the installed
+	 * ones by title, then any other gateway the stored orders were paid with, by id.
 	 *
 	 * @return array Payment gateway titles, keyed by gateway id.
 	 */
 	private function get_payment_gateway_titles() {
+		global $wpdb;
+
 		$titles = array();
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			$titles[ $gateway->id ] = $gateway->get_method_title();
 		}
+
+		// A gateway that is no longer installed still has orders, so it stays in the filter under its id.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$stored = $wpdb->get_col( "SELECT DISTINCT payment_method FROM {$wpdb->prefix}wc_order_stats WHERE payment_method != '' ORDER BY payment_method" );
+
+		$titles += array_combine( $stored, $stored );
 
 		return $titles;
 	}
