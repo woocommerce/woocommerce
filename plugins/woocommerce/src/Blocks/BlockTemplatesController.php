@@ -67,11 +67,11 @@ class BlockTemplatesController {
 				if ( $template_part && ! empty( $template_part->content ) ) {
 					$content = do_blocks( $template_part->content );
 
-					// Backward compatibility: set block-support context so get_block_wrapper_attributes resolves this block's attributes, not a parent's.
+					// Set block-support context so get_block_wrapper_attributes resolves this block's attributes, not a parent's.
 					list( $previous_block, \WP_Block_Supports::$block_to_render )     = array( \WP_Block_Supports::$block_to_render, $parsed_block );
 					list( $wrapper_attributes, \WP_Block_Supports::$block_to_render ) = array( get_block_wrapper_attributes(), $previous_block );
 
-					// Backward compatibility: pre_render_block skips core's render_block filter, re-apply it so extensions filtering template part output still work.
+					// The pre_render_block skips core's render_block filter, re-apply it so extensions filtering template part output still work.
 					$html_tag      = $attributes['tagName'] ?? null;
 					$html_tag      = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
 					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
