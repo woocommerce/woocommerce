@@ -51,7 +51,7 @@ export default function FulfillmentCard( {
 							onKeyUp: handleKeyUp,
 							role: 'button',
 							tabIndex: 0,
-					  }
+						}
 					: {} ) }
 			>
 				{ header }

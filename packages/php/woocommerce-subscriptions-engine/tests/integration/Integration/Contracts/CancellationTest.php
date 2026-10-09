@@ -14,6 +14,8 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use DomainException;
 use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
@@ -60,6 +62,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 	private function seed( string $status, ?string $end_gmt = null ): int {
 		$contract = Contract::create(
 			array(
+				'extension_slug'   => 'engine-tests',
 				'customer_id'      => 1,
 				'status'           => $status,
 				'currency'         => 'USD',
@@ -118,7 +121,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
 		$this->assertSame( '2099-01-01 00:00:00', $stored->get_end_gmt() );
 		$this->assertNull( $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_cancel_at_period_end_on_a_pending_cancellation_contract_is_a_no_op(): void {
@@ -160,6 +163,7 @@ class CancellationTest extends EngineIntegrationTestCase {
 	public function test_rejects_a_terminal_contract(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'engine-tests',
 				'customer_id'     => 1,
 				'status'          => ContractStatus::CANCELLED,
 				'currency'        => 'USD',
@@ -193,7 +197,93 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::CANCELLED, $stored->get_status() );
 		$this->assertNull( $stored->get_next_payment_gmt() );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
+	}
+
+	/**
+	 * The anchor is cleared after the status write has committed, so a failed delete must
+	 * not abort the transition: the lifecycle action still fires.
+	 *
+	 * @dataProvider provide_cancel_modes
+	 *
+	 * @param string $method Cancellation method under test.
+	 * @param string $action Action the method fires.
+	 * @param string $status Status the method writes.
+	 */
+	public function test_a_failed_anchor_clear_does_not_abort_the_transition( string $method, string $action, string $status ): void {
+		$id = $this->seed_active();
+		( new Hold( $this->contracts ) )->hold( $this->reload( $id ) );
+
+		$fired = 0;
+		add_action(
+			$action,
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+		$break = $this->break_meta_deletes();
+
+		try {
+			$this->assertTrue( $this->sut->$method( $this->reload( $id ) ) );
+		} finally {
+			remove_filter( 'query', $break );
+		}
+
+		$this->assertSame( 1, $fired, 'The lifecycle action fires.' );
+		$this->assertSame( $status, $this->reload( $id )->get_status() );
+		$this->assertSame( '2099-01-01 00:00:00', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ), 'The anchor is left behind.' );
+	}
+
+	/**
+	 * A transition that loses its compare-and-set leaves the hold anchor in place, so the
+	 * contract that won can still resume from it.
+	 *
+	 * @dataProvider provide_cancel_modes
+	 *
+	 * @param string $method Cancellation method under test.
+	 */
+	public function test_a_lost_race_keeps_the_hold_anchor( string $method ): void {
+		$id = $this->seed_active();
+		( new Hold( $this->contracts ) )->hold( $this->reload( $id ) );
+		$stale = $this->reload( $id );
+
+		$concurrent = $this->reload( $id );
+		$concurrent->set_status( ContractStatus::EXPIRED );
+		$this->contracts->update( $concurrent );
+
+		try {
+			$this->sut->$method( $stale );
+			$this->fail( 'Expected a DomainException when the conditional write misses.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( '2099-01-01 00:00:00', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
+		}
+	}
+
+	/**
+	 * Both cancellation modes: method, action, resulting status.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2: string}>
+	 */
+	public function provide_cancel_modes(): array {
+		return array(
+			'cancel'               => array( 'cancel', Cancellation::CONTRACT_CANCELLED_ACTION, ContractStatus::CANCELLED ),
+			'cancel at period end' => array( 'cancel_at_period_end', Cancellation::CONTRACT_PENDING_CANCELLATION_ACTION, ContractStatus::PENDING_CANCELLATION ),
+		);
+	}
+
+	/**
+	 * Make every contract meta DELETE fail until the returned filter is removed.
+	 *
+	 * @return callable The `query` filter to remove.
+	 */
+	private function break_meta_deletes(): callable {
+		$meta_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$break      = static function ( string $query ) use ( $meta_table ): string {
+			return 0 === strpos( $query, "DELETE FROM `{$meta_table}`" ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+
+		return $break;
 	}
 
 	public function test_cancel_accepts_a_pending_cancellation_contract(): void {
@@ -204,6 +294,33 @@ class CancellationTest extends EngineIntegrationTestCase {
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::CANCELLED, $stored->get_status() );
 		$this->assertNull( $stored->get_next_payment_gmt() );
+	}
+
+	public function test_cancel_accepts_a_draft_contract(): void {
+		// A stuck draft (created, never activated) has no cycles and no due moment.
+		$id = Contracts::create(
+			array(
+				'extension_slug' => 'test-owner',
+				'customer_id'    => 1,
+				'currency'       => 'USD',
+			)
+		)->get_id();
+		$this->assertSame( ContractStatus::DRAFT, $this->reload( $id )->get_status() );
+
+		$fired = 0;
+		add_action(
+			Cancellation::CONTRACT_CANCELLED_ACTION,
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+
+		$this->assertTrue( Subscriptions::cancel( $id ) );
+
+		$stored = $this->reload( $id );
+		$this->assertSame( ContractStatus::CANCELLED, $stored->get_status() );
+		$this->assertNull( $stored->get_next_payment_gmt() );
+		$this->assertSame( 1, $fired );
 	}
 
 	public function test_cancel_on_a_cancelled_contract_is_a_no_op_that_refires_the_action(): void {
@@ -253,39 +370,28 @@ class CancellationTest extends EngineIntegrationTestCase {
 
 	public function test_cancel_at_period_end_ignores_a_malformed_hold_anchor(): void {
 		$id = $this->seed( ContractStatus::ON_HOLD );
-		$this->contracts->update( $this->with_hold_anchor( $this->reload( $id ), 'not-a-date' ) );
+		$this->contracts->update_meta( $id, Hold::ANCHOR_META_KEY, 'not-a-date' );
 
 		$this->sut->cancel_at_period_end( $this->reload( $id ) );
 
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
 		$this->assertSame( '2099-01-01 00:00:00', $stored->get_end_gmt(), 'The stored next payment, not the malformed anchor, is the period end.' );
-		$this->assertArrayNotHasKey( Hold::ANCHOR_META_KEY, $stored->get_meta() );
+		$this->assertSame( '', $this->contracts->get_meta( $id, Hold::ANCHOR_META_KEY, true ) );
 	}
 
 	public function test_cancel_at_period_end_from_on_hold_without_a_date_leaves_no_end(): void {
 		$id   = $this->seed( ContractStatus::ON_HOLD );
 		$held = $this->reload( $id );
 		$held->set_next_payment_gmt( null );
-		$this->contracts->update( $this->with_hold_anchor( $held, 'not-a-date' ) );
+		$this->contracts->update( $held );
+		$this->contracts->update_meta( $id, Hold::ANCHOR_META_KEY, 'not-a-date' );
 
 		$this->sut->cancel_at_period_end( $this->reload( $id ) );
 
 		$stored = $this->reload( $id );
 		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $stored->get_status() );
 		$this->assertNull( $stored->get_end_gmt(), 'A malformed anchor is never written as the end date.' );
-	}
-
-	/**
-	 * Set the hold anchor meta on a contract.
-	 *
-	 * @param Contract $contract Contract to change.
-	 * @param string   $anchor   Anchor value to store.
-	 */
-	private function with_hold_anchor( Contract $contract, string $anchor ): Contract {
-		$contract->set_meta( Hold::ANCHOR_META_KEY, $anchor );
-
-		return $contract;
 	}
 
 	public function test_cancel_at_period_end_rejects_an_expired_contract(): void {

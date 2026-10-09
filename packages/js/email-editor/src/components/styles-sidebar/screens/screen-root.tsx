@@ -4,14 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { typography, color, background, layout } from '@wordpress/icons';
 import {
-	__experimentalVStack as VStack, // eslint-disable-line
+	__experimentalVStack as VStack,
 	Card,
 	CardBody,
 	CardMedia,
-	__experimentalItemGroup as ItemGroup, // eslint-disable-line
-	__experimentalItem as Item, // eslint-disable-line
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalNavigatorButton as NavigatorButton, // eslint-disable-line
+	__experimentalItemGroup as ItemGroup,
+	__experimentalItem as Item,
+	__experimentalHStack as HStack,
+	__experimentalNavigatorButton as NavigatorButton,
 	Icon,
 	FlexItem,
 } from '@wordpress/components';

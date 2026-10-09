@@ -46,7 +46,7 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 						setIsOpen( ! isOpen );
 					}
 				},
-		  }
+			}
 		: {};
 
 	return { isOpen, isLarge, ariaControlsId, toggleProps };
