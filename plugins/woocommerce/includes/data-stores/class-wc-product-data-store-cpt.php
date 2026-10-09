@@ -375,6 +375,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				clean_post_cache( $product->get_id() );
 			} else {
 				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+
+				// WordPress can change post fields on update (slug generated on publish, sanitized content), so sync them back.
+				$post_object = get_post( $product->get_id() );
+				if ( $post_object instanceof WP_Post ) {
+					$product->set_props( $this->get_product_props_from_post( $post_object ) );
+				}
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 

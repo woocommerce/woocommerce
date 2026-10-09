@@ -263,6 +263,70 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Publishing a draft product puts the slug WordPress generated on the object, so renaming it later keeps the permalink.
+	 */
+	public function test_product_update_syncs_slug_generated_on_publish(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Draft lamp' );
+		$product->set_status( ProductStatus::DRAFT );
+		$product->save();
+
+		$product = new WC_Product_Simple( $product->get_id() );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->save();
+
+		$product_id = $product->get_id();
+		$this->assertSame( 'draft-lamp', get_post_field( 'post_name', $product_id ), 'Publishing should generate the slug' );
+		$this->assertSame( 'draft-lamp', $product->get_slug( 'edit' ), 'The saved object should have the generated slug' );
+
+		$product->set_name( 'Draft torch' );
+		$product->save();
+
+		$this->assertSame( 'draft-lamp', get_post_field( 'post_name', $product_id ), 'Renaming the same object should keep the permalink' );
+	}
+
+	/**
+	 * @testdox Updating a product puts post fields changed on save on the object and in woocommerce_update_product, so a later save keeps them.
+	 */
+	public function test_product_update_syncs_filtered_post_fields(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Filtered update hat' );
+		$product->set_short_description( 'Typed by the merchant' );
+		$product->save();
+		$product_id = $product->get_id();
+
+		$filter_excerpt = function ( $data, $postarr ) use ( $product_id ) {
+			if ( isset( $postarr['ID'] ) && $product_id === (int) $postarr['ID'] ) {
+				$data['post_excerpt'] = 'Set by filter';
+			}
+			return $data;
+		};
+		add_filter( 'wp_insert_post_data', $filter_excerpt, 10, 2 );
+		$updated_short_description = null;
+		add_action(
+			'woocommerce_update_product',
+			function ( $updated_id, $updated_product ) use ( &$updated_short_description ) {
+				$updated_short_description = $updated_product->get_short_description( 'edit' );
+			},
+			10,
+			2
+		);
+
+		$product->set_name( 'Filtered update cap' );
+		$product->save();
+		remove_filter( 'wp_insert_post_data', $filter_excerpt, 10 );
+
+		$this->assertSame( 'Set by filter', $product->get_short_description( 'edit' ), 'The saved object should have the stored summary' );
+		$this->assertSame( 'Set by filter', $updated_short_description, 'woocommerce_update_product should receive the stored summary' );
+		$this->assertSame( array(), $product->get_changes(), 'A saved product should have no pending changes' );
+
+		$product->set_menu_order( 4 );
+		$product->save();
+
+		$this->assertSame( 'Set by filter', get_post_field( 'post_excerpt', $product_id ), 'A later save should not restore the pre-filter summary' );
+	}
+
+	/**
 	 * Test reading a product.
 	 *
 	 * @since 3.0.0
