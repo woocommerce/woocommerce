@@ -1318,6 +1318,11 @@ class WC_AJAX {
 
 			$order = wc_get_order( $order_id );
 
+			// Coupons already on the order were applied before these items existed, so apply them again to include the new items.
+			if ( ! empty( $added_items ) && $order instanceof WC_Order && $order->get_items( 'coupon' ) ) {
+				$order->recalculate_coupons();
+			}
+
 			// Get HTML to return.
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
