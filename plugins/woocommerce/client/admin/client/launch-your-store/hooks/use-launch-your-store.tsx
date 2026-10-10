@@ -16,6 +16,7 @@ export const useLaunchYourStore = (
 ) => {
 	const {
 		isLoading,
+		isFetchingDisabled,
 		launchYourStoreEnabled,
 		comingSoon,
 		storePagesOnly,
@@ -26,6 +27,7 @@ export const useLaunchYourStore = (
 			if ( ! enabled ) {
 				return {
 					isLoading: false,
+					isFetchingDisabled: true,
 					comingSoon: null,
 					storePagesOnly: null,
 					privateLink: null,
@@ -52,6 +54,7 @@ export const useLaunchYourStore = (
 
 			return {
 				isLoading: allOptionResolutionsFinished,
+				isFetchingDisabled: false,
 				comingSoon: getOption( 'woocommerce_coming_soon' ),
 				storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
 				privateLink: getOption( 'woocommerce_private_link' ),
@@ -64,6 +67,7 @@ export const useLaunchYourStore = (
 
 	return {
 		isLoading,
+		isFetchingDisabled,
 		comingSoon,
 		storePagesOnly,
 		privateLink,
