@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop taxing legacy local pickup rate at the same address of a new pickup location one.
