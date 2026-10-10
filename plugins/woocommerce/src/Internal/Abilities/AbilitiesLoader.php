@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -76,12 +77,36 @@ class AbilitiesLoader {
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		AbilitiesCategories::init();
+		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 
 		AbilitiesRestBridge::init();
 
 		self::$initialized = true;
+	}
+
+	/**
+	 * Let extensions register their ability fields, before the abilities build their schemas.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function init_extensions(): void {
+		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityContracts::is_enabled() ) {
+			return;
+		}
+
+		/**
+		 * Fires when extensions can register their fields with AbilityExtensions.
+		 *
+		 * Fires one time, only when the experimental `ability_contracts` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_ability_extensions_init' );
 	}
 
 	/**
