@@ -801,7 +801,6 @@ class StyleAttributesUtils {
 	public static function get_global_styles( array $path ) {
 		static $blocks_styles = null;
 
-		// Optimization: request-level cache with optimized for blocks styles.
 		if ( 'blocks' === ( $path[0] ?? null ) ) {
 			$blocks_styles   = $blocks_styles ?? wp_get_global_styles( array( 'blocks' ) );
 			$resolution_path = implode( '::', array_slice( $path, 1 ) );
