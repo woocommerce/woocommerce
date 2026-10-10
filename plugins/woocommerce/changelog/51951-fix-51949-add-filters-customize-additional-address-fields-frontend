@@ -1,0 +1,3 @@
+Significance: minor
+Type: enhancement
+Comment: Added new filters `woocommerce_checkout_render_additional_field` and `woocommerce_checkout_render_address_field` for customizing the output of additional fields and address fields on the frontend.
