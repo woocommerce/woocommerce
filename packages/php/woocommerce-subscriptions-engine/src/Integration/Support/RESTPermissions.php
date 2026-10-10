@@ -19,10 +19,9 @@ class RESTPermissions {
 	/**
 	 * Require a logged in user.
 	 *
-	 * The shared authentication floor for customer-facing routes: any logged-in user
-	 * passes; resource-level authorization (e.g. per-contract ownership) stays with the
-	 * route handlers. Core's cookie auth has already verified the REST nonce (`wp_rest`)
-	 * for a cookie-authenticated request by the time a permission callback runs.
+	 * The authentication floor under {@see self::require_admin_permission()}. Core's cookie
+	 * auth has already verified the REST nonce (`wp_rest`) for a cookie-authenticated
+	 * request by the time a permission callback runs.
 	 *
 	 * @return true|\WP_Error True when logged in, else a 401 error.
 	 */
