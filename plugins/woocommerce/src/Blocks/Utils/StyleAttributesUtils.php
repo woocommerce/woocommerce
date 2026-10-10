@@ -793,7 +793,7 @@ class StyleAttributesUtils {
 	}
 
 	/**
-	 * Request-level Caching wrapper for wp_get_global_styles, which is pretty expensive in runtime.
+	 * Request-level caching wrapper for wp_get_global_styles, which is pretty expensive in runtime.
 	 *
 	 * @param string[] $path Path to the desired global styles value.
 	 * @return mixed The resolved global styles value.
