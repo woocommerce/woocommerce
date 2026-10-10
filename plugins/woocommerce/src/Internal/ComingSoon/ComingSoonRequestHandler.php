@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\ComingSoon;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\Jetpack\Constants;
 
 /**
@@ -45,6 +46,14 @@ class ComingSoonRequestHandler {
 				}
 
 				add_filter( 'template_include', array( $this, 'handle_template_include' ) );
+				add_action(
+					'template_redirect',
+					function () {
+						// Registered last so no other template_include callback can replace the private page.
+						add_filter( 'template_include', array( $this, 'handle_classic_template_include' ), PHP_INT_MAX );
+					},
+					PHP_INT_MAX
+				);
 				add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'after_setup_theme', array( $this, 'possibly_init_block_templates' ), 999 );
@@ -54,10 +63,15 @@ class ComingSoonRequestHandler {
 
 	/**
 	 * Initializes block templates so we can show coming soon page in non-FSE themes.
+	 * Skipped when the classic PHP templates render the page instead.
 	 */
 	public function possibly_init_block_templates() {
 		// No need to initialize block templates since we've already initialized them in the Block Bootstrap.
 		if ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) {
+			return;
+		}
+
+		if ( $this->should_use_classic_templates() ) {
 			return;
 		}
 
@@ -75,6 +89,10 @@ class ComingSoonRequestHandler {
 	 * @return string The path to the 'coming soon' template or any empty string to prevent further template loading in FSE themes.
 	 */
 	public function handle_template_include( $template ) {
+		if ( $this->should_use_classic_templates() ) {
+			return $template;
+		}
+
 		if ( ! $this->should_show_coming_soon() ) {
 			return $template;
 		}
@@ -92,12 +110,7 @@ class ComingSoonRequestHandler {
 			get_header();
 		}
 
-		add_action(
-			'wp_head',
-			function () {
-				echo "<meta name='woo-coming-soon-page' content='yes'>";
-			}
-		);
+		$this->add_coming_soon_meta();
 
 		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
 			if ( ! $is_fse_theme && $is_store_coming_soon && function_exists( 'get_the_block_template_html' ) ) {
@@ -120,6 +133,125 @@ class ComingSoonRequestHandler {
 			// We need to exit to prevent further processing.
 			exit();
 		}
+	}
+
+	/**
+	 * Selects a PHP Coming Soon template after every other template_include callback.
+	 *
+	 * @internal
+	 *
+	 * @param string $template The previously selected template path.
+	 * @return string The Coming Soon PHP path, an empty path on lookup failure, or the original path on bypass requests.
+	 */
+	public function handle_classic_template_include( $template ) {
+		if ( ! $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
+			return $template;
+		}
+
+		if ( ! headers_sent() ) {
+			header( 'Cache-Control: max-age=60' );
+		}
+
+		$type = 'coming-soon';
+		/**
+		 * Filters the Coming Soon PHP template hierarchy, matching the WordPress query-template contract.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string[] $templates Template filenames in priority order.
+		 */
+		$templates = apply_filters( "{$type}_template_hierarchy", array( 'coming-soon.php' ) );
+		$templates = is_array( $templates ) ? array_filter( $templates, 'is_string' ) : array( 'coming-soon.php' );
+		$selected  = locate_template( $templates );
+
+		if ( ! $selected ) {
+			$template_name = $this->coming_soon_helper->is_store_coming_soon() ? 'coming-soon-store-only.php' : 'coming-soon-entire-site.php';
+			$selected      = wc_locate_template( 'coming-soon/' . $template_name );
+		}
+
+		/**
+		 * Filters the Coming Soon PHP path, matching the WordPress query-template contract.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string   $selected  The located template path.
+		 * @param string   $type      The template type, coming-soon.
+		 * @param string[] $templates Template filenames in priority order.
+		 */
+		$selected = apply_filters( "{$type}_template", $selected, $type, $templates );
+		if ( ! is_string( $selected ) || ! is_file( $selected ) || ! is_readable( $selected ) ) {
+			// Never fall back to protected content when a template override cannot be loaded.
+			return '';
+		}
+
+		wp_enqueue_style(
+			'woocommerce-coming-soon-classic',
+			WC()->plugin_url() . '/assets/css/coming-soon-classic.css',
+			array(),
+			Constants::get_constant( 'WC_VERSION' )
+		);
+		wp_style_add_data( 'woocommerce-coming-soon-classic', 'rtl', 'replace' );
+		$this->add_coming_soon_meta();
+
+		return $selected;
+	}
+
+	/**
+	 * Marks the page as Coming Soon for caches and other integrations.
+	 */
+	private function add_coming_soon_meta(): void {
+		add_action(
+			'wp_head',
+			function () {
+				echo "<meta name='woo-coming-soon-page' content='yes'>";
+			}
+		);
+	}
+
+	/**
+	 * Keeps saved and theme-owned block designs on the legacy renderer even with an unsupported classic theme.
+	 *
+	 * @return bool Whether the default PHP templates should be used.
+	 */
+	private function should_use_classic_templates() {
+		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) || BlockTemplateUtils::theme_has_template( 'coming-soon' ) ) {
+			return false;
+		}
+
+		return ! $this->has_published_block_customization( 'wp_template', 'coming-soon' )
+			&& ! $this->has_published_block_customization( 'wp_template_part', 'coming-soon-social-links' );
+	}
+
+	/**
+	 * Detects applicable published templates before the block registry is initialized.
+	 * Query filters are skipped: this runs before `init`, and no filter should hide a saved design.
+	 *
+	 * @param string $post_type The template post type.
+	 * @param string $slug      The template slug.
+	 * @return bool Whether a saved design exists.
+	 */
+	private function has_published_block_customization( $post_type, $slug ) {
+		$query = new \WP_Query(
+			array(
+				'post_type'        => $post_type,
+				'post_status'      => 'publish',
+				'post_name__in'    => array( $slug ),
+				'suppress_filters' => true,
+				'posts_per_page'   => 1,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'orderby'          => 'none',
+				'tax_query'        => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- A single published template ID is checked against its required theme scope.
+					array(
+						'taxonomy' => 'wp_theme',
+						'field'    => 'name',
+						'terms'    => array( get_stylesheet(), BlockTemplateUtils::PLUGIN_SLUG, BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG ),
+					),
+				),
+			)
+		);
+
+		return ! empty( $query->posts );
 	}
 
 	/**

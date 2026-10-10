@@ -1,0 +1,103 @@
+.woocommerce-coming-soon-classic-page {
+	margin: 0;
+}
+
+.woocommerce-coming-soon-classic {
+	box-sizing: border-box;
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: inherit;
+	}
+
+	&--entire-site {
+		display: flex;
+		font-family: system-ui, sans-serif;
+		line-height: 1.5;
+		flex-direction: column;
+		min-height: 100vh;
+		min-height: 100svh;
+		padding-inline: clamp(24px, 5vw, 80px);
+		color: #1e1e1e;
+		background: #fff;
+	}
+
+	&__header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 24px;
+		width: 100%;
+		max-width: 1280px;
+		margin-inline: auto;
+		padding-block: 26px;
+	}
+
+	&__identity {
+		display: flex;
+		flex: 1 1 0;
+		align-items: center;
+		min-width: 0;
+		gap: 16px;
+		font-size: 20px;
+		overflow-wrap: anywhere;
+
+		.custom-logo-link {
+			flex: none;
+		}
+
+		.custom-logo {
+			width: 60px;
+			height: auto;
+		}
+	}
+
+	&__content {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		max-width: 960px;
+		margin-inline: auto;
+		padding-block: 80px;
+		text-align: center;
+		overflow-wrap: anywhere;
+
+		h1 {
+			margin-block: 0 24px;
+			font-size: clamp(32px, 5vw, 48px);
+			font-weight: 400;
+			line-height: 1.2;
+		}
+
+		p {
+			margin-block: 0;
+			font-size: 18px;
+		}
+	}
+
+	&--store-only {
+		padding-inline: 24px;
+	}
+
+	&--entire-site a {
+		color: inherit;
+	}
+
+	&__login {
+		padding-block: 12px;
+		padding-inline: 16px;
+		border: 1px solid currentcolor;
+		border-radius: 6px;
+		text-decoration: none;
+	}
+
+	a:focus-visible {
+		outline: 2px solid currentcolor;
+		outline-offset: 4px;
+	}
+}
