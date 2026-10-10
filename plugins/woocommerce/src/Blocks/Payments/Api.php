@@ -167,14 +167,7 @@ class Api {
 		$payment_method_scripts = $this->payment_method_registry->get_all_active_payment_method_script_dependencies();
 
 		foreach ( $payment_method_scripts as $payment_method_script ) {
-			if (
-				! array_key_exists( $payment_method_script, $wp_scripts->registered ) ||
-				! property_exists( $wp_scripts->registered[ $payment_method_script ], 'deps' )
-			) {
-				continue;
-			}
-			$deps = $wp_scripts->registered[ $payment_method_script ]->deps;
-			foreach ( $deps as $dep ) {
+			foreach ( ( $wp_scripts->registered[ $payment_method_script ]->deps ?? array() ) as $dep ) {
 				if ( ! wp_script_is( $dep, 'registered' ) ) {
 					$error_handle  = $dep . '-dependency-error';
 					$error_message = sprintf(
