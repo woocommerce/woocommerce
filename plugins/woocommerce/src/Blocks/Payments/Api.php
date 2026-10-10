@@ -130,10 +130,10 @@ class Api {
 		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
 		wp_prime_option_caches(
 			array(
-				'woocommerce_bacs_accounts',
 				'woocommerce_cheque_settings',
-				'woocommerce_cod_settings',
 				'woocommerce_paypal_settings',
+				'woocommerce_bacs_accounts',
+				'woocommerce_cod_settings',
 			)
 		);
 
