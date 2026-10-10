@@ -281,6 +281,104 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * on_sale=true combined with include must intersect: only the included products that are on sale.
+	 */
+	public function test_on_sale_true_intersects_with_include(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66, 77 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'include', array( 55, 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 55 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=true with an include list that contains no on-sale products must return nothing, not the include list.
+	 */
+	public function test_on_sale_true_is_not_ignored_when_include_has_no_on_sale_products(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'include', array( 101, 102 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=false combined with exclude must merge: exclude the explicit list plus every on-sale product.
+	 */
+	public function test_on_sale_false_merges_on_sale_ids_into_exclude(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', false );
+		$request->set_param( 'exclude', array( 99 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 99, 55, 66 ), $args['post__not_in'] );
+	}
+
+	/**
+	 * on_sale=false combined with include must remove the on-sale products from post__in, because WP_Query ignores post__not_in when post__in is set.
+	 */
+	public function test_on_sale_false_removes_on_sale_products_from_include(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', false );
+		$request->set_param( 'include', array( 55, 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertSame( array( 101 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=true combined with exclude must remove the excluded products from post__in.
+	 */
+	public function test_on_sale_true_removes_excluded_products(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66, 77 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'exclude', array( 66 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 55, 77 ), $args['post__in'] );
+	}
+
+	/**
+	 * The related filter must return no products when none of the included products are related, not every product.
+	 */
+	public function test_related_filter_with_empty_intersection_returns_no_products(): void {
+		$fixtures = new FixtureData();
+		$anchor   = $fixtures->get_simple_product( array( 'name' => 'Related anchor' ) );
+
+		$callback = static function () {
+			return array( 55, 66 );
+		};
+		add_filter( 'woocommerce_related_products', $callback );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $anchor->get_id() );
+		$request->set_param( 'include', array( 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		remove_filter( 'woocommerce_related_products', $callback );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
 	 * Get product IDs matched by a Store API slug filter.
 	 *
 	 * @param string $slug_filter Slug filter value.

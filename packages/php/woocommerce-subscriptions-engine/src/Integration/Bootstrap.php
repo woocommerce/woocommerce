@@ -16,6 +16,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
@@ -47,6 +48,7 @@ final class Bootstrap {
 		self::$initialized = true;
 
 		CapabilityRegistry::init();
+		ContractCapabilities::register_hooks();
 
 		// Register the callbacks that dispatch renewals back into the engine. Plain
 		// add_action calls, safe before Action Scheduler has loaded; must run on every
