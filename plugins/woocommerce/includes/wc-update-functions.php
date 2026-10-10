@@ -4157,6 +4157,7 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 				WHERE stats.order_id IN ({$id_list})
 				AND stats.payment_method IS NULL
 				AND orders.payment_method != ''";
+			$refund_join  = "JOIN {$orders_table} refund_orders ON refund_orders.id = refunds.order_id AND refund_orders.type = 'shop_order_refund'";
 		} else {
 			$from_orders = "UPDATE {$stats_table} stats
 				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = '_payment_method'
@@ -4164,10 +4165,13 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 				WHERE stats.order_id IN ({$id_list})
 				AND stats.payment_method IS NULL
 				AND meta.meta_value != ''";
+			$refund_join = "JOIN {$wpdb->posts} refund_orders ON refund_orders.ID = refunds.order_id AND refund_orders.post_type = 'shop_order_refund'";
 		}
 
 		// A refund holds no payment method of its own, so it takes the refunded order's. That order has the lower id, so its row is already filled.
+		// The join on the order type leaves out other child orders, which the sync stores without the parent's payment method.
 		$from_parents = "UPDATE {$stats_table} refunds
+			{$refund_join}
 			JOIN {$stats_table} parents ON parents.order_id = refunds.parent_id
 			SET refunds.payment_method = parents.payment_method
 			WHERE refunds.order_id IN ({$id_list})

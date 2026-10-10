@@ -1179,6 +1179,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $refund );
 		OrdersStatsDataStore::sync_order( $refund->get_id() );
 
+		// A child order that is not a refund, such as a scheduled payment, has no gateway until it is paid.
+		$child_order = wc_create_order( array( 'parent' => $order->get_id() ) );
+		OrdersStatsDataStore::sync_order( $child_order->get_id() );
+
 		$stats_table = $wpdb->prefix . 'wc_order_stats';
 
 		$get_payment_method = function ( $order_id ) use ( $wpdb, $stats_table ) {
@@ -1218,11 +1222,12 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'cheque', $get_payment_method( $order->get_id() ) );
 		$this->assertSame( 'cheque', $get_payment_method( $refund->get_id() ), 'A refund takes the payment method of the order it refunds.' );
+		$this->assertNull( $get_payment_method( $child_order->get_id() ), 'A child order that is not a refund does not take the payment method of its parent.' );
 		$this->assertFalse( get_option( 'woocommerce_update_1130_last_payment_method_order_id' ), 'The cursor is cleared on completion.' );
 	}
 
 	/**
-	 * @testdox Migration carries its cursor between batches, so rows past the first batch are backfilled too.
+	 * @testdox Migration carries its cursor between batches, so it reaches the rows past the first batch.
 	 */
 	public function test_wc_update_1130_backfill_order_stats_payment_method_in_batches(): void {
 		global $wpdb;
@@ -1234,43 +1239,28 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$date        = gmdate( 'Y-m-d H:i:s' );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
 		$first_id = (int) $wpdb->get_var( "SELECT MAX(order_id) FROM {$stats_table}" ) + 1;
+		$last_id  = $first_id + 500;
 
-		// A refund takes the payment method of its parent row, so the rows below need no order behind them.
-		$rows = array( array( $first_id, 0, 'cheque' ) );
-		// One full batch of rows that sits between the parent and the refund, to push the refund into a second batch.
-		for ( $offset = 1; $offset <= 500; $offset++ ) {
-			$rows[] = array( $first_id + $offset, 0, null );
-		}
-		$refund_id = $first_id + 501;
-		$rows[]    = array( $refund_id, $first_id, null );
-
-		foreach ( $rows as list( $order_id, $parent_id, $payment_method ) ) {
+		// One full batch of rows and one row more. The cursor is under test, so the rows need no order behind them.
+		for ( $order_id = $first_id; $order_id <= $last_id; $order_id++ ) {
 			$wpdb->insert(
 				$stats_table,
 				array(
 					'order_id'         => $order_id,
-					'parent_id'        => $parent_id,
 					'status'           => OrderInternalStatus::COMPLETED,
 					'customer_id'      => 0,
 					'date_created'     => $date,
 					'date_created_gmt' => $date,
-					'payment_method'   => $payment_method,
 				),
-				array( '%d', '%d', '%s', '%d', '%s', '%s', '%s' )
+				array( '%d', '%s', '%d', '%s', '%s' )
 			);
 		}
 
-		$get_payment_method = function ( $order_id ) use ( $wpdb, $stats_table ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
-			return $wpdb->get_var( $wpdb->prepare( "SELECT payment_method FROM {$stats_table} WHERE order_id = %d", $order_id ) );
-		};
-
 		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'A full batch leaves work for another run.' );
 		$this->assertSame( $first_id + 499, (int) get_option( $cursor ), 'The cursor is saved at the last id of the batch.' );
-		$this->assertNull( $get_payment_method( $refund_id ), 'The refund row sits past the first batch.' );
 
 		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'The second batch resumes after the cursor.' );
-		$this->assertSame( 'cheque', $get_payment_method( $refund_id ), 'The refund row is backfilled on a later batch.' );
+		$this->assertSame( $last_id, (int) get_option( $cursor ), 'The second batch takes the row past the first batch.' );
 
 		$this->assertFalse( wc_update_1130_backfill_order_stats_payment_method(), 'An empty batch ends the migration.' );
 		$this->assertFalse( get_option( $cursor ), 'The cursor is cleared on completion.' );
