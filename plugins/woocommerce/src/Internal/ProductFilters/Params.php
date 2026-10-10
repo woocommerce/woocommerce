@@ -142,23 +142,28 @@ class Params implements FilterUrlParam {
 			}
 		}
 
+		$filter_params             = $other_params;
+		$filter_params['taxonomy'] = $params;
+
 		/**
-		 * Filters product taxonomy URL parameters: `product_cat` => `categories`, `product_tag` => `tags`,
-		 * `product_brand` => `brands`; other product taxonomies use `filter_{taxonomy}`.
+		 * Filters the complete Product Filters URL parameter map. Only changes to the `taxonomy` entry are currently applied.
+		 * That entry maps taxonomy names to URL parameter names, e.g. `product_cat` => `categories`.
 		 * Rename with a non-empty, unused parameter name; omitted or invalid entries keep their defaults.
 		 * Register callbacks before Params is first read; the map is cached per request.
 		 *
-		 * @hook woocommerce_product_filter_taxonomy_params
+		 * @hook woocommerce_product_filter_params
 		 * @since 11.3.0
 		 *
-		 * @param array $params Map of taxonomy name to URL parameter name.
-		 * @return array Map of taxonomy name to URL parameter name.
+		 * @param array $filter_params Filter types (`price`, `rating`, `status`, `attribute`, `taxonomy`) mapped to their URL parameter arrays.
+		 * @return array Filter types mapped to their URL parameter arrays.
 		 */
-		$filtered = apply_filters( 'woocommerce_product_filter_taxonomy_params', $params );
+		$filtered = apply_filters( 'woocommerce_product_filter_params', $filter_params );
 
-		if ( ! is_array( $filtered ) ) {
+		if ( ! is_array( $filtered ) || ! isset( $filtered['taxonomy'] ) || ! is_array( $filtered['taxonomy'] ) ) {
 			return $params;
 		}
+
+		$filtered = $filtered['taxonomy'];
 
 		$used_params = array_merge( array_values( $params ), ...array_values( $other_params ) );
 		foreach ( array_keys( $other_params['attribute'] ) as $attribute ) {
