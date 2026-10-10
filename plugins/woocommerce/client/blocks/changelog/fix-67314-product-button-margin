@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect Product Button margins without adding the parent block spacing.
