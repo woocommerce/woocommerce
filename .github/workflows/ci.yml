@@ -136,9 +136,13 @@ jobs:
             // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
             // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
 
+            // The base ref fills the `<baseRef>` placeholder in project commands, so a PR
+            // targeting a release/* branch is linted against that branch, not trunk.
             let prNumberFilter   = '';
+            let baseRefFilter    = '';
             if ( '${{ github.event_name }}' === 'pull_request' ) {
               prNumberFilter = `--pr-number ${{ github.event.pull_request.number }}`;
+              baseRefFilter  = `--base-ref origin/${ process.env.GITHUB_BASE_REF }`;
             }
 
             let githubEvent = ${{ toJson( github.event_name ) }};
@@ -155,7 +159,7 @@ jobs:
             }
 
             const child_process = require( 'node:child_process' );
-            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
+            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } ${ baseRefFilter } --event ${ githubEvent }` );
 
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
