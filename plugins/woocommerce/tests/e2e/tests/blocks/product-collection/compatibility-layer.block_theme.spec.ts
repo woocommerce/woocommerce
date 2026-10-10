@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, enableTestPlugin } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -20,9 +20,10 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Product Collection: Compatibility Layer', () => {
-	test.beforeEach( async ( { pageObject, requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-product-collection-compatibility-layer'
+	test.beforeEach( async ( { pageObject, context } ) => {
+		await enableTestPlugin(
+			context,
+			'product-collection-compatibility-layer'
 		);
 		await pageObject.goToProductCatalogFrontend();
 	} );
