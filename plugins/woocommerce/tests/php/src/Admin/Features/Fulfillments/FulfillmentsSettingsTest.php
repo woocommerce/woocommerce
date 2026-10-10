@@ -52,8 +52,8 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 	public function test_hooks_added() {
 		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 
-		// Check if the admin_init filter is added.
-		$this->assertNotFalse( has_filter( 'admin_init', array( $fulfillments_settings, 'init_settings_auto_fulfill' ) ) > 0 );
+		// The settings fields are added right away, not on admin_init, which runs after settings are saved.
+		$this->assertNotFalse( has_filter( 'woocommerce_get_settings_products', array( $fulfillments_settings, 'add_auto_fulfill_settings' ) ) );
 
 		// Check if the order status hooks are added.
 		$this->assertNotFalse( has_action( 'woocommerce_order_status_processing', array( $fulfillments_settings, 'auto_fulfill_items_on_processing' ) ) > 0 );
