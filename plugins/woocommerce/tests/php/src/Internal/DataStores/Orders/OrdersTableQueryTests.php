@@ -480,6 +480,177 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A first search page with room to spare supplies the total without a count query.
+	 * @dataProvider provider_first_search_page_sizes
+	 *
+	 * @param int  $matches        Number of orders matching the search term.
+	 * @param bool $count_expected Whether the count query must still run.
+	 */
+	public function test_first_search_page_supplies_total( int $matches, bool $count_expected ): void {
+		global $wpdb;
+
+		$ids = array();
+		for ( $i = 0; $i < $matches; $i++ ) {
+			$order = new WC_Order();
+			$order->set_billing_email( 'first-page@woo.test' );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		$query = new OrdersTableQuery(
+			array(
+				's'        => 'first-page@woo.test',
+				'limit'    => 5,
+				'paginate' => true,
+				'orderby'  => 'ID',
+				'order'    => 'DESC',
+				'return'   => 'ids',
+			)
+		);
+
+		$this->assertSame( array_slice( array_reverse( $ids ), 0, 5 ), $query->orders );
+		$this->assertSame( $matches, $query->found_orders );
+		$this->assertSame( (int) ceil( $matches / 5 ), $query->max_num_pages );
+		if ( $count_expected ) {
+			$this->assertStringStartsWith( 'SELECT COUNT(*)', $wpdb->last_query );
+		} else {
+			$this->assertStringStartsWith( "SELECT {$wpdb->prefix}wc_orders.id", $wpdb->last_query );
+		}
+	}
+
+	/**
+	 * Numbers of matching orders around the page size of 5.
+	 *
+	 * @return array<string, array{int, bool}>
+	 */
+	public static function provider_first_search_page_sizes(): array {
+		return array(
+			'no match'         => array( 0, false ),
+			'one match'        => array( 1, false ),
+			'almost full page' => array( 4, false ),
+			'full page'        => array( 5, true ),
+			'more than a page' => array( 6, true ),
+		);
+	}
+
+	/**
+	 * @testdox The count query still runs when the page cannot prove the total.
+	 * @dataProvider provider_pages_that_cannot_prove_total
+	 *
+	 * @param array $args            Query argument overrides.
+	 * @param int   $expected_orders Number of orders on the page.
+	 */
+	public function test_count_query_runs_when_page_cannot_prove_total( array $args, int $expected_orders ): void {
+		global $wpdb;
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			$order = new WC_Order();
+			$order->set_billing_email( 'keep-count@woo.test' );
+			$order->update_meta_data( '_keep_count', 'yes' );
+			$order->save();
+		}
+
+		$query = new OrdersTableQuery(
+			array_merge(
+				array(
+					's'        => 'keep-count@woo.test',
+					'limit'    => 2,
+					'paginate' => true,
+					'return'   => 'ids',
+				),
+				$args
+			)
+		);
+
+		$this->assertCount( $expected_orders, $query->orders );
+		$this->assertSame( 3, $query->found_orders );
+		$this->assertStringStartsWith( 'SELECT COUNT(', $wpdb->last_query );
+	}
+
+	/**
+	 * Queries whose result page does not hold every match, or is not a plain search.
+	 *
+	 * @return array<string, array{array, int}>
+	 */
+	public static function provider_pages_that_cannot_prove_total(): array {
+		return array(
+			'second page'               => array( array( 'page' => 2 ), 1 ),
+			'offset'                    => array( array( 'offset' => 2 ), 1 ),
+			'not a search'              => array(
+				array(
+					's'     => '',
+					'limit' => 5,
+				),
+				3,
+			),
+			'search that joins a table' => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => '_keep_count',
+							'value' => 'yes',
+						),
+					),
+					'limit'      => 5,
+				),
+				3,
+			),
+		);
+	}
+
+	/**
+	 * @testdox A filter that changes the query keeps the count query.
+	 * @dataProvider provider_query_changing_filters
+	 *
+	 * @param string   $hook     Filter name.
+	 * @param callable $callback Callback that changes the filtered value.
+	 */
+	public function test_changed_query_keeps_count( string $hook, callable $callback ): void {
+		global $wpdb;
+
+		$order = new WC_Order();
+		$order->set_billing_email( 'changed-query@woo.test' );
+		$order->save();
+
+		add_filter( $hook, $callback );
+		$query = new OrdersTableQuery(
+			array(
+				's'        => 'changed-query@woo.test',
+				'limit'    => 5,
+				'paginate' => true,
+				'return'   => 'ids',
+			)
+		);
+		remove_filter( $hook, $callback );
+
+		$this->assertSame( array( $order->get_id() ), $query->orders );
+		$this->assertSame( 1, $query->found_orders );
+		$this->assertStringStartsWith( 'SELECT COUNT(*)', $wpdb->last_query );
+	}
+
+	/**
+	 * WooCommerce query filters, each with a callback that makes a harmless change.
+	 *
+	 * @return array<string, array{string, callable}>
+	 */
+	public static function provider_query_changing_filters(): array {
+		return array(
+			'clauses'   => array(
+				'woocommerce_orders_table_query_clauses',
+				static fn( array $clauses ) => array_merge( $clauses, array( 'where' => $clauses['where'] . ' AND 1=1' ) ),
+			),
+			'list SQL'  => array(
+				'woocommerce_orders_table_query_sql',
+				static fn( string $sql ) => $sql . ' ',
+			),
+			'count SQL' => array(
+				'woocommerce_orders_table_query_count_sql',
+				static fn( string $sql ) => $sql . ' ',
+			),
+		);
+	}
+
+	/**
 	 * Set up some dummy orders, to help test the search filter.
 	 *
 	 * @return array Order IDs
