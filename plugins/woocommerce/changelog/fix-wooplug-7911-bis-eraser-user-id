@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Erase back-in-stock sign-ups made under a customer's previous account email when their personal data is erased.

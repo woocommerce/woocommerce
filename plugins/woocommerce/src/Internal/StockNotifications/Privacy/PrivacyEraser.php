@@ -40,7 +40,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Erase customer stock notification data for a given email address.
+	 * Erase customer stock notification data for a given email address and the account it belongs to.
 	 *
 	 * This method anonymizes the user email and sets the status of the notifications to 'cancelled'.
 	 *
@@ -63,6 +63,21 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 				'user_email' => $email_address,
 			)
 		);
+
+		// Sign-ups made before an account email change keep the old email, so also match by user ID.
+		$user = get_user_by( 'email', $email_address );
+		if ( $user instanceof \WP_User && $user->ID > 0 ) {
+			$notifications = array_unique(
+				array_merge(
+					$notifications,
+					NotificationQuery::get_notifications(
+						array(
+							'user_id' => $user->ID,
+						)
+					)
+				)
+			);
+		}
 
 		foreach ( $notifications as $notification_id ) {
 			$notification = Factory::get_notification( $notification_id );
