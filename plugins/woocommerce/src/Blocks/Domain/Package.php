@@ -55,7 +55,7 @@ class Package {
 			$this->feature_gating = new FeatureGating();
 		}
 		$this->version = $version;
-		$this->path    = $plugin_path;
+		$this->path    = trailingslashit( $plugin_path );
 	}
 
 	/**
@@ -98,7 +98,7 @@ class Package {
 	 * @return string
 	 */
 	public function get_path( $relative_path = '' ) {
-		return trailingslashit( $this->path ) . $relative_path;
+		return $this->path . $relative_path;
 	}
 
 	/**

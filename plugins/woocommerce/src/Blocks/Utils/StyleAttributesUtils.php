@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * StyleAttributesUtils class used for getting class and style from attributes.
  *
@@ -788,5 +790,21 @@ class StyleAttributesUtils {
 			'classes' => implode( ' ', $classes ),
 			'styles'  => implode( ' ', $styles ),
 		);
+	}
+
+	/**
+	 * Request-level caching wrapper for wp_get_global_styles, which is pretty expensive in runtime.
+	 *
+	 * @param string[] $path Path to the desired global styles value.
+	 * @return mixed The resolved global styles value.
+	 */
+	public static function get_global_styles( array $path = array() ) {
+		static $resolved_styles = array();
+
+		$theme                     = get_stylesheet();
+		$resolved_styles[ $theme ] = $resolved_styles[ $theme ] ?? wp_get_global_styles();
+		$target_styles             = defined( 'WP_RUN_CORE_TESTS' ) ? wp_get_global_styles() : $resolved_styles[ $theme ];
+
+		return ArrayUtil::get_nested_value( $target_styles, implode( '::', $path ), $target_styles );
 	}
 }
