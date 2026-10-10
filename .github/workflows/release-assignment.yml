@@ -518,9 +518,124 @@ jobs:
       LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
       LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
 
+  create-release-comms-issue:
+    name: Create release comms issue in Linear
+    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, create-parent-tracking-issue, create-sub-tracking-issues]
+    if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Install linear-sdk
+        run: npm install @linear/sdk@71.0.0
+
+      - name: Create release comms issue from template
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
+          RELEASE_VERSION: ${{ needs.check-upcoming-release-events.outputs.version }}
+          RELEASE_DATE: ${{ needs.check-upcoming-release-events.outputs.final-release-date }}
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: process.env.LINEAR_OAUTH_TOKEN
+            } );
+
+            const teamKey = 'WOODEAD';
+            const projectName = 'Release and Developer Comms';
+            const templateId = '5028e207-4aed-4832-836d-2dc61669fe34';
+            const version = process.env.RELEASE_VERSION;
+            const releaseDate = process.env.RELEASE_DATE;
+            const title = `[${ version }] Release Comms`;
+
+            if ( ! /^\d{4}-\d{2}-\d{2}$/.test( releaseDate ) ) {
+              core.setFailed( `Missing or invalid stable release date for ${ version }: ${ releaseDate }` );
+              return;
+            }
+
+            const teams = await linearClient.teams( {
+              filter: { key: { eq: teamKey } }
+            } );
+
+            if ( teams.nodes.length !== 1 ) {
+              core.setFailed( `Expected one Linear team with key ${ teamKey }, found ${ teams.nodes.length }` );
+              return;
+            }
+
+            const teamId = teams.nodes[ 0 ].id;
+            const [ projects, states ] = await Promise.all( [
+              linearClient.projects( {
+                filter: {
+                  name: { eq: projectName },
+                  accessibleTeams: { some: { id: { eq: teamId } } }
+                }
+              } ),
+              linearClient.workflowStates( {
+                filter: {
+                  team: { id: { eq: teamId } },
+                  name: { eq: 'Triage' }
+                }
+              } )
+            ] );
+
+            if ( projects.nodes.length !== 1 ) {
+              core.setFailed( `Expected one Linear project named ${ projectName } for ${ teamKey }, found ${ projects.nodes.length }` );
+              return;
+            }
+
+            if ( states.nodes.length !== 1 ) {
+              core.setFailed( `Expected one Triage state for ${ teamKey }, found ${ states.nodes.length }` );
+              return;
+            }
+
+            const existingIssues = await linearClient.issues( {
+              includeArchived: true,
+              filter: {
+                team: { id: { eq: teamId } },
+                title: { eq: title }
+              }
+            } );
+
+            if ( existingIssues.nodes.length > 1 ) {
+              core.setFailed( `Found multiple ${ teamKey } issues titled ${ title }; resolve the duplicates before creating release comms` );
+              return;
+            }
+
+            if ( existingIssues.nodes.length === 1 ) {
+              const issue = existingIssues.nodes[ 0 ];
+              const issueProject = await issue.project;
+
+              if ( issueProject?.id !== projects.nodes[ 0 ].id ) {
+                core.setFailed( `Existing ${ teamKey } issue titled ${ title } is not in ${ projectName }; move it to the release comms project or rename it` );
+                return;
+              }
+
+              console.log( `Release comms issue already exists: ${ issue.url }` );
+              await core.summary.addRaw( `Linear release comms issue already exists: [${ title }](${ issue.url })` ).write();
+              return;
+            }
+
+            const result = await linearClient.createIssue( {
+              teamId,
+              projectId: projects.nodes[ 0 ].id,
+              stateId: states.nodes[ 0 ].id,
+              templateId,
+              title,
+              dueDate: releaseDate
+            } );
+
+            const issue = await result.issue;
+            if ( ! issue ) {
+              core.setFailed( `Failed to create Linear release comms issue for ${ version }` );
+              return;
+            }
+
+            console.log( `Created release comms issue: ${ issue.url }` );
+            await core.summary.addRaw( `Linear release comms issue created: [${ title }](${ issue.url })` ).write();
+
   notify-on-failure:
     name: Notify on failure
-    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues]
+    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues, create-release-comms-issue]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
