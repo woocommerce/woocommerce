@@ -72,60 +72,130 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that the method adds the 'Inter' and 'Cardo' fonts to the theme JSON data.
+	 * @testdox Adds a bundled font only when the theme does not already provide it by name, or by font family and slug with its own font faces.
+	 * @dataProvider provider_theme_fonts
+	 *
+	 * @param array<int, array<string, mixed>> $theme_fonts    Theme font presets.
+	 * @param string[]                         $expected_slugs Preset slugs after filtering.
 	 */
-	public function test_experimental_filter_theme_json_theme() {
-		$theme_json   = $this->createMock( \WP_Theme_JSON_Data::class );
-		$initial_data = array(
-			'settings' => array(
-				'typography' => array(
-					'fontFamilies' => array(
-						'theme' => array(
-							array(
-								'fontFamily' => 'Existing Font',
-								'name'       => 'Existing Font',
-								'slug'       => 'existing-font',
-								'fontFace'   => array(
-									array(
-										'fontFamily' => 'Existing Font',
-										'fontStyle'  => 'normal',
-										'fontWeight' => '400',
-										'src'        => array( 'existing-font.woff2' ),
-									),
-								),
-							),
-							array(
-								'fontFamily' => 'Unnamed Font',
-								'slug'       => 'unnamed-font',
-								'fontFace'   => array(
-									array(
-										'fontFamily' => 'Unnamed Font',
-										'fontStyle'  => 'normal',
-										'fontWeight' => '400',
-										'src'        => array( 'unnamed-font.woff2' ),
-									),
-								),
-							),
+	public function test_experimental_filter_theme_json_theme_adds_missing_bundled_fonts( array $theme_fonts, array $expected_slugs ): void {
+		$fonts = $this->filter_theme_fonts( $theme_fonts );
+
+		$this->assertSame( $expected_slugs, array_column( $fonts, 'slug' ) );
+		$this->assertSame( $theme_fonts, array_slice( $fonts, 0, count( $theme_fonts ) ), 'Theme fonts should be kept unchanged and in order.' );
+	}
+
+	/**
+	 * Theme font presets and the preset slugs expected after the Coming Soon fonts are added.
+	 *
+	 * @return array<string, array{0: array<int, array<string, mixed>>, 1: string[]}>
+	 */
+	public function provider_theme_fonts(): array {
+		return array(
+			'no bundled fonts'                        => array(
+				array(
+					array(
+						'fontFamily' => 'Theme Sans',
+						'name'       => 'Theme Sans',
+						'slug'       => 'theme-sans',
+					),
+				),
+				array( 'theme-sans', 'inter', 'cardo' ),
+			),
+			'bundled fonts without the bundled names' => array(
+				array(
+					array(
+						'fontFamily' => '"Inter", sans-serif',
+						'name'       => 'Sans Serif: Inter',
+						'slug'       => 'inter',
+						'fontFace'   => array( array( 'fontFamily' => 'Inter' ) ),
+					),
+					array(
+						'fontFamily' => 'Cardo',
+						'slug'       => 'cardo',
+						'fontFace'   => array( array( 'fontFamily' => 'Cardo' ) ),
+					),
+				),
+				array( 'inter', 'cardo' ),
+			),
+			'bundled font family and slug without font faces' => array(
+				array(
+					array(
+						'fontFamily' => '"Inter", sans-serif',
+						'slug'       => 'inter',
+					),
+				),
+				array( 'inter', 'inter', 'cardo' ),
+			),
+			'bundled name with another font family'   => array(
+				array(
+					array(
+						'fontFamily' => 'IBM Plex Serif, sans-serif',
+						'name'       => 'IBMPlexSerif',
+						'slug'       => 'ibm-plex-serif',
+					),
+					array(
+						'fontFamily' => 'Inter, sans-serif',
+						'name'       => 'Inter',
+						'slug'       => 'inter',
+					),
+				),
+				array( 'ibm-plex-serif', 'inter', 'cardo' ),
+			),
+			'unnamed bundled font family under another slug' => array(
+				array(
+					array(
+						'fontFamily' => '"Inter", sans-serif',
+						'slug'       => 'body',
+						'fontFace'   => array( array( 'fontFamily' => 'Inter' ) ),
+					),
+				),
+				array( 'body', 'inter', 'cardo' ),
+			),
+			'unnamed bundled slug with another font family' => array(
+				array(
+					array(
+						'fontFamily' => 'Theme Serif, serif',
+						'slug'       => 'cardo',
+						'fontFace'   => array( array( 'fontFamily' => 'Theme Serif' ) ),
+					),
+				),
+				array( 'cardo', 'inter', 'cardo' ),
+			),
+		);
+	}
+
+	/**
+	 * Filters the supplied theme fonts through the Coming Soon theme JSON handler.
+	 *
+	 * @param array<int, array<string, mixed>> $font_data Theme font definitions.
+	 * @return array<int, array<string, mixed>> Filtered theme font definitions.
+	 */
+	private function filter_theme_fonts( array $font_data ): array {
+		$theme_json     = $this->createMock( \WP_Theme_JSON_Data::class );
+		$captured_fonts = array();
+
+		$theme_json->method( 'get_data' )->willReturn(
+			array(
+				'settings' => array(
+					'typography' => array(
+						'fontFamilies' => array(
+							'theme' => $font_data,
 						),
 					),
 				),
-			),
+			)
 		);
-
-		$theme_json->method( 'get_data' )->willReturn( $initial_data );
-
 		$theme_json->expects( $this->once() )
 			->method( 'update_with' )
-			->with(
-				$this->callback(
-					function ( $new_data ) {
-						$fonts      = $new_data['settings']['typography']['fontFamilies']['theme'];
-						$font_names = array_column( $fonts, 'name' );
-						return in_array( 'Inter', $font_names, true ) && in_array( 'Cardo', $font_names, true );
-					}
-				)
+			->willReturnCallback(
+				function ( array $new_data ) use ( &$captured_fonts ): void {
+					$captured_fonts = $new_data['settings']['typography']['fontFamilies']['theme'];
+				}
 			);
 
 		$this->sut->experimental_filter_theme_json_theme( $theme_json );
+
+		return $captured_fonts;
 	}
 }
