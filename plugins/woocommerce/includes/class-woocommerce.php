@@ -1213,7 +1213,7 @@ final class WooCommerce {
 			return $plugin_url;
 		}
 
-		// If 'plugins_url' filter is present (rare occasion), caching it is a gamble so we pass it on.
+		// If 'plugins_url' filter is present (a rare occasion), caching it is a gamble so we pass it on.
 		return untrailingslashit( plugins_url( '/', WC_PLUGIN_FILE ) );
 	}
 
