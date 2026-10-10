@@ -117,8 +117,9 @@ class BlockPatterns extends \WP_UnitTestCase {
 			),
 		);
 		$pattern_data  = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => $mock_patterns,
+			'version'   => WOOCOMMERCE_VERSION,
+			'timestamp' => (int) filemtime( __DIR__ . '/patterns' ),
+			'patterns'  => $mock_patterns,
 		);
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
@@ -140,28 +141,38 @@ class BlockPatterns extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that a cached pattern whose source file no longer exists on disk is
-	 * skipped, so core is never asked to lazily load a missing file.
+	 * @testdox Stale cache with mismatched directory mtime falls through to a fresh glob scan.
 	 */
 	public function test_cached_pattern_with_missing_file_is_skipped() {
 		$pattern_data = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => array(
+			'version'   => WOOCOMMERCE_VERSION,
+			'timestamp' => 0,
+			'patterns'  => array(
 				array(
-					'title'   => 'Mock Missing',
-					'source'  => 'does-not-exist.php',
-					'content' => '',
+					'title'  => 'Ghost Pattern',
+					'slug'   => 'woocommerce-blocks/ghost-pattern',
+					'source' => 'does-not-exist.php',
 				),
 			),
 		);
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		// Cache is invalid (mtime mismatch), so register_block_patterns rescans the directory and finds the real mock files instead of the ghost entry.
+		$registered_sources = array();
 		$this->pattern_registry
-			->expects( $this->never() )
-			->method( 'register_block_pattern' );
+			->expects( $this->exactly( 2 ) )
+			->method( 'register_block_pattern' )
+			->willReturnCallback(
+				function ( $source ) use ( &$registered_sources ) {
+					$registered_sources[] = basename( $source );
+				}
+			);
 
 		$this->block_patterns->register_block_patterns();
+
+		sort( $registered_sources );
+		$this->assertSame( array( 'mock-footer.php', 'mock-header.php' ), $registered_sources, 'Only real pattern files are registered, ghost entry is excluded.' );
 	}
 
 	/**
@@ -170,8 +181,9 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 */
 	public function test_cached_pattern_with_invalid_source_is_skipped() {
 		$pattern_data = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => array(
+			'version'   => WOOCOMMERCE_VERSION,
+			'timestamp' => (int) filemtime( __DIR__ . '/patterns' ),
+			'patterns'  => array(
 				array(
 					'title'   => 'No Source',
 					'content' => '',

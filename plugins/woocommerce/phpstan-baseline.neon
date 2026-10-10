@@ -48670,12 +48670,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractBlock.php
 
 		-
-			message: '#^Parameter \#1 \$file_or_folder of function register_block_type_from_metadata expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
 			message: '#^Parameter \#1 \$handle of function wp_enqueue_script expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -48732,12 +48726,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractInnerBlock\:\:register_block_type\(\) should return array\<string\> but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
-
-		-
-			message: '#^Parameter \#1 \$file_or_folder of function register_block_type_from_metadata expects string, bool\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
 

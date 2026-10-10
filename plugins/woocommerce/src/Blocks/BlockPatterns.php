@@ -94,25 +94,15 @@ class BlockPatterns {
 			return;
 		}
 
-		$patterns = $this->get_block_patterns();
-		foreach ( $patterns as $pattern ) {
+		foreach ( $this->get_block_patterns() as $pattern ) {
 			// The pattern list can come from a stale or malformed site transient, so make sure the source is a
 			// usable string before dereferencing it, to avoid a PHP warning when building the path.
 			if ( empty( $pattern['source'] ) || ! is_string( $pattern['source'] ) ) {
 				continue;
 			}
 
-			$pattern_path = $this->patterns_path . '/' . $pattern['source'];
-
-			// The pattern list can come from a stale cache, so confirm the file
-			// still exists before registering it with a `filePath`. Without
-			// inline content, core would otherwise emit an undefined-content
-			// warning when it tries to load a missing file on demand. This
-			// mirrors core's own `_register_theme_block_patterns()` guard.
-			if ( ! file_exists( $pattern_path ) ) {
-				continue;
-			}
-
+			// Performance note: don't add file_exists, the transient is path mtime aware and delivers relevant results.
+			$pattern_path        = $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source']   = $pattern_path;
 			$pattern['filePath'] = $pattern_path;
 
@@ -126,7 +116,7 @@ class BlockPatterns {
 	 * @return array Block pattern data.
 	 */
 	private function get_block_patterns() {
-		$pattern_data = $this->get_pattern_cache();
+		list( $pattern_data, $path_timestamp ) = $this->get_pattern_cache();
 
 		if ( is_array( $pattern_data ) ) {
 			return $pattern_data;
@@ -162,34 +152,42 @@ class BlockPatterns {
 			$patterns[]     = $data;
 		}
 
-		$this->set_pattern_cache( $patterns );
+		$this->set_pattern_cache( $patterns, $path_timestamp );
 		return $patterns;
 	}
 
 	/**
-	 * Gets block pattern cache.
+	 * Gets cache state details.
 	 *
-	 * @return array|false Returns an array of patterns if cache is found, otherwise false.
+	 * @return array{array|null,int}
 	 */
-	private function get_pattern_cache() {
-		$pattern_data = get_site_transient( 'woocommerce_blocks_patterns' );
+	private function get_pattern_cache(): array {
+		$path_timestamp = (int) @filemtime( $this->patterns_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization.
+		$pattern_data   = get_site_transient( 'woocommerce_blocks_patterns' );
 
 		if ( is_array( $pattern_data ) && WOOCOMMERCE_VERSION === $pattern_data['version'] ) {
-			return $pattern_data['patterns'];
+			// If cluster nodes are provisioned individually (not a shared mount), the last one updated will refresh the transient.
+			// If the current node lags behind the update briefly, it reuses the lead node's version instead of overwriting it.
+			$cached_timestamp = (int) ( $pattern_data['timestamp'] ?? 0 );
+			if ( $cached_timestamp >= $path_timestamp ) {
+				return array( $pattern_data['patterns'], $path_timestamp );
+			}
 		}
 
-		return false;
+		return array( null, $path_timestamp );
 	}
 
 	/**
 	 * Sets block pattern cache.
 	 *
-	 * @param array $patterns Block patterns data to set in cache.
+	 * @param array $patterns  Block patterns data to set in cache.
+	 * @param int   $timestamp Directory mtime captured during cache check.
 	 */
-	private function set_pattern_cache( array $patterns ) {
+	private function set_pattern_cache( array $patterns, int $timestamp ) {
 		$pattern_data = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => $patterns,
+			'version'   => WOOCOMMERCE_VERSION,
+			'timestamp' => $timestamp,
+			'patterns'  => $patterns,
 		);
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data, MONTH_IN_SECONDS );
