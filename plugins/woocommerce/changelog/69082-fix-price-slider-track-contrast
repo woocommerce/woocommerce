@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the unselected part of the Product Filters price slider track easier to see, meeting WCAG non-text contrast.
