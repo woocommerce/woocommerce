@@ -3,6 +3,16 @@
 	<!-- Set the base standard to WordPress -->
 	<rule ref="WordPress"/>
 
+	<!-- The engine maps these meta capabilities (Integration\Ownership\ContractCapabilities). -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="read_subscription_contract"/>
+				<element value="manage_subscription_contract"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- Define files and folders to scan -->
 	<file>.</file>
 
