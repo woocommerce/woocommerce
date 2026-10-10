@@ -14,6 +14,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test if verify base table can detect missing tables and clear the stored missing table list.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_verify_base_tables_stores_and_removes_missing_tables() {
 		global $wpdb;
@@ -55,6 +57,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test if verify base table can fix the table as well.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_verify_base_tables_fix_tables() {
 		global $wpdb;
@@ -118,6 +122,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * runs again on every update, the second pass has to leave everything alone.
 	 *
 	 * @testdox create_tables() re-keys the tax lookup by tax order item, keeps its rows, and runs once.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_create_tables_rekeys_the_order_tax_lookup_by_tax_order_item(): void {
 		global $wpdb;
@@ -170,6 +176,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * says the store missed the fix.
 	 *
 	 * @testdox create_tables() logs a tax lookup re-key that did not land.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_create_tables_logs_a_failed_order_tax_lookup_rekey(): void {
 		global $wpdb;

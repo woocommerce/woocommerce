@@ -29,6 +29,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * Integration test for database table creation.
 	 *
 	 * @group database
+	 *
+	 * @ddlInTransaction Creating the Analytics tables is the subject.
 	 */
 	public function test_create_tables() {
 		global $wpdb;
