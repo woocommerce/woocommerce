@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce Woo template parts resolution footprint during page generation.

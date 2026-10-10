@@ -48442,12 +48442,6 @@ parameters:
 			path: src/Blocks/BlockTemplatesController.php
 
 		-
-			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
 			message: '#^Default value of the parameter \#2 \$template_type \(string\) of method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:block_template_is_available\(\) is incompatible with type array\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -48468,12 +48462,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_block_template_details\(\) should return Automattic\\WooCommerce\\Blocks\\WP_Block_Template\|null but returns Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_plugin_templates_parts_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTemplatesController.php
 
