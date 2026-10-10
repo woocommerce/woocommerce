@@ -800,7 +800,6 @@ class StyleAttributesUtils {
 	 */
 	public static function get_global_styles( array $path ) {
 		static $blocks_styles = null;
-		static $other_styles  = array();
 
 		// Optimization: request-level cache with optimized resolution routed to \WP_Theme_JSON_Resolver::get_merged_data.
 		if ( 'blocks' === ( $path[0] ?? null ) ) {
@@ -810,12 +809,6 @@ class StyleAttributesUtils {
 			return $resolution_path === '' ? $blocks_styles : ArrayUtil::get_nested_value( $blocks_styles, $resolution_path );
 		}
 
-		// Fallback: request-level cache with values resolution routed to wp_get_global_styles.
-		$key = implode( '-', $path );
-		if ( ! array_key_exists( $key, $other_styles ) ) {
-			$other_styles[ $key ] = wp_get_global_styles( $path );
-		}
-
-		return $other_styles[ $key ];
+		return wp_get_global_styles( $path );
 	}
 }
