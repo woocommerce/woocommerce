@@ -798,7 +798,7 @@ class StyleAttributesUtils {
 	 * @param string[] $path Path to the desired global styles value.
 	 * @return mixed The resolved global styles value.
 	 */
-	public static function get_global_styles( array $path ) {
+	public static function get_global_styles( array $path = array() ) {
 		static $resolved_styles = null;
 		$resolved_styles        = $resolved_styles ?? wp_get_global_styles();
 

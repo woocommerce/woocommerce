@@ -640,21 +640,13 @@ function wc_wp_theme_get_element_class_name( $element ) {
  * @return bool
  */
 function wc_block_theme_has_styles_for_element( $element ) {
-	if (
-		! wp_is_block_theme() ||
-		wc_wp_theme_get_element_class_name( $element ) === ''
-	) {
+	if ( ! wp_is_block_theme() || wc_wp_theme_get_element_class_name( $element ) === '' ) {
 		return false;
 	}
 
-	if ( function_exists( 'wp_get_global_styles' ) ) {
-		$global_styles = wp_get_global_styles();
-		if (
-			array_key_exists( 'elements', $global_styles ) &&
-			array_key_exists( $element, $global_styles['elements'] )
-		) {
-			return is_array( $global_styles['elements'][ $element ] );
-		}
+	$global_styles = \Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_global_styles();
+	if ( array_key_exists( $element, $global_styles['elements'] ?? array() ) ) {
+		return is_array( $global_styles['elements'][ $element ] );
 	}
 
 	return false;
