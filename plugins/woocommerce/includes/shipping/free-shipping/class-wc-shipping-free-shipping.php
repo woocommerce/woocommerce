@@ -25,7 +25,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	/**
 	 * Min amount to be valid.
 	 *
-	 * @var integer
+	 * @var int|string
 	 */
 	public $min_amount = 0;
 
@@ -74,7 +74,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 
 		// Define user set variables.
 		$this->title            = $this->get_option( 'title' );
-		$this->min_amount       = $this->get_option( 'min_amount', 0 );
+		$this->min_amount       = wc_format_decimal( $this->get_option( 'min_amount', 0 ) ); // Values saved outside the settings form can still be in the store's number format.
 		$this->requires         = $this->get_option( 'requires' );
 		$this->ignore_discounts = $this->get_option( 'ignore_discounts' );
 

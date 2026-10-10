@@ -662,4 +662,27 @@ class WC_Shipping_Free_Shipping_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $this->is_offered(), 'A minimum of 35.77 should not be satisfied by 35.76.' );
 	}
+
+	/**
+	 * @testdox A minimum amount stored in the store's number format still refuses carts below it.
+	 *
+	 * @testWith [50, false]
+	 *           [150, true]
+	 *
+	 * @param int  $price    Price of the only product in the cart.
+	 * @param bool $expected Whether free shipping should be available.
+	 */
+	public function test_is_available_with_locale_formatted_min_amount( int $price, bool $expected ): void {
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+		$this->method_with(
+			array(
+				'requires'   => 'min_amount',
+				'min_amount' => '100,00',
+			)
+		);
+		$this->cart_holding( (float) $price );
+
+		$this->assertSame( $expected, $this->is_offered() );
+	}
 }
