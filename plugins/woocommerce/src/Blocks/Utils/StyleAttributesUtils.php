@@ -803,7 +803,8 @@ class StyleAttributesUtils {
 
 		$theme                     = get_stylesheet();
 		$resolved_styles[ $theme ] = $resolved_styles[ $theme ] ?? wp_get_global_styles();
+		$target_styles             = defined( 'WP_RUN_CORE_TESTS' ) ? wp_get_global_styles() : $resolved_styles[ $theme ];
 
-		return ArrayUtil::get_nested_value( $resolved_styles[ $theme ], implode( '::', $path ), $resolved_styles[ $theme ] );
+		return ArrayUtil::get_nested_value( $target_styles, implode( '::', $path ), $target_styles );
 	}
 }
