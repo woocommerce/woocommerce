@@ -52,6 +52,7 @@ class StockNotifications implements RegisterHooksInterface {
 		add_action( 'init', array( $this, 'maybe_init_services' ), 1 );
 		add_action( 'woocommerce_installed', array( $this, 'on_install_or_update' ) );
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'on_feature_enabled_changed' ), 10, 2 );
+		add_filter( 'woocommerce_email_classes', array( $this, 'register_email_classes' ) );
 	}
 
 	/**
@@ -178,7 +179,7 @@ class StockNotifications implements RegisterHooksInterface {
 		// attached at `init`. Read the option directly rather than through
 		// feature_is_enabled(): a data store can be loaded before `init`, and building
 		// the translated feature definitions that early is not safe.
-		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) && ! self::is_alpha_enabled() ) {
+		if ( ! self::is_enabled_by_option() ) {
 			return $data_stores;
 		}
 
@@ -188,6 +189,38 @@ class StockNotifications implements RegisterHooksInterface {
 
 		$data_stores['stock_notification'] = wc_get_container()->get( StockNotificationsDataStore::class );
 		return $data_stores;
+	}
+
+	/**
+	 * Register the email classes, unless the feature is disabled.
+	 *
+	 * Hooked in register() rather than maybe_init_services(): `WC_Emails` can be built
+	 * on `woocommerce_init` (`init` priority 0), and it applies this filter only once.
+	 *
+	 * @param array $emails Email classes.
+	 * @return array
+	 *
+	 * @internal
+	 */
+	public function register_email_classes( $emails ) {
+		if ( ! self::is_enabled_by_option() || ! is_array( $emails ) ) {
+			return $emails;
+		}
+
+		return wc_get_container()->get( EmailManager::class )->email_classes( $emails );
+	}
+
+	/**
+	 * Check whether the feature is enabled, without building the feature definitions.
+	 *
+	 * Safe to call before `init`, unlike is_enabled(). It matches feature_is_enabled() only
+	 * because this feature has `enabled_by_default => false` and is not deprecated, the same
+	 * assumption register_data_stores() makes.
+	 *
+	 * @return bool
+	 */
+	private static function is_enabled_by_option(): bool {
+		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' ) || self::is_alpha_enabled();
 	}
 
 	/**

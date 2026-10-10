@@ -102,6 +102,36 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should log a warning instead of failing silently when the email class is missing from the mailer.
+	 */
+	public function test_send_verify_email_logs_a_warning_when_the_email_is_not_registered() {
+		$notification = $this->build_notification();
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with( $this->stringContains( 'WC_Email_Customer_Stock_Notification_Verify' ) );
+		$use_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $use_logger );
+
+		$drop_bis_emails = function ( $emails ) {
+			unset( $emails['WC_Email_Customer_Stock_Notification_Verify'] );
+			return $emails;
+		};
+		add_filter( 'woocommerce_email_classes', $drop_bis_emails, 20 );
+		$this->reset_email_singleton();
+
+		$this->sut->send_verify_email( $notification );
+
+		remove_filter( 'woocommerce_email_classes', $drop_bis_emails, 20 );
+		remove_filter( 'woocommerce_logging_class', $use_logger );
+
+		$this->assertEmpty( $this->sent_to );
+	}
+
+	/**
 	 * @testdox Should dispatch the verify email to the notification's user email when send_verify_email is called.
 	 */
 	public function test_send_verify_email_prepares_verify_email_for_notification() {

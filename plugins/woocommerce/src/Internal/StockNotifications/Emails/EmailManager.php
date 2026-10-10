@@ -36,9 +36,6 @@ class EmailManager {
 	 */
 	final public function init() {
 
-		// Setup email hooks & handlers.
-		add_filter( 'woocommerce_email_classes', array( $this, 'email_classes' ) );
-
 		// Add "transactional" emails.
 		add_action( 'woocommerce_email_actions', array( $this, 'add_transactional_emails' ) );
 
@@ -283,9 +280,12 @@ class EmailManager {
 		$emails = WC()->mailer()->get_emails();
 		$email  = $emails['WC_Email_Customer_Stock_Notification'] ?? null;
 
-		if ( $email instanceof CustomerStockNotificationEmail ) {
-			$email->trigger( $notification );
+		if ( ! $email instanceof CustomerStockNotificationEmail ) {
+			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification', $notification );
+			return;
 		}
+
+		$email->trigger( $notification );
 	}
 
 	/**
@@ -298,9 +298,12 @@ class EmailManager {
 		$emails = WC()->mailer()->get_emails();
 		$email  = $emails['WC_Email_Customer_Stock_Notification_Verify'] ?? null;
 
-		if ( $email instanceof CustomerStockNotificationVerifyEmail ) {
-			$email->trigger( $notification );
+		if ( ! $email instanceof CustomerStockNotificationVerifyEmail ) {
+			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification_Verify', $notification );
+			return;
 		}
+
+		$email->trigger( $notification );
 	}
 
 	/**
@@ -313,8 +316,28 @@ class EmailManager {
 		$emails = WC()->mailer()->get_emails();
 		$email  = $emails['WC_Email_Customer_Stock_Notification_Verified'] ?? null;
 
-		if ( $email instanceof CustomerStockNotificationVerifiedEmail ) {
-			$email->trigger( $notification );
+		if ( ! $email instanceof CustomerStockNotificationVerifiedEmail ) {
+			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification_Verified', $notification );
+			return;
 		}
+
+		$email->trigger( $notification );
+	}
+
+	/**
+	 * Log that an email could not be sent because its class is not registered with the mailer.
+	 *
+	 * @param string       $email_key    The key the email is registered under in `WC_Emails`.
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	private function log_missing_email( string $email_key, Notification $notification ): void {
+		wc_get_logger()->warning(
+			sprintf( 'Email %s is not registered with the mailer; nothing was sent for notification %d.', $email_key, $notification->get_id() ),
+			array(
+				'source'          => 'wc-customer-stock-notifications',
+				'notification_id' => $notification->get_id(),
+			)
+		);
 	}
 }
