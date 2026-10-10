@@ -123,11 +123,17 @@ test.describe( 'Shopper → Cart block', () => {
 		expect( hoodiePriceText ).toBe( '$50.00' );
 	} );
 
-	test( 'User can view empty cart message', async ( {
+	test( 'User sees the empty cart after removing an item and can add a product again', async ( {
 		frontendUtils,
 		page,
 	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
+
+		await page
+			.getByLabel( `Remove ${ REGULAR_PRICED_PRODUCT_NAME } from cart` )
+			.click();
 
 		// Verify cart is empty
 		await expect(
@@ -135,6 +141,16 @@ test.describe( 'Shopper → Cart block', () => {
 				name: 'Your cart is empty',
 			} )
 		).toBeVisible();
+
+		// Add a product to cart.
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'spinbutton', { name: 'Quantity of' } )
+		).toHaveValue( '1' );
 	} );
 
 	test( 'User can remove a product from cart', async ( {
