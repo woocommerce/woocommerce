@@ -21,20 +21,15 @@ use DateTimeImmutable;
 use DateTimeZone;
 use EngineIntegrationTestCase;
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Hold;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -82,7 +77,13 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 
 	public function test_a_held_contract_is_not_renewed_at_or_after_its_former_date(): void {
 		$id = $this->sign_up( self::OWNER );
-		( new Hold( $this->contracts ) )->hold( $this->reload( $id ) );
+		Contracts::update(
+			$id,
+			array(
+				'status'           => ContractStatus::ON_HOLD,
+				'next_payment_gmt' => null,
+			)
+		);
 
 		$this->run_batch_at( self::FIRST_DUE );
 		$this->run_batch_at( '2026-06-01 00:00:00' );
@@ -95,7 +96,14 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 
 	public function test_a_pending_cancellation_contract_is_not_renewed_at_its_end_date(): void {
 		$id = $this->sign_up( self::OWNER );
-		( new Cancellation( $this->contracts ) )->cancel_at_period_end( $this->reload( $id ) );
+		Contracts::update(
+			$id,
+			array(
+				'status'           => ContractStatus::PENDING_CANCELLATION,
+				'next_payment_gmt' => null,
+				'end_gmt'          => self::FIRST_DUE,
+			)
+		);
 
 		$this->run_batch_at( self::FIRST_DUE );
 
@@ -148,21 +156,13 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Sign up a monthly contract owned by `$owner` via the checkout factory (cycle 1 billed,
+	 * Sign up a monthly contract owned by `$owner` through the contracts facade (cycle 1 billed,
 	 * next payment due {@see self::FIRST_DUE}). Returns the contract id.
 	 *
 	 * @param string $owner The plan's (and so the contract's) extension slug.
 	 */
 	private function sign_up( string $owner ): int {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => $owner,
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
+		$plan = $this->plan_view( $this->make_plan( array( 'extension_slug' => $owner ) ) );
 
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
@@ -171,8 +171,7 @@ class OwnerScopedDueScanTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		$contract = ( new ContractFactory() )->create_from_order( $order, $plan );
-		$id       = (int) $contract->get_id();
+		$id = $this->sign_up_from_order( $order, $plan );
 		$this->assertSame( self::FIRST_DUE, $this->reload( $id )->get_next_payment_gmt() );
 
 		return $id;

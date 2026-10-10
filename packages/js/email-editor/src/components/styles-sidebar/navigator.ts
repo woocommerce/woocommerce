@@ -9,7 +9,7 @@ import {
 	Navigator as WPNavigator,
 	__experimentalNavigatorProvider as NavigatorProvider,
 	__experimentalNavigatorScreen as NavigatorScreen,
-	__experimentalNavigatorBackButton as NavigatorBackButton, // eslint-disable-line
+	__experimentalNavigatorBackButton as NavigatorBackButton,
 } from '@wordpress/components';
 
 type NavigatorWithCompound = typeof WPNavigator & {

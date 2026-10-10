@@ -32,7 +32,7 @@ describe( 'InboxDismissConfirmationModal', () => {
 		expect( queryByText( 'Custom button' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should call onClose if Cancel is clicked', () => {
+	it( 'should call onClose if Cancel is clicked', async () => {
 		const onClose = jest.fn();
 		const { getByText } = render(
 			<InboxDismissConfirmationModal
@@ -40,11 +40,11 @@ describe( 'InboxDismissConfirmationModal', () => {
 				onDismiss={ jest.fn() }
 			/>
 		);
-		userEvent.click( getByText( 'Cancel' ) );
+		await userEvent.click( getByText( 'Cancel' ) );
 		expect( onClose ).toHaveBeenCalled();
 	} );
 
-	it( 'should call onDismiss if dismiss button is clicked', () => {
+	it( 'should call onDismiss if dismiss button is clicked', async () => {
 		const onDismiss = jest.fn();
 		const { getByText } = render(
 			<InboxDismissConfirmationModal
@@ -52,7 +52,7 @@ describe( 'InboxDismissConfirmationModal', () => {
 				onDismiss={ onDismiss }
 			/>
 		);
-		userEvent.click( getByText( "Yes, I'm sure" ) );
+		await userEvent.click( getByText( "Yes, I'm sure" ) );
 		expect( onDismiss ).toHaveBeenCalled();
 	} );
 } );

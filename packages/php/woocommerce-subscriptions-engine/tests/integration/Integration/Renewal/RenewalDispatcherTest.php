@@ -13,19 +13,16 @@ use DateTimeImmutable;
 use DateTimeZone;
 use EngineIntegrationTestCase;
 use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\ContractFactory;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher
@@ -66,24 +63,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Persist a monthly plan and return the entity (the ContractFactory needs the plan).
-	 */
-	private function make_plan_object(): Plan {
-		$plan = Plan::create(
-			array(
-				'name'           => 'Monthly',
-				'billing_policy' => new BillingPolicy( 'month', 1, null, null, null ),
-				'category'       => Plan::DEFAULT_CATEGORY,
-				'extension_slug' => 'engine-tests',
-			)
-		);
-		( new PlanRepository() )->insert( $plan );
-
-		return $plan;
-	}
-
-	/**
-	 * Sign up a contract via the checkout factory so its billing chain holds cycle 1 (billed),
+	 * Sign up a contract through the contracts facade so its billing chain holds cycle 1 (billed),
 	 * with its next payment due at the given date.
 	 *
 	 * @param string $gateway          Gateway id stamped on the order/contract.
@@ -91,7 +71,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 	 * @return Contract The persisted contract with cycle 1 billed.
 	 */
 	private function sign_up_contract( string $gateway, string $next_payment_gmt ): Contract {
-		$plan = $this->make_plan_object();
+		$plan = $this->plan_view( $this->make_plan() );
 
 		$order = new WC_Order();
 		$order->set_currency( 'USD' );
@@ -100,12 +80,14 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$order->set_date_paid( '2026-01-15 00:00:00' );
 		$order->save();
 
-		$contract = ( new ContractFactory() )->create_from_order( $order, $plan );
+		$id = $this->sign_up_from_order( $order, $plan );
 
-		// The factory anchors the first renewal off the plan cadence; pin the schedule date
+		// Sign-up anchors the first renewal off the plan cadence; pin the schedule date
 		// the test reasons about so due/not-due is explicit.
-		$contract->set_next_payment_gmt( $next_payment_gmt );
-		( new ContractRepository() )->update( $contract );
+		Contracts::update( $id, array( 'next_payment_gmt' => $next_payment_gmt ) );
+
+		$contract = ( new ContractRepository() )->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
 
 		return $contract;
 	}
@@ -129,7 +111,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 
 		// The contract was not advanced: still cycle 1, schedule unmoved.
 		$repo = new ContractRepository();
-		$this->assertSame( 1, $repo->max_count( $contract_id ) );
+		$this->assertSame( 1, $this->head_count( $contract_id ) );
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-02-15 00:00:00', $reloaded->get_next_payment_gmt() );
@@ -183,7 +165,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 
 		// Untouched: still cycle 1, schedule unmoved, no renewal order.
 		$repo = new ContractRepository();
-		$this->assertSame( 1, $repo->max_count( $contract_id ) );
+		$this->assertSame( 1, $this->head_count( $contract_id ) );
 		$reloaded = $repo->find( $contract_id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
 		$this->assertSame( '2026-06-15 00:00:00', $reloaded->get_next_payment_gmt() );
@@ -209,14 +191,14 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 2, $processed, 'A single tick processes at most the batch size.' );
 
 		// The two oldest-due contracts advanced; the third is still at cycle 1.
-		$this->assertSame( 2, $repo->max_count( (int) $first->get_id() ) );
-		$this->assertSame( 2, $repo->max_count( (int) $second->get_id() ) );
-		$this->assertSame( 1, $repo->max_count( (int) $third->get_id() ) );
+		$this->assertSame( 2, $this->head_count( (int) $first->get_id() ) );
+		$this->assertSame( 2, $this->head_count( (int) $second->get_id() ) );
+		$this->assertSame( 1, $this->head_count( (int) $third->get_id() ) );
 
 		// The next tick drains the remaining due contract.
 		$processed_next = $dispatcher->run_batch( $this->scan_now(), 2 );
 		$this->assertSame( 1, $processed_next );
-		$this->assertSame( 2, $repo->max_count( (int) $third->get_id() ) );
+		$this->assertSame( 2, $this->head_count( (int) $third->get_id() ) );
 	}
 
 	/**
@@ -306,7 +288,7 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 0, $dispatcher->run_batch( $this->scan_now(), -5 ) );
 
 		// Nothing was renewed by the no-op ticks.
-		$this->assertSame( 1, ( new ContractRepository() )->max_count( (int) $contract->get_id() ) );
+		$this->assertSame( 1, $this->head_count( (int) $contract->get_id() ) );
 	}
 
 	/**
@@ -359,5 +341,16 @@ class RenewalDispatcherTest extends EngineIntegrationTestCase {
 				}
 			)
 		);
+	}
+
+	/**
+	 * The billing chain head's count, or null for an empty chain.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function head_count( int $contract_id ): ?int {
+		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
+
+		return null === $head ? null : $head->get_count();
 	}
 }

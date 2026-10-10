@@ -27,9 +27,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 .wc-addons-wrap {
 
 	.marketplace-header {
-		background-image: url("../images/marketplace-header-bg@2x.png");
-		background-position: right;
-		background-size: cover;
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
@@ -7147,6 +7144,23 @@ img.help_tip {
 
 	select {
 		margin: 0.25em 0.25em 0.25em 0;
+	}
+}
+
+.wc-product-customs {
+
+	.woocommerce_options_panel & > h4 {
+		padding-inline: 12px;
+	}
+
+	// Leave room for the error tip under the description, the last field in the Shipping panel, which the panel wrapper would otherwise clip.
+	#shipping_product_data & {
+		padding-block-end: 4em;
+	}
+
+	.woocommerce_variation & {
+		border-top: 1px solid #eee;
+		margin-top: 12px;
 	}
 }
 
