@@ -833,6 +833,296 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Without compute_totals a net refund plus tax exceeding the line gross is rejected.
+	 */
+	public function test_unflagged_net_plus_tax_exceeding_line_gross_is_rejected(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'quantity'     => 1,
+						'refund_total' => 105.00,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 10.00,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_refund_total_exceeds_line', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A negative refund on a positive product cannot offset another product's refund.
+	 */
+	public function test_unflagged_negative_refund_on_positive_line_is_rejected(): void {
+		$order   = $this->create_order_with_product( 100.00, 1 );
+		$first   = $this->get_first_line_item_id( $order );
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'total'    => 100,
+				'subtotal' => 100,
+			)
+		);
+		$order->set_total( 200 );
+		$order->save();
+		$items  = $order->get_items( 'line_item' );
+		$second = array_key_last( $items );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '3',
+				'line_items' => array(
+					array(
+						'id'           => $first,
+						'refund_total' => 100,
+					),
+					array(
+						'id'           => $second,
+						'refund_total' => -97,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_refund_total', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A negative discount fee can be refunded alongside a positive product line.
+	 */
+	public function test_unflagged_negative_discount_fee_refund_succeeds(): void {
+		$order = $this->create_order_with_product_and_fee( 100.00, -10.00 );
+		$fee   = current( $order->get_items( 'fee' ) );
+		$item  = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $item,
+						'refund_total' => 20,
+					),
+					array(
+						'id'           => $fee->get_id(),
+						'refund_total' => -5,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '15.00', $response->get_data()['amount'] );
+		$refunds = wc_get_order( $order->get_id() )->get_refunds();
+		$fees    = $refunds[0]->get_items( 'fee' );
+		$this->assertEquals( 5, current( $fees )->get_total() );
+	}
+
+	/**
+	 * @testdox A line item belonging to another order cannot be used to validate a refund.
+	 */
+	public function test_unflagged_foreign_order_item_is_rejected(): void {
+		$order   = $this->create_order_with_product( 20.00, 1 );
+		$foreign = $this->create_order_with_product( 20.00, 1 );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '5',
+				'line_items' => array(
+					array(
+						'id'           => $this->get_first_line_item_id( $foreign ),
+						'refund_total' => 5,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_line_item_not_found', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Explicit fee and shipping refunds respect each line's original total.
+	 */
+	public function test_unflagged_fee_and_shipping_limits(): void {
+		$order = $this->create_order_with_product( 100.00, 1 );
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_total( 10 );
+		$order->add_item( $fee );
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_total( 5 );
+		$order->add_item( $shipping );
+		$order->set_total( 115 );
+		$order->save();
+
+		foreach ( array( $fee, $shipping ) as $item ) {
+			$response = $this->do_create_request(
+				$order->get_id(),
+				array(
+					'amount'     => '20',
+					'line_items' => array(
+						array(
+							'id'           => $item->get_id(),
+							'refund_total' => 20,
+						),
+					),
+				)
+			);
+			$this->assertSame( 422, $response->get_status() );
+			$this->assertSame( 'woocommerce_rest_refund_total_exceeds_line', $response->get_data()['code'] );
+		}
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'line_items' => array(
+					array(
+						'id'           => $fee->get_id(),
+						'refund_total' => 5,
+					),
+					array(
+						'id'           => $shipping->get_id(),
+						'refund_total' => 2,
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '7.00', $response->get_data()['amount'] );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox An already fully refunded line is rejected even when another line remains refundable.
+	 */
+	public function test_unflagged_fully_refunded_line_is_rejected(): void {
+		$order = $this->create_order_with_product_and_fee( 100.00, 10.00 );
+		$fee   = current( $order->get_items( 'fee' ) );
+		$first = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '10',
+				'line_items' => array(
+					array(
+						'id'           => $fee->get_id(),
+						'refund_total' => 10,
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $first->get_status() );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '1',
+				'line_items' => array(
+					array(
+						'id'           => $fee->get_id(),
+						'refund_total' => 1,
+					),
+				),
+			)
+		);
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_line_item_already_refunded', $response->get_data()['code'] );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox A full-line refund with higher-precision tax is accepted at currency precision.
+	 */
+	public function test_unflagged_high_precision_tax_full_refund(): void {
+		$previous = get_option( 'woocommerce_tax_round_at_subtotal' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+		try {
+			$rate_id  = $this->create_tax_rate( 8.333 );
+			$order    = $this->create_order_with_product_and_tax( 10.00, 1, $rate_id, 0.8333 );
+			$item_id  = $this->get_first_line_item_id( $order );
+			$response = $this->do_create_request(
+				$order->get_id(),
+				array(
+					'amount'     => '10.83',
+					'line_items' => array(
+						array(
+							'id'           => $item_id,
+							'refund_total' => 10,
+							'refund_tax'   => array(
+								array(
+									'id'           => $rate_id,
+									'refund_total' => 0.8333,
+								),
+							),
+						),
+					),
+				)
+			);
+			$this->assertSame( 201, $response->get_status() );
+			$this->assertSame( '10.83', $response->get_data()['amount'] );
+
+			$partial_order = $this->create_order_with_product_and_tax( 10.00, 1, $rate_id, 0.8333 );
+			$partial_id    = $this->get_first_line_item_id( $partial_order );
+			$first         = $this->do_create_request(
+				$partial_order->get_id(),
+				array(
+					'amount'     => '5',
+					'line_items' => array(
+						array(
+							'id'           => $partial_id,
+							'refund_total' => 5,
+						),
+					),
+				)
+			);
+			$this->assertSame( 201, $first->get_status() );
+
+			$remaining = $this->do_create_request(
+				$partial_order->get_id(),
+				array(
+					'amount'     => '5.83',
+					'line_items' => array(
+						array(
+							'id'           => $partial_id,
+							'refund_total' => 5,
+							'refund_tax'   => array(
+								array(
+									'id'           => $rate_id,
+									'refund_total' => 0.8333,
+								),
+							),
+						),
+					),
+				)
+			);
+			$this->assertSame( 201, $remaining->get_status() );
+			$this->assertCount( 2, wc_get_order( $partial_order->get_id() )->get_refunds() );
+		} finally {
+			update_option( 'woocommerce_tax_round_at_subtotal', $previous );
+		}
+	}
+
+	/**
 	 * @testdox The compute_totals parameter is declared in the create schema with a false default.
 	 */
 	public function test_compute_totals_declared_in_schema(): void {
