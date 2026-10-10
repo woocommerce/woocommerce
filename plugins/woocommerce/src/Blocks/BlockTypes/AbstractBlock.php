@@ -59,6 +59,13 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
+	 * Whether unified block editor assets are enabled.
+	 *
+	 * @var bool
+	 */
+	private bool $unified_assets_enabled;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -67,10 +74,11 @@ abstract class AbstractBlock {
 	 * @param string              $block_name Optionally set block name during construct.
 	 */
 	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, $block_name = '' ) {
-		$this->asset_api            = $asset_api;
-		$this->asset_data_registry  = $asset_data_registry;
-		$this->integration_registry = $integration_registry;
-		$this->block_name           = $block_name ? $block_name : $this->block_name;
+		$this->asset_api              = $asset_api;
+		$this->asset_data_registry    = $asset_data_registry;
+		$this->integration_registry   = $integration_registry;
+		$this->block_name             = $block_name ? $block_name : $this->block_name;
+		$this->unified_assets_enabled = BlockEditorUnifiedAssets::is_enabled();
 		$this->initialize();
 	}
 
@@ -376,10 +384,7 @@ abstract class AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		static $is_unified_assets_enabled;
-		$is_unified_assets_enabled = $is_unified_assets_enabled ?? BlockEditorUnifiedAssets::is_enabled();
-
-		$script = $is_unified_assets_enabled
+		$script = $this->unified_assets_enabled
 			? array(
 				'handle'       => 'wc-block-library',
 				'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
@@ -401,10 +406,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		static $is_unified_assets_enabled;
-		$is_unified_assets_enabled = $is_unified_assets_enabled ?? BlockEditorUnifiedAssets::is_enabled();
-
-		return $is_unified_assets_enabled ? 'wc-block-library-style' : 'wc-blocks-editor-style';
+		return $this->unified_assets_enabled ? 'wc-block-library-style' : 'wc-blocks-editor-style';
 	}
 
 	/**
