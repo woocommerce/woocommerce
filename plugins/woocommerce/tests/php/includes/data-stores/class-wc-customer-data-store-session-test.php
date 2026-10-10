@@ -121,18 +121,20 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should ignore the session data entirely when the date modified does not match the persisted customer.
+	 * @testdox Should ignore session addresses but keep session-only values when the date modified does not match the persisted customer.
 	 */
-	public function test_stale_session_data_is_ignored(): void {
+	public function test_stale_session_data_keeps_only_session_only_values(): void {
 		$customer_id = WC_Helper_Customer::create_customer( 'session_stale_data', 'password', 'session-stale-data@example.com' )->get_id();
 
 		WC()->session->set(
 			'customer',
 			array(
-				'id'                 => (string) $customer_id,
-				'date_modified'      => 'stale-date',
-				'address_2'          => '',
-				'shipping_address_2' => '',
+				'id'                  => (string) $customer_id,
+				'date_modified'       => 'stale-date',
+				'address_2'           => '',
+				'shipping_address_2'  => '',
+				'is_vat_exempt'       => true,
+				'calculated_shipping' => true,
 			)
 		);
 
@@ -140,6 +142,30 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Apt 1', $customer->get_billing_address_2(), 'Stale session data should not override the persisted billing values' );
 		$this->assertSame( 'Apt 1', $customer->get_shipping_address_2(), 'Stale session data should not override the persisted shipping values' );
+		$this->assertTrue( $customer->get_is_vat_exempt(), 'VAT exemption is not saved to the account, so a newer account should not discard it' );
+		$this->assertTrue( $customer->get_calculated_shipping(), 'Calculated shipping is not saved to the account, so a newer account should not discard it' );
+	}
+
+	/**
+	 * @testdox Should not apply session-only values from a session that belongs to a different customer.
+	 */
+	public function test_session_only_values_are_ignored_for_a_different_customer(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'session_other_customer', 'password', 'session-other-customer@example.com' )->get_id();
+
+		WC()->session->set(
+			'customer',
+			array(
+				'id'                  => '0',
+				'date_modified'       => '',
+				'is_vat_exempt'       => true,
+				'calculated_shipping' => true,
+			)
+		);
+
+		$customer = new WC_Customer( $customer_id, true );
+
+		$this->assertFalse( $customer->get_is_vat_exempt(), 'A guest session should not make a logged in customer VAT exempt' );
+		$this->assertFalse( $customer->get_calculated_shipping(), 'A guest session should not carry calculated shipping to a logged in customer' );
 	}
 
 	/**

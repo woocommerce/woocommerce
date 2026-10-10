@@ -42,6 +42,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function process_order_without_payment( $order_id ) {
 				return parent::process_order_without_payment( $order_id );
 			}
+
+			public function process_customer( $data ) {
+				parent::process_customer( $data );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -196,6 +200,42 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$reloaded_order = wc_get_order( $order->get_id() );
 		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
 		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
+	 */
+	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'classic_vat_exempt', 'password', 'classic-vat-exempt@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer_id, true );
+
+		try {
+			WC()->customer->set_is_vat_exempt( true );
+			WC()->customer->save();
+
+			$this->sut->process_customer(
+				array(
+					'billing_first_name' => 'Classic',
+					'billing_address_1'  => '456 Classic Road',
+					'billing_email'      => 'classic-vat-exempt@example.com',
+				)
+			);
+
+			// The session customer is saved on shutdown in a real request.
+			WC()->customer->save();
+
+			$reloaded_customer = new WC_Customer( $customer_id, true );
+			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+		} finally {
+			WC()->customer = $original_customer;
+		}
 	}
 
 	/**
