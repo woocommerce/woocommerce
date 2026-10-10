@@ -471,7 +471,7 @@ abstract class AbstractBlock {
 	 * @return array
 	 */
 	protected function parse_render_callback_attributes( $attributes ) {
-		return is_a( $attributes, 'WP_Block' ) ? $attributes->attributes : $attributes;
+		return $attributes instanceof \WP_Block ? $attributes->attributes : $attributes;
 	}
 
 	/**
