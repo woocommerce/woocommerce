@@ -135,6 +135,7 @@ class IntegrationRegistry {
 		foreach ( $this->get_all_registered() as $registered_integration ) {
 			$script_handles[] = $registered_integration->get_editor_script_handles();
 		}
+
 		return array_unique( array_filter( array_merge( ...$script_handles ) ) );
 	}
 
@@ -148,6 +149,7 @@ class IntegrationRegistry {
 		foreach ( $this->get_all_registered() as $registered_integration ) {
 			$script_handles[] = $registered_integration->get_script_handles();
 		}
+
 		return array_unique( array_filter( array_merge( ...$script_handles ) ) );
 	}
 
@@ -157,10 +159,8 @@ class IntegrationRegistry {
 	 * @return array
 	 */
 	public function get_all_registered_script_data() {
-		$script_data             = [];
-		$registered_integrations = $this->get_all_registered();
-
-		foreach ( $registered_integrations as $registered_integration ) {
+		$script_data = array();
+		foreach ($this->get_all_registered() as $registered_integration ) {
 			$script_data[ $registered_integration->get_name() . '_data' ] = $registered_integration->get_script_data();
 		}
 
