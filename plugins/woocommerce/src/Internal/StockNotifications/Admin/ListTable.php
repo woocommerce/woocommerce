@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
@@ -377,8 +378,7 @@ class ListTable extends \WP_List_Table {
 			$filter  = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$product = wc_get_product( $filter );
 			if ( $product instanceof \WC_Product ) {
-				$target_ids               = $this->eligibility_service->get_target_product_ids( $product );
-				$query_args['product_id'] = $target_ids;
+				$query_args['product_id'] = $product->is_type( ProductType::VARIABLE ) ? array_merge( array( $product->get_id() ), $product->get_children() ) : array( $product->get_id() );
 			} else {
 				NotificationsPage::add_notice( __( 'Invalid product selected.', 'woocommerce' ), 'error' );
 			}
