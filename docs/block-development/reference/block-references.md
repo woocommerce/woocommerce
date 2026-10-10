@@ -1545,7 +1545,7 @@ Contains the block elements used to render a product.
 
 - **Name:** woocommerce/product-template
 - **Category:** woocommerce
-- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
+- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), shadow, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
 
 ## Top Rated Products - woocommerce/product-top-rated
 
