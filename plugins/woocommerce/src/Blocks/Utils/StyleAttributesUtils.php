@@ -799,14 +799,9 @@ class StyleAttributesUtils {
 	 * @return mixed The resolved global styles value.
 	 */
 	public static function get_global_styles( array $path ) {
-		static $styles = null;
+		static $resolved_styles = null;
+		$resolved_styles        = $resolved_styles ?? wp_get_global_styles();
 
-		if ( 'blocks' === ( $path[0] ?? null ) ) {
-			$styles = $styles ?? wp_get_global_styles();
-
-			return ArrayUtil::get_nested_value( $styles, implode( '::', $path ), $styles );
-		}
-
-		return wp_get_global_styles( $path );
+		return ArrayUtil::get_nested_value( $resolved_styles, implode( '::', $path ), $resolved_styles );
 	}
 }
