@@ -805,7 +805,7 @@ class StyleAttributesUtils {
 			$styles          = $styles ?? wp_get_global_styles();
 			$resolution_path = implode( '::', $path );
 
-			return ArrayUtil::get_nested_value( $styles, $resolution_path ) ?? $styles;
+			return ArrayUtil::get_nested_value( $styles, $resolution_path, $styles );
 		}
 
 		return wp_get_global_styles( $path );
