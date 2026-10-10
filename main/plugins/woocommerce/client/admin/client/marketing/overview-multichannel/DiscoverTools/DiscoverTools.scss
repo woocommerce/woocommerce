@@ -1,0 +1,16 @@
+.woocommerce-marketing-discover-tools-card-body-empty-content {
+	width: 50%;
+	margin: auto;
+	text-align: center;
+
+	svg {
+		background-color: #f6f7f7;
+		border-radius: 28px;
+		margin-bottom: $gap-smallest;
+	}
+
+	div {
+		color: $gray-700;
+		margin-bottom: $gap-smaller;
+	}
+}

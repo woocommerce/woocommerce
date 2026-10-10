@@ -1,0 +1,59 @@
+$font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+html {
+	font-family: $font-sf-pro-display;
+}
+
+// Payments tab keeps its main content panel white while letting the tab
+// strip above it sit on the wp-admin body grey, matching every other
+// Settings tab. Target the strip and the form explicitly rather than
+// changing #wpbody-content — that container's background is set by the
+// parent body.woocommerce_page_wc-settings rule in legacy admin.scss,
+// and the bg-color isn't doing structural work inside it, just
+// determining what shows through the (transparent) .nav-tab-wrapper.
+// Doubled-up body class on the outer selector is intentional: same
+// flat specificity as the legacy rule, so the doubled class wins it
+// regardless of load order.
+body.woocommerce_page_wc-settings.woocommerce-settings-payments-tab {
+	.nav-tab-wrapper {
+		background-color: #f0f0f1;
+	}
+	// The panel has to reach the bottom of the window, footer included, but
+	// #mainform is only as tall as its content, so the body grey used to show
+	// beneath it. Other tabs leave #mainform grey, so the seam only appears
+	// here. #wpcontent is already held to the window height, so making it a
+	// column lets #wpbody take whatever the content leaves over — no
+	// hardcoded admin-bar, page-header, or footer heights to drift when any
+	// of them change, and no arithmetic that a short page rounds differently
+	// from a long one.
+	#wpcontent {
+		display: flex;
+		flex-direction: column;
+	}
+	// The white goes on #wpbody rather than #wpcontent because #wpbody clears
+	// the fixed page header with a top margin, and a margin paints the
+	// parent's background. A white #wpcontent therefore leaks into the strip
+	// between the page header and the tab strip as soon as the content moves
+	// off its resting position, which is the continuous grey chrome region
+	// the tab strip above is establishing. #wpbody starts below that margin,
+	// so it cannot reach it. The footer is absolutely positioned against the
+	// bottom of #wpwrap and overlaps #wpbody, so it lands on the white too.
+	#wpbody {
+		background-color: #fff;
+		flex: 1;
+	}
+	#mainform {
+		background-color: #fff;
+	}
+}
+
+.settings-payments-offline__container {
+	margin: 0 -30px;
+
+	.settings-layout {
+		// The horizontal 48px lines the form up with the header above it. The
+		// top, plus the section heading's own leading, puts the first line of
+		// the form roughly where it sat before the header was reworked.
+		margin: $gap 48px 0;
+	}
+}

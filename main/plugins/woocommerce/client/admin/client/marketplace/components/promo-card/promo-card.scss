@@ -1,0 +1,179 @@
+@import "../../stylesheets/_variables.scss";
+
+.promo-card {
+	.promo-card__body {
+		padding: $large-gap;
+	}
+
+	&.has-background {
+		background-color: #fbf9f6;
+		background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzExIiBoZWlnaHQ9IjE2NCIgdmlld0JveD0iMCAwIDMxMSAxNjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTM0Ni4wMjggMTA2LjQ4OEMzNjcuMzA4IDg3LjAwNjEgMzUzLjQwOSA0Mi43MDc5IDMxNC45OTcgNy41NDIxM0MyNzYuNTc2IC0yNy42MzE4IDIyOC4xODggLTQwLjM0ODQgMjA2LjkwOCAtMjAuODc0OUMxOTMuNTIgLTguNjE4NjQgMTk0LjA1OSAxMy40NzcxIDIwNS44NzUgMzYuOTI5MUMxNDYuMTkyIC0xLjIyMDUzIDgzLjE5NTQgLTEwLjcxNDggNTIuMTI4MSAxNy43MTg3QzIxLjA2OTggNDYuMTUyMSAzMS40NDA2IDEwMy44MjUgNzMuMTEyIDE1OC40NzJDNDcuNDg2IDE0Ny42NTQgMjMuMzU5NSAxNDcuMTUzIDkuOTcxODEgMTU5LjQxN0MtMTEuMzA4NCAxNzguODk5IDIuNTkxMDggMjIzLjE5NyA0MS4wMDMyIDI1OC4zNjNDNzkuNDE1MyAyOTMuNTI5IDEyNy44MTIgMzA2LjI1NCAxNDkuMDgzIDI4Ni43NzJDMTYyLjQ3MSAyNzQuNTE2IDE2MS45MzIgMjUyLjQyIDE1MC4xMTYgMjI4Ljk2OEMyMDkuNzk5IDI2Ny4xMTcgMjcyLjc5NiAyNzYuNjEyIDMwMy44NjMgMjQ4LjE3QzMzNC45MjEgMjE5LjczNyAzMjQuNTUxIDE2Mi4wNjQgMjgyLjg3OSAxMDcuNDE3QzMwOC41MDUgMTE4LjIzNCAzMzIuNjMyIDExOC43MjggMzQ2LjAxOSAxMDYuNDcxTDM0Ni4wMjggMTA2LjQ4OFoiIGZpbGw9IiNFNkUyREUiIGZpbGwtb3BhY2l0eT0iMC41Ii8+PC9zdmc+);
+		background-position: right -50px bottom;
+		background-repeat: no-repeat;
+		background-size: auto 100%;
+	}
+
+	&.has-background .promo-card__body {
+		align-items: center;
+		display: flex;
+		flex-direction: row;
+		gap: $medium-gap;
+		justify-content: space-between;
+	}
+
+	&.wide .promo-card__body {
+		display: flex;
+		flex-direction: column;
+		gap: $large-gap;
+		justify-content: space-between;
+
+		.promo-content-image {
+			align-items: center;
+			flex-direction: row-reverse;
+		}
+
+		.promo-links {
+			align-self: flex-end;
+			flex-direction: row-reverse;
+			margin-top: 0;
+		}
+
+		.promo-image {
+			svg {
+				width: 48px;
+			}
+		}
+	}
+}
+
+.promo-content {
+	display: flex;
+	flex-direction: column;
+	gap: $small-gap;
+}
+
+.promo-image {
+	display: none;
+
+	svg {
+		width: 72px;
+		height: auto;
+	}
+}
+
+.promo-content-links {
+	display: flex;
+	flex-direction: column;
+	gap: $medium-gap;
+
+	.promo-links {
+		margin-top: 0;
+	}
+}
+
+.promo-content-image {
+	display: flex;
+	gap: $large-gap;
+	justify-content: space-between;
+}
+
+.promo-links {
+	align-items: center;
+	align-self: stretch;
+	display: flex;
+	flex-direction: row;
+	gap: $small-gap;
+	justify-content: flex-start;
+	margin-top: $medium-gap;
+}
+
+.promo-title {
+	color: #1e1e1e;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 24px;
+	margin: 0;
+}
+
+.promo-text {
+	color: $gray-700;
+	font-size: 14px;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 20px;
+	text-wrap: pretty;
+
+	p {
+		color: inherit;
+		font-size: inherit;
+		font-style: inherit;
+		font-weight: inherit;
+		line-height: inherit;
+		margin-top: 0;
+		text-wrap: inherit;
+	}
+
+	p:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.promo-cta,
+.promo-cta-link {
+	white-space: nowrap;
+}
+
+.promo-cta-link.woocommerce-admin-dismiss-notification {
+	color: $gray-700;
+
+	&:hover {
+		box-shadow: inset 0 0 0 1px $gray-700;
+	}
+}
+
+// WooCommerce > Extensions
+.woocommerce-admin-page__extensions {
+	.promo-card {
+		margin-bottom: 40px;
+		width: 100%;
+	}
+}
+
+// Marketing > Coupons
+.woocommerce-marketing-coupons {
+	.promo-card {
+		margin-bottom: 24px;
+	}
+}
+
+@media screen and (min-width: 385px) {
+	.promo-image {
+		display: flex;
+		justify-content: flex-end;
+	}
+}
+
+@media screen and (min-width: $breakpoint-small) {
+	.promo-card {
+		&.has-background .promo-card__body {
+			gap: $large-gap;
+		}
+
+		&.has-background .promo-image {
+			width: 250px;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.promo-card {
+		&.wide .promo-card__body {
+			flex-direction: row;
+
+			.promo-links {
+				align-self: center;
+			}
+		}
+	}
+}
