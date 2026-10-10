@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve VAT exemptions and shipping state when customers retry checkout after a failed payment.
