@@ -1206,7 +1206,14 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_url() {
+		if ( ! has_filter( 'plugins_url' ) ) {
+			static $plugin_url = null;
+			$plugin_url        = $plugin_url ?? untrailingslashit( plugins_url( '/', WC_PLUGIN_FILE ) );
 
+			return $plugin_url;
+		}
+
+		// If 'plugins_url' filter is present (rare occasion), caching it is a gamble so we pass it on.
 		return untrailingslashit( plugins_url( '/', WC_PLUGIN_FILE ) );
 	}
 
