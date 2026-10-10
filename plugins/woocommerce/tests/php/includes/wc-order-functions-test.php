@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class WC_Order_Functions_Test
@@ -176,6 +177,119 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->untrash();
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * Add a raw coupon item to an order and save it, bypassing apply_coupon().
+	 *
+	 * @param WC_Order $order Order.
+	 * @param string   $code  Coupon code.
+	 */
+	private function add_raw_coupon_item( WC_Order $order, string $code ): void {
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$item->set_discount( 1 );
+		$order->add_item( $item );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Coupon usage is not marked as recorded while the order has no coupons, so coupons added later are counted.
+	 */
+	public function test_wc_update_coupon_usage_counts_counts_coupons_added_after_first_status_change() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'late-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox An order without coupons never gets the recorded flag through valid status changes.
+	 */
+	public function test_wc_update_coupon_usage_counts_does_not_flag_orders_without_coupons() {
+		$order = WC_Helper_Order::create_order();
+		$store = $order->get_data_store();
+
+		foreach ( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING, OrderStatus::COMPLETED ) as $status ) {
+			$order->update_status( $status );
+			$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ), "Flag set for status {$status}." );
+		}
+	}
+
+	/**
+	 * @testdox A legacy coupon-less order carrying the recorded flag is counted once a coupon is added.
+	 */
+	public function test_wc_update_coupon_usage_counts_treats_legacy_flag_without_coupons_as_unrecorded() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'legacy-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$store->set_recorded_coupon_usage_counts( $order, true );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Pinning: a coupon applied to an auto-draft order is counted once when the order is later paid.
+	 */
+	public function test_wc_update_coupon_usage_counts_admin_applied_coupon_paid_later_counts_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'admin-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$order->set_status( 'auto-draft' );
+		$order->save();
+
+		$result = $order->apply_coupon_using_edited_totals( $coupon->get_code() );
+		$this->assertTrue( $result );
+
+		$order->update_status( OrderStatus::PENDING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->payment_complete();
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		\Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_order_coupons( $order->get_id() );
+		global $wpdb;
+		$rows = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_coupon_lookup WHERE order_id = %d AND coupon_id = %d",
+				$order->get_id(),
+				$coupon->get_id()
+			)
+		);
+		$this->assertEquals( 1, (int) $rows );
 	}
 
 	/**
@@ -605,5 +719,387 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			wc_get_order( $refund->get_id() )->get_refunded_by(),
 			'An unattributed refund should stay unattributed after a round trip through the data store.'
 		);
+	}
+
+	/**
+	 * Create a processing order that has counted a coupon.
+	 *
+	 * @param WC_Coupon $coupon Coupon.
+	 * @return WC_Order
+	 */
+	private function create_recorded_order( WC_Coupon $coupon ): WC_Order {
+		$order = WC_Helper_Order::create_order();
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$order->update_status( OrderStatus::PROCESSING );
+
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		return $order;
+	}
+
+	/**
+	 * @testdox Should release coupon usage when a recorded order is deleted permanently.
+	 */
+	public function test_force_deleting_a_recorded_order_releases_coupon_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'deleted-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order->delete( true );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage once when a recorded order is trashed and then deleted.
+	 */
+	public function test_deleting_a_trashed_order_does_not_release_coupon_usage_twice() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'trashed-deleted-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order->delete( false );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order->delete( true );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should not change coupon usage when an order that never counted its coupons is deleted.
+	 */
+	public function test_deleting_an_unrecorded_order_leaves_coupon_usage_unchanged() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'unrecorded-deleted-order' );
+		$this->create_recorded_order( $coupon );
+		$order = WC_Helper_Order::create_order();
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$order->delete( true );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage once when a recorded order is deleted with wp_delete_post.
+	 */
+	public function test_wp_delete_post_on_a_recorded_order_releases_coupon_usage_once() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'wp-deleted-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		wp_delete_post( $order->get_id(), true );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage when a recorded auto-draft order is deleted.
+	 */
+	public function test_deleting_a_recorded_auto_draft_order_releases_coupon_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'auto-draft-order' );
+		$order  = new WC_Order();
+		$order->set_status( 'auto-draft' );
+		$order->save();
+		$order->apply_coupon( $coupon );
+
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order->delete( true );
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should not touch coupon usage when a refund of a recorded order is deleted.
+	 */
+	public function test_deleting_a_refund_does_not_release_coupon_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'refund-deleted' );
+		$order  = $this->create_recorded_order( $coupon );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$this->assertNotWPError( $refund );
+
+		$refund->delete( true );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( wc_get_order( $order->get_id() )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should leave coupon usage untouched when an unrelated post is deleted.
+	 */
+	public function test_deleting_a_product_post_leaves_coupon_usage_unchanged() {
+		$coupon  = WC_Helper_Coupon::create_coupon( 'product-deleted' );
+		$order   = $this->create_recorded_order( $coupon );
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_delete_post( $product->get_id(), true );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should count coupon usage again when a trashed order is restored.
+	 */
+	public function test_restoring_a_trashed_order_counts_coupon_usage_again() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'restored-order' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( wc_get_order( $order_id )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should count coupon usage again when a trashed order is restored with wp_untrash_post.
+	 */
+	public function test_wp_untrash_post_on_a_trashed_order_counts_coupon_usage_again() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'wp-restored-order' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		wp_untrash_post( $order_id );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should count coupon usage only once when more than one restore hook fires for the order.
+	 */
+	public function test_restoring_a_trashed_order_counts_coupon_usage_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'restored-once' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+
+		do_action( 'woocommerce_untrash_order', $order_id, OrderInternalStatus::PROCESSING );
+		do_action( 'untrashed_post', $order_id );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should not count coupon usage when a trashed order is restored to a cancelled status.
+	 */
+	public function test_restoring_a_cancelled_order_does_not_count_coupon_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'restored-cancelled' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$order_id = $order->get_id();
+		$order->delete( false );
+		$order = wc_get_order( $order_id );
+		$order->untrash();
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertFalse( wc_get_order( $order_id )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should leave coupon usage untouched when an unrelated post is restored.
+	 */
+	public function test_restoring_a_product_post_leaves_coupon_usage_unchanged() {
+		$coupon  = WC_Helper_Coupon::create_coupon( 'product-restored' );
+		$order   = $this->create_recorded_order( $coupon );
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_trash_post( $product->get_id() );
+		wp_untrash_post( $product->get_id() );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+	}
+
+	/**
+	 * @testdox Should release coupon usage when a recorded order is trashed with wp_trash_post, and count it again on restore.
+	 */
+	public function test_wp_trash_post_on_a_recorded_order_releases_coupon_usage() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'wp-trashed-order' );
+		$order  = $this->create_recorded_order( $coupon );
+
+		wp_trash_post( $order->get_id() );
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertFalse( wc_get_order( $order->get_id() )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		wp_untrash_post( $order->get_id() );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage once when a recorded order is trashed.
+	 */
+	public function test_trashing_a_recorded_order_releases_coupon_usage_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'trashed-once' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$order->delete( false );
+
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should not save the order and should release usage once when a recorded order is deleted permanently.
+	 */
+	public function test_force_deleting_a_recorded_order_does_not_save_the_order() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'delete-no-save' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$updates  = 0;
+		$callback = function () use ( &$updates ) {
+			++$updates;
+		};
+		add_action( 'woocommerce_before_order_object_save', $callback );
+		// The total sales update saves the order on delete as well; keep it out of the count.
+		remove_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
+
+		$order->delete( true );
+
+		add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
+		remove_action( 'woocommerce_before_order_object_save', $callback );
+		$this->assertSame( 0, $updates );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage once when both delete hooks fire for the same order.
+	 */
+	public function test_both_delete_hooks_for_one_order_release_coupon_usage_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'both-delete-hooks' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		// The order stays in place, so keep the cleanup that removes its items out of the way.
+		$cleanup = array( WC_Post_Data::class, 'before_delete_order' );
+		remove_action( 'woocommerce_before_delete_order', $cleanup );
+		remove_action( 'before_delete_post', $cleanup );
+
+		do_action( 'woocommerce_before_delete_order', $order->get_id(), $order );
+		do_action( 'woocommerce_before_delete_order', $order->get_id(), $order );
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			do_action( 'before_delete_post', $order->get_id(), get_post( $order->get_id() ) );
+		}
+
+		add_action( 'woocommerce_before_delete_order', $cleanup );
+		add_action( 'before_delete_post', $cleanup );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should read the order items before another callback ahead of the order item cleanup removes them.
+	 */
+	public function test_coupon_usage_is_released_before_the_order_items_are_deleted() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'items-still-present' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$delete_items = array( WC_Post_Data::class, 'delete_order_items' );
+		add_action( 'woocommerce_before_delete_order', $delete_items, 9 );
+		add_action( 'before_delete_post', $delete_items, 9 );
+
+		$order->delete( true );
+
+		remove_action( 'woocommerce_before_delete_order', $delete_items, 9 );
+		remove_action( 'before_delete_post', $delete_items, 9 );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should release coupon usage through the post hooks for a counted order type other than shop_order.
+	 */
+	public function test_post_delete_hook_releases_usage_for_other_counted_order_types() {
+		global $wc_order_types;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Orders are not posts when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'custom-type-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		wc_register_order_type( 'shop_order_custom', array( 'exclude_from_order_count' => false ) );
+		wp_update_post(
+			array(
+				'ID'        => $order->get_id(),
+				'post_type' => 'shop_order_custom',
+			)
+		);
+		$this->assertContains( 'shop_order_custom', wc_get_order_types( 'order-count' ) );
+		add_filter( 'woocommerce_order_class', fn() => WC_Order::class );
+
+		do_action( 'before_delete_post', $order->get_id(), get_post( $order->get_id() ) );
+
+		unset( $wc_order_types['shop_order_custom'] );
+		$this->assertSame( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Should leave coupon usage unchanged when a backup post of a recorded HPOS order is deleted or trashed.
+	 */
+	public function test_post_hooks_on_a_backup_post_leave_hpos_order_coupon_usage_unchanged() {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Only applies when HPOS is authoritative.' );
+		}
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'backup-post-order' );
+		$this->create_recorded_order( $coupon );
+		$order = $this->create_recorded_order( $coupon );
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_order' ), array( 'ID' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		$this->assertSame( 'shop_order', get_post_type( $order->get_id() ) );
+
+		do_action( 'trashed_post', $order->get_id() );
+		do_action( 'untrashed_post', $order->get_id() );
+		do_action( 'before_delete_post', $order->get_id(), get_post( $order->get_id() ) );
+
+		$this->assertSame( 2, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertTrue( wc_get_order( $order->get_id() )->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 	}
 }

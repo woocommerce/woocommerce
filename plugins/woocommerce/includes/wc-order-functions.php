@@ -1018,12 +1018,33 @@ add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
  * @param int $order_id Order ID.
  */
 function wc_update_coupon_usage_counts( $order_id ) {
+	static $released_on_delete = array();
+
+	$current_action = current_action();
+	$is_deleting    = in_array( $current_action, array( 'woocommerce_before_delete_order', 'before_delete_post' ), true );
+
+	if ( in_array( $current_action, array( 'before_delete_post', 'trashed_post', 'untrashed_post' ), true ) ) {
+		// With HPOS authoritative, the order hooks cover every path and a post with this ID is only a backup.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() || ! in_array( get_post_type( $order_id ), wc_get_order_types( 'order-count' ), true ) ) {
+			return;
+		}
+	}
+
+	// Both delete hooks can fire for one order, and a deleted order keeps no flag to show it was released.
+	if ( $is_deleting ) {
+		if ( isset( $released_on_delete[ $order_id ] ) ) {
+			return;
+		}
+		$released_on_delete[ $order_id ] = true;
+	}
+
 	$order = wc_get_order( $order_id );
 
 	if ( ! $order ) {
 		return;
 	}
 
+	$coupon_codes     = array_filter( $order->get_coupon_codes(), fn( $code ) => ! StringUtil::is_null_or_whitespace( $code ) );
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
@@ -1039,25 +1060,26 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
-	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
+	$is_invalid = $is_deleting || $order->has_status( $invalid_statuses );
+
+	// A flag on an order without coupons is stale, so it is cleared and no usage is reduced.
+	if ( $has_recorded && ( $is_invalid || ! $coupon_codes ) ) {
 		$action = 'reduce';
-		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
+		if ( ! $is_deleting ) {
+			$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
+		}
+	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( $invalid_statuses ) ) {
-		wc_release_coupons_for_order( $order );
+	} elseif ( $is_invalid ) {
+		wc_release_coupons_for_order( $order, ! $is_deleting );
 		return;
 	} else {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( StringUtil::is_null_or_whitespace( $code ) ) {
-				continue;
-			}
-
+	if ( count( $coupon_codes ) > 0 ) {
+		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 
@@ -1074,7 +1096,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 					break;
 			}
 		}
-		wc_release_coupons_for_order( $order );
+		wc_release_coupons_for_order( $order, ! $is_deleting );
 	}
 }
 add_action( 'woocommerce_order_status_pending', 'wc_update_coupon_usage_counts' );
@@ -1084,6 +1106,10 @@ add_action( 'woocommerce_order_status_on-hold', 'wc_update_coupon_usage_counts' 
 add_action( 'woocommerce_order_status_cancelled', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_order_status_failed', 'wc_update_coupon_usage_counts' );
 add_action( 'woocommerce_trash_order', 'wc_update_coupon_usage_counts' );
+add_action( 'woocommerce_before_delete_order', 'wc_update_coupon_usage_counts', 5 );
+add_action( 'before_delete_post', 'wc_update_coupon_usage_counts', 5 );
+add_action( 'trashed_post', 'wc_update_coupon_usage_counts' );
+add_action( 'untrashed_post', 'wc_update_coupon_usage_counts' );
 
 /**
  * Cancel all unpaid orders after held duration to prevent stock lock for those products.

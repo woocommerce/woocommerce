@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1865,14 +1866,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool TRUE if coupon was removed, FALSE otherwise.
 	 */
 	public function remove_coupon( $code ) {
-		$coupons = $this->get_items( 'coupon' );
+		$coupons      = $this->get_items( 'coupon' );
+		$has_recorded = $this->get_data_store()->get_recorded_coupon_usage_counts( $this ); // @phpstan-ignore method.notFound (Defined by the order data store interface.)
+		$this->set_recorded_coupon_usage_counts( $has_recorded );
 
 		// Remove the coupon line.
 		foreach ( $coupons as $item_id => $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
-				$coupon_object->decrease_usage_count( $this->get_user_id() );
+
+				if ( $has_recorded ) {
+					$coupon_object->decrease_usage_count( $this->get_user_id() ? $this->get_user_id() : $this->get_billing_email() ); // @phpstan-ignore method.notFound (Billing email exists on orders; refunds have no coupons.)
+
+					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
+					if ( ! $remaining_codes ) {
+						$this->set_recorded_coupon_usage_counts( false );
+					}
+				}
+
 				$this->recalculate_coupons();
 
 				/**

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
@@ -2409,5 +2410,40 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Sending the coupons an order already counts must not change their usage counts.
+	 */
+	public function test_update_order_with_same_coupons_keeps_usage_counts() {
+		wp_set_current_user( $this->user );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		CouponHelper::create_coupon( 'usage-coupon-a' );
+		CouponHelper::create_coupon( 'usage-coupon-b' );
+		$order->apply_coupon( 'usage-coupon-a' );
+		$order->apply_coupon( 'usage-coupon-b' );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-a' ) )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-b' ) )->get_usage_count() );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array( 'code' => 'usage-coupon-a' ),
+					array( 'code' => 'usage-coupon-b' ),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $order->get_items( 'coupon' ) );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-a' ) )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-b' ) )->get_usage_count() );
 	}
 }

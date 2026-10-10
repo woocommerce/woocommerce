@@ -99,4 +99,88 @@ class CouponsController {
 
 		return $order;
 	}
+
+	/**
+	 * Get who coupon usage is recorded against: the customer ID, or the billing email for guests.
+	 *
+	 * @since 11.3.0
+	 * @param \WC_Order $order Order.
+	 * @return string
+	 */
+	public function get_usage_identity( \WC_Order $order ): string {
+		return (string) ( $order->get_user_id() ? $order->get_user_id() : $order->get_billing_email() );
+	}
+
+	/**
+	 * Adjust coupon usage counts after the coupons of an order changed outside of apply_coupon() and remove_coupon().
+	 *
+	 * An order that has not counted its coupons yet is counted through wc_update_coupon_usage_counts(), which
+	 * only does so when the order status allows it.
+	 *
+	 * @since 11.3.0
+	 * @param \WC_Order $order                  The saved order, with its current coupons.
+	 * @param string[]  $previous_codes         Coupon codes the order had before the change.
+	 * @param string    $previous_usage_identity Value of get_usage_identity() before the change. Usage held under it is released for removed coupons and moved for kept ones.
+	 */
+	public function sync_usage_counts( \WC_Order $order, array $previous_codes, string $previous_usage_identity ): void {
+		/**
+		 * Order data store.
+		 *
+		 * @var \WC_Order_Data_Store_Interface $data_store
+		 */
+		$data_store = $order->get_data_store();
+
+		if ( ! $data_store->get_recorded_coupon_usage_counts( $order ) ) {
+			wc_update_coupon_usage_counts( $order->get_id() );
+			return;
+		}
+
+		$previous = $this->normalize_codes( $previous_codes );
+		$current  = $this->normalize_codes( $order->get_coupon_codes() );
+		$used_by  = $this->get_usage_identity( $order );
+
+		foreach ( array_diff_key( $current, $previous ) as $code ) {
+			$coupon = new \WC_Coupon( $code );
+			if ( $coupon->get_id() ) {
+				$coupon->increase_usage_count( $used_by, $order );
+			}
+		}
+
+		if ( $previous_usage_identity !== $used_by ) {
+			foreach ( array_intersect_key( $current, $previous ) as $code ) {
+				$coupon = new \WC_Coupon( $code );
+				if ( $coupon->get_id() ) {
+					$coupon->decrease_usage_count( $previous_usage_identity );
+					$coupon->increase_usage_count( $used_by, $order );
+				}
+			}
+		}
+
+		foreach ( array_diff_key( $previous, $current ) as $code ) {
+			$coupon = new \WC_Coupon( $code );
+			if ( $coupon->get_id() ) {
+				$coupon->decrease_usage_count( $previous_usage_identity );
+			}
+		}
+
+		if ( ! $current ) {
+			$data_store->set_recorded_coupon_usage_counts( $order, false );
+		}
+	}
+
+	/**
+	 * Drop blank codes and duplicates, keyed by the lowercase code.
+	 *
+	 * @param string[] $codes Coupon codes.
+	 * @return array<string, string>
+	 */
+	private function normalize_codes( array $codes ): array {
+		$normalized = array();
+		foreach ( $codes as $code ) {
+			if ( ! StringUtil::is_null_or_whitespace( $code ) ) {
+				$normalized[ wc_strtolower( $code ) ] = $code;
+			}
+		}
+		return $normalized;
+	}
 }
