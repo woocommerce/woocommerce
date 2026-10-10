@@ -801,6 +801,7 @@ class StyleAttributesUtils {
 	public static function get_global_styles( array $path = array() ) {
 		static $resolved_styles = array();
 
+		// The wp_get_global_styles downstream workflows has some caching, bur merging routines are heavy.
 		$theme                     = get_stylesheet();
 		$resolved_styles[ $theme ] = $resolved_styles[ $theme ] ?? wp_get_global_styles();
 		$target_styles             = defined( 'WP_RUN_CORE_TESTS' ) ? wp_get_global_styles() : $resolved_styles[ $theme ];
