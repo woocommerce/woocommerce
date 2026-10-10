@@ -127,9 +127,7 @@ class Breadcrumbs extends AbstractBlock {
 	 * @return array The font size classes and styles.
 	 */
 	private function get_theme_font_size_classes_and_styles() {
-		$theme_font_size = StyleAttributesUtils::get_global_styles(
-			array( 'blocks', 'woocommerce/breadcrumbs', 'typography', 'fontSize' )
-		);
+		$theme_font_size = StyleAttributesUtils::get_global_styles( array( 'blocks', 'woocommerce/breadcrumbs', 'typography', 'fontSize' ) );
 
 		if ( ! is_string( $theme_font_size ) || '' === $theme_font_size ) {
 			return array(

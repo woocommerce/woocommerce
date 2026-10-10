@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * StyleAttributesUtils class used for getting class and style from attributes.
  *
@@ -797,13 +799,23 @@ class StyleAttributesUtils {
 	 * @return mixed The resolved global styles value.
 	 */
 	public static function get_global_styles( array $path ) {
-		static $resolved = array();
+		static $blocks_styles = null;
+		static $other_styles  = array();
 
-		$key = implode( '-', $path );
-		if ( ! array_key_exists( $key, $resolved ) ) {
-			$resolved[ $key ] = wp_get_global_styles( $path );
+		// Optimization: request-level cache with optimized resolution routed to the upstream with blocks context.
+		if ( 'blocks' === ( $path[0] ?? null ) ) {
+			$blocks_styles   = $blocks_styles ?? wp_get_global_styles( 'blocks', array( 'origin' => 'blocks' ) );
+			$resolution_path = implode( '::', array_slice( $path, 1 ) );
+
+			return $resolution_path === '' ? $blocks_styles : ArrayUtil::get_nested_value( $blocks_styles, $resolution_path );
 		}
 
-		return $resolved[ $key ];
+		// Fallback: request-level cache with values resolution routed to the upstream with default context.
+		$key = implode( '-', $path );
+		if ( ! array_key_exists( $key, $other_styles ) ) {
+			$other_styles[ $key ] = wp_get_global_styles( $path );
+		}
+
+		return $other_styles[ $key ];
 	}
 }
