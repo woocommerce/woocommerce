@@ -18799,12 +18799,6 @@ parameters:
 			path: includes/export/abstract-wc-csv-batch-exporter.php
 
 		-
-			message: '#^Method WC_CSV_Batch_Exporter\:\:generate_file\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/export/abstract-wc-csv-batch-exporter.php
-
-		-
 			message: '#^Method WC_CSV_Batch_Exporter\:\:get_file\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -18818,12 +18812,6 @@ parameters:
 
 		-
 			message: '#^Method WC_CSV_Batch_Exporter\:\:set_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/export/abstract-wc-csv-batch-exporter.php
-
-		-
-			message: '#^Method WC_CSV_Batch_Exporter\:\:write_csv_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/export/abstract-wc-csv-batch-exporter.php
