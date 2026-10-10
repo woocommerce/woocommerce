@@ -74,10 +74,10 @@ abstract class AbstractBlock {
 	 * @param string              $block_name Optionally set block name during construct.
 	 */
 	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, $block_name = '' ) {
-		$this->asset_api              = $asset_api;
-		$this->asset_data_registry    = $asset_data_registry;
-		$this->integration_registry   = $integration_registry;
-		$this->block_name             = $block_name ? $block_name : $this->block_name;
+		$this->asset_api                     = $asset_api;
+		$this->asset_data_registry           = $asset_data_registry;
+		$this->integration_registry          = $integration_registry;
+		$this->block_name                    = $block_name ? $block_name : $this->block_name;
 		$this->unified_editor_assets_enabled = BlockEditorUnifiedAssets::is_enabled();
 		$this->initialize();
 	}
