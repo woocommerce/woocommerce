@@ -520,8 +520,8 @@ jobs:
 
   create-release-comms-issue:
     name: Create release comms issue in Linear
-    needs: [check-upcoming-release-events]
-    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
+    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, create-parent-tracking-issue, create-sub-tracking-issues]
+    if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -563,21 +563,6 @@ jobs:
             }
 
             const teamId = teams.nodes[ 0 ].id;
-            const existingIssues = await linearClient.issues( {
-              includeArchived: true,
-              filter: {
-                team: { id: { eq: teamId } },
-                title: { eq: title }
-              }
-            } );
-
-            if ( existingIssues.nodes.length > 0 ) {
-              const issue = existingIssues.nodes[ 0 ];
-              console.log( `Release comms issue already exists: ${ issue.url }` );
-              await core.summary.addRaw( `Linear release comms issue already exists: [${ title }](${ issue.url })` ).write();
-              return;
-            }
-
             const [ projects, states ] = await Promise.all( [
               linearClient.projects( {
                 filter: {
@@ -600,6 +585,33 @@ jobs:
 
             if ( states.nodes.length !== 1 ) {
               core.setFailed( `Expected one Triage state for ${ teamKey }, found ${ states.nodes.length }` );
+              return;
+            }
+
+            const existingIssues = await linearClient.issues( {
+              includeArchived: true,
+              filter: {
+                team: { id: { eq: teamId } },
+                title: { eq: title }
+              }
+            } );
+
+            if ( existingIssues.nodes.length > 1 ) {
+              core.setFailed( `Found multiple ${ teamKey } issues titled ${ title }; resolve the duplicates before creating release comms` );
+              return;
+            }
+
+            if ( existingIssues.nodes.length === 1 ) {
+              const issue = existingIssues.nodes[ 0 ];
+              const issueProject = await issue.project;
+
+              if ( issueProject?.id !== projects.nodes[ 0 ].id ) {
+                core.setFailed( `Existing ${ teamKey } issue titled ${ title } is not in ${ projectName }; move it to the release comms project or rename it` );
+                return;
+              }
+
+              console.log( `Release comms issue already exists: ${ issue.url }` );
+              await core.summary.addRaw( `Linear release comms issue already exists: [${ title }](${ issue.url })` ).write();
               return;
             }
 
