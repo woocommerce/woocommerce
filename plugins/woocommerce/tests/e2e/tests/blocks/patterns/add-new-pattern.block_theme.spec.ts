@@ -12,12 +12,39 @@ test.describe( 'Patterns in block theme', () => {
 	test( 'Synced Pattern can be created with basic blocks', async ( {
 		admin,
 		editor,
+		requestUtils,
 	} ) => {
-		await admin.createNewPattern( 'Woo Blocks Synced Pattern' );
-		const { productTitles, productPrices } =
-			await addTestingBlocks( editor );
+		const patternName = `Woo Blocks Synced Pattern ${
+			test.info().repeatEachIndex
+		}`;
 
-		await expect( productTitles ).toHaveText( expectedTitles );
-		await expect( productPrices ).toHaveText( expectedPrices );
+		try {
+			await admin.createNewPattern( patternName );
+			const { productTitles, productPrices } =
+				await addTestingBlocks( editor );
+
+			await expect( productTitles ).toHaveText( expectedTitles );
+			await expect( productPrices ).toHaveText( expectedPrices );
+		} finally {
+			const patterns: { id: number; title: { raw: string } }[] =
+				await requestUtils.rest( {
+					path: '/wp/v2/blocks',
+					params: {
+						search: patternName,
+						status: 'any',
+						context: 'edit',
+						per_page: 100,
+					},
+				} );
+			for ( const { id } of patterns.filter(
+				( { title } ) => title.raw === patternName
+			) ) {
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/blocks/${ id }`,
+					params: { force: true },
+				} );
+			}
+		}
 	} );
 } );
