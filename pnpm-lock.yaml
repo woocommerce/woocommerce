@@ -3887,6 +3887,9 @@ importers:
       jest-fixed-jsdom:
         specifier: ^0.0.10
         version: 0.0.10(jest-environment-jsdom@30.4.1)
+      jquery:
+        specifier: 3.7.1
+        version: 3.7.1
       sass:
         specifier: 1.69.5
         version: 1.69.5
@@ -14636,6 +14639,9 @@ packages:
 
   jpeg-js@0.4.4:
     resolution: {integrity: sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==}
+
+  jquery@3.7.1:
+    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
 
   js-beautify@1.15.4:
     resolution: {integrity: sha512-9/KXeZUKKJwqCXUdBxFJ3vPh467OCckSBmYDwSK/EtV090K+iMJ7zx2S3HLVDIWFQdqMIsZWbnaGiba18aWhaA==}
@@ -35997,6 +36003,8 @@ snapshots:
       '@standard-schema/spec': 1.1.0
 
   jpeg-js@0.4.4: {}
+
+  jquery@3.7.1: {}
 
   js-beautify@1.15.4:
     dependencies:

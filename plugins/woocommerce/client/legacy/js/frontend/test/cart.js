@@ -44,6 +44,7 @@ describe( 'cart.js request data', () => {
 	const cartFormElement = { id: 'cart-form' };
 	const shippingFormElement = { id: 'shipping-form' };
 	const removeCouponElement = { id: 'remove-coupon' };
+	const shippingMethodElement = { id: 'shipping-method' };
 
 	beforeEach( () => {
 		capturedAjaxRequests = [];
@@ -175,6 +176,20 @@ describe( 'cart.js request data', () => {
 			if ( arg === removeCouponElement ) {
 				return $removeCouponLink;
 			}
+			if ( arg === 'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]' ) {
+				const $methods = createDefaultMock();
+				$methods.each = jest.fn( ( callback ) => {
+					callback.call( shippingMethodElement, 0, shippingMethodElement );
+					return $methods;
+				} );
+				return $methods;
+			}
+			if ( arg === shippingMethodElement ) {
+				const $method = createDefaultMock();
+				$method.data = jest.fn( () => 0 );
+				$method.val = jest.fn( () => "flat_rate:O'Fallon" );
+				return $method;
+			}
 			return createDefaultMock();
 		} );
 		jQueryMock.ajax = jest.fn( ( options ) => {
@@ -261,6 +276,26 @@ describe( 'cart.js request data', () => {
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).toBe( QUANTITY_FORM_SERIALIZED );
+		expect( request.wc_encode_apostrophes ).toBe( true );
+	} );
+
+	test( 'should send the chosen shipping method as an object with the encoding opt-in', () => {
+		const change = findDocumentHandler(
+			'change',
+			'select.shipping_method, :input[name^=shipping_method]'
+		);
+
+		change( { currentTarget: shippingMethodElement } );
+
+		const request = capturedAjaxRequests.find( ( options ) =>
+			options.url.includes( 'update_shipping_method' )
+		);
+		expect( request ).toBeDefined();
+		expect( typeof request.data ).toBe( 'object' );
+		expect( request.data ).toEqual( {
+			security: 'nonce',
+			shipping_method: { 0: "flat_rate:O'Fallon" },
+		} );
 		expect( request.wc_encode_apostrophes ).toBe( true );
 	} );
 

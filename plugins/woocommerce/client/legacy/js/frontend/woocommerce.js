@@ -7,7 +7,9 @@
  * jQuery leaves `'` alone when it serializes data, so bodies can reach the
  * server with literal apostrophes that some WAF rules reject. Running as a
  * prefilter lets jQuery serialize the request first, so removed (undefined)
- * fields are dropped and other prefilters still see the data as it was given.
+ * fields are dropped and `originalOptions.data` stays the object the caller
+ * passed. Prefilters registered after this one, and `beforeSend` handlers,
+ * see the encoded string in `options.data`.
  */
 jQuery.ajaxPrefilter( function ( options ) {
 	if ( options.wc_encode_apostrophes && 'string' === typeof options.data ) {
