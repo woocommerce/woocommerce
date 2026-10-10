@@ -803,7 +803,7 @@ class StyleAttributesUtils {
 
 		// Optimization: request-level cache with optimized resolution routed to \WP_Theme_JSON_Resolver::get_merged_data.
 		if ( 'blocks' === ( $path[0] ?? null ) ) {
-			$blocks_styles   = $blocks_styles ?? \WP_Theme_JSON_Resolver::get_merged_data( 'blocks' )->get_raw_data()['styles'];
+			$blocks_styles   = $blocks_styles ?? wp_get_global_styles( array( 'blocks' ) );
 			$resolution_path = implode( '::', array_slice( $path, 1 ) );
 
 			return $resolution_path === '' ? $blocks_styles : ArrayUtil::get_nested_value( $blocks_styles, $resolution_path );
