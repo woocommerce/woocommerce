@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WC_Order_Refund;
@@ -482,6 +483,15 @@ class FulfillmentsManager {
 
 		if ( $old_status !== $new_status && isset( $this->fulfillment_order_notes ) ) {
 			$this->fulfillment_order_notes->add_order_fulfillment_status_changed_note( $order, $old_status, $new_status );
+		}
+
+		if (
+			$old_status !== $new_status
+			&& 'fulfilled' === $new_status
+			&& $order->has_status( OrderStatus::PROCESSING )
+			&& FulfillmentsSettings::should_complete_fulfilled_order( $order )
+		) {
+			$order->update_status( OrderStatus::COMPLETED, __( 'All items are fulfilled.', 'woocommerce' ) );
 		}
 	}
 

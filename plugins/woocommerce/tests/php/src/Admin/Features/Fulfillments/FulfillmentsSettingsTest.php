@@ -74,7 +74,7 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 		$fulfillments_settings = wc_get_container()->get( FulfillmentsSettings::class );
 		$modified_settings     = $fulfillments_settings->add_auto_fulfill_settings( $settings, '' );
 
-		$this->assertCount( 5, $modified_settings );
+		$this->assertCount( 6, $modified_settings );
 		$this->assertEquals( 'catalog_options', $modified_settings[0]['id'] );
 		$this->assertEquals( 'sectionend', $modified_settings[0]['type'] );
 		$this->assertEquals( 'auto_fulfill_options', $modified_settings[1]['id'] );
@@ -83,8 +83,11 @@ class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'checkbox', $modified_settings[2]['type'] );
 		$this->assertEquals( 'auto_fulfill_virtual', $modified_settings[3]['id'] );
 		$this->assertEquals( 'checkbox', $modified_settings[3]['type'] );
-		$this->assertEquals( 'auto_fulfill_options', $modified_settings[4]['id'] );
-		$this->assertEquals( 'sectionend', $modified_settings[4]['type'] );
+		$this->assertEquals( FulfillmentsSettings::COMPLETE_ORDER_OPTION, $modified_settings[4]['id'] );
+		$this->assertEquals( 'checkbox', $modified_settings[4]['type'] );
+		$this->assertEquals( 'no', $modified_settings[4]['default'] );
+		$this->assertEquals( 'auto_fulfill_options', $modified_settings[5]['id'] );
+		$this->assertEquals( 'sectionend', $modified_settings[5]['type'] );
 	}
 
 	/**
