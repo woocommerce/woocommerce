@@ -823,7 +823,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
-				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->set_prices_include_tax( wc_prices_include_tax() );
 				$object->save();
 				$object->calculate_totals();
 			} else {
