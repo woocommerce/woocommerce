@@ -127,6 +127,16 @@ class Api {
 	 * @param PaymentMethodRegistry $payment_method_registry Payment method registry instance.
 	 */
 	public function register_payment_method_integrations( PaymentMethodRegistry $payment_method_registry ) {
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_bacs_accounts',
+				'woocommerce_cheque_settings',
+				'woocommerce_cod_settings',
+				'woocommerce_paypal_settings',
+			)
+		);
+
 		$payment_method_registry->register(
 			Package::container()->get( Cheque::class )
 		);
