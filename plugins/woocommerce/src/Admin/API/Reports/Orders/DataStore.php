@@ -81,6 +81,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'total_sales'      => 'floatval',
 		'num_items_sold'   => 'intval',
 		'customer_type'    => 'strval',
+		'payment_method'   => 'strval',
 	);
 
 	/**
@@ -124,6 +125,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
 			'customer_type'    => "(CASE WHEN {$returning_customer} = 0 THEN 'new' ELSE 'returning' END) as customer_type",
+			'payment_method'   => "{$table_name}.payment_method",
 		);
 	}
 
