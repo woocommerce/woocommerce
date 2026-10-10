@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent password-protected variable products from being added to the cart through their variation IDs.

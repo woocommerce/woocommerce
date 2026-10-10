@@ -247,6 +247,45 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A child keeps its parent key while the parent is in the cart and becomes standalone after removal.
+	 */
+	public function test_parent_item_key_is_null_after_removing_parent_item() {
+		$parent_item_key_filter = function ( $parent_item_key, $cart_item, $cart_item_key ) {
+			unset( $cart_item );
+
+			return $this->keys[1] === $cart_item_key ? $this->keys[0] : $parent_item_key;
+		};
+		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter, 10, 3 );
+
+		try {
+			$cart_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+			$this->assertSame( 200, $cart_response->get_status() );
+			$cart_items = array_column( $cart_response->get_data()['items'], null, 'key' );
+			$this->assertSame( $this->keys[0], $cart_items[ $this->keys[1] ]['parent_item_key'] );
+			$this->assertNull( $cart_items[ $this->keys[0] ]['parent_item_key'] );
+
+			$remove_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+			$remove_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$remove_request->set_body_params( array( 'key' => $this->keys[0] ) );
+			$remove_response = rest_get_server()->dispatch( $remove_request );
+
+			$this->assertSame( 200, $remove_response->get_status() );
+			$remaining_items = array_column( $remove_response->get_data()['items'], null, 'key' );
+			$this->assertArrayNotHasKey( $this->keys[0], $remaining_items );
+			$this->assertArrayHasKey( $this->keys[1], $remaining_items );
+			$this->assertNull( $remaining_items[ $this->keys[1] ]['parent_item_key'] );
+			$this->assertSame( 1, $remaining_items[ $this->keys[1] ]['quantity'] );
+
+			$this->assertSame( $this->keys[0], wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 ) );
+			$restored_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+			$restored_items    = array_column( $restored_response->get_data()['items'], null, 'key' );
+			$this->assertSame( $this->keys[0], $restored_items[ $this->keys[1] ]['parent_item_key'] );
+		} finally {
+			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter, 10 );
+		}
+	}
+
+	/**
 	 * Test changing the quantity of a cart item.
 	 */
 	public function test_update_item() {
