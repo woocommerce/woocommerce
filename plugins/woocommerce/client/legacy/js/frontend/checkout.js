@@ -740,6 +740,7 @@ jQuery( function ( $ ) {
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
 				data: data,
+				wc_encode_apostrophes: true,
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -1018,6 +1019,7 @@ jQuery( function ( $ ) {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
 					data: $form.serialize(),
+					wc_encode_apostrophes: true,
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -1324,6 +1326,7 @@ jQuery( function ( $ ) {
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
 				data: data,
+				wc_encode_apostrophes: true,
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1398,6 +1401,7 @@ jQuery( function ( $ ) {
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
 				data: data,
+				wc_encode_apostrophes: true,
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'

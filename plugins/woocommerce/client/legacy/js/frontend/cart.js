@@ -20,19 +20,6 @@ jQuery( function ( $ ) {
 	};
 
 	/**
-	 * Percent-encode literal apostrophes in an already URL-encoded request body.
-	 *
-	 * `encodeURIComponent()` leaves `'` alone, so serialized bodies can reach the
-	 * server with literal apostrophes that some WAF rules reject.
-	 *
-	 * @param {string} data URL-encoded request body.
-	 * @return {string} Body with apostrophes encoded as %27.
-	 */
-	function encodeApostrophes( data ) {
-		return data.split( "'" ).join( '%27' );
-	}
-
-	/**
 	 * Check if a node is blocked for processing.
 	 *
 	 * @param {JQuery Object} $node
@@ -346,6 +333,7 @@ jQuery( function ( $ ) {
 				type: 'post',
 				url: get_url( 'update_shipping_method' ),
 				data: data,
+				wc_encode_apostrophes: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
@@ -387,7 +375,8 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
-				data: encodeApostrophes( $form.serialize() ),
+				data: $form.serialize(),
+				wc_encode_apostrophes: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response );
@@ -504,7 +493,8 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
-				data: encodeApostrophes( $form.serialize() ),
+				data: $form.serialize(),
+				wc_encode_apostrophes: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response, preserve_notices );
@@ -637,7 +627,8 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: 'POST',
 				url: get_url( 'apply_coupon' ),
-				data: encodeApostrophes( $.param( data ) ),
+				data: data,
+				wc_encode_apostrophes: true,
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -695,7 +686,8 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: 'POST',
 				url: get_url( 'remove_coupon' ),
-				data: encodeApostrophes( $.param( data ) ),
+				data: data,
+				wc_encode_apostrophes: true,
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -754,7 +746,8 @@ jQuery( function ( $ ) {
 			$.ajax( {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
-				data: encodeApostrophes( $form.serialize() ),
+				data: $form.serialize(),
+				wc_encode_apostrophes: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response );
