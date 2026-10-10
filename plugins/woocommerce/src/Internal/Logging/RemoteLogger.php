@@ -30,6 +30,11 @@ class RemoteLogger extends \WC_Log_Handler {
 	const WC_NEW_VERSION_TRANSIENT = 'woocommerce_new_version';
 
 	/**
+	 * Log sources whose entries carry an engine-error backtrace and go through the third-party error check.
+	 */
+	private const THIRD_PARTY_CHECK_SOURCES = array( 'fatal-errors', 'store-api' );
+
+	/**
 	 * Handle a log entry.
 	 *
 	 * @param int    $timestamp Log timestamp.
@@ -182,8 +187,8 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		// Record fatal error stats.
-		if ( WC_Log_Levels::get_level_severity( $level ) >= WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
+		// Record fatal error stats. Caught Store API errors are not fatals, and the stats ping is a blocking request that would otherwise run once per error inside the shopper's request.
+		if ( 'fatal-errors' === ( $context['source'] ?? '' ) && WC_Log_Levels::get_level_severity( $level ) >= WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
 			try {
 				$mc_stats = wc_get_container()->get( McStats::class );
 				$mc_stats->add( 'error', 'critical-errors' );
@@ -310,7 +315,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	}
 
 	/**
-	 * Check if the error exclusively contains third-party stack frames for fatal-errors source context.
+	 * Check if the error exclusively contains third-party stack frames, for the sources that carry an engine-error backtrace.
 	 *
 	 * @param string $message The error message.
 	 * @param array  $context The error context.
@@ -318,8 +323,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	protected function is_third_party_error( string $message, array $context ): bool {
-		// Only check for fatal-errors source context.
-		if ( ! isset( $context['source'] ) || 'fatal-errors' !== $context['source'] ) {
+		if ( ! isset( $context['source'] ) || ! in_array( $context['source'], self::THIRD_PARTY_CHECK_SOURCES, true ) ) {
 			return false;
 		}
 
@@ -363,11 +367,13 @@ class RemoteLogger extends \WC_Log_Handler {
 		/**
 		 * Filter to allow other plugins to overwrite the result of the third-party error check for remote logging.
 		 *
+		 * Runs for `fatal-errors` entries (from the shutdown handler, with `error.type`, `error.file` and `error.line`) and, since 11.3.0, for `store-api` entries (caught Store API engine errors, with `error.file` and `error.line` only). Both carry a `backtrace` list of `#N file(line): call` strings.
+		 *
 		 * @since 9.2.0
 		 *
 		 * @param bool   $is_third_party_error The result of the third-party error check.
 		 * @param string $message              The error message.
-		 * @param array  $context              The error context.
+		 * @param array  $context              The error context, including `source`.
 		 */
 		return apply_filters( 'woocommerce_remote_logging_is_third_party_error', true, $message, $context );
 	}

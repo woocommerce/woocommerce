@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Logger_Interface;
@@ -58,7 +59,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should log the engine failure as critical with a bounded backtrace.
+	 * @testdox Should log the engine failure as critical, opted into remote logging, with a bounded backtrace.
 	 */
 	public function test_logs_engine_failure_as_critical_with_bounded_backtrace(): void {
 		$error = new \TypeError( 'Fixture logged engine failure.' );
@@ -69,8 +70,12 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 			'critical',
 			self::class,
 			array(
-				'source'    => 'store-api',
-				'exception' => $error,
+				'source'         => 'store-api',
+				'error'          => array(
+					'file' => $error->getFile(),
+					'line' => $error->getLine(),
+				),
+				'remote-logging' => true,
 			)
 		);
 		$this->assertCount( 1, $this->captured_logs );
@@ -78,11 +83,43 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( \TypeError::class, $message );
 		$this->assertStringContainsString( 'Fixture logged engine failure.', $message );
 
-		$backtrace = $this->captured_logs[0]['context']['backtrace'];
+		$context = $this->captured_logs[0]['context'];
+		$this->assertArrayNotHasKey( 'exception', $context, 'The error object must not be logged: remote logging would serialise its public properties unredacted.' );
+
+		$backtrace = $context['backtrace'];
 		$this->assertIsArray( $backtrace );
 		$this->assertGreaterThanOrEqual( 1, count( $backtrace ) );
 		$this->assertLessThanOrEqual( 10, count( $backtrace ) );
 		$this->assertStringStartsWith( '#0 ', $backtrace[0] );
+	}
+
+	/**
+	 * @testdox Should produce a remote log record that keeps the file and leaks nothing from the error object.
+	 */
+	public function test_logged_context_formats_into_a_remote_record(): void {
+		$error = new class('Fixture engine failure with state.') extends \TypeError {
+			/**
+			 * Public state a third-party error class might carry.
+			 *
+			 * @var string
+			 */
+			public $token = 'fixture-secret-token';
+		};
+
+		UnexpectedErrorResponse::create( $error, self::class );
+
+		$logged        = $this->captured_logs[0];
+		$remote_logger = wc_get_container()->get( RemoteLogger::class );
+		$record        = $remote_logger->get_formatted_log( 'critical', $logged['message'], $logged['context'] );
+
+		$this->assertSame( 'store-api', $record['extra']['source'] );
+		$this->assertStringContainsString( basename( __FILE__ ), $record['file'], 'The remote record must carry the file the error was raised in.' );
+		$this->assertStringStartsWith( '#0 ', $record['trace'] );
+		$this->assertStringNotContainsString( 'fixture-secret-token', wp_json_encode( $record ), 'Error object state must not reach the remote record.' );
+
+		$is_third_party = new \ReflectionMethod( RemoteLogger::class, 'is_third_party_error' );
+		$is_third_party->setAccessible( true );
+		$this->assertFalse( $is_third_party->invoke( $remote_logger, $logged['message'], $logged['context'] ), 'An error raised inside WooCommerce must pass the third-party check.' );
 	}
 
 	/**
