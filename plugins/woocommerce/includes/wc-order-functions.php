@@ -1020,7 +1020,20 @@ add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
 function wc_update_coupon_usage_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order ) {
+	// Refunds never consume coupon usage.
+	if ( ! $order || $order instanceof WC_Order_Refund ) {
+		return;
+	}
+
+	/**
+	 * Data store wrapper.
+	 *
+	 * @var WC_Data_Store $data_store
+	 */
+	$data_store = $order->get_data_store();
+
+	// Only order data stores can record coupon usage.
+	if ( ! $data_store->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
 		return;
 	}
 
@@ -1061,7 +1074,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 
-			if ( ! $used_by ) {
+			if ( ! $used_by && is_callable( array( $order, 'get_billing_email' ) ) ) {
 				$used_by = $order->get_billing_email();
 			}
 

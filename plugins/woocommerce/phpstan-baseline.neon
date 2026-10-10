@@ -367,12 +367,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_postcode\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -380,12 +374,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_customer_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/abstracts/abstract-wc-order.php
@@ -544,12 +532,6 @@ parameters:
 			message: '#^Call to an undefined method object\:\:get_quantity\(\)\.$#'
 			identifier: method.notFound
 			count: 6
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_recorded_coupon_usage_counts\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
@@ -752,12 +734,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$raw_tax_data of method WC_Order_Item_Shipping\:\:set_taxes\(\) expects array, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:decrease_usage_count\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/abstracts/abstract-wc-order.php
@@ -33940,12 +33916,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_remaining_refund_amount\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -34144,12 +34114,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Parameter \#1 \$order of function wc_release_coupons_for_order expects int\|WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Parameter \#1 \$order of function wc_restock_refunded_items expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
@@ -34157,18 +34121,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$post_type of function register_post_type expects lowercase\-string&non\-empty\-string, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:decrease_usage_count\(\) expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:increase_usage_count\(\) expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-order-functions.php
@@ -34199,12 +34151,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Parameter \#2 \$order of method WC_Coupon\:\:increase_usage_count\(\) expects WC_Order\|null, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-order-functions.php
