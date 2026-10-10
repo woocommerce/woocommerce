@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the product link in the "choose product options" notice on stores that use plain permalinks.
