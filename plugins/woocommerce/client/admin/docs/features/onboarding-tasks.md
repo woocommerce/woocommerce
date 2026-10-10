@@ -100,7 +100,7 @@ registerPlugin( 'add-task-list-item', {
 
 ### Example
 
-You can find a complete example of how to add a custom task as a WordPress plugin in the [examples directory](../examples/extensions/add-task/).
+You can scaffold a complete plugin with the maintained [`add-task` variant](../../../../../../packages/js/create-woo-extension/README.md#onboarding-variants).
 
 ## Models and classes
 
