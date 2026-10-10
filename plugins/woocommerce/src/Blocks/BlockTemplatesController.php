@@ -25,13 +25,20 @@ class BlockTemplatesController {
 	 */
 	public function init() {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
-		add_filter( 'pre_render_block', array( $this, 'pre_render_woocommerce_template_part' ), 10, 2 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_db_templates_with_woo_slug' ), 10, 3 );
 		add_filter( 'rest_pre_insert_wp_template', array( $this, 'dont_load_templates_for_suggestions' ), 10, 1 );
+		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
+
+		// Fix a bug in WordPress 6.8 and lower that caused block hooks not to
+		// run in templates registered via the Template Registration API.
+		// @see https://github.com/WordPress/gutenberg/issues/71139.
+		if ( Utils::wp_version_compare( '6.8', '<=' ) ) {
+			add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -48,54 +55,15 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Short-circuits rendering of `core/template-part` blocks that belong to WooCommerce (header, footer, navigation etc. are skipped).
-	 *
-	 * @since 11.4.0
-	 * @internal
-	 *
-	 * @param string|null $pre_render   The pre-rendered content, or null to let the block render normally.
-	 * @param array       $parsed_block The block being rendered.
-	 * @return string|null
-	 */
-	public function pre_render_woocommerce_template_part( $pre_render, $parsed_block ) {
-		// Upstream render_block_core_template_part can't resolve plugin-shipped template parts. This intercepts only woocommerce/woocommerce
-		// parts via pre_render_block; non-WooCommerce parts (header, footer, etc.) reach core directly with zero overhead.
-		if ( 'core/template-part' === ( $parsed_block['blockName'] ?? null ) && 'woocommerce/woocommerce' === ( $parsed_block['attrs']['theme'] ?? null ) ) {
-			$attributes = $parsed_block['attrs'];
-			if ( isset( $attributes['theme'], $attributes['slug'] ) ) {
-				$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
-				if ( $template_part && ! empty( $template_part->content ) ) {
-					$content            = do_blocks( $template_part->content );
-					$wrapper_attributes = get_block_wrapper_attributes();
-					$html_tag           = $attributes['tagName'] ?? null;
-					$html_tag           = ( $html_tag && tag_escape( $html_tag ) === $html_tag ) ? esc_attr( $html_tag ) : 'div';
-
-					// BC: pre_render_block skips core's render_block filter, re-apply it so extensions filtering template part output still work.
-					$block_content = "<$html_tag $wrapper_attributes>" . str_replace( ']]>', ']]&gt;', $content ) . "</$html_tag>";
-					$block_content = apply_filters( 'render_block', $block_content, $parsed_block, new \WP_Block( $parsed_block ) );
-
-					return $block_content;
-				}
-			}
-		}
-
-		return $pre_render;
-	}
-
-	/**
 	 * Renders the `core/template-part` block on the server.
-	 * Introduced because the core handling for template parts only supports templates from the current theme, not from a plugin.
+	 *
+	 * This is done because the core handling for template parts only supports templates from the current theme, not
+	 * from a plugin.
 	 *
 	 * @param array $attributes The block attributes.
-	 * @return string
-	 *@deprecated 11.4.0
-	 *
+	 * @return string The render.
 	 */
 	public function render_woocommerce_template_part( $attributes ) {
-		// Superseded by pre_render_woocommerce_template_part. The old approach (add_plugin_templates_parts_support) replaced
-		// the render_callback for all core/template-part blocks, not just WooCommerce ones.
-		wc_deprecated_function( __METHOD__, '11.4.0' );
-
 		if ( isset( $attributes['theme'] ) && 'woocommerce/woocommerce' === $attributes['theme'] ) {
 			$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
 
@@ -119,16 +87,10 @@ class BlockTemplatesController {
 	 * By default, the Template Part Block only supports template parts that are in the current theme directory.
 	 * This render_callback wrapper allows us to add support for plugin-housed template parts.
 	 *
-	 * @deprecated 11.4.0
-	 *
 	 * @param array $settings Array of determined settings for registering a block type.
 	 * @param array $metadata     Metadata provided for registering a block type.
-	 *
-	 * @return array
 	 */
 	public function add_plugin_templates_parts_support( $settings, $metadata ) {
-		wc_deprecated_function( __METHOD__, '11.4.0' );
-
 		if (
 			isset( $metadata['name'], $settings['render_callback'] ) &&
 			'core/template-part' === $metadata['name'] &&
@@ -260,14 +222,10 @@ class BlockTemplatesController {
 	/**
 	 * Run hooks on block templates.
 	 *
-	 * @deprecated 11.4.0
-	 *
 	 * @param array $templates The block templates.
 	 * @return array The block templates.
 	 */
 	public function run_hooks_on_block_templates( $templates ) {
-		wc_deprecated_function( __METHOD__, '11.4.0' );
-
 		foreach ( $templates as $template ) {
 			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
 				$template->content = apply_block_hooks_to_content( $template->content, $template, 'insert_hooked_blocks_and_set_ignored_hooked_blocks_metadata' );
