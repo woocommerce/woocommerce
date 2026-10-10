@@ -63,7 +63,7 @@ abstract class AbstractBlock {
 	 *
 	 * @var bool
 	 */
-	private bool $unified_assets_enabled;
+	private bool $unified_editor_assets_enabled;
 
 	/**
 	 * Constructor.
@@ -78,7 +78,7 @@ abstract class AbstractBlock {
 		$this->asset_data_registry    = $asset_data_registry;
 		$this->integration_registry   = $integration_registry;
 		$this->block_name             = $block_name ? $block_name : $this->block_name;
-		$this->unified_assets_enabled = BlockEditorUnifiedAssets::is_enabled();
+		$this->unified_editor_assets_enabled = BlockEditorUnifiedAssets::is_enabled();
 		$this->initialize();
 	}
 
@@ -384,7 +384,7 @@ abstract class AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = $this->unified_assets_enabled
+		$script = $this->unified_editor_assets_enabled
 			? array(
 				'handle'       => 'wc-block-library',
 				'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
@@ -406,7 +406,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return $this->unified_assets_enabled ? 'wc-block-library-style' : 'wc-blocks-editor-style';
+		return $this->unified_editor_assets_enabled ? 'wc-block-library-style' : 'wc-blocks-editor-style';
 	}
 
 	/**
