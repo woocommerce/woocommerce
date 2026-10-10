@@ -244,15 +244,12 @@ const blocksSerialSpecs = [
 
 	// Change global settings that cart, checkout and storefront specs read:
 	// shipping, taxes, local pickup, account creation, site language, the shop
-	// page slug, product reviews and feature flags.
+	// page slug and feature flags.
 	'**/tests/blocks/cart/cart-checkout-block-shipping.block_theme.spec.ts',
 	'**/tests/blocks/cart/cart-checkout-block-taxes.shopper.block_theme.spec.ts',
 	'**/tests/blocks/cart/cart-checkout-block-translations.shopper.block_theme.spec.ts',
 	'**/tests/blocks/checkout/checkout-block.shopper.block_theme.spec.ts',
 	'**/tests/blocks/checkout/order-confirmation.block_theme.spec.ts',
-	'**/tests/blocks/local-pickup/local-pickup.merchant.block_theme.spec.ts',
-	'**/tests/blocks/product-collection/inspector-controls.block_theme.spec.ts',
-	'**/tests/blocks/single-product-template/single-product-template.product-rating.spec.ts',
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
 
 	// Place orders, which change the Best Sellers ranking. Some also add to the
