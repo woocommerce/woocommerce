@@ -802,10 +802,9 @@ class StyleAttributesUtils {
 		static $styles = null;
 
 		if ( 'blocks' === ( $path[0] ?? null ) ) {
-			$styles          = $styles ?? wp_get_global_styles();
-			$resolution_path = implode( '::', $path );
+			$styles = $styles ?? wp_get_global_styles();
 
-			return ArrayUtil::get_nested_value( $styles, $resolution_path, $styles );
+			return ArrayUtil::get_nested_value( $styles, implode( '::', $path ), $styles );
 		}
 
 		return wp_get_global_styles( $path );
