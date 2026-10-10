@@ -24,6 +24,13 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_protected_product_add_to_cart( $passed, $product_id ) {
+	if ( 'product_variation' === get_post_type( $product_id ) ) {
+		$parent_id = wp_get_post_parent_id( $product_id );
+		if ( $parent_id ) {
+			$product_id = $parent_id;
+		}
+	}
+
 	if ( post_password_required( $product_id ) ) {
 		$passed = false;
 		wc_add_notice( __( 'This product is protected and cannot be purchased.', 'woocommerce' ), 'error' );
