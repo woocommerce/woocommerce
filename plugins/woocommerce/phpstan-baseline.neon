@@ -51622,18 +51622,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductSKU.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSaleBadge.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductSaleBadge.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSaleBadge\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51649,12 +51637,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSaleBadge\:\:render\(\) should return string but returns null\.$#'
 			identifier: return.type
 			count: 2
-			path: src/Blocks/BlockTypes/ProductSaleBadge.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSaleBadge\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/ProductSaleBadge.php
 
 		-
