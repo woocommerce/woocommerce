@@ -59,7 +59,20 @@ function wc_update_order_item( $item_id, $args ) {
 		return false;
 	}
 
-	do_action( 'woocommerce_update_order_item', $item_id, $args );
+	$item = WC_Order_Factory::get_order_item( $item_id );
+
+	/**
+	 * Fires after an order item is updated.
+	 *
+	 * @since 2.2.0
+	 * @since 11.3.0 Passes the item and order ID, like the order item data store does, with the update arguments last.
+	 *
+	 * @param int                 $item_id  Item ID.
+	 * @param WC_Order_Item|false $item     Updated order item.
+	 * @param int                 $order_id Order ID.
+	 * @param array               $args     Arguments passed to wc_update_order_item().
+	 */
+	do_action( 'woocommerce_update_order_item', $item_id, $item, $item ? $item->get_order_id() : 0, $args );
 
 	return true;
 }

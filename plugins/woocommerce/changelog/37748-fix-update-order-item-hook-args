@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pass the order item and order ID to woocommerce_update_order_item from wc_update_order_item(), matching the order item data store.
