@@ -74,10 +74,13 @@ class SiteLocale {
 		$use_site_locale      = static fn() => $locale;
 
 		try {
-			// When the request already runs in the site locale, the loaded catalog is the site-locale one.
-			$translated_slug = determine_locale() === $locale
-				? get_translations_for_domain( 'woocommerce' )->translate( $slug, 'slug' )
-				: self::load_and_translate_slug( $slug, $locale );
+			$translated_slug = self::load_and_translate_slug( $slug, $locale );
+
+			if ( false === $translated_slug && determine_locale() === $locale ) {
+				// Nothing is registered for the site locale, so use a catalog a loader put in place for this request.
+				$translated_slug = get_translations_for_domain( 'woocommerce' )->translate( $slug, 'slug' );
+			}
+
 			$translated_slug = is_string( $translated_slug ) && '' !== $translated_slug ? $translated_slug : $slug;
 
 			// Filters that check the request locale should see the site locale here.
