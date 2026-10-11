@@ -229,7 +229,7 @@ describe( 'ReviewDrawer', () => {
 		);
 		for ( const title of [ 'Added Group wrapper', 'Reordered Heading' ] ) {
 			expect( getItem( title ) ).toHaveTextContent(
-				'Core changed the block structure here. This update does not apply structural changes.'
+				'The block structure differs from core here. This update does not apply structural changes.'
 			);
 		}
 	} );

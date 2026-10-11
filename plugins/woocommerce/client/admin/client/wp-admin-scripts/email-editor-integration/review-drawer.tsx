@@ -324,11 +324,11 @@ const AutoResolvedGroup = ( {
 								? __(
 										'Core still has this block. Your removal is kept.',
 										'woocommerce'
-								  )
+									)
 								: __(
-										'Core changed the block structure here. This update does not apply structural changes.',
+										'The block structure differs from core here. This update does not apply structural changes.',
 										'woocommerce'
-								  )
+									)
 						}
 						tag="keep_yours"
 					/>
