@@ -1055,8 +1055,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			return 'woocommerce' === $domain && $site_locale === $locale ? __DIR__ . '/fixtures/permalink-translations.php' : $file;
 		};
 		$filter_request_translation = static function ( $translation, $text, $context, $domain ) {
-			if ( 'woocommerce' === $domain && 'slug' === $context ) {
-				return determine_locale() . '-' . $text;
+			if ( 'woocommerce' === $domain && 'slug' === $context && 'en_US' === determine_locale() ) {
+				return 'request-' . $text;
 			}
 
 			return $translation;

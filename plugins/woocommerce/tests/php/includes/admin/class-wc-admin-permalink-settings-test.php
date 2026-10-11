@@ -268,24 +268,20 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An unchanged save preserves a former filtered Default base and its product URLs.
+	 * @testdox An unchanged save keeps a bare base shown as Custom and its product URLs.
 	 * @testWith ["/%postname%/"]
 	 *           ["/index.php/%postname%/"]
 	 *
 	 * @param string $structure WordPress permalink structure.
 	 */
-	public function test_unchanged_save_preserves_a_former_default_base( string $structure ): void {
+	public function test_unchanged_save_keeps_a_bare_custom_base( string $structure ): void {
 		$this->ensure_shop_page();
 		update_option( 'permalink_structure', $structure );
 		update_option( 'woocommerce_permalinks', array( 'product_base' => 'waren' ) );
-		add_filter(
-			'gettext_with_context',
-			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context && 'product' === $text ? 'waren' : $translation,
-			10,
-			4
-		);
 
-		$xpath = $this->get_xpath( $this->render_settings() );
+		$html  = $this->render_settings();
+		$xpath = $this->get_xpath( $html );
+		$this->assert_only_radio_checked( $html, 'custom' );
 		$this->save_and_render(
 			$xpath->query( '//input[@name="product_permalink"][@checked]' )->item( 0 )->getAttribute( 'value' ),
 			$xpath->query( '//input[@name="product_permalink_structure"]' )->item( 0 )->getAttribute( 'value' )

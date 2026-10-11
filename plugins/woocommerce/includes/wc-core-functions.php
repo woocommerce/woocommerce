@@ -2170,9 +2170,9 @@ function wc_get_permalink_structure() {
 		'use_verbose_page_rules' => false,
 	);
 
-	if ( empty( $saved_permalinks['product_base'] ) || empty( $saved_permalinks['category_base'] ) || empty( $saved_permalinks['tag_base'] ) ) {
-		// These defaults are persisted site-wide, so translate them in the site locale rather than the request locale.
-		foreach ( array( 'product_base', 'category_base', 'tag_base' ) as $permalink_key ) {
+	foreach ( array( 'product_base', 'category_base', 'tag_base' ) as $permalink_key ) {
+		if ( empty( $saved_permalinks[ $permalink_key ] ) ) {
+			// These defaults are persisted site-wide, so translate them in the site locale rather than the request locale.
 			$default_permalinks[ $permalink_key ] = SiteLocale::translate_slug( $default_permalinks[ $permalink_key ] );
 		}
 	}

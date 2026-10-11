@@ -69,6 +69,129 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Missing permalink bases keep slugs customized through gettext filters.
+	 * @testWith ["en_US"]
+	 *           ["fr_FR"]
+	 *
+	 * @param string $request_locale Locale of the request that fills in the missing bases.
+	 */
+	public function test_missing_permalink_bases_keep_gettext_filtered_slugs( string $request_locale ): void {
+		$slugs = array(
+			'product-category' => 'waren-kategorie',
+			'product-tag'      => 'waren-schlagwort',
+		);
+		add_filter( 'pre_determine_locale', static fn() => $request_locale );
+		add_filter(
+			'gettext_with_context',
+			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context ? ( $slugs[ $text ] ?? $translation ) : $translation,
+			10,
+			4
+		);
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'  => 'waren',
+				'category_base' => '',
+				'tag_base'      => '',
+			)
+		);
+
+		wc_get_permalink_structure();
+		$permalinks = get_option( 'woocommerce_permalinks' );
+
+		$this->assertSame( 'waren', $permalinks['product_base'], 'A stored base should be left alone.' );
+		$this->assertSame( 'waren-kategorie', $permalinks['category_base'], 'The filtered category slug should be stored.' );
+		$this->assertSame( 'waren-schlagwort', $permalinks['tag_base'], 'The filtered tag slug should be stored.' );
+	}
+
+	/**
+	 * @testdox A translation loader that reads the permalink settings does not re-enter the slug lookup.
+	 */
+	public function test_translate_slug_does_not_re_enter_from_a_translation_loader(): void {
+		global $wp_textdomain_registry;
+
+		$loader_calls  = 0;
+		$previous_path = $wp_textdomain_registry->get( 'woocommerce', 'wc_LOADER' );
+		$wp_textdomain_registry->set( 'woocommerce', 'wc_LOADER', WC_ABSPATH . 'tests/legacy/unit-tests/util/fixtures/' );
+		add_filter( 'pre_option_WPLANG', static fn() => 'wc_LOADER' );
+		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter(
+			'pre_load_textdomain',
+			static function ( $override, $domain ) use ( &$loader_calls ) {
+				if ( 'woocommerce' === $domain ) {
+					++$loader_calls;
+					if ( $loader_calls > 10 ) {
+						throw new \RuntimeException( 'The translation loader re-entered the slug lookup.' );
+					}
+					wc_get_permalink_structure();
+				}
+				return $override;
+			},
+			10,
+			2
+		);
+		delete_option( 'woocommerce_permalinks' );
+
+		try {
+			$permalinks = wc_get_permalink_structure();
+		} finally {
+			$wp_textdomain_registry->set( 'woocommerce', 'wc_LOADER', $previous_path );
+		}
+
+		$this->assertSame( 'product', $permalinks['product_base'], 'The lookup should finish with the untranslated slug.' );
+		$this->assertLessThanOrEqual( 3, $loader_calls, 'Each missing base should reach the loader once at most.' );
+	}
+
+	/**
+	 * @testdox translate_slug() prefers translations loaded for the site locale over a catalog supplied by a loader.
+	 */
+	public function test_translate_slug_prefers_site_locale_translations_over_a_loader_catalog(): void {
+		global $wp_textdomain_registry;
+
+		$locale        = 'wc_ORDER';
+		$custom_file   = WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo';
+		$previous_path = $wp_textdomain_registry->get( 'woocommerce', $locale );
+		$catalogs      = array();
+		foreach ( array( 'site-product', 'loader-product' ) as $translation ) {
+			$catalogs[ $translation ] = new \MO();
+			$catalogs[ $translation ]->add_entry(
+				array(
+					'singular'     => 'product',
+					'context'      => 'slug',
+					'translations' => array( $translation ),
+				)
+			);
+		}
+		wp_mkdir_p( dirname( $custom_file ) );
+		$this->assertTrue( $catalogs['site-product']->export_to_file( $custom_file ), 'The site locale translation file should be written.' );
+		$wp_textdomain_registry->set( 'woocommerce', $locale, WC_ABSPATH . 'tests/legacy/unit-tests/util/fixtures/' );
+		add_filter( 'pre_option_WPLANG', static fn() => $locale );
+		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter(
+			'override_load_textdomain',
+			static function ( $override, $domain, $mofile ) use ( $catalogs, $custom_file ) {
+				if ( 'woocommerce' === $domain && $custom_file !== $mofile ) {
+					$GLOBALS['l10n'][ $domain ] = $catalogs['loader-product']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate a loader that ignores the requested locale.
+					return true;
+				}
+				return $override;
+			},
+			10,
+			3
+		);
+
+		try {
+			$product_slug = SiteLocale::translate_slug( 'product' );
+		} finally {
+			WP_Translation_Controller::get_instance()->unload_textdomain( 'woocommerce', $locale );
+			$wp_textdomain_registry->set( 'woocommerce', $locale, $previous_path );
+			wp_delete_file( $custom_file );
+		}
+
+		$this->assertSame( 'site-product', $product_slug, 'The translation loaded for the site locale should win.' );
+	}
+
+	/**
 	 * @testdox get() reads the stored site locale and ignores the locale filter.
 	 */
 	public function test_get_ignores_the_locale_filter(): void {
@@ -89,7 +212,7 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox translate_slug() uses the site locale translations and ignores request-scoped gettext filters.
+	 * @testdox translate_slug() uses the site locale translations and passes them through gettext filters in the site locale.
 	 */
 	public function test_translate_slug_uses_site_locale_translations(): void {
 		global $wp_textdomain_registry;
@@ -116,7 +239,7 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 		);
 		add_filter(
 			'gettext_with_context',
-			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context ? 'request-' . $text : $translation,
+			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context && 'product' === $text ? $translation . '-' . determine_locale() : $translation,
 			10,
 			4
 		);
@@ -130,7 +253,7 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 			$wp_textdomain_registry->set( 'woocommerce', $site_locale, $original_translation_path );
 		}
 
-		$this->assertSame( 'site-product', $product_slug, 'A translated slug should come from the site locale translations.' );
+		$this->assertSame( 'site-product-wc_TEST', $product_slug, 'A gettext filter should receive the site locale translation and see the site locale.' );
 		$this->assertSame( 'product-tag', $product_tag_slug, 'An untranslated slug should be returned unchanged.' );
 		$this->assertSame( $original_controller_locale, $translation_controller->get_locale(), 'The translation controller locale should be restored.' );
 		$this->assertSame( 'en_US', determine_locale(), 'The request locale should stay unchanged.' );
