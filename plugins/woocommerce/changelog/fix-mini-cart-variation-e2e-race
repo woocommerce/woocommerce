@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix flaky Mini-Cart variation-attributes e2e test by waiting for the Add to cart button to be enabled.

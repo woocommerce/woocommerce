@@ -14,7 +14,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.2.0
+ * @version 11.2.0
  */
 
 // Exit if accessed directly.
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="wc_bis_form<?php echo $is_visible ? '' : ' hidden'; ?>" data-bis-product-id="<?php echo absint( $product_id ); ?>">
+<div class="wc_bis_form" data-bis-product-id="<?php echo absint( $product_id ); ?>" <?php echo $is_visible ? '' : 'hidden'; ?>>
 
 	<h3 id="wc_bis_form_heading_<?php echo absint( $product_id ); ?>">
 		<?php echo wp_kses_post( __( 'Want to be notified when this product is back in stock?', 'woocommerce' ) ); ?>
@@ -54,19 +54,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php echo esc_html( __( 'Notify me', 'woocommerce' ) ); ?>
 			</button>
 		</div>
-
-		<?php if ( $show_checkbox ) : ?>
-
-			<label for="wc_bis_opt_in_<?php echo absint( $product_id ); ?>" class="wc_bis_form__checkbox">
-				<input
-					type="checkbox"
-					name="wc_bis_opt_in"
-					id="wc_bis_opt_in_<?php echo absint( $product_id ); ?>"
-				/>
-				<?php echo wp_kses_post( wc_replace_policy_page_link_placeholders( wc_get_privacy_policy_text( 'registration' ) ) ); ?>
-			</label>
-
-		<?php endif; ?>
 
 		<?php wp_nonce_field( 'wc_bis_signup', 'wc_bis_nonce' ); ?>
 

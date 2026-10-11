@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix downloads of local product files with spaces in their filenames.

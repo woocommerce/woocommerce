@@ -24,10 +24,6 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
-### The changelog workflow fails with "Your local changes would be overwritten"
-
-Backport the updated `tools/monorepo-utils/dist/index.js` from `trunk` to the release branch and re-run the workflow. This happens on the rare occasions that file (a committed build artifact) is updated on `trunk`, making the two branches diverge during the workflow's checkout.
-
 ### CI is failing on a release-related PR
 
 During the release process, you may encounter CI test failures on release-related PRs. These failures sometimes occur because test fixes were merged to trunk but not backported to the release branch before it was cut.

@@ -12,6 +12,7 @@ jobs:
   prep:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved' || github.event.label.name == 'Rejected'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       pr_number: ${{ steps.extract-pr.outputs.PR_NUMBER }}
     steps:
@@ -43,6 +44,7 @@ jobs:
   verify:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       release_number: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
     permissions:
@@ -193,6 +195,7 @@ jobs:
   apply-milestone:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved' || github.event.label.name == 'Rejected'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     needs:
@@ -210,6 +213,7 @@ jobs:
   cfe-created:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs:
       - verify
     permissions:
@@ -256,6 +260,7 @@ jobs:
   request-approved:
     if: ${{ github.event.label.name == 'Approved' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       pull-requests: write
       issues: write
@@ -335,6 +340,7 @@ jobs:
   request-rejected:
     if: ${{ github.event.label.name == 'Rejected' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:

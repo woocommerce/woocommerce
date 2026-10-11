@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Excluded product IDs no longer leak back into product search results through matching variations of a variable product or through numeric search terms.

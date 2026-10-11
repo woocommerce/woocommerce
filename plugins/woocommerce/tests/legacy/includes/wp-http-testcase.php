@@ -189,7 +189,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 			$this->http_responder = array( $this, 'route_request' );
 		}
 
-		add_filter( 'pre_http_request', array( $this, 'http_request_listner' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'http_request_listener' ), 10, 3 );
 	}
 
 	/**
@@ -201,7 +201,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		parent::tearDown();
 
-		remove_filter( 'pre_http_request', array( $this, 'http_request_listner' ) );
+		remove_filter( 'pre_http_request', array( $this, 'http_request_listener' ) );
 		remove_filter( 'wp_handle_sideload_overrides', array( $this, 'set_sample_image_unique_filename_callback' ) );
 
 		$this->skip_cache_next               = false;
@@ -225,7 +225,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 	 *
 	 * @return mixed A response, or false.
 	 */
-	public function http_request_listner( $preempt, $request, $url ) {
+	public function http_request_listener( $preempt, $request, $url ) {
 
 		$this->http_requests[] = array(
 			'url'     => $url,

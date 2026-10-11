@@ -218,7 +218,7 @@ class Hydration {
 	 * Extracts URL parameters from regex named groups and query string parameters.
 	 *
 	 * @param string $path The path to match (may include query string).
-	 * @param array  $available_routes Available routes in { $regex1 => $contoller_class1, ... } format.
+	 * @param array  $available_routes Available routes in { $regex1 => $controller_class1, ... } format.
 	 *
 	 * @return array|null Array with 'controller', 'url_params', and 'query_params' keys, or null if no match.
 	 */

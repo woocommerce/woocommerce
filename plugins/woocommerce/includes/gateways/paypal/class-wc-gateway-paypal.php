@@ -589,7 +589,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function maybe_remove_fields( $form_fields ) {
-		// Remove legacy setting fiels when using Orders v2.
+		// Remove legacy setting fields when using Orders v2.
 		if ( $this->should_use_orders_v2() ) {
 			foreach ( $form_fields as $key => $field ) {
 				if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {

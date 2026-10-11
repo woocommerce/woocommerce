@@ -239,10 +239,25 @@ class Content_Renderer {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
 		try {
+			/**
+			 * Fires when rendering an email's content is about to start.
+			 *
+			 * @since 2.9.2
+			 */
 			do_action( 'woocommerce_email_editor_render_start' );
 			$rendered_html = get_the_block_template_html();
 		} finally {
 			$this->reset();
+			/**
+			 * Fires when rendering an email's content has finished, whether it succeeded or threw.
+			 *
+			 * Counterpart of woocommerce_email_editor_render_start, for integrations that change global state
+			 * for the render, such as hooked filters, and have to put it back afterwards. The renderer has
+			 * already been reset when it fires, so a callback must not throw and must not expect render state.
+			 *
+			 * @since 2.18.0
+			 */
+			do_action( 'woocommerce_email_editor_render_end' );
 		}
 
 		return array(
@@ -660,7 +675,7 @@ class Content_Renderer {
 		 * Layout CSS assumes the top level block will have a single DIV wrapper with children. Since our blocks use tables,
 		 * we need to adjust this to look for children in the TD element. This may requires more advanced replacement but
 		 * this works in the current version of Gutenberg.
-		 * Example rule we're targetting: .wp-container-core-group-is-layout-1.wp-container-core-group-is-layout-1 > *
+		 * Example rule we're targeting: .wp-container-core-group-is-layout-1.wp-container-core-group-is-layout-1 > *
 		 */
 		$block_support_styles = preg_replace(
 			'/group-is-layout-(\d+) >/',

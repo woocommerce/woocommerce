@@ -91,8 +91,8 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
-		"@babel/runtime": "7.25.7",
+		"@babel/core": "catalog:tooling",
+		"@babel/runtime": "catalog:tooling",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/react": "^16.x.x",
 		"@types/jest": "29.5.x",

@@ -668,15 +668,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
 			data-email-template-id="<?php echo esc_attr( $email_template_id ); ?>"
 		>
-			<div style="
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 12px;
-			height: 40px;
-			width: 100%;
-			">
-				<h3> <?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?>  </h3>
+			<div class="woocommerce-email-listing-placeholder" role="status">
+				<p><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></p>
 			</div>
 		</div>
 		<div>
@@ -763,7 +756,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		?>
 		<tr class="<?php echo esc_attr( $value['row_class'] ); ?>">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo wc_help_tip( $value['desc'] ); // WPCS: XSS ok. ?></label>
+				<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?> <?php echo wc_help_tip( $value['desc'] ); ?></label>
 			</th>
 			<td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
 				<input

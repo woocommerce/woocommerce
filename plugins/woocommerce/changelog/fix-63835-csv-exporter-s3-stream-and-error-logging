@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Change CSV batch exporter default fopen mode from a+ to a for S3 stream wrapper compatibility and add error logging when opening, writing to, or closing the export file fails.

@@ -12,6 +12,7 @@ import { RawHTML } from '@wordpress/element';
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
+import { canMakePaymentForShippingMethods } from '../utils/shipping-method-restrictions';
 
 const settings = getPaymentMethodData( 'bacs', {} );
 const defaultLabel = __( 'Direct bank transfer', 'woocommerce' );
@@ -42,7 +43,7 @@ const bankTransferPaymentMethod = {
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
-	canMakePayment: () => true,
+	canMakePayment: canMakePaymentForShippingMethods( settings ),
 	ariaLabel: label,
 	supports: {
 		features: settings?.supports ?? [],

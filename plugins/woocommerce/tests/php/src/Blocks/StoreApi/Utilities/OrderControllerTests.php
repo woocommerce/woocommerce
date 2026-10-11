@@ -301,6 +301,48 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox validate_address_fields() enforces the default required fields when the default locale entry is missing or not an array.
+	 *
+	 * @dataProvider provide_broken_default_locale_entries
+	 *
+	 * @param mixed $default_entry Value to put in the default locale entry, or null to remove the entry.
+	 */
+	public function test_validate_address_fields_enforces_default_fields_without_a_default_locale_entry( $default_entry ): void {
+		$countries = wc()->countries;
+		$countries->get_country_locale();
+		if ( null === $default_entry ) {
+			unset( $countries->locale['default'] );
+		} else {
+			$countries->locale['default'] = $default_entry;
+		}
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_postcode( '' );
+		$errors = new \WP_Error();
+
+		try {
+			$this->sut->validate_address_fields( $order, 'billing', $errors );
+		} finally {
+			// Drop the broken settings so the next lookup rebuilds them.
+			$countries->locale = array();
+		}
+
+		$this->assertCount( 1, $errors->get_error_messages( 'billing' ), 'Only the missing default field should be reported.' );
+		$this->assertSame( 'postcode', $errors->get_error_data( 'billing' ), 'The default required fields should still be enforced.' );
+	}
+
+	/**
+	 * Broken values for the default entry of the country locale settings.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provide_broken_default_locale_entries(): array {
+		return array(
+			'entry removed'      => array( null ),
+			'entry not an array' => array( false ),
+		);
+	}
+
+	/**
 	 * test_validate_order_before_payment_valid_coupon.
 	 */
 	public function test_validate_order_before_payment_valid_coupon() {

@@ -1,0 +1,130 @@
+/**
+ * External dependencies
+ */
+import clsx from 'clsx';
+import { __ } from '@wordpress/i18n';
+import {
+	AlignmentToolbar,
+	BlockControls,
+	useBlockProps,
+	InspectorControls,
+} from '@wordpress/block-editor';
+import type { BlockEditProps } from '@wordpress/blocks';
+import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useProduct } from '@woocommerce/entities';
+import {
+	Disabled,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import Block from './block';
+import { BlockAttributes } from './types';
+
+const DEFAULT_ATTRIBUTES = {
+	width: undefined,
+};
+
+function WidthPanel( {
+	selectedWidth,
+	setAttributes,
+}: {
+	selectedWidth: number | undefined;
+	setAttributes: ( attributes: BlockAttributes ) => void;
+} ) {
+	return (
+		<ToolsPanel
+			label={ __( 'Width settings', 'woocommerce' ) }
+			resetAll={ () =>
+				setAttributes( { width: DEFAULT_ATTRIBUTES.width } )
+			}
+		>
+			<ToolsPanelItem
+				label={ __( 'Button width', 'woocommerce' ) }
+				hasValue={ () => selectedWidth !== DEFAULT_ATTRIBUTES.width }
+				onDeselect={ () =>
+					setAttributes( { width: DEFAULT_ATTRIBUTES.width } )
+				}
+				isShownByDefault
+			>
+				<ToggleGroupControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					hideLabelFromVision
+					label={ __( 'Button width', 'woocommerce' ) }
+					value={ selectedWidth }
+					isDeselectable
+					onChange={ ( value?: number ) =>
+						setAttributes( { width: value } )
+					}
+				>
+					{ [ 25, 50, 75, 100 ].map( ( widthValue ) => (
+						<ToggleGroupControlOption
+							key={ widthValue }
+							value={ widthValue }
+							label={ `${ widthValue }%` }
+						/>
+					) ) }
+				</ToggleGroupControl>
+			</ToolsPanelItem>
+		</ToolsPanel>
+	);
+}
+
+const Edit = ( {
+	attributes,
+	setAttributes,
+	context,
+}: BlockEditProps< BlockAttributes > & {
+	context?: Context | undefined;
+} ): JSX.Element => {
+	const blockProps = useBlockProps();
+	const { product } = useProduct( context?.postId );
+	const { width } = attributes;
+	return (
+		<>
+			<BlockControls>
+				<AlignmentToolbar
+					value={ attributes.textAlign }
+					onChange={ ( newAlign ) => {
+						setAttributes( { textAlign: newAlign || '' } );
+					} }
+				/>
+			</BlockControls>
+			<InspectorControls>
+				<WidthPanel
+					selectedWidth={ width }
+					setAttributes={ setAttributes }
+				/>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<Disabled>
+					<Block
+						{ ...{ ...attributes, ...context } }
+						product={ {
+							...product,
+							button_text: product?.button_text || '',
+						} }
+						isAdmin={ true }
+						blockClientId={ blockProps?.id }
+						className={ clsx( attributes.className, {
+							[ `has-custom-width wp-block-button__width-${ width }` ]:
+								width,
+						} ) }
+					/>
+				</Disabled>
+			</div>
+		</>
+	);
+};
+
+export default Edit;

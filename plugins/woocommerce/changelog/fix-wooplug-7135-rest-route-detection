@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Detect REST API requests made via the ?rest_route= query parameter (plain permalinks, Jetpack-signed requests) in is_rest_api_request().

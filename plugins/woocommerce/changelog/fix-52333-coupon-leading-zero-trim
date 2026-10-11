@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Leading zeros are now trimmed from the coupon amount on save for cleaner display.

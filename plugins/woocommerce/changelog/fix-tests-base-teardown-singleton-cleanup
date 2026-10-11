@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Clear the WC singleton cart, cart context, notice queue, and cached country locale in the base test case teardown, and remove the per-class cleanup that is now redundant.

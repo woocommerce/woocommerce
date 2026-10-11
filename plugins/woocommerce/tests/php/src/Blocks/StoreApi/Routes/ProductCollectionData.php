@@ -197,6 +197,190 @@ class ProductCollectionData extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Store API counts and attribute filtering follow the lookup option.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $lookup_enabled Whether lookup filtering is enabled.
+	 */
+	public function test_attribute_counts_follow_lookup_option( bool $lookup_enabled ): void {
+		update_option( 'woocommerce_attribute_lookup_enabled', $lookup_enabled ? 'yes' : 'no' );
+		$fixtures  = new FixtureData();
+		$attribute = $this->create_product_attribute( 'size', array( 'xs', 's' ) );
+		$product   = $fixtures->get_variable_product( array(), array( $attribute ) );
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_size' => 's-slug' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore::class )->create_data_for_product( wc_get_product( $product->get_id() ) );
+
+		$response = $this->dispatch_collection_data_request(
+			array(
+				'calculate_attribute_counts' => array(
+					array(
+						'taxonomy'   => 'pa_size',
+						'query_type' => 'or',
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$counts = wp_list_pluck( $response->get_data()['attribute_counts'], 'count', 'term' );
+		$this->assertSame( $lookup_enabled ? 0 : 1, $counts[ term_exists( 'xs', 'pa_size' )['term_id'] ] ?? 0 );
+
+		$cases = array(
+			array(
+				'slug'     => array( 'xs-slug' ),
+				'operator' => 'in',
+				'matches'  => ! $lookup_enabled,
+			),
+			array(
+				'slug'     => array( 'xs-slug' ),
+				'operator' => 'not_in',
+				'matches'  => $lookup_enabled,
+			),
+			array(
+				'term_id'  => array( $attribute['term_ids'][1] ),
+				'operator' => 'in',
+				'matches'  => true,
+			),
+			array(
+				'slug'     => array( 'xs-slug', 's-slug' ),
+				'operator' => 'and',
+				'matches'  => ! $lookup_enabled,
+			),
+			array(
+				'slug'     => array( 'unknown' ),
+				'operator' => 'in',
+				'matches'  => false,
+			),
+			array(
+				'slug'     => array( 'unknown' ),
+				'operator' => 'not_in',
+				'matches'  => true,
+			),
+			array(
+				'slug'     => array( 's-slug', 'unknown' ),
+				'operator' => 'and',
+				'matches'  => false,
+			),
+		);
+		foreach ( $cases as $case ) {
+			$matches = $case['matches'];
+			unset( $case['matches'] );
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'include', array( $product->get_id() ) );
+			$request->set_param( 'attributes', array( array_merge( array( 'attribute' => 'pa_size' ), $case ) ) );
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $matches ? array( $product->get_id() ) : array(), wp_list_pluck( $response->get_data(), 'id' ), wp_json_encode( $case ) );
+		}
+	}
+
+	/**
+	 * @testdox OR attribute counts remove the counted facet while preserving price filters.
+	 */
+	public function test_attribute_count_matrix(): void {
+		$fixtures    = new FixtureData();
+		$attribute   = $this->create_product_attribute( 'color', array( 'blue', 'gray', 'red' ) );
+		$term_ids    = array(
+			'blue' => $attribute['term_ids'][0],
+			'gray' => $attribute['term_ids'][1],
+			'red'  => $attribute['term_ids'][2],
+		);
+		$product_ids = array();
+
+		try {
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['blue'] ), 10 );
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['blue'], $term_ids['gray'] ), 20 );
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['gray'] ), 30 );
+			$product_ids[] = $this->create_attribute_count_product( $fixtures, $attribute, array( $term_ids['red'] ), 50 );
+
+			$unfiltered_counts = array(
+				$term_ids['blue'] => 2,
+				$term_ids['gray'] => 2,
+				$term_ids['red']  => 1,
+			);
+			$test_cases        = array(
+				'selected blue'                  => array(
+					'attributes' => array(
+						array(
+							'attribute' => 'pa_color',
+							'operator'  => 'in',
+							'slug'      => array( 'blue-slug' ),
+						),
+					),
+					'expected'   => $unfiltered_counts,
+				),
+				'selected blue and gray'         => array(
+					'attributes' => array(
+						array(
+							'attribute' => 'pa_color',
+							'operator'  => 'in',
+							'slug'      => array( 'blue-slug', 'gray-slug' ),
+						),
+					),
+					'expected'   => $unfiltered_counts,
+				),
+				'selected blue with price range' => array(
+					'attributes' => array(
+						array(
+							'attribute' => 'pa_color',
+							'operator'  => 'in',
+							'slug'      => array( 'blue-slug' ),
+						),
+					),
+					'min_price'  => '1500',
+					'max_price'  => '4000',
+					'expected'   => array(
+						$term_ids['blue'] => 1,
+						$term_ids['gray'] => 2,
+					),
+				),
+			);
+
+			foreach ( $test_cases as $case_name => $test_case ) {
+				$params = array(
+					'attributes'                 => $test_case['attributes'],
+					'calculate_attribute_counts' => array(
+						array(
+							'taxonomy'   => 'pa_color',
+							'query_type' => 'or',
+						),
+					),
+				);
+
+				if ( isset( $test_case['min_price'] ) ) {
+					$params['min_price'] = $test_case['min_price'];
+					$params['max_price'] = $test_case['max_price'];
+				}
+
+				$response = $this->dispatch_collection_data_request( $params );
+				$counts   = array();
+
+				foreach ( $response->get_data()['attribute_counts'] as $count ) {
+					$counts[ $count->term ] = $count->count;
+				}
+
+				ksort( $counts );
+				ksort( $test_case['expected'] );
+
+				$this->assertSame( 200, $response->get_status(), "{$case_name}: the route should accept the count request." );
+				$this->assertSame( $test_case['expected'], $counts, "{$case_name}: counts should ignore the active color facet and retain other filters." );
+			}
+		} finally {
+			foreach ( $product_ids as $product_id ) {
+				$product = wc_get_product( $product_id );
+
+				if ( $product ) {
+					$product->delete( true );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Test calculation method.
 	 */
 	public function test_calculate_rating_counts() {
@@ -794,6 +978,35 @@ class ProductCollectionData extends ControllerTestCase {
 		}
 
 		return $attribute;
+	}
+
+	/**
+	 * Create a simple product for the attribute-count matrix.
+	 *
+	 * @param FixtureData $fixtures Fixture data helper.
+	 * @param array       $attribute Attribute taxonomy data.
+	 * @param int[]       $term_ids Attribute term IDs assigned to the product.
+	 * @param int         $price Product price.
+	 * @return int Product ID.
+	 */
+	private function create_attribute_count_product( FixtureData $fixtures, array $attribute, array $term_ids, int $price ): int {
+		$product_attribute = new \WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( $term_ids );
+		$product_attribute->set_visible( true );
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => "Attribute count product {$price}",
+				'regular_price' => $price,
+				'stock_status'  => 'instock',
+			)
+		);
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		return $product->get_id();
 	}
 
 	/**

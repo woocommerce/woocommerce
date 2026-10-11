@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import type { StoryFn, Meta } from '@storybook/react';
-import { useArgs } from '@storybook/client-api';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
+import { useArgs } from 'storybook/preview-api';
 import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 
 /**
@@ -26,7 +26,7 @@ const Template: StoryFn< ErrorPlaceholderProps > = ( args ) => {
 					() => setArgs( { isLoading: false } ),
 					INTERACTION_TIMEOUT
 				);
-		  }
+			}
 		: undefined;
 
 	return (

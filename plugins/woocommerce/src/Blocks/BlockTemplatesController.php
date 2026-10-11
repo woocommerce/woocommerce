@@ -259,6 +259,12 @@ class BlockTemplatesController {
 		$new_templates  = array();
 
 		foreach ( $template_files as $template_file ) {
+			// Queries for a specific post must not inject other WooCommerce templates.
+			// See https://github.com/woocommerce/woocommerce/issues/67862.
+			if ( isset( $query['wp_id'] ) && (int) ( $template_file->wp_id ?? 0 ) !== (int) $query['wp_id'] ) {
+				continue;
+			}
+
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
 			if ( 'custom' === $template_file->source ) {

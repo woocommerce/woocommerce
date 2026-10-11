@@ -10,7 +10,9 @@ Only published products are accessible via the Store API. Requesting a draft, pe
 
 ### Password-protected products
 
-Password-protected products are visible in the API, but their `description` and `short_description` fields are redacted (returned as empty strings) until the correct password has been submitted. The response includes an `is_password_protected` boolean field so clients can detect this state and prompt the user.
+Password-protected products, including variations whose parent product is password-protected, are visible in the API, but their `description` and `short_description` fields are redacted (returned as empty strings) until the correct password has been submitted.
+
+The `is_password_protected` field indicates whether the product or its parent has a configured password. It remains `true` after the current visitor has submitted the correct password and the descriptions become accessible.
 
 Password verification uses WordPress's native `wp-postpass_*` cookie, set when a user submits the password form on the frontend. The Store API does not accept passwords directly.
 

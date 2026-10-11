@@ -24,7 +24,7 @@ class CategoryTitle extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$term_id       = $block->context['termId'] ?? 0;
-		$term_taxonomy = $block->context['termTaxonomy'] ?? 'product_cat';
+		$term_taxonomy = $block->context['termTaxonomy'] ?? $block->context['taxonomy'] ?? 'product_cat';
 
 		$level      = isset( $attributes['level'] ) ? max( 0, min( 6, intval( $attributes['level'] ) ) ) : 2;
 		$text_align = isset( $attributes['textAlign'] ) ? sanitize_key( $attributes['textAlign'] ) : '';
@@ -71,15 +71,6 @@ class CategoryTitle extends AbstractBlock {
 		}
 
 		return $title_html;
-	}
-
-	/**
-	 * Register the context used by this block.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'termId', 'termTaxonomy' ];
 	}
 
 	/**

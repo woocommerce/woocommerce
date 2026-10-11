@@ -141,8 +141,7 @@ export const getCanMakePaymentArg = (): CanMakePaymentArgument => {
 
 const registrationErrorNotice = (
 	paymentMethod:
-		| ExpressPaymentMethodConfigInstance
-		| PaymentMethodConfigInstance,
+		ExpressPaymentMethodConfigInstance | PaymentMethodConfigInstance,
 	errorMessage: string,
 	express = false
 ) => {
@@ -173,8 +172,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 
 	const addAvailablePaymentMethod = (
 		paymentMethod:
-			| PaymentMethodConfigInstance
-			| ExpressPaymentMethodConfigInstance
+			PaymentMethodConfigInstance | ExpressPaymentMethodConfigInstance
 	) => {
 		if ( express ) {
 			const {
@@ -217,7 +215,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 					...( getSetting( 'paymentMethodSortOrder', [] ) as [] ),
 					...Object.keys( paymentMethods ),
 				] )
-		  );
+			);
 	const canPayArgument = getCanMakePaymentArg();
 	const cartPaymentMethods = canPayArgument.paymentMethods as string[];
 	const isEditor = !! select( 'core/editor' );
@@ -239,9 +237,9 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			const canPay = isEditor
 				? true
 				: validForCart &&
-				  ( await Promise.resolve(
+					( await Promise.resolve(
 						paymentMethod.canMakePayment( canPayArgument )
-				  ) );
+					) );
 
 			if ( canPay ) {
 				if ( typeof canPay === 'object' && canPay.error ) {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Apply the stepper quantity-selector styles only to quantity containers that hold a visible quantity input, so a form containing both visible and hidden quantity fields no longer renders a stepper box around a hidden one.

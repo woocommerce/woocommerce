@@ -30,14 +30,31 @@
 		"align": false,
 		"color": {
 			"background": true,
-			"text": true
+			"text": true,
+			"gradients": true,
+			"link": true
 		},
 		"html": false,
 		"spacing": {
 			"margin": true,
 			"padding": true
 		},
-		"typography": true
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		}
 	},
-	"usesContext": [ "termId", "termTaxonomy" ]
+	"usesContext": [ "termId", "termTaxonomy", "taxonomy" ]
 }

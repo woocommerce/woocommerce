@@ -238,7 +238,7 @@ const blocks = {
 
 /**
  * Blocks that are generic and will likely be pushed up to Gutenberg or a public block registry.
- * Keep in sync with the generic_blocks array in copy-blocks-json.sh
+ * Keep in sync with genericBlocks in copy-blocks-json.sh
  */
 const genericBlocks = {
 	'accordion-group': {
@@ -276,7 +276,7 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
 						relativePath,
-					{ dotRelative: true }
+					{ dotRelative: true, posix: true }
 				);
 				if ( filePaths.length > 0 ) {
 					return [ blockCode, filePaths ];
@@ -343,6 +343,7 @@ const entries = {
 			'./packages/public-api/{price-format,blocks-components,blocks-checkout}/**/index.{t,j}s',
 			{
 				dotRelative: true,
+				posix: true,
 			}
 		),
 
@@ -351,7 +352,7 @@ const entries = {
 
 		// Blocks
 		'product-image-gallery':
-			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
+			'./assets/js/blocks/product-elements-blocks/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
 	},

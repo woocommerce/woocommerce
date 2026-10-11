@@ -17,7 +17,7 @@ const OPTIONS = [
 	{ label: 'Disabled', value: 'disabled' },
 ];
 
-export const SetWccomRequestErrros = () => {
+export const SetWccomRequestErrors = () => {
 	const errorsMode = useSelect(
 		( select ) => select( store ).getWccomRequestErrorsMode(),
 		[]

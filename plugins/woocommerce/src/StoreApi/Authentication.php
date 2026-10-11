@@ -249,7 +249,7 @@ class Authentication {
 						'Too many requests. Please wait %d seconds before trying again.',
 						$retry
 					),
-					array( 'status' => 400 )
+					array( 'status' => 429 )
 				);
 			}
 

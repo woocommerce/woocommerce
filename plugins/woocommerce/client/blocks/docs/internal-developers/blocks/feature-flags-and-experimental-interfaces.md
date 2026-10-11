@@ -147,6 +147,9 @@ Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `di
 | Action | Additional parameters |
 | --- | --- |
 | `experimental__woocommerce_blocks-checkout-submit` | None |
+| `experimental__woocommerce_blocks-checkout-cart-render` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-open` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-close` | None |
 | `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` | `shippingRateId` |
 | `experimental__woocommerce_blocks-checkout-set-active-payment-method` | `paymentMethodSlug` |
 | `experimental__woocommerce_blocks-checkout-render-checkout-form` | None |

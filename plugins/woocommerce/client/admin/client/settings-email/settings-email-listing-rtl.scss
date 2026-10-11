@@ -1,0 +1,4 @@
+// Right-to-left twin of settings-email-listing.scss. The fill loads one of the
+// two by text direction, because chunk stylesheets bypass the RTL swap
+// WordPress applies to registered styles.
+@import "@wordpress/dataviews/build-style/style-rtl.css";

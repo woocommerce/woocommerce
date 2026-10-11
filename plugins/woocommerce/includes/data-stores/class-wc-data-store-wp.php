@@ -350,6 +350,10 @@ class WC_Data_Store_WP {
 		$dates    = array();
 		$operator = '=';
 
+		// The raw strings $dates[0] and $dates[1] came from. Only day precision reads them.
+		$raw_start = '';
+		$raw_end   = '';
+
 		try {
 			// Specific time query with a WC_DateTime.
 			if ( is_a( $query_var, 'WC_DateTime' ) ) {
@@ -358,7 +362,11 @@ class WC_Data_Store_WP {
 				$dates[] = new WC_DateTime( "@{$query_var}", new DateTimeZone( 'UTC' ) );
 			} elseif ( preg_match( $query_parse_regex, $query_var, $sections ) ) { // Query with operators and possible range of dates.
 				if ( ! empty( $sections[1] ) ) {
-					$dates[] = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
+					$dates[]   = is_numeric( $sections[1] ) ? new WC_DateTime( "@{$sections[1]}", new DateTimeZone( 'UTC' ) ) : wc_string_to_datetime( $sections[1] );
+					$raw_start = $sections[1];
+					$raw_end   = $sections[3];
+				} else {
+					$raw_start = $sections[3];
 				}
 
 				$operator = in_array( $sections[2], $valid_operators, true ) ? $sections[2] : '';
@@ -369,6 +377,7 @@ class WC_Data_Store_WP {
 				}
 			} else { // Specific time query with a string.
 				$dates[]   = wc_string_to_datetime( $query_var );
+				$raw_start = $query_var;
 				$precision = 'day';
 			}
 		} catch ( Exception $e ) {
@@ -442,15 +451,62 @@ class WC_Data_Store_WP {
 		// Meta dates are stored as timestamps in the db.
 		// Check against beginning/end-of-day timestamps when using 'day' precision.
 		if ( 'day' === $precision ) {
-			$start_timestamp = strtotime( gmdate( 'm/d/Y 00:00:00', $dates[0]->getTimestamp() ) );
-			$end_timestamp   = '...' !== $operator ? ( $start_timestamp + DAY_IN_SECONDS ) : strtotime( gmdate( 'm/d/Y 00:00:00', $dates[1]->getTimestamp() ) );
+			/*
+			 * Name the day from the raw string the way OrdersTableQuery::local_time_to_gmt_date_query()
+			 * does, never from the timezone-aware $dates, or posts and HPOS resolve one query var to
+			 * different days.
+			 */
+			try {
+				$timezone = wp_timezone();
+				$start    = new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_start ) ) . ' 00:00:00', $timezone );
+				$end      = '...' === $operator
+					? new DateTime( gmdate( 'Y-m-d', (int) wc_string_to_timestamp( $raw_end ) ) . ' 00:00:00', $timezone )
+					: clone $start;
+			} catch ( Exception $e ) {
+				/*
+				 * The date could not be constructed, which a year past 9999 does. Match nothing, by
+				 * asking for a value that is both at least 1 and at most 0.
+				 *
+				 * Returning without a clause would not do that: the callers have already dropped
+				 * their own date clause, so the query would come back unfiltered. Nor would a single
+				 * bound like "below 0", since these keys hold a negative timestamp for a date before
+				 * 1970.
+				 */
+				$wp_query_args['meta_query'][] = array(
+					'key'     => $key,
+					'value'   => array( 1, 0 ),
+					'type'    => 'NUMERIC',
+					'compare' => 'BETWEEN',
+				);
+
+				return $wp_query_args;
+			}
+
+			/*
+			 * The end of the day is the next local midnight, not the start plus 24 hours: a local day
+			 * runs 23 or 25 hours across a DST transition. '+1 day' would not do either, because it
+			 * keeps the start's time of day, and that is not midnight in a timezone where DST begins
+			 * at 00:00 and the constructor above had to move the start forward.
+			 */
+			$end->modify( 'tomorrow' );
+
+			$start_timestamp = $start->getTimestamp();
+			$end_timestamp   = $end->getTimestamp();
+
+			// The bounds are half-open (>= start, < end) so that a day is matched in full and exactly once.
 			switch ( $operator ) {
 				case '>':
+					$wp_query_args['meta_query'][] = array(
+						'key'     => $key,
+						'value'   => $end_timestamp,
+						'compare' => '>=',
+					);
+					break;
 				case '<=':
 					$wp_query_args['meta_query'][] = array(
 						'key'     => $key,
 						'value'   => $end_timestamp,
-						'compare' => $operator,
+						'compare' => '<',
 					);
 					break;
 				case '<':
@@ -470,7 +526,7 @@ class WC_Data_Store_WP {
 					$wp_query_args['meta_query'][] = array(
 						'key'     => $key,
 						'value'   => $end_timestamp,
-						'compare' => '<=',
+						'compare' => '<',
 					);
 			}
 		} elseif ( '...' !== $operator ) {

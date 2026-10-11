@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce legacy Filter by Attribute E2E tests from 11 to 3; PHPUnit owns the OR attribute counts and Jest owns the count hand-off, the collection-data request, and the editor controls.
+

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add contextual image metadata to onboarding tasks via Task::get_image_url() and Task::get_image_alt(), so third-party tasks can supply their own illustration for My Home and the legacy dashboard setup widget.

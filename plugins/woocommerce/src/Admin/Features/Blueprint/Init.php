@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsAccount;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsAdvanced;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsEmails;
@@ -80,7 +79,6 @@ class Init {
 			ExportWCSettingsProducts::class,
 			ExportWCSettingsTax::class,
 			ExportWCSettingsShipping::class,
-			ExportWCPaymentGateways::class,
 			ExportWCSettingsAccount::class,
 			ExportWCSettingsEmails::class,
 			ExportWCSettingsIntegrations::class,
@@ -197,7 +195,7 @@ class Init {
 		return array(
 			array(
 				'id'          => 'settings',
-				'description' => __( 'Includes all the items featured in WooCommerce | Settings.', 'woocommerce' ),
+				'description' => __( 'Includes WooCommerce settings except payment settings, which must be configured manually after import.', 'woocommerce' ),
 				'label'       => __( 'WooCommerce Settings', 'woocommerce' ),
 				'icon'        => 'settings',
 				'items'       => array_map(

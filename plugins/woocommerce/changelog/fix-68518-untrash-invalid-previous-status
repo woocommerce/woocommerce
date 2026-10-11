@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed order notes and trash metadata not being cleaned up when an HPOS order is restored from the trash and its previous status is no longer valid.

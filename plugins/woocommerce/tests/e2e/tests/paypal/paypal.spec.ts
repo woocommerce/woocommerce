@@ -79,24 +79,6 @@ test.describe(
 			return paypalDiv;
 		}
 
-		/**
-		 * Temporary function to remove the disabled attribute from the Save changes button, as it is currently disabled by default and prevents saving changes in tests.
-		 * This should be removed once the underlying issue is resolved and the Save changes button can be enabled as expected.
-		 * See: https://github.com/woocommerce/woocommerce/issues/63498
-		 *
-		 * @param {Page} page The Playwright Page object representing the browser page to interact with.
-		 */
-		async function enableSaveButton( page: Page ) {
-			await page.evaluate( () => {
-				const saveButton = document.querySelector(
-					'button[name="save"]'
-				);
-				if ( saveButton ) {
-					saveButton.removeAttribute( 'disabled' );
-				}
-			} );
-		}
-
 		test( 'PayPal Standard can be enabled', async ( { page } ) => {
 			await openPayments( page );
 
@@ -130,15 +112,13 @@ test.describe(
 				name: 'Enable',
 			} );
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( await enableLink.isVisible() ) {
-				await enableLink.click();
-				await expect(
-					paypalDiv
-						.getByText( 'Active' )
-						.or( paypalDiv.getByText( 'Test account' ) )
-				).toBeVisible( visibilityOptions );
-			}
+			await expect( enableLink ).toBeVisible( visibilityOptions );
+			await enableLink.click();
+			await expect(
+				paypalDiv
+					.getByText( 'Active' )
+					.or( paypalDiv.getByText( 'Test account' ) )
+			).toBeVisible( visibilityOptions );
 
 			await paypalDiv
 				.getByRole( 'button', {
@@ -174,58 +154,54 @@ test.describe(
 				.locator( '#woocommerce_paypal_title' )
 				.inputValue();
 
-			await test.step( 'Update the title field', async () => {
-				await page
-					.locator( '#woocommerce_paypal_title' )
-					.fill( 'PayPal Custom Title ' + Date.now() );
+			try {
+				await test.step( 'Update the title field', async () => {
+					await page
+						.locator( '#woocommerce_paypal_title' )
+						.fill( 'PayPal Custom Title ' + Date.now() );
 
-				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				await enableSaveButton( page );
+					await page
+						.getByRole( 'button', {
+							name: 'Save changes',
+						} )
+						.click();
 
-				await page
-					.getByRole( 'button', {
-						name: 'Save changes',
-					} )
-					.click();
+					await expect(
+						page.locator( 'div.updated.inline' )
+					).toContainText( 'Your settings have been saved.' );
 
-				await expect(
-					page.locator( 'div.updated.inline' )
-				).toContainText( 'Your settings have been saved.' );
-			} );
+					// The save is what completes Transact onboarding, and onboarding is
+					// what unlocks `Enable PayPal Buttons` — but the field is missing
+					// from the page the save returns, so assert against the next load
+					// instead, which is the one a merchant actually reaches. Not a wait:
+					// see https://github.com/woocommerce/woocommerce/issues/68689.
+					await page.reload();
+				} );
 
-			await test.step( 'Check the setting present only when Jetpack onboarding is complete', async () => {
-				const paypalButtonsSetting = page.getByText(
-					'Enable PayPal Buttons',
-					{ exact: true }
-				);
-				await expect( paypalButtonsSetting ).toBeVisible();
-			} );
+				await test.step( 'Check the setting present only when Jetpack onboarding is complete', async () => {
+					const paypalButtonsSetting = page.getByText(
+						'Enable PayPal Buttons',
+						{ exact: true }
+					);
+					await expect( paypalButtonsSetting ).toBeVisible();
+				} );
+			} finally {
+				await test.step( 'Revert title change', async () => {
+					await page
+						.locator( '#woocommerce_paypal_title' )
+						.fill( originalPayPalTitle );
 
-			// Clean up by reverting the title change and disabling PayPal Standard.
-			await test.step( 'Revert title change and disable PayPal Standard', async () => {
-				await page
-					.locator( '#woocommerce_paypal_title' )
-					.fill( originalPayPalTitle );
+					await page
+						.getByRole( 'button', {
+							name: 'Save changes',
+						} )
+						.click();
 
-				await page
-					.getByRole( 'checkbox', {
-						name: 'Enable PayPal Standard',
-					} )
-					.uncheck();
-
-				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				await enableSaveButton( page );
-
-				await page
-					.getByRole( 'button', {
-						name: 'Save changes',
-					} )
-					.click();
-
-				await expect(
-					page.locator( 'div.updated.inline' )
-				).toContainText( 'Your settings have been saved.' );
-			} );
+					await expect(
+						page.locator( 'div.updated.inline' )
+					).toContainText( 'Your settings have been saved.' );
+				} );
+			}
 		} );
 	}
 );

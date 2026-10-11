@@ -13,6 +13,7 @@ module.exports = [
 		output: {
 			path: path.resolve( './build' ),
 			filename: '[name].js',
+			chunkFilename: '[name].js?ver=[contenthash]',
 		},
 		resolve: {
 			extensions: [ '.ts', '.tsx', '.js', '.jsx', '.json' ],

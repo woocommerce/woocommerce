@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add a translators comment for the cron interval placeholder to give translators context.

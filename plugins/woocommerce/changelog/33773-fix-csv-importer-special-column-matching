@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-CSV product importer: match special columns (attributes, downloads, meta) by prefix instead of with unanchored regexes, so columns that merely contain a special name no longer get the wrong formatting callback.

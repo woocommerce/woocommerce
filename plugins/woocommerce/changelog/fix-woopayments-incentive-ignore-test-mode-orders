@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop counting test-mode WooPayments usage - a test-drive account or test-mode orders - when determining WooPayments incentives eligibility, so trialing WooPayments no longer disqualifies a store from incentives. Stores already disqualified this way get their eligibility re-determined once.

@@ -2,19 +2,15 @@
  * External dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import { trackPluginNoticeLinks } from '~/utils/plugin-notice-tracking';
 
 domReady( () => {
-	const connectYourStoreLinks = document.querySelectorAll(
-		'.woocommerce-connect-your-store'
+	trackPluginNoticeLinks(
+		'.woocommerce-connect-your-store',
+		'woo_connect_notice_in_plugins'
 	);
-
-	if ( connectYourStoreLinks.length > 0 ) {
-		recordEvent( 'woo_connect_notice_in_plugins_shown' );
-		connectYourStoreLinks.forEach( ( link ) => {
-			link.addEventListener( 'click', function () {
-				recordEvent( 'woo_connect_notice_in_plugins_clicked' );
-			} );
-		} );
-	}
 } );

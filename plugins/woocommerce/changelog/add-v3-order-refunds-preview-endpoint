@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a refund preview endpoint (POST /wc/v3/orders/{id}/refunds/preview) that returns server-computed refund totals and per-line breakdowns without creating a refund.

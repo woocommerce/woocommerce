@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix CSV importer HTML-encoding attribute names, which prevented matching existing global attributes and caused duplicate attributes or slug-too-long import errors.

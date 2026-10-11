@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Declare the storefront, twentytwenty and twentytwentytwo E2E themes in .wp-env.e2e.json instead of installing them from wordpress.org during provisioning.

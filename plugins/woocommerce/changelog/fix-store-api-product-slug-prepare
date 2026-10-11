@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Use prepared statements when filtering Store API products by slug.

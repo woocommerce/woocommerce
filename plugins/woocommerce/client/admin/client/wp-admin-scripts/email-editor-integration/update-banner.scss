@@ -2,8 +2,8 @@
  * <UpdateBanner> — RSM-141.
  *
  * Floating card pinned 16px from the canvas top, centered horizontally.
- * Uses WPDS tokens via CSS custom properties with sensible WP-admin
- * fallbacks; no custom design tokens introduced.
+ * Uses WPDS tokens via CSS custom properties; fallbacks are added at
+ * build time. No custom design tokens introduced.
  */
 
 .wc-update-banner {
@@ -12,12 +12,12 @@
 	left: 50%;
 	transform: translateX(-50%);
 	width: min(720px, calc(100% - 32px));
-	background: var(--wpds-color-bg-surface, #fff);
-	border-radius: var(--wpds-border-radius-sm, 2px);
+	background: var(--wpds-color-background-surface-neutral-strong);
+	border-radius: var(--wpds-border-radius-sm);
 	box-shadow:
-		var(--wpds-elevation-md, 0 1px 2px rgba(0, 0, 0, 0.06)),
+		var(--wpds-elevation-md),
 		0 4px 12px rgba(0, 0, 0, 0.08);
-	border-left: 3px solid var(--wpds-color-bg-interactive-brand-strong, #3858e9);
+	border-left: 3px solid var(--wpds-color-stroke-surface-brand-strong);
 	padding: 12px 16px;
 	display: flex;
 	gap: 16px;
@@ -39,7 +39,7 @@
 	&__subtitle {
 		margin-top: 4px;
 		font-size: 12px;
-		color: var(--wpds-color-text-secondary, #757575);
+		color: var(--wpds-color-foreground-content-neutral-weak);
 	}
 
 	&__expand {
@@ -48,7 +48,7 @@
 		border: 0;
 		padding: 4px 0 0 0;
 		margin-top: 6px;
-		color: var(--wpds-color-bg-interactive-brand-strong, #3858e9);
+		color: var(--wpds-color-foreground-interactive-brand);
 		cursor: pointer;
 		font-size: 12px;
 		font-weight: 500;
@@ -76,7 +76,7 @@
 		font-size: 16px;
 		line-height: 1;
 		cursor: pointer;
-		color: var(--wpds-color-text-secondary, #757575);
+		color: var(--wpds-color-foreground-content-neutral-weak);
 
 		&:disabled {
 			opacity: 0.5;
@@ -86,13 +86,13 @@
 
 	/* Success morph */
 	&--success {
-		background: var(--wpds-color-bg-surface-success-weak, #ebffed);
-		border-left-color: var(--wpds-color-bg-interactive-success-strong, #00ba37);
+		background: var(--wpds-color-background-surface-success-weak);
+		border-left-color: var(--wpds-color-stroke-surface-success-strong);
 	}
 
 	/* Failure morph */
 	&--failure {
-		background: var(--wpds-color-bg-surface-warning, #fde6be);
+		background: var(--wpds-color-background-surface-warning);
 		border-left-color: #b26200;
 	}
 }

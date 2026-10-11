@@ -82,8 +82,7 @@ export type AddCartItemError = {
  * success into a failure.
  */
 export type AddCartItemOutcome =
-	| { success: true }
-	| { success: false; error: AddCartItemError };
+	{ success: true } | { success: false; error: AddCartItemError };
 
 export type Store = {
 	state: {
@@ -448,14 +447,14 @@ function emitSyncEvent( {
  * import kicked off by {@link preloadA11y} resolves. `null` until then, or if
  * the import never resolves (e.g. a chunk-load failure).
  */
-let speakFn: ( typeof import('@wordpress/a11y') )[ 'speak' ] | null = null;
+let speakFn: ( typeof import( '@wordpress/a11y' ) )[ 'speak' ] | null = null;
 
 /**
  * The in-flight (or already-settled) `@wordpress/a11y` import kicked off by
  * {@link preloadA11y}, reused across calls so the module is only imported
  * once per page load.
  */
-let a11yPromise: Promise< typeof import('@wordpress/a11y') > | null = null;
+let a11yPromise: Promise< typeof import( '@wordpress/a11y' ) > | null = null;
 
 /**
  * Kicks off (once) the dynamic import of `@wordpress/a11y` and stashes its
@@ -739,7 +738,7 @@ const { actions } = store< Store >(
 							cartItemsPendingQuantity: existingItem?.key
 								? [ existingItem.key ]
 								: [],
-					  }
+						}
 					: { productsPendingAdd: [ id ] };
 
 				// Prepare the item to send.
@@ -785,9 +784,7 @@ const { actions } = store< Store >(
 				type ProductCapture = {
 					id: number;
 					variation?:
-						| CartVariationItem[]
-						| SelectedAttributes[]
-						| undefined;
+						CartVariationItem[] | SelectedAttributes[] | undefined;
 					preAddTotal: number;
 					deltaTotal: number;
 					preExistingKeys: string[];
@@ -1166,13 +1163,28 @@ const { actions } = store< Store >(
 			},
 
 			*refreshCartItems(): AsyncAction< void > {
+				// Skip when the server did not provide the interactivity
+				// state this store needs, e.g. when a block imports this
+				// store without loading the shared cart state. Release
+				// pending mutations so they fail visibly instead of
+				// waiting forever for a nonce that will never arrive.
+				if ( ! state.restUrl ) {
+					if ( resolveNonceReady ) {
+						resolveNonceReady();
+						resolveNonceReady = null;
+					}
+					return;
+				}
+
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
 				}
 
 				// Skips if there's a pending request.
-				if ( pendingRefresh ) return;
+				if ( pendingRefresh ) {
+					return;
+				}
 
 				pendingRefresh = true;
 
@@ -1197,8 +1209,9 @@ const { actions } = store< Store >(
 					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
+					if ( isApiErrorResponse( res, json ) ) {
 						throw generateError( json );
+					}
 
 					// If the batcher started a cycle while we were fetching,
 					// discard this response — the batcher will reconcile.
@@ -1254,7 +1267,7 @@ const { actions } = store< Store >(
 					dismissible: true,
 				} );
 
-				// Emmits console.error for troubleshooting.
+				// Emits console.error for troubleshooting.
 				// eslint-disable-next-line no-console
 				console.error( error );
 			},

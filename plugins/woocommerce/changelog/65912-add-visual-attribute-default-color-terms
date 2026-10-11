@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Automatically create 9 default color terms when a new wc-visual product attribute is created, so users can start using color swatches without manually adding each color.

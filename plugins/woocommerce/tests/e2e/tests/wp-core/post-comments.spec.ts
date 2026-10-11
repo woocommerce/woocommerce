@@ -13,7 +13,18 @@ const test = baseTest.extend( {
 	storageState: CUSTOMER_STATE_PATH,
 } );
 
+const postSlug = `comment-test-${ Date.now() }`;
+let postId: number;
+
 test.beforeAll( async ( { restApi } ) => {
+	const createPostResponse = await restApi.post( `${ WP_API_PATH }/posts`, {
+		title: 'Comment test post',
+		slug: postSlug,
+		status: 'publish',
+		comment_status: 'open',
+	} );
+	postId = createPostResponse.data.id;
+
 	// Jetpack Comments replaces the default WordPress comment form when activated, and will cause this test to fail.
 	// Make sure it's disabled prior to running this test.
 	await test.step( 'disable Jetpack comments if Jetpack is installed and active', async () => {
@@ -43,15 +54,26 @@ test.beforeAll( async ( { restApi } ) => {
 	} );
 } );
 
+test.afterAll( async ( { restApi } ) => {
+	if ( postId ) {
+		await restApi.delete( `${ WP_API_PATH }/posts/${ postId }`, {
+			force: true,
+		} );
+	}
+} );
+
 test(
 	'logged-in customer can comment on a post',
 	{
 		tag: [ tags.WP_CORE ],
 	},
 	async ( { page } ) => {
-		await page.goto( 'hello-world/' );
+		await page.goto( `${ postSlug }/` );
 		await expect(
-			page.getByRole( 'heading', { name: 'Hello world!', exact: true } )
+			page.getByRole( 'heading', {
+				name: 'Comment test post',
+				exact: true,
+			} )
 		).toBeVisible();
 
 		await expect( page.getByText( `Logged in as` ) ).toBeVisible();

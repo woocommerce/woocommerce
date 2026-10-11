@@ -13,7 +13,6 @@ test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.
 
 	const dashboardScreens = {
 		'WP Admin home': 'wp-admin',
-		'WP Admin profile page': 'wp-admin/profile.php',
 		'WP Admin using ajax query param': 'wp-admin?wc-ajax=1',
 	};
 

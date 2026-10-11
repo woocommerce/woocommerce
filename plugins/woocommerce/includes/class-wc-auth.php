@@ -167,12 +167,18 @@ class WC_Auth {
 		);
 
 		foreach ( $params as $param ) {
-			if ( empty( $_REQUEST[ $param ] ) ) { // WPCS: input var ok, CSRF ok.
+			if ( empty( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 				/* translators: %s: parameter */
 				throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param ) );
 			}
 
-			$data[ $param ] = wp_unslash( $_REQUEST[ $param ] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+			// Every handshake parameter is a single string; anything else, an array in particular, is rejected here so that it cannot reach the string-only functions used below.
+			if ( ! is_string( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+				/* translators: %s: parameter */
+				throw new Exception( sprintf( __( 'Invalid parameter %s', 'woocommerce' ), $param ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The caught message is escaped by esc_html() where it is rendered; escaping here would double-encode translated text.
+			}
+
+			$data[ $param ] = wp_unslash( $_REQUEST[ $param ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw values are needed to validate the submitted URLs and scope; each value is sanitized or escaped where it is used, and key creation verifies capability and nonce.
 		}
 
 		if ( ! in_array( $data['scope'], array( 'read', 'write', 'read_write' ), true ) ) {
@@ -290,12 +296,12 @@ class WC_Auth {
 	public function handle_auth_requests() {
 		global $wp;
 
-		if ( ! empty( $_GET['wc-auth-version'] ) ) { // WPCS: input var ok, CSRF ok.
-			$wp->query_vars['wc-auth-version'] = wc_clean( wp_unslash( $_GET['wc-auth-version'] ) ); // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['wc-auth-version'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+			$wp->query_vars['wc-auth-version'] = wc_clean( wp_unslash( $_GET['wc-auth-version'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 		}
 
-		if ( ! empty( $_GET['wc-auth-route'] ) ) { // WPCS: input var ok, CSRF ok.
-			$wp->query_vars['wc-auth-route'] = wc_clean( wp_unslash( $_GET['wc-auth-route'] ) ); // WPCS: input var ok, CSRF ok.
+		if ( ! empty( $_GET['wc-auth-route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+			$wp->query_vars['wc-auth-route'] = wc_clean( wp_unslash( $_GET['wc-auth-route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 		}
 
 		// wc-auth endpoint requests.
@@ -320,7 +326,8 @@ class WC_Auth {
 			$route = strtolower( wc_clean( $route ) );
 			$this->make_validation();
 
-			$data = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
+			// Validated by make_validation() above. Values are cleaned or escaped where they are rendered or stored; create_keys() sanitizes what it persists.
+			$data = wp_unslash( $_REQUEST );
 
 			// Login endpoint.
 			if ( 'login' === $route && ! is_user_logged_in() ) {
@@ -405,7 +412,7 @@ class WC_Auth {
 
 			} elseif ( 'access_granted' === $route && current_user_can( 'manage_woocommerce' ) ) {
 				// Granted access endpoint.
-				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['wc_auth_nonce'] ) ), 'wc_auth_grant_access' ) ) { // WPCS: input var ok.
+				if ( ! isset( $_GET['wc_auth_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['wc_auth_nonce'] ) ), 'wc_auth_grant_access' ) ) {
 					throw new Exception( __( 'Invalid nonce verification', 'woocommerce' ) );
 				}
 

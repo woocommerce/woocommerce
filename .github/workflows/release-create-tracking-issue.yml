@@ -44,6 +44,7 @@ jobs:
   create-tracking-issue:
     name: Create Release Tracking Issue
     runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     steps:
       - name: Parse version and determine template
         id: parse-version

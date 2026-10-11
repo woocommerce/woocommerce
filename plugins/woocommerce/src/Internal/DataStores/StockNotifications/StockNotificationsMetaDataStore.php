@@ -27,7 +27,7 @@ class StockNotificationsMetaDataStore extends CustomMetaDataStore {
 	}
 
 	/**
-	 * Returns the name of the field/column used for identifiying metadata entries.
+	 * Returns the name of the field/column used for identifying metadata entries.
 	 *
 	 * @return string
 	 */

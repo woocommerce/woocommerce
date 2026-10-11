@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Reject duplicate tax IDs in refund line items on the wc/v4 refunds endpoint and the wc/v3 compute_totals path, which previously created refunds whose stored line taxes did not add up to the refund amount.

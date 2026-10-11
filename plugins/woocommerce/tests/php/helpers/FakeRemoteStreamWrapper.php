@@ -16,7 +16,8 @@ declare( strict_types = 1 );
  *     // ...
  *     stream_wrapper_restore( 'http' );
  *
- * Only the operations the download handler performs are implemented; the stream is always empty.
+ * Only the operations the download handler performs are implemented; the stream is empty unless
+ * configured to fail reads.
  * Parameter names and signatures are fixed by PHP's streamWrapper prototype, so unused ones are
  * expected: https://www.php.net/manual/en/class.streamwrapper.php
  *
@@ -28,6 +29,20 @@ declare( strict_types = 1 );
  * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
  */
 class FakeRemoteStreamWrapper {
+
+	/**
+	 * Whether reads should fail.
+	 *
+	 * @var bool
+	 */
+	public static $fail_reads = false;
+
+	/**
+	 * Whether the stream was closed.
+	 *
+	 * @var bool
+	 */
+	public static $closed = false;
 
 	/**
 	 * Stream context, assigned by PHP when the wrapper is instantiated.
@@ -46,6 +61,7 @@ class FakeRemoteStreamWrapper {
 	 * @return bool
 	 */
 	public function stream_open( $path, $mode, $options, &$opened_path ) {
+		self::$closed = false;
 		return true;
 	}
 
@@ -53,9 +69,13 @@ class FakeRemoteStreamWrapper {
 	 * Read from the stream.
 	 *
 	 * @param int $count Bytes to read.
-	 * @return string
+	 * @return string|false
 	 */
 	public function stream_read( $count ) {
+		if ( self::$fail_reads ) {
+			return false;
+		}
+
 		return '';
 	}
 
@@ -65,7 +85,27 @@ class FakeRemoteStreamWrapper {
 	 * @return bool
 	 */
 	public function stream_eof() {
+		return ! self::$fail_reads;
+	}
+
+	/**
+	 * Seek within the stream.
+	 *
+	 * @param int $offset Seek offset.
+	 * @param int $whence Seek origin.
+	 * @return bool
+	 */
+	public function stream_seek( $offset, $whence ) {
 		return true;
+	}
+
+	/**
+	 * Get the current stream position.
+	 *
+	 * @return int
+	 */
+	public function stream_tell() {
+		return 0;
 	}
 
 	/**
@@ -83,6 +123,7 @@ class FakeRemoteStreamWrapper {
 	 * @return bool
 	 */
 	public function stream_close() {
+		self::$closed = true;
 		return true;
 	}
 

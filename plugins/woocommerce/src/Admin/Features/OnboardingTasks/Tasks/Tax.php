@@ -38,8 +38,8 @@ class Tax extends Task {
 	 * Adds a return to task list notice when completing the task.
 	 */
 	public function possibly_add_return_notice_script() {
-		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore csrf ok, sanitization ok.
-		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore csrf ok, sanitization ok.
+		$page = isset( $_GET['page'] ) ? $_GET['page'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Values are used only in strict comparisons and never reach a sink.
+		$tab  = isset( $_GET['tab'] ) ? $_GET['tab'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Values are used only in strict comparisons and never reach a sink.
 
 		if ( $page !== 'wc-settings' || $tab !== 'tax' ) {
 			return;

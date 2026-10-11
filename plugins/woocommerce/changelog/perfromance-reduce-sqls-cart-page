@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduced the number of SQL queries on the cart page for multi-product carts.

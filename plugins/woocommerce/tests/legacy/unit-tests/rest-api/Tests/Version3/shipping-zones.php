@@ -146,6 +146,42 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the default Shipping Zone cannot be changed or deleted.
+	 *
+	 * @testdox Default shipping zone rejects mutation and survives force deletion.
+	 */
+	public function test_default_shipping_zone_guards() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/shipping/zones/0' );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 0, $response->get_data()['id'] );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/shipping/zones' ) );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( array( 0 ), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/shipping/zones/0' );
+		$request->set_body_params( array( 'name' => 'Default shipping zone' ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shipping_zone_invalid_zone', $data['code'] );
+		$this->assertSame( 'The "locations not covered by your other zones" zone cannot be updated.', $data['message'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/shipping/zones/0/locations' );
+		$request->add_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( array( 'code' => 'US' ) ) ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shipping_zone_locations_invalid_zone', $data['code'] );
+		$this->assertSame( 'The "locations not covered by your other zones" zone cannot be updated.', $data['message'] );
+	}
+
+	/**
 	 * Test /shipping/zones without valid permissions/creds.
 	 *
 	 * @since 3.5.0
@@ -305,6 +341,10 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 				$data
 			)
 		);
+
+		$persisted_zone = new WC_Shipping_Zone( $zone->get_id() );
+		$this->assertSame( 'Zone Test', $persisted_zone->get_zone_name() );
+		$this->assertSame( 2, $persisted_zone->get_zone_order() );
 	}
 
 	/**
@@ -342,6 +382,11 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $zone->get_id(), $data['id'] );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/shipping/zones/' . $zone->get_id() ) );
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shipping_zone_invalid', $response->get_data()['code'] );
 	}
 
 	/**
@@ -576,6 +621,66 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 			),
 			$data
 		);
+	}
+
+	/**
+	 * Test that location updates replace prior locations and can clear the zone.
+	 *
+	 * @testdox Shipping zone locations replace countries with a state and then clear.
+	 */
+	public function test_replace_and_clear_locations() {
+		wp_set_current_user( $this->user );
+		$zone  = $this->create_shipping_zone( 'Replacement Zone' );
+		$route = '/wc/v3/shipping/zones/' . $zone->get_id() . '/locations';
+
+		$request = new WP_REST_Request( 'PUT', $route );
+		$request->add_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( array( 'code' => 'GB' ), array( 'code' => 'US' ) ) ) );
+		$response = $this->server->dispatch( $request );
+		$expected = array(
+			array(
+				'code' => 'GB',
+				'type' => 'country',
+			),
+			array(
+				'code' => 'US',
+				'type' => 'country',
+			),
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $expected, $this->get_location_tuples( $response->get_data() ) );
+		$this->assertSame( $expected, $this->get_location_tuples( ( new WC_Shipping_Zone( $zone->get_id() ) )->get_zone_locations() ) );
+
+		$request = new WP_REST_Request( 'PUT', $route );
+		$request->add_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					array(
+						'code' => 'BR:SP',
+						'type' => 'state',
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$expected = array(
+			array(
+				'code' => 'BR:SP',
+				'type' => 'state',
+			),
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $expected, $this->get_location_tuples( $response->get_data() ) );
+		$this->assertSame( $expected, $this->get_location_tuples( ( new WC_Shipping_Zone( $zone->get_id() ) )->get_zone_locations() ) );
+
+		$request = new WP_REST_Request( 'PUT', $route );
+		$request->add_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array() ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( array(), $this->get_location_tuples( $response->get_data() ) );
+		$this->assertSame( array(), $this->get_location_tuples( ( new WC_Shipping_Zone( $zone->get_id() ) )->get_zone_locations() ) );
 	}
 
 	/**
@@ -833,5 +938,23 @@ class WC_Tests_API_Shipping_Zones extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Reduce response arrays and persisted location objects to stable tuples.
+	 *
+	 * @param array $locations Shipping zone locations.
+	 * @return array
+	 */
+	private function get_location_tuples( $locations ) {
+		return array_map(
+			static function ( $location ) {
+				return array(
+					'code' => is_array( $location ) ? $location['code'] : $location->code,
+					'type' => is_array( $location ) ? $location['type'] : $location->type,
+				);
+			},
+			$locations
+		);
 	}
 }

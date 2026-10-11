@@ -162,12 +162,17 @@ class Config {
 	}
 
 	/**
-	 * Check if an account is created on signup.
+	 * Whether an account is created on signup.
+	 *
+	 * Guest sign-ups no longer create accounts, so this always returns false.
+	 *
+	 * @deprecated 11.2.0 Account creation on sign-up was removed.
 	 *
 	 * @return bool
 	 */
 	public static function creates_account_on_signup(): bool {
-		return 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' );
+		wc_deprecated_function( __METHOD__, '11.2.0' );
+		return false;
 	}
 
 	/**
