@@ -752,8 +752,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox The woocommerce_checkout_after_cart_item_meta action fires for visible cart items in the review order template.
 	 */
 	public function test_checkout_after_cart_item_meta_action_fires_for_visible_items() {
-		$product = WC_Helper_Product::create_simple_product();
-		WC()->cart->add_to_cart(
+		$product       = WC_Helper_Product::create_simple_product();
+		$cart_item_key = WC()->cart->add_to_cart(
 			$product->get_id(),
 			1,
 			'',
@@ -763,28 +763,52 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$fired = array();
+		$fired    = array();
 		$callback = static function ( $cart_item, $cart_item_key ) use ( &$fired ) {
-			$fired[] = $cart_item_key;
+			$fired[ $cart_item_key ] = $cart_item;
 			echo 'TEST_CHECKOUT_AFTER_CART_ITEM_META';
 		};
 		add_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10, 2 );
 
+		$get_item_data = static function () {
+			return array(
+				array(
+					'key'     => 'test_meta',
+					'display' => 'TEST_ITEM_META_DATA',
+				),
+			);
+		};
+		add_filter( 'woocommerce_get_item_data', $get_item_data );
+
 		$output = wc_get_template_html( 'checkout/review-order.php' );
 
 		remove_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10 );
+		remove_filter( 'woocommerce_get_item_data', $get_item_data );
 
 		$this->assertCount( 1, $fired, 'The action should fire once for the visible cart item.' );
+		$this->assertArrayHasKey( $cart_item_key, $fired, 'The action should receive the cart item key.' );
+		$this->assertSame( $product->get_id(), $fired[ $cart_item_key ]['product_id'], 'The action should receive the cart item.' );
 		$this->assertStringContainsString( 'TEST_ITEM_META_DATA', $output, 'The cart item data should be rendered for the test to be meaningful.' );
 		$this->assertStringContainsString( 'TEST_CHECKOUT_AFTER_CART_ITEM_META', $output );
+
+		$cell_start = strpos( $output, '<td class="product-name">' );
+		$cell_end   = strpos( $output, '</td>', $cell_start );
+		$marker_pos = strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' );
+		$meta_pos   = strpos( $output, 'TEST_ITEM_META_DATA' );
+
 		$this->assertGreaterThan(
-			strpos( $output, '<td class="product-name">' ),
-			strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' ),
+			$cell_start,
+			$marker_pos,
+			'The action output should be rendered inside the product name cell.'
+		);
+		$this->assertLessThan(
+			$cell_end,
+			$marker_pos,
 			'The action output should be rendered inside the product name cell.'
 		);
 		$this->assertGreaterThan(
-			strpos( $output, 'TEST_ITEM_META_DATA' ),
-			strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' ),
+			$meta_pos,
+			$marker_pos,
 			'The action output should be rendered after the cart item data.'
 		);
 	}
@@ -798,9 +822,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_checkout_cart_item_visible', '__return_false' );
 
-		$fired = 0;
+		$fired    = 0;
 		$callback = static function () use ( &$fired ) {
-			$fired++;
+			++$fired;
 			echo 'TEST_CHECKOUT_AFTER_CART_ITEM_META';
 		};
 		add_action( 'woocommerce_checkout_after_cart_item_meta', $callback );
