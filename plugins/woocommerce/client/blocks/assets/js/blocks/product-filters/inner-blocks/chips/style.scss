@@ -172,10 +172,16 @@
 	}
 
 	&.has-chip-border-color :where(.wc-block-product-filter-chips__item:not([aria-checked="true"]) .wc-block-product-filter-chips__swatch) {
-		border-color: var(--wc-product-filter-chips-border);
+		border-color: var(
+			--wc-product-filter-chips-swatch-border,
+			var(--wc-product-filter-chips-border)
+		);
 	}
 	&.has-selected-chip-border-color :where(.wc-block-product-filter-chips__item[aria-checked="true"] .wc-block-product-filter-chips__swatch) {
-		border-color: transparent;
+		border-color: var(
+			--wc-product-filter-chips-swatch-border,
+			transparent
+		);
 	}
 
 	.wc-block-product-filter-chips__text,
