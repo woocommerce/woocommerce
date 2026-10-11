@@ -226,6 +226,57 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox translate_slug() on a site-locale request prefers registered site locale translations over the catalog already loaded.
+	 * @testWith [true, "site-product"]
+	 *           [false, "loaded-product"]
+	 *
+	 * @param bool   $has_site_translations Whether translations are registered for the site locale.
+	 * @param string $expected_slug         Expected translated slug.
+	 */
+	public function test_translate_slug_on_a_site_locale_request( bool $has_site_translations, string $expected_slug ): void {
+		global $l10n, $wp_textdomain_registry;
+
+		$locale                = 'wc_TEST';
+		$fixtures_dir          = WC_ABSPATH . 'tests/legacy/unit-tests/util/fixtures/';
+		$previous_path         = $wp_textdomain_registry->get( 'woocommerce', $locale );
+		$previous_translations = $l10n['woocommerce'] ?? null;
+		$loaded_catalog        = new \MO();
+		$loaded_catalog->add_entry(
+			array(
+				'singular'     => 'product',
+				'context'      => 'slug',
+				'translations' => array( 'loaded-product' ),
+			)
+		);
+		add_filter( 'pre_option_WPLANG', static fn() => $locale );
+		add_filter( 'pre_determine_locale', static fn() => $locale );
+		if ( $has_site_translations ) {
+			$wp_textdomain_registry->set( 'woocommerce', $locale, $fixtures_dir );
+			add_filter(
+				'load_translation_file',
+				static fn( $file, $domain, $file_locale ) => 'woocommerce' === $domain && $locale === $file_locale ? $fixtures_dir . 'permalink-translations.php' : $file,
+				10,
+				3
+			);
+		}
+		$l10n['woocommerce'] = $loaded_catalog; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate a catalog loaded earlier in the request.
+
+		try {
+			$product_slug = SiteLocale::translate_slug( 'product' );
+		} finally {
+			WP_Translation_Controller::get_instance()->unload_textdomain( 'woocommerce', $locale );
+			$wp_textdomain_registry->set( 'woocommerce', $locale, $previous_path );
+			if ( null === $previous_translations ) {
+				unset( $l10n['woocommerce'] );
+			} else {
+				$l10n['woocommerce'] = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the test's original translations.
+			}
+		}
+
+		$this->assertSame( $expected_slug, $product_slug, 'Registered site locale translations should win, with the loaded catalog as the fallback.' );
+	}
+
+	/**
 	 * @testdox get() reads the stored site locale and ignores the locale filter.
 	 */
 	public function test_get_ignores_the_locale_filter(): void {
