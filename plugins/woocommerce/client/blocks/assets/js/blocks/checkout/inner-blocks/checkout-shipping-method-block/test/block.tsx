@@ -169,7 +169,10 @@ describe( 'Block', () => {
 		} );
 
 		expect(
-			screen.getByRole( 'radio', { name: /backup shipping text/ } )
+			screen.getByRole( 'radio', {
+				name: ( name: string ) =>
+					name.startsWith( 'backup shipping text' ),
+			} )
 		).toHaveTextContent( '$5.00' );
 		expect(
 			screen.queryByText( 'calculated with an address' )
