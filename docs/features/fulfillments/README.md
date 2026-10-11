@@ -357,12 +357,9 @@ When working with the fulfillments feature, follow these guidelines to ensure ro
 4. **Performance**: Use batch operations for bulk fulfillment updates rather than looping individual operations.
 5. **Security**: Always validate user permissions before allowing fulfillment operations. Use the REST API permission checks as a reference for capability requirements.
 
-## REST API and hooks
+## Hooks
 
-WooCommerce exposes order fulfillments through order-scoped REST API v3 routes.
-
-- Use the [REST API reference](./rest-api.md) for endpoint shapes, permissions, and example payloads.
-- Use the [hooks reference](./hooks.md) for lifecycle filters, notification actions, provider filters, and email template hooks.
+Use the [hooks reference](./hooks.md) for lifecycle filters, notification actions, provider filters, and email template hooks.
 
 ## Shipping providers and tracking lookups
 
