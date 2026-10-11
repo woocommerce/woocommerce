@@ -462,13 +462,17 @@ class SiteHealth {
 					'description' => __( 'WooCommerce did not detect an unusually large order metadata table.', 'woocommerce' ),
 				),
 				'fail'      => array(
-					'label'       => __( 'WooCommerce order metadata table is unusually large', 'woocommerce' ),
-					'description' => static fn( array $context ) => sprintf(
-						/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
-						__( 'The estimated row counts are %1$s for the order metadata table and %2$s for the orders table. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
-						number_format_i18n( $context['meta_rows'] ),
-						number_format_i18n( $context['order_rows'] )
-					),
+					'label'       => static fn( array $context ) => ! empty( $context['unverified'] )
+						? __( 'WooCommerce could not check the order metadata table size', 'woocommerce' )
+						: __( 'WooCommerce order metadata table is unusually large', 'woocommerce' ),
+					'description' => static fn( array $context ) => ! empty( $context['unverified'] )
+						? __( 'The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.', 'woocommerce' )
+						: sprintf(
+							/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
+							__( 'The estimated row counts are %1$s for the order metadata table and %2$s for the orders table. These estimates can be up to a day old. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+							number_format_i18n( $context['meta_rows'] ),
+							number_format_i18n( $context['order_rows'] )
+						),
 				),
 			);
 		}
@@ -484,45 +488,36 @@ class SiteHealth {
 	private function get_hpos_table_statistics(): ?array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This bounded query reads database-maintained table statistics during Site Health checks.
-		$statistics = $wpdb->get_row(
-			$wpdb->prepare(
-				'SELECT
-					(
-						SELECT TABLE_ROWS
-						FROM information_schema.TABLES
-						WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
-					) AS order_rows,
-					(
-						SELECT TABLE_ROWS
-						FROM information_schema.TABLES
-						WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
-					) AS meta_rows',
-				OrdersTableDataStore::get_orders_table_name(),
-				OrdersTableDataStore::get_meta_table_name()
-			)
-		);
+		$row_counts = array();
 
-		if ( ! is_object( $statistics ) || ! isset( $statistics->order_rows, $statistics->meta_rows ) || ! is_numeric( $statistics->order_rows ) || ! is_numeric( $statistics->meta_rows ) ) {
-			return null;
+		foreach ( array( OrdersTableDataStore::get_orders_table_name(), OrdersTableDataStore::get_meta_table_name() ) as $table ) {
+			// Naming the table lets a database drop-in route the query to the server that holds it.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This reads database-maintained table statistics during Site Health checks.
+			$status = $wpdb->get_row( $wpdb->prepare( 'SHOW TABLE STATUS WHERE Name = %s', $table ), ARRAY_A );
+
+			if ( ! is_array( $status ) || ! isset( $status['Rows'] ) || ! is_numeric( $status['Rows'] ) ) {
+				return null;
+			}
+
+			$row_counts[] = (int) $status['Rows'];
 		}
 
 		return array(
-			'order_rows' => (int) $statistics->order_rows,
-			'meta_rows'  => (int) $statistics->meta_rows,
+			'order_rows' => $row_counts[0],
+			'meta_rows'  => $row_counts[1],
 		);
 	}
 
 	/**
-	 * Get context when the order metadata table is unusually large.
+	 * Get context when the order metadata table is unusually large, or when its size could not be checked.
 	 *
-	 * @return array{order_rows: int, meta_rows: int}|array{}
+	 * @return array{order_rows: int, meta_rows: int}|array{unverified: true}|array{}
 	 */
 	private function get_order_meta_table_size_issue(): array {
 		$table_statistics = $this->get_hpos_table_statistics();
 
 		if ( null === $table_statistics ) {
-			return array();
+			return array( 'unverified' => true );
 		}
 
 		if ( $table_statistics['meta_rows'] < self::ORDER_META_ROW_COUNT_THRESHOLD ) {

@@ -136,7 +136,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'WooCommerce order metadata table is unusually large', $result['label'], 'The result should describe the table size without claiming duplicate metadata.' );
 		$this->assertSame( 'Performance', $result['badge']['label'], 'The result should use the performance badge.' );
-		$this->assertSame( '<p>The estimated row counts are 49,800,000 for the order metadata table and 44 for the orders table. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.</p>', $result['description'], 'The result should explain the risk and recommend investigation rather than deletion.' );
+		$this->assertSame( '<p>The estimated row counts are 49,800,000 for the order metadata table and 44 for the orders table. These estimates can be up to a day old. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.</p>', $result['description'], 'The result should explain the risk and recommend investigation rather than deletion.' );
 		$this->assertSame( '', $result['actions'], 'The result should not link to an unsafe generic cleanup action.' );
 	}
 
@@ -147,7 +147,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$statistics_queries = 0;
 		$query_filter       = static function ( $query ) use ( &$statistics_queries ) {
-			if ( false !== strpos( $query, 'FROM information_schema.TABLES' ) ) {
+			if ( false !== strpos( $query, 'SHOW TABLE STATUS' ) ) {
 				++$statistics_queries;
 			}
 
@@ -166,16 +166,16 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order metadata table size check does not require attention when table statistics are unavailable.
+	 * @testdox Order metadata table size check is inconclusive when table statistics are unavailable.
 	 */
-	public function test_order_meta_table_size_check_is_good_without_statistics(): void {
+	public function test_order_meta_table_size_check_is_inconclusive_without_statistics(): void {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 		$this->use_hpos_table_statistics( null, null );
 
 		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
 
-		$this->assertSame( 'good', $result['status'], 'Unavailable table statistics should not create a recommendation.' );
-		$this->assertSame( 'WooCommerce order metadata table does not require attention', $result['label'], 'The result should not claim that unavailable statistics were verified.' );
+		$this->assertSame( 'recommended', $result['status'], 'Unavailable table statistics should be reported as inconclusive.' );
+		$this->assertSame( 'WooCommerce could not check the order metadata table size', $result['label'], 'The result should not claim that unavailable statistics were verified.' );
 	}
 
 	/**
@@ -189,7 +189,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
 
 		$this->assertSame( '', $wpdb->last_error, 'The table statistics query should be valid for the test database.' );
-		$this->assertSame( 'good', $result['status'], 'The test database should not have an unusually large order metadata table.' );
+		$this->assertSame( 'good', $result['status'], 'Real row estimates should be returned and stay under the limits; missing estimates would be reported as inconclusive.' );
 	}
 
 	/**
@@ -303,11 +303,11 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		$order_rows_sql = null === $order_rows ? 'NULL' : (string) $order_rows;
 		$meta_rows_sql  = null === $meta_rows ? 'NULL' : (string) $meta_rows;
 		$query_filter   = static function ( $query ) use ( $order_rows_sql, $meta_rows_sql ) {
-			if ( false === strpos( $query, 'FROM information_schema.TABLES' ) ) {
+			if ( false === strpos( $query, 'SHOW TABLE STATUS' ) ) {
 				return $query;
 			}
 
-			return "SELECT {$order_rows_sql} AS order_rows, {$meta_rows_sql} AS meta_rows";
+			return 'SELECT ' . ( false !== strpos( $query, 'wc_orders_meta' ) ? $meta_rows_sql : $order_rows_sql ) . ' AS `Rows`';
 		};
 
 		add_filter( 'query', $query_filter );
