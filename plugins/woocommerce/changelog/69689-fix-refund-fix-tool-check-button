@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Restore the "Check" button on the "Fix Complete Refund Data for Analytics" tool in WooCommerce > Status > Tools.
+Restore the "Check" button on the "Fix analytics full refund data" tool in WooCommerce > Status > Tools.
