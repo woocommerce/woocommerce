@@ -192,6 +192,40 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox translate_slug() looks for a file named after the locale when the language directory is inside the active theme.
+	 */
+	public function test_translate_slug_uses_the_theme_file_name_for_a_theme_language_directory(): void {
+		global $wp_textdomain_registry;
+
+		$locale        = 'wc_THEME';
+		$theme_path    = trailingslashit( get_stylesheet_directory() ) . 'languages/';
+		$previous_path = $wp_textdomain_registry->get( 'woocommerce', $locale );
+		$loaded_files  = array();
+		$wp_textdomain_registry->set( 'woocommerce', $locale, $theme_path );
+		add_filter( 'pre_option_WPLANG', static fn() => $locale );
+		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter(
+			'load_textdomain_mofile',
+			static function ( $mofile, $domain ) use ( &$loaded_files ) {
+				if ( 'woocommerce' === $domain ) {
+					$loaded_files[] = $mofile;
+				}
+				return $mofile;
+			},
+			10,
+			2
+		);
+
+		try {
+			SiteLocale::translate_slug( 'product' );
+		} finally {
+			$wp_textdomain_registry->set( 'woocommerce', $locale, $previous_path );
+		}
+
+		$this->assertSame( array( $theme_path . 'wc_THEME.mo' ), $loaded_files, 'A theme language directory should use the locale as the file name.' );
+	}
+
+	/**
 	 * @testdox get() reads the stored site locale and ignores the locale filter.
 	 */
 	public function test_get_ignores_the_locale_filter(): void {
@@ -225,6 +259,7 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 
 		add_filter( 'pre_option_WPLANG', static fn() => $site_locale );
 		add_filter( 'pre_determine_locale', static fn() => 'en_US' );
+		add_filter( 'locale', static fn() => 'fr_FR' );
 		add_filter(
 			'lang_dir_for_domain',
 			static fn( $path, $domain, $locale ) => 'woocommerce' === $domain && $site_locale === $locale ? $fixtures_dir : $path,
@@ -239,7 +274,7 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 		);
 		add_filter(
 			'gettext_with_context',
-			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context && 'product' === $text ? $translation . '-' . determine_locale() : $translation,
+			static fn( $translation, $text, $context, $domain ) => 'woocommerce' === $domain && 'slug' === $context && 'product' === $text ? $translation . '-' . determine_locale() . '-' . get_locale() : $translation,
 			10,
 			4
 		);
@@ -253,7 +288,7 @@ class SiteLocaleTest extends WC_Unit_Test_Case {
 			$wp_textdomain_registry->set( 'woocommerce', $site_locale, $original_translation_path );
 		}
 
-		$this->assertSame( 'site-product-wc_TEST', $product_slug, 'A gettext filter should receive the site locale translation and see the site locale.' );
+		$this->assertSame( 'site-product-wc_TEST-wc_TEST', $product_slug, 'A gettext filter should receive the site locale translation and see the site locale.' );
 		$this->assertSame( 'product-tag', $product_tag_slug, 'An untranslated slug should be returned unchanged.' );
 		$this->assertSame( $original_controller_locale, $translation_controller->get_locale(), 'The translation controller locale should be restored.' );
 		$this->assertSame( 'en_US', determine_locale(), 'The request locale should stay unchanged.' );

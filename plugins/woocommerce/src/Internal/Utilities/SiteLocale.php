@@ -82,6 +82,7 @@ class SiteLocale {
 
 			// Filters that check the request locale should see the site locale here.
 			add_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
+			add_filter( 'locale', $use_site_locale, PHP_INT_MAX );
 
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Both filters are documented in wp-includes/l10n.php.
 			$filtered_slug = apply_filters( 'gettext_with_context', $translated_slug, $slug, 'slug', 'woocommerce' );
@@ -89,6 +90,7 @@ class SiteLocale {
 			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} finally {
 			remove_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
+			remove_filter( 'locale', $use_site_locale, PHP_INT_MAX );
 			self::$is_translating = false;
 		}
 
@@ -129,7 +131,10 @@ class SiteLocale {
 			}
 
 			if ( is_string( $translation_path ) && '' !== $translation_path ) {
-				load_textdomain( 'woocommerce', trailingslashit( $translation_path ) . 'woocommerce-' . $locale . '.mo', $locale );
+				// Like core, a language directory inside the active theme holds files named after the locale only.
+				$translation_path = trailingslashit( $translation_path );
+				$is_theme_path    = str_starts_with( $translation_path, trailingslashit( get_template_directory() ) ) || str_starts_with( $translation_path, trailingslashit( get_stylesheet_directory() ) );
+				load_textdomain( 'woocommerce', $translation_path . ( $is_theme_path ? '' : 'woocommerce-' ) . $locale . '.mo', $locale );
 			}
 
 			$translated_slug = $translation_controller->translate( $slug, 'slug', 'woocommerce', $locale );
