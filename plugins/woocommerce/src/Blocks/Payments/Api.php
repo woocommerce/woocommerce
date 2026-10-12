@@ -127,16 +127,6 @@ class Api {
 	 * @param PaymentMethodRegistry $payment_method_registry Payment method registry instance.
 	 */
 	public function register_payment_method_integrations( PaymentMethodRegistry $payment_method_registry ) {
-		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
-		wp_prime_option_caches(
-			array(
-				'woocommerce_cheque_settings',
-				'woocommerce_paypal_settings',
-				'woocommerce_bacs_accounts',
-				'woocommerce_cod_settings',
-			)
-		);
-
 		$payment_method_registry->register(
 			Package::container()->get( Cheque::class )
 		);
@@ -167,7 +157,14 @@ class Api {
 		$payment_method_scripts = $this->payment_method_registry->get_all_active_payment_method_script_dependencies();
 
 		foreach ( $payment_method_scripts as $payment_method_script ) {
-			foreach ( ( $wp_scripts->registered[ $payment_method_script ]->deps ?? array() ) as $dep ) {
+			if (
+				! array_key_exists( $payment_method_script, $wp_scripts->registered ) ||
+				! property_exists( $wp_scripts->registered[ $payment_method_script ], 'deps' )
+			) {
+				continue;
+			}
+			$deps = $wp_scripts->registered[ $payment_method_script ]->deps;
+			foreach ( $deps as $dep ) {
 				if ( ! wp_script_is( $dep, 'registered' ) ) {
 					$error_handle  = $dep . '-dependency-error';
 					$error_message = sprintf(
