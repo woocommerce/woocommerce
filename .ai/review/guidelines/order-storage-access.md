@@ -6,7 +6,7 @@
 - #65493: legacy admin reports and `wc/v3/reports/sales` built their SQL on `{$wpdb->posts}` and returned empty results on HPOS-authoritative sites with sync off.
 - #67015: the #65493 fix translated only some legacy `posts` columns, so a bare `post_status` reached `wc_orders` and reports rendered zeros with no error.
 
-**What broke:** Code outside the order data stores read orders from `wp_posts` / `wp_postmeta`. With HPOS authoritative and compatibility sync off, those tables hold only `shop_order_placehold` posts or nothing, so counts, lists, and totals came back empty without an error.
+**What broke:** Code outside the order data stores read orders from `wp_posts` / `wp_postmeta`. With HPOS authoritative and compatibility sync off, those tables hold `shop_order_placehold` posts, nothing, or stale copies from before sync was turned off, so counts, lists, and totals came back empty or wrong without an error.
 
 **Pattern to catch:**
 

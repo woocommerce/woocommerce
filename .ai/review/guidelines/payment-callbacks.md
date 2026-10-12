@@ -20,4 +20,4 @@
 
 **How to confirm:** Send the handler the same event twice, then an older event after a newer one. Does the order change state again? Move the order through processing and completed twice: how many gateway requests go out? Remove the sender proof: can an anonymous request reach the state change? Send a field with the wrong type: does the handler log and return, or fatal?
 
-**Don't flag when:** A request that no callback or status change can repeat (building the checkout redirect). A duplicate check already present in a shared helper the handler calls. A missing nonce on an IPN, webhook, or gateway return: sender proof is the guard there.
+**Don't flag when:** A request that no callback or status change can repeat (building the checkout redirect). A duplicate check in a shared helper that guards this event and every write it makes (status, transaction ID, meta, notes). A missing nonce on an IPN, webhook, or gateway return: sender proof is the guard there.
