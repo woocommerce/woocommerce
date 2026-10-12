@@ -77,6 +77,35 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should return no products when no products are on sale.
+	 */
+	public function test_merging_on_sale_queries_without_products_on_sale(): void {
+		set_transient( 'wc_products_onsale', array(), DAY_IN_SECONDS * 30 );
+
+		$parsed_block                                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertSame( array( 0 ), $merged_query['post__in'], 'The on sale filter should match no products when none are on sale.' );
+	}
+
+	/**
+	 * @testdox Should return no products when no products are on sale and hand-picked products are set.
+	 */
+	public function test_merging_on_sale_queries_without_products_on_sale_and_handpicked_products(): void {
+		set_transient( 'wc_products_onsale', array(), DAY_IN_SECONDS * 30 );
+
+		$parsed_block                                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array( 1, 2 );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertSame( array( 0 ), $merged_query['post__in'], 'Hand-picked products should not be returned when none are on sale.' );
+	}
+
+	/**
 	 * Test merging stock status queries.
 	 */
 	public function test_merging_stock_status_queries() {
@@ -739,7 +768,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
-		$this->assertEquals( array( -1 ), $merged_query['post__in'] );
+		$this->assertEquals( array( 0 ), $merged_query['post__in'] );
 	}
 
 	/**
