@@ -144,6 +144,15 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register the resources that Core registers before the init action.
+	 */
+	private function register_resources(): void {
+		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
+			AbilityExtensions::register_resource( $resource_name );
+		}
+	}
+
+	/**
 	 * @testdox Should return the fields of each extension under its namespace, and leave out a product with no values.
 	 */
 	public function test_product_reads_return_fields_under_their_namespace(): void {
@@ -217,10 +226,76 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should fire woocommerce_ability_extensions_init one time, before the abilities build their schemas.
 	 */
 	public function test_init_action_fires_once_before_the_schemas(): void {
+		$events     = array();
+		$on_init    = static function () use ( &$events ) {
+			$events[] = 'extensions';
+		};
+		$on_ability = static function ( $args, $name ) use ( &$events ) {
+			$events[] = $name;
+			return $args;
+		};
+		add_action( 'woocommerce_ability_extensions_init', $on_init );
+		add_filter( 'wp_register_ability_args', $on_ability, 10, 2 );
+
 		$this->get_output_schema( 'woocommerce/products-query' );
 		do_action( 'wp_abilities_api_init' );
 
+		remove_action( 'woocommerce_ability_extensions_init', $on_init );
+		remove_filter( 'wp_register_ability_args', $on_ability, 10 );
 		$this->assertSame( 1, did_action( 'woocommerce_ability_extensions_init' ) );
+		$this->assertSame( 'extensions', $events[0] );
+		$this->assertSame( 1, count( array_keys( $events, 'extensions', true ) ) );
+		$this->assertContains( 'woocommerce/products-query', $events );
+	}
+
+	/**
+	 * @testdox Should refuse a field that is registered after the init action, and keep the abilities valid.
+	 */
+	public function test_a_field_registered_after_the_init_action_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_field' );
+		$this->get_output_schema( 'woocommerce/products-query' );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen late' ) );
+
+		AbilityExtensions::register_field(
+			array(
+				'resource'     => 'product',
+				'namespace'    => 'late-ext',
+				'field'        => 'code',
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'late',
+			)
+		);
+		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen late' ) )['products'], null, 'id' );
+
+		$this->assertArrayNotHasKey( 'late-ext', $products[ $product->get_id() ]['extensions'] ?? array() );
+		$this->assertArrayNotHasKey( 'late-ext', AbilityExtensions::add_fields_to_object( array(), 'product', $product )['extensions'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should let an extension register a resource and fields on it.
+	 */
+	public function test_register_resource_lets_an_extension_register_fields_on_its_own_resource(): void {
+		$register = static function () {
+			AbilityExtensions::register_resource( 'ticket' );
+			AbilityExtensions::register_field(
+				array(
+					'resource'     => 'ticket',
+					'namespace'    => 'test-ext',
+					'field'        => 'code',
+					'schema'       => array( 'type' => 'string' ),
+					'get_callback' => static fn() => 'T1',
+				)
+			);
+		};
+		add_action( 'woocommerce_ability_extensions_init', $register );
+		$this->get_output_schema( 'woocommerce/products-query' );
+		remove_action( 'woocommerce_ability_extensions_init', $register );
+
+		$output = AbilityExtensions::add_fields_to_object( array(), 'ticket', new \stdClass() );
+		$schema = AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
+
+		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $output['extensions'] );
+		$this->assertSame( array( 'type' => 'string' ), $schema['properties']['extensions']['properties']['test-ext']['properties']['code'] );
 	}
 
 	/**
@@ -306,6 +381,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			'schema'       => array( 'type' => 'string' ),
 			'get_callback' => static fn() => 'second',
 		);
+		$this->register_resources();
 		$this->register_test_fields();
 
 		AbilityExtensions::register_field( $valid );
@@ -313,6 +389,16 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => '' ) ) );
 		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => null ) ) );
 		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'get_callback' => 'not_a_function' ) ) );
+		AbilityExtensions::register_field(
+			array_merge(
+				$valid,
+				array(
+					'field'    => 'other',
+					'resource' => 'line_item',
+				)
+			)
+		);
+		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => array( 'description' => 'x' ) ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
@@ -325,6 +411,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should leave out a field that throws, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
+		$this->register_resources();
 		$this->register_test_fields();
 		$fields = array(
 			'broken' => array(
@@ -458,7 +545,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported' ) as $property ) {
+		foreach ( array( 'fields', 'reported', 'resources' ) as $property ) {
 			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
