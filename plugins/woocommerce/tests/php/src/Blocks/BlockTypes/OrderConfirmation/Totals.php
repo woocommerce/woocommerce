@@ -102,10 +102,12 @@ class Totals extends \WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
-		parent::tearDown();
-		remove_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ) );
-		WC()->cart->empty_cart();
-		WC()->session->destroy_session();
+		try {
+			// The session handler deletes its row through $wpdb, so this has to run before the rollback.
+			WC()->session->destroy_session();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
