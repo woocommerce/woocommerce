@@ -97,9 +97,10 @@ class StepLogTableReader {
 
 			/*
 			 * Windows are walked newest first, so everything left is older than
-			 * what is held and cannot belong on this page.
+			 * this window's oldest row. That row's second can carry on into the
+			 * next window, so stop only once a full page is newer than it.
 			 */
-			if ( count( $rows ) >= $limit ) {
+			if ( count( array_filter( $rows, fn( array $row ) => null === $oldest || $row['timestamp'] > $oldest ) ) >= $limit ) {
 				$covered_from = null === $oldest ? $from : $oldest;
 				$has_more     = $upper > 0 && $covered_from > $from;
 				break;

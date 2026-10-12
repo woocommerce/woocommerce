@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\StepLogTableReader;
 use WC_Log_Handler_DB;
+use WC_Log_Levels;
 use WC_Unit_Test_Case;
 
 /**
@@ -77,6 +78,63 @@ class StepLogTableReaderTest extends WC_Unit_Test_Case {
 		$result = $this->sut->read( 'push-token-404', time() - DAY_IN_SECONDS, time() );
 
 		$this->assertSame( array(), $result['rows'] );
+	}
+
+	/**
+	 * @testdox Should read on into the next window when the page's last second carries on there.
+	 */
+	public function test_read_does_not_stop_partway_through_a_second(): void {
+		$now  = time();
+		$edge = $this->next_free_log_id() + 10;
+		$top  = $edge + StepLogTableReader::WINDOW_SIZE;
+
+		// Three newer lines, then five lines of one second on both sides of the edge between two windows.
+		foreach ( array( $top, $top - 1, $top - 2 ) as $offset => $log_id ) {
+			$this->insert_row( $log_id, $now - 1 - $offset, 'Newer ' . $offset );
+		}
+
+		foreach ( range( $edge - 2, $edge + 2 ) as $log_id ) {
+			$this->insert_row( $log_id, $now - 10, 'Split ' . $log_id );
+		}
+
+		$rows = $this->sut->read( 'push-token-1', $now - HOUR_IN_SECONDS, $now, 5 )['rows'];
+
+		$this->assertCount( 5, array_filter( $rows, fn( array $row ) => $now - 10 === $row['timestamp'] ), 'Every line of the second on the window edge should be read.' );
+	}
+
+	/**
+	 * Returns an ID above every row in the log table, for rows placed by ID.
+	 *
+	 * @return int
+	 */
+	private function next_free_log_id(): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var( "SELECT COALESCE( MAX(log_id), 0 ) FROM {$wpdb->prefix}woocommerce_log" ) + 1; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * Writes one `push-token-1` row at a chosen ID, as the database handler would.
+	 *
+	 * @param int    $log_id    The row ID.
+	 * @param int    $timestamp The row's timestamp.
+	 * @param string $message   The message.
+	 * @return void
+	 */
+	private function insert_row( int $log_id, int $timestamp, string $message ): void {
+		global $wpdb;
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_log',
+			array(
+				'log_id'    => $log_id,
+				'timestamp' => gmdate( 'Y-m-d H:i:s', $timestamp ),
+				'level'     => WC_Log_Levels::get_level_severity( 'info' ),
+				'source'    => 'push-token-1',
+				'message'   => $message,
+			),
+			array( '%d', '%s', '%d', '%s', '%s' )
+		);
 	}
 
 	/**
