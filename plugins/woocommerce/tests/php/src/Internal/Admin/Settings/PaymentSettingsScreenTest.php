@@ -79,7 +79,7 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 	 */
 	private function register_example_screen(): void {
 		add_filter(
-			'woocommerce_experimental_payment_settings_screens',
+			'__experimental_woocommerce_payment_settings_screens',
 			fn( $screens ) => array_merge(
 				$screens,
 				array(

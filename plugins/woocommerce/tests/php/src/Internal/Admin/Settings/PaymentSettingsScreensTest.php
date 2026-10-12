@@ -91,7 +91,7 @@ class PaymentSettingsScreensTest extends WC_Unit_Test_Case {
 	 * @testdox Should return no screens when the filter returns something other than an array.
 	 */
 	public function test_returns_no_screens_for_invalid_filter_result(): void {
-		add_filter( 'woocommerce_experimental_payment_settings_screens', fn() => 'not an array' );
+		add_filter( '__experimental_woocommerce_payment_settings_screens', fn() => 'not an array' );
 
 		$this->assertSame( array(), $this->sut->get_screens() );
 	}
@@ -102,6 +102,6 @@ class PaymentSettingsScreensTest extends WC_Unit_Test_Case {
 	 * @param array $screens The screens to register.
 	 */
 	private function register_screens( array $screens ): void {
-		add_filter( 'woocommerce_experimental_payment_settings_screens', fn() => $screens );
+		add_filter( '__experimental_woocommerce_payment_settings_screens', fn() => $screens );
 	}
 }

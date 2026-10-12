@@ -39,7 +39,7 @@ final class PaymentSettingsScreens {
 		 *
 		 * @param array $screens The registered screens.
 		 */
-		$screens = apply_filters( 'woocommerce_experimental_payment_settings_screens', array() );
+		$screens = apply_filters( '__experimental_woocommerce_payment_settings_screens', array() );
 		if ( ! is_array( $screens ) ) {
 			return array();
 		}

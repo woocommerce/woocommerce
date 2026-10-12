@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 // The screen, entity and endpoint used by the example.
 add_filter(
-	'woocommerce_experimental_payment_settings_screens',
+	'__experimental_woocommerce_payment_settings_screens',
 	static function ( $screens ) {
 		$screens['example'] = array(
 			'title'     => 'Example gateway settings',
