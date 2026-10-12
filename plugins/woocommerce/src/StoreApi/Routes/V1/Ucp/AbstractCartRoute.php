@@ -68,11 +68,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Refuse an id this store never signed, then hand off with the token slot restored.
+	 * Refuse an id this store never signed, and restore the token slot afterwards.
 	 *
-	 * The slot is per-process, not per-dispatch, so a second route dispatched in the same
-	 * process — `rest_do_request()` from other code, or a test — would otherwise inherit
-	 * this cart's token and bind to its session.
+	 * The slot is per-process, so leaving it set would bind the next dispatch in the same
+	 * process — an internal `rest_do_request()`, or a test — to this cart's session.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -268,7 +267,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Build a transport-level error response.
+	 * Build an error response.
+	 *
+	 * `$status` follows the split UCP draws: a malformed request is a transport error and
+	 * keeps a non-2xx status, while a valid request that ends in a refusal is a business
+	 * outcome and is reported at 200 through `ucp.status` and `messages`.
 	 *
 	 * @param string $code Error code.
 	 * @param string $message Error message.
@@ -299,8 +302,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * Build the response for a cart id that does not resolve.
 	 *
-	 * Never existed, expired and cancelled are reported alike, in the envelope rather
-	 * than as a 404: UCP clients read `ucp.status`, not the HTTP status.
+	 * Never existed, expired and cancelled are reported alike, and at 200: the request was
+	 * valid, so the refusal is a business outcome. See `ucp_error()`.
 	 *
 	 * @return \WP_REST_Response
 	 */
@@ -329,6 +332,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * Two lines can hold the same product and differ only in cart item data, as an add-on
 	 * does, so a payload naming a line is collected per cart item. A line id the cart no
 	 * longer holds falls back to `item.id`: the buyer may have removed it meanwhile.
+	 *
+	 * A malformed payload is refused at 400, an unsellable id at 200 — see `ucp_error()`.
 	 *
 	 * @param mixed $line_items Raw `line_items` value.
 	 * @return array{by_key: array<string, int>, by_product: array<int, int>}|\WP_REST_Response
@@ -370,7 +375,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$product_id = $this->resolve_item_id( (string) $line_item['item']['id'] );
 
 			if ( 0 === $product_id ) {
-				return $this->ucp_error( 'not_found', __( 'Product not found.', 'woocommerce' ), 'unrecoverable', 400, $path . '.item.id' );
+				// The payload is well formed; the store simply has nothing purchasable
+				// under that id. A business outcome, so 200 like every other `not_found`.
+				return $this->ucp_error( 'not_found', __( 'Product not found.', 'woocommerce' ), 'unrecoverable', 200, $path . '.item.id' );
 			}
 
 			// Repeating an id is additive, matching how a cart treats two adds of the

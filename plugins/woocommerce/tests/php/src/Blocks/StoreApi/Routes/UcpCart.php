@@ -421,6 +421,8 @@ class UcpCart extends ControllerTestCase {
 		$this->assertSame( 400, $zero_quantity->get_status() );
 		$this->assertSame( '$.line_items[0].quantity', $zero_quantity->get_data()['messages'][0]['path'] );
 
+		// A well-formed payload naming an id the store cannot sell is a business outcome,
+		// reported at 200 like every other `not_found`, not a malformed request.
 		$unknown_product = $this->request(
 			'PUT',
 			'/carts/' . $created['id'],
@@ -434,8 +436,10 @@ class UcpCart extends ControllerTestCase {
 			)
 		);
 
-		$this->assertSame( 400, $unknown_product->get_status() );
+		$this->assertSame( 200, $unknown_product->get_status() );
+		$this->assertSame( 'error', $unknown_product->get_data()['ucp']['status'] );
 		$this->assertSame( 'not_found', $unknown_product->get_data()['messages'][0]['code'] );
+		$this->assertSame( '$.line_items[0].item.id', $unknown_product->get_data()['messages'][0]['path'] );
 
 		// The cart itself is untouched by a refused update.
 		$this->assertCount( 1, $this->request( 'GET', '/carts/' . $created['id'] )->get_data()['line_items'] );
