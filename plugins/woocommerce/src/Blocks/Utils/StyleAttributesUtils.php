@@ -801,7 +801,7 @@ class StyleAttributesUtils {
 	public static function get_global_styles( array $path = array() ) {
 		static $resolved_styles = array();
 
-		// The wp_get_global_styles downstream workflows has some caching, bur merging routines are heavy.
+		// The wp_get_global_styles downstream workflows has some caching, but merging routines are heavy.
 		// In PHPUnit environment, workarounds are bypassing upstream caching hence we skip static cache to keep tests green.
 		$theme                     = get_stylesheet();
 		$resolved_styles[ $theme ] = $resolved_styles[ $theme ] ?? wp_get_global_styles();
