@@ -42,7 +42,7 @@ final class Payments {
 	/**
 	 * Whether a registered gateway supports engine charges ({@see self::GATEWAY_FEATURE}).
 	 * Reads the gateway's `supports()`, so core's `woocommerce_payment_gateway_supports`
-	 * filter applies. False for an empty or unknown id, or when WooCommerce is not loaded.
+	 * filter applies. False for an empty or unknown id.
 	 *
 	 * @param string $gateway_id Gateway id.
 	 */
@@ -132,16 +132,7 @@ final class Payments {
 	 * @param string $gateway_id Gateway id.
 	 */
 	private static function get_gateway( string $gateway_id ): ?WC_Payment_Gateway {
-		if ( '' === $gateway_id || ! function_exists( 'WC' ) ) {
-			return null;
-		}
-
-		$gateways = WC()->payment_gateways();
-		if ( ! is_object( $gateways ) || ! method_exists( $gateways, 'payment_gateways' ) ) {
-			return null;
-		}
-
-		$gateway = $gateways->payment_gateways()[ $gateway_id ] ?? null;
+		$gateway = WC()->payment_gateways()->payment_gateways()[ $gateway_id ] ?? null;
 
 		return $gateway instanceof WC_Payment_Gateway ? $gateway : null;
 	}
