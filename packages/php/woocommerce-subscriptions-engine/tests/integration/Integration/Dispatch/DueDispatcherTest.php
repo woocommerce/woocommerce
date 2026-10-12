@@ -351,21 +351,6 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Scheduling the due scan removes the renewal scan action of earlier builds.
-	 */
-	public function test_scheduling_removes_the_earlier_renewal_scan_action(): void {
-		delete_option( self::SCHEDULE_CHECK_OPTION );
-		as_schedule_recurring_action( time() + 600, 600, 'woocommerce_subscriptions_engine_dispatch_due_renewals', array(), DueDispatcher::GROUP );
-		update_option( 'woocommerce_subscriptions_engine_dispatch_scheduled_check', time() + 3600 );
-
-		$this->register_recording_handler();
-		DueDispatcher::ensure_scheduled();
-
-		$this->assertFalse( as_next_scheduled_action( 'woocommerce_subscriptions_engine_dispatch_due_renewals', array(), DueDispatcher::GROUP ) );
-		$this->assertFalse( get_option( 'woocommerce_subscriptions_engine_dispatch_scheduled_check', false ) );
-	}
-
-	/**
 	 * @testdox handle_tick runs a batch at the current moment.
 	 */
 	public function test_handle_tick_routes_to_run_batch(): void {

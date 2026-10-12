@@ -121,10 +121,6 @@ final class DueDispatcher {
 		}
 
 		if ( ! self::is_scheduled() ) {
-			// Pre-release cleanup: drop the renewal scan action and its cache option from earlier builds.
-			as_unschedule_all_actions( 'woocommerce_subscriptions_engine_dispatch_due_renewals', array(), self::GROUP );
-			delete_option( 'woocommerce_subscriptions_engine_dispatch_scheduled_check' );
-
 			// `$unique = true` is a best-effort dedup; the per-contract claim keeps a
 			// duplicate recurring action from notifying a contract twice.
 			as_schedule_recurring_action( time() + self::INTERVAL_SECONDS, self::INTERVAL_SECONDS, self::HOOK, array(), self::GROUP, true );
