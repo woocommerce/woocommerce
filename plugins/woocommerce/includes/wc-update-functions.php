@@ -4119,7 +4119,7 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 }
 
 /**
- * Re-run the autoload migration for options whose settings definitions had 'autoload' => false, reverting the migration on the settings modification.
+ * Re-run the autoload migration for options whose settings definitions reverted it on save.
  *
  * @since 11.3.0
  */
