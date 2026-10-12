@@ -491,6 +491,8 @@ class DataUtils {
 	 * Both refund paths use this limit. The computed path passes a tax-inclusive
 	 * amount; the explicit wc/v3 path passes its tax-inclusive gross amount.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Fee|WC_Order_Item_Shipping $item                  Original order item.
 	 * @param float                                                          $refund_total          Requested line item refund amount.
 	 * @param float                                                          $already_refunded_total Prior refunds for this item, including tax.
