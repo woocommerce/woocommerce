@@ -47,21 +47,6 @@ type ProductBlockConfig< T extends BlockAttributes > = ProductBlockSettings & {
 };
 
 /**
- * Configuration object for registering a product block type.
- *
- * @typedef {Object} ProductBlockRegistrationConfig
- * @template T Extends BlockAttributes to define the block's attribute types
- * @property {Partial<BlockConfiguration>} settings                - Block settings configuration
- * @property {boolean}                     [isVariationBlock]      - Whether this block is a variation
- * @property {string}                      [variationName]         - The name of the variation if applicable
- * @property {boolean}                     isAvailableOnPostEditor - Whether the block should be available in post editor
- */
-type ProductBlockRegistrationConfig< T extends BlockAttributes > = Partial<
-	BlockConfiguration< T >
-> &
-	ProductBlockSettings;
-
-/**
  * Manages block registration and unregistration for WooCommerce product blocks in different contexts.
  * Implements the Singleton pattern to ensure consistent block management across the application.
  */
@@ -389,7 +374,7 @@ const hasBlockName = < T extends BlockAttributes >(
  */
 export const registerProductBlockType = < T extends BlockAttributes >(
 	metadata: BlockConfiguration< T >,
-	settings?: ProductBlockRegistrationConfig< BlockConfiguration< T > >
+	settings?: ProductBlockSettings
 ): void => {
 	if ( ! hasBlockName( metadata ) ) {
 		// eslint-disable-next-line no-console
