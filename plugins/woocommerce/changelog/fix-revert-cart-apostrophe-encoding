@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Revert the unreleased classic cart apostrophe encoding; cart requests match 11.2, no merchant change.
