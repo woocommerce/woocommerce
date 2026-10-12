@@ -105,9 +105,14 @@ final class DueDispatcher {
 	 *
 	 * A positive check is cached in an autoloaded option and re-verified once per re-check
 	 * window, so most requests skip the Action Scheduler store query. Call once Action
-	 * Scheduler is available (`action_scheduler_init`).
+	 * Scheduler is available (`action_scheduler_init`). Without Action Scheduler (for
+	 * example from a deactivation hook while WooCommerce is inactive) it does nothing.
 	 */
 	public static function ensure_scheduled(): void {
+		if ( ! self::action_scheduler_available() ) {
+			return;
+		}
+
 		if ( array() === ConsumerRegistry::get_slugs_with_contract_due_handler() ) {
 			if ( false !== get_option( self::SCHEDULE_CHECK_OPTION, false ) ) {
 				as_unschedule_all_actions( self::HOOK, array(), self::GROUP );
@@ -128,6 +133,15 @@ final class DueDispatcher {
 		}
 
 		update_option( self::SCHEDULE_CHECK_OPTION, time() + self::SCHEDULE_RECHECK_SECONDS, true );
+	}
+
+	/**
+	 * Whether the Action Scheduler functions the schedule check calls are loaded.
+	 */
+	private static function action_scheduler_available(): bool {
+		return function_exists( 'as_next_scheduled_action' )
+			&& function_exists( 'as_schedule_recurring_action' )
+			&& function_exists( 'as_unschedule_all_actions' );
 	}
 
 	/**
