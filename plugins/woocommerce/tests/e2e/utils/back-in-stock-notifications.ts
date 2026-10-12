@@ -882,6 +882,12 @@ export const bisNotice = {
 				productName
 			) }" becomes available\\.`
 		),
+	/**
+	 * Printed on the shop page after an unsubscribe link is followed for a
+	 * notification that was already sent.
+	 */
+	alreadySent:
+		/This notification has already been sent, so there is nothing to unsubscribe from\./,
 	errors: {
 		invalidEmail: /Invalid email address\./,
 		invalidProduct: /Invalid product\./,
