@@ -109,18 +109,18 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		$probe = clone $order;
-		$probe->set_status( $status );
-		if ( $status !== $probe->get_status() ) {
-			return new \WP_Error(
-				'woocommerce_order_status_invalid',
-				/* translators: %s: order status slug. */
-				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
-				array( 'status' => 400 )
-			);
-		}
-
 		try {
+			$probe = clone $order;
+			$probe->set_status( $status );
+			if ( $status !== $probe->get_status() ) {
+				return new \WP_Error(
+					'woocommerce_order_status_invalid',
+					/* translators: %s: order status slug. */
+					sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
+					array( 'status' => 400 )
+				);
+			}
+
 			$updated = $order->update_status(
 				$status,
 				isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
