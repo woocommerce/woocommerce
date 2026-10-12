@@ -531,26 +531,60 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not resume a continuation saved without a last product ID.
+	 * @testdox Should restart a continuation saved by a version that tracked pages instead of product IDs.
 	 */
-	public function test_feed_generation_does_not_resume_status_without_last_id() {
-		$this->mock_integration->expects( $this->never() )->method( 'create_feed' );
+	public function test_feed_generation_restarts_legacy_page_based_continuation() {
+		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
 
-		// A continuation saved by a version that tracked pages instead of product IDs.
-		$status = array(
-			'state'           => AsyncGenerator::STATE_IN_PROGRESS,
-			'file_name'       => 'pos-catalog-feed-legacy.json',
-			'page'            => 3,
-			'processed'       => 2,
-			'entries_written' => 2,
-			'total'           => 5,
-			'updated_at'      => time(),
+		$this->setup_real_feed_integration();
+
+		$product_ids = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
+		}
+
+		// A partial feed written by the older version an hour ago, holding a stale entry. Feed file names
+		// are derived from the current second, so the earlier time keeps it distinct from the restarted feed.
+		$an_hour_ago = fn() => time() - HOUR_IN_SECONDS;
+		add_filter( 'woocommerce_product_feed_time', $an_hour_ago );
+		$legacy_feed = new JsonFileFeed( 'pos-catalog-feed-test' );
+		$legacy_file = $legacy_feed->open();
+		$legacy_feed->add_entry( array( 'id' => 999999 ) );
+		$legacy_feed->flush();
+		remove_filter( 'woocommerce_product_feed_time', $an_hour_ago );
+		$legacy_path = wp_upload_dir()['basedir'] . '/' . JsonFileFeed::UPLOAD_DIR . '/' . $legacy_file;
+
+		update_option(
+			self::OPTION_KEY,
+			array(
+				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
+				'file_name'       => $legacy_file,
+				'page'            => 2,
+				'processed'       => 1,
+				'entries_written' => 1,
+				'total'           => 3,
+				'updated_at'      => time(),
+			)
 		);
-		update_option( self::OPTION_KEY, $status );
 
-		$this->sut->feed_generation_action( self::OPTION_KEY );
+		$iterations = 0;
+		do {
+			$this->sut->feed_generation_action( self::OPTION_KEY );
+			$status = get_option( self::OPTION_KEY );
+			++$iterations;
+		} while ( AsyncGenerator::STATE_IN_PROGRESS === $status['state'] && $iterations < 10 );
 
-		$this->assertSame( $status, get_option( self::OPTION_KEY ), 'The status should be left for the stuck-job recovery to restart' );
+		$this->assertSame( AsyncGenerator::STATE_COMPLETED, $status['state'] );
+		$this->assertArrayNotHasKey( 'page', $status );
+		$this->assertFileDoesNotExist( $legacy_path, 'The legacy partial feed should be discarded' );
+		$this->assertFalse( get_option( self::OPTION_KEY . '_chunk_size' ), 'A legacy restart should not reduce the chunk size' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$entries = json_decode( (string) file_get_contents( $status['path'] ), true );
+		$this->assertSame( $product_ids, array_column( $entries, 'id' ) );
+
+		wp_delete_file( $status['path'] );
 	}
 
 	/**

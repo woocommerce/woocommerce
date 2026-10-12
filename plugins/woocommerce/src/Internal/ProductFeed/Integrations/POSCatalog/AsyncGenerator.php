@@ -207,10 +207,17 @@ class AsyncGenerator {
 
 		$is_first_chunk = self::STATE_SCHEDULED === $status['state'];
 
-		// A continuation must know which feed file it is appending to and which product to resume after.
-		// If it doesn't (corrupt, or saved by an older version that tracked pages), bail and let the
-		// heartbeat-based recovery restart generation from scratch.
-		if ( ! $is_first_chunk && ( empty( $status['file_name'] ) || ! isset( $status['last_product_id'] ) ) ) {
+		// A continuation saved by an older version tracked pages rather than product IDs, so it cannot be
+		// resumed. Restart it from scratch right away instead of leaving it for the stuck-job recovery.
+		if ( ! $is_first_chunk && ! isset( $status['last_product_id'] ) ) {
+			$this->discard_feed( $status );
+			unset( $status['page'] );
+			$is_first_chunk = true;
+		}
+
+		// A continuation must know which feed file it is appending to. If it doesn't, the status is
+		// corrupt; bail and let the heartbeat-based recovery restart generation from scratch.
+		if ( ! $is_first_chunk && empty( $status['file_name'] ) ) {
 			wc_get_logger()->error( 'Invalid feed generation continuation status', array( 'status' => $status ) );
 			return;
 		}
