@@ -143,11 +143,10 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test a border color slug the palette cannot resolve falls back to the table's own color.
 	 *
-	 * Two failures are pinned here. The slug used to pass through sanitize_color() untouched, since
-	 * it matches that method's permissive named-color branch, and reached the markup as
-	 * `solid theme-4`. Now that it resolves to an empty string, sanitize_color() would turn it into
-	 * black instead, which is why get_custom_border_color() returns null rather than sanitizing: a
-	 * foreign slug must not paint a border color the author never chose.
+	 * Two things are pinned. The slug must not reach the markup: sanitize_color() accepts a bare
+	 * identifier through its permissive named-color branch. And the border must not be black:
+	 * sanitize_color() turns the empty string the slug resolves to into `#000000`, which is why
+	 * get_custom_border_color() reports no color rather than sanitizing.
 	 */
 	public function testItFallsBackToTableColorForUnresolvableBorderColorSlug(): void {
 		$parsed_table                             = $this->parsed_table;

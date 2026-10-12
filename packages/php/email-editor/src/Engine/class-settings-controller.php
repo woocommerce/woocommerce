@@ -185,7 +185,9 @@ class Settings_Controller {
 	}
 
 	/**
-	 * Translate slug to color.
+	 * Translate a color slug to the color the palette gives it.
+	 *
+	 * {@see Theme_Controller::translate_slug_to_color()}.
 	 *
 	 * @param string $color_slug Color slug, or a literal color.
 	 * @return string The color value, or an empty string for a slug the palette does not define.

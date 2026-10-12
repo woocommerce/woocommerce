@@ -152,8 +152,8 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test that a slug the palette does not define translates to an empty string.
 	 *
-	 * Returning the slug would put it in the stylesheet as the color (background-color: theme-4),
-	 * which mail clients drop, losing the block's color entirely.
+	 * The slug as a value (`background-color: theme-4`) is invalid CSS that mail clients drop, which
+	 * costs the block its color.
 	 */
 	public function testItReturnsNoColorForUnknownSlug(): void {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
@@ -163,9 +163,8 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test the generated preset classes agree with the color lookup on a duplicated slug.
 	 *
-	 * The stylesheet emits one rule per definition and the cascade takes the last, while the lookup
-	 * takes the first. A slug defined by more than one origin used to get a different color from
-	 * each route; one definition per slug is what keeps them the same.
+	 * The stylesheet emits one rule per definition and the cascade reads the last, while the lookup
+	 * reads the first, so one definition per slug is what keeps the two routes agreeing.
 	 */
 	public function testItGeneratesPresetClassesThatAgreeWithTheColorLookup(): void {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
@@ -210,8 +209,8 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Test that a literal color passes through untranslated.
 	 *
-	 * Color block attributes usually hold a slug, but they can carry a literal color, and callers
-	 * rely on handing one to this method unchanged.
+	 * Color block attributes usually hold a slug, but a literal color can arrive in one, and callers
+	 * rely on getting it back unchanged.
 	 */
 	public function testItPassesLiteralColorsThrough(): void {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );

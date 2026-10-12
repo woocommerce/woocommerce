@@ -241,9 +241,8 @@ class Typography_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	/**
 	 * Test an unresolvable text color slug is not copied down to children.
 	 *
-	 * Passing the slug on put `color: theme-4` in the children's styles, and passing on the empty
-	 * string it now resolves to would put `color: ;` there. Leaving it unset lets
-	 * set_defaults_from_theme() fill in the theme's own text color instead.
+	 * Passing on the empty string the slug resolves to would put `color: ;` in the children's
+	 * styles. Leaving it unset lets set_defaults_from_theme() supply the theme's own text color.
 	 */
 	public function testItDoesNotCopyUnresolvableTextColorSlugs(): void {
 		$blocks = array(

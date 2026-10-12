@@ -298,13 +298,10 @@ class Theme_Controller {
 	}
 
 	/**
-	 * Translate color slug to color.
+	 * Translate a color slug to the color the palette gives it.
 	 *
-	 * Returns an empty string when the palette has no such slug, so callers skip the declaration
-	 * instead of emitting the slug as a color. A slug can be missing because the post was written
-	 * under a different theme, or because it came from a palette the email does not carry.
-	 *
-	 * A value that is already a literal color passes through untranslated.
+	 * A slug can be missing from the palette because the post was written under a different theme,
+	 * or came from a palette the email does not carry. {@see Styles_Helper::resolve_color_from_palette()}.
 	 *
 	 * @param string $color_slug Color slug, or a literal color.
 	 * @return string The color value, or an empty string for a slug the palette does not define.
