@@ -16,7 +16,10 @@ import { paymentStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import PaymentMethodCard from './payment-method-card';
-import { noticeContexts } from '../../../base/context/event-emit';
+import {
+	noticeContexts,
+	PAYMENT_METHOD_REQUIRED_NOTICE_ID,
+} from '../../../base/context/event-emit';
 
 /**
  * Component used to render all non-saved payment method options.
@@ -72,6 +75,10 @@ const PaymentMethodOptions = () => {
 		( value ) => {
 			__internalSetActivePaymentMethod( value );
 			removeNotice( 'wc-payment-error', noticeContexts.PAYMENTS );
+			removeNotice(
+				PAYMENT_METHOD_REQUIRED_NOTICE_ID,
+				noticeContexts.PAYMENTS
+			);
 			dispatchCheckoutEvent( 'set-active-payment-method', {
 				paymentMethodSlug: value,
 			} );
