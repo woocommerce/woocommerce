@@ -70,9 +70,9 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A contract claimed by another dispatcher between scan and claim is not notified.
+	 * @testdox A contract another dispatcher already claimed is not selected by the scan.
 	 */
-	public function test_a_lost_claim_is_skipped(): void {
+	public function test_a_contract_claimed_before_the_scan_is_not_notified(): void {
 		$this->register_recording_handler();
 		$id = $this->create_due_contract();
 
@@ -80,6 +80,34 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
+	}
+
+	/**
+	 * @testdox A contract whose claim is lost between the scan and the claim is skipped.
+	 */
+	public function test_a_claim_lost_after_the_scan_is_skipped(): void {
+		$first  = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$second = $this->create_due_contract( '2026-02-15 00:00:00' );
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( $first, $second ): void {
+					$this->calls[] = array(
+						'contract' => $contract,
+						'context'  => $context,
+					);
+					if ( $first === $contract->get_id() ) {
+						// Another writer moves the second contract after the scan read it.
+						Contracts::update( $second, array( 'next_payment_gmt' => '2026-02-14 12:00:00' ) );
+					}
+				},
+			)
+		);
+
+		$this->assertSame( 1, $this->sut->run_batch( $this->now() ), 'Only the first contract is notified.' );
+		$this->assertCount( 1, $this->calls );
+		$this->assertSame( $first, $this->calls[0]['contract']->get_id() );
+		$this->assertNull( $this->stored_claim( $second ), 'The lost claim wrote nothing.' );
 	}
 
 	/**
