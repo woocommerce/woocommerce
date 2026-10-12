@@ -121,7 +121,7 @@ class Params implements FilterUrlParam {
 				$param = $filtered['taxonomy'][ $taxonomy ] ?? null;
 				if ( is_string( $param ) && '' !== $param && ( $param === $default_param || ! in_array( $param, $used_params, true ) ) ) {
 					$params['taxonomy'][ $taxonomy ] = $param;
-					$used_params[]                  = $param;
+					$used_params[]                   = $param;
 				}
 			}
 		}
