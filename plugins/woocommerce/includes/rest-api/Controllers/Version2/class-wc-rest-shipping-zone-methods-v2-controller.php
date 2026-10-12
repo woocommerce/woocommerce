@@ -308,7 +308,7 @@ class WC_REST_Shipping_Zone_Methods_V2_Controller extends WC_REST_Shipping_Zones
 					if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
 						try {
 							$value = call_user_func( $field['sanitize_callback'], $request['settings'][ $key ] );
-						} catch ( Exception $e ) {
+						} catch ( Throwable $e ) {
 							$value = new WP_Error( 'rest_setting_value_invalid', $e->getMessage() );
 						}
 					} elseif ( is_callable( array( $this, 'validate_setting_' . $field['type'] . '_field' ) ) ) {
