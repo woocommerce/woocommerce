@@ -57,7 +57,6 @@
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
-				"@wordpress/stylelint-config",
 				"eslint*"
 			],
 			"packages": [

@@ -147,9 +147,19 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Percent fee calculation works as expected with comma as decimal separator. Value after the comma is ignored.
+	 * Percent fee calculation keeps the decimals when the store uses a comma as the decimal separator.
 	 */
 	public function test_evaluate_cost_percent_fee_comma() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="10,1" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'The minimum fee should apply, read with a comma decimal.' );
+
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'[fee percent="10,1"]',
@@ -158,7 +168,82 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 				'cost' => 100,
 			)
 		);
-		$this->assertEquals( 10, $val );
+		$this->assertEquals( 10.1, $val, 'The percentage should keep its decimals.' );
+	}
+
+	/**
+	 * A fee below a comma-decimal minimum is raised to that minimum.
+	 */
+	public function test_evaluate_cost_percent_fee_below_comma_min_fee() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="5" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee below the minimum should be raised to it.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="12,25" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee just below the minimum should be raised to it.' );
+	}
+
+	/**
+	 * A fee below a comma-decimal maximum is not capped.
+	 */
+	public function test_evaluate_cost_percent_fee_below_comma_max_fee() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="3" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 3, $val, 'A fee below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="20,25" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.25, $val, 'A fee just below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="30" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.5, $val, 'A fee above the maximum should be capped to it.' );
+	}
+
+	/**
+	 * A comma-decimal percent fee keeps its decimals inside a cost formula.
+	 */
+	public function test_evaluate_cost_comma_percent_fee_in_formula() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'10,5 + [fee percent="2,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 13.0, $val, 'The fee should keep its decimals when added to a base cost.' );
 	}
 
 	/**

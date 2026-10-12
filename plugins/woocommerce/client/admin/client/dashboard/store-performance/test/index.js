@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { reportsStore, settingsStore } from '@woocommerce/data';
 
 /**
@@ -177,6 +177,12 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	} ),
 } ) );
 
+jest.mock( '~/guided-tours/performance-metrics-tour', () => ( {
+	PerformanceMetricsTour: ( { hasOpenedMenu } ) => (
+		<div>{ hasOpenedMenu ? 'Menu opened' : 'Menu not opened' }</div>
+	),
+} ) );
+
 describe( 'StorePerformance', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
@@ -220,5 +226,31 @@ describe( 'StorePerformance', () => {
 				name: /^Variations Sold 56(\s|$)/,
 			} )
 		).toBeInTheDocument();
+	} );
+
+	it( 'tells the tour when the menu is opened', async () => {
+		render(
+			<StorePerformance
+				controls={ () => null }
+				filters={ [] }
+				hiddenBlocks={ [] }
+				query={ {
+					period: 'month',
+					compare: 'previous_year',
+				} }
+				title="Store Performance"
+			/>
+		);
+
+		expect( screen.getByText( 'Menu not opened' ) ).toBeInTheDocument();
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: 'Choose which analytics to display and the section name',
+			} )
+		);
+
+		// Awaiting lets the popover finish positioning itself after the click.
+		expect( await screen.findByText( 'Menu opened' ) ).toBeInTheDocument();
 	} );
 } );

@@ -48,6 +48,7 @@ class WCAdminAssets {
 	public function __construct() {
 		Features::get_instance();
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_deprecated_scripts_and_styles' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ), 15 );
@@ -61,6 +62,16 @@ class WCAdminAssets {
 	 */
 	public static function get_path( $ext ) {
 		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+	}
+
+	/**
+	 * Registers deprecated scripts and styles.
+	 *
+	 * @return void
+	 */
+	public static function register_deprecated_scripts_and_styles() {
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( 'wc-admin-layout', false );
 	}
 
 	/**
@@ -382,9 +393,6 @@ class WCAdminAssets {
 		// Register the CSS styles.
 		$styles = array(
 			array(
-				'handle' => 'wc-admin-layout',
-			),
-			array(
 				'handle' => 'wc-components',
 			),
 			array(
@@ -395,7 +403,7 @@ class WCAdminAssets {
 			),
 			array(
 				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+				'dependencies' => array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
 			),
 			array(
 				'handle' => 'wc-onboarding',
