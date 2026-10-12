@@ -428,9 +428,9 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		$this->assertContains( 'chain_seq', $indexes, 'Expected the UNIQUE (contract_id, kind, sequence_no) index.' );
 		$this->assertContains( 'chain_count', $indexes, 'Expected the UNIQUE (contract_id, kind, count) index.' );
-		$this->assertContains( 'due', $indexes, 'Expected the due (kind, status, starts_at_gmt) index.' );
 		$this->assertContains( 'order_id', $indexes, 'Expected the (order_id) index.' );
 		$this->assertContains( 'contract_kind', $indexes, 'Expected the (contract_id, kind) index.' );
+		$this->assertNotContains( 'due', $indexes, 'The due dispatcher scans contracts, so cycles carry no due index.' );
 	}
 
 	public function test_cycles_chain_sequence_index_columns_are_in_order(): void {
@@ -448,17 +448,6 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertSame(
 			array( 'contract_id', 'kind', 'count' ),
 			$this->index_columns( $table, 'chain_count' )
-		);
-	}
-
-	public function test_cycles_due_index_columns_are_in_scan_order(): void {
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// The dispatcher scans the due index as (kind, status, starts_at_gmt); the
-		// column order is load-bearing, so assert it exactly, not just existence.
-		$this->assertSame(
-			array( 'kind', 'status', 'starts_at_gmt' ),
-			$this->index_columns( $table, 'due' )
 		);
 	}
 

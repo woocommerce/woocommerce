@@ -55,6 +55,8 @@ final class SchemaInstaller {
 	 * 2.8.0 - contracts `schedule_source` widens to VARCHAR(64) (it holds extension and
 	 *         gateway slugs) and defaults to 'subscriptions_engine' (was 'primitive');
 	 *         pre-freeze, recreate the tables (stored 'primitive' rows are not renamed).
+	 *         Cycles drop the `due (kind, status, starts_at_gmt)` index: the due dispatcher
+	 *         scans contracts, and no cycle read filters on those columns.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
@@ -337,13 +339,11 @@ final class SchemaInstaller {
 		// chain from holding two cycles at one position; `chain_count` (UNIQUE) is the
 		// per-charge idempotency anchor, with `count` nullable so non-counting cycles
 		// (e.g. future trial periods) coexist freely under MySQL's NULL-distinct rule.
-		// The `due` index keys the dispatcher's due-scan in (kind, status, starts_at_gmt)
-		// order, since billing-in-advance fires at `starts_at_gmt`. `order_id` is non-1:1
-		// (an aggregate order may serve many cycles); `contract_kind` serves targeted
-		// per-chain reads (MAX(count), head). `claimed_until` is the cycle lease: stamped when
-		// a caller appends, claims or transitions a cycle with a lease, claimable again once
-		// it passes; the chain's UNIQUE positions remain the primary guard against a duplicate
-		// cycle.
+		// `order_id` is non-1:1 (an aggregate order may serve many cycles); `contract_kind`
+		// serves targeted per-chain reads (MAX(count), head). `claimed_until` is the cycle
+		// lease: stamped when a caller appends, claims or transitions a cycle with a lease,
+		// claimable again once it passes; the chain's UNIQUE positions remain the primary
+		// guard against a duplicate cycle.
 		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.
 		$cycles_sql = "CREATE TABLE {$cycles} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -368,7 +368,6 @@ final class SchemaInstaller {
   PRIMARY KEY  (id),
   UNIQUE KEY chain_seq (contract_id, kind, sequence_no),
   UNIQUE KEY chain_count (contract_id, kind, count),
-  KEY due (kind, status, starts_at_gmt),
   KEY order_id (order_id),
   KEY contract_kind (contract_id, kind)
 ) {$collate};";
