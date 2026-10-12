@@ -1082,11 +1082,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$claimed_until = $this->cycle( $id, $cycle->get_id() )->get_claimed_until_gmt();
 		$this->assertNotNull( $claimed_until );
 		$this->assertGreaterThan( time() + 800, strtotime( $claimed_until . ' UTC' ) );
-		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), 900 ), 'The appender holds the cycle.' );
+		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'The appender holds the cycle.' );
 
 		$this->expire_lease( $cycle->get_id() );
-		$this->assertTrue( Contracts::claim_cycle( $cycle->get_id(), 900 ), 'An expired lease can be taken.' );
-		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), 900 ), 'Only once.' );
+		$this->assertTrue( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'An expired lease can be taken.' );
+		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'Only once.' );
 	}
 
 	/**
@@ -1103,20 +1103,21 @@ class ContractsTest extends EngineIntegrationTestCase {
 		}
 
 		$this->expectException( InvalidArgumentException::class );
-		Contracts::claim_cycle( 1, 0 );
+		Contracts::claim_cycle( 1, CycleStatus::PENDING, 0 );
 	}
 
 	/**
-	 * @testdox claim_cycle wins once on a lease-less pending cycle and never on a billed one.
+	 * @testdox claim_cycle wins once on a lease-less cycle in the status the caller read.
 	 */
 	public function test_claim_cycle_on_lease_less_pending_and_billed_cycles(): void {
 		$id      = $this->contract_with_currency();
 		$billed  = Contracts::add_cycle( $id, $this->cycle_args() );
 		$pending = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
-		$this->assertTrue( Contracts::claim_cycle( $pending->get_id(), 900 ) );
-		$this->assertFalse( Contracts::claim_cycle( $pending->get_id(), 900 ) );
-		$this->assertFalse( Contracts::claim_cycle( $billed->get_id(), 900 ) );
+		$this->assertTrue( Contracts::claim_cycle( $pending->get_id(), CycleStatus::PENDING, 900 ) );
+		$this->assertFalse( Contracts::claim_cycle( $pending->get_id(), CycleStatus::PENDING, 900 ) );
+		$this->assertFalse( Contracts::claim_cycle( $billed->get_id(), CycleStatus::PENDING, 900 ), 'A stale read loses.' );
+		$this->assertTrue( Contracts::claim_cycle( $billed->get_id(), CycleStatus::BILLED, 900 ), 'The caller names the status it read.' );
 	}
 
 	/**
@@ -1173,7 +1174,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertNull( $this->cycle( $id, $cycle_id )->get_claimed_until_gmt(), 'No lease_seconds clears the lease.' );
 
 		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'lease_seconds' => 900 ) ) );
-		$this->assertFalse( Contracts::claim_cycle( $cycle_id, 900 ), 'The retrier holds the lease.' );
+		$this->assertFalse( Contracts::claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the lease.' );
 
 		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'reason' => null ) ) );
 		$this->assertNull( Contracts::get_cycles( $id, 1 )[0]->get_reason(), 'A null reason clears it.' );

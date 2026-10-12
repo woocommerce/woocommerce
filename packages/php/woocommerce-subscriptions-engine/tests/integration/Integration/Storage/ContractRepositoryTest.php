@@ -1080,8 +1080,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$cycle    = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
 		$cycle_id = (int) $cycle->get_id();
 
-		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, 900 ), 'The first caller takes the expired lease.' );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, 900 ), 'The second caller finds a live lease.' );
+		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The first caller takes the expired lease.' );
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The second caller finds a live lease.' );
 
 		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
@@ -1096,21 +1096,35 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id    = $this->sut->insert( $this->make_contract() );
 		$cycle = $this->append_pending_cycle_with_lease( $id, null );
 
-		$this->assertTrue( $this->sut->claim_cycle( (int) $cycle->get_id(), 900 ) );
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), 900 ) );
+		$this->assertTrue( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ) );
+		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ) );
 	}
 
 	/**
-	 * @testdox claim_cycle refuses a live lease and a non-pending cycle.
+	 * @testdox claim_cycle refuses a live lease and a cycle that left the status the caller read.
 	 */
 	public function test_claim_cycle_refuses_a_live_lease_and_a_settled_cycle(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
 		$cycle = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() + 600 ) );
 
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), 900 ), 'A live lease is held by someone else.' );
+		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A live lease is held by someone else.' );
 
 		$this->assertTrue( $this->sut->transition_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array() ) );
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), 900 ), 'A billed cycle is never claimable.' );
+		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A cycle no longer in the read status is not claimable.' );
+	}
+
+	/**
+	 * @testdox claim_cycle leases a cycle in whatever status the caller read, not only pending.
+	 */
+	public function test_claim_cycle_keys_on_the_callers_status(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$cycle_id = (int) $this->append_pending_cycle_with_lease( $id, null )->get_id();
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array() ) );
+
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'A stale read loses.' );
+		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'The current status wins.' );
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'Only once while the lease is live.' );
+		$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value(), 'Claiming does not change the status.' );
 	}
 
 	/**
@@ -1431,7 +1445,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( CycleStatus::PENDING, $retried->get_status()->get_value() );
 		$this->assertNotNull( $retried->get_claimed_until_gmt() );
 		$this->assertGreaterThan( time() + 800, strtotime( $retried->get_claimed_until_gmt() . ' UTC' ) );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, 900 ), 'The retrier holds the lease.' );
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the lease.' );
 	}
 
 	/**

@@ -243,17 +243,19 @@ final class Contracts {
 	}
 
 	/**
-	 * Take the lease of a `pending` cycle whose lease expired or was never set. A
-	 * compare-and-set: of concurrent callers exactly one gets true and holds the cycle for
-	 * `$lease_seconds`; the others get false. Leases are measured on the database clock.
+	 * Take the lease of a cycle still in `$status` whose lease expired or was never set. A
+	 * compare-and-set on the status and the lease: of concurrent callers that read `$status`,
+	 * exactly one gets true and holds the cycle for `$lease_seconds`; the others get false.
+	 * Leases are measured on the database clock.
 	 *
-	 * @param int $cycle_id      Cycle id.
-	 * @param int $lease_seconds Lease length in seconds (positive).
+	 * @param int    $cycle_id      Cycle id.
+	 * @param string $status        The status the caller read; the cycle must still carry it.
+	 * @param int    $lease_seconds Lease length in seconds (positive).
 	 * @return bool True when the caller now holds the cycle.
 	 * @throws InvalidArgumentException If `$lease_seconds` is not positive.
 	 */
-	public static function claim_cycle( int $cycle_id, int $lease_seconds ): bool {
-		return ( new ContractRepository() )->claim_cycle( $cycle_id, ArgumentValidator::validate_positive_int( 'lease_seconds', $lease_seconds ) );
+	public static function claim_cycle( int $cycle_id, string $status, int $lease_seconds ): bool {
+		return ( new ContractRepository() )->claim_cycle( $cycle_id, $status, ArgumentValidator::validate_positive_int( 'lease_seconds', $lease_seconds ) );
 	}
 
 	/**

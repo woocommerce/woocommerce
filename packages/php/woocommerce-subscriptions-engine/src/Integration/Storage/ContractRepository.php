@@ -1084,16 +1084,17 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Take the lease of a `pending` cycle whose lease has expired or was never set, for
-	 * `$lease_seconds`. A compare-and-set: among concurrent callers exactly one matches the
-	 * row. The expiry check and the new lease use the database clock (`UTC_TIMESTAMP()`), the
-	 * one clock every worker shares.
+	 * Take the lease of a cycle in `$status` whose lease has expired or was never set, for
+	 * `$lease_seconds`. A compare-and-set on the status and the lease: among concurrent
+	 * callers exactly one matches the row. The expiry check and the new lease use the
+	 * database clock (`UTC_TIMESTAMP()`), the one clock every worker shares.
 	 *
-	 * @param int $cycle_id      Cycle id.
-	 * @param int $lease_seconds Lease length in seconds, from the database's now.
+	 * @param int    $cycle_id      Cycle id.
+	 * @param string $status        The status the caller read; the compare-and-set predicate (not validated).
+	 * @param int    $lease_seconds Lease length in seconds, from the database's now.
 	 * @return bool True when this caller took the lease.
 	 */
-	public function claim_cycle( int $cycle_id, int $lease_seconds ): bool {
+	public function claim_cycle( int $cycle_id, string $status, int $lease_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1105,7 +1106,7 @@ final class ContractRepository {
 				WHERE id = %d AND status = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
 				$lease_seconds,
 				$cycle_id,
-				CycleStatus::PENDING
+				$status
 			)
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
