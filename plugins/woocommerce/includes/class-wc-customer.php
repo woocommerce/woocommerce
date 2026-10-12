@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Internal\Tax\CartWithoutShipping;
 
 require_once __DIR__ . '/legacy/class-wc-legacy-customer.php';
 
@@ -189,7 +190,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get taxable address.
 	 *
-	 * @see Automattic\WooCommerce\Internal\Tax\NonShippingCartTaxLocation
+	 * @see Automattic\WooCommerce\Internal\Tax\CartWithoutShipping
 	 * @return array
 	 */
 	public function get_taxable_address() {
@@ -198,6 +199,11 @@ class WC_Customer extends WC_Legacy_Customer {
 		// Check shipping method at this point to see if we need special handling.
 		if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && count( array_intersect( wc_get_chosen_shipping_method_ids(), apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) > 0 ) {
 			$tax_based_on = TaxBasedOn::BASE;
+		}
+
+		if ( wc_get_container()->get( CartWithoutShipping::class )->should_use_billing_address( $this ) ) {
+			// Nothing in the cart needs shipping, so use the billing address.
+			$tax_based_on = TaxBasedOn::BILLING;
 		}
 
 		if ( TaxBasedOn::BASE === $tax_based_on ) {

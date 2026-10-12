@@ -7,11 +7,12 @@ namespace Automattic\WooCommerce\Internal\Tax;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 
 /**
- * Selects the billing address for shipping-based tax when cart products do not need shipping.
+ * Decides when shipping-based tax should use the billing address because nothing in the cart ships.
  *
+ * @internal
  * @since 11.3.0
  */
-class NonShippingCartTaxLocation {
+class CartWithoutShipping {
 
 	/**
 	 * Tracks whether the cart is being priced, as opposed to catalog prices.
@@ -28,7 +29,7 @@ class NonShippingCartTaxLocation {
 	private $is_checking_shipping = false;
 
 	/**
-	 * Register hooks.
+	 * Set up the cart pricing context.
 	 *
 	 * @since 11.3.0
 	 * @internal
@@ -37,30 +38,6 @@ class NonShippingCartTaxLocation {
 	 */
 	final public function init( CartPricingContext $cart_pricing_context ): void {
 		$this->cart_pricing_context = $cart_pricing_context;
-		// Runs early so it only replaces the default address, and callbacks from other plugins at the default priority see and can override the result.
-		add_filter( 'woocommerce_customer_taxable_address', array( $this, 'use_billing_address_for_cart_without_shipping' ), 1, 2 );
-	}
-
-	/**
-	 * Use the customer's billing address for shipping-based tax when no product in a non-empty cart needs shipping.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param mixed $taxable_address The current taxable address.
-	 * @param mixed $customer        The customer whose taxable address is being determined.
-	 * @return mixed The taxable address.
-	 */
-	public function use_billing_address_for_cart_without_shipping( $taxable_address, $customer = null ) {
-		if ( ! $customer instanceof \WC_Customer || ! $this->should_use_billing_address( $customer ) ) {
-			return $taxable_address;
-		}
-
-		return array(
-			$customer->get_billing_country(),
-			$customer->get_billing_state(),
-			$customer->get_billing_postcode(),
-			$customer->get_billing_city(),
-		);
 	}
 
 	/**
@@ -96,7 +73,23 @@ class NonShippingCartTaxLocation {
 
 		$this->is_checking_shipping = true;
 		try {
-			return $this->has_only_non_shipping_products( $cart );
+			if ( ! $this->has_only_non_shipping_products( $cart ) ) {
+				return false;
+			}
+
+			/**
+			 * Filters whether shipping-based tax uses the billing address for a non-empty cart with nothing to ship.
+			 *
+			 * Return false to keep using the shipping address. The filter only fires when the cart qualifies,
+			 * so it cannot turn the fallback on for other carts. It may fire multiple times per request.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param bool         $use_billing Always true when fired.
+			 * @param \WC_Customer $customer    Customer whose taxable address is being resolved.
+			 * @param \WC_Cart     $cart        The customer's cart.
+			 */
+			return true === apply_filters( 'woocommerce_apply_billing_tax_for_cart_without_shipping', true, $customer, $cart );
 		} finally {
 			$this->is_checking_shipping = false;
 		}

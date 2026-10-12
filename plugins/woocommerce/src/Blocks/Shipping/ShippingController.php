@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
-use Automattic\WooCommerce\Internal\Tax\NonShippingCartTaxLocation;
+use Automattic\WooCommerce\Internal\Tax\CartWithoutShipping;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use WC_Customer;
@@ -455,7 +455,7 @@ class ShippingController {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
 		if ( $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && in_array( $chosen_method_id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
 			// The session keeps a pickup choice after the last shippable item is removed, so ignore it when the cart no longer needs shipping.
-			if ( $customer instanceof WC_Customer && wc_get_container()->get( NonShippingCartTaxLocation::class )->should_use_billing_address( $customer ) ) {
+			if ( $customer instanceof WC_Customer && wc_get_container()->get( CartWithoutShipping::class )->should_use_billing_address( $customer ) ) {
 				return $address;
 			}
 
