@@ -18,8 +18,8 @@ costs more trust than a missed `low`.
    the sink: a query, output, redirect, file call, remote request, unserialize, or a state change.
 3. Look for the guard on that path. A correct guard in any standard form (below) means no finding.
    If the guard is elsewhere, Read it and confirm it covers this exact input before you rely on it.
-   A guard clears only the weakness it stops: `(int)` stops SQL injection, not a missing capability
-   check or an SSRF to an integer host; a capability check does not replace a nonce.
+   A guard clears only the weakness it stops: a cast clears SQL injection, not authorization or SSRF;
+   on admin, AJAX, and form handlers a capability check does not replace a nonce.
 4. Judge only the post-change code. If the diff adds the guard, there is no finding unless the guard
    is wrong or incomplete.
 
@@ -94,8 +94,8 @@ never the value.
 - A guard that is present and correct, in any standard form.
 - An attack that needs a capability that already grants the same power (an admin with
   `unfiltered_html` injecting script; a `manage_woocommerce` user changing store settings).
-  This clears only an attacker who holds that capability. A missing nonce on the same action is
-  still CSRF: a third party forges the privileged user's request.
+  This clears only an attacker who holds that capability. A missing nonce on the same admin, AJAX,
+  or form action is still CSRF: a third party forges the privileged user's request.
 - A theoretical issue with no reachable path from an entry point.
 - Hardening ideas on unchanged code.
 

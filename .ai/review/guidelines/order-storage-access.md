@@ -15,6 +15,6 @@
 - SQL that selects orders from `$wpdb->posts` or their meta from `$wpdb->postmeta`.
 - An HPOS translation layer that maps only some legacy columns or query args.
 
-**How to confirm:** Is the ID or post type an order or refund? Trace the read with HPOS authoritative and sync off: does it reach `wc_orders`? The safe forms are `wc_get_order()`, `wc_get_orders()`, `$order->get_meta()`, `OrderUtil::get_count_for_type()`, and `OrderUtil::get_table_for_orders()`. For a translation layer, check that every legacy column the callers use is mapped, qualified and bare.
+**How to confirm:** Is the ID or post type an order or refund? Trace the read with HPOS authoritative and sync off: does it reach `wc_orders`? The safe forms are `wc_get_order()`, `wc_get_orders()`, `$order->get_meta()`, `OrderUtil::get_count_for_type()`, and SQL on `OrderUtil::get_table_for_orders()` that uses that table's own column names. For a translation layer, check that every legacy column the callers use is mapped, qualified and bare.
 
-**Don't flag when:** Code inside the order data stores, the sync, or the migration (`hpos-sync-on-read` covers those). A posts branch that runs only when `OrderUtil::custom_orders_table_usage_is_enabled()` is false, next to an HPOS branch. Non-order post types (products, coupons, pages).
+**Don't flag when:** Posts-table access inside the order data stores, the sync, or the migration, where it is the job; a legacy query-arg mapping there (`OrdersTableQuery`) is still a translation layer. A posts branch that runs only when `OrderUtil::custom_orders_table_usage_is_enabled()` is false, next to an HPOS branch. Non-order post types (products, coupons, pages).

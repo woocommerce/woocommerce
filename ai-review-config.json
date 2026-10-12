@@ -456,7 +456,6 @@
 				"update_post_meta",
 				"delete_post_meta",
 				"$wpdb->posts",
-				"$wpdb->postmeta",
 				"shop_order",
 				"post_status"
 			],
@@ -470,7 +469,7 @@
 			"path": [
 				"plugins/woocommerce/includes/gateways/**/*.php",
 				"plugins/woocommerce/src/Gateways/**/*.php",
-				"plugins/woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php"
+				"plugins/woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-paypal-*.php"
 			],
 			"personas": [
 				"security",
