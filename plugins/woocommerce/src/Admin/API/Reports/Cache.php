@@ -75,11 +75,11 @@ class Cache {
 		 *
 		 * @since 11.3.0
 		 *
-		 * @param int    $expiration Time until expiration in seconds. Default one week.
+		 * @param int    $expiration Time until expiration in seconds. Must be greater than 0; other values use the default of one week.
 		 * @param string $key        Cache key.
 		 */
 		$expiration = apply_filters( 'woocommerce_reports_cache_expiration', WEEK_IN_SECONDS, $key );
-		$expiration = is_numeric( $expiration ) && $expiration >= 0 ? (int) ceil( (float) $expiration ) : WEEK_IN_SECONDS;
+		$expiration = is_numeric( $expiration ) && $expiration > 0 && is_finite( (float) $expiration ) ? (int) ceil( (float) $expiration ) : WEEK_IN_SECONDS;
 
 		$result = set_transient( $key, $transient_value, $expiration );
 

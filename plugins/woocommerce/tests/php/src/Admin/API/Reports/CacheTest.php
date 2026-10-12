@@ -18,6 +18,8 @@ class CacheTest extends WC_Unit_Test_Case {
 	 *           [60, 60]
 	 *           [0.5, 1]
 	 *           [-60, 604800]
+	 *           [0, 604800]
+	 *           ["0", 604800]
 	 *           ["soon", 604800]
 	 *
 	 * @param mixed $expiration Filtered expiration, or null to leave the default.
