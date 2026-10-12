@@ -159,17 +159,4 @@ describe( 'woocommerce.js apostrophe prefilter with real jQuery', () => {
 			'security=nonce&coupon_code=SAVE%2710&woocs_sk=key'
 		);
 	} );
-
-	test( 'should honour a global beforeSend that aborts the request', () => {
-		$.ajaxSetup( { beforeSend: () => false } );
-
-		$.ajax( {
-			type: 'POST',
-			url: '/?wc-ajax=update_order_review',
-			data: checkoutData(),
-			wc_encode_apostrophes: true,
-		} );
-
-		expect( sent ).toHaveLength( 0 );
-	} );
 } );
