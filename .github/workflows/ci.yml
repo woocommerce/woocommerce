@@ -138,11 +138,18 @@ jobs:
 
             // The base ref fills the `<baseRef>` placeholder in project commands, so a PR
             // targeting a release/* branch is linted against that branch, not trunk.
+            // It ends up in shell commands here and in the Lint step, so a branch name with
+            // anything other than letters, digits, `.`, `_`, `/` or `-` falls back to trunk.
             let prNumberFilter   = '';
             let baseRefFilter    = '';
             if ( '${{ github.event_name }}' === 'pull_request' ) {
               prNumberFilter = `--pr-number ${{ github.event.pull_request.number }}`;
-              baseRefFilter  = `--base-ref origin/${ process.env.GITHUB_BASE_REF }`;
+              const baseRef  = process.env.GITHUB_BASE_REF;
+              if ( /^[A-Za-z0-9._\/-]+$/.test( baseRef ) ) {
+                baseRefFilter = `--base-ref origin/${ baseRef }`;
+              } else {
+                core.warning( `Linting against trunk because the base branch name is not safe to pass to a shell: ${ baseRef }` );
+              }
             }
 
             let githubEvent = ${{ toJson( github.event_name ) }};
