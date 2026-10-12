@@ -8,6 +8,12 @@
 const CART_URL = 'https://example.test/cart/';
 const COUPON_CODE = "SAVE'10";
 
+// Matches the selector cart.js uses to collect the chosen shipping methods.
+const CHOSEN_SHIPPING_METHODS_SELECTOR =
+	'select.shipping_method, ' +
+	':input[name^=shipping_method][type=radio]:checked, ' +
+	':input[name^=shipping_method][type=hidden]';
+
 const SHIPPING_FORM_SERIALIZED =
 	'calc_shipping_country=US' +
 	"&calc_shipping_state=O'State" +
@@ -176,7 +182,7 @@ describe( 'cart.js request data', () => {
 			if ( arg === removeCouponElement ) {
 				return $removeCouponLink;
 			}
-			if ( arg === 'select.shipping_method, :input[name^=shipping_method][type=radio]:checked, :input[name^=shipping_method][type=hidden]' ) {
+			if ( arg === CHOSEN_SHIPPING_METHODS_SELECTOR ) {
 				const $methods = createDefaultMock();
 				$methods.each = jest.fn( ( callback ) => {
 					callback.call( shippingMethodElement, 0, shippingMethodElement );
