@@ -131,7 +131,7 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A throwing gateway callback is logged with the order id and charge still reports it fired.
+	 * @testdox A throwing gateway callback is logged with the order id and charge returns false.
 	 */
 	public function test_a_throwing_gateway_is_logged(): void {
 		$this->support_engine_charges( self::GATEWAY );
@@ -147,7 +147,7 @@ class PaymentsTest extends EngineIntegrationTestCase {
 			'error',
 			array( 'order_id' => $order->get_id() ),
 			function () use ( $order ): void {
-				$this->assertTrue( Payments::charge( $order ) );
+				$this->assertFalse( Payments::charge( $order ), 'A gateway that threw is not a charge in flight.' );
 			}
 		);
 

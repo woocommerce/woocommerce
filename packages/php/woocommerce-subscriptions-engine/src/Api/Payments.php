@@ -59,11 +59,14 @@ final class Payments {
 	 * has a payment method, needs payment (`WC_Order::needs_payment()`, so the
 	 * `woocommerce_order_needs_payment` filter applies) and its gateway supports engine charges.
 	 * The engine adds no amount check of its own: core already refuses a $0 order unless an
-	 * extension filtered it to need payment. The outcome is the order's status; a throwing
-	 * gateway is logged.
+	 * extension filtered it to need payment. A throwing gateway is logged.
+	 *
+	 * True means the charge request was handed to the gateway without error, never that the
+	 * charge succeeded: the outcome is the order's status, which the caller reads.
 	 *
 	 * @param WC_Order $order Order to charge, carrying the payment method and token.
-	 * @return bool True when the charge action fired; false when a precondition failed.
+	 * @return bool True when the charge action fired and no callback threw; false when a
+	 *              precondition failed or the gateway threw.
 	 */
 	public static function charge( WC_Order $order ): bool {
 		$gateway_id = $order->get_payment_method();
@@ -93,6 +96,8 @@ final class Payments {
 					'order_id' => $order->get_id(),
 				)
 			);
+
+			return false;
 		}
 
 		return true;
