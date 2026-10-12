@@ -396,5 +396,4 @@ class CustomerAccount extends AbstractBlock {
 			? __( 'My Account', 'woocommerce' )
 			: __( 'Login', 'woocommerce' );
 	}
-
 }
