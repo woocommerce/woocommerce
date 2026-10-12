@@ -48,12 +48,15 @@ const headers = basicAuthHeaders( sectionsUser );
 
 // Call this before the click that triggers the save, and await the returned
 // promise after it — registering the listener after the click can miss a
-// response that already arrived.
+// response that already arrived. It matches the write that carries the section
+// layout: other preference writes, such as the metrics tour being dismissed,
+// go to the same endpoint and would otherwise satisfy it too early.
 const waitForUserPrefsSave = () =>
 	page.waitForResponse(
 		( res ) =>
 			res.url().includes( `/users/${ userId }` ) &&
-			res.request().method() !== 'GET'
+			res.request().method() !== 'GET' &&
+			!! res.request().postData()?.includes( 'dashboard_sections' )
 	);
 
 const expectSaved = ( response: PlaywrightResponse ) =>
@@ -130,6 +133,28 @@ test.describe(
 						pwd: sectionsUser.password,
 					},
 				} );
+			} );
+
+			// The shared admin has the metrics tour marked as seen in site setup.
+			// This administrator is new, so the tour would show and its dismissal
+			// would write preferences alongside the section layout this spec saves.
+			await test.step( `Mark the metrics tour as seen`, async () => {
+				const response = await page.request.post(
+					`./wp-json/wp/v2/users/${ userId }`,
+					{
+						data: {
+							id: userId,
+							woocommerce_meta: {
+								dashboard_performance_tour_shown: 'yes',
+							},
+						},
+						headers,
+					}
+				);
+				expect(
+					response.ok(),
+					`${ response.status() } ${ await response.text() }`
+				).toBeTruthy();
 			} );
 
 			await resetSections();
