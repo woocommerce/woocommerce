@@ -3,6 +3,7 @@
  */
 import { select, dispatch } from '@wordpress/data';
 import { PlainPaymentMethods } from '@woocommerce/types';
+import { shouldPreselectPaymentMethod } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -27,6 +28,17 @@ export const setDefaultPaymentMethod = async (
 		activePaymentMethod &&
 		allPaymentMethodKeys.includes( activePaymentMethod )
 	) {
+		return;
+	}
+
+	// The store setting can require shoppers to pick a method themselves.
+	if ( ! shouldPreselectPaymentMethod() ) {
+		if ( activePaymentMethod ) {
+			void dispatch( paymentStore ).__internalSetPaymentIdle();
+			void dispatch( paymentStore ).__internalSetActivePaymentMethod(
+				''
+			);
+		}
 		return;
 	}
 

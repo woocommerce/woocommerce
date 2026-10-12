@@ -63,6 +63,12 @@ export const SHIPPING_ENABLED = getSetting< boolean >(
 	true
 );
 
+/**
+ * Whether the checkout preselects a payment method. Merchants can turn this off so shoppers pick one themselves.
+ */
+export const shouldPreselectPaymentMethod = (): boolean =>
+	!! getSetting< boolean >( 'checkoutPreselectPaymentMethod', true );
+
 type FieldsLocations = {
 	address: Array< keyof AddressForm >;
 	contact: Array< keyof ContactForm >;

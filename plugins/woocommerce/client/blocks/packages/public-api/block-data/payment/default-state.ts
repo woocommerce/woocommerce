@@ -7,6 +7,7 @@ import type {
 	GlobalPaymentMethod,
 } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
+import { shouldPreselectPaymentMethod } from '@woocommerce/block-settings';
 import {
 	PlainPaymentMethods,
 	PlainExpressPaymentMethods,
@@ -28,8 +29,10 @@ const savedPaymentMethods = getSetting<
 	Record< string, SavedPaymentMethod[] > | EmptyObjectType
 >( 'customerPaymentMethods', {} );
 
+// When the store does not preselect a payment method, the server only returns the shopper's
+// own choice in checkoutData.payment_method, so only the editor preview needs the setting here.
 const defaultPaymentMethod = isEditor()
-	? globalPaymentMethods[ 0 ]?.id || ''
+	? ( shouldPreselectPaymentMethod() && globalPaymentMethods[ 0 ]?.id ) || ''
 	: checkoutData?.payment_method;
 
 function getDefaultPaymentMethod() {
@@ -46,7 +49,8 @@ function getDefaultPaymentMethod() {
  * as a token stored in `wcSettings`.
  */
 function getDefaultPaymentMethodData() {
-	if ( ! defaultPaymentMethod ) {
+	// The session remembers only the gateway, not the card the shopper picked, so don't pick one for them.
+	if ( ! defaultPaymentMethod || ! shouldPreselectPaymentMethod() ) {
 		return {};
 	}
 
