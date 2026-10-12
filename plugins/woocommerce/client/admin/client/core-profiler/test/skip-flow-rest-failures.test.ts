@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
-import { createActor, waitFor } from 'xstate5';
+import { createActor, toPromise, waitFor } from 'xstate5';
 
 /**
  * Internal dependencies
@@ -30,6 +30,10 @@ jest.mock( '~/utils/admin-settings', () => ( {
 } ) );
 
 // Simulates REST for WooCommerce stores: actions and resolvers listed here reject, all others resolve.
+const mockJetpackAuthResult = {
+	success: true,
+	url: 'https://jetpack.test/authorize',
+};
 const mockFailingRequests = new Set< string >();
 const mockStoreCalls: string[] = [];
 function mockWooStore( resolvedValues: Record< string, unknown > ) {
@@ -70,6 +74,7 @@ jest.mock( '@wordpress/data', () => {
 						getCountries: [],
 						getFreeExtensions: [],
 						getCoreProfilerCompletedSteps: {},
+						getJetpackAuthUrl: mockJetpackAuthResult,
 					} )
 				: actual.resolveSelect( store ),
 	};
@@ -202,5 +207,20 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		expect( await waitForNavigation() ).toBe( HOME_PATH );
 		expect( mockStoreCalls ).toContain( 'coreProfilerCompleted' );
 		actor.stop();
+	} );
+
+	it( 'still fetches the Jetpack auth URL when Coming Soon setup fails', async () => {
+		mockFailingRequests.add( 'coreProfilerCompleted' );
+		const actor = createActor(
+			coreProfilerMachineActors.exitToJetpackAuth
+		).start();
+
+		await expect( toPromise( actor ) ).resolves.toEqual(
+			mockJetpackAuthResult
+		);
+		expect( mockStoreCalls ).toEqual( [
+			'coreProfilerCompleted',
+			'getJetpackAuthUrl',
+		] );
 	} );
 } );

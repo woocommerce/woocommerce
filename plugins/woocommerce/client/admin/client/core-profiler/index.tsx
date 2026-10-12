@@ -334,6 +334,17 @@ const exitToWooHome = fromPromise( async () => {
 	window.location.href = getNewPath( {}, '/', {} );
 } );
 
+const exitToJetpackAuth = fromPromise( async () => {
+	// Coming Soon setup is best effort, as in exitToWooHome.
+	await dispatch( onboardingStore )
+		.coreProfilerCompleted()
+		.catch( () => undefined );
+	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
+		redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
+		from: 'woocommerce-core-profiler',
+	} );
+} );
+
 /**
  * Saves the skip through a non-REST admin-post request when the REST write fails,
  * so WooCommerce Home stops redirecting back to the profiler.
@@ -735,6 +746,7 @@ export const coreProfilerMachineActors = {
 	skipFlowUpdateBusinessLocation,
 	pluginInstallerMachine,
 	exitToWooHome,
+	exitToJetpackAuth,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -1703,24 +1715,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				sendToJetpackAuthPage: {
 					invoke: {
-						src: fromPromise( async () => {
-							await dispatch(
-								onboardingStore
-							).coreProfilerCompleted();
-							return await resolveSelect(
-								onboardingStore
-							).getJetpackAuthUrl( {
-								redirectUrl: getAdminLink(
-									'admin.php?page=wc-admin'
-								),
-								from: 'woocommerce-core-profiler',
-							} );
-						} ),
+						src: 'exitToJetpackAuth',
 						onDone: {
 							actions: enqueueActions( ( { enqueue, check } ) => {
 								if (
 									check(
-										( { event } ) => event.output.success
+										( {
+											event,
+										}: {
+											event: DoneActorEvent< {
+												success: boolean;
+											} >;
+										} ) => event.output.success
 									)
 								) {
 									enqueue( {
