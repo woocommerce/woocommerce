@@ -3,7 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
-import { useState, createInterpolateElement } from '@wordpress/element';
+import {
+	useState,
+	createInterpolateElement,
+	Fragment,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,6 +18,7 @@ import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { GeolocationCountrySelect } from '../components/geolocation-country-select/geolocation-country-select';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const BusinessLocation = ( {
 	sendEvent,
@@ -33,6 +38,10 @@ export const BusinessLocation = ( {
 	} );
 
 	const inputLabel = __( 'Select country/region', 'woocommerce' );
+	// Only preloaded for users who can open Site Health.
+	const { siteHealthUrl } = getAdminSetting( 'onboarding', {} ) as {
+		siteHealthUrl?: string;
+	};
 
 	return (
 		<div
@@ -68,47 +77,73 @@ export const BusinessLocation = ( {
 						isDismissible={ false }
 						status="error"
 					>
-						{ createInterpolateElement(
-							__(
-								'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
-								'woocommerce'
-							),
-							{
-								retryButton: (
-									<Button
-										onClick={ () => {
-											sendEvent( {
-												type: 'RETRY_COUNTRIES_LIST',
-											} );
-										} }
-										variant="tertiary"
-									>
-										{ __(
-											'Please try again',
+						{ [
+							<Fragment key="error">
+								{ createInterpolateElement(
+									__(
+										'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+										'woocommerce'
+									),
+									{
+										retryButton: (
+											<Button
+												onClick={ () => {
+													sendEvent( {
+														type: 'RETRY_COUNTRIES_LIST',
+													} );
+												} }
+												variant="tertiary"
+											>
+												{ __(
+													'Please try again',
+													'woocommerce'
+												) }
+											</Button>
+										),
+										skipButton: (
+											<Button
+												onClick={ () => {
+													sendEvent( {
+														type: 'BUSINESS_LOCATION_COMPLETED',
+														payload: {
+															storeLocation:
+																'US:CA',
+														},
+													} );
+												} }
+												variant="tertiary"
+											>
+												{ __(
+													'Skip this step',
+													'woocommerce'
+												) }
+											</Button>
+										),
+									}
+								) }
+							</Fragment>,
+							<p key="help">
+								{ siteHealthUrl
+									? createInterpolateElement(
+											__(
+												'If this keeps happening, your site’s REST API may be blocked. <siteHealthLink>Check Site Health</siteHealthLink> for details.',
+												'woocommerce'
+											),
+											{
+												siteHealthLink: (
+													<Button
+														variant="link"
+														href={ siteHealthUrl }
+													/>
+												),
+											}
+										)
+									: __(
+											'If this keeps happening, ask your hosting provider to check that your site’s REST API is working.',
 											'woocommerce'
 										) }
-									</Button>
-								),
-								skipButton: (
-									<Button
-										onClick={ () => {
-											sendEvent( {
-												type: 'BUSINESS_LOCATION_COMPLETED',
-												payload: {
-													storeLocation: 'US:CA',
-												},
-											} );
-										} }
-										variant="tertiary"
-									>
-										{ __(
-											'Skip this step',
-											'woocommerce'
-										) }
-									</Button>
-								),
-							}
-						) }
+							</p>,
+						] }
 					</Notice>
 				) }
 				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">

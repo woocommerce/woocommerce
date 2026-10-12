@@ -10,6 +10,7 @@ import {
 	assertEvent,
 	enqueueActions,
 	DoneActorEvent,
+	ErrorActorEvent,
 	fromCallback,
 	or,
 } from 'xstate5';
@@ -46,6 +47,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { findComponentMeta } from '~/utils/xstate/find-component';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { initRemoteLogging } from '~/lib/init-remote-logging';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
@@ -325,9 +327,29 @@ const handleGeolocation = assign( {
 const redirectToWooHome = raise( { type: 'REDIRECT_TO_WOO_HOME' } );
 
 const exitToWooHome = fromPromise( async () => {
-	await dispatch( onboardingStore ).coreProfilerCompleted();
+	// Coming Soon setup is best effort; a failed request must not leave the loader stuck.
+	await dispatch( onboardingStore )
+		.coreProfilerCompleted()
+		.catch( () => undefined );
 	window.location.href = getNewPath( {}, '/', {} );
 } );
+
+/**
+ * Saves the skip through a non-REST admin-post request when the REST write fails,
+ * so WooCommerce Home stops redirecting back to the profiler.
+ */
+const redirectToSkipOnboardingFallback = () => {
+	const { skipOnboardingFallbackUrl } = getAdminSetting(
+		'onboarding',
+		{}
+	) as { skipOnboardingFallbackUrl?: unknown };
+
+	window.location.href =
+		typeof skipOnboardingFallbackUrl === 'string' &&
+		skipOnboardingFallbackUrl
+			? skipOnboardingFallbackUrl
+			: getNewPath( {}, '/', {} );
+};
 
 const getPluginNameParam = (
 	pluginsSelected: CoreProfilerStateMachineContext[ 'pluginsSelected' ],
@@ -641,7 +663,15 @@ const skipFlowUpdateBusinessLocation = fromPromise(
 			getCountryCode( context.businessInfo.location ) as string
 		);
 
-		return Promise.all( [ skipped, businessLocation, currencyUpdate ] );
+		// Only the skipped flag is required to leave the profiler; location and currency are best effort.
+		const [ skippedResult ] = await Promise.allSettled( [
+			skipped,
+			businessLocation,
+			currencyUpdate,
+		] );
+		if ( skippedResult.status === 'rejected' ) {
+			throw skippedResult.reason;
+		}
 	}
 );
 
@@ -658,7 +688,7 @@ export const preFetchActions = {
 	preFetchJetpackAuthUrl,
 };
 
-const coreProfilerMachineActions = {
+export const coreProfilerMachineActions = {
 	...preFetchActions,
 	...recordTracksActions,
 	handlePlugins,
@@ -678,12 +708,13 @@ const coreProfilerMachineActions = {
 	assignCurrentUserEmail,
 	assignCurrentUser,
 	redirectToWooHome,
+	redirectToSkipOnboardingFallback,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
 	reloadPage,
 };
 
-const coreProfilerMachineActors = {
+export const coreProfilerMachineActors = {
 	preFetchGetPlugins,
 	getAllowTrackingOption,
 	getStoreNameOption,
@@ -710,7 +741,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 	initial: 'navigate',
 	types: {} as {
 		context: CoreProfilerStateMachineContext;
-		events: CoreProfilerEvents;
+		events: CoreProfilerEvents | ErrorActorEvent;
 	},
 	invoke: {
 		id: 'browserPopstateHandler',
@@ -723,6 +754,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		REDIRECT_TO_WOO_HOME: {
 			target: '#redirectingToWooHome',
 		},
+		// Background prefetches and writes are spawned without error handlers. Without this,
+		// one failed REST request (for example, when /wp-json/ is not routed) stops the whole profiler.
+		// Invoke-level onError handlers belong to deeper states and still take precedence.
+		'xstate.error.actor.*': {},
 	},
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
@@ -924,7 +959,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									input: ( {
 										event,
 									}: {
-										event: CoreProfilerEvents;
+										event:
+											| CoreProfilerEvents
+											| ErrorActorEvent;
 									} ) => {
 										assertEvent( event, 'INTRO_SKIPPED' );
 										return event.payload;
@@ -1365,6 +1402,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								src: 'skipFlowUpdateBusinessLocation',
 								onDone: {
 									target: 'progress20',
+								},
+								onError: {
+									actions: 'redirectToSkipOnboardingFallback',
 								},
 							},
 						},

@@ -17,6 +17,11 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\ProcessCoreProfil
  */
 class OnboardingSetupWizard {
 	/**
+	 * Admin-post action for skipping onboarding setup.
+	 */
+	private const SKIP_ONBOARDING_SETUP_ACTION = 'woocommerce_skip_onboarding_setup';
+
+	/**
 	 * Class instance.
 	 *
 	 * @var OnboardingSetupWizard instance
@@ -62,6 +67,60 @@ class OnboardingSetupWizard {
 		add_action( 'current_screen', array( $this, 'redirect_to_profiler' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_old_install_notice' ), 10, 2 );
 		add_filter( 'admin_viewport_meta', array( $this, 'set_viewport_meta_tag' ) );
+		add_action( 'admin_post_' . self::SKIP_ONBOARDING_SETUP_ACTION, array( $this, 'handle_admin_post_woocommerce_skip_onboarding_setup' ) );
+	}
+
+	/**
+	 * Handle the authenticated onboarding setup skip fallback.
+	 *
+	 * Saves the skip without the REST API, then explains that some screens may not work and where to look.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public function handle_admin_post_woocommerce_skip_onboarding_setup(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die(
+				esc_html__( 'You do not have permission to skip WooCommerce setup.', 'woocommerce' ),
+				'',
+				array( 'response' => 403 )
+			);
+		}
+
+		check_admin_referer( self::SKIP_ONBOARDING_SETUP_ACTION );
+
+		$profile            = (array) get_option( OnboardingProfile::DATA_OPTION, array() );
+		$profile['skipped'] = true;
+		update_option( OnboardingProfile::DATA_OPTION, $profile );
+
+		$persisted_profile = (array) get_option( OnboardingProfile::DATA_OPTION, array() );
+		if ( true !== ( $persisted_profile['skipped'] ?? false ) ) {
+			wp_die(
+				esc_html__( 'WooCommerce could not save your setup preference. Please try again.', 'woocommerce' ),
+				'',
+				array( 'response' => 500 )
+			);
+		}
+
+		if ( current_user_can( 'view_site_health_checks' ) ) {
+			$next_step = sprintf(
+				/* translators: %s: link to the WordPress Site Health screen. */
+				esc_html__( 'Check %s to see what is blocking these requests.', 'woocommerce' ),
+				'<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html__( 'Site Health', 'woocommerce' ) . '</a>'
+			);
+		} else {
+			$next_step = esc_html__( 'Ask your hosting provider to check that your site’s REST API is working.', 'woocommerce' );
+		}
+
+		wp_die(
+			'<h1>' . esc_html__( 'WooCommerce setup skipped', 'woocommerce' ) . '</h1>' .
+			'<p>' . esc_html__( 'Your choice to skip setup is saved. Your site’s REST API did not respond correctly, so some WooCommerce screens may not work until that is fixed.', 'woocommerce' ) . '</p>' .
+			'<p>' . wp_kses_post( $next_step ) . '</p>' .
+			'<p><a class="button button-primary" href="' . esc_url( wc_admin_url() ) . '">' . esc_html__( 'Continue to WooCommerce Home', 'woocommerce' ) . '</a></p>',
+			esc_html__( 'WooCommerce setup skipped', 'woocommerce' ),
+			array( 'response' => 200 )
+		);
 	}
 
 	/**
@@ -226,6 +285,19 @@ class OnboardingSetupWizard {
 		$settings['onboarding'] = array(
 			'profile' => $profile,
 		);
+		// Home can route to the setup wizard without a page load, so preload the URL whenever setup is still pending.
+		if ( ( $this->is_setup_wizard() || OnboardingProfile::needs_completion() ) && current_user_can( 'manage_woocommerce' ) ) {
+			$settings['onboarding']['skipOnboardingFallbackUrl'] = add_query_arg(
+				array(
+					'action'   => self::SKIP_ONBOARDING_SETUP_ACTION,
+					'_wpnonce' => wp_create_nonce( self::SKIP_ONBOARDING_SETUP_ACTION ),
+				),
+				admin_url( 'admin-post.php' )
+			);
+			if ( current_user_can( 'view_site_health_checks' ) ) {
+				$settings['onboarding']['siteHealthUrl'] = admin_url( 'site-health.php' );
+			}
+		}
 
 		// Only fetch if the onboarding wizard OR the task list is incomplete or currently shown
 		// or the current page is one of the WooCommerce Admin pages.
