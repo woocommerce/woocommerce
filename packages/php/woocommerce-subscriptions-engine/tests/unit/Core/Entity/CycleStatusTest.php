@@ -46,24 +46,6 @@ class CycleStatusTest extends TestCase {
 		$this->assertFalse( CycleStatus::is_registered( 'nonsense' ) );
 	}
 
-	public function test_billed_and_cancelled_are_terminal(): void {
-		$this->assertTrue( CycleStatus::is_terminal( CycleStatus::BILLED ) );
-		$this->assertTrue( CycleStatus::is_terminal( CycleStatus::CANCELLED ) );
-	}
-
-	public function test_pending_processing_and_failed_are_not_terminal(): void {
-		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PENDING ) );
-		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PROCESSING ) );
-		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::FAILED ) );
-	}
-
-	public function test_unknown_and_extension_registered_statuses_are_not_terminal(): void {
-		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
-
-		$this->assertFalse( CycleStatus::is_terminal( 'disputed' ) );
-		$this->assertFalse( CycleStatus::is_terminal( 'legacy-x' ) );
-	}
-
 	public function test_constructor_wraps_a_default_status(): void {
 		$this->assertSame( CycleStatus::PENDING, ( new CycleStatus( CycleStatus::PENDING ) )->get_value() );
 	}

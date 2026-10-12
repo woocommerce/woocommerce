@@ -1080,93 +1080,96 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Atomically reclaim a stalled `pending` cycle whose crash-recovery lease has expired,
-	 * extending the lease by `$lease_ttl_seconds`. The compare-and-set that makes reclaim
-	 * race-safe: the predicate keys on `claimed_until <= now`, so among concurrent workers
-	 * only the first to run the UPDATE matches a row - it writes the future lease, after
-	 * which every other worker's `<=` predicate matches zero rows.
+	 * Take the lease of a `pending` cycle whose lease has expired or was never set, for
+	 * `$lease_seconds`. A compare-and-set: among concurrent callers exactly one matches the
+	 * row. The expiry check and the new lease use the database clock (`UTC_TIMESTAMP()`), the
+	 * one clock every worker shares.
 	 *
-	 * Both the expiry predicate and the fresh lease anchor on the DATABASE clock
-	 * (`UTC_TIMESTAMP()`) - the one clock every worker shares - so a worker whose PHP clock
-	 * runs fast cannot take over a lease that is still live in real terms, and the lease it
-	 * stamps means the same thing to every other worker.
-	 *
-	 * @param int $cycle_id          The stalled cycle's id.
-	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
-	 * @return bool True when this caller won the reclaim (exactly one row updated); false
-	 *              when another worker already reclaimed it (zero rows matched).
+	 * @param int $cycle_id      Cycle id.
+	 * @param int $lease_seconds Lease length in seconds, from the database's now.
+	 * @return bool True when this caller took the lease.
 	 */
-	public function reclaim_expired_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
+	public function claim_cycle( int $cycle_id, int $lease_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= UTC_TIMESTAMP()", $lease_ttl_seconds, $cycle_id, CycleStatus::PENDING ) );
-
-		// Exactly one row matched means this caller won the CAS; 0 means another worker
-		// already extended the lease (or the cycle settled) between read and write.
-		return false !== $result && 1 === $wpdb->rows_affected;
-	}
-
-	/**
-	 * Re-claim a failed cycle for an admin-triggered retry, as an atomic compare-and-set:
-	 * flip it back to `pending` and stamp a fresh lease only while it is still `failed`.
-	 * Returns true when this caller won (exactly one row matched), false when it was already
-	 * re-claimed or has since moved on.
-	 *
-	 * The fresh lease anchors on the DATABASE clock (`UTC_TIMESTAMP()`), the shared reference
-	 * clock for all lease arbitration.
-	 *
-	 * @param int $cycle_id          The cycle to re-claim.
-	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
-	 */
-	public function reclaim_failed_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s", CycleStatus::PENDING, $lease_ttl_seconds, $cycle_id, CycleStatus::FAILED ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP()
+				WHERE id = %d AND status = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
+				$lease_seconds,
+				$cycle_id,
+				CycleStatus::PENDING
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return false !== $result && 1 === $wpdb->rows_affected;
 	}
 
 	/**
-	 * Settle a cycle's outcome as an atomic compare-and-set on its status: move it from
-	 * `$from_status` to `$to_status`, stamp the settling order and reason, and clear the
-	 * crash-recovery lease - all in one UPDATE gated on the row still being in `$from_status`.
-	 * Among concurrent settlers (the post-charge reconciliation and the order-status listener
-	 * can race across workers), exactly one caller matches the row and wins; the rest match
-	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
+	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status:
+	 * one UPDATE that lands only while the row still carries `$from_status`, so among
+	 * concurrent callers exactly one wins. `$changes` keys present are written: `order_id`
+	 * and `reason` (null clears); `lease_seconds` sets a lease from the database's now, and
+	 * without it the lease is cleared.
 	 *
-	 * `$to_status` must be a registered cycle status (the write-path allowlist). `$from_status`
-	 * is only the CAS predicate and is not validated, so a cycle carrying an unknown stored
-	 * status can still be settled out of it.
-	 *
-	 * @param int         $cycle_id    The cycle to settle.
-	 * @param string      $from_status The status the caller read; the CAS predicate.
-	 * @param string      $to_status   The settled status to write; must be registered.
-	 * @param int         $order_id    The renewal order carrying the outcome.
-	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
+	 * @param string               $to_status   The status to write; must be a registered cycle status.
+	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string), `lease_seconds` (int).
+	 * @return bool True when this caller won the transition.
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
-	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
+	public function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $changes ): bool {
 		global $wpdb;
 
 		if ( ! CycleStatus::is_registered( $to_status ) ) {
-			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle_status(): cycle status "%s" is not registered.', $to_status ) ) );
+			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ) ) );
 		}
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$set    = array( 'status = %s' );
+		$values = array( $to_status );
 
-		if ( null === $reason ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = NULL, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		if ( array_key_exists( 'order_id', $changes ) ) {
+			if ( null === $changes['order_id'] ) {
+				$set[] = 'order_id = NULL';
+			} else {
+				$set[]    = 'order_id = %d';
+				$values[] = Coercion::coerce_int( $changes['order_id'] );
+			}
+		}
+
+		if ( array_key_exists( 'reason', $changes ) ) {
+			if ( null === $changes['reason'] ) {
+				$set[] = 'reason = NULL';
+			} else {
+				$set[]    = 'reason = %s';
+				$values[] = Coercion::coerce_string( $changes['reason'] );
+			}
+		}
+
+		if ( array_key_exists( 'lease_seconds', $changes ) ) {
+			$set[]    = 'claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
+			$values[] = Coercion::coerce_int( $changes['lease_seconds'] );
 		} else {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = %s, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, $reason, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+			$set[] = 'claimed_until = NULL';
 		}
+
+		$set[]    = 'date_updated_gmt = %s';
+		$values[] = gmdate( 'Y-m-d H:i:s' );
+		$values[] = $cycle_id;
+		$values[] = $from_status;
+
+		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$set_clause = implode( ', ', $set );
+
+		// The SET clause is built from fixed fragments above; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET {$set_clause} WHERE id = %d AND status = %s", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
 		return false !== $result && 1 === $wpdb->rows_affected;
 	}
@@ -1175,8 +1178,7 @@ final class ContractRepository {
 	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
 	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
 	 * necessarily the cycle current by date (a forced early renewal bills a head whose
-	 * period lies ahead). Snapshots are decoded into typed value objects only for an
-	 * in-flight cycle (see {@see self::hydrate_cycle()}).
+	 * period lies ahead).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1199,7 +1201,7 @@ final class ContractRepository {
 
 	/**
 	 * A window of a chain's cycle history, newest first - the paginated read for
-	 * history screens. Snapshots are decoded only for any in-flight cycle in the window.
+	 * history screens.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1228,10 +1230,10 @@ final class ContractRepository {
 	/**
 	 * All cycles linked to `$order_id`, across kinds and contracts. `order_id` is a
 	 * non-1:1 reference (an aggregate order may serve many cycles), so this returns
-	 * every match. Snapshots are decoded for any in-flight cycle.
+	 * every match.
 	 *
 	 * @param int $order_id WooCommerce order id.
-	 * @return array<int, Cycle> Cycles linked to the order, oldest first.
+	 * @return array<int, Cycle> Cycles linked to the order, newest first.
 	 */
 	public function find_cycles_by_order_id( int $order_id ): array {
 		global $wpdb;
@@ -1239,7 +1241,7 @@ final class ContractRepository {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id DESC", $order_id ), ARRAY_A );
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -1323,10 +1325,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Hydrate a cycle row, attaching typed snapshot value objects only for an in-flight
-	 * (non-terminal) cycle. A settled record keeps its snapshot ids but skips the extra
-	 * reads to decode their payloads. {@see CycleStatus::is_terminal()} is false for an
-	 * unknown or extension-registered status, so such a cycle's snapshots are decoded.
+	 * Hydrate a cycle row, attaching typed snapshot value objects for the snapshot ids
+	 * it carries (a cycle without snapshot ids costs no extra read).
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
@@ -1334,18 +1334,20 @@ final class ContractRepository {
 	private function hydrate_cycle( array $row ): Cycle {
 		$cycle = Cycle::from_storage( $row );
 
-		if ( CycleStatus::is_terminal( $cycle->get_status()->get_value() ) ) {
-			return $cycle;
+		$plan_snapshot_id = $cycle->get_plan_snapshot_id();
+		if ( null !== $plan_snapshot_id ) {
+			$plan = $this->find_plan_snapshot( $plan_snapshot_id );
+			if ( $plan instanceof PlanSnapshot ) {
+				$cycle->set_plan_snapshot( $plan );
+			}
 		}
 
-		$plan = $this->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
-		if ( $plan instanceof PlanSnapshot ) {
-			$cycle->set_plan_snapshot( $plan );
-		}
-
-		$items = $this->find_items_snapshot( $cycle->get_items_snapshot_id() );
-		if ( $items instanceof ItemsSnapshot ) {
-			$cycle->set_items_snapshot( $items );
+		$items_snapshot_id = $cycle->get_items_snapshot_id();
+		if ( null !== $items_snapshot_id ) {
+			$items = $this->find_items_snapshot( $items_snapshot_id );
+			if ( $items instanceof ItemsSnapshot ) {
+				$cycle->set_items_snapshot( $items );
+			}
 		}
 
 		return $cycle;

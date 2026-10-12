@@ -120,17 +120,4 @@ final class CycleStatus {
 	public static function is_valid( string $status ): bool {
 		return StatusRegistry::is_valid_slug( $status );
 	}
-
-	/**
-	 * Whether `$status` is `billed` or `cancelled`.
-	 *
-	 * Interim: moves out of the engine with the renewal flow (only the repository's
-	 * snapshot skip in `hydrate_cycle()` reads this). Unknown and
-	 * extension-registered statuses report false.
-	 *
-	 * @param string $status Status to check.
-	 */
-	public static function is_terminal( string $status ): bool {
-		return in_array( $status, array( self::BILLED, self::CANCELLED ), true );
-	}
 }
