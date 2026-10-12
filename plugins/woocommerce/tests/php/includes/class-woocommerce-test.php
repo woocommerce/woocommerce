@@ -140,7 +140,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should detect a UCP request as a Store API request, so the session and cart are loaded for it.
+	 * @testdox Should detect a UCP request as a Store API request, since it also returns data rather than pages.
 	 */
 	public function test_is_store_api_request_returns_true_for_ucp_pretty_permalinks(): void {
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/ucp/v1/carts';

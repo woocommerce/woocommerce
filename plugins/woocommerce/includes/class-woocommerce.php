@@ -664,7 +664,8 @@ final class WooCommerce {
 	/**
 	 * Returns true if the request is a store REST API request.
 	 *
-	 * The UCP namespace is included because its cart routes need access to the same session and cart as Store API.
+	 * The UCP namespace counts as one: like the Store API it returns data rather than rendered
+	 * pages, so callers can skip the same work — block and template registration, site tracking.
 	 *
 	 * @return bool
 	 */
