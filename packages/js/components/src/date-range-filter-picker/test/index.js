@@ -43,12 +43,16 @@ describe( 'DateRangeFilterPicker', () => {
 	} );
 
 	it.each( [
-		[ 'untranslated', undefined, '09/25/2024', '10/04/2024' ],
-		[ 'day-first', 'DD/MM/YYYY', '25/09/2024', '04/10/2024' ],
-		[ 'dotted day-first', 'DD.MM.YYYY', '25.09.2024', '04.10.2024' ],
+		[ 'untranslated', undefined, 'MM/DD/YYYY', '09/25/2024', '10/04/2024' ],
+		[ 'day-first', 'DD/MM/YYYY', 'DD/MM/YYYY', '25/09/2024', '04/10/2024' ],
+		[ 'dotted', 'DD.MM.YYYY', 'DD.MM.YYYY', '25.09.2024', '04.10.2024' ],
+		// Translations from real language packs that aren't Moment.js formats.
+		[ 'cs_CZ', 'MM/DD/RRRR', 'MM/DD/YYYY', '09/25/2024', '10/04/2024' ],
+		[ 'et', 'KK/PP/AAAA', 'MM/DD/YYYY', '09/25/2024', '10/04/2024' ],
+		[ 'lowercase', 'dd/mm/aaaa', 'MM/DD/YYYY', '09/25/2024', '10/04/2024' ],
 	] )(
-		'shows and parses typed dates in the %s format',
-		async ( _, translatedFormat, afterText, typedBefore ) => {
+		'shows and parses typed dates for the %s translation',
+		async ( _, translatedFormat, format, afterText, typedBefore ) => {
 			if ( translatedFormat ) {
 				setLocaleData(
 					{ 'MM/DD/YYYY': [ translatedFormat ] },
@@ -64,7 +68,7 @@ describe( 'DateRangeFilterPicker', () => {
 			expect( startInput ).toHaveValue( afterText );
 			expect( startInput ).toHaveAttribute(
 				'placeholder',
-				( translatedFormat || 'MM/DD/YYYY' ).toLowerCase()
+				format.toLowerCase()
 			);
 
 			await typeDate( 'End Date', typedBefore );
