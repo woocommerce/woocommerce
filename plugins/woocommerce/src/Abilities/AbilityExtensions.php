@@ -33,6 +33,13 @@ class AbilityExtensions {
 	private static array $fields = array();
 
 	/**
+	 * Registered resources, keyed by resource name.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static array $resources = array();
+
+	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
 	 *
 	 * @var array<string, bool>
@@ -40,9 +47,31 @@ class AbilityExtensions {
 	private static array $reported = array();
 
 	/**
+	 * Register a resource that abilities format, so extensions can register fields on it.
+	 *
+	 * Core registers `product`, `order` and `order_item`. An extension registers a
+	 * resource that its own abilities format, and then calls `add_fields_to_object()`
+	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
+	 * Registering the same resource again does nothing.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $resource_name Slug of the resource, such as `ticket`.
+	 */
+	public static function register_resource( string $resource_name ): void {
+		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name ) {
+			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores.', '11.3.0' );
+			return;
+		}
+
+		self::$resources[ $resource_name ] = true;
+	}
+
+	/**
 	 * Register a field that the abilities of a resource return under `extensions.<namespace>.<field>`.
 	 *
-	 * Call it inside the `woocommerce_ability_extensions_init` action.
+	 * Call it inside the `woocommerce_ability_extensions_init` action. A call after that action is refused.
+	 * The resource must be registered with `register_resource()`.
 	 *
 	 * @since 11.3.0
 	 *
@@ -52,7 +81,9 @@ class AbilityExtensions {
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
-	 *     @type array    $schema       JSON schema of the value. Its `title` is the label clients show.
+	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
+	 *                                  A field with `required` must return a value that matches its schema
+	 *                                  for every object, or the ability output fails validation.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
@@ -61,14 +92,22 @@ class AbilityExtensions {
 	 * }
 	 */
 	public static function register_field( array $args ): void {
+		if ( did_action( 'woocommerce_ability_extensions_init' ) && ! doing_action( 'woocommerce_ability_extensions_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_ability_extensions_init action, before the abilities build their schemas.', '11.3.0' );
+			return;
+		}
 		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
 			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
 				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
 				return;
 			}
 		}
-		if ( ! is_array( $args['schema'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array.', '11.3.0' );
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" resource is not registered. Call AbilityExtensions::register_resource() first.', $args['resource'] ), '11.3.0' );
+			return;
+		}
+		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array with a "type".', '11.3.0' );
 			return;
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
@@ -128,9 +167,9 @@ class AbilityExtensions {
 
 	/**
 	 * Add the `extensions` property to an object schema when the feature is on.
-	 * It lists each namespace with its fields, and allows others, because a
-	 * field can be registered after the ability. The schema stays unchanged when
-	 * no field is registered for the resource.
+	 * It lists each namespace with its fields. Call it after the
+	 * `woocommerce_ability_extensions_init` action, when the ability builds its
+	 * schema. The schema stays unchanged when no field is registered for the resource.
 	 *
 	 * @since 11.3.0
 	 *
