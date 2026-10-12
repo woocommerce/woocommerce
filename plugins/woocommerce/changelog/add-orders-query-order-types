@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let the orders query ability list orders of the types that extensions register, such as subscriptions.

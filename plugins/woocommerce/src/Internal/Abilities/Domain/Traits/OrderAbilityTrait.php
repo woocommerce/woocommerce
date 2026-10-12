@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -35,6 +36,53 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * Order types that the abilities can query, such as `shop_order` and the
+	 * types that extensions register. Refunds are not included.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_order_type_slugs(): array {
+		return array_values(
+			array_diff(
+				wc_get_order_types( 'order-meta-boxes' ),
+				array( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE )
+			)
+		);
+	}
+
+	/**
+	 * Status slugs (without the `wc-` prefix) that extensions register for
+	 * their order types, such as `active` for subscriptions.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_order_type_status_slugs(): array {
+		$statuses = array_filter(
+			get_post_stati(),
+			static function ( $status ): bool {
+				return 0 === strpos( $status, 'wc-' );
+			}
+		);
+
+		return array_map( array( OrderUtil::class, 'remove_status_prefix' ), array_values( $statuses ) );
+	}
+
+	/**
+	 * Status slugs (without the `wc-` prefix) that the orders query accepts for
+	 * any order type.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_query_order_status_slugs(): array {
+		return array_values(
+			array_diff(
+				array_unique( array_merge( self::get_allowed_order_status_slugs(), self::get_order_type_status_slugs() ) ),
+				array( OrderStatus::CHECKOUT_DRAFT )
+			)
+		);
+	}
+
+	/**
 	 * Possible order status slugs (without the `wc-` prefix) for ability output.
 	 *
 	 * @return array<int, string>
@@ -42,9 +90,12 @@ trait OrderAbilityTrait {
 	protected static function get_order_output_status_slugs(): array {
 		return array_values(
 			array_unique(
-				array_map(
-					array( OrderUtil::class, 'remove_status_prefix' ),
-					array_merge( OrderStatus::get_all(), array_keys( wc_get_order_statuses() ) )
+				array_merge(
+					array_map(
+						array( OrderUtil::class, 'remove_status_prefix' ),
+						array_merge( OrderStatus::get_all(), array_keys( wc_get_order_statuses() ) )
+					),
+					self::get_order_type_status_slugs()
 				)
 			)
 		);

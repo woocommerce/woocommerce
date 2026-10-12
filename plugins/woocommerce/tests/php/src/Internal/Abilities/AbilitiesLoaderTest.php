@@ -404,6 +404,102 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list shop_order by default, and not refunds or HPOS placeholders.
+	 */
+	public function test_orders_query_type_defaults_to_shop_order(): void {
+		$schema = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
+		$types  = $schema['properties']['type']['enum'] ?? array();
+
+		$this->assertSame( 'shop_order', $schema['properties']['type']['default'] ?? null );
+		$this->assertContains( 'shop_order', $types );
+		$this->assertNotContains( 'shop_order_refund', $types );
+		$this->assertNotContains( 'shop_order_placehold', $types );
+
+		$query_args = $this->capture_order_query_args( array() );
+
+		$this->assertSame( 'shop_order', $query_args['type'] ?? null );
+	}
+
+	/**
+	 * @testdox Should query an order type and status that an extension registers.
+	 */
+	public function test_orders_query_accepts_registered_order_type_and_status(): void {
+		global $wc_order_types;
+
+		$this->unregister_domain_abilities();
+		wc_register_order_type(
+			'shop_test_contract',
+			array(
+				'capability_type'          => 'shop_order',
+				'exclude_from_order_views' => true,
+			)
+		);
+		register_post_status( 'wc-test-active', array( 'label' => 'Active' ) );
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
+
+			$this->assertContains( 'shop_test_contract', $input['type']['enum'] );
+			$this->assertContains( 'test-active', $input['status']['enum'] );
+			$this->assertContains( 'test-active', $output['status']['enum'] );
+
+			$query_args = $this->capture_order_query_args(
+				array(
+					'type'   => 'shop_test_contract',
+					'status' => 'test-active',
+				)
+			);
+
+			$this->assertSame( 'shop_test_contract', $query_args['type'] ?? null );
+			$this->assertSame( array( 'wc-test-active' ), $query_args['status'] ?? null );
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-active'] );
+			unregister_post_type( 'shop_test_contract' );
+			$this->register_domain_abilities();
+		}
+	}
+
+	/**
+	 * @testdox Should reject an order type that is not registered.
+	 */
+	public function test_orders_query_rejects_unknown_order_type(): void {
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'type' => 'shop_order_refund' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * Run the orders query ability and return the arguments of its order query.
+	 *
+	 * @param array $input Ability input.
+	 * @return array
+	 */
+	private function capture_order_query_args( array $input ): array {
+		$captured = array();
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured = $args;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_order_query_args', $capture );
+		try {
+			$result = wp_get_ability( 'woocommerce/orders-query' )->execute( $input );
+		} finally {
+			remove_filter( 'woocommerce_order_query_args', $capture );
+		}
+
+		$this->assertNotWPError( $result );
+
+		return $captured;
+	}
+
+	/**
 	 * @testdox Should register extension ability classes appended via the loader filter.
 	 */
 	public function test_loader_filter_accepts_valid_extension_classes(): void {
