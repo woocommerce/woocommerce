@@ -196,7 +196,7 @@ final class Contracts {
 	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
 	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional.
 	 * `lease_seconds` (positive int) appends the cycle claimed: the caller holds its lease for
-	 * that long (see {@see self::claim_cycle()}). The contract is not read: appending to an
+	 * that long, measured on the database clock like {@see self::claim_cycle()}. The contract is not read: appending to an
 	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()` notice
 	 * and are ignored.
 	 *
@@ -222,9 +222,10 @@ final class Contracts {
 			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
+		$repository = new ContractRepository();
+
 		if ( array_key_exists( 'lease_seconds', $filtered_args ) ) {
-			$lease_seconds               = ArgumentValidator::validate_positive_int( 'lease_seconds', $filtered_args['lease_seconds'] );
-			$cycle_args['claimed_until'] = gmdate( 'Y-m-d H:i:s', time() + $lease_seconds );
+			$cycle_args['claimed_until'] = $repository->lease_until( ArgumentValidator::validate_positive_int( 'lease_seconds', $filtered_args['lease_seconds'] ) );
 		}
 
 		try {
@@ -234,7 +235,7 @@ final class Contracts {
 		}
 
 		try {
-			( new ContractRepository() )->append_cycle( $cycle, null );
+			$repository->append_cycle( $cycle, null );
 		} catch ( DuplicateCycleException $e ) {
 			throw new DomainException( 'Contracts: the cycle position or count already exists.' );
 		}

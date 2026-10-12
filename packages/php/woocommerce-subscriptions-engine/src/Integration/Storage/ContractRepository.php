@@ -1084,6 +1084,23 @@ final class ContractRepository {
 	}
 
 	/**
+	 * When a lease of `$lease_seconds` taken now ends, on the database clock that
+	 * {@see self::claim_cycle()} and {@see self::transition_cycle()} stamp and compare leases
+	 * on, so a lease set at append time is measured like every other.
+	 *
+	 * @param int $lease_seconds Lease length in seconds.
+	 * @return string GMT `Y-m-d H:i:s`; the PHP clock only if the database cannot answer.
+	 */
+	public function lease_until( int $lease_seconds ): string {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$until = $wpdb->get_var( $wpdb->prepare( 'SELECT DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', $lease_seconds ) );
+
+		return is_string( $until ) && '' !== $until ? $until : gmdate( 'Y-m-d H:i:s', time() + $lease_seconds );
+	}
+
+	/**
 	 * Take the lease of a cycle in `$status` whose lease has expired or was never set, for
 	 * `$lease_seconds`. A compare-and-set on the status and the lease: among concurrent
 	 * callers exactly one matches the row. The expiry check and the new lease use the

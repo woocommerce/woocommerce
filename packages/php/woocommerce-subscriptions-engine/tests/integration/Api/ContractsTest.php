@@ -1090,6 +1090,35 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A claimed append stamps its lease on the database clock, like claim_cycle.
+	 */
+	public function test_a_claimed_append_stamps_the_lease_on_the_database_clock(): void {
+		global $wpdb;
+
+		$id = $this->contract_with_currency();
+
+		// Pin the session's database clock far from PHP's; UTC_TIMESTAMP() follows it.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( $wpdb->prepare( 'SET timestamp = %d', gmmktime( 0, 0, 0, 1, 1, 2035 ) ) );
+		try {
+			$cycle = Contracts::add_cycle(
+				$id,
+				$this->cycle_args(
+					array(
+						'status'        => CycleStatus::PENDING,
+						'lease_seconds' => 900,
+					)
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( 'SET timestamp = DEFAULT' );
+		}
+
+		$this->assertSame( '2035-01-01 00:15:00', $this->cycle( $id, $cycle->get_id() )->get_claimed_until_gmt() );
+	}
+
+	/**
 	 * @testdox An invalid lease_seconds is rejected without a write.
 	 */
 	public function test_an_invalid_lease_is_rejected(): void {
