@@ -257,9 +257,9 @@ class ProductWalker {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param callable|null $callback                    The callback to call after each batch of products is processed.
+	 * @param callable|null $callback                The callback to call after each batch of products is processed.
 	 * @param int           $resume_after_product_id Resume after this product ID, usually the previous chunk's `last_product_id`; 0 starts from the beginning.
-	 * @param int           $max_batches                 The maximum number of batches to process in this call.
+	 * @param int           $max_batches             The maximum number of batches to process in this call.
 	 * @return WalkerProgress Items/batches processed here, plus the total_count and total_batch_count
 	 *                        remaining when this chunk started, so the caller knows whether the feed is complete.
 	 */

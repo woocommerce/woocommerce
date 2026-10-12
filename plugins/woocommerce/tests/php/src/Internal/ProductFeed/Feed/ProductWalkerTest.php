@@ -295,10 +295,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a bounded walk processes a limited number of batches, resumes after the last walked ID,
-	 * stops at the last page, and never manages the feed lifecycle (start/end).
+	 * @testdox Should walk a bounded chunk, resume after the last walked ID, stop at the last page, and never manage the feed lifecycle.
 	 */
-	public function test_walk_processes_bounded_pages_and_resumes() {
+	public function test_walk_processes_bounded_pages_and_resumes(): void {
 		$batch_size  = 2;
 		$total       = 6;
 		$total_pages = 3;
@@ -344,11 +343,11 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$mock_integration->method( 'get_feed_validator' )->willReturn( $mock_validator );
 		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
 
-		$walker = ProductWalker::from_integration( $mock_integration, $mock_feed );
-		$walker->set_batch_size( $batch_size );
+		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$sut->set_batch_size( $batch_size );
 
 		// First chunk: products 1-4 (allotment of 2 batches reached).
-		$progress = $walker->walk_chunk( null, 0, 2 );
+		$progress = $sut->walk_chunk( null, 0, 2 );
 		$this->assertSame( $total, $progress->total_count );
 		$this->assertSame( $total_pages, $progress->total_batch_count );
 		$this->assertSame( 2, $progress->processed_batches );
@@ -356,7 +355,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 4, $progress->last_product_id );
 
 		// Final chunk: resumes after product 4 and stops at the last page even though 2 batches were allowed.
-		$progress = $walker->walk_chunk( null, $progress->last_product_id, 2 );
+		$progress = $sut->walk_chunk( null, $progress->last_product_id, 2 );
 		$this->assertSame( 2, $progress->total_count );
 		$this->assertSame( 1, $progress->total_batch_count );
 		$this->assertSame( 1, $progress->processed_batches );
@@ -365,10 +364,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the deprecated page-based walk still processes a limited number of batches, resumes
-	 * from the right page, and stops at the last page.
+	 * @testdox Should keep the deprecated page-based walk working: bounded batches, resuming from a page, stopping at the last page.
 	 */
-	public function test_deprecated_walk_batches_resumes_from_page() {
+	public function test_deprecated_walk_batches_resumes_from_page(): void {
 		$this->setExpectedDeprecated( ProductWalker::class . '::walk_batches' );
 
 		$batch_size  = 2;
@@ -415,18 +413,18 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$mock_integration->method( 'get_feed_validator' )->willReturn( $mock_validator );
 		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
 
-		$walker = ProductWalker::from_integration( $mock_integration, $mock_feed );
-		$walker->set_batch_size( $batch_size );
+		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$sut->set_batch_size( $batch_size );
 
 		// First chunk: pages 1-2 (allotment of 2 batches reached).
-		$progress = $walker->walk_batches( null, 1, 2 );
+		$progress = $sut->walk_batches( null, 1, 2 );
 		$this->assertSame( $total, $progress->total_count );
 		$this->assertSame( $total_pages, $progress->total_batch_count );
 		$this->assertSame( 2, $progress->processed_batches );
 		$this->assertSame( 4, $progress->processed_items );
 
 		// Final chunk: resumes at page 3 and stops at the last page even though 2 batches were allowed.
-		$progress = $walker->walk_batches( null, 3, 2 );
+		$progress = $sut->walk_batches( null, 3, 2 );
 		$this->assertSame( 1, $progress->processed_batches );
 		$this->assertSame( 2, $progress->processed_items );
 	}

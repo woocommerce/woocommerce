@@ -495,7 +495,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	 *
 	 * @param callable $remove Removes the given product from the catalog.
 	 */
-	public function test_feed_generation_does_not_skip_products_when_exported_product_is_removed( callable $remove ) {
+	public function test_feed_generation_does_not_skip_products_when_exported_product_is_removed( callable $remove ): void {
 		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
 		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
 
@@ -533,7 +533,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should restart a continuation saved by a version that tracked pages instead of product IDs.
 	 */
-	public function test_feed_generation_restarts_legacy_page_based_continuation() {
+	public function test_feed_generation_restarts_legacy_page_based_continuation(): void {
 		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
 		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
 
