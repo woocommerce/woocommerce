@@ -329,11 +329,8 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	public function test_order_filter_returns_matching_orders( bool $hpos, bool $sync ): void {
 		$original = OrderUtil::custom_orders_table_usage_is_enabled();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		if ( $hpos ) {
-			$this->setup_cot();
-		} else {
-			$this->toggle_cot_feature_and_usage( false );
-		}
+		$this->setup_cot();
+		$this->toggle_cot_feature_and_usage( $hpos );
 		if ( $sync ) {
 			$this->enable_cot_sync();
 		} else {
@@ -364,9 +361,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( 2, $output['total_pages'] );
 			$this->assertContains( $output['orders'][0]['id'], $tagged );
 		} finally {
-			if ( $hpos ) {
-				$this->clean_up_cot_setup();
-			}
+			$this->clean_up_cot_setup();
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 			$this->toggle_cot_feature_and_usage( $original );
 			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
