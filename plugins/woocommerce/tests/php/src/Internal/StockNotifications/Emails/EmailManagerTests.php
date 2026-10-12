@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
@@ -63,6 +64,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		// whatever filters are active for them, rather than inheriting this test's list.
 		$this->reset_email_singleton();
 		parent::tearDown();
+		WC()->query->init_query_vars();
 	}
 
 	/**
@@ -129,6 +131,49 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should link registered recipients to account management and preserve guest unsubscribe links.
+	 * @testWith [false, false, "stock-notifications"]
+	 *           [true, false, "stock-notifications"]
+	 *           [false, false, "restock-alerts"]
+	 *           [true, false, "restock-alerts"]
+	 *           [false, true, "stock-notifications"]
+	 *           [true, true, "stock-notifications"]
+	 *
+	 * @param bool   $verified Whether to render the confirmation email.
+	 * @param bool   $guest Whether the signup belongs to a guest.
+	 * @param string $endpoint The configured account endpoint.
+	 */
+	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint ): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, $endpoint );
+		WC()->query->init_query_vars();
+		$notification = $this->build_notification();
+		if ( ! $guest ) {
+			$notification->set_user_id( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+			$notification->save();
+		}
+
+		$emails = WC()->mailer()->get_emails();
+		$sut    = $emails[ $verified ? 'WC_Email_Customer_Stock_Notification_Verified' : 'WC_Email_Customer_Stock_Notification' ];
+		$sut->prepare_email( $notification );
+		$html = $sut->get_content_html();
+		$this->assertSame( 1, preg_match( '/href="([^"]+)" id="notification__unsubscribe_link"/', $html, $matches ), 'The footer must contain its management link.' );
+		$link = html_entity_decode( $matches[1], ENT_QUOTES );
+		parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
+		$this->assertSame( 'email', $query['utm_medium'] );
+		if ( $guest ) {
+			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
+			$this->assertTrue( wp_verify_fast_hash( $query['email_link_action_key'], $notification->get_meta( 'unsubscribe_action_key' ) ), 'The guest link must contain the persisted unsubscribe key.' );
+			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
+		} else {
+			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
+			$this->assertArrayNotHasKey( 'email_link_action', $query );
+			$this->assertArrayNotHasKey( 'email_link_action_key', $query );
+		}
 	}
 
 	/**
