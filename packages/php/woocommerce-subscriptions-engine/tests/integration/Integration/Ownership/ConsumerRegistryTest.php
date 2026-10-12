@@ -32,22 +32,18 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The registry is empty when nothing is registered.
+	 * @testdox No owner has a due handler when nothing is registered.
 	 */
-	public function test_is_empty_when_nothing_is_registered(): void {
-		$this->assertTrue( ConsumerRegistry::is_empty() );
-		$this->assertSame( array(), ConsumerRegistry::all() );
+	public function test_no_handler_owners_when_nothing_is_registered(): void {
 		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler() );
 	}
 
 	/**
-	 * @testdox Registering a slug records a consumer without a due handler.
+	 * @testdox Registering a slug without configuration records no due handler.
 	 */
 	public function test_register_records_a_consumer(): void {
 		ConsumerRegistry::register( 'lite' );
 
-		$this->assertFalse( ConsumerRegistry::is_empty() );
-		$this->assertSame( array( 'lite' ), ConsumerRegistry::all() );
 		$this->assertNull( ConsumerRegistry::get_contract_due_handler( 'lite' ) );
 		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'A slug without a handler is not a dispatch owner.' );
 	}
@@ -71,9 +67,6 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => static function (): void {} ) );
 		ConsumerRegistry::register( 'premium' );
 
-		$all = ConsumerRegistry::all();
-		sort( $all );
-		$this->assertSame( array( 'lite', 'premium' ), $all );
 		$this->assertSame( array( 'lite' ), ConsumerRegistry::get_slugs_with_contract_due_handler() );
 		$this->assertNull( ConsumerRegistry::get_contract_due_handler( 'unknown' ), 'An unregistered slug has no handler.' );
 	}
@@ -86,9 +79,12 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => 'not_a_function_anywhere' ) );
 
-		$this->assertSame( array( 'lite' ), ConsumerRegistry::all() );
 		$this->assertNull( ConsumerRegistry::get_contract_due_handler( 'lite' ) );
 		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler() );
+
+		// The slug registered: a later registration is a repeat and does not take.
+		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => static function (): void {} ) );
+		$this->assertNull( ConsumerRegistry::get_contract_due_handler( 'lite' ) );
 	}
 
 	/**
@@ -120,20 +116,23 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => static function (): void {} ) );
 		ConsumerRegistry::register( ' lite ' );
 
-		$this->assertSame( array( 'lite' ), ConsumerRegistry::all() );
 		$this->assertSame( $first, ConsumerRegistry::get_contract_due_handler( 'lite' ) );
+		$this->assertSame( array( 'lite' ), ConsumerRegistry::get_slugs_with_contract_due_handler() );
 	}
 
 	/**
 	 * @testdox An empty or whitespace-only slug is ignored and a slug is stored trimmed.
 	 */
 	public function test_register_ignores_blank_slugs_and_trims(): void {
-		ConsumerRegistry::register( '' );
-		ConsumerRegistry::register( "  \t\n", array( 'contract_due_handler' => static function (): void {} ) );
-		$this->assertTrue( ConsumerRegistry::is_empty(), 'A blank slug must not register.' );
+		$handler = static function (): void {};
 
-		ConsumerRegistry::register( '  woocommerce-subscriptions-lite  ' );
-		$this->assertSame( array( 'woocommerce-subscriptions-lite' ), ConsumerRegistry::all(), 'The slug is stored trimmed.' );
+		ConsumerRegistry::register( '' );
+		ConsumerRegistry::register( "  \t\n", array( 'contract_due_handler' => $handler ) );
+		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'A blank slug must not register.' );
+
+		ConsumerRegistry::register( '  woocommerce-subscriptions-lite  ', array( 'contract_due_handler' => $handler ) );
+		$this->assertSame( array( 'woocommerce-subscriptions-lite' ), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'The slug is stored trimmed.' );
+		$this->assertSame( $handler, ConsumerRegistry::get_contract_due_handler( ' woocommerce-subscriptions-lite ' ) );
 	}
 
 	/**
@@ -141,17 +140,17 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_unregister_removes_only_the_named_consumer(): void {
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => static function (): void {} ) );
-		ConsumerRegistry::register( 'premium' );
+		ConsumerRegistry::register( 'premium', array( 'contract_due_handler' => static function (): void {} ) );
 
 		ConsumerRegistry::unregister( 'lite' );
-		$this->assertSame( array( 'premium' ), ConsumerRegistry::all(), 'Only the named consumer is removed.' );
-		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler() );
-
-		ConsumerRegistry::unregister( ' premium ' );
-		$this->assertTrue( ConsumerRegistry::is_empty(), 'The slug is trimmed, matching register().' );
+		$this->assertSame( array( 'premium' ), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'Only the named consumer is removed.' );
+		$this->assertNull( ConsumerRegistry::get_contract_due_handler( 'lite' ) );
 
 		ConsumerRegistry::unregister( 'unknown' );
-		$this->assertTrue( ConsumerRegistry::is_empty(), 'An unknown slug is a no-op.' );
+		$this->assertSame( array( 'premium' ), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'An unknown slug is a no-op.' );
+
+		ConsumerRegistry::unregister( ' premium ' );
+		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler(), 'The slug is trimmed, matching register().' );
 	}
 
 	/**
@@ -161,7 +160,7 @@ class ConsumerRegistryTest extends EngineIntegrationTestCase {
 		ConsumerRegistry::register( 'lite', array( 'contract_due_handler' => static function (): void {} ) );
 		ConsumerRegistry::reset();
 
-		$this->assertTrue( ConsumerRegistry::is_empty() );
 		$this->assertSame( array(), ConsumerRegistry::get_slugs_with_contract_due_handler() );
+		$this->assertNull( ConsumerRegistry::get_contract_due_handler( 'lite' ) );
 	}
 }

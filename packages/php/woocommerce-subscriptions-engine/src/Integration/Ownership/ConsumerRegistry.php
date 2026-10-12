@@ -90,22 +90,6 @@ final class ConsumerRegistry {
 	}
 
 	/**
-	 * Whether no consumer is registered.
-	 */
-	public static function is_empty(): bool {
-		return array() === self::$consumers;
-	}
-
-	/**
-	 * The registered consumer slugs (order not significant).
-	 *
-	 * @return array<int, string>
-	 */
-	public static function all(): array {
-		return array_map( 'strval', array_keys( self::$consumers ) );
-	}
-
-	/**
 	 * The contract due handler a consumer registered, or null when it has none or is not registered.
 	 *
 	 * @param string $slug The consumer extension's registered slug.
