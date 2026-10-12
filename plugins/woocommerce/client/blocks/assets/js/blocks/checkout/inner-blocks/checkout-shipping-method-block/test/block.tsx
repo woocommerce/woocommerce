@@ -151,8 +151,8 @@ describe( 'Block', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	// The delivery option reflects what the server filtered; it applies no rule of its own.
-	// With nothing deliverable it asks for an address whatever the merchant setting says.
+	// Hiding costs until an address is entered must not change what the shopper reads here.
+	// With nothing deliverable there is no price to hide, only the prompt to enter an address.
 	it( 'keeps the address prompt for pickup-only rates even with costs hidden and the address incomplete', () => {
 		renderWith( {
 			costRequiresAddress: true,
