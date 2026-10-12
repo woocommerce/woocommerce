@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return the right orders from the orders query ability when filtering by creation date and time on stores outside UTC.

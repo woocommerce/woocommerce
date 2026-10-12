@@ -126,9 +126,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_map( 'intval', $input['exclude'] );
 		}
 
-		foreach ( array( 'date_after', 'date_before' ) as $field ) {
-			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( $input[ $field ] );
+		$created_date_arg = self::build_created_date_arg( $input );
+		if ( null !== $created_date_arg ) {
+			$args['date_created'] = $created_date_arg;
+		} else {
+			foreach ( array( 'date_after', 'date_before' ) as $field ) {
+				if ( ! empty( $input[ $field ] ) ) {
+					$args[ $field ] = wc_clean( $input[ $field ] );
+				}
 			}
 		}
 
@@ -267,6 +272,40 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+	}
+
+	/**
+	 * Build a date_created arg from date_after/date_before input.
+	 *
+	 * For values with a time, wc_get_orders() adds the store offset to date_after/date_before and then
+	 * compares them as UTC, so the offset is applied twice. UTC timestamps avoid that.
+	 *
+	 * @param array $input Ability input.
+	 * @return string|null Null when there is no valid created-date input.
+	 */
+	private static function build_created_date_arg( array $input ): ?string {
+		$after  = isset( $input['date_after'] ) && is_string( $input['date_after'] ) ? sanitize_text_field( $input['date_after'] ) : '';
+		$before = isset( $input['date_before'] ) && is_string( $input['date_before'] ) ? sanitize_text_field( $input['date_before'] ) : '';
+
+		if ( '' === $after && '' === $before ) {
+			return null;
+		}
+
+		$after_timestamp  = '' !== $after ? self::prepare_date_time_for_query( $after ) : null;
+		$before_timestamp = '' !== $before ? self::prepare_date_time_for_query( $before ) : null;
+
+		if (
+			( '' !== $after && null === $after_timestamp )
+			|| ( '' !== $before && null === $before_timestamp )
+		) {
+			return null;
+		}
+
+		if ( null !== $after_timestamp && null !== $before_timestamp ) {
+			return $after_timestamp . '...' . $before_timestamp;
+		}
+
+		return null !== $after_timestamp ? '>' . $after_timestamp : '<' . $before_timestamp;
 	}
 
 	/**

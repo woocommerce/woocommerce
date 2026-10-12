@@ -1994,6 +1994,50 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply date_after and date_before with a time in the store timezone.
+	 */
+	public function test_orders_query_filters_created_date_in_store_timezone(): void {
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$email = wp_unique_id( 'abilities-order-created-timezone-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T09:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-07-15T11:00:00', '2025-07-15T11:00:00' );
+
+		$after = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after );
+		$this->assertSame( array( $late->get_id() ), array_column( $after['orders'], 'id' ), 'date_after 10:00 should return only the order created at 11:00 store time.' );
+
+		$before = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_before'   => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $before );
+		$this->assertSame( array( $early->get_id() ), array_column( $before['orders'], 'id' ), 'date_before 10:00 should return only the order created at 09:00 store time.' );
+
+		$after_utc = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00Z',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_utc );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_utc['orders'], 'id' ), 'date_after 08:00 UTC (10:00 store time) should return only the order created at 11:00 store time.' );
+	}
+
+	/**
 	 * @testdox Should filter modified_before with time precision across order storage engines.
 	 *
 	 * @dataProvider provider_order_storage_engines
