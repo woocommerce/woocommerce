@@ -50,13 +50,15 @@ final class SchemaInstaller {
 	 *         `inventory_policy` and their indexes; `billing_policy` nullable; an
 	 *         `extension_status (extension_slug, status)` index; new selling_plan_meta
 	 *         table (HPOS-style indexes); pre-freeze, recreate the tables.
+	 * 2.7.0 - contracts `dispatch_claimed_until` (due-dispatch claim); dbDelta adds the
+	 *         nullable column in place.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.6.0';
+	private const VERSION = '2.7.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -261,6 +263,7 @@ final class SchemaInstaller {
   payment_token_id BIGINT UNSIGNED NULL,
   start_gmt DATETIME NULL,
   next_payment_gmt DATETIME NULL,
+  dispatch_claimed_until DATETIME NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   billing_total DECIMAL(26,8) NOT NULL DEFAULT 0,

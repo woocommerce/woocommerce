@@ -290,10 +290,26 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.6.0 (plans as records, plan meta table).
+	 * @testdox The schema version is 2.7.0 (contract due-dispatch claim).
 	 */
-	public function test_schema_version_is_2_6_0(): void {
-		$this->assertSame( '2.6.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_7_0(): void {
+		$this->assertSame( '2.7.0', SchemaInstaller::get_version() );
+	}
+
+	/**
+	 * @testdox Contracts carry a nullable dispatch_claimed_until column for the due-dispatch claim.
+	 */
+	public function test_contracts_dispatch_claimed_until_is_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'dispatch_claimed_until' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.dispatch_claimed_until column.' );
+		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected contracts.dispatch_claimed_until to be NULLable.' );
+		$this->assertSame( 'datetime', $row['Type'] ?? null );
 	}
 
 	/**
