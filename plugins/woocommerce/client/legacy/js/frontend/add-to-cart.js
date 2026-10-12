@@ -13,6 +13,7 @@ jQuery( function( $ ) {
 		this.addRequest  = this.addRequest.bind( this );
 		this.run         = this.run.bind( this );
 		this.$liveRegion = this.createLiveRegion();
+		this.errorNotices = null;
 
 		$( document.body )
 			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
@@ -101,6 +102,8 @@ jQuery( function( $ ) {
 				data[ key ] = value;
 			});
 
+			data.return_notices = true;
+
 			// Trigger event.
 			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
@@ -113,10 +116,28 @@ jQuery( function( $ ) {
 						return;
 					}
 
-					if ( response.error && response.product_url ) {
-						window.location = response.product_url;
+					if ( response.error ) {
+						// Any string, even an empty one, means the server already consumed the notices for this page.
+						var showsNotices = typeof response.messages === 'string';
+
+						$thisbutton.removeClass( 'loading' );
+
+						if ( showsNotices ) {
+							e.data.addToCartHandler.showErrorNotices( $thisbutton, response.messages );
+						}
+
+						// The response reported an error, so added_to_cart will not fire. Some extensions send an error on purpose
+						// to redirect the shopper, even after adding the product. Fires before any redirect, so themes and plugins
+						// can undo what they started on adding_to_cart.
+						$( document.body ).trigger( 'wc_add_to_cart_failed', [ $thisbutton, response ] );
+
+						if ( ! showsNotices && typeof response.product_url === 'string' && response.product_url ) {
+							window.location = response.product_url;
+						}
 						return;
 					}
+
+					e.data.addToCartHandler.clearErrorNotices( $thisbutton );
 
 					// Redirect to cart option
 					if ( wc_add_to_cart_params.cart_redirect_after_add === 'yes' ) {
@@ -129,6 +150,70 @@ jQuery( function( $ ) {
 				},
 				dataType: 'json'
 			});
+		}
+	};
+
+	/**
+	 * Show a failed addition's notices above its product list, replacing the previous failure's notices.
+	 */
+	AddToCartHandler.prototype.showErrorNotices = function( $button, messages ) {
+		this.clearErrorNotices();
+
+		if ( ! messages ) {
+			return;
+		}
+
+		var isAttached = $.contains( document.body, $button[0] ),
+			$messages = $( $.parseHTML( messages ) ),
+			$wrapper = isAttached ? this.getLocalNoticesWrapper( $button ) : $(),
+			$inserted = $messages;
+
+		if ( ! $wrapper.length ) {
+			var $container = $button.closest( '.products, .wc-block-grid__products, .woocommerce:not(body)' );
+
+			$wrapper = $inserted = $( '<div class="woocommerce-notices-wrapper"></div>' );
+
+			if ( ! isAttached ) {
+				$( document.body ).prepend( $wrapper );
+			} else {
+				$wrapper.insertBefore( $container.length ? $container : $button );
+			}
+		}
+
+		$wrapper.append( $messages );
+		this.errorNotices = { button: $button[0], $elements: $inserted };
+
+		// The list's notices can be far above a button lower in the grid. When the view moves to them,
+		// move focus too, so keyboard users are not left on a button that is now off screen.
+		var notice = $messages.filter( '*' )[0],
+			rect = notice && notice.getBoundingClientRect();
+
+		if ( rect && ( rect.top < 0 || rect.bottom > window.innerHeight ) ) {
+			notice.setAttribute( 'tabindex', '-1' );
+			notice.scrollIntoView( { block: 'center' } );
+			notice.focus( { preventScroll: true } );
+		}
+	};
+
+	/**
+	 * Find the notices wrapper that unambiguously belongs to the button's product list.
+	 */
+	AddToCartHandler.prototype.getLocalNoticesWrapper = function( $button ) {
+		var $host = $button.closest( '.woocommerce:not(body), main' ),
+			$wrappers = $host.find( '.woocommerce-notices-wrapper' ).filter( function() {
+				return $( this ).parent().closest( '.woocommerce:not(body), main' )[0] === $host[0];
+			});
+
+		return $host.find( '.products' ).length === 1 && $wrappers.length === 1 ? $wrappers : $();
+	};
+
+	/**
+	 * Remove the shown error notices, or only those of the given button when it is passed.
+	 */
+	AddToCartHandler.prototype.clearErrorNotices = function( $button ) {
+		if ( this.errorNotices && ( ! $button || this.errorNotices.button === $button[0] ) ) {
+			this.errorNotices.$elements.remove();
+			this.errorNotices = null;
 		}
 	};
 

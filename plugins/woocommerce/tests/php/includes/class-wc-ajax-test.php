@@ -1660,6 +1660,188 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should negotiate inline errors without consuming notices needed by legacy clients or explicit redirects.
+	 * @dataProvider add_to_cart_error_response_provider
+	 *
+	 * @param mixed  $capability Posted capability, or null when absent.
+	 * @param string $policy Redirect callback policy.
+	 * @param bool   $inline Whether notices should be rendered and consumed.
+	 * @param mixed  $redirect Expected redirect, or null for the product permalink.
+	 */
+	public function test_add_to_cart_error_response( $capability, string $policy, bool $inline, $redirect ): void {
+		$original_notices = wc_get_notices();
+		$calls            = array();
+		$product          = new WC_Product_Simple();
+		$product->set_name( 'Canvas bag' );
+		$product->set_regular_price( '12' );
+		$product->save();
+
+		try {
+			wc_clear_notices();
+			wc_add_notice( 'Earlier notice.', 'notice', array( 'source' => 'catalog' ) );
+			add_filter(
+				'woocommerce_add_to_cart_validation',
+				static function () {
+					wc_add_notice( 'Cannot add this item.', 'error', array( 'source' => 'validation' ) );
+					return false;
+				}
+			);
+			remove_all_filters( 'woocommerce_cart_redirect_after_error' );
+			if ( 'none' !== $policy ) {
+				$callback = static function ( $url, $product_id ) use ( $policy, $redirect, &$calls, &$callback ) {
+					$calls[] = array( $url, $product_id );
+					if ( 'self-removing' === $policy ) {
+						remove_filter( 'woocommerce_cart_redirect_after_error', $callback, 0 );
+					}
+					return in_array( $policy, array( 'same', 'self-removing' ), true ) ? $url : $redirect;
+				};
+				add_filter( 'woocommerce_cart_redirect_after_error', $callback, 0, 2 );
+				if ( 'chain' === $policy ) {
+					add_filter( 'woocommerce_cart_redirect_after_error', '__return_false', 10 );
+				}
+			}
+			$_POST = array( 'product_id' => $product->get_id() );
+			if ( null !== $capability ) {
+				$_POST['return_notices'] = $capability;
+			}
+
+			$response     = $this->do_ajax( 'woocommerce_add_to_cart' );
+			$expected_url = 'chain' === $policy ? false : ( $redirect ?? get_permalink( $product->get_id() ) );
+			$this->assertSame( true, $response['error'] );
+			$this->assertSame( $expected_url, $response['product_url'] );
+			if ( 'none' !== $policy ) {
+				$this->assertSame( array( array( get_permalink( $product->get_id() ), $product->get_id() ) ), $calls );
+			}
+			if ( $inline ) {
+				$this->assertSame( array( 'error', 'product_url', 'messages' ), array_keys( $response ) );
+				$this->assertIsString( $response['messages'] );
+				$this->assertStringContainsString( 'Cannot add this item.', $response['messages'] );
+				$this->assertStringContainsString( 'Earlier notice.', $response['messages'] );
+				$this->assertStringContainsString( 'role="alert"', $response['messages'] );
+				$this->assertStringContainsString( 'data-source="validation"', $response['messages'] );
+				$this->assertStringContainsString( 'data-source="catalog"', $response['messages'] );
+				$this->assertSame( array(), wc_get_notices() );
+			} else {
+				$this->assertSame(
+					array(
+						'error'       => true,
+						'product_url' => $expected_url,
+					),
+					$response
+				);
+				$this->assertSame(
+					array(
+						'notice' => array(
+							array(
+								'notice' => 'Earlier notice.',
+								'data'   => array( 'source' => 'catalog' ),
+							),
+						),
+						'error'  => array(
+							array(
+								'notice' => 'Cannot add this item.',
+								'data'   => array( 'source' => 'validation' ),
+							),
+						),
+					),
+					wc_get_notices()
+				);
+			}
+		} finally {
+			// WP_Ajax_UnitTestCase restores hooks and database rows, but not the WooCommerce notice queue.
+			wc_set_notices( $original_notices );
+		}
+	}
+
+	/**
+	 * Capability and explicit redirect compatibility cases.
+	 *
+	 * @return array[]
+	 */
+	public static function add_to_cart_error_response_provider(): array {
+		return array(
+			'absent'        => array( null, 'none', false, null ),
+			'false'         => array( 'false', 'none', false, null ),
+			'array'         => array( array( 'true' ), 'none', false, null ),
+			'one'           => array( '1', 'none', false, null ),
+			'empty'         => array( '', 'none', false, null ),
+			'inline'        => array( 'true', 'none', true, null ),
+			'false URL'     => array( 'true', 'false', true, false ),
+			'custom URL'    => array( 'true', 'custom', false, '/error-help/' ),
+			'priority zero' => array( 'true', 'same', false, null ),
+			'self removing' => array( 'true', 'self-removing', false, null ),
+			'malformed URL' => array( 'true', 'custom', false, array( 'invalid' ) ),
+			'final false'   => array( 'true', 'chain', true, '/error-help/' ),
+		);
+	}
+
+	/**
+	 * @testdox Should sanitize inline notices, stay inline when queued notices render empty, and redirect when none were queued.
+	 * @testWith ["unsafe"]
+	 *           ["suppressed"]
+	 *           ["empty"]
+	 *
+	 * @param string $notice_mode Notice fixture mode.
+	 */
+	public function test_add_to_cart_inline_notice_rendering( string $notice_mode ): void {
+		$original_notices = wc_get_notices();
+		$product          = new WC_Product_Simple();
+		$product->set_name( 'Canvas bag' );
+		$product->set_regular_price( '12' );
+		$product->save();
+
+		try {
+			wc_clear_notices();
+			remove_all_filters( 'woocommerce_cart_redirect_after_error' );
+			add_filter(
+				'woocommerce_add_to_cart_validation',
+				static function () use ( $notice_mode ) {
+					if ( 'empty' !== $notice_mode ) {
+						wc_add_notice( '<strong>Cannot add this item.</strong><script>alert(1)</script><a href="javascript:alert(1)" onclick="alert(1)">Help</a>', 'error' );
+					}
+					return false;
+				}
+			);
+			if ( 'suppressed' === $notice_mode ) {
+				add_filter( 'woocommerce_notice_types', '__return_empty_array' );
+			}
+			$_POST = array(
+				'product_id'     => $product->get_id(),
+				'return_notices' => 'true',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_add_to_cart' );
+			if ( 'empty' === $notice_mode ) {
+				// Nothing was queued, so nothing is lost by keeping the legacy product page redirect.
+				$this->assertSame(
+					array(
+						'error'       => true,
+						'product_url' => get_permalink( $product->get_id() ),
+					),
+					$response
+				);
+				return;
+			}
+			$this->assertSame( true, $response['error'] );
+			$this->assertSame( get_permalink( $product->get_id() ), $response['product_url'] );
+			$this->assertArrayHasKey( 'messages', $response );
+			$this->assertIsString( $response['messages'] );
+			if ( 'unsafe' === $notice_mode ) {
+				$this->assertStringContainsString( '<strong>Cannot add this item.</strong>', $response['messages'] );
+				$this->assertStringContainsString( 'role="alert"', $response['messages'] );
+				$this->assertStringNotContainsString( '<script', $response['messages'] );
+				$this->assertStringNotContainsString( 'javascript:', $response['messages'] );
+				$this->assertStringNotContainsString( 'onclick=', $response['messages'] );
+			} else {
+				$this->assertSame( '', $response['messages'] );
+			}
+			$this->assertSame( array(), wc_get_notices() );
+		} finally {
+			wc_set_notices( $original_notices );
+		}
+	}
+
+	/**
 	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
 	 */
 	public function test_add_to_cart_fires_cart_item_added_from_user_request(): void {

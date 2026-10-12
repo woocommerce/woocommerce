@@ -600,11 +600,20 @@ class WC_AJAX {
 
 		} else {
 
-			// If there was an error adding to the cart, redirect to the product page to show any errors.
-			$data = array(
+			// Checked before applying the filter, so a callback that removes itself still counts as a redirect.
+			$has_error_redirect = has_filter( 'woocommerce_cart_redirect_after_error' );
+			$data               = array(
 				'error'       => true,
 				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
 			);
+
+			// Return the notices only to clients that ask for them, like the bundled script, only when no callback asked for a
+			// redirect, and only when there is something to show. Otherwise the client follows product_url, so the notices
+			// stay queued for the next page.
+			$client_shows_notices = isset( $_POST['return_notices'] ) && 'true' === $_POST['return_notices'];
+			if ( $client_shows_notices && ( ! $has_error_redirect || ! $data['product_url'] ) && WC()->session && wc_notice_count() > 0 ) {
+				$data['messages'] = wc_print_notices( true );
+			}
 
 			wp_send_json( $data );
 		}
