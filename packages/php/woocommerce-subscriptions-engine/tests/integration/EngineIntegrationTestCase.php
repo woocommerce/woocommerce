@@ -11,15 +11,22 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 
 /**
  * Engine integration test case.
  */
 abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
+
+	/**
+	 * Owner slug of the plans {@see self::make_plan()} creates by default.
+	 */
+	protected const PLAN_OWNER = 'engine-tests';
 
 	/**
 	 * Gateway ids wired with an approving scheduled-payment handler, to unhook on teardown.
@@ -90,17 +97,90 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Create a plan through the plan facade: a monthly billing payload owned by
+	 * {@see self::PLAN_OWNER} unless overridden.
+	 *
+	 * @param array<string, mixed> $overrides `Plans::create()` args to replace.
+	 * @return int The plan id.
+	 */
+	protected function make_plan( array $overrides = array() ): int {
+		$plan = Plans::create(
+			array_merge(
+				array(
+					'extension_slug' => self::PLAN_OWNER,
+					'name'           => 'Monthly',
+					'billing_policy' => array(
+						'period'   => 'month',
+						'interval' => 1,
+					),
+				),
+				$overrides
+			)
+		);
+
+		return $plan->get_id();
+	}
+
+	/**
+	 * Run `$run` and return the context of every engine log entry at `$level` it wrote whose
+	 * context matches `$context_match` (for example a contract id). Matching on source, level and
+	 * context, not message text, keeps the assertions valid when a message is reworded.
+	 *
+	 * @param string               $level         Log level, e.g. `warning`.
+	 * @param array<string, mixed> $context_match Context keys and values every returned entry carries.
+	 * @param callable             $run           Code under test.
+	 * @return array<int, array<string, mixed>> Contexts of the matching entries, in log order.
+	 */
+	protected function capture_engine_log( string $level, array $context_match, callable $run ): array {
+		$entries = array();
+		$capture = static function ( $message, $entry_level, $context ) use ( &$entries, $level, $context_match ) {
+			if ( $level !== $entry_level || ! is_array( $context ) || 'woocommerce-subscriptions-engine' !== ( $context['source'] ?? null ) ) {
+				return $message;
+			}
+			foreach ( $context_match as $key => $value ) {
+				if ( ! array_key_exists( $key, $context ) || $value !== $context[ $key ] ) {
+					return $message;
+				}
+			}
+			$entries[] = $context;
+
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+
+		try {
+			$run();
+		} finally {
+			remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+		}
+
+		return $entries;
+	}
+
+	/**
+	 * Read a plan through the plan facade, asserting it exists.
+	 *
+	 * @param int $plan_id Plan id.
+	 */
+	protected function plan_view( int $plan_id ): PlanView {
+		$plan = Plans::get( $plan_id );
+		$this->assertInstanceOf( PlanView::class, $plan );
+
+		return $plan;
+	}
+
+	/**
 	 * Sign up a contract for a paid order on `$plan` through the contracts facade, the way an
 	 * extension maps its checkout: create a draft from explicit order fields and snapshots,
 	 * record cycle 1 (billed, linked to the order), then activate. An order without a
 	 * customer gets a new one.
 	 *
 	 * @param WC_Order             $order     Saved, paid order.
-	 * @param Plan                 $plan      Saved selling plan.
+	 * @param PlanView             $plan      Saved selling plan.
 	 * @param array<string, mixed> $overrides `Contracts::create()` fields to replace; `status` is the final status.
 	 * @return int The contract id.
 	 */
-	protected function sign_up_from_order( WC_Order $order, Plan $plan, array $overrides = array() ): int {
+	protected function sign_up_from_order( WC_Order $order, PlanView $plan, array $overrides = array() ): int {
 		if ( $order->get_customer_id() <= 0 ) {
 			$customer_id = self::factory()->user->create();
 			$this->assertIsInt( $customer_id );
@@ -143,7 +223,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				'payment_method_title' => '' !== $order->get_payment_method_title() ? $order->get_payment_method_title() : null,
 				'payment_token_id'     => $token_id > 0 ? $token_id : null,
 				'start_gmt'            => $start,
-				'next_payment_gmt'     => $plan->get_billing_policy()->compute_first_renewal_from( $start ),
+				'next_payment_gmt'     => BillingPolicy::from_array( $plan->get_billing_policy() ?? array() )->compute_first_renewal_from( $start ),
 				'billing_total'        => (string) $order->get_total(),
 				'discount_total'       => (string) $order->get_total_discount(),
 				'shipping_total'       => (string) $order->get_shipping_total(),

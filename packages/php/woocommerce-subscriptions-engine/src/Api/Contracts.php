@@ -22,7 +22,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
@@ -366,7 +366,7 @@ final class Contracts {
 	 * authenticated user at the REST boundary), never inferred, so it never returns
 	 * another customer's contracts. Each view projects the stored contract fields (items
 	 * and addresses not loaded); a caller needing plan terms resolves `selling_plan_id`
-	 * through {@see SellingPlans}.
+	 * through {@see Plans::get()}.
 	 *
 	 * The status filter applies before paging, so a page holds `$limit` matching contracts.
 	 *
@@ -402,7 +402,7 @@ final class Contracts {
 	 * contract it does not own.
 	 *
 	 * The returned view projects the stored contract fields with items and addresses; a
-	 * caller needing plan terms resolves `selling_plan_id` through {@see SellingPlans}.
+	 * caller needing plan terms resolves `selling_plan_id` through {@see Plans::get()}.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $customer_id Customer that must own the contract.
@@ -514,7 +514,7 @@ final class Contracts {
 			}
 		}
 
-		$contract->set_payment_instrument( new InstrumentRef( $token_id, $gateway, $title ) );
+		$contract->set_payment_instrument( new PaymentInstrumentRef( $token_id, $gateway, $title ) );
 		$contract->assert_money_has_currency();
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
