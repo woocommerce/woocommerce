@@ -17,8 +17,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -54,8 +52,9 @@ final class SchemaInstaller {
 	 *         table (HPOS-style indexes); pre-freeze, recreate the tables.
 	 * 2.7.0 - contracts `dispatch_claimed_until` (due-dispatch claim); dbDelta adds the
 	 *         nullable column in place.
-	 * 2.8.0 - contracts `schedule_source` defaults to 'subscriptions_engine' (was
-	 *         'primitive'); a one-time upgrade step renames stored 'primitive' rows.
+	 * 2.8.0 - contracts `schedule_source` widens to VARCHAR(64) (it holds extension and
+	 *         gateway slugs) and defaults to 'subscriptions_engine' (was 'primitive');
+	 *         pre-freeze, recreate the tables (stored 'primitive' rows are not renamed).
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
@@ -123,39 +122,14 @@ final class SchemaInstaller {
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-		$collate          = $wpdb->get_charset_collate();
-		$names            = self::get_table_names( $wpdb->prefix );
-		$database_version = self::get_database_version();
+		$collate = $wpdb->get_charset_collate();
+		$names   = self::get_table_names( $wpdb->prefix );
 
 		foreach ( self::get_table_definitions( $names, $collate ) as $sql ) {
 			dbDelta( $sql );
 		}
 
-		self::upgrade_rows( $database_version, $names );
-
 		update_option( self::VERSION_OPTION, self::VERSION );
-	}
-
-	/**
-	 * Rewrite stored values whose meaning changed between schema versions. Each step
-	 * runs once, when upgrading from a version before the one that introduced it; a
-	 * fresh install has no rows to rewrite.
-	 *
-	 * @param string|null           $from  Installed schema version before this install, or null.
-	 * @param array<string, string> $names Map of logical => prefixed table names.
-	 */
-	private static function upgrade_rows( ?string $from, array $names ): void {
-		global $wpdb;
-
-		if ( null === $from ) {
-			return;
-		}
-
-		if ( version_compare( $from, '2.8.0', '<' ) ) {
-			$contracts = $names[ self::TABLE_CONTRACTS ];
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( $wpdb->prepare( "UPDATE {$contracts} SET schedule_source = %s WHERE schedule_source = %s", Contract::SCHEDULE_SOURCE_ENGINE, 'primitive' ) );
-		}
 	}
 
 	/**
@@ -304,7 +278,7 @@ final class SchemaInstaller {
   last_attempt_gmt DATETIME NULL,
   trial_end_gmt DATETIME NULL,
   end_gmt DATETIME NULL,
-  schedule_source VARCHAR(20) NOT NULL DEFAULT 'subscriptions_engine',
+  schedule_source VARCHAR(64) NOT NULL DEFAULT 'subscriptions_engine',
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,
   PRIMARY KEY  (id),

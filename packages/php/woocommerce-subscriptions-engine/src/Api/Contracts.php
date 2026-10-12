@@ -109,7 +109,7 @@ final class Contracts {
 	 * strings, and a non-null money value requires a currency. `items` is a list of item
 	 * rows; `addresses` is keyed `billing` / `shipping`. `schedule_source` says who keeps the
 	 * payment schedule: `subscriptions_engine` (the default; the engine notifies the owner when
-	 * `next_payment_gmt` passes) or the slug (1-20 of `a-z0-9_-`) of a gateway or extension that
+	 * `next_payment_gmt` passes) or the slug (1-64 of `a-z0-9_-`) of a gateway or extension that
 	 * keeps its own schedule and triggers its own renewals; the engine never dispatches those
 	 * contracts. Unknown keys, also inside item rows and addresses, raise a `_doing_it_wrong()`
 	 * notice and are ignored. The contract row, items and addresses are separate writes and the

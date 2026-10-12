@@ -813,14 +813,15 @@ final class Contract {
 	}
 
 	/**
-	 * Refuse a schedule source that is not a slug of 1-20 lowercase letters, digits,
-	 * underscores or hyphens (the column is VARCHAR(20)).
+	 * Refuse a schedule source that is not a slug of 1-64 lowercase letters, digits,
+	 * underscores or hyphens (the column is VARCHAR(64), wide enough for extension and
+	 * gateway slugs).
 	 *
 	 * @param string $schedule_source Schedule source to check.
 	 * @throws DomainException If `$schedule_source` is not a valid slug.
 	 */
 	private static function assert_schedule_source( string $schedule_source ): void {
-		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,20}$/D', $schedule_source ) ) {
+		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $schedule_source ) ) {
 			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
 		}
 	}

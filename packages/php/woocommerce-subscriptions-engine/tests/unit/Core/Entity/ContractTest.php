@@ -234,20 +234,20 @@ class ContractTest extends TestCase {
 			'space'         => array( 'my gateway' ),
 			'dot'           => array( 'my.gateway' ),
 			'markup'        => array( '<b>' ),
-			'over 20 chars' => array( str_repeat( 'a', 21 ) ),
+			'over 64 chars' => array( str_repeat( 'a', 65 ) ),
 			'trailing LF'   => array( "my_gateway\n" ),
 		);
 	}
 
 	/**
-	 * @testdox The schedule source defaults to the engine and accepts any slug of 1-20 lowercase letters, digits, underscores or hyphens.
+	 * @testdox The schedule source defaults to the engine and accepts any slug of 1-64 lowercase letters, digits, underscores or hyphens.
 	 */
 	public function test_set_schedule_source_accepts_an_open_slug(): void {
 		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
 
 		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $contract->get_schedule_source() );
 
-		foreach ( array( 'a', 'my-gateway_2', str_repeat( 'a', 20 ), Contract::SCHEDULE_SOURCE_ENGINE ) as $schedule_source ) {
+		foreach ( array( 'a', 'my-gateway_2', 'woocommerce-subscriptions-lite', str_repeat( 'a', 64 ), Contract::SCHEDULE_SOURCE_ENGINE ) as $schedule_source ) {
 			$contract->set_schedule_source( $schedule_source );
 
 			$this->assertSame( $schedule_source, $contract->get_schedule_source() );
