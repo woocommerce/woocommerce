@@ -10,6 +10,7 @@ import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvement
 import { disableEmailEditor } from '../email-editor/helpers/enable-email-editor-feature';
 import { tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { expectEmail } from '../../utils/email';
 
 const pickImageFromLibrary = async ( page: Page, imageName: string ) => {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
@@ -35,7 +36,7 @@ test.describe(
 		} );
 
 		test(
-			'Live preview when changing email settings',
+			'Email preview renders, switches type, and updates live when settings change',
 			{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
 			async ( { page, baseURL } ) => {
 				await setFeatureEmailImprovementsFlag( baseURL, 'no' );
@@ -146,8 +147,10 @@ test.describe(
 			} );
 			await expect( sendButton ).toBeDisabled();
 
-			// Fill in the email address field
-			const email = 'test@example.com';
+			// Fill in the email address field. The recipient is unique per run so the
+			// mail log assertion below finds this run's message on a store that keeps
+			// the ones before it.
+			const email = `preview-${ Date.now() }@example.com`;
 			const emailInput = modal.getByLabel( 'Send to' );
 			await emailInput.fill( email );
 
@@ -155,12 +158,20 @@ test.describe(
 			await expect( sendButton ).toBeEnabled();
 			await sendButton.click();
 
-			// Sending fails in the test env (no mail server); the backend returns
+			// Delivery fails in the test env (no mail server); the backend returns
 			// `woocommerce_rest_email_preview_not_sent`, which hits the generic fallback in friendlyEmailSendError.
 			const message = modal.locator(
 				"text=Couldn't send the test email. Check your email settings and try again."
 			);
 			await expect( message ).toBeVisible();
+
+			// The preview email still reaches the mailer, addressed to the entered
+			// recipient and carrying the previewed email's own subject.
+			await expectEmail(
+				page,
+				email,
+				new RegExp( `Your ${ storeName } order has been received!` )
+			);
 		} );
 
 		test( 'Choose image in email image url field', async ( { page } ) => {
@@ -175,6 +186,18 @@ test.describe(
 			await expect( page.locator( logoImageElement ) ).toBeVisible();
 			await expect( page.locator( uploadIconElement ) ).toBeHidden();
 
+			// The preview and the setting both hold the URL of the picked image.
+			const headerImageInput = page.locator(
+				'#woocommerce_email_header_image'
+			);
+			const pickedImageUrl = await page
+				.locator( logoImageElement )
+				.getAttribute( 'src' );
+			expect( pickedImageUrl ).toMatch( /image-03/ );
+			await expect( headerImageInput ).toHaveValue(
+				pickedImageUrl as string
+			);
+
 			// Remove an image
 			await page
 				.locator( '#wc_settings_email_image_url_slotfill' )
@@ -182,6 +205,7 @@ test.describe(
 				.click();
 			await expect( page.locator( logoImageElement ) ).toBeHidden();
 			await expect( page.locator( uploadIconElement ) ).toBeVisible();
+			await expect( headerImageInput ).toHaveValue( '' );
 		} );
 	}
 );
