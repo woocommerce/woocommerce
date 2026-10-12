@@ -240,7 +240,7 @@ class OnboardingSetupWizardTest extends WC_Unit_Test_Case {
 		$this->assertSame( 200, $response->getCode(), 'A successful fallback should answer with HTTP 200.' );
 		$this->assertStringStartsWith( '<h1>WooCommerce setup skipped</h1><p>Your choice to skip setup is saved.', $page, 'The confirmation should open with its heading and say the skip is saved.' );
 		$this->assertStringContainsString(
-			'<p>Check <a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">Site Health</a> to see what is blocking these requests.</p>',
+			'<p>If WooCommerce screens keep failing to load, check <a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">Site Health</a> for problems with the REST API.</p>',
 			$page,
 			'Administrators should be pointed to Site Health.'
 		);

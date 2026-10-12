@@ -73,7 +73,7 @@ class OnboardingSetupWizard {
 	/**
 	 * Handle the authenticated onboarding setup skip fallback.
 	 *
-	 * Saves the skip without the REST API, then explains that some screens may not work and where to look.
+	 * Saves the skip without the REST API, then says where to look if WooCommerce screens keep failing.
 	 *
 	 * @internal
 	 *
@@ -106,16 +106,16 @@ class OnboardingSetupWizard {
 		if ( current_user_can( 'view_site_health_checks' ) ) {
 			$next_step = sprintf(
 				/* translators: %s: link to the WordPress Site Health screen. */
-				esc_html__( 'Check %s to see what is blocking these requests.', 'woocommerce' ),
+				esc_html__( 'If WooCommerce screens keep failing to load, check %s for problems with the REST API.', 'woocommerce' ),
 				'<a href="' . esc_url( admin_url( 'site-health.php' ) ) . '">' . esc_html__( 'Site Health', 'woocommerce' ) . '</a>'
 			);
 		} else {
-			$next_step = esc_html__( 'Ask your hosting provider to check that your site’s REST API is working.', 'woocommerce' );
+			$next_step = esc_html__( 'If WooCommerce screens keep failing to load, ask your hosting provider to check that your site’s REST API is working.', 'woocommerce' );
 		}
 
 		wp_die(
 			'<h1>' . esc_html__( 'WooCommerce setup skipped', 'woocommerce' ) . '</h1>' .
-			'<p>' . esc_html__( 'Your choice to skip setup is saved. Your site’s REST API did not respond correctly, so some WooCommerce screens may not work until that is fixed.', 'woocommerce' ) . '</p>' .
+			'<p>' . esc_html__( 'Your choice to skip setup is saved. A request to your site’s REST API failed, so WooCommerce saved it another way.', 'woocommerce' ) . '</p>' .
 			'<p>' . wp_kses_post( $next_step ) . '</p>' .
 			'<p><a class="button button-primary" href="' . esc_url( wc_admin_url() ) . '">' . esc_html__( 'Continue to WooCommerce Home', 'woocommerce' ) . '</a></p>',
 			esc_html__( 'WooCommerce setup skipped', 'woocommerce' ),
