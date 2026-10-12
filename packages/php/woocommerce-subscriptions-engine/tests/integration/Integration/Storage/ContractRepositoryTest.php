@@ -1560,7 +1560,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	/**
 	 * @testdox An unknown stored cycle status hydrates through every cycle read.
 	 */
-	public function test_an_unknown_stored_cycle_status_hydrates_and_round_trips(): void {
+	public function test_an_unknown_stored_cycle_status_hydrates_through_every_cycle_read(): void {
 		global $wpdb;
 
 		$id    = $this->sut->insert( $this->make_contract() );
