@@ -49,6 +49,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\Internal\Orders\OrderItemPermalink;
 
 /**
  * Main WooCommerce Class.
@@ -413,6 +414,7 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( PaymentSettingsScreen::class );
+		$container->get( OrderItemPermalink::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
