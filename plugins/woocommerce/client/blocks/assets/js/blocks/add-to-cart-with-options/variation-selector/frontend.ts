@@ -307,8 +307,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			toggle(
 				itemArg?:
-					| SelectableItem< { visual?: VisualAttributeTerm } >
-					| Event
+					SelectableItem< { visual?: VisualAttributeTerm } > | Event
 			) {
 				const context = getContext< ToggleContext >();
 				const item =

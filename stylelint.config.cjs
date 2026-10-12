@@ -4,6 +4,7 @@
  */
 module.exports = {
 	extends: '@wordpress/stylelint-config/scss-stylistic',
+	plugins: [ '@wordpress/theme/stylelint-plugins/no-token-fallback-values' ],
 	reportNeedlessDisables: true,
 	ignoreFiles: [
 		'docs/**',
@@ -32,6 +33,7 @@ module.exports = {
 		'scss/selector-no-redundant-nesting-selector': null,
 		'selector-id-pattern': null,
 		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
+		'plugin-wpds/no-token-fallback-values': true,
 	},
 	overrides: [
 		{
