@@ -430,7 +430,41 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertContains( 'chain_count', $indexes, 'Expected the UNIQUE (contract_id, kind, count) index.' );
 		$this->assertContains( 'order_id', $indexes, 'Expected the (order_id) index.' );
 		$this->assertContains( 'contract_kind', $indexes, 'Expected the (contract_id, kind) index.' );
-		$this->assertNotContains( 'due', $indexes, 'The due dispatcher scans contracts, so cycles carry no due index.' );
+	}
+
+	/**
+	 * @testdox The installer declares no cycles due index (the due dispatcher scans contracts).
+	 *
+	 * Reads the schema the installer hands to dbDelta rather than the live table: dbDelta never
+	 * drops an index, so a long-lived test database may still carry one from an earlier schema.
+	 */
+	public function test_cycles_schema_declares_no_due_index(): void {
+		$queries = array();
+		$capture = static function ( array $dbdelta_queries ) use ( &$queries ): array {
+			$queries = array_merge( $queries, $dbdelta_queries );
+
+			// Run no DDL: it would implicitly commit the test transaction.
+			return array();
+		};
+
+		add_filter( 'dbdelta_queries', $capture );
+		try {
+			SchemaInstaller::install();
+		} finally {
+			remove_filter( 'dbdelta_queries', $capture );
+		}
+
+		$cycles = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$create = '';
+		foreach ( $queries as $query ) {
+			if ( is_string( $query ) && false !== strpos( $query, "CREATE TABLE {$cycles} (" ) ) {
+				$create = $query;
+			}
+		}
+
+		$this->assertNotSame( '', $create, 'Expected the installer to declare the cycles table.' );
+		$this->assertStringContainsString( 'KEY contract_kind (contract_id, kind)', $create );
+		$this->assertDoesNotMatchRegularExpression( '/\bKEY due\b/', $create );
 	}
 
 	public function test_cycles_chain_sequence_index_columns_are_in_order(): void {
