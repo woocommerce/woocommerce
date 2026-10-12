@@ -36,6 +36,8 @@ The checklist covers four areas:
 
 A deliberate decision to ship, made while there is still time to not ship. It runs once the RC has finished its staging monitoring - holding it earlier would mean deciding before the RC has been seen on real sites. The release lead and the Product DRI confirm the readiness verdicts still hold, review the RC's sweep and staging thread, and note any fix merged after the RC and whether it ran on staging. Then they record the decision as a comment on the release sub-issue on GitHub: **go**, **no-go**, or **go with conditions** - with names.
 
+The RC stays on staging for at least 24 hours before the go/no-go. The release lead can wait longer, for example when a finding is still open or a fix merged after the RC hasn't run on staging.
+
 Recorded decisions are the input for release retrospectives and future updates to these checklists.
 
 ## For point releases
