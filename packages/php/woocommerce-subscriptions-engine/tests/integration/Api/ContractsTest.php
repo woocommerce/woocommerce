@@ -1220,6 +1220,42 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox transition_cycle rejects an invalid argument value and leaves the cycle unchanged.
+	 * @dataProvider provide_invalid_transition_args
+	 *
+	 * @param array<string, mixed> $args Transition args.
+	 */
+	public function test_transition_cycle_rejects_invalid_argument_values( array $args ): void {
+		$id    = $this->contract_with_currency();
+		$cycle = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		try {
+			Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, $args );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$stored = $this->cycle( $id, $cycle->get_id() );
+			$this->assertSame( CycleStatus::PENDING, $stored->get_status()->get_value() );
+			$this->assertNull( $stored->get_order_id() );
+			$this->assertNull( $stored->get_reason() );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_transition_args(): array {
+		return array(
+			'zero lease'        => array( array( 'lease_seconds' => 0 ) ),
+			'negative lease'    => array( array( 'lease_seconds' => -1 ) ),
+			'non-numeric lease' => array( array( 'lease_seconds' => 'x' ) ),
+			'zero order id'     => array( array( 'order_id' => 0 ) ),
+			'negative order id' => array( array( 'order_id' => -5 ) ),
+			'non-string reason' => array( array( 'reason' => array( 'payment-failed' ) ) ),
+			'numeric reason'    => array( array( 'reason' => 42 ) ),
+		);
+	}
+
+	/**
 	 * @testdox find_cycles_by_order returns the cycles of every contract linked to an order, newest first.
 	 */
 	public function test_find_cycles_by_order_spans_contracts_newest_first(): void {
