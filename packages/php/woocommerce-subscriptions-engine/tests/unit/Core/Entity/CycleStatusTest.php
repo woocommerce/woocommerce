@@ -108,11 +108,6 @@ class CycleStatusTest extends TestCase {
 		$this->assertTrue( CycleStatus::is_registered( 'disputed' ) );
 	}
 
-	public function test_equals_compares_by_value(): void {
-		$this->assertTrue( ( new CycleStatus( CycleStatus::PENDING ) )->equals( new CycleStatus( CycleStatus::PENDING ) ) );
-		$this->assertFalse( ( new CycleStatus( CycleStatus::PENDING ) )->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
 	public function test_the_retired_transition_api_and_factories_are_gone(): void {
 		foreach ( array( 'is_transition_allowed', 'can_transition', 'assert_transition_allowed', 'can_transition_to', 'transition_to', 'from', 'stored', 'pending', 'processing', 'billed', 'failed', 'cancelled', 'all', 'defaults' ) as $method ) {
 			$this->assertFalse( method_exists( CycleStatus::class, $method ), "CycleStatus::{$method}() should not exist." );

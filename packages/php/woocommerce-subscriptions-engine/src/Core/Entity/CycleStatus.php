@@ -67,15 +67,6 @@ final class CycleStatus {
 	}
 
 	/**
-	 * Whether this status is the same as `$other`.
-	 *
-	 * @param CycleStatus $other Status to compare against.
-	 */
-	public function equals( CycleStatus $other ): bool {
-		return $this->value === $other->value;
-	}
-
-	/**
 	 * The engine's default cycle statuses (the registry seed).
 	 *
 	 * @return array<int, string>

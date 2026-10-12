@@ -898,7 +898,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $cycle->get_id(), $current->get_id() );
 		$this->assertSame( 1, $current->get_sequence_no() );
 		$this->assertSame( 1, $current->get_count() );
-		$this->assertTrue( $current->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
+		$this->assertSame( CycleStatus::PENDING, $current->get_status()->get_value() );
 		$this->assertSame( '2026-07-15 00:00:00', $current->get_starts_at_gmt() );
 		$this->assertSame( '19.99000000', $current->get_expected_total() );
 		$this->assertSame( 'lite', $current->get_extension_slug() );

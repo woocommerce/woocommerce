@@ -58,7 +58,7 @@ class CycleTest extends TestCase {
 		$this->assertSame( 1, $cycle->get_sequence_no() );
 		$this->assertSame( 1, $cycle->get_count() );
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
+		$this->assertSame( CycleStatus::PENDING, $cycle->get_status()->get_value() );
 		$this->assertNull( $cycle->get_reason() );
 		$this->assertSame( '2026-02-01 00:00:00', $cycle->get_starts_at_gmt() );
 		$this->assertSame( '2026-03-01 00:00:00', $cycle->get_ends_at_gmt() );
@@ -83,7 +83,7 @@ class CycleTest extends TestCase {
 		// The checkout signup cycle is created directly billed (the origin order is paid).
 		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
 
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
+		$this->assertSame( CycleStatus::BILLED, $cycle->get_status()->get_value() );
 	}
 
 	public function test_create_requires_a_contract_id(): void {
@@ -305,7 +305,7 @@ class CycleTest extends TestCase {
 		$this->assertSame( 7, $cycle->get_contract_id() );
 		$this->assertSame( 2, $cycle->get_sequence_no() );
 		$this->assertSame( 2, $cycle->get_count() );
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
+		$this->assertSame( CycleStatus::BILLED, $cycle->get_status()->get_value() );
 		$this->assertSame( 11, $cycle->get_plan_snapshot_id() );
 		$this->assertSame( 22, $cycle->get_items_snapshot_id() );
 		$this->assertSame( 123, $cycle->get_order_id() );
