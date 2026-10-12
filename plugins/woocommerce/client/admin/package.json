@@ -169,10 +169,8 @@
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/jest-preset-default": "next",
-		"@wordpress/postcss-plugins-preset": "next",
+		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
-		"@wordpress/prettier-config": "4.49.0",
-		"@wordpress/stylelint-config": "^23.14.0",
 		"@xstate/inspect": "0.8.0",
 		"@xstate/test": "0.5.1",
 		"autoprefixer": "^10.4.16",
@@ -200,7 +198,7 @@
 		"postcss": "catalog:tooling",
 		"postcss-color-function": "^4.1.0",
 		"postcss-loader": "4.3.x",
-		"prettier": "npm:wp-prettier@3.0.3",
+		"prettier": "npm:wp-prettier@3.9.6",
 		"promptly": "^3.2.0",
 		"prop-types": "^15.8.1",
 		"raw-loader": "4.0.x",
@@ -211,7 +209,7 @@
 		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
 		"sass-loader": "10.5.x",
-		"stylelint": "^16.9.0",
+		"stylelint": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
@@ -227,7 +225,10 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "client/**/*.{js,ts,tsx,scss}"
+				"changes": [
+					"client/**/*.{js,ts,tsx,scss}",
+					"stylelint.config.js"
+				]
 			},
 			"tests": [
 				{

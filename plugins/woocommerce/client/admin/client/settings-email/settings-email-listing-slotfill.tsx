@@ -42,10 +42,10 @@ const ListView = lazy( () =>
 		isRTL()
 			? import(
 					/* webpackChunkName: "settings-email-listing-styles-rtl" */ './settings-email-listing-rtl.scss'
-			  )
+				)
 			: import(
 					/* webpackChunkName: "settings-email-listing-styles" */ './settings-email-listing.scss'
-			  ),
+				),
 	] )
 		.then( ( [ module ] ) => ( { default: module.ListView } ) )
 		.catch( ( error ) => {
@@ -71,9 +71,7 @@ export type EmailStatus = 'enabled' | 'disabled' | 'manual';
  * Public REST API contract — see RSM-140 spec § 4.3.
  */
 export type TemplateStatus =
-	| 'in_sync'
-	| 'core_updated_uncustomized'
-	| 'core_updated_customized';
+	'in_sync' | 'core_updated_uncustomized' | 'core_updated_customized';
 
 export type EmailType = {
 	title: string;
@@ -331,7 +329,7 @@ export const registerSettingsEmailListingFill = () => {
 		emailTypes = Array.isArray( parsed )
 			? parsed.map( ( item: Record< string, unknown > ) =>
 					normalizeEmailTypePayload( item )
-			  )
+				)
 			: [];
 	} catch ( e ) {}
 

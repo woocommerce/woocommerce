@@ -96,7 +96,7 @@ export function ImportStatusBar(): JSX.Element | null {
 					: __(
 							'Failed to trigger analytics update.',
 							'woocommerce'
-					  ),
+						),
 				{
 					isDismissible: true,
 				}
@@ -159,11 +159,11 @@ export function ImportStatusBar(): JSX.Element | null {
 								? __(
 										'Analytics data import in progress',
 										'woocommerce'
-								  )
+									)
 								: __(
 										'Manually trigger analytics data import',
 										'woocommerce'
-								  )
+									)
 						}
 					>
 						{ isBusy ? (

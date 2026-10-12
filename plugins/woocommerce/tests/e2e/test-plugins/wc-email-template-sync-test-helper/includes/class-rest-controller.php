@@ -18,9 +18,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Helper REST endpoints exposed under /wc-email-test-helper/v1/ for Playwright E2E tests.
  *
- * Health endpoint is open; every other route requires manage_options. The plugin's location
- * under tests/e2e/test-plugins/ — only mounted via .wp-env.e2e.json for the test environment —
- * provides the second layer of defense.
+ * Every route requires manage_options. The plugin's location under tests/e2e/test-plugins/ —
+ * only mounted via .wp-env.e2e.json for the test environment — provides the second layer
+ * of defense.
  */
 class REST_Controller {
 
@@ -30,16 +30,6 @@ class REST_Controller {
 	 * Register all REST routes.
 	 */
 	public function register_routes(): void {
-		register_rest_route(
-			self::NAMESPACE,
-			'/health',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'health' ),
-				'permission_callback' => '__return_true',
-			)
-		);
-
 		register_rest_route(
 			self::NAMESPACE,
 			'/reset-post/(?P<email_id>[a-z0-9_]+)',
@@ -125,33 +115,6 @@ class REST_Controller {
 
 		register_rest_route(
 			self::NAMESPACE,
-			'/trigger-backfill',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'trigger_backfill' ),
-				'permission_callback' => array( self::class, 'require_admin' ),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/tracks',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_tracks' ),
-					'permission_callback' => array( self::class, 'require_admin' ),
-				),
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'clear_tracks' ),
-					'permission_callback' => array( self::class, 'require_admin' ),
-				),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
 			'/set-option',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -168,23 +131,6 @@ class REST_Controller {
 				'callback'            => array( $this, 'delete_option_value' ),
 				'permission_callback' => array( self::class, 'require_admin' ),
 			)
-		);
-	}
-
-	/**
-	 * Health probe. Tests call this in beforeAll to confirm the helper plugin is loaded.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused; REST callback signature requires it).
-	 * @return WP_REST_Response
-	 */
-	public function health( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-		return new WP_REST_Response(
-			array(
-				'ok'      => true,
-				'version' => '1.0.0',
-			),
-			200
 		);
 	}
 
@@ -518,101 +464,6 @@ class REST_Controller {
 	}
 
 	/**
-	 * Run the legacy-post backfill inline, then snapshot a count of stamped posts.
-	 * Production `run()` returns false unconditionally — value reported back is for caller
-	 * convenience only. Tests assert via meta snapshots before/after.
-	 *
-	 * WC_Tracks::record_event() short-circuits when site tracking is disabled (the
-	 * default in wp-env), so it never reaches the woocommerce_tracks_event_properties
-	 * filter that Tracks_Recorder hooks into. To capture the _backfill_completed event
-	 * reliably we inject a custom recorder via set_event_recorder() that writes
-	 * directly to the Tracks_Recorder log option, then restore the default (null)
-	 * after the backfill completes.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused).
-	 * @return WP_REST_Response
-	 */
-	public function trigger_backfill( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-
-		// Inject a direct-write recorder so _backfill_completed lands in the log
-		// even when WC_Tracks::record_event() is disabled for the test environment.
-		// The recorder is gated on the same wc_test_tracks_enabled option that
-		// Tracks_Recorder uses, so it only fires when a spy is active and the log
-		// stays empty for tests that don't attach a spy.
-		//
-		// Event names get the 'wcadmin_' prefix to match WC_Tracks::PREFIX — that's
-		// what server-side events are dispatched as via WC_Tracks::record_event().
-		// The TRACKS_EVENTS constants in classifications.ts expect the prefixed name.
-		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
-			static function ( string $event_name, array $payload ): void {
-				if ( 'yes' !== get_option( Tracks_Recorder::ENABLED_OPTION, 'no' ) ) {
-					return;
-				}
-				$log = get_option( Tracks_Recorder::LOG_OPTION, array() );
-				if ( ! is_array( $log ) ) {
-					$log = array();
-				}
-				$log[] = array(
-					'name'         => 'wcadmin_' . $event_name,
-					'properties'   => $payload,
-					'timestamp_ms' => (int) ( microtime( true ) * 1000 ),
-				);
-				update_option( Tracks_Recorder::LOG_OPTION, $log, false );
-			}
-		);
-
-		$ran = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill::run();
-
-		// Restore the default recorder so subsequent calls don't double-log via
-		// both the injected recorder and any future WC_Tracks path.
-		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
-
-		global $wpdb;
-		$stamped = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value <> ''",
-				\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY
-			)
-		);
-
-		return new WP_REST_Response(
-			array(
-				'ran'     => (bool) $ran,
-				'stamped' => $stamped,
-			),
-			200
-		);
-	}
-
-	/**
-	 * Return the in-option Tracks event log captured by Tracks_Recorder.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused).
-	 * @return WP_REST_Response
-	 */
-	public function get_tracks( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-		$log = get_option( Tracks_Recorder::LOG_OPTION, array() );
-		return new WP_REST_Response(
-			array( 'events' => is_array( $log ) ? $log : array() ),
-			200
-		);
-	}
-
-	/**
-	 * Clear the Tracks event log option so the next read starts empty.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused).
-	 * @return WP_REST_Response
-	 */
-	public function clear_tracks( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-		delete_option( Tracks_Recorder::LOG_OPTION );
-		return new WP_REST_Response( array( 'cleared' => true ), 200 );
-	}
-
-	/**
 	 * Write a typed value to a WordPress option, preserving array/object structure.
 	 * Body shape: `{ "option_name": string, "option_value": mixed }`. Unlike the
 	 * shared `e2e-options/update` endpoint, this preserves arrays and nested objects
@@ -653,7 +504,7 @@ class REST_Controller {
 	}
 
 	/**
-	 * Permission callback used by every non-health endpoint. Requires the manage_options
+	 * Permission callback used by every endpoint. Requires the manage_options
 	 * capability. The plugin is only mounted in test environments via .wp-env.e2e.json — it
 	 * does not ship in any production WooCommerce build — which provides the second
 	 * layer of defense.

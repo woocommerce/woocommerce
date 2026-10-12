@@ -120,6 +120,10 @@ export interface ProductCollectionQuery {
 	priceRange: undefined | PriceRange;
 	filterable: boolean;
 	productReference?: number;
+	/**
+	 * If `null`/`undefined`: Infer from location context.
+	 */
+	productReferenceType?: 'cart' | 'order' | null;
 	relatedBy?: RelatedBy | undefined;
 }
 
@@ -151,11 +155,7 @@ export type ProductCollectionContentProps =
 
 export type TProductCollectionOrder = 'asc' | 'desc';
 export type TProductCollectionOrderBy =
-	| 'date'
-	| 'title'
-	| 'popularity'
-	| 'price'
-	| 'rating';
+	'date' | 'title' | 'popularity' | 'price' | 'rating';
 
 export type ProductCollectionSetAttributes = (
 	attrs: Partial< ProductCollectionAttributes >

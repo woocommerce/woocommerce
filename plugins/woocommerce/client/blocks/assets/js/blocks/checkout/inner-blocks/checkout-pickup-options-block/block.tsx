@@ -196,7 +196,7 @@ const Block = () => {
 
 	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const slotFillProps = {
 		extensions,

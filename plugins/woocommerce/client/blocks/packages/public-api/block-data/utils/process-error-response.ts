@@ -88,7 +88,7 @@ export const getErrorDetails = (
 								];
 							}
 							return errorObject;
-					  } )
+						} )
 					: [] ),
 			];
 		},

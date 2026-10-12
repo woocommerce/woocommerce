@@ -48,7 +48,7 @@ const useLoadSampleProducts = ( {
 					: __(
 							'There was an error importing the sample products',
 							'woocommerce'
-					  );
+						);
 
 			createNotice( 'error', message );
 		}

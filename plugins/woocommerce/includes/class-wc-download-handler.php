@@ -61,12 +61,13 @@ class WC_Download_Handler {
 		$downloads  = $product ? $product->get_downloads() : array();
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
-		$key = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$key       = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$order_key = empty( $_GET['order'] ) ? '' : wc_clean( wp_unslash( $_GET['order'] ) );
 
 		if (
 			! $product
 			|| empty( $key )
-			|| empty( $_GET['order'] )
+			|| empty( $order_key )
 			|| ! isset( $downloads[ $key ] )
 			|| ! $downloads[ $key ]->get_enabled()
 		) {
@@ -78,7 +79,7 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) );
+		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
 
 		if ( isset( $_GET['email'] ) ) {
@@ -95,10 +96,16 @@ class WC_Download_Handler {
 			}
 		}
 
+		$user_email = sanitize_email( str_replace( ' ', '+', $email_address ) );
+
+		if ( empty( $user_email ) ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
+
 		$download_ids = $data_store->get_downloads(
 			array(
-				'user_email'  => sanitize_email( str_replace( ' ', '+', $email_address ) ),
-				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ),
+				'user_email'  => $user_email,
+				'order_key'   => $order_key,
 				'product_id'  => $product_id,
 				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
@@ -563,7 +570,7 @@ class WC_Download_Handler {
 				);
 				self::download_file_redirect( $file_path );
 			} else {
-				self::download_error( __( 'File not found', 'woocommerce' ) );
+				self::download_error( __( 'File not found', 'woocommerce' ), '', 404 );
 			}
 		}
 
@@ -771,7 +778,7 @@ class WC_Download_Handler {
 
 		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
 			if ( false === $download_range['is_range_valid'] ) {
-				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				status_header( 416 );
 				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
 				exit;
 			}
@@ -780,7 +787,7 @@ class WC_Download_Handler {
 			$end    = $download_range['start'] + $download_range['length'] - 1;
 			$length = $download_range['length'];
 
-			header( 'HTTP/1.1 206 Partial Content' );
+			status_header( 206 );
 			header( "Accept-Ranges: 0-$file_size" );
 			header( "Content-Range: bytes $start-$end/$file_size" );
 			header( "Content-Length: $length" );
@@ -977,7 +984,7 @@ class WC_Download_Handler {
 	 * @param string  $title   Error title.
 	 * @param integer $status  Error status.
 	 */
-	private static function download_error( $message, $title = '', $status = 404 ) {
+	private static function download_error( $message, $title = '', $status = 403 ) {
 		/*
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.

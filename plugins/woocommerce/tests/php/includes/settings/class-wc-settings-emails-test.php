@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Email\EmailColors;
-use Automattic\WooCommerce\Internal\Email\EmailFont;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
@@ -135,22 +134,46 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The email font setting renders every supported font and the selected value.
+	 * @testdox The email font setting renders every shipped font, with its stack, and the selected value.
 	 */
 	public function test_email_font_family_setting_contract(): void {
-		$settings_by_id = $this->index_settings_by_id( ( new WC_Settings_Emails() )->get_settings_for_section( '' ) );
+		// Spelled out rather than read from EmailFont so that dropping a font
+		// from the shipped list fails here instead of shrinking both sides.
+		$expected_fonts = array(
+			'Arial'           => "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+			'Comic Sans MS'   => "'Comic Sans MS', 'Marker Felt-Thin', Arial, sans-serif",
+			'Courier New'     => "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace",
+			'Georgia'         => "Georgia, Times, 'Times New Roman', serif",
+			'Helvetica'       => "'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif",
+			'Lucida'          => "'Lucida Sans Unicode', 'Lucida Grande', sans-serif",
+			'Tahoma'          => 'Tahoma, Verdana, Segoe, sans-serif',
+			'Times New Roman' => "'Times New Roman', Times, Baskerville, Georgia, serif",
+			'Trebuchet MS'    => "'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif",
+			'Verdana'         => 'Verdana, Geneva, sans-serif',
+		);
+
+		$sut            = new WC_Settings_Emails();
+		$settings_by_id = $this->index_settings_by_id( $sut->get_settings_for_section( '' ) );
 		$setting        = $settings_by_id['woocommerce_email_font_family'];
 
 		$this->assertSame( 'Font family', $setting['title'] );
 		$this->assertSame( 'email_font_family', $setting['type'] );
 		$this->assertSame( 'Helvetica', $setting['default'] );
 
+		// The settings page renders a row by dispatching its type through this
+		// action, so the select below never reaches the page without the hook.
+		$this->assertSame(
+			10,
+			has_action( 'woocommerce_admin_field_email_font_family', array( $sut, 'email_font_family' ) ),
+			'The font family row is rendered from woocommerce_admin_field_email_font_family.'
+		);
+
 		$setting['field_name'] = $setting['id'];
 		$setting['value']      = 'Georgia';
 
 		ob_start();
 		try {
-			( new WC_Settings_Emails() )->email_font_family( $setting );
+			$sut->email_font_family( $setting );
 			$output = (string) ob_get_contents();
 		} finally {
 			ob_end_clean();
@@ -160,19 +183,67 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$select   = $this->get_element_by_id( $document, 'woocommerce_email_font_family' );
 
 		$options = $select->getElementsByTagName( 'option' );
-		$this->assertCount( count( EmailFont::$font ), $options );
+		$this->assertCount( count( $expected_fonts ), $options );
 
 		$rendered_fonts = array();
+		$rendered_names = array();
 		$selected       = array();
 		foreach ( $options as $option ) {
 			$rendered_fonts[ $option->getAttribute( 'value' ) ] = $option->getAttribute( 'data-font-family' );
+			$rendered_names[]                                   = $option->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMNode defines this public property name.
 			if ( $option->hasAttribute( 'selected' ) ) {
 				$selected[] = $option->getAttribute( 'value' );
 			}
 		}
 
-		$this->assertSame( EmailFont::$font, $rendered_fonts );
+		$this->assertSame( $expected_fonts, $rendered_fonts );
+		$this->assertSame( array_keys( $expected_fonts ), $rendered_names );
 		$this->assertSame( array( 'Georgia' ), $selected );
+	}
+
+	/**
+	 * @testdox The color palette settings row carries the title the palette section heading renders.
+	 */
+	public function test_email_color_palette_setting_row_contract(): void {
+		$sut      = new WC_Settings_Emails();
+		$settings = $sut->get_settings_for_section( '' );
+
+		// Indexing by ID is not enough here: the sectionend that closes the
+		// palette section reuses the same ID.
+		$rows = array_values(
+			array_filter(
+				$settings,
+				function ( $setting ) {
+					return 'email_color_palette' === ( $setting['id'] ?? '' )
+						&& 'email_color_palette' === ( $setting['type'] ?? '' );
+				}
+			)
+		);
+
+		$this->assertCount( 1, $rows, 'The default section defines exactly one color palette row.' );
+		$this->assertSame( 'Color palette', $rows[0]['title'] );
+
+		// The settings page renders a row by dispatching its type through this
+		// action, so the heading below never reaches the page without the hook.
+		$this->assertSame(
+			10,
+			has_action( 'woocommerce_admin_field_email_color_palette', array( $sut, 'email_color_palette' ) ),
+			'The color palette row is rendered from woocommerce_admin_field_email_color_palette.'
+		);
+
+		ob_start();
+		try {
+			$sut->email_color_palette( $rows[0] );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$document = $this->load_html_document( $output . '</table>' );
+		$headings = $document->getElementsByTagName( 'h2' );
+
+		$this->assertGreaterThan( 0, $headings->length, 'The palette section renders its heading.' );
+		$this->assertSame( 'Color palette', $headings->item( 0 )->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMNode defines this public property name.
 	}
 
 	/**
@@ -196,17 +267,26 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A single email preview renders its exact type, content settings, URL, and sender values.
+	 * @testdox A single email preview hangs off the email settings screen and renders its exact type, content settings, URL, and sender values.
 	 */
 	public function test_email_preview_single_contract(): void {
 		update_option( 'woocommerce_email_from_name', 'Woo Test Store' );
 		update_option( 'woocommerce_email_from_address', 'orders@example.com' );
 
 		$email = WC_Emails::instance()->get_emails()[ WC_Email_Customer_Processing_Order::class ];
+		$sut   = new WC_Settings_Emails();
+
+		// The per-email settings screen renders the preview through this action,
+		// so the mount below never reaches the page without the hook.
+		$this->assertSame(
+			10,
+			has_action( 'woocommerce_email_settings_after', array( $sut, 'email_preview_single' ) ),
+			'The single email preview is hooked onto woocommerce_email_settings_after.'
+		);
 
 		ob_start();
 		try {
-			( new WC_Settings_Emails() )->email_preview_single( $email );
+			$sut->email_preview_single( $email );
 			$output = (string) ob_get_contents();
 		} finally {
 			ob_end_clean();
