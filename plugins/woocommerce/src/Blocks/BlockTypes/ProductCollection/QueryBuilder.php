@@ -941,9 +941,9 @@ class QueryBuilder {
 
 		$on_sale_ids = wc_get_product_ids_on_sale();
 
-		// An empty post__in is ignored when queries are merged, so use -1 to return no products.
+		// An empty post__in is ignored when queries are merged, so use 0 to match no product.
 		return array(
-			'post__in' => empty( $on_sale_ids ) ? array( -1 ) : $on_sale_ids,
+			'post__in' => empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids,
 		);
 	}
 

@@ -87,7 +87,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
-		$this->assertSame( array( -1 ), $merged_query['post__in'], 'The on sale filter should match no products when none are on sale.' );
+		$this->assertSame( array( 0 ), $merged_query['post__in'], 'The on sale filter should match no products when none are on sale.' );
 	}
 
 	/**
