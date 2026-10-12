@@ -2031,11 +2031,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	protected function set_coupon_discount_amounts( $discounts ) {
-		$coupons           = $this->get_items( 'coupon' );
-		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
-		$all_discounts     = $discounts->get_discounts();
-		$coupon_discounts  = $discounts->get_discounts_by_coupon();
-		$is_vat_exempt     = $this->is_vat_exempt();
+		$coupons          = $this->get_items( 'coupon' );
+		$all_discounts    = $discounts->get_discounts();
+		$coupon_discounts = $discounts->get_discounts_by_coupon();
+		$is_vat_exempt    = $this->is_vat_exempt();
+
+		// Index existing coupon items by code, so unsaved items (ID 0) are reused too.
+		$coupon_code_to_item = array();
+		foreach ( $coupons as $existing_coupon_item ) {
+			$coupon_code_to_item[ $existing_coupon_item->get_code() ] = $existing_coupon_item;
+		}
 
 		$tax_location = $this->get_tax_location();
 		$tax_location = array(
@@ -2047,9 +2052,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
-				$item_id = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
-
-				if ( ! $item_id ) {
+				if ( ! isset( $coupon_code_to_item[ $coupon_code ] ) ) {
 					$coupon_item = new WC_Order_Item_Coupon();
 					$coupon_item->set_code( $coupon_code );
 
@@ -2060,7 +2063,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$coupon_info = $coupon->get_short_info();
 					$coupon_item->add_meta_data( 'coupon_info', $coupon_info );
 				} else {
-					$coupon_item = $this->get_item( $item_id, false );
+					$coupon_item = $coupon_code_to_item[ $coupon_code ];
 				}
 
 				$discount_tax = 0;
