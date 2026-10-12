@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a child theme's own fonts in Coming Soon mode instead of replacing them with its parent theme's fonts.
