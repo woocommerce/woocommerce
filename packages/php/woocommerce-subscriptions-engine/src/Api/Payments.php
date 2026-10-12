@@ -61,12 +61,20 @@ final class Payments {
 	 * The engine adds no amount check of its own: core already refuses a $0 order unless an
 	 * extension filtered it to need payment. A throwing gateway is logged.
 	 *
-	 * True means the charge request was handed to the gateway without error, never that the
-	 * charge succeeded: the outcome is the order's status, which the caller reads.
+	 * The return says whether the request reached the gateway cleanly, never whether the
+	 * charge succeeded; in every case the caller reads the outcome from the order status.
+	 * - True: the charge action fired and no callback threw.
+	 * - False, either of two cases the return does not tell apart:
+	 *   - the request was not handed to the gateway (a precondition failed; nothing was
+	 *     charged), or
+	 *   - the gateway threw (logged with the order id): the outcome is unknown, since the
+	 *     gateway may have charged before throwing.
+	 * A caller that sees false and an order still needing payment should not assume the
+	 * gateway was never reached.
 	 *
 	 * @param WC_Order $order Order to charge, carrying the payment method and token.
 	 * @return bool True when the charge action fired and no callback threw; false when a
-	 *              precondition failed or the gateway threw.
+	 *              precondition failed or the gateway threw (outcome unknown).
 	 */
 	public static function charge( WC_Order $order ): bool {
 		$gateway_id = $order->get_payment_method();
