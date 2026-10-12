@@ -1064,6 +1064,197 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 77, $history[0]->get_order_id() );
 	}
 
+	/**
+	 * @testdox A claimed append holds a lease: claim_cycle fails until the lease expires.
+	 */
+	public function test_a_claimed_append_holds_a_lease(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = Contracts::add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'status'        => CycleStatus::PENDING,
+					'lease_seconds' => 900,
+				)
+			)
+		);
+
+		$claimed_until = $this->cycle( $id, $cycle->get_id() )->get_claimed_until_gmt();
+		$this->assertNotNull( $claimed_until );
+		$this->assertGreaterThan( time() + 800, strtotime( $claimed_until . ' UTC' ) );
+		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), 900 ), 'The appender holds the cycle.' );
+
+		$this->expire_lease( $cycle->get_id() );
+		$this->assertTrue( Contracts::claim_cycle( $cycle->get_id(), 900 ), 'An expired lease can be taken.' );
+		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), 900 ), 'Only once.' );
+	}
+
+	/**
+	 * @testdox An invalid lease_seconds is rejected without a write.
+	 */
+	public function test_an_invalid_lease_is_rejected(): void {
+		$id = $this->contract_with_currency();
+
+		try {
+			Contracts::add_cycle( $id, $this->cycle_args( array( 'lease_seconds' => 0 ) ) );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( array(), Contracts::get_cycles( $id ) );
+		}
+
+		$this->expectException( InvalidArgumentException::class );
+		Contracts::claim_cycle( 1, 0 );
+	}
+
+	/**
+	 * @testdox claim_cycle wins once on a lease-less pending cycle and never on a billed one.
+	 */
+	public function test_claim_cycle_on_lease_less_pending_and_billed_cycles(): void {
+		$id      = $this->contract_with_currency();
+		$billed  = Contracts::add_cycle( $id, $this->cycle_args() );
+		$pending = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assertTrue( Contracts::claim_cycle( $pending->get_id(), 900 ) );
+		$this->assertFalse( Contracts::claim_cycle( $pending->get_id(), 900 ) );
+		$this->assertFalse( Contracts::claim_cycle( $billed->get_id(), 900 ) );
+	}
+
+	/**
+	 * @testdox transition_cycle settles a pending cycle billed with its order, and a lost compare-and-set returns false.
+	 */
+	public function test_transition_cycle_settles_and_loses_a_stale_read(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assertTrue( Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 77 ) ) );
+		$this->assertFalse( Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::FAILED ), 'A caller that read pending loses.' );
+
+		$stored = $this->cycle( $id, $cycle->get_id() );
+		$this->assertSame( CycleStatus::BILLED, $stored->get_status()->get_value() );
+		$this->assertSame( 77, $stored->get_order_id() );
+	}
+
+	/**
+	 * @testdox transition_cycle attaches an order under a lease, fails with a reason, and retries with a new lease.
+	 */
+	public function test_transition_cycle_order_reason_and_lease(): void {
+		$id       = $this->contract_with_currency();
+		$cycle    = Contracts::add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'status'        => CycleStatus::PENDING,
+					'lease_seconds' => 900,
+				)
+			)
+		);
+		$cycle_id = $cycle->get_id();
+
+		$this->assertTrue(
+			Contracts::transition_cycle(
+				$cycle_id,
+				CycleStatus::PENDING,
+				CycleStatus::PENDING,
+				array(
+					'order_id'      => 77,
+					'lease_seconds' => 900,
+				)
+			)
+		);
+		$attached = $this->cycle( $id, $cycle_id );
+		$this->assertSame( 77, $attached->get_order_id() );
+		$this->assertNotNull( $attached->get_claimed_until_gmt(), 'The lease is kept while attaching the order.' );
+
+		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) );
+		$failed = Contracts::get_cycles( $id, 1 )[0];
+		$this->assertSame( CycleStatus::FAILED, $failed->get_status() );
+		$this->assertSame( 'payment-failed', $failed->get_reason() );
+		$this->assertSame( 77, $failed->get_order_id(), 'An omitted order_id keeps the stored one.' );
+		$this->assertNull( $this->cycle( $id, $cycle_id )->get_claimed_until_gmt(), 'No lease_seconds clears the lease.' );
+
+		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'lease_seconds' => 900 ) ) );
+		$this->assertFalse( Contracts::claim_cycle( $cycle_id, 900 ), 'The retrier holds the lease.' );
+
+		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'reason' => null ) ) );
+		$this->assertNull( Contracts::get_cycles( $id, 1 )[0]->get_reason(), 'A null reason clears it.' );
+	}
+
+	/**
+	 * @testdox transition_cycle rejects an unregistered target status and ignores unknown keys with a notice.
+	 */
+	public function test_transition_cycle_rejects_bad_input(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		try {
+			Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, 'nonsense' );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( CycleStatus::PENDING, Contracts::get_cycles( $id, 1 )[0]->get_status() );
+		}
+
+		$this->setExpectedIncorrectUsage( Contracts::class . '::transition_cycle' );
+		$this->assertTrue( Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array( 'status' => 'x' ) ) );
+	}
+
+	/**
+	 * @testdox find_cycles_by_order returns the cycles of every contract linked to an order, newest first.
+	 */
+	public function test_find_cycles_by_order_spans_contracts_newest_first(): void {
+		$first  = $this->contract_with_currency();
+		$second = $this->contract_with_currency();
+		$older  = Contracts::add_cycle( $first, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$newer  = Contracts::add_cycle( $second, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		Contracts::add_cycle( $first, $this->cycle_args( array( 'order_id' => 88 ) ) );
+
+		$cycles = Contracts::find_cycles_by_order( 77 );
+
+		$this->assertSame(
+			array( $newer->get_id(), $older->get_id() ),
+			array_map(
+				static function ( CycleView $cycle ): int {
+					return $cycle->get_id();
+				},
+				$cycles
+			)
+		);
+		$this->assertSame( array(), Contracts::find_cycles_by_order( 99 ) );
+	}
+
+	/**
+	 * @testdox get_cycles pages with an offset, newest first.
+	 */
+	public function test_get_cycles_pages_with_an_offset(): void {
+		$id    = $this->contract_with_currency();
+		$one   = Contracts::add_cycle( $id, $this->cycle_args() );
+		$two   = Contracts::add_cycle( $id, $this->cycle_args() );
+		$three = Contracts::add_cycle( $id, $this->cycle_args() );
+
+		$ids = static function ( array $cycles ): array {
+			return array_map(
+				static function ( CycleView $cycle ): int {
+					return $cycle->get_id();
+				},
+				$cycles
+			);
+		};
+
+		$this->assertSame( array( $three->get_id(), $two->get_id() ), $ids( Contracts::get_cycles( $id, 2 ) ) );
+		$this->assertSame( array( $one->get_id() ), $ids( Contracts::get_cycles( $id, 2, 2 ) ) );
+	}
+
+	/**
+	 * Move a cycle's lease into the past.
+	 *
+	 * @param int $cycle_id Cycle id.
+	 */
+	private function expire_lease( int $cycle_id ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ), array( 'claimed_until' => gmdate( 'Y-m-d H:i:s', time() - 60 ) ), array( 'id' => $cycle_id ) );
+	}
+
 	public function test_meta_keeps_several_values_under_one_key(): void {
 		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 

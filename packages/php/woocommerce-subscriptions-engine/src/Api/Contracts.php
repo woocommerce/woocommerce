@@ -87,6 +87,18 @@ final class Contracts {
 		'expected_total' => true,
 		'currency'       => true,
 		'order_id'       => true,
+		'lease_seconds'  => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::transition_cycle()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const TRANSITION_KEYS = array(
+		'order_id'      => true,
+		'reason'        => true,
+		'lease_seconds' => true,
 	);
 
 	/**
@@ -178,9 +190,11 @@ final class Contracts {
 	 * `status` (a registered cycle status) defaults to `pending`; `kind` defaults to
 	 * `billing`; an absent or null `sequence_no` is assigned on append as the head's plus one;
 	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
-	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional. The contract is not
-	 * read: appending to an unknown contract id is a caller error. Unknown keys raise a
-	 * `_doing_it_wrong()` notice and are ignored.
+	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional.
+	 * `lease_seconds` (positive int) appends the cycle claimed: the caller holds its lease for
+	 * that long (see {@see self::claim_cycle()}). The contract is not read: appending to an
+	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()` notice
+	 * and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
@@ -204,6 +218,11 @@ final class Contracts {
 			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
+		if ( array_key_exists( 'lease_seconds', $filtered_args ) ) {
+			$lease_seconds               = ArgumentValidator::validate_positive_int( 'lease_seconds', $filtered_args['lease_seconds'] );
+			$cycle_args['claimed_until'] = gmdate( 'Y-m-d H:i:s', time() + $lease_seconds );
+		}
+
 		try {
 			$cycle = Cycle::create( $cycle_args );
 		} catch ( DomainException $e ) {
@@ -217,6 +236,66 @@ final class Contracts {
 		}
 
 		return CycleView::from_cycle( $cycle );
+	}
+
+	/**
+	 * Take the lease of a `pending` cycle whose lease expired or was never set. A
+	 * compare-and-set: of concurrent callers exactly one gets true and holds the cycle for
+	 * `$lease_seconds`; the others get false. Leases are measured on the database clock.
+	 *
+	 * @param int $cycle_id      Cycle id.
+	 * @param int $lease_seconds Lease length in seconds (positive).
+	 * @return bool True when the caller now holds the cycle.
+	 * @throws InvalidArgumentException If `$lease_seconds` is not positive.
+	 */
+	public static function claim_cycle( int $cycle_id, int $lease_seconds ): bool {
+		return ( new ContractRepository() )->claim_cycle( $cycle_id, ArgumentValidator::validate_positive_int( 'lease_seconds', $lease_seconds ) );
+	}
+
+	/**
+	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status: of
+	 * concurrent callers that read `$from_status`, exactly one gets true. `$args`: `order_id`
+	 * (?int) and `reason` (?string) are written when present (omitted keeps the stored value,
+	 * null clears it); `lease_seconds` (int) holds the cycle for that long, and without it the
+	 * lease is cleared. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
+	 *
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status The status the caller read.
+	 * @param string               $to_status   The status to write; a registered cycle status.
+	 * @param array<string, mixed> $args        Optional `order_id`, `reason`, `lease_seconds`.
+	 * @return bool True when this call made the transition.
+	 * @throws InvalidArgumentException If `$to_status` is not registered or a value is invalid.
+	 */
+	public static function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $args = array() ): bool {
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
+		$changes       = array();
+
+		if ( array_key_exists( 'order_id', $filtered_args ) ) {
+			$changes['order_id'] = ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] );
+		}
+		if ( array_key_exists( 'reason', $filtered_args ) ) {
+			$changes['reason'] = ArgumentValidator::validate_nullable_string( 'reason', $filtered_args['reason'] );
+		}
+		if ( array_key_exists( 'lease_seconds', $filtered_args ) ) {
+			$changes['lease_seconds'] = ArgumentValidator::validate_positive_int( 'lease_seconds', $filtered_args['lease_seconds'] );
+		}
+
+		try {
+			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the repository message is not output.
+		}
+	}
+
+	/**
+	 * The cycles linked to an order, newest first, across contracts and chain kinds (one
+	 * order may serve several cycles).
+	 *
+	 * @param int $order_id Order id.
+	 * @return array<int, CycleView>
+	 */
+	public static function find_cycles_by_order( int $order_id ): array {
+		return self::cycle_views( ( new ContractRepository() )->find_cycles_by_order_id( $order_id ) );
 	}
 
 	/**
@@ -418,15 +497,11 @@ final class Contracts {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $limit       Maximum cycles to return.
+	 * @param int $offset      Cycles to skip (for paging).
 	 * @return array<int, CycleView> Cycles newest first.
 	 */
-	public static function get_cycles( int $contract_id, int $limit = 20 ): array {
-		return array_map(
-			static function ( Cycle $cycle ): CycleView {
-				return CycleView::from_cycle( $cycle );
-			},
-			( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit )
-		);
+	public static function get_cycles( int $contract_id, int $limit = 20, int $offset = 0 ): array {
+		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
@@ -527,6 +602,21 @@ final class Contracts {
 	 */
 	private static function view( ?Contract $contract, bool $with_children ): ?ContractView {
 		return null === $contract ? null : ContractView::from_contract( $contract, $with_children );
+	}
+
+	/**
+	 * Views of cycles.
+	 *
+	 * @param array<int, Cycle> $cycles Cycles.
+	 * @return array<int, CycleView>
+	 */
+	private static function cycle_views( array $cycles ): array {
+		return array_map(
+			static function ( Cycle $cycle ): CycleView {
+				return CycleView::from_cycle( $cycle );
+			},
+			$cycles
+		);
 	}
 
 	/**
