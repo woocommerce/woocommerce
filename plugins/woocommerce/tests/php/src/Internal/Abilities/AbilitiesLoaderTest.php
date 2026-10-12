@@ -465,6 +465,41 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a status that another order type registers, and keep the order status.
+	 */
+	public function test_order_update_status_refuses_status_of_another_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$status_before             = $order->get_status();
+
+		$this->unregister_domain_abilities();
+		register_post_status( 'wc-test-active', array( 'label' => 'Active' ) );
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/order-update-status' );
+			$this->assertContains( 'test-active', $ability->get_input_schema()['properties']['status']['enum'] );
+
+			$result = $ability->execute(
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'test-active',
+				)
+			);
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $GLOBALS['wp_post_statuses']['wc-test-active'] );
+			$this->register_domain_abilities();
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_status_invalid', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] ?? null );
+		$this->assertSame( $status_before, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should reject an order type that is not registered.
 	 */
 	public function test_orders_query_rejects_unknown_order_type(): void {
