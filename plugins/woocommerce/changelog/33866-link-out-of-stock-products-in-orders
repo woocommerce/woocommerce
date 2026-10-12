@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Keep the product link on past orders when the product is out of stock and "Hide out of stock items" is enabled.
