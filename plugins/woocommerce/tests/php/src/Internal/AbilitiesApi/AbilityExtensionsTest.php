@@ -398,7 +398,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out a field that throws, cast a value to its schema type, and keep a null that the schema allows.
+	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		$this->register_test_fields();
@@ -416,6 +416,14 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			'empty'  => array(
 				'schema'       => array( 'type' => array( 'string', 'null' ) ),
 				'get_callback' => '__return_null',
+			),
+			'dupes'  => array(
+				'schema'       => array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'integer' ),
+					'uniqueItems' => true,
+				),
+				'get_callback' => static fn() => array( '12', 12 ),
 			),
 		);
 		foreach ( $fields as $field => $args ) {
