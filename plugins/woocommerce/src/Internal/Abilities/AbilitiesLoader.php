@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
@@ -98,10 +97,6 @@ class AbilitiesLoader {
 	public static function init_extensions(): void {
 		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityContracts::is_enabled() ) {
 			return;
-		}
-
-		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
-			AbilityExtensions::register_resource( $resource_name );
 		}
 
 		/**
