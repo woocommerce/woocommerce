@@ -360,11 +360,13 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Configures the mock integration with a real feed and lightweight mapper/validator so the
 	 * chunked generation path can be exercised end to end.
+	 *
+	 * @param array $query_args The product query args the integration should return.
 	 */
-	private function setup_real_feed_integration(): void {
+	private function setup_real_feed_integration( array $query_args = array() ): void {
 		$this->delete_all_products();
 
-		$this->mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
+		$this->mock_integration->method( 'get_product_feed_query_args' )->willReturn( $query_args );
 		$this->mock_integration->method( 'create_feed' )->willReturnCallback(
 			fn() => new JsonFileFeed( 'pos-catalog-feed-test' )
 		);
@@ -469,6 +471,89 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for removing an already-exported product between chunks.
+	 *
+	 * @return array
+	 */
+	public function provider_removed_product(): array {
+		return array(
+			'trashed'     => array( fn( \WC_Product $product ) => $product->delete() ),
+			'unpublished' => array(
+				function ( \WC_Product $product ) {
+					$product->set_status( 'draft' );
+					$product->save();
+				},
+			),
+			'POS-hidden'  => array( fn( \WC_Product $product ) => wp_set_object_terms( $product->get_id(), 'pos-hidden', 'pos_product_visibility' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should not skip a product when an already-exported $_dataName product is removed between chunks.
+	 *
+	 * @dataProvider provider_removed_product
+	 *
+	 * @param callable $remove Removes the given product from the catalog.
+	 */
+	public function test_feed_generation_does_not_skip_products_when_exported_product_is_removed( callable $remove ) {
+		add_filter( 'woocommerce_product_feed_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_product_feed_chunk_size', fn() => 1 );
+
+		$this->setup_real_feed_integration( ( new POSIntegration() )->get_product_feed_query_args() );
+
+		$products = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$products[] = WC_Helper_Product::create_simple_product();
+		}
+		$product_ids = array_map( fn( $product ) => $product->get_id(), $products );
+
+		update_option( self::OPTION_KEY, array( 'state' => AsyncGenerator::STATE_SCHEDULED ) );
+
+		// The first chunk exports the first product, which is then removed before the next chunk.
+		$this->sut->feed_generation_action( self::OPTION_KEY );
+		$remove( $products[0] );
+		wp_cache_flush();
+
+		$iterations = 1;
+		do {
+			$this->sut->feed_generation_action( self::OPTION_KEY );
+			$status = get_option( self::OPTION_KEY );
+			++$iterations;
+		} while ( AsyncGenerator::STATE_IN_PROGRESS === $status['state'] && $iterations < 10 );
+
+		$this->assertSame( AsyncGenerator::STATE_COMPLETED, $status['state'] );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$entries = json_decode( (string) file_get_contents( $status['path'] ), true );
+		$this->assertSame( $product_ids, array_column( $entries, 'id' ) );
+
+		wp_delete_file( $status['path'] );
+	}
+
+	/**
+	 * @testdox Should not resume a continuation saved without a last product ID.
+	 */
+	public function test_feed_generation_does_not_resume_status_without_last_id() {
+		$this->mock_integration->expects( $this->never() )->method( 'create_feed' );
+
+		// A continuation saved by a version that tracked pages instead of product IDs.
+		$status = array(
+			'state'           => AsyncGenerator::STATE_IN_PROGRESS,
+			'file_name'       => 'pos-catalog-feed-legacy.json',
+			'page'            => 3,
+			'processed'       => 2,
+			'entries_written' => 2,
+			'total'           => 5,
+			'updated_at'      => time(),
+		);
+		update_option( self::OPTION_KEY, $status );
+
+		$this->sut->feed_generation_action( self::OPTION_KEY );
+
+		$this->assertSame( $status, get_option( self::OPTION_KEY ), 'The status should be left for the stuck-job recovery to restart' );
+	}
+
+	/**
 	 * Test that entries_written accumulates correctly across chunks rather than being double-counted.
 	 *
 	 * Each resumed chunk seeds the feed's entry count with the running total, so the feed already
@@ -567,7 +652,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 				'state'      => AsyncGenerator::STATE_IN_PROGRESS,
 				'updated_at' => time() - HOUR_IN_SECONDS,
 				'file_name'  => $identifier,
-				'page'       => 3,
+				'last_id'    => 3,
 				'processed'  => 50000,
 				'total'      => 120000,
 			)
@@ -635,7 +720,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'updated_at'      => time() - HOUR_IN_SECONDS,
 				'file_name'       => $identifier,
-				'page'            => 3,
+				'last_id'         => 3,
 				'processed'       => 2500,
 				'total'           => 12000,
 				'entries_written' => 2500,
@@ -682,7 +767,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => 'pos-catalog-feed-missing.json',
-				'page'            => 5,
+				'last_id'         => 5,
 				'processed'       => 999,
 				'entries_written' => 999,
 				'total'           => 999,
@@ -728,7 +813,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => $identifier,
-				'page'            => 2,
+				'last_id'         => 2,
 				'processed'       => 1,
 				'entries_written' => 1,
 				'total'           => 5,
