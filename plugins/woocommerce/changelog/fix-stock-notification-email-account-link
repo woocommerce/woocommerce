@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Open account management instead of unsubscribing registered customers from stock notification email links.
