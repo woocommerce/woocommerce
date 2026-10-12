@@ -98,7 +98,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
-			'type'     => 'shop_order',
+			'type'     => self::get_order_type_from_input( $input ),
 		);
 
 		foreach ( array( 'status', 'billing_email', 'order' ) as $field ) {
@@ -108,8 +108,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		}
 
 		if ( empty( $args['status'] ) ) {
-			$args['status'] = self::get_allowed_order_status_slugs();
+			$args['status'] = self::get_query_order_status_slugs();
 		}
+
+		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
 		if ( ! empty( $input['orderby'] ) && is_scalar( $input['orderby'] ) ) {
 			$orderby         = sanitize_text_field( (string) $input['orderby'] );
@@ -172,8 +174,21 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	public static function can_query_orders( $input = array() ): bool {
 		$order_id = self::get_id_from_input( $input );
+		$type     = is_array( $input ) ? self::get_order_type_from_input( $input ) : 'shop_order';
 
-		return wc_rest_check_post_permissions( 'shop_order', 'read', $order_id );
+		return wc_rest_check_post_permissions( $type, 'read', $order_id );
+	}
+
+	/**
+	 * Order type from the input, or `shop_order` when the input has no known type.
+	 *
+	 * @param array $input Ability input.
+	 * @return string
+	 */
+	private static function get_order_type_from_input( array $input ): string {
+		$type = $input['type'] ?? 'shop_order';
+
+		return is_string( $type ) && in_array( $type, self::get_order_type_slugs(), true ) ? $type : 'shop_order';
 	}
 
 	/**
@@ -189,10 +204,16 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
+				'type'               => array(
+					'type'        => 'string',
+					'description' => __( 'Order type to list. Extensions add types, such as shop_subscription for subscriptions. Defaults to shop_order.', 'woocommerce' ),
+					'enum'        => self::get_order_type_slugs(),
+					'default'     => 'shop_order',
+				),
 				'status'             => array(
 					'type'        => 'string',
-					'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
-					'enum'        => self::get_allowed_order_status_slugs(),
+					'description' => __( 'Filter by order status slug without the wc- prefix. Each order type uses its own statuses, such as active for subscriptions.', 'woocommerce' ),
+					'enum'        => self::get_query_order_status_slugs(),
 				),
 				'customer_id'        => array(
 					'type'        => 'integer',
@@ -331,6 +352,18 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	private static function format_timestamp_for_date_query( int $timestamp ): string {
 		return gmdate( 'Y-m-d H:i:s', $timestamp );
+	}
+
+	/**
+	 * Add the `wc-` prefix to a status that is registered with it. The order
+	 * query adds the prefix only to order statuses, not to the statuses of
+	 * other order types.
+	 *
+	 * @param string $status Status slug without the `wc-` prefix.
+	 * @return string
+	 */
+	private static function prepare_status_arg( string $status ): string {
+		return in_array( 'wc-' . $status, get_post_stati(), true ) ? 'wc-' . $status : $status;
 	}
 
 	/**
