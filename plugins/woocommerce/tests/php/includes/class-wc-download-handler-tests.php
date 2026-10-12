@@ -832,52 +832,60 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox download_product() should reject a generated UID link when the order billing email is empty.
+	 * @testdox download_product() should authorize a generated UID link for a guest order placed without an email.
 	 */
-	public function test_download_product_rejects_generated_uid_link_when_billing_email_is_empty(): void {
-		self::remove_download_handlers();
+	public function test_download_product_accepts_generated_uid_link_when_billing_email_is_empty(): void {
+		$order = $this->build_downloadable_order_without_email( 0 );
 
-		try {
-			list( $product, $order ) = $this->build_downloadable_product_and_order_one(
-				array(
-					array(
-						'name' => 'Protected download',
-						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
-					),
-				)
-			);
+		$this->assert_download_url_is_authorized( current( $order->get_downloadable_items() )['download_url'] );
+	}
 
-			$download = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'product_id' => $product->get_id() ) ) );
-			$download->set_downloads_remaining( 5 );
-			$download->save();
+	/**
+	 * @testdox download_product() should reject a UID link for an order without an email when the permission was granted to an email.
+	 */
+	public function test_download_product_rejects_uid_link_for_permission_granted_to_an_email(): void {
+		global $wpdb;
 
-			$order->set_customer_id( 0 );
-			$order->set_billing_email( '' );
-			$order->save();
+		$order    = $this->build_downloadable_order_without_email( 0 );
+		$url      = current( $order->get_downloadable_items() )['download_url'];
+		$download = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) ) );
+		$download->set_downloads_remaining( 5 );
+		$download->save();
+		$wpdb->update( $wpdb->prefix . 'woocommerce_downloadable_product_permissions', array( 'user_email' => 'customer@example.com' ), array( 'order_id' => $order->get_id() ) );
 
-			$downloadable_items = $order->get_downloadable_items();
-			$download_url       = current( $downloadable_items )['download_url'];
-			$query_args         = array();
+		$this->assert_download_url_is_rejected( $url, 'Invalid download link' );
+		$this->assertSame( 5, ( new WC_Customer_Download( $download->get_id() ) )->get_downloads_remaining(), 'A rejected request must not consume remaining downloads.' );
+	}
 
-			parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
-			$_GET = $query_args;
+	/**
+	 * @testdox download_product() should reject an email param that sanitizes to empty on a UID link for an order without an email.
+	 */
+	public function test_download_product_rejects_empty_email_param_on_uid_link_when_billing_email_is_empty(): void {
+		$url = current( $this->build_downloadable_order_without_email( 0 )->get_downloadable_items() )['download_url'];
 
-			$wp_die_message = '';
+		$this->assert_download_url_is_rejected( add_query_arg( 'email', '', $url ), 'Invalid download link' );
+		$this->assert_download_url_is_rejected( add_query_arg( 'email', 'x', $url ), 'Invalid download link' );
+	}
 
-			try {
-				WC_Download_Handler::download_product();
-			} catch ( WPDieException $e ) {
-				$wp_die_message = $e->getMessage();
-			}
+	/**
+	 * @testdox download_product() should only authorize the order's customer for a UID link on an order without an email.
+	 */
+	public function test_download_product_requires_order_customer_for_uid_link_when_billing_email_is_empty(): void {
+		global $wpdb;
 
-			$this->assertStringContainsString( 'Invalid download link', $wp_die_message, 'A UID derived from an empty billing email should be rejected.' );
+		$owner = self::factory()->user->create( array( 'role' => 'customer' ) );
+		// Empty the account email so maybe_set_user_billing_email() doesn't copy it back onto the order on save.
+		$wpdb->update( $wpdb->users, array( 'user_email' => '' ), array( 'ID' => $owner ) );
+		clean_user_cache( $owner );
 
-			$download = new WC_Customer_Download( $download->get_id() );
-			$this->assertSame( 5, $download->get_downloads_remaining(), 'A rejected UID request must not consume the customer\'s remaining downloads.' );
-		} finally {
-			self::restore_download_handlers();
-			$_GET = array();
-		}
+		$order = $this->build_downloadable_order_without_email( $owner );
+		$url   = current( $order->get_downloadable_items() )['download_url'];
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$this->assert_download_url_is_rejected( $url, 'This is not your download link' );
+
+		wp_set_current_user( $owner );
+		$this->assert_download_url_is_authorized( $url );
 	}
 
 	/**
@@ -914,6 +922,54 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			$product,
 			$order,
 		);
+	}
+
+	/**
+	 * Creates a completed downloadable order with an empty billing email.
+	 *
+	 * @param int $customer_id Customer ID, 0 for a guest order.
+	 */
+	private function build_downloadable_order_without_email( int $customer_id ): WC_Order {
+		list( , $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+				),
+			)
+		);
+		$order->set_customer_id( $customer_id );
+		$order->set_billing_email( '' );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Assert that a download URL is rejected with the given message before any file is dispatched.
+	 *
+	 * @param string $download_url Download URL.
+	 * @param string $message      Expected error message.
+	 */
+	private function assert_download_url_is_rejected( string $download_url, string $message ): void {
+		$download_method = function () {
+			return 'test';
+		};
+		add_filter( 'woocommerce_file_download_method', $download_method );
+
+		try {
+			$query_args = array();
+			parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+			$_GET = $query_args;
+
+			WC_Download_Handler::download_product();
+			$this->fail( 'The download URL should have been rejected.' );
+		} catch ( WPDieException $e ) {
+			$this->assertStringContainsString( $message, $e->getMessage() );
+		} finally {
+			remove_filter( 'woocommerce_file_download_method', $download_method );
+			$_GET = array();
+		}
 	}
 
 	/**
