@@ -144,15 +144,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Register the resources that Core registers before the init action.
-	 */
-	private function register_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
-			AbilityExtensions::register_resource( $resource_name );
-		}
-	}
-
-	/**
 	 * @testdox Should return the fields of each extension under its namespace, and leave out a product with no values.
 	 */
 	public function test_product_reads_return_fields_under_their_namespace(): void {
@@ -381,7 +372,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			'schema'       => array( 'type' => 'string' ),
 			'get_callback' => static fn() => 'second',
 		);
-		$this->register_resources();
 		$this->register_test_fields();
 
 		AbilityExtensions::register_field( $valid );
@@ -411,7 +401,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should leave out a field that throws, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
-		$this->register_resources();
 		$this->register_test_fields();
 		$fields = array(
 			'broken' => array(
@@ -545,11 +534,15 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported', 'resources' ) as $property ) {
+		foreach ( array( 'fields', 'reported' ) as $property ) {
 			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
 		}
+
+		$reflection = new \ReflectionProperty( AbilityExtensions::class, 'resources' );
+		$reflection->setAccessible( true );
+		$reflection->setValue( null, array_fill_keys( array( 'product', 'order', 'order_item' ), true ) );
 
 		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
 			if ( class_exists( $registry ) ) {

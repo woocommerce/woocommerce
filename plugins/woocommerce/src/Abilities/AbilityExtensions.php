@@ -33,11 +33,15 @@ class AbilityExtensions {
 	private static array $fields = array();
 
 	/**
-	 * Registered resources, keyed by resource name.
+	 * Registered resources, keyed by resource name. Core's resources are registered from the start.
 	 *
 	 * @var array<string, bool>
 	 */
-	private static array $resources = array();
+	private static array $resources = array(
+		'product'    => true,
+		'order'      => true,
+		'order_item' => true,
+	);
 
 	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
@@ -49,8 +53,8 @@ class AbilityExtensions {
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
-	 * Core registers `product`, `order` and `order_item`. An extension registers a
-	 * resource that its own abilities format, and then calls `add_fields_to_object()`
+	 * Core's `product`, `order` and `order_item` are registered from the start. An
+	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
 	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
 	 *
