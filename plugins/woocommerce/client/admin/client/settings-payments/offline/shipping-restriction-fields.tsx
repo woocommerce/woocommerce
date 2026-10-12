@@ -60,15 +60,16 @@ export const getShippingRestrictionFields = (
 				gateway.settings.enable_for_methods.options
 			)
 		: [];
+	const enableForMethodsHelp = __(
+		'Select shipping methods for which this payment method is enabled.',
+		'woocommerce'
+	);
 
 	return [
 		{
 			id: 'enable_for_methods',
 			label: __( 'Enable for shipping methods', 'woocommerce' ),
-			description: __(
-				'Select shipping methods for which this payment method is enabled.',
-				'woocommerce'
-			),
+			description: enableForMethodsHelp,
 			// Renders the shipping methods multi-select using the options
 			// that ship with the gateway.
 			Edit: ( { data, field, onChange } ) => {
@@ -76,7 +77,7 @@ export const getShippingRestrictionFields = (
 				return (
 					<TreeSelectControl
 						label={ field.label }
-						help={ field.description as string }
+						help={ enableForMethodsHelp }
 						options={ shippingMethodsOptions }
 						value={ Array.isArray( value ) ? value : [] }
 						onChange={ ( newValue: string[] ) =>
