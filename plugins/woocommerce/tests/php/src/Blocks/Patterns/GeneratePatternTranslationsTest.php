@@ -39,7 +39,15 @@ class GeneratePatternTranslationsTest extends \WC_Unit_Test_Case {
 		// The generated file must stay in sync so WordPress.org can scan release ZIPs.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$this->assertSame( $source, file_get_contents( WC_ABSPATH . 'i18n/patterns.php' ), 'Run composer generate-pattern-translations after changing pattern headers.' );
-		$translations = $this->extract_strings( $source );
+		$translations = new Translations();
+		$translations->setDomain( 'woocommerce' );
+		PhpCodeExtractor::fromString(
+			$source,
+			$translations,
+			array(
+				'file' => 'i18n/patterns.php',
+			)
+		);
 
 		$pattern_files = glob( WC_ABSPATH . 'patterns/*.php' );
 		$this->assertNotEmpty( $pattern_files );
