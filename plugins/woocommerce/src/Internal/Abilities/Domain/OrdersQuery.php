@@ -206,13 +206,13 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 				'type'               => array(
 					'type'        => 'string',
-					'description' => __( 'Order type to list. Extensions add types, such as shop_subscription for subscriptions. Defaults to shop_order.', 'woocommerce' ),
+					'description' => __( 'Order type to list. Extensions can register more order types. Defaults to shop_order.', 'woocommerce' ),
 					'enum'        => self::get_order_type_slugs(),
 					'default'     => 'shop_order',
 				),
 				'status'             => array(
 					'type'        => 'string',
-					'description' => __( 'Filter by order status slug without the wc- prefix. Each order type uses its own statuses, such as active for subscriptions.', 'woocommerce' ),
+					'description' => __( 'Filter by order status slug without the wc- prefix. Each order type uses its own statuses.', 'woocommerce' ),
 					'enum'        => self::get_query_order_status_slugs(),
 				),
 				'customer_id'        => array(
