@@ -78,6 +78,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $constant_overrides_at_setup = array();
 
 	/**
+	 * The registered block types at setUp(), by name.
+	 *
+	 * @var array<string, WP_Block_Type>
+	 */
+	private $block_types_at_setup = array();
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
@@ -180,6 +187,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		$this->server_at_setup             = $_SERVER;
 		$this->constant_overrides_at_setup = Constants::$set_constants;
+		$this->block_types_at_setup        = WP_Block_Type_Registry::get_instance()->get_all_registered();
 	}
 
 	/**
@@ -189,7 +197,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * locale, and the customer all live on the WC() singletons, which neither the
 	 * per-test database rollback nor the hook restore resets, so clear them here or
 	 * they leak into every later test in the process. The same goes for $_SERVER,
-	 * which WordPress only resets for its own core tests, and for Constants overrides.
+	 * which WordPress only resets for its own core tests, for Constants overrides,
+	 * and for the block type registry.
 	 *
 	 * @since 11.1.0
 	 */
@@ -200,6 +209,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			try {
 				$this->restore_server_superglobal();
 				$this->restore_constant_overrides();
+				$this->restore_block_type_registry();
 			} finally {
 				// The parent teardown must always run: it rolls back the database
 				// transaction and restores the hooks. Skipping it would poison every
@@ -294,6 +304,25 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		Constants::$set_constants = $this->constant_overrides_at_setup;
 	}
 
+	/**
+	 * Put back the block types from setUp(): unregister the ones a test added or replaced, and
+	 * register again the ones it removed. The registry is a singleton that outlives the test.
+	 */
+	protected function restore_block_type_registry(): void {
+		$registry = WP_Block_Type_Registry::get_instance();
+
+		foreach ( $registry->get_all_registered() as $name => $block_type ) {
+			if ( ( $this->block_types_at_setup[ $name ] ?? null ) !== $block_type ) {
+				$registry->unregister( $name );
+			}
+		}
+
+		foreach ( $this->block_types_at_setup as $name => $block_type ) {
+			if ( ! $registry->is_registered( $name ) ) {
+				$registry->register( $block_type );
+			}
+		}
+	}
 
 	/**
 	 * Fire rest_api_init with only the provided callbacks attached.

@@ -132,4 +132,27 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $overrides_at_setup, Constants::$set_constants, 'The overrides should be back to what they were at setUp().' );
 	}
 
+	/**
+	 * @testdox Block types a test registers, replaces or removes are put back as they were at setUp().
+	 */
+	public function test_restore_block_type_registry_undoes_registry_changes(): void {
+		$registry        = \WP_Block_Type_Registry::get_instance();
+		$types_at_setup  = $registry->get_all_registered();
+		$replaced_name   = array_key_first( $types_at_setup );
+		$removed_name    = array_keys( $types_at_setup )[1];
+		$replaced_type   = $types_at_setup[ $replaced_name ];
+		$registered_name = 'woocommerce-tests/leaked-block';
+
+		register_block_type( $registered_name );
+		$registry->unregister( $replaced_name );
+		register_block_type( $replaced_name );
+		$registry->unregister( $removed_name );
+
+		$this->restore_block_type_registry();
+
+		$this->assertFalse( $registry->is_registered( $registered_name ), 'A block type the test registered should be gone.' );
+		$this->assertSame( $replaced_type, $registry->get_registered( $replaced_name ), 'A block type the test replaced should be the original again.' );
+		$this->assertSame( $types_at_setup[ $removed_name ], $registry->get_registered( $removed_name ), 'A block type the test removed should be back.' );
+		$this->assertEqualsCanonicalizing( array_keys( $types_at_setup ), array_keys( $registry->get_all_registered() ), 'The registered names should match setUp().' );
+	}
 }
