@@ -7,14 +7,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
@@ -24,41 +17,12 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
-	 * Tracks whether blocks have been registered.
-	 *
-	 * @var bool
-	 */
-	protected static $are_blocks_registered = false;
-
-	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		if ( ! self::$are_blocks_registered ) {
-			// We need to register the blocks after set up. They are no registered
-			// on `init` because `init` is called with a classic theme.
-			// Other test classes register some of these, so register only the missing ones.
-			$mocks    = array(
-				'add-to-cart-with-options' => AddToCartWithOptionsMock::class,
-				'add-to-cart-with-options-quantity-selector' => AddToCartWithOptionsQuantitySelectorMock::class,
-				'add-to-cart-with-options-grouped-product-selector' => AddToCartWithOptionsGroupedProductSelectorMock::class,
-				'add-to-cart-with-options-grouped-product-item' => AddToCartWithOptionsGroupedProductItemMock::class,
-				'add-to-cart-with-options-grouped-product-item-selector' => AddToCartWithOptionsGroupedProductItemSelectorMock::class,
-				'add-to-cart-with-options-variation-selector' => AddToCartWithOptionsVariationSelectorMock::class,
-				'add-to-cart-with-options-variation-selector-attribute' => AddToCartWithOptionsVariationSelectorAttributeMock::class,
-				'add-to-cart-with-options-variation-selector-attribute-name' => AddToCartWithOptionsVariationSelectorAttributeNameMock::class,
-			);
-			$registry = \WP_Block_Type_Registry::get_instance();
-			foreach ( $mocks as $block_name => $mock_class ) {
-				if ( ! $registry->is_registered( 'woocommerce/' . $block_name ) ) {
-					new $mock_class();
-				}
-			}
-
-			self::$are_blocks_registered = true;
-		}
+		AddToCartWithOptionsMocks::register_all();
 	}
 
 	/**
