@@ -51,8 +51,8 @@ trait OrderAbilityTrait {
 	}
 
 	/**
-	 * Status slugs (without the `wc-` prefix) that extensions register for
-	 * their order types, such as `active` for subscriptions.
+	 * Status slugs (without the `wc-` prefix) that are registered with the
+	 * `wc-` prefix, including the statuses of other order types.
 	 *
 	 * @return array<int, string>
 	 */

@@ -162,7 +162,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'status' => array(
 					'type'        => 'string',
-					'description' => __( 'Order status slug without the wc- prefix. Each order type uses its own statuses, such as active for subscriptions.', 'woocommerce' ),
+					'description' => __( 'Order status slug without the wc- prefix. Each order type uses its own statuses.', 'woocommerce' ),
 					'enum'        => self::get_query_order_status_slugs(),
 				),
 				'note'   => array(
