@@ -7,10 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
-use DateTimeImmutable;
-use DateTimeZone;
-use Exception;
-
 /**
  * Helpers for building `date_query` arguments.
  *
@@ -19,32 +15,24 @@ use Exception;
 class DateQueryUtil {
 
 	/**
-	 * Convert a date that names its own UTC offset or timezone to the UTC 'Y-m-d H:i:s' form that GMT date columns store.
+	 * Convert a REST date that names its own UTC offset to the UTC 'Y-m-d H:i:s' form that GMT date columns store.
 	 *
-	 * WP_Date_Query re-expresses such dates in the site timezone even when the column is GMT, shifting them by the site offset.
+	 * WP_Date_Query re-expresses offset dates in the site timezone even when the column is GMT, shifting them by the site offset.
 	 * Dates without an offset and values that can't be parsed are returned unchanged.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param mixed $date The date, usually an ISO 8601 string from a REST request.
+	 * @param mixed $date The date, usually an RFC 3339 string from a REST request.
 	 * @return mixed The equivalent UTC date string, or the original value.
 	 */
 	public static function to_gmt_date_query_value( $date ) {
-		if ( ! is_string( $date ) ) {
+		// Same offset check as rest_get_date_with_gmt(), so values without one stay byte-identical.
+		if ( ! is_string( $date ) || ! preg_match( '#(Z|[+-]\d{2}(:\d{2})?)$#', $date ) ) {
 			return $date;
 		}
 
-		$parsed = date_parse( $date );
-		if ( $parsed['error_count'] > 0 || empty( $parsed['zone_type'] ) ) {
-			return $date;
-		}
+		$dates = rest_get_date_with_gmt( $date, true );
 
-		try {
-			$datetime = new DateTimeImmutable( $date );
-		} catch ( Exception $e ) {
-			return $date;
-		}
-
-		return $datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		return null === $dates ? $date : $dates[1];
 	}
 }
