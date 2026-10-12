@@ -664,6 +664,7 @@ export const BIS_EMAIL_FOOTER = {
 	loggedIn:
 		/To manage your notifications, click here to log in to your account\./,
 	guest: /To stop receiving these messages, click here to unsubscribe\./,
+	reason: /You have received this message because your e-mail address was used to sign up for stock notifications on our store\./,
 } as const;
 
 /**

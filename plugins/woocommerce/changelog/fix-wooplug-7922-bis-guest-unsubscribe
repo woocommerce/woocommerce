@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the unsubscribe link from the Back in Stock email sent to guests, since the sign-up it would cancel has already been fulfilled.

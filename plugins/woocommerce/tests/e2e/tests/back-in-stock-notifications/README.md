@@ -9,10 +9,11 @@ Covers the scenarios from the original plugin test plan that have a target in co
   rejections for an invalid email and a tampered product id.
 - `receiving-confirmations.spec.ts` — verify email + verified email + unsubscribe
   flow (double opt-in), the frontend verify/unsubscribe notices, the logged-in
-  footer of the verified email, and rejected verify links (tampered key, expired).
-- `receiving-notifications.spec.ts` — back-in-stock email dispatch on restock +
-  unsubscribe flow, the logged-in footer of the back-in-stock email, and a
-  rejected (tampered) unsubscribe link.
+  footer of the verified email, and rejected verify and unsubscribe links
+  (tampered key, expired).
+- `receiving-notifications.spec.ts` — back-in-stock email dispatch on restock,
+  the guest footer without an unsubscribe link, and the logged-in footer of the
+  back-in-stock email.
 - `managing-notifications.spec.ts` — admin list rendering + Resend on PENDING + Resend guard on ACTIVE + admin Cancel.
 - `variations.spec.ts` — variable products: the form following the selected
   variation, signup against a variation, the variation's attributes in the

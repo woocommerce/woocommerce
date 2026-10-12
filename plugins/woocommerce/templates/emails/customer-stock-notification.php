@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.2.0
+ * @version 11.3.0
  */
 
 // Exit if accessed directly.
@@ -67,11 +67,6 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 			$unsubscribe_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for existing customers', 'woocommerce' ) );
 			// translators: %s placeholder is the text part from above.
 			echo wp_kses_post( sprintf( __( 'To manage your notifications, %s to log in to your account.', 'woocommerce' ), $unsubscribe_link_tag ) );
-		} else {
-			// translators: %1$s placeholder is the unsubscribe link, %2$s placeholder is the Unsubscribe text link.
-			$unsubscribe_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for guests', 'woocommerce' ) );
-			// translators: %s placeholder is the text part from above.
-			echo wp_kses_post( sprintf( __( 'To stop receiving these messages, %s to unsubscribe.', 'woocommerce' ), $unsubscribe_link_tag ) );
 		}
 		?>
 		<br><br>

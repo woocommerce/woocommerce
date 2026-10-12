@@ -132,6 +132,31 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave the unsubscribe link out of the guest back-in-stock email only.
+	 * @testWith ["WC_Email_Customer_Stock_Notification", true, false]
+	 *           ["WC_Email_Customer_Stock_Notification", false, true]
+	 *           ["WC_Email_Customer_Stock_Notification_Verified", true, true]
+	 *
+	 * @param string $email_id    The email class key.
+	 * @param bool   $guest       Whether the signup belongs to a guest.
+	 * @param bool   $expect_link Whether the footer should contain the unsubscribe link.
+	 */
+	public function test_email_footer_unsubscribe_link( string $email_id, bool $guest, bool $expect_link ): void {
+		$notification = $this->build_notification();
+		if ( ! $guest ) {
+			$notification->set_user_id( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+			$notification->save();
+		}
+
+		$sut = WC()->mailer()->get_emails()[ $email_id ];
+		$sut->prepare_email( $notification );
+		$html = $sut->get_content_html();
+
+		$this->assertStringContainsString( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', $html );
+		$this->assertSame( $expect_link, str_contains( $html, 'id="notification__unsubscribe_link"' ) );
+	}
+
+	/**
 	 * Build a persisted notification for an in-stock simple product.
 	 *
 	 * @return Notification

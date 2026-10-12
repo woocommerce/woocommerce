@@ -206,6 +206,54 @@ test.describe(
 			await expect( row.getByText( /Cancelled/i ) ).toBeVisible();
 		} );
 
+		test( 'an unsubscribe link with a tampered key changes nothing', async ( {
+			page,
+			product,
+			browser,
+		} ) => {
+			const email = uniqueGuestEmail( 'bis-confirm-unsub-bad-key' );
+
+			await signUpAsGuest( browser, product.permalink, email );
+
+			const verifyLink = await getEmailLinkById(
+				page,
+				email,
+				bisEmailSubject.verify( product.name ),
+				BIS_EMAIL_LINKS.actionButton
+			);
+			await page.goto( verifyLink );
+
+			const unsubscribeLink = await getEmailLinkById(
+				page,
+				email,
+				bisEmailSubject.verified( product.name ),
+				BIS_EMAIL_LINKS.unsubscribe
+			);
+
+			await page.goto( corruptEmailLinkKey( unsubscribeLink ) );
+
+			// A rejected key is a no-op: no redirect to the shop, no notice.
+			await expect( page ).toHaveURL( /notification_id=/ );
+			await expect(
+				page.getByText( bisNotice.unsubscribed( email, product.name ) )
+			).toHaveCount( 0 );
+
+			await page.goto( bisAdminListUrl( product.id ) );
+			const row = page
+				.getByRole( 'row' )
+				.filter( { has: page.getByText( email, { exact: true } ) } );
+			await expect( row ).toHaveCount( 1 );
+			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
+
+			// Positive control: the untouched link still unsubscribes, so the
+			// row above survived because of the key and not because
+			// unsubscribing is broken.
+			await page.goto( unsubscribeLink );
+			await expect(
+				page.getByText( bisNotice.unsubscribed( email, product.name ) )
+			).toBeVisible();
+		} );
+
 		test( "a logged-in customer's confirmation email offers account management instead of unsubscribing", async ( {
 			page,
 			product,
