@@ -1177,7 +1177,7 @@ final class ContractRepository {
 	/**
 	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
 	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
-	 * necessarily the cycle current by date (a forced early renewal bills a head whose
+	 * necessarily the cycle current by date (an extension may append a head whose
 	 * period lies ahead).
 	 *
 	 * @param int    $contract_id Contract id.
@@ -1392,13 +1392,10 @@ final class ContractRepository {
 	/**
 	 * Decode a stored plan snapshot row into a typed value object.
 	 *
-	 * Public so the renewal money-path can resolve a contract's own frozen plan terms
-	 * (the cadence to bill the next cycle under) from its `plan_snapshot_id`.
-	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return PlanSnapshot|null The decoded value object, or null.
 	 */
-	public function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
+	private function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
 		if ( null === $decoded ) {
 			return null;

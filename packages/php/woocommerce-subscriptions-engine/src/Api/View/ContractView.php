@@ -270,7 +270,7 @@ final class ContractView {
 	}
 
 	/**
-	 * Who runs renewals: `primitive` or `gateway`.
+	 * Who keeps the payment schedule: `primitive` or `gateway`.
 	 */
 	public function get_schedule_source(): string {
 		return $this->fields['schedule_source'];

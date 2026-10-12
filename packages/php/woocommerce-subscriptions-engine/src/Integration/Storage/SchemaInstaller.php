@@ -36,7 +36,7 @@ final class SchemaInstaller {
 	 * 2.1.1 - add `status` and `sort_order` columns to plans table.
 	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery lease) and
 	 *         reserved `retry_at`; a `due_contract (status, next_payment_gmt)` index on
-	 *         contracts for the batch renewal scan.
+	 *         contracts for the batch due scan.
 	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
 	 *         options, gain merchant_code (UNIQUE).
 	 * 2.4.0 - owner-scoped due scan: `due_owner (extension_slug, next_payment_gmt)` replaces
@@ -248,8 +248,8 @@ final class SchemaInstaller {
 		// `selling_plan_id` and `start_gmt` are NULLABLE until the extension supplies them. There is no generic
 		// `cycle_count` - counters are per-chain, derived as `MAX(count)` over
 		// `(contract_id, kind)`. `currency` is first-class (forward-compat for multi-currency
-		// recurring; today the store base currency). `schedule_source` distinguishes
-		// engine-owned renewals from gateway-owned schedules.
+		// recurring; today the store base currency). `schedule_source` records
+		// whether the extension or the gateway keeps the payment schedule.
 		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
@@ -336,9 +336,9 @@ final class SchemaInstaller {
 		// The `due` index keys the dispatcher's due-scan in (kind, status, starts_at_gmt)
 		// order, since billing-in-advance fires at `starts_at_gmt`. `order_id` is non-1:1
 		// (an aggregate order may serve many cycles); `contract_kind` serves targeted
-		// per-chain reads (MAX(count), head). `claimed_until` is the crash-recovery lease:
-		// it is stamped when a `pending` cycle is claimed and a stuck pending cycle past it
-		// is reclaimable; the create-as-claim UNIQUE remains the primary concurrency guard.
+		// per-chain reads (MAX(count), head). `claimed_until` is the cycle lease: stamped when
+		// a caller claims a `pending` cycle, claimable again once it passes; the chain's
+		// UNIQUE positions remain the primary guard against a duplicate cycle.
 		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.
 		$cycles_sql = "CREATE TABLE {$cycles} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

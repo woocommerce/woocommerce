@@ -143,9 +143,9 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
-	 * Crash-recovery lease expiry (GMT string), or null. Set when a `pending` cycle is
-	 * claimed; a stuck pending cycle past this moment is reclaimable. The create-as-claim
-	 * UNIQUE index is the primary concurrency guard - this only recovers a crashed charge.
+	 * Lease expiry (GMT string), or null. Set when a caller claims a `pending` cycle; once
+	 * it passes, another caller may claim the cycle. The chain's UNIQUE positions remain
+	 * the primary guard against a duplicate cycle.
 	 *
 	 * @var string|null
 	 */

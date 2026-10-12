@@ -3,11 +3,11 @@
  * Contracts - the engine's public contract facade (reads and writes).
  *
  * Extensions create and progressively build contracts from explicit argument arrays:
- * the engine records the facts it is given and decides nothing about them. Any caller
- * may read or write any contract (authorization is the caller's concern). Reads return
- * read-only views ({@see ContractView}, {@see CycleView}). The engine opens no
- * transaction and keeps no cache, so a caller may wrap several calls in its own
- * transaction. No hooks fire.
+ * the engine records the facts it is given and decides nothing about them. Cycle tools
+ * (claimed appends, leases, compare-and-set transitions) let an extension run its own
+ * billing flow safely under concurrency. Any caller may read or write any contract
+ * (authorization is the caller's concern). Reads return read-only views ({@see ContractView},
+ * {@see CycleView}). The engine opens no transaction and keeps no cache. No hooks fire.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */

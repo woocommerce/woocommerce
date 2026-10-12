@@ -139,8 +139,8 @@ final class Contract {
 	private $start_gmt;
 
 	/**
-	 * Live schedule: when the next renewal fires, or null. GMT string. The due scan
-	 * keys on this; a billing cycle freezes its period from it.
+	 * The next due moment, or null. GMT string. The due dispatcher notifies the owner
+	 * once it has passed; what happens then is the owner's decision.
 	 *
 	 * @var string|null
 	 */
@@ -227,7 +227,8 @@ final class Contract {
 	private $end_gmt;
 
 	/**
-	 * Who runs renewals: 'primitive' (this engine) or 'gateway'.
+	 * Who keeps the payment schedule: 'primitive' (the owning extension, through the
+	 * engine's due moment) or 'gateway'. Recorded for the owner; the engine does not read it.
 	 *
 	 * @var string
 	 */
@@ -485,14 +486,14 @@ final class Contract {
 	}
 
 	/**
-	 * Next renewal attempt, or null.
+	 * The next due moment, or null.
 	 */
 	public function get_next_payment_gmt(): ?string {
 		return $this->next_payment_gmt;
 	}
 
 	/**
-	 * Set the live schedule (when the next renewal fires).
+	 * Set the next due moment.
 	 *
 	 * @param string|null $next_payment_gmt GMT string or null.
 	 */
@@ -695,14 +696,14 @@ final class Contract {
 	}
 
 	/**
-	 * Who runs renewals: 'primitive' or 'gateway'.
+	 * Who keeps the payment schedule: 'primitive' or 'gateway'.
 	 */
 	public function get_schedule_source(): string {
 		return $this->schedule_source;
 	}
 
 	/**
-	 * Set who runs renewals.
+	 * Set who keeps the payment schedule.
 	 *
 	 * @param string $schedule_source 'primitive' or 'gateway'.
 	 * @throws DomainException If `$schedule_source` is neither.
