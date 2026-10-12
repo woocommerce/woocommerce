@@ -4,6 +4,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
@@ -1049,6 +1050,71 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order1->delete( true );
 		$order2->delete( true );
+	}
+
+	/**
+	 * @testdox GMT date filters should pass dates with an explicit offset to the query as the equivalent UTC time.
+	 */
+	public function test_get_query_args_converts_offset_dates_for_gmt_filters(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', '2026-09-24T16:39:52+02:00' );
+		$request->set_param( 'before', '2026-09-24T14:39:52Z' );
+		$request->set_param( 'modified_after', '2026-09-24T14:39:52+00:00' );
+		$request->set_param( 'modified_before', '2026-09-24T17:39:52+03:00' );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'before' => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_modified_gmt',
+				'after'  => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+		$this->assertContains(
+			array(
+				'column' => 'post_modified_gmt',
+				'before' => '2026-09-24 14:39:52',
+			),
+			$date_query
+		);
+	}
+
+	/**
+	 * @testdox Local date filters should pass dates with an explicit offset to the query unchanged.
+	 */
+	public function test_get_query_args_keeps_offset_dates_for_local_filters(): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'modified_after', '2026-09-24T14:39:52Z' );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_modified',
+				'after'  => '2026-09-24T14:39:52Z',
+			),
+			$date_query
+		);
 	}
 
 	/**

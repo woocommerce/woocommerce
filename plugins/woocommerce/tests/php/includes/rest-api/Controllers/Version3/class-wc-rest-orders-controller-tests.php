@@ -250,6 +250,85 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GMT date filters should treat a date with an explicit offset as the same instant on a non-UTC site.
+	 *
+	 * @dataProvider data_provider_gmt_date_filters_with_offset
+	 *
+	 * @param bool   $hpos_enabled   Whether HPOS is the authoritative order storage.
+	 * @param string $param          The date filter parameter.
+	 * @param string $value          The date filter value.
+	 * @param bool   $expect_matched Whether the order should be returned.
+	 */
+	public function test_orders_gmt_date_filters_respect_explicit_offsets( bool $hpos_enabled, string $param, string $value, bool $expect_matched ): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$utc_date = '2026-09-24 14:40:20';
+		$order    = new WC_Order();
+		$order->set_date_created( strtotime( $utc_date . ' UTC' ) );
+		$order->save();
+
+		// Saving stamps the current time as the modification date, so pin it in storage.
+		if ( $hpos_enabled ) {
+			$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'date_updated_gmt' => $utc_date ), array( 'id' => $order->get_id() ) );
+		} else {
+			$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $utc_date ), array( 'ID' => $order->get_id() ) );
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'include', array( $order->get_id() ) );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( $param, $value );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			$expect_matched ? array( $order->get_id() ) : array(),
+			wp_list_pluck( $response->get_data(), 'id' ),
+			"Order modified and created at {$utc_date} UTC should " . ( $expect_matched ? '' : 'not ' ) . "match {$param}={$value}."
+		);
+	}
+
+	/**
+	 * Data provider for test_orders_gmt_date_filters_respect_explicit_offsets.
+	 *
+	 * @return array
+	 */
+	public function data_provider_gmt_date_filters_with_offset(): array {
+		$cases = array(
+			'after, Z'                   => array( 'after', '2026-09-24T14:39:52Z', true ),
+			'before, Z'                  => array( 'before', '2026-09-24T14:39:52Z', false ),
+			'modified_after, Z'          => array( 'modified_after', '2026-09-24T14:39:52Z', true ),
+			'modified_before, Z'         => array( 'modified_before', '2026-09-24T14:39:52Z', false ),
+			'modified_after, +02:00'     => array( 'modified_after', '2026-09-24T16:00:00+02:00', true ),
+			'modified_before, +02:00'    => array( 'modified_before', '2026-09-24T16:00:00+02:00', false ),
+			'modified_after, no offset'  => array( 'modified_after', '2026-09-24T14:39:52', true ),
+			'modified_before, no offset' => array( 'modified_before', '2026-09-24T14:39:52', false ),
+			// Boundaries between the order's UTC and local times only match when the GMT columns are compared.
+			'after, Z, later'            => array( 'after', '2026-09-24T15:00:00Z', false ),
+			'before, Z, later'           => array( 'before', '2026-09-24T15:00:00Z', true ),
+			'modified_after, Z, later'   => array( 'modified_after', '2026-09-24T15:00:00Z', false ),
+			'modified_before, Z, later'  => array( 'modified_before', '2026-09-24T15:00:00Z', true ),
+		);
+
+		$storage_modes = array(
+			'HPOS'  => true,
+			'posts' => false,
+		);
+
+		$data = array();
+		foreach ( $storage_modes as $storage => $hpos_enabled ) {
+			foreach ( $cases as $label => $case ) {
+				$data[ "{$storage}: {$label}" ] = array_merge( array( $hpos_enabled ), $case );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Tests creating an order.
 	 */
 	public function test_orders_create(): void {
