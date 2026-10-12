@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e78b6681ee9e0c0a47559de3dd00738b",
+    "content-hash": "98b7997fd077713bbc854b056ac16904",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -624,16 +624,16 @@
         },
         {
             "name": "automattic/tracks-shared-utils",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/tracks-shared-utils.git",
-                "reference": "6828997db5c76b1e810535c1d2729355b095aa91"
+                "reference": "8a7740be2b017deacfd7fec320aeb56bdfdd077e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/tracks-shared-utils/zipball/6828997db5c76b1e810535c1d2729355b095aa91",
-                "reference": "6828997db5c76b1e810535c1d2729355b095aa91",
+                "url": "https://api.github.com/repos/Automattic/tracks-shared-utils/zipball/8a7740be2b017deacfd7fec320aeb56bdfdd077e",
+                "reference": "8a7740be2b017deacfd7fec320aeb56bdfdd077e",
                 "shasum": ""
             },
             "require": {
@@ -664,7 +664,7 @@
                 "issues": "https://github.com/Automattic/tracks-shared-utils/issues",
                 "source": "https://github.com/Automattic/tracks-shared-utils"
             },
-            "time": "2026-09-25T19:43:46+00:00"
+            "time": "2026-10-09T13:53:29+00:00"
         }
     ],
     "packages-dev": [
