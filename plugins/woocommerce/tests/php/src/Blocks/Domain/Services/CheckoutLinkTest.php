@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 
 /**
@@ -220,10 +221,20 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Keeps the cart page error when the $unpublished product that needs options is not published.
+	 * Unpublished product cases for checkout links that need options.
 	 *
-	 * @testWith ["parent", "draft"]
-	 *           ["variation", "private"]
+	 * @return array<string, array{string, string}>
+	 */
+	public function unpublished_product_provider(): array {
+		return [
+			'draft parent'      => [ 'parent', ProductStatus::DRAFT ],
+			'private variation' => [ 'variation', ProductStatus::PRIVATE ],
+		];
+	}
+
+	/**
+	 * @testdox Keeps the cart page error when the $unpublished product that needs options is not published.
+	 * @dataProvider unpublished_product_provider
 	 *
 	 * @param string $unpublished Which product to unpublish: the parent or the variation.
 	 * @param string $status      The unpublished status to set.
