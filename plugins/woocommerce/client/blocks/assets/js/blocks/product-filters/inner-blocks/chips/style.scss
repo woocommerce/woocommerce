@@ -151,10 +151,7 @@
 		width: 2.3em;
 		height: 2.3em;
 		border-radius: 50%;
-		border: 1px solid var(
-			--wc-product-filter-chips-swatch-border,
-			color-mix(in srgb, currentColor 60%, transparent)
-		);
+		border: 1px solid color-mix(in srgb, currentColor 60%, transparent);
 		flex-shrink: 0;
 	}
 
@@ -172,16 +169,10 @@
 	}
 
 	&.has-chip-border-color :where(.wc-block-product-filter-chips__item:not([aria-checked="true"]) .wc-block-product-filter-chips__swatch) {
-		border-color: var(
-			--wc-product-filter-chips-swatch-border,
-			var(--wc-product-filter-chips-border)
-		);
+		border-color: var(--wc-product-filter-chips-border);
 	}
 	&.has-selected-chip-border-color :where(.wc-block-product-filter-chips__item[aria-checked="true"] .wc-block-product-filter-chips__swatch) {
-		border-color: var(
-			--wc-product-filter-chips-swatch-border,
-			transparent
-		);
+		border-color: transparent;
 	}
 
 	.wc-block-product-filter-chips__text,
