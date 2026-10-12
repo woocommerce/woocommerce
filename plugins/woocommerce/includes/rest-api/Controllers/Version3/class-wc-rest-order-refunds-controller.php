@@ -531,7 +531,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		}
 
 		if ( NumberUtil::round( $line_total, $price_decimals ) > NumberUtil::round( (float) $amount, $price_decimals ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_refund_amount', __( 'Refund amount cannot be less than the total of line items.', 'woocommerce' ), array( 'status' => 400 ) );
+			$message = null === $amount
+				? __( 'Refund amount is required when it cannot be calculated from line items.', 'woocommerce' )
+				: __( 'Refund amount cannot be less than the total of line items.', 'woocommerce' );
+			return new WP_Error( 'woocommerce_rest_invalid_refund_amount', $message, array( 'status' => 400 ) );
 		}
 
 		return true;
