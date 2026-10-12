@@ -222,6 +222,10 @@ export type TaxesReport = {
 	shipping_tax: number;
 	/** Taxable amount. */
 	taxable_amount?: number;
+	/** Taxable amount of line items and fees. */
+	order_taxable_amount?: number;
+	/** Taxable amount of shipping. */
+	shipping_taxable_amount?: number;
 	/** Number of orders. */
 	orders_count: number;
 };

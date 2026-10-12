@@ -1192,7 +1192,8 @@ function wc_get_order_note( $data ) {
 		'woocommerce_get_order_note',
 		array(
 			'id'            => (int) $data->comment_ID,
-			'date_created'  => wc_string_to_datetime( $data->comment_date ),
+			// comment_date is frozen in the timezone the site had when the note was saved, so use the GMT date.
+			'date_created'  => wc_string_to_datetime( mysql_to_rfc3339( $data->comment_date_gmt ) . 'Z' ),
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
