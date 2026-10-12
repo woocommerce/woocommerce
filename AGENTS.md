@@ -277,6 +277,10 @@ Do not add `default` values to block attributes in `block.json`.
 
 Consult the [Gutenberg Block Metadata reference](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/) as the source of truth for `block.json` field types. Several fields (`style`, `editorStyle`, `script`, `viewScript`) accept `string | string[]`, so code that reads them must handle both shapes — don't assume a string.
 
+### Block Metadata Translations
+
+**Preserve server-translated metadata when registering blocks.** Pass the complete `block.json` metadata object as the first argument to `registerBlockType( metadata, settings )`, including through registration helpers.
+
 ## Interactivity API Stores
 
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
