@@ -907,6 +907,54 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox A negative tax entry cannot offset a positive line refund, even if the tax rate is absent from the line.
+	 * @dataProvider provide_lines_with_and_without_tax
+	 *
+	 * @param bool $taxed Whether the line has the requested tax rate.
+	 */
+	public function test_unflagged_opposite_sign_tax_is_rejected( bool $taxed ): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $taxed
+			? $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 )
+			: $this->create_order_with_product( 100.00, 1 );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '3',
+				'line_items' => array(
+					array(
+						'id'           => $this->get_first_line_item_id( $order ),
+						'refund_total' => 100,
+						'refund_tax'   => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => -97,
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_refund_amount', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * Provide taxed and untaxed lines for the explicit refund tax validation test.
+	 *
+	 * @return array
+	 */
+	public static function provide_lines_with_and_without_tax(): array {
+		return array(
+			'taxed line'   => array( true ),
+			'untaxed line' => array( false ),
+		);
+	}
+
+	/**
 	 * @testdox A negative discount fee can be refunded alongside a positive product line.
 	 */
 	public function test_unflagged_negative_discount_fee_refund_succeeds(): void {

@@ -487,15 +487,17 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			}
 
 			$gross_refund_total = (float) $line['refund_total'];
+			$has_nonzero_tax    = false;
 			if ( is_array( $line['refund_tax'] ?? null ) ) {
 				foreach ( $line['refund_tax'] as $tax_total ) {
 					if ( is_numeric( $tax_total ) ) {
 						$gross_refund_total += (float) $tax_total;
+						$has_nonzero_tax     = $has_nonzero_tax || 0.0 !== (float) $tax_total;
 					}
 				}
 			}
 			$line_total += $gross_refund_total;
-			if ( 0.0 === $gross_refund_total && 0.0 === (float) $line['refund_total'] ) {
+			if ( 0.0 === $gross_refund_total && 0.0 === (float) $line['refund_total'] && ! $has_nonzero_tax ) {
 				continue;
 			}
 
@@ -504,8 +506,16 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 				return new WP_Error( 'woocommerce_rest_line_item_not_found', __( 'Line item not found.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
-			if ( (float) $line['refund_total'] * ( (float) $item->get_total() + (float) $item->get_total_tax() ) < 0 ) {
+			$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+			if ( (float) $line['refund_total'] * $signed_line_total < 0 ) {
 				return new WP_Error( 'woocommerce_rest_invalid_refund_total', __( 'Refund total has the wrong sign for this line item.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			if ( is_array( $line['refund_tax'] ?? null ) ) {
+				foreach ( $line['refund_tax'] as $tax_total ) {
+					if ( is_numeric( $tax_total ) && (float) $tax_total * $signed_line_total < 0 ) {
+						return new WP_Error( 'woocommerce_rest_invalid_refund_amount', __( 'Refund tax total has the wrong sign for this line item.', 'woocommerce' ), array( 'status' => 400 ) );
+					}
+				}
 			}
 			if ( 0.0 === $gross_refund_total ) {
 				continue;
