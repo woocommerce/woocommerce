@@ -112,7 +112,7 @@ class Params implements FilterUrlParam {
 		$filtered = apply_filters( 'woocommerce_product_filter_params', $params );
 
 		if ( is_array( $filtered ) && isset( $filtered['taxonomy'] ) && is_array( $filtered['taxonomy'] ) ) {
-			$used_params = array_merge( ...array_map( 'array_values', $params ) );
+			$used_params = array_merge( ...array_values( array_map( 'array_values', $params ) ) );
 			foreach ( array_keys( $params['attribute'] ) as $attribute ) {
 				$used_params[] = 'query_type_' . $attribute;
 			}

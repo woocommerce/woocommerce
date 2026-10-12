@@ -324,6 +324,24 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox An attribute parameter remains reserved when its map key matches a product taxonomy.
+	 */
+	public function test_taxonomy_rename_cannot_claim_attribute_with_same_map_key(): void {
+		$attribute_id = wc_create_attribute( array( 'name' => 'product_brand' ) );
+		$this->assertNotWPError( $attribute_id, 'The attribute fixture should be created.' );
+
+		$this->taxonomy_params_filter = static function ( array $params ): array {
+			$params['taxonomy']['product_brand'] = 'filter_product_brand';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$this->assertSame( 'brands', $this->sut->get_param( 'taxonomy' )['product_brand'], 'A taxonomy cannot claim the attribute parameter with the same map key.' );
+		$this->assertSame( 'filter_product_brand', $this->sut->get_param( 'attribute' )['product_brand'], 'The original attribute parameter remains unchanged.' );
+		$this->assertContains( 'brands', $this->sut->get_param_keys(), 'Parameter initialization must retain the default brand key.' );
+	}
+
+	/**
 	 * @testdox Two taxonomies cannot be renamed to the same new parameter.
 	 */
 	public function test_duplicate_taxonomy_renames_keep_one_default(): void {
