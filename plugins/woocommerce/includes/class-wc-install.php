@@ -367,6 +367,7 @@ class WC_Install {
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
+			'wc_update_1130_re_enable_autoload_options',
 		),
 	);
 

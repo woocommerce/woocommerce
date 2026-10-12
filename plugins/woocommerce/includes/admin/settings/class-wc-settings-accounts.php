@@ -91,7 +91,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'           => 'no',
 				'type'              => 'checkbox',
 				'checkboxgroup'     => 'start',
-				'autoload'          => false,
+				'autoload'          => true,
 				'custom_attributes' => array(
 					'disabled-tooltip' => __( 'Enable guest checkout to use this feature.', 'woocommerce' ),
 				),
