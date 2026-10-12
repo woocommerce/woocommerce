@@ -14,12 +14,16 @@ defined( 'ABSPATH' ) || exit;
 /**
  * An ability that changes one object and saves it one time. Register it with
  * a subclass as the `ability_class`. The execute callback loads the object,
- * changes it in memory, writes the `extensions` input with the fields that
- * AbilityExtensions::register_field() adds, and then saves it. A rejection
- * from any step saves nothing.
+ * checks the `extensions` input against the field schemas, changes the object
+ * in memory, writes the fields with their `update_callback`, and then saves
+ * it. A rejection from any step saves nothing.
  *
  * The input schema gets the `extensions` property of the resource, so the
  * ability accepts the fields with no extra code.
+ *
+ * With the feature off, the input schema gets no `extensions` property and the
+ * input is ignored. An ability whose own input schema sets
+ * `additionalProperties` to false rejects it instead.
  *
  * Only save() saves. The other steps must not save, send email or make HTTP
  * requests.
@@ -98,13 +102,21 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $subject;
 		}
 
+		$updates = array();
+		if ( AbilityContracts::is_enabled() ) {
+			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
+			$updates    = $this->prepare_fields( $extensions );
+			if ( is_wp_error( $updates ) ) {
+				return $updates;
+			}
+		}
+
 		$changed = $this->change( $subject, $input );
 		if ( is_wp_error( $changed ) ) {
 			return $changed;
 		}
 
-		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-		$rejected   = $this->update_fields( $subject, $extensions );
+		$rejected = $this->apply_fields( $subject, $updates );
 		if ( null !== $rejected ) {
 			return $rejected;
 		}
@@ -133,20 +145,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Write `extensions.<namespace>.<field>` input values to the object in
-	 * memory with the update_callback of each field. Every value is checked and
-	 * cast to its field schema before the first callback runs. A null value is
-	 * passed as is, to delete the value. Nothing happens when the feature is off.
+	 * Check `extensions.<namespace>.<field>` input values against the schema of
+	 * each field, and cast them. No callback runs here. A null value is kept as
+	 * is, to delete the value.
 	 *
-	 * @param \WC_Data             $subject Object to change.
-	 * @param array<string, mixed> $values  Values keyed by namespace, then field.
-	 * @return \WP_Error|null A WP_Error when a value is rejected.
+	 * @param array<string, mixed> $values Values keyed by namespace, then field.
+	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
 	 */
-	private function update_fields( $subject, array $values ): ?\WP_Error {
-		if ( ! AbilityContracts::is_enabled() ) {
-			return null;
-		}
-
+	private function prepare_fields( array $values ) {
 		$registered = AbilityExtensions::get_fields( $this->get_resource() );
 		$updates    = array();
 		foreach ( $values as $namespace => $fields ) {
@@ -171,7 +177,18 @@ abstract class ActionableAbility extends \WP_Ability {
 				$updates[] = array( $args['update_callback'], $value );
 			}
 		}
+		return $updates;
+	}
 
+	/**
+	 * Write the checked values to the object in memory with the update_callback
+	 * of each field.
+	 *
+	 * @param \WC_Data $subject Object to change.
+	 * @param array    $updates Pairs of update_callback and value from prepare_fields().
+	 * @return \WP_Error|null A WP_Error when a callback rejects a value.
+	 */
+	private function apply_fields( $subject, array $updates ): ?\WP_Error {
 		foreach ( $updates as list( $callback, $value ) ) {
 			$updated = call_user_func( $callback, $subject, $value );
 			if ( is_wp_error( $updated ) ) {

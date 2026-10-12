@@ -86,13 +86,76 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Change the order status in memory.
+	 * Change the order status with WC_Order::update_status(). This is the path
+	 * with the ability contracts feature off. It calls update_status() so an
+	 * order class such as a subscription applies its own rules. With the feature
+	 * on, CoreActionableAbility runs change() and save() instead.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function execute( array $input ) {
+		$order = self::load( $input );
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		$status = self::get_new_status( $order, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		if ( ! $order->update_status( $status, self::get_note( $input ), true ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'Failed to update order status.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return self::prepare_response( $order );
+	}
+
+	/**
+	 * Change the order status in memory. The order class must accept the
+	 * status. A clone checks this first and is never saved. set_status() without
+	 * the manual flag fires no action, so a refused status fires no
+	 * woocommerce_order_edit_status.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
 	 */
 	public static function change( $subject, array $input ) {
+		$status = self::get_new_status( $subject, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		$probe = clone $subject;
+		$probe->set_status( $status );
+		if ( $status !== $probe->get_status() ) {
+			return new \WP_Error(
+				'woocommerce_order_status_invalid',
+				/* translators: %s: order status slug. */
+				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$subject->set_status( $status, self::get_note( $input ), true );
+
+		return null;
+	}
+
+	/**
+	 * Get the new status of the order from the input.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @param array     $input Ability input.
+	 * @return string|\WP_Error
+	 */
+	private static function get_new_status( $order, array $input ) {
 		if ( empty( $input['status'] ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_required',
@@ -111,7 +174,7 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			);
 		}
 
-		if ( $status === $subject->get_status() ) {
+		if ( $status === $order->get_status() ) {
 			return new \WP_Error(
 				'woocommerce_order_status_unchanged',
 				__(
@@ -122,22 +185,17 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			);
 		}
 
-		$subject->set_status(
-			$status,
-			isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
-			true
-		);
+		return $status;
+	}
 
-		if ( $status !== $subject->get_status() ) {
-			return new \WP_Error(
-				'woocommerce_order_status_invalid',
-				/* translators: %s: order status slug. */
-				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
-				array( 'status' => 400 )
-			);
-		}
-
-		return null;
+	/**
+	 * Get the status change note from the input.
+	 *
+	 * @param array $input Ability input.
+	 * @return string
+	 */
+	private static function get_note( array $input ): string {
+		return isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '';
 	}
 
 	/**
