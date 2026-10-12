@@ -30,6 +30,11 @@ class UcpUtils {
 	const CAPABILITY_CATALOG_LOOKUP = 'dev.ucp.shopping.catalog.lookup';
 
 	/**
+	 * Capability served by the `/carts` routes.
+	 */
+	const CAPABILITY_CART = 'dev.ucp.shopping.cart';
+
+	/**
 	 * Whether the UCP routes are registered.
 	 *
 	 * @return bool
@@ -74,6 +79,11 @@ class UcpUtils {
 				'version' => self::VERSION,
 				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/catalog/lookup',
 				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/catalog_lookup.json',
+			),
+			self::CAPABILITY_CART           => array(
+				'version' => self::VERSION,
+				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/cart',
+				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/cart.json',
 			),
 		);
 	}
