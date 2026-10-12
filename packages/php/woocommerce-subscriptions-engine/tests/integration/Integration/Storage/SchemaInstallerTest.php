@@ -10,7 +10,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -290,10 +292,51 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.7.0 (contract due-dispatch claim).
+	 * @testdox The schema version is 2.8.0 (engine schedule source rename).
 	 */
-	public function test_schema_version_is_2_7_0(): void {
-		$this->assertSame( '2.7.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_8_0(): void {
+		$this->assertSame( '2.8.0', SchemaInstaller::get_version() );
+	}
+
+	/**
+	 * @testdox Contracts default schedule_source to the engine's own schedule.
+	 */
+	public function test_contracts_schedule_source_defaults_to_the_engine(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'schedule_source' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.schedule_source column.' );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $row['Default'] ?? null );
+	}
+
+	/**
+	 * @testdox Upgrading from before 2.8.0 renames stored 'primitive' schedule sources and leaves others alone.
+	 */
+	public function test_upgrade_from_2_7_0_renames_primitive_schedule_sources(): void {
+		$primitive = $this->insert_contract_with_schedule_source( 'primitive' );
+		$gateway   = $this->insert_contract_with_schedule_source( 'my_gateway' );
+
+		update_option( 'wc_subscriptions_engine_db_version', '2.7.0' );
+		$this->install_without_ddl();
+
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $this->schedule_source_of( $primitive ) );
+		$this->assertSame( 'my_gateway', $this->schedule_source_of( $gateway ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
+	}
+
+	/**
+	 * @testdox Reinstalling on the current version does not rewrite schedule sources.
+	 */
+	public function test_install_on_the_current_version_keeps_schedule_sources(): void {
+		$id = $this->insert_contract_with_schedule_source( 'primitive' );
+
+		$this->install_without_ddl();
+
+		$this->assertSame( 'primitive', $this->schedule_source_of( $id ) );
 	}
 
 	/**
@@ -629,6 +672,53 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		}
 
 		return $columns;
+	}
+
+	/**
+	 * Run the installer with dbDelta's ALTERs dropped: the test schema is already current, and
+	 * DDL would implicitly commit the test transaction (leaking rows and options).
+	 */
+	private function install_without_ddl(): void {
+		$drop_alters = static function ( string $query ): string {
+			return 1 === preg_match( '/^\s*ALTER\s/i', $query ) ? '' : $query;
+		};
+
+		add_filter( 'query', $drop_alters );
+		try {
+			SchemaInstaller::install();
+		} finally {
+			remove_filter( 'query', $drop_alters );
+		}
+	}
+
+	/**
+	 * Insert a contract with the given schedule source; returns its id.
+	 *
+	 * @param string $schedule_source Schedule source to store.
+	 */
+	private function insert_contract_with_schedule_source( string $schedule_source ): int {
+		return ( new ContractRepository() )->insert(
+			Contract::create(
+				array(
+					'extension_slug'  => 'engine-tests',
+					'schedule_source' => $schedule_source,
+				)
+			)
+		);
+	}
+
+	/**
+	 * Read a contract's stored schedule source.
+	 *
+	 * @param int $id Contract id.
+	 */
+	private function schedule_source_of( int $id ): ?string {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return Coercion::coerce_nullable_string( $wpdb->get_var( $wpdb->prepare( "SELECT schedule_source FROM {$table} WHERE id = %d", $id ) ) );
 	}
 
 	/**

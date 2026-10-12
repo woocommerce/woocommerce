@@ -270,7 +270,8 @@ final class ContractView {
 	}
 
 	/**
-	 * Who keeps the payment schedule: `primitive` or `gateway`.
+	 * Who keeps the payment schedule: `subscriptions_engine` (the engine dispatches the
+	 * contract when it is due) or the slug of the gateway or extension that keeps its own.
 	 */
 	public function get_schedule_source(): string {
 		return $this->fields['schedule_source'];

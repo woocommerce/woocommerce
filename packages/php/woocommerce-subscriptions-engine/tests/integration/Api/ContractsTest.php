@@ -98,7 +98,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'last_attempt_gmt'     => '2026-01-03 00:00:00',
 				'trial_end_gmt'        => '2026-01-04 00:00:00',
 				'end_gmt'              => '2027-01-01 00:00:00',
-				'schedule_source'      => Contract::SCHEDULE_SOURCE_GATEWAY,
+				'schedule_source'      => 'my_gateway',
 				'billing_total'        => 20,
 				'discount_total'       => '1.5',
 				'shipping_total'       => 5.25,
@@ -138,7 +138,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			$this->assertSame( '2026-01-03 00:00:00', $view->get_last_attempt_gmt() );
 			$this->assertSame( '2026-01-04 00:00:00', $view->get_trial_end_gmt() );
 			$this->assertSame( '2027-01-01 00:00:00', $view->get_end_gmt() );
-			$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $view->get_schedule_source() );
+			$this->assertSame( 'my_gateway', $view->get_schedule_source() );
 			$this->assertSame( '20.00000000', $view->get_billing_total() );
 			$this->assertSame( '1.50000000', $view->get_discount_total() );
 			$this->assertSame( '5.25000000', $view->get_shipping_total() );
@@ -345,7 +345,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				),
 			),
 			'money without currency' => array( array( 'billing_total' => '10' ) ),
-			'bad schedule source'    => array( array( 'schedule_source' => 'cron' ) ),
+			'bad schedule source'    => array( array( 'schedule_source' => 'Not a slug' ) ),
 			'non-string method'      => array( array( 'payment_method' => 5 ) ),
 			'items not a list'       => array( array( 'items' => array( 'a' => array() ) ) ),
 			'unknown address type'   => array( array( 'addresses' => array( 'home' => array() ) ) ),

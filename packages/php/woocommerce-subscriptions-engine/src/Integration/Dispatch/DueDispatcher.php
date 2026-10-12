@@ -4,8 +4,10 @@
  *
  * One recurring Action Scheduler job scans for contracts whose `next_payment_gmt` has
  * passed and whose owner registered a `contract_due_handler` ({@see ConsumerRegistry}),
- * claims each one, and calls the owner's handler. The engine decides nothing about what
- * a due contract means: renewing, skipping or clearing the due moment is the owner's call.
+ * claims each one, and calls the owner's handler. Only contracts whose schedule the engine
+ * keeps (`schedule_source` `subscriptions_engine`) are dispatched; a gateway or extension
+ * that keeps its own schedule triggers its own renewals. The engine decides nothing about
+ * what a due contract means: renewing, skipping or clearing the due moment is the owner's call.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch
  */

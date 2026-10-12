@@ -1198,7 +1198,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_find_due_skips_an_unlisted_owner_until_it_is_listed(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, 'other-ext' );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_ENGINE, CycleStatus::BILLED, null, null, 'other-ext' );
 
 		$this->assertNotContains( $id, $this->due_ids( $now, 50 ) );
 
@@ -1247,14 +1247,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due selects gateway-scheduled contracts too; acting on them is the owner's decision.
+	 * @testdox find_due selects only contracts whose schedule the engine keeps.
 	 */
-	public function test_find_due_selects_gateway_scheduled_contracts(): void {
+	public function test_find_due_selects_only_engine_scheduled_contracts(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
-		$gateway = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY );
+		$engine  = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_ENGINE );
+		$gateway = $this->insert_contract_due_at( '2026-05-01 00:00:00', ContractStatus::ACTIVE, 'my_gateway' );
+		$legacy  = $this->insert_contract_due_at( '2026-05-15 00:00:00', ContractStatus::ACTIVE, 'primitive' );
 
-		$this->assertSame( array( $gateway ), $this->due_ids( $now, 50 ) );
+		$ids = $this->due_ids( $now, 50 );
+
+		$this->assertSame( array( $engine ), $ids );
+		$this->assertNotContains( $gateway, $ids, 'A contract whose schedule a gateway keeps is never dispatched.' );
+		$this->assertNotContains( $legacy, $ids, 'Only the engine source is dispatched.' );
 	}
 
 	/**
@@ -1591,7 +1597,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 *
 	 * @param string|null $next_payment_gmt The next-payment date, or null for no schedule/head.
 	 * @param string      $status           The contract status (a ContractStatus value).
-	 * @param string      $schedule_source  Who owns the schedule (primitive or gateway).
+	 * @param string      $schedule_source  Who keeps the schedule (the engine, or a gateway/extension slug).
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
 	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
@@ -1600,7 +1606,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	private function insert_contract_due_at(
 		?string $next_payment_gmt,
 		string $status,
-		string $schedule_source = Contract::SCHEDULE_SOURCE_PRIMITIVE,
+		string $schedule_source = Contract::SCHEDULE_SOURCE_ENGINE,
 		string $head_status = CycleStatus::BILLED,
 		?string $claimed_until = null,
 		?string $head_ends_at = null,

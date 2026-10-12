@@ -603,9 +603,12 @@ final class ContractRepository {
 	 * Contracts due at `$now`, oldest-due first - the due dispatcher's scan.
 	 *
 	 * A contract is due when its `next_payment_gmt` is at or before `$now`, its owner
-	 * (`extension_slug`) is one of `$owners`, and it carries no live due-dispatch claim. Status
-	 * is not read: whether a due contract acts is its owner's decision. Driven by the
-	 * `due_owner (extension_slug, next_payment_gmt)` index; the claim is a residual filter.
+	 * (`extension_slug`) is one of `$owners`, the engine keeps its schedule (`schedule_source`
+	 * is {@see Contract::SCHEDULE_SOURCE_ENGINE}), and it carries no live due-dispatch claim.
+	 * A contract whose schedule a gateway or extension keeps is never selected: that party
+	 * triggers its own renewals. Status is not read: whether a due contract acts is its
+	 * owner's decision. Driven by the `due_owner (extension_slug, next_payment_gmt)` index;
+	 * the schedule source and the claim are residual filters.
 	 *
 	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
@@ -628,7 +631,7 @@ final class ContractRepository {
 		$cutoff             = self::format_utc( $now );
 		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
 
-		$args = array_merge( $owners, array( $cutoff, $cutoff, $limit ) );
+		$args = array_merge( $owners, array( $cutoff, Contract::SCHEDULE_SOURCE_ENGINE, $cutoff, $limit ) );
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
 		// The owner placeholder list is generated, one `%s` per owner in `$args`.
@@ -638,6 +641,7 @@ final class ContractRepository {
 				"SELECT id, extension_slug, next_payment_gmt
 				FROM {$contracts}
 				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
+				  AND schedule_source = %s
 				  AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= %s )
 				ORDER BY next_payment_gmt ASC, id ASC
 				LIMIT %d",

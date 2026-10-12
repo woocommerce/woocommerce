@@ -210,6 +210,18 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A contract whose schedule a gateway or extension keeps is not dispatched.
+	 */
+	public function test_a_contract_with_another_schedule_source_is_not_dispatched(): void {
+		$this->register_recording_handler();
+		$id = $this->create_due_contract( '2026-02-15 00:00:00', array( 'schedule_source' => 'my_gateway' ) );
+
+		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( array(), $this->calls );
+		$this->assertNull( $this->stored_claim( $id ), 'No claim is taken on a contract the engine does not schedule.' );
+	}
+
+	/**
 	 * @testdox The handler receives the contract view with items and the stored due moment in UTC.
 	 */
 	public function test_the_handler_receives_the_contract_view_and_due_at(): void {
