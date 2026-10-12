@@ -627,6 +627,97 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire no woocommerce_order_edit_status action when the order refuses the status.
+	 */
+	public function test_a_refused_status_fires_no_edit_status_action(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_status( 'processing' );
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Valid statuses without completed, as a subscription has.
+				 *
+				 * @return array
+				 */
+				protected function get_valid_statuses() {
+					return array_values( array_diff( parent::get_valid_statuses(), array( 'wc-completed' ) ) );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		wp_cache_flush();
+		$before = did_action( 'woocommerce_order_edit_status' );
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_order_status_invalid', $response->get_data()['code'] );
+		$this->assertSame( $before, did_action( 'woocommerce_order_edit_status' ) );
+		$this->assertSame( 'processing', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should call WC_Order::update_status() with the feature off, and skip it with the feature on by design.
+	 */
+	public function test_the_feature_off_path_calls_update_status(): void {
+		$calls        = 0;
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Calls of update_status().
+				 *
+				 * @var int
+				 */
+				public static $calls = 0;
+
+				/**
+				 * Count the call, then update the status.
+				 *
+				 * @param string $new_status    Status to change the order to.
+				 * @param string $note          Optional note.
+				 * @param bool   $manual_update Whether a person made the change.
+				 * @return bool
+				 */
+				public function update_status( $new_status, $note = '', $manual_update = false ) {
+					++self::$calls;
+					return parent::update_status( $new_status, $note, $manual_update );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+
+		foreach ( array( false, true ) as $enabled ) {
+			$this->set_feature( $enabled );
+			$this->reset_registries();
+			$order_class::$calls = 0;
+			$order               = \WC_Helper_Order::create_order();
+
+			$this->run_ability(
+				'woocommerce/order-update-status',
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'completed',
+				)
+			);
+
+			$calls = $order_class::$calls;
+			$this->assertSame( $enabled ? 0 : 1, $calls, $enabled ? 'feature on' : 'feature off' );
+			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+		}
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+	}
+
+	/**
 	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {
@@ -653,6 +744,29 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$saved = wc_get_product( $product->get_id() );
 		$this->assertSame( 'Pen', $saved->get_name() );
 		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should check every extension value before any update callback runs, when a later value fails its schema.
+	 */
+	public function test_a_value_that_fails_its_schema_runs_no_update_callback(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'test-ext'  => array( 'color' => 'red' ),
+					'other_ext' => array( 'count' => 'many' ),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array(), self::$received );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
 	/**
