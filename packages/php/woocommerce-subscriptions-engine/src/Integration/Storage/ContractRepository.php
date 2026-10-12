@@ -6,8 +6,9 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_chain_head()},
- * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
+ * through purpose-built reads ({@see self::find_chain_head()}, etc.), appended one at a
+ * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
+ * ({@see self::claim_cycle()}, {@see self::transition_cycle()}).
  * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
  * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
  * Meta is read and written only through the meta methods ({@see self::add_meta()} etc.),
@@ -1059,38 +1060,6 @@ final class ContractRepository {
 
 		$head = $this->find_chain_head( $cycle->get_contract_id(), $cycle->get_kind() );
 		$cycle->assign_sequence_no( null === $head ? 1 : $head->get_sequence_no() + 1 );
-	}
-
-	/**
-	 * Update an existing cycle row.
-	 *
-	 * @param Cycle $cycle Cycle to update. Must have an id whose row still exists.
-	 * @throws \RuntimeException If the cycle has no id, the update fails, or its row
-	 *                          no longer exists (stale id or concurrent delete).
-	 */
-	public function update_cycle( Cycle $cycle ): void {
-		global $wpdb;
-
-		$id = $cycle->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot update a cycle that has no id. Use ContractRepository::append_cycle() for a new cycle.' );
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ),
-			array_merge(
-				$cycle->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array( 'id' => (int) $id )
-		);
-
-		// date_updated_gmt always changes, so a matched row reports 1 affected row; 0
-		// means no row matched (stale id or concurrent delete) and must fail loudly.
-		if ( false === $updated || 0 === $updated ) {
-			throw new \RuntimeException( 'Cycle row not found during update (concurrent delete or stale id).' );
-		}
 	}
 
 	/**

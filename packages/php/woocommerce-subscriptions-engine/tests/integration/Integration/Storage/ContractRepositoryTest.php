@@ -1017,24 +1017,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update_cycle persists a status transition on a stored cycle.
-	 */
-	public function test_update_cycle_persists_a_status_change(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
-		$this->sut->append_cycle( $cycle );
-
-		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
-		$this->sut->update_cycle( $cycle );
-
-		$reloaded = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $reloaded );
-		$this->assertTrue( $reloaded->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
-	/**
-	 * @testdox The cycle crash-recovery lease column round-trips through append and update.
+	 * @testdox The cycle crash-recovery lease column round-trips through append and a transition.
 	 */
 	public function test_cycle_claimed_until_round_trips(): void {
 		$id = $this->sut->insert( $this->make_contract() );
@@ -1059,10 +1042,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '2026-07-15 00:15:00', $reloaded->get_claimed_until_gmt() );
 
-		// Cleared on update (a settled cycle holds no lease).
-		$reloaded->set_status( new CycleStatus( CycleStatus::BILLED ) );
-		$reloaded->set_claimed_until_gmt( null );
-		$this->sut->update_cycle( $reloaded );
+		// Cleared by a transition without a lease (a settled cycle holds no lease).
+		$this->assertTrue( $this->sut->transition_cycle( (int) $reloaded->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array() ) );
 
 		$settled = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $settled );
@@ -1483,8 +1464,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_billed_cycle_hydrates_its_snapshots(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
-		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
+		$cycle = Cycle::create(
+			array(
+				'contract_id'    => $id,
+				'sequence_no'    => 1,
+				'count'          => 1,
+				'status'         => new CycleStatus( CycleStatus::BILLED ),
+				'starts_at_gmt'  => '2026-07-15 00:00:00',
+				'ends_at_gmt'    => '2026-08-15 00:00:00',
+				'expected_total' => '19.99',
+				'currency'       => 'USD',
+				'plan_snapshot'  => $this->sample_plan_snapshot(),
+				'items_snapshot' => $this->sample_items_snapshot(),
+			)
+		);
 		$this->sut->append_cycle( $cycle );
 
 		$head = $this->sut->find_chain_head( $id );
@@ -1548,7 +1541,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An unknown stored cycle status hydrates through every cycle read and survives an update.
+	 * @testdox An unknown stored cycle status hydrates through every cycle read.
 	 */
 	public function test_an_unknown_stored_cycle_status_hydrates_and_round_trips(): void {
 		global $wpdb;
@@ -1568,14 +1561,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$history = $this->sut->find_cycle_history( $id );
 		$this->assertCount( 1, $history );
 		$this->assertSame( 'legacy-x', $history[0]->get_status()->get_value() );
-
-		$head->set_reason( 'annotated' );
-		$this->sut->update_cycle( $head );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, reason FROM {$table} WHERE id = %d", $cycle->get_id() ), ARRAY_A );
-		$this->assertSame( 'legacy-x', $stored['status'] );
-		$this->assertSame( 'annotated', $stored['reason'] );
 	}
 
 	/**

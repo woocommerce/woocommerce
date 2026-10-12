@@ -4,8 +4,8 @@
  * `(contract_id, kind)` with counters derived from its rows (not a stored entity).
  *
  * An immutable billing record frozen at billing (snapshot references, period
- * boundaries, `expected_total`); only `status`, `order_id`, and `reason` may change
- * afterwards. The `count` is the chargeable number and idempotency anchor, nullable
+ * boundaries, `expected_total`). Only the repository's compare-and-set tools change a
+ * stored cycle's `status`, `order_id`, `reason` and lease afterwards. The `count` is the chargeable number and idempotency anchor, nullable
  * for non-counting cycles (e.g. a future trial). Money is a decimal-safe string;
  * timestamps are GMT strings (`Y-m-d H:i:s`).
  *
@@ -334,40 +334,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Set the cycle status.
-	 *
-	 * Any status may follow any other: the engine enforces no transition table. A
-	 * changed status must be registered (an unregistered value, such as one built
-	 * through {@see new CycleStatus()}, is rejected); setting the current status
-	 * is a no-op, so a hydrated unregistered status can be saved unchanged.
-	 *
-	 * @param CycleStatus $status Target status.
-	 * @throws DomainException If the status changes to an unregistered value.
-	 */
-	public function set_status( CycleStatus $status ): void {
-		if ( $this->status->equals( $status ) ) {
-			return;
-		}
-
-		self::assert_status( $status );
-
-		$this->status = $status;
-	}
-
-	/**
 	 * Open-ended annotation, or null.
 	 */
 	public function get_reason(): ?string {
 		return $this->reason;
-	}
-
-	/**
-	 * Annotate the cycle with an open-ended reason. Always writable.
-	 *
-	 * @param string|null $reason Reason text, or null to clear.
-	 */
-	public function set_reason( ?string $reason ): void {
-		$this->reason = $reason;
 	}
 
 	/**
@@ -444,16 +414,6 @@ final class Cycle {
 	}
 
 	/**
-	 * Link the cycle to its order. One of the few post-freeze-mutable fields (with
-	 * `status` and `reason`): the order id is stamped once the charge order exists.
-	 *
-	 * @param int $order_id Linked order id.
-	 */
-	public function set_order_id( int $order_id ): void {
-		$this->order_id = $order_id;
-	}
-
-	/**
 	 * Owning extension slug, or null.
 	 */
 	public function get_extension_slug(): ?string {
@@ -468,29 +428,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Set (or clear) the crash-recovery lease expiry. Post-freeze-mutable (with `status`,
-	 * `order_id`, `reason`): a claim stamps it, and a reclaim/resolve may re-stamp or clear it.
-	 *
-	 * @param string|null $claimed_until_gmt Lease expiry GMT string, or null to clear.
-	 */
-	public function set_claimed_until_gmt( ?string $claimed_until_gmt ): void {
-		$this->claimed_until_gmt = $claimed_until_gmt;
-	}
-
-	/**
 	 * Reserved retry moment (GMT string), or null.
 	 */
 	public function get_retry_at_gmt(): ?string {
 		return $this->retry_at_gmt;
-	}
-
-	/**
-	 * Set (or clear) the reserved retry moment. Reserved for a later retry/dunning pass.
-	 *
-	 * @param string|null $retry_at_gmt Retry moment GMT string, or null to clear.
-	 */
-	public function set_retry_at_gmt( ?string $retry_at_gmt ): void {
-		$this->retry_at_gmt = $retry_at_gmt;
 	}
 
 	/**
@@ -643,8 +584,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Reject a status value that is not registered. Write paths only
-	 * ({@see self::create()}, {@see self::set_status()}); storage hydration keeps an
+	 * Reject a status value that is not registered. Write path only
+	 * ({@see self::create()}); storage hydration keeps an
 	 * unregistered stored value verbatim.
 	 *
 	 * @param CycleStatus $status Status to check.
@@ -661,8 +602,7 @@ final class Cycle {
 	/**
 	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
 	 * through; null defaults to `pending`; a string is wrapped (slug format checked).
-	 * Registration is checked by {@see self::create()} and {@see self::set_status()},
-	 * not here, so storage hydration keeps an unregistered stored value.
+	 * Registration is checked by {@see self::create()}, not here, so storage hydration keeps an unregistered stored value.
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus

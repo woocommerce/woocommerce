@@ -187,21 +187,6 @@ class CycleTest extends TestCase {
 		$this->assertSame( $items, $cycle->get_items_snapshot() );
 	}
 
-	public function test_status_changes_go_through_cycle_status(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
-	public function test_status_change_is_not_constrained_by_a_transition_table(): void {
-		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
-
-		$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
-
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::FAILED ) ) );
-	}
-
 	public function test_create_accepts_an_extension_registered_status_string(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
 
@@ -230,53 +215,10 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
 	}
 
-	public function test_set_status_rejects_an_unregistered_status_and_leaves_the_status_unchanged(): void {
-		$cycle = $this->make_pending();
-
-		try {
-			$cycle->set_status( new CycleStatus( 'nope' ) );
-			$this->fail( 'Expected a DomainException for an unregistered status.' );
-		} catch ( DomainException $e ) {
-			$this->assertStringContainsString( 'nope', $e->getMessage() );
-		}
-
-		$this->assertSame( CycleStatus::PENDING, $cycle->get_status()->get_value() );
-	}
-
 	public function test_create_rejects_an_unregistered_status_instance(): void {
 		$this->expectException( DomainException::class );
 
 		$this->make_pending( array( 'status' => new CycleStatus( 'nope' ) ) );
-	}
-
-	public function test_a_hydrated_unregistered_status_can_be_kept_unchanged(): void {
-		$cycle = Cycle::from_storage(
-			array(
-				'id'             => 5,
-				'contract_id'    => 7,
-				'sequence_no'    => 1,
-				'count'          => 1,
-				'kind'           => Cycle::KIND_BILLING,
-				'status'         => 'legacy-x',
-				'starts_at_gmt'  => '2026-03-01 00:00:00',
-				'ends_at_gmt'    => '2026-04-01 00:00:00',
-				'expected_total' => '20.00',
-				'currency'       => 'USD',
-			)
-		);
-
-		$cycle->set_status( new CycleStatus( 'legacy-x' ) );
-		$cycle->set_reason( 'annotated' );
-
-		$this->assertSame( 'legacy-x', $cycle->to_storage()['status'] );
-	}
-
-	public function test_setting_the_same_status_is_a_no_op(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_status( new CycleStatus( CycleStatus::PENDING ) );
-
-		$this->assertTrue( $cycle->get_status()->equals( new CycleStatus( CycleStatus::PENDING ) ) );
 	}
 
 	public function test_period_boundaries_are_frozen_at_construction(): void {
@@ -336,41 +278,6 @@ class CycleTest extends TestCase {
 
 		$this->expectException( DomainException::class );
 		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
-	}
-
-	public function test_reason_can_be_annotated_on_a_pending_cycle(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_reason( 'flagged for review' );
-
-		$this->assertSame( 'flagged for review', $cycle->get_reason() );
-	}
-
-	public function test_reason_can_be_annotated_when_cancelling_a_pending_cycle(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_status( new CycleStatus( CycleStatus::CANCELLED ) );
-		$cycle->set_reason( 'customer requested cancellation' );
-
-		$this->assertSame( 'customer requested cancellation', $cycle->get_reason() );
-	}
-
-	public function test_reason_can_be_annotated_on_a_billed_cycle(): void {
-		// `reason` is one of the few mutable fields: any cycle may carry one.
-		$cycle = $this->make_pending( array( 'status' => new CycleStatus( CycleStatus::BILLED ) ) );
-
-		$cycle->set_reason( 'settled after retry' );
-
-		$this->assertSame( 'settled after retry', $cycle->get_reason() );
-	}
-
-	public function test_reason_can_be_annotated_on_a_failed_cycle(): void {
-		$cycle = $this->make_pending();
-		$cycle->set_status( new CycleStatus( CycleStatus::FAILED ) );
-
-		$cycle->set_reason( 'gateway declined the charge' );
-
-		$this->assertSame( 'gateway declined the charge', $cycle->get_reason() );
 	}
 
 	public function test_from_storage_hydrates_a_persisted_cycle(): void {

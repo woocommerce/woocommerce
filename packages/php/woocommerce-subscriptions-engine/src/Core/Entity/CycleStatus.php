@@ -26,8 +26,7 @@ defined( 'ABSPATH' ) || exit;
  * Immutable: `new CycleStatus( CycleStatus::PENDING )`. The constructor checks the slug
  * format only, so a stored status a since-deactivated extension wrote still loads;
  * whether a status is registered is checked where a cycle status is written
- * ({@see Cycle::create()}, {@see Cycle::set_status()}, the repository's status
- * compare-and-set).
+ * ({@see Cycle::create()} and the repository's status compare-and-set).
  */
 final class CycleStatus {
 
