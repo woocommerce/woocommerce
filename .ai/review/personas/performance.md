@@ -107,6 +107,16 @@ This controls false positives. Follow it strictly.
   mixed list must be SPLIT (regular names primed always, transient names under the guard), never
   wrapped whole. Check the guard's direction.
 
+## Remote calls on page renders
+
+- A hunk that adds, or newly reaches, a synchronous remote request (`wp_remote_get()`,
+  `wp_safe_remote_post()`, `WC_Helper_API` calls, `'blocking' => true`) on a path that renders a
+  page (admin or storefront) makes that page wait on another server. Trace when it fires: a cache
+  that now lives longer but counts as fresh for less time, a removed `'blocking' => false`, or a
+  check moved out of cron or AJAX into a render hook all count.
+- Don't flag requests that already ran on that path before the change, ones that run only in cron,
+  Action Scheduler, AJAX or REST handlers, or ones behind a cache the hunk does not change.
+
 ## Severity
 
 Pure performance findings **never block**. Every finding whose only claim is query count, scan shape,
@@ -115,6 +125,8 @@ or cache priming is `follow-up`, never `fix here`, and at most `medium`:
 - **`medium`, `follow-up`** — the hunk makes a hot path (checkout, cart, product listing or rendering,
   order admin list) unboundedly worse: per-item queries or fan-out rows that grow with the collection.
   Say so plainly in `description`: name the hot path and what the cost scales with.
+- **`medium`, `follow-up`** — a new synchronous remote request on any page render, admin included:
+  a slow or hanging remote host stalls the page for every user who hits it.
 - **`low`, `follow-up`** — a bounded regression, a new anti-pattern on a warm or admin path, dead
   priming, a redundant guard, or bounded overhead off hot paths.
 
