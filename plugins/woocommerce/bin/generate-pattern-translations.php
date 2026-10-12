@@ -15,6 +15,6 @@ $source    = $generator->generate( dirname( __DIR__ ) );
 
 // This build script writes a local generated file without loading WordPress.
 // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-if ( false === file_put_contents( __DIR__ . '/../i18n/pattern-translations.php', $source ) ) {
+if ( false === file_put_contents( __DIR__ . '/../i18n/patterns.php', $source ) ) {
 	throw new \RuntimeException( 'Could not write pattern translation strings.' );
 }
