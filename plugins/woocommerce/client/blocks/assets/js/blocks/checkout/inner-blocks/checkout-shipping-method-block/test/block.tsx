@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
-import { useShippingData } from '@woocommerce/base-context/hooks';
+import { cartStore, validationStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -41,37 +41,6 @@ jest.mock( '@woocommerce/settings', () => {
 	};
 } );
 
-jest.mock( '@woocommerce/base-context/hooks', () => ( {
-	...jest.requireActual( '@woocommerce/base-context/hooks' ),
-	useShippingData: jest.fn(),
-} ) );
-
-// The component selects only from the cart store, to decide whether anything is still
-// deliverable; answer that one and let any other store resolve for real. The validation store
-// the tests drive is read inside cart/utils.ts rather than here, so it works because the mock
-// spreads the real module, not because of this fall-through.
-let mockPackages: ReturnType< typeof generateShippingPackage >[] = [];
-
-jest.mock( '@wordpress/data', () => {
-	const actualModule = jest.requireActual( '@wordpress/data' );
-	return {
-		...actualModule,
-		useSelect: (
-			mapSelect: ( select: typeof actualModule.select ) => unknown
-		) =>
-			mapSelect( ( storeName: { name?: string } | string ) => {
-				const name =
-					typeof storeName === 'string' ? storeName : storeName?.name;
-				if ( name === 'wc/store/cart' ) {
-					return { getShippingRates: () => mockPackages };
-				}
-				return actualModule.select( storeName );
-			} ),
-	};
-} );
-
-const VALIDATION_STORE = 'wc/store/validation';
-
 const deliveryRate = generateShippingRate( {
 	rateId: 'flat_rate:1',
 	name: 'Flat rate',
@@ -89,7 +58,9 @@ const collectionRate = generateShippingRate( {
 } );
 
 /**
- * Put the store in one shape and render the two options.
+ * Seed the cart store with the given rates and render the two options.
+ *
+ * Both the component's own cart selector and the real useShippingData read these seeded rates.
  *
  * @param options                     The shopper's situation.
  * @param options.costRequiresAddress Whether the merchant hid costs until an address is entered.
@@ -109,19 +80,21 @@ const renderWith = ( {
 	showPrice?: boolean;
 } ) => {
 	mockShippingCostRequiresAddress = costRequiresAddress;
-	mockPackages = [
-		generateShippingPackage( { packageId: 0, shippingRates: offers } ),
-	];
 
-	dispatch( VALIDATION_STORE ).clearValidationErrors();
-	if ( addressIncomplete ) {
-		dispatch( VALIDATION_STORE ).setValidationErrors( {
-			shipping_city: { message: 'Enter a city', hidden: true },
+	act( () => {
+		dispatch( cartStore ).receiveCart( {
+			shipping_rates: [
+				generateShippingPackage( {
+					packageId: 0,
+					shippingRates: offers,
+				} ),
+			],
 		} );
-	}
-
-	( useShippingData as jest.Mock ).mockReturnValue( {
-		shippingRates: mockPackages,
+		if ( addressIncomplete ) {
+			dispatch( validationStore ).setValidationErrors( {
+				shipping_city: { message: 'Enter a city', hidden: true },
+			} );
+		}
 	} );
 
 	return render(
@@ -137,8 +110,7 @@ const renderWith = ( {
 };
 
 afterEach( () => {
-	mockShippingCostRequiresAddress = false;
-	dispatch( VALIDATION_STORE ).clearValidationErrors();
+	dispatch( validationStore ).clearValidationErrors();
 } );
 
 describe( 'Block', () => {
@@ -177,5 +149,22 @@ describe( 'Block', () => {
 		expect(
 			screen.queryByText( 'calculated with an address' )
 		).not.toBeInTheDocument();
+	} );
+
+	// Hiding costs until an address is entered must not change what the shopper reads here.
+	// With nothing deliverable there is no price to hide, only the prompt to enter an address.
+	it( 'keeps the address prompt for pickup-only rates even with costs hidden and the address incomplete', () => {
+		renderWith( {
+			costRequiresAddress: true,
+			addressIncomplete: true,
+			offers: [ collectionRate ],
+		} );
+
+		expect(
+			screen.getByRole( 'radio', {
+				name: ( name: string ) =>
+					name.startsWith( 'backup shipping text' ),
+			} )
+		).toHaveTextContent( 'calculated with an address' );
 	} );
 } );
