@@ -1158,9 +1158,9 @@ class QueryBuilder {
 		if ( count( $post__in ) > 1 ) {
 			$post__in = array_intersect( ...$post__in );
 			// An empty array means that there was no overlap between the filters and so
-			// the query should return no results.
+			// the query should return no results. WP_Query applies absint(), so use 0.
 			if ( empty( $post__in ) ) {
-				return array( -1 );
+				return array( 0 );
 			}
 		} else {
 			$post__in = reset( $post__in );
