@@ -466,6 +466,60 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The on_sale parameter combines with include and exclude.
+	 */
+	public function test_variations_filter_by_on_sale_with_include_and_exclude(): void {
+		$parent_product    = WC_Helper_Product::create_variation_product();
+		$variation_ids     = $parent_product->get_children();
+		$on_sale_variation = wc_get_product( $variation_ids[0] );
+		$on_sale_variation->set_sale_price( 5 );
+		$on_sale_variation->save();
+
+		$excluded_variation = wc_get_product( $variation_ids[1] );
+		$excluded_variation->set_sale_price( 5 );
+		$excluded_variation->save();
+
+		$regular_variation = wc_get_product( $variation_ids[2] );
+		$included_ids      = array( $on_sale_variation->get_id(), $regular_variation->get_id() );
+
+		delete_transient( 'wc_products_onsale' );
+
+		$cases = array(
+			'on_sale=true with include'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'include' => $included_ids,
+				),
+				'expected' => array( $on_sale_variation->get_id() ),
+			),
+			'on_sale=false with include' => array(
+				'params'   => array(
+					'on_sale' => false,
+					'include' => $included_ids,
+				),
+				'expected' => array( $regular_variation->get_id() ),
+			),
+			'on_sale=true with exclude'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'exclude' => array( $excluded_variation->get_id() ),
+				),
+				'expected' => array( $on_sale_variation->get_id() ),
+			),
+		);
+
+		foreach ( $cases as $name => $case ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+			$request->set_query_params( $case['params'] );
+
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 200, $response->get_status(), $name );
+			$this->assertSame( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
+		}
+	}
+
+	/**
 	 * Test `downloadable` filter returns only downloadable product variations.
 	 */
 	public function test_downloadable_filter_returns_only_downloadable_products() {
