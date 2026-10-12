@@ -140,7 +140,7 @@ final class SchemaInstaller {
 	public static function uninstall(): void {
 		global $wpdb;
 
-		// TODO: Determine what we should do with the tables when uninstalling - WOOSUBS-1718.
+		// TODO: Decide what happens to the tables on uninstall (keep or drop the data).
 
 		delete_option( self::VERSION_OPTION );
 	}
