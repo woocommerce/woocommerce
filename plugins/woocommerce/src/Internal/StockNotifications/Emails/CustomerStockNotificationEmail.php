@@ -188,6 +188,8 @@ class CustomerStockNotificationEmail extends WC_Email {
 				)
 			),
 			'is_guest'         => $is_guest,
+			// A notification that was already sent once is being sent again, e.g. after an admin re-activated it.
+			'is_repeat'        => null !== $notification->get_date_notified(),
 		);
 	}
 
