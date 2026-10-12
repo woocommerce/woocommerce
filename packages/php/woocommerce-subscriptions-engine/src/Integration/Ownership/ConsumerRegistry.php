@@ -3,14 +3,12 @@
  * ConsumerRegistry - the set of extensions consuming engine functionality.
  *
  * A consumer extension registers its slug here on load, identifying itself as an
- * active owner of the primitives it drives. Engine components read the registry to
- * decide whether, and on whose behalf, to act: an empty registry means "no consumer
- * present," so the engine stays inert when bundled but unused - the renewal
- * dispatcher charges nothing, and future components gate the same way.
+ * owner of the primitives it drives, with an optional configuration. The due
+ * dispatcher only notifies owners that registered a `contract_due_handler`, so the
+ * engine stays inert when bundled but unused.
  *
  * Static (not instance state) because registration is a load-time, by-class-name
- * call - every consumer reaches the registry by class name, mirroring
- * {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities}.
+ * call - every consumer reaches the registry by class name.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership
  */
@@ -18,6 +16,8 @@
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership;
+
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -27,49 +27,73 @@ defined( 'ABSPATH' ) || exit;
 final class ConsumerRegistry {
 
 	/**
-	 * Registered consumer slugs, de-duplicated (a set keyed by slug).
-	 *
-	 * @var array<string, true>
+	 * Configuration keys a consumer may register.
 	 */
-	private static $slugs = array();
+	private const CONFIG_KEYS = array(
+		'contract_due_handler' => true,
+	);
 
 	/**
-	 * Register a consumer extension by its slug.
+	 * Registered consumers keyed by slug, each with its validated configuration.
 	 *
-	 * Idempotent: registering the same slug twice is a no-op. The slug is trimmed, and
-	 * an empty or whitespace-only slug is ignored so a misconfigured caller cannot flip
-	 * the gate open with a blank registration.
-	 *
-	 * @param string $slug The consumer extension's registered slug.
+	 * @var array<string, array{contract_due_handler?: callable}>
 	 */
-	public static function register( string $slug ): void {
+	private static $consumers = array();
+
+	/**
+	 * Register a consumer extension by its slug, with an optional configuration.
+	 *
+	 * `contract_due_handler`: `callable( ContractView $contract, array $context ): void`, called
+	 * when one of the consumer's contracts is due (`$context['due_at']` is the due moment, UTC).
+	 * The slug is trimmed; an empty slug is ignored. A repeat registration, an unknown key or a
+	 * non-callable handler raises a `_doing_it_wrong()` notice (the first registration is kept;
+	 * the invalid key is dropped and the slug still registers).
+	 *
+	 * @param string               $slug   The consumer extension's registered slug.
+	 * @param array<string, mixed> $config Consumer configuration.
+	 */
+	public static function register( string $slug, array $config = array() ): void {
 		$slug = trim( $slug );
 		if ( '' === $slug ) {
 			return;
 		}
 
-		self::$slugs[ $slug ] = true;
+		if ( isset( self::$consumers[ $slug ] ) ) {
+			self::reject( sprintf( 'Consumer "%s" is already registered; the first registration is kept.', $slug ) );
+			return;
+		}
+
+		$filtered_config = ArgumentValidator::filter_known_keys( __METHOD__, $config, self::CONFIG_KEYS );
+		$registration    = array();
+
+		if ( array_key_exists( 'contract_due_handler', $filtered_config ) ) {
+			$handler = $filtered_config['contract_due_handler'];
+			if ( is_callable( $handler ) ) {
+				$registration['contract_due_handler'] = $handler;
+			} else {
+				self::reject( sprintf( 'The "contract_due_handler" of consumer "%s" must be callable; it is ignored.', $slug ) );
+			}
+		}
+
+		self::$consumers[ $slug ] = $registration;
 	}
 
 	/**
 	 * Remove a consumer registration. A deactivating consumer deregisters itself so the
-	 * engine's gates re-evaluate while its code is still loaded - the engine only loads
-	 * through its consumers, so the deactivation request is the last chance for components
-	 * to clean up (e.g. the renewal dispatcher removes its recurring scan when the last
-	 * consumer leaves). An unknown slug is a no-op.
+	 * engine's gates re-evaluate while its code is still loaded (e.g. the due dispatcher
+	 * removes its recurring scan when the last handler-owner leaves). An unknown slug is a no-op.
 	 *
 	 * @param string $slug The consumer extension's registered slug.
 	 */
 	public static function unregister( string $slug ): void {
-		unset( self::$slugs[ trim( $slug ) ] );
+		unset( self::$consumers[ trim( $slug ) ] );
 	}
 
 	/**
-	 * Whether no consumer is registered. The dispatcher gate: true means charge
-	 * nothing this run.
+	 * Whether no consumer is registered.
 	 */
 	public static function is_empty(): bool {
-		return array() === self::$slugs;
+		return array() === self::$consumers;
 	}
 
 	/**
@@ -78,7 +102,32 @@ final class ConsumerRegistry {
 	 * @return array<int, string>
 	 */
 	public static function all(): array {
-		return array_keys( self::$slugs );
+		return array_map( 'strval', array_keys( self::$consumers ) );
+	}
+
+	/**
+	 * The contract due handler a consumer registered, or null when it has none or is not registered.
+	 *
+	 * @param string $slug The consumer extension's registered slug.
+	 */
+	public static function get_contract_due_handler( string $slug ): ?callable {
+		return self::$consumers[ trim( $slug ) ]['contract_due_handler'] ?? null;
+	}
+
+	/**
+	 * The slugs of the consumers that registered a contract due handler (order not significant).
+	 *
+	 * @return array<int, string>
+	 */
+	public static function get_slugs_with_contract_due_handler(): array {
+		$slugs = array();
+		foreach ( self::$consumers as $slug => $registration ) {
+			if ( isset( $registration['contract_due_handler'] ) ) {
+				$slugs[] = (string) $slug;
+			}
+		}
+
+		return $slugs;
 	}
 
 	/**
@@ -88,6 +137,15 @@ final class ConsumerRegistry {
 	 *           of the consumer API.
 	 */
 	public static function reset(): void {
-		self::$slugs = array();
+		self::$consumers = array();
+	}
+
+	/**
+	 * Raise the `_doing_it_wrong()` notice for an invalid registration.
+	 *
+	 * @param string $message What is wrong.
+	 */
+	private static function reject( string $message ): void {
+		_doing_it_wrong( __CLASS__ . '::register', esc_html( $message ), '0.0.1' );
 	}
 }
