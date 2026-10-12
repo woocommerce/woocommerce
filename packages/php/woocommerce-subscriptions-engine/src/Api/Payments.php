@@ -109,7 +109,9 @@ final class Payments {
 		/**
 		 * Filters whether an order (or, with a null order, the current cart) needs a payment
 		 * method that can be charged off-session. Extensions return true for what they will
-		 * charge later; only a boolean true counts.
+		 * charge later; only a boolean true counts. Several extensions answer through the same
+		 * filter, so combine with the incoming value rather than replace it:
+		 * `return $requires || $mine;`. A plain `false` would discard another extension's true.
 		 *
 		 * @param bool          $requires Whether a reusable payment method is required. Default false.
 		 * @param WC_Order|null $order    The order being paid, or null for the current cart.
