@@ -1,0 +1,1380 @@
+{
+	"personas": {
+		"general": {
+			"enabled": false
+		},
+		"qa": {
+			"enabled": false
+		},
+		"security": {
+			"file": ".ai/review/personas/security.md",
+			"engine": "codex",
+			"model": "gpt-6-astra",
+			"triggers": [
+				"**/*.php",
+				"**/*.js",
+				"**/*.jsx",
+				"**/*.ts",
+				"**/*.tsx",
+				"**/*.mjs",
+				"**/*.cjs",
+				"**/*.html",
+				"**/.github/workflows/**",
+				"**/.github/actions/**",
+				"**/composer.json",
+				"**/package.json"
+			]
+		},
+		"regression": {
+			"file": ".ai/review/personas/regression.md",
+			"engine": "claude",
+			"model": "claude-opus-4-8",
+			"triggers": [
+				"**/*.php"
+			],
+			"severity_threshold": "medium"
+		},
+		"performance": {
+			"file": ".ai/review/personas/performance.md",
+			"engine": "claude",
+			"model": "claude-opus-4-8",
+			"triggers": [
+				"**/*.php"
+			],
+			"severity_threshold": "medium",
+			"gate": {
+				"signals": [
+					"$wpdb",
+					"wp_query",
+					"get_posts(",
+					"_prime_",
+					"get_option(",
+					"wp_prime_option_caches",
+					"wc_get_product(",
+					"wc_get_products(",
+					"wc_get_order(",
+					"wc_get_orders(",
+					"get_post(",
+					" join ",
+					"meta_query",
+					"tax_query",
+					"group by",
+					"order by",
+					"select ",
+					"transient",
+					"wp_cache_",
+					"lookup",
+					"prime_image_caches",
+					"update_meta_cache",
+					"update_post_caches",
+					"get_children",
+					"'fields'",
+					"get_available_variations",
+					"wp_count_posts",
+					"glob(",
+					"scandir",
+					"file_exists",
+					"->debug(",
+					"woocommerce_init",
+					"plugins_loaded",
+					"::instance(",
+					"get_emails",
+					"wc()->mailer",
+					"term_relationships",
+					"meta_key",
+					"union",
+					"get_results"
+				],
+				"always_paths": [],
+				"signal_types": [
+					"php",
+					"phtml",
+					"inc",
+					"md",
+					"markdown",
+					"txt",
+					"rst",
+					"adoc",
+					"json",
+					"yml",
+					"yaml",
+					"xml",
+					"toml",
+					"ini",
+					"csv",
+					"css",
+					"scss",
+					"less",
+					"sass",
+					"styl",
+					"svg",
+					"png",
+					"jpg",
+					"jpeg",
+					"gif",
+					"ico",
+					"webp",
+					"woff",
+					"woff2",
+					"ttf",
+					"eot",
+					"map",
+					"lock",
+					"po",
+					"mo",
+					"pot",
+					"snap",
+					"js",
+					"jsx",
+					"ts",
+					"tsx",
+					"mjs",
+					"cjs"
+				]
+			}
+		},
+		"frontend": {
+			"file": ".ai/review/personas/frontend.md",
+			"engine": "claude",
+			"model": "claude-opus-4-8",
+			"triggers": [
+				"**/*.ts",
+				"**/*.tsx",
+				"**/*.js",
+				"**/*.jsx",
+				"**/*.scss",
+				"**/*.css",
+				"**/block.json"
+			],
+			"severity_threshold": "medium"
+		}
+	},
+	"exclude": [
+		"plugins/*/changelog/*",
+		"plugins/woocommerce/client/blocks/changelog/*",
+		"packages/js/*/changelog/*",
+		"packages/php/*/changelog/*"
+	],
+	"guidelines": [
+		{
+			"name": "hook-payload-contract",
+			"file": ".ai/review/guidelines/hook-payload-contract.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"apply_filters",
+				"do_action",
+				"apply_filters_ref_array",
+				"do_action_ref_array",
+				"apply_filters_deprecated"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "hook-firing-scope",
+			"file": ".ai/review/guidelines/hook-firing-scope.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"do_action",
+				"add_action",
+				"add_filter",
+				"remove_action",
+				"remove_filter",
+				"is_admin",
+				"did_action",
+				"doing_action",
+				"clean_post_cache",
+				"wp_set_object_terms",
+				"data_store->",
+				"get_data_store",
+				"->delete_items",
+				"WC_Data_Store::load",
+				"has_filter",
+				"has_action"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "php-loose-type-juggling",
+			"file": ".ai/review/guidelines/php-loose-type-juggling.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"strict_types",
+				": string",
+				": int",
+				"?string",
+				"get_post_stati",
+				"wp_count_posts",
+				"array_keys",
+				"wp_cache_get",
+				"is_numeric",
+				"(float)",
+				"floatval",
+				"intval",
+				"absint",
+				"wc_get_price_decimals",
+				"price_decimals",
+				"wc_format_decimal",
+				"per_page",
+				"array_sum"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "public-php-api-bc",
+			"file": ".ai/review/guidelines/public-php-api-bc.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"interface ",
+				"abstract ",
+				"implements ",
+				"extends ",
+				"public function",
+				"protected function",
+				"public static function",
+				"function wc_",
+				"function woocommerce_",
+				"wc_deprecated_function",
+				"_deprecated_",
+				"final "
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "upgrade-time-class-load",
+			"file": ".ai/review/guidelines/upgrade-time-class-load.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php",
+				"plugins/woocommerce/src/Autoloader.php"
+			],
+			"signals": [
+				"Enums\\",
+				"enum ",
+				"use Automattic\\WooCommerce",
+				"class_exists",
+				"require_once",
+				"include_once",
+				"register_routes",
+				"rest_api_init",
+				"admin_print_footer_scripts",
+				"Autoloader"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "action-scheduler-lifecycle",
+			"file": ".ai/review/guidelines/action-scheduler-lifecycle.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"as_schedule_",
+				"as_enqueue_async_action",
+				"as_has_scheduled_action",
+				"as_next_scheduled_action",
+				"as_unschedule",
+				"as_get_scheduled_actions",
+				"action_scheduler_",
+				"ActionScheduler",
+				"wp_schedule_event",
+				"wp_schedule_single_event",
+				"wp_clear_scheduled_hook",
+				"wp_next_scheduled",
+				"register_recurring_actions"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "request-input-validation",
+			"file": ".ai/review/guidelines/request-input-validation.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"$_GET",
+				"$_POST",
+				"$_REQUEST",
+				"$_COOKIE",
+				"get_query_var",
+				"get_param(",
+				"wc_clean",
+				"urldecode",
+				"validate_callback",
+				"rest_validate",
+				"preg_match",
+				"is_numeric",
+				"ctype_digit",
+				"filter_var",
+				"wc_format_postcode",
+				"is_postcode",
+				"postcode",
+				"validate_",
+				"$_get",
+				"$_post"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "missing-object-deref",
+			"file": ".ai/review/guidelines/missing-object-deref.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"wc_get_product(",
+				"wc_get_order(",
+				"wc_get_product_object",
+				"get_post(",
+				"get_term(",
+				"get_term_by",
+				"get_parent_id",
+				"->get_product(",
+				"get_queried_object",
+				"WC_Email",
+				"get_emails",
+				"template_html",
+				"woocommerce_email_classes",
+				"get_variation_attributes",
+				"get_attribute_taxonomies"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "meta-option-value-semantics",
+			"file": ".ai/review/guidelines/meta-option-value-semantics.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"get_post_meta",
+				"update_post_meta",
+				"delete_post_meta",
+				"add_post_meta",
+				"get_meta(",
+				"update_meta_data",
+				"delete_meta_data",
+				"get_option(",
+				"update_option(",
+				"delete_option",
+				"get_transient",
+				"set_transient",
+				"maybe_unserialize",
+				"_thumbnail_id",
+				"get_user_meta",
+				"update_user_meta"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "hpos-sync-on-read",
+			"file": ".ai/review/guidelines/hpos-sync-on-read.md",
+			"path": [
+				"plugins/woocommerce/src/Internal/DataStores/Orders/**/*.php",
+				"plugins/woocommerce/includes/data-stores/class-wc-order-data-store-cpt.php",
+				"plugins/woocommerce/includes/data-stores/abstract-wc-order-data-store-cpt.php",
+				"plugins/woocommerce/includes/class-wc-post-data.php",
+				"plugins/woocommerce/src/Internal/Utilities/COTMigrationUtil.php",
+				"plugins/woocommerce/src/Database/Migrations/**/*.php"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "migration-upgrade-state",
+			"file": ".ai/review/guidelines/migration-upgrade-state.md",
+			"path": [
+				"plugins/woocommerce/includes/class-wc-install.php",
+				"plugins/woocommerce/includes/wc-update-functions.php",
+				"plugins/woocommerce/src/Database/**/*.php",
+				"plugins/woocommerce/src/Internal/Admin/Schedulers/**/*.php",
+				"plugins/woocommerce/src/Internal/DataStores/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/includes/class-wc-background-updater.php"
+			],
+			"signals": [
+				"wc_update_",
+				"db_updates",
+				"dbDelta",
+				"get_schema",
+				"PRIMARY KEY",
+				"ALTER TABLE",
+				"CREATE TABLE",
+				"DROP ",
+				"update_db_version",
+				"woocommerce_db_version",
+				"migrat",
+				"KEY ",
+				"UNIQUE",
+				"primary key",
+				"alter table",
+				"create table",
+				"drop ",
+				"key ",
+				"unique"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "proxy-predicate-inference",
+			"file": ".ai/review/guidelines/proxy-predicate-inference.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"needs_shipping",
+				"get_shipping_methods",
+				"has_shipping_address",
+				"get_shipping_address",
+				"get_billing_address",
+				"ship_to_different_address",
+				"get_customer_id",
+				"created_via",
+				"is_guest",
+				"get_items( 'shipping'",
+				"get_billing_",
+				"get_shipping_",
+				"has_status",
+				"is_virtual",
+				"get_formatted_shipping"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "wc-query-shop-front-page",
+			"file": ".ai/review/guidelines/wc-query-shop-front-page.md",
+			"path": [
+				"plugins/woocommerce/includes/class-wc-query.php",
+				"plugins/woocommerce/includes/class-wc-template-loader.php",
+				"plugins/woocommerce/includes/class-wc-post-types.php",
+				"plugins/woocommerce/includes/wc-page-functions.php",
+				"plugins/woocommerce/src/Blocks/Templates/**/*.php",
+				"plugins/woocommerce/src/Internal/ComingSoon/**/*.php"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "request-lifecycle-state",
+			"file": ".ai/review/guidelines/request-lifecycle-state.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"woocommerce_init",
+				"plugins_loaded",
+				"woocommerce_loaded",
+				"after_setup_theme",
+				"'init'",
+				"did_action",
+				"::instance(",
+				"wp_loaded",
+				"load_plugin_textdomain",
+				"remove_filter",
+				"$GLOBALS",
+				"finally",
+				"switch_to_",
+				"restore_",
+				"wp_reset_postdata",
+				"render_block",
+				"$globals"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "template-and-js-default",
+			"file": ".ai/review/guidelines/template-and-js-default.md",
+			"path": [
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/includes/wc-template-functions.php",
+				"plugins/woocommerce/includes/wc-template-hooks.php",
+				"plugins/woocommerce/src/Blocks/BlockTypes/**/*.php"
+			],
+			"signals": [
+				"@version",
+				"disabled",
+				"display:none",
+				"display: none",
+				"hidden",
+				"wp_script_is",
+				"do_action",
+				"apply_filters",
+				"wc_get_template",
+				"aria-disabled",
+				"remove_action"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "rest-response-contract",
+			"file": ".ai/review/guidelines/rest-response-contract.md",
+			"path": [
+				"plugins/woocommerce/src/StoreApi/**/*.php",
+				"plugins/woocommerce/includes/rest-api/**/*.php",
+				"plugins/woocommerce/src/Admin/API/**/*.php",
+				"plugins/woocommerce/src/Internal/RestApi/**/*.php",
+				"plugins/woocommerce/includes/class-wc-rest-*.php",
+				"plugins/woocommerce/includes/wc-rest-functions.php"
+			],
+			"signals": [
+				"get_item_schema",
+				"prepare_item_for_response",
+				"get_schema",
+				"'properties'",
+				"'type'",
+				"'context'",
+				"html_entity_decode",
+				"wp_specialchars_decode",
+				"prepare_html_response",
+				"rest_ensure_response",
+				"IDENTIFIER",
+				"get_extended_data",
+				"->data[",
+				"wc_rest_prepare_date_response",
+				"'items'",
+				"identifier"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "session-cart-persistence",
+			"file": ".ai/review/guidelines/session-cart-persistence.md",
+			"path": [
+				"plugins/woocommerce/includes/class-wc-session-handler.php",
+				"plugins/woocommerce/includes/abstracts/abstract-wc-session.php",
+				"plugins/woocommerce/includes/class-wc-cart-session.php",
+				"plugins/woocommerce/includes/class-wc-cart.php",
+				"plugins/woocommerce/includes/class-wc-customer.php",
+				"plugins/woocommerce/includes/data-stores/class-wc-customer-data-store-session.php",
+				"plugins/woocommerce/src/StoreApi/**/*.php",
+				"plugins/woocommerce/includes/wc-user-functions.php",
+				"plugins/woocommerce/includes/class-wc-form-handler.php",
+				"plugins/woocommerce/src/Blocks/**/Cart*.php"
+			],
+			"signals": [
+				"session",
+				"cart_token",
+				"Cart-Token",
+				"persistent_cart",
+				"_woocommerce_persistent_cart",
+				"wp_logout",
+				"wp_login",
+				"set_customer_session_cookie",
+				"init_session_cookie",
+				"get_session_data",
+				"load_cart",
+				"get_cart_from_session",
+				"wc_load_cart",
+				"CartTokenUtils",
+				"customer_id",
+				"set_current_user"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "check-then-write-race",
+			"file": ".ai/review/guidelines/check-then-write-race.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"ReserveStock",
+				"reserve_stock",
+				"wc_reserve_stock",
+				"hold_stock",
+				"wc_reduce_stock",
+				"increase_usage_count",
+				"usage_count",
+				"GET_LOCK",
+				"FOR UPDATE",
+				"START TRANSACTION",
+				"INSERT",
+				"add_post_meta",
+				"add_meta_data",
+				"$wpdb->insert",
+				"wc_update_product_stock",
+				"update_stock",
+				"release_held",
+				"get_lock",
+				"for update",
+				"start transaction"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "order-totals-recalc",
+			"file": ".ai/review/guidelines/order-totals-recalc.md",
+			"path": [
+				"plugins/woocommerce/includes/abstracts/abstract-wc-order.php",
+				"plugins/woocommerce/includes/class-wc-order*.php",
+				"plugins/woocommerce/includes/class-wc-cart*.php",
+				"plugins/woocommerce/includes/class-wc-discounts.php",
+				"plugins/woocommerce/includes/class-wc-tax.php",
+				"plugins/woocommerce/includes/class-wc-coupon.php",
+				"plugins/woocommerce/includes/wc-coupon-functions.php",
+				"plugins/woocommerce/includes/wc-order-functions.php",
+				"plugins/woocommerce/includes/admin/meta-boxes/**/*.php",
+				"plugins/woocommerce/includes/class-wc-ajax.php",
+				"plugins/woocommerce/src/StoreApi/Utilities/*.php"
+			],
+			"signals": [
+				"calculate_",
+				"recalculate_coupons",
+				"set_total",
+				"get_total",
+				"wc_round_tax_total",
+				"is_vat_exempt",
+				"prices_include_tax",
+				"number_precision",
+				"get_subtotal",
+				"apply_coupon",
+				"discount",
+				"adjust_non_base_location_prices",
+				"round(",
+				"get_fees",
+				"fee",
+				"tax_class",
+				"get_taxes"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "shipping-rate-pipeline",
+			"file": ".ai/review/guidelines/shipping-rate-pipeline.md",
+			"path": [
+				"plugins/woocommerce/includes/class-wc-shipping*.php",
+				"plugins/woocommerce/includes/shipping/**/*.php",
+				"plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
+				"plugins/woocommerce/includes/class-wc-cart.php",
+				"plugins/woocommerce/includes/class-wc-cart-totals.php",
+				"plugins/woocommerce/includes/class-wc-checkout.php",
+				"plugins/woocommerce/src/Blocks/Shipping/**/*.php",
+				"plugins/woocommerce/src/StoreApi/**/*.php",
+				"plugins/woocommerce/includes/wc-cart-functions.php"
+			],
+			"signals": [
+				"woocommerce_package_rates",
+				"add_rate",
+				"WC_Shipping_Rate",
+				"needs_shipping",
+				"calculate_shipping",
+				"get_packages",
+				"price_decimals",
+				"local_pickup",
+				"free_shipping",
+				"woocommerce_shipping_method_add_rate_args",
+				"shipping_rates",
+				"chosen_shipping_methods",
+				"show_shipping",
+				"get_rates",
+				"package",
+				"shipping_method",
+				"rates"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "sql-clause-filter-contract",
+			"file": ".ai/review/guidelines/sql-clause-filter-contract.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"posts_clauses",
+				"posts_join",
+				"posts_where",
+				"posts_orderby",
+				"woocommerce_admin_report_columns",
+				"pre_get_posts",
+				"append_product_sorting_table_join",
+				"woocommerce_get_catalog_ordering_args",
+				"ORDER BY",
+				"GROUP BY",
+				"report_columns",
+				"'join'",
+				"'where'",
+				"wc_product_meta_lookup",
+				"query_vars",
+				"order by",
+				"group by"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "cache-invalidation-and-poisoning",
+			"file": ".ai/review/guidelines/cache-invalidation-and-poisoning.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"wp_cache_get",
+				"wp_cache_set",
+				"wp_cache_delete",
+				"wp_cache_flush",
+				"get_transient",
+				"set_transient",
+				"delete_transient",
+				"WC_Cache_Helper",
+				"get_cache_prefix",
+				"invalidate_cache_group",
+				"CacheNameSpaceTrait",
+				"ObjectCache",
+				"cache_key",
+				"clean_post_cache",
+				"incr_cache_prefix",
+				"wp_cache_add"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "perf-refactor-semantic-drift",
+			"file": ".ai/review/guidelines/perf-refactor-semantic-drift.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"_prime_post_caches",
+				"prime_",
+				"wp_prime_option_caches",
+				"update_meta_cache",
+				"'fields'",
+				"wc_product_meta_lookup",
+				"lookup_table",
+				"LIMIT 1",
+				"get_children",
+				"get_transient",
+				"set_transient",
+				"array_slice",
+				"no_found_rows",
+				"wp_cache_get",
+				"limit 1"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "fix-and-test-verification",
+			"file": ".ai/review/guidelines/fix-and-test-verification.md",
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "perf-sql-query-shape",
+			"file": ".ai/review/guidelines/perf-sql-query-shape.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"$wpdb->",
+				"JOIN",
+				"term_relationships",
+				"term_taxonomy_id",
+				"wc_product_meta_lookup",
+				"wc_product_attributes_lookup",
+				"meta_key",
+				"meta_value",
+				"GROUP BY",
+				"SELECT MIN",
+				"SELECT MAX",
+				"UNION",
+				"->posts",
+				"->postmeta",
+				"woocommerce_attribute_lookup_enabled",
+				"product_lookup_table_is_generating",
+				"get_results",
+				"get_col",
+				"join",
+				"group by"
+			],
+			"personas": [
+				"performance"
+			]
+		},
+		{
+			"name": "perf-cache-option-priming",
+			"file": ".ai/review/guidelines/perf-cache-option-priming.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"_prime_post_caches",
+				"prime_image_caches",
+				"prime_",
+				"update_post_caches",
+				"update_meta_cache",
+				"wp_prime_option_caches",
+				"wp_using_ext_object_cache",
+				"get_option(",
+				"wc_get_product(",
+				"wc_get_order(",
+				"get_post(",
+				"get_posts(",
+				"wc_get_products",
+				"get_children",
+				"'fields'",
+				"update_post_meta_cache",
+				"get_image_id",
+				"wp_get_attachment"
+			],
+			"personas": [
+				"performance"
+			]
+		},
+		{
+			"name": "perf-hot-path-eager-work",
+			"file": ".ai/review/guidelines/perf-hot-path-eager-work.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"woocommerce_init",
+				"'init'",
+				"plugins_loaded",
+				"wp_loaded",
+				"::instance(",
+				"get_emails",
+				"WC()->mailer",
+				"glob(",
+				"file_exists",
+				"scandir",
+				"->debug(",
+				"get_available_variations",
+				"get_children",
+				"wp_count_posts",
+				"WP_Query",
+				"wc_get_products",
+				"get_posts("
+			],
+			"personas": [
+				"performance"
+			]
+		},
+		{
+			"name": "script-handle-loading-contract",
+			"file": ".ai/review/guidelines/script-handle-loading-contract.md",
+			"path": [
+				"plugins/woocommerce/src/Blocks/AssetsController.php",
+				"plugins/woocommerce/src/Blocks/Assets/**/*.php",
+				"plugins/woocommerce/src/Blocks/BlockTypes/**/*.php",
+				"plugins/woocommerce/includes/class-wc-frontend-scripts.php",
+				"plugins/woocommerce/includes/admin/class-wc-admin-assets.php",
+				"plugins/woocommerce/src/Admin/**/*.php",
+				"plugins/woocommerce/src/Internal/**/*.php",
+				"plugins/woocommerce/includes/**/*.php"
+			],
+			"signals": [
+				"wp_register_script",
+				"wp_enqueue_script",
+				"wp_register_style",
+				"wp_enqueue_style",
+				"register_script",
+				"register_style",
+				"'strategy'",
+				"'defer'",
+				"in_footer",
+				"wp_script_is",
+				"wp_style_is",
+				"wp_add_inline_script",
+				"wp_is_block_theme",
+				"current_theme_supports",
+				"wc_current_theme_is_fse_theme",
+				"dependencies",
+				"wp_deregister_script",
+				"wp_dequeue_"
+			],
+			"personas": [
+				"frontend",
+				"regression"
+			]
+		},
+		{
+			"name": "classic-jquery-contract",
+			"file": ".ai/review/guidelines/classic-jquery-contract.md",
+			"path": [
+				"plugins/woocommerce/client/legacy/js/**/*.js"
+			],
+			"signals": [
+				"$.ajax(",
+				"$.post(",
+				"$.get(",
+				"$.param",
+				"serialize",
+				"document.body",
+				"trigger(",
+				"triggerHandler",
+				".on(",
+				"data:",
+				"wc_checkout_params",
+				"wc_cart_params",
+				"encodeURIComponent",
+				"processData",
+				"update_checkout",
+				"updated_wc_div",
+				"added_to_cart"
+			],
+			"personas": [
+				"frontend"
+			]
+		},
+		{
+			"name": "js-public-api-contract",
+			"file": ".ai/review/guidelines/js-public-api-contract.md",
+			"path": [
+				"packages/js/**/*.js",
+				"packages/js/**/*.jsx",
+				"packages/js/**/*.ts",
+				"packages/js/**/*.tsx",
+				"plugins/woocommerce/client/blocks/packages/**/*.ts",
+				"plugins/woocommerce/client/blocks/packages/**/*.tsx",
+				"plugins/woocommerce/client/blocks/assets/js/settings/**/*.ts",
+				"plugins/woocommerce/client/admin/client/**/*.tsx",
+				"plugins/woocommerce/src/Blocks/Assets/AssetDataRegistry.php",
+				"plugins/woocommerce/src/Internal/Admin/Settings.php"
+			],
+			"signals": [
+				"export ",
+				"export default",
+				"createElement",
+				"Fragment",
+				"registerStore",
+				"createReduxStore",
+				"register(",
+				"PropTypes",
+				"getSetting",
+				"getAdminSetting",
+				"wcSettings",
+				"getSettingWithCoercion",
+				"window.wc",
+				"->add(",
+				"defaultProps",
+				"deprecated("
+			],
+			"personas": [
+				"frontend",
+				"regression"
+			]
+		},
+		{
+			"name": "checkout-extensibility-payload",
+			"file": ".ai/review/guidelines/checkout-extensibility-payload.md",
+			"path": [
+				"plugins/woocommerce/client/blocks/assets/js/**/*.js",
+				"plugins/woocommerce/client/blocks/assets/js/**/*.jsx",
+				"plugins/woocommerce/client/blocks/assets/js/**/*.ts",
+				"plugins/woocommerce/client/blocks/assets/js/**/*.tsx",
+				"plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/**/*.js",
+				"plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/**/*.jsx",
+				"plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/**/*.ts",
+				"plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/**/*.tsx",
+				"plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields*.php",
+				"plugins/woocommerce/src/Blocks/Payments/**/*.php"
+			],
+			"signals": [
+				"registerCheckoutFilters",
+				"applyCheckoutFilter",
+				"registerPaymentMethod",
+				"registerExpressPaymentMethod",
+				"typeof",
+				"extensions",
+				"additional_fields",
+				"additionalFields",
+				"isVisible",
+				"hidden",
+				"required",
+				"canMakePayment",
+				"validation",
+				"__experimental",
+				"registerCheckoutBlock",
+				"CheckoutFields"
+			],
+			"personas": [
+				"frontend",
+				"regression"
+			]
+		},
+		{
+			"name": "css-layout-regression",
+			"file": ".ai/review/guidelines/css-layout-regression.md",
+			"path": [
+				"plugins/woocommerce/client/**/*.scss",
+				"plugins/woocommerce/client/**/*.css",
+				"packages/js/**/*.scss",
+				"plugins/woocommerce/client/legacy/css/**/*.scss",
+				"plugins/woocommerce/client/legacy/css/**/*.scss"
+			],
+			"personas": [
+				"frontend"
+			]
+		},
+		{
+			"name": "js-request-failure-handling",
+			"file": ".ai/review/guidelines/js-request-failure-handling.md",
+			"path": [
+				"plugins/woocommerce/client/**/*.js",
+				"plugins/woocommerce/client/**/*.jsx",
+				"plugins/woocommerce/client/**/*.ts",
+				"plugins/woocommerce/client/**/*.tsx",
+				"packages/js/**/*.js",
+				"packages/js/**/*.jsx",
+				"packages/js/**/*.ts",
+				"packages/js/**/*.tsx"
+			],
+			"signals": [
+				"apiFetch",
+				"fetch(",
+				".then(",
+				".catch(",
+				"await ",
+				"localStorage",
+				"sessionStorage",
+				"triggerFetch",
+				"AbortController",
+				"sendBeacon",
+				"navigator.",
+				"store(",
+				"getContext",
+				"async ",
+				"Promise"
+			],
+			"personas": [
+				"frontend"
+			]
+		},
+		{
+			"name": "react-render-and-keyboard",
+			"file": ".ai/review/guidelines/react-render-and-keyboard.md",
+			"path": [
+				"plugins/woocommerce/client/**/*.jsx",
+				"plugins/woocommerce/client/**/*.tsx",
+				"packages/js/**/*.jsx",
+				"packages/js/**/*.tsx"
+			],
+			"signals": [
+				"key=",
+				"key:",
+				"useEffect",
+				"useMemo",
+				"useCallback",
+				"useSelect",
+				"createSlotFill",
+				"onKeyDown",
+				"onKeyPress",
+				"keydown",
+				"'Enter'",
+				"preventDefault",
+				"tabIndex",
+				"role=",
+				"focus(",
+				"aria-"
+			],
+			"personas": [
+				"frontend"
+			]
+		},
+		{
+			"name": "i18n-string-identity",
+			"file": ".ai/review/guidelines/i18n-string-identity.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php",
+				"plugins/woocommerce/client/**/*.js",
+				"plugins/woocommerce/client/**/*.jsx",
+				"plugins/woocommerce/client/**/*.ts",
+				"plugins/woocommerce/client/**/*.tsx",
+				"packages/js/**/*.js",
+				"packages/js/**/*.jsx",
+				"packages/js/**/*.ts",
+				"packages/js/**/*.tsx",
+				"plugins/woocommerce/patterns/**/*.php"
+			],
+			"signals": [
+				"_x(",
+				"_n(",
+				"_nx(",
+				"_n_noop",
+				"translators:",
+				"wp_set_script_translations",
+				"load_plugin_textdomain",
+				"load_textdomain",
+				"msgid",
+				"createInterpolateElement",
+				"__(",
+				"esc_html__("
+			],
+			"personas": [
+				"frontend",
+				"regression"
+			]
+		},
+		{
+			"name": "sec-sql-prepare-and-identifiers",
+			"file": ".ai/review/guidelines/sec-sql-prepare-and-identifiers.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"$wpdb->",
+				"prepare(",
+				"esc_sql",
+				"ORDER BY",
+				"orderby",
+				"order_by",
+				" IN (",
+				"get_var",
+				"get_col",
+				"->query(",
+				"%i",
+				"sanitize_sql_orderby",
+				"date_type",
+				"$_GET",
+				"$_REQUEST",
+				"get_param(",
+				"order by",
+				" in (",
+				"$_get",
+				"$_request"
+			],
+			"personas": [
+				"security"
+			]
+		},
+		{
+			"name": "sec-rest-and-ajax-permissions",
+			"file": ".ai/review/guidelines/sec-rest-and-ajax-permissions.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"permission_callback",
+				"current_user_can",
+				"user_can",
+				"permissions_check",
+				"__return_true",
+				"register_rest_route",
+				"wc_rest_check_",
+				"manage_woocommerce",
+				"edit_shop_orders",
+				"wp_ajax_",
+				"wp_ajax_nopriv_",
+				"check_ajax_referer",
+				"wp_verify_nonce",
+				"check_admin_referer",
+				"map_meta_cap",
+				"is_user_logged_in"
+			],
+			"personas": [
+				"security"
+			]
+		},
+		{
+			"name": "sec-order-cart-ownership",
+			"file": ".ai/review/guidelines/sec-order-cart-ownership.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php"
+			],
+			"signals": [
+				"order_key",
+				"get_order_key",
+				"key_is_valid",
+				"hash_equals",
+				"get_customer_id",
+				"get_current_user_id",
+				"cart_token",
+				"Cart-Token",
+				"billing_email",
+				"post_password",
+				"post_password_required",
+				"view_order",
+				"pay_for_order",
+				"get_error_message",
+				"is_customer",
+				"guest",
+				"Order_Pay",
+				"wc_customer_bought_product"
+			],
+			"personas": [
+				"security"
+			]
+		},
+		{
+			"name": "sec-sanitize-and-escape",
+			"file": ".ai/review/guidelines/sec-sanitize-and-escape.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/uninstall.php",
+				"plugins/woocommerce/woocommerce.php",
+				"plugins/woocommerce/client/**/*.js",
+				"plugins/woocommerce/client/**/*.jsx",
+				"plugins/woocommerce/client/**/*.ts",
+				"plugins/woocommerce/client/**/*.tsx"
+			],
+			"signals": [
+				"esc_html",
+				"esc_attr",
+				"esc_url",
+				"esc_js",
+				"wp_kses",
+				"dangerouslySetInnerHTML",
+				"decodeEntities",
+				"innerHTML",
+				"RawHTML",
+				"sanitize_",
+				"wc_clean",
+				"wp_unslash",
+				"sanitize_callback",
+				"wc_sanitize_",
+				"wp_strip_all_tags",
+				"html_entity_decode",
+				"wptexturize",
+				"esc_textarea"
+			],
+			"personas": [
+				"security"
+			]
+		},
+		{
+			"name": "sec-auth-tokens-and-cookies",
+			"file": ".ai/review/guidelines/sec-auth-tokens-and-cookies.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"hash_equals",
+				"hash_hmac",
+				"wp_hash",
+				"consumer_key",
+				"consumer_secret",
+				"setcookie",
+				"wc_setcookie",
+				"nonce",
+				"wc-auth",
+				"Authorization",
+				"determine_current_user",
+				"rest_authentication_errors",
+				"wp_set_current_user",
+				"api_key",
+				"password",
+				"session_cookie",
+				"COOKIE",
+				"cookie"
+			],
+			"personas": [
+				"security"
+			]
+		}
+	]
+}
