@@ -49,18 +49,18 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_depth = 0;
 
 	/**
-	 * The WC()->customer instance at setUp(), whose shipping address teardown restores.
+	 * The WC()->customer instance at setUp(), which teardown puts back with its state.
 	 *
 	 * @var WC_Customer|null
 	 */
 	private $customer_at_setup;
 
 	/**
-	 * The shipping address of $customer_at_setup when the test started.
+	 * The internal state of $customer_at_setup when the test started.
 	 *
-	 * @var array<string, string>
+	 * @var array<string, mixed>
 	 */
-	private $customer_shipping_at_setup = array();
+	private $customer_state_at_setup = array();
 
 	/**
 	 * $_SERVER['REQUEST_URI'] at setUp(), or null when it was not set.
@@ -167,10 +167,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
-		if ( WC()->customer instanceof WC_Customer ) {
-			$this->customer_at_setup          = WC()->customer;
-			$this->customer_shipping_at_setup = WC()->customer->get_shipping( 'edit' );
-		}
+		$this->customer_at_setup       = WC()->customer instanceof WC_Customer ? WC()->customer : null;
+		$this->customer_state_at_setup = $this->customer_at_setup ? self::customer_state( $this->customer_at_setup ) : array();
 
 		$this->request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Kept verbatim to restore at teardown.
 	}
@@ -179,10 +177,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Tear down test case.
 	 *
 	 * The cart contents, the cart context, the queued notices, the cached country
-	 * locale, and the customer's shipping address all live on the WC() singletons,
-	 * which neither the per-test database rollback nor the hook restore resets, so
-	 * clear them here or they leak into every later test in the process. The same
-	 * goes for the REQUEST_URI that go_to() sets.
+	 * locale, and the customer all live on the WC() singletons, which neither the
+	 * per-test database rollback nor the hook restore resets, so clear them here or
+	 * they leak into every later test in the process. The same goes for the
+	 * REQUEST_URI that go_to() sets.
 	 *
 	 * @since 11.1.0
 	 */
@@ -234,10 +232,37 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		if ( $this->customer_at_setup ) {
-			foreach ( $this->customer_shipping_at_setup as $key => $value ) {
-				$this->customer_at_setup->{"set_shipping_{$key}"}( $value );
-			}
+			// Tests swap in a customer for another user, or change addresses, tax exemption and
+			// other props through setters, which also leave entries in the change set. Put back
+			// the setUp() instance with its exact state, so later tests start from the same one.
+			WC()->customer = $this->customer_at_setup;
+			self::customer_state( $this->customer_at_setup, $this->customer_state_at_setup );
 		}
+	}
+
+	/**
+	 * Read a customer's internal state, or write it back when $state is given.
+	 *
+	 * @param WC_Customer               $customer The customer.
+	 * @param array<string, mixed>|null $state    State from an earlier read, to write back.
+	 * @return array<string, mixed> The state as it was before any write.
+	 */
+	private static function customer_state( WC_Customer $customer, ?array $state = null ): array {
+		$access = function ( ?array $state ): array {
+			$current = array(
+				'id'                  => $this->id,
+				'data'                => $this->data,
+				'changes'             => $this->changes,
+				'is_vat_exempt'       => $this->is_vat_exempt,
+				'calculated_shipping' => $this->calculated_shipping,
+			);
+			foreach ( (array) $state as $prop => $value ) {
+				$this->$prop = $value;
+			}
+			return $current;
+		};
+
+		return Closure::bind( $access, $customer, WC_Customer::class )( $state );
 	}
 
 	/**

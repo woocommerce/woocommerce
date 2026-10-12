@@ -76,6 +76,28 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A test that swaps in another customer or changes its props leaves the setUp() customer behind, unchanged.
+	 */
+	public function test_clear_wc_singleton_state_restores_the_customer(): void {
+		$customer_at_setup = WC()->customer;
+		$data_at_setup     = $customer_at_setup->get_data();
+		$changes_at_setup  = $customer_at_setup->get_changes();
+		$vat_at_setup      = $customer_at_setup->get_is_vat_exempt();
+
+		$customer_at_setup->set_billing_country( 'MV' );
+		$customer_at_setup->set_shipping_country( 'NZ' );
+		$customer_at_setup->set_is_vat_exempt( ! $vat_at_setup );
+		WC()->customer = new \WC_Customer( 0, true );
+
+		$this->clear_wc_singleton_state();
+
+		$this->assertSame( $customer_at_setup, WC()->customer, 'The setUp() customer should be back on WC().' );
+		$this->assertSame( $data_at_setup, WC()->customer->get_data(), 'The customer data should be back to what it was at setUp().' );
+		$this->assertSame( $changes_at_setup, WC()->customer->get_changes(), 'Restoring should not add entries to the change set.' );
+		$this->assertSame( $vat_at_setup, WC()->customer->get_is_vat_exempt(), 'The tax exemption should be back to what it was at setUp().' );
+	}
+
+	/**
 	 * The REQUEST_URI that go_to() sets does not outlive the test.
 	 */
 	public function test_restore_request_uri_undoes_go_to(): void {
