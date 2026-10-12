@@ -92,6 +92,10 @@ never the value.
 - A guard that is present and correct, in any standard form.
 - An attack that needs a capability that already grants the same power (an admin with
   `unfiltered_html` injecting script; a `manage_woocommerce` user changing store settings).
+  This clears only an attacker who holds that capability. A missing nonce on the same action is
+  still CSRF: a third party forges the privileged user's request. Likewise a cast or validation clears
+  only the weakness it stops: `(int)` stops SQL injection, not a missing capability check or an SSRF
+  to an integer host.
 - A theoretical issue with no reachable path from an entry point.
 - Hardening ideas on unchanged code.
 

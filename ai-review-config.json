@@ -439,6 +439,32 @@
 			]
 		},
 		{
+			"name": "order-storage-access",
+			"file": ".ai/review/guidelines/order-storage-access.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php"
+			],
+			"signals": [
+				"wp_count_posts",
+				"get_posts(",
+				"WP_Query",
+				"get_post(",
+				"get_post_status",
+				"get_post_meta",
+				"update_post_meta",
+				"delete_post_meta",
+				"$wpdb->posts",
+				"$wpdb->postmeta",
+				"shop_order",
+				"post_status"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
 			"name": "migration-upgrade-state",
 			"file": ".ai/review/guidelines/migration-upgrade-state.md",
 			"path": [
