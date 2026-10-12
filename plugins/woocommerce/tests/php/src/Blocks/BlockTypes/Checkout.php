@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Checkout\PaymentMethodPreselection;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\CheckoutMock;
@@ -62,6 +63,10 @@ class Checkout extends \WP_UnitTestCase {
 	 * @return void
 	 */
 	protected function tearDown(): void {
+		// Each CheckoutMock registers this block type, so drop it for the next test.
+		if ( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/checkout-mock' ) ) {
+			unregister_block_type( 'woocommerce/checkout-mock' );
+		}
 		parent::tearDown();
 		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
 
@@ -138,6 +143,25 @@ class Checkout extends \WP_UnitTestCase {
 		$data_from_registry = $this->registry->get();
 		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
 		wp_delete_post( $page_id );
+	}
+
+	/**
+	 * @testdox Should expose the payment method preselection setting to the block.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 *
+	 * @param string $option_value The saved option value.
+	 * @param bool   $expected     The value the block should receive.
+	 */
+	public function test_preselect_payment_method_setting_is_exposed( string $option_value, bool $expected ): void {
+		update_option( PaymentMethodPreselection::OPTION_NAME, $option_value );
+
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->mock_enqueue_data();
+
+		$data_from_registry = $this->registry->get();
+		$this->assertArrayHasKey( 'checkoutPreselectPaymentMethod', $data_from_registry );
+		$this->assertSame( $expected, $data_from_registry['checkoutPreselectPaymentMethod'] );
 	}
 
 	/**

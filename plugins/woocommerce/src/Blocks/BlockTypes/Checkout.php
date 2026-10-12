@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\Checkout\PaymentMethodPreselection;
 
 /**
  * Checkout class.
@@ -447,6 +448,7 @@ class Checkout extends AbstractBlock {
 				'woocommerce_ship_to_destination',
 				'woocommerce_registration_generate_password',
 				'pickup_location_pickup_locations',
+				PaymentMethodPreselection::OPTION_NAME,
 			)
 		);
 
@@ -465,6 +467,7 @@ class Checkout extends AbstractBlock {
 			)
 		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
+		$this->asset_data_registry->add( 'checkoutPreselectPaymentMethod', PaymentMethodPreselection::is_enabled() );
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
