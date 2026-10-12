@@ -210,7 +210,7 @@ class AsyncGenerator {
 		// A continuation must know which feed file it is appending to and which product to resume after.
 		// If it doesn't (corrupt, or saved by an older version that tracked pages), bail and let the
 		// heartbeat-based recovery restart generation from scratch.
-		if ( ! $is_first_chunk && ( empty( $status['file_name'] ) || ! isset( $status['last_id'] ) ) ) {
+		if ( ! $is_first_chunk && ( empty( $status['file_name'] ) || ! isset( $status['last_product_id'] ) ) ) {
 			wc_get_logger()->error( 'Invalid feed generation continuation status', array( 'status' => $status ) );
 			return;
 		}
@@ -223,7 +223,7 @@ class AsyncGenerator {
 
 			if ( $is_first_chunk ) {
 				$status['file_name']       = $feed->open();
-				$status['last_id']         = 0;
+				$status['last_product_id'] = 0;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
 			} else {
@@ -244,16 +244,16 @@ class AsyncGenerator {
 
 			$this->apply_mapper_args( $status['args'] ?? array() );
 
-			// The walker's total only counts products after `last_id`, so add what earlier chunks processed.
+			// The walker's total only counts products after `last_product_id`, so add what earlier chunks processed.
 			$base_processed = (int) ( $status['processed'] ?? 0 );
-			$progress       = $walker->walk_batches_after_id(
+			$progress       = $walker->walk_chunk(
 				function ( WalkerProgress $progress ) use ( &$status, $option_key, $base_processed ) {
 					// Refresh progress and the heartbeat after every batch, so polling sees smooth progress
 					// within a chunk rather than a single jump at the chunk boundary.
 					$status = $this->update_progress( $status, $base_processed + $progress->processed_items, $base_processed + $progress->total_count );
 					update_option( $option_key, $status );
 				},
-				(int) $status['last_id'],
+				(int) $status['last_product_id'],
 				$this->get_chunk_batch_count( $option_key )
 			);
 
@@ -261,7 +261,7 @@ class AsyncGenerator {
 			// total when resuming), so store it as-is rather than adding to the previous total.
 			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $base_processed + $progress->total_count );
 			$status['entries_written'] = $feed->get_entry_count();
-			$status['last_id']         = $progress->last_id;
+			$status['last_product_id'] = $progress->last_product_id;
 
 			$is_complete = $progress->processed_batches >= $progress->total_batch_count;
 

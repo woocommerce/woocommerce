@@ -348,20 +348,20 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$walker->set_batch_size( $batch_size );
 
 		// First chunk: products 1-4 (allotment of 2 batches reached).
-		$progress = $walker->walk_batches_after_id( null, 0, 2 );
+		$progress = $walker->walk_chunk( null, 0, 2 );
 		$this->assertSame( $total, $progress->total_count );
 		$this->assertSame( $total_pages, $progress->total_batch_count );
 		$this->assertSame( 2, $progress->processed_batches );
 		$this->assertSame( 4, $progress->processed_items );
-		$this->assertSame( 4, $progress->last_id );
+		$this->assertSame( 4, $progress->last_product_id );
 
 		// Final chunk: resumes after product 4 and stops at the last page even though 2 batches were allowed.
-		$progress = $walker->walk_batches_after_id( null, $progress->last_id, 2 );
+		$progress = $walker->walk_chunk( null, $progress->last_product_id, 2 );
 		$this->assertSame( 2, $progress->total_count );
 		$this->assertSame( 1, $progress->total_batch_count );
 		$this->assertSame( 1, $progress->processed_batches );
 		$this->assertSame( 2, $progress->processed_items );
-		$this->assertSame( 6, $progress->last_id );
+		$this->assertSame( 6, $progress->last_product_id );
 	}
 
 	/**
@@ -460,11 +460,11 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 
 		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
 		$sut->set_batch_size( 1 );
-		$progress = $sut->walk_batches_after_id( null, 0, 2 );
+		$progress = $sut->walk_chunk( null, 0, 2 );
 
 		$product_ids[] = \WC_Helper_Product::create_simple_product( true, array( 'date_created' => '2026-01-02 00:00:00' ) )->get_id();
 
-		$sut->walk_batches_after_id( null, $progress->last_id );
+		$sut->walk_chunk( null, $progress->last_product_id );
 
 		$this->assertSame( $product_ids, $exported_ids, 'Each product should be exported once, in ID order, with the new product last' );
 	}

@@ -50,7 +50,7 @@ final class WalkerProgress {
 	 *
 	 * @var int
 	 */
-	public int $last_id = 0;
+	public int $last_product_id = 0;
 
 	/**
 	 * Creates a WalkerProgress instance from a WooCommerce products query result.

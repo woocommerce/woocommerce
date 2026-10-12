@@ -208,7 +208,7 @@ class ProductWalker {
 	 *
 	 * This is the simple, single-process entry point: it starts the feed, walks every batch, ends the
 	 * feed and returns the number of products processed. Callers that need to write a feed across
-	 * several processes should own the feed lifecycle themselves and use {@see walk_batches_after_id()} instead.
+	 * several processes should own the feed lifecycle themselves and use {@see walk_chunk()} instead.
 	 *
 	 * @since 10.5.0
 	 *
@@ -217,7 +217,7 @@ class ProductWalker {
 	 */
 	public function walk( ?callable $callback = null ): int {
 		$this->feed->start();
-		$progress = $this->walk_batches_after_id( $callback );
+		$progress = $this->walk_chunk( $callback );
 		$this->feed->end();
 
 		return $progress->processed_items;
@@ -234,7 +234,7 @@ class ProductWalker {
 	 * `$max_batches` to process a bounded slice and resume later from `processed_batches`.
 	 *
 	 * @since 11.0.0
-	 * @deprecated 11.3.0 Use walk_batches_after_id() instead. Resuming from a page skips products when earlier ones are removed in between.
+	 * @deprecated 11.3.0 Use walk_chunk() instead. Resuming from a page skips products when earlier ones are removed in between.
 	 *
 	 * @param callable|null $callback    The callback to call after each batch of products is processed.
 	 * @param int           $start_page  The 1-based page (batch) to start at.
@@ -243,28 +243,28 @@ class ProductWalker {
 	 *                        total_batch_count so the caller knows whether the feed is complete.
 	 */
 	public function walk_batches( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
-		wc_deprecated_function( __METHOD__, '11.3.0', __CLASS__ . '::walk_batches_after_id' );
+		wc_deprecated_function( __METHOD__, '11.3.0', __CLASS__ . '::walk_chunk' );
 
 		return $this->walk_batches_from( $callback, max( 1, $start_page ), 0, $max_batches );
 	}
 
 	/**
-	 * Walks through products after a given product ID, optionally limited to a bounded number of batches.
+	 * Walks through a chunk of products, optionally limited to a bounded number of batches.
 	 *
-	 * The walker does not own the feed lifecycle, so a feed can be written across several processes.
-	 * Pass `$after_id` and `$max_batches` to process a bounded slice and resume later from `last_id`.
-	 * Resuming from an ID rather than a page keeps products from being skipped when earlier ones are removed.
+	 * The walker does not own the feed lifecycle, so a feed can be written across several processes:
+	 * walk a chunk, then resume the next one from the returned `last_product_id`. Resuming from an ID
+	 * rather than a page keeps products from being skipped when earlier ones are removed in between.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param callable|null $callback    The callback to call after each batch of products is processed.
-	 * @param int           $after_id    Only walk products with an ID greater than this one.
-	 * @param int           $max_batches The maximum number of batches to process in this call.
+	 * @param callable|null $callback                    The callback to call after each batch of products is processed.
+	 * @param int           $resume_after_product_id Resume after this product ID, usually the previous chunk's `last_product_id`; 0 starts from the beginning.
+	 * @param int           $max_batches                 The maximum number of batches to process in this call.
 	 * @return WalkerProgress Items/batches processed here, plus the total_count and total_batch_count
-	 *                        remaining after `$after_id`, so the caller knows whether the feed is complete.
+	 *                        remaining when this chunk started, so the caller knows whether the feed is complete.
 	 */
-	public function walk_batches_after_id( ?callable $callback = null, int $after_id = 0, int $max_batches = PHP_INT_MAX ): WalkerProgress {
-		return $this->walk_batches_from( $callback, null, max( 0, $after_id ), $max_batches );
+	public function walk_chunk( ?callable $callback = null, int $resume_after_product_id = 0, int $max_batches = PHP_INT_MAX ): WalkerProgress {
+		return $this->walk_batches_from( $callback, null, max( 0, $resume_after_product_id ), $max_batches );
 	}
 
 	/**
@@ -294,18 +294,18 @@ class ProductWalker {
 
 			// Only build the progress object once, so the totals reflect what remained when this call started.
 			if ( is_null( $progress ) ) {
-				$progress          = WalkerProgress::from_wc_get_products_result( $result );
-				$progress->last_id = $after_id;
+				$progress                  = WalkerProgress::from_wc_get_products_result( $result );
+				$progress->last_product_id = $after_id;
 			}
 			if ( $iterated > 0 ) {
-				$progress->last_id = end( $result->products )->get_id();
+				$progress->last_product_id = end( $result->products )->get_id();
 			}
 			$progress->processed_items += $iterated;
 			++$progress->processed_batches;
 			++$batches_processed;
 
 			if ( is_null( $start_page ) ) {
-				$after_id = $progress->last_id;
+				$after_id = $progress->last_product_id;
 			} else {
 				++$page;
 			}

@@ -133,7 +133,7 @@ class ApiController {
 				$response['action_id'],
 				$response['path'],
 				$response['file_name'],
-				$response['last_id'],
+				$response['last_product_id'],
 				$response['entries_written'],
 				$response['updated_at']
 			);

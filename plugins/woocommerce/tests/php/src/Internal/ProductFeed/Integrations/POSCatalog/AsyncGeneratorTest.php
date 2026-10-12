@@ -649,12 +649,12 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		update_option(
 			$option_key,
 			array(
-				'state'      => AsyncGenerator::STATE_IN_PROGRESS,
-				'updated_at' => time() - HOUR_IN_SECONDS,
-				'file_name'  => $identifier,
-				'last_id'    => 3,
-				'processed'  => 50000,
-				'total'      => 120000,
+				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
+				'updated_at'      => time() - HOUR_IN_SECONDS,
+				'file_name'       => $identifier,
+				'last_product_id' => 3,
+				'processed'       => 50000,
+				'total'           => 120000,
 			)
 		);
 
@@ -720,7 +720,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'updated_at'      => time() - HOUR_IN_SECONDS,
 				'file_name'       => $identifier,
-				'last_id'         => 3,
+				'last_product_id' => 3,
 				'processed'       => 2500,
 				'total'           => 12000,
 				'entries_written' => 2500,
@@ -767,7 +767,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => 'pos-catalog-feed-missing.json',
-				'last_id'         => 5,
+				'last_product_id' => 5,
 				'processed'       => 999,
 				'entries_written' => 999,
 				'total'           => 999,
@@ -813,7 +813,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			array(
 				'state'           => AsyncGenerator::STATE_IN_PROGRESS,
 				'file_name'       => $identifier,
-				'last_id'         => 2,
+				'last_product_id' => 2,
 				'processed'       => 1,
 				'entries_written' => 1,
 				'total'           => 5,
