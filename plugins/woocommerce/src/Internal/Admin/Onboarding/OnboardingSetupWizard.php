@@ -73,7 +73,7 @@ class OnboardingSetupWizard {
 	/**
 	 * Handle the authenticated onboarding setup skip fallback.
 	 *
-	 * Saves the skip without the REST API, then says where to look if WooCommerce screens keep failing.
+	 * Saves the skip without the REST API, then explains that some screens may not work and where to look.
 	 *
 	 * @internal
 	 *
@@ -115,7 +115,7 @@ class OnboardingSetupWizard {
 
 		wp_die(
 			'<h1>' . esc_html__( 'WooCommerce setup skipped', 'woocommerce' ) . '</h1>' .
-			'<p>' . esc_html__( 'Your choice to skip setup is saved. A request to your site’s REST API failed, so WooCommerce saved it another way.', 'woocommerce' ) . '</p>' .
+			'<p>' . esc_html__( 'Your choice to skip setup is saved. Your site’s REST API did not respond correctly, so some WooCommerce screens may not work until that is fixed.', 'woocommerce' ) . '</p>' .
 			'<p>' . wp_kses_post( $next_step ) . '</p>' .
 			'<p><a class="button button-primary" href="' . esc_url( wc_admin_url() ) . '">' . esc_html__( 'Continue to WooCommerce Home', 'woocommerce' ) . '</a></p>',
 			esc_html__( 'WooCommerce setup skipped', 'woocommerce' ),
