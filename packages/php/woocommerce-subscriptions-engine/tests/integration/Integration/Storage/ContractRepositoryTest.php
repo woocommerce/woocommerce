@@ -1309,40 +1309,45 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A live dispatch claim hides the contract from find_due until the claim expires.
+	 * @testdox A live dispatch claim hides the contract from find_due until the claim expires on the database clock.
 	 */
 	public function test_a_live_claim_hides_the_contract_until_it_expires(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->pin_db_clock( '2026-07-15 00:00:00' );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
 
-		$this->assertSame( array(), $this->due_ids( $now->modify( '+899 seconds' ), 50 ), 'A live claim hides the contract.' );
-		$this->assertSame( array( $id ), $this->due_ids( $now->modify( '+900 seconds' ), 50 ), 'An expired claim no longer hides it.' );
+		$this->pin_db_clock( '2026-07-15 00:14:59' );
+		$this->assertSame( array(), $this->due_ids( $now, 50 ), 'A live claim hides the contract.' );
+		$this->assertSame( array(), $this->due_ids( $now->modify( '+1 day' ), 50 ), 'A later scan cutoff does not expire the claim; the database clock does.' );
+
+		$this->pin_db_clock( '2026-07-15 00:15:00' );
+		$this->assertSame( array( $id ), $this->due_ids( $now, 50 ), 'An expired claim no longer hides it.' );
 	}
 
 	/**
-	 * @testdox claim_for_dispatch wins once; a second claim on the same due moment loses.
+	 * @testdox claim_for_dispatch wins once on the database clock; a second claim on the same due moment loses.
 	 */
 	public function test_claim_for_dispatch_wins_once(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
-		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ), 'An overlapping dispatcher loses.' );
-		$this->assertSame( '2026-07-15 00:15:00', $this->stored_claim( $id ) );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ), 'An overlapping dispatcher loses.' );
+		$this->assertSame( '2035-01-01 00:15:00', $this->stored_claim( $id ), 'The claim is stamped from the database clock at the write.' );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now->modify( '+900 seconds' ), 900 ), 'An expired claim can be taken again.' );
+		$this->pin_db_clock( '2035-01-01 00:15:00' );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ), 'An expired claim can be taken again.' );
 	}
 
 	/**
 	 * @testdox claim_for_dispatch loses when the due moment changed since the scan read it.
 	 */
 	public function test_claim_for_dispatch_loses_when_the_due_moment_moved(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-		$id  = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
+		$id = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
 		$this->assertNull( $this->stored_claim( $id ) );
 	}
 
@@ -1350,10 +1355,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox Writing next_payment_gmt releases the claim; other writes keep it.
 	 */
 	public function test_due_moment_writes_release_the_claim(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_status( ContractStatus::ON_HOLD );
@@ -1363,7 +1367,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
 		$this->assertNull( $this->stored_claim( $id ), 'Contracts::update() with next_payment_gmt releases the claim, even to the same moment.' );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
 		$this->sut->update( $contract );
 		$this->assertNull( $this->stored_claim( $id ), 'A full update() releases the claim.' );
 	}

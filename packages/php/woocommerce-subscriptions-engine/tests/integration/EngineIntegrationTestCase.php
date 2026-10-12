@@ -28,6 +28,32 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	protected const PLAN_OWNER = 'engine-tests';
 
 	/**
+	 * Return the session's database clock to the server clock after each test.
+	 */
+	public function tear_down(): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( 'SET timestamp = DEFAULT' );
+		parent::tear_down();
+	}
+
+	/**
+	 * Pin the session's database clock: `UTC_TIMESTAMP()` returns `$utc` until the next pin
+	 * or the end of the test. Dispatch claims and cycle leases are measured on this clock.
+	 *
+	 * @param string $utc Moment (UTC, `Y-m-d H:i:s`).
+	 */
+	protected function pin_db_clock( string $utc ): void {
+		global $wpdb;
+
+		$timestamp = ( new DateTimeImmutable( $utc, new DateTimeZone( 'UTC' ) ) )->getTimestamp();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( $wpdb->prepare( 'SET timestamp = %d', $timestamp ) );
+	}
+
+	/**
 	 * Create a plan through the plan facade: a monthly billing payload owned by
 	 * {@see self::PLAN_OWNER} unless overridden.
 	 *

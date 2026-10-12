@@ -610,6 +610,9 @@ final class ContractRepository {
 	 * owner's decision. Driven by the `due_owner (extension_slug, next_payment_gmt)` index;
 	 * the schedule source and the claim are residual filters.
 	 *
+	 * `$now` is the due cutoff only; claim liveness is read on the database clock
+	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_for_dispatch()} stamps claims on.
+	 *
 	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
@@ -631,7 +634,7 @@ final class ContractRepository {
 		$cutoff             = self::format_utc( $now );
 		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
 
-		$args = array_merge( $owners, array( $cutoff, Contract::SCHEDULE_SOURCE_ENGINE, $cutoff, $limit ) );
+		$args = array_merge( $owners, array( $cutoff, Contract::SCHEDULE_SOURCE_ENGINE, $limit ) );
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
 		// The owner placeholder list is generated, one `%s` per owner in `$args`.
@@ -642,7 +645,7 @@ final class ContractRepository {
 				FROM {$contracts}
 				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
 				  AND schedule_source = %s
-				  AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= %s )
+				  AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= UTC_TIMESTAMP() )
 				ORDER BY next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
@@ -676,34 +679,34 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Take the due-dispatch claim on a contract until `$now + $ttl_seconds`.
+	 * Take the due-dispatch claim on a contract for `$ttl_seconds`.
 	 *
 	 * One conditional write: it lands only while the contract still carries the
 	 * `next_payment_gmt` the caller read and no live claim, so of two overlapping
-	 * dispatchers exactly one wins. Writes that move the due moment release the claim.
+	 * dispatchers exactly one wins. The claim is stamped and its liveness compared on the
+	 * database clock (`UTC_TIMESTAMP()`) at the moment of the write, the same clock cycle
+	 * leases use, so a claim taken late in a slow batch still lives its full TTL. Any write
+	 * of `next_payment_gmt` releases the claim (see {@see self::update_fields()} and
+	 * {@see self::update()}).
 	 *
-	 * @param int               $contract_id           Contract id.
-	 * @param string            $seen_next_payment_gmt The `next_payment_gmt` the caller read (UTC, `Y-m-d H:i:s`).
-	 * @param DateTimeImmutable $now                   The dispatcher's clock (the same `$now` as the scan).
-	 * @param int               $ttl_seconds           Claim lifetime in seconds.
+	 * @param int    $contract_id           Contract id.
+	 * @param string $seen_next_payment_gmt The `next_payment_gmt` the caller read (UTC, `Y-m-d H:i:s`).
+	 * @param int    $ttl_seconds           Claim lifetime in seconds.
 	 * @return bool True when this call took the claim.
 	 */
-	public function claim_for_dispatch( int $contract_id, string $seen_next_payment_gmt, DateTimeImmutable $now, int $ttl_seconds ): bool {
+	public function claim_for_dispatch( int $contract_id, string $seen_next_payment_gmt, int $ttl_seconds ): bool {
 		global $wpdb;
 
-		$table       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$now_gmt     = self::format_utc( $now );
-		$claim_until = self::format_utc( $now->modify( sprintf( '+%d seconds', $ttl_seconds ) ) );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$updated = $wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$table} SET dispatch_claimed_until = %s
-				WHERE id = %d AND next_payment_gmt = %s AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= %s )",
-				$claim_until,
+				"UPDATE {$table} SET dispatch_claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )
+				WHERE id = %d AND next_payment_gmt = %s AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= UTC_TIMESTAMP() )",
+				$ttl_seconds,
 				$contract_id,
-				$seen_next_payment_gmt,
-				$now_gmt
+				$seen_next_payment_gmt
 			)
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared

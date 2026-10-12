@@ -76,7 +76,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->register_recording_handler();
 		$id = $this->create_due_contract();
 
-		$this->assertTrue( ( new ContractRepository() )->claim_for_dispatch( $id, '2026-02-15 00:00:00', $this->now()->modify( '-1 second' ), DueDispatcher::CLAIM_TTL_SECONDS ) );
+		$this->assertTrue( ( new ContractRepository() )->claim_for_dispatch( $id, '2026-02-15 00:00:00', DueDispatcher::CLAIM_TTL_SECONDS ) );
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
@@ -89,12 +89,15 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->register_recording_handler();
 		$this->create_due_contract();
 
+		$this->pin_db_clock( '2026-02-15 00:00:00' );
 		$this->sut->run_batch( $this->now() );
-		$this->sut->run_batch( $this->now()->modify( '+899 seconds' ) );
+		$this->pin_db_clock( '2026-02-15 00:14:59' );
+		$this->sut->run_batch( $this->now() );
 		$this->assertCount( 1, $this->calls, 'Not re-notified within the claim TTL.' );
 
-		$this->sut->run_batch( $this->now()->modify( '+901 seconds' ) );
-		$this->assertCount( 2, $this->calls, 'Re-notified once the claim expired.' );
+		$this->pin_db_clock( '2026-02-15 00:15:00' );
+		$this->sut->run_batch( $this->now() );
+		$this->assertCount( 2, $this->calls, 'Re-notified once the claim expired on the database clock.' );
 	}
 
 	/**

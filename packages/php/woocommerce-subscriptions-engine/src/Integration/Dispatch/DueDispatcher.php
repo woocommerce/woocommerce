@@ -180,7 +180,7 @@ final class DueDispatcher {
 		foreach ( $due_rows as $row ) {
 			$contract_id = $row['id'];
 
-			if ( ! $this->contracts->claim_for_dispatch( $contract_id, $row['next_payment_gmt'], $scan_now, self::CLAIM_TTL_SECONDS ) ) {
+			if ( ! $this->contracts->claim_for_dispatch( $contract_id, $row['next_payment_gmt'], self::CLAIM_TTL_SECONDS ) ) {
 				++$skipped;
 				continue;
 			}
