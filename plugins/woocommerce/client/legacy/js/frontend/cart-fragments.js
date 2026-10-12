@@ -161,15 +161,22 @@ jQuery( function( $ ) {
 	}
 
 	/* Cart Hiding */
-	if ( Cookies.get( 'woocommerce_items_in_cart' ) > 0 ) {
-		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
-	} else {
-		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).hide();
+	function update_cart_widget_visibility() {
+		if ( Cookies.get( 'woocommerce_items_in_cart' ) > 0 ) {
+			$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
+		} else {
+			$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).hide();
+		}
 	}
+
+	update_cart_widget_visibility();
 
 	$( document.body ).on( 'adding_to_cart', function() {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
 	});
+
+	// A failed addition leaves the cart unchanged, so hide the widget again if the cart is still empty.
+	$( document.body ).on( 'wc_add_to_cart_failed', update_cart_widget_visibility );
 
 	// Customiser support.
 	var hasSelectiveRefresh = (
