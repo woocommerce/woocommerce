@@ -108,9 +108,9 @@ final class ContractRepository {
 	 * Persist changes to an existing contract and its child rows.
 	 *
 	 * Updates the contract row in place, then reconciles items / addresses only when
-	 * they differ (meta is never touched). A full write also releases the due-dispatch
-	 * claim, as any write of `next_payment_gmt` does, even to the same moment. No transaction
-	 * (see {@see self::insert()}).
+	 * they differ (meta is never touched). A `next_payment_gmt` that differs from the stored
+	 * one (including null) releases the due-dispatch claim; re-saving the stored moment keeps
+	 * it. No transaction (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
@@ -124,6 +124,7 @@ final class ContractRepository {
 
 		$this->assert_contract_exists( $id );
 
+		$this->write_due_moment( $id, $contract->get_next_payment_gmt() );
 		$this->update_contract_row( $contract );
 		$this->sync_children( $contract );
 
@@ -133,9 +134,10 @@ final class ContractRepository {
 	/**
 	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
 	 * and replace items / addresses when named. Unnamed columns keep their stored
-	 * values, so a concurrent write to them is not reverted. Any write of `next_payment_gmt`,
-	 * even to the moment already stored, also releases the due-dispatch claim. Existence
-	 * is checked only when the row write changes nothing.
+	 * values, so a concurrent write to them is not reverted. Writing a `next_payment_gmt`
+	 * that differs from the stored one (including null) also releases the due-dispatch
+	 * claim; re-saving the stored moment keeps it. Existence is checked only when the row
+	 * write changes nothing.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -164,7 +166,7 @@ final class ContractRepository {
 		}
 
 		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
-			$columns['dispatch_claimed_until'] = null;
+			$this->write_due_moment( $id, $contract->get_next_payment_gmt() );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -615,7 +617,7 @@ final class ContractRepository {
 	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_for_dispatch()} stamps claims on.
 	 *
 	 * Fairness: a handler is expected to move or clear the due moment it was notified for
-	 * (any write of `next_payment_gmt` releases the claim). A contract whose handler leaves
+	 * (writing a different `next_payment_gmt` releases the claim). A contract whose handler leaves
 	 * it in place keeps its expired claim, so it sorts behind every contract that has not
 	 * been notified for its current due moment and repeat notifications never crowd fresh
 	 * ones out of the batch. Ordering on the claim expression costs a filesort over the due
@@ -693,9 +695,9 @@ final class ContractRepository {
 	 * `next_payment_gmt` the caller read and no live claim, so of two overlapping
 	 * dispatchers exactly one wins. The claim is stamped and its liveness compared on the
 	 * database clock (`UTC_TIMESTAMP()`) at the moment of the write, the same clock cycle
-	 * leases use, so a claim taken late in a slow batch still lives its full TTL. Any write
-	 * of `next_payment_gmt` releases the claim (see {@see self::update_fields()} and
-	 * {@see self::update()}).
+	 * leases use, so a claim taken late in a slow batch still lives its full TTL. Writing a
+	 * different `next_payment_gmt` (or null) releases the claim; re-saving the same moment
+	 * keeps it (see {@see self::update_fields()} and {@see self::update()}).
 	 *
 	 * @param int    $contract_id           Contract id.
 	 * @param string $seen_next_payment_gmt The `next_payment_gmt` the caller read (UTC, `Y-m-d H:i:s`).
@@ -1516,8 +1518,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update the contract row in place (no child rows). The row write always releases the
-	 * due-dispatch claim, since it rewrites `next_payment_gmt`.
+	 * Update the contract row in place (no child rows). The claim column is not written:
+	 * {@see self::write_due_moment()} releases it when the due moment changes.
 	 *
 	 * @param Contract $contract Contract whose row to update. Must have an id.
 	 * @throws \RuntimeException If the update fails.
@@ -1530,15 +1532,55 @@ final class ContractRepository {
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
 			array_merge(
 				$contract->to_storage(),
-				array(
-					'dispatch_claimed_until' => null,
-					'date_updated_gmt'       => gmdate( 'Y-m-d H:i:s' ),
-				)
+				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
 			),
 			array( 'id' => (int) $contract->get_id() )
 		);
 
 		if ( false === $updated ) {
+			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+	}
+
+	/**
+	 * Write a contract's due moment and release its due-dispatch claim, in one conditional
+	 * write that lands only when the value changes. A claim belongs to the due moment it
+	 * was taken on: moving or clearing that moment frees the contract for the next scan,
+	 * while re-saving it keeps the claim, so a handler cannot jump the dispatch queue by
+	 * writing the same moment back. The caller's row write repeats the value harmlessly.
+	 *
+	 * @param int         $id               Contract id.
+	 * @param string|null $next_payment_gmt The due moment to store (UTC, `Y-m-d H:i:s`), or null.
+	 * @throws \RuntimeException If the write fails.
+	 */
+	private function write_due_moment( int $id, ?string $next_payment_gmt ): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		if ( null === $next_payment_gmt ) {
+			$written = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$table} SET next_payment_gmt = NULL, dispatch_claimed_until = NULL
+					WHERE id = %d AND next_payment_gmt IS NOT NULL",
+					$id
+				)
+			);
+		} else {
+			$written = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$table} SET next_payment_gmt = %s, dispatch_claimed_until = NULL
+					WHERE id = %d AND ( next_payment_gmt IS NULL OR next_payment_gmt <> %s )",
+					$next_payment_gmt,
+					$id,
+					$next_payment_gmt
+				)
+			);
+		}
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( false === $written ) {
 			throw new \RuntimeException( 'Failed to update contract.' );
 		}
 	}

@@ -1333,7 +1333,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Writing next_payment_gmt releases the claim; other writes keep it.
+	 * @testdox Moving or clearing next_payment_gmt releases the claim; re-saving it or other writes keep it.
 	 */
 	public function test_due_moment_writes_release_the_claim(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
@@ -1346,11 +1346,28 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $this->stored_claim( $id ), 'A write that leaves the due moment alone keeps the claim.' );
 
 		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
-		$this->assertNull( $this->stored_claim( $id ), 'Contracts::update() with next_payment_gmt releases the claim, even to the same moment.' );
+		$this->assertNotNull( $this->stored_claim( $id ), 'Re-saving the same due moment keeps the claim (no queue jump).' );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
 		$this->sut->update( $contract );
-		$this->assertNull( $this->stored_claim( $id ), 'A full update() releases the claim.' );
+		$this->assertNotNull( $this->stored_claim( $id ), 'A full update() with the same due moment keeps the claim.' );
+
+		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-16 00:00:00' ) );
+		$this->assertNull( $this->stored_claim( $id ), 'Moving the due moment releases the claim.' );
+
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-16 00:00:00', 900 ) );
+		Contracts::update( $id, array( 'next_payment_gmt' => null ) );
+		$this->assertNull( $this->stored_claim( $id ), 'Clearing the due moment releases the claim.' );
+
+		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$moved = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $moved );
+		$moved->set_next_payment_gmt( '2026-07-01 00:00:00' );
+		$this->sut->update( $moved );
+		$this->assertNull( $this->stored_claim( $id ), 'A full update() that moves the due moment releases the claim.' );
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( '2026-07-01 00:00:00', $stored->get_next_payment_gmt() );
 	}
 
 	/**

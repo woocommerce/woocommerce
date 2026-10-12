@@ -44,9 +44,10 @@ final class DueDispatcher {
 
 	/**
 	 * How long a dispatch claim hides a notified contract from later scans, in seconds,
-	 * measured on the database clock. Any write of `next_payment_gmt` releases the claim
-	 * early. A handler that leaves the due moment unwritten is notified again once the claim
-	 * expires, behind contracts not yet notified for their current due moment.
+	 * measured on the database clock. Moving or clearing `next_payment_gmt` releases the
+	 * claim early; re-saving the same moment does not. A handler that leaves the due moment
+	 * in place is notified again once the claim expires, behind contracts not yet notified
+	 * for their current due moment.
 	 */
 	public const CLAIM_TTL_SECONDS = 900;
 
