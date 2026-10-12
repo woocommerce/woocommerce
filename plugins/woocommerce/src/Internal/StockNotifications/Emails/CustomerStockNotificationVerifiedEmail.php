@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Utilities\UtmHelper;
 use WC_Email;
 
@@ -148,6 +149,7 @@ class CustomerStockNotificationVerifiedEmail extends WC_Email {
 
 		return array(
 			'is_guest'         => $is_guest,
+			'account_link'     => UtmHelper::add_email_utm_params( MyAccountEndpoint::get_endpoint_url() ),
 			'unsubscribe_link' => UtmHelper::add_email_utm_params(
 				add_query_arg(
 					array(

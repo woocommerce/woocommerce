@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.2.0
+ * @version 11.3.0
  */
 
 // Exit if accessed directly.
@@ -63,10 +63,10 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 		echo esc_html( __( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' ) );
 
 		if ( ! $is_guest ) {
-			// translators: %1$s placeholder is the unsubscribe link, %2$s placeholder is the Unsubscribe text link.
-			$unsubscribe_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for existing customers', 'woocommerce' ) );
+			// translators: %1$s placeholder is the account link, %2$s placeholder is the link text.
+			$account_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $account_link ), _x( 'click here', 'unsubscribe cta for stock notifications for existing customers', 'woocommerce' ) );
 			// translators: %s placeholder is the text part from above.
-			echo wp_kses_post( sprintf( __( 'To manage your notifications, %s to log in to your account.', 'woocommerce' ), $unsubscribe_link_tag ) );
+			echo wp_kses_post( sprintf( __( 'To manage your notifications, %s to log in to your account.', 'woocommerce' ), $account_link_tag ) );
 		} else {
 			// translators: %1$s placeholder is the unsubscribe link, %2$s placeholder is the Unsubscribe text link.
 			$unsubscribe_link_tag = sprintf( '<a href="%1$s" id="notification__unsubscribe_link">%2$s</a>', esc_url( $unsubscribe_link ), _x( 'click here', 'unsubscribe cta for stock notifications for guests', 'woocommerce' ) );
