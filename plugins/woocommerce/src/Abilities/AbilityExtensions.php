@@ -158,8 +158,12 @@ class AbilityExtensions {
 					);
 					continue;
 				}
-				if ( self::matches_schema( $args, $value ) ) {
-					$extensions[ $namespace ][ $field ] = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
+				if ( ! self::matches_schema( $args, $value ) ) {
+					continue;
+				}
+				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
+				if ( ! is_wp_error( $sanitized ) ) {
+					$extensions[ $namespace ][ $field ] = $sanitized;
 				}
 			}
 		}
