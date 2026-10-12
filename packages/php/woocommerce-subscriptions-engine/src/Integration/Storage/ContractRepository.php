@@ -107,9 +107,9 @@ final class ContractRepository {
 	 * Persist changes to an existing contract and its child rows.
 	 *
 	 * Updates the contract row in place, then reconciles items / addresses only when
-	 * they differ (meta is never touched) - so the common renewal-cache write (status, next_payment_gmt)
-	 * does not churn child rows. The write seam a later transaction-handling change
-	 * wraps; no transaction now (see {@see self::insert()}).
+	 * they differ (meta is never touched). A full write also releases the due-dispatch
+	 * claim: a claim lives only as long as the due moment it was taken on. No transaction
+	 * (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
@@ -132,8 +132,9 @@ final class ContractRepository {
 	/**
 	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
 	 * and replace items / addresses when named. Unnamed columns keep their stored
-	 * values, so a concurrent write to them is not reverted. Existence is checked only
-	 * when the row write changes nothing, before any child write.
+	 * values, so a concurrent write to them is not reverted. Writing `next_payment_gmt`
+	 * also releases the due-dispatch claim (a claim lives only as long as the due moment
+	 * it was taken on). Existence is checked only when the row write changes nothing.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -161,6 +162,10 @@ final class ContractRepository {
 			$columns[ $field ] = $storage[ $field ];
 		}
 
+		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
+			$columns['dispatch_claimed_until'] = null;
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$updated = $wpdb->update(
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
@@ -184,69 +189,6 @@ final class ContractRepository {
 		if ( in_array( 'addresses', $fields, true ) ) {
 			$this->replace_addresses( $id, $contract->get_addresses() );
 		}
-
-		return true;
-	}
-
-	/**
-	 * Update the contract row (and children) ONLY while its stored status still matches
-	 * `$expected_status` - the optimistic compare-and-set for status-sensitive writes,
-	 * mirroring {@see self::transition_cycle_status()} on the cycle side.
-	 *
-	 * The renewal engine's schedule advances read-validate-write the contract row while an
-	 * extension may change its status (a customer cancel); unconditioned, the slower writer
-	 * silently clobbers the faster one - a cancel lost to a concurrent settle would
-	 * resurrect the contract into future billing. Keying the
-	 * write on the status the caller read makes the race lose LOUDLY: no row matches,
-	 * false comes back, and the caller reports a conflict or re-reads instead of
-	 * overwriting.
-	 *
-	 * A zero-row result is disambiguated with a follow-up status read (an update whose
-	 * values happen to be byte-identical also reports zero rows), so false always means
-	 * "the stored status is no longer `$expected_status`, or the row is gone" - never a
-	 * false conflict.
-	 *
-	 * @param Contract $contract        Contract to write. Must have an id.
-	 * @param string   $expected_status The status the caller read; the write lands only while the row still carries it.
-	 * @return bool True when the row was written (children synced); false when the condition missed.
-	 * @throws \RuntimeException If the contract has no id, or the write itself errors.
-	 */
-	public function update_if_status( Contract $contract, string $expected_status ): bool {
-		global $wpdb;
-
-		$id = $contract->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge(
-				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array(
-				'id'     => (int) $id,
-				'status' => $expected_status,
-			)
-		);
-
-		if ( false === $updated ) {
-			throw new \RuntimeException( 'Failed to update contract.' );
-		}
-
-		if ( 0 === $updated ) {
-			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$current = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d", $id ) );
-			if ( $expected_status !== $current ) {
-				return false;
-			}
-		}
-
-		$this->sync_children( $contract );
 
 		return true;
 	}
@@ -658,39 +600,17 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
+	 * Contracts due at `$now`, oldest-due first - the due dispatcher's scan.
 	 *
-	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
-	 * (`extension_slug`) is one of `$owners` - the dispatcher passes the registered consumers.
-	 * A contract with a null or unlisted owner waits untouched (its next-due moment is never
-	 * rewritten) until its owner is listed; with no owners the scan returns nothing. A null
-	 * `next_payment_gmt` never matches the `<=` comparison.
+	 * A contract is due when its `next_payment_gmt` is at or before `$now`, its owner
+	 * (`extension_slug`) is one of `$owners`, and it carries no live due-dispatch claim. Status
+	 * is not read: whether a due contract acts is its owner's decision. Driven by the
+	 * `due_owner (extension_slug, next_payment_gmt)` index; the claim is a residual filter.
 	 *
-	 * Interim: moves out of the engine with the renewal flow (the predicates below; the scan
-	 * then stays owner-scoped only). Until then the scan's only caller is the engine renewal
-	 * flow, so it keeps just what that flow can charge now:
-	 *
-	 * - the contract is `active` (status is otherwise opaque engine data; a contract in any other
-	 *   status, including an extension-registered one, is simply not selected and its next-due
-	 *   moment is left as is);
-	 * - the contract is not gateway-scheduled (the gateway owns its renewal);
-	 * - its head cycle is chargeable now:
-	 *
-	 *   - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
-	 *   - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
-	 *
-	 * Any other head (`failed` awaiting dunning, `processing` awaiting its gateway, `pending` with
-	 * a live lease) is excluded in SQL, so `LIMIT` counts only actionable rows and a cluster of
-	 * non-actionable heads cannot starve healthy renewals. Driven by the
-	 * `due_owner (extension_slug, next_payment_gmt)` index (status and `schedule_source` are
-	 * residual filters); the head cycle is joined per candidate
-	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
-	 * does not re-load the head to decide what to bill.
-	 *
-	 * @param DateTimeImmutable  $now   The cutoff moment; contracts due at or before it.
+	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
-	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
+	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, oldest-due first.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -705,41 +625,21 @@ final class ContractRepository {
 		global $wpdb;
 
 		$contracts          = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$cycles             = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$cutoff             = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$cutoff             = self::format_utc( $now );
 		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
 
-		$args = array_merge(
-			array( Cycle::KIND_BILLING, Cycle::KIND_BILLING ),
-			$owners,
-			array(
-				ContractStatus::ACTIVE,
-				Contract::SCHEDULE_SOURCE_GATEWAY,
-				$cutoff,
-				CycleStatus::BILLED,
-				$cutoff,
-				CycleStatus::PENDING,
-				$cutoff,
-				$limit,
-			)
-		);
+		$args = array_merge( $owners, array( $cutoff, $cutoff, $limit ) );
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
-		// The owner placeholder list is generated, one `%s` per registered owner in `$args`.
+		// The owner placeholder list is generated, one `%s` per owner in `$args`.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
-				FROM {$contracts} c
-				JOIN {$cycles} cy
-				  ON cy.contract_id = c.id AND cy.kind = %s
-				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
-				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
-				  AND (
-				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
-				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
-				      )
-				ORDER BY c.next_payment_gmt ASC, c.id ASC
+				"SELECT id, extension_slug, next_payment_gmt
+				FROM {$contracts}
+				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
+				  AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= %s )
+				ORDER BY next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
 			),
@@ -747,11 +647,11 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
+		// A failed scan otherwise reads exactly like "nothing due" and dispatch stalls
 		// store-wide with no signal; the return stays empty either way.
 		if ( '' !== $wpdb->last_error ) {
 			wc_get_logger()->error(
-				sprintf( 'ContractRepository::find_due(): due-index scan failed - renewals may stall until this is fixed. %s', $wpdb->last_error ),
+				sprintf( 'ContractRepository::find_due(): due-index scan failed - due dispatch may stall until this is fixed. %s', $wpdb->last_error ),
 				array( 'source' => self::LOG_SOURCE )
 			);
 		}
@@ -761,16 +661,59 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$head_count = $row['head_count'] ?? null;
-			$result[]   = new RenewalCandidate(
-				Coercion::coerce_int( $row['contract_id'] ?? 0 ),
-				null === $head_count ? null : Coercion::coerce_int( $head_count ),
-				Coercion::coerce_string( $row['head_status'] ?? '' ),
-				Coercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+			$result[] = array(
+				'id'               => Coercion::coerce_int( $row['id'] ?? 0 ),
+				'extension_slug'   => Coercion::coerce_string( $row['extension_slug'] ?? '' ),
+				'next_payment_gmt' => Coercion::coerce_string( $row['next_payment_gmt'] ?? '' ),
 			);
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Take the due-dispatch claim on a contract until `$now + $ttl_seconds`.
+	 *
+	 * One conditional write: it lands only while the contract still carries the
+	 * `next_payment_gmt` the caller read and no live claim, so of two overlapping
+	 * dispatchers exactly one wins. Writes that move the due moment release the claim.
+	 *
+	 * @param int               $contract_id           Contract id.
+	 * @param string            $seen_next_payment_gmt The `next_payment_gmt` the caller read (UTC, `Y-m-d H:i:s`).
+	 * @param DateTimeImmutable $now                   The dispatcher's clock (the same `$now` as the scan).
+	 * @param int               $ttl_seconds           Claim lifetime in seconds.
+	 * @return bool True when this call took the claim.
+	 */
+	public function claim_for_dispatch( int $contract_id, string $seen_next_payment_gmt, DateTimeImmutable $now, int $ttl_seconds ): bool {
+		global $wpdb;
+
+		$table       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$now_gmt     = self::format_utc( $now );
+		$claim_until = self::format_utc( $now->modify( sprintf( '+%d seconds', $ttl_seconds ) ) );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET dispatch_claimed_until = %s
+				WHERE id = %d AND next_payment_gmt = %s AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= %s )",
+				$claim_until,
+				$contract_id,
+				$seen_next_payment_gmt,
+				$now_gmt
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return 1 === $updated;
+	}
+
+	/**
+	 * Format a moment as a UTC `Y-m-d H:i:s` column value.
+	 *
+	 * @param DateTimeImmutable $moment Moment to format.
+	 */
+	private static function format_utc( DateTimeImmutable $moment ): string {
+		return $moment->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
 
 	/**
@@ -1573,7 +1516,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update the contract row in place (no child rows).
+	 * Update the contract row in place (no child rows). The row write always releases the
+	 * due-dispatch claim, since it rewrites `next_payment_gmt`.
 	 *
 	 * @param Contract $contract Contract whose row to update. Must have an id.
 	 * @throws \RuntimeException If the update fails.
@@ -1586,7 +1530,10 @@ final class ContractRepository {
 			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
 			array_merge(
 				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
+				array(
+					'dispatch_claimed_until' => null,
+					'date_updated_gmt'       => gmdate( 'Y-m-d H:i:s' ),
+				)
 			),
 			array( 'id' => (int) $contract->get_id() )
 		);

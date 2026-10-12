@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -19,7 +20,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore;
 
@@ -270,7 +270,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'pdp', $this->sut->get_meta( $id, 'source_channel', true ) );
 
 		$contract->set_status( ContractStatus::ACTIVE );
-		$this->assertTrue( $this->sut->update_if_status( $contract, ContractStatus::ON_HOLD ) );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ) ) );
 		$this->assertSame( array( 'pdp' ), $this->sut->get_meta( $id, 'source_channel' ) );
 	}
 
@@ -1161,29 +1161,32 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due returns only active contracts whose next_payment has arrived, oldest first.
+	 * @testdox find_due returns due contracts whatever their status, oldest first.
 	 */
-	public function test_find_due_returns_only_due_active_contracts_oldest_first(): void {
+	public function test_find_due_is_status_blind_oldest_first(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
-		$due_old    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$due_recent = $this->insert_contract_due_at( '2026-07-14 00:00:00', ContractStatus::ACTIVE );
-		$not_yet    = $this->insert_contract_due_at( '2026-08-15 00:00:00', ContractStatus::ACTIVE );
-		$on_hold    = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ON_HOLD );
+		$on_hold     = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ON_HOLD );
+		$due_old     = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$pending_cxl = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::PENDING_CANCELLATION );
+		$extension   = $this->insert_contract_due_at( '2026-06-25 00:00:00', 'paused-by-merchant' );
+		$draft       = $this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::DRAFT );
+		$due_recent  = $this->insert_contract_due_at( '2026-07-14 00:00:00', ContractStatus::ACTIVE );
+		$not_yet     = $this->insert_contract_due_at( '2026-08-15 00:00:00', ContractStatus::ACTIVE );
 
-		$ids = $this->due_ids( $now, 50 );
-
-		// Only the two due+active contracts, oldest-due first; the future and the past-due
-		// on-hold row excluded (the interim renewal-flow status predicate).
-		$this->assertSame( array( $due_old, $due_recent ), $ids );
-		$this->assertNotContains( $not_yet, $ids );
-		$this->assertNotContains( $on_hold, $ids );
+		$this->assertSame(
+			array( $on_hold, $due_old, $pending_cxl, $extension, $draft, $due_recent ),
+			$this->due_ids( $now, 50 ),
+			'Every due contract is selected whatever its status; whether it acts is the owner\'s decision.'
+		);
+		$this->assertNotContains( $not_yet, $this->due_ids( $now, 50 ) );
 	}
 
 	/**
-	 * @testdox find_due skips a due contract whose stored status is not registered.
+	 * @testdox find_due selects a due contract whose stored status is not registered.
 	 */
-	public function test_find_due_skips_a_contract_with_an_unregistered_stored_status(): void {
+	public function test_find_due_selects_a_contract_with_an_unregistered_stored_status(): void {
 		global $wpdb;
 
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
@@ -1191,7 +1194,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
 
-		$this->assertSame( array(), $this->due_ids( $now, 50 ) );
+		$this->assertSame( array( $id ), $this->due_ids( $now, 50 ) );
 	}
 
 	/**
@@ -1213,9 +1216,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due skips a contract whose owner is not registered, and selects it untouched once it registers.
+	 * @testdox find_due skips a contract whose owner is not listed, and selects it untouched once it is.
 	 */
-	public function test_find_due_skips_an_unregistered_owner_until_it_registers(): void {
+	public function test_find_due_skips_an_unlisted_owner_until_it_is_listed(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, 'other-ext' );
 
@@ -1228,9 +1231,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox find_due returns nothing when no consumer is registered.
+	 * @testdox find_due returns nothing when no owner is listed.
 	 */
-	public function test_find_due_returns_nothing_when_no_consumer_is_registered(): void {
+	public function test_find_due_returns_nothing_without_owners(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
@@ -1262,86 +1265,38 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$second = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 		$this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE );
 
-		// The limit caps the batch from the oldest-due end; the newest-due row is left for a later tick.
 		$this->assertSame( array( $first, $second ), $this->due_ids( $now, 2 ) );
 	}
 
 	/**
-	 * @testdox find_due excludes gateway-scheduled contracts (the gateway owns their renewal).
+	 * @testdox find_due selects gateway-scheduled contracts too; acting on them is the owner's decision.
 	 */
-	public function test_find_due_excludes_gateway_scheduled_contracts(): void {
+	public function test_find_due_selects_gateway_scheduled_contracts(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 
-		$primitive = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$gateway   = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY );
+		$gateway = $this->insert_contract_due_at( '2026-06-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_GATEWAY );
 
-		$ids = $this->due_ids( $now, 50 );
-
-		$this->assertContains( $primitive, $ids );
-		$this->assertNotContains( $gateway, $ids, 'A gateway-scheduled contract must never enter the primitive scan.' );
+		$this->assertSame( array( $gateway ), $this->due_ids( $now, 50 ) );
 	}
 
 	/**
-	 * @testdox find_due returns the head fields the selector needs.
+	 * @testdox find_due returns the id, owner and stored due moment of each row.
 	 */
-	public function test_find_due_returns_the_head_fields(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+	public function test_find_due_returns_the_row_shape(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 02:00:00', new \DateTimeZone( 'Europe/Berlin' ) );
 
-		$id         = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$candidates = $this->sut->find_due( $now, 50, array( self::OWNER ) );
+		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertCount( 1, $candidates );
-		$row = $candidates[0];
-		$this->assertInstanceOf( RenewalCandidate::class, $row );
-		$this->assertSame( $id, $row->get_contract_id() );
-		$this->assertSame( 1, $row->get_head_count() );
-		$this->assertSame( CycleStatus::BILLED, $row->get_head_status() );
-		$this->assertSame( '2026-06-15 00:00:00', $row->get_head_ends_at_gmt() );
-	}
-
-	/**
-	 * @testdox find_due excludes a contract whose head is not actionable (failed / processing).
-	 */
-	public function test_find_due_excludes_non_actionable_heads(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-
-		$billed     = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED );
-		$failed     = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::FAILED );
-		$processing = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PROCESSING );
-
-		$ids = $this->due_ids( $now, 50 );
-
-		$this->assertContains( $billed, $ids );
-		$this->assertNotContains( $failed, $ids, 'A failed head awaits dunning, not the scan.' );
-		$this->assertNotContains( $processing, $ids, 'A processing head awaits its gateway, not the scan.' );
-	}
-
-	/**
-	 * @testdox find_due excludes a billed head whose period has not ended (the advance due-guard).
-	 */
-	public function test_find_due_excludes_a_billed_head_not_yet_ended(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-
-		// next_payment has arrived (the coarse index would pick it), but the head's own period
-		// runs into the future - so the successor is not yet due and the scan must exclude it.
-		$not_ended = $this->insert_contract_due_at( '2026-07-01 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, '2026-08-15 00:00:00' );
-
-		$this->assertNotContains( $not_ended, $this->due_ids( $now, 50 ) );
-	}
-
-	/**
-	 * @testdox find_due includes a reclaim-ready pending head but not a live-lease one.
-	 */
-	public function test_find_due_includes_reclaim_ready_pending_but_not_live_lease(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-
-		$reclaimable = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING, '2026-07-14 00:00:00' );
-		$live_lease  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::PENDING, '2026-08-15 00:00:00' );
-
-		$ids = $this->due_ids( $now, 50 );
-
-		$this->assertContains( $reclaimable, $ids, 'A pending head whose lease has expired is reclaim-ready.' );
-		$this->assertNotContains( $live_lease, $ids, 'A pending head with a live lease is a concurrent claim, not for the scan.' );
+		$this->assertSame(
+			array(
+				array(
+					'id'               => $id,
+					'extension_slug'   => self::OWNER,
+					'next_payment_gmt' => '2026-06-15 00:00:00',
+				),
+			),
+			$this->sut->find_due( $now, 50, array( self::OWNER ) )
+		);
 	}
 
 	/**
@@ -1353,6 +1308,82 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( array(), $this->sut->find_due( $now, 0, array( self::OWNER ) ) );
 		$this->assertSame( array(), $this->sut->find_due( $now, -1, array( self::OWNER ) ) );
+	}
+
+	/**
+	 * @testdox A live dispatch claim hides the contract from find_due until the claim expires.
+	 */
+	public function test_a_live_claim_hides_the_contract_until_it_expires(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+
+		$this->assertSame( array(), $this->due_ids( $now->modify( '+899 seconds' ), 50 ), 'A live claim hides the contract.' );
+		$this->assertSame( array( $id ), $this->due_ids( $now->modify( '+900 seconds' ), 50 ), 'An expired claim no longer hides it.' );
+	}
+
+	/**
+	 * @testdox claim_for_dispatch wins once; a second claim on the same due moment loses.
+	 */
+	public function test_claim_for_dispatch_wins_once(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ), 'An overlapping dispatcher loses.' );
+		$this->assertSame( '2026-07-15 00:15:00', $this->stored_claim( $id ) );
+
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now->modify( '+900 seconds' ), 900 ), 'An expired claim can be taken again.' );
+	}
+
+	/**
+	 * @testdox claim_for_dispatch loses when the due moment changed since the scan read it.
+	 */
+	public function test_claim_for_dispatch_loses_when_the_due_moment_moved(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
+
+		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->assertNull( $this->stored_claim( $id ) );
+	}
+
+	/**
+	 * @testdox Writing next_payment_gmt releases the claim; other writes keep it.
+	 */
+	public function test_due_moment_writes_release_the_claim(): void {
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$this->sut->update_fields( $contract, array( 'status' ) );
+		$this->assertNotNull( $this->stored_claim( $id ), 'A write that leaves the due moment alone keeps the claim.' );
+
+		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
+		$this->assertNull( $this->stored_claim( $id ), 'Contracts::update() with next_payment_gmt releases the claim, even to the same moment.' );
+
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', $now, 900 ) );
+		$this->sut->update( $contract );
+		$this->assertNull( $this->stored_claim( $id ), 'A full update() releases the claim.' );
+	}
+
+	/**
+	 * The stored due-dispatch claim of a contract.
+	 *
+	 * @param int $id Contract id.
+	 */
+	private function stored_claim( int $id ): ?string {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT dispatch_claimed_until FROM {$table} WHERE id = %d", $id ) );
+
+		return null === $claim ? null : (string) $claim;
 	}
 
 	/**
@@ -1437,7 +1468,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$contract->set_next_payment_gmt( '2026-09-15 00:00:00' );
 		$this->assertTrue( $this->sut->update( $contract ) );
-		$this->assertTrue( $this->sut->update_if_status( $contract, 'legacy-paused' ) );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, next_payment_gmt FROM {$table} WHERE id = %d", $id ), ARRAY_A );
@@ -1499,8 +1529,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	private function due_ids( \DateTimeImmutable $now, int $limit, ?array $owners = null ): array {
 		return array_map(
-			static function ( RenewalCandidate $candidate ): int {
-				return $candidate->get_contract_id();
+			static function ( array $row ): int {
+				return $row['id'];
 			},
 			$this->sut->find_due( $now, $limit, $owners ?? array( self::OWNER ) )
 		);
