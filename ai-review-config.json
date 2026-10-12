@@ -456,10 +456,13 @@
 				"update_post_meta",
 				"delete_post_meta",
 				"$wpdb->posts",
+				"$wpdb->postmeta",
 				"shop_order",
 				"post_status",
 				"post_parent",
 				"'post_date",
+				"'post_modified",
+				"'post_type'",
 				"'orders."
 			],
 			"personas": [

@@ -18,8 +18,9 @@ costs more trust than a missed `low`.
    the sink: a query, output, redirect, file call, remote request, unserialize, or a state change.
 3. Look for the guard on that path. A correct guard in any standard form (below) means no finding.
    If the guard is elsewhere, Read it and confirm it covers this exact input before you rely on it.
-   A guard clears only the weakness it stops: a cast clears SQL injection, not authorization or SSRF;
-   on admin, AJAX, and form handlers a capability check does not replace a nonce.
+   A guard clears only the weakness it stops: `(int)` or `absint()` on a numeric SQL value clears
+   injection there, not authorization or SSRF; on admin, AJAX, and form handlers a capability check
+   does not replace a nonce.
 4. Judge only the post-change code. If the diff adds the guard, there is no finding unless the guard
    is wrong or incomplete.
 
