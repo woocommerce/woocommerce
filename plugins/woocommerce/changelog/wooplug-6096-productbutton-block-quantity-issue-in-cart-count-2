@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Exclude child cart items from interactive Add to cart button counts; extensions declare them with the new Store API `parent_item_key` field and `woocommerce_store_api_cart_item_parent_item_key` filter.

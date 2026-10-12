@@ -554,7 +554,14 @@ class AddToCartWithOptions extends AbstractBlock {
 			$form_attributes         = '';
 			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
 			if ( $legacy_mode ) {
-				$action_url = BlocksUtils::get_current_page_url();
+				$action_url   = BlocksUtils::get_current_page_url();
+				$form_classes = 'cart';
+
+				if ( ProductType::VARIABLE === $product_type ) {
+					$form_classes .= ' variations_form';
+				} elseif ( ProductType::GROUPED === $product_type ) {
+					$form_classes .= ' grouped_form';
+				}
 
 				// If an extension is hooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
@@ -571,7 +578,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					),
 					'method'  => 'post',
 					'enctype' => 'multipart/form-data',
-					'class'   => 'cart',
+					'class'   => $form_classes,
 				);
 			} else {
 				// Otherwise, we use the Interactivity API.

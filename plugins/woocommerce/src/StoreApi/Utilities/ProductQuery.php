@@ -193,13 +193,26 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
+				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
+			} else {
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
+			}
 		}
 
 		$catalog_visibility = $request->get_param( 'catalog_visibility' );
@@ -270,6 +283,10 @@ class ProductQuery implements QueryClausesGenerator {
 				$args['post__in'] = ! empty( $args['post__in'] )
 					? array_values( array_intersect( $args['post__in'], $related ) )
 					: array_values( $related );
+				// An empty intersection (no included product is related) must return no products, not all.
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
 			} else {
 				// No related products found, return empty result.
 				$args['post__in'] = array( 0 );

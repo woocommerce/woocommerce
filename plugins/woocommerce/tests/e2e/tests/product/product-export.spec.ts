@@ -129,10 +129,11 @@ test.describe( 'Product > Export Selected Products', () => {
 				page.locator( 'label[for="woocommerce-exporter-category"]' )
 			).toBeHidden();
 			await expect(
-				page.locator( '.woocommerce-exporter header p' )
-			).toHaveText(
-				'This tool allows you to generate and download a CSV file containing the selected products.'
-			);
+				page.getByText(
+					'This tool allows you to generate and download a CSV file containing the selected products.',
+					{ exact: true }
+				)
+			).toBeVisible();
 		} );
 
 		await test.step( 'Clear the selected products', async () => {
@@ -156,10 +157,11 @@ test.describe( 'Product > Export Selected Products', () => {
 				page.locator( 'label[for="woocommerce-exporter-category"]' )
 			).toBeVisible();
 			await expect(
-				page.locator( '.woocommerce-exporter header p' )
-			).toHaveText(
-				'This tool allows you to generate and download a CSV file containing a list of all products.'
-			);
+				page.getByText(
+					'This tool allows you to generate and download a CSV file containing a list of all products.',
+					{ exact: true }
+				)
+			).toBeVisible();
 		} );
 	} );
 } );

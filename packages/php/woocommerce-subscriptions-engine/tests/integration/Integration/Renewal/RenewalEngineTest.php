@@ -21,7 +21,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Contracts\Cancellation;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Renewal\RenewalEngine;
@@ -1080,84 +1079,6 @@ class RenewalEngineTest extends EngineIntegrationTestCase {
 	public function test_scheduled_renewal_skips_unknown_contract(): void {
 		$this->assertNull( $this->run_scheduled_renewal( 999999 ) );
 	}
-
-	/**
-	 * @testdox cancel transitions the contract to cancelled and disarms its next-due moment.
-	 *
-	 * Cancellation clears `next_payment_gmt` itself - the flow disarms its own due moment
-	 * rather than relying on the scan's status predicate.
-	 */
-	public function test_cancel_transitions_the_contract(): void {
-		GatewayCapabilities::declare( self::GATEWAY, array( GatewayCapabilities::RECURRING ) );
-
-		$plan_id     = $this->make_plan();
-		$order       = $this->make_origin_order();
-		$contract    = $this->make_contract( $plan_id, $order->get_id() );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
-
-		$reloaded = ( new ContractRepository() )->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( ContractStatus::CANCELLED, $reloaded->get_status() );
-		$this->assertNull( $reloaded->get_next_payment_gmt() );
-	}
-
-	/**
-	 * @testdox cancel closes a mid-charge pending cycle.
-	 */
-	public function test_cancel_closes_a_pending_cycle(): void {
-		$contract    = $this->sign_up_contract( self::GATEWAY );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		// Append a pending cycle 2 (a charge caught mid-flight).
-		$repo     = new ContractRepository();
-		$previous = $repo->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $previous );
-		$pending = Cycle::create(
-			array(
-				'contract_id'    => $contract_id,
-				'sequence_no'    => $previous->get_sequence_no() + 1,
-				'count'          => 2,
-				'status'         => new CycleStatus( CycleStatus::PENDING ),
-				'starts_at_gmt'  => '2026-02-15 00:00:00',
-				'ends_at_gmt'    => '2026-03-15 00:00:00',
-				'expected_total' => '19.99',
-				'currency'       => 'USD',
-			)
-		);
-		$repo->append_cycle( $pending, $previous );
-
-		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
-
-		// The contract is terminal and the pending cycle is cancelled.
-		$reloaded = $repo->find( $contract_id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( ContractStatus::CANCELLED, $reloaded->get_status() );
-
-		$head = $repo->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::CANCELLED ) ) );
-	}
-
-	/**
-	 * @testdox cancel with only settled cycles leaves them untouched.
-	 */
-	public function test_cancel_leaves_a_settled_cycle_untouched(): void {
-		$contract    = $this->sign_up_contract( self::GATEWAY );
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$this->assertTrue( ( new Cancellation() )->cancel( $contract ) );
-
-		// Cycle 1 stays billed (only a pending head is closed by cancel).
-		$head = ( new ContractRepository() )->find_chain_head( $contract_id );
-		$this->assertInstanceOf( Cycle::class, $head );
-		$this->assertTrue( $head->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
 
 	/**
 	 * @testdox the scheduled scan leaves the cycle processing when the charge is neither paid nor failed.

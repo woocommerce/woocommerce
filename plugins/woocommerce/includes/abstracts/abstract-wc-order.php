@@ -1993,15 +1993,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
-		$tax_location   = $this->get_tax_location();
-		$tax_location   = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
+		$is_vat_exempt  = $this->is_vat_exempt();
+
+		$tax_location = $this->get_tax_location();
+		$tax_location = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
 
 		if ( $item_discounts ) {
 			foreach ( $item_discounts as $item_id => $amount ) {
 				$item = $this->get_item( $item_id, false );
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
-				if ( $this->get_prices_include_tax() && wc_tax_enabled() && ProductTaxStatus::TAXABLE === $item->get_tax_status() ) {
+				if ( ! $is_vat_exempt && $this->get_prices_include_tax() && wc_tax_enabled() && ProductTaxStatus::TAXABLE === $item->get_tax_status() ) {
 					$taxes = WC_Tax::calc_tax( $amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), true );
 
 					// Use unrounded taxes so totals will be re-calculated accurately, like in cart.
@@ -2025,8 +2027,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
-		$tax_location      = $this->get_tax_location();
-		$tax_location      = array(
+		$is_vat_exempt     = $this->is_vat_exempt();
+
+		$tax_location = $this->get_tax_location();
+		$tax_location = array(
 			$tax_location['country'],
 			$tax_location['state'],
 			$tax_location['postcode'],
@@ -2057,7 +2061,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
 					$item = $this->get_item( $item_id, false );
 
-					if ( ProductTaxStatus::TAXABLE !== $item->get_tax_status() || ! wc_tax_enabled() ) {
+					if ( $is_vat_exempt || ProductTaxStatus::TAXABLE !== $item->get_tax_status() || ! wc_tax_enabled() ) {
 						continue;
 					}
 
@@ -2314,6 +2318,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the filtered VAT exemption for this order.
+	 *
+	 * @return bool Whether the order is exempt from VAT.
+	 */
+	private function is_vat_exempt(): bool {
+		/**
+		 * Filters whether the order is exempt from VAT.
+		 *
+		 * @since 3.3.0
+		 * @since 11.3.0 Also applied to discounts.
+		 *
+		 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
+		 * @param WC_Abstract_Order $order         Order instance.
+		 */
+		return (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+	}
+
+	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * If by default the taxes are based on the shipping address and the current order doesn't
@@ -2340,7 +2362,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+		$is_vat_exempt = $this->is_vat_exempt();
 
 		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
