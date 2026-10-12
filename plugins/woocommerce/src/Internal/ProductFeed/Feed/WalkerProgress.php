@@ -44,6 +44,15 @@ final class WalkerProgress {
 	public int $processed_batches = 0;
 
 	/**
+	 * ID of the last walked product, to resume after.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var int
+	 */
+	public int $last_id = 0;
+
+	/**
 	 * Creates a WalkerProgress instance from a WooCommerce products query result.
 	 *
 	 * @since 10.5.0
