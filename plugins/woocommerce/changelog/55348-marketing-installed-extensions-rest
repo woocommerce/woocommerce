@@ -1,4 +1,4 @@
 Significance: patch
-Type: performance
+Type: enhancement
 
 Load the Marketing installed extensions from the REST API instead of computing them on every WooCommerce admin page load.
