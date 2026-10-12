@@ -4,6 +4,7 @@
 import {
 	addAProductToCart,
 	WC_API_PATH,
+	WP_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -42,6 +43,133 @@ test.describe(
 			await restApi.post( `${ WC_API_PATH }/products/batch`, {
 				delete: [ productId ],
 			} );
+		} );
+
+		test( 'should show classic AJAX stock errors on the product list even when cart redirect is enabled', async ( {
+			page,
+			restApi,
+		} ) => {
+			const ajaxSetting = `${ WC_API_PATH }/settings/products/woocommerce_enable_ajax_add_to_cart`;
+			const redirectSetting = `${ WC_API_PATH }/settings/products/woocommerce_cart_redirect_after_add`;
+			const [ ajax, redirect ] = await Promise.all( [
+				restApi.get( ajaxSetting ),
+				restApi.get( redirectSetting ),
+			] );
+			const stockProductName = `Canvas bag ${ Date.now() }`;
+			let stockProductId: number | undefined;
+			let listPageId: number | undefined;
+
+			try {
+				const product = await restApi.post(
+					`${ WC_API_PATH }/products`,
+					{
+						name: stockProductName,
+						type: 'simple',
+						regular_price: '12',
+						manage_stock: true,
+						stock_quantity: 1,
+						backorders: 'no',
+					}
+				);
+				stockProductId = product.data.id;
+				// The products shortcode renders a classic product list on any theme.
+				const listPage = await restApi.post( `${ WP_API_PATH }/pages`, {
+					title: `Classic list ${ stockProductId }`,
+					status: 'publish',
+					content: `[products ids="${ stockProductId }"]`,
+				} );
+				listPageId = listPage.data.id;
+				const listUrl = listPage.data.link;
+				await restApi.put( ajaxSetting, { value: 'yes' } );
+				await restApi.put( redirectSetting, { value: 'yes' } );
+				await page.goto( listUrl );
+				const addButton = page
+					.locator( `.post-${ stockProductId }` )
+					.getByRole( 'link', { name: /Add to cart/ } );
+				const firstResponse = page.waitForResponse( ( response ) =>
+					response.url().includes( 'wc-ajax=add_to_cart' )
+				);
+				await addButton.click();
+				await firstResponse;
+				await expect( page ).toHaveURL( /\/cart\// );
+				await checkCartContentInBlocksCart(
+					page,
+					[
+						{
+							data: { name: stockProductName, price: '12' },
+							qty: 1,
+						},
+					],
+					12
+				);
+
+				await page.goto( listUrl );
+				await page.evaluate( () => {
+					document.body.dataset.addedToCartCount = '0';
+					const jquery = (
+						window as typeof window & {
+							jQuery: ( element: HTMLElement ) => {
+								on: (
+									event: string,
+									callback: () => void
+								) => void;
+							};
+						}
+					 ).jQuery;
+					jquery( document.body ).on( 'added_to_cart', () => {
+						document.body.dataset.addedToCartCount = String(
+							Number( document.body.dataset.addedToCartCount ) + 1
+						);
+					} );
+				} );
+				const secondResponse = page.waitForResponse( ( response ) =>
+					response.url().includes( 'wc-ajax=add_to_cart' )
+				);
+				await addButton.click();
+				const secondResult = await ( await secondResponse ).json();
+				expect( secondResult.error ).toBe( true );
+				expect( typeof secondResult.messages ).toBe( 'string' );
+				const errorAlert = page.getByRole( 'alert' ).filter( {
+					hasText: 'You cannot add that amount to the cart',
+				} );
+				await expect( errorAlert ).toBeInViewport();
+				await expect( page ).toHaveURL( listUrl );
+				await expect( addButton ).not.toHaveClass( /loading|added/ );
+				await expect( page.locator( 'body' ) ).toHaveAttribute(
+					'data-added-to-cart-count',
+					'0'
+				);
+			} finally {
+				// Attempt every restoration even if another cleanup request fails.
+				const cleanup = await Promise.allSettled( [
+					restApi.put( ajaxSetting, { value: ajax.data.value } ),
+					restApi.put( redirectSetting, {
+						value: redirect.data.value,
+					} ),
+					...( listPageId
+						? [
+								restApi.delete(
+									`${ WP_API_PATH }/pages/${ listPageId }`,
+									{ force: true }
+								),
+							]
+						: [] ),
+					...( stockProductId
+						? [
+								restApi.delete(
+									`${ WC_API_PATH }/products/${ stockProductId }`,
+									{ force: true }
+								),
+							]
+						: [] ),
+				] );
+				expect(
+					cleanup.filter(
+						( result ) => result.status === 'rejected'
+					),
+					'Every owned fixture and setting must be restored.'
+				).toEqual( [] );
+			}
 		} );
 
 		test(
