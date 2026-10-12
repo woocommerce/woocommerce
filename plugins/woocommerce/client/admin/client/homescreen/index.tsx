@@ -18,6 +18,13 @@ type HomescreenProps = ReturnType< typeof withSelectHandler > & {
 	hasFinishedResolution: boolean;
 };
 
+const onboardingData = getAdminSetting( 'onboarding', {} );
+
+// The preloaded profile does not depend on the REST API. When the profile request fails
+// before hydration runs, the store only holds empty defaults.
+const isProfilerDoneOnPageLoad = () =>
+	!! ( onboardingData.profile?.completed || onboardingData.profile?.skipped );
+
 const Homescreen = ( {
 	profileItems: {
 		completed: profilerCompleted,
@@ -29,7 +36,8 @@ const Homescreen = ( {
 		if (
 			hasFinishedResolution &&
 			! profilerCompleted &&
-			! profilerSkipped
+			! profilerSkipped &&
+			! isProfilerDoneOnPageLoad()
 		) {
 			getHistory().push( getNewPath( {}, '/setup-wizard', {} ) );
 		}
@@ -40,8 +48,6 @@ const Homescreen = ( {
 	// @ts-expect-error -- TODO: convert Layout to TS component
 	return <Layout query={ query } />;
 };
-
-const onboardingData = getAdminSetting( 'onboarding', {} );
 
 const withSelectHandler = ( select: SelectFunction ) => {
 	const { getProfileItems, hasFinishedResolution } =
