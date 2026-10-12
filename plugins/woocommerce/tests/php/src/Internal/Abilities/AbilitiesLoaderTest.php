@@ -417,8 +417,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should query an order type and status that an extension registers.
 	 */
 	public function test_orders_query_accepts_registered_order_type_and_status(): void {
-		global $wc_order_types;
+		global $wc_order_types, $post_type_meta_caps;
 
+		$meta_caps = $post_type_meta_caps;
 		$this->unregister_domain_abilities();
 		wc_register_order_type(
 			'shop_test_contract',
@@ -453,6 +454,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->unregister_domain_abilities();
 			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-active'] );
 			unregister_post_type( 'shop_test_contract' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
 			$this->register_domain_abilities();
 		}
 	}
@@ -500,6 +502,30 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the permission against the actual type of the order ID.
+	 */
+	public function test_orders_query_refuses_id_of_unsupported_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'   => $refund->get_id(),
+				'type' => 'shop_order',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**

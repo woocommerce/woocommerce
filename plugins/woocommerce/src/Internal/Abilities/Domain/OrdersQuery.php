@@ -174,9 +174,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	public static function can_query_orders( $input = array() ): bool {
 		$order_id = self::get_id_from_input( $input );
-		$type     = is_array( $input ) ? self::get_order_type_from_input( $input ) : 'shop_order';
 
-		return wc_rest_check_post_permissions( $type, 'read', $order_id );
+		if ( $order_id > 0 ) {
+			return self::check_order_permission( $order_id, 'read' );
+		}
+
+		$type = is_array( $input ) ? self::get_order_type_from_input( $input ) : 'shop_order';
+
+		return wc_rest_check_post_permissions( $type, 'read' );
 	}
 
 	/**

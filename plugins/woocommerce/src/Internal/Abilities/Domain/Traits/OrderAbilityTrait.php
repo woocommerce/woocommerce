@@ -231,7 +231,24 @@ trait OrderAbilityTrait {
 	public static function can_edit_order( $input = array() ): bool {
 		$order_id = self::get_id_from_input( $input );
 
-		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
+		return $order_id > 0 && self::check_order_permission( $order_id, 'edit' );
+	}
+
+	/**
+	 * Check a permission against the actual type of an order. An order whose
+	 * type the abilities do not support fails. An ID with no order is checked
+	 * as `shop_order`.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $context  Permission context, such as `read` or `edit`.
+	 * @return bool
+	 */
+	protected static function check_order_permission( int $order_id, string $context ): bool {
+		$type = OrderUtil::get_order_type( $order_id );
+		$type = $type ? $type : 'shop_order';
+
+		return in_array( $type, self::get_order_type_slugs(), true )
+			&& wc_rest_check_post_permissions( $type, $context, $order_id );
 	}
 
 	/**
