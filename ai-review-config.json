@@ -83,7 +83,11 @@
 					"term_relationships",
 					"meta_key",
 					"union",
-					"get_results"
+					"get_results",
+					"wp_remote_",
+					"wp_safe_remote",
+					"_in_seconds",
+					"helper_api"
 				],
 				"always_paths": [],
 				"signal_types": [
@@ -385,7 +389,12 @@
 				"template_html",
 				"woocommerce_email_classes",
 				"get_variation_attributes",
-				"get_attribute_taxonomies"
+				"get_attribute_taxonomies",
+				"get_country_locale",
+				"get_address_fields",
+				"return array();",
+				"return [];",
+				"?? null"
 			],
 			"personas": [
 				"regression"
@@ -948,6 +957,32 @@
 				"WP_Query",
 				"wc_get_products",
 				"get_posts("
+			],
+			"personas": [
+				"performance"
+			]
+		},
+		{
+			"name": "perf-blocking-remote-call",
+			"file": ".ai/review/guidelines/perf-blocking-remote-call.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php"
+			],
+			"signals": [
+				"wp_remote_",
+				"wp_safe_remote_",
+				"WC_Helper_API",
+				"set_transient",
+				"set_site_transient",
+				"HOUR_IN_SECONDS",
+				"DAY_IN_SECONDS",
+				"WEEK_IN_SECONDS",
+				"MONTH_IN_SECONDS",
+				"'blocking'",
+				"'timeout'",
+				"admin_menu",
+				"admin_notices"
 			],
 			"personas": [
 				"performance"

@@ -70,6 +70,12 @@ out", "guarded elsewhere" (unread), and "couldn't verify" are not proof. A mitig
 you Read the line that enforces it for the exact input in question. If the concern is real and you
 can't settle it, report it at `medium` severity with `low` or `medium` confidence.
 
+**7. When a return value widens, check every caller.** If a hunk lets a function return something it
+didn't before (an empty array, `null`, `false`, a missing key), or guards one caller against such a
+value, Grep every other caller of that function and Read how each uses the result. A caller that
+still assumes the old shape is a finding, even when its file is not in the diff. Name the caller's
+file and line, and point at the guard the PR added elsewhere as the fix.
+
 ## Woo invariants
 
 **Sessions and users.** A session and a `WP_User` are not 1:1. User switching, B2B portals, and
