@@ -76,11 +76,7 @@ export const getShippingRestrictionFields = (
 				return (
 					<TreeSelectControl
 						label={ field.label }
-						help={
-							typeof field.description === 'string'
-								? field.description
-								: undefined
-						}
+						help={ field.description as string }
 						options={ shippingMethodsOptions }
 						value={ Array.isArray( value ) ? value : [] }
 						onChange={ ( newValue: string[] ) =>
