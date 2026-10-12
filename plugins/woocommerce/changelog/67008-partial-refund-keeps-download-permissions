@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a customer's download permissions on a partial quantity refund and lower the remaining downloads by the refunded quantity.
