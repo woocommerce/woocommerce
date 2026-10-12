@@ -302,6 +302,30 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Contracts whose handler left the due moment in place sort behind a freshly due contract.
+	 */
+	public function test_repeat_notifications_do_not_starve_a_fresh_due_contract(): void {
+		global $wpdb;
+
+		$this->register_recording_handler();
+		$stuck = array();
+		for ( $i = 0; $i < 101; $i++ ) {
+			$stuck[] = $this->create_due_contract( '2026-01-15 00:00:00' );
+		}
+		$fresh = $this->create_due_contract( '2026-02-15 00:00:00' );
+
+		// Every stuck contract was notified before and its claim has since expired.
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		foreach ( $stuck as $id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
+		}
+
+		$this->assertSame( 50, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( $fresh, $this->calls[0]['contract']->get_id(), 'The never-notified contract goes first despite its later due moment.' );
+	}
+
+	/**
 	 * @testdox ensure_scheduled schedules only when a handler exists, is idempotent, and unschedules when the last handler-owner leaves.
 	 */
 	public function test_ensure_scheduled_follows_the_handler_owners(): void {
