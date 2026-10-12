@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add opt-in UCP cart endpoints so AI shopping agents can build a cart and provide according payment URL.
+Add opt-in UCP cart endpoints so AI shopping agents can build a cart and provide a payment URL.
