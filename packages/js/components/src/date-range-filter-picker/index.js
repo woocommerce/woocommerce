@@ -14,8 +14,10 @@ import clsx from 'clsx';
 import DatePickerContent from './content';
 import DropdownButton from '../dropdown-button';
 
-const shortDateFormatPlaceholder = __( 'MM/DD/YYYY', 'woocommerce' );
-const shortDateFormat = 'MM/DD/YYYY';
+// Used both as the input placeholder and to parse typed dates, so the hint always matches what the field accepts.
+const getShortDateFormat = () =>
+	/* translators: Moment.js date format for typed dates. Keep the DD, MM and YYYY tokens. */
+	__( 'MM/DD/YYYY', 'woocommerce' );
 
 /**
  * Select a range of dates or single dates.
@@ -46,6 +48,7 @@ class DateRangeFilterPicker extends Component {
 
 	getResetState() {
 		const { period, compare, before, after } = this.props.dateQuery;
+		const shortDateFormat = getShortDateFormat();
 
 		return {
 			period,
@@ -171,10 +174,7 @@ class DateRangeFilterPicker extends Component {
 							beforeText={ beforeText }
 							afterError={ afterError }
 							beforeError={ beforeError }
-							shortDateFormat={ shortDateFormat }
-							shortDateFormatPlaceholder={
-								shortDateFormatPlaceholder
-							}
+							shortDateFormat={ getShortDateFormat() }
 						/>
 					) }
 				/>
