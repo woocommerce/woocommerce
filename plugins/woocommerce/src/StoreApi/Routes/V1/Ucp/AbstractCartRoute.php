@@ -68,7 +68,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Refuse an id this store never signed, before any cart is loaded.
+	 * Refuse an id this store never signed, then hand off with the token slot restored.
+	 *
+	 * The slot is per-process, not per-dispatch, so a second route dispatched in the same
+	 * process — `rest_do_request()` from other code, or a test — would otherwise inherit
+	 * this cart's token and bind to its session.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -81,7 +85,29 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return $this->ucp_not_found();
 		}
 
-		return parent::get_response( $request );
+		$inherited_token = CartTokenUtils::get_request_cart_token();
+
+		try {
+			return parent::get_response( $request );
+		} finally {
+			$this->restore_request_cart_token( $inherited_token );
+		}
+	}
+
+	/**
+	 * Put the request's cart token slot back the way it was found.
+	 *
+	 * @param string $token The token the request arrived with, or '' for none.
+	 */
+	private function restore_request_cart_token( string $token ): void {
+		if ( '' === $token ) {
+			// phpcs:ignore WooCommerceStoreApi.StoreApi.CartTokenSource.ServerSuperglobal -- Clearing the slot, not reading the token from it.
+			unset( $_SERVER['HTTP_CART_TOKEN'] );
+			return;
+		}
+
+		// phpcs:ignore WooCommerceStoreApi.StoreApi.CartTokenSource.ServerSuperglobalWrite -- Restoring the value the request arrived with, already validated by whatever read it.
+		$_SERVER['HTTP_CART_TOKEN'] = $token;
 	}
 
 	/**

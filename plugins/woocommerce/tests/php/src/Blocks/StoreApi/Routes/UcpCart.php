@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Tests for the /wc/ucp/v1/carts endpoints.
@@ -554,6 +555,30 @@ class UcpCart extends ControllerTestCase {
 
 		$this->assertSame( 200, $store_api->get_status() );
 		$this->assertSame( array(), $store_api->get_data()['items'] );
+	}
+
+	/**
+	 * A cart request leaves the token slot as it found it.
+	 *
+	 * The slot is per-process, so a route that kept its token there would bind the next
+	 * dispatch in the same process — `rest_do_request()` from other code, or a test — to
+	 * this cart's session.
+	 */
+	public function test_a_cart_request_does_not_leak_its_token_to_the_next_dispatch(): void {
+		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+
+		$this->assertSame( '', CartTokenUtils::get_request_cart_token(), 'after create' );
+
+		$this->request( 'GET', '/carts/' . $created['id'] );
+		$this->assertSame( '', CartTokenUtils::get_request_cart_token(), 'after read' );
+
+		$this->request( 'PUT', '/carts/' . $created['id'], array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+		$this->assertSame( '', CartTokenUtils::get_request_cart_token(), 'after update' );
+
+		// A request that arrived with its own token keeps it, rather than being cleared.
+		$_SERVER['HTTP_CART_TOKEN'] = $created['id'];
+		$this->request( 'GET', '/carts/' . $created['id'] );
+		$this->assertSame( $created['id'], CartTokenUtils::get_request_cart_token(), 'inherited token preserved' );
 	}
 
 	/**
