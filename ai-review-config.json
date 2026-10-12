@@ -465,6 +465,19 @@
 			]
 		},
 		{
+			"name": "payment-callbacks",
+			"file": ".ai/review/guidelines/payment-callbacks.md",
+			"path": [
+				"plugins/woocommerce/includes/gateways/**/*.php",
+				"plugins/woocommerce/src/Gateways/**/*.php",
+				"plugins/woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php"
+			],
+			"personas": [
+				"security",
+				"regression"
+			]
+		},
+		{
 			"name": "migration-upgrade-state",
 			"file": ".ai/review/guidelines/migration-upgrade-state.md",
 			"path": [
