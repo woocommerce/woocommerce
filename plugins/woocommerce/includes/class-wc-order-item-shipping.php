@@ -312,7 +312,13 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_tax_status( $context = 'view' ) {
-		$shipping_method = \WC_Shipping_Zones::get_shipping_method( $this->get_instance_id() );
+		// Local pickup is registered outside shipping zones, so it has no instance ID to look up.
+		if ( ! $this->get_instance_id() && 'pickup_location' === $this->get_method_id() ) {
+			$shipping_methods = WC()->shipping()->get_shipping_methods();
+			$shipping_method  = $shipping_methods['pickup_location'] ?? null;
+		} else {
+			$shipping_method = \WC_Shipping_Zones::get_shipping_method( $this->get_instance_id() );
+		}
 		return $shipping_method instanceof \WC_Shipping_Method ? $shipping_method->tax_status : ProductTaxStatus::TAXABLE;
 	}
 
