@@ -110,10 +110,24 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	public function provide_uncharged_orders(): array {
 		return array(
 			'unsupported gateway' => array( false, self::GATEWAY, '12.50', 'pending' ),
-			'zero total'          => array( true, self::GATEWAY, '0', 'pending' ),
+			'zero total'          => array( true, self::GATEWAY, '0', 'pending' ), // Core needs_payment() is false.
 			'paid order'          => array( true, self::GATEWAY, '12.50', 'processing' ),
 			'no payment method'   => array( true, '', '12.50', 'pending' ),
 		);
+	}
+
+	/**
+	 * @testdox charge fires for a $0 order an extension filtered to need payment, with amount 0.
+	 */
+	public function test_charge_fires_for_a_zero_order_that_needs_payment(): void {
+		$this->support_engine_charges( self::GATEWAY );
+		$order = $this->make_order( self::GATEWAY, '0' );
+		add_filter( 'woocommerce_order_needs_payment', '__return_true' );
+
+		$this->assertTrue( Payments::charge( $order ) );
+
+		$this->assertCount( 1, $this->charges );
+		$this->assertSame( 0.0, $this->charges[0]['amount'] );
 	}
 
 	/**

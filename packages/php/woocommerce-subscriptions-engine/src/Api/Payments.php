@@ -56,8 +56,11 @@ final class Payments {
 	 * Ask the order's gateway to charge it off-session.
 	 *
 	 * Fires `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}` only when the order
-	 * needs payment, has a payment method, totals more than zero, and its gateway supports
-	 * engine charges. The outcome is the order's status; a throwing gateway is logged.
+	 * has a payment method, needs payment (`WC_Order::needs_payment()`, so the
+	 * `woocommerce_order_needs_payment` filter applies) and its gateway supports engine charges.
+	 * The engine adds no amount check of its own: core already refuses a $0 order unless an
+	 * extension filtered it to need payment. The outcome is the order's status; a throwing
+	 * gateway is logged.
 	 *
 	 * @param WC_Order $order Order to charge, carrying the payment method and token.
 	 * @return bool True when the charge action fired; false when a precondition failed.
@@ -66,7 +69,7 @@ final class Payments {
 		$gateway_id = $order->get_payment_method();
 		$amount     = (float) $order->get_total();
 
-		if ( '' === $gateway_id || $amount <= 0 || ! $order->needs_payment() || ! self::supports_gateway( $gateway_id ) ) {
+		if ( '' === $gateway_id || ! $order->needs_payment() || ! self::supports_gateway( $gateway_id ) ) {
 			return false;
 		}
 
@@ -75,7 +78,8 @@ final class Payments {
 			 * Fires to charge an order off-session. The gateway charges `$amount` against the
 			 * payment method and token stored on the order, then reports the outcome through the
 			 * order status: paid (`payment_complete()`), `failed` on a decline, or `on-hold` while
-			 * an asynchronous charge awaits confirmation.
+			 * an asynchronous charge awaits confirmation. `$amount` may be 0 when an extension
+			 * filtered a $0 order to need payment (for example, to save a payment method).
 			 *
 			 * @param float    $amount The amount to charge, in the order currency.
 			 * @param WC_Order $order  The order to charge.
