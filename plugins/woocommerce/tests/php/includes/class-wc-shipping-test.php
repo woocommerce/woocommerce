@@ -555,6 +555,62 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Removing nested product data invalidates the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_nested_product_data_is_removed(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->set_category_ids( array( 123 ) );
+		$product->apply_changes();
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$product->set_category_ids( array() );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Removing an array-valued product property should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox Unsupported objects anywhere in package metadata disable the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_does_not_memoize_unsupported_package_metadata_objects(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$metadata                          = new SplObjectStorage();
+		$packages                          = array( $this->get_package_hash_test_package() );
+		$packages[0]['extension_metadata'] = array( 'state' => $metadata );
+		$filter_calls                      = 0;
+		$filter                            = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			$shipping_packages[0]['metadata_count'] = count( $shipping_packages[0]['extension_metadata']['state'] );
+			return $shipping_packages;
+		};
+
+		$metadata->attach( new stdClass() );
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first = $this->sut->calculate_shipping( $packages );
+		$metadata->attach( new stdClass() );
+		$second = $this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Unsupported nested objects should disable memoization.' );
+		$this->assertSame( 1, $first[0]['metadata_count'], 'The first filter result should expose the initial object state.' );
+		$this->assertSame( 2, $second[0]['metadata_count'], 'The second filter result should expose the changed object state.' );
+	}
+
+	/**
 	 * @testdox Shipping debug mode bypasses the shipping packages filter memo.
 	 */
 	public function test_calculate_shipping_does_not_memoize_in_debug_mode(): void {

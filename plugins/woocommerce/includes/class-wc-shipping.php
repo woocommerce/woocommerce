@@ -329,23 +329,69 @@ class WC_Shipping {
 	 * @return string|null
 	 */
 	private function get_shipping_packages_filter_cache_key( array $packages ): ?string {
-		foreach ( $packages as $package_key => $package ) {
-			foreach ( (array) ( $package['contents'] ?? array() ) as $item_key => $item ) {
-				$data_object = $item['data'] ?? null;
+		$cacheable           = true;
+		$normalized_packages = self::normalize_shipping_packages_filter_cache_value( $packages, $cacheable, new SplObjectStorage() );
 
-				if ( $data_object instanceof WC_Data ) {
-					$packages[ $package_key ]['contents'][ $item_key ]['data'] = array(
-						'class' => get_class( $data_object ),
-						'data'  => array_replace_recursive( $data_object->get_data(), $data_object->get_changes() ),
-					);
-				} elseif ( is_object( $data_object ) && ! $data_object instanceof JsonSerializable ) {
+		if ( ! $cacheable ) {
+			return null;
+		}
+
+		$encoded_packages = wp_json_encode( $normalized_packages );
+		return false === $encoded_packages ? null : md5( $encoded_packages );
+	}
+
+	/**
+	 * Normalize filter-visible values for the shipping packages cache key.
+	 *
+	 * @param mixed            $value        Value to normalize.
+	 * @param bool             $cacheable    Whether the value can be represented safely.
+	 * @param SplObjectStorage $seen_objects Objects in the current recursion path.
+	 * @phpstan-param SplObjectStorage<object, null> $seen_objects
+	 * @return mixed
+	 */
+	private static function normalize_shipping_packages_filter_cache_value( $value, bool &$cacheable, SplObjectStorage $seen_objects ) {
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $nested_value ) {
+				$value[ $key ] = self::normalize_shipping_packages_filter_cache_value( $nested_value, $cacheable, $seen_objects );
+
+				if ( ! $cacheable ) {
 					return null;
 				}
 			}
+
+			return $value;
 		}
 
-		$encoded_packages = wp_json_encode( $packages );
-		return false === $encoded_packages ? null : md5( $encoded_packages );
+		if ( ! is_object( $value ) ) {
+			return $value;
+		}
+
+		if ( $seen_objects->contains( $value ) ) {
+			$cacheable = false;
+			return null;
+		}
+
+		$seen_objects->attach( $value );
+
+		if ( $value instanceof WC_Data ) {
+			$normalized_value = array(
+				'class' => get_class( $value ),
+				'data'  => array_replace( $value->get_data(), $value->get_changes() ),
+			);
+		} elseif ( $value instanceof JsonSerializable ) {
+			$normalized_value = array(
+				'class' => get_class( $value ),
+				'data'  => $value->jsonSerialize(),
+			);
+		} else {
+			$cacheable = false;
+			return null;
+		}
+
+		$normalized_value = self::normalize_shipping_packages_filter_cache_value( $normalized_value, $cacheable, $seen_objects );
+		$seen_objects->detach( $value );
+
+		return $normalized_value;
 	}
 
 	/**
