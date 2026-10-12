@@ -15,6 +15,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -47,13 +48,22 @@ final class Bootstrap {
 		ContractCapabilities::register_hooks();
 		PlansController::register_hooks();
 		ContractsController::register_hooks();
+		( new DueDispatcher() )->register_hooks();
 
-		// The schema install reads options and runs dbDelta, so it waits for `init`; run it
-		// immediately when a consumer boots the engine after `init` already fired.
+		// Deferred boot work, each on the moment it needs: the schema install reads options
+		// and runs dbDelta, so it waits for `init`; the recurring-action enqueue needs the
+		// `as_*` functions, so it waits for `action_scheduler_init`. Run immediately when a
+		// consumer boots the engine after a hook already fired.
 		if ( did_action( 'init' ) ) {
 			SchemaInstaller::maybe_install();
 		} else {
 			add_action( 'init', array( SchemaInstaller::class, 'maybe_install' ) );
+		}
+
+		if ( did_action( 'action_scheduler_init' ) ) {
+			DueDispatcher::ensure_scheduled();
+		} else {
+			add_action( 'action_scheduler_init', array( DueDispatcher::class, 'ensure_scheduled' ) );
 		}
 	}
 }

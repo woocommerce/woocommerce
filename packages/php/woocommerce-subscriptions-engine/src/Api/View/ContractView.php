@@ -53,7 +53,7 @@ final class ContractView {
 	/**
 	 * Build a view of a stored contract.
 	 *
-	 * @internal Built by the engine `Api\` facades only.
+	 * @internal Built by the engine only (the `Api\` facades and the due dispatcher).
 	 *
 	 * @param Contract $contract      Stored contract.
 	 * @param bool     $with_children Whether the read loaded items and addresses.
