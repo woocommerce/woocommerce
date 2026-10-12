@@ -15,7 +15,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Gateway\CapabilityRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ContractCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\PlansController;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -45,7 +44,6 @@ final class Bootstrap {
 
 		self::$initialized = true;
 
-		CapabilityRegistry::init();
 		ContractCapabilities::register_hooks();
 		PlansController::register_hooks();
 		ContractsController::register_hooks();
