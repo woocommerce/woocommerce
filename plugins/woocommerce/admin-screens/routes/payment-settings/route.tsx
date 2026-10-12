@@ -18,7 +18,6 @@ export const route = {
 	beforeLoad: async ( { params }: RouteOptions ) => {
 		const screen = getScreen( params.page );
 		if ( ! screen ) {
-			// eslint-disable-next-line @typescript-eslint/only-throw-error -- The router expects notFound() to be thrown.
 			throw notFound();
 		}
 		const { kind, name } = screen.entity;
