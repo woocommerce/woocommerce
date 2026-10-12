@@ -36,7 +36,7 @@ class WC_Beta_Tester_Live_Branches {
 			return;
 		}
 
-		if ( ! is_admin() ) {
+		if ( ! is_admin() || ! current_user_can( 'install_plugins' ) ) {
 			return;
 		}
 
@@ -79,7 +79,7 @@ class WC_Beta_Tester_Live_Branches {
 				'title'      => __( 'Live Branches', 'woocommerce-beta-tester' ),
 				'path'       => '/live-branches',
 				'parent'     => 'woocommerce',
-				'capability' => 'read',
+				'capability' => 'install_plugins',
 			)
 		);
 	}

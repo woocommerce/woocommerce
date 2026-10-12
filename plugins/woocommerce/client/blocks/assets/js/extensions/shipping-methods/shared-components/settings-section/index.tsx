@@ -52,7 +52,6 @@ const SettingsSection = ( {
 	children,
 	...props
 }: {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Description?: () => JSX.Element | null;
 	children: React.ReactNode;
 } ): JSX.Element => (

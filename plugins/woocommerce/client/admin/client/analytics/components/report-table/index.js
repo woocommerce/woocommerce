@@ -621,7 +621,7 @@ export default compose(
 					advancedFilters,
 					defaultDateRange,
 					fields: summaryFields,
-			  } )
+				} )
 			: EMPTY_OBJECT;
 		const queriedTableData =
 			tableData ||
@@ -646,7 +646,7 @@ export default compose(
 				itemIdField && extendedTableData.items.data
 					? extendedTableData.items.data.map(
 							( item ) => item[ itemIdField ]
-					  )
+						)
 					: EMPTY_ARRAY,
 			tableData: extendedTableData,
 			query,

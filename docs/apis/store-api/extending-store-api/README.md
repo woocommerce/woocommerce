@@ -16,3 +16,4 @@ The documents listed below contain further details on how to achieve the above.
 | [Available Formatters](./extend-store-api-formatters/) | Available `Formatters` to format data for use in the Store API. |
 | [Updating the cart on-demand](./extend-store-api-update-cart/) | Update the server-side cart following an action from the front-end. |
 | [Adding fields and passing values](./extend-store-api-add-custom-fields/) | How to add custom fields to Store API endpoints. | 
+| [Marking a cart item as a child](./extend-store-api-parent-item/) | Declare a parent for a child cart item in a Store API response. |

@@ -147,9 +147,19 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Percent fee calculation works as expected with comma as decimal separator. Value after the comma is ignored.
+	 * Percent fee calculation keeps the decimals when the store uses a comma as the decimal separator.
 	 */
 	public function test_evaluate_cost_percent_fee_comma() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="10,1" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'The minimum fee should apply, read with a comma decimal.' );
+
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'[fee percent="10,1"]',
@@ -158,7 +168,82 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 				'cost' => 100,
 			)
 		);
-		$this->assertEquals( 10, $val );
+		$this->assertEquals( 10.1, $val, 'The percentage should keep its decimals.' );
+	}
+
+	/**
+	 * A fee below a comma-decimal minimum is raised to that minimum.
+	 */
+	public function test_evaluate_cost_percent_fee_below_comma_min_fee() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="5" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee below the minimum should be raised to it.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="12,25" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee just below the minimum should be raised to it.' );
+	}
+
+	/**
+	 * A fee below a comma-decimal maximum is not capped.
+	 */
+	public function test_evaluate_cost_percent_fee_below_comma_max_fee() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="3" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 3, $val, 'A fee below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="20,25" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.25, $val, 'A fee just below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="30" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.5, $val, 'A fee above the maximum should be capped to it.' );
+	}
+
+	/**
+	 * A comma-decimal percent fee keeps its decimals inside a cost formula.
+	 */
+	public function test_evaluate_cost_comma_percent_fee_in_formula() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'10,5 + [fee percent="2,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 13.0, $val, 'The fee should keep its decimals when added to a base cost.' );
 	}
 
 	/**
@@ -434,5 +519,29 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertFloatEquals( 12.0, (float) $val, null, 'The fee should be a percentage of cost, with the weight added on top.' );
+	}
+
+	/**
+	 * A plain amount is stored dot-decimal whichever separator the merchant typed, so the value
+	 * that reaches evaluate_cost() is the one PHP can read. setUp() puts the store on a comma
+	 * decimal separator and a dot thousand separator, which is where the forms differ.
+	 *
+	 * The three rows are three different routes through the sanitiser: a value that is already
+	 * dot-decimal is taken as it stands, one written in the store's own separators is converted,
+	 * and one carrying a thousand separator has that removed rather than read as a decimal point.
+	 *
+	 * @testdox sanitize_cost() stores a plain amount dot-decimal whichever separator was typed.
+	 *
+	 * @testWith ["10.5", "10.5"]
+	 *           ["10,5", "10.5"]
+	 *           ["1.000,50", "1000.50"]
+	 *
+	 * @param string $typed    What the merchant entered.
+	 * @param string $expected What should be stored.
+	 */
+	public function test_sanitize_cost_stores_a_plain_amount_dot_decimal( string $typed, string $expected ): void {
+		$result = $this->call_sanitize_cost->call( $this->sut, $typed );
+
+		$this->assertSame( $expected, trim( $result ), 'Entered as "' . $typed . '" on a comma-decimal store.' );
 	}
 }

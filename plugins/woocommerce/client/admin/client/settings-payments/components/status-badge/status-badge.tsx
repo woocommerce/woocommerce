@@ -84,7 +84,10 @@ export const StatusBadge = ( {
 			event.stopPropagation();
 			setPopoverVisible( false );
 			buttonRef.current?.focus();
-		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+		} else if (
+			( event.key === 'Enter' || event.key === ' ' ) &&
+			event.target === buttonRef.current
+		) {
 			event.preventDefault();
 			handleClick( event );
 		}

@@ -50,7 +50,7 @@ const getDataMock = () => ( {
 } );
 
 type RegisterProductBlockType =
-	typeof import('../register-product-block-type').registerProductBlockType;
+	typeof import( '../register-product-block-type' ).registerProductBlockType;
 
 const blockSettings = {
 	title: 'Test product block',

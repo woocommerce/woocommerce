@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Helper_Order;
@@ -352,6 +353,64 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce_rest_cannot_create', $data['code'] );
 		$this->assertEquals( 'Sorry, you cannot create resources.', $data['message'] );
 		$this->assertEquals( WP_Http::UNAUTHORIZED, $data['data']['status'] );
+	}
+
+	/**
+	 * @testdox Create ignores an id in the body: it inserts a new fulfillment and applies metadata to it, not to the supplied id.
+	 */
+	public function test_create_fulfillment_ignores_body_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a           = WC_Helper_Order::create_order();
+		$order_b           = WC_Helper_Order::create_order();
+		$other_fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'id'           => $other_fulfillment->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => 'request_create_meta',
+							'value' => 'new_fulfillment',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$created = $response->get_data();
+		$this->assertNotEquals( $other_fulfillment->get_id(), $created['id'], 'Create must insert a new fulfillment, not reuse the id from the body.' );
+		$this->assertEquals( (string) $order_a->get_id(), (string) $created['entity_id'], 'The new fulfillment must belong to the routed order.' );
+
+		$response_meta_keys = wp_list_pluck( $created['meta_data'], 'key' );
+		$this->assertContains( 'request_create_meta', $response_meta_keys, 'Request metadata must be applied to the new fulfillment.' );
+		$this->assertNotContains( 'test_meta_key', $response_meta_keys, 'The new fulfillment must not inherit metadata from the fulfillment whose id was supplied in the body.' );
+
+		// The metadata must persist on the saved row, not just appear in the response.
+		$created_reloaded = new Fulfillment( (int) $created['id'] );
+		$this->assertSame( 'new_fulfillment', $created_reloaded->get_meta( 'request_create_meta' ), 'Request metadata must be saved on the new fulfillment row.' );
+
+		$other_reloaded = new Fulfillment( $other_fulfillment->get_id() );
+		$this->assertSame( (string) $order_b->get_id(), $other_reloaded->get_entity_id(), 'The fulfillment whose id was supplied in the body must be untouched.' );
 	}
 
 	/**
@@ -875,6 +934,313 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		}
 
 		wp_set_current_user( self::$created_user_id );
+	}
+
+	/**
+	 * @testdox The v3 update route keeps the fulfillment on its own order and ignores entity_id in the body.
+	 */
+	public function test_update_fulfillment_does_not_reparent_via_entity_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a     = WC_Helper_Order::create_order();
+		$order_b     = WC_Helper_Order::create_order();
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_id'    => (string) $order_b->get_id(),
+					'entity_type'  => WC_Order::class,
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update must succeed so the reparenting guard is actually exercised.' );
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$this->assertSame(
+			(string) $order_a->get_id(),
+			$reloaded->get_entity_id(),
+			'A v3 PUT must not move the fulfillment to a different order via the request body.'
+		);
+	}
+
+	/**
+	 * @testdox The v3 update route ignores an id in the body and never writes to a different fulfillment row.
+	 */
+	public function test_update_fulfillment_ignores_body_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a       = WC_Helper_Order::create_order();
+		$order_b       = WC_Helper_Order::create_order();
+		$fulfillment_a = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+		$fulfillment_b = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment_a->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'id'           => $fulfillment_b->get_id(),
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update targeted by the route must succeed.' );
+
+		$other_reloaded = new Fulfillment( $fulfillment_b->get_id() );
+		$this->assertSame(
+			(string) $order_b->get_id(),
+			$other_reloaded->get_entity_id(),
+			'A body id must not redirect the update onto a different fulfillment row.'
+		);
+		$this->assertNotSame(
+			'fulfilled',
+			$other_reloaded->get_status(),
+			'A body id must not change the other fulfillment status.'
+		);
+	}
+
+	/**
+	 * @testdox The v3 update route resolves the order from the URL and ignores a different order_id in the body.
+	 */
+	public function test_update_fulfillment_ignores_body_order_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a     = WC_Helper_Order::create_order();
+		$order_b     = WC_Helper_Order::create_order();
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'order_id'     => $order_b->get_id(),
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update must resolve order_id from the URL, not from the body param.' );
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$this->assertSame(
+			(string) $order_a->get_id(),
+			$reloaded->get_entity_id(),
+			'A different order_id in the body must not change which order the fulfillment belongs to.'
+		);
+	}
+
+	/**
+	 * @testdox The v3 update route ignores a nested props.id payload and never writes to a different fulfillment row.
+	 */
+	public function test_update_fulfillment_ignores_nested_props_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a       = WC_Helper_Order::create_order();
+		$order_b       = WC_Helper_Order::create_order();
+		$fulfillment_a = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+		$fulfillment_b = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment_a->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'props'        => array( 'id' => $fulfillment_b->get_id() ),
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update targeted by the route must succeed.' );
+
+		$other_reloaded = new Fulfillment( $fulfillment_b->get_id() );
+		$this->assertSame(
+			(string) $order_b->get_id(),
+			$other_reloaded->get_entity_id(),
+			'A nested props.id must not redirect the update onto a different fulfillment row.'
+		);
+		$this->assertNotSame(
+			'fulfilled',
+			$other_reloaded->get_status(),
+			'A nested props.id must not change the other fulfillment status.'
+		);
+	}
+
+	/**
+	 * @testdox The v3 update route ignores a props_from_storage payload and does not reparent the fulfillment.
+	 */
+	public function test_update_fulfillment_ignores_props_from_storage_entity(): void {
+		wp_set_current_user( 1 );
+
+		$order_a     = WC_Helper_Order::create_order();
+		$order_b     = WC_Helper_Order::create_order();
+		$fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'props_from_storage' => array(
+						'entity_id'   => (string) $order_b->get_id(),
+						'entity_type' => WC_Order::class,
+					),
+					'status'             => 'fulfilled',
+					'is_fulfilled'       => true,
+					'meta_data'          => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'The update must succeed so the re-pin is exercised.' );
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$this->assertSame(
+			(string) $order_a->get_id(),
+			$reloaded->get_entity_id(),
+			'A props_from_storage payload must not reparent the fulfillment to another order.'
+		);
+	}
+
+	/**
+	 * @testdox The v3 update route ignores a props_from_storage id in the body and reports the routed fulfillment id everywhere.
+	 */
+	public function test_update_fulfillment_ignores_props_from_storage_id(): void {
+		wp_set_current_user( 1 );
+
+		$order_a           = WC_Helper_Order::create_order();
+		$order_b           = WC_Helper_Order::create_order();
+		$fulfillment_a     = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_a->get_id() ) );
+		$other_fulfillment = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => (string) $order_b->get_id() ) );
+
+		$hook_id = null;
+		add_action(
+			'woocommerce_fulfillment_after_update',
+			function ( $fulfillment ) use ( &$hook_id ) {
+				$hook_id = $fulfillment->get_id();
+			}
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_a->get_id() . '/fulfillments/' . $fulfillment_a->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'props_from_storage' => array( 'id' => $other_fulfillment->get_id() ),
+					'status'             => 'fulfilled',
+					'is_fulfilled'       => true,
+					'meta_data'          => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 2,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame(
+			$fulfillment_a->get_id(),
+			$data['id'],
+			'The response must report the routed fulfillment id, not an id supplied through props_from_storage.'
+		);
+		$this->assertSame(
+			$fulfillment_a->get_id(),
+			$hook_id,
+			'The after_update hook must receive the routed fulfillment, not the id supplied through props_from_storage.'
+		);
+
+		$other_reloaded = new Fulfillment( $other_fulfillment->get_id() );
+		$this->assertNotSame(
+			'fulfilled',
+			$other_reloaded->get_status(),
+			'The other fulfillment must not be modified.'
+		);
 	}
 
 	/**
