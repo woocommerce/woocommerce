@@ -155,7 +155,7 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox requires_reusable_payment_method is false by default and true only for a boolean true answer.
+	 * @testdox requires_reusable_payment_method is false by default and casts the filter answer to bool.
 	 */
 	public function test_requires_reusable_payment_method_answers(): void {
 		$this->assertFalse( Payments::requires_reusable_payment_method() );
@@ -164,13 +164,15 @@ class PaymentsTest extends EngineIntegrationTestCase {
 		$this->assertTrue( Payments::requires_reusable_payment_method() );
 		remove_filter( self::REUSABLE_FILTER, '__return_true' );
 
-		add_filter(
-			self::REUSABLE_FILTER,
-			static function () {
-				return 'yes';
-			}
-		);
-		$this->assertFalse( Payments::requires_reusable_payment_method(), 'A non-boolean answer counts as false.' );
+		$answer = 'yes';
+		$filter = static function () use ( &$answer ) {
+			return $answer;
+		};
+		add_filter( self::REUSABLE_FILTER, $filter );
+		$this->assertTrue( Payments::requires_reusable_payment_method(), 'A truthy answer counts as true.' );
+
+		$answer = 0;
+		$this->assertFalse( Payments::requires_reusable_payment_method(), 'A falsy answer counts as false.' );
 	}
 
 	/**
