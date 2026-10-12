@@ -326,6 +326,32 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Among notified contracts, the least recently notified goes first, so stuck older ones do not starve a later-due retry.
+	 */
+	public function test_stuck_contracts_do_not_starve_a_later_due_retry(): void {
+		global $wpdb;
+
+		$this->register_recording_handler();
+		$stuck = array();
+		for ( $i = 0; $i < 101; $i++ ) {
+			$stuck[] = $this->create_due_contract( '2026-01-15 00:00:00' );
+		}
+		$retry = $this->create_due_contract( '2026-02-10 00:00:00' );
+
+		// The stuck contracts were re-notified recently; the retry's handler threw a while ago.
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		foreach ( $stuck as $id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
+
+		$this->assertSame( 50, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( $retry, $this->calls[0]['contract']->get_id(), 'The least recently notified contract goes first despite its later due moment.' );
+	}
+
+	/**
 	 * @testdox ensure_scheduled schedules only when a handler exists, is idempotent, and unschedules when the last handler-owner leaves.
 	 */
 	public function test_ensure_scheduled_follows_the_handler_owners(): void {
