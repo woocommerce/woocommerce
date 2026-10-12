@@ -8,6 +8,8 @@
  * keeps (`schedule_source` `subscriptions_engine`) are dispatched; a gateway or extension
  * that keeps its own schedule triggers its own renewals. The engine decides nothing about
  * what a due contract means: renewing, skipping or clearing the due moment is the owner's call.
+ * A handler is expected to move or clear the due moment; one that does not is notified
+ * again after the claim expires, behind contracts not yet notified.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch
  */
@@ -41,8 +43,10 @@ final class DueDispatcher {
 	public const GROUP = 'woocommerce_subscriptions_engine';
 
 	/**
-	 * How long a dispatch claim hides a notified contract from later scans, in seconds. A
-	 * handler that leaves the due moment unchanged is notified again once the claim expires.
+	 * How long a dispatch claim hides a notified contract from later scans, in seconds,
+	 * measured on the database clock. Any write of `next_payment_gmt` releases the claim
+	 * early. A handler that leaves the due moment unwritten is notified again once the claim
+	 * expires, behind contracts not yet notified for their current due moment.
 	 */
 	public const CLAIM_TTL_SECONDS = 900;
 
@@ -153,7 +157,8 @@ final class DueDispatcher {
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
 	 * @param int                    $limit Maximum due contracts this tick; non-positive is a no-op.
-	 * @return int The number of contracts whose handler was called.
+	 * @return int The number of contracts whose handler returned without throwing; lost
+	 *             claims, missing contracts or handlers, and throwing handlers are not counted.
 	 */
 	public function run_batch( ?DateTimeImmutable $now = null, int $limit = self::BATCH_SIZE ): int {
 		if ( $limit < 1 ) {

@@ -367,8 +367,9 @@ final class SchemaInstaller {
 		// order, since billing-in-advance fires at `starts_at_gmt`. `order_id` is non-1:1
 		// (an aggregate order may serve many cycles); `contract_kind` serves targeted
 		// per-chain reads (MAX(count), head). `claimed_until` is the cycle lease: stamped when
-		// a caller claims a `pending` cycle, claimable again once it passes; the chain's
-		// UNIQUE positions remain the primary guard against a duplicate cycle.
+		// a caller appends, claims or transitions a cycle with a lease, claimable again once
+		// it passes; the chain's UNIQUE positions remain the primary guard against a duplicate
+		// cycle.
 		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.
 		$cycles_sql = "CREATE TABLE {$cycles} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

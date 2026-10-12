@@ -108,7 +108,7 @@ final class ContractRepository {
 	 *
 	 * Updates the contract row in place, then reconciles items / addresses only when
 	 * they differ (meta is never touched). A full write also releases the due-dispatch
-	 * claim: a claim lives only as long as the due moment it was taken on. No transaction
+	 * claim, as any write of `next_payment_gmt` does, even to the same moment. No transaction
 	 * (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
@@ -132,9 +132,9 @@ final class ContractRepository {
 	/**
 	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
 	 * and replace items / addresses when named. Unnamed columns keep their stored
-	 * values, so a concurrent write to them is not reverted. Writing `next_payment_gmt`
-	 * also releases the due-dispatch claim (a claim lives only as long as the due moment
-	 * it was taken on). Existence is checked only when the row write changes nothing.
+	 * values, so a concurrent write to them is not reverted. Any write of `next_payment_gmt`,
+	 * even to the moment already stored, also releases the due-dispatch claim. Existence
+	 * is checked only when the row write changes nothing.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.

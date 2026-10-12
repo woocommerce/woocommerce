@@ -143,9 +143,9 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
-	 * Lease expiry (GMT string), or null. Set when a caller claims a `pending` cycle; once
-	 * it passes, another caller may claim the cycle. The chain's UNIQUE positions remain
-	 * the primary guard against a duplicate cycle.
+	 * Lease expiry (GMT string), or null. Set when a caller appends a cycle claimed, claims
+	 * it, or transitions it with a lease; once it passes, another caller may claim the
+	 * cycle. The chain's UNIQUE positions remain the primary guard against a duplicate cycle.
 	 *
 	 * @var string|null
 	 */
