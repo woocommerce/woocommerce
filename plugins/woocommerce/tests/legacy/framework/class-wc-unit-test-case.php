@@ -63,11 +63,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $customer_state_at_setup = array();
 
 	/**
-	 * $_SERVER['REQUEST_URI'] at setUp(), or null when it was not set.
+	 * $_SERVER at setUp().
 	 *
-	 * @var string|null
+	 * @var array<string, mixed>
 	 */
-	private $request_uri_at_setup;
+	private $server_at_setup = array();
 
 	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
@@ -170,7 +170,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$this->customer_at_setup       = WC()->customer instanceof WC_Customer ? WC()->customer : null;
 		$this->customer_state_at_setup = $this->customer_at_setup ? self::customer_state( $this->customer_at_setup ) : array();
 
-		$this->request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Kept verbatim to restore at teardown.
+		$this->server_at_setup = $_SERVER;
 	}
 
 	/**
@@ -179,15 +179,18 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * The cart contents, the cart context, the queued notices, the cached country
 	 * locale, and the customer all live on the WC() singletons, which neither the
 	 * per-test database rollback nor the hook restore resets, so clear them here or
-	 * they leak into every later test in the process. The same goes for the
-	 * REQUEST_URI that go_to() sets.
+	 * they leak into every later test in the process. The same goes for $_SERVER,
+	 * which WordPress only resets for its own core tests.
 	 *
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
 		try {
-			$this->clear_wc_singleton_state();
-			$this->restore_request_uri();
+			try {
+				$this->clear_wc_singleton_state();
+			} finally {
+				$this->restore_server_superglobal();
+			}
 		} finally {
 			// The parent teardown must always run: it rolls back the database
 			// transaction and restores the hooks. Skipping it would poison every
@@ -266,15 +269,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Put back the REQUEST_URI from setUp(). go_to() overwrites it, and code that compares it to
-	 * a permalink would otherwise see the previous test's page.
+	 * Put back $_SERVER from setUp(). Tests change it directly and through go_to(), and code that
+	 * reads the request URI, client IP or user agent would otherwise see the previous test's values.
 	 */
-	protected function restore_request_uri(): void {
-		if ( null === $this->request_uri_at_setup ) {
-			unset( $_SERVER['REQUEST_URI'] );
-		} else {
-			$_SERVER['REQUEST_URI'] = $this->request_uri_at_setup;
-		}
+	protected function restore_server_superglobal(): void {
+		$_SERVER = $this->server_at_setup;
 	}
 
 	/**
