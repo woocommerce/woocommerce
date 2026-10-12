@@ -114,8 +114,7 @@ describe( 'woocommerce.js apostrophe prefilter with real jQuery', () => {
 	} );
 
 	test( 'should let a prefilter registered later read the original data as an object', () => {
-		// The shape HurryTimer and Global Seller Services use. Plugin scripts load
-		// after woocommerce.js, so their prefilters run after ours.
+		// The shape HurryTimer and Global Seller Services use, added after ours.
 		const seen = {};
 		$.ajaxPrefilter( ( options, originalOptions ) => {
 			seen.originalType = typeof originalOptions.data;

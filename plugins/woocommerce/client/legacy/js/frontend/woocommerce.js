@@ -8,8 +8,9 @@
  * server with literal apostrophes that some WAF rules reject. Running as a
  * prefilter lets jQuery serialize the request first, so removed (undefined)
  * fields are dropped and `originalOptions.data` stays the object the caller
- * passed. Prefilters registered after this one, and `beforeSend` handlers,
- * see the encoded string in `options.data`.
+ * passed. `beforeSend` handlers and `'*'` prefilters that run after this one
+ * see the encoded string in `options.data`. Prefilters for a specific data
+ * type, or added earlier or with `'+*'`, run first and see the unencoded one.
  */
 jQuery.ajaxPrefilter( function ( options ) {
 	if ( options.wc_encode_apostrophes && 'string' === typeof options.data ) {
