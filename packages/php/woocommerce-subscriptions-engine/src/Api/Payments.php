@@ -1,0 +1,137 @@
+<?php
+/**
+ * Payments - the engine's broker between extensions and payment gateways.
+ *
+ * Gateways integrate once: they declare the `subscriptions_engine` feature in their
+ * `$supports`, charge on the scheduled-payment action and answer nothing else. Extensions
+ * ask whether a gateway can charge off-session, request a charge for an order they built,
+ * and answer whether an order needs a reusable payment method. The engine fires and
+ * aggregates; it reads no outcome and writes nothing.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine\Api
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
+
+use Throwable;
+use WC_Order;
+use WC_Payment_Gateway;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Public payments facade.
+ *
+ * Final and static-only: a stateless entry point, not an extension seam.
+ */
+final class Payments {
+
+	/**
+	 * The feature a gateway adds to its `$supports` to accept engine charges: it charges
+	 * an order off-session on `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}`.
+	 */
+	public const GATEWAY_FEATURE = 'subscriptions_engine';
+
+	/**
+	 * Logger source tag.
+	 */
+	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
+
+	/**
+	 * Whether a registered gateway supports engine charges ({@see self::GATEWAY_FEATURE}).
+	 * Reads the gateway's `supports()`, so core's `woocommerce_payment_gateway_supports`
+	 * filter applies. False for an empty or unknown id, or when WooCommerce is not loaded.
+	 *
+	 * @param string $gateway_id Gateway id.
+	 */
+	public static function supports_gateway( string $gateway_id ): bool {
+		$gateway = self::get_gateway( $gateway_id );
+
+		return null !== $gateway && $gateway->supports( self::GATEWAY_FEATURE );
+	}
+
+	/**
+	 * Ask the order's gateway to charge it off-session.
+	 *
+	 * Fires `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}` only when the order
+	 * needs payment, has a payment method, totals more than zero, and its gateway supports
+	 * engine charges. The outcome is the order's status; a throwing gateway is logged.
+	 *
+	 * @param WC_Order $order Order to charge, carrying the payment method and token.
+	 * @return bool True when the charge action fired; false when a precondition failed.
+	 */
+	public static function charge( WC_Order $order ): bool {
+		$gateway_id = $order->get_payment_method();
+		$amount     = (float) $order->get_total();
+
+		if ( '' === $gateway_id || $amount <= 0 || ! $order->needs_payment() || ! self::supports_gateway( $gateway_id ) ) {
+			return false;
+		}
+
+		try {
+			/**
+			 * Fires to charge an order off-session. The gateway charges `$amount` against the
+			 * payment method and token stored on the order, then reports the outcome through the
+			 * order status: paid (`payment_complete()`), `failed` on a decline, or `on-hold` while
+			 * an asynchronous charge awaits confirmation.
+			 *
+			 * @param float    $amount The amount to charge, in the order currency.
+			 * @param WC_Order $order  The order to charge.
+			 */
+			do_action( 'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway_id, $amount, $order );
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Payments::charge(): the %s gateway threw while charging order %d: %s', $gateway_id, $order->get_id(), $e->getMessage() ),
+				array(
+					'source'   => self::LOG_SOURCE,
+					'order_id' => $order->get_id(),
+				)
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether an order (or, with null, the current cart) needs a payment method that can be
+	 * charged off-session - the question a gateway asks before deciding to save the method.
+	 * Extensions answer through the filter below; the engine decides nothing.
+	 *
+	 * @param WC_Order|null $order The order being paid, or null for the current cart.
+	 */
+	public static function requires_reusable_payment_method( ?WC_Order $order = null ): bool {
+		/**
+		 * Filters whether an order (or, with a null order, the current cart) needs a payment
+		 * method that can be charged off-session. Extensions return true for what they will
+		 * charge later; only a boolean true counts.
+		 *
+		 * @param bool          $requires Whether a reusable payment method is required. Default false.
+		 * @param WC_Order|null $order    The order being paid, or null for the current cart.
+		 */
+		$requires = apply_filters( 'woocommerce_subscriptions_engine_requires_reusable_payment_method', false, $order );
+
+		return true === $requires;
+	}
+
+	/**
+	 * The registered gateway instance for an id, or null.
+	 *
+	 * @param string $gateway_id Gateway id.
+	 */
+	private static function get_gateway( string $gateway_id ): ?WC_Payment_Gateway {
+		if ( '' === $gateway_id || ! function_exists( 'WC' ) ) {
+			return null;
+		}
+
+		$gateways = WC()->payment_gateways();
+		if ( ! is_object( $gateways ) || ! method_exists( $gateways, 'payment_gateways' ) ) {
+			return null;
+		}
+
+		$gateway = $gateways->payment_gateways()[ $gateway_id ] ?? null;
+
+		return $gateway instanceof WC_Payment_Gateway ? $gateway : null;
+	}
+}
