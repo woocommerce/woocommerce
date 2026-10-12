@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests;
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Tests that WC_Unit_Test_Case clears the WC() singleton state that neither the per-test
  * database rollback nor the hook restore covers.
@@ -114,4 +116,20 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $server_at_setup, $_SERVER, '$_SERVER should be back to what it was at setUp().' );
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 	}
+
+	/**
+	 * @testdox Constants overrides a test sets or clears do not outlive the test.
+	 */
+	public function test_restore_constant_overrides_undoes_overrides(): void {
+		$overrides_at_setup = Constants::$set_constants;
+
+		Constants::set_constant( 'WC_TEARDOWN_LEAKED_CONSTANT', 'leaked' );
+		Constants::clear_constants();
+		Constants::set_constant( 'WC_TEARDOWN_LEAKED_CONSTANT', 'leaked' );
+
+		$this->restore_constant_overrides();
+
+		$this->assertSame( $overrides_at_setup, Constants::$set_constants, 'The overrides should be back to what they were at setUp().' );
+	}
+
 }

@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests
  */
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -68,6 +69,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @var array<string, mixed>
 	 */
 	private $server_at_setup = array();
+
+	/**
+	 * Constants::$set_constants at setUp().
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $constant_overrides_at_setup = array();
 
 	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
@@ -170,7 +178,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$this->customer_at_setup       = WC()->customer instanceof WC_Customer ? WC()->customer : null;
 		$this->customer_state_at_setup = $this->customer_at_setup ? self::customer_state( $this->customer_at_setup ) : array();
 
-		$this->server_at_setup = $_SERVER;
+		$this->server_at_setup             = $_SERVER;
+		$this->constant_overrides_at_setup = Constants::$set_constants;
 	}
 
 	/**
@@ -180,22 +189,23 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * locale, and the customer all live on the WC() singletons, which neither the
 	 * per-test database rollback nor the hook restore resets, so clear them here or
 	 * they leak into every later test in the process. The same goes for $_SERVER,
-	 * which WordPress only resets for its own core tests.
+	 * which WordPress only resets for its own core tests, and for Constants overrides.
 	 *
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
 		try {
-			try {
-				$this->clear_wc_singleton_state();
-			} finally {
-				$this->restore_server_superglobal();
-			}
+			$this->clear_wc_singleton_state();
 		} finally {
-			// The parent teardown must always run: it rolls back the database
-			// transaction and restores the hooks. Skipping it would poison every
-			// test that runs after this one.
-			parent::tearDown();
+			try {
+				$this->restore_server_superglobal();
+				$this->restore_constant_overrides();
+			} finally {
+				// The parent teardown must always run: it rolls back the database
+				// transaction and restores the hooks. Skipping it would poison every
+				// test that runs after this one.
+				parent::tearDown();
+			}
 		}
 	}
 
@@ -275,6 +285,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	protected function restore_server_superglobal(): void {
 		$_SERVER = $this->server_at_setup;
 	}
+
+	/**
+	 * Put back the Constants overrides from setUp(). Constants::set_constant() keeps them in a static
+	 * store, so one a test forgets to clear would otherwise apply to every later test.
+	 */
+	protected function restore_constant_overrides(): void {
+		Constants::$set_constants = $this->constant_overrides_at_setup;
+	}
+
 
 	/**
 	 * Fire rest_api_init with only the provided callbacks attached.
