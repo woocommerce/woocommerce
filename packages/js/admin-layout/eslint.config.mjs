@@ -11,7 +11,6 @@ export default [
 			'import/core-modules': [ ...coreModules ],
 			'import/resolver': {
 				node: {},
-				webpack: {},
 				typescript: {},
 			},
 		},

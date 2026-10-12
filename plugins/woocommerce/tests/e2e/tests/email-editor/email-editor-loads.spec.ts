@@ -13,7 +13,7 @@ import {
 	disableEmailEditor,
 	enableEmailEditor,
 } from './helpers/enable-email-editor-feature';
-import { accessTheEmailEditor } from '../../utils/email';
+import { accessTheEmailEditor, openEmailPostInEditor } from '../../utils/email';
 import { setOption } from '../../utils/options';
 
 test.describe(
@@ -33,9 +33,16 @@ test.describe(
 		};
 
 		const accessAndTrackEmailPost = async ( page: Page ) => {
+			const [ knownPostId ] = emailPostIds;
 			let postId: string | null = null;
 			try {
-				await accessTheEmailEditor( page, 'New order' );
+				// The settings page is slow, so only the first test in a worker opens
+				// the editor through it. The lock keeps the post in place until afterAll.
+				if ( knownPostId ) {
+					await openEmailPostInEditor( page, knownPostId );
+				} else {
+					await accessTheEmailEditor( page, 'New order' );
+				}
 			} finally {
 				postId = captureEmailPostId( page );
 			}

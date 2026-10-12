@@ -47,7 +47,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 					? {
 							...state,
 							status: IDLE,
-					  }
+						}
 					: state;
 			break;
 		case SET_DISABLED:
@@ -56,7 +56,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 					? {
 							...state,
 							status: DISABLED,
-					  }
+						}
 					: state;
 			break;
 		case SET_QUANTITY:
@@ -65,7 +65,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 					? {
 							...state,
 							quantity,
-					  }
+						}
 					: state;
 			break;
 		case SET_REQUEST_PARAMS:
@@ -90,7 +90,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 							...state,
 							status: PROCESSING,
 							hasError: false,
-					  }
+						}
 					: state;
 			// clear any error state.
 			newState =
@@ -105,7 +105,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 							...state,
 							status: BEFORE_PROCESSING,
 							hasError: false,
-					  }
+						}
 					: state;
 			break;
 		case SET_AFTER_PROCESSING:
@@ -114,7 +114,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 					? {
 							...state,
 							status: AFTER_PROCESSING,
-					  }
+						}
 					: state;
 			break;
 		case SET_HAS_ERROR:
@@ -123,14 +123,14 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 				: {
 						...state,
 						hasError: true,
-				  };
+					};
 			newState =
 				state.status === PROCESSING ||
 				state.status === BEFORE_PROCESSING
 					? {
 							...newState,
 							status: IDLE,
-					  }
+						}
 					: newState;
 			break;
 		case SET_NO_ERROR:
@@ -138,7 +138,7 @@ export const reducer = ( state = DEFAULT_STATE, { quantity, type, data } ) => {
 				? {
 						...state,
 						hasError: false,
-				  }
+					}
 				: state;
 			break;
 	}

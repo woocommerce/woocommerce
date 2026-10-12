@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -31,6 +32,13 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	private $previous_old_full_refund_flag;
 
 	/**
+	 * Post status registered by a test, unregistered in tearDown() so a failed assertion does not leak it.
+	 *
+	 * @var string|null
+	 */
+	private $registered_post_status = null;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -52,6 +60,10 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			update_option( 'woocommerce_analytics_uses_old_full_refund_data', $this->previous_old_full_refund_flag );
 		} else {
 			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		}
+		if ( null !== $this->registered_post_status ) {
+			unset( $GLOBALS['wp_post_statuses'][ $this->registered_post_status ] );
+			$this->registered_post_status = null;
 		}
 		parent::tearDown();
 	}
@@ -570,8 +582,9 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	public function test_returning_customer_recalculated_for_long_excluded_status(): void {
 		global $wpdb;
 
-		$long_status = 'competition-completed';
-		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
+		$long_status                  = 'competition-completed';
+		$this->registered_post_status = 'wc-' . $long_status;
+		register_post_status( $this->registered_post_status, array( 'public' => true ) );
 		$add_status = function ( $statuses ) use ( $long_status ) {
 			$statuses[ 'wc-' . $long_status ] = 'Competition Completed';
 			return $statuses;
@@ -602,11 +615,34 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$this->assertSame( '0', $returning_flag( $order_1->get_id() ), 'Oldest order should start as the non-returning first order.' );
 		$this->assertSame( '1', $returning_flag( $order_2->get_id() ), 'Second order should start as returning.' );
 
-		// Core warns when saving a status longer than the 20-char column; that
-		// truncated storage is the exact scenario under test.
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
-		$order_1->set_status( $long_status );
-		$order_1->save();
+		// Saving the long status stores nothing: WordPress refuses to shorten an
+		// overlength value for the posts table, and the orders table only keeps a
+		// truncated one while strict SQL mode is off. Write the truncated status
+		// the reports are meant to read.
+		$truncated_status = mb_substr( 'wc-' . $long_status, 0, 20 );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				$wpdb->prefix . 'wc_orders',
+				array( 'status' => $truncated_status ),
+				array( 'id' => $order_1->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			wc_get_container()->get( OrdersTableDataStore::class )->clear_cached_data( array( $order_1->get_id() ) );
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => $truncated_status ),
+				array( 'ID' => $order_1->get_id() ),
+				array( '%s' ),
+				array( '%d' )
+			);
+			clean_post_cache( $order_1->get_id() );
+		}
+
+		if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			wc_get_container()->get( OrderCache::class )->remove( $order_1->get_id() );
+		}
 
 		// Reload so the order reports the truncated status actually stored in the database.
 		$order_1 = wc_get_order( $order_1->get_id() );
@@ -620,8 +656,5 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			$returning_flag( $order_2->get_id() ),
 			'The next oldest order should be reassigned as the customer\'s first order.'
 		);
-
-		remove_filter( 'wc_order_statuses', $add_status );
-		unset( $GLOBALS['wp_post_statuses'][ 'wc-' . $long_status ] );
 	}
 }
