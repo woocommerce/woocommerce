@@ -242,7 +242,10 @@ abstract class ActionableAbility extends \WP_Ability {
 
 		$schema['properties']['extensions'] = $extensions;
 		foreach ( array_keys( $schema['oneOf'] ?? array() ) as $index ) {
-			$schema['oneOf'][ $index ]['properties']['extensions'] = array( 'type' => 'object' );
+			$schema['oneOf'][ $index ]['properties']['extensions'] = array(
+				'type'        => 'object',
+				'description' => __( 'The fields are listed in the top-level extensions property.', 'woocommerce' ),
+			);
 		}
 		return $schema;
 	}

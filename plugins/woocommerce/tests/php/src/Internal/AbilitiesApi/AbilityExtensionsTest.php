@@ -684,6 +684,9 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$this->assertSame( 400, $response->get_status(), wp_json_encode( $extensions ) );
+			if ( isset( $extensions['other_ext']['count'] ) && 'many' === $extensions['other_ext']['count'] ) {
+				$this->assertStringContainsString( 'input[extensions][other_ext][count] is not of type integer,null.', $response->get_data()['message'] );
+			}
 		}
 		$saved = wc_get_product( $product->get_id() );
 		$this->assertSame( 'Pen', $saved->get_name() );
@@ -874,7 +877,8 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			foreach ( $schema['oneOf'] as $branch ) {
-				$this->assertSame( array( 'type' => 'object' ), $branch['properties']['extensions'] );
+				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
+				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
 			}
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
