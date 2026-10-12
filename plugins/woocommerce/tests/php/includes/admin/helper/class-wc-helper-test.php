@@ -201,19 +201,17 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 * @testdox get_subscriptions should filter malformed API entries before caching them.
 	 */
 	public function test_get_subscriptions_filters_malformed_api_entries(): void {
-		$response_data         = $this->get_mixed_subscription_data();
-		$previous_auth         = WC_Helper_Options::get( 'auth', array() );
-		$previous_log          = WC_Helper::$log;
-		$had_wp_debug_override = array_key_exists( 'WP_DEBUG', Constants::$set_constants );
-		$previous_wp_debug     = Constants::$set_constants['WP_DEBUG'] ?? null;
-		$filtered_count        = count( $response_data ) - count( $this->get_valid_subscription_data() );
-		$http_mock             = static function () use ( $response_data ) {
+		$response_data  = $this->get_mixed_subscription_data();
+		$previous_auth  = WC_Helper_Options::get( 'auth', array() );
+		$previous_log   = WC_Helper::$log;
+		$filtered_count = count( $response_data ) - count( $this->get_valid_subscription_data() );
+		$http_mock      = static function () use ( $response_data ) {
 			return array(
 				'response' => array( 'code' => 200 ),
 				'body'     => wp_json_encode( $response_data ),
 			);
 		};
-		$logger                = $this->createMock( WC_Logger_Interface::class );
+		$logger         = $this->createMock( WC_Logger_Interface::class );
 		$logger->expects( $this->once() )
 			->method( 'log' )
 			->with(
@@ -241,11 +239,6 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_mock );
 			WC_Helper_Options::update( 'auth', $previous_auth );
 			WC_Helper::$log = $previous_log;
-			if ( $had_wp_debug_override ) {
-				Constants::set_constant( 'WP_DEBUG', $previous_wp_debug );
-			} else {
-				Constants::clear_single_constant( 'WP_DEBUG' );
-			}
 		}
 
 		$this->assertSame( $this->get_valid_subscription_data(), $result, 'Only valid API subscriptions should be returned unchanged' );

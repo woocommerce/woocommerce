@@ -181,7 +181,6 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 			$tool = $this->endpoint->get_tools()['regenerate_product_lookup_tables'];
 			$this->assertStringContainsString( 'View queued updates', $tool['status_text'] );
 		} finally {
-			\Automattic\Jetpack\Constants::clear_single_constant( 'DISABLE_WP_CRON' );
 			as_unschedule_all_actions( '', array(), 'wc_update_product_lookup_tables' );
 		}
 	}

@@ -63,7 +63,6 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 
 		unset( $GLOBALS['wp_filesystem'] );
 		$this->reset_legacy_proxy_mocks();
-		Constants::clear_constants();
 		$this->reset_direct_filesystem_cache();
 
 		parent::tearDown();

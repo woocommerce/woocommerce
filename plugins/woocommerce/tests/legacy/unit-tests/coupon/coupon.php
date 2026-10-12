@@ -25,15 +25,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Cleans up after the test class.
-	 */
-	public function tearDown(): void {
-		\Automattic\Jetpack\Constants::clear_single_constant( 'WOOCOMMERCE_CHECKOUT' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test the code/id differentiation of the coupon constructor.
 	 *
 	 * @since 3.2

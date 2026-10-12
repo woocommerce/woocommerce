@@ -26,7 +26,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		parent::tearDown();
 	}

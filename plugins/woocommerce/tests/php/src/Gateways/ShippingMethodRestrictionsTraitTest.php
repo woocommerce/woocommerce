@@ -76,7 +76,6 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 			$this->set_order_pay_query_var( null );
 			set_query_var( 'wc-ajax', '' );
 			remove_all_actions( 'wc_ajax_shipping_restrictions_test' );
-			Constants::clear_single_constant( 'WC_DOING_AJAX' );
 			WC()->session->set( 'chosen_shipping_methods', null );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
 			WC()->shipping()->enabled = $this->shipping_was_enabled;
