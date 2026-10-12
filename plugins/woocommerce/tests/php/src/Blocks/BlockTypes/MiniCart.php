@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
  *
  * @since $VID:$
  */
-class MiniCart extends \WP_UnitTestCase {
+class MiniCart extends \WC_Unit_Test_Case {
 
 	/**
 	 * Mock instance of the MiniCart block.
@@ -22,13 +22,6 @@ class MiniCart extends \WP_UnitTestCase {
 	 * @var MiniCartMock
 	 */
 	protected $mock;
-
-	/**
-	 * The original block type registry entry for the MiniCart block.
-	 *
-	 * @var \WP_Block_Type
-	 */
-	protected $original_block_type;
 
 	/**
 	 * The upcoming template for the Mini-Cart block.
@@ -123,9 +116,8 @@ class MiniCart extends \WP_UnitTestCase {
 
 		$registry = \WP_Block_Type_Registry::get_instance();
 
-		$this->original_block_type = null;
+		// The base test case registers the original again after the test.
 		if ( $registry->is_registered( 'woocommerce/mini-cart' ) ) {
-			$this->original_block_type = $registry->get_registered( 'woocommerce/mini-cart' );
 			$registry->unregister( 'woocommerce/mini-cart' );
 		}
 
@@ -144,22 +136,6 @@ class MiniCart extends \WP_UnitTestCase {
 		);
 		WC()->cart->empty_cart();
 		add_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
-	}
-
-	/**
-	 * Tear down test. Called after every test.
-	 * @return void
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-		WC()->cart->empty_cart();
-		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
-
-		$registry = \WP_Block_Type_Registry::get_instance();
-		$registry->unregister( 'woocommerce/mini-cart' );
-		if ( $this->original_block_type ) {
-			$registry->register( $this->original_block_type );
-		}
 	}
 
 	/**

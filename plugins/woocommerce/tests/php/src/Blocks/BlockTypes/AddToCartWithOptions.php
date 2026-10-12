@@ -14,12 +14,12 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 /**
  * Tests for the AddToCartWithOptions block type
  */
-class AddToCartWithOptions extends \WP_UnitTestCase {
+class AddToCartWithOptions extends \WC_Unit_Test_Case {
 
 	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		AddToCartWithOptionsMocks::register_all();
@@ -727,7 +727,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup = do_blocks( $block );
 			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the wishlist feature is disabled.' );
 		} finally {
-			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
 			$features->change_feature_enable( 'product_wishlist', $original );
 		}
 	}

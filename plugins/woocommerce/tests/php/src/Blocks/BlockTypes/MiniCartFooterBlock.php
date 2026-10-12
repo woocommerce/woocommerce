@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
  *
  * @since 10.4.0
  */
-class MiniCartFooterBlock extends \WP_UnitTestCase {
+class MiniCartFooterBlock extends \WC_Unit_Test_Case {
 
 	/**
 	 * Instance of the block being tested.
@@ -23,13 +23,6 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 	protected $block;
 
 	/**
-	 * The original block type registry entry for the block.
-	 *
-	 * @var \WP_Block_Type|null
-	 */
-	private $original_block_type;
-
-	/**
 	 * Setup test.
 	 */
 	public function setUp(): void {
@@ -37,8 +30,8 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 
 		$registry = \WP_Block_Type_Registry::get_instance();
 
-		$this->original_block_type = $registry->get_registered( 'woocommerce/mini-cart-footer-block' );
-		if ( $this->original_block_type ) {
+		// The base test case registers the original again after the test.
+		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
 			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
 		}
 
@@ -47,21 +40,6 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 			Package::container()->get( AssetDataRegistry::class ),
 			new IntegrationRegistry()
 		);
-	}
-
-	/**
-	 * Tear down test.
-	 */
-	public function tearDown(): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
-			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
-		}
-		if ( $this->original_block_type ) {
-			$registry->register( $this->original_block_type );
-		}
-		unset( $this->block );
-		parent::tearDown();
 	}
 
 	/**

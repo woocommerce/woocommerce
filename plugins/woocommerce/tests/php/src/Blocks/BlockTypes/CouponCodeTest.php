@@ -11,7 +11,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 /**
  * Tests for the CouponCode block type.
  */
-class CouponCodeTest extends \WP_UnitTestCase {
+class CouponCodeTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Mock instance of the CouponCode block.
@@ -28,13 +28,6 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	private Rendering_Context $rendering_context;
 
 	/**
-	 * The original block type registry entry for the CouponCode block.
-	 *
-	 * @var \WP_Block_Type|null
-	 */
-	private $original_block_type;
-
-	/**
 	 * Setup test fixtures.
 	 */
 	public function setUp(): void {
@@ -42,9 +35,8 @@ class CouponCodeTest extends \WP_UnitTestCase {
 
 		$registry = \WP_Block_Type_Registry::get_instance();
 
-		$this->original_block_type = null;
+		// The base test case registers the original again after the test.
 		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$this->original_block_type = $registry->get_registered( 'woocommerce/coupon-code' );
 			$registry->unregister( 'woocommerce/coupon-code' );
 		}
 
@@ -52,23 +44,6 @@ class CouponCodeTest extends \WP_UnitTestCase {
 
 		$theme_controller        = Email_Editor_Container::container()->get( Theme_Controller::class );
 		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme(), array() );
-	}
-
-	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$registry->unregister( 'woocommerce/coupon-code' );
-		}
-
-		if ( $this->original_block_type ) {
-			$registry->register( $this->original_block_type );
-		}
-
-		parent::tearDown();
 	}
 
 	/**
