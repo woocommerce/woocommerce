@@ -2558,7 +2558,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
 				$item_id       = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
-				$unsaved_item  = $item_id || $this->writing_through ? null : $this->get_unsaved_coupon_item( $coupon_code );
+				$unsaved_item  = $item_id ? null : $this->get_unsaved_coupon_item( $coupon_code );
 				$reuse_unsaved = null !== $unsaved_item;
 
 				if ( $reuse_unsaved ) {

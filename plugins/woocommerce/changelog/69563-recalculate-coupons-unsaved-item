@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix recalculating coupons on an order duplicating a coupon line or failing when the order has unsaved items.
