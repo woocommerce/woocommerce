@@ -31,6 +31,11 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// The container keeps the product_cat hierarchy map across tests, and nothing here clears it when
+		// terms are created or deleted. Clear it before and after, so this class neither reads a stale
+		// map nor leaves its own behind.
+		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
+
 		add_filter( 'woocommerce_pre_product_filter_data', array( $this, 'filter_product_filter_data' ), 10, 4 );
 	}
 
@@ -44,7 +49,6 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 			wp_delete_term( $term_id, 'product_cat' );
 		}
 
-		// Nothing clears the map on delete_term here either, so drop the one this class built.
 		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
 
 		parent::tearDown();
@@ -57,9 +61,6 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 		$term = wp_insert_term( 'Indoor & Tropical Bonsai', 'product_cat' );
 
 		$this->assertNotWPError( $term );
-
-		// The container keeps the hierarchy map built by earlier tests, and nothing clears it on created_term here.
-		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
 
 		$term_id                       = (int) $term['term_id'];
 		$this->term_ids[]              = $term_id;
