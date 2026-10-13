@@ -92,6 +92,7 @@ packages:
     - 'packages/js/*'
     - 'packages/php/*'
     - 'plugins/*'
+    - 'themes'
     - 'plugins/woocommerce/admin-screens'
     - 'plugins/woocommerce/client/admin'
     - 'plugins/woocommerce/client/blocks'

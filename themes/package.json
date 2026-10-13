@@ -1,0 +1,23 @@
+{
+	"name": "@woocommerce/themes",
+	"description": "Shared development tools for WooCommerce themes.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"scripts": {
+		"validate": "node scripts/validate-theme.mjs",
+		"build:zip": "node scripts/build-zip.mjs",
+		"lint:php": "node scripts/lint-php.mjs",
+		"changelog": "composer exec -- changelogger",
+		"lint": "prettier --check scripts package.json composer.json .wp-env.json",
+		"env:start": "wp-env start",
+		"env:stop": "wp-env stop",
+		"wp-env": "wp-env"
+	},
+	"devDependencies": {
+		"@wordpress/env": "catalog:tooling",
+		"ajv": "^8.17.1"
+	}
+}

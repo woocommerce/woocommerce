@@ -3892,6 +3892,15 @@ importers:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
 
+  themes:
+    devDependencies:
+      '@wordpress/env':
+        specifier: catalog:tooling
+        version: 11.17.0(@types/node@24.12.2)
+      ajv:
+        specifier: ^8.17.1
+        version: 8.18.0
+
   tools/code-analyzer:
     dependencies:
       '@actions/core':
