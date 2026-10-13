@@ -1186,6 +1186,7 @@ class WC_Helper_Updater {
 		}
 
 		set_transient( $cache_key, $data, WEEK_IN_SECONDS );
+		delete_transient( '_woocommerce_helper_updates_count' );
 		return $data['products'];
 	}
 
@@ -1201,17 +1202,13 @@ class WC_Helper_Updater {
 			return $count;
 		}
 
-		// This runs often, so it only counts from cached data; a cache that's stale or expired by a refresh triggers one update check here.
+		// This runs on every admin page, so it counts from the cached update data, even when stale, and never runs an update check.
 		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
 			return 0;
 		}
 
-		if ( ! get_transient( '_woocommerce_helper_updates' ) ) {
-			return 0;
-		}
-
 		$count       = 0;
-		$update_data = self::get_update_data();
+		$update_data = self::get_cached_products( get_transient( '_woocommerce_helper_updates' ), '' );
 
 		if ( empty( $update_data ) ) {
 			set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
@@ -1220,7 +1217,7 @@ class WC_Helper_Updater {
 
 		// Scan local plugins.
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
-			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
+			if ( ! isset( $update_data[ $plugin['_product_id'] ]['version'] ) ) {
 				continue;
 			}
 
@@ -1235,7 +1232,7 @@ class WC_Helper_Updater {
 
 		// Scan local themes.
 		foreach ( WC_Helper::get_local_woo_themes() as $theme ) {
-			if ( empty( $update_data[ $theme['_product_id'] ] ) ) {
+			if ( ! isset( $update_data[ $theme['_product_id'] ]['version'] ) ) {
 				continue;
 			}
 
