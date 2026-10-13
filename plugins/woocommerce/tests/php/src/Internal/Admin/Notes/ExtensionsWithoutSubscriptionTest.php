@@ -281,6 +281,38 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run no database queries while the extensions without a subscription haven't changed.
+	 */
+	public function test_unchanged_refresh_runs_no_queries(): void {
+		global $wpdb;
+		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
+		$this->sut->refresh_note();
+
+		$queries_before = $wpdb->num_queries;
+		$this->sut->refresh_note();
+
+		$this->assertSame( 0, $wpdb->num_queries - $queries_before, 'A refresh that changes nothing should not hit the database.' );
+		$this->assertTrue( ExtensionsWithoutSubscription::note_exists(), 'The note should still be there.' );
+	}
+
+	/**
+	 * @testdox Should run no database queries on a connected store without WooCommerce.com extensions.
+	 */
+	public function test_connected_store_without_extensions_runs_no_queries(): void {
+		global $wpdb;
+		$this->mock_active_woo_plugins( array() );
+		$this->connect_store();
+		$requests = $this->mock_subscription_requests();
+		$this->sut->refresh_note();
+
+		$queries_before = $wpdb->num_queries;
+		$this->sut->refresh_note();
+
+		$this->assertSame( 0, $wpdb->num_queries - $queries_before, 'With nothing to check there is nothing to read.' );
+		$this->assertSame( 0, $requests->count, 'With nothing to check there is nothing to fetch.' );
+	}
+
+	/**
 	 * @testdox Should do nothing outside WooCommerce admin pages.
 	 */
 	public function test_note_is_not_added_outside_woocommerce_pages(): void {

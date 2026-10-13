@@ -27,6 +27,11 @@ class ExtensionsWithoutSubscription {
 	const LAST_FETCH_OPTION_KEY = 'woocommerce_admin-extensions-without-subscription-last-fetch';
 
 	/**
+	 * Option holding the plugin files the note was last refreshed for, so unchanged page loads skip the notes table.
+	 */
+	const LAST_PLUGINS_OPTION_KEY = 'woocommerce_admin-extensions-without-subscription-last-plugins';
+
+	/**
 	 * Hook the note refresh.
 	 *
 	 * @since 11.3.0
@@ -38,6 +43,9 @@ class ExtensionsWithoutSubscription {
 	/**
 	 * Add, update or remove the note on WooCommerce admin pages, so it follows the installed extensions.
 	 *
+	 * Runs on every WooCommerce admin page, so it only touches the notes table when the set of
+	 * extensions without a subscription differs from the last refresh.
+	 *
 	 * @since 11.3.0
 	 */
 	public function refresh_note(): void {
@@ -45,10 +53,20 @@ class ExtensionsWithoutSubscription {
 			return;
 		}
 
-		$plugins = self::get_plugins( self::may_fetch() );
+		// Try the cached subscription list first, so a store with nothing to check never reads the fetch budget.
+		$plugins = self::get_plugins( false );
+		if ( null === $plugins && self::may_fetch() ) {
+			$plugins = self::get_plugins( true );
+		}
 
 		// Leave the note as it is while the subscription list can't be trusted.
 		if ( null === $plugins ) {
+			return;
+		}
+
+		$plugin_files = array_keys( $plugins );
+		sort( $plugin_files );
+		if ( get_option( self::LAST_PLUGINS_OPTION_KEY ) === $plugin_files ) {
 			return;
 		}
 
@@ -59,6 +77,8 @@ class ExtensionsWithoutSubscription {
 		} else {
 			self::possibly_add_note();
 		}
+
+		update_option( self::LAST_PLUGINS_OPTION_KEY, $plugin_files, true );
 	}
 
 	/**
