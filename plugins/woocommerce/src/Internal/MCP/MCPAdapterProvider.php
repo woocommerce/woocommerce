@@ -271,12 +271,14 @@ class MCPAdapterProvider {
 	/**
 	 * Get the admin URL for installing the MCP Adapter plugin.
 	 *
+	 * On multisite, plugins are installed from the network admin.
+	 *
 	 * @return string The plugin installer URL.
 	 *
 	 * @since 11.3.0
 	 */
 	public static function get_mcp_adapter_install_url(): string {
-		return admin_url( 'plugin-install.php?tab=search&type=term&s=mcp-adapter' );
+		return network_admin_url( 'plugin-install.php?tab=search&type=term&s=mcp-adapter' );
 	}
 
 	/**
