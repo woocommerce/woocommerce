@@ -2433,20 +2433,22 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$response = $this->server->dispatch( $request );
+		$quantity = wc_get_order( $order->get_id() )->get_item( $item->get_id() )->get_quantity();
 		remove_filter( 'woocommerce_stock_amount', 'floatval' );
 		add_filter( 'woocommerce_stock_amount', 'intval' );
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertEquals( 1.5, wc_get_order( $order->get_id() )->get_item( $item->get_id() )->get_quantity() );
+		$this->assertEquals( 1.5, $quantity );
 	}
 
 	/**
-	 * @testdox A fractional line item quantity is rejected when the store only allows whole quantities.
+	 * @testdox A fractional line item quantity rejects the whole update when the store only allows whole quantities.
 	 */
 	public function test_order_update_rejects_fractional_quantity_by_default(): void {
-		$order = WC_Helper_Order::create_order();
-		$items = $order->get_items();
-		$item  = reset( $items );
+		$order             = WC_Helper_Order::create_order();
+		$items             = $order->get_items();
+		$item              = reset( $items );
+		$original_quantity = $item->get_quantity();
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
@@ -2454,7 +2456,11 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'line_items' => array(
 					array(
 						'id'       => $item->get_id(),
-						'quantity' => 1.5,
+						'quantity' => $original_quantity + 2,
+					),
+					array(
+						'product_id' => WC_Helper_Product::create_simple_product()->get_id(),
+						'quantity'   => 1.5,
 					),
 				),
 			)
@@ -2463,6 +2469,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_invalid_quantity', $response->get_data()['code'] );
+		$this->assertEquals( $original_quantity, wc_get_order( $order->get_id() )->get_item( $item->get_id() )->get_quantity() );
 	}
 
 	/**

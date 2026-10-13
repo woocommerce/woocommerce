@@ -115,6 +115,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
+		$this->validate_line_item_quantities( $request['line_items'] );
+
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
 			$value = $request[ $key ];
