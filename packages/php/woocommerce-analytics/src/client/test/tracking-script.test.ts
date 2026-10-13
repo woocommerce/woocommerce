@@ -60,4 +60,19 @@ describe( 'activateTrackingScript', () => {
 		expect( scripts ).toHaveLength( 1 );
 		expect( scripts[ 0 ].getAttribute( 'type' ) ).toBe( 'text/plain' );
 	} );
+
+	it.each( [
+		'https://evil.example/s-202642.js',
+		'https://stats.wp.com/other.js',
+		'http://stats.wp.com/s-202642.js',
+		'javascript:alert(1)',
+	] )( 'never runs a held tag whose src is not s.js: %s', src => {
+		printHeldTag( { src } );
+
+		activateTrackingScript();
+
+		const scripts = getScripts();
+		expect( scripts ).toHaveLength( 1 );
+		expect( scripts[ 0 ].getAttribute( 'type' ) ).toBe( 'text/plain' );
+	} );
 } );
