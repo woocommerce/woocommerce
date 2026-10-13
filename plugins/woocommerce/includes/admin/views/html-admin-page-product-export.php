@@ -25,32 +25,30 @@ if ( ! empty( $_GET['product_ids'] ) ) {
 }
 ?>
 <div class="wrap woocommerce">
-	<h1><?php esc_html_e( 'Export Products', 'woocommerce' ); ?></h1>
-
-	<?php
-	if ( $is_exporting_product_ids ) {
-		$clear_url = remove_query_arg( 'product_ids' );
-		$count     = count( $product_ids_to_export );
-		$notice    = sprintf(
-			// translators: %1$d: Number of products, %2$s: URL to clear selection.
-			_n(
-				'You are about to export %1$d product. To export all products, <a href="%2$s">clear your selection</a>.',
-				'You are about to export %1$d products. To export all products, <a href="%2$s">clear your selection</a>.',
-				$count,
-				'woocommerce'
-			),
-			$count,
-			esc_url( $clear_url )
-		);
-		?>
-		<div id="selected-product-export-notice" class="notice notice-info inline">
-			<p><?php echo wp_kses_post( $notice ); ?></p>
-		</div>
-		<?php
-	}
-	?>
-
 	<div class="woocommerce-exporter-wrapper">
+		<?php
+		if ( $is_exporting_product_ids ) {
+			$clear_url = remove_query_arg( 'product_ids' );
+			$count     = count( $product_ids_to_export );
+			$notice    = sprintf(
+				// translators: %1$d: Number of products, %2$s: URL to clear selection.
+				_n(
+					'You are about to export %1$d product. To export all products, <a href="%2$s">clear your selection</a>.',
+					'You are about to export %1$d products. To export all products, <a href="%2$s">clear your selection</a>.',
+					$count,
+					'woocommerce'
+				),
+				$count,
+				esc_url( $clear_url )
+			);
+			?>
+			<div id="selected-product-export-notice" class="notice notice-info inline">
+				<p><?php echo wp_kses_post( $notice ); ?></p>
+			</div>
+			<?php
+		}
+		?>
+
 		<form class="woocommerce-exporter">
 			<?php
 			// Add hidden input if exporting product IDs, so JS can potentially pick it up.

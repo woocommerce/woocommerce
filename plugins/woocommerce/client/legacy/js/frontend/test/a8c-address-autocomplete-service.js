@@ -4,6 +4,7 @@
 
 describe( 'Automattic address autocomplete service', () => {
 	let provider;
+	const originalFetch = global.fetch;
 
 	beforeEach( () => {
 		jest.useFakeTimers();
@@ -24,7 +25,7 @@ describe( 'Automattic address autocomplete service', () => {
 	afterEach( () => {
 		jest.useRealTimers();
 		delete global.a8cAddressAutocompleteServiceKeys;
-		delete global.fetch;
+		global.fetch = originalFetch;
 		delete window.wc;
 	} );
 

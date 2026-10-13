@@ -6,7 +6,11 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\AuthorizationFailureReason;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -15,6 +19,8 @@ use WP_REST_Server;
  * Tests for the PushNotificationRestController class.
  */
 class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
 
 	/**
 	 * REST server used to verify route registration.
@@ -312,5 +318,106 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 200, $result->get_status() );
 		$this->assertTrue( $result->get_data()['success'] );
+	}
+
+	/**
+	 * @testdox Should record one refused request per rate limit window, however many arrive.
+	 */
+	public function test_authorize_rate_limits_the_refusal_line(): void {
+		$body = '{"notifications":[{"type":"store_order","resource_id":1}]}';
+
+		$first = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$first->set_body( $body );
+		$this->sut->authorize( $first );
+
+		$this->assertCount( 1, $this->get_logs_by_level( 'warning' ) );
+
+		$second = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$second->set_body( $body );
+		$this->sut->authorize( $second );
+
+		$this->assertCount( 1, $this->get_logs_by_level( 'warning' ) );
+	}
+
+	/**
+	 * @testdox Should log a refused request only when the body carries a notifications key.
+	 */
+	public function test_authorize_logs_refusals_only_for_loopback_shaped_bodies(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"notifications":[{"type":"store_order","resource_id":1}]}' );
+		$this->sut->authorize( $request );
+
+		$this->assertLogged(
+			'warning',
+			'Loopback request refused: Missing credential',
+			array(
+				'source'        => PushNotifications::FEATURE_NAME,
+				'step'          => 'loopback_started',
+				'outcome'       => 'auth_failed',
+				'reason'        => AuthorizationFailureReason::CREDENTIAL_MISSING,
+				'notifications' => 1,
+			)
+		);
+	}
+
+	/**
+	 * The rate limit would also stop the line, so this puts the next allowed
+	 * time in the past first. Without that the test passes whether or not the
+	 * body is checked at all, since the limiter returns early either way.
+	 *
+	 * @testdox Should not log a refused request whose body is not ours, even when nothing is rate limited.
+	 */
+	public function test_authorize_does_not_log_a_refusal_without_our_body(): void {
+		WC_Rate_Limiter::set_rate_limit( PushNotificationRestController::AUTH_FAILURE_LOG_RATE_LIMIT_ID, -60 );
+		$this->captured_logs = array();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"anything":"else"}' );
+		$this->sut->authorize( $request );
+
+		$this->assertSame( array(), $this->captured_logs, 'A refused request without our body must not be logged.' );
+	}
+
+	/**
+	 * @testdox Should log a malformed body with the step fields.
+	 */
+	public function test_create_logs_malformed_body(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{}' );
+
+		$this->sut->create( $request );
+
+		$this->assertLogged(
+			'warning',
+			'empty or missing notifications array',
+			array(
+				'source'  => PushNotifications::FEATURE_NAME,
+				'step'    => 'loopback_started',
+				'outcome' => 'malformed_body',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should log a notification that cannot be built, with the type and resource it named.
+	 */
+	public function test_create_logs_invalid_notification(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"notifications":[{"type":"unknown_type","resource_id":7}]}' );
+
+		$result = $this->sut->create( $request );
+
+		$this->assertSame( 200, $result->get_status() );
+		$this->assertLogged(
+			'error',
+			'Failed to process notification:',
+			array(
+				'source'      => PushNotifications::FEATURE_NAME,
+				'step'        => 'loopback_started',
+				'outcome'     => 'invalid_notification',
+				'type'        => 'unknown_type',
+				'resource_id' => 7,
+			)
+		);
 	}
 }

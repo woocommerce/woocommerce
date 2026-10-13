@@ -6,7 +6,7 @@ import type { Page } from '@playwright/test';
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_FEATURE_OPTION,
@@ -38,7 +38,10 @@ async function submitNotificationEditForm( page: Page ): Promise< void > {
 
 test.describe(
 	'Back in Stock Notifications — admin management',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 

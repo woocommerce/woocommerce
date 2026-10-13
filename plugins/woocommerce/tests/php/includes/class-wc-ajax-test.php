@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
@@ -16,6 +17,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * Class WC_AJAX_Test file.
  */
 class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
+
+	/**
+	 * Taxonomy that stores custom shipping providers.
+	 */
+	private const PROVIDER_TAXONOMY = 'wc_fulfillment_shipping_provider';
 
 	/**
 	 * Sets up the test fixture.
@@ -2625,6 +2631,160 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Adding a product uses the unsaved editor tax location without saving the order address.
+	 * @dataProvider add_order_item_editor_tax_location_cases
+	 *
+	 * @param string $tax_based_on Whether taxes use the billing or shipping address.
+	 * @param bool   $has_customer Whether the order has a customer with a saved base-country address.
+	 */
+	public function test_add_order_item_uses_unsaved_tax_location( string $tax_based_on, bool $has_customer ): void {
+		$this->_setRole( 'administrator' );
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', $tax_based_on );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+
+		$order = wc_create_order();
+		if ( $has_customer ) {
+			$customer = WC_Helper_Customer::create_customer( 'tax-location-customer', wp_generate_password(), 'tax-location@example.com' );
+			$customer->set_billing_country( 'BE' );
+			$customer->save();
+			$order->set_customer_id( $customer->get_id() );
+			$order->save();
+		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = 'NL';
+		$_POST['state']    = '';
+		$_POST['postcode'] = '';
+		$_POST['city']     = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.09, (float) $item->get_total(), 0.0001, 'The line price should exclude the editor location tax rate.' );
+		$this->assertSame( '', $stored_order->get_billing_country(), 'The unsaved billing country must not be persisted.' );
+		$this->assertSame( '', $stored_order->get_shipping_country(), 'The unsaved shipping country must not be persisted.' );
+	}
+
+	/**
+	 * Editor address cases for the Add product request.
+	 *
+	 * @return array
+	 */
+	public function add_order_item_editor_tax_location_cases(): array {
+		return array(
+			'billing guest'    => array( 'billing', false ),
+			'billing customer' => array( 'billing', true ),
+			'shipping guest'   => array( 'shipping', false ),
+		);
+	}
+
+	/**
+	 * @testdox Adding a product with no editor country uses the assigned customer's tax location.
+	 */
+	public function test_add_order_item_without_editor_country_uses_customer_tax_location(): void {
+		$this->_setRole( 'administrator' );
+
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'NL' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product  = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+		$customer = WC_Helper_Customer::create_customer( 'tax-fallback-customer', wp_generate_password(), 'tax-fallback@example.com' );
+		$customer->set_billing_country( 'BE' );
+		$customer->save();
+
+		$order = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->save();
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['data']     = array(
+			array(
+				'id'  => $product->get_id(),
+				'qty' => 1,
+			),
+		);
+		$_POST['country']  = '';
+
+		$response = $this->do_ajax( 'woocommerce_add_order_item' );
+
+		$this->assertTrue( $response['success'], 'The product should be added successfully.' );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $stored_order->get_items(), 'The product should appear on the order.' );
+		$item = current( $stored_order->get_items() );
+		$this->assertEqualsWithDelta( 24 / 1.06, (float) $item->get_total(), 0.0001, 'The net price should use the customer’s Belgian rate rather than the Dutch base rate.' );
+	}
+
+	/**
 	 * @testdox save_order_items rejects a negative quantity and leaves the stored item untouched.
 	 */
 	public function test_save_order_items_rejects_negative_quantity() {
@@ -2785,6 +2945,530 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		} finally {
 			$_POST = $original_post;
 		}
+	}
+
+	/**
+	 * @testdox A rejected checkout update nonce should ask for one reload, then show the expired notice.
+	 */
+	public function test_update_order_review_reloads_once_for_rejected_nonce(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+			unset( WC()->session->reload_checkout_for_nonce );
+
+			$_POST = array(
+				'security'  => 'stale-nonce',
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertSame( array( 'reload' => true ), $response, 'The first rejected nonce should only ask the checkout to reload.' );
+			$this->assertTrue( WC()->session->get( 'reload_checkout_for_nonce' ), 'The session should remember that a reload was requested.' );
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The second rejected nonce should return a JSON array.' );
+			$this->assertArrayNotHasKey( 'reload', $response, 'A second rejected nonce should not reload again.' );
+			$this->assertStringContainsString( 'Sorry, your session has expired.', $response['fragments']['form.woocommerce-checkout'], 'A second rejected nonce should show the expired notice.' );
+		} finally {
+			unset( WC()->session->reload_checkout_for_nonce );
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A rejected checkout update nonce should show the expired notice when the guest has no session to remember the reload.
+	 */
+	public function test_update_order_review_skips_reload_without_session(): void {
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+		$original_session = WC()->session;
+
+		try {
+			wp_set_current_user( 0 );
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+
+			$this->assertFalse( WC()->session->has_session(), 'The guest should start without a cookie-backed session.' );
+
+			$_POST = array(
+				'security'  => 'stale-nonce',
+				'post_data' => '',
+			);
+
+			$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertIsArray( $response, 'The rejected nonce should return a JSON array.' );
+			$this->assertArrayNotHasKey( 'reload', $response, 'Without a session the checkout should not be asked to reload.' );
+			$this->assertStringContainsString( 'Sorry, your session has expired.', $response['fragments']['form.woocommerce-checkout'], 'Without a session the expired notice should show.' );
+		} finally {
+			WC()->session = $original_session;
+			$_POST        = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox A checkout update with a valid nonce should clear the pending nonce reload flag.
+	 */
+	public function test_update_order_review_valid_nonce_clears_reload_flag(): void {
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test globals before building the request.
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+			);
+
+			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertNull( WC()->session->get( 'reload_checkout_for_nonce' ), 'A valid nonce should let a later stale page reload again.' );
+		} finally {
+			unset( WC()->session->reload_checkout_for_nonce );
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * @testdox Saving shipping providers is rejected when the fulfillments feature is disabled.
+	 */
+	public function test_shipping_providers_save_changes_rejects_when_feature_disabled(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		$this->_setRole( 'administrator' );
+
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => wp_create_nonce( 'wc_shipping_providers_nonce' ),
+			'changes'                     => array(),
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+		$response = $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+
+		$this->assertFalse( $response['success'] ?? true, 'A disabled feature should reject the request.' );
+		$this->assertSame( 'feature_disabled', $response['data'] ?? null );
+	}
+
+	/**
+	 * @testdox Saving shipping providers is rejected when the nonce or changes payload is missing.
+	 */
+	public function test_shipping_providers_save_changes_rejects_missing_fields(): void {
+		$this->enable_fulfillments_feature();
+		$this->_setRole( 'administrator' );
+
+		// Nonce present, but the changes payload is absent.
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => wp_create_nonce( 'wc_shipping_providers_nonce' ),
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+		$response = $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+
+		$this->assertFalse( $response['success'] ?? true, 'A missing changes payload should reject the request.' );
+		$this->assertSame( 'missing_fields', $response['data'] ?? null );
+	}
+
+	/**
+	 * @testdox Saving shipping providers is rejected when the nonce is invalid.
+	 */
+	public function test_shipping_providers_save_changes_rejects_bad_nonce(): void {
+		$this->enable_fulfillments_feature();
+		$this->_setRole( 'administrator' );
+
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => 'not-a-valid-nonce',
+			'changes'                     => array(),
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test asserts the invalid nonce is rejected.
+
+		$response = $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+
+		$this->assertFalse( $response['success'] ?? true, 'An invalid nonce should reject the request.' );
+		$this->assertSame( 'bad_nonce', $response['data'] ?? null );
+	}
+
+	/**
+	 * @testdox Saving shipping providers is rejected for a user without the manage_woocommerce capability.
+	 */
+	public function test_shipping_providers_save_changes_rejects_without_capability(): void {
+		$this->enable_fulfillments_feature();
+
+		// A customer passes the nonce check (it is tied to the current user) but lacks manage_woocommerce.
+		$this->_setRole( 'customer' );
+
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => wp_create_nonce( 'wc_shipping_providers_nonce' ),
+			'changes'                     => array(),
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+		$response = $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+
+		$this->assertFalse( $response['success'] ?? true, 'A user without manage_woocommerce should be rejected.' );
+		$this->assertSame( 'missing_capabilities', $response['data'] ?? null );
+	}
+
+	/**
+	 * @testdox The nonce is checked before the capability, so a bad nonce is rejected even without manage_woocommerce.
+	 */
+	public function test_shipping_providers_save_changes_checks_nonce_before_capability(): void {
+		$this->enable_fulfillments_feature();
+		$this->_setRole( 'customer' );
+
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => 'not-a-valid-nonce',
+			'changes'                     => array(),
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test asserts the invalid nonce is rejected.
+
+		$response = $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+
+		$this->assertFalse( $response['success'] ?? true, 'A bad nonce should reject the request.' );
+		$this->assertSame( 'bad_nonce', $response['data'] ?? null, 'The nonce guard runs before the capability guard.' );
+	}
+
+	/**
+	 * @testdox Saving shipping providers is rejected when the changes payload is not an array.
+	 */
+	public function test_shipping_providers_save_changes_rejects_non_array_changes(): void {
+		$this->enable_fulfillments_feature();
+		$this->_setRole( 'administrator' );
+
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => wp_create_nonce( 'wc_shipping_providers_nonce' ),
+			'changes'                     => 'not-an-array',
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+		$response = $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+
+		$this->assertFalse( $response['success'] ?? true, 'A non-array changes payload should reject the request.' );
+		$this->assertSame( 'invalid_changes', $response['data'] ?? null );
+	}
+
+	/**
+	 * @testdox Creating a new custom provider persists its term, slug, and URL meta, and returns it in the response.
+	 */
+	public function test_shipping_providers_save_changes_creates_new_provider(): void {
+		$this->enable_fulfillments_feature();
+		$name          = 'Acme Couriers ' . wp_unique_id();
+		$expected_slug = sanitize_title( $name );
+
+		$response = $this->post_provider_changes(
+			array(
+				'new-row' => array(
+					'newRow'                => true,
+					'name'                  => $name,
+					'tracking_url_template' => 'https://acme.test/track/__PLACEHOLDER__',
+					'icon'                  => 'https://acme.test/logo.png',
+				),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'Creating a provider should succeed.' );
+		$this->assertArrayNotHasKey( 'error', $response['data'], 'A valid creation should not return an error.' );
+
+		$term = get_term_by( 'slug', $expected_slug, self::PROVIDER_TAXONOMY );
+		$this->assertInstanceOf( WP_Term::class, $term, 'The provider term should be created.' );
+		if ( ! $term instanceof WP_Term ) {
+			throw new RuntimeException( 'The provider term could not be reloaded.' );
+		}
+
+		$this->assertSame( $name, $term->name );
+		$this->assertSame( 'https://acme.test/track/__PLACEHOLDER__', get_term_meta( $term->term_id, 'tracking_url_template', true ) );
+		$this->assertSame( 'https://acme.test/logo.png', get_term_meta( $term->term_id, 'icon', true ) );
+
+		$matching_rows = array_values(
+			array_filter(
+				$response['data']['shipping_providers'] ?? array(),
+				static fn ( array $row ): bool => (int) ( $row['term_id'] ?? 0 ) === $term->term_id
+			)
+		);
+		$this->assertCount( 1, $matching_rows, 'The response should contain the new provider exactly once.' );
+		$this->assertSame( $expected_slug, $matching_rows[0]['slug'] );
+		$this->assertSame( $name, $matching_rows[0]['name'] );
+	}
+
+	/**
+	 * @testdox A new provider whose explicit slug matches a built-in provider key is rejected and not created.
+	 */
+	public function test_shipping_providers_save_changes_rejects_explicit_builtin_slug(): void {
+		$this->enable_fulfillments_feature();
+
+		$response = $this->post_provider_changes(
+			array(
+				'new-row' => array(
+					'newRow' => true,
+					'name'   => 'Pretend Amazon',
+					'slug'   => 'amazon-logistics',
+				),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'The handler reports validation problems via the error field, not a failed request.' );
+		$this->assertStringContainsString( 'built-in shipping provider', $response['data']['error'] ?? '' );
+		$this->assertFalse( get_term_by( 'name', 'Pretend Amazon', self::PROVIDER_TAXONOMY ), 'No term should be created for a reserved slug.' );
+	}
+
+	/**
+	 * @testdox A new provider whose auto-generated slug collides with a built-in key is rolled back and reported.
+	 */
+	public function test_shipping_providers_save_changes_rejects_autogenerated_builtin_slug(): void {
+		$this->enable_fulfillments_feature();
+
+		// No explicit slug: sanitize_title( 'Amazon Logistics' ) === 'amazon-logistics', a built-in key.
+		$response = $this->post_provider_changes(
+			array(
+				'new-row' => array(
+					'newRow' => true,
+					'name'   => 'Amazon Logistics',
+				),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'The handler reports validation problems via the error field, not a failed request.' );
+		$this->assertStringContainsString( 'auto-generated slug conflicts', $response['data']['error'] ?? '' );
+		$this->assertFalse( get_term_by( 'slug', 'amazon-logistics', self::PROVIDER_TAXONOMY ), 'The colliding term should be deleted after detection.' );
+	}
+
+	/**
+	 * @testdox Updating an existing provider changes its name but leaves the slug immutable.
+	 */
+	public function test_shipping_providers_save_changes_slug_is_immutable_on_update(): void {
+		$this->enable_fulfillments_feature();
+		$term_id = $this->create_custom_provider_term( 'Original Name', 'original-slug' );
+
+		$response = $this->post_provider_changes(
+			array(
+				(string) $term_id => array(
+					'name' => 'Renamed Provider',
+					'slug' => 'hacked-slug',
+				),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'Updating a provider should succeed.' );
+
+		$term = get_term( $term_id, self::PROVIDER_TAXONOMY );
+		$this->assertInstanceOf( WP_Term::class, $term );
+		$this->assertSame( 'Renamed Provider', $term->name, 'The name should be updated.' );
+		$this->assertSame( 'original-slug', $term->slug, 'The slug should be ignored on update.' );
+	}
+
+	/**
+	 * @testdox Deleting a provider referenced by a fulfillment is blocked and reported.
+	 */
+	public function test_shipping_providers_save_changes_blocks_deleting_provider_in_use(): void {
+		$this->enable_fulfillments_feature();
+		$term_id = $this->create_custom_provider_term( 'In Use Provider', 'in-use-provider' );
+		$this->seed_fulfillment_for_provider( 'in-use-provider' );
+
+		$response = $this->post_provider_changes(
+			array(
+				(string) $term_id => array( 'deleted' => true ),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'The handler reports the block via the error field, not a failed request.' );
+		$this->assertStringContainsString( 'used by existing fulfillments', $response['data']['error'] ?? '' );
+		$this->assertInstanceOf( WP_Term::class, get_term( $term_id, self::PROVIDER_TAXONOMY ), 'The in-use provider should not be deleted.' );
+	}
+
+	/**
+	 * @testdox Deleting a provider that no fulfillment references removes the term.
+	 */
+	public function test_shipping_providers_save_changes_deletes_unused_provider(): void {
+		$this->enable_fulfillments_feature();
+		$term_id = $this->create_custom_provider_term( 'Unused Provider', 'unused-provider' );
+
+		$response = $this->post_provider_changes(
+			array(
+				(string) $term_id => array( 'deleted' => true ),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'Deleting an unused provider should succeed.' );
+		$this->assertArrayNotHasKey( 'error', $response['data'], 'Deleting an unused provider should not report an error.' );
+		$this->assertNull( get_term( $term_id, self::PROVIDER_TAXONOMY ), 'The unused provider should be deleted.' );
+	}
+
+	/**
+	 * @testdox An invalid tracking URL is rejected and the existing value is preserved.
+	 * @testWith ["javascript:alert(document.domain)"]
+	 *           ["ftp://example.test/track/__PLACEHOLDER__"]
+	 *           ["not-a-url"]
+	 *
+	 * @param string $invalid_url The rejected tracking URL template.
+	 */
+	public function test_shipping_providers_save_changes_rejects_invalid_tracking_url( string $invalid_url ): void {
+		$this->enable_fulfillments_feature();
+		$term_id = $this->create_custom_provider_term(
+			'URL Provider',
+			'url-provider',
+			array( 'tracking_url_template' => 'https://existing.test/track/__PLACEHOLDER__' )
+		);
+
+		$response = $this->post_provider_changes(
+			array(
+				(string) $term_id => array( 'tracking_url_template' => $invalid_url ),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'The handler reports URL problems via the error field, not a failed request.' );
+		$this->assertStringContainsString( 'valid HTTP or HTTPS URL', $response['data']['error'] ?? '' );
+		$this->assertSame(
+			'https://existing.test/track/__PLACEHOLDER__',
+			get_term_meta( $term_id, 'tracking_url_template', true ),
+			'A rejected URL should leave the stored value untouched.'
+		);
+	}
+
+	/**
+	 * @testdox An empty tracking URL clears the stored value.
+	 */
+	public function test_shipping_providers_save_changes_clears_tracking_url_with_empty_string(): void {
+		$this->enable_fulfillments_feature();
+		$term_id = $this->create_custom_provider_term(
+			'Clearable Provider',
+			'clearable-provider',
+			array( 'tracking_url_template' => 'https://existing.test/track/__PLACEHOLDER__' )
+		);
+
+		$response = $this->post_provider_changes(
+			array(
+				(string) $term_id => array( 'tracking_url_template' => '' ),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'Clearing a tracking URL should succeed.' );
+		$this->assertSame( '', get_term_meta( $term_id, 'tracking_url_template', true ), 'An empty string should clear the stored URL.' );
+	}
+
+	/**
+	 * @testdox A wp_insert_term failure while creating a provider is surfaced in the response error.
+	 */
+	public function test_shipping_providers_save_changes_surfaces_insert_term_error(): void {
+		$this->enable_fulfillments_feature();
+
+		$fail_insert = static function () {
+			return new WP_Error( 'insert_failed', 'Could not insert the term.' );
+		};
+		add_filter( 'pre_insert_term', $fail_insert );
+
+		try {
+			$response = $this->post_provider_changes(
+				array(
+					'new-row' => array(
+						'newRow' => true,
+						'name'   => 'Doomed Provider',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_insert_term', $fail_insert );
+		}
+
+		$this->assertTrue( $response['success'] ?? false, 'The handler reports insert failures via the error field, not a failed request.' );
+		$this->assertSame( 'Could not insert the term.', $response['data']['error'] ?? '' );
+		$this->assertFalse( get_term_by( 'name', 'Doomed Provider', self::PROVIDER_TAXONOMY ), 'No term should remain after an insert failure.' );
+	}
+
+	/**
+	 * @testdox A wp_update_term failure for an unknown term id is surfaced in the response error.
+	 */
+	public function test_shipping_providers_save_changes_surfaces_update_term_error(): void {
+		$this->enable_fulfillments_feature();
+
+		// A numeric, non-newRow key for a term that does not exist makes wp_update_term return a WP_Error.
+		$response = $this->post_provider_changes(
+			array(
+				'999999' => array( 'name' => 'Ghost Provider' ),
+			)
+		);
+
+		$this->assertTrue( $response['success'] ?? false, 'The handler reports update failures via the error field, not a failed request.' );
+		$this->assertNotEmpty( $response['data']['error'] ?? '', 'An update failure should be reported in the error field.' );
+		$this->assertFalse( get_term_by( 'name', 'Ghost Provider', self::PROVIDER_TAXONOMY ), 'A failed update should not create a term.' );
+	}
+
+	/**
+	 * Enable the fulfillments feature and register its taxonomy and classes.
+	 */
+	private function enable_fulfillments_feature(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		wc_get_container()->get( FulfillmentsController::class )->initialize_fulfillments();
+	}
+
+	/**
+	 * Build the request payload with a valid admin nonce and fire the save-changes action.
+	 *
+	 * @param array $changes The changes payload to submit.
+	 * @return array|null The decoded AJAX response.
+	 */
+	private function post_provider_changes( array $changes ) {
+		$this->_setRole( 'administrator' );
+
+		$_POST    = array(
+			'wc_shipping_providers_nonce' => wp_create_nonce( 'wc_shipping_providers_nonce' ),
+			'changes'                     => $changes,
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test installs the real nonce immediately above.
+
+		return $this->do_ajax( 'woocommerce_shipping_providers_save_changes' );
+	}
+
+	/**
+	 * Create a custom shipping provider term with optional meta.
+	 *
+	 * @param string               $name The provider name.
+	 * @param string               $slug The provider slug.
+	 * @param array<string, mixed> $meta Term meta to set after creation.
+	 * @return int The created term id.
+	 */
+	private function create_custom_provider_term( string $name, string $slug, array $meta = array() ): int {
+		$term = wp_insert_term( $name, self::PROVIDER_TAXONOMY, array( 'slug' => $slug ) );
+		$this->assertIsArray( $term, 'The fixture provider term should be created.' );
+
+		$term_id = (int) $term['term_id'];
+		foreach ( $meta as $key => $value ) {
+			update_term_meta( $term_id, $key, $value );
+		}
+
+		return $term_id;
+	}
+
+	/**
+	 * Insert a non-deleted fulfillment that references a provider slug, as the in-use check expects.
+	 *
+	 * @param string $provider_slug The provider slug the fulfillment references.
+	 */
+	private function seed_fulfillment_for_provider( string $provider_slug ): void {
+		global $wpdb;
+		$now = current_time( 'mysql', true );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_fulfillments',
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => 1,
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => 0,
+				'date_updated' => $now,
+			)
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_fulfillment_meta',
+			// Column names of a custom fulfillments table, not a slow postmeta query.
+			array(
+				'fulfillment_id' => (int) $wpdb->insert_id,
+				'meta_key'       => '_shipment_provider', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'     => wp_json_encode( $provider_slug ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'date_updated'   => $now,
+			)
+		);
 	}
 
 	/**

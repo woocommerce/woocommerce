@@ -20,6 +20,7 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
+						// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 						prefix: __( 'Category: ', 'woocommerce' ),
 						term: 'product_cat',
 					},
@@ -27,6 +28,7 @@ const Edit = () => {
 				[
 					'core/post-terms',
 					{
+						// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 						prefix: __( 'Tags: ', 'woocommerce' ),
 						term: 'product_tag',
 					},

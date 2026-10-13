@@ -6,7 +6,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import {
 	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
@@ -60,7 +60,10 @@ async function createTestCustomer( restApi ): Promise< TestCustomer > {
 
 test.describe(
 	'Back in Stock Notifications — My Account',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
