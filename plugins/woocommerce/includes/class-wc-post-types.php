@@ -401,7 +401,7 @@ class WC_Post_Types {
 					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
 					'public'              => true,
 					'show_ui'             => true,
-					'menu_icon'           => MenuIcons::get( 'woocommerce/box', 'dashicons-archive' ), // TODO(WOOPLUG-7938): prototype guard.
+					'menu_icon'           => MenuIcons::get( 'core/tag', 'dashicons-archive' ), // TODO(WOOPLUG-7938): prototype guard.
 					'capability_type'     => 'product',
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => true,
