@@ -96,4 +96,22 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $changes_at_setup, WC()->customer->get_changes(), 'Restoring should not add entries to the change set.' );
 		$this->assertSame( $vat_at_setup, WC()->customer->get_is_vat_exempt(), 'The tax exemption should be back to what it was at setUp().' );
 	}
+
+	/**
+	 * @testdox $_SERVER changes, including the REQUEST_URI that go_to() sets, do not outlive the test.
+	 */
+	public function test_restore_server_superglobal_undoes_server_changes(): void {
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+		$server_at_setup = $_SERVER;
+
+		$this->go_to( home_url( '/?product=leaked-product' ) );
+		$this->assertSame( '/?product=leaked-product', $_SERVER['REQUEST_URI'], 'go_to() should set REQUEST_URI.' );
+		$_SERVER['HTTP_USER_AGENT'] = 'Leaked agent';
+		unset( $_SERVER['REMOTE_ADDR'] );
+
+		$this->restore_server_superglobal();
+
+		$this->assertSame( $server_at_setup, $_SERVER, '$_SERVER should be back to what it was at setUp().' );
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
+	}
 }
