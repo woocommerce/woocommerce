@@ -690,16 +690,12 @@ class OrdersTableQuery {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		// Only strings are accepted as statuses. If none are given, match no orders rather than treating the empty list as "any".
-		$statuses = array_map( 'strtolower', array_filter( $this->args['status'], 'is_string' ) );
-		if ( empty( $statuses ) && ! empty( $this->args['status'] ) ) {
-			$this->where[]        = '1=0';
-			$this->args['status'] = array();
-			return;
-		}
-		$this->args['status'] = $statuses;
+		$requested_statuses = $this->args['status'];
 
-		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
+		// Only strings are accepted as statuses.
+		$this->args['status'] = array_map( 'strtolower', array_filter( $requested_statuses, 'is_string' ) );
+
+		if ( empty( $requested_statuses ) || in_array( 'any', $this->args['status'], true ) ) {
 			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses(),
 			// excluding statuses marked as exclude_from_search (e.g. checkout-draft) to match WP_Query behavior.
 			$exclude              = get_post_stati( array( 'exclude_from_search' => true ) );
@@ -707,6 +703,7 @@ class OrdersTableQuery {
 		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
 			// Querying for 'all' status does not filter by status at all.
 			$this->args['status'] = array();
+			return;
 		}
 
 		foreach ( $this->args['status'] as &$status ) {
@@ -714,6 +711,11 @@ class OrdersTableQuery {
 		}
 
 		$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
+
+		// Nothing usable is left (e.g. only non-strings or '0' were given). Match no orders instead of skipping the status condition.
+		if ( empty( $this->args['status'] ) ) {
+			$this->where[] = '1=0';
+		}
 	}
 
 	/**
