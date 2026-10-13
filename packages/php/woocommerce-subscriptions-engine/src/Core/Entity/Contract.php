@@ -759,7 +759,7 @@ final class Contract {
 	/**
 	 * Serialize the contract row (excluding generated id/timestamps).
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, int|string|null>
 	 */
 	public function to_storage(): array {
 		return array(

@@ -124,7 +124,7 @@ final class ContractRepository {
 
 		$this->assert_contract_exists( $id );
 
-		$this->update_contract_row( $contract );
+		$this->write_contract_row( $id, $contract->to_storage() );
 		$this->sync_children( $contract );
 
 		return true;
@@ -145,8 +145,6 @@ final class ContractRepository {
 	 * @throws \RuntimeException If the contract has no id or the write fails.
 	 */
 	public function update_fields( Contract $contract, array $fields ): bool {
-		global $wpdb;
-
 		$id = $contract->get_id();
 		if ( null === $id ) {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
@@ -1507,17 +1505,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update the contract row in place (no child rows), in one statement
-	 * ({@see self::write_contract_row()}).
-	 *
-	 * @param Contract $contract Contract whose row to update. Must have an id.
-	 * @throws \RuntimeException If the update fails.
-	 */
-	private function update_contract_row( Contract $contract ): void {
-		$this->write_contract_row( (int) $contract->get_id(), $contract->to_storage() );
-	}
-
-	/**
 	 * Write contract columns (plus `date_updated_gmt`) in one UPDATE statement, so the
 	 * row never lands half-written: a status and a due moment written together change
 	 * together or not at all.
@@ -1530,10 +1517,10 @@ final class ContractRepository {
 	 * right, so the claim is assigned first, while `next_payment_gmt` still holds the
 	 * stored value; `<=>` keeps the comparison NULL-safe.
 	 *
-	 * @param int                  $id      Contract id.
-	 * @param array<string, mixed> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
+	 * @param int                            $id      Contract id.
+	 * @param array<string, int|string|null> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
 	 * @return int The number of rows the statement changed.
-	 * @throws \RuntimeException If a value is not scalar or null, or the write fails.
+	 * @throws \RuntimeException If the write fails.
 	 */
 	private function write_contract_row( int $id, array $columns ): int {
 		global $wpdb;
@@ -1549,7 +1536,7 @@ final class ContractRepository {
 				$assignments[] = '`dispatch_claimed_until` = IF( `next_payment_gmt` <=> NULL, `dispatch_claimed_until`, NULL )';
 			} else {
 				$assignments[] = '`dispatch_claimed_until` = IF( `next_payment_gmt` <=> %s, `dispatch_claimed_until`, NULL )';
-				$values[]      = Coercion::coerce_string( $next_payment );
+				$values[]      = (string) $next_payment;
 			}
 		}
 
@@ -1557,9 +1544,6 @@ final class ContractRepository {
 			if ( null === $value ) {
 				$assignments[] = "`{$column}` = NULL";
 				continue;
-			}
-			if ( ! is_scalar( $value ) ) {
-				throw new \RuntimeException( esc_html( sprintf( 'Cannot write a non-scalar value to contract column "%s".', $column ) ) );
 			}
 			$assignments[] = "`{$column}` = %s";
 			$values[]      = (string) $value;
@@ -1584,8 +1568,8 @@ final class ContractRepository {
 	/**
 	 * Guard against a stale id / concurrent delete before touching any table.
 	 *
-	 * `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no row
-	 * matched", so on its own it cannot tell the parent is gone - and a child reconcile
+	 * The contract row UPDATE reports 0 changed rows for both "matched, nothing changed" and
+	 * "no row matched", so on its own it cannot tell the parent is gone - and a child reconcile
 	 * would then write orphan rows (no FK enforces the relation). This narrows but does
 	 * not fully close the race; the complete fix (a transaction with SELECT ... FOR UPDATE)
 	 * is the seam a later transaction-handling change wraps.
