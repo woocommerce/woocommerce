@@ -617,12 +617,16 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		AbilityExtensions::register_query_filter( $filter );
 		$this->assertSame( array(), AbilityExtensions::get_query_args( 'ticket', $input ) );
 
-		$register = static function () use ( $filter ) {
+		$register_resource = static function () {
 			AbilityExtensions::register_resource( 'ticket' );
+		};
+		$register          = static function () use ( $filter ) {
 			AbilityExtensions::register_query_filter( $filter );
 		};
+		add_action( 'woocommerce_ability_resources_init', $register_resource );
 		add_action( 'woocommerce_ability_extensions_init', $register );
 		$this->get_input_schema( 'woocommerce/products-query' );
+		remove_action( 'woocommerce_ability_resources_init', $register_resource );
 		remove_action( 'woocommerce_ability_extensions_init', $register );
 
 		$this->assertSame( array( 'meta_query' => array( array( array( 'key' => 'gift' ) ) ) ), AbilityExtensions::get_query_args( 'ticket', $input ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
