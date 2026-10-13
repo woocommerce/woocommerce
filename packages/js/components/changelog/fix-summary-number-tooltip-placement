@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use the Tooltip `placement` prop instead of the deprecated `position` prop in `SummaryNumber` and `MenuItem`.
+Stop tooltip deprecation warnings in the browser console on Analytics report summaries and select menus.
