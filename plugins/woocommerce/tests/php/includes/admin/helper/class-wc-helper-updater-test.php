@@ -754,6 +754,77 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The updates count should come from cached data an update check wouldn't reuse, without making the check.
+	 */
+	public function test_updates_count_reads_stale_cache_without_a_request(): void {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+		$this->set_subscriptions( array( $this->subscription() ) );
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => 'a-stale-hash',
+				'updated'  => time() - 13 * HOUR_IN_SECONDS,
+				'products' => array( 123 => array( 'version' => '2.0.0' ) ),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$requests  = 0;
+		$http_mock = static function () use ( &$requests ) {
+			++$requests;
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$count = WC_Helper_Updater::get_updates_count();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( 1, $count, 'The active plugin behind the cached version should be counted' );
+		$this->assertSame( 0, $requests, 'Counting updates should not call WooCommerce.com' );
+	}
+
+	/**
+	 * @testdox The updates count should be 0 when the cached update data is malformed.
+	 */
+	public function test_updates_count_is_zero_for_malformed_cached_data(): void {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+		$this->set_subscriptions( array( $this->subscription() ) );
+		set_transient( '_woocommerce_helper_updates', array( 'products' => 'not-an-array' ), WEEK_IN_SECONDS );
+
+		$this->assertSame( 0, WC_Helper_Updater::get_updates_count() );
+	}
+
+	/**
+	 * @testdox A successful update check should reset the cached updates count.
+	 */
+	public function test_update_check_resets_updates_count(): void {
+		set_transient( '_woocommerce_helper_updates_count', 5, 12 * HOUR_IN_SECONDS );
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+
+		try {
+			$this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertNotFalse( get_transient( '_woocommerce_helper_updates' ), 'The update check should cache its result' );
+		$this->assertFalse( get_transient( '_woocommerce_helper_updates_count' ), 'A new cache should reset the count computed from the old one' );
+	}
+
+	/**
 	 * Test should_use_cached_update_data returns false when data is not an array.
 	 */
 	public function test_should_use_cached_update_data_rejects_non_array() {

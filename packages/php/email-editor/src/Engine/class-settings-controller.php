@@ -207,6 +207,7 @@ class Settings_Controller {
 			'wp-block-library-css',
 			'wp-block-editor-content-css',
 			'wp-edit-blocks-css',
+			'wp-base-styles-css', // Admin color scheme variables.
 		);
 
 		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
