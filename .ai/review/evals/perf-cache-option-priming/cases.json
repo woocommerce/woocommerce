@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G26B-v3",
+			"id": "G26B-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-26.php",
 			"before": {
 				"file": "fixtures/G26B/before.php"
@@ -26,7 +26,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wp_prime_option_caches"
+				"contains": "option priming"
 			}
 		},
 		{

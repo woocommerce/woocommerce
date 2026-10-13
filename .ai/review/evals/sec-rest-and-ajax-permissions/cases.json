@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G37A-v3",
+			"id": "G37A-v5",
 			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
 			"before": {
 				"file": "fixtures/G37A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "manage_woocommerce"
+				"contains": "permission"
 			}
 		},
 		{

@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G33B-v3",
+			"id": "G33B-v4",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
 			"before": {
 				"file": "fixtures/G33B/before.js"
@@ -26,7 +26,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "JSON.parse"
+				"contains": "malformed"
 			}
 		},
 		{

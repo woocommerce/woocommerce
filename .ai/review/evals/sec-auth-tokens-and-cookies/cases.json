@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G40B-v3",
+			"id": "G40B-v4",
 			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
 			"before": {
 				"file": "fixtures/G40B/before.php"
@@ -26,7 +26,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "HMAC"
+				"contains": "hash_equals"
 			}
 		},
 		{

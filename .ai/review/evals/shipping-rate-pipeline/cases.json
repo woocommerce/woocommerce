@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G20D-v3",
+			"id": "G20D-v4",
 			"path": "plugins/woocommerce/includes/class-wc-shipping.php",
 			"before": {
 				"file": "fixtures/G20D/before.php"

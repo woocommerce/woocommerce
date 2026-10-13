@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G27A-v3",
+			"id": "G27A-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
 			"before": {
 				"file": "fixtures/G27A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "numberposts"
+				"contains": "catalog"
 			}
 		},
 		{
-			"id": "G27B-v3",
+			"id": "G27B-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
 			"before": {
 				"file": "fixtures/G27B/before.php"
@@ -26,7 +26,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc_inventory_debug_enabled"
+				"contains": "woocommerce_inventory_debug"
 			}
 		},
 		{

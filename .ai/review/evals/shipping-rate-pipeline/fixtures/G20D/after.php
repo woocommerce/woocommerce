@@ -2,6 +2,7 @@
 function make_export_rate( $args ) {
     $args = wp_parse_args( $args, array( 'id' => 'flat_rate:1', 'label' => 'Delivery', 'cost' => '', 'price_decimals' => false ) );
     $total_cost = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
+    if ( '' === $total_cost ) { $total_cost = '0'; }
     $total_cost = wc_format_decimal( $total_cost, $args['price_decimals'] );
     if ( '' === $total_cost ) { $total_cost = '0'; }
     return new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, array(), 'flat_rate', 1 );

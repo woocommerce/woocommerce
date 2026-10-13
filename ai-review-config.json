@@ -87,7 +87,8 @@
 					"wp_remote_",
 					"wp_safe_remote",
 					"_in_seconds",
-					"helper_api"
+					"helper_api",
+					"is_shop("
 				],
 				"always_paths": [],
 				"signal_types": [
@@ -360,11 +361,11 @@
 				"ctype_digit",
 				"filter_var",
 				"wc_format_postcode",
-				"is_postcode",
 				"postcode",
 				"validate_",
 				"$_get",
-				"$_post"
+				"$_post",
+				"is_string"
 			],
 			"personas": [
 				"regression"
@@ -982,7 +983,8 @@
 				"wp_count_posts",
 				"WP_Query",
 				"wc_get_products",
-				"get_posts("
+				"get_posts(",
+				"is_shop("
 			],
 			"personas": [
 				"performance"

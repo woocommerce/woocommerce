@@ -22,7 +22,7 @@ A `finding` expectation requires a finding on that path containing the specified
 
 ## Fixture corrections and limitations
 
-Cases use versioned `-v3` and `-v4` IDs after adversarial fixture reviews. Revisions include concrete PHP callback boundaries, shipping normalization and filter consumers, actual currency package files, and regression tests with observable results. Fixture directory names may retain their original IDs; the suite identifies the current case version. Some safe cases deliberately exercise simple copy or private refactoring changes alongside harder boundaries.
+Cases use versioned IDs after adversarial fixture reviews. Revisions include concrete PHP callback boundaries, shipping normalization and filter consumers, actual currency package files, and regression tests with observable results. Fixture directory names may retain their original IDs; the suite identifies the current case version. Some safe cases deliberately exercise simple copy or private refactoring changes alongside harder boundaries.
 
 The original experiment and its failed outcomes remain preserved separately. Revised scenarios have versioned case IDs and must be evaluated again. Earlier results do not establish the revised cases' results. These cases exercise review behavior on selected changes; they do not measure production-wide accuracy or isolate the effect of a guideline from the broader persona prompt.
 
@@ -49,24 +49,24 @@ The original experiment and its failed outcomes remain preserved separately. Rev
 | [session-cart-persistence](session-cart-persistence/cases.json) | G17A-v3, G17B-v3 | G17C-v3, G17D-v3 |
 | [check-then-write-race](check-then-write-race/cases.json) | G18A-v3, G18B-v3 | G18C-v3, G18D-v3 |
 | [order-totals-recalc](order-totals-recalc/cases.json) | G19A-v3, G19B-v3 | G19C-v3, G19D-v3 |
-| [shipping-rate-pipeline](shipping-rate-pipeline/cases.json) | G20A-v3, G20B-v3 | G20C-v4, G20D-v3 |
+| [shipping-rate-pipeline](shipping-rate-pipeline/cases.json) | G20A-v3, G20B-v3 | G20C-v4, G20D-v4 |
 | [sql-clause-filter-contract](sql-clause-filter-contract/cases.json) | G21A-v3, G21B-v3 | G21C-v3, G21D-v3 |
 | [cache-invalidation-and-poisoning](cache-invalidation-and-poisoning/cases.json) | G22A-v3, G22B-v3 | G22C-v4, G22D-v3 |
-| [perf-refactor-semantic-drift](perf-refactor-semantic-drift/cases.json) | G23A-v4, G23B-v3 | G23C-v3, G23D-v3 |
-| [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3 | G24C-v3, G24D-v3 |
-| [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v3, G25B-v3 | G25C-v3, G25D-v3 |
-| [perf-cache-option-priming](perf-cache-option-priming/cases.json) | G26A-v3, G26B-v3 | G26C-v3, G26D-v3 |
-| [perf-hot-path-eager-work](perf-hot-path-eager-work/cases.json) | G27A-v3, G27B-v3 | G27C-v3, G27D-v3 |
+| [perf-refactor-semantic-drift](perf-refactor-semantic-drift/cases.json) | G23A-v5, G23B-v3 | G23C-v3, G23D-v3 |
+| [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3 | G24C-v4, G24D-v3 |
+| [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v4, G25B-v3 | G25C-v3, G25D-v3 |
+| [perf-cache-option-priming](perf-cache-option-priming/cases.json) | G26A-v3, G26B-v4 | G26C-v3, G26D-v3 |
+| [perf-hot-path-eager-work](perf-hot-path-eager-work/cases.json) | G27A-v4, G27B-v4 | G27C-v3, G27D-v3 |
 | [script-handle-loading-contract](script-handle-loading-contract/cases.json) | G28A-v3, G28B-v3 | G28C-v3, G28D-v3 |
 | [classic-jquery-contract](classic-jquery-contract/cases.json) | G29A-v3, G29B-v3 | G29C-v3, G29D-v3 |
 | [js-public-api-contract](js-public-api-contract/cases.json) | G30A-v3, G30B-v3 | G30C-v3, G30D-v3 |
 | [checkout-extensibility-payload](checkout-extensibility-payload/cases.json) | G31A-v3, G31B-v3 | G31C-v3, G31D-v3 |
 | [css-layout-regression](css-layout-regression/cases.json) | G32A-v3, G32B-v3 | G32C-v3, G32D-v3 |
-| [js-request-failure-handling](js-request-failure-handling/cases.json) | G33A-v3, G33B-v3 | G33C-v3, G33D-v3 |
+| [js-request-failure-handling](js-request-failure-handling/cases.json) | G33A-v3, G33B-v4 | G33C-v3, G33D-v3 |
 | [react-render-and-keyboard](react-render-and-keyboard/cases.json) | G34A-v3, G34B-v3 | G34C-v3, G34D-v3 |
 | [i18n-string-identity](i18n-string-identity/cases.json) | G35A-v3, G35B-v3 | G35C-v3, G35D-v3 |
 | [sec-sql-prepare-and-identifiers](sec-sql-prepare-and-identifiers/cases.json) | G36A-v3, G36B-v3 | G36C-v3, G36D-v3 |
-| [sec-rest-and-ajax-permissions](sec-rest-and-ajax-permissions/cases.json) | G37A-v3, G37B-v3 | G37C-v3, G37D-v3 |
+| [sec-rest-and-ajax-permissions](sec-rest-and-ajax-permissions/cases.json) | G37A-v5, G37B-v3 | G37C-v3, G37D-v3 |
 | [sec-order-cart-ownership](sec-order-cart-ownership/cases.json) | G38A-v3, G38B-v3 | G38C-v3, G38D-v3 |
-| [sec-sanitize-and-escape](sec-sanitize-and-escape/cases.json) | G39A-v4, G39B-v3 | G39C-v3, G39D-v3 |
-| [sec-auth-tokens-and-cookies](sec-auth-tokens-and-cookies/cases.json) | G40A-v3, G40B-v3 | G40C-v3, G40D-v3 |
+| [sec-sanitize-and-escape](sec-sanitize-and-escape/cases.json) | G39A-v5, G39B-v3 | G39C-v3, G39D-v3 |
+| [sec-auth-tokens-and-cookies](sec-auth-tokens-and-cookies/cases.json) | G40A-v3, G40B-v4 | G40C-v3, G40D-v3 |

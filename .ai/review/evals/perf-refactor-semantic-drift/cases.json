@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G23A-v4",
+			"id": "G23A-v5",
 			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
 			"before": {
 				"file": "fixtures/G23A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "array_slice"
+				"contains": "first"
 			}
 		},
 		{

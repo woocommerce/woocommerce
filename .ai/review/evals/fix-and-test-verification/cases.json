@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G24C-v3",
+			"id": "G24C-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24C/before.php"

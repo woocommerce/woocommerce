@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G25A-v3",
+			"id": "G25A-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
 			"before": {
 				"file": "fixtures/G25A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "get_row"
+				"contains": "per product"
 			}
 		},
 		{
