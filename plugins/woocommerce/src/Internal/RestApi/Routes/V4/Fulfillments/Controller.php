@@ -124,7 +124,7 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_update_args(),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
@@ -341,7 +341,14 @@ class Controller extends AbstractController {
 			if ( $fulfillment_id ) {
 				try {
 					$fulfillment = new Fulfillment( $fulfillment_id );
-					$order       = wc_get_order( (int) $fulfillment->get_entity_id() );
+					if ( $fulfillment->get_id() && WC_Order::class !== $fulfillment->get_entity_type() ) {
+						return new WP_Error(
+							'woocommerce_rest_invalid_entity_type',
+							esc_html__( 'The entity type must be "order".', 'woocommerce' ),
+							array( 'status' => WP_Http::BAD_REQUEST )
+						);
+					}
+					$order = wc_get_order( (int) $fulfillment->get_entity_id() );
 				} catch ( ApiException $ex ) {
 					return new WP_Error(
 						$ex->getErrorCode(),
@@ -417,6 +424,21 @@ class Controller extends AbstractController {
 	 */
 	protected function get_schema(): array {
 		return $this->item_schema->get_item_schema();
+	}
+
+	/**
+	 * Get the writable args for the update route.
+	 *
+	 * A fulfillment's identity and parent order come from the route, not the body, so entity_id and
+	 * entity_type are not writable on edit. They stay required on create, where the parent is taken
+	 * from the body.
+	 *
+	 * @return array The update endpoint args.
+	 */
+	private function get_update_args(): array {
+		$args = $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE );
+		unset( $args['entity_id'], $args['entity_type'] );
+		return $args;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Argument validators shared by the public write facades.
+ * Argument validators shared by the public facades.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Support
  */
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Validate caller argument values and return them normalized.
  *
- * @internal Engine implementation detail shared by the `Api\` write facades, not part of the public API.
+ * @internal Engine implementation detail shared by the `Api\` facades, not part of the public API.
  */
 final class ArgumentValidator {
 
@@ -60,7 +60,7 @@ final class ArgumentValidator {
 	 * @throws InvalidArgumentException If the value is not null or a three-letter uppercase code.
 	 */
 	public static function validate_currency( $value ): ?string {
-		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}$/', $value ) ) ) {
+		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}\z/', $value ) ) ) {
 			throw new InvalidArgumentException( '"currency" must be null or a three-letter uppercase ISO-4217 code.' );
 		}
 
@@ -77,6 +77,21 @@ final class ArgumentValidator {
 	public static function validate_string( string $key, $value ): string {
 		if ( ! is_string( $value ) ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be a string.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate and return a non-empty string.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not a non-empty string.
+	 */
+	public static function validate_non_empty_string( string $key, $value ): string {
+		if ( ! is_string( $value ) || '' === $value ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string.', esc_html( $key ) ) );
 		}
 
 		return $value;
@@ -109,12 +124,91 @@ final class ArgumentValidator {
 			return null;
 		}
 
-		if ( is_string( $value ) && 1 === preg_match( '/^[0-9]+$/', $value ) ) {
-			$value = (int) $value;
-		}
-
+		$value = self::cast_digit_string( $value );
 		if ( ! is_int( $value ) || $value <= 0 ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be null or a positive integer.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate and return a non-negative integer (a digit string is cast).
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @throws InvalidArgumentException If the value is not a non-negative integer.
+	 */
+	public static function validate_non_negative_int( string $key, $value ): int {
+		$value = self::cast_digit_string( $value );
+		if ( ! is_int( $value ) || $value < 0 ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a non-negative integer.', esc_html( $key ) ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Validate a list of positive integer ids (digit strings are cast) and return it.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int, int>
+	 * @throws InvalidArgumentException If the value is not a list of positive integers.
+	 */
+	public static function validate_id_list( string $key, $value ): array {
+		if ( ! self::is_list( $value ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a list of positive integers.', esc_html( $key ) ) );
+		}
+
+		$ids = array();
+		foreach ( $value as $id ) {
+			$id = self::cast_digit_string( $id );
+			if ( ! is_int( $id ) || $id <= 0 ) {
+				throw new InvalidArgumentException( sprintf( '"%s" must be a list of positive integers.', esc_html( $key ) ) );
+			}
+			$ids[] = $id;
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Validate a non-empty string or a list of them and return it as a list.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int, string>
+	 * @throws InvalidArgumentException If the value is not a non-empty string or a list of them.
+	 */
+	public static function validate_string_list( string $key, $value ): array {
+		$values = is_string( $value ) ? array( $value ) : $value;
+		if ( ! self::is_list( $values ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string or a list of them.', esc_html( $key ) ) );
+		}
+
+		$strings = array();
+		foreach ( $values as $item ) {
+			if ( ! is_string( $item ) || '' === $item ) {
+				throw new InvalidArgumentException( sprintf( '"%s" must be a non-empty string or a list of them.', esc_html( $key ) ) );
+			}
+			$strings[] = $item;
+		}
+
+		return $strings;
+	}
+
+	/**
+	 * Validate and return an array, or null.
+	 *
+	 * @param string $key   Field name.
+	 * @param mixed  $value Caller value.
+	 * @return array<int|string, mixed>|null
+	 * @throws InvalidArgumentException If the value is not null or an array.
+	 */
+	public static function validate_nullable_array( string $key, $value ): ?array {
+		if ( null !== $value && ! is_array( $value ) ) {
+			throw new InvalidArgumentException( sprintf( '"%s" must be null or an array.', esc_html( $key ) ) );
 		}
 
 		return $value;
@@ -174,7 +268,7 @@ final class ArgumentValidator {
 	 * @throws InvalidArgumentException If the value is not a list of arrays.
 	 */
 	public static function validate_list_of_arrays( string $key, $value ): array {
-		if ( ! is_array( $value ) || ( array() !== $value && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) ) {
+		if ( ! self::is_list( $value ) ) {
 			throw new InvalidArgumentException( sprintf( '"%s" must be a list of arrays.', esc_html( $key ) ) );
 		}
 
@@ -232,5 +326,29 @@ final class ArgumentValidator {
 		}
 
 		return $addresses;
+	}
+
+	/**
+	 * Whether a value is a list: an array with consecutive int keys from 0 (an empty array is one).
+	 *
+	 * @param mixed $value Caller value.
+	 * @phpstan-assert-if-true array<int, mixed> $value
+	 */
+	private static function is_list( $value ): bool {
+		return is_array( $value ) && ( array() === $value || array_keys( $value ) === range( 0, count( $value ) - 1 ) );
+	}
+
+	/**
+	 * Cast a digit string to an int; any other value is returned unchanged.
+	 *
+	 * @param mixed $value Caller value.
+	 * @return mixed
+	 */
+	private static function cast_digit_string( $value ) {
+		if ( is_string( $value ) && ctype_digit( $value ) ) {
+			return (int) $value;
+		}
+
+		return $value;
 	}
 }
