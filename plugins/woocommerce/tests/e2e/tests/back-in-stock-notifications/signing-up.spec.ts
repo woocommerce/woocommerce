@@ -106,6 +106,14 @@ test.describe(
 					} )
 				).toBeVisible();
 
+				// The prompt is a paragraph, not a heading, so it stays out of
+				// the document outline.
+				await expect(
+					page.getByRole( 'heading', {
+						name: /Want to be notified when this product is back in stock\?/i,
+					} )
+				).toHaveCount( 0 );
+
 				// A logged-in customer does not see the email field — email is derived server-side.
 				await expect(
 					page.getByRole( 'textbox', {
