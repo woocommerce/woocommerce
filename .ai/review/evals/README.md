@@ -2,9 +2,37 @@
 
 Each of the original 40 review guidelines has two bug cases and two safe boundary cases: 160 cases in total. The root `ai-review-config.json` links each guideline to its suite. The later `perf-blocking-remote-call` guideline is outside this initial corpus.
 
+## Set up the runner
+
+These evals require `a8c-review` V2 with the `eval` command. The runner is currently an internal tool and is not distributed with WooCommerce; you need access to an existing AI Review CLI checkout. Contributors without access can still inspect and edit the JSON suites and source fixtures.
+
+Install PHP 8.2+, Composer, Node.js 18+ and Git. From your AI Review CLI checkout (replace the example path):
+
+```sh
+cd /path/to/ai-review-cli/ai-review-cli-v2
+composer install
+npm ci
+mkdir -p "$HOME/.local/bin"
+ln -s "$PWD/bin/a8c-review" "$HOME/.local/bin/a8c-review"
+export PATH="$HOME/.local/bin:$PATH"
+a8c-review eval --help
+```
+
+If `a8c-review` is already installed, check that `eval --help` works before creating the symlink. Keep the CLI checkout in place: the symlink points to it. To make the PATH setting permanent, add the `export PATH` line to your shell startup file, such as `~/.zshrc` or `~/.bashrc`.
+
+The committed review configuration uses Claude and Codex. Authenticate with both bundled clients from the same CLI directory:
+
+```sh
+node_modules/.bin/claude
+# Run /login in Claude, then exit.
+node_modules/.bin/codex login
+```
+
+Existing logins can be reused. Your accounts must have access to the configured models and available quota. Live evals consume model usage.
+
 ## Run locally
 
-Use an installed `a8c-review` version with the `eval` command. From the WooCommerce repository root:
+From the WooCommerce repository root on a branch containing these evals:
 
 ```sh
 a8c-review eval --plan
@@ -13,6 +41,16 @@ a8c-review eval --guideline sql-clause-filter-contract
 ```
 
 `--plan` validates the definitions and reads the fixtures without calling models. Live runs inherit this repository's personas, models, prompts and routing. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
+
+Each live run prints a new results directory in the system temporary directory. Save that directory elsewhere if you need to retain the evidence. To run just one case:
+
+```sh
+a8c-review eval --guideline hook-payload-contract --case G01A-v3
+```
+
+The default timeout is 600 seconds per reviewer attempt; `--timeout 300` changes it to 300 seconds. It is not a limit for the whole suite.
+
+If a case reports `Native review failed`, inspect its `stdout.json` and `stderr.log` beneath the printed results directory. An authentication or quota error means the review did not complete, not that the case failed its expectation. For a quota limit, stop the run with Ctrl+C and rerun after quota is available. `--plan` does not check authentication or quota.
 
 Each fixture directory contains before and after source files. The suite's `path` is the simulated WooCommerce source location used for routing and finding matching. These are focused source fixtures, not executable WordPress integration tests. Supporting callers, consumers and framework behavior establish the contract being tested.
 
