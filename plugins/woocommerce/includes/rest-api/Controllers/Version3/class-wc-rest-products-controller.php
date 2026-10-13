@@ -877,7 +877,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 				if ( $attribute_id ) {
 
-					if ( isset( $attribute['options'] ) ) {
+					if ( isset( $attribute['term_ids'] ) && is_array( $attribute['term_ids'] ) ) {
+						// Term IDs identify terms exactly, even when several terms share a name.
+						$values = array_values( array_filter( array_map( 'absint', $attribute['term_ids'] ) ) );
+					} elseif ( isset( $attribute['options'] ) ) {
 						$options = $attribute['options'];
 
 						if ( ! is_array( $attribute['options'] ) ) {
@@ -1765,6 +1768,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 									'type' => 'string',
 								),
 								'context'     => array( 'view', 'edit' ),
+							),
+							'term_ids'  => array(
+								'description' => __( 'List of term IDs of a global attribute. When set, it is used instead of options.', 'woocommerce' ),
+								'type'        => 'array',
+								'items'       => array(
+									'type' => 'integer',
+								),
+								'context'     => array( 'edit' ),
 							),
 						),
 					),

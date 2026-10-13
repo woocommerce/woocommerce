@@ -2848,4 +2848,43 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Schema validation should reject the non-string value.' );
 		$this->assertFalse( metadata_exists( 'post', $product->get_id(), '_customs_commodity_code' ), 'A rejected commodity code should not be stored.' );
 	}
+
+	/**
+	 * @testdox Global attribute terms can be set by ID, so terms that share a name are not mixed up.
+	 */
+	public function test_create_product_with_attribute_term_ids(): void {
+		list( $attribute, , $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Trousers',
+				'attributes' => array(
+					array(
+						'id'       => $attribute['attribute_id'],
+						'term_ids' => array( $second_term_id ),
+						'options'  => array( 'Green' ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$terms = wc_get_product_terms( $response->get_data()['id'], $attribute['attribute_taxonomy'], array( 'fields' => 'slugs' ) );
+		$this->assertSame( array( 'trousers-green' ), $terms );
+	}
+
+	/**
+	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
+	 *
+	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
+	 */
+	private function create_attribute_with_duplicate_term_names(): array {
+		$attribute = WC_Helper_Product::create_attribute( 'color', array() );
+		$first     = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'shirts-green' ) );
+		$second    = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'trousers-green' ) );
+
+		return array( $attribute, $first['term_id'], $second['term_id'] );
+	}
 }

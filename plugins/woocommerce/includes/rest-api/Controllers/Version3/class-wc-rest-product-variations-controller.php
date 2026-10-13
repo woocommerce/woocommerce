@@ -418,8 +418,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$attribute_value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
-					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					$term = get_term_by( 'name', $attribute_value, $attribute_name );
+					// A term ID identifies the term exactly; otherwise get the slug from the name posted to the API.
+					$term = ! empty( $attribute['term_id'] )
+						? get_term_by( 'id', absint( $attribute['term_id'] ), $attribute_name )
+						: get_term_by( 'name', $attribute_value, $attribute_name );
 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$attribute_value = $term->slug;
@@ -891,20 +893,25 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'     => array(
+							'id'      => array(
 								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'name'   => array(
+							'name'    => array(
 								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'option' => array(
+							'option'  => array(
 								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
+							),
+							'term_id' => array(
+								'description' => __( 'Selected term ID of a global attribute. When set, it is used instead of option.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'edit' ),
 							),
 						),
 					),

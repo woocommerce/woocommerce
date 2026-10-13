@@ -1322,4 +1322,52 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		$product->save();
 		return $product;
 	}
+
+	/**
+	 * @testdox A variation attribute can be set by term ID, so terms that share a name are not mixed up.
+	 */
+	public function test_create_variation_with_attribute_term_id(): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $attribute['attribute_taxonomy'] );
+		$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+		$product_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_body_params(
+			array(
+				'attributes' => array(
+					array(
+						'id'      => $attribute['attribute_id'],
+						'option'  => 'Green',
+						'term_id' => $second_term_id,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$variation = wc_get_product( $response->get_data()['id'] );
+		$this->assertSame( 'trousers-green', $variation->get_attributes()[ $attribute['attribute_taxonomy'] ] );
+	}
+
+	/**
+	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
+	 *
+	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
+	 */
+	private function create_attribute_with_duplicate_term_names(): array {
+		$attribute = WC_Helper_Product::create_attribute( 'color', array() );
+		$first     = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'shirts-green' ) );
+		$second    = wp_insert_term( 'Green', $attribute['attribute_taxonomy'], array( 'slug' => 'trousers-green' ) );
+
+		return array( $attribute, $first['term_id'], $second['term_id'] );
+	}
 }
