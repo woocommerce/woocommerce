@@ -298,6 +298,26 @@ describe( 'ProductCard click tracking', () => {
 	} );
 } );
 
+describe( 'ProductCard title', () => {
+	it( 'decodes HTML entities from the API', () => {
+		const { container } = renderCard( ProductCardType.compact, {
+			title: 'Mondial Relay &amp; Chronopost',
+			icon: 'https://example.com/icon.png',
+		} );
+
+		expect(
+			container.querySelector(
+				'.woocommerce-marketplace__product-card__title'
+			)?.textContent
+		).toContain( 'Mondial Relay & Chronopost' );
+		expect(
+			container
+				.querySelector( '.woocommerce-marketplace__product-card__icon' )
+				?.getAttribute( 'alt' )
+		).toBe( 'Mondial Relay & Chronopost' );
+	} );
+} );
+
 describe( 'ProductCard product preview experiment', () => {
 	const productUrl = 'https://woocommerce.com/products/test-extension/';
 
