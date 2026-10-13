@@ -392,42 +392,123 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		add_action(
 			'woocommerce_ability_extensions_init',
 			static function () {
-				AbilityExtensions::register_query_filter(
-					array(
-						'resource'  => 'order',
-						'namespace' => 'test-ext',
-						'filter'    => 'broken',
-						'schema'    => array( 'type' => 'boolean' ),
-						'callback'  => static fn() => array( 'post__in' => array( 1 ) ),
-					)
+				$callbacks = array(
+					array( 'order', 'broken', static fn() => array( 'post__in' => array( 1 ) ) ),
+					array( 'order', 'taxed', static fn() => array( 'tax_query' => array( array( 'taxonomy' => 'product_cat' ) ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+					array( 'product', 'scalar', static fn() => array( 'meta_query' => 'x' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				);
+				foreach ( $callbacks as list( $resource, $filter, $callback ) ) {
+					AbilityExtensions::register_query_filter(
+						array(
+							'resource'  => $resource,
+							'namespace' => 'test-ext',
+							'filter'    => $filter,
+							'schema'    => array( 'type' => 'boolean' ),
+							'callback'  => $callback,
+						)
+					);
+				}
 			}
 		);
 
 		$refused = $this->dispatch_ability( 'woocommerce/orders-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tag' => 'bad' ) ) ) ) );
 		$failed  = $this->dispatch_ability( 'woocommerce/orders-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'broken' => true ) ) ) ) );
+		$taxed   = $this->dispatch_ability( 'woocommerce/orders-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'taxed' => true ) ) ) ) );
+		$scalar  = $this->dispatch_ability( 'woocommerce/products-query', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'scalar' => true ) ) ) ) );
 
 		$this->assertSame( 'test_bad_tag', $refused->get_data()['code'] );
 		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $failed->get_data()['code'] );
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $taxed->get_data()['code'] );
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $scalar->get_data()['code'] );
 	}
 
 	/**
-	 * @testdox Should refuse a filter on a resource that has no list ability.
+	 * @testdox Should accept a filter that returns an empty clause, and not filter the query.
+	 */
+	public function test_a_filter_that_returns_an_empty_clause_does_not_filter(): void {
+		add_action(
+			'woocommerce_ability_extensions_init',
+			static function () {
+				AbilityExtensions::register_query_filter(
+					array(
+						'resource'  => 'product',
+						'namespace' => 'test-ext',
+						'filter'    => 'empty_clause',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static fn() => array( 'meta_query' => array() ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					)
+				);
+			}
+		);
+		$this->get_input_schema( 'woocommerce/products-query' );
+
+		$this->assertSame( array(), AbilityExtensions::get_query_args( 'product', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'empty_clause' => true ) ) ) ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse a filter on a resource that is not registered, and accept one on a registered resource.
 	 */
 	public function test_a_filter_on_an_unsupported_resource_is_refused(): void {
 		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_query_filter' );
+		$input  = array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'gift' => true ) ) ) );
+		$filter = array(
+			'resource'  => 'ticket',
+			'namespace' => 'test-ext',
+			'filter'    => 'gift',
+			'schema'    => array( 'type' => 'boolean' ),
+			'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		);
+
+		AbilityExtensions::register_query_filter( $filter );
+		$this->assertSame( array(), AbilityExtensions::get_query_args( 'ticket', $input ) );
+
+		$register = static function () use ( $filter ) {
+			AbilityExtensions::register_resource( 'ticket' );
+			AbilityExtensions::register_query_filter( $filter );
+		};
+		add_action( 'woocommerce_ability_extensions_init', $register );
+		$this->get_input_schema( 'woocommerce/products-query' );
+		remove_action( 'woocommerce_ability_extensions_init', $register );
+
+		$this->assertSame( array( 'meta_query' => array( array( array( 'key' => 'gift' ) ) ) ), AbilityExtensions::get_query_args( 'ticket', $input ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+	}
+
+	/**
+	 * @testdox Should refuse a filter that is registered after the init action.
+	 */
+	public function test_a_filter_registered_after_the_init_action_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_query_filter' );
+		$this->get_input_schema( 'woocommerce/products-query' );
 
 		AbilityExtensions::register_query_filter(
 			array(
-				'resource'  => 'order_item',
-				'namespace' => 'test-ext',
+				'resource'  => 'product',
+				'namespace' => 'late-ext',
 				'filter'    => 'gift',
 				'schema'    => array( 'type' => 'boolean' ),
-				'callback'  => '__return_empty_array',
+				'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			)
 		);
 
-		$this->assertSame( array(), AbilityExtensions::get_query_args( 'order_item', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'gift' => true ) ) ) ) ) );
+		$this->assertSame( array(), AbilityExtensions::get_query_args( 'product', array( 'filters' => array( 'extensions' => array( 'late-ext' => array( 'gift' => true ) ) ) ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse an id sent together with filters.
+	 */
+	public function test_an_id_with_filters_is_refused(): void {
+		$input = array(
+			'id'      => 1,
+			'filters' => array( 'extensions' => array( 'test-ext' => array( 'has_code' => true ) ) ),
+		);
+
+		$products = $this->dispatch_ability( 'woocommerce/products-query', $input );
+		$orders   = $this->dispatch_ability( 'woocommerce/orders-query', array( 'id' => 1 ) + array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tag' => 'gift' ) ) ) ) );
+
+		$this->assertSame( 400, $products->get_status() );
+		$this->assertSame( 'woocommerce_ability_filters_with_id', $products->get_data()['code'] );
+		$this->assertSame( 400, $orders->get_status() );
+		$this->assertSame( 'woocommerce_ability_filters_with_id', $orders->get_data()['code'] );
 	}
 
 	/**

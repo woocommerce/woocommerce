@@ -76,6 +76,14 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$product = self::get_product_from_input( $input );
 

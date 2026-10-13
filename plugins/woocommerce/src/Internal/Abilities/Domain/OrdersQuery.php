@@ -78,6 +78,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function execute( array $input ) {
 		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
 
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
