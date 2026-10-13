@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Register the store with WordPress.com only when the merchant clicks Connect in WooPayments onboarding, instead of on every admin page that reads the payments setup state.

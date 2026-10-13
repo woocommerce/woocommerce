@@ -218,6 +218,26 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		// Onboarding step specific routes.
 		register_rest_route(
 			$this->route_namespace,
+			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'handle_onboarding_wpcom_connection_authorize' ),
+					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
+					'args'                => array(
+						'source' => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			),
+			$override
+		);
+		register_rest_route(
+			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT . '/init',
 			array(
 				array(
@@ -679,6 +699,28 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Handle the onboarding WPCOM connection authorize action.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_Error|WP_REST_Response The response or error.
+	 */
+	protected function handle_onboarding_wpcom_connection_authorize( WP_REST_Request $request ) {
+		try {
+			$result = $this->woopayments->onboarding_wpcom_connection_authorize( $request->get_param( 'source' ) );
+		} catch ( ApiException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		return rest_ensure_response(
+			array_merge(
+				array( 'success' => true ),
+				$result
+			)
+		);
 	}
 
 	/**
@@ -1190,6 +1232,13 @@ class WooPaymentsRestController extends RestApiControllerBase {
 								'auth'                 => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'Action to authorize the WPCOM connection.', 'woocommerce' ),
+									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'authorize'            => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'Action to register the store with WPCOM, if needed, and get the URL to authorize the WPCOM connection.', 'woocommerce' ),
 									'properties'  => $this->get_schema_properties_for_onboarding_step_action(),
 									'context'     => array( 'view', 'edit' ),
 									'readonly'    => true,
