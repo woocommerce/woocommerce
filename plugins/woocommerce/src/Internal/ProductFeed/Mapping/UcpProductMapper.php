@@ -462,13 +462,13 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			return $variants;
 		}
 
-		$ordered = array_merge( $required, array_values( array_diff( $children, $required ) ) );
+		$required_first = array_merge( $required, array_values( array_diff( $children, $required ) ) );
 
 		// The floor keeps named variations and at least one variant: an empty
 		// `variants` array would violate the schema's `minItems: 1`.
 		$floor    = max( 1, count( $required ) );
 		$cap      = max( $floor, min( self::MAX_VARIANTS_PER_PRODUCT, $this->variant_budget ) );
-		$variants = $this->build_variation_list( $ordered, $currency, $cap );
+		$variants = $this->build_variation_list( $required_first, $currency, $cap );
 
 		$this->variant_budget -= count( $variants );
 
