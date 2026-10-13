@@ -941,6 +941,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
+		if ( isset( $posted['quantity'] ) && (float) wc_stock_amount( $posted['quantity'] ) !== (float) $posted['quantity'] ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_quantity', esc_html__( 'Quantity must be a whole number unless the store allows decimal quantities.', 'woocommerce' ), 400 );
+		}
+
 		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 		$product              = wc_get_product( $this->get_product_id( $posted, $action ) );
 		$product_item         = $item instanceof WC_Order_Item_Product ? $item : null;
