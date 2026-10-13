@@ -133,6 +133,13 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 	const originalLocation = window.location;
 	let consoleError: jest.SpyInstance;
 
+	// Each simulated request rejects with "<request> failed", so this pins which failure was logged.
+	const expectLoggedFailure = ( request: string ) =>
+		expect( consoleError ).toHaveBeenCalledWith(
+			'WooCommerce Core Profiler:',
+			expect.objectContaining( { message: `${ request } failed` } )
+		);
+
 	beforeEach( () => {
 		jest.useFakeTimers();
 		jest.clearAllMocks();
@@ -173,6 +180,8 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 				cause: expect.objectContaining( { code: 'rest_no_route' } ),
 			} )
 		);
+		// The plugins prefetch has no error handler of its own, so only the root handler logs it.
+		expectLoggedFailure( 'getFreeExtensions' );
 		actor.stop();
 	} );
 
@@ -205,6 +214,8 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 				'coreProfilerCompleted',
 			] )
 		);
+		expectLoggedFailure( 'saveSetting' );
+		expectLoggedFailure( 'updateStoreCurrencyAndMeasurementUnits' );
 		actor.stop();
 	} );
 
@@ -215,6 +226,7 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		await skipToBusinessLocationAndSubmit( actor );
 
 		expect( await waitForNavigation() ).toBe( HOME_PATH );
+		expectLoggedFailure( 'coreProfilerCompleted' );
 		actor.stop();
 	} );
 
@@ -255,5 +267,6 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 			'coreProfilerCompleted',
 			'getJetpackAuthUrl',
 		] );
+		expectLoggedFailure( 'coreProfilerCompleted' );
 	} );
 } );
