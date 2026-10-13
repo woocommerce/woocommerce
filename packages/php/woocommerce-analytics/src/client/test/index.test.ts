@@ -143,6 +143,18 @@ describe( 'client entry point', () => {
 		expect( mockInitAnalytics ).not.toHaveBeenCalled();
 	} );
 
+	it( 'loads s.js and analytics when consent is granted before the consent type is defined', async () => {
+		window.wp_has_consent = () => false;
+		window.waitfor_consent_hook = '1';
+		await loadPage();
+
+		changeConsent( 'allow' );
+		await flushPromises();
+
+		expect( isTrackingScriptLoaded() ).toBe( true );
+		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
+	} );
+
 	it( 'loads s.js and analytics once a late consent type allows statistics', async () => {
 		window.wp_has_consent = () => true;
 		window.waitfor_consent_hook = '1';

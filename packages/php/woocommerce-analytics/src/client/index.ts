@@ -8,7 +8,7 @@ import { consentManager } from './consent';
 import { activateTrackingScript } from './tracking-script';
 
 /**
- * Start tracking. s.js sends the events analytics queues in `window._wca` whenever it arrives.
+ * Start tracking. Safe to call again, and s.js sends the events analytics queues in `window._wca` whenever it arrives.
  */
 function startTracking() {
 	activateTrackingScript();
@@ -20,18 +20,16 @@ jQuery( () => {
 		return;
 	}
 
+	// Consent given on the page counts without the consent type, so this does not wait for it.
+	consentManager.addConsentChangeListener( ( hasConsent: boolean ) => {
+		if ( hasConsent ) {
+			startTracking();
+		}
+	} );
+
 	consentManager.waitForConsentType( () => {
-		// Check for consent before initializing analytics
 		if ( consentManager.hasAnalyticsConsent() ) {
 			startTracking();
-			return;
 		}
-
-		// Set up consent change listener to initialize when consent is granted
-		consentManager.addConsentChangeListener( ( hasConsent: boolean ) => {
-			if ( hasConsent ) {
-				startTracking();
-			}
-		} );
 	} );
 } );
