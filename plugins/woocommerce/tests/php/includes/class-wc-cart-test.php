@@ -65,6 +65,98 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order Again keeps the attributes of a variation with a multibyte attribute name and an "Any" value.
+	 */
+	public function test_order_again_keeps_multibyte_any_attribute() {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+		WC()->cart->empty_cart();
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( '色' );
+		$attribute->set_options( array( '赤', '青' ) );
+		$attribute->set_variation( true );
+
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Multibyte attribute product' );
+		$variable_product->set_attributes( array( $attribute ) );
+		$variable_product->save();
+
+		$attribute_key = sanitize_title( '色' );
+		$variation     = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_regular_price( '10' );
+		$variation->set_attributes( array( $attribute_key => '' ) );
+		$variation->save();
+
+		$order      = WC_Helper_Order::create_order( $user_id, $variation, array( 'status' => OrderStatus::COMPLETED ) );
+		$order_item = array_values( $order->get_items() )[0];
+		$order_item->set_variation( array( 'attribute_' . $attribute_key => '青' ) );
+		$order_item->save();
+
+		$cart_session = new WC_Cart_Session( WC()->cart );
+		$method       = ( new ReflectionClass( WC_Cart_Session::class ) )->getMethod( 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$populated = $method->invoke( $cart_session, $order->get_id(), array() );
+
+		$this->assertCount( 1, $populated );
+		$cart_item = array_values( $populated )[0];
+		$this->assertSame( $variation->get_id(), $cart_item['variation_id'] );
+		$this->assertSame( array( 'attribute_' . $attribute_key => '青' ), $cart_item['variation'] );
+	}
+
+	/**
+	 * @testdox Order Again keeps an encoded term slug for an "Any" global attribute.
+	 */
+	public function test_order_again_keeps_encoded_any_term_slug() {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+		WC()->cart->empty_cart();
+
+		$attribute_data = WC_Helper_Product::create_attribute( 'shoe-size', array( '7½' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+		$term_slug      = get_term( $attribute_data['term_ids'][0], $taxonomy )->slug;
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_data['attribute_id'] );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( $attribute_data['term_ids'] );
+		$attribute->set_variation( true );
+
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Encoded term product' );
+		$variable_product->set_attributes( array( $attribute ) );
+		$variable_product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_regular_price( '10' );
+		$variation->set_attributes( array( $taxonomy => '' ) );
+		$variation->save();
+
+		$order      = WC_Helper_Order::create_order( $user_id, $variation, array( 'status' => OrderStatus::COMPLETED ) );
+		$order_item = array_values( $order->get_items() )[0];
+		$order_item->set_variation( array( 'attribute_' . $taxonomy => $term_slug ) );
+		$order_item->save();
+
+		$cart_session = new WC_Cart_Session( WC()->cart );
+		$method       = ( new ReflectionClass( WC_Cart_Session::class ) )->getMethod( 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$populated = $method->invoke( $cart_session, $order->get_id(), array() );
+
+		$this->assertCount( 1, $populated );
+		$this->assertSame( array( 'attribute_' . $taxonomy => $term_slug ), array_values( $populated )[0]['variation'] );
+	}
+
+	/**
 	 * @testdox Order Again should enforce sold individually for variable products (no duplicates, qty forced to 1)
 	 */
 	public function test_order_again_enforces_sold_individually_for_variations() {
