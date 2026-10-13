@@ -1352,6 +1352,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->sut->update( $contract );
 		$this->assertNotNull( $this->stored_claim( $id ), 'A full update() with the same due moment keeps the claim.' );
 
+		$reformatted = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $reformatted );
+		$reformatted->set_next_payment_gmt( '2026-06-15T00:00:00' );
+		$this->sut->update_fields( $reformatted, array( 'next_payment_gmt' ) );
+		$this->assertNotNull( $this->stored_claim( $id ), 'The same moment in another DATETIME literal form keeps the claim (MySQL compares DATETIME values).' );
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
+
 		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-16 00:00:00' ) );
 		$this->assertNull( $this->stored_claim( $id ), 'Moving the due moment releases the claim.' );
 

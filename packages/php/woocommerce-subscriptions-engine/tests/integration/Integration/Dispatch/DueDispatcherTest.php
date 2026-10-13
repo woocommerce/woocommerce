@@ -309,7 +309,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->register_recording_handler();
 		$stuck = array();
-		for ( $i = 0; $i < 101; $i++ ) {
+		for ( $i = 0; $i < 3; $i++ ) {
 			$stuck[] = $this->create_due_contract( '2026-01-15 00:00:00' );
 		}
 		$fresh = $this->create_due_contract( '2026-02-15 00:00:00' );
@@ -321,7 +321,8 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 			$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
 		}
 
-		$this->assertSame( 50, $this->sut->run_batch( $this->now() ) );
+		// A batch smaller than the stuck backlog: the fresh contract still makes it in.
+		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
 		$this->assertSame( $fresh, $this->calls[0]['contract']->get_id(), 'The never-notified contract goes first despite its later due moment.' );
 	}
 
@@ -333,7 +334,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->register_recording_handler();
 		$stuck = array();
-		for ( $i = 0; $i < 101; $i++ ) {
+		for ( $i = 0; $i < 3; $i++ ) {
 			$stuck[] = $this->create_due_contract( '2026-01-15 00:00:00' );
 		}
 		$retry = $this->create_due_contract( '2026-02-10 00:00:00' );
@@ -347,7 +348,8 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
 
-		$this->assertSame( 50, $this->sut->run_batch( $this->now() ) );
+		// A batch smaller than the stuck backlog: the retry still makes it in.
+		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
 		$this->assertSame( $retry, $this->calls[0]['contract']->get_id(), 'The least recently notified contract goes first despite its later due moment.' );
 	}
 
