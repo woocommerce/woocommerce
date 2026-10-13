@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Internal\Checkout\PaymentMethodPreselection;
+
 /**
  * PaymentUtils
  *
@@ -87,13 +89,20 @@ class PaymentUtils {
 	/**
 	 * Returns the default payment method for a customer.
 	 *
+	 * When the store does not preselect a payment method, only the shopper's own
+	 * choice from the session is returned; the saved card and first-gateway fallbacks are skipped.
+	 *
 	 * @return string
 	 */
 	public static function get_default_payment_method() {
-		$saved_payment_methods = self::get_saved_payment_methods();
-		// A saved payment method exists, set as default.
-		if ( $saved_payment_methods && ! empty( $saved_payment_methods['default'] ) ) {
-			return $saved_payment_methods['default']['method']['gateway'] ?? '';
+		$preselect = PaymentMethodPreselection::is_enabled();
+
+		if ( $preselect ) {
+			$saved_payment_methods = self::get_saved_payment_methods();
+			// A saved payment method exists, set as default.
+			if ( $saved_payment_methods && ! empty( $saved_payment_methods['default'] ) ) {
+				return $saved_payment_methods['default']['method']['gateway'] ?? '';
+			}
 		}
 
 		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
@@ -103,6 +112,10 @@ class PaymentUtils {
 			return $chosen_payment_method;
 		}
 
+		if ( ! $preselect ) {
+			return '';
+		}
+
 		// If no saved payment method exists, use the first enabled payment method.
 		$enabled_payment_gateways = self::get_enabled_payment_gateways();
 
@@ -110,8 +123,8 @@ class PaymentUtils {
 			return '';
 		}
 
-		$first_key                = array_key_first( $enabled_payment_gateways );
-		$first_payment_method     = $enabled_payment_gateways[ $first_key ];
+		$first_key            = array_key_first( $enabled_payment_gateways );
+		$first_payment_method = $enabled_payment_gateways[ $first_key ];
 		return $first_payment_method->id ?? '';
 	}
 }

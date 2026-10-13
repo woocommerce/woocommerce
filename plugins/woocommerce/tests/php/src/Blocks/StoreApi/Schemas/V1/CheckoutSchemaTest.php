@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\Checkout\PaymentMethodPreselection;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
@@ -41,10 +42,19 @@ class CheckoutSchemaTest extends WC_Unit_Test_Case {
 	private $field_id = 'plugin-namespace/gov-id';
 
 	/**
+	 * Gateway instances before the test; they cache their settings, which the rollback doesn't reset.
+	 *
+	 * @var array
+	 */
+	private $payment_gateways_before_test = array();
+
+	/**
 	 * Set up before test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->payment_gateways_before_test = WC()->payment_gateways()->payment_gateways;
 
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
@@ -75,7 +85,49 @@ class CheckoutSchemaTest extends WC_Unit_Test_Case {
 		__internal_woocommerce_blocks_deregister_checkout_field( $this->field_id );
 		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
-		parent::tearDown();
+		try {
+			parent::tearDown();
+		} finally {
+			wp_cache_delete( 'woocommerce_bacs_settings', 'options' );
+			WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
+	 * @testdox Should keep the shopper's choice in the draft response when preselection is off.
+	 */
+	public function test_draft_response_keeps_the_shoppers_choice_when_preselection_is_off(): void {
+		$this->enable_bacs();
+		WC()->session->set( 'chosen_payment_method', 'bacs' );
+		update_option( PaymentMethodPreselection::OPTION_NAME, 'no' );
+
+		$response = $this->sut->get_draft_response( WC()->cart, WC()->customer );
+
+		$this->assertSame( 'bacs', $response['payment_method'] );
+	}
+
+	/**
+	 * @testdox Should leave the draft response without a payment method when preselection is off and nothing was chosen.
+	 */
+	public function test_draft_response_has_no_payment_method_when_preselection_is_off_and_nothing_was_chosen(): void {
+		$this->enable_bacs();
+		WC()->session->set( 'chosen_payment_method', null );
+		update_option( PaymentMethodPreselection::OPTION_NAME, 'no' );
+
+		$response = $this->sut->get_draft_response( WC()->cart, WC()->customer );
+
+		$this->assertSame( '', $response['payment_method'] );
+	}
+
+	/**
+	 * Enable Direct bank transfer and rebuild the gateway instances so they see it.
+	 */
+	private function enable_bacs(): void {
+		$bacs_settings            = (array) get_option( 'woocommerce_bacs_settings', array() );
+		$bacs_settings['enabled'] = 'yes';
+		update_option( 'woocommerce_bacs_settings', $bacs_settings );
+		WC()->payment_gateways()->init();
 	}
 
 	/**
