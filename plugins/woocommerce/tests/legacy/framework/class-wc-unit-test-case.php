@@ -49,27 +49,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_depth = 0;
 
 	/**
-	 * The WC()->customer instance at setUp(), which teardown puts back with its state.
-	 *
-	 * @var WC_Customer|null
-	 */
-	private $customer_at_setup;
-
-	/**
-	 * The internal state of $customer_at_setup when the test started.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $customer_state_at_setup = array();
-
-	/**
-	 * $_SERVER at setUp().
-	 *
-	 * @var array<string, mixed>
-	 */
-	private $server_at_setup = array();
-
-	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
@@ -166,31 +145,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
-
-		$this->customer_at_setup       = WC()->customer instanceof WC_Customer ? WC()->customer : null;
-		$this->customer_state_at_setup = $this->customer_at_setup ? self::customer_state( $this->customer_at_setup ) : array();
-
-		$this->server_at_setup = $_SERVER;
 	}
 
 	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents, the cart context, the queued notices, the cached country
-	 * locale, and the customer all live on the WC() singletons, which neither the
-	 * per-test database rollback nor the hook restore resets, so clear them here or
-	 * they leak into every later test in the process. The same goes for $_SERVER,
-	 * which WordPress only resets for its own core tests.
+	 * The cart contents, the cart context, the queued notices, and the cached country
+	 * locale all live on the WC() singletons, which neither the per-test database
+	 * rollback nor the hook restore resets, so clear them here or they leak into every
+	 * later test in the process.
 	 *
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
 		try {
-			try {
-				$this->clear_wc_singleton_state();
-			} finally {
-				$this->restore_server_superglobal();
-			}
+			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
 			// transaction and restores the hooks. Skipping it would poison every
@@ -233,47 +202,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// cache it produced.
 			WC()->countries->locale = array();
 		}
-
-		if ( $this->customer_at_setup ) {
-			// Tests swap in a customer for another user, or change addresses, tax exemption and
-			// other props through setters, which also leave entries in the change set. Put back
-			// the setUp() instance with its exact state, so later tests start from the same one.
-			WC()->customer = $this->customer_at_setup;
-			self::customer_state( $this->customer_at_setup, $this->customer_state_at_setup );
-		}
-	}
-
-	/**
-	 * Read a customer's internal state, or write it back when $state is given.
-	 *
-	 * @param WC_Customer               $customer The customer.
-	 * @param array<string, mixed>|null $state    State from an earlier read, to write back.
-	 * @return array<string, mixed> The state as it was before any write.
-	 */
-	private static function customer_state( WC_Customer $customer, ?array $state = null ): array {
-		$access = function ( ?array $state ): array {
-			$current = array(
-				'id'                  => $this->id,
-				'data'                => $this->data,
-				'changes'             => $this->changes,
-				'is_vat_exempt'       => $this->is_vat_exempt,
-				'calculated_shipping' => $this->calculated_shipping,
-			);
-			foreach ( (array) $state as $prop => $value ) {
-				$this->$prop = $value;
-			}
-			return $current;
-		};
-
-		return Closure::bind( $access, $customer, WC_Customer::class )( $state );
-	}
-
-	/**
-	 * Put back $_SERVER from setUp(). Tests change it directly and through go_to(), and code that
-	 * reads the request URI, client IP or user agent would otherwise see the previous test's values.
-	 */
-	protected function restore_server_superglobal(): void {
-		$_SERVER = $this->server_at_setup;
 	}
 
 	/**
