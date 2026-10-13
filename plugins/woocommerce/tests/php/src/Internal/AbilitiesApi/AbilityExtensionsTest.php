@@ -1007,7 +1007,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return the message and the field or namespace when an update_callback or a validator throws, and save nothing.
+	 * @testdox Should return a fixed message and the field or namespace when an update_callback or a validator throws, and save nothing.
 	 */
 	public function test_a_callback_that_throws_returns_a_clear_error(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1057,10 +1057,10 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 500, $field->get_status() );
 		$this->assertSame( 'woocommerce_ability_extension_failed', $field->get_data()['code'] );
-		$this->assertSame( 'Field broke.', $field->get_data()['message'] );
+		$this->assertSame( 'An extension failed while checking this change.', $field->get_data()['message'] );
 		$this->assertSame( 'extensions.test-ext.broken', $field->get_data()['data']['field'] );
 		$this->assertSame( 500, $validator->get_status() );
-		$this->assertSame( 'Validator broke.', $validator->get_data()['message'] );
+		$this->assertSame( 'An extension failed while checking this change.', $validator->get_data()['message'] );
 		$this->assertSame( 'other_ext', $validator->get_data()['data']['namespace'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}

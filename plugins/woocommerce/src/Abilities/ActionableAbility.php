@@ -218,8 +218,9 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Run an extension callback. A WP_Error that it returns, or an exception
-	 * that it throws, becomes an error with the given data. An exception keeps
-	 * its message and gets the 500 status.
+	 * that it throws, becomes an error with the given data. An exception is
+	 * logged and becomes a 500 with a fixed message, so its text never reaches
+	 * the client.
 	 *
 	 * @param callable             $callback Field update_callback or validator.
 	 * @param array                $args     Callback arguments.
@@ -234,7 +235,11 @@ abstract class ActionableAbility extends \WP_Ability {
 				sprintf( 'Ability extension "%s" failed: %s', implode( '', $data ), $e->getMessage() ),
 				array( 'source' => 'ability-extensions' )
 			);
-			$result = new \WP_Error( 'woocommerce_ability_extension_failed', $e->getMessage(), array( 'status' => 500 ) );
+			$result = new \WP_Error(
+				'woocommerce_ability_extension_failed',
+				__( 'An extension failed while checking this change.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
 		}
 		return is_wp_error( $result ) ? self::with_data( $result, $data ) : null;
 	}
