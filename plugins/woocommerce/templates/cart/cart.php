@@ -133,6 +133,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 							/**
 							 * Filter the backorder notification shown for a cart item.
 							 *
+							 * Themes with an outdated copy of this template pass only the first two arguments, so callbacks that
+							 * accept `$cart_item` and `$cart_item_key` should give them default values, e.g. `$cart_item = null`.
+							 *
 							 * @param string $notification  The backorder notification HTML.
 							 * @param int    $product_id    The product ID. For a variation, this is the parent product ID.
 							 * @param array  $cart_item     The cart item data, including `variation_id` and the product in `data`.
