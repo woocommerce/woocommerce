@@ -367,12 +367,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_postcode\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -380,12 +374,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_state\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_customer_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/abstracts/abstract-wc-order.php
@@ -544,12 +532,6 @@ parameters:
 			message: '#^Call to an undefined method object\:\:get_quantity\(\)\.$#'
 			identifier: method.notFound
 			count: 6
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_recorded_coupon_usage_counts\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
@@ -752,12 +734,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$raw_tax_data of method WC_Order_Item_Shipping\:\:set_taxes\(\) expects array, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:decrease_usage_count\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/abstracts/abstract-wc-order.php
@@ -18799,12 +18775,6 @@ parameters:
 			path: includes/export/abstract-wc-csv-batch-exporter.php
 
 		-
-			message: '#^Method WC_CSV_Batch_Exporter\:\:generate_file\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/export/abstract-wc-csv-batch-exporter.php
-
-		-
 			message: '#^Method WC_CSV_Batch_Exporter\:\:get_file\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -18818,12 +18788,6 @@ parameters:
 
 		-
 			message: '#^Method WC_CSV_Batch_Exporter\:\:set_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/export/abstract-wc-csv-batch-exporter.php
-
-		-
-			message: '#^Method WC_CSV_Batch_Exporter\:\:write_csv_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/export/abstract-wc-csv-batch-exporter.php
@@ -33940,12 +33904,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_remaining_refund_amount\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -34144,12 +34102,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Parameter \#1 \$order of function wc_release_coupons_for_order expects int\|WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Parameter \#1 \$order of function wc_restock_refunded_items expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
@@ -34157,18 +34109,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$post_type of function register_post_type expects lowercase\-string&non\-empty\-string, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:decrease_usage_count\(\) expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Parameter \#1 \$used_by of method WC_Coupon\:\:increase_usage_count\(\) expects string, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-order-functions.php
@@ -34199,12 +34139,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Parameter \#2 \$order of method WC_Coupon\:\:increase_usage_count\(\) expects WC_Order\|null, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-order-functions.php
@@ -48670,12 +48604,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractBlock.php
 
 		-
-			message: '#^Parameter \#1 \$file_or_folder of function register_block_type_from_metadata expects string, string\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
 			message: '#^Parameter \#1 \$handle of function wp_enqueue_script expects string, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -48732,12 +48660,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractInnerBlock\:\:register_block_type\(\) should return array\<string\> but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
-
-		-
-			message: '#^Parameter \#1 \$file_or_folder of function register_block_type_from_metadata expects string, bool\|string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
 
@@ -51584,30 +51506,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductRatingStars.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductResultsCount.php
-
-		-
-			message: '#^Parameter \#1 \$html of class WP_HTML_Tag_Processor constructor expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductResultsCount.php
-
-		-
-			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''div'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductResultsCount.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductResultsCount\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:get_block_type_uses_context\(\) has no return type specified\.$#'

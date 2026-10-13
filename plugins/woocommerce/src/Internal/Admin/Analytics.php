@@ -1115,8 +1115,8 @@ class Analytics {
 					} );
 			} );
 
-			if ( fixBtn ) {
-				actionCell.insertBefore( checkBtn, fixBtn );
+			if ( fixBtn && fixBtn.parentNode ) {
+				fixBtn.parentNode.insertBefore( checkBtn, fixBtn );
 			} else {
 				actionCell.appendChild( checkBtn );
 			}

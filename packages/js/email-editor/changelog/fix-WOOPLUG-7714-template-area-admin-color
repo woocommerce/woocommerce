@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the admin color scheme for the template area outline in the email editor canvas.

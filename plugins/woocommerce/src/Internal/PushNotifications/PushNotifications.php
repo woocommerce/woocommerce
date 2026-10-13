@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPr
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\StepLogRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -85,6 +86,11 @@ class PushNotifications {
 		// read on a store that has been switched off. The controller registers the
 		// write routes only while the module is enabled, like everything below.
 		( new PushTokenRestController() )->register();
+
+		// Registered ahead of the enablement check for the same reason: a store
+		// is most worth reading the step log for once push notifications have
+		// been switched off, which is often why they were switched off.
+		wc_get_container()->get( StepLogRestController::class )->register();
 
 		if ( ! $this->should_be_enabled() ) {
 			return;

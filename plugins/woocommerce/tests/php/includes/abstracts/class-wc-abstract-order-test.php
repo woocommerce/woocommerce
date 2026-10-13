@@ -538,6 +538,175 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for refund coupon tests.
+	 *
+	 * @return array
+	 */
+	public function provide_refund_parent_customer_ids(): array {
+		return array(
+			'guest parent order'      => array( 0 ),
+			'registered parent order' => array( 1 ),
+		);
+	}
+
+	/**
+	 * Create a refund for one line item of a new order.
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 * @return WC_Order_Refund
+	 */
+	private function create_line_item_refund( int $customer_id ): WC_Order_Refund {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$item  = current( $order->get_items() );
+
+		return wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => $item->get_quantity(),
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Applying a coupon to a refund returns an error and records no coupon usage.
+	 * @dataProvider provide_refund_parent_customer_ids
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 */
+	public function test_apply_coupon_on_refund_returns_error( int $customer_id ) {
+		$coupon_code = 'coupon_test_refund_' . $customer_id;
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$refund = $this->create_line_item_refund( $customer_id );
+
+		$result = $refund->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_coupon', $result->get_error_code() );
+		$this->assertCount( 0, $refund->get_items( 'coupon' ) );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A refund uses the tax location of its parent order.
+	 */
+	public function test_refund_get_taxable_location_returns_parent_tax_location() {
+		$refund       = $this->create_line_item_refund( 1 );
+		$parent_order = wc_get_order( $refund->get_parent_id() );
+
+		$this->assertSame( 'US', $parent_order->get_taxable_location()['country'] );
+		$this->assertSame( $parent_order->get_taxable_location(), $refund->get_taxable_location() );
+	}
+
+	/**
+	 * @testdox A refund without a parent order uses the store base address as its tax location.
+	 */
+	public function test_refund_get_taxable_location_without_parent_returns_base_address() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$refund = new WC_Order_Refund();
+
+		$this->assertSame(
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94110',
+				'city'     => 'San Francisco',
+			),
+			$refund->get_taxable_location()
+		);
+	}
+
+	/**
+	 * @testdox A coupon can be applied to a custom order type that has no customer ID or billing email.
+	 */
+	public function test_apply_coupon_on_custom_order_type_without_customer() {
+		$coupon_code = 'coupon_test_custom_order_type';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order = $this->create_custom_order();
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+		$this->assertFalse( is_callable( array( $order, 'get_billing_email' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Create and save a CustomerlessTestOrder with one line item.
+	 *
+	 * @param string|null $billing_email When set, the order type also has get_billing_email() returning this.
+	 * @return CustomerlessTestOrder
+	 */
+	private function create_custom_order( ?string $billing_email = null ): CustomerlessTestOrder {
+		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
+		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $data_store ) {
+				$stores['test-custom-order'] = $data_store;
+				return $stores;
+			}
+		);
+
+		if ( null === $billing_email ) {
+			$order = new CustomerlessTestOrder();
+		} else {
+			$order = new class() extends CustomerlessTestOrder {
+				/**
+				 * Billing email returned by get_billing_email().
+				 *
+				 * @var string
+				 */
+				public $test_billing_email = '';
+
+				/**
+				 * Get the billing email.
+				 *
+				 * @return string
+				 */
+				public function get_billing_email() {
+					return $this->test_billing_email;
+				}
+			};
+
+			$order->test_billing_email = $billing_email;
+		}
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox The per-email coupon usage limit applies to a custom order type that has a billing email but no customer ID.
+	 */
+	public function test_apply_coupon_enforces_email_usage_limit_on_custom_order_type_without_customer_id() {
+		$coupon_code = 'coupon_test_custom_order_type_email_limit';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code, array( 'usage_limit_per_user' => '1' ) );
+		$coupon->increase_usage_count( 'guest@example.com' );
+		$order = $this->create_custom_order( 'guest@example.com' );
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $coupon->get_coupon_error( 106 ), $result->get_error_message() );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
 	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
 	 */
 	public function test_remove_coupon_fires_order_removed_coupon_hook() {
