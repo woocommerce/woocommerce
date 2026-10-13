@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Order.
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -176,6 +177,75 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->untrash();
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox wc_update_coupon_usage_counts() does not count coupon usage for a refund.
+	 */
+	public function test_wc_update_coupon_usage_counts_ignores_refunds() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_on_refund' );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => WC_Helper_Order::create_order( 0 )->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$refund->add_item( $item );
+		$refund->save();
+
+		wc_update_coupon_usage_counts( $refund->get_id() );
+
+		$coupon = new WC_Coupon( $coupon->get_code() );
+		$this->assertSame( 0, $coupon->get_usage_count() );
+		$this->assertSame( array(), $coupon->get_used_by() );
+	}
+
+	/**
+	 * @testdox wc_update_coupon_usage_counts() does not count coupon usage for an order whose data store cannot record it.
+	 */
+	public function test_wc_update_coupon_usage_counts_skips_orders_whose_data_store_cannot_record_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_without_recording_support' );
+		$order  = WC_Helper_Order::create_order();
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->save();
+
+		// Load the order with a data store that lacks the coupon usage methods of WC_Order_Data_Store_Interface.
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) {
+				$stores['test-basic-order'] = new class() extends Abstract_WC_Order_Data_Store_CPT {
+				};
+				return $stores;
+			}
+		);
+		$order_class = get_class(
+			new class() extends WC_Order {
+				/**
+				 * Get a data store without the coupon usage methods.
+				 *
+				 * @return WC_Data_Store
+				 */
+				public function get_data_store() {
+					return WC_Data_Store::load( 'test-basic-order' );
+				}
+			}
+		);
+		add_filter(
+			'woocommerce_order_class',
+			function () use ( $order_class ) {
+				return $order_class;
+			}
+		);
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		wc_update_coupon_usage_counts( $order->get_id() );
+		wc_update_coupon_usage_counts( $order->get_id() );
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
 	}
 
 	/**
