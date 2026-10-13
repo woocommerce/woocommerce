@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Blocks Test Cart Line Identity
- * Description: Simulates a meta-differentiated cart line for blocks e2e tests by marking flagged add-to-cart requests.
+ * Description: Simulates meta-differentiated and declared-child cart lines for blocks e2e tests.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *
@@ -39,6 +39,10 @@
  * test, and core resolves it as a separate standalone line. Toggling the marker
  * is what produces the meta-differentiated line: a flagged add creates/extends a
  * meta line, an unflagged add follows the normal standalone-line identity.
+ *
+ * A second request flag declares a seeded line to be a child by providing its
+ * parent cart key. The key is published through the Store API parent-item-key
+ * filter so cart count tests can verify child-line exclusion.
  */
 
 declare(strict_types=1);
@@ -59,6 +63,16 @@ const CART_LINE_IDENTITY_FLAG = 'cart_line_identity_marker';
  * matching how extensions store internal differentiators.
  */
 const CART_LINE_IDENTITY_KEY = '_cart_line_identity';
+
+/**
+ * Request flag a test toggles to declare an added cart line as a child.
+ */
+const CART_LINE_PARENT_ITEM_KEY_FLAG = 'cart_line_parent_item_key';
+
+/**
+ * cart_item_data key used to carry the declared parent cart key.
+ */
+const CART_LINE_PARENT_ITEM_KEY = '_cart_line_parent_item_key';
 
 add_filter(
 	'woocommerce_add_cart_item_data',
@@ -96,4 +110,56 @@ add_filter(
 	},
 	10,
 	1
+);
+
+add_filter(
+	'woocommerce_add_cart_item_data',
+	/**
+	 * Store a declared parent key on a flagged cart line.
+	 *
+	 * @param array $cart_item_data Existing cart item data.
+	 * @return array Cart item data, with a parent key when the request supplies one.
+	 */
+	function ( $cart_item_data ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only test marker; nonce handled by the underlying add-to-cart request.
+		if ( ! isset( $_REQUEST[ CART_LINE_PARENT_ITEM_KEY_FLAG ] ) || ! is_string( $_REQUEST[ CART_LINE_PARENT_ITEM_KEY_FLAG ] ) ) {
+			return $cart_item_data;
+		}
+
+		$parent_item_key = sanitize_text_field( wp_unslash( $_REQUEST[ CART_LINE_PARENT_ITEM_KEY_FLAG ] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( '' !== $parent_item_key ) {
+			$cart_item_data[ CART_LINE_PARENT_ITEM_KEY ] = $parent_item_key;
+		}
+
+		return $cart_item_data;
+	},
+	10,
+	1
+);
+
+add_filter(
+	'woocommerce_store_api_cart_item_parent_item_key',
+	/**
+	 * Publish the declared parent key for a flagged cart line.
+	 *
+	 * @param string|null $parent_item_key Parent key declared by an earlier callback.
+	 * @param mixed       $cart_item        Raw cart item.
+	 * @param string      $cart_item_key    Cart item key.
+	 * @return string|null The declared parent key or the incoming value.
+	 */
+	function ( $parent_item_key, $cart_item, $cart_item_key ) {
+		unset( $cart_item_key );
+
+		if ( ! is_array( $cart_item ) ) {
+			return $parent_item_key;
+		}
+
+		$declared_parent_item_key = $cart_item[ CART_LINE_PARENT_ITEM_KEY ] ?? null;
+
+		return is_string( $declared_parent_item_key ) && '' !== $declared_parent_item_key ? $declared_parent_item_key : $parent_item_key;
+	},
+	10,
+	3
 );
