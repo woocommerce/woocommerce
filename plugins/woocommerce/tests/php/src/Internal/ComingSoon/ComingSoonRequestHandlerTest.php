@@ -62,6 +62,9 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_store_pages_only', 'no' );
 		update_option( 'woocommerce_private_link', 'no' );
 		$this->sut = wc_get_container()->get( ComingSoonRequestHandler::class );
+		$renderer  = new \ReflectionProperty( ComingSoonRequestHandler::class, 'use_classic_templates' );
+		$renderer->setAccessible( true );
+		$renderer->setValue( $this->sut, null );
 	}
 
 	/**

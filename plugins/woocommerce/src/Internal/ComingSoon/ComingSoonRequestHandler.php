@@ -28,6 +28,13 @@ class ComingSoonRequestHandler {
 	private static $show_coming_soon = false;
 
 	/**
+	 * Whether the classic PHP templates render the page, cached because saved templates do not change mid-request.
+	 *
+	 * @var bool|null
+	 */
+	private $use_classic_templates = null;
+
+	/**
 	 * Sets up the hook.
 	 *
 	 * @internal
@@ -89,11 +96,7 @@ class ComingSoonRequestHandler {
 	 * @return string The path to the 'coming soon' template or any empty string to prevent further template loading in FSE themes.
 	 */
 	public function handle_template_include( $template ) {
-		if ( $this->should_use_classic_templates() ) {
-			return $template;
-		}
-
-		if ( ! $this->should_show_coming_soon() ) {
+		if ( $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
 			return $template;
 		}
 
@@ -214,12 +217,14 @@ class ComingSoonRequestHandler {
 	 * @return bool Whether the default PHP templates should be used.
 	 */
 	private function should_use_classic_templates() {
-		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) || BlockTemplateUtils::theme_has_template( 'coming-soon' ) ) {
-			return false;
+		if ( null === $this->use_classic_templates ) {
+			$this->use_classic_templates = ! BlockTemplateUtils::supports_block_templates( 'wp_template_part' )
+				&& ! BlockTemplateUtils::theme_has_template( 'coming-soon' )
+				&& ! $this->has_published_block_customization( 'wp_template', 'coming-soon' )
+				&& ! $this->has_published_block_customization( 'wp_template_part', 'coming-soon-social-links' );
 		}
 
-		return ! $this->has_published_block_customization( 'wp_template', 'coming-soon' )
-			&& ! $this->has_published_block_customization( 'wp_template_part', 'coming-soon-social-links' );
+		return $this->use_classic_templates;
 	}
 
 	/**
