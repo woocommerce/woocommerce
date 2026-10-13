@@ -222,11 +222,9 @@ final class Contracts {
 			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
-		$repository = new ContractRepository();
-
-		if ( array_key_exists( 'claim_seconds', $filtered_args ) ) {
-			$cycle_args['claimed_until'] = $repository->claim_until( ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] ) );
-		}
+		$claim_seconds = array_key_exists( 'claim_seconds', $filtered_args )
+			? ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] )
+			: null;
 
 		try {
 			$cycle = Cycle::create( $cycle_args );
@@ -235,7 +233,7 @@ final class Contracts {
 		}
 
 		try {
-			$repository->append_cycle( $cycle );
+			( new ContractRepository() )->append_cycle( $cycle, $claim_seconds );
 		} catch ( DuplicateCycleException $e ) {
 			throw new DomainException( 'Contracts: the cycle position or count already exists.' );
 		}

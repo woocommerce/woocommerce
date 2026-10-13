@@ -1032,26 +1032,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The cycle crash-recovery claim column round-trips through append and a transition.
+	 * @testdox A claimed append stamps the cycle claim on the database clock; a transition without a claim releases it.
 	 */
 	public function test_cycle_claimed_until_round_trips(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		// Appended with a claim set.
-		$cycle = Cycle::create(
-			array(
-				'contract_id'    => $id,
-				'sequence_no'    => 1,
-				'count'          => 1,
-				'status'         => new CycleStatus( CycleStatus::PENDING ),
-				'starts_at_gmt'  => '2026-07-15 00:00:00',
-				'ends_at_gmt'    => '2026-08-15 00:00:00',
-				'expected_total' => '19.99',
-				'currency'       => 'USD',
-				'claimed_until'  => '2026-07-15 00:15:00',
-			)
-		);
-		$this->sut->append_cycle( $cycle );
+		// Appended claimed: the INSERT stamps the claim from the database clock.
+		$this->pin_db_clock( '2026-07-15 00:00:00' );
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
+		$this->sut->append_cycle( $cycle, 900 );
 
 		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
@@ -1140,12 +1129,59 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'ends_at_gmt'    => '2026-08-15 00:00:00',
 				'expected_total' => '19.99',
 				'currency'       => 'USD',
-				'claimed_until'  => $claimed_until,
 			)
 		);
 		$this->sut->append_cycle( $cycle );
+		$this->stamp_cycle_claim( (int) $cycle->get_id(), $claimed_until );
 
 		return $cycle;
+	}
+
+	/**
+	 * Seed a cycle's stored claim expiry directly (fixtures need claims in the past).
+	 *
+	 * @param int         $cycle_id      Cycle id.
+	 * @param string|null $claimed_until Claim expiry GMT string, or null for none.
+	 */
+	private function stamp_cycle_claim( int $cycle_id, ?string $claimed_until ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ), array( 'claimed_until' => $claimed_until ), array( 'id' => $cycle_id ) );
+	}
+
+	/**
+	 * @testdox A claimed append is one INSERT: the claim is stamped in the same statement, with no read or follow-up write.
+	 */
+	public function test_a_claimed_append_is_one_insert(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+
+		$cycles  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$queries = array();
+		$capture = static function ( string $query ) use ( &$queries ): string {
+			$queries[] = $query;
+			return $query;
+		};
+
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
+		add_filter( 'query', $capture );
+		try {
+			$this->sut->append_cycle( $cycle, 900 );
+		} finally {
+			remove_filter( 'query', $capture );
+		}
+
+		$writes = array_values(
+			array_filter(
+				$queries,
+				static function ( string $query ) use ( $cycles ): bool {
+					return false !== strpos( $query, $cycles ) || false !== stripos( $query, 'UTC_TIMESTAMP' );
+				}
+			)
+		);
+		$this->assertCount( 1, $writes, 'Only the INSERT touches the cycles table or the database clock.' );
+		$this->assertStringStartsWith( "INSERT INTO `{$cycles}`", $writes[0] );
+		$this->assertStringContainsString( 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL 900 SECOND )', $writes[0] );
 	}
 
 	/**
@@ -1848,10 +1884,14 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 						'ends_at_gmt'    => $head_ends_at ?? $next_payment_gmt,
 						'expected_total' => '19.99',
 						'currency'       => 'USD',
-						'claimed_until'  => $claimed_until,
 					)
 				)
 			);
+			if ( null !== $claimed_until ) {
+				$head = $this->sut->find_chain_head( $id );
+				$this->assertInstanceOf( Cycle::class, $head );
+				$this->stamp_cycle_claim( (int) $head->get_id(), $claimed_until );
+			}
 		}
 
 		return $id;

@@ -1005,15 +1005,21 @@ final class ContractRepository {
 	 * UNIQUE indexes guard concurrent appends and duplicate counts. The seam a later
 	 * transaction-handling change wraps.
 	 *
-	 * @param Cycle $cycle Cycle to append. Carries its contract id and kind.
+	 * With `$claim_seconds`, the cycle is appended claimed: the same INSERT stamps
+	 * `claimed_until` from the database clock, like {@see self::claim_cycle()} and
+	 * {@see self::transition_cycle()}, so the claim and the row land together. The entity's
+	 * own claim value is never written.
+	 *
+	 * @param Cycle    $cycle         Cycle to append. Carries its contract id and kind.
+	 * @param int|null $claim_seconds Claim length in seconds from the database's now, or null to append unclaimed.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
 	 *                                 position is already claimed - the create-as-claim race).
 	 * @throws \RuntimeException If the cycle insert fails for any other reason (the
 	 *                          database error is in the message).
 	 */
-	public function append_cycle( Cycle $cycle ): void {
+	public function append_cycle( Cycle $cycle, ?int $claim_seconds = null ): void {
 		$this->assign_next_sequence_no( $cycle );
-		$this->insert_cycle( $cycle );
+		$this->insert_cycle( $cycle, $claim_seconds );
 	}
 
 	/**
@@ -1028,23 +1034,6 @@ final class ContractRepository {
 
 		$head = $this->find_chain_head( $cycle->get_contract_id(), $cycle->get_kind() );
 		$cycle->assign_sequence_no( null === $head ? 1 : $head->get_sequence_no() + 1 );
-	}
-
-	/**
-	 * When a claim of `$claim_seconds` taken now ends, on the database clock that
-	 * {@see self::claim_cycle()} and {@see self::transition_cycle()} stamp and compare claims
-	 * on, so a claim set at append time is measured like every other.
-	 *
-	 * @param int $claim_seconds Claim length in seconds.
-	 * @return string GMT `Y-m-d H:i:s`; the PHP clock only if the database cannot answer.
-	 */
-	public function claim_until( int $claim_seconds ): string {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$until = $wpdb->get_var( $wpdb->prepare( 'SELECT DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', $claim_seconds ) );
-
-		return is_string( $until ) && '' !== $until ? $until : gmdate( 'Y-m-d H:i:s', time() + $claim_seconds );
 	}
 
 	/**
@@ -1252,28 +1241,55 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert a cycle row and stamp the generated id back onto the entity.
+	 * Insert a cycle row and stamp the generated id back onto the entity. Hand-built so
+	 * a claim can be stamped from `UTC_TIMESTAMP()` in the same statement; string values
+	 * are checked against their column lengths first, as `$wpdb->insert()` would.
 	 *
-	 * @param Cycle $cycle Cycle to insert. Carries its contract id and kind.
+	 * @param Cycle    $cycle         Cycle to insert. Carries its contract id and kind.
+	 * @param int|null $claim_seconds Claim length in seconds from the database's now, or null for none.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
-	 * @throws \RuntimeException If the insert fails for any other reason.
+	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
 	 */
-	private function insert_cycle( Cycle $cycle ): void {
+	private function insert_cycle( Cycle $cycle, ?int $claim_seconds ): void {
 		global $wpdb;
 
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$now   = gmdate( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$inserted = $wpdb->insert(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ),
-			array_merge(
-				$cycle->to_storage(),
-				array(
-					'date_created_gmt' => $now,
-					'date_updated_gmt' => $now,
-				)
-			)
-		);
+		$columns = $cycle->to_storage();
+		unset( $columns['claimed_until'] );
+		$columns['date_created_gmt'] = $now;
+		$columns['date_updated_gmt'] = $now;
+
+		$names        = array();
+		$placeholders = array();
+		$values       = array();
+		foreach ( $columns as $column => $value ) {
+			$names[] = "`{$column}`";
+			if ( null === $value ) {
+				$placeholders[] = 'NULL';
+				continue;
+			}
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+			$placeholders[] = '%s';
+			$values[]       = (string) $value;
+		}
+
+		if ( null !== $claim_seconds ) {
+			$names[]        = '`claimed_until`';
+			$placeholders[] = 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
+			$values[]       = $claim_seconds;
+		}
+
+		$name_list        = implode( ', ', $names );
+		$placeholder_list = implode( ', ', $placeholders );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false === $inserted ) {
 			$db_error = $wpdb->last_error;
@@ -1506,7 +1522,7 @@ final class ContractRepository {
 		$size = 'byte' === ( $length['type'] ?? '' ) ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
 		if ( $max > 0 && $size > $max ) {
 			throw new \RuntimeException(
-				esc_html( sprintf( 'Failed to update contract: the value for "%s" is longer than the column allows (%d).', $column, $max ) )
+				esc_html( sprintf( 'Failed to write %s: the value for "%s" is longer than the column allows (%d).', $table, $column, $max ) )
 			);
 		}
 	}

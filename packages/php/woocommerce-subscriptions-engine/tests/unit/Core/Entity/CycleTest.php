@@ -172,6 +172,13 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'acme-subs', $cycle->get_extension_slug() );
 	}
 
+	public function test_create_ignores_a_claim_expiry(): void {
+		$cycle = $this->make_pending( array( 'claimed_until' => '2026-03-01 00:15:00' ) );
+
+		$this->assertNull( $cycle->get_claimed_until_gmt(), 'The database stamps a claim on append; a new cycle carries none.' );
+		$this->assertNull( $cycle->to_storage()['claimed_until'] );
+	}
+
 	public function test_create_ignores_snapshot_value_objects(): void {
 		$cycle = $this->make_pending(
 			array(

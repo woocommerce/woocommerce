@@ -213,8 +213,9 @@ final class Cycle {
 	 * @throws DomainException If the attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		// A new cycle is always unsaved; never adopt a caller-supplied id.
-		unset( $args['id'] );
+		// A new cycle is always unsaved; never adopt a caller-supplied id. A claim is
+		// stamped by the database when the cycle is appended, never carried in.
+		unset( $args['id'], $args['claimed_until'] );
 
 		$cycle = new self( $args );
 
@@ -451,7 +452,7 @@ final class Cycle {
 	 * Serialize the cycle row (excluding the generated id/timestamps). Status is
 	 * stored as its plain string value.
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, int|string|null>
 	 */
 	public function to_storage(): array {
 		return array(
