@@ -3,11 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
-import {
-	useState,
-	createInterpolateElement,
-	Fragment,
-} from '@wordpress/element';
+import { useState, createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -77,73 +73,68 @@ export const BusinessLocation = ( {
 						isDismissible={ false }
 						status="error"
 					>
-						{ [
-							<Fragment key="error">
-								{ createInterpolateElement(
-									__(
-										'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
-										'woocommerce'
-									),
-									{
-										retryButton: (
-											<Button
-												onClick={ () => {
-													sendEvent( {
-														type: 'RETRY_COUNTRIES_LIST',
-													} );
-												} }
-												variant="tertiary"
-											>
-												{ __(
-													'Please try again',
-													'woocommerce'
-												) }
-											</Button>
-										),
-										skipButton: (
-											<Button
-												onClick={ () => {
-													sendEvent( {
-														type: 'BUSINESS_LOCATION_COMPLETED',
-														payload: {
-															storeLocation:
-																'US:CA',
-														},
-													} );
-												} }
-												variant="tertiary"
-											>
-												{ __(
-													'Skip this step',
-													'woocommerce'
-												) }
-											</Button>
-										),
-									}
-								) }
-							</Fragment>,
-							<p key="help">
-								{ siteHealthUrl
-									? createInterpolateElement(
-											__(
-												'If this keeps happening, your site’s REST API may be blocked. <siteHealthLink>Check Site Health</siteHealthLink> for details.',
-												'woocommerce'
-											),
-											{
-												siteHealthLink: (
-													<Button
-														variant="link"
-														href={ siteHealthUrl }
-													/>
-												),
-											}
-										)
-									: __(
-											'If this keeps happening, ask your hosting provider to check that your site’s REST API is working.',
+						{ createInterpolateElement(
+							__(
+								'Oops! We encountered a problem while fetching the list of countries to choose from. <retryButton/> or <skipButton/>',
+								'woocommerce'
+							),
+							{
+								retryButton: (
+									<Button
+										onClick={ () => {
+											sendEvent( {
+												type: 'RETRY_COUNTRIES_LIST',
+											} );
+										} }
+										variant="tertiary"
+									>
+										{ __(
+											'Please try again',
 											'woocommerce'
 										) }
-							</p>,
-						] }
+									</Button>
+								),
+								skipButton: (
+									<Button
+										onClick={ () => {
+											sendEvent( {
+												type: 'BUSINESS_LOCATION_COMPLETED',
+												payload: {
+													storeLocation: 'US:CA',
+												},
+											} );
+										} }
+										variant="tertiary"
+									>
+										{ __(
+											'Skip this step',
+											'woocommerce'
+										) }
+									</Button>
+								),
+							}
+						) }
+						<p>
+							{ siteHealthUrl
+								? createInterpolateElement(
+										__(
+											'If this keeps happening, your site’s REST API may be blocked. <siteHealthLink>Check Site Health</siteHealthLink> for details.',
+											'woocommerce'
+										),
+										{
+											siteHealthLink: (
+												<Button
+													variant="link"
+													href={ siteHealthUrl }
+												/>
+											),
+										}
+									)
+								: __(
+										'If this keeps happening, ask your hosting provider to check that your site’s REST API is working.',
+										'woocommerce'
+									) }
+						</p>
 					</Notice>
 				) }
 				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">
