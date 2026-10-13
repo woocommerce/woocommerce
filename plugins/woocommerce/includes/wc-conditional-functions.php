@@ -645,9 +645,6 @@ function wc_block_theme_has_styles_for_element( $element ) {
 	}
 
 	$global_styles = \Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_global_styles();
-	if ( array_key_exists( $element, $global_styles['elements'] ?? array() ) ) {
-		return is_array( $global_styles['elements'][ $element ] );
-	}
 
-	return false;
+	return is_array( $global_styles['elements'][ $element ] ?? null );
 }
