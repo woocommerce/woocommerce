@@ -248,7 +248,6 @@ class UcpCatalog extends ControllerTestCase {
 		$this->assertCount( 1, $first['products'] );
 		$this->assertTrue( $first['pagination']['has_next_page'] );
 		$this->assertNotEmpty( $first['pagination']['cursor'] );
-		$this->assertGreaterThan( 1, $first['pagination']['total_count'] );
 
 		$second = $this->post(
 			'/catalog/search',

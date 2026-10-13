@@ -121,12 +121,6 @@ class CatalogSearch extends AbstractCatalogRoute {
 			$pagination_result['cursor'] = $this->encode_cursor( $offset + $limit );
 		}
 
-		// The total count is inflated by variable products with no published variations.
-		// Cleaning them up is an expensive operation which opens the door for DOS-attacks,
-		// so we don't do it. Instead, we report the inflated total count, and let the client
-		// sort out the mismatch.
-		$pagination_result['total_count'] = $results['total'];
-
 		$response = array(
 			'ucp'        => $this->ucp_metadata(),
 			'products'   => $mapped,
