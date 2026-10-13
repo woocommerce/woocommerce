@@ -157,9 +157,12 @@ class AbilityExtensions {
 	 *
 	 * Use it for a value that an extension adds through WooCommerce's filters,
 	 * such as an order status from `wc_order_statuses`, or for a change that an
-	 * extension makes to how a field behaves. Every ability that declares the
-	 * resource adds the description to the field's `description`. A value
-	 * description is left out of a field whose `enum` does not list the value.
+	 * extension makes to how a field behaves. Several extensions can describe
+	 * the same value, and a value that means different things for different
+	 * objects can say so in its text, such as "For a subscription: ...". Every
+	 * ability that declares the resource adds the description to the field's
+	 * `description`. A value description is left out of a field whose `enum`
+	 * does not list the value.
 	 *
 	 * Call it inside the `woocommerce_ability_extensions_init` action. A call after that action is refused.
 	 *
@@ -211,8 +214,8 @@ class AbilityExtensions {
 		}
 
 		foreach ( self::$descriptions[ $args['resource'] ][ $args['field'] ] ?? array() as $entry ) {
-			if ( $entry['value'] === $value && ! empty( array_intersect( $entry['roles'], $roles ) ) ) {
-				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" field of "%s" already has a description for this value and role.', $args['field'], $args['resource'] ), '11.3.0' );
+			if ( $entry['value'] === $value && $entry['description'] === $description && ! empty( array_intersect( $entry['roles'], $roles ) ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" field of "%s" already has this description for this value and role.', $args['field'], $args['resource'] ), '11.3.0' );
 				return;
 			}
 		}

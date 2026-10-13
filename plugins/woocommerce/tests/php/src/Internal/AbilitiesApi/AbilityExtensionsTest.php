@@ -327,7 +327,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse an invalid, duplicate or late description, and keep the first one.
+	 * @testdox Should refuse an invalid, repeated or late description, and join two different descriptions of a value.
 	 */
 	public function test_invalid_duplicate_and_late_descriptions_are_refused(): void {
 		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::describe' );
@@ -339,6 +339,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				'description' => 'First.',
 			);
 			AbilityExtensions::describe( $valid );
+			AbilityExtensions::describe( array_merge( $valid, array( 'description' => 'For a subscription: second.' ) ) );
 			$invalid = array(
 				array( 'roles' => array( 'write' ) ),
 				array( 'resource' => 'customer' ),
@@ -368,7 +369,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$schema = array( 'properties' => array( 'status' => array( 'enum' => array( 'pending', 'processing', 'completed' ) ) ) );
 
 		remove_action( 'woocommerce_ability_extensions_init', $describe );
-		$this->assertSame( 'pending: First.', AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'write' )['properties']['status']['description'] );
+		$this->assertSame( 'pending: First. pending: For a subscription: second.', AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'write' )['properties']['status']['description'] );
 		$this->assertSame( $schema, AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'output' ) );
 	}
 
