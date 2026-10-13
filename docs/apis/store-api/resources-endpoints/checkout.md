@@ -251,39 +251,22 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 
 There are many payment gateways available for merchants to use, and each one will be expecting different `payment_data`. We cannot comprehensively list all expected requests for all payment gateways, and we would recommend reaching out to the authors of the payment gateway plugins you're working with for further information.
 
-An example of the payment data sent to the Checkout endpoint when using the [WooCommerce Stripe Payment Gateway](https://wordpress.org/plugins/woocommerce-gateway-stripe/) is shown below.
-
-For further information on generating a `stripe_source` please check [the Stripe documentation](https://stripe.com/docs).
+An example of the payment data sent to the Checkout endpoint by current versions of the [WooCommerce Stripe Payment Gateway](https://wordpress.org/plugins/woocommerce-gateway-stripe/) is shown below. The gateway creates a [Stripe PaymentMethod](https://docs.stripe.com/api/payment_methods) in the browser with Stripe.js and sends its ID. The PaymentIntent is created and confirmed on the server when the order is processed, so you don't send a PaymentIntent yourself. The older `stripe_source` key used Stripe's deprecated Sources API.
 
 ```json
 {
+  "payment_method": "stripe",
   "payment_data": [
     {
-      "key": "stripe_source",
-      "value": "src_xxxxxxxxxxxxx"
-    },
-    {
-      "key": "billing_email",
-      "value": "myemail@email.com"
-    },
-    {
-      "key": "billing_first_name",
-      "value": "Jane"
-    },
-    {
-      "key": "billing_last_name",
-      "value": "Doe"
-    },
-    {
-      "key": "paymentMethod",
+      "key": "payment_method",
       "value": "stripe"
     },
     {
-      "key": "paymentRequestType",
-      "value": "cc"
+      "key": "wc-stripe-payment-method",
+      "value": "pm_xxxxxxxxxxxxx"
     },
     {
-      "key": "wc-stripe-new-payment-method",
+      "key": "wc-stripe-is-deferred-intent",
       "value": true
     }
   ]
