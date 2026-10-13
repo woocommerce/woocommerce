@@ -749,7 +749,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0.0 === (float) $item['quantity'] ) ) {
 										$order->remove_item( $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
@@ -1585,7 +1585,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'quantity'         => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'number',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class'        => array(

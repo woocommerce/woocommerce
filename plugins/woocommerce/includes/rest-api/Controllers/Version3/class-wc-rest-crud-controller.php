@@ -700,9 +700,15 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 * collection parameter to an internal WP_Query parameter. Use the
 		 * `rest_{$this->post_type}_query` filter to set WP_Query parameters.
 		 *
-		 * @param array        $query_params JSON Schema-formatted collection parameters.
-		 * @param WP_Post_Type $post_type    Post type object.
+		 * Core's posts controller passes the post type object as the second argument. This controller has
+		 * always passed the post type slug there, so the object is passed as a third argument instead.
+		 *
+		 * @since 11.3.0 Added the `$post_type_object` argument.
+		 *
+		 * @param array             $query_params     JSON Schema-formatted collection parameters.
+		 * @param string            $post_type        Post type slug.
+		 * @param WP_Post_Type|null $post_type_object Post type object, or null if the post type is not registered.
 		 */
-		return apply_filters( "rest_{$this->post_type}_collection_params", $params, $this->post_type );
+		return apply_filters( "rest_{$this->post_type}_collection_params", $params, $this->post_type, get_post_type_object( $this->post_type ) );
 	}
 }
