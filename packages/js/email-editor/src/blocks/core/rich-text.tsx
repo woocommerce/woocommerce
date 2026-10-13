@@ -5,7 +5,7 @@ import type { RichTextValue } from '@wordpress/rich-text/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useCallback, useState } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import * as React from '@wordpress/element';
@@ -14,6 +14,7 @@ import * as React from '@wordpress/element';
  * Internal dependencies
  */
 import {
+	getElementRange,
 	insertPersonalizationTag,
 	replacePersonalizationTagsWithHTMLComments,
 } from '../../components/personalization-tags/rich-text-utils';
@@ -46,6 +47,15 @@ function disableCertainRichTextFormats() {
 	} );
 }
 
+const OBJECT_REPLACEMENT_CHARACTER = '\ufffc';
+
+// The bundled RichText types omit these properties.
+type LooseFormat = {
+	type: string;
+	attributes?: Record< string, string >;
+	unregisteredAttributes?: Record< string, string >;
+};
+
 type Props = {
 	contentRef: React.RefObject< HTMLElement >;
 	value: RichTextValue;
@@ -62,29 +72,6 @@ type Props = {
  */
 function PersonalizationTagsButton( { contentRef, value, onChange }: Props ) {
 	const [ isModalOpened, setIsModalOpened ] = useState( false );
-	const selectedBlockId = useSelect( ( select ) =>
-		select( 'core/block-editor' ).getSelectedBlockClientId()
-	);
-
-	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
-
-	// Get the current block attributes
-	const blockAttributes: object = useSelect( ( select ) => {
-		const attributes =
-			select( 'core/block-editor' ).getBlockAttributes( selectedBlockId );
-
-		return attributes;
-	} );
-
-	// Some blocks, such as the Button block, store the content in `text` attribute.
-	const blockContentKey = 'text' in blockAttributes ? 'text' : 'content';
-
-	// After first saving the content does not have property originalHTML, so we need to check for content as well
-	const blockContent =
-		blockAttributes?.[ blockContentKey ]?.originalHTML ||
-		blockAttributes?.[ blockContentKey ] ||
-		'';
-
 	const handleInsert = useCallback(
 		( tag: string, linkText: string | null ) =>
 			onChange( insertPersonalizationTag( value, tag, linkText ) ),
@@ -106,39 +93,74 @@ function PersonalizationTagsButton( { contentRef, value, onChange }: Props ) {
 				/>
 				<PersonalizationTagsPopover
 					contentRef={ contentRef }
-					onUpdate={ ( originalTag, updatedTag ) => {
-						// When we update the tag, we need to add brackets to the tag, because the popover removes them
-						const updatedContent = blockContent.replace(
-							`<!--[${ originalTag }]-->`,
-							`<!--[${ updatedTag }]-->`
-						);
-						void updateBlockAttributes( selectedBlockId, {
-							[ blockContentKey ]: updatedContent,
-						} );
+					onUpdate={ ( _originalTag, updatedTag, anchor ) => {
+						const range =
+							anchor &&
+							getElementRange( contentRef.current, anchor );
+						if (
+							! range ||
+							range.end - range.start !== 1 ||
+							value.text[ range.start ] !==
+								OBJECT_REPLACEMENT_CHARACTER ||
+							value.replacements[ range.start ]?.type !==
+								'#comment'
+						) {
+							return;
+						}
+						const replacements = (
+							value.replacements as LooseFormat[]
+						 ).slice();
+						const replacement = replacements[ range.start ];
+						replacements[ range.start ] = {
+							...replacement,
+							attributes: {
+								...replacement.attributes,
+								// The popover removes the brackets, so add them back.
+								'data-rich-text-comment': `[${ updatedTag }]`,
+							},
+						};
+						onChange( {
+							...value,
+							replacements,
+							activeFormats: [],
+						} as RichTextValue );
 					} }
 				/>
 				<PersonalizationTagsLinkPopover
 					contentRef={ contentRef }
-					onUpdate={ ( htmlElement, newTag, newText ) => {
-						const oldTag = htmlElement
-							.getAttribute( 'data-link-href' )
-							.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-						const regex = new RegExp(
-							`<a([^>]*?)data-link-href="${ oldTag }"([^>]*?)>${ htmlElement.textContent }</a>`,
-							'gi'
+					onUpdate={ ( linkElement, newTag, newText ) => {
+						const range = getElementRange(
+							contentRef.current,
+							linkElement,
+							true
 						);
-
-						// Replace the matched link with the new link
-						const updatedContent = blockContent.replace(
-							regex,
-							( _, beforeAttrs, afterAttrs ) => {
-								// Construct the new <a> tag
-								return `<a${ beforeAttrs }data-link-href="${ newTag }"${ afterAttrs }>${ newText }</a>`;
-							}
+						const isTagLink =
+							range &&
+							(
+								( value.formats[ range.start ] ||
+									[] ) as LooseFormat[]
+							 ).some(
+								( format ) =>
+									format.attributes?.[ 'data-link-href' ] !==
+										undefined ||
+									format.unregisteredAttributes?.[
+										'data-link-href'
+									] !== undefined
+							);
+						if ( ! range || ! isTagLink ) {
+							return;
+						}
+						onChange(
+							insertPersonalizationTag(
+								{
+									...value,
+									start: range.start,
+									end: range.end,
+								},
+								newTag,
+								newText
+							)
 						);
-						void updateBlockAttributes( selectedBlockId, {
-							content: updatedContent,
-						} );
 					} }
 				/>
 				<PersonalizationTagsModal

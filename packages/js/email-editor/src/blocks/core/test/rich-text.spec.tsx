@@ -1,10 +1,11 @@
+/* global HTMLElement */
 import * as React from 'react';
 
 /**
  * External dependencies
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import { registerFormatType, RichTextData } from '@wordpress/rich-text';
+import { create, registerFormatType, RichTextData } from '@wordpress/rich-text';
 import type { RichTextValue } from '@wordpress/rich-text/build-types/types';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -12,6 +13,13 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { extendRichTextFormats } from '../rich-text';
+
+let capturedTagPopover: {
+	onUpdate: ( o: string, u: string, anchor?: HTMLElement ) => void;
+};
+let capturedLinkPopover: {
+	onUpdate: ( el: HTMLElement, tag: string, text: string ) => void;
+};
 
 jest.mock( '@wordpress/rich-text', () => ( {
 	...jest.requireActual( '@wordpress/rich-text' ),
@@ -90,14 +98,20 @@ jest.mock(
 jest.mock(
 	'../../../components/personalization-tags/personalization-tags-popover',
 	() => ( {
-		PersonalizationTagsPopover: () => null,
+		PersonalizationTagsPopover: ( props: unknown ) => {
+			capturedTagPopover = props as typeof capturedTagPopover;
+			return null;
+		},
 	} )
 );
 
 jest.mock(
 	'../../../components/personalization-tags/personalization-tags-link-popover',
 	() => ( {
-		PersonalizationTagsLinkPopover: () => null,
+		PersonalizationTagsLinkPopover: ( props: unknown ) => {
+			capturedLinkPopover = props as typeof capturedLinkPopover;
+			return null;
+		},
 	} )
 );
 
@@ -259,5 +273,297 @@ describe( 'PersonalizationTagsButton insertion', () => {
 		expect( onChange.mock.calls[ 0 ][ 0 ].text ).toBe(
 			'Hello\ufffc\u00a0'
 		);
+	} );
+} );
+
+describe( 'PersonalizationTagsButton editing', () => {
+	const TAG_SPAN = ( tag: string ) =>
+		`<span contenteditable="false" data-rich-text-comment="${ tag }"><span>${ tag }</span></span>`;
+	const FIRST = '[woocommerce/customer-first-name]';
+	const LAST = '[woocommerce/customer-last-name]';
+	const updateBlockAttributes = jest.fn();
+	let Edit: React.ComponentType< EditProps >;
+	let p: HTMLElement;
+
+	const mountValue = ( html: string ) => {
+		p = document.createElement( 'p' );
+		p.innerHTML = html;
+		document.body.appendChild( p );
+		return create( {
+			element: p,
+			__unstableIsEditableTree: true,
+		} ) as unknown as RichTextValue;
+	};
+
+	const setup = (
+		attributes: object,
+		value: RichTextValue,
+		container: unknown = p
+	) => {
+		const onChange = jest.fn();
+		( useSelect as jest.Mock ).mockImplementation( () => attributes );
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			updateBlockAttributes,
+		} );
+		render(
+			<Edit
+				contentRef={ { current: container } }
+				value={ value }
+				onChange={ onChange }
+			/>
+		);
+		return onChange;
+	};
+
+	const twoTags = () =>
+		`Hi ${ TAG_SPAN( FIRST ) }&nbsp;and ${ TAG_SPAN( FIRST ) } end`;
+	const tagOf = ( value: RichTextValue, i: number ) =>
+		(
+			value.replacements[ i ] as unknown as {
+				attributes: Record< string, string >;
+			}
+		 )?.attributes[ 'data-rich-text-comment' ];
+
+	beforeEach( () => {
+		updateBlockAttributes.mockClear();
+		registerFormatTypeMock.mockClear();
+		extendRichTextFormats();
+		Edit = registerFormatTypeMock.mock.calls.find(
+			( c ) => c[ 0 ] === 'woocommerce-email-editor/shortcode'
+		)[ 1 ].edit;
+	} );
+
+	afterEach( () => {
+		p?.remove();
+		document.body.innerHTML = '';
+	} );
+
+	it( 'edits the clicked tag when identical tags exist', () => {
+		const value = mountValue( twoTags() );
+		const snapshot = value.replacements.slice();
+		const snapshotObjects = JSON.stringify( value.replacements );
+		const onChange = setup( { content: 'x' }, value );
+		const second = p.querySelectorAll< HTMLElement >(
+			'[data-rich-text-comment]'
+		)[ 1 ];
+		capturedTagPopover.onUpdate(
+			'woocommerce/customer-first-name',
+			'woocommerce/customer-last-name',
+			second
+		);
+		expect( onChange ).toHaveBeenCalledTimes( 1 );
+		const result = onChange.mock.calls[ 0 ][ 0 ];
+		const idx = [ ...value.text ]
+			.map( ( c, i ) => ( c === '\ufffc' ? i : -1 ) )
+			.filter( ( i ) => i >= 0 );
+		expect( tagOf( result, idx[ 0 ] ) ).toBe( FIRST );
+		expect( tagOf( result, idx[ 1 ] ) ).toBe( LAST );
+		expect( result.text ).toBe( value.text );
+		expect( result.activeFormats ).toEqual( [] );
+		expect( value.replacements ).toEqual( snapshot );
+		value.replacements.forEach( ( r, i ) => {
+			expect( r ).toBe( snapshot[ i ] );
+		} );
+		expect( JSON.stringify( value.replacements ) ).toBe( snapshotObjects );
+		expect( updateBlockAttributes ).not.toHaveBeenCalled();
+	} );
+
+	it( 'edits a tag in a caption field through onChange', () => {
+		const value = mountValue( `Cap ${ TAG_SPAN( FIRST ) }` );
+		const onChange = setup( { url: 'x', caption: 'Cap' }, value );
+		capturedTagPopover.onUpdate(
+			'a',
+			'woocommerce/customer-last-name',
+			p.querySelector< HTMLElement >( '[data-rich-text-comment]' )
+		);
+		expect( onChange ).toHaveBeenCalledTimes( 1 );
+		expect( updateBlockAttributes ).not.toHaveBeenCalled();
+	} );
+
+	it( 'edits a tag in whitespace-collapsed content', () => {
+		const source = document.createElement( 'p' );
+		source.innerHTML = ' Hi <!--[woocommerce/customer-first-name]--> ';
+		const data = RichTextData.fromHTMLElement( source );
+		const value = {
+			text: data.text,
+			formats: data.formats,
+			replacements: data.replacements,
+		} as RichTextValue;
+		p = document.createElement( 'p' );
+		p.innerHTML = `Hi ${ TAG_SPAN( FIRST ) }`;
+		document.body.appendChild( p );
+		const onChange = setup( { content: ' Hi ' }, value );
+		capturedTagPopover.onUpdate(
+			'a',
+			'woocommerce/customer-last-name',
+			p.querySelector< HTMLElement >( '[data-rich-text-comment]' )
+		);
+		expect( onChange ).toHaveBeenCalledTimes( 1 );
+		const result = onChange.mock.calls[ 0 ][ 0 ];
+		expect( result.text ).toBe( data.text );
+		expect( tagOf( result, data.text.indexOf( '\ufffc' ) ) ).toBe( LAST );
+		expect( updateBlockAttributes ).not.toHaveBeenCalled();
+	} );
+
+	it( 'ignores stale anchors and non-comment positions', () => {
+		const value = mountValue( `Hi ${ TAG_SPAN( FIRST ) } <b>bold</b>` );
+		const onChange = setup( { content: 'x' }, value );
+		const detached = document.createElement( 'span' );
+		expect( () =>
+			capturedTagPopover.onUpdate( 'a', 'b', detached )
+		).not.toThrow();
+		capturedTagPopover.onUpdate(
+			'a',
+			'b',
+			p.querySelector< HTMLElement >( 'b' )
+		);
+		expect( onChange ).not.toHaveBeenCalled();
+	} );
+
+	it( 'ignores a single-character replacement that is not a tag', () => {
+		const value = mountValue( `Hi <img src="x.png"> there` );
+		const onChange = setup( { content: 'x' }, value );
+		capturedTagPopover.onUpdate(
+			'a',
+			'b',
+			p.querySelector< HTMLElement >( 'img' )
+		);
+		expect( onChange ).not.toHaveBeenCalled();
+	} );
+
+	describe( 'link editing', () => {
+		const LINK = '[woocommerce/shop-url]';
+		const NEW = '[woocommerce/my-account-url]';
+		const linkFormats = ( result: RichTextValue ) =>
+			result.formats.map( ( f ) =>
+				(
+					( f || [] ) as unknown as Array< {
+						type: string;
+						attributes?: Record< string, string >;
+						unregisteredAttributes?: Record< string, string >;
+					} >
+				 ).map( ( x ) => x.type )
+			);
+
+		const expectUpdated = ( result: RichTextValue ) => {
+			expect( result.text ).toBe( 'Go to my account now' );
+			const types = linkFormats( result );
+			expect( types.flat() ).toEqual(
+				Array( 13 ).fill( 'woocommerce-email-editor/link-shortcode' )
+			);
+			for ( let i = 0; i < result.formats.length; i++ ) {
+				const f = ( result.formats[ i ] || [] ) as unknown as Array< {
+					attributes: Record< string, string >;
+				} >;
+				expect( f.length ).toBe( i >= 3 && i < 16 ? 1 : 0 );
+				if ( f.length ) {
+					expect( f[ 0 ].attributes[ 'data-link-href' ] ).toBe( NEW );
+				}
+			}
+			expect( result.activeFormats ).toEqual( [] );
+		};
+
+		afterEach( () => {
+			(
+				jest.requireActual( '@wordpress/rich-text' ) as {
+					unregisterFormatType: ( n: string ) => void;
+				}
+			 ).unregisterFormatType( 'core/link' );
+		} );
+
+		it.each( [ [ true ], [ false ] ] )(
+			'edits a class-less template link (core/link registered: %s)',
+			( withCoreLink ) => {
+				if ( withCoreLink ) {
+					(
+						jest.requireActual( '@wordpress/rich-text' ) as {
+							registerFormatType: (
+								n: string,
+								s: object
+							) => void;
+						}
+					 ).registerFormatType( 'core/link', {
+						name: 'core/link',
+						title: 'Link',
+						tagName: 'a',
+						className: null,
+						attributes: { url: 'href', target: 'target' },
+						edit: () => null,
+					} );
+				}
+				const value = mountValue(
+					`Go <a data-link-href="${ LINK }" contenteditable="false" style="text-decoration: underline;">here</a> now`
+				);
+				expect(
+					JSON.stringify( value.formats[ 3 ] ).includes(
+						'unregisteredAttributes'
+					)
+				).toBe( withCoreLink );
+				const onChange = setup( { content: 'x' }, value );
+				capturedLinkPopover.onUpdate(
+					p.querySelector< HTMLElement >( 'a' ),
+					NEW,
+					'to my account'
+				);
+				expect( onChange ).toHaveBeenCalledTimes( 1 );
+				expectUpdated( onChange.mock.calls[ 0 ][ 0 ] );
+				expect( updateBlockAttributes ).not.toHaveBeenCalled();
+			}
+		);
+
+		it( 'edits a link created by insertPersonalizationTag', () => {
+			const { insertPersonalizationTag } = jest.requireActual(
+				'../../../components/personalization-tags/rich-text-utils'
+			);
+			const base = create( { html: 'Go  now' } ) as RichTextValue;
+			const linked = insertPersonalizationTag(
+				{ ...base, start: 3, end: 3 },
+				LINK,
+				'here'
+			) as RichTextValue;
+			p = document.createElement( 'p' );
+			p.innerHTML = `Go <a data-link-href="${ LINK }" contenteditable="false" style="text-decoration: underline;">here</a> now`;
+			document.body.appendChild( p );
+			const onChange = setup( { content: 'x' }, linked );
+			capturedLinkPopover.onUpdate(
+				p.querySelector< HTMLElement >( 'a' ),
+				NEW,
+				'to my account'
+			);
+			expect( onChange ).toHaveBeenCalledTimes( 1 );
+			expectUpdated( onChange.mock.calls[ 0 ][ 0 ] );
+		} );
+
+		it( 'edits a link on the Button block through onChange', () => {
+			const value = mountValue(
+				`Go <a data-link-href="${ LINK }" contenteditable="false">here</a> now`
+			);
+			const onChange = setup( { text: 'x' }, value );
+			capturedLinkPopover.onUpdate(
+				p.querySelector< HTMLElement >( 'a' ),
+				NEW,
+				'to my account'
+			);
+			expect( onChange ).toHaveBeenCalledTimes( 1 );
+			expect( updateBlockAttributes ).not.toHaveBeenCalled();
+		} );
+
+		it( 'ignores stale link anchors', () => {
+			const value = mountValue( 'Go <b>here</b> now' );
+			const onChange = setup( { content: 'x' }, value );
+			expect( () =>
+				capturedLinkPopover.onUpdate(
+					document.createElement( 'a' ),
+					NEW,
+					'x'
+				)
+			).not.toThrow();
+			capturedLinkPopover.onUpdate(
+				p.querySelector< HTMLElement >( 'b' ),
+				NEW,
+				'x'
+			);
+			expect( onChange ).not.toHaveBeenCalled();
+		} );
 	} );
 } );

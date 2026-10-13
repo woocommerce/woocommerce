@@ -67,6 +67,35 @@ const getCursorPosition = (
 };
 
 /**
+ * Resolve a DOM element inside a RichText container to its offsets in the RichText value.
+ *
+ * @param container    The editable element.
+ * @param element      The element to locate.
+ * @param contentsOnly Only select the element's contents.
+ */
+const getElementRange = (
+	container: HTMLElement | null | undefined,
+	element: HTMLElement,
+	contentsOnly = false
+): { start: number; end: number } | null => {
+	if ( ! container?.contains( element ) ) {
+		return null;
+	}
+	const range = container.ownerDocument.createRange();
+	if ( contentsOnly ) {
+		range.selectNodeContents( element );
+	} else {
+		range.selectNode( element );
+	}
+	const { start, end } = create( {
+		element: container,
+		range,
+		__unstableIsEditableTree: true,
+	} );
+	return start === undefined || end === undefined ? null : { start, end };
+};
+
+/**
  * Replace registered personalization tags with HTML comments in content.
  *
  * @param content string The content to replace the tags in.
@@ -152,6 +181,7 @@ const insertPersonalizationTag = (
 
 export {
 	getCursorPosition,
+	getElementRange,
 	insertPersonalizationTag,
 	replacePersonalizationTagsWithHTMLComments,
 };
