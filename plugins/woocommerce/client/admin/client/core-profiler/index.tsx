@@ -64,7 +64,7 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
-import { STORE_LOCATION_NOT_SAVED_QUERY_ARG } from './utils/store-location-not-saved';
+import { getStoreLocationNotSavedQuery } from './utils/store-location-not-saved';
 import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins/Plugins';
 import { NoPermissionsError } from './pages/Plugins/NoPermissions';
@@ -353,9 +353,7 @@ const exitToWooHome = fromPromise(
 			.coreProfilerCompleted()
 			.catch( logProfilerError );
 		window.location.href = getNewPath(
-			input?.storeLocationNotSaved
-				? { [ STORE_LOCATION_NOT_SAVED_QUERY_ARG ]: '1' }
-				: {},
+			getStoreLocationNotSavedQuery( !! input?.storeLocationNotSaved ),
 			'/',
 			{}
 		);
@@ -380,12 +378,12 @@ const exitToJetpackAuth = fromPromise( async () => {
 class SkippedFlagNotSavedError extends Error {
 	cause: unknown;
 
-	storeLocationSaved: boolean;
+	storeLocationNotSaved: boolean;
 
-	constructor( cause: unknown, storeLocationSaved: boolean ) {
+	constructor( cause: unknown, storeLocationNotSaved: boolean ) {
 		super( 'The skipped flag for onboarding could not be saved.' );
 		this.cause = cause;
-		this.storeLocationSaved = storeLocationSaved;
+		this.storeLocationNotSaved = storeLocationNotSaved;
 	}
 }
 
@@ -404,11 +402,10 @@ const redirectToSkipOnboardingFallback = ( {
 		'onboarding',
 		{}
 	) as { skipOnboardingFallbackUrl?: unknown };
-	const storeLocationQuery =
+	const storeLocationQuery = getStoreLocationNotSavedQuery(
 		event.error instanceof SkippedFlagNotSavedError &&
-		! event.error.storeLocationSaved
-			? { [ STORE_LOCATION_NOT_SAVED_QUERY_ARG ]: '1' }
-			: {};
+			event.error.storeLocationNotSaved
+	);
 
 	window.location.href =
 		typeof skipOnboardingFallbackUrl === 'string' &&
@@ -736,20 +733,20 @@ const skipFlowUpdateBusinessLocation = fromPromise(
 				businessLocation,
 				currencyUpdate,
 			] );
-		const storeLocationSaved = storeLocationResults.every( ( result ) => {
+		let storeLocationNotSaved = false;
+		for ( const result of storeLocationResults ) {
 			if ( result.status === 'rejected' ) {
 				logProfilerError( result.reason );
-				return false;
+				storeLocationNotSaved = true;
 			}
-			return true;
-		} );
+		}
 		if ( skippedResult.status === 'rejected' ) {
 			throw new SkippedFlagNotSavedError(
 				skippedResult.reason,
-				storeLocationSaved
+				storeLocationNotSaved
 			);
 		}
-		return { storeLocationSaved };
+		return { storeLocationNotSaved };
 	}
 );
 
@@ -1490,10 +1487,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 											event,
 										}: {
 											event: DoneActorEvent< {
-												storeLocationSaved: boolean;
+												storeLocationNotSaved: boolean;
 											} >;
 										} ) =>
-											! event.output.storeLocationSaved,
+											event.output.storeLocationNotSaved,
 									} ),
 								},
 								onError: {
