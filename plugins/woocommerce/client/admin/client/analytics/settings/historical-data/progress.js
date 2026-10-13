@@ -12,10 +12,10 @@ function HistoricalDataProgress( { label, progress, total } ) {
 
 	const labelCounters = ! isNil( total )
 		? /* translators: 1: progress, 2: total */
-		  sprintf( __( '%(progress)s of %(total)s', 'woocommerce' ), {
+			sprintf( __( '%(progress)s of %(total)s', 'woocommerce' ), {
 				progress: progress || 0,
 				total,
-		  } )
+			} )
 		: null;
 
 	return (

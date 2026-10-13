@@ -111,7 +111,7 @@ final class RenewalCalculator {
 				'contract_id'       => $values['contract_id'] ?? null,
 				'sequence_no'       => $values['sequence_no'] ?? null,
 				'count'             => $values['count'] ?? null,
-				'status'            => CycleStatus::pending(),
+				'status'            => new CycleStatus( CycleStatus::PENDING ),
 				'starts_at_gmt'     => $start->format( 'Y-m-d H:i:s' ),
 				'ends_at_gmt'       => $end->format( 'Y-m-d H:i:s' ),
 				'expected_total'    => $values['expected_total'] ?? null,

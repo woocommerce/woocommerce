@@ -19,6 +19,7 @@
 		"build:project:admin": "pnpm --filter='@woocommerce/admin-library' build",
 		"build:project:blocks": "pnpm --filter='@woocommerce/block-library' build",
 		"build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' build",
+		"build:project:admin-screens": "pnpm --filter='@woocommerce/admin-screens' build",
 		"build:project:packages": "XDEBUG_MODE=off composer install --quiet",
 		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -79,8 +80,8 @@
 		"test:e2e:blocks": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/e2e/utils/blocks/*.test.mjs && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=blocks-chromium",
 		"test:e2e:blocks:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:e2e:blocks",
 		"test:e2e:blocks:performance": "pnpm playwright test --config=tests/e2e/playwright.performance.config.ts --project=blocks-performance",
-		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-serial --project=core-parallel --grep @pr tests/email-editor/update-propagation",
-		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-serial --project=core-parallel tests/email-editor/update-propagation",
+		"test:e2e:email-update-propagation:pr": "pnpm test:e2e:default --project=core-parallel --grep @pr tests/email-editor/update-propagation",
+		"test:e2e:email-update-propagation:nightly": "pnpm test:e2e:default --project=core-parallel tests/email-editor/update-propagation",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
@@ -115,6 +116,7 @@
 		"watch:build:project:admin": "pnpm --filter='@woocommerce/admin-library' watch:build",
 		"watch:build:project:blocks": "pnpm --filter='@woocommerce/block-library' watch:build",
 		"watch:build:project:classic-assets": "pnpm --filter='@woocommerce/classic-assets' watch:build",
+		"watch:build:project:admin-screens": "pnpm --filter='@woocommerce/admin-screens' watch:build",
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
 		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
@@ -357,10 +359,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -399,10 +398,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [],
 					"testEnv": {
 						"start": "env:e2e --debug",
@@ -513,10 +509,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
@@ -579,10 +572,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
@@ -648,10 +638,7 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:core-serial",
-					"shardingArguments": [
-						"--shard=1/2",
-						"--shard=2/2"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"tests/e2e/{*,!(tests)/**,tests/{*,!(blocks)/**}}"
 					],
@@ -1348,7 +1335,7 @@
 		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
-		"prettier": "npm:wp-prettier@3.0.3",
+		"prettier": "npm:wp-prettier@3.9.6",
 		"rimraf": "5.0.5",
 		"typescript": "5.7.x",
 		"wp-textdomain": "1.0.1"
@@ -1361,6 +1348,7 @@
 	],
 	"dependencies": {
 		"@woocommerce/admin-library": "workspace:*",
+		"@woocommerce/admin-screens": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/classic-assets": "workspace:*"
 	}

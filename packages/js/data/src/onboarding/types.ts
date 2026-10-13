@@ -218,8 +218,7 @@ export type OnboardingProductType = {
 };
 
 export type OnboardingProductTypes =
-	| Record< ProductTypeSlug, OnboardingProductType >
-	| Record< string, never >;
+	Record< ProductTypeSlug, OnboardingProductType > | Record< string, never >;
 
 export type ExtensionList = {
 	key: string;

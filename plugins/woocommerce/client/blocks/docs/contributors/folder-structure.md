@@ -17,7 +17,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── .eslintrc
 ├── .gitattributes
 ├── .gitignore
-├── .prettierrc.js
 ├── .stylelintrc.json
 ├── phpcs.xml.dist
 │ Dot files and config files used to configure the various linting tools

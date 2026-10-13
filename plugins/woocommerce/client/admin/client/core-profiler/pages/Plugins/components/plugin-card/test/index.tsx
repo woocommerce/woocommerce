@@ -28,8 +28,12 @@ describe( 'PluginCard', () => {
 		const description = queryByText( 'Plugin description' );
 		expect( title ).toBeInTheDocument();
 		expect( description ).toBeInTheDocument();
-		if ( title ) fireEvent.click( title );
-		if ( description ) fireEvent.click( description );
+		if ( title ) {
+			fireEvent.click( title );
+		}
+		if ( description ) {
+			fireEvent.click( description );
+		}
 		expect( onChange ).toHaveBeenCalledTimes( 2 );
 	} );
 
@@ -53,8 +57,12 @@ describe( 'PluginCard', () => {
 		expect( checkbox ).toBeDisabled();
 		const title = queryByText( 'Plugin title' );
 		const description = queryByText( 'Plugin description' );
-		if ( title ) fireEvent.click( title );
-		if ( description ) fireEvent.click( description );
+		if ( title ) {
+			fireEvent.click( title );
+		}
+		if ( description ) {
+			fireEvent.click( description );
+		}
 		expect( onChange ).not.toHaveBeenCalled();
 	} );
 } );

@@ -97,7 +97,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 				? getNewPath( {}, '/analytics/customers', {
 						filter: 'single_customer',
 						customers: customer.id,
-				  } )
+					} )
 				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
@@ -277,7 +277,6 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			return { isRequesting: false };
 		}
 
-		/* eslint-disable @wordpress/no-unused-vars-before-return */
 		const actionableOrders = getOrders( actionableOrdersQuery, null );
 
 		const isRequestingActionable = hasFinishedResolution( 'getOrders', [

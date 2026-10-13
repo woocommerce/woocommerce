@@ -354,6 +354,77 @@
 				}
 			)
 
+			// Commodity codes allow any punctuation and spacing merchants copy them with, such as 0901.21.0010,
+			// matching the backend. Codes over 14 digits are flagged rather than cut, so a different valid code
+			// isn't saved. Too-short codes are only flagged on change, so the tip doesn't show while typing.
+			.on(
+				'input',
+				'input[type=text][name*=_customs_commodity_code]',
+				function () {
+					var value = $( this ).val();
+
+					$( document.body ).triggerHandler(
+						( value.match( /[0-9]/g ) || [] ).length > 14 ||
+							new RegExp( '[^0-9\\p{P}\\s]', 'u' ).test( value )
+							? 'wc_add_error_tip'
+							: 'wc_remove_error_tip',
+						[ $( this ), 'i18n_commodity_code_error' ]
+					);
+				}
+			)
+
+			// Customs descriptions allow only letters, digits, spaces, punctuation and printable ASCII symbols other
+			// than < and >, so emoji and symbols such as ™ are dropped. RegExp() keeps the legacy ES5 parser from
+			// rejecting the u flag. Text over 35 code points is flagged rather than cut, counting like the backend's
+			// mb_strlen(); maxlength would count UTF-16 units.
+			.on(
+				'input',
+				'input[type=text][name*=_customs_description]',
+				function () {
+					var value = $( this ).val();
+					var disallowed = new RegExp(
+						'[<>]|[^\\x20-\\x7E\\p{L}\\p{Mn}\\p{Mc}\\p{N}\\p{P}\\s]|[\\uFE00-\\uFE0F\\u{E0100}-\\u{E01EF}]',
+						'gu'
+					);
+					var cleaned = value.replace( disallowed, '' );
+
+					if ( cleaned !== value ) {
+						var caret = value
+							.slice( 0, this.selectionStart )
+							.replace( disallowed, '' ).length;
+						$( this ).val( cleaned );
+						this.setSelectionRange( caret, caret );
+					}
+
+					$( document.body ).triggerHandler(
+						cleaned !== value || Array.from( cleaned ).length > 35
+							? 'wc_add_error_tip'
+							: 'wc_remove_error_tip',
+						[ $( this ), 'i18n_customs_description_error' ]
+					);
+				}
+			)
+
+			// Remove the punctuation and spacing the backend removes. Letters and symbols are kept so the
+			// code stays visibly invalid, and a code with them or without 6 to 14 digits is flagged.
+			.on(
+				'change',
+				'input[type=text][name*=_customs_commodity_code]',
+				function () {
+					var cleaned = $( this )
+						.val()
+						.replace( new RegExp( '[\\p{P}\\s]', 'gu' ), '' );
+					$( this ).val( cleaned );
+
+					$( document.body ).triggerHandler(
+						/^([0-9]{6,14})?$/.test( cleaned )
+							? 'wc_remove_error_tip'
+							: 'wc_add_error_tip',
+						[ $( this ), 'i18n_commodity_code_error' ]
+					);
+				}
+			)
+
 			.on( 'init_tooltips', function () {
 				$( '.tips, .help_tip, .woocommerce-help-tip' ).tipTip( {
 					attribute: 'data-tip',
