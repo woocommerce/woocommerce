@@ -1127,8 +1127,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( null !== $type && ! is_string( $type ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
-				/* translators: %s: PHP type that was passed instead of a string. */
-				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
+				sprintf( esc_html( 'remove_order_items() expects a string item type or null; received %s.' ), esc_html( gettype( $type ) ) ),
 				'11.0.0'
 			);
 			return;

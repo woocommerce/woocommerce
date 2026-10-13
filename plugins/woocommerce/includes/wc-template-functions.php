@@ -2934,7 +2934,7 @@ if ( ! function_exists( 'woocommerce_checkout_payment' ) ) {
 		if ( ! WC()->cart ) {
 			wc_doing_it_wrong(
 				__FUNCTION__,
-				__( 'Cart is not available. This may indicate that the function is being called before woocommerce_init or in an admin context.', 'woocommerce' ),
+				'Cart is not available. This may indicate that the function is being called before woocommerce_init or in an admin context.',
 				'9.8.0'
 			);
 			return;

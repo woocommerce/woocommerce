@@ -81,7 +81,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		if ( ! WC()->session ) {
 			wc_doing_it_wrong(
 				__METHOD__,
-				__( 'WC_Session is not available, customer data cannot be saved to session.', 'woocommerce' ),
+				'WC_Session is not available, customer data cannot be saved to session.',
 				'9.8.0'
 			);
 			return;

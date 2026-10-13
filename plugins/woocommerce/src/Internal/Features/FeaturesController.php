@@ -304,7 +304,7 @@ class FeaturesController {
 				$this->issued_feature_definitions_notice = true;
 				wc_doing_it_wrong(
 					__METHOD__,
-					__( 'FeaturesController methods that access feature definitions should not be called while feature definitions are being initialized. Use the woocommerce_init action or later.', 'woocommerce' ),
+					'FeaturesController methods that access feature definitions should not be called while feature definitions are being initialized. Use the woocommerce_init action or later.',
 					'11.3.0'
 				);
 			}
@@ -1028,8 +1028,7 @@ class FeaturesController {
 	public function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
 		if ( ! $this->proxy->call_function( 'doing_action', 'before_woocommerce_init' ) ) {
 			$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
-			/* translators: 1: class::method 2: before_woocommerce_init */
-			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should be called inside the %2$s action.', 'woocommerce' ), $class_and_method, 'before_woocommerce_init' ), '7.0' );
+			$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( '%1$s should be called inside the %2$s action.', $class_and_method, 'before_woocommerce_init' ), '7.0' );
 			return false;
 		}
 		if ( ! $this->feature_exists( $feature_id ) ) {
@@ -1239,8 +1238,7 @@ class FeaturesController {
 			! $this->proxy->call_function( 'doing_action', 'woocommerce_init' ) ) {
 			if ( ! is_null( $function_name ) ) {
 				$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function_name;
-				/* translators: 1: class::method 2: plugins_loaded */
-				$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
+				$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( '%1$s should not be called before the %2$s action.', $class_and_method, 'woocommerce_init' ), '7.0' );
 			}
 			return false;
 		}

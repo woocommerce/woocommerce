@@ -578,7 +578,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			if ( $this->prices_array[ $hash_display ] !== $transient_cached_prices_array[ $hash_display ] && ! $this->validate_prices_data( array( $hash_display => $this->prices_array[ $hash_display ] ), $transient_version ) ) {
 				wc_doing_it_wrong(
 					__METHOD__,
-					__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+					'`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.',
 					'11.1'
 				);
 			}
@@ -587,7 +587,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			if ( $this->prices_array[ $hash_raw ] !== $transient_cached_prices_array[ $hash_raw ] && ! $this->validate_prices_data( array( $hash_raw => $this->prices_array[ $hash_raw ] ), $transient_version ) ) {
 				wc_doing_it_wrong(
 					__METHOD__,
-					__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+					'`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.',
 					'11.1'
 				);
 			}

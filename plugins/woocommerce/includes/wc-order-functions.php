@@ -182,7 +182,7 @@ function wc_get_order_status_name( $status ) {
 	if ( ! is_string( $status ) ) {
 		wc_doing_it_wrong(
 			__FUNCTION__,
-			__( 'An invalid order status slug was supplied.', 'woocommerce' ),
+			'An invalid order status slug was supplied.',
 			'9.6'
 		);
 	}

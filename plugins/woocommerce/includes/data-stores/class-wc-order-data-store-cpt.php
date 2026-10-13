@@ -1085,13 +1085,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				__METHOD__,
 				esc_html(
 					sprintf(
-					// translators: %s is a comma separated list of query arguments.
-						_n(
-							'Order query argument (%s) is not supported on the current order datastore.',
-							'Order query arguments (%s) are not supported on the current order datastore.',
-							count( $unsupported_args_in_query ),
-							'woocommerce'
-						),
+						1 === count( $unsupported_args_in_query )
+							? 'Order query argument (%s) is not supported on the current order datastore.'
+							: 'Order query arguments (%s) are not supported on the current order datastore.',
 						implode( ', ', $unsupported_args_in_query )
 					)
 				),

@@ -1659,9 +1659,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product category list warns about an unsupported ordering mode and still falls back to WordPress order.
+	 * @testdox Product category list warns in English about an unsupported ordering mode and still falls back to WordPress order.
 	 */
 	public function test_wc_get_product_category_list_warns_on_unsupported_orderby(): void {
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
 		$suffix   = wp_unique_id();
 		$category = wp_insert_term( 'Unsupported orderby ' . $suffix, 'product_cat' );
 		$product  = WC_Helper_Product::create_simple_product();
@@ -1672,12 +1681,22 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$expected = get_the_term_list( $product->get_id(), 'product_cat', '', ', ', '' );
 
 			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+			add_filter(
+				'gettext',
+				function ( $translation, $text, $domain ) {
+					return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+				},
+				10,
+				3
+			);
 
 			$this->assertSame(
 				$expected,
 				wc_get_product_category_list( $product->get_id(), ', ', '', '', 'menu_order' ),
 				'An unsupported ordering mode should still return the WordPress term-list output.'
 			);
+			$this->assertArrayHasKey( 'wc_get_product_category_list', $messages, 'An unsupported ordering mode should raise a notice.' );
+			$this->assertStringStartsWith( 'Unsupported $orderby value "menu_order". Use "name", "breadcrumb", or an empty string for WordPress term-list order.', $messages['wc_get_product_category_list'], 'The notice should be the English message.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $category['term_id'], 'product_cat' );

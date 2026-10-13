@@ -32,7 +32,7 @@ class IntegrationRegistry {
 		}
 
 		if ( empty( $this->registry_identifier ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Integration registry requires an identifier.', 'woocommerce' ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( 'Integration registry requires an identifier.' ), '4.6.0' );
 			return false;
 		}
 
@@ -65,8 +65,7 @@ class IntegrationRegistry {
 		$name = $integration->get_name();
 
 		if ( $this->is_registered( $name ) ) {
-			/* translators: %s: Integration name. */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( '"%s" is already registered.', 'woocommerce' ), $name ) ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( '"%s" is already registered.', $name ) ), '4.6.0' );
 			return false;
 		}
 
@@ -96,8 +95,7 @@ class IntegrationRegistry {
 		}
 
 		if ( ! $this->is_registered( $name ) ) {
-			/* translators: %s: Integration name. */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Integration "%s" is not registered.', 'woocommerce' ), $name ) ), '4.6.0' );
+			_doing_it_wrong( __METHOD__, esc_html( sprintf( 'Integration "%s" is not registered.', $name ) ), '4.6.0' );
 			return false;
 		}
 

@@ -463,7 +463,7 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function install_notice() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html__( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html( 'Onboarding is maintained in WooCommerce Admin.' ) );
 	}
 
 	/**
