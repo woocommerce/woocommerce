@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -52,7 +53,7 @@ class ExtensionsWithoutSubscription {
 		}
 
 		if ( empty( $plugins ) ) {
-			self::possibly_delete_note();
+			self::delete_note_unless_dismissed_or_actioned();
 		} elseif ( self::note_exists() ) {
 			self::possibly_update_note();
 		} else {
@@ -108,6 +109,27 @@ class ExtensionsWithoutSubscription {
 		);
 
 		return $note;
+	}
+
+	/**
+	 * Delete the note now that nothing is missing a subscription, unless the merchant already dealt with it.
+	 *
+	 * A dismissed or actioned note is hidden anyway, and keeping it means it stays that way if the
+	 * extensions come back, for example after deactivating every plugin to find a conflict.
+	 *
+	 * @return void
+	 */
+	private static function delete_note_unless_dismissed_or_actioned(): void {
+		$note = Notes::get_note_by_name( self::NOTE_NAME );
+		if ( ! $note instanceof Note ) {
+			return;
+		}
+
+		if ( $note->get_is_deleted() || Note::E_WC_ADMIN_NOTE_ACTIONED === $note->get_status() ) {
+			return;
+		}
+
+		self::possibly_delete_note();
 	}
 
 	/**

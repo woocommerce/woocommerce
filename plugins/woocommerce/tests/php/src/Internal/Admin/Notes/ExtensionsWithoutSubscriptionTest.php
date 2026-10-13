@@ -130,6 +130,42 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a dismissed note once resolved, so it stays dismissed if the extension comes back.
+	 */
+	public function test_dismissed_note_stays_dismissed_after_resolving_and_returning(): void {
+		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
+		$this->sut->refresh_note();
+		$note = $this->get_saved_note();
+		$note->set_is_deleted( true );
+		$note->save();
+
+		$this->mock_active_woo_plugins( array() );
+		$this->sut->refresh_note();
+		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
+		$this->sut->refresh_note();
+
+		$this->assertTrue( $this->get_saved_note()->get_is_deleted(), 'Deactivating and reactivating the extension should not bring back a dismissed note.' );
+	}
+
+	/**
+	 * @testdox Should keep an actioned note once resolved, so it stays actioned if the extension comes back.
+	 */
+	public function test_actioned_note_stays_actioned_after_resolving_and_returning(): void {
+		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
+		$this->sut->refresh_note();
+		$note = $this->get_saved_note();
+		$note->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
+		$note->save();
+
+		$this->mock_active_woo_plugins( array() );
+		$this->sut->refresh_note();
+		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
+		$this->sut->refresh_note();
+
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_ACTIONED, $this->get_saved_note()->get_status(), 'Deactivating and reactivating the extension should not bring back an actioned note.' );
+	}
+
+	/**
 	 * @testdox Should keep the note while a connected store's subscriptions fetch is failing.
 	 */
 	public function test_note_is_kept_while_the_api_is_failing(): void {
