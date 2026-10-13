@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Redirect opted-in gateway settings sections to the experimental payment settings screen; no merchant-facing change.
+
