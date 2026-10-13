@@ -22,7 +22,9 @@ function debounceWithScope< Args extends unknown[] >(
 ) {
 	let timer: ReturnType< typeof setTimeout > | null;
 	return function ( this: unknown, ...args: Args ) {
-		if ( timer ) clearTimeout( timer );
+		if ( timer ) {
+			clearTimeout( timer );
+		}
 		timer = setTimeout(
 			withScope( () => {
 				func.apply( this, args );

@@ -21,6 +21,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepos
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\RenewalCandidate;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SnapshotStore;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository
@@ -52,6 +53,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	private function make_contract(): Contract {
 		return Contract::create(
 			array(
+				'status'               => ContractStatus::ACTIVE,
 				'customer_id'          => 42,
 				'currency'             => 'USD',
 				'selling_plan_id'      => 7,
@@ -92,9 +94,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 						'last_name'  => 'Lovelace',
 						'country'    => 'US',
 					),
-				),
-				'meta'                 => array(
-					'source_channel' => 'pdp',
 				),
 			)
 		);
@@ -190,8 +189,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertArrayHasKey( Contract::ADDRESS_BILLING, $addresses );
 		$this->assertArrayHasKey( Contract::ADDRESS_SHIPPING, $addresses );
 		$this->assertSame( 'Ada', $addresses[ Contract::ADDRESS_BILLING ]['first_name'] );
-
-		$this->assertSame( 'pdp', $fetched->get_meta()['source_channel'] );
 	}
 
 	/**
@@ -206,7 +203,75 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( $id, $summary->get_id() );
 		$this->assertSame( '2026-07-15 00:00:00', $summary->get_next_payment_gmt() );
 		$this->assertSame( array(), $summary->get_items() );
-		$this->assertSame( array(), $summary->get_meta() );
+	}
+
+	/**
+	 * @testdox find_by_origin_order returns the matching contracts oldest first, with plan terms hydrated.
+	 */
+	public function test_find_by_origin_order_returns_matches_oldest_first(): void {
+		$first  = $this->sut->insert( $this->make_contract() );
+		$second = $this->sut->insert( $this->make_contract() );
+		$other  = $this->make_contract();
+		$other->set_origin_order_id( 2002 );
+		$this->sut->insert( $other );
+
+		$first_contract = $this->sut->find( $first );
+		$this->assertInstanceOf( Contract::class, $first_contract );
+		$this->seed_plan_snapshot(
+			$first_contract,
+			array(
+				'selling_plan_id' => 7,
+				'name'            => 'Monthly',
+			)
+		);
+
+		$found = $this->sut->find_by_origin_order( 1001 );
+
+		$this->assertSame(
+			array( $first, $second ),
+			array_map(
+				static function ( Contract $c ): ?int {
+					return $c->get_id();
+				},
+				$found
+			)
+		);
+		$snapshot = $found[0]->get_plan_snapshot();
+		$this->assertInstanceOf( PlanSnapshot::class, $snapshot );
+		$this->assertSame( 'Monthly', $snapshot->to_array()['name'] );
+		$this->assertSame( array(), $this->sut->find_by_origin_order( 9999 ) );
+	}
+
+	/**
+	 * Store a plan snapshot row and point the contract at it.
+	 *
+	 * @param Contract             $contract Stored contract.
+	 * @param array<string, mixed> $payload  Plan snapshot payload.
+	 */
+	private function seed_plan_snapshot( Contract $contract, array $payload ): void {
+		$plan = PlanSnapshot::from_array( $payload );
+		$contract->set_plan_snapshot_id(
+			( new SnapshotStore() )->insert( (int) $contract->get_id(), SnapshotStore::TYPE_PLAN, $plan->get_selling_plan_id(), $plan->to_payload(), $plan->get_schema_version() )
+		);
+		$this->sut->update_fields( $contract, array( 'plan_snapshot_id' ) );
+	}
+
+	/**
+	 * @testdox Meta written through the meta methods survives whole-contract writes.
+	 */
+	public function test_meta_survives_a_whole_entity_update(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->sut->add_meta( $id, 'source_channel', 'pdp' );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertSame( 'pdp', $this->sut->get_meta( $id, 'source_channel', true ) );
+
+		$contract->set_status( ContractStatus::ACTIVE );
+		$this->assertTrue( $this->sut->update_if_status( $contract, ContractStatus::ON_HOLD ) );
+		$this->assertSame( array( 'pdp' ), $this->sut->get_meta( $id, 'source_channel' ) );
 	}
 
 	/**
@@ -258,6 +323,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		return $this->sut->insert(
 			Contract::create(
 				array(
+					'extension_slug'   => 'engine-tests',
 					'customer_id'      => $customer_id,
 					'status'           => $status,
 					'currency'         => 'USD',
@@ -525,7 +591,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$counts = $this->sut->count_by_status();
 
 		$this->assertSame( ContractStatus::get_all(), array_keys( $counts ) );
-		$this->assertSame( array( 0, 0, 0, 0, 0 ), array_values( $counts ) );
+		$this->assertSame( array_fill( 0, count( $counts ), 0 ), array_values( $counts ) );
 	}
 
 	/**
@@ -614,6 +680,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->sut->insert(
 			Contract::create(
 				array(
+					'extension_slug'  => 'engine-tests',
+					'status'          => ContractStatus::ACTIVE,
 					'customer_id'     => 1,
 					'currency'        => 'EUR',
 					'selling_plan_id' => 2,
@@ -628,41 +696,16 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox insert_with_origin_cycle records cycle 1's snapshot refs on the contract too.
+	 * @testdox A stored row with no extension_slug hydrates a null slug.
 	 */
-	public function test_insert_with_origin_cycle_records_refs_on_the_contract(): void {
-		$contract = $this->make_contract();
-		$cycle    = $this->make_cycle( 0, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot(), 1001 );
-		$cycle->set_status( new CycleStatus( CycleStatus::BILLED ) );
+	public function test_a_stored_null_extension_slug_hydrates_as_null(): void {
+		global $wpdb;
 
-		$id = $this->sut->insert_with_origin_cycle( $contract, $cycle );
-		$this->assertGreaterThan( 0, $id );
-
-		// The signup cycle was stamped with the contract id and its snapshots resolved.
-		$this->assertSame( $id, $cycle->get_contract_id() );
-		$this->assertNotNull( $cycle->get_plan_snapshot_id() );
-		$this->assertNotNull( $cycle->get_items_snapshot_id() );
-
-		// The contract carries the SAME snapshot refs as cycle 1 (latest/live).
-		$reloaded = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $reloaded );
-		$this->assertSame( $cycle->get_plan_snapshot_id(), $reloaded->get_plan_snapshot_id() );
-		$this->assertSame( $cycle->get_items_snapshot_id(), $reloaded->get_items_snapshot_id() );
-
-		// Cycle 1 is the billed signup, reachable as the chain's most-recent cycle.
-		$current = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $current );
-		$this->assertSame( 1, $current->get_count() );
-		$this->assertTrue( $current->get_status()->equals( new CycleStatus( CycleStatus::BILLED ) ) );
-	}
-
-	/**
-	 * @testdox extension_slug defaults to null when unset.
-	 */
-	public function test_extension_slug_defaults_to_null_when_unset(): void {
 		$id = $this->sut->insert(
 			Contract::create(
 				array(
+					'extension_slug'  => 'engine-tests',
+					'status'          => ContractStatus::ACTIVE,
 					'customer_id'     => 1,
 					'currency'        => 'EUR',
 					'selling_plan_id' => 2,
@@ -671,6 +714,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				)
 			)
 		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'extension_slug' => null ), array( 'id' => $id ) );
 
 		$fetched = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $fetched );
@@ -728,6 +774,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$mutated = Contract::create(
 			array(
+				'extension_slug'  => 'engine-tests',
+				'status'          => ContractStatus::ACTIVE,
 				'customer_id'     => 42,
 				'currency'        => 'USD',
 				'selling_plan_id' => 7,
@@ -743,7 +791,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 						'total'      => '24.00',
 					),
 				),
-				'meta'            => array( 'source_channel' => 'email' ),
 			)
 		);
 		$mutated->set_id( $id );
@@ -755,7 +802,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$items = $reloaded->get_items();
 		$this->assertCount( 1, $items );
 		$this->assertSame( 'Tea tin', $items[0]['item_name'] );
-		$this->assertSame( 'email', $reloaded->get_meta()['source_channel'] );
 	}
 
 	/**
@@ -790,6 +836,50 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
 
 		$this->assertSame( '0', $remaining );
+	}
+
+	/**
+	 * @testdox update_fields on a deleted contract returns false before any child write.
+	 */
+	public function test_update_fields_returns_false_for_a_deleted_contract_and_writes_no_children(): void {
+		global $wpdb;
+
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->assertTrue( $this->sut->delete( $id ) );
+
+		$stale = $this->make_contract();
+		$stale->set_id( $id );
+
+		$this->assertFalse( $this->sut->update_fields( $stale, array( 'status', 'items', 'addresses' ) ) );
+
+		foreach ( array( SchemaInstaller::TABLE_CONTRACT_ITEMS, SchemaInstaller::TABLE_CONTRACT_ADDRESSES ) as $table ) {
+			$table = SchemaInstaller::get_table_name( $table );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $id ) ) );
+		}
+	}
+
+	/**
+	 * @testdox update_fields writing identical values (no changed rows) does not throw.
+	 */
+	public function test_update_fields_with_identical_values_does_not_throw(): void {
+		global $wpdb;
+
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		// A write in a new second changes date_updated_gmt; repeat until one changes no rows.
+		$zero_rows = false;
+		for ( $i = 0; $i < 3 && ! $zero_rows; $i++ ) {
+			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) ) );
+			$zero_rows = 0 === $wpdb->rows_affected;
+		}
+
+		$this->assertTrue( $zero_rows, 'A write changed no rows.' );
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 	}
 
 	/**
@@ -899,27 +989,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$next = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 2 );
 		$this->assertCount( 1, $next );
 		$this->assertSame( 1, $next[0]->get_sequence_no() );
-	}
-
-	/**
-	 * @testdox max_count tracks the highest count appended (the MAX(count) + 1 anchor).
-	 */
-	public function test_max_count_reads_the_per_chain_counter(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$this->assertNull( $this->sut->max_count( $id ), 'An empty chain has no counting cycle.' );
-
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
-		$this->assertSame( 1, $this->sut->max_count( $id ) );
-
-		$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
-		$this->assertSame( 2, $this->sut->max_count( $id ) );
-
-		// The next chargeable number is derived as MAX(count) + 1; appending it must
-		// advance the counter, confirming the derivation is wired through the writes.
-		$next = (int) $this->sut->max_count( $id ) + 1;
-		$this->sut->append_cycle( $this->make_cycle( $id, 3, $next, '2026-09-15 00:00:00', '2026-10-15 00:00:00' ) );
-		$this->assertSame( 3, $this->sut->max_count( $id ) );
 	}
 
 	/**
@@ -1129,9 +1198,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_due skips a due contract with no owner.
 	 */
 	public function test_find_due_skips_a_contract_with_no_owner(): void {
+		global $wpdb;
+
 		$now      = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
 		$owned    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$no_owner = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_PRIMITIVE, CycleStatus::BILLED, null, null, null );
+		$no_owner = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), array( 'extension_slug' => null ), array( 'id' => $no_owner ) );
 
 		$ids = $this->due_ids( $now, 50 );
 
@@ -1444,7 +1517,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
 	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
-	 * @param string|null $owner            The owning extension slug; defaults to the registered test owner.
+	 * @param string      $owner            The owning extension slug; defaults to the registered test owner.
 	 */
 	private function insert_contract_due_at(
 		?string $next_payment_gmt,
@@ -1453,7 +1526,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		string $head_status = CycleStatus::BILLED,
 		?string $claimed_until = null,
 		?string $head_ends_at = null,
-		?string $owner = self::OWNER
+		string $owner = self::OWNER
 	): int {
 		$contract = Contract::create(
 			array(
@@ -1629,6 +1702,60 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * Build a billing cycle whose position the append assigns.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $overrides   Extra or replacement keys.
+	 */
+	private function make_unpositioned_cycle( int $contract_id, array $overrides = array() ): Cycle {
+		return Cycle::create(
+			array_merge(
+				array(
+					'contract_id'   => $contract_id,
+					'starts_at_gmt' => '2026-07-15 00:00:00',
+					'ends_at_gmt'   => '2026-08-15 00:00:00',
+					'currency'      => 'USD',
+				),
+				$overrides
+			)
+		);
+	}
+
+	/**
+	 * @testdox append_cycle assigns sequence 1 to the first unpositioned cycle and leaves the count alone.
+	 */
+	public function test_append_cycle_assigns_the_first_sequence_no(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$cycle = $this->make_unpositioned_cycle( $id );
+
+		$this->sut->append_cycle( $cycle );
+
+		$this->assertSame( 1, $cycle->get_sequence_no() );
+		$this->assertNull( $cycle->get_count() );
+		$head = $this->sut->find_chain_head( $id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( $cycle->get_id(), $head->get_id() );
+	}
+
+	/**
+	 * @testdox append_cycle assigns the head's sequence + 1 within the cycle's own chain.
+	 */
+	public function test_append_cycle_assigns_the_next_sequence_no_in_its_chain(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
+
+		$next  = $this->make_unpositioned_cycle( $id, array( 'count' => 3 ) );
+		$other = $this->make_unpositioned_cycle( $id, array( 'kind' => 'shipping' ) );
+		$this->sut->append_cycle( $next );
+		$this->sut->append_cycle( $other );
+
+		$this->assertSame( 3, $next->get_sequence_no() );
+		$this->assertSame( 3, $next->get_count() );
+		$this->assertSame( 1, $other->get_sequence_no() );
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {
@@ -1643,9 +1770,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertCount( 2, $history );
 		$this->assertNull( $history[0]->get_count() );
 		$this->assertNull( $history[1]->get_count() );
-
-		// No counting cycle, so the per-chain counter is null.
-		$this->assertNull( $this->sut->max_count( $id ) );
 	}
 
 	/**

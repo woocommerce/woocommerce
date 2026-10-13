@@ -74,6 +74,8 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			$this->set_order_pay_query_var( null );
+			set_query_var( 'wc-ajax', '' );
+			remove_all_actions( 'wc_ajax_shipping_restrictions_test' );
 			Constants::clear_single_constant( 'WC_DOING_AJAX' );
 			WC()->session->set( 'chosen_shipping_methods', null );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
@@ -263,14 +265,14 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should evaluate the cart's shipping method on wc-ajax requests, even when order-pay is an existing order.
+	 * @testdox Should evaluate the cart's shipping method inside a wc-ajax handler, even when order-pay is an existing order.
 	 * @testWith ["flat_rate_a", true]
 	 *           ["flat_rate_b", false]
 	 *
 	 * @param string $chosen_rate Symbolic name of the shipping rate selected in the cart.
 	 * @param bool   $expected    Expected availability.
 	 */
-	public function test_is_available_uses_the_cart_on_wc_ajax_requests_with_an_existing_order( string $chosen_rate, bool $expected ): void {
+	public function test_is_available_uses_the_cart_inside_wc_ajax_handlers_with_an_existing_order( string $chosen_rate, bool $expected ): void {
 		$gateway = $this->create_gateway(
 			WC_Gateway_COD::class,
 			array(
@@ -282,9 +284,40 @@ class ShippingMethodRestrictionsTraitTest extends WC_Unit_Test_Case {
 		$this->fill_cart( $chosen_rate );
 		// An order without shipping would count as virtual and skip the restriction if its context were used.
 		$this->set_order_pay_query_var( (string) $this->create_order_with_shipping( null )->get_id() );
-		Constants::set_constant( 'WC_DOING_AJAX', true );
+		set_query_var( 'wc-ajax', 'shipping_restrictions_test' );
 
-		$this->assertSame( $expected, $gateway->is_available() );
+		$is_available = null;
+		add_action(
+			'wc_ajax_shipping_restrictions_test',
+			function () use ( $gateway, &$is_available ) {
+				$is_available = $gateway->is_available();
+			}
+		);
+		do_action( 'wc_ajax_shipping_restrictions_test' );
+
+		$this->assertSame( $expected, $is_available );
+	}
+
+	/**
+	 * @testdox Should evaluate the order's shipping methods when the pay form is submitted with a wc-ajax parameter.
+	 */
+	public function test_is_available_uses_the_order_when_the_pay_form_is_sent_with_wc_ajax(): void {
+		$gateway = $this->create_gateway(
+			WC_Gateway_COD::class,
+			array(
+				'enabled'            => 'yes',
+				'enable_for_methods' => array( $this->rate_ids['flat_rate_a'] ),
+				'enable_for_virtual' => 'yes',
+			)
+		);
+		// The cart would allow the gateway on its own, so a pass here proves the order context was used.
+		$this->fill_cart( 'flat_rate_a' );
+		$this->set_order_pay_query_var( (string) $this->create_order_with_shipping( 'flat_rate_b' )->get_id() );
+		// WC_AJAX::define_ajax() defines this on init for any wc-ajax value, before WC_Form_Handler::pay_action() runs on wp.
+		Constants::set_constant( 'WC_DOING_AJAX', true );
+		set_query_var( 'wc-ajax', 'checkout' );
+
+		$this->assertFalse( $gateway->is_available() );
 	}
 
 	/**

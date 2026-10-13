@@ -8,7 +8,6 @@ import type { StoryFn, Meta } from '@storybook/react-webpack5';
  */
 import ValidationInputError, { type ValidationInputErrorProps } from '..';
 import '../style.scss';
-import '../../validation-input-error/style.scss';
 
 export default {
 	title: 'External Components/ValidationInputError',

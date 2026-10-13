@@ -517,8 +517,7 @@ function addNotice(
  */
 const getRefreshErrorMessage = ( error: unknown ): string => {
 	const candidate = error as
-		| { data?: { message?: unknown }; message?: unknown }
-		| undefined;
+		{ data?: { message?: unknown }; message?: unknown } | undefined;
 
 	const message = [ candidate?.data?.message, candidate?.message ].find(
 		( value ): value is string => typeof value === 'string' && value !== ''

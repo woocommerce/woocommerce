@@ -9,7 +9,7 @@ const returns = ( hookDoc ) => {
 				p: `\`${ returnDoc.types.join( ', ' ) }\` ${
 					returnDoc.content
 				}`.trim(),
-		  }
+			}
 		: null;
 };
 

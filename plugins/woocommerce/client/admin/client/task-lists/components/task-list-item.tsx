@@ -248,7 +248,7 @@ export const TaskListItem = ( {
 							: () => {
 									trackTaskListClick?.();
 									setExpandedTask( id );
-							  }
+								}
 					}
 				/>
 			);
