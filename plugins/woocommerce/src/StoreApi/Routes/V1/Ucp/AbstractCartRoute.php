@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartRoute;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpCartTransformer;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
@@ -91,6 +92,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return parent::get_response( $request );
 		} finally {
 			$this->restore_request_cart_token( $inherited_token );
+			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
 	}
 
@@ -131,7 +133,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$_SERVER['HTTP_CART_TOKEN'] = $cart_id;
 		}
 
+		// The parent promotes the token handler only for a request that carries a token,
+		// which leaves cart creation on the cookie handler. UCP has no cookie to trust:
+		// the id is the only credential, so the handler is fixed for every route here.
+		add_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
+
 		parent::load_cart_session( $request );
+	}
+
+	/**
+	 * The session handler a UCP cart route binds to.
+	 *
+	 * Token-keyed, so an id this store signed is the only way to reach a cart. Without a
+	 * valid token it mints an empty session, which is what cart creation needs.
+	 *
+	 * @return string
+	 */
+	public static function session_handler_class(): string {
+		return SessionHandler::class;
 	}
 
 	/**
@@ -174,8 +193,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * UCP requests are not browser requests, so they carry no nonce.
 	 *
-	 * Cart creation has no token yet and is left open deliberately: it mints an empty
-	 * guest cart, the same as an anonymous storefront add-to-cart.
+	 * Safe because `load_cart_session()` binds every route to the token-keyed session
+	 * handler, so no request here reads the browser's session cookie: there is no ambient
+	 * credential for a cross-site request to ride on. Cart creation is left open
+	 * deliberately — with no token it mints an empty session of its own.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *

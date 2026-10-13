@@ -250,6 +250,35 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A UCP cart route never reads the browser's session cookie.
+	 *
+	 * Cart creation carries no token, so the parent would leave the cookie handler in
+	 * place and bind the route to whatever cart the caller's cookie names. With
+	 * `line_items` read as the complete desired state, a cross-site POST would then
+	 * rewrite that shopper's cart, and `requires_nonce()` returning false leaves nothing
+	 * else in the way. The handler is fixed for every route here instead.
+	 */
+	public function test_cart_routes_never_bind_to_the_session_cookie(): void {
+		unset( $_SERVER['HTTP_CART_TOKEN'] );
+
+		$routes = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$route  = $routes->get( 'ucp-carts', 'ucp' );
+
+		$bind = new \ReflectionMethod( $route, 'load_cart_session' );
+		$bind->setAccessible( true );
+		$bind->invoke( $route, new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' ) );
+
+		try {
+			$this->assertSame(
+				SessionHandler::class,
+				apply_filters( 'woocommerce_session_handler', \WC_Session_Handler::class )
+			);
+		} finally {
+			remove_filter( 'woocommerce_session_handler', array( AbstractCartRoute::class, 'session_handler_class' ) );
+		}
+	}
+
+	/**
 	 * Creating a cart answers the UCP cart shape, with amounts in minor units.
 	 */
 	public function test_create_cart_returns_ucp_cart(): void {
