@@ -10,6 +10,7 @@ namespace Automattic;
 
 use Automattic\Jetpack\Assets;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use Automattic\Woocommerce_Analytics\Consent_Manager;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
 use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking_Proxy;
@@ -165,17 +166,32 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Place script to call s.js, Store Analytics.
+	 * Get the URL of s.js, Store Analytics.
+	 *
+	 * @since 0.18.1
+	 *
+	 * @return string
 	 */
-	public static function enqueue_tracking_script() {
-		$url = sprintf(
+	public static function get_tracking_script_url() {
+		return sprintf(
 			'https://stats.wp.com/s-%d.js',
 			gmdate( 'YW' )
 		);
+	}
+
+	/**
+	 * Place script to call s.js, Store Analytics.
+	 *
+	 * The script sets referrer cookies as soon as it runs, so with a consent plugin the client loads it after statistics consent.
+	 */
+	public static function enqueue_tracking_script() {
+		if ( Consent_Manager::is_consent_api_active() ) {
+			return;
+		}
 
 		wp_enqueue_script(
 			'woocommerce-analytics',
-			$url,
+			self::get_tracking_script_url(),
 			array(),
 			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- The version is set in the URL.
 			array(

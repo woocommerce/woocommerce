@@ -8,6 +8,7 @@
 namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Jetpack\Constants;
+use Automattic\Woocommerce_Analytics;
 use WC_Order;
 use WC_Product;
 
@@ -113,6 +114,9 @@ class Universal {
 					sessionTracking: <?php echo $is_clickhouse_enabled ? 'true' : 'false'; ?>,
 					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
+
+				// Set only when the client must load s.js itself, after statistics consent.
+				wcAnalytics.trackingScriptUrl = <?php echo wp_json_encode( Consent_Manager::is_consent_api_active() ? Woocommerce_Analytics::get_tracking_script_url() : null, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
