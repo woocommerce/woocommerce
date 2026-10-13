@@ -352,14 +352,13 @@ class WC_Post_Data {
 	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
 	 * Sanitizes coupon codes with wc_sanitize_coupon_code() so they are stored the same way for every user.
 	 *
-	 * @since 11.3.0 Added the `$postarr` and `$unsanitized_postarr` parameters.
-	 *
-	 * @param array $data                An array of slashed post data.
-	 * @param array $postarr             An array of sanitized, but otherwise unmodified post data.
-	 * @param array $unsanitized_postarr An array of slashed, unsanitized post data as passed to wp_insert_post().
+	 * @param array $data An array of slashed post data.
 	 * @return array
 	 */
-	public static function wp_insert_post_data( $data, $postarr = array(), $unsanitized_postarr = array() ) {
+	public static function wp_insert_post_data( $data ) {
+		// Read the hook's third argument without changing the signature that subclasses may override.
+		$unsanitized_postarr = func_get_args()[2] ?? array();
+
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {

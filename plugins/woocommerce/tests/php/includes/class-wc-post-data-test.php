@@ -91,6 +91,49 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should allow subclasses to override the original one-argument post data method.
+	 */
+	public function test_wp_insert_post_data_supports_legacy_subclasses(): void {
+		$sut = new class() extends WC_Post_Data {
+			/**
+			 * Process post data using the original method signature.
+			 *
+			 * @param array $data Slashed post data.
+			 * @return array
+			 */
+			public static function wp_insert_post_data( $data ) {
+				$data['post_title'] = 'prefix-' . $data['post_title'];
+				return parent::wp_insert_post_data( $data );
+			}
+		};
+
+		$data = $sut::wp_insert_post_data(
+			array(
+				'post_type'  => 'shop_coupon',
+				'post_title' => 'B&Q',
+			)
+		);
+
+		$this->assertSame( 'prefix-B&amp;Q', $data['post_title'] );
+	}
+
+	/**
+	 * @testdox Should display an ampersand in the coupon list without double encoding it.
+	 */
+	public function test_coupon_list_displays_ampersand(): void {
+		global $post;
+
+		require_once WC_ABSPATH . 'includes/admin/list-tables/class-wc-admin-list-table-coupons.php';
+		$this->login_as_administrator();
+		$coupon_id = $this->create_coupon_from_edit_screen( 'Coupon&Test' );
+		$post      = get_post( $coupon_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The list table reads the current row from the global post.
+		$sut       = new WC_Admin_List_Table_Coupons();
+
+		$this->expectOutputRegex( '/>coupon&amp;test<\/a>/' );
+		$sut->render_columns( 'coupon_code', $coupon_id );
+	}
+
+	/**
 	 * @testdox Should store coupon codes in the same format for every role, and find them by the code customers enter.
 	 *
 	 * @dataProvider data_provider_coupon_codes_by_role
