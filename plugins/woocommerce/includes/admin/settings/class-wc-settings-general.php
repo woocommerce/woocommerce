@@ -269,6 +269,16 @@ class WC_Settings_General extends WC_Settings_Page {
 				$address_autocomplete_preferred_provider_setting,
 
 				array(
+					'title'    => __( 'Payment method selection', 'woocommerce' ),
+					'desc'     => __( 'Preselect a payment method at checkout (Checkout block only)', 'woocommerce' ),
+					// A literal, not PaymentMethodPreselection::OPTION_NAME: this file can load mid-upgrade, before the autoloader knows new src/ classes.
+					'id'       => 'woocommerce_checkout_preselect_payment_method',
+					'type'     => 'checkbox',
+					'default'  => 'yes',
+					'desc_tip' => __( 'When unchecked, no payment method is selected and customers must choose one. Some countries don\'t allow a preselected payment method.', 'woocommerce' ),
+				),
+
+				array(
 					'type' => 'sectionend',
 					'id'   => 'general_options',
 				),

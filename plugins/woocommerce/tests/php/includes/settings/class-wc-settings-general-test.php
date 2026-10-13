@@ -141,6 +141,7 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_specific_ship_to_countries'   => 'multi_select_countries',
 			'woocommerce_default_customer_address'     => 'select',
 			'woocommerce_address_autocomplete_enabled' => 'checkbox',
+			'woocommerce_checkout_preselect_payment_method' => 'checkbox',
 			'woocommerce_calc_taxes'                   => 'checkbox',
 			'woocommerce_enable_coupons'               => 'checkbox',
 			'woocommerce_calc_discounts_sequentially'  => 'checkbox',
@@ -155,6 +156,19 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );
+	}
+
+	/**
+	 * @testdox The payment method preselection checkbox defaults to on so existing stores keep preselecting.
+	 */
+	public function test_get_settings__payment_method_preselection_defaults_to_on() {
+		$sut = new WC_Settings_General();
+
+		$settings = $sut->get_settings_for_section( '' );
+		$setting  = current( wp_list_filter( $settings, array( 'id' => 'woocommerce_checkout_preselect_payment_method' ) ) );
+
+		$this->assertIsArray( $setting, 'The preselection setting is missing from the General tab.' );
+		$this->assertSame( 'yes', $setting['default'] );
 	}
 
 	/**
