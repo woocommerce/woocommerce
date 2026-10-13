@@ -7,7 +7,7 @@
  * gateway can do for a subscription (renewal payments, payment method changes, ...) it
  * declares with the existing WooCommerce gateway features, which the engine does not
  * interpret. Extensions ask whether a gateway supports the engine and the features an
- * operation needs, request a charge for an order they built, and answer whether an order
+ * operation needs, request a scheduled payment for an order they built, and answer whether an order
  * needs a reusable payment method. The engine fires and aggregates; it reads no outcome
  * and writes nothing.
  *
@@ -71,54 +71,48 @@ final class Payments {
 	}
 
 	/**
-	 * Ask the order's gateway to charge it off-session.
+	 * Ask the order's gateway to take a scheduled payment for it off-session.
 	 *
-	 * Fires `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}` only when the order
-	 * has a payment method, needs payment (`WC_Order::needs_payment()`, so the
-	 * `woocommerce_order_needs_payment` filter applies) and its gateway supports the engine.
-	 * Which further gateway features the charge needs (such as `subscriptions` for a renewal)
-	 * is the caller's to check with {@see self::gateway_supports()} first.
-	 * The engine adds no amount check of its own: core already refuses a $0 order unless an
-	 * extension filtered it to need payment. A throwing gateway is logged.
+	 * Fires `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}` with the order
+	 * when the order's gateway supports the engine. Everything else is the caller's: whether
+	 * the order should be paid at all (paid, $0 or already in flight) and which further
+	 * gateway features the payment needs (such as `subscriptions` for a renewal, checked with
+	 * {@see self::gateway_supports()} first). A throwing gateway is logged.
 	 *
 	 * The return says whether the request reached the gateway cleanly, never whether the
-	 * charge succeeded; in every case the caller reads the outcome from the order status.
-	 * - True: the charge action fired and no callback threw.
+	 * payment succeeded; in every case the caller reads the outcome from the order status.
+	 * - True: the action fired and no callback threw.
 	 * - False, either of two cases the return does not tell apart:
-	 *   - the request was not handed to the gateway (a precondition failed; nothing was
-	 *     charged), or
+	 *   - the order's gateway does not support the engine (nothing was fired), or
 	 *   - the gateway threw (logged with the order id): the outcome is unknown, since the
 	 *     gateway may have charged before throwing.
 	 * A caller that sees false and an order still needing payment should not assume the
 	 * gateway was never reached.
 	 *
-	 * @param WC_Order $order Order to charge, carrying the payment method and token.
-	 * @return bool True when the charge action fired and no callback threw; false when a
-	 *              precondition failed or the gateway threw (outcome unknown).
+	 * @param WC_Order $order Order to pay, carrying the payment method and token.
+	 * @return bool True when the action fired and no callback threw; false when the gateway
+	 *              does not support the engine or threw (outcome unknown).
 	 */
-	public static function charge( WC_Order $order ): bool {
+	public static function process_scheduled_payment( WC_Order $order ): bool {
 		$gateway_id = $order->get_payment_method();
-		$amount     = (float) $order->get_total();
 
-		if ( '' === $gateway_id || ! $order->needs_payment() || ! self::gateway_supports( $gateway_id ) ) {
+		if ( ! self::gateway_supports( $gateway_id ) ) {
 			return false;
 		}
 
 		try {
 			/**
-			 * Fires to charge an order off-session. The gateway charges `$amount` against the
-			 * payment method and token stored on the order, then reports the outcome through the
-			 * order status: paid (`payment_complete()`), `failed` on a decline, or `on-hold` while
-			 * an asynchronous charge awaits confirmation. `$amount` may be 0 when an extension
-			 * filtered a $0 order to need payment (for example, to save a payment method).
+			 * Fires to take a scheduled payment for an order off-session. The gateway charges the
+			 * order total against the payment method and token stored on the order, then reports
+			 * the outcome through the order status: paid (`payment_complete()`), `failed` on a
+			 * decline, or `on-hold` while an asynchronous charge awaits confirmation.
 			 *
-			 * @param float    $amount The amount to charge, in the order currency.
-			 * @param WC_Order $order  The order to charge.
+			 * @param WC_Order $order The order to pay.
 			 */
-			do_action( 'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway_id, $amount, $order );
+			do_action( 'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway_id, $order );
 		} catch ( Throwable $e ) {
 			wc_get_logger()->error(
-				sprintf( 'Payments::charge(): the %s gateway threw while charging order %d: %s', $gateway_id, $order->get_id(), $e->getMessage() ),
+				sprintf( 'Payments::process_scheduled_payment(): the %s gateway threw while paying order %d: %s', $gateway_id, $order->get_id(), $e->getMessage() ),
 				array(
 					'source'   => self::LOG_SOURCE,
 					'order_id' => $order->get_id(),

@@ -26,9 +26,9 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	private const REUSABLE_FILTER = 'woocommerce_subscriptions_engine_requires_reusable_payment_method';
 
 	/**
-	 * Arguments of each charge action call, in order.
+	 * The order argument of each scheduled-payment action call, in order.
 	 *
-	 * @var array<int, array{amount: mixed, order: mixed}>
+	 * @var array<int, mixed>
 	 */
 	private $charges = array();
 
@@ -37,14 +37,9 @@ class PaymentsTest extends EngineIntegrationTestCase {
 		$this->charges = array();
 		add_action(
 			self::CHARGE_HOOK,
-			function ( $amount, $order ): void {
-				$this->charges[] = array(
-					'amount' => $amount,
-					'order'  => $order,
-				);
-			},
-			10,
-			2
+			function ( $order ): void {
+				$this->charges[] = $order;
+			}
 		);
 	}
 
@@ -88,67 +83,57 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox charge fires the gateway's scheduled-payment action once with the amount and order.
+	 * @testdox process_scheduled_payment fires the gateway's scheduled-payment action once with the order.
 	 */
-	public function test_charge_fires_once_for_a_supported_gateway(): void {
+	public function test_process_scheduled_payment_fires_once_for_a_supported_gateway(): void {
 		$this->support_engine_charges( self::GATEWAY );
 		$order = $this->make_order();
 
-		$this->assertTrue( Payments::charge( $order ) );
+		$this->assertTrue( Payments::process_scheduled_payment( $order ) );
 
-		$this->assertCount( 1, $this->charges );
-		$this->assertSame( 12.5, $this->charges[0]['amount'] );
-		$this->assertSame( $order, $this->charges[0]['order'] );
+		$this->assertSame( array( $order ), $this->charges );
 	}
 
 	/**
-	 * @testdox charge does not fire when a precondition fails.
-	 *
-	 * @dataProvider provide_uncharged_orders
-	 *
-	 * @param bool   $supported Whether the gateway supports engine charges.
-	 * @param string $method    Order payment method.
-	 * @param string $total     Order total.
-	 * @param string $status    Order status.
+	 * @testdox process_scheduled_payment leaves whether the order should be paid to the caller.
 	 */
-	public function test_charge_does_not_fire_when_a_precondition_fails( bool $supported, string $method, string $total, string $status ): void {
-		if ( $supported ) {
-			$this->support_engine_charges( self::GATEWAY );
-		}
-		$order = $this->make_order( $method, $total, $status );
+	public function test_process_scheduled_payment_fires_whatever_the_order_state(): void {
+		$this->support_engine_charges( self::GATEWAY );
+		$paid = $this->make_order( self::GATEWAY, '12.50', 'processing' );
+		$free = $this->make_order( self::GATEWAY, '0' );
 
-		$this->assertFalse( Payments::charge( $order ) );
+		$this->assertTrue( Payments::process_scheduled_payment( $paid ) );
+		$this->assertTrue( Payments::process_scheduled_payment( $free ) );
+
+		$this->assertSame( array( $paid, $free ), $this->charges );
+	}
+
+	/**
+	 * @testdox process_scheduled_payment does not fire when the order's gateway does not support the engine.
+	 *
+	 * @dataProvider provide_unsupported_payment_methods
+	 *
+	 * @param string $method Order payment method.
+	 */
+	public function test_process_scheduled_payment_does_not_fire_without_engine_support( string $method ): void {
+		$order = $this->make_order( $method );
+
+		$this->assertFalse( Payments::process_scheduled_payment( $order ) );
 		$this->assertSame( array(), $this->charges );
 	}
 
 	/**
-	 * @return array<string, array{0: bool, 1: string, 2: string, 3: string}>
+	 * @return array<string, array{0: string}>
 	 */
-	public function provide_uncharged_orders(): array {
+	public function provide_unsupported_payment_methods(): array {
 		return array(
-			'unsupported gateway' => array( false, self::GATEWAY, '12.50', 'pending' ),
-			'zero total'          => array( true, self::GATEWAY, '0', 'pending' ), // Core needs_payment() is false.
-			'paid order'          => array( true, self::GATEWAY, '12.50', 'processing' ),
-			'no payment method'   => array( true, '', '12.50', 'pending' ),
+			'unsupported gateway' => array( self::GATEWAY ),
+			'no payment method'   => array( '' ),
 		);
 	}
 
 	/**
-	 * @testdox charge fires for a $0 order an extension filtered to need payment, with amount 0.
-	 */
-	public function test_charge_fires_for_a_zero_order_that_needs_payment(): void {
-		$this->support_engine_charges( self::GATEWAY );
-		$order = $this->make_order( self::GATEWAY, '0' );
-		add_filter( 'woocommerce_order_needs_payment', '__return_true' );
-
-		$this->assertTrue( Payments::charge( $order ) );
-
-		$this->assertCount( 1, $this->charges );
-		$this->assertSame( 0.0, $this->charges[0]['amount'] );
-	}
-
-	/**
-	 * @testdox A throwing gateway callback is logged with the order id and charge returns false.
+	 * @testdox A throwing gateway callback is logged with the order id and process_scheduled_payment returns false.
 	 */
 	public function test_a_throwing_gateway_is_logged(): void {
 		$this->support_engine_charges( self::GATEWAY );
@@ -164,7 +149,7 @@ class PaymentsTest extends EngineIntegrationTestCase {
 			'error',
 			array( 'order_id' => $order->get_id() ),
 			function () use ( $order ): void {
-				$this->assertFalse( Payments::charge( $order ), 'A gateway that threw is not a charge in flight.' );
+				$this->assertFalse( Payments::process_scheduled_payment( $order ), 'A gateway that threw is not a payment in flight.' );
 			}
 		);
 
