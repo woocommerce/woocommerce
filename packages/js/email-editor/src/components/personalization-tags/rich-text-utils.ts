@@ -62,7 +62,7 @@ const getCursorPosition = (
 
 	return {
 		start: start ?? 0,
-		end: Math.max( start ?? 0, end ?? start ?? 0 ),
+		end: end ?? start ?? 0,
 	};
 };
 

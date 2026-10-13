@@ -167,8 +167,8 @@ export function RichTextWithButton( {
 								attributeName,
 								toHTMLString( { value: updated } )
 							);
+							return;
 						}
-						return;
 					}
 					// When we update the tag, we need to add brackets to the tag, because the popover removes them
 					updateProperty(

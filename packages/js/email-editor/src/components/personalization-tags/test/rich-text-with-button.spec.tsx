@@ -272,4 +272,18 @@ describe( 'RichTextWithButton caret tracking', () => {
 
 		expect( mockRenderCount.count ).toBe( before );
 	} );
+
+	it( 'falls back to renaming the first match when the anchor is not a tag', () => {
+		setup( `<!--[a/one]-->, hi <!--[a/one]-->` );
+
+		act( () => {
+			mockPopover.onUpdate(
+				'a/one',
+				'a/two',
+				document.createElement( 'span' )
+			);
+		} );
+
+		expect( written ).toEqual( [ '<!--[a/two]-->, hi <!--[a/one]-->' ] );
+	} );
 } );
