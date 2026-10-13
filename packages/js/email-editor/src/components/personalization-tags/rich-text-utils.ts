@@ -3,156 +3,66 @@
  */
 import * as React from '@wordpress/element';
 import { applyFormat, create, insert } from '@wordpress/rich-text';
-import type {
-	RichTextFormatList,
-	RichTextValue,
-} from '@wordpress/rich-text/build-types/types';
+import type { RichTextValue } from '@wordpress/rich-text/build-types/types';
 
 /**
  * Internal dependencies
  */
 import { PersonalizationTag } from '../../store';
 
-type Replacement = {
-	attributes: Record< string, string >;
-	type: string;
-};
-
-function getChildElement( rootElement: HTMLElement ): HTMLElement | null {
-	let currentElement: HTMLElement | null = rootElement;
-
-	while ( currentElement && currentElement?.children?.length > 0 ) {
-		// Traverse into the first child element
-		currentElement = currentElement.children[ 0 ] as HTMLElement;
-	}
-
-	return currentElement;
-}
-
-function findReplacementIndex(
-	element: HTMLElement,
-	replacements: ( null | Replacement )[]
-): number | null {
-	// Iterate over the replacements array
-	for ( const [ index, replacement ] of replacements.entries() ) {
-		if ( ! replacement ) {
-			continue;
-		}
-
-		const { attributes } = replacement;
-
-		if (
-			element.getAttribute( 'data-rich-text-comment' ) ===
-			attributes[ 'data-rich-text-comment' ]
-		) {
-			return index;
-		}
-	}
-
-	return null; // Return null if no match is found
-}
-
 /**
- * Find the latest index of the format that matches the element.
+ * Read the selection offsets of a RichText field from its live editable DOM.
+ * Returns null when the selection is not in the field.
  *
- * @param element
- * @param formats
- */
-function findLatestFormatIndex(
-	element: HTMLElement,
-	formats: RichTextFormatList[]
-): number | null {
-	let latestFormatIndex = null;
-
-	for ( const [ index, formatList ] of formats.entries() ) {
-		if ( ! formatList ) {
-			continue;
-		}
-
-		// Check each format within the format list at the current index
-		for ( const format of formatList ) {
-			if (
-				// @ts-expect-error attributes property is missing in build type for RichTextFormatList type
-				format?.attributes &&
-				element.tagName.toLowerCase() ===
-					// @ts-expect-error tagName property is missing in build type for RichTextFormatList type
-					format.tagName?.toLowerCase() &&
-				element.getAttribute( 'data-link-href' ) ===
-					// @ts-expect-error attributes property is missing in build type for RichTextFormatList type
-					format?.attributes[ 'data-link-href' ]
-			) {
-				latestFormatIndex = index;
-			}
-		}
-	}
-
-	return latestFormatIndex;
-}
-
-/**
- * Retrieves the cursor position within a RichText component.
- * Calculates the offset in plain text while accounting for HTML tags and comments.
- *
- * @param {React.RefObject<HTMLElement>} richTextRef - Reference to the RichText component.
- * @param {string}                       content     - The plain text content of the block.
- * @return {{ start: number, end: number } | null} - The cursor position as start and end offsets.
+ * @param richTextRef - Reference to the editable element.
  */
 const getCursorPosition = (
-	richTextRef: React.RefObject< HTMLElement >,
-	content: string
-): { start: number; end: number } => {
-	const selection =
-		richTextRef.current.ownerDocument.defaultView.getSelection();
+	richTextRef: React.RefObject< HTMLElement >
+): { start: number; end: number } | null => {
+	const element = richTextRef.current;
+	const selection = element?.ownerDocument.defaultView?.getSelection();
 
-	if ( ! selection.rangeCount ) {
-		return {
-			start: 0,
-			end: 0,
-		};
+	if ( ! element || ! selection?.rangeCount ) {
+		return null;
 	}
 
-	const range = selection.getRangeAt( 0 );
+	const range = selection.getRangeAt( 0 ).cloneRange();
 
-	if ( selection.anchorNode.previousSibling === null ) {
-		return {
-			start: selection.anchorOffset,
-			end: selection.anchorOffset + range.toString().length,
-		};
+	if ( ! range.intersectsNode( element ) ) {
+		return null;
 	}
 
-	const richTextValue = create( { html: content } );
-	let previousSibling = selection.anchorNode.previousSibling as HTMLElement;
-	previousSibling = getChildElement( previousSibling );
-
-	const formatIndex = findLatestFormatIndex(
-		previousSibling,
-		richTextValue.formats
-	);
-	if ( formatIndex !== null ) {
-		return {
-			start: formatIndex + selection.anchorOffset + 1, // We need to add 1 for the format length
-			end: formatIndex + selection.anchorOffset + range.toString().length,
-		};
+	if ( ! element.contains( range.endContainer ) ) {
+		range.setEnd( element, element.childNodes.length );
 	}
 
-	const replacementIndex = findReplacementIndex(
-		previousSibling,
-		richTextValue.replacements as Replacement[]
-	);
-	if ( replacementIndex !== null ) {
-		return {
-			start: replacementIndex + selection.anchorOffset + 1, // We need to add 1 for the replacement length
-			end:
-				replacementIndex +
-				selection.anchorOffset +
-				range.toString().length,
-		};
+	// A caret inside a tag comment counts as right after it.
+	const getCommentSpan = ( container: Node ) => {
+		const node =
+			container.nodeType === container.TEXT_NODE
+				? container.parentElement
+				: ( container as Element );
+		const span = node?.closest( '[data-rich-text-comment]' );
+		return span && element.contains( span ) ? span : null;
+	};
+	const startSpan = getCommentSpan( range.startContainer );
+	if ( startSpan ) {
+		range.setStartAfter( startSpan );
+	}
+	const endSpan = getCommentSpan( range.endContainer );
+	if ( endSpan ) {
+		range.setEndAfter( endSpan );
 	}
 
-	// fallback for placing the value at the end of the rich text
+	const { start, end } = create( {
+		element,
+		range,
+		__unstableIsEditableTree: true,
+	} );
+
 	return {
-		start: richTextValue.text.length,
-		end: richTextValue.text.length + range.toString().length,
+		start: start ?? 0,
+		end: Math.max( start ?? 0, end ?? start ?? 0 ),
 	};
 };
 

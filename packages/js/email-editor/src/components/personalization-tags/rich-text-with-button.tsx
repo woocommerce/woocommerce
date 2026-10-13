@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import { BaseControl, Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useCallback, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { create, insert, toHTMLString } from '@wordpress/rich-text';
 import { RichText } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
@@ -52,13 +52,32 @@ export function RichTextWithButton( {
 
 	const richTextRef = useRef( null );
 
+	useEffect( () => {
+		const doc = richTextRef.current?.ownerDocument ?? document;
+		const onSelectionChange = () => {
+			if (
+				! richTextRef.current ||
+				doc.activeElement !== richTextRef.current
+			) {
+				return;
+			}
+			const position = getCursorPosition( richTextRef );
+			if ( position ) {
+				setSelectionRange( position );
+			}
+		};
+		doc.addEventListener( 'selectionchange', onSelectionChange );
+		return () =>
+			doc.removeEventListener( 'selectionchange', onSelectionChange );
+	}, [] );
+
 	const handleInsertPersonalizationTag = useCallback(
 		( tagName, currentValue, currentSelectionRange ) => {
-			// Ensure selection range is within bounds
-			const start = currentSelectionRange?.start ?? currentValue.length;
-			const end = currentSelectionRange?.end ?? currentValue.length;
-
 			let richTextValue = create( { html: currentValue } );
+			const start =
+				currentSelectionRange?.start ?? richTextValue.text.length;
+			const end = currentSelectionRange?.end ?? start;
+
 			richTextValue = insert(
 				richTextValue,
 				create( { html: `<!--${ tagName }-->` } ),
@@ -70,7 +89,7 @@ export function RichTextWithButton( {
 			// Update the corresponding property
 			updateProperty( attributeName, updatedValue );
 
-			setSelectionRange( null );
+			setSelectionRange( { start: start + 1, end: start + 1 } );
 		},
 		[ attributeName, updateProperty ]
 	);
@@ -145,21 +164,6 @@ export function RichTextWithButton( {
 				ref={ richTextRef }
 				className="woocommerce-settings-panel-richtext"
 				placeholder={ placeholder }
-				onFocus={ () => {
-					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
-					);
-				} }
-				onKeyUp={ () => {
-					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
-					);
-				} }
-				onClick={ () => {
-					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
-					);
-				} }
 				onChange={ ( value ) => {
 					value = replacePersonalizationTagsWithHTMLComments(
 						value ?? '',
