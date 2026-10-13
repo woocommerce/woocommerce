@@ -1046,6 +1046,8 @@ class WC_Checkout {
 						)
 					);
 				}
+			} elseif ( $this->is_shipping_withheld_for_missing_address() ) {
+				$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -1068,6 +1070,28 @@ class WC_Checkout {
 		}
 
 		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
+	}
+
+	/**
+	 * Check whether shipping was left out because "Hide shipping costs until an address is entered" found the address incomplete.
+	 *
+	 * Without this check an order could be saved with no shipping line, for example when a store removes billing
+	 * address fields and the empty values are copied over the shipping address. Stores that turn off shipping
+	 * calculation through the woocommerce_cart_ready_to_calc_shipping filter are left alone.
+	 *
+	 * @return bool
+	 */
+	private function is_shipping_withheld_for_missing_address(): bool {
+		if ( 'yes' !== get_option( 'woocommerce_shipping_cost_requires_address' ) || WC()->cart->has_calculated_shipping() ) {
+			return false;
+		}
+
+		/**
+		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 2.7.0
+		 */
+		return (bool) apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
 	/**
