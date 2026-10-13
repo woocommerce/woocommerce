@@ -97,7 +97,11 @@ class CartsById extends AbstractCartRoute {
 				return $desired;
 			}
 
-			$this->apply_line_items( $desired );
+			$error = $this->apply_line_items( $desired );
+
+			if ( null !== $error ) {
+				return $error;
+			}
 		}
 
 		return $this->cart_response( $this->route_cart_id( $request ) );

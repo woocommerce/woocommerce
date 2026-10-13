@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartRoute;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpCartTransformer;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
@@ -372,11 +373,22 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 				continue;
 			}
 
-			$product_id = $this->resolve_item_id( (string) $line_item['item']['id'] );
+			$item_id    = (string) $line_item['item']['id'];
+			$product_id = $this->resolve_item_id( $item_id );
 
 			if ( 0 === $product_id ) {
-				// The payload is well formed; the store simply has nothing purchasable
-				// under that id. A business outcome, so 200 like every other `not_found`.
+				// The payload is well formed; the store simply has nothing orderable under
+				// that id. A business outcome, so 200 like every other refusal.
+				if ( $this->names_a_variable_parent( $item_id ) ) {
+					return $this->ucp_error(
+						'item_unavailable',
+						__( 'This product is only orderable as one of its variants. Use a variant id from the catalog.', 'woocommerce' ),
+						'recoverable',
+						200,
+						$path . '.item.id'
+					);
+				}
+
 				return $this->ucp_error( 'not_found', __( 'Product not found.', 'woocommerce' ), 'unrecoverable', 200, $path . '.item.id' );
 			}
 
@@ -389,31 +401,114 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Resolve a UCP item id to a purchasable product id.
+	 * Resolve a UCP item id to an orderable product id.
 	 *
-	 * Accepts anything catalog hands out: product id, variation id or SKU.
+	 * Accepts anything catalog hands out: product id, variation id or SKU. A variable
+	 * parent is refused — it reports a price and so passes `is_purchasable()`, but a cart
+	 * line needs one of its variants.
 	 *
 	 * @param string $item_id Item identifier.
-	 * @return int Product id, or 0 when nothing purchasable matched.
+	 * @return int Product id, or 0 when nothing orderable matched.
 	 */
 	protected function resolve_item_id( string $item_id ): int {
+		$product = $this->get_item_product( $item_id );
+
+		if ( ! $product instanceof \WC_Product || $product instanceof \WC_Product_Variable || ! $product->is_purchasable() ) {
+			return 0;
+		}
+
+		return (int) $product->get_id();
+	}
+
+	/**
+	 * Whether an item id names a variable product rather than one of its variants.
+	 *
+	 * @param string $item_id Item identifier.
+	 * @return bool
+	 */
+	protected function names_a_variable_parent( string $item_id ): bool {
+		return $this->get_item_product( $item_id ) instanceof \WC_Product_Variable;
+	}
+
+	/**
+	 * Load the product an item id names, by id or SKU.
+	 *
+	 * @param string $item_id Item identifier.
+	 * @return \WC_Product|null
+	 */
+	private function get_item_product( string $item_id ) {
 		$product_id = ctype_digit( $item_id ) ? (int) $item_id : (int) wc_get_product_id_by_sku( $item_id );
 		$product    = $product_id > 0 ? wc_get_product( $product_id ) : null;
 
-		return $product instanceof \WC_Product && $product->is_purchasable() ? (int) $product->get_id() : 0;
+		return $product instanceof \WC_Product ? $product : null;
 	}
 
 	/**
 	 * Bring the cart in line with a set of desired quantities.
 	 *
 	 * `line_items` is the complete desired state, so an unaccounted-for line is removed.
-	 * An entry naming a cart item addresses that one; an entry naming only a product
-	 * takes the first line holding it, and further lines of that product go.
+	 * An entry naming a cart item addresses that one; an entry naming only a product takes
+	 * the first line holding it, and further lines of that product go.
+	 *
+	 * A refusal from the cart is returned in the UCP envelope, carrying the cart's own
+	 * message, since the Store API error shape has no `ucp` object to read. Removals run
+	 * before adds, so the contents are restored first: otherwise replacing a cart with
+	 * something out of stock would empty it.
 	 *
 	 * @param array{by_key: array<string, int>, by_product: array<int, int>} $desired Desired quantities.
-	 * @throws \Automattic\WooCommerce\StoreApi\Exceptions\RouteException When an item cannot be added.
+	 * @return \WP_REST_Response|null An error response, or null when the cart was updated.
 	 */
-	protected function apply_line_items( array $desired ): void {
+	protected function apply_line_items( array $desired ) {
+		$cart     = $this->cart_controller->get_cart_instance();
+		$snapshot = $cart->get_cart_contents();
+
+		try {
+			$this->reconcile_line_items( $desired );
+		} catch ( RouteException $error ) {
+			$cart->set_cart_contents( $snapshot );
+			$this->cart_controller->calculate_totals();
+
+			return $this->ucp_error(
+				self::cart_error_code( $error->getErrorCode() ),
+				$error->getMessage(),
+				'recoverable',
+				200,
+				'$.line_items'
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Translate a cart error code into the UCP code closest to it.
+	 *
+	 * The cart names more reasons than UCP does, so the two an agent can act on
+	 * differently — retry smaller, or re-read the cart — stay apart and the rest collapse.
+	 *
+	 * @param string $code Store API error code.
+	 * @return string One of `out_of_stock`, `not_found` or `item_unavailable`.
+	 */
+	private static function cart_error_code( string $code ): string {
+		switch ( $code ) {
+			case 'woocommerce_rest_product_out_of_stock':
+			case 'woocommerce_rest_product_partially_out_of_stock':
+			case 'woocommerce_rest_product_too_many_in_cart':
+				return 'out_of_stock';
+			case 'woocommerce_rest_cart_invalid_key':
+				return 'not_found';
+			default:
+				return 'item_unavailable';
+		}
+	}
+
+	/**
+	 * Reconcile the cart to the desired quantities.
+	 *
+	 * @param array{by_key: array<string, int>, by_product: array<int, int>} $desired Desired quantities.
+	 * @throws RouteException When an item cannot be added or adjusted.
+	 */
+	private function reconcile_line_items( array $desired ): void {
 		$by_key     = $desired['by_key'];
 		$by_product = $desired['by_product'];
 

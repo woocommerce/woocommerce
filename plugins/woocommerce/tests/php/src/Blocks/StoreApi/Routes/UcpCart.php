@@ -23,6 +23,23 @@ class UcpCart extends ControllerTestCase {
 	private static $product_ids = array();
 
 	/**
+	 * A product with exactly one unit in stock.
+	 *
+	 * @var int
+	 */
+	private static $limited_stock_id = 0;
+
+	/**
+	 * Variable parent id and one of its variation ids.
+	 *
+	 * @var array{parent: int, variation: int}
+	 */
+	private static $variable = array(
+		'parent'    => 0,
+		'variation' => 0,
+	);
+
+	/**
 	 * Option behind the `ucp` feature.
 	 */
 	private const FEATURE_OPTION = 'woocommerce_feature_ucp_enabled';
@@ -54,13 +71,50 @@ class UcpCart extends ControllerTestCase {
 			},
 			$products
 		);
+
+		$limited = self::create_class_fixture_products(
+			array(
+				array(
+					'name'           => 'UCP Cart Last One',
+					'regular_price'  => '9.00',
+					'price'          => '9.00',
+					'manage_stock'   => true,
+					'stock_quantity' => 1,
+				),
+			)
+		);
+
+		self::$limited_stock_id = $limited[0]->get_id();
+
+		$fixtures  = new \Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData();
+		$parent    = $fixtures->get_variable_product( array( 'name' => 'UCP Cart Tee' ), array( $fixtures->get_product_attribute( 'size', array( 'small', 'large' ) ) ) );
+		$variation = $fixtures->get_variation_product(
+			$parent->get_id(),
+			array( 'pa_size' => 'small' ),
+			array( 'regular_price' => '12.00' )
+		);
+
+		// Sync so the parent reports a price and therefore passes is_purchasable(), as a
+		// real variable product does — that is what makes the parent reach add_to_cart
+		// unless the route refuses it first.
+		\WC_Product_Variable::sync( $parent->get_id() );
+
+		self::$variable = array(
+			'parent'    => $parent->get_id(),
+			'variation' => $variation->get_id(),
+		);
 	}
 
 	/**
 	 * Delete class fixtures.
 	 */
 	public static function wpTearDownAfterClass(): void {
-		self::delete_class_fixture_products( self::$product_ids );
+		self::delete_class_fixture_products(
+			array_merge(
+				self::$product_ids,
+				array( self::$limited_stock_id, self::$variable['variation'], self::$variable['parent'] )
+			)
+		);
 	}
 
 	/**
@@ -442,6 +496,90 @@ class UcpCart extends ControllerTestCase {
 		$this->assertSame( '$.line_items[0].item.id', $unknown_product->get_data()['messages'][0]['path'] );
 
 		// The cart itself is untouched by a refused update.
+		$this->assertCount( 1, $this->request( 'GET', '/carts/' . $created['id'] )->get_data()['line_items'] );
+	}
+
+	/**
+	 * A variable product is bought by naming one of its variants.
+	 *
+	 * The variant id is what catalog hands out, and what the cart echoes back, so an id
+	 * from search round-trips into a cart without translation.
+	 */
+	public function test_create_cart_accepts_a_variation_id(): void {
+		$data = $this->create_cart(
+			array(
+				array(
+					'item'     => array( 'id' => (string) self::$variable['variation'] ),
+					'quantity' => 2,
+				),
+			)
+		);
+
+		$this->assertCount( 1, $data['line_items'] );
+		$this->assertSame( (string) self::$variable['variation'], $data['line_items'][0]['item']['id'] );
+		$this->assertSame( 1200, $data['line_items'][0]['item']['price'] );
+		$this->assertSame( 2400, $this->total( $data['totals'], 'total' ) );
+	}
+
+	/**
+	 * A variable parent is refused, in the envelope, telling the agent to name a variant.
+	 *
+	 * The parent reports a price so it passes `is_purchasable()`, and letting it through
+	 * would reach `CartController::add_to_cart()` and surface a Store API error shape with
+	 * no `ucp` object for a client to read.
+	 */
+	public function test_create_cart_refuses_a_variable_parent(): void {
+		$response = $this->request(
+			'POST',
+			'/carts',
+			array(
+				'line_items' => array(
+					array(
+						'item'     => array( 'id' => (string) self::$variable['parent'] ),
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'item_unavailable', $data['messages'][0]['code'] );
+		$this->assertSame( '$.line_items[0].item.id', $data['messages'][0]['path'] );
+	}
+
+	/**
+	 * A stock ceiling is reported as `out_of_stock`, in the envelope, with the cart's message.
+	 *
+	 * The cart distinguishes more refusals than UCP names codes for, so the ones an agent
+	 * can act on differently are kept apart: a stock ceiling invites a smaller quantity,
+	 * where `item_unavailable` would only say "no".
+	 */
+	public function test_update_cart_reports_a_stock_ceiling_as_out_of_stock(): void {
+		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+
+		$response = $this->request(
+			'PUT',
+			'/carts/' . $created['id'],
+			array(
+				'line_items' => array(
+					array(
+						'item'     => array( 'id' => (string) self::$limited_stock_id ),
+						'quantity' => 5,
+					),
+				),
+			)
+		);
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'out_of_stock', $data['messages'][0]['code'] );
+		// The cart's own wording names the product and what is left, which is actionable.
+		$this->assertStringContainsString( 'not enough stock', $data['messages'][0]['content'] );
+
+		// A refused update leaves the cart alone.
 		$this->assertCount( 1, $this->request( 'GET', '/carts/' . $created['id'] )->get_data()['line_items'] );
 	}
 

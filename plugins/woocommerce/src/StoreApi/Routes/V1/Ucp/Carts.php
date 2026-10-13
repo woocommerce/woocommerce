@@ -79,7 +79,11 @@ class Carts extends AbstractCartRoute {
 				return $desired;
 			}
 
-			$this->apply_line_items( $desired );
+			$error = $this->apply_line_items( $desired );
+
+			if ( null !== $error ) {
+				return $error;
+			}
 		}
 
 		$cart_id = $this->current_cart_id();
