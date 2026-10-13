@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import type { RichTextValue } from '@wordpress/rich-text/build-types/types';
+import { applyFormat } from '@wordpress/rich-text';
+import type {
+	RichTextValue,
+	RichTextFormat as WPFormat,
+} from '@wordpress/rich-text/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
@@ -134,33 +138,46 @@ function PersonalizationTagsButton( { contentRef, value, onChange }: Props ) {
 							linkElement,
 							true
 						);
-						const isTagLink =
-							range &&
-							(
-								( value.formats[ range.start ] ||
-									[] ) as LooseFormat[]
-							 ).some(
-								( format ) =>
-									format.attributes?.[ 'data-link-href' ] !==
-										undefined ||
-									format.unregisteredAttributes?.[
-										'data-link-href'
-									] !== undefined
-							);
-						if ( ! range || ! isTagLink ) {
+						const formats = ( ( range &&
+							value.formats[ range.start ] ) ||
+							[] ) as LooseFormat[];
+						const isLinkFormat = ( format: LooseFormat ) =>
+							format.attributes?.[ 'data-link-href' ] !==
+								undefined ||
+							format.unregisteredAttributes?.[
+								'data-link-href'
+							] !== undefined;
+						if ( ! range || ! formats.some( isLinkFormat ) ) {
 							return;
 						}
-						onChange(
-							insertPersonalizationTag(
-								{
-									...value,
-									start: range.start,
-									end: range.end,
-								},
-								newTag,
-								newText
-							)
+						// Never turn the link into a plain tag: empty text keeps the old text.
+						const text = newText.trim()
+							? newText
+							: value.text.slice( range.start, range.end );
+						let result = insertPersonalizationTag(
+							{
+								...value,
+								start: range.start,
+								end: range.end,
+							},
+							newTag,
+							text
 						);
+						// Re-apply the formatting that surrounded the old link.
+						formats
+							.filter( ( format ) => ! isLinkFormat( format ) )
+							.forEach( ( format ) => {
+								result = {
+									...applyFormat(
+										result,
+										format as unknown as WPFormat,
+										range.start,
+										range.start + text.length
+									),
+									activeFormats: [],
+								} as RichTextValue;
+							} );
+						onChange( result );
 					} }
 				/>
 				<PersonalizationTagsModal

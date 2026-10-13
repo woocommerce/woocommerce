@@ -548,6 +548,59 @@ describe( 'PersonalizationTagsButton editing', () => {
 			expect( updateBlockAttributes ).not.toHaveBeenCalled();
 		} );
 
+		it( 'keeps the link text when the new text is empty', () => {
+			const value = mountValue(
+				`Go <a data-link-href="${ LINK }" contenteditable="false">here</a> now`
+			);
+			const onChange = setup( { content: 'x' }, value );
+			capturedLinkPopover.onUpdate(
+				p.querySelector< HTMLElement >( 'a' ),
+				NEW,
+				'  '
+			);
+			const result = onChange.mock.calls[ 0 ][ 0 ];
+			expect( result.text ).toBe( 'Go here now' );
+			for ( let i = 3; i < 7; i++ ) {
+				const f = result.formats[ i ] as unknown as Array< {
+					attributes: Record< string, string >;
+				} >;
+				expect( f[ 0 ].attributes[ 'data-link-href' ] ).toBe( NEW );
+			}
+		} );
+
+		it.each( [ [ 'to my account' ], [ 'here' ] ] )(
+			'keeps surrounding bold when editing a link (text: %s)',
+			( text ) => {
+				const value = mountValue(
+					`<strong>Visit <a data-link-href="${ LINK }" contenteditable="false">our shop</a></strong> now`
+				);
+				const snapshot = JSON.stringify( value.formats );
+				const onChange = setup( { content: 'x' }, value );
+				capturedLinkPopover.onUpdate(
+					p.querySelector< HTMLElement >( 'a' ),
+					NEW,
+					text
+				);
+				const result = onChange.mock.calls[ 0 ][ 0 ];
+				expect( result.text ).toBe( `Visit ${ text } now` );
+				for ( let i = 0; i < 6 + text.length; i++ ) {
+					const types = (
+						( result.formats[ i ] || [] ) as unknown as Array< {
+							type: string;
+						} >
+					 ).map( ( f ) => f.type );
+					expect( types ).toContain( 'strong' );
+					expect(
+						types.includes(
+							'woocommerce-email-editor/link-shortcode'
+						)
+					).toBe( i >= 6 );
+				}
+				expect( result.formats[ 6 + text.length ] ).toBeUndefined();
+				expect( JSON.stringify( value.formats ) ).toBe( snapshot );
+			}
+		);
+
 		it( 'ignores stale link anchors', () => {
 			const value = mountValue( 'Go <b>here</b> now' );
 			const onChange = setup( { content: 'x' }, value );
