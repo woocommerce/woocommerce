@@ -1,4 +1,4 @@
 Significance: patch
 Type: fixed
 
-Load the Tracks script only after statistics consent when a WP Consent API plugin is active, including plugins that set the consent type after page load.
+Hold the analytics tracking script until visitors consent to statistics when a consent plugin is active.
