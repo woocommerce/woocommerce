@@ -141,12 +141,12 @@ const TaxRecommendationItem = ( {
 								/* translators: %s: extension name. */
 								__( '%s activated!', 'woocommerce' ),
 								title
-						  )
+							)
 						: sprintf(
 								/* translators: %s: extension name. */
 								__( '%s is installed!', 'woocommerce' ),
 								title
-						  ),
+							),
 					{}
 				);
 			},

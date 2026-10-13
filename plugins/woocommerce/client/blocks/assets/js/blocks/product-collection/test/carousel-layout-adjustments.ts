@@ -64,11 +64,11 @@ async function setup( {
 					[ headingBlockName ],
 					[ productTemplateBlockName ],
 					INNER_BLOCKS_PAGINATION_TEMPLATE,
-			  ]
+				]
 			: [
 					[ productTemplateBlockName ],
 					INNER_BLOCKS_PAGINATION_TEMPLATE,
-			  ],
+				],
 	};
 	return initializeEditor( [ productCollectionBlock ] );
 }

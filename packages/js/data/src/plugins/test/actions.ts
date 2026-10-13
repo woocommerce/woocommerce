@@ -168,8 +168,7 @@ function runUntilThrow(
 		let step = gen.next();
 		while ( ! step.done ) {
 			const value = step.value as
-				| { type?: string; next?: unknown }
-				| undefined;
+				{ type?: string; next?: unknown } | undefined;
 			if ( value?.type === 'API_FETCH' ) {
 				step = apiThrows
 					? gen.throw( apiResult )

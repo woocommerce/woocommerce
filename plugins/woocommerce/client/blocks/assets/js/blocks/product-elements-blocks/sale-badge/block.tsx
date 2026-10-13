@@ -65,11 +65,11 @@ export const Block = ( props: Props ): ReactElement | null => {
 							/* translators: %s: discount percentage. %% is the percent sign. */
 							__( '%s%%', 'woocommerce' ),
 							percentage
-					  )
+						)
 					: formatPrice(
 							discount,
 							getCurrencyFromPriceResponse( prices )
-					  );
+						);
 			// Parent prices are independent minima, so the editor preview may differ from the largest variation discount.
 			label =
 				product.type === 'variable'
@@ -77,10 +77,10 @@ export const Block = ( props: Props ): ReactElement | null => {
 							/* translators: %s: approximate discount for a variable product in the editor. */
 							__( 'Up to %s', 'woocommerce' ),
 							value
-					  )
+						)
 					: `${ props.prefix ?? '' }${ value }${
 							props.suffix ?? ''
-					  }`;
+						}`;
 		}
 	}
 
