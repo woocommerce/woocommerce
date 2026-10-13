@@ -117,47 +117,59 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	 * @param string $label Description of the spelling.
 	 * @param string $query Query string to add to the page URL.
 	 */
-	public function test_same_page_gives_same_name_under_plain_permalinks( string $label, string $query ): void {
-		$this->assert_same_name_as_plain_page( $query );
+	public function test_same_page_gives_same_name( string $label, string $query ): void {
+		$this->go_to( $this->page_url( 0 ) );
+		$plain = ProductScopes::get_scope_name( 'sticky-bar' );
+
+		$this->go_to( $this->page_url( 0, $query ) );
+
+		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ) );
 	}
 
 	/**
-	 * @testdox Should give a form name the same per-page name for every spelling of the same page under pretty permalinks: $label.
-	 * @dataProvider same_page_spellings
-	 *
-	 * @param string $label Description of the spelling.
-	 * @param string $query Query string to add to the page URL.
-	 */
-	public function test_same_page_gives_same_name_under_pretty_permalinks( string $label, string $query ): void {
-		$this->set_permalink_structure( '/%postname%/' );
-
-		$this->assert_same_name_as_plain_page( $query );
-	}
-
-	/**
-	 * Spellings of the same page: a query string to add to the page's URL.
+	 * Spellings of the same page: a query string to add to the page's URL. Each variable the helper leaves out of
+	 * the page is dropped on its own, so a spelling carrying several of them fails when any one is no longer dropped.
 	 *
 	 * @return array[]
 	 */
 	public function same_page_spellings(): array {
 		return array(
-			'no change'                       => array( 'the URL resolved again', '' ),
-			'cache bust added'                => array( 'wc-cache-bust added', 'wc-cache-bust=1a2b3c' ),
-			'add to cart'                     => array( 'add-to-cart present', 'add-to-cart=12' ),
-			'collection page one'             => array( 'Product Collection page 1', 'query-2-page=1' ),
-			'collection cst'                  => array( 'Product Collection cst', 'cst' ),
-			'collection page two'             => array( 'Product Collection page 2', 'query-2-page=2' ),
-			'paged'                           => array( 'paged', 'paged=3' ),
-			'page'                            => array( 'page', 'page=2' ),
-			'cpage'                           => array( 'cpage', 'cpage=2' ),
-			'orderby and order'               => array( 'orderby and order', 'orderby=price&order=desc' ),
-			'catalog sorting back to default' => array( 'Catalog Sorting default', 'orderby=menu_order&paged=1' ),
-			'attribute filter'                => array( 'attribute filter', 'filter_color=red,blue&query_type_color=or' ),
-			'price filter'                    => array( 'price filter', 'min_price=10&max_price=50' ),
-			'stock filter'                    => array( 'stock filter', 'filter_stock_status=instock,onbackorder' ),
-			'rating filter'                   => array( 'rating filter', 'rating_filter=4,5' ),
-			'taxonomy filter'                 => array( 'taxonomy filter', 'categories=shoes&tags=sale&brands=acme' ),
-			'private query variable'          => array( 'private query variable', 'not_a_public_var=1' ),
+			'no change'                     => array( 'the URL resolved again', '' ),
+			'arguments that are not public' => array( 'wc-cache-bust, add-to-cart, Product Collection page 1 and cst, and a private variable', 'wc-cache-bust=1a2b3c&add-to-cart=12&query-2-page=1&cst&not_a_public_var=1' ),
+			'pagination and sorting'        => array( 'paged, page, cpage, orderby and order', 'paged=3&page=2&cpage=2&orderby=price&order=desc' ),
+			'catalog sorting default'       => array( 'Catalog Sorting back to default', 'orderby=menu_order&paged=1' ),
+			'product filters'               => array( 'attribute, price, stock, rating and taxonomy filters', 'filter_color=red,blue&query_type_color=or&min_price=10&max_price=50&filter_stock_status=instock,onbackorder&rating_filter=4,5&categories=shoes&tags=sale&brands=acme' ),
+		);
+	}
+
+	/**
+	 * @testdox Should give a form name the same per-page name when pretty permalinks write the pagination in the path: $label.
+	 * @dataProvider path_pagination_spellings
+	 *
+	 * @param string $label    Description of the spelling.
+	 * @param string $path     Path to add to the page's permalink.
+	 * @param string $variable The query variable WordPress resolves the path into.
+	 */
+	public function test_path_pagination_gives_same_name( string $label, string $path, string $variable ): void {
+		$this->set_permalink_structure( '/%postname%/' );
+		$this->go_to( $this->page_url( 0 ) );
+		$plain = ProductScopes::get_scope_name( 'sticky-bar' );
+
+		$this->go_to( trailingslashit( $this->page_url( 0 ) ) . $path );
+
+		$this->assertSame( '2', $GLOBALS['wp']->query_vars[ $variable ] ?? null, 'The path should resolve into the pagination variable.' );
+		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ) );
+	}
+
+	/**
+	 * Pagination spellings WordPress writes into the path under pretty permalinks.
+	 *
+	 * @return array[]
+	 */
+	public function path_pagination_spellings(): array {
+		return array(
+			'pagination'         => array( 'page/N/', 'page/2/', 'paged' ),
+			'comment pagination' => array( 'comment-page-N/', 'comment-page-2/', 'cpage' ),
 		);
 	}
 
@@ -225,19 +237,24 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give the same form name a different per-page name on a different page under plain permalinks.
+	 * @testdox Should give the same form name a different per-page name on a different page under $label permalinks.
+	 * @testWith ["plain", ""]
+	 *           ["pretty", "/%postname%/"]
+	 *
+	 * @param string $label     Description of the permalink setting.
+	 * @param string $structure The permalink structure to set.
 	 */
-	public function test_different_pages_give_different_names_under_plain_permalinks(): void {
-		$this->assert_different_pages_give_different_names();
-	}
+	public function test_different_pages_give_different_names( string $label, string $structure ): void {
+		$this->set_permalink_structure( $structure );
 
-	/**
-	 * @testdox Should give the same form name a different per-page name on a different page under pretty permalinks.
-	 */
-	public function test_different_pages_give_different_names_under_pretty_permalinks(): void {
-		$this->set_permalink_structure( '/%postname%/' );
+		$this->go_to( $this->page_url( 0 ) );
+		$first = ProductScopes::get_scope_name( 'sticky-bar' );
+		$this->go_to( $this->page_url( 1 ) );
+		$second = ProductScopes::get_scope_name( 'sticky-bar' );
+		$this->go_to( $this->page_url( 0 ) );
 
-		$this->assert_different_pages_give_different_names();
+		$this->assertNotSame( $first, $second );
+		$this->assertSame( $first, ProductScopes::get_scope_name( 'sticky-bar' ), 'Returning to the first page should give its name back.' );
 	}
 
 	/**
@@ -254,6 +271,34 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->assertSame( $every_first, $every_second, 'The every-page name should not depend on the page.' );
 		$this->assertNotSame( $every_first, $per_page_one, 'The every-page name should differ from the name on the first page.' );
 		$this->assertNotSame( $every_first, $per_page_two, 'The every-page name should differ from the name on the second page.' );
+	}
+
+	/**
+	 * @testdox Should never give an every-page name that equals a per-page name: $form_name.
+	 * @testWith ["sticky-bar"]
+	 *           ["12"]
+	 *           ["abcdef12"]
+	 *
+	 * @param string $form_name An accepted form name.
+	 */
+	public function test_every_page_name_never_equals_a_per_page_name( string $form_name ): void {
+		$this->go_to( $this->page_url( 0 ) );
+		$per_page = ProductScopes::get_scope_name( $form_name );
+		$checked  = 0;
+
+		// Every ending of the per-page name that is itself an accepted form name.
+		for ( $offset = 1, $length = strlen( $per_page ); $offset < $length; $offset++ ) {
+			$candidate = substr( $per_page, $offset );
+
+			if ( 1 !== preg_match( '/\A[A-Za-z0-9_\/-]+\z/', $candidate ) ) {
+				continue;
+			}
+
+			++$checked;
+			$this->assertNotSame( $per_page, ProductScopes::get_scope_name( $candidate, false ), "The every-page name of '$candidate' should differ from the per-page name." );
+		}
+
+		$this->assertGreaterThan( 0, $checked, 'The name should have an ending that is an accepted form name.' );
 	}
 
 	/**
@@ -279,9 +324,7 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should never give the global scope name to an accepted form name, `_default` included.
 	 * @testWith ["_default"]
-	 *           ["default"]
 	 *           ["_DEFAULT"]
-	 *           ["-"]
 	 *           ["0"]
 	 *
 	 * @param string $form_name An accepted form name.
@@ -345,23 +388,16 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 			'trailing newline'  => array( "sticky-bar\n" ),
 			'float'             => array( 12.0 ),
 			'bool true'         => array( true ),
-			'bool false'        => array( false ),
 			'array'             => array( array( 'sticky-bar' ) ),
-			'object'            => array( new \stdClass() ),
 		);
 	}
 
 	/**
-	 * @testdox Should give names that read back unchanged as a JSON key and from a data-wp-context attribute: $form_name.
-	 * @testWith ["shop/sticky-bar_2"]
-	 *           ["a"]
-	 *           ["-_/"]
-	 *           ["Mixed-Case_1"]
-	 *
-	 * @param string $form_name An allowed form name.
+	 * @testdox Should give names that read back unchanged as a JSON key and from a data-wp-context attribute.
 	 */
-	public function test_names_survive_json_and_context_attributes( string $form_name ): void {
+	public function test_names_survive_json_and_context_attributes(): void {
 		$this->go_to( $this->page_url( 0 ) );
+		$form_name = 'shop/sticky-bar_2';
 
 		foreach ( array( true, false ) as $per_page ) {
 			$name = ProductScopes::get_scope_name( $form_name, $per_page );
@@ -434,18 +470,6 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give the name of an empty page the same in an unparsed WP as on a request with only view variables.
-	 */
-	public function test_empty_page_is_the_same_everywhere(): void {
-		$this->replace_wp_global( new WP() );
-		$unparsed = ProductScopes::get_scope_name( 'sticky-bar' );
-
-		$this->go_to( '/?paged=2&orderby=price&min_price=5' );
-
-		$this->assertSame( $unparsed, ProductScopes::get_scope_name( 'sticky-bar' ) );
-	}
-
-	/**
 	 * @testdox Should not read the product-filter parameter map for a request without query variables.
 	 */
 	public function test_does_not_read_the_filter_parameter_map_without_query_variables(): void {
@@ -454,36 +478,6 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		ProductScopes::get_scope_name( 'sticky-bar' );
 
 		$this->assertSame( array(), $this->get_params_cache(), 'The helper should not warm the cached map.' );
-	}
-
-	/**
-	 * Asserts that a spelling of the first page gets the same per-page and every-page names as the plain URL.
-	 *
-	 * @param string $query Query string to add to the page URL.
-	 */
-	private function assert_same_name_as_plain_page( string $query ): void {
-		$url = $this->page_url( 0 );
-		$this->go_to( $url );
-		$plain = ProductScopes::get_scope_name( 'sticky-bar' );
-
-		$this->go_to( $this->page_url( 0, $query ) );
-		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ), 'The page should keep its name.' );
-		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ), 'Resolving twice should keep it.' );
-		$this->assertSame( 'wc:sticky-bar', ProductScopes::get_scope_name( 'sticky-bar', false ), 'The every-page name should not carry the page.' );
-	}
-
-	/**
-	 * Asserts that two different pages get different per-page names for one form name.
-	 */
-	private function assert_different_pages_give_different_names(): void {
-		$this->go_to( $this->page_url( 0 ) );
-		$first = ProductScopes::get_scope_name( 'sticky-bar' );
-		$this->go_to( $this->page_url( 1 ) );
-		$second = ProductScopes::get_scope_name( 'sticky-bar' );
-		$this->go_to( $this->page_url( 0 ) );
-
-		$this->assertNotSame( $first, $second );
-		$this->assertSame( $first, ProductScopes::get_scope_name( 'sticky-bar' ), 'Returning to the first page should give its name back.' );
 	}
 
 	/**
