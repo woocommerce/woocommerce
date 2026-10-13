@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the Tooltip `placement` prop instead of the deprecated `position` prop in `SummaryNumber` and `MenuItem`.
