@@ -200,13 +200,17 @@ final class Contracts {
 	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()` notice
 	 * and are ignored.
 	 *
+	 * Losing the append race is an outcome, not an error: when the chain position or count is
+	 * already taken (another caller appended it first), nothing is written and the call returns
+	 * null, as {@see self::claim_cycle()} and {@see self::transition_cycle()} return false when
+	 * their compare-and-set loses.
+	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
-	 * @return CycleView The appended cycle.
+	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid.
-	 * @throws DomainException If the chain position or count is already taken.
 	 */
-	public static function add_cycle( int $contract_id, array $args ): CycleView {
+	public static function add_cycle( int $contract_id, array $args ): ?CycleView {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$cycle_args = array(
@@ -235,7 +239,7 @@ final class Contracts {
 		try {
 			( new ContractRepository() )->append_cycle( $cycle, $claim_seconds );
 		} catch ( DuplicateCycleException $e ) {
-			throw new DomainException( 'Contracts: the cycle position or count already exists.' );
+			return null;
 		}
 
 		return CycleView::from_cycle( $cycle );

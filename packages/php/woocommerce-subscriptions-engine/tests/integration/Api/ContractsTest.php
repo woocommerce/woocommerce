@@ -833,7 +833,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_the_first_cycle_takes_the_chain_defaults(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) )->get_id();
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) )->get_id();
 		$cycle    = $this->cycle( $id, $cycle_id );
 
 		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
@@ -849,9 +849,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 	public function test_the_next_cycle_defaults_to_the_next_position(): void {
 		$id = $this->contract_with_currency();
-		Contracts::add_cycle( $id, $this->cycle_args() );
+		$this->add_cycle( $id, $this->cycle_args() );
 
-		$cycle_id = Contracts::add_cycle(
+		$cycle_id = $this->add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
@@ -872,42 +872,40 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_a_non_counting_cycle_takes_a_null_count(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) )->get_id();
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) )->get_id();
 
 		$this->assertNull( $this->cycle( $id, $cycle_id )->get_count() );
 	}
 
-	public function test_a_taken_position_is_refused(): void {
+	public function test_a_taken_position_returns_null(): void {
 		$id = $this->contract_with_currency();
-		Contracts::add_cycle( $id, $this->cycle_args() );
+		$this->add_cycle( $id, $this->cycle_args() );
 
-		$this->expectException( DomainException::class );
-
-		Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) );
+		$this->assertNull( Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A lost append returns null.' );
+		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
 	}
 
 	public function test_a_null_sequence_no_takes_the_next_position(): void {
 		$id = $this->contract_with_currency();
-		Contracts::add_cycle( $id, $this->cycle_args() );
+		$this->add_cycle( $id, $this->cycle_args() );
 
-		$view = Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => null ) ) );
+		$view = $this->add_cycle( $id, $this->cycle_args( array( 'sequence_no' => null ) ) );
 
 		$this->assertSame( 2, $view->get_sequence_no() );
 	}
 
-	public function test_a_taken_count_is_refused(): void {
+	public function test_a_taken_count_returns_null(): void {
 		$id = $this->contract_with_currency();
-		Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
+		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
 
-		$this->expectException( DomainException::class );
-
-		Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
+		$this->assertNull( Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) ), 'A lost append returns null.' );
+		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
 	}
 
 	public function test_an_explicit_position_is_kept(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle_id = Contracts::add_cycle(
+		$cycle_id = $this->add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
@@ -924,10 +922,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 	public function test_another_kind_starts_its_own_chain(): void {
 		$id = $this->contract_with_currency();
-		Contracts::add_cycle( $id, $this->cycle_args() );
-		Contracts::add_cycle( $id, $this->cycle_args() );
+		$this->add_cycle( $id, $this->cycle_args() );
+		$this->add_cycle( $id, $this->cycle_args() );
 
-		$view = Contracts::add_cycle( $id, $this->cycle_args( array( 'kind' => 'shipping' ) ) );
+		$view = $this->add_cycle( $id, $this->cycle_args( array( 'kind' => 'shipping' ) ) );
 
 		$this->assertSame( 'shipping', $view->get_kind() );
 		$this->assertSame( 1, $view->get_sequence_no() );
@@ -942,7 +940,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 
 		try {
-			Contracts::add_cycle( $id, $args );
+			$this->add_cycle( $id, $args );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertSame( array(), Contracts::get_cycles( $id ), 'No cycle is written.' );
@@ -1003,7 +1001,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_add_cycle_defaults_the_status_to_pending(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle = Contracts::add_cycle(
+		$cycle = $this->add_cycle(
 			$id,
 			array(
 				'starts_at_gmt' => '2026-01-01 00:00:00',
@@ -1019,7 +1017,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::add_cycle' );
 
-		$cycle_id = Contracts::add_cycle(
+		$cycle_id = $this->add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
@@ -1037,20 +1035,20 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->expectException( InvalidArgumentException::class );
 
-		Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => null ) ) );
+		$this->add_cycle( $id, $this->cycle_args( array( 'currency' => null ) ) );
 	}
 
 	public function test_the_cycle_currency_is_the_given_one(): void {
 		$id = $this->contract_with_currency();
 
-		$cycle_id = Contracts::add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) )->get_id();
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) )->get_id();
 
 		$this->assertSame( 'EUR', $this->cycle( $id, $cycle_id )->get_currency() );
 	}
 
 	public function test_get_cycles_returns_the_appended_cycle_as_a_view(): void {
 		$id      = $this->contract_with_currency();
-		$created = Contracts::add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$created = $this->add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
 
 		$history = Contracts::get_cycles( $id );
 
@@ -1069,7 +1067,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_claimed_append_holds_a_claim(): void {
 		$id    = $this->contract_with_currency();
-		$cycle = Contracts::add_cycle(
+		$cycle = $this->add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
@@ -1097,7 +1095,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		// Pin the session's database clock far from PHP's; UTC_TIMESTAMP() follows it.
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		$cycle = Contracts::add_cycle(
+		$cycle = $this->add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
@@ -1117,7 +1115,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 
 		try {
-			Contracts::add_cycle( $id, $this->cycle_args( array( 'claim_seconds' => 0 ) ) );
+			$this->add_cycle( $id, $this->cycle_args( array( 'claim_seconds' => 0 ) ) );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertSame( array(), Contracts::get_cycles( $id ) );
@@ -1132,8 +1130,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_claim_cycle_on_unclaimed_pending_and_billed_cycles(): void {
 		$id      = $this->contract_with_currency();
-		$billed  = Contracts::add_cycle( $id, $this->cycle_args() );
-		$pending = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$billed  = $this->add_cycle( $id, $this->cycle_args() );
+		$pending = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		$this->assertTrue( Contracts::claim_cycle( $pending->get_id(), CycleStatus::PENDING, 900 ) );
 		$this->assertFalse( Contracts::claim_cycle( $pending->get_id(), CycleStatus::PENDING, 900 ) );
@@ -1146,7 +1144,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_settles_and_loses_a_stale_read(): void {
 		$id    = $this->contract_with_currency();
-		$cycle = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		$this->assertTrue( Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 77 ) ) );
 		$this->assertFalse( Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::FAILED ), 'A caller that read pending loses.' );
@@ -1161,7 +1159,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_order_reason_and_claim(): void {
 		$id       = $this->contract_with_currency();
-		$cycle    = Contracts::add_cycle(
+		$cycle    = $this->add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
@@ -1206,7 +1204,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_rejects_bad_input(): void {
 		$id    = $this->contract_with_currency();
-		$cycle = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		try {
 			Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, 'nonsense' );
@@ -1227,7 +1225,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_rejects_invalid_argument_values( array $args ): void {
 		$id    = $this->contract_with_currency();
-		$cycle = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		try {
 			Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, $args );
@@ -1261,9 +1259,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_find_cycles_by_order_spans_contracts_newest_first(): void {
 		$first  = $this->contract_with_currency();
 		$second = $this->contract_with_currency();
-		$older  = Contracts::add_cycle( $first, $this->cycle_args( array( 'order_id' => 77 ) ) );
-		$newer  = Contracts::add_cycle( $second, $this->cycle_args( array( 'order_id' => 77 ) ) );
-		Contracts::add_cycle( $first, $this->cycle_args( array( 'order_id' => 88 ) ) );
+		$older  = $this->add_cycle( $first, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$newer  = $this->add_cycle( $second, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$this->add_cycle( $first, $this->cycle_args( array( 'order_id' => 88 ) ) );
 
 		$cycles = Contracts::find_cycles_by_order( 77 );
 
@@ -1284,9 +1282,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_get_cycles_pages_with_an_offset(): void {
 		$id    = $this->contract_with_currency();
-		$one   = Contracts::add_cycle( $id, $this->cycle_args() );
-		$two   = Contracts::add_cycle( $id, $this->cycle_args() );
-		$three = Contracts::add_cycle( $id, $this->cycle_args() );
+		$one   = $this->add_cycle( $id, $this->cycle_args() );
+		$two   = $this->add_cycle( $id, $this->cycle_args() );
+		$three = $this->add_cycle( $id, $this->cycle_args() );
 
 		$ids = static function ( array $cycles ): array {
 			return array_map(
@@ -1299,6 +1297,19 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( array( $three->get_id(), $two->get_id() ), $ids( Contracts::get_cycles( $id, 2 ) ) );
 		$this->assertSame( array( $one->get_id() ), $ids( Contracts::get_cycles( $id, 2, 2 ) ) );
+	}
+
+	/**
+	 * Append a cycle through the facade, asserting the append won.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        Cycle fields.
+	 */
+	private function add_cycle( int $contract_id, array $args ): CycleView {
+		$view = Contracts::add_cycle( $contract_id, $args );
+		$this->assertInstanceOf( CycleView::class, $view );
+
+		return $view;
 	}
 
 	/**
