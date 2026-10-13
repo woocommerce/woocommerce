@@ -207,6 +207,17 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clear the version constant setUp() sets, which would otherwise outlive the class.
+	 */
+	public function tearDown(): void {
+		try {
+			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * Test get onboarding details when the extension is NOT active.
 	 */
 	public function test_get_onboarding_details_throws_when_extension_not_active(): void {

@@ -22,11 +22,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
-	 * Customer shipping address to restore after a test that changes it, keyed by prop name.
+	 * Customer shipping address before the test, restored at teardown.
 	 *
-	 * @var array<string, string>|null
+	 * @var array<string, string>
 	 */
-	private $original_shipping_address = null;
+	private $previous_shipping_address = array();
 
 	/**
 	 * Called before every test.
@@ -35,6 +35,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		parent::setUp();
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
+
+		// Several tests change the shipping address on WC()->customer, which outlives a test.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -44,14 +47,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		WC()->customer->set_is_vat_exempt( false );
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 		WC()->session->set( 'wc_notices', null );
 
-		if ( null !== $this->original_shipping_address ) {
-			WC()->customer->set_props( $this->original_shipping_address );
-			$this->original_shipping_address = null;
-			// The checkout fields were built while the test's filters were attached.
-			$this->clear_checkout_fields();
-		}
+		// The checkout fields may have been built while a test's filters were attached.
+		$this->clear_checkout_fields();
 
 		// The parent teardown only clears chosen_shipping_methods, through
 		// WC_Shipping::reset_shipping(). Planted shipping_for_package_* rates survive and
@@ -841,6 +843,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * Test show shipping.
 	 */
 	public function test_show_shipping() {
+		// Start from a customer without an address; WC()->customer outlives a test.
+		WC()->customer->set_shipping_location( '', '', '', '' );
+
 		// Test with an empty cart.
 		$this->assertFalse( WC()->cart->show_shipping() );
 
@@ -1382,13 +1387,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'US' );
 		$customer->set_shipping_city( 'New York' );
 		$customer->set_shipping_state( 'state' === $missing_field ? '' : 'NY' );
