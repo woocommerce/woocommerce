@@ -281,7 +281,7 @@ export const fileUploadMachine = setup( {
 		hasSettingsToOverwrite: ( { context } ) =>
 			Boolean(
 				context.settings_to_overwrite &&
-					context.settings_to_overwrite.length > 0
+				context.settings_to_overwrite.length > 0
 			),
 	},
 } ).createMachine( {

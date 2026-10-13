@@ -177,7 +177,7 @@ pnpm run lint:fix:lang:css
 
 **CSS Linting Configuration:**
 
-- **Tool**: Stylelint 14.x
+- **Tool**: Stylelint 16.x
 - **Config**: Uses `@wordpress/stylelint-config`
 - **Files**: `**/*.scss` (excludes `storybook/wordpress`)
 - **Cache**: `node_modules/.cache/stylelint`

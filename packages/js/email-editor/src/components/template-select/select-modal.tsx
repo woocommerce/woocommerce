@@ -74,8 +74,12 @@ function SelectTemplateBody( {
 
 		// Put 'recent' category first
 		return allCategories.sort( ( a, b ) => {
-			if ( a.name === 'recent' ) return -1;
-			if ( b.name === 'recent' ) return 1;
+			if ( a.name === 'recent' ) {
+				return -1;
+			}
+			if ( b.name === 'recent' ) {
+				return 1;
+			}
 			return 0;
 		} );
 	}, [ templates, patternCategories, hideRecentCategory ] );

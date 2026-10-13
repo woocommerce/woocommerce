@@ -74,7 +74,7 @@ if ( data && data.promotion && anchor && anchor.parentNode ) {
 						},
 						body: JSON.stringify( { id: promoId } ),
 					} ).catch( () => {} );
-			  }
+				}
 			: undefined;
 
 	createRoot( root ).render(

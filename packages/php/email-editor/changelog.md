@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.18.0](https://github.com/woocommerce/email-editor/releases/tag/2.18.0) - 2026-10-05 
+
+-   Minor - Add the woocommerce_email_editor_render_end action, fired when rendering an email has finished, so integrations can restore state they changed for the render. [#69003]
+-   Patch - Move the personalization tag chip styles to a single flattened stylesheet loaded into both the editor iframe and the admin document. [#68501]
+
 ## [2.17.2](https://github.com/woocommerce/email-editor/releases/tag/2.17.2) - 2026-09-09 
 
 -   Patch - Keep Media & Text blocks in normal document flow so a button placed after one no longer paints its background across it. The wrapper table's align="left" rendered as a float in email clients, pulling the block out of flow so the following block failed to clear it. Alignment is preserved via the existing text-align CSS. [#68443]

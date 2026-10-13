@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -36,6 +37,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
+			}
+
+			public function process_order_without_payment( $order_id ) {
+				return parent::process_order_without_payment( $order_id );
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
@@ -142,6 +147,55 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
 		$this->assertStringNotContainsString( '<script>', $content );
 		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should not complete a cancelled unpaid non-zero order without payment.' );
+		} catch ( Exception $exception ) {
+			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::CANCELLED, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to complete a pending non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_allows_pending_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
 	}
 
 	/**

@@ -427,13 +427,13 @@ class Notification extends \WC_Data {
 	public function get_product_permalink() {
 
 		$product = $this->get_product();
-		if ( ! $product ) {
+		if ( ! $product || ! $product->get_id() ) {
 			return '';
 		}
 
 		$posted_attributes = $this->get_meta( 'posted_attributes' );
 		if ( ! $product instanceof \WC_Product_Variation || empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
-			return $product->get_permalink();
+			return (string) $product->get_permalink();
 		}
 
 		// Posted attributes hold only the values chosen for "Any" attributes, so merge them over the variation's own attributes to build a complete link.
@@ -441,7 +441,7 @@ class Notification extends \WC_Data {
 		$variation_attributes = $product->get_variation_attributes();
 		$attributes           = array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $variation_attributes ) );
 
-		return $product->get_permalink( array( 'variation' => $attributes ) );
+		return (string) $product->get_permalink( array( 'variation' => $attributes ) );
 	}
 
 	/**

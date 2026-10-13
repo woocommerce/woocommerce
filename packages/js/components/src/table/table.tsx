@@ -267,7 +267,7 @@ const Table: React.FC< TableProps > = ( {
 												( typeof label === 'string'
 													? label
 													: '' )
-									  )
+										)
 									: sprintf(
 											/* translators: %s: column label */
 											__(
@@ -278,7 +278,7 @@ const Table: React.FC< TableProps > = ( {
 												( typeof label === 'string'
 													? label
 													: '' )
-									  );
+										);
 
 							const textLabel = (
 								<Fragment>
