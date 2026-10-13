@@ -313,6 +313,26 @@ class OnboardingSetupWizardTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The confirmation points to the general settings only when the profiler could not save the store location.
+	 */
+	public function test_confirmation_mentions_unsaved_store_location_only_when_flagged(): void {
+		$this->prepare_valid_request( self::$admin_id );
+		$settings_link = '<a href="' . admin_url( 'admin.php?page=wc-settings&amp;tab=general' ) . '">WooCommerce &gt; Settings &gt; General</a>';
+
+		$unflagged_page = $this->dispatch_request()->getMessage();
+
+		$_GET['store_location_not_saved'] = '1';
+		$flagged_page                     = $this->dispatch_request()->getMessage();
+
+		$this->assertStringNotContainsString( 'store location', $unflagged_page, 'Without the flag, the confirmation should not mention the store location.' );
+		$this->assertStringContainsString(
+			'<p>Your store location and currency were not saved. Set them in ' . $settings_link . ', since taxes and prices depend on them.</p>',
+			$flagged_page,
+			'With the flag, the confirmation should link to the general settings.'
+		);
+	}
+
+	/**
 	 * @testdox An invalid nonce cannot mutate the profile.
 	 */
 	public function test_invalid_nonce_does_not_mutate_profile(): void {

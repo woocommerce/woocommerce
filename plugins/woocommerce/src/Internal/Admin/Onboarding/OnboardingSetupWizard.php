@@ -113,9 +113,20 @@ class OnboardingSetupWizard {
 			$next_step = esc_html__( 'If WooCommerce screens keep failing to load, ask your hosting provider to check that your site’s REST API is working.', 'woocommerce' );
 		}
 
+		$store_location_notice = '';
+		// The profiler adds this flag when it could not save the country and currency the merchant picked.
+		if ( isset( $_GET['store_location_not_saved'] ) ) {
+			$store_location_notice = '<p>' . sprintf(
+				/* translators: %s: link to the WooCommerce general settings screen. */
+				esc_html__( 'Your store location and currency were not saved. Set them in %s, since taxes and prices depend on them.', 'woocommerce' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=general' ) ) . '">' . esc_html__( 'WooCommerce > Settings > General', 'woocommerce' ) . '</a>'
+			) . '</p>';
+		}
+
 		wp_die(
 			'<h1>' . esc_html__( 'WooCommerce setup skipped', 'woocommerce' ) . '</h1>' .
 			'<p>' . esc_html__( 'Your choice to skip setup is saved. Your site’s REST API did not respond correctly, so some WooCommerce screens may not work until that is fixed.', 'woocommerce' ) . '</p>' .
+			wp_kses_post( $store_location_notice ) .
 			'<p>' . wp_kses_post( $next_step ) . '</p>' .
 			'<p><a class="button button-primary" href="' . esc_url( wc_admin_url() ) . '">' . esc_html__( 'Continue to WooCommerce Home', 'woocommerce' ) . '</a></p>',
 			esc_html__( 'WooCommerce setup skipped', 'woocommerce' ),

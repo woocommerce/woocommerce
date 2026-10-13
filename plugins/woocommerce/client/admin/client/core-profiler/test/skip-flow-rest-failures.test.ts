@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getQuery } from '@woocommerce/navigation';
+import { getNewPath, getQuery } from '@woocommerce/navigation';
 import { createActor, toPromise, waitFor } from 'xstate5';
 
 /**
@@ -83,6 +83,7 @@ jest.mock( '@wordpress/data', () => {
 const FALLBACK_URL =
 	'http://example.test/wp-admin/admin-post.php?action=woocommerce_skip_onboarding_setup';
 const HOME_PATH = 'admin.php?page=wc-admin';
+const STORE_LOCATION_NOT_SAVED = { store_location_not_saved: '1' };
 
 const startProfiler = () => {
 	const actor = createActor(
@@ -134,6 +135,7 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 
 	beforeEach( () => {
 		jest.useFakeTimers();
+		jest.clearAllMocks();
 		// Recovered errors are logged on purpose; keep them out of the test output.
 		consoleError = jest
 			.spyOn( console, 'error' )
@@ -160,13 +162,27 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 
 		await skipToBusinessLocationAndSubmit( actor );
 
-		expect( await waitForNavigation() ).toBe( FALLBACK_URL );
+		expect( await waitForNavigation() ).toBe(
+			`${ FALLBACK_URL }&store_location_not_saved=1`
+		);
 		expect( actor.getSnapshot().status ).toBe( 'active' );
 		expect( mockStoreCalls ).not.toContain( 'coreProfilerCompleted' );
 		expect( consoleError ).toHaveBeenCalledWith(
 			'WooCommerce Core Profiler:',
-			expect.objectContaining( { code: 'rest_no_route' } )
+			expect.objectContaining( {
+				cause: expect.objectContaining( { code: 'rest_no_route' } ),
+			} )
 		);
+		actor.stop();
+	} );
+
+	it( 'leaves the store location flag off the fallback page when only the skipped flag fails', async () => {
+		mockFailingRequests.add( 'updateProfileItems' );
+		const actor = startProfiler();
+
+		await skipToBusinessLocationAndSubmit( actor );
+
+		expect( await waitForNavigation() ).toBe( FALLBACK_URL );
 		actor.stop();
 	} );
 
@@ -178,6 +194,11 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		await skipToBusinessLocationAndSubmit( actor );
 
 		expect( await waitForNavigation() ).toBe( HOME_PATH );
+		expect( getNewPath ).toHaveBeenLastCalledWith(
+			STORE_LOCATION_NOT_SAVED,
+			'/',
+			{}
+		);
 		expect( mockStoreCalls ).toEqual(
 			expect.arrayContaining( [
 				'updateProfileItems',
@@ -215,6 +236,7 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		await skipToBusinessLocationAndSubmit( actor );
 
 		expect( await waitForNavigation() ).toBe( HOME_PATH );
+		expect( getNewPath ).toHaveBeenLastCalledWith( {}, '/', {} );
 		expect( mockStoreCalls ).toContain( 'coreProfilerCompleted' );
 		expect( consoleError ).not.toHaveBeenCalled();
 		actor.stop();

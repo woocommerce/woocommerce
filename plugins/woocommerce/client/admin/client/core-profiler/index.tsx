@@ -18,6 +18,7 @@ import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import { addQueryArgs } from '@wordpress/url';
 import {
 	updateQueryString,
 	getQuery,
@@ -63,6 +64,7 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
+import { STORE_LOCATION_NOT_SAVED_QUERY_ARG } from './utils/store-location-not-saved';
 import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins/Plugins';
 import { NoPermissionsError } from './pages/Plugins/NoPermissions';
@@ -133,6 +135,7 @@ export type CoreProfilerStateMachineContext = {
 	jetpackAuthUrl?: string;
 	currentUserEmail: string | undefined;
 	currentUser?: WCUser;
+	storeLocationNotSaved: boolean;
 };
 
 const getAllowTrackingOption = fromPromise( async () =>
@@ -336,13 +339,28 @@ const logActorError = ( { event }: { event: ErrorActorEvent } ) => {
 	logProfilerError( event.error );
 };
 
-const exitToWooHome = fromPromise( async () => {
-	// Coming Soon setup is best effort; a failed request must not leave the loader stuck.
-	await dispatch( onboardingStore )
-		.coreProfilerCompleted()
-		.catch( logProfilerError );
-	window.location.href = getNewPath( {}, '/', {} );
-} );
+const exitToWooHome = fromPromise(
+	async ( {
+		input,
+	}: {
+		input?: Pick<
+			CoreProfilerStateMachineContext,
+			'storeLocationNotSaved'
+		>;
+	} ) => {
+		// Coming Soon setup is best effort; a failed request must not leave the loader stuck.
+		await dispatch( onboardingStore )
+			.coreProfilerCompleted()
+			.catch( logProfilerError );
+		window.location.href = getNewPath(
+			input?.storeLocationNotSaved
+				? { [ STORE_LOCATION_NOT_SAVED_QUERY_ARG ]: '1' }
+				: {},
+			'/',
+			{}
+		);
+	}
+);
 
 const exitToJetpackAuth = fromPromise( async () => {
 	// Coming Soon setup is best effort, as in exitToWooHome.
@@ -354,6 +372,22 @@ const exitToJetpackAuth = fromPromise( async () => {
 		from: 'woocommerce-core-profiler',
 	} );
 } );
+
+/**
+ * Thrown when the skip flow cannot save the skipped flag. It also records whether the store location
+ * and currency saved, so the fallback page can tell the merchant to set them.
+ */
+class SkippedFlagNotSavedError extends Error {
+	cause: unknown;
+
+	storeLocationSaved: boolean;
+
+	constructor( cause: unknown, storeLocationSaved: boolean ) {
+		super( 'The skipped flag for onboarding could not be saved.' );
+		this.cause = cause;
+		this.storeLocationSaved = storeLocationSaved;
+	}
+}
 
 /**
  * Saves the skip through a non-REST admin-post request when the REST write fails,
@@ -370,12 +404,17 @@ const redirectToSkipOnboardingFallback = ( {
 		'onboarding',
 		{}
 	) as { skipOnboardingFallbackUrl?: unknown };
+	const storeLocationQuery =
+		event.error instanceof SkippedFlagNotSavedError &&
+		! event.error.storeLocationSaved
+			? { [ STORE_LOCATION_NOT_SAVED_QUERY_ARG ]: '1' }
+			: {};
 
 	window.location.href =
 		typeof skipOnboardingFallbackUrl === 'string' &&
 		skipOnboardingFallbackUrl
-			? skipOnboardingFallbackUrl
-			: getNewPath( {}, '/', {} );
+			? addQueryArgs( skipOnboardingFallbackUrl, storeLocationQuery )
+			: getNewPath( storeLocationQuery, '/', {} );
 };
 
 const getPluginNameParam = (
@@ -691,14 +730,26 @@ const skipFlowUpdateBusinessLocation = fromPromise(
 		);
 
 		// Only the skipped flag is required to leave the profiler; location and currency are best effort.
-		const [ skippedResult ] = await Promise.allSettled( [
-			skipped,
-			businessLocation,
-			currencyUpdate,
-		] );
+		const [ skippedResult, ...storeLocationResults ] =
+			await Promise.allSettled( [
+				skipped,
+				businessLocation,
+				currencyUpdate,
+			] );
+		const storeLocationSaved = storeLocationResults.every( ( result ) => {
+			if ( result.status === 'rejected' ) {
+				logProfilerError( result.reason );
+				return false;
+			}
+			return true;
+		} );
 		if ( skippedResult.status === 'rejected' ) {
-			throw skippedResult.reason;
+			throw new SkippedFlagNotSavedError(
+				skippedResult.reason,
+				storeLocationSaved
+			);
 		}
+		return { storeLocationSaved };
 	}
 );
 
@@ -812,6 +863,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		currentUserEmail: undefined,
 		currentUser: undefined,
 		coreProfilerCompletedSteps: {},
+		storeLocationNotSaved: false,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -1433,6 +1485,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								src: 'skipFlowUpdateBusinessLocation',
 								onDone: {
 									target: 'progress20',
+									actions: assign( {
+										storeLocationNotSaved: ( {
+											event,
+										}: {
+											event: DoneActorEvent< {
+												storeLocationSaved: boolean;
+											} >;
+										} ) =>
+											! event.output.storeLocationSaved,
+									} ),
 								},
 								onError: {
 									actions: 'redirectToSkipOnboardingFallback',
@@ -1836,6 +1898,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			id: 'redirectingToWooHome',
 			invoke: {
 				src: 'exitToWooHome',
+				input: ( { context } ) => context,
 			},
 		},
 	},
