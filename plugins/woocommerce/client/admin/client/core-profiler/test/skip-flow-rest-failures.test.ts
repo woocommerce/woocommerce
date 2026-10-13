@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getNewPath, getQuery } from '@woocommerce/navigation';
+import { getQuery } from '@woocommerce/navigation';
 import { createActor, toPromise, waitFor } from 'xstate5';
 
 /**
@@ -18,7 +18,6 @@ jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 jest.mock( '@woocommerce/navigation', () => ( {
 	...jest.requireActual( '@woocommerce/navigation' ),
 	getQuery: jest.fn( () => ( {} ) ),
-	getNewPath: jest.fn( () => 'admin.php?page=wc-admin' ),
 	updateQueryString: jest.fn(),
 } ) );
 
@@ -83,7 +82,6 @@ jest.mock( '@wordpress/data', () => {
 const FALLBACK_URL =
 	'http://example.test/wp-admin/admin-post.php?action=woocommerce_skip_onboarding_setup';
 const HOME_PATH = 'admin.php?page=wc-admin';
-const STORE_LOCATION_NOT_SAVED = { store_location_not_saved: '1' };
 
 const startProfiler = () => {
 	const actor = createActor(
@@ -202,11 +200,8 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 
 		await skipToBusinessLocationAndSubmit( actor );
 
-		expect( await waitForNavigation() ).toBe( HOME_PATH );
-		expect( getNewPath ).toHaveBeenLastCalledWith(
-			STORE_LOCATION_NOT_SAVED,
-			'/',
-			{}
+		expect( await waitForNavigation() ).toBe(
+			`${ HOME_PATH }&store_location_not_saved=1`
 		);
 		expect( mockStoreCalls ).toEqual(
 			expect.arrayContaining( [
@@ -248,7 +243,6 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		await skipToBusinessLocationAndSubmit( actor );
 
 		expect( await waitForNavigation() ).toBe( HOME_PATH );
-		expect( getNewPath ).toHaveBeenLastCalledWith( {}, '/', {} );
 		expect( mockStoreCalls ).toContain( 'coreProfilerCompleted' );
 		expect( consoleError ).not.toHaveBeenCalled();
 		actor.stop();
