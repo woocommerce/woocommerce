@@ -115,8 +115,7 @@ class Universal {
 					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
 
-				// Set only when the client must load s.js itself, after statistics consent.
-				wcAnalytics.trackingScriptUrl = <?php echo wp_json_encode( Consent_Manager::is_consent_api_active() ? Woocommerce_Analytics::get_tracking_script_url() : null, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
+				wcAnalytics.trackingScriptUrl = <?php echo wp_json_encode( $this->get_client_tracking_script_url(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
@@ -128,6 +127,21 @@ class Universal {
 			})();
 		</script>
 		<?php
+	}
+
+	/**
+	 * Get the s.js URL the client loads after statistics consent.
+	 *
+	 * Null when PHP printed s.js itself (no consent plugin), or when the `woocommerce-analytics` handle was dequeued to turn it off.
+	 *
+	 * @return string|null
+	 */
+	private function get_client_tracking_script_url() {
+		if ( ! Consent_Manager::is_consent_api_active() || ! wp_script_is( 'woocommerce-analytics', 'enqueued' ) ) {
+			return null;
+		}
+
+		return Woocommerce_Analytics::get_tracking_script_url();
 	}
 
 	/**

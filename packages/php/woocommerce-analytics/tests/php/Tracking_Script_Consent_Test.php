@@ -47,7 +47,7 @@ class Tracking_Script_Consent_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that with the WP Consent API, s.js is not printed by PHP and its URL is handed to the client instead.
+	 * Test that with the WP Consent API, PHP enqueues the handle without s.js and hands the URL to the client instead.
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
@@ -57,11 +57,47 @@ class Tracking_Script_Consent_Test extends BaseTestCase {
 
 		Woocommerce_Analytics::enqueue_tracking_script();
 
-		$this->assertFalse( wp_script_is( 'woocommerce-analytics', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'woocommerce-analytics', 'enqueued' ) );
+		$this->assertFalse( wp_scripts()->registered['woocommerce-analytics']->src );
 		$this->assertStringContainsString(
 			'wcAnalytics.trackingScriptUrl = "' . Woocommerce_Analytics::get_tracking_script_url() . '";',
 			$this->render_analytics_data()
 		);
+	}
+
+	/**
+	 * Test that with the WP Consent API, scripts that depend on the handle still print.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_dependents_of_the_handle_still_print_when_the_consent_api_is_active(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+
+		Woocommerce_Analytics::enqueue_tracking_script();
+		wp_enqueue_script( 'analytics-dependent', 'https://example.com/dependent.js', array( 'woocommerce-analytics' ), '1.0' );
+
+		ob_start();
+		wp_print_scripts();
+		$output = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'https://example.com/dependent.js', $output );
+		$this->assertStringNotContainsString( 'stats.wp.com', $output );
+	}
+
+	/**
+	 * Test that with the WP Consent API, dequeuing the handle still turns s.js off.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_dequeued_handle_keeps_s_js_off_when_the_consent_api_is_active(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+
+		Woocommerce_Analytics::enqueue_tracking_script();
+		wp_dequeue_script( 'woocommerce-analytics' );
+
+		$this->assertStringContainsString( 'wcAnalytics.trackingScriptUrl = null;', $this->render_analytics_data() );
 	}
 
 	/**

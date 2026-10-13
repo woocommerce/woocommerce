@@ -183,9 +183,12 @@ class Woocommerce_Analytics {
 	 * Place script to call s.js, Store Analytics.
 	 *
 	 * The script sets referrer cookies as soon as it runs, so with a consent plugin the client loads it after statistics consent.
+	 * The handle is still enqueued there, without a source, so its dependents print and dequeuing it still turns s.js off.
 	 */
 	public static function enqueue_tracking_script() {
 		if ( Consent_Manager::is_consent_api_active() ) {
+			wp_register_script( 'woocommerce-analytics', false, array(), null, false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- No source to version.
+			wp_enqueue_script( 'woocommerce-analytics' );
 			return;
 		}
 
