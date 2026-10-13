@@ -359,7 +359,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 				<!-- wp:column -->
 				<div class="wp-block-column">
-					<!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+					<!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
 
 					<!-- wp:woocommerce/product-rating /-->
 
