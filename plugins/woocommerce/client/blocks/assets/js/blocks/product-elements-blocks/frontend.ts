@@ -19,6 +19,7 @@ import {
 	swapPreformattedHtml,
 	PRODUCT_ELEMENT_HTML_CONFIG,
 } from '../../base/utils/preformatted-html';
+import { getSaleBadgeDiscount } from './sale-badge/utils';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -67,24 +68,25 @@ const { state } = store(
 				) {
 					return context.saleBadgeText;
 				}
-				const regular = Number( variation.prices.regular_price );
-				const discount = regular - Number( variation.prices.price );
-				if ( ! ( regular > 0 && discount > 0 ) ) {
+				const prices = variation.prices;
+				const discount = getSaleBadgeDiscount( prices );
+				if ( ! discount ) {
 					return context.saleBadgeText;
 				}
-				const percentage = Math.round( ( discount / regular ) * 100 );
-				if ( context.badgeContent === 'percentage' && percentage < 1 ) {
+				if (
+					context.badgeContent === 'percentage' &&
+					discount.percentage === 0
+				) {
 					return null;
 				}
 				const config = getConfig() as SaleBadgeConfig;
-				const prices = variation.prices;
 				const value =
 					context.badgeContent === 'percentage'
 						? config.saleBadgePercentageTemplate.replace(
 								'%s',
-								String( percentage )
+								String( discount.percentage )
 						  )
-						: formatPriceWithCurrency( discount, {
+						: formatPriceWithCurrency( discount.amount, {
 								code: prices.currency_code,
 								symbol: prices.currency_symbol,
 								minorUnit: prices.currency_minor_unit,
