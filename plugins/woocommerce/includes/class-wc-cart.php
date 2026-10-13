@@ -10,6 +10,7 @@
  */
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
@@ -1727,6 +1728,42 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get the destination of the default shipping package from the customer's shipping address.
+	 *
+	 * While the customer's location is still the store base default, the base postcode and city are used too,
+	 * so shipping zones limited to postcodes or cities match before the customer enters an address.
+	 *
+	 * @return array
+	 */
+	private function get_shipping_package_destination(): array {
+		$customer    = $this->get_customer();
+		$destination = array(
+			'country'   => $customer->get_shipping_country(),
+			'state'     => $customer->get_shipping_state(),
+			'postcode'  => $customer->get_shipping_postcode(),
+			'city'      => $customer->get_shipping_city(),
+			'address'   => $customer->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
+			'address_1' => $customer->get_shipping_address_1(),
+			'address_2' => $customer->get_shipping_address_2(),
+		);
+
+		$uses_base_location = DefaultCustomerAddress::BASE === get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE )
+			&& ! $customer->has_calculated_shipping()
+			&& '' === (string) $destination['postcode']
+			&& '' === (string) $destination['city']
+			&& '' === (string) $destination['address_1']
+			&& WC()->countries->get_base_country() === $destination['country']
+			&& WC()->countries->get_base_state() === $destination['state'];
+
+		if ( $uses_base_location ) {
+			$destination['postcode'] = WC()->countries->get_base_postcode();
+			$destination['city']     = WC()->countries->get_base_city();
+		}
+
+		return $destination;
+	}
+
+	/**
 	 * Get packages to calculate shipping for.
 	 *
 	 * This lets us calculate costs for carts that are shipped to multiple locations.
@@ -1757,15 +1794,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					'user'            => array(
 						'ID' => get_current_user_id(),
 					),
-					'destination'     => array(
-						'country'   => $this->get_customer()->get_shipping_country(),
-						'state'     => $this->get_customer()->get_shipping_state(),
-						'postcode'  => $this->get_customer()->get_shipping_postcode(),
-						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
-						'address_1' => $this->get_customer()->get_shipping_address_1(),
-						'address_2' => $this->get_customer()->get_shipping_address_2(),
-					),
+					'destination'     => $this->get_shipping_package_destination(),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
 				),
 			)

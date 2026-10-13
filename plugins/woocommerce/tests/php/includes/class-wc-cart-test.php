@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -2765,5 +2766,38 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox The default shipping package uses the store base postcode and city while the customer location is still the base default.
+	 */
+	public function test_shipping_package_destination_uses_base_postcode_and_city(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_postcode', '90210' );
+		update_option( 'woocommerce_store_city', 'Beverly Hills' );
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
+
+		$customer = WC()->cart->get_customer();
+		$customer->set_shipping_location( 'US', 'CA', '', '' );
+		$customer->set_shipping_address_1( '' );
+		$customer->set_calculated_shipping( false );
+
+		$destination = WC()->cart->get_shipping_packages()[0]['destination'];
+		$this->assertSame( '90210', $destination['postcode'] );
+		$this->assertSame( 'Beverly Hills', $destination['city'] );
+
+		$customer->set_calculated_shipping( true );
+		$this->assertSame( '', WC()->cart->get_shipping_packages()[0]['destination']['postcode'], 'A customer who calculated shipping keeps an empty postcode.' );
+
+		$customer->set_calculated_shipping( false );
+		$customer->set_shipping_location( 'US', 'NY', '', '' );
+		$this->assertSame( '', WC()->cart->get_shipping_packages()[0]['destination']['postcode'], 'A location other than the base keeps an empty postcode.' );
+
+		$customer->set_shipping_location( 'US', 'CA', '10001', '' );
+		$this->assertSame( '10001', WC()->cart->get_shipping_packages()[0]['destination']['postcode'], 'An entered postcode is kept.' );
+
+		$customer->set_shipping_location( 'US', 'CA', '', '' );
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::GEOLOCATION );
+		$this->assertSame( '', WC()->cart->get_shipping_packages()[0]['destination']['postcode'], 'Only the base default location uses the base postcode.' );
 	}
 }
