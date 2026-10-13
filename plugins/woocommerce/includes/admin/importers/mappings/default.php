@@ -117,6 +117,8 @@ function wc_importer_default_special_english_mappings( $mappings ) {
 		'Meta: %s'              => 'meta:',
 	);
 
+	$new_mappings['Attribute %d used for variations'] = 'attributes:variation';
+
 	return array_merge( $mappings, $new_mappings );
 }
 add_filter( 'woocommerce_csv_product_import_mapping_special_columns', 'wc_importer_default_special_english_mappings', 100 );

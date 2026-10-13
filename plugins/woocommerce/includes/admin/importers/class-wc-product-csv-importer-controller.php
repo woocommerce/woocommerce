@@ -852,6 +852,8 @@ class WC_Product_CSV_Importer_Controller {
 						/* translators: %d: Attribute number */
 						__( 'Attribute %d visible', 'woocommerce' ) => 'attributes:visible',
 						/* translators: %d: Attribute number */
+						__( 'Attribute %d used for variations', 'woocommerce' ) => 'attributes:variation',
+						/* translators: %d: Attribute number */
 						__( 'Attribute %d global', 'woocommerce' ) => 'attributes:taxonomy',
 						/* translators: %d: Attribute number */
 						__( 'Attribute %d default', 'woocommerce' ) => 'attributes:default',
@@ -1024,11 +1026,12 @@ class WC_Product_CSV_Importer_Controller {
 			'attributes'         => array(
 				'name'    => __( 'Attributes', 'woocommerce' ),
 				'options' => array(
-					'attributes:name' . $index     => __( 'Attribute name', 'woocommerce' ),
-					'attributes:value' . $index    => __( 'Attribute value(s)', 'woocommerce' ),
-					'attributes:taxonomy' . $index => __( 'Is a global attribute?', 'woocommerce' ),
-					'attributes:visible' . $index  => __( 'Attribute visibility', 'woocommerce' ),
-					'attributes:default' . $index  => __( 'Default attribute', 'woocommerce' ),
+					'attributes:name' . $index      => __( 'Attribute name', 'woocommerce' ),
+					'attributes:value' . $index     => __( 'Attribute value(s)', 'woocommerce' ),
+					'attributes:taxonomy' . $index  => __( 'Is a global attribute?', 'woocommerce' ),
+					'attributes:visible' . $index   => __( 'Attribute visibility', 'woocommerce' ),
+					'attributes:variation' . $index => __( 'Used for variations', 'woocommerce' ),
+					'attributes:default' . $index   => __( 'Default attribute', 'woocommerce' ),
 				),
 			),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
