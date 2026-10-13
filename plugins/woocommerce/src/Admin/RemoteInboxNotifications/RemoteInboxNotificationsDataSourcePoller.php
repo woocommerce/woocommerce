@@ -20,6 +20,23 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	const ID = 'remote_inbox_notifications';
 
 	/**
+	 * Transient holding the spec slugs and fetch time of the latest complete read.
+	 */
+	private const PUBLISHED_SNAPSHOT_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_published_snapshot';
+
+	/**
+	 * Progress of the read in flight: whether every source so far returned a nonempty list of valid,
+	 * uniquely keyed specs, whether the WooCommerce.com feed was among them, and the merged slugs.
+	 *
+	 * @var array{complete: bool, includes_canonical_source: bool, slugs: array<string, true>}
+	 */
+	private $current_read = array(
+		'complete'                  => false,
+		'includes_canonical_source' => false,
+		'slugs'                     => array(),
+	);
+
+	/**
 	 * Default data sources array.
 	 *
 	 * @deprecated since 9.5.0. Use get_data_sources() instead.
@@ -48,6 +65,116 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 			);
 		}
 		return self::$instance;
+	}
+
+	/**
+	 * Read the data sources, and record which specs were published when every source returned a complete list.
+	 *
+	 * Any other read that returns specs clears the recorded snapshot, because those specs are newer evidence of what is published.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool Whether any specs were read.
+	 */
+	public function read_specs_from_data_sources() {
+		$fetched_at = time();
+		$this->start_read();
+
+		$result = parent::read_specs_from_data_sources();
+
+		if ( true === $result ) {
+			if ( $this->current_read['complete'] && $this->current_read['includes_canonical_source'] ) {
+				$this->save_published_snapshot( $fetched_at, array_map( 'strval', array_keys( $this->current_read['slugs'] ) ) );
+			} else {
+				delete_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get the spec slugs from the latest read in which every data source returned a complete list.
+	 *
+	 * An empty or failed response never produces a snapshot, because the feed cannot tell those apart.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 *
+	 * @return array{fetched_at: int, slugs: string[]}|null The snapshot, or null when none is stored.
+	 */
+	public function get_published_snapshot(): ?array {
+		$snapshot = get_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
+
+		if ( ! is_array( $snapshot ) || ! isset( $snapshot['fetched_at'], $snapshot['slugs'] ) || ! is_int( $snapshot['fetched_at'] ) || ! is_array( $snapshot['slugs'] ) ) {
+			return null;
+		}
+
+		return array(
+			'fetched_at' => $snapshot['fetched_at'],
+			'slugs'      => array_map( 'strval', array_values( array_filter( $snapshot['slugs'], 'is_scalar' ) ) ),
+		);
+	}
+
+	/**
+	 * Merge the specs of one data source, tracking whether its response was complete.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array  $specs_to_merge_in The specs to merge in to $specs.
+	 * @param array  $specs             The list of specs being merged into.
+	 * @param string $url               The url of the feed being merged in.
+	 * @return void
+	 */
+	protected function merge_specs( $specs_to_merge_in, &$specs, $url ) {
+		$source_specs = array();
+		parent::merge_specs( $specs_to_merge_in, $source_specs, $url );
+
+		$this->current_read['complete'] = $this->current_read['complete']
+			&& count( $source_specs ) > 0
+			&& count( $source_specs ) === count( $specs_to_merge_in );
+
+		if ( in_array( $url, self::get_data_sources(), true ) ) {
+			$this->current_read['includes_canonical_source'] = true;
+		}
+
+		foreach ( $source_specs as $key => $spec ) {
+			$specs[ $key ]                       = $spec;
+			$this->current_read['slugs'][ $key ] = true;
+		}
+	}
+
+	/**
+	 * Reset the progress tracked for a new read.
+	 */
+	private function start_read(): void {
+		$this->current_read = array(
+			'complete'                  => true,
+			'includes_canonical_source' => false,
+			'slugs'                     => array(),
+		);
+	}
+
+	/**
+	 * Store a published snapshot unless a newer one is already stored.
+	 *
+	 * @param int      $fetched_at When the read started.
+	 * @param string[] $slugs      Spec slugs returned by the read.
+	 */
+	private function save_published_snapshot( int $fetched_at, array $slugs ): void {
+		$stored = $this->get_published_snapshot();
+		if ( null !== $stored && $stored['fetched_at'] > $fetched_at ) {
+			return;
+		}
+
+		set_transient(
+			self::PUBLISHED_SNAPSHOT_TRANSIENT,
+			array(
+				'fetched_at' => $fetched_at,
+				'slugs'      => $slugs,
+			),
+			$this->args['transient_expiry']
+		);
 	}
 
 	/**
