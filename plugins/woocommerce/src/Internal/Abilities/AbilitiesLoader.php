@@ -80,7 +80,7 @@ class AbilitiesLoader {
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		AbilitiesCategories::init();
-		add_action( 'woocommerce_ability_resources_init', array( __CLASS__, 'register_core_resources' ) );
+		add_action( 'woocommerce_ability_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
