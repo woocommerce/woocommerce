@@ -4,6 +4,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Tax;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+
 /**
  * Helpers to register test REST routes and dispatch them through the full REST lifecycle.
  *
@@ -62,5 +64,61 @@ trait StoreApiRouteTestTrait {
 		);
 
 		rest_do_request( new \WP_REST_Request( 'GET', $route ) );
+	}
+
+	/**
+	 * Wrap a callback in a Store API cart route, so the cart pricing context treats it like a real cart or checkout route.
+	 *
+	 * @param callable $callback Route callback.
+	 * @return callable Callback on a cart route object.
+	 */
+	private function as_cart_route( callable $callback ): callable {
+		$route = new class( $callback ) extends AbstractCartRoute {
+			/**
+			 * Route callback.
+			 *
+			 * @var callable
+			 */
+			private $callback;
+
+			/**
+			 * Store the callback without the Store API dependencies a real route needs.
+			 *
+			 * @param callable $callback Route callback.
+			 */
+			public function __construct( callable $callback ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- Skips the parent constructor on purpose.
+				$this->callback = $callback;
+			}
+
+			/**
+			 * Get the path of this route.
+			 *
+			 * @return string
+			 */
+			public function get_path() {
+				return '/test-cart-route';
+			}
+
+			/**
+			 * Get the route arguments.
+			 *
+			 * @return array
+			 */
+			public function get_args() {
+				return array();
+			}
+
+			/**
+			 * Run the wrapped callback.
+			 *
+			 * @param \WP_REST_Request $request Request object.
+			 * @return mixed
+			 */
+			public function handle( \WP_REST_Request $request ) {
+				return ( $this->callback )( $request );
+			}
+		};
+
+		return array( $route, 'handle' );
 	}
 }

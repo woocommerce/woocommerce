@@ -4,6 +4,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Tax;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+
 /**
  * Tracks whether code is running to price the cart, as opposed to displaying catalog prices.
  *
@@ -63,7 +65,7 @@ class CartPricingContext {
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
 		// Blocks hydration calls cart and checkout route callbacks directly, without the REST dispatch
 		// lifecycle, so the context is registered from its own before/after filters instead.
-		add_filter( 'woocommerce_hydration_dispatch_request', array( $this, 'handle_hydration_dispatch_request' ), 10, 3 );
+		add_filter( 'woocommerce_hydration_dispatch_request', array( $this, 'handle_hydration_dispatch_request' ), 10, 4 );
 		add_filter( 'woocommerce_hydration_request_after_callbacks', array( $this, 'handle_hydration_request_after_callbacks' ), 10, 3 );
 		// Cart totals are saved in the session and mini-cart line prices are calculated on render,
 		// so both can happen outside the cart and checkout pages.
@@ -160,7 +162,7 @@ class CartPricingContext {
 	 * @return mixed The response.
 	 */
 	public function handle_rest_request_before_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$this->register_dispatch_context( $request, $request->get_route() );
+		$this->register_dispatch_context( $request, self::is_cart_route_handler( $handler ) );
 
 		return $response;
 	}
@@ -195,14 +197,15 @@ class CartPricingContext {
 	 * @param mixed $hydration_result Result of the hydration. If not null, it is used as the response.
 	 * @param mixed $request          Request used to generate the response.
 	 * @param mixed $path             Request path matched for the request.
+	 * @param mixed $handler          Route handler used for the request.
 	 * @return mixed The hydration result.
 	 */
-	public function handle_hydration_dispatch_request( $hydration_result, $request, $path ) {
+	public function handle_hydration_dispatch_request( $hydration_result, $request, $path, $handler = null ) {
 		if ( ! $request instanceof \WP_REST_Request ) {
 			return $hydration_result;
 		}
 
-		$this->register_dispatch_context( $request, is_string( $path ) ? (string) strtok( $path, '?' ) : $request->get_route() );
+		$this->register_dispatch_context( $request, self::is_cart_route_handler( $handler ) );
 
 		return $hydration_result;
 	}
@@ -229,17 +232,29 @@ class CartPricingContext {
 	}
 
 	/**
+	 * Determine whether a route handler belongs to a Store API cart or checkout route.
+	 *
+	 * @param mixed $handler Route handler, with the route object as the first element of its callback.
+	 * @return bool True when the handler is a Store API cart or checkout route.
+	 */
+	private static function is_cart_route_handler( $handler ): bool {
+		$callback = is_array( $handler ) ? ( $handler['callback'] ?? null ) : null;
+
+		return is_array( $callback ) && ( $callback[0] ?? null ) instanceof AbstractCartRoute;
+	}
+
+	/**
 	 * Push a dispatch context on the stack.
 	 *
-	 * @param \WP_REST_Request $request    Request used to generate the response.
-	 * @param string           $route_path Route path the request was matched to.
+	 * @param \WP_REST_Request $request             Request used to generate the response.
+	 * @param bool             $is_cart_or_checkout Whether the request is handled by a Store API cart or checkout route.
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 */
-	private function register_dispatch_context( \WP_REST_Request $request, string $route_path ): void {
+	private function register_dispatch_context( \WP_REST_Request $request, bool $is_cart_or_checkout ): void {
 		$dispatch_id = spl_object_id( $request );
 
 		$this->dispatch_contexts[ $dispatch_id ] = array(
-			'is_cart_or_checkout' => 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $route_path ),
+			'is_cart_or_checkout' => $is_cart_or_checkout,
 			'calculation_depth'   => $this->calculation_depth,
 			'mini_cart_count'     => count( $this->mini_cart_depths ),
 		);

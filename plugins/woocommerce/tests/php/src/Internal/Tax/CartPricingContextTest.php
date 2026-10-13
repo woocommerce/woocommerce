@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Tax;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Tax\CartPricingContext;
+use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
@@ -50,51 +52,34 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Is active for Store API cart and checkout routes.
-	 *
-	 * @dataProvider provider_store_api_cart_and_checkout_routes
-	 *
-	 * @param string $route Store API route.
 	 */
-	public function test_is_active_for_store_api_cart_and_checkout_routes( string $route ): void {
+	public function test_is_active_for_store_api_cart_and_checkout_routes(): void {
 		$is_active = null;
 
 		$this->dispatch_test_route(
-			$route,
-			function ( $request ) use ( &$is_active ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				$is_active = $this->sut->is_active();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
+			'/wc/store/v1/cart',
+			$this->as_cart_route(
+				function ( $request ) use ( &$is_active ) {
+					unset( $request ); // Avoid parameter not used PHPCS errors.
+					$is_active = $this->sut->is_active();
+					return rest_ensure_response( array( 'ok' => true ) );
+				}
+			)
 		);
 
-		$this->assertTrue( $is_active, "The {$route} route should price the cart." );
+		$this->assertTrue( $is_active, 'A Store API cart route should price the cart.' );
 	}
 
 	/**
-	 * Provides Store API cart and checkout routes that can calculate cart totals.
-	 *
-	 * @return array<string, array<string>>
+	 * @testdox Every Store API cart and checkout route extends AbstractCartRoute, so the context recognizes it.
 	 */
-	public function provider_store_api_cart_and_checkout_routes(): array {
-		return array(
-			'cart namespace'       => array( '/wc/store/cart' ),
-			'versioned cart'       => array( '/wc/store/v1/cart' ),
-			'add cart item'        => array( '/wc/store/v1/cart/add-item' ),
-			'cart items'           => array( '/wc/store/v1/cart/items' ),
-			'cart item by key'     => array( '/wc/store/v1/cart/items/cart-item-key' ),
-			'apply coupon'         => array( '/wc/store/v1/cart/apply-coupon' ),
-			'cart coupons'         => array( '/wc/store/v1/cart/coupons' ),
-			'remove coupon'        => array( '/wc/store/v1/cart/coupons/coupon-code' ),
-			'remove cart coupon'   => array( '/wc/store/v1/cart/remove-coupon' ),
-			'remove cart item'     => array( '/wc/store/v1/cart/remove-item' ),
-			'select shipping rate' => array( '/wc/store/v1/cart/select-shipping-rate' ),
-			'update cart item'     => array( '/wc/store/v1/cart/update-item' ),
-			'update customer'      => array( '/wc/store/v1/cart/update-customer' ),
-			'cart extension'       => array( '/wc/store/v1/cart/extensions' ),
-			'checkout namespace'   => array( '/wc/store/checkout' ),
-			'versioned checkout'   => array( '/wc/store/v1/checkout' ),
-			'checkout draft order' => array( '/wc/store/v1/checkout/123' ),
-		);
+	public function test_every_store_api_cart_and_checkout_route_extends_abstract_cart_route(): void {
+		$routes = StoreApi::container()->get( RoutesController::class )->get_all_routes( 'v1', true );
+
+		foreach ( $routes as $path => $route_class ) {
+			$is_cart_path = 1 === preg_match( '#^/wc/store/v1/(?:cart|checkout)(?:/|$)#', $path );
+			$this->assertSame( $is_cart_path, is_subclass_of( $route_class, AbstractCartRoute::class ), "The {$path} route should extend AbstractCartRoute only when it is a cart or checkout route." );
+		}
 	}
 
 	/**
@@ -103,6 +88,7 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	 * @testWith ["/wc/store/v1/products"]
 	 *           ["/wc/store/v1/cartography"]
 	 *           ["/wc/v3/cart"]
+	 *           ["/wc/store/v1/cart/not-a-cart-route"]
 	 *
 	 * @param string $route REST route.
 	 */
@@ -379,12 +365,14 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 					);
 					$this->register_test_route(
 						'/wc/store/v1/cart/test-outer',
-						function ( $request ) use ( &$outer ) {
-							unset( $request ); // Avoid parameter not used PHPCS errors.
-							rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-inner' ) );
-							$outer = $this->sut->is_active();
-							return rest_ensure_response( array( 'ok' => true ) );
-						}
+						$this->as_cart_route(
+							function ( $request ) use ( &$outer ) {
+								unset( $request ); // Avoid parameter not used PHPCS errors.
+								rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-inner' ) );
+								$outer = $this->sut->is_active();
+								return rest_ensure_response( array( 'ok' => true ) );
+							}
+						)
 					);
 				},
 			)
@@ -408,11 +396,13 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 				function () use ( &$inner, &$outer ): void {
 					$this->register_test_route(
 						'/wc/store/v1/cart/test-inner',
-						function ( $request ) use ( &$inner ) {
-							unset( $request ); // Avoid parameter not used PHPCS errors.
-							$inner = $this->sut->is_active();
-							return rest_ensure_response( array( 'ok' => true ) );
-						}
+						$this->as_cart_route(
+							function ( $request ) use ( &$inner ) {
+								unset( $request ); // Avoid parameter not used PHPCS errors.
+								$inner = $this->sut->is_active();
+								return rest_ensure_response( array( 'ok' => true ) );
+							}
+						)
 					);
 					$this->register_test_route(
 						'/wc/v3/test-outer',

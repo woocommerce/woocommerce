@@ -1051,7 +1051,8 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_tax_based_on',
 						label: 'Calculate tax based on',
-						description: '',
+						description:
+							'"Customer shipping address" uses the billing address when nothing in the cart needs shipping, such as downloads or services.',
 						type: 'select',
 						default: 'shipping',
 						options: {

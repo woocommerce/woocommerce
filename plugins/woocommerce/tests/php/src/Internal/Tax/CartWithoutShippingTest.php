@@ -168,11 +168,13 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 
 		$this->dispatch_test_route(
 			'/wc/store/v1/cart',
-			function ( $request ) use ( &$recorded ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				$recorded = $this->customer->get_taxable_address();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
+			$this->as_cart_route(
+				function ( $request ) use ( &$recorded ) {
+					unset( $request ); // Avoid parameter not used PHPCS errors.
+					$recorded = $this->customer->get_taxable_address();
+					return rest_ensure_response( array( 'ok' => true ) );
+				}
+			)
 		);
 
 		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $recorded, 'A Store API cart request should use the billing address.' );
