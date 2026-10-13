@@ -74,9 +74,14 @@
 		min-height: 280px;
 	}
 
+	&--marketplace,
+	&--current-theme {
+		min-height: 280px;
+	}
+
 	&--marketplace &__content,
 	&--current-theme &__content {
-		min-height: 160px;
+		flex: 1;
 	}
 
 	&--marketplace &__media {

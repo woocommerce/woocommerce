@@ -25,24 +25,17 @@ type PurpleCardProps = {
 
 type BadgeIntent = ComponentProps< typeof Badge >[ 'intent' ];
 
-const getCopy = ( state: PurpleState ) => {
+/**
+ * Badge and helper text for each state. The title, description and benefits stay the same.
+ */
+const getStatusCopy = ( state: PurpleState ) => {
 	const freeTheme = {
 		badge: __( 'Free theme', 'woocommerce' ),
 		badgeIntent: 'informational' as BadgeIntent,
-		title: __( 'Built by WooCommerce, for your store', 'woocommerce' ),
-		description: __(
-			'The Purple theme gives your shop, product, cart and checkout pages a polished design from day one, so you can focus on your products.',
-			'woocommerce'
-		),
 	};
 	const installed = {
 		badge: __( 'Installed, not active yet', 'woocommerce' ),
 		badgeIntent: 'stable' as BadgeIntent,
-		title: __( 'Purple is ready to try', 'woocommerce' ),
-		description: __(
-			"Try it with your own products in Live Preview, then activate it when you're ready.",
-			'woocommerce'
-		),
 	};
 
 	switch ( state ) {
@@ -74,11 +67,6 @@ const getCopy = ( state: PurpleState ) => {
 			return {
 				badge: __( 'Active theme', 'woocommerce' ),
 				badgeIntent: 'stable' as BadgeIntent,
-				title: __( 'Purple is your store theme', 'woocommerce' ),
-				description: __(
-					'Next, make it yours: pick colors and fonts, then edit your homepage and store pages.',
-					'woocommerce'
-				),
 				helper: __(
 					'Your products and orders stay as they are.',
 					'woocommerce'
@@ -205,8 +193,7 @@ const Actions = ( {
 
 export const PurpleCard = ( props: PurpleCardProps ) => {
 	const { state } = props;
-	const copy = getCopy( state );
-	const showBenefits = state === 'default' || state === 'installing';
+	const copy = getStatusCopy( state );
 
 	return (
 		<ThemeCard
@@ -223,15 +210,18 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 		>
 			<Badge intent={ copy.badgeIntent }>{ copy.badge }</Badge>
 			<Text variant="heading-xl" render={ <h2 /> }>
-				{ copy.title }
+				{ __( 'Built by WooCommerce, for your store', 'woocommerce' ) }
 			</Text>
 			<Text
 				className="purple-cys-theme-card__description"
 				render={ <p /> }
 			>
-				{ copy.description }
+				{ __(
+					'The Purple theme gives your shop, product, cart and checkout pages a polished design from day one, so you can focus on your products.',
+					'woocommerce'
+				) }
 			</Text>
-			{ showBenefits && <Benefits /> }
+			<Benefits />
 			{ state === 'error' && (
 				<Notice.Root
 					intent="error"
