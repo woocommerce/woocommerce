@@ -137,7 +137,6 @@ class WCAdminHelper {
 			'cart'        => wc_get_page_id( 'cart' ),
 			'checkout'    => wc_get_page_id( 'checkout' ),
 			'terms'       => wc_terms_and_conditions_page_id(),
-			'coming_soon' => wc_get_page_id( 'coming_soon' ),
 		);
 
 		/**
