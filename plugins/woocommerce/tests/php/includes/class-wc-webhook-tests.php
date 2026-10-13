@@ -461,4 +461,48 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox customer.deleted accepts users of any role, and rejects user IDs that don't exist.
+	 */
+	public function test_is_valid_user_action_accepts_any_role(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$customer_id   = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$webhook  = new WC_Webhook();
+		$is_valid = function ( $arg ) {
+			return $this->is_valid_user_action( $arg );
+		};
+
+		$this->assertTrue( $is_valid->call( $webhook, $subscriber_id ) );
+		$this->assertTrue( $is_valid->call( $webhook, $customer_id ) );
+		$this->assertFalse( $is_valid->call( $webhook, PHP_INT_MAX ) );
+	}
+
+	/**
+	 * @testdox customer.deleted listens to users being removed from a site, which is how multisite deletes users.
+	 */
+	public function test_customer_deleted_topic_includes_remove_user_from_blog(): void {
+		$topic_hooks = WC_Webhook::get_default_topic_hooks();
+
+		$this->assertContains( 'remove_user_from_blog', $topic_hooks['customer.deleted'] );
+	}
+
+	/**
+	 * @testdox Only users removed from the webhook site trigger it, including when the site ID is omitted.
+	 */
+	public function test_process_user_removed_from_blog_only_processes_the_webhook_site(): void {
+		$webhook = $this->getMockBuilder( WC_Webhook::class )->onlyMethods( array( 'process' ) )->getMock();
+		$webhook->set_topic( 'customer.deleted' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->enqueue();
+
+		$webhook->expects( $this->exactly( 2 ) )->method( 'process' )->with( 123 );
+
+		$webhook->process_user_removed_from_blog( 123, get_current_blog_id() + 1 );
+		$webhook->process_user_removed_from_blog( 123, get_current_blog_id() );
+		$webhook->process_user_removed_from_blog( 123, 0 );
+
+		remove_all_actions( 'remove_user_from_blog' );
+		remove_all_actions( 'delete_user' );
+	}
 }
