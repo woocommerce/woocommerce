@@ -140,9 +140,9 @@ class ProductSaleBadge extends AbstractBlock {
 			&& ! isset( $block->context['isDescendantOfGroupedProductSelector'] );
 		$interactive_attributes = '';
 		if ( $is_interactive ) {
-			wp_enqueue_script_module( 'woocommerce/product-elements' );
+			wp_enqueue_script_module( 'woocommerce/product-sale-badge' );
 			wp_interactivity_config(
-				'woocommerce/product-elements',
+				'woocommerce/product-sale-badge',
 				array(
 					/* translators: %s: discount percentage. %% is the percent sign. */
 					'saleBadgePercentageTemplate'   => sprintf( __( '%s%%', 'woocommerce' ), '%s' ),
@@ -151,7 +151,7 @@ class ProductSaleBadge extends AbstractBlock {
 				)
 			);
 			wp_interactivity_state(
-				'woocommerce/product-elements',
+				'woocommerce/product-sale-badge',
 				array(
 					'saleBadgeText'             => static function () {
 						return wp_interactivity_get_context()['saleBadgeText'];
@@ -162,7 +162,7 @@ class ProductSaleBadge extends AbstractBlock {
 					'isSaleBadgeHidden'         => false,
 				)
 			);
-			$interactive_attributes = ' data-wp-interactive="woocommerce/product-elements" data-wp-bind--hidden="state.isSaleBadgeHidden" aria-live="polite" aria-atomic="true" ' . wp_interactivity_data_wp_context(
+			$interactive_attributes = ' data-wp-interactive="woocommerce/product-sale-badge" data-wp-bind--hidden="state.isSaleBadgeHidden" aria-live="polite" aria-atomic="true" ' . wp_interactivity_data_wp_context(
 				array(
 					'saleBadgeText'             => $sale_text,
 					'saleBadgeScreenReaderText' => $screen_reader_text,

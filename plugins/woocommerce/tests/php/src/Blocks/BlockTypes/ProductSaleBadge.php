@@ -306,6 +306,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$html   = new \WP_HTML_Tag_Processor( $markup );
 		$html->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-sale-badge' ) );
 		$context = json_decode( $html->get_attribute( 'data-wp-context' ), true );
+		$this->assertSame( 'woocommerce/product-sale-badge', $html->get_attribute( 'data-wp-interactive' ) );
 		$this->assertSame( 'state.isSaleBadgeHidden', $html->get_attribute( 'data-wp-bind--hidden' ) );
 		$this->assertSame( 'Up to 50%', $context['saleBadgeText'] );
 		$this->assertSame( 'percentage', $context['badgeContent'] );
