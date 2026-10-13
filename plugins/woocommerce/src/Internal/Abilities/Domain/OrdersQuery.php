@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -189,10 +190,15 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'status'             => array(
-					'type'        => 'string',
-					'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
-					'enum'        => self::get_allowed_order_status_slugs(),
+				'status'             => AbilityExtensions::add_descriptions(
+					array(
+						'type'        => 'string',
+						'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
+						'enum'        => self::get_allowed_order_status_slugs(),
+					),
+					'order',
+					'status',
+					'input'
 				),
 				'customer_id'        => array(
 					'type'        => 'integer',

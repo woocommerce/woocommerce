@@ -161,9 +161,14 @@ trait ProductAbilityTrait {
 				'type'        => 'string',
 				'description' => __( 'Short product description content. Safe HTML is allowed.', 'woocommerce' ),
 			),
-			'status'            => array(
-				'type' => 'string',
-				'enum' => self::get_product_mutation_status_slugs(),
+			'status'            => AbilityExtensions::add_descriptions(
+				array(
+					'type' => 'string',
+					'enum' => self::get_product_mutation_status_slugs(),
+				),
+				'product',
+				'status',
+				'input'
 			),
 			'manage_stock'      => array( 'type' => 'boolean' ),
 			'stock_quantity'    => array(
@@ -836,14 +841,24 @@ trait ProductAbilityTrait {
 						'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
 						'format'      => 'uri',
 					),
-					'type'              => array(
-						'type'        => 'string',
-						'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
-						'enum'        => array_keys( wc_get_product_types() ),
+					'type'              => AbilityExtensions::add_descriptions(
+						array(
+							'type'        => 'string',
+							'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
+							'enum'        => array_keys( wc_get_product_types() ),
+						),
+						'product',
+						'type',
+						'output'
 					),
-					'status'            => array(
-						'type' => 'string',
-						'enum' => self::get_product_output_status_slugs(),
+					'status'            => AbilityExtensions::add_descriptions(
+						array(
+							'type' => 'string',
+							'enum' => self::get_product_output_status_slugs(),
+						),
+						'product',
+						'status',
+						'output'
 					),
 					'sku'               => array( 'type' => 'string' ),
 					'currency'          => array(

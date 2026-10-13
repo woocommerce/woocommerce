@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -176,9 +177,14 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
-				'status'             => array(
-					'type' => 'string',
-					'enum' => self::get_product_query_status_slugs(),
+				'status'             => AbilityExtensions::add_descriptions(
+					array(
+						'type' => 'string',
+						'enum' => self::get_product_query_status_slugs(),
+					),
+					'product',
+					'status',
+					'input'
 				),
 				'product_type_alias' => array(
 					'type'        => 'string',

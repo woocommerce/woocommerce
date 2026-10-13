@@ -253,6 +253,136 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add descriptions to the fields they target, and leave out a value that a field does not accept.
+	 */
+	public function test_descriptions_follow_their_field_value_and_context(): void {
+		$add_status = static function ( array $statuses ): array {
+			$statuses['wc-test-paused'] = 'Paused';
+			return $statuses;
+		};
+		$describe   = static function (): void {
+			$entries = array(
+				array( 'order', 'status', 'test-paused', null, 'Billing is paused.' ),
+				array( 'order', 'status', 'test-missing', null, 'Not on this store.' ),
+				array( 'order', 'status', null, 'input', 'Paused orders wait for the customer.' ),
+				array( 'product', 'type', 'simple', null, 'One product.' ),
+			);
+			foreach ( $entries as list( $resource, $field, $value, $context, $description ) ) {
+				AbilityExtensions::describe(
+					array_filter(
+						array(
+							'resource'    => $resource,
+							'field'       => $field,
+							'value'       => $value,
+							'context'     => $context,
+							'description' => $description,
+						)
+					)
+				);
+			}
+		};
+		add_filter( 'wc_order_statuses', $add_status );
+		add_action( 'woocommerce_ability_extensions_init', $describe );
+
+		$query  = $this->get_ability( 'woocommerce/orders-query' );
+		$update = $this->get_ability( 'woocommerce/order-update-status' );
+		$type   = $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['type'];
+
+		remove_filter( 'wc_order_statuses', $add_status );
+		remove_action( 'woocommerce_ability_extensions_init', $describe );
+		$this->assertSame( 'Filter by order status slug without the wc- prefix. test-paused: Billing is paused. Paused orders wait for the customer.', $query['input_schema']['properties']['status']['description'] );
+		$this->assertSame( 'Order status slug without the wc- prefix. test-paused: Billing is paused. Paused orders wait for the customer.', $update['input_schema']['properties']['status']['description'] );
+		$this->assertSame( 'test-paused: Billing is paused.', $query['output_schema']['properties']['orders']['items']['properties']['status']['description'] );
+		$this->assertStringEndsWith( 'or variable. simple: One product.', $type['description'] );
+	}
+
+	/**
+	 * @testdox Should describe any value of a field that has no enum.
+	 */
+	public function test_a_value_description_applies_to_a_field_without_an_enum(): void {
+		$describe = static function (): void {
+			AbilityExtensions::describe(
+				array(
+					'resource'    => 'order',
+					'field'       => 'payment_method',
+					'value'       => 'test_gateway',
+					'description' => 'Test <b>gateway</b>.',
+				)
+			);
+		};
+		add_action( 'woocommerce_ability_extensions_init', $describe );
+		AbilitiesLoader::init_extensions();
+		remove_action( 'woocommerce_ability_extensions_init', $describe );
+
+		$property = AbilityExtensions::add_descriptions( array( 'type' => 'string' ), 'order', 'payment_method', 'output' );
+
+		$this->assertSame( 'test_gateway: Test gateway.', $property['description'] );
+	}
+
+	/**
+	 * @testdox Should refuse an invalid, duplicate or late description, and keep the first one.
+	 */
+	public function test_invalid_duplicate_and_late_descriptions_are_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::describe' );
+		$describe = static function (): void {
+			$valid = array(
+				'resource'    => 'order',
+				'field'       => 'status',
+				'value'       => 'pending',
+				'context'     => 'output',
+				'description' => 'First.',
+			);
+			AbilityExtensions::describe( $valid );
+			AbilityExtensions::describe( array_merge( $valid, array( 'context' => null ) ) );
+			AbilityExtensions::describe( array_merge( $valid, array( 'resource' => 'customer' ) ) );
+			AbilityExtensions::describe( array_merge( $valid, array( 'context' => 'both' ) ) );
+			AbilityExtensions::describe( array_merge( $valid, array( 'value' => '' ) ) );
+			AbilityExtensions::describe(
+				array_merge(
+					$valid,
+					array(
+						'value'       => 'processing',
+						'description' => str_repeat( 'a', 301 ),
+					)
+				)
+			);
+		};
+		add_action( 'woocommerce_ability_extensions_init', $describe );
+
+		$this->get_output_schema( 'woocommerce/orders-query' );
+		AbilityExtensions::describe(
+			array(
+				'resource'    => 'order',
+				'field'       => 'status',
+				'value'       => 'completed',
+				'description' => 'Late.',
+			)
+		);
+		$enum = array( 'enum' => array( 'pending', 'processing', 'completed' ) );
+
+		remove_action( 'woocommerce_ability_extensions_init', $describe );
+		$this->assertSame( 'pending: First.', AbilityExtensions::add_descriptions( $enum, 'order', 'status', 'output' )['description'] );
+		$this->assertSame( $enum, AbilityExtensions::add_descriptions( $enum, 'order', 'status', 'input' ) );
+	}
+
+	/**
+	 * @testdox Should leave a field unchanged when the feature is off.
+	 */
+	public function test_descriptions_do_nothing_with_the_feature_off(): void {
+		AbilityExtensions::describe(
+			array(
+				'resource'    => 'order',
+				'field'       => 'status',
+				'description' => 'Note.',
+			)
+		);
+		$this->set_feature( false );
+		$property = array( 'type' => 'string' );
+
+		$this->assertSame( $property, AbilityExtensions::add_descriptions( $property, 'order', 'status', 'input' ) );
+	}
+
+	/**
 	 * @testdox Should fire woocommerce_ability_extensions_init one time, before the abilities build their schemas.
 	 */
 	public function test_init_action_fires_once_before_the_schemas(): void {
@@ -937,7 +1067,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported' ) as $property ) {
+		foreach ( array( 'fields', 'descriptions', 'reported' ) as $property ) {
 			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

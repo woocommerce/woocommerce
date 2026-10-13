@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add AbilityExtensions::describe() to the experimental ability contracts feature. With it on, extensions can describe a field of a Core ability, or a value that they add to it, such as an order status, and Core adds the text to the field description.

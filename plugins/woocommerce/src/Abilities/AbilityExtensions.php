@@ -35,6 +35,19 @@ class AbilityExtensions {
 	private static array $fields = array();
 
 	/**
+	 * Longest description that describe() accepts, in characters.
+	 */
+	private const MAX_DESCRIPTION_LENGTH = 300;
+
+	/**
+	 * Descriptions keyed by resource, then field. Each entry has a `value`, which is null
+	 * for a note about the field, a list of `contexts`, and a `description`.
+	 *
+	 * @var array<string, array<string, array<int, array{value: ?string, contexts: string[], description: string}>>>
+	 */
+	private static array $descriptions = array();
+
+	/**
 	 * Registered resources, keyed by resource name. Core's resources are registered from the start.
 	 *
 	 * @var array<string, bool>
@@ -137,6 +150,116 @@ class AbilityExtensions {
 		}
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+	}
+
+	/**
+	 * Describe a field of a resource, or one value of it, for agents.
+	 *
+	 * Use it for a value that an extension adds through WooCommerce's filters,
+	 * such as an order status from `wc_order_statuses`, or for a change that an
+	 * extension makes to how a field behaves. An ability adds the description to
+	 * the field's `description`. A value description is left out of a field whose
+	 * `enum` does not list the value, so a value that a field does not accept adds nothing.
+	 *
+	 * Call it inside the `woocommerce_ability_extensions_init` action. A call after that action is refused.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Description arguments.
+	 *
+	 *     @type string $resource    Resource that an ability formats, for example `product` or `order`.
+	 *     @type string $field       Name of the field in the ability schema, for example `status` or `search`.
+	 *     @type string $value       Optional. Value of the field, for example `pending-cancel`. Without it,
+	 *                               the description is about the field.
+	 *     @type string $context     Optional. `input` or `output`. Without it, the description is added to both.
+	 *     @type string $description Plain text of up to 300 characters, such as one sentence.
+	 * }
+	 */
+	public static function describe( array $args ): void {
+		if ( did_action( 'woocommerce_ability_extensions_init' ) && ! doing_action( 'woocommerce_ability_extensions_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, 'Add a description inside the woocommerce_ability_extensions_init action, before the abilities build their schemas.', '11.3.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'field' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
+				return;
+			}
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" resource is not registered. Call AbilityExtensions::register_resource() first.', $args['resource'] ), '11.3.0' );
+			return;
+		}
+		$value = $args['value'] ?? null;
+		if ( null !== $value && ( ! is_string( $value ) || '' === $value ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "value" argument must be a non-empty string.', '11.3.0' );
+			return;
+		}
+		$context = $args['context'] ?? null;
+		if ( null !== $context && ! in_array( $context, array( 'input', 'output' ), true ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "context" argument must be "input" or "output".', '11.3.0' );
+			return;
+		}
+		$description = is_string( $args['description'] ?? null ) ? trim( wp_strip_all_tags( $args['description'] ) ) : '';
+		if ( '' === $description || mb_strlen( $description ) > self::MAX_DESCRIPTION_LENGTH ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "description" argument must be plain text of 1 to %d characters.', self::MAX_DESCRIPTION_LENGTH ), '11.3.0' );
+			return;
+		}
+
+		$contexts = null === $context ? array( 'input', 'output' ) : array( $context );
+		foreach ( self::$descriptions[ $args['resource'] ][ $args['field'] ] ?? array() as $entry ) {
+			if ( $entry['value'] === $value && ! empty( array_intersect( $entry['contexts'], $contexts ) ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" field of "%s" already has a description for this value and context.', $args['field'], $args['resource'] ), '11.3.0' );
+				return;
+			}
+		}
+
+		self::$descriptions[ $args['resource'] ][ $args['field'] ][] = array(
+			'value'       => $value,
+			'contexts'    => $contexts,
+			'description' => $description,
+		);
+	}
+
+	/**
+	 * Add the descriptions of a field to its schema when the feature is on.
+	 * A value description is added as `value: description`, and only when the
+	 * field has no `enum`, or its `enum` or the `enum` of its items lists the
+	 * value. Call it after the `woocommerce_ability_extensions_init` action,
+	 * when the ability builds its schema.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array<string, mixed> $property      Schema of the field.
+	 * @param string               $resource_name Resource.
+	 * @param string               $field         Name of the field in the ability schema.
+	 * @param string               $context       `input` for an input schema, or `output` for an output schema.
+	 * @return array<string, mixed>
+	 */
+	public static function add_descriptions( array $property, string $resource_name, string $field, string $context ): array {
+		if ( ! AbilityContracts::is_enabled() || empty( self::$descriptions[ $resource_name ][ $field ] ) ) {
+			return $property;
+		}
+
+		$enum  = $property['enum'] ?? $property['items']['enum'] ?? null;
+		$lines = array();
+		foreach ( self::$descriptions[ $resource_name ][ $field ] as $entry ) {
+			if ( ! in_array( $context, $entry['contexts'], true ) ) {
+				continue;
+			}
+			if ( null === $entry['value'] ) {
+				$lines[] = $entry['description'];
+			} elseif ( null === $enum || in_array( $entry['value'], $enum, true ) ) {
+				$lines[] = sprintf( '%s: %s', $entry['value'], $entry['description'] );
+			}
+		}
+		if ( empty( $lines ) ) {
+			return $property;
+		}
+
+		$property['description'] = trim( ( $property['description'] ?? '' ) . ' ' . implode( ' ', $lines ) );
+		return $property;
 	}
 
 	/**

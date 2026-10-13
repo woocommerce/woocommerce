@@ -77,9 +77,14 @@ trait OrderAbilityTrait {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                   => array( 'type' => 'integer' ),
-				'status'               => array(
-					'type' => 'string',
-					'enum' => self::get_order_output_status_slugs(),
+				'status'               => AbilityExtensions::add_descriptions(
+					array(
+						'type' => 'string',
+						'enum' => self::get_order_output_status_slugs(),
+					),
+					'order',
+					'status',
+					'output'
 				),
 				'currency'             => array(
 					'type' => 'string',
