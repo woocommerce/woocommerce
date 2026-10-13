@@ -83,7 +83,9 @@ describe( 'ProductRecommendations', () => {
 		);
 
 		await userEvent.click(
-			screen.getByRole( 'link', { name: 'Browse all extensions' } )
+			screen.getByRole( 'link', {
+				name: 'Visit the WooCommerce Marketplace',
+			} )
 		);
 		expect( recordEvent ).toHaveBeenLastCalledWith(
 			'marketplace_suggestion_clicked',

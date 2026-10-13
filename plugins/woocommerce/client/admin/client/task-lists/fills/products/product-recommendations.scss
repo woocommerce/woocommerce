@@ -2,12 +2,17 @@
 .woocommerce-product-recommendations {
 	width: 100%;
 	max-width: 550px;
-	margin-block-start: 40px;
+	margin-block-start: 64px;
 
 	.woocommerce-product-recommendations__intro {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 16px;
+		text-align: center;
+
+		> * {
+			margin: 0;
+		}
 	}
 
 	// Secondary text on the page's gray background; $gray-700 drops below 4.5:1 there.
@@ -16,7 +21,7 @@
 	}
 
 	.woocommerce-products-stack {
-		margin-block-start: 12px;
+		margin-block-start: 32px;
 	}
 
 	.woocommerce-product-recommendations__icon {
@@ -40,7 +45,7 @@
 
 	.woocommerce-product-recommendations__browse-all {
 		display: block;
-		margin-block-start: 16px;
+		margin-block-start: 24px;
 		font-size: 13px;
 		line-height: 20px;
 		text-align: center;

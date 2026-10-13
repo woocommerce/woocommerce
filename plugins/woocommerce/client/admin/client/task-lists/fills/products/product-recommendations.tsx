@@ -56,13 +56,12 @@ const getTrackProps = ( item: ProductRecommendation, target: string ) => ( {
 const SectionIntro = () => (
 	<div className="woocommerce-product-recommendations__intro">
 		<Text
+			variant="title"
 			as="h3"
 			id={ HEADING_ID }
-			size={ 14 }
-			weight={ 600 }
-			lineHeight="20px"
+			className="woocommerce-task-products__title"
 		>
-			{ __( 'Other types of products', 'woocommerce' ) }
+			{ __( 'Expand your store', 'woocommerce' ) }
 		</Text>
 		<Text
 			as="p"
@@ -70,7 +69,7 @@ const SectionIntro = () => (
 			className="woocommerce-product-recommendations__description"
 		>
 			{ __(
-				'Add them to your store with extensions from the WooCommerce Marketplace.',
+				'Discover extensions to do more with your store.',
 				'woocommerce'
 			) }
 		</Text>
@@ -90,7 +89,7 @@ const BrowseAllLink = () => (
 		} }
 		message={ __(
 			// translators: {{Link}} is a placeholder for a html element.
-			'{{Link}}Browse all extensions{{/Link}}',
+			'Browse all the extensions. {{Link}}Visit the WooCommerce Marketplace{{/Link}}',
 			'woocommerce'
 		) }
 		eventName="marketplace_suggestion_clicked"
