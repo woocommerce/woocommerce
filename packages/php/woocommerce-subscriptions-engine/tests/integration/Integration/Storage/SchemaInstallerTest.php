@@ -291,10 +291,10 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.9.0 (schedule source width, no cycles due index).
+	 * @testdox The schema version is 2.7.0 (due dispatch).
 	 */
-	public function test_schema_version_is_2_9_0(): void {
-		$this->assertSame( '2.9.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_7_0(): void {
+		$this->assertSame( '2.7.0', SchemaInstaller::get_version() );
 	}
 
 	/**

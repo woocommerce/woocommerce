@@ -50,23 +50,21 @@ final class SchemaInstaller {
 	 *         `inventory_policy` and their indexes; `billing_policy` nullable; an
 	 *         `extension_status (extension_slug, status)` index; new selling_plan_meta
 	 *         table (HPOS-style indexes); pre-freeze, recreate the tables.
-	 * 2.7.0 - contracts `dispatch_claimed_until` (due-dispatch claim); dbDelta adds the
-	 *         nullable column in place.
-	 * 2.8.0 - contracts `schedule_source` defaults to 'subscriptions_engine' (was 'primitive').
-	 * 2.9.0 - contracts `schedule_source` widens to VARCHAR(64) (it holds extension and
-	 *         gateway slugs); cycles drop the `due (kind, status, starts_at_gmt)` index (the
+	 * 2.7.0 - due dispatch: contracts gain a nullable `dispatch_claimed_until` (the
+	 *         due-dispatch claim); contracts `schedule_source` is VARCHAR(64) (it holds
+	 *         extension and gateway slugs) and defaults to 'subscriptions_engine' (was
+	 *         'primitive'); cycles drop the `due (kind, status, starts_at_gmt)` index (the
 	 *         due dispatcher scans contracts, and no cycle read filters on those columns).
-	 *         Bumped so a dev box on an earlier 2.8.0 re-runs the installer: dbDelta widens
-	 *         the column and sets the default in place, but does not drop the index or
-	 *         rename stored 'primitive' rows (which the due scan skips), so pre-freeze,
-	 *         recreate the tables.
+	 *         dbDelta adds the column and widens `schedule_source` in place, but does not
+	 *         drop the index or rename stored 'primitive' rows (which the due scan skips):
+	 *         pre-freeze, recreate the tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.9.0';
+	private const VERSION = '2.7.0';
 
 	/**
 	 * Option key tracking the installed schema version.
