@@ -84,7 +84,7 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 
 ### A critical bug surfaced after the release was marked stable on WordPress.org
 
-See [Rolling back a release](/docs/contribution/releases/rollback) for target-version checks and recovery steps for stores that already updated.
+See [Rolling back a release](/docs/contribution/releases/rollback) for version checks and recovery steps.
 
 If a severe regression or bug is discovered (e.g., checkout failure or unrecoverable data loss):
 
