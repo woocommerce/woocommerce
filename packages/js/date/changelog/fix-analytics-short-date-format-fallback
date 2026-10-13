@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add getShortDateFormat() for the translated date input format, falling back to MM/DD/YYYY when the translation is not a valid Moment.js format.

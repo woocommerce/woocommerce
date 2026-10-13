@@ -389,7 +389,12 @@
 				"template_html",
 				"woocommerce_email_classes",
 				"get_variation_attributes",
-				"get_attribute_taxonomies"
+				"get_attribute_taxonomies",
+				"get_country_locale",
+				"get_address_fields",
+				"return array();",
+				"return [];",
+				"?? null"
 			],
 			"personas": [
 				"regression"
