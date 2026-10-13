@@ -420,7 +420,14 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 			'REST query vars' => array(
 				'REST query vars',
 				function ( self $test ) {
-					$test->go_to( '/?rest_route=/wc/v3/products&per_page=5' );
+					$wp = new WP();
+					$wp->add_query_var( 'rest_route' );
+					$wp->query_vars = array( 'rest_route' => '/wc/store/v1/products' );
+					$test->replace_wp_global( $wp );
+
+					$test->assertContains( 'rest_route', $wp->public_query_vars, 'rest_route should be a public query variable.' );
+					$test->assertSame( array( 'rest_route' => '/wc/store/v1/products' ), $wp->query_vars, 'The request should carry the REST route.' );
+					$test->assertFalse( defined( 'REST_REQUEST' ), 'The arrangement should not serve a REST request.' );
 				},
 			),
 		);
