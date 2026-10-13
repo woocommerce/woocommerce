@@ -1,0 +1,10 @@
+<?php
+/* Scenario context: Public read-only endpoint returns only published product IDs. Scalar filtering, integer normalization, and empty-list early return remain in the shown function. Result ordering is unspecified. */
+add_action( 'wp_ajax_nopriv_wc_catalog_ids', 'wc_catalog_ids' );
+function wc_catalog_ids() {
+    global $wpdb;
+    $ids = isset( $_GET['ids'] ) && is_array( $_GET['ids'] ) ? array_filter( $_GET['ids'], 'is_scalar' ) : array();
+    $ids = array_values( array_unique( array_map( 'absint', $ids ) ) );
+    if ( ! $ids ) { wp_send_json( array() ); return; }
+    wp_send_json( $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type='product' AND post_status='publish' AND ID IN (" . implode( ',', $ids ) . ')' ) );
+}

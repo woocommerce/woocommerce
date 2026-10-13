@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G03A",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "numeric"
+			}
+		},
+		{
+			"id": "G03B",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "zero"
+			}
+		},
+		{
+			"id": "G03C",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G03D",
+			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+			"before": {
+				"file": "fixtures/G03D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G03D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

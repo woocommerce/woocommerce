@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G04A",
+			"path": "plugins/woocommerce/includes/class-wc-public-php-api-bc.php",
+			"before": {
+				"file": "fixtures/G04A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G04A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "get_entry_count"
+			}
+		},
+		{
+			"id": "G04B",
+			"path": "plugins/woocommerce/includes/class-wc-public-php-api-bc.php",
+			"before": {
+				"file": "fixtures/G04B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G04B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "csv"
+			}
+		},
+		{
+			"id": "G04C",
+			"path": "plugins/woocommerce/includes/class-wc-public-php-api-bc.php",
+			"before": {
+				"file": "fixtures/G04C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G04C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G04D",
+			"path": "plugins/woocommerce/includes/class-wc-public-php-api-bc.php",
+			"before": {
+				"file": "fixtures/G04D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G04D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G25A",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "get_row"
+			}
+		},
+		{
+			"id": "G25B",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "draft"
+			}
+		},
+		{
+			"id": "G25C",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G25D",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

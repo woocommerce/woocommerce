@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G32A",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32A/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32A/after.css"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "vertical"
+			}
+		},
+		{
+			"id": "G32B",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32B/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32B/after.css"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "selector"
+			}
+		},
+		{
+			"id": "G32C",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32C/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32C/after.css"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G32D",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32D/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32D/after.css"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G19A",
+			"path": "plugins/woocommerce/includes/wc-order-functions.php",
+			"before": {
+				"file": "fixtures/G19A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G19A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "recalculat"
+			}
+		},
+		{
+			"id": "G19B",
+			"path": "plugins/woocommerce/includes/class-wc-cart-totals.php",
+			"before": {
+				"file": "fixtures/G19B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G19B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "exempt"
+			}
+		},
+		{
+			"id": "G19C-v2",
+			"path": "plugins/woocommerce/includes/wc-order-functions.php",
+			"before": {
+				"file": "fixtures/G19C-v2/before.php"
+			},
+			"after": {
+				"file": "fixtures/G19C-v2/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G19D",
+			"path": "plugins/woocommerce/includes/wc-order-functions.php",
+			"before": {
+				"file": "fixtures/G19D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G19D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G06A",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "unique"
+			}
+		},
+		{
+			"id": "G06B",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "recurring"
+			}
+		},
+		{
+			"id": "G06C",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G06D",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

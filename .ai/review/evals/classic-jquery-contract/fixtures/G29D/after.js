@@ -1,0 +1,2 @@
+/* Scenario context: Released event signature is (event,fragments,cartHash,$button); documentation permits additional trailing arguments. Consumers read the first three payload arguments; no code relies on exact arguments.length. This change adds documented optional metadata after the button. */
+function notifyAddedToCart( fragments, cartHash, button ) { jQuery( document.body ).trigger( 'added_to_cart', [ fragments, cartHash, button, { source: 'classic' } ] ); }

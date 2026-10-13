@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G29A",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "prefilter"
+			}
+		},
+		{
+			"id": "G29B",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "document.body"
+			}
+		},
+		{
+			"id": "G29C",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G29D",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

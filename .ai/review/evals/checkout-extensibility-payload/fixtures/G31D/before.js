@@ -1,0 +1,2 @@
+/* Scenario context: Published extension schema permits only finite numbers or numeric decimal strings; namespace always exists. Booleans, objects, and arrays have never been supported. This adds rejection of unsupported types while keeping both documented types. */
+export function extensionAmount( extensions ) { const raw = extensions['sample-shipping'].amount; const value = Number( raw ); return Number.isFinite( value ) ? value : 0; }

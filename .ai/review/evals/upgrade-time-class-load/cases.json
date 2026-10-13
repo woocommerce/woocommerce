@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G05A",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "classmap"
+			}
+		},
+		{
+			"id": "G05B",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "classmap"
+			}
+		},
+		{
+			"id": "G05C",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G05D",
+			"path": "plugins/woocommerce/includes/class-wc-upgrade-time-class-load.php",
+			"before": {
+				"file": "fixtures/G05D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G05D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

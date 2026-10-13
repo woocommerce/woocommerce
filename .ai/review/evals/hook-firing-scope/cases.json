@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G02A",
+			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
+			"before": {
+				"file": "fixtures/G02A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G02A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "existing customer"
+			}
+		},
+		{
+			"id": "G02B",
+			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
+			"before": {
+				"file": "fixtures/G02B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G02B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "delete_items"
+			}
+		},
+		{
+			"id": "G02C",
+			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
+			"before": {
+				"file": "fixtures/G02C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G02C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G02D",
+			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
+			"before": {
+				"file": "fixtures/G02D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G02D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

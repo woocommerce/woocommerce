@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G28A",
+			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
+			"before": {
+				"file": "fixtures/G28A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G28A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "wc-tokenization-form"
+			}
+		},
+		{
+			"id": "G28B",
+			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
+			"before": {
+				"file": "fixtures/G28B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G28B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "wc-tokenization-form"
+			}
+		},
+		{
+			"id": "G28C",
+			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
+			"before": {
+				"file": "fixtures/G28C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G28C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G28D",
+			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
+			"before": {
+				"file": "fixtures/G28D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G28D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

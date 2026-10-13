@@ -1,0 +1,2 @@
+/* Scenario context: Classic checkout uses jQuery defaults. Extension prefilters inspect originalOptions.data as an object. The supported build toolchain compiles const/object shorthand, and values are plain strings. */
+function updateCheckout( address ) { const data = { security: wc_checkout_params.update_order_review_nonce, country: address.country }; return jQuery.ajax( { url: wc_checkout_params.wc_ajax_url, type: 'POST', data } ); }

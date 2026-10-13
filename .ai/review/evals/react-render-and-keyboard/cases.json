@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G34A",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/payment-list.jsx",
+			"before": {
+				"file": "fixtures/G34A/before.jsx"
+			},
+			"after": {
+				"file": "fixtures/G34A/after.jsx"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "reorder"
+			}
+		},
+		{
+			"id": "G34B",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/payment-list.jsx",
+			"before": {
+				"file": "fixtures/G34B/before.jsx"
+			},
+			"after": {
+				"file": "fixtures/G34B/after.jsx"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "keyboard"
+			}
+		},
+		{
+			"id": "G34C",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/payment-list.jsx",
+			"before": {
+				"file": "fixtures/G34C/before.jsx"
+			},
+			"after": {
+				"file": "fixtures/G34C/after.jsx"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G34D",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/payment-list.jsx",
+			"before": {
+				"file": "fixtures/G34D/before.jsx"
+			},
+			"after": {
+				"file": "fixtures/G34D/after.jsx"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

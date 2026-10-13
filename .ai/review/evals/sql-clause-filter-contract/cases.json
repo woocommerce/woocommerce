@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G21A",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "wc_product_meta_lookup"
+			}
+		},
+		{
+			"id": "G21B",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "region"
+			}
+		},
+		{
+			"id": "G21C",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G21D",
+			"path": "plugins/woocommerce/includes/class-wc-eval-21.php",
+			"before": {
+				"file": "fixtures/G21D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G21D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

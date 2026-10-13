@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G11A",
+			"path": "plugins/woocommerce/includes/class-wc-install.php",
+			"before": {
+				"file": "fixtures/G11A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G11A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "11.0.0"
+			}
+		},
+		{
+			"id": "G11B",
+			"path": "plugins/woocommerce/includes/wc-update-functions.php",
+			"before": {
+				"file": "fixtures/G11B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G11B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "orphan"
+			}
+		},
+		{
+			"id": "G11C",
+			"path": "plugins/woocommerce/includes/wc-update-functions.php",
+			"before": {
+				"file": "fixtures/G11C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G11C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G11D",
+			"path": "plugins/woocommerce/includes/class-wc-install.php",
+			"before": {
+				"file": "fixtures/G11D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G11D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

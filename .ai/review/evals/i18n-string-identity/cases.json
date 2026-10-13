@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G35A",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "translation"
+			}
+		},
+		{
+			"id": "G35B",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "domain"
+			}
+		},
+		{
+			"id": "G35C",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G35D",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"before": {
+				"file": "fixtures/G35D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G35D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G31A",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
+			"before": {
+				"file": "fixtures/G31A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G31A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "numeric-string"
+			}
+		},
+		{
+			"id": "G31B",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
+			"before": {
+				"file": "fixtures/G31B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G31B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "hidden"
+			}
+		},
+		{
+			"id": "G31C",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
+			"before": {
+				"file": "fixtures/G31C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G31C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G31D",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
+			"before": {
+				"file": "fixtures/G31D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G31D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

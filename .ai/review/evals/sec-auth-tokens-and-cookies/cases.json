@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G40A",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "loose"
+			}
+		},
+		{
+			"id": "G40B",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "HMAC"
+			}
+		},
+		{
+			"id": "G40C",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G40D",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G39A",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"file": "fixtures/G39A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G39A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "XSS"
+			}
+		},
+		{
+			"id": "G39B",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"file": "fixtures/G39B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G39B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "XSS"
+			}
+		},
+		{
+			"id": "G39C",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"file": "fixtures/G39C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G39C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G39D",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/customer-note.js",
+			"before": {
+				"file": "fixtures/G39D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G39D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G37A",
+			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
+			"before": {
+				"file": "fixtures/G37A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G37A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "manage_woocommerce"
+			}
+		},
+		{
+			"id": "G37B",
+			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
+			"before": {
+				"file": "fixtures/G37B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G37B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "nonce"
+			}
+		},
+		{
+			"id": "G37C",
+			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
+			"before": {
+				"file": "fixtures/G37C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G37C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G37D",
+			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
+			"before": {
+				"file": "fixtures/G37D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G37D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

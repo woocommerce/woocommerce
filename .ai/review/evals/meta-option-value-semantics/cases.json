@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G09A",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "inherit"
+			}
+		},
+		{
+			"id": "G09B",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "url"
+			}
+		},
+		{
+			"id": "G09C",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G09D",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

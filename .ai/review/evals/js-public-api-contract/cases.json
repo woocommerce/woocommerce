@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G30A",
+			"path": "packages/js/currency/src/index.js",
+			"before": {
+				"file": "fixtures/G30A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G30A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "getCurrencySymbol"
+			}
+		},
+		{
+			"id": "G30B",
+			"path": "packages/js/currency/src/index.js",
+			"before": {
+				"file": "fixtures/G30B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G30B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "zero"
+			}
+		},
+		{
+			"id": "G30C",
+			"path": "packages/js/currency/src/index.js",
+			"before": {
+				"file": "fixtures/G30C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G30C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G30D",
+			"path": "packages/js/currency/src/index.js",
+			"before": {
+				"file": "fixtures/G30D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G30D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

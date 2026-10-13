@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G01A",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "wc-"
+			}
+		},
+		{
+			"id": "G01B",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "status"
+			}
+		},
+		{
+			"id": "G01C",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G01D",
+			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+			"before": {
+				"file": "fixtures/G01D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G01D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

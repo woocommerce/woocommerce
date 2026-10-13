@@ -1,0 +1,2 @@
+/* Scenario context: Checkout initializes its cart view with readCartCache(window.localStorage) before the first render. Older release or browser extensions can leave wc-cart value "{broken"; this is a cache, not authoritative cart state. Caller has no catch; empty fallback lets the server refresh populate items. */
+export function readCartCache( storage ) { try { const value = JSON.parse( storage.getItem( 'wc-cart' ) ); return value && Array.isArray( value.items ) ? value.items : []; } catch ( error ) { return []; } }

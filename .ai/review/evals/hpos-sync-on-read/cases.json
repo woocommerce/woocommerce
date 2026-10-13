@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G10A",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "object"
+			}
+		},
+		{
+			"id": "G10B",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "placeholder"
+			}
+		},
+		{
+			"id": "G10C",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G10D",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

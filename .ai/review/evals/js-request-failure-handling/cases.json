@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G33A",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "manual"
+			}
+		},
+		{
+			"id": "G33B",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "malformed"
+			}
+		},
+		{
+			"id": "G33C",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G33D",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
+			"before": {
+				"file": "fixtures/G33D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G33D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

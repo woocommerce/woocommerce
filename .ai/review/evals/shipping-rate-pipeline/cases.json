@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G20A",
+			"path": "plugins/woocommerce/includes/class-wc-shipping.php",
+			"before": {
+				"file": "fixtures/G20A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G20A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "local_pickup"
+			}
+		},
+		{
+			"id": "G20B",
+			"path": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
+			"before": {
+				"file": "fixtures/G20B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G20B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "integer"
+			}
+		},
+		{
+			"id": "G20C",
+			"path": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
+			"before": {
+				"file": "fixtures/G20C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G20C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G20D",
+			"path": "plugins/woocommerce/includes/class-wc-shipping.php",
+			"before": {
+				"file": "fixtures/G20D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G20D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

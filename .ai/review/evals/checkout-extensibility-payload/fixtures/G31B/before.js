@@ -1,0 +1,2 @@
+/* Scenario context: Released additional-fields registration accepts hidden=true or hidden=1. For these two values server excludes fields using empty($field["hidden"]); false and 0 remain visible. Active extension registers hidden=1 for its internal reference field. The client renders every returned field. */
+export function visibleAdditionalFields( additionalFields ) { return additionalFields.filter( ( field ) => ! field.hidden ); }

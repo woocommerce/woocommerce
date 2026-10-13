@@ -1,0 +1,7 @@
+<?php
+/* Scenario context: Public page prints shortcode output as HTML. A visitor supplies entity-encoded notice through the URL. Allowed-HTML sanitizer does not treat &lt;img...&gt; text as an actual tag; decoding afterward can introduce an unsanitized tag. No subsequent sanitizer or restrictive CSP exists. */
+add_shortcode( 'wc_entity_notice', static function() {
+    $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] ) ? wp_unslash( $_GET['notice'] ) : '';
+    $notice = html_entity_decode( $notice, ENT_QUOTES, 'UTF-8' );
+    return '<div class="wc-notice">' . wp_kses_post( $notice ) . '</div>';
+} );

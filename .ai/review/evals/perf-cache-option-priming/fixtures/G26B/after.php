@@ -1,0 +1,3 @@
+<?php
+/* Scenario context: Runs each checkout render across all registered gateway IDs, whose count grows with installed extensions. This fresh store has never saved these gateway settings; no corresponding option rows or notoptions entries exist at request start, and no persistent object cache is active. The settings API autoload default applies only after options are saved. */
+function wc_checkout_gateway_settings( $gateway_ids ) { $keys = array_map( static function( $id ) { return 'woocommerce_' . $id . '_settings'; }, $gateway_ids ); $settings = array(); foreach ( $keys as $key ) { $settings[$key] = get_option( $key, array() ); } return $settings; }

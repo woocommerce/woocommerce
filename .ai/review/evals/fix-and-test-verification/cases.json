@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G24A",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "wc-cancelled"
+			}
+		},
+		{
+			"id": "G24B",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "paged"
+			}
+		},
+		{
+			"id": "G24C",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G24D",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

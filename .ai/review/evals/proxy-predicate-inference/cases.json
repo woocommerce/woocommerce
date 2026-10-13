@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G12A",
+			"path": "plugins/woocommerce/includes/address-editor.php",
+			"before": {
+				"file": "fixtures/G12A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "linked"
+			}
+		},
+		{
+			"id": "G12B",
+			"path": "plugins/woocommerce/includes/receipt-audience.php",
+			"before": {
+				"file": "fixtures/G12B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "guest"
+			}
+		},
+		{
+			"id": "G12C",
+			"path": "plugins/woocommerce/includes/address-editor.php",
+			"before": {
+				"file": "fixtures/G12C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G12D",
+			"path": "plugins/woocommerce/includes/address-editor.php",
+			"before": {
+				"file": "fixtures/G12D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

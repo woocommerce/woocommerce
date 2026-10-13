@@ -1,0 +1,2 @@
+/* Scenario context: Released classic added_to_cart documentation instructs extensions to bind jQuery(document.body).on("added_to_cart", handler). The button is a jQuery button object. Events bubble from body toward document, not from document down to body. */
+function notifyAddedToCart( fragments, cartHash, button ) { jQuery( document ).trigger( 'added_to_cart', [ fragments, cartHash, button ] ); }

@@ -1,0 +1,2 @@
+/* Scenario context: Cart editor and frontend wrappers use horizontal-tb writing mode, including RTL locales. Children stack in normal block flow in this layout. No other rule overrides either margin. Both properties resolve to physical top margin in this supported writing mode. */
+.wc-block-cart .wc-block-cart__main + .wc-block-cart__sidebar { margin-block-start: 24px; }

@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G16A",
+			"path": "plugins/woocommerce/includes/rest-api/controllers/order-items.php",
+			"before": {
+				"file": "fixtures/G16A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G16A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "object"
+			}
+		},
+		{
+			"id": "G16B",
+			"path": "plugins/woocommerce/includes/rest-api/controllers/product-search.php",
+			"before": {
+				"file": "fixtures/G16B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G16B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "entit"
+			}
+		},
+		{
+			"id": "G16C",
+			"path": "plugins/woocommerce/includes/rest-api/controllers/product-search.php",
+			"before": {
+				"file": "fixtures/G16C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G16C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G16D",
+			"path": "plugins/woocommerce/src/StoreApi/Routes/ExperimentalItems.php",
+			"before": {
+				"file": "fixtures/G16D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G16D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

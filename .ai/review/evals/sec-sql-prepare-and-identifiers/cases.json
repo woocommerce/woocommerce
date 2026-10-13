@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G36A",
+			"path": "plugins/woocommerce/includes/class-wc-catalog-probe.php",
+			"before": {
+				"file": "fixtures/G36A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G36A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "quot"
+			}
+		},
+		{
+			"id": "G36B",
+			"path": "plugins/woocommerce/includes/class-wc-catalog-probe.php",
+			"before": {
+				"file": "fixtures/G36B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G36B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "injection"
+			}
+		},
+		{
+			"id": "G36C",
+			"path": "plugins/woocommerce/includes/class-wc-catalog-probe.php",
+			"before": {
+				"file": "fixtures/G36C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G36C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G36D",
+			"path": "plugins/woocommerce/includes/class-wc-catalog-probe.php",
+			"before": {
+				"file": "fixtures/G36D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G36D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
