@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Match the core profiler skip-flow test stub to the actor's new return shape.
