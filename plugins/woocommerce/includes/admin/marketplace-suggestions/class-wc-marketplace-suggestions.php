@@ -215,61 +215,32 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Get feed suggestions for a display context, in feed order, filtered like the legacy marketplace-suggestions.js.
-	 * Drops dismissed suggestions and products that are already active, honours show-if-active, and caps the list at the feed's recommendations-count.
+	 * Get feed suggestions for a display context, filtered like marketplace-suggestions.js: no dismissed ones, no active plugins, capped at the feed's recommendations-count.
 	 *
 	 * @internal
 	 * @since 11.3.0
 	 *
 	 * @param string $context Display context, for example products-list-empty-body.
-	 * @return array[] Raw feed items.
+	 * @return array[] Feed items.
 	 */
 	public static function get_suggestions_for_context( $context ) {
-		$feed = self::get_suggestions_api_data();
-		if ( ! is_array( $feed ) || empty( $feed ) ) {
-			return array();
-		}
-
-		$first = reset( $feed );
-		$count = is_array( $first ) && is_numeric( $first['recommendations-count'] ?? null ) ? (int) $first['recommendations-count'] : 0;
-		$limit = $count > 0 && $count <= 50 ? $count : 5;
-
+		$feed           = self::get_suggestions_api_data();
 		$dismissed      = self::get_dismissed_suggestions();
 		$active_plugins = array_map( 'dirname', (array) get_option( 'active_plugins', array() ) );
-		$suggestions    = array();
 
-		foreach ( $feed as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
+		$suggestions = array_filter(
+			$feed,
+			function ( $item ) use ( $context, $dismissed, $active_plugins ) {
+				return isset( $item['slug'], $item['context'] )
+					&& in_array( $context, (array) $item['context'], true )
+					&& ! in_array( $item['slug'], $dismissed, true )
+					&& ! in_array( $item['product'] ?? '', $active_plugins, true );
 			}
+		);
 
-			$contexts = isset( $item['context'] ) ? (array) $item['context'] : array();
-			if ( ! in_array( $context, $contexts, true ) ) {
-				continue;
-			}
+		$count = (int) ( $feed[0]['recommendations-count'] ?? 5 );
 
-			$slug = isset( $item['slug'] ) && is_scalar( $item['slug'] ) ? (string) $item['slug'] : '';
-			if ( '' === $slug || in_array( $slug, $dismissed, true ) ) {
-				continue;
-			}
-
-			$product = isset( $item['product'] ) && is_scalar( $item['product'] ) ? (string) $item['product'] : '';
-			if ( '' !== $product && in_array( $product, $active_plugins, true ) ) {
-				continue;
-			}
-
-			$show_if_active = isset( $item['show-if-active'] ) ? array_filter( (array) $item['show-if-active'], 'is_string' ) : array();
-			if ( $show_if_active && ! array_intersect( $active_plugins, $show_if_active ) ) {
-				continue;
-			}
-
-			$suggestions[] = $item;
-			if ( count( $suggestions ) >= $limit ) {
-				break;
-			}
-		}
-
-		return $suggestions;
+		return array_slice( array_values( $suggestions ), 0, $count > 0 ? $count : 5 );
 	}
 
 	/**
@@ -292,38 +263,22 @@ class WC_Marketplace_Suggestions {
 			return $settings;
 		}
 
-		$suggestions = array();
-		foreach ( self::get_suggestions_for_context( 'products-list-empty-body' ) as $item ) {
-			$url = isset( $item['url'] ) && is_string( $item['url'] ) ? esc_url_raw( $item['url'] ) : '';
-			if ( '' === $url ) {
-				continue;
-			}
-
-			$suggestions[] = array(
-				'slug'     => (string) $item['slug'],
-				'product'  => self::get_string_field( $item, 'product' ),
-				'title'    => self::get_string_field( $item, 'title' ),
-				'copy'     => self::get_string_field( $item, 'copy' ),
-				'icon'     => esc_url_raw( self::get_string_field( $item, 'icon' ) ),
-				'url'      => $url,
-				'promoted' => self::get_string_field( $item, 'promoted' ),
-			);
-		}
-
-		$settings['productsListEmptySuggestions'] = $suggestions;
+		$settings['productsListEmptySuggestions'] = array_map(
+			function ( $item ) {
+				return array(
+					'slug'     => $item['slug'],
+					'product'  => $item['product'] ?? '',
+					'title'    => $item['title'] ?? '',
+					'copy'     => $item['copy'] ?? '',
+					'icon'     => esc_url_raw( $item['icon'] ?? '' ),
+					'url'      => esc_url_raw( $item['url'] ?? '' ),
+					'promoted' => $item['promoted'] ?? '',
+				);
+			},
+			self::get_suggestions_for_context( 'products-list-empty-body' )
+		);
 
 		return $settings;
-	}
-
-	/**
-	 * Read a scalar field from a feed item as a string, or an empty string when missing or not scalar.
-	 *
-	 * @param array  $item Feed item.
-	 * @param string $key  Field name.
-	 * @return string
-	 */
-	private static function get_string_field( array $item, string $key ): string {
-		return isset( $item[ $key ] ) && is_scalar( $item[ $key ] ) ? (string) $item[ $key ] : '';
 	}
 }
 

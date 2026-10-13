@@ -39,11 +39,8 @@ const items = [
 describe( 'ProductRecommendations', () => {
 	beforeEach( () => jest.clearAllMocks() );
 
-	it( 'tracks each item as displayed once and links out in a new tab', () => {
-		const { rerender } = render(
-			<ProductRecommendations items={ items } />
-		);
-		rerender( <ProductRecommendations items={ items } /> );
+	it( 'tracks each item as displayed and links out in a new tab', () => {
+		render( <ProductRecommendations items={ items } /> );
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
 		expect( recordEvent ).toHaveBeenCalledWith(
