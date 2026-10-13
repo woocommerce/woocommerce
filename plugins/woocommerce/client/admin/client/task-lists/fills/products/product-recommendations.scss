@@ -1,0 +1,48 @@
+// Rows reuse the product type cards from stack.scss.
+.woocommerce-product-recommendations {
+	width: 100%;
+	max-width: 550px;
+	margin-block-start: 40px;
+
+	.woocommerce-product-recommendations__intro {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	// Secondary text on the page's gray background; $gray-700 drops below 4.5:1 there.
+	.woocommerce-product-recommendations__description {
+		color: #50575d;
+	}
+
+	.woocommerce-products-stack {
+		margin-block-start: 12px;
+	}
+
+	.woocommerce-product-recommendations__icon {
+		display: block;
+		width: 40px;
+		height: 40px;
+		border-radius: 4px;
+		object-fit: cover;
+	}
+
+	// Two-line descriptions otherwise run into the external-link icon.
+	.woocommerce-list__item-after {
+		padding-inline-start: 16px;
+	}
+
+	// stack.scss hides the focus ring on cards; keep one on these links.
+	.woocommerce-list__item-inner:focus-visible {
+		outline: 2px solid transparent;
+		box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) var(--wp-admin-theme-color, #007cba);
+	}
+
+	.woocommerce-product-recommendations__browse-all {
+		display: block;
+		margin-block-start: 16px;
+		font-size: 13px;
+		line-height: 20px;
+		text-align: center;
+	}
+}
