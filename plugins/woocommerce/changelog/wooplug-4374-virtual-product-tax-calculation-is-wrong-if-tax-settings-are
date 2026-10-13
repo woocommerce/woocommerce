@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-For a cart with products that do not require shipping and the "Tax based on shipping" setting, fall back to the billing address.
+Calculate tax from the billing address when tax is based on shipping and nothing in the cart needs shipping.

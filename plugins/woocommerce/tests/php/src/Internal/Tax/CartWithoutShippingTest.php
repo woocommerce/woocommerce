@@ -40,6 +40,13 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	private $original_customer;
 
 	/**
+	 * Shipping zone with a flat rate method, so a cart with physical products needs shipping.
+	 *
+	 * @var \WC_Shipping_Zone
+	 */
+	private $shipping_zone;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -56,6 +63,13 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		WC()->customer           = $this->customer;
 
 		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+
+		// WC_Cart::needs_shipping() is false for every cart when no shipping method exists.
+		$this->shipping_zone = new \WC_Shipping_Zone();
+		$this->shipping_zone->set_zone_name( 'Test Zone' );
+		$this->shipping_zone->save();
+		$this->shipping_zone->add_shipping_method( 'flat_rate' );
+		delete_transient( 'wc_shipping_method_count' );
 	}
 
 	/**
@@ -64,6 +78,8 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			WC()->customer = $this->original_customer;
+			$this->shipping_zone->delete( true );
+			delete_transient( 'wc_shipping_method_count' );
 			remove_filter( 'woocommerce_is_checkout', '__return_true' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
 			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
@@ -344,24 +360,27 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_leaves_address_unchanged_when_cart_needs_shipping_filter_forces_shipping(): void {
 		$this->add_product_to_cart( true );
-
-		// A shipping method must exist for WC_Cart::needs_shipping() to apply the filter below.
-		$zone = new \WC_Shipping_Zone();
-		$zone->set_zone_name( 'Test Zone' );
-		$zone->save();
-		$zone->add_shipping_method( 'flat_rate' );
-		delete_transient( 'wc_shipping_method_count' );
-
 		add_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
 		$this->set_checkout_context();
 
-		try {
-			$result = $this->customer->get_taxable_address();
+		$result = $this->customer->get_taxable_address();
 
-			$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A cart forced to need shipping by the woocommerce_cart_needs_shipping filter should use the configured shipping address.' );
-		} finally {
-			$zone->delete( true );
-		}
+		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A cart forced to need shipping by the woocommerce_cart_needs_shipping filter should use the configured shipping address.' );
+	}
+
+	/**
+	 * @testdox Uses the billing address for a cart with physical products when shipping is disabled.
+	 *
+	 * Checkout copies the billing address to shipping when the cart does not need shipping, so the cart should price with it too.
+	 */
+	public function test_uses_billing_address_for_physical_products_when_shipping_is_disabled(): void {
+		$this->add_product_to_cart( false );
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+		$this->set_checkout_context();
+
+		$result = $this->customer->get_taxable_address();
+
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A cart that does not need shipping because shipping is disabled should use the billing address.' );
 	}
 
 	/**

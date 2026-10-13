@@ -73,7 +73,7 @@ class CartWithoutShipping {
 
 		$this->is_checking_shipping = true;
 		try {
-			if ( ! $this->has_only_non_shipping_products( $cart ) ) {
+			if ( $cart->is_empty() || $cart->needs_shipping() ) {
 				return false;
 			}
 
@@ -93,33 +93,5 @@ class CartWithoutShipping {
 		} finally {
 			$this->is_checking_shipping = false;
 		}
-	}
-
-	/**
-	 * Determine whether the cart is non-empty and none of its products need shipping.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param \WC_Cart $cart The cart to check.
-	 * @return bool True when the cart has products and none of them need shipping.
-	 */
-	private function has_only_non_shipping_products( \WC_Cart $cart ): bool {
-		if ( $cart->needs_shipping() ) {
-			return false;
-		}
-
-		$cart_contents = $cart->get_cart();
-		if ( empty( $cart_contents ) ) {
-			return false;
-		}
-
-		foreach ( $cart_contents as $cart_item ) {
-			$product = $cart_item['data'] ?? null;
-			if ( ! $product instanceof \WC_Product || $product->needs_shipping() ) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 }
