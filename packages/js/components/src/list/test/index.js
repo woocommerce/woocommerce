@@ -30,7 +30,7 @@ describe( 'List', () => {
 			expect( screen.getAllByRole( 'menuitem' ) ).toHaveLength( 2 );
 		} );
 
-		it( 'should support `onClick` for items', () => {
+		it( 'should support `onClick` for items', async () => {
 			const clickHandler = jest.fn();
 			const listItems = [
 				{
@@ -45,7 +45,7 @@ describe( 'List', () => {
 
 			render( <List items={ listItems } /> );
 
-			userEvent.click(
+			await userEvent.click(
 				screen.getByRole( 'menuitem', { name: 'Click me!' } )
 			);
 

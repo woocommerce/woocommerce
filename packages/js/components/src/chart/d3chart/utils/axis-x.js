@@ -90,7 +90,7 @@ const getFactors = ( inputNum ) => {
 	for ( let i = 1; i <= Math.floor( Math.sqrt( inputNum ) ); i++ ) {
 		if ( inputNum % i === 0 ) {
 			numFactors.push( i );
-			// eslint-disable-next-line no-unused-expressions
+
 			inputNum / i !== i && numFactors.push( inputNum / i );
 		}
 	}
@@ -195,7 +195,6 @@ export const compareStrings = (
 	const diff = [];
 	const long = s1.length > s2.length ? string1 : string2;
 	for ( let x = 0; x < long.length; x++ ) {
-		// eslint-disable-next-line no-unused-expressions
 		string1[ x ] !== string2[ x ] && diff.push( string2[ x ] );
 	}
 	return diff;
@@ -210,7 +209,7 @@ const removeDuplicateDates = ( d, i, ticks, formatter ) => {
 		? formatter( monthDate )
 		: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join(
 				' '
-		  );
+			);
 };
 
 export const drawXAxis = ( node, params, scales, formats ) => {
@@ -236,7 +235,7 @@ export const drawXAxis = ( node, params, scales, formats ) => {
 					params.interval === 'hour'
 						? formats.xFormat(
 								d instanceof Date ? d : moment( d ).toDate()
-						  )
+							)
 						: removeDuplicateDates( d, i, ticks, formats.xFormat )
 				)
 		);

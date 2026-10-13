@@ -25,12 +25,18 @@ import { accessTheEmailEditor, expectEmail } from '../../utils/email';
  *
  * Uses the customer "Processing order" email; delivery is asserted through the
  * WP Mail Logging inbox like the classic `order-emails.spec.ts`.
+ *
+ * The customization includes a Product Collection block, so the sent email also
+ * covers WooCommerce registering its block types for the render. Orders created
+ * through the REST API are one of the requests that skip that registration, and
+ * the block used to render empty in the emails they send.
  */
 
 const EMAIL_LISTING_TITLE = 'Order confirmation';
 const EMAIL_TYPE = 'customer_processing_order';
 const SUBJECT_REGEX = /Your .+ order has been received!/;
 const DRAFT_MARKER = 'WOOPLUG6171_DRAFT_ONLY_MARKER';
+const PRODUCT_NAME = 'WOOPLUG7795 Email product';
 const EMAIL_POST_MAPPING_OPTION =
 	'woocommerce_email_templates_customer_processing_order_post_id';
 
@@ -61,6 +67,47 @@ const deleteEmailTypePosts = async ( baseURL: string ) => {
 };
 
 const orderIds: number[] = [];
+let productId: number;
+
+/**
+ * Block markup for a product collection listing just the given product.
+ *
+ * @param {number} handPickedProductId The product to list.
+ * @return {string} The serialized block markup.
+ */
+const productCollectionBlock = ( handPickedProductId: number ) => {
+	const attributes = {
+		queryId: 0,
+		query: {
+			perPage: 1,
+			pages: 1,
+			offset: 0,
+			postType: 'product',
+			order: 'asc',
+			orderBy: 'title',
+			search: '',
+			exclude: [],
+			inherit: false,
+			taxQuery: {},
+			isProductCollectionBlock: true,
+			woocommerceOnSale: false,
+			woocommerceStockStatus: [ 'instock', 'outofstock', 'onbackorder' ],
+			woocommerceAttributes: [],
+			woocommerceHandPickedProducts: [ String( handPickedProductId ) ],
+		},
+		tagName: 'div',
+		displayLayout: { type: 'flex', columns: 1 },
+		collection: 'woocommerce/product-collection/hand-picked',
+	};
+
+	return `<!-- wp:woocommerce/product-collection ${ JSON.stringify(
+		attributes
+	) } -->
+<div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template -->
+<!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- /wp:woocommerce/product-template --></div>
+<!-- /wp:woocommerce/product-collection -->`;
+};
 
 test.beforeAll( async ( { baseURL } ) => {
 	await setOption(
@@ -75,12 +122,28 @@ test.beforeAll( async ( { baseURL } ) => {
 	// after an environment restore reuses the numeric ID. Remove this email
 	// type's mapping so the real Edit action creates a fresh `woo_email` draft.
 	await deleteOption( request, baseURL, EMAIL_POST_MAPPING_OPTION );
+
+	const productResponse = await createAdminApiClient( baseURL ).post(
+		`${ WC_API_PATH }/products`,
+		{
+			name: PRODUCT_NAME,
+			type: 'simple',
+			regular_price: '10',
+			status: 'publish',
+		}
+	);
+	productId = productResponse.data.id;
 } );
 
 test.afterAll( async ( { baseURL } ) => {
 	const apiClient = createAdminApiClient( baseURL );
 	for ( const orderId of orderIds ) {
 		await apiClient.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+			force: true,
+		} );
+	}
+	if ( productId ) {
+		await apiClient.delete( `${ WC_API_PATH }/products/${ productId }`, {
 			force: true,
 		} );
 	}
@@ -150,7 +213,11 @@ test(
 		expect( draft ).toBeTruthy();
 		expect( Number.isSafeInteger( draft.id ) && draft.id > 0 ).toBe( true );
 		await restApi.post( `${ WP_API_PATH }/woo_email/${ draft.id }`, {
-			content: `${ draft.content.raw }\n<!-- wp:paragraph --><p>${ DRAFT_MARKER }</p><!-- /wp:paragraph -->`,
+			content: `${
+				draft.content.raw
+			}\n<!-- wp:paragraph --><p>${ DRAFT_MARKER }</p><!-- /wp:paragraph -->\n${ productCollectionBlock(
+				productId
+			) }`,
 		} );
 
 		// The real listing must reopen that same edited scratchpad before Save.
@@ -192,6 +259,12 @@ test(
 
 		await expect( emailBody.locator( 'body' ) ).toContainText(
 			DRAFT_MARKER
+		);
+		// The order was created through the REST API, which skips registering
+		// WooCommerce's block types. Without the on-demand registration the
+		// product collection renders empty in the sent email.
+		await expect( emailBody.locator( 'body' ) ).toContainText(
+			PRODUCT_NAME
 		);
 	}
 );

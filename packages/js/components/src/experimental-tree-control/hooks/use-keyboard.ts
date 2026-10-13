@@ -58,11 +58,15 @@ function getNextFocusableElement(
 	code: 'ArrowDown' | 'ArrowUp'
 ): HTMLLabelElement | null {
 	const headingsNodeList = getAllHeadings( currentHeading );
-	if ( ! headingsNodeList ) return null;
+	if ( ! headingsNodeList ) {
+		return null;
+	}
 
 	let currentHeadingIndex = 0;
 	for ( const heading of headingsNodeList.values() ) {
-		if ( heading === currentHeading ) break;
+		if ( heading === currentHeading ) {
+			break;
+		}
 		currentHeadingIndex++;
 	}
 	if (
@@ -84,7 +88,9 @@ function getFirstFocusableElement(
 	currentHeading: HTMLDivElement
 ): HTMLLabelElement | null {
 	const headingsNodeList = getAllHeadings( currentHeading );
-	if ( ! headingsNodeList ) return null;
+	if ( ! headingsNodeList ) {
+		return null;
+	}
 	return headingsNodeList
 		.item( 0 )
 		.querySelector< HTMLLabelElement >(
@@ -96,7 +102,9 @@ function getLastFocusableElement(
 	currentHeading: HTMLDivElement
 ): HTMLLabelElement | null {
 	const headingsNodeList = getAllHeadings( currentHeading );
-	if ( ! headingsNodeList ) return null;
+	if ( ! headingsNodeList ) {
+		return null;
+	}
 	return headingsNodeList
 		.item( headingsNodeList.length - 1 )
 		.querySelector< HTMLLabelElement >(
@@ -115,11 +123,11 @@ export function useKeyboard( {
 }: {
 	item: LinkedTree;
 	isExpanded: boolean;
-	onExpand(): void;
-	onCollapse(): void;
-	onToggleExpand(): void;
-	onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
-	onFirstItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+	onExpand: () => void;
+	onCollapse: () => void;
+	onToggleExpand: () => void;
+	onLastItemLoop?: ( event: React.KeyboardEvent< HTMLDivElement > ) => void;
+	onFirstItemLoop?: ( event: React.KeyboardEvent< HTMLDivElement > ) => void;
 } ) {
 	function onKeyDown( event: React.KeyboardEvent< HTMLDivElement > ) {
 		if ( event.code === 'ArrowRight' ) {

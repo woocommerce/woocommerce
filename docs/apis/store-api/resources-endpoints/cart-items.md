@@ -18,6 +18,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 [
 	{
 		"key": "c74d97b01eae257e44aa9d5bade97baf",
+		"parent_item_key": null,
 		"id": 16,
 		"quantity": 1,
 		"type": "simple",
@@ -98,6 +99,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items"
 	},
 	{
 		"key": "e03e407f41901484125496b5ec69a76f",
+		"parent_item_key": null,
 		"id": 29,
 		"quantity": 1,
 		"type": "variation",
@@ -240,6 +242,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/cart/items/c74d97b01eae257e4
 ```json
 {
 	"key": "c74d97b01eae257e44aa9d5bade97baf",
+	"parent_item_key": null,
 	"id": 16,
 	"quantity": 1,
 	"quantity_limits": {
