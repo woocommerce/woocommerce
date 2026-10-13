@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Store API: cart/items and cart/coupons now behave like cart/add-item, cart/update-item and cart/apply-coupon, and are soft-deprecated in favor of them.
