@@ -286,7 +286,7 @@ class OnboardingSetupWizard {
 			'profile' => $profile,
 		);
 		// Home can route to the setup wizard without a page load, so preload the URL whenever setup is still pending.
-		if ( ( $this->is_setup_wizard() || OnboardingProfile::needs_completion() ) && current_user_can( 'manage_woocommerce' ) ) {
+		if ( $this->should_show() && current_user_can( 'manage_woocommerce' ) ) {
 			$settings['onboarding']['skipOnboardingFallbackUrl'] = add_query_arg(
 				array(
 					'action'   => self::SKIP_ONBOARDING_SETUP_ACTION,
