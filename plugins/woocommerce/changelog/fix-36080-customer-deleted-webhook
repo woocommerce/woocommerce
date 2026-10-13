@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send the customer.deleted webhook for users of any role, and when a user is deleted or removed from the site on multisite.
