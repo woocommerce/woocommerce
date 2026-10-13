@@ -1047,7 +1047,7 @@ class WC_Checkout {
 					);
 				}
 			} elseif ( $this->is_shipping_withheld_for_missing_address() ) {
-				$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
+				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 

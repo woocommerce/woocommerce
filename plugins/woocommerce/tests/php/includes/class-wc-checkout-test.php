@@ -740,7 +740,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Placing the order blanks the shipping address, so shipping is no longer calculated.' );
 		$this->assertSame(
-			'No shipping method has been selected. Please double check your address, or contact us if you need any help.',
+			'Please enter an address to continue.',
 			$errors->get_error_message( 'shipping' ),
 			'Checkout must not accept a shippable order that has no shipping package.'
 		);
