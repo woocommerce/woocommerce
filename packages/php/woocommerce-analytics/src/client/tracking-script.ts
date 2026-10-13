@@ -1,3 +1,10 @@
+/**
+ * External dependencies
+ */
+import debugFactory from 'debug';
+
+const debug = debugFactory( 'wc-analytics:tracking-script' );
+
 const HELD_ATTRIBUTE = 'data-wc-analytics-consent';
 
 /**
@@ -28,9 +35,18 @@ export function activateTrackingScript(): void {
 		`script[type="text/plain"][${ HELD_ATTRIBUTE }]`
 	);
 
-	// No src means a consent plugin took the tag over and will run it itself.
-	const src = held?.getAttribute( 'src' );
-	if ( ! held || ! src || ! isTrackingScriptUrl( src ) ) {
+	if ( ! held ) {
+		return;
+	}
+
+	const src = held.getAttribute( 'src' );
+	if ( ! src ) {
+		debug( 'A consent plugin took over the held s.js tag and will run it' );
+		return;
+	}
+
+	if ( ! isTrackingScriptUrl( src ) ) {
+		debug( 'Not running a held tag whose src is not s.js:', src );
 		return;
 	}
 
