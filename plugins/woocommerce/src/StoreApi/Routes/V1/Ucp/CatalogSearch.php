@@ -217,9 +217,9 @@ class CatalogSearch extends AbstractCatalogRoute {
 	/**
 	 * Translate the UCP search body into Store API product collection parameters.
 	 *
-	 * Price bounds pass through unchanged: both UCP and the Store API take them in
-	 * minor units, and ProductQuery converts them to the store's decimals and
-	 * adjusts them for the shop's tax display mode itself.
+	 * Price bounds pass through in minor units for ProductQuery to convert and tax-adjust.
+	 * Like core's other price filters it matches on range overlap: a variable product
+	 * qualifies when its min–max span intersects the bounds, even with no variation inside them.
 	 *
 	 * @param string $query Free-text search term.
 	 * @param array  $filters Request filters.
