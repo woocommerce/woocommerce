@@ -281,6 +281,12 @@ Consult the [Gutenberg Block Metadata reference](https://developer.wordpress.org
 
 **Preserve server-translated metadata when registering blocks.** Pass the complete `block.json` metadata object as the first argument to `registerBlockType( metadata, settings )`, including through registration helpers.
 
+### Block Variation Translations
+
+When registering a block variation with `registerBlockVariation()` or a helper such as `registerElementVariation()`, translate its title, description, and keywords with `@wordpress/i18n` functions using literal strings and the `woocommerce` text domain, for example `__( 'Display the title of a product.', 'woocommerce' )`.
+
+Do not import these user-facing strings from `block.json`, pass JSON properties or variables to translation functions, or read another block's registered metadata to obtain them.
+
 ## Interactivity API Stores
 
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
