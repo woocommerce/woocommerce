@@ -66,13 +66,15 @@ export default function useAsyncFilter< T >( {
 	};
 }
 
+/* eslint-disable @typescript-eslint/method-signature-style -- Preserve callback parameter variance for existing TypeScript consumers. */
 export type UseAsyncFilterInput< T > = {
-	filter: ( value?: string ) => Promise< T[] >;
-	onFilterStart?: ( value?: string ) => void;
-	onFilterEnd?: ( filteredItems: T[], value?: string ) => void;
-	onFilterError?: ( error: Error, value?: string ) => void;
+	filter( value?: string ): Promise< T[] >;
+	onFilterStart?( value?: string ): void;
+	onFilterEnd?( filteredItems: T[], value?: string ): void;
+	onFilterError?( error: Error, value?: string ): void;
 	debounceTime?: number;
 };
+/* eslint-enable @typescript-eslint/method-signature-style */
 
 export type UseAsyncFilterOutput< T > = Pick<
 	SelectControlProps< T >,
