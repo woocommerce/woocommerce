@@ -155,15 +155,12 @@ class ComingSoonRequestHandler {
 			header( 'Cache-Control: max-age=60' );
 		}
 
-		$type = 'coming-soon';
-		/**
-		 * Filters the Coming Soon PHP template hierarchy, matching the WordPress query-template contract.
-		 *
-		 * @since 11.3.0
-		 *
-		 * @param string[] $templates Template filenames in priority order.
+		/*
+		 * Fire core's get_query_template( 'coming-soon' ) hooks, which the block renderer already fires,
+		 * so callbacks on either renderer see the same contract.
 		 */
-		$templates = apply_filters( "{$type}_template_hierarchy", array( 'coming-soon.php' ) );
+		/** This filter is documented in wp-includes/template.php */
+		$templates = apply_filters( 'coming-soon_template_hierarchy', array( 'coming-soon.php' ) ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		$templates = is_array( $templates ) ? array_filter( $templates, 'is_string' ) : array( 'coming-soon.php' );
 		$selected  = locate_template( $templates );
 
@@ -172,16 +169,8 @@ class ComingSoonRequestHandler {
 			$selected      = wc_locate_template( 'coming-soon/' . $template_name );
 		}
 
-		/**
-		 * Filters the Coming Soon PHP path, matching the WordPress query-template contract.
-		 *
-		 * @since 11.3.0
-		 *
-		 * @param string   $selected  The located template path.
-		 * @param string   $type      The template type, coming-soon.
-		 * @param string[] $templates Template filenames in priority order.
-		 */
-		$selected = apply_filters( "{$type}_template", $selected, $type, $templates );
+		/** This filter is documented in wp-includes/template.php */
+		$selected = apply_filters( 'coming-soon_template', $selected, 'coming-soon', $templates ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		if ( ! is_string( $selected ) || ! is_file( $selected ) || ! is_readable( $selected ) ) {
 			// Never fall back to protected content when a template override cannot be loaded.
 			return '';
