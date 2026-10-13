@@ -115,7 +115,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 		 * Empty session values must be applied too (hence isset and not empty below): the session snapshot always contains all the keys,
 		 * so an empty value means the field was explicitly cleared and must override the value loaded from the database.
 		 */
-		if ( isset( $data['id'], $data['date_modified'] ) && $data['id'] === (string) $customer->get_id() && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
+		$is_same_customer = isset( $data['id'] ) && $data['id'] === (string) $customer->get_id();
+
+		if ( $is_same_customer && isset( $data['date_modified'] ) && $data['date_modified'] === (string) $customer->get_date_modified( 'edit' ) ) {
 			foreach ( $this->session_keys as $session_key ) {
 				if ( in_array( $session_key, array( 'id', 'date_modified' ), true ) ) {
 					continue;
@@ -139,9 +141,97 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 					}
 				}
 			}
+		} elseif ( ! $is_same_customer ) {
+			// Only for a new session or a login. When the account changed during this session, for example after placing
+			// an order whose payment then failed, the account already holds the shipping address the shopper chose.
+			$this->maybe_default_shipping_to_billing( $customer );
 		}
 		$this->set_defaults( $customer );
 		$customer->set_object_read( true );
+	}
+
+	/**
+	 * Copies the billing address over the shipping address when the "Shipping destination" setting defaults to billing.
+	 *
+	 * Only called when the session doesn't belong to this customer yet, so an address the shopper set during the session is kept.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function maybe_default_shipping_to_billing( $customer ): void {
+		if ( 'shipping' === get_option( 'woocommerce_ship_to_destination', 'billing' ) || ! $this->billing_address_can_replace_shipping( $customer ) ) {
+			return;
+		}
+
+		foreach ( $customer->get_billing( 'edit' ) as $field => $value ) {
+			if ( is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
+				$customer->{"set_shipping_{$field}"}( $value );
+			}
+		}
+
+		$this->copy_additional_billing_fields_to_shipping( $customer );
+	}
+
+	/**
+	 * Copies the values of additional address checkout fields from billing to shipping.
+	 *
+	 * Works from the stored values rather than the registered fields: the session customer is loaded before
+	 * woocommerce_init, which is where extensions usually register their fields.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return void
+	 */
+	private function copy_additional_billing_fields_to_shipping( WC_Customer $customer ): void {
+		$checkout_fields = \Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields::class );
+		$billing_fields  = $checkout_fields->get_all_fields_from_object( $customer, 'billing', true );
+		$shipping_fields = $checkout_fields->get_all_fields_from_object( $customer, 'shipping', true );
+
+		foreach ( array_keys( $billing_fields + $shipping_fields ) as $field_key ) {
+			$checkout_fields->persist_field_for_customer( (string) $field_key, $billing_fields[ $field_key ] ?? '', $customer, 'shipping' );
+		}
+	}
+
+	/**
+	 * Checks whether the billing address can replace the shipping address.
+	 *
+	 * When there is a saved shipping address, the billing address needs a street, city or postcode, plus a postcode if
+	 * its country requires one. Otherwise copying it would clear the fields that shipping zones match against.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return bool
+	 */
+	private function billing_address_can_replace_shipping( $customer ): bool {
+		$country = $customer->get_billing_country( 'edit' );
+
+		if ( ! $country ) {
+			return false;
+		}
+
+		if ( ! $customer->has_shipping_address() || $customer->get_billing_postcode( 'edit' ) ) {
+			return true;
+		}
+
+		if ( ! $customer->get_billing_address_1( 'edit' ) && ! $customer->get_billing_city( 'edit' ) ) {
+			return false;
+		}
+
+		return ! $this->is_postcode_required( $country );
+	}
+
+	/**
+	 * Checks whether addresses in a country require a postcode, based on the store's country locale settings.
+	 *
+	 * @param string $country Country code.
+	 * @return bool
+	 */
+	private function is_postcode_required( string $country ): bool {
+		if ( ! WC()->countries instanceof WC_Countries ) {
+			return true;
+		}
+
+		$locale = WC()->countries->get_country_locale();
+
+		return (bool) ( $locale[ $country ]['postcode']['required'] ?? $locale['default']['postcode']['required'] ?? true );
 	}
 
 	/**
@@ -156,14 +246,16 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 
 			if ( ! $customer->get_billing_country() ) {
 				$customer->set_billing_country( $default['country'] );
+
+				// The default state only makes sense together with the default country: a saved address in a country
+				// without states must not pick up the store's base state.
+				if ( ! $customer->get_billing_state() ) {
+					$customer->set_billing_state( $default['state'] );
+				}
 			}
 
 			if ( ! $customer->get_shipping_country() && ! $has_shipping_address ) {
 				$customer->set_shipping_country( $customer->get_billing_country() );
-			}
-
-			if ( ! $customer->get_billing_state() ) {
-				$customer->set_billing_state( $default['state'] );
 			}
 
 			if ( ! $customer->get_shipping_state() && ! $has_shipping_address ) {
