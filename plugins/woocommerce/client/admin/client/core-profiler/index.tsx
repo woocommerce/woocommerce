@@ -326,11 +326,21 @@ const handleGeolocation = assign( {
 
 const redirectToWooHome = raise( { type: 'REDIRECT_TO_WOO_HOME' } );
 
+// Errors the profiler recovers from still go to the console, so support has something to look at.
+const logProfilerError = ( error: unknown ) => {
+	// eslint-disable-next-line no-console
+	console.error( 'WooCommerce Core Profiler:', error );
+};
+
+const logActorError = ( { event }: { event: ErrorActorEvent } ) => {
+	logProfilerError( event.error );
+};
+
 const exitToWooHome = fromPromise( async () => {
 	// Coming Soon setup is best effort; a failed request must not leave the loader stuck.
 	await dispatch( onboardingStore )
 		.coreProfilerCompleted()
-		.catch( () => undefined );
+		.catch( logProfilerError );
 	window.location.href = getNewPath( {}, '/', {} );
 } );
 
@@ -338,7 +348,7 @@ const exitToJetpackAuth = fromPromise( async () => {
 	// Coming Soon setup is best effort, as in exitToWooHome.
 	await dispatch( onboardingStore )
 		.coreProfilerCompleted()
-		.catch( () => undefined );
+		.catch( logProfilerError );
 	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
 		redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
 		from: 'woocommerce-core-profiler',
@@ -349,7 +359,13 @@ const exitToJetpackAuth = fromPromise( async () => {
  * Saves the skip through a non-REST admin-post request when the REST write fails,
  * so WooCommerce Home stops redirecting back to the profiler.
  */
-const redirectToSkipOnboardingFallback = () => {
+const redirectToSkipOnboardingFallback = ( {
+	event,
+}: {
+	event: ErrorActorEvent;
+} ) => {
+	logProfilerError( event.error );
+
 	const { skipOnboardingFallbackUrl } = getAdminSetting(
 		'onboarding',
 		{}
@@ -720,6 +736,7 @@ export const coreProfilerMachineActions = {
 	assignCurrentUser,
 	redirectToWooHome,
 	redirectToSkipOnboardingFallback,
+	logActorError,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
 	reloadPage,
@@ -769,7 +786,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		// Background prefetches and writes are spawned without error handlers. Without this,
 		// one failed REST request (for example, when /wp-json/ is not routed) stops the whole profiler.
 		// Invoke-level onError handlers belong to deeper states and still take precedence.
-		'xstate.error.actor.*': {},
+		'xstate.error.actor.*': {
+			actions: 'logActorError',
+		},
 	},
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly

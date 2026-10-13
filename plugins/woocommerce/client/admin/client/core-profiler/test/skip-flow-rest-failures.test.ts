@@ -130,9 +130,14 @@ const waitForNavigation = async () => {
 
 describe( 'Core Profiler skip flow when REST requests fail', () => {
 	const originalLocation = window.location;
+	let consoleError: jest.SpyInstance;
 
 	beforeEach( () => {
 		jest.useFakeTimers();
+		// Recovered errors are logged on purpose; keep them out of the test output.
+		consoleError = jest
+			.spyOn( console, 'error' )
+			.mockImplementation( () => undefined );
 		mockFailingRequests.clear();
 		mockStoreCalls.length = 0;
 		mockOnboardingSetting.skipOnboardingFallbackUrl = FALLBACK_URL;
@@ -144,6 +149,7 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 
 	afterEach( () => {
 		jest.useRealTimers();
+		jest.restoreAllMocks();
 		// @ts-expect-error Restore jsdom's location.
 		window.location = originalLocation;
 	} );
@@ -157,6 +163,10 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 		expect( await waitForNavigation() ).toBe( FALLBACK_URL );
 		expect( actor.getSnapshot().status ).toBe( 'active' );
 		expect( mockStoreCalls ).not.toContain( 'coreProfilerCompleted' );
+		expect( consoleError ).toHaveBeenCalledWith(
+			'WooCommerce Core Profiler:',
+			expect.objectContaining( { code: 'rest_no_route' } )
+		);
 		actor.stop();
 	} );
 
@@ -206,6 +216,7 @@ describe( 'Core Profiler skip flow when REST requests fail', () => {
 
 		expect( await waitForNavigation() ).toBe( HOME_PATH );
 		expect( mockStoreCalls ).toContain( 'coreProfilerCompleted' );
+		expect( consoleError ).not.toHaveBeenCalled();
 		actor.stop();
 	} );
 
