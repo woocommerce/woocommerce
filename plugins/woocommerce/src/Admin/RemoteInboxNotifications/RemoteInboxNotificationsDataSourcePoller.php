@@ -25,16 +25,21 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	private const PUBLISHED_SNAPSHOT_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_published_snapshot';
 
 	/**
-	 * Progress of the read in flight: whether every source so far returned a nonempty list of valid,
-	 * uniquely keyed specs, whether the WooCommerce.com feed was among them, and the merged slugs.
-	 *
-	 * @var array{complete: bool, includes_canonical_source: bool, slugs: array<string, true>}
+	 * Progress tracked at the start of a read.
 	 */
-	private $current_read = array(
-		'complete'                  => false,
+	private const READ_START = array(
+		'complete'                  => true,
 		'includes_canonical_source' => false,
 		'slugs'                     => array(),
 	);
+
+	/**
+	 * Progress of the read in flight: whether every source so far returned a nonempty list of valid,
+	 * uniquely keyed specs, whether the WooCommerce.com feed was among them, and the merged slugs.
+	 *
+	 * @var array{complete: bool, includes_canonical_source: bool, slugs: array<int|string>}
+	 */
+	private $current_read = self::READ_START;
 
 	/**
 	 * Default data sources array.
@@ -84,7 +89,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 
 		if ( true === $result ) {
 			if ( $this->current_read['complete'] && $this->current_read['includes_canonical_source'] ) {
-				$this->save_published_snapshot( $fetched_at, array_map( 'strval', array_keys( $this->current_read['slugs'] ) ) );
+				$this->save_published_snapshot( $fetched_at, array_map( 'strval', $this->current_read['slugs'] ) );
 			} else {
 				delete_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
 			}
@@ -106,7 +111,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	public function get_published_snapshot(): ?array {
 		$snapshot = get_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
 
-		if ( ! is_array( $snapshot ) || ! isset( $snapshot['fetched_at'], $snapshot['slugs'] ) || ! is_int( $snapshot['fetched_at'] ) || ! is_array( $snapshot['slugs'] ) ) {
+		if ( ! is_array( $snapshot ) || ! is_int( $snapshot['fetched_at'] ?? null ) || ! is_array( $snapshot['slugs'] ?? null ) ) {
 			return null;
 		}
 
@@ -138,21 +143,15 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 			$this->current_read['includes_canonical_source'] = true;
 		}
 
-		foreach ( $source_specs as $key => $spec ) {
-			$specs[ $key ]                       = $spec;
-			$this->current_read['slugs'][ $key ] = true;
-		}
+		$specs                       = array_replace( $specs, $source_specs );
+		$this->current_read['slugs'] = array_keys( $specs );
 	}
 
 	/**
 	 * Reset the progress tracked for a new read.
 	 */
 	private function start_read(): void {
-		$this->current_read = array(
-			'complete'                  => true,
-			'includes_canonical_source' => false,
-			'slugs'                     => array(),
-		);
+		$this->current_read = self::READ_START;
 	}
 
 	/**

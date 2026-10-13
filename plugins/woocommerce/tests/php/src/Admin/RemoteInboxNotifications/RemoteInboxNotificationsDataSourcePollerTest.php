@@ -187,7 +187,8 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 		$complete_snapshot = $this->sut->get_published_snapshot();
 		$this->assertNotNull( $complete_snapshot );
 
-		$this->responses = array_fill_keys( array_keys( $this->responses ), null );
+		$healthy_responses = $this->responses;
+		$this->responses   = array_fill_keys( array_keys( $healthy_responses ), null );
 		$this->sut->delete_specs_transient();
 
 		$this->assertFalse( $this->sut->read_specs_from_data_sources() );
@@ -198,10 +199,7 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 			'slugs'      => array( 'remote-alert-newer' ),
 		);
 		set_transient( self::SNAPSHOT_TRANSIENT, $newer_snapshot, DAY_IN_SECONDS );
-		$this->responses = array(
-			$this->data_sources[0] => $this->encode_specs( 'remote-alert-a' ),
-			self::AUXILIARY_URL    => $this->encode_specs( 'remote-alert-c' ),
-		);
+		$this->responses = $healthy_responses;
 		$this->sut->delete_specs_transient();
 
 		$this->assertTrue( $this->sut->read_specs_from_data_sources() );

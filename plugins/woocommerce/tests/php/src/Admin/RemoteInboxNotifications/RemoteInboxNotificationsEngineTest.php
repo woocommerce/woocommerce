@@ -33,6 +33,11 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	private const GROUP = 'woocommerce-remote-inbox-engine';
 
 	/**
+	 * Transient holding the latest complete feed read.
+	 */
+	private const SNAPSHOT_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_published_snapshot';
+
+	/**
 	 * Initialize only the engine's update listener. The parent restores hooks and database fixtures.
 	 */
 	public function setUp(): void {
@@ -419,16 +424,14 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	 * @param int|null $fetched_at Time of the complete read, or null when there is none.
 	 */
 	private function arrange_feed( array $specs, ?int $fetched_at ): void {
-		$keyed_specs = array();
-		foreach ( $specs as $spec ) {
-			$keyed_specs[ $spec->slug ] = $spec;
-		}
+		$keyed_specs = array_column( $specs, null, 'slug' );
 		set_transient( 'woocommerce_admin_' . RemoteInboxNotificationsDataSourcePoller::ID . '_specs', array( get_user_locale() => $keyed_specs ), DAY_IN_SECONDS );
 
-		delete_transient( 'woocommerce_admin_remote_inbox_notifications_published_snapshot' );
-		if ( null !== $fetched_at ) {
+		if ( null === $fetched_at ) {
+			delete_transient( self::SNAPSHOT_TRANSIENT );
+		} else {
 			set_transient(
-				'woocommerce_admin_remote_inbox_notifications_published_snapshot',
+				self::SNAPSHOT_TRANSIENT,
 				array(
 					'fetched_at' => $fetched_at,
 					'slugs'      => array_keys( $keyed_specs ),
@@ -438,7 +441,16 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 		}
 
 		update_option( RemoteInboxNotificationsEngine::STORED_STATE_OPTION_NAME, new \stdClass(), false );
-		add_filter( 'pre_http_request', fn() => new WP_Error( 'http_request_blocked', 'Remote inbox tests must not reach the network.' ) );
+		add_filter( 'pre_http_request', array( $this, 'block_http_request' ) );
+	}
+
+	/**
+	 * Keep the engine from reaching the network.
+	 *
+	 * @return WP_Error Blocked request.
+	 */
+	public function block_http_request(): WP_Error {
+		return new WP_Error( 'http_request_blocked', 'Remote inbox tests must not reach the network.' );
 	}
 
 	/**

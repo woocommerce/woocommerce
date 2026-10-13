@@ -190,22 +190,25 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 			return;
 		}
 
-		$published_slugs = array_fill_keys( array_merge( $snapshot['slugs'], $processed_slugs ), true );
-
 		/**
 		 * Note data store.
 		 *
 		 * @var DataStore $data_store
 		 */
-		$data_store     = Notes::load_data_store();
-		$alerts         = $data_store->lookup_notes(
+		$data_store = Notes::load_data_store();
+		$alerts     = $data_store->lookup_notes(
 			array(
 				'source' => array( 'woocommerce.com' ),
 				'type'   => array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ),
 				'status' => array( Note::E_WC_ADMIN_NOTE_UNACTIONED ),
 			)
 		);
-		$changed_before = $snapshot['fetched_at'] - self::WITHDRAWN_ALERT_GRACE_PERIOD;
+		if ( empty( $alerts ) ) {
+			return;
+		}
+
+		$published_slugs = array_fill_keys( array_merge( $snapshot['slugs'], $processed_slugs ), true );
+		$changed_before  = $snapshot['fetched_at'] - self::WITHDRAWN_ALERT_GRACE_PERIOD;
 
 		foreach ( $alerts as $alert ) {
 			// Stored dates are GMT; the creation date moves forward whenever a spec changes the note's status.
