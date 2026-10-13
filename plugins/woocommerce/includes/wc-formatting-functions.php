@@ -377,24 +377,28 @@ function wc_format_coupon_code( $value ) {
 /**
  * Sanitize a coupon code.
  *
- * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
+ * Coupon codes are stored as post titles with `&`, `<` and `>` encoded. Entered codes are decoded, then encoded the
+ * same way for every user, so the code a customer enters matches the code a merchant saved.
  *
- * Due to the unfiltered_html capability that some (admin) users have, we need to account for slashes.
+ * The encoding repeats the steps wp_kses() applied to codes, so codes saved by earlier versions still match.
+ * wp_kses_no_null() removes control characters (keeping a literal `\0`, as wp_kses() did), and
+ * wp_kses_normalize_entities() encodes `&` unless it starts a valid entity such as `&amp;` or `&#039;`. Both are plain
+ * string functions that don't use the kses HTML parser, so changes to wp_kses() don't affect the result. Tags aren't
+ * parsed, so `<` and `>` are encoded rather than stripped.
  *
- * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
- * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
- * during application, causing legitimate coupons to be rejected.
- *
+ * @see WC_Formatting_Functions_Test::test_wc_sanitize_coupon_code
  * @see WC_Cart_Test::test_coupon_codes_with_special_characters
  *
  * @since  3.6.0
  * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
- * @param  string $value Coupon code to format.
+ * @since  11.3.0 Encode special characters instead of using kses, so the result no longer depends on the current user.
+ * @param  string|null $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
-	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
+	$value = html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) );
+	$value = trim( wp_kses_no_null( $value, array( 'slash_zero' => 'keep' ) ) );
+	return str_replace( array( '<', '>' ), array( '&lt;', '&gt;' ), wp_kses_normalize_entities( $value ) );
 }
 
 /**

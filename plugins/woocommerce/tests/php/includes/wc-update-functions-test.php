@@ -473,19 +473,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 * @testdox Migration sanitizes dirty coupon codes and invalidates every coupon code lookup entry once, on the last batch.
 	 */
 	public function test_wc_update_450_sanitize_coupons_code_invalidates_the_lookup_cache(): void {
-		global $wpdb;
-
-		$coupon_id = wp_insert_post(
-			array(
-				'post_type'   => 'shop_coupon',
-				'post_title'  => 'dirty-code',
-				'post_status' => 'publish',
-			)
-		);
-
-		// The migration exists for titles WordPress would not store today, so write the raw one directly.
-		$wpdb->update( $wpdb->posts, array( 'post_title' => ' dirty-code ' ), array( 'ID' => $coupon_id ) );
-		clean_post_cache( $coupon_id );
+		$coupon_id = $this->create_coupon_with_stored_title( ' dirty-code ' );
 
 		// Start the batch at this coupon, so the assertions do not depend on what else is in the database.
 		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
@@ -539,6 +527,50 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			WC_Cache_Helper::get_cache_prefix( 'coupons' ),
 			'A run that rewrites no code should leave the warm lookup entries alone.'
 		);
+	}
+
+	/**
+	 * @testdox Migration stores coupon codes in the format coupon lookups expect, without adding slashes.
+	 *
+	 * @testWith ["a&b", "a&amp;b"]
+	 *           ["test's", "test's"]
+	 *           ["a\\b", "a\\b"]
+	 *
+	 * @param string $stored_title   Title stored before the migration.
+	 * @param string $expected_title Title expected after the migration.
+	 */
+	public function test_wc_update_450_sanitize_coupons_code_stores_codes_as_lookups_expect( string $stored_title, string $expected_title ): void {
+		$coupon_id = $this->create_coupon_with_stored_title( $stored_title );
+
+		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$this->run_wc_update_450_sanitize_coupons_code_to_completion();
+
+		$this->assertSame( $expected_title, get_post( $coupon_id )->post_title );
+	}
+
+	/**
+	 * Create a coupon and write its title directly, as the 4.5.0 migration exists for titles WordPress would not store today.
+	 *
+	 * @param string $title Raw post title to store.
+	 * @return int Coupon ID.
+	 */
+	private function create_coupon_with_stored_title( string $title ): int {
+		global $wpdb;
+
+		$coupon_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_coupon',
+				'post_title'  => 'placeholder',
+				'post_status' => 'publish',
+			)
+		);
+		$wpdb->update( $wpdb->posts, array( 'post_title' => $title ), array( 'ID' => $coupon_id ) );
+		clean_post_cache( $coupon_id );
+
+		return $coupon_id;
 	}
 
 	/**

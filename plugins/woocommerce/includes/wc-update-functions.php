@@ -2268,7 +2268,7 @@ function wc_update_450_sanitize_coupons_code() {
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
-		$code      = trim( wp_filter_kses( $data['post_title'] ) );
+		$code      = wc_sanitize_coupon_code( $data['post_title'] );
 
 		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
 			$wpdb->update(
