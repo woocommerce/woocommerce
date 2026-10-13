@@ -70,7 +70,9 @@ class ListTable extends \WP_List_Table {
 	/**
 	 * Eligibility service.
 	 *
-	 * @var EligibilityService
+	 * @deprecated 11.3.0 No longer used by this class. Will be removed in a future version.
+	 *
+	 * @var EligibilityService|null
 	 */
 	public $eligibility_service;
 
@@ -78,6 +80,8 @@ class ListTable extends \WP_List_Table {
 	 * Init.
 	 *
 	 * @internal
+	 *
+	 * @deprecated 11.3.0 No longer used by this class. Will be removed in a future version.
 	 *
 	 * @param EligibilityService $eligibility_service Eligibility service.
 	 */
@@ -378,7 +382,10 @@ class ListTable extends \WP_List_Table {
 			$filter  = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$product = wc_get_product( $filter );
 			if ( $product instanceof \WC_Product ) {
-				$query_args['product_id'] = $product->is_type( ProductType::VARIABLE ) ? array_merge( array( $product->get_id() ), $product->get_children() ) : array( $product->get_id() );
+				$children                 = $product->get_children();
+				$query_args['product_id'] = $product->is_type( ProductType::VARIABLE )
+					? array_merge( array( $product->get_id() ), is_array( $children ) ? $children : array() )
+					: array( $product->get_id() );
 			} else {
 				NotificationsPage::add_notice( __( 'Invalid product selected.', 'woocommerce' ), 'error' );
 			}
