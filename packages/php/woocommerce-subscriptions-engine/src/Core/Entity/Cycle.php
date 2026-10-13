@@ -160,14 +160,14 @@ final class Cycle {
 	private $retry_at_gmt;
 
 	/**
-	 * Typed plan snapshot held in memory, or null.
+	 * Typed plan snapshot attached on read from `plan_snapshot_id`, or null.
 	 *
 	 * @var PlanSnapshot|null
 	 */
 	private $plan_snapshot;
 
 	/**
-	 * Typed items snapshot held in memory, or null.
+	 * Typed items snapshot attached on read from `items_snapshot_id`, or null.
 	 *
 	 * @var ItemsSnapshot|null
 	 */
@@ -197,8 +197,6 @@ final class Cycle {
 		$this->extension_slug    = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
 		$this->claimed_until_gmt = Coercion::coerce_nullable_string( $data['claimed_until'] ?? null );
 		$this->retry_at_gmt      = Coercion::coerce_nullable_string( $data['retry_at'] ?? null );
-		$this->plan_snapshot     = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
-		$this->items_snapshot    = ( $data['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $data['items_snapshot'] : null;
 	}
 
 	/**
@@ -208,8 +206,8 @@ final class Cycle {
 	 * `currency`. Optional: `sequence_no` (absent or null: the append assigns the chain's
 	 * next position), `count` (absent or null for a non-counting cycle; the caller owns
 	 * the numbering), `status` (defaults to `pending`), `kind` (defaults to billing), `reason`,
-	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`,
-	 * `plan_snapshot`, `items_snapshot`.
+	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`. Snapshot value
+	 * objects are attached only when a stored cycle is read.
 	 *
 	 * @param array<string, mixed> $args Cycle attributes.
 	 * @throws DomainException If the attributes are not valid.
@@ -244,9 +242,6 @@ final class Cycle {
 	 * @throws DomainException If the stored status is not a well-formed status slug.
 	 */
 	public static function from_storage( array $row ): self {
-		// The typed snapshot value objects are attached on load, never hydrated here.
-		unset( $row['plan_snapshot'], $row['items_snapshot'] );
-
 		return new self( $row );
 	}
 
@@ -376,34 +371,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Record the plan snapshot row id once it is stored. Write-once: only fills an
-	 * unset id, never re-points the frozen reference.
-	 *
-	 * @param int $plan_snapshot_id Snapshot row id.
-	 * @throws DomainException If a plan snapshot id is already recorded.
-	 */
-	public function set_plan_snapshot_id( int $plan_snapshot_id ): void {
-		$this->assert_snapshot_ref_unset( 'plan_snapshot_id', $this->plan_snapshot_id );
-		$this->plan_snapshot_id = $plan_snapshot_id;
-	}
-
-	/**
 	 * Items snapshot row id, or null.
 	 */
 	public function get_items_snapshot_id(): ?int {
 		return $this->items_snapshot_id;
-	}
-
-	/**
-	 * Record the items snapshot row id once it is stored. Write-once companion to
-	 * {@see self::set_plan_snapshot_id()}.
-	 *
-	 * @param int $items_snapshot_id Snapshot row id.
-	 * @throws DomainException If an items snapshot id is already recorded.
-	 */
-	public function set_items_snapshot_id( int $items_snapshot_id ): void {
-		$this->assert_snapshot_ref_unset( 'items_snapshot_id', $this->items_snapshot_id );
-		$this->items_snapshot_id = $items_snapshot_id;
 	}
 
 	/**
@@ -501,22 +472,6 @@ final class Cycle {
 			'claimed_until'     => $this->claimed_until_gmt,
 			'retry_at'          => $this->retry_at_gmt,
 		);
-	}
-
-	/**
-	 * Guard a snapshot row-id stamp so it is write-once; a second stamp would
-	 * re-point a frozen reference.
-	 *
-	 * @param string   $field   Field being stamped, for the error message.
-	 * @param int|null $current The currently recorded id (must be null to stamp).
-	 * @throws DomainException If the id is already recorded.
-	 */
-	private function assert_snapshot_ref_unset( string $field, ?int $current ): void {
-		if ( null !== $current ) {
-			throw new DomainException(
-				sprintf( 'Cycle: "%s" is frozen and cannot be re-pointed.', $field )
-			);
-		}
 	}
 
 	/**

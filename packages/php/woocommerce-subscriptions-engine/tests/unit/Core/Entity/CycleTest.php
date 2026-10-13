@@ -172,19 +172,16 @@ class CycleTest extends TestCase {
 		$this->assertSame( 'acme-subs', $cycle->get_extension_slug() );
 	}
 
-	public function test_holds_snapshot_vos_when_provided(): void {
-		$plan  = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
-		$items = ItemsSnapshot::from_items( array( array( 'product_id' => 42 ) ) );
-
+	public function test_create_ignores_snapshot_value_objects(): void {
 		$cycle = $this->make_pending(
 			array(
-				'plan_snapshot'  => $plan,
-				'items_snapshot' => $items,
+				'plan_snapshot'  => PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) ),
+				'items_snapshot' => ItemsSnapshot::from_items( array( array( 'product_id' => 42 ) ) ),
 			)
 		);
 
-		$this->assertSame( $plan, $cycle->get_plan_snapshot() );
-		$this->assertSame( $items, $cycle->get_items_snapshot() );
+		$this->assertNull( $cycle->get_plan_snapshot(), 'Snapshot value objects are attached only on read.' );
+		$this->assertNull( $cycle->get_items_snapshot() );
 	}
 
 	public function test_create_accepts_an_extension_registered_status_string(): void {
@@ -231,32 +228,6 @@ class CycleTest extends TestCase {
 		$this->assertFalse( $reflection->hasMethod( 'set_ends_at_gmt' ) );
 	}
 
-	public function test_plan_snapshot_id_is_stamped_write_once(): void {
-		$cycle = $this->make_pending();
-
-		$cycle->set_plan_snapshot_id( 11 );
-		$cycle->set_items_snapshot_id( 22 );
-
-		$this->assertSame( 11, $cycle->get_plan_snapshot_id() );
-		$this->assertSame( 22, $cycle->get_items_snapshot_id() );
-	}
-
-	public function test_plan_snapshot_id_cannot_be_re_pointed(): void {
-		$cycle = $this->make_pending();
-		$cycle->set_plan_snapshot_id( 11 );
-
-		$this->expectException( DomainException::class );
-		$cycle->set_plan_snapshot_id( 99 );
-	}
-
-	public function test_items_snapshot_id_cannot_be_re_pointed(): void {
-		$cycle = $this->make_pending();
-		$cycle->set_items_snapshot_id( 22 );
-
-		$this->expectException( DomainException::class );
-		$cycle->set_items_snapshot_id( 99 );
-	}
-
 	public function test_plan_snapshot_vo_is_attached_write_once(): void {
 		$cycle = $this->make_pending();
 
@@ -267,14 +238,16 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_plan_snapshot_vo_cannot_be_replaced(): void {
-		$cycle = $this->make_pending( array( 'plan_snapshot' => PlanSnapshot::from_array( array( 'selling_plan_id' => 9 ) ) ) );
+		$cycle = $this->make_pending();
+		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 9 ) ) );
 
 		$this->expectException( DomainException::class );
 		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 10 ) ) );
 	}
 
 	public function test_items_snapshot_vo_cannot_be_replaced(): void {
-		$cycle = $this->make_pending( array( 'items_snapshot' => ItemsSnapshot::from_items( array() ) ) );
+		$cycle = $this->make_pending();
+		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array() ) );
 
 		$this->expectException( DomainException::class );
 		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
@@ -310,58 +283,6 @@ class CycleTest extends TestCase {
 		$this->assertSame( 22, $cycle->get_items_snapshot_id() );
 		$this->assertSame( 123, $cycle->get_order_id() );
 		$this->assertSame( 'acme-subs', $cycle->get_extension_slug() );
-	}
-
-	public function test_from_storage_cycle_plan_snapshot_ref_is_write_once(): void {
-		// A cycle hydrated from storage already carries non-null snapshot refs through
-		// the constructor; the write-once guard must still reject re-pointing them.
-		$cycle = Cycle::from_storage(
-			array(
-				'id'                => 5,
-				'contract_id'       => 7,
-				'sequence_no'       => 2,
-				'count'             => 2,
-				'kind'              => Cycle::KIND_BILLING,
-				'status'            => 'billed',
-				'reason'            => null,
-				'starts_at_gmt'     => '2026-03-01 00:00:00',
-				'ends_at_gmt'       => '2026-04-01 00:00:00',
-				'expected_total'    => '20.00',
-				'currency'          => 'USD',
-				'plan_snapshot_id'  => 11,
-				'items_snapshot_id' => 22,
-				'order_id'          => 123,
-				'extension_slug'    => 'acme-subs',
-			)
-		);
-
-		$this->expectException( DomainException::class );
-		$cycle->set_plan_snapshot_id( 99 );
-	}
-
-	public function test_from_storage_cycle_items_snapshot_ref_is_write_once(): void {
-		$cycle = Cycle::from_storage(
-			array(
-				'id'                => 5,
-				'contract_id'       => 7,
-				'sequence_no'       => 2,
-				'count'             => 2,
-				'kind'              => Cycle::KIND_BILLING,
-				'status'            => 'billed',
-				'reason'            => null,
-				'starts_at_gmt'     => '2026-03-01 00:00:00',
-				'ends_at_gmt'       => '2026-04-01 00:00:00',
-				'expected_total'    => '20.00',
-				'currency'          => 'USD',
-				'plan_snapshot_id'  => 11,
-				'items_snapshot_id' => 22,
-				'order_id'          => 123,
-				'extension_slug'    => 'acme-subs',
-			)
-		);
-
-		$this->expectException( DomainException::class );
-		$cycle->set_items_snapshot_id( 99 );
 	}
 
 	public function test_from_storage_keeps_stored_values_that_create_would_refuse(): void {
@@ -409,12 +330,12 @@ class CycleTest extends TestCase {
 	public function test_to_storage_excludes_id_and_serializes_the_row(): void {
 		$cycle = $this->make_pending(
 			array(
-				'order_id'         => 123,
-				'extension_slug'   => 'acme-subs',
-				'plan_snapshot_id' => 11,
+				'order_id'          => 123,
+				'extension_slug'    => 'acme-subs',
+				'plan_snapshot_id'  => 11,
+				'items_snapshot_id' => 22,
 			)
 		);
-		$cycle->set_items_snapshot_id( 22 );
 
 		$row = $cycle->to_storage();
 

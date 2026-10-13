@@ -235,7 +235,7 @@ final class Contracts {
 		}
 
 		try {
-			$repository->append_cycle( $cycle, null );
+			$repository->append_cycle( $cycle );
 		} catch ( DuplicateCycleException $e ) {
 			throw new DomainException( 'Contracts: the cycle position or count already exists.' );
 		}

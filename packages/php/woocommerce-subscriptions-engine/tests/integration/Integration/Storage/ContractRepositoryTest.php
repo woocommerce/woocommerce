@@ -103,30 +103,47 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	/**
 	 * Build a billing cycle for the given contract at a sequence/count.
 	 *
-	 * @param int                $contract_id Contract id.
-	 * @param int                $sequence_no Position in the chain.
-	 * @param int|null           $count       Chargeable count, or null for non-counting.
-	 * @param string             $starts_at   Period start GMT string.
-	 * @param string             $ends_at     Period end GMT string.
-	 * @param PlanSnapshot|null  $plan        Plan snapshot, or null.
-	 * @param ItemsSnapshot|null $items       Items snapshot, or null.
-	 * @param int|null           $order_id    Linked order id, or null.
+	 * @param int      $contract_id       Contract id.
+	 * @param int      $sequence_no       Position in the chain.
+	 * @param int|null $count             Chargeable count, or null for non-counting.
+	 * @param string   $starts_at         Period start GMT string.
+	 * @param string   $ends_at           Period end GMT string.
+	 * @param int|null $plan_snapshot_id  Stored plan snapshot id, or null.
+	 * @param int|null $items_snapshot_id Stored items snapshot id, or null.
+	 * @param int|null $order_id          Linked order id, or null.
 	 */
-	private function make_cycle( int $contract_id, int $sequence_no, ?int $count, string $starts_at, string $ends_at, ?PlanSnapshot $plan = null, ?ItemsSnapshot $items = null, ?int $order_id = null ): Cycle {
+	private function make_cycle( int $contract_id, int $sequence_no, ?int $count, string $starts_at, string $ends_at, ?int $plan_snapshot_id = null, ?int $items_snapshot_id = null, ?int $order_id = null ): Cycle {
 		return Cycle::create(
 			array(
-				'contract_id'    => $contract_id,
-				'sequence_no'    => $sequence_no,
-				'count'          => $count,
-				'starts_at_gmt'  => $starts_at,
-				'ends_at_gmt'    => $ends_at,
-				'expected_total' => '19.99',
-				'currency'       => 'USD',
-				'extension_slug' => 'lite',
-				'order_id'       => $order_id,
-				'plan_snapshot'  => $plan,
-				'items_snapshot' => $items,
+				'contract_id'       => $contract_id,
+				'sequence_no'       => $sequence_no,
+				'count'             => $count,
+				'starts_at_gmt'     => $starts_at,
+				'ends_at_gmt'       => $ends_at,
+				'expected_total'    => '19.99',
+				'currency'          => 'USD',
+				'extension_slug'    => 'lite',
+				'order_id'          => $order_id,
+				'plan_snapshot_id'  => $plan_snapshot_id,
+				'items_snapshot_id' => $items_snapshot_id,
 			)
+		);
+	}
+
+	/**
+	 * Store the sample plan and items snapshot rows for a contract.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return array{0: int, 1: int} The plan and items snapshot ids.
+	 */
+	private function seed_cycle_snapshots( int $contract_id ): array {
+		$store = new SnapshotStore();
+		$plan  = $this->sample_plan_snapshot();
+		$items = $this->sample_items_snapshot();
+
+		return array(
+			$store->insert( $contract_id, SnapshotStore::TYPE_PLAN, $plan->get_selling_plan_id(), $plan->to_payload(), $plan->get_schema_version() ),
+			$store->insert( $contract_id, SnapshotStore::TYPE_ITEMS, null, $items->to_payload(), $items->get_schema_version() ),
 		);
 	}
 
@@ -889,7 +906,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_append_cycle_and_find_chain_head(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
 		$this->sut->append_cycle( $cycle );
 
 		$this->assertNotNull( $cycle->get_id() );
@@ -904,7 +921,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( '19.99000000', $current->get_expected_total() );
 		$this->assertSame( 'lite', $current->get_extension_slug() );
 
-		// Snapshots decoded back into typed value objects on an in-flight cycle.
+		// Stored snapshot ids are decoded back into typed value objects on read.
 		$this->assertInstanceOf( PlanSnapshot::class, $current->get_plan_snapshot() );
 		$this->assertSame(
 			array(
@@ -953,7 +970,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->sut->append_cycle( $first );
 
 		$second = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' );
-		$this->sut->append_cycle( $second, $first );
+		$this->sut->append_cycle( $second );
 
 		$current = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $current );
@@ -975,11 +992,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_find_cycle_history_pages_newest_first(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		$prev = null;
 		for ( $n = 1; $n <= 3; $n++ ) {
-			$cycle = $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) );
-			$this->sut->append_cycle( $cycle, $prev );
-			$prev = $cycle;
+			$this->sut->append_cycle( $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) ) );
 		}
 
 		$page = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 0 );
@@ -1654,19 +1668,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A billed cycle hydrates its plan and items snapshots.
 	 */
 	public function test_a_billed_cycle_hydrates_its_snapshots(): void {
-		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = Cycle::create(
+		$id           = $this->sut->insert( $this->make_contract() );
+		$snapshot_ids = $this->seed_cycle_snapshots( $id );
+		$cycle        = Cycle::create(
 			array(
-				'contract_id'    => $id,
-				'sequence_no'    => 1,
-				'count'          => 1,
-				'status'         => new CycleStatus( CycleStatus::BILLED ),
-				'starts_at_gmt'  => '2026-07-15 00:00:00',
-				'ends_at_gmt'    => '2026-08-15 00:00:00',
-				'expected_total' => '19.99',
-				'currency'       => 'USD',
-				'plan_snapshot'  => $this->sample_plan_snapshot(),
-				'items_snapshot' => $this->sample_items_snapshot(),
+				'contract_id'       => $id,
+				'sequence_no'       => 1,
+				'count'             => 1,
+				'status'            => new CycleStatus( CycleStatus::BILLED ),
+				'starts_at_gmt'     => '2026-07-15 00:00:00',
+				'ends_at_gmt'       => '2026-08-15 00:00:00',
+				'expected_total'    => '19.99',
+				'currency'          => 'USD',
+				'plan_snapshot_id'  => $snapshot_ids[0],
+				'items_snapshot_id' => $snapshot_ids[1],
 			)
 		);
 		$this->sut->append_cycle( $cycle );
@@ -1738,7 +1753,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		global $wpdb;
 
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
 		$this->sut->append_cycle( $cycle );
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1840,62 +1855,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		}
 
 		return $id;
-	}
-
-	/**
-	 * @testdox Consecutive cycles with an unchanged plan/items share one snapshot row each.
-	 */
-	public function test_copy_forward_reuses_unchanged_snapshots(): void {
-		global $wpdb;
-
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$first = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
-		$this->sut->append_cycle( $first );
-
-		// The next cycle's plan/items are unchanged: copy-forward should reuse the ids.
-		$second = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
-		$this->sut->append_cycle( $second, $first );
-
-		$this->assertSame( $first->get_plan_snapshot_id(), $second->get_plan_snapshot_id() );
-		$this->assertSame( $first->get_items_snapshot_id(), $second->get_items_snapshot_id() );
-
-		// Exactly two snapshot rows: one plan payload, one items payload.
-		$snapshots = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row_count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$snapshots} WHERE contract_id = %d", $id ) );
-		$this->assertSame( 2, $row_count );
-	}
-
-	/**
-	 * @testdox A changed plan snapshot inserts a new row instead of copy-forwarding.
-	 */
-	public function test_copy_forward_inserts_a_new_row_when_the_plan_changes(): void {
-		global $wpdb;
-
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$first = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() );
-		$this->sut->append_cycle( $first );
-
-		// The plan terms changed, so the plan snapshot must not be reused.
-		$changed_plan = PlanSnapshot::from_array(
-			array(
-				'selling_plan_id' => 7,
-				'cadence'         => 'weekly',
-			)
-		);
-		$second       = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00', $changed_plan, $this->sample_items_snapshot() );
-		$this->sut->append_cycle( $second, $first );
-
-		$this->assertNotSame( $first->get_plan_snapshot_id(), $second->get_plan_snapshot_id() );
-		// The items were unchanged, so that row is still shared.
-		$this->assertSame( $first->get_items_snapshot_id(), $second->get_items_snapshot_id() );
-
-		$snapshots = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row_count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$snapshots} WHERE contract_id = %d", $id ) );
-		$this->assertSame( 3, $row_count, 'Two plan payloads plus one shared items payload.' );
 	}
 
 	/**
@@ -2057,7 +2016,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		global $wpdb;
 
 		$id = $this->sut->insert( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', $this->sample_plan_snapshot(), $this->sample_items_snapshot() ) );
+		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) ) );
 
 		$this->assertTrue( $this->sut->delete( $id ) );
 		$this->assertNull( $this->sut->find( $id ) );

@@ -9,8 +9,8 @@
  * through purpose-built reads ({@see self::find_chain_head()}, etc.), appended one at a
  * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
  * ({@see self::claim_cycle()}, {@see self::transition_cycle()}).
- * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
- * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
+ * There is no whole-graph `save()`. Cycle snapshot ids are stored as given and their
+ * value objects attached on read; nothing writes snapshot rows on append.
  * Meta is read and written only through the meta methods ({@see self::add_meta()} etc.),
  * so a whole-contract write never rewrites meta. It opens no transactions and keeps no
  * object cache; a caller may wrap several calls in its own transaction.
@@ -43,23 +43,6 @@ final class ContractRepository {
 	 * Logger source tag.
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
-
-	/**
-	 * The per-contract typed snapshot store.
-	 *
-	 * @var SnapshotStore
-	 */
-	private $snapshots;
-
-	/**
-	 * Build a repository over the given snapshot store.
-	 *
-	 * @param SnapshotStore|null $snapshots Snapshot store; a default instance is
-	 *                                      created when omitted.
-	 */
-	public function __construct( ?SnapshotStore $snapshots = null ) {
-		$this->snapshots = $snapshots ?? new SnapshotStore();
-	}
 
 	/**
 	 * Insert a new contract and its items and addresses.
@@ -1015,25 +998,21 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Append a cycle to its chain `(contract_id, kind)`, copy-forwarding snapshots.
+	 * Append a cycle to its chain `(contract_id, kind)`.
 	 *
-	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), resolves the
-	 * cycle's snapshots (reused from `$previous` when unchanged, else inserted fresh), then
-	 * inserts the cycle row and stamps the generated id back onto the entity. The chain's
+	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), then inserts
+	 * the cycle row and stamps the generated id back onto the entity. The chain's
 	 * UNIQUE indexes guard concurrent appends and duplicate counts. The seam a later
 	 * transaction-handling change wraps.
 	 *
-	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
-	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
-	 *                             snapshot ids should be considered; null for the first cycle.
+	 * @param Cycle $cycle Cycle to append. Carries its contract id and kind.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
 	 *                                 position is already claimed - the create-as-claim race).
-	 * @throws \RuntimeException If a snapshot write or the cycle insert fails for any
-	 *                          other reason (the database error is in the message).
+	 * @throws \RuntimeException If the cycle insert fails for any other reason (the
+	 *                          database error is in the message).
 	 */
-	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
+	public function append_cycle( Cycle $cycle ): void {
 		$this->assign_next_sequence_no( $cycle );
-		$this->resolve_cycle_snapshots( $cycle, $previous );
 		$this->insert_cycle( $cycle );
 	}
 
@@ -1241,77 +1220,6 @@ final class ContractRepository {
 		}
 
 		return $cycles;
-	}
-
-	/**
-	 * Resolve a cycle's in-memory snapshot value objects into stored row ids (write-once).
-	 *
-	 * Per snapshot type: when the cycle carries a fresh value object and no stored id
-	 * yet, the id is copy-forwarded from `$previous` (when payload + schema version
-	 * match) or freshly inserted, then stamped onto the cycle. A cycle that already
-	 * carries an id is left as is - a frozen reference is never re-pointed.
-	 *
-	 * @param Cycle      $cycle    Cycle whose snapshots to resolve.
-	 * @param Cycle|null $previous The previous cycle to copy-forward from, or null.
-	 */
-	private function resolve_cycle_snapshots( Cycle $cycle, ?Cycle $previous ): void {
-		$contract_id = $cycle->get_contract_id();
-
-		$plan = $cycle->get_plan_snapshot();
-		if ( $plan instanceof PlanSnapshot && null === $cycle->get_plan_snapshot_id() ) {
-			$cycle->set_plan_snapshot_id(
-				$this->copy_forward_or_insert(
-					$contract_id,
-					SnapshotStore::TYPE_PLAN,
-					$plan->get_selling_plan_id(),
-					$plan->to_payload(),
-					$plan->get_schema_version(),
-					null === $previous ? null : $previous->get_plan_snapshot_id()
-				)
-			);
-		}
-
-		$items = $cycle->get_items_snapshot();
-		if ( $items instanceof ItemsSnapshot && null === $cycle->get_items_snapshot_id() ) {
-			$cycle->set_items_snapshot_id(
-				$this->copy_forward_or_insert(
-					$contract_id,
-					SnapshotStore::TYPE_ITEMS,
-					null,
-					$items->to_payload(),
-					$items->get_schema_version(),
-					null === $previous ? null : $previous->get_items_snapshot_id()
-				)
-			);
-		}
-	}
-
-	/**
-	 * Reuse the previous cycle's snapshot id when its payload + schema version match,
-	 * else insert a fresh row.
-	 *
-	 * The match is a strict comparison against the JSON-decoded stored payload, so
-	 * payload values must be JSON-round-trip-safe scalars: ints and strings (money as
-	 * decimal strings, never PHP floats - a float may not decode back identical,
-	 * defeating the reuse).
-	 *
-	 * @param int                      $contract_id          Owning contract id.
-	 * @param string                   $snapshot_type        Snapshot type (`plan` | `items`).
-	 * @param int|null                 $parent_id            Weak link to the source, or null.
-	 * @param array<int|string, mixed> $payload              The new snapshot payload.
-	 * @param int                      $schema_version       Payload-format version.
-	 * @param int|null                 $previous_snapshot_id The previous cycle's snapshot id, or null.
-	 * @return int The reused or newly-inserted snapshot id.
-	 */
-	private function copy_forward_or_insert( int $contract_id, string $snapshot_type, ?int $parent_id, array $payload, int $schema_version, ?int $previous_snapshot_id ): int {
-		if ( null !== $previous_snapshot_id ) {
-			$previous = $this->find_snapshot_payload( $previous_snapshot_id );
-			if ( null !== $previous && $previous['schema_version'] === $schema_version && $previous['payload'] === $payload ) {
-				return $previous_snapshot_id;
-			}
-		}
-
-		return $this->snapshots->insert( $contract_id, $snapshot_type, $parent_id, $payload, $schema_version );
 	}
 
 	/**
