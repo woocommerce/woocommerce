@@ -77,7 +77,7 @@ test.describe(
 				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 				await expect(
 					page.getByText(
-						/Want to be notified when this product is back in stock\?/i
+						'Want to be notified when this product is back in stock?'
 					)
 				).toHaveCount( 0 );
 			} );
