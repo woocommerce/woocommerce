@@ -159,8 +159,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 				break;
 		}
 
-		$this->assertSame( '/original.php', $this->sut->handle_classic_template_include( '/original.php' ) );
-		$this->assertFalse( wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
+		$this->assert_classic_result( '/original.php' );
 	}
 
 	/**
@@ -176,9 +175,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	public function test_saved_template_selection( string $type, string $slug, string $status, string $scope, bool $preserved ): void {
 		$this->create_saved_design( $type, $slug, $status, 'current' === $scope ? get_stylesheet() : $scope );
 
-		$expected = $preserved ? '/original.php' : self::ENTIRE_SITE_TEMPLATE;
-		$this->assertSame( $expected, $this->sut->handle_classic_template_include( '/original.php' ) );
-		$this->assertSame( ! $preserved, wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
+		$this->assert_classic_result( $preserved ? '/original.php' : self::ENTIRE_SITE_TEMPLATE );
 	}
 
 	/**
@@ -230,9 +227,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			add_filter( 'stylesheet_directory', fn() => $root . '/child' );
 			add_filter( 'template_directory', fn() => $root . '/parent' );
 
-			$expected = $preserved ? '/original.php' : self::ENTIRE_SITE_TEMPLATE;
-			$this->assertSame( $expected, $this->sut->handle_classic_template_include( '/original.php' ) );
-			$this->assertSame( ! $preserved, wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
+			$this->assert_classic_result( $preserved ? '/original.php' : self::ENTIRE_SITE_TEMPLATE );
 			$this->assertFalse( current_theme_supports( 'block-templates' ) );
 		} finally {
 			wp_delete_file( $path );
@@ -240,6 +235,17 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			$this->remove_fixture_directory( $root . '/' . $theme );
 			$this->remove_fixture_directory( $root );
 		}
+	}
+
+	/**
+	 * Assert the classic template result, and that its stylesheet is enqueued only when the WooCommerce page is selected.
+	 *
+	 * @param string $expected Expected template path.
+	 * @param string $original Previously selected template path.
+	 */
+	private function assert_classic_result( string $expected, string $original = '/original.php' ): void {
+		$this->assertSame( $expected, $this->sut->handle_classic_template_include( $original ) );
+		$this->assertSame( self::ENTIRE_SITE_TEMPLATE === $expected, wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
 	}
 
 	/**
@@ -340,10 +346,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( WC_ABSPATH . 'templates/single-product.php', $this->sut->handle_classic_template_include( '/original.php' ) );
 		$this->assertSame( array( array( 'coming-soon.php' ) ), $hierarchy_calls );
-		$this->assertCount( 1, $template_calls );
-		$this->assertSame( self::ENTIRE_SITE_TEMPLATE, $template_calls[0][0] );
-		$this->assertSame( 'coming-soon', $template_calls[0][1] );
-		$this->assertSame( array( 'coming-soon.php' ), $template_calls[0][2] );
+		$this->assertSame( array( array( self::ENTIRE_SITE_TEMPLATE, 'coming-soon', array( 'coming-soon.php' ) ) ), $template_calls );
 	}
 
 	/**
@@ -356,8 +359,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	public function test_classic_template_failure_is_closed( string $filter, $value ): void {
 		add_filter( $filter, fn() => $value );
 
-		$this->assertSame( '', $this->sut->handle_classic_template_include( '/protected.php' ) );
-		$this->assertFalse( wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
+		$this->assert_classic_result( '', '/protected.php' );
 	}
 
 	/**
@@ -400,8 +402,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			}
 			add_filter( 'coming-soon_template', fn() => $path );
 
-			$this->assertSame( '', $this->sut->handle_classic_template_include( '/protected.php' ) );
-			$this->assertFalse( wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
+			$this->assert_classic_result( '', '/protected.php' );
 		} finally {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Restore task-owned fixture permissions before deleting it.
 			chmod( $path, 0600 );
@@ -429,9 +430,14 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$output = $this->render( $this->sut->handle_classic_template_include( '/original.php' ) );
 
 		$this->assertSame( 1, substr_count( strtolower( $output ), '<!doctype html>' ) );
-		$this->assertSame( 1, $hook_counts['wp_head'] );
-		$this->assertSame( 1, $hook_counts['wp_body_open'] );
-		$this->assertSame( 1, $hook_counts['wp_footer'] );
+		$this->assertSame(
+			array(
+				'wp_head'      => 1,
+				'wp_body_open' => 1,
+				'wp_footer'    => 1,
+			),
+			$hook_counts
+		);
 		$this->assertSame( 1, substr_count( $output, '</html>' ) );
 		$this->assertSame( 1, substr_count( $output, "<meta name='woo-coming-soon-page' content='yes'>" ) );
 		$this->assertStringContainsString( 'Test &amp; shop is coming soon', $output );
