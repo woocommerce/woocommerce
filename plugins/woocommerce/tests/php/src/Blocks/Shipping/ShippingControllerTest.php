@@ -19,14 +19,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	private ShippingController $shipping_controller;
 
 	/**
-	 * The new checkout page ID.
-	 *
-	 * @var int $block_checkout_page_id
-	 */
-	private $block_checkout_page_id;
-
-
-	/**
 	 * Mock logger instance.
 	 *
 	 * @var \WC_Logger_Interface $mock_logger
@@ -66,7 +58,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		$this->backup_wc = WC();
 
 		// Local pickup only works with the checkout block.
-		$this->block_checkout_page_id = $this->factory->post->create(
+		$block_checkout_page_id = $this->factory->post->create(
 			array(
 				'post_type'    => 'page',
 				'post_title'   => 'Checkout',
@@ -74,7 +66,10 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 				'post_status'  => 'publish',
 			)
 		);
-		update_option( 'woocommerce_checkout_page_id', $this->block_checkout_page_id );
+		update_option( 'woocommerce_checkout_page_id', $block_checkout_page_id );
+		// An earlier test class may have loaded the shipping methods while the checkout was a
+		// shortcode page, which skips local pickup. Unload them so the next read registers it.
+		WC()->shipping()->unregister_shipping_methods();
 
 		$this->shipping_controller = new ShippingController(
 			Package::container()->get( Api::class ),
@@ -355,9 +350,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	 */
 	private function shopper_is_on_the_block_checkout(): void {
 		WC()->cart->cart_context = 'store-api';
-		// An earlier test class may have loaded the shipping methods before setUp() made the
-		// checkout a block, which skips pickup, so register it directly.
-		$this->shipping_controller->register_local_pickup();
 	}
 
 	/**
