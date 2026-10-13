@@ -91,11 +91,6 @@ $min-product-width: 150px;
  * Carousel layout
  */
 
-:where(.is-product-collection-layout-carousel) {
-	// Padding to prevent focus outline from being clipped (WCAG 2.4.13).
-	padding: 4px;
-}
-
 .is-product-collection-layout-carousel {
 	overflow-x: auto;
 	scrollbar-width: none;
@@ -106,6 +101,9 @@ $min-product-width: 150px;
 	container-name: carousel;
 
 	.wc-block-product {
+		box-sizing: border-box;
+		// Padding to prevent focus outline from being clipped.
+		padding: 4px;
 		scroll-snap-align: center;
 		flex-basis: 0;
 		// Show 2 products in 85% of available space.
