@@ -667,6 +667,10 @@ final class WooCommerce {
 	 * The UCP namespace counts as one: like the Store API it returns data rather than rendered
 	 * pages, so callers can skip the same work — block and template registration, site tracking.
 	 *
+	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
+	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
+	 * which a UCP agent never sends, so UCP routes must not inherit them.
+	 *
 	 * @return bool
 	 */
 	public function is_store_api_request() {
