@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ExtensionCartUpdateArgs } from '@woocommerce/types';
+import { addAction, removeAction } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -380,6 +381,74 @@ describe( 'receiveCart', () => {
 
 		// item-1 is still in the cart, so pending delete should NOT be cleared.
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should fire the cart-updated action with the new and previous cart after clearing pending deletes', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'bundle-parent' }, { key: 'simple-product' } ],
+			pendingDelete: [ 'bundle-parent' ],
+		} );
+		const previousCart = select.getCartData();
+		const callback = jest.fn( () => {
+			// Pending deletes are already cleared when extensions are told about the update.
+			expect( dispatch.itemIsPendingDelete ).toHaveBeenCalledWith(
+				'bundle-parent',
+				false
+			);
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated',
+			callback
+		);
+
+		try {
+			receiveCart( {
+				items: [ { key: 'simple-product' } ],
+				errors: [],
+			} as never )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated'
+			);
+		}
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith( {
+			storeCart: select.getCartData(),
+			previousStoreCart: previousCart,
+		} );
+	} );
+
+	it( 'should still update the cart when a cart-updated callback throws', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'item-1' } ],
+			pendingDelete: [],
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-throws',
+			() => {
+				throw new Error( 'Extension error' );
+			}
+		);
+
+		try {
+			receiveCart( {
+				items: [ { key: 'item-2' } ],
+				errors: [],
+			} as never )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-throws'
+			);
+		}
+
+		expect( dispatch.setCartData ).toHaveBeenCalled();
+		expect( dispatch.setErrorData ).toHaveBeenCalledWith( null );
+		expect( console ).toHaveErroredWith( new Error( 'Extension error' ) );
 	} );
 
 	it( 'should handle empty pending delete list', () => {
