@@ -557,11 +557,6 @@
 					"text": "var(--wp--preset--color--theme-2)"
 				}
 			},
-			"woocommerce/product-price": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-4)"
-				}
-			},
 			"woocommerce/product-results-count": {
 				"color": {
 					"text": "var(--wp--preset--color--theme-4)"
@@ -639,11 +634,6 @@
 					"style": "solid",
 					"width": "1px",
 					"color": "var(--wp--preset--color--theme-7)"
-				}
-			},
-			"woocommerce/product-summary": {
-				"color": {
-					"text": "var(--wp--preset--color--theme-4)"
 				}
 			},
 			"woocommerce/product-title": {
