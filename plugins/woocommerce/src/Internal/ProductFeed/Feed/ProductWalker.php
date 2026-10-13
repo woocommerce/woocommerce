@@ -140,6 +140,7 @@ class ProductWalker {
 		 * Allows the base arguments for querying products for product feeds to be changed.
 		 *
 		 * Variable products are not included by default, as their variations will be included.
+		 * `orderby` and `order` are always overridden with `ID` and `ASC`, as products are walked by ID.
 		 *
 		 * @since 10.5.0
 		 *

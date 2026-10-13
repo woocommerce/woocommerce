@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Integrations\POSCatalog;
 
 use PHPUnit\Framework\MockObject\MockObject;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\AsyncGenerator;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSIntegration;
@@ -480,7 +481,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			'trashed'     => array( fn( \WC_Product $product ) => $product->delete() ),
 			'unpublished' => array(
 				function ( \WC_Product $product ) {
-					$product->set_status( 'draft' );
+					$product->set_status( ProductStatus::DRAFT );
 					$product->save();
 				},
 			),
