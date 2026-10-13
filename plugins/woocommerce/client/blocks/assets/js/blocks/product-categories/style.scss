@@ -4,16 +4,15 @@
 	&.is-dropdown {
 		display: flex;
 	}
-
-	select {
-		margin-inline-end: 0.5em;
-	}
 }
 
-// Match the sizing defaults of the Add to Cart with Options variation dropdown.
-:where(.wc-block-product-categories__dropdown select) {
-	height: 3em;
-	padding: 0.25em 1em;
+.wc-block-product-categories__dropdown {
+	@include opinionated-select-arrow;
+	margin-inline-end: 0.5em;
+
+	select {
+		@include opinionated-select;
+	}
 }
 
 .wc-block-product-categories-list--has-images {

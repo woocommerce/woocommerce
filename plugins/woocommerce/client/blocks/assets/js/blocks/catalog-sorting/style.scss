@@ -10,6 +10,7 @@
 	}
 
 	select.orderby {
+		@include opinionated-select;
 		field-sizing: content;
 		font-size: inherit;
 		vertical-align: middle;
@@ -22,6 +23,7 @@
 	}
 
 	.woocommerce-ordering {
+		@include opinionated-select-arrow;
 		margin: auto;
 	}
 }
