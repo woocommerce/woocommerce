@@ -27,9 +27,9 @@ class CartPricingContext {
 	private $dispatch_stack = array();
 
 	/**
-	 * Map of dispatch IDs to whether the route is a cart or checkout route, and the cart calculation depth when the dispatch started.
+	 * Map of dispatch IDs to whether the route is a cart or checkout route, and the calculation and mini-cart depths when the dispatch started.
 	 *
-	 * @var array<int, array{is_cart_or_checkout: bool, calculation_depth: int}>
+	 * @var array<int, array{is_cart_or_checkout: bool, calculation_depth: int, mini_cart_count: int}>
 	 */
 	private $dispatch_contexts = array();
 
@@ -181,7 +181,7 @@ class CartPricingContext {
 	 * @return mixed The response.
 	 */
 	public function handle_rest_request_after_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$this->clear_dispatch_context( $request );
+		$this->end_dispatch( $request );
 
 		return $response;
 	}
@@ -222,7 +222,7 @@ class CartPricingContext {
 	 */
 	public function handle_hydration_request_after_callbacks( $response, $handler, $request ) {
 		if ( $request instanceof \WP_REST_Request ) {
-			$this->clear_dispatch_context( $request );
+			$this->end_dispatch( $request );
 		}
 
 		return $response;
@@ -241,24 +241,40 @@ class CartPricingContext {
 		$this->dispatch_contexts[ $dispatch_id ] = array(
 			'is_cart_or_checkout' => 1 === preg_match( '#^/wc/store(?:/v1)?/(?:cart|checkout)(?:/|$)#', $route_path ),
 			'calculation_depth'   => $this->calculation_depth,
+			'mini_cart_count'     => count( $this->mini_cart_depths ),
 		);
 		$this->dispatch_stack[]                  = $dispatch_id;
 	}
 
 	/**
-	 * Remove a dispatch context from the stack, preserving the order of outer contexts.
+	 * End a dispatch, dropping its context and any inner contexts left on the stack above it.
+	 *
+	 * Calculation and mini-cart depths go back to their values from when the dispatch started, so an
+	 * exception caught inside the dispatch cannot leave the cart priced for the rest of the request.
+	 * Calling it again for a dispatch that already ended does nothing.
+	 *
+	 * @since 11.3.0
+	 * @internal
 	 *
 	 * @param \WP_REST_Request $request Request whose context should be cleared.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @phpstan-template T of array
+	 * @phpstan-param \WP_REST_Request<T> $request
 	 */
-	private function clear_dispatch_context( \WP_REST_Request $request ): void {
+	public function end_dispatch( \WP_REST_Request $request ): void {
 		$dispatch_id = spl_object_id( $request );
+		// Search from the top, in case a leaked context reused the same object ID.
+		$stack_key = array_search( $dispatch_id, array_reverse( $this->dispatch_stack, true ), true );
+		$context   = $this->dispatch_contexts[ $dispatch_id ] ?? null;
 
-		unset( $this->dispatch_contexts[ $dispatch_id ] );
-
-		$stack_key = array_search( $dispatch_id, $this->dispatch_stack, true );
-		if ( false !== $stack_key ) {
-			array_splice( $this->dispatch_stack, (int) $stack_key, 1 );
+		if ( false === $stack_key || null === $context ) {
+			return;
 		}
+
+		foreach ( array_splice( $this->dispatch_stack, (int) $stack_key ) as $ended_dispatch_id ) {
+			unset( $this->dispatch_contexts[ $ended_dispatch_id ] );
+		}
+
+		$this->calculation_depth = $context['calculation_depth'];
+		$this->mini_cart_depths  = array_slice( $this->mini_cart_depths, 0, $context['mini_cart_count'] );
 	}
 }

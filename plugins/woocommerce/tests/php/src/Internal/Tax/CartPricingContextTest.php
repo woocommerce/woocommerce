@@ -292,6 +292,74 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Clears the hydration context when a hydration dispatch filter throws.
+	 */
+	public function test_clears_hydration_context_when_dispatch_filter_throws(): void {
+		$after    = null;
+		$throwing = function () {
+			throw new \Exception( 'Hydration failure' );
+		};
+		// Runs after the context is registered at the default priority.
+		add_filter( 'woocommerce_hydration_dispatch_request', $throwing, 11 );
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$after ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				StoreApi::container();
+				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
+				$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+				$after = $this->sut->is_active();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		$this->assertFalse( $after, 'A failed hydration should not leave the cart route context active.' );
+		$this->assert_dispatch_stack_empty( 'A failed hydration should not leave a context on the stack.' );
+	}
+
+	/**
+	 * @testdox Restores the outer route context when a nested request catches a failed cart calculation.
+	 */
+	public function test_restores_context_after_nested_request_catches_failed_calculation(): void {
+		$this->add_product_to_cart();
+		$outer    = null;
+		$throwing = function (): void {
+			throw new \Exception( 'Calculation failure' );
+		};
+		add_action( 'woocommerce_before_calculate_totals', $throwing );
+
+		$this->dispatch_nested_test_routes(
+			function (): void {
+				try {
+					WC()->cart->calculate_totals();
+				} catch ( \Exception $e ) {
+					unset( $e ); // The failure is the point of the test.
+				}
+			},
+			$outer
+		);
+
+		$this->assertFalse( $outer, 'A calculation that never ended should not price the cart once its request is done.' );
+	}
+
+	/**
+	 * @testdox Restores the outer route context when a nested request leaves a mini-cart render unfinished.
+	 */
+	public function test_restores_context_after_nested_request_leaves_mini_cart_unfinished(): void {
+		$outer = null;
+
+		$this->dispatch_nested_test_routes(
+			function (): void {
+				$this->sut->handle_template_part_start( 'cart/mini-cart.php' );
+			},
+			$outer
+		);
+
+		$this->assertFalse( $outer, 'A mini-cart render that never ended should not price the cart once its request is done.' );
+	}
+
+	/**
 	 * @testdox Restores the cart route context after a nested non-cart request.
 	 */
 	public function test_restores_cart_route_context_after_nested_non_cart_request(): void {
@@ -453,6 +521,40 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 404, $response->get_status(), 'An unmatched Store API cart route should return 404.' );
 		$this->assert_dispatch_stack_empty( 'An unmatched cart request should not leave a context on the stack.' );
+	}
+
+	/**
+	 * Dispatch a non-cart route that runs a nested non-cart request, and record whether the cart is priced after it.
+	 *
+	 * @param callable  $inner_work Work done inside the nested request.
+	 * @param bool|null $outer      Set to is_active() after the nested request returns.
+	 */
+	private function dispatch_nested_test_routes( callable $inner_work, ?bool &$outer ): void {
+		$this->create_rest_server_with_routes(
+			array(
+				function () use ( $inner_work, &$outer ): void {
+					$this->register_test_route(
+						'/wc/v3/test-inner',
+						function ( $request ) use ( $inner_work ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							$inner_work();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+					$this->register_test_route(
+						'/wc/v3/test-outer',
+						function ( $request ) use ( &$outer ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-inner' ) );
+							$outer = $this->sut->is_active();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+				},
+			)
+		);
+
+		rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-outer' ) );
 	}
 
 	/**
