@@ -483,7 +483,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not accept a status that is excluded from search.
+	 * @testdox Should not accept a status that is excluded from search, but return it in the output.
 	 */
 	public function test_a_status_excluded_from_search_is_not_queryable(): void {
 		global $wc_order_types, $post_type_meta_caps;
@@ -509,9 +509,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		try {
 			$this->register_domain_abilities();
 
-			$input = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema()['properties'];
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
 
 			$this->assertNotContains( 'test-hidden', $input['status']['anyOf'][0]['enum'] );
+			$this->assertContains( 'test-hidden', $output['status']['enum'] );
 
 			$query_args = $this->capture_order_query_args( array( 'type' => 'shop_test_contract' ) );
 
