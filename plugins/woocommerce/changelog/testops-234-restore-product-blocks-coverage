@@ -1,4 +1,3 @@
 Significance: patch
 Type: dev
-
-Compare the un-migrated Products block with the classic template on three routes, cover per-product template registration of Product Details, and assert the has-post-thumbnail body class
+Comment: Improve product-block regression coverage; no production change.
