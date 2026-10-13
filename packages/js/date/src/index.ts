@@ -1280,6 +1280,11 @@ export function getShortDateFormat() {
 		/* translators: Moment.js date format for typed dates. Keep the DD, MM and YYYY tokens. */
 		__( 'MM/DD/YYYY', 'woocommerce' )
 	);
+	// Localized tokens ("L", "l", "LT", ...) round-trip, but loadLocaleData()
+	// would then define "L" in terms of itself.
+	if ( /[Ll]/.test( format.replace( /\[[^[]*\]|\\./g, '' ) ) ) {
+		return defaultShortDateFormat;
+	}
 	// Created per call so month names format and parse in the current locale.
 	const checkDate = moment( '2001-02-03', isoDateFormat );
 	const parsed = moment( checkDate.format( format ), format, true );

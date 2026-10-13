@@ -1477,6 +1477,14 @@ describe( 'getShortDateFormat', () => {
 		[ 'dd/mm/aaaa', 'MM/DD/YYYY' ],
 		[ 'મમ/દદ/વવવવ', 'MM/DD/YYYY' ],
 		[ 'DD/MM', 'MM/DD/YYYY' ],
+		[ 'DD/YYYY', 'MM/DD/YYYY' ],
+		[ 'MM/YYYY', 'MM/DD/YYYY' ],
+		// Localized tokens would make loadLocaleData() define "L" as itself.
+		[ 'L', 'MM/DD/YYYY' ],
+		[ 'l', 'MM/DD/YYYY' ],
+		[ 'LL', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY LT', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY [L]', 'DD/MM/YYYY [L]' ],
 	] )( 'returns %s as %s', ( translation, expected ) => {
 		translateShortDateFormat( translation );
 		expect( getShortDateFormat() ).toBe( expected );
