@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
 		<a class="woocommerce-coming-soon-classic__login" href="<?php echo esc_url( wp_login_url() ); ?>"><?php esc_html_e( 'Log in', 'woocommerce' ); ?></a>
 	</header>
 	<main class="woocommerce-coming-soon-classic__content">
-		<h1>
+		<h1 class="woocommerce-coming-soon-banner">
 			<?php
 			echo esc_html(
 				sprintf(
