@@ -2876,6 +2876,30 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An unknown attribute term ID is rejected instead of clearing the product's terms.
+	 */
+	public function test_create_product_with_unknown_attribute_term_id_fails(): void {
+		list( $attribute ) = $this->create_attribute_with_duplicate_term_names();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'       => 'Trousers',
+				'attributes' => array(
+					array(
+						'id'       => $attribute['attribute_id'],
+						'term_ids' => array( PHP_INT_MAX ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $response->get_data()['code'] );
+	}
+
+	/**
 	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
 	 *
 	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
