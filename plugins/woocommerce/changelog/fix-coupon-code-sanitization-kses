@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep coupon codes with special characters working on WordPress 7.2, and show codes with `&` correctly in the coupon editor.
