@@ -365,7 +365,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 					<!-- wp:woocommerce/product-price {"fontSize":"large"} /-->
 
-					<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary", "excerptLength":100} /-->
+					<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-collection/product-summary", "excerptLength":100} /-->
 
 					<!-- wp:woocommerce/add-to-cart-form /-->
 
