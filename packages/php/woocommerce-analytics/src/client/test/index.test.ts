@@ -117,7 +117,7 @@ describe( 'client entry point', () => {
 	it( 'waits for the consent type before checking consent', async () => {
 		// WP Consent API reports consent until a consent type is set.
 		window.wp_has_consent = () => window.wp_consent_type === undefined;
-		window.waitfor_consent_hook = true;
+		window.waitfor_consent_hook = '1';
 
 		await loadPage();
 		expect( isTrackingScriptLoaded() ).toBe( false );
@@ -129,5 +129,21 @@ describe( 'client entry point', () => {
 
 		expect( isTrackingScriptLoaded() ).toBe( false );
 		expect( mockInitAnalytics ).not.toHaveBeenCalled();
+	} );
+
+	it( 'loads s.js and analytics once a late consent type allows statistics', async () => {
+		window.wp_has_consent = () => true;
+		window.waitfor_consent_hook = '1';
+
+		await loadPage();
+		expect( isTrackingScriptLoaded() ).toBe( false );
+		expect( mockInitAnalytics ).not.toHaveBeenCalled();
+
+		window.wp_consent_type = 'optout';
+		document.dispatchEvent( new CustomEvent( 'wp_consent_type_defined' ) );
+		await flushPromises();
+
+		expect( isTrackingScriptLoaded() ).toBe( true );
+		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

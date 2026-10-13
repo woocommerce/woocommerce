@@ -13,7 +13,8 @@ import { loadTrackingScript } from './tracking-script';
 function startTracking() {
 	const { trackingScriptUrl } = window.wcAnalytics;
 
-	// Only a string may become a script URL: a same-named DOM element could otherwise stand in for it.
+	// null means PHP already enqueued s.js. Requiring a string also skips a same-named DOM element
+	// that stands in for `wcAnalytics` when the config script did not run.
 	if ( typeof trackingScriptUrl === 'string' ) {
 		loadTrackingScript( trackingScriptUrl );
 	}

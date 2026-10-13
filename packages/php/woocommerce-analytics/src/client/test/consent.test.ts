@@ -34,7 +34,7 @@ describe( 'ConsentManager.waitForConsentType', () => {
 
 	it( 'runs right away when the consent type is already defined', () => {
 		window.wp_has_consent = () => false;
-		window.waitfor_consent_hook = true;
+		window.waitfor_consent_hook = '1';
 		window.wp_consent_type = 'optin';
 		const callback = jest.fn();
 
@@ -45,7 +45,7 @@ describe( 'ConsentManager.waitForConsentType', () => {
 
 	it( 'waits for the consent plugin to define the consent type', () => {
 		window.wp_has_consent = () => false;
-		window.waitfor_consent_hook = true;
+		window.waitfor_consent_hook = '1';
 		const callback = jest.fn();
 
 		new ConsentManager().waitForConsentType( callback );
