@@ -355,6 +355,9 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	 */
 	private function shopper_is_on_the_block_checkout(): void {
 		WC()->cart->cart_context = 'store-api';
+		// An earlier test class may have loaded the shipping methods before setUp() made the
+		// checkout a block, which skips pickup, so register it directly.
+		$this->shipping_controller->register_local_pickup();
 	}
 
 	/**
