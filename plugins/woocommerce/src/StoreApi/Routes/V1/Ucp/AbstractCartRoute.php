@@ -33,6 +33,14 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const CANCELLED_SESSION_KEY = 'ucp_cart_cancelled';
 
 	/**
+	 * Most lines one request may name.
+	 *
+	 * Each line can cost a product lookup, so an open route needs a ceiling. Matches the
+	 * catalog search page size, so one page of results always fits in one cart request.
+	 */
+	const LINE_ITEMS_MAX = 100;
+
+	/**
 	 * Cart transformer.
 	 *
 	 * @var UcpCartTransformer|null
@@ -364,6 +372,17 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	protected function parse_line_items( $line_items ) {
 		if ( ! is_array( $line_items ) ) {
 			return $this->ucp_error( 'VALIDATION_ERROR', __( 'line_items must be an array.', 'woocommerce' ), 'recoverable', 400, '$.line_items' );
+		}
+
+		if ( count( $line_items ) > self::LINE_ITEMS_MAX ) {
+			return $this->ucp_error(
+				'VALIDATION_ERROR',
+				/* translators: %d: maximum number of line items accepted in one request. */
+				sprintf( __( 'line_items may hold at most %d entries.', 'woocommerce' ), self::LINE_ITEMS_MAX ),
+				'recoverable',
+				400,
+				'$.line_items'
+			);
 		}
 
 		$cart_items = $this->cart_controller->get_cart_items();

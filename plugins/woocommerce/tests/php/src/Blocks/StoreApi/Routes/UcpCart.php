@@ -279,6 +279,24 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A request naming more lines than the ceiling is refused before any product lookup.
+	 */
+	public function test_create_cart_refuses_too_many_line_items(): void {
+		$line_items = array_fill( 0, AbstractCartRoute::LINE_ITEMS_MAX + 1, $this->line_item( 0, 1 ) );
+
+		$response = $this->request( 'POST', '/carts', array( 'line_items' => $line_items ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+		$this->assertSame( '$.line_items', $data['messages'][0]['path'] );
+
+		// Exactly the ceiling is still accepted.
+		$this->create_cart( array_slice( $line_items, 0, AbstractCartRoute::LINE_ITEMS_MAX ) );
+	}
+
+	/**
 	 * Creating a cart answers the UCP cart shape, with amounts in minor units.
 	 */
 	public function test_create_cart_returns_ucp_cart(): void {
