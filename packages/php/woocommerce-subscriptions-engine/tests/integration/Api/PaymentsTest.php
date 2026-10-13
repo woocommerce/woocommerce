@@ -49,40 +49,42 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox supports_gateway follows the gateway's supports(), including the core filter.
+	 * @testdox gateway_supports follows the gateway's supports(), including the core filter.
 	 */
-	public function test_supports_gateway_reads_the_gateway_feature(): void {
-		$this->assertFalse( Payments::supports_gateway( self::GATEWAY ), 'A core gateway does not support engine charges by default.' );
+	public function test_gateway_supports_reads_the_gateway_feature(): void {
+		$this->assertFalse( Payments::gateway_supports( self::GATEWAY ), 'A core gateway does not support engine charges by default.' );
 
 		$this->support_engine_charges( self::GATEWAY );
 
-		$this->assertTrue( Payments::supports_gateway( self::GATEWAY ) );
-		$this->assertFalse( Payments::supports_gateway( 'bacs' ), 'Only the gateway that declared the feature.' );
+		$this->assertTrue( Payments::gateway_supports( self::GATEWAY ) );
+		$this->assertFalse( Payments::gateway_supports( 'bacs' ), 'Only the gateway that declared the feature.' );
 	}
 
 	/**
-	 * @testdox supports_gateway with features needs the engine feature and every listed one.
+	 * @testdox gateway_supports with features needs the engine feature and every listed one.
 	 */
-	public function test_supports_gateway_checks_the_listed_features_with_the_engine_feature(): void {
+	public function test_gateway_supports_checks_the_listed_features_with_the_engine_feature(): void {
 		$this->support_feature( self::GATEWAY, 'subscriptions' );
 
-		$this->assertFalse( Payments::supports_gateway( self::GATEWAY, 'subscriptions' ), 'A listed feature without the engine feature is not enough.' );
+		$this->assertFalse( Payments::gateway_supports( self::GATEWAY, 'subscriptions' ), 'A listed feature without the engine feature is not enough.' );
 
 		$this->support_engine_charges( self::GATEWAY );
 
-		$this->assertTrue( Payments::supports_gateway( self::GATEWAY, 'subscriptions' ) );
-		$this->assertFalse( Payments::supports_gateway( self::GATEWAY, 'subscriptions', 'subscription_payment_method_change' ), 'Every listed feature is needed.' );
-		$this->assertFalse( Payments::supports_gateway( 'bacs', 'subscriptions' ) );
+		$this->assertTrue( Payments::gateway_supports( self::GATEWAY, 'subscriptions' ) );
+		$this->assertTrue( Payments::gateway_supports( self::GATEWAY, array( 'subscriptions' ) ), 'A list works like a single feature.' );
+		$this->assertTrue( Payments::gateway_supports( self::GATEWAY, array() ), 'No listed feature checks the engine feature alone.' );
+		$this->assertFalse( Payments::gateway_supports( self::GATEWAY, array( 'subscriptions', 'subscription_payment_method_change' ) ), 'Every listed feature is needed.' );
+		$this->assertFalse( Payments::gateway_supports( 'bacs', 'subscriptions' ) );
 	}
 
 	/**
-	 * @testdox supports_gateway is false for an empty or unknown gateway id.
+	 * @testdox gateway_supports is false for an empty or unknown gateway id.
 	 */
-	public function test_supports_gateway_is_false_for_unknown_ids(): void {
+	public function test_gateway_supports_is_false_for_unknown_ids(): void {
 		$this->support_engine_charges( 'no-such-gateway' );
 
-		$this->assertFalse( Payments::supports_gateway( '' ) );
-		$this->assertFalse( Payments::supports_gateway( 'no-such-gateway' ) );
+		$this->assertFalse( Payments::gateway_supports( '' ) );
+		$this->assertFalse( Payments::gateway_supports( 'no-such-gateway' ) );
 	}
 
 	/**

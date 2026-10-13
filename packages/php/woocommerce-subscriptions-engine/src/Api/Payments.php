@@ -51,16 +51,17 @@ final class Payments {
 	 * `supports()` without interpreting them, so core's `woocommerce_payment_gateway_supports`
 	 * filter applies to each. False for an empty or unknown id.
 	 *
-	 * @param string $gateway_id  Gateway id.
-	 * @param string ...$features Gateway features the operation needs, besides the engine's.
+	 * @param string          $gateway_id Gateway id.
+	 * @param string|string[] $features   Gateway feature, or features, the operation needs
+	 *                                    besides the engine's. Default none.
 	 */
-	public static function supports_gateway( string $gateway_id, string ...$features ): bool {
+	public static function gateway_supports( string $gateway_id, $features = array() ): bool {
 		$gateway = self::get_gateway( $gateway_id );
 		if ( null === $gateway ) {
 			return false;
 		}
 
-		foreach ( array( self::GATEWAY_FEATURE, ...$features ) as $feature ) {
+		foreach ( array_merge( array( self::GATEWAY_FEATURE ), (array) $features ) as $feature ) {
 			if ( ! $gateway->supports( $feature ) ) {
 				return false;
 			}
@@ -76,7 +77,7 @@ final class Payments {
 	 * has a payment method, needs payment (`WC_Order::needs_payment()`, so the
 	 * `woocommerce_order_needs_payment` filter applies) and its gateway supports the engine.
 	 * Which further gateway features the charge needs (such as `subscriptions` for a renewal)
-	 * is the caller's to check with {@see self::supports_gateway()} first.
+	 * is the caller's to check with {@see self::gateway_supports()} first.
 	 * The engine adds no amount check of its own: core already refuses a $0 order unless an
 	 * extension filtered it to need payment. A throwing gateway is logged.
 	 *
@@ -99,7 +100,7 @@ final class Payments {
 		$gateway_id = $order->get_payment_method();
 		$amount     = (float) $order->get_total();
 
-		if ( '' === $gateway_id || ! $order->needs_payment() || ! self::supports_gateway( $gateway_id ) ) {
+		if ( '' === $gateway_id || ! $order->needs_payment() || ! self::gateway_supports( $gateway_id ) ) {
 			return false;
 		}
 
