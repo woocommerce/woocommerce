@@ -21,6 +21,10 @@
 		padding-inline: clamp(24px, 5vw, 80px);
 		color: #1e1e1e;
 		background: #fff;
+
+		a {
+			color: inherit;
+		}
 	}
 
 	&__header {
@@ -82,10 +86,6 @@
 
 	&--store-only {
 		padding-inline: 24px;
-	}
-
-	&--entire-site a {
-		color: inherit;
 	}
 
 	&__login {
