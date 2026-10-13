@@ -145,7 +145,7 @@ export const AddToCartButton = ( {
 				cartQuantity,
 				productCartDetails,
 				isDescendantOfAddToCartWithOptions,
-		  } );
+			} );
 
 	const ButtonTag = allowAddToCart && ! isCartContents ? 'button' : 'a';
 	const buttonProps = {} as HTMLAnchorElement & { onClick: () => void };

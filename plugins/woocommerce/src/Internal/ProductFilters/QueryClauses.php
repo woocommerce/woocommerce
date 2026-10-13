@@ -450,8 +450,11 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			$term_ids_by_taxonomy[ $term->taxonomy ][] = $term->term_id;
 		}
 
-		foreach ( $term_ids_by_taxonomy as $taxonomy => $term_ids ) {
+		foreach ( array_keys( $chosen_taxonomies ) as $taxonomy ) {
+			$term_ids = $term_ids_by_taxonomy[ $taxonomy ] ?? array();
+
 			if ( empty( $term_ids ) ) {
+				$tax_queries[] = '0=1';
 				continue;
 			}
 
@@ -501,11 +504,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			);
 		}
 
-		if ( ! empty( $tax_queries ) ) {
-			$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
-		} else {
-			$args['where'] .= ' AND 1=0';
-		}
+		$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
 
 		return $args;
 	}

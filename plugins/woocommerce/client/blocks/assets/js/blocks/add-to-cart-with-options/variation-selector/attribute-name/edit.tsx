@@ -57,7 +57,9 @@ export default function AttributeNameEdit(
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	if ( ! attribute ) return;
+	if ( ! attribute ) {
+		return;
+	}
 
 	return (
 		<label { ...blockProps } htmlFor={ attribute.taxonomy }>

@@ -19,6 +19,7 @@ const singletonWpModules = [
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
+	'@wordpress/hooks',
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',

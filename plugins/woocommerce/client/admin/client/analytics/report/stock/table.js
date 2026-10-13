@@ -128,7 +128,7 @@ class StockReportTable extends Component {
 								this.context.getCurrencyConfig(),
 								'number',
 								stockQuantity
-						  )
+							)
 						: __( 'N/A', 'woocommerce' ),
 					value: stockQuantity,
 				},
