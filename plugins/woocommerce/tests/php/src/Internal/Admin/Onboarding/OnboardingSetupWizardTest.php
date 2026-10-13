@@ -317,6 +317,7 @@ class OnboardingSetupWizardTest extends WC_Unit_Test_Case {
 	 */
 	public function test_confirmation_mentions_unsaved_store_location_only_when_flagged(): void {
 		$this->prepare_valid_request( self::$admin_id );
+		// wp_kses_post() turns esc_url()'s &#038; into &amp;, so the rendered link uses &amp;.
 		$settings_link = '<a href="' . admin_url( 'admin.php?page=wc-settings&amp;tab=general' ) . '">WooCommerce &gt; Settings &gt; General</a>';
 
 		$unflagged_page = $this->dispatch_request()->getMessage();
