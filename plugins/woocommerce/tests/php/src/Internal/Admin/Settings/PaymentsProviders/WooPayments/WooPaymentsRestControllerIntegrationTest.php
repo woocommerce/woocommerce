@@ -1258,6 +1258,58 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the WPCOM connection authorize action registers the store and returns the authorization URL.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize() {
+		// Arrange.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->atLeastOnce() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		// The merchant clicked to connect, so the attempt must not be held back by an earlier failure.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->with( true, true )
+			->willReturn( true );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request->set_param( 'source', 'test_source' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['success'] );
+		$this->assertSame( 'https://wordpress.com/auth?query=some_query', $data['url'] );
+	}
+
+	/**
+	 * Test that the WPCOM connection authorize action reports a failed registration.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_registration_error() {
+		// Arrange.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->atLeastOnce() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( new \WP_Error( 'siteurl_private_ip', 'The site URL is a private IP address.' ) );
+
+		// Act.
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'The site URL is a private IP address.', $response->get_data()['message'] );
+	}
+
+	/**
 	 * Test onboarding reset.
 	 */
 	public function test_onboarding_reset() {
