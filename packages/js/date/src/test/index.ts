@@ -1482,6 +1482,21 @@ describe( 'getShortDateFormat', () => {
 		expect( getShortDateFormat() ).toBe( expected );
 	} );
 
+	it( 'validates month names with the current locale', () => {
+		const originalLocale = moment.locale();
+		moment.defineLocale( 'xx-short-date', {
+			monthsShort:
+				'sij_velj_ožu_tra_svi_lip_srp_kol_ruj_lis_stu_pro'.split( '_' ),
+		} );
+		translateShortDateFormat( 'D MMM YYYY' );
+
+		const format = getShortDateFormat();
+		moment.locale( originalLocale );
+		moment.updateLocale( 'xx-short-date', null );
+
+		expect( format ).toBe( 'DD MMM YYYY' );
+	} );
+
 	it( 'parses padded and formats padded dates for a single-token translation', () => {
 		translateShortDateFormat( 'D/M/YYYY' );
 		const format = getShortDateFormat();

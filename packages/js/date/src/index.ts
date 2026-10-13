@@ -1250,7 +1250,6 @@ export function getDateFormatsForInterval(
 }
 
 const defaultShortDateFormat = 'MM/DD/YYYY';
-const shortDateFormatCheckDate = moment( '2001-02-03', isoDateFormat );
 
 /**
  * Pads single "D" and "M" tokens to "DD" and "MM", leaving literals, "Do",
@@ -1281,14 +1280,10 @@ export function getShortDateFormat() {
 		/* translators: Moment.js date format for typed dates. Keep the DD, MM and YYYY tokens. */
 		__( 'MM/DD/YYYY', 'woocommerce' )
 	);
-	const parsed = moment(
-		shortDateFormatCheckDate.format( format ),
-		format,
-		true
-	);
-	return parsed.isSame( shortDateFormatCheckDate, 'day' )
-		? format
-		: defaultShortDateFormat;
+	// Created per call so month names format and parse in the current locale.
+	const checkDate = moment( '2001-02-03', isoDateFormat );
+	const parsed = moment( checkDate.format( format ), format, true );
+	return parsed.isSame( checkDate, 'day' ) ? format : defaultShortDateFormat;
 }
 
 /**
