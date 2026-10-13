@@ -196,6 +196,13 @@ class WC_Admin_Addons {
 			exit();
 		}
 
+		$default_redirect_url = admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' );
+
+		if ( '_featured' === $section ) {
+			wp_safe_redirect( $default_redirect_url );
+			exit();
+		}
+
 		// get_sections() returns false when the request fails, and the filter can return anything.
 		$sections         = self::get_sections();
 		$sections         = is_array( $sections ) ? $sections : array();
@@ -205,11 +212,9 @@ class WC_Admin_Addons {
 				$allowed_sections[] = $section_object->slug;
 			}
 		}
-		// Validate if the category is supported.
-		$section = in_array( $section, $allowed_sections, true ) ? $section : '_featured';
 
-		if ( '_featured' === $section ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' ) );
+		if ( ! in_array( $section, $allowed_sections, true ) ) {
+			wp_safe_redirect( $default_redirect_url );
 			exit();
 		}
 

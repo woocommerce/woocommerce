@@ -79,6 +79,30 @@ class WC_Admin_Addons_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Legacy redirect sends the featured section to the extensions page without loading categories.
+	 */
+	public function test_redirect_for_featured_section_skips_categories_request(): void {
+		$http_requests = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $response ) use ( &$http_requests ) {
+				++$http_requests;
+				return $response;
+			}
+		);
+
+		$this->assertSame(
+			admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' ),
+			$this->get_redirect_for_section( '_featured' ),
+			'The featured section should go to the default extensions page.'
+		);
+		$this->assertSame( 0, $http_requests, 'The featured section should not request categories.' );
+
+		$this->get_redirect_for_section( 'marketing' );
+		$this->assertSame( 1, $http_requests, 'Other sections should still request categories.' );
+	}
+
+	/**
 	 * @testdox Legacy redirect ignores malformed filtered sections and keeps valid ones.
 	 */
 	public function test_redirect_ignores_malformed_sections(): void {
