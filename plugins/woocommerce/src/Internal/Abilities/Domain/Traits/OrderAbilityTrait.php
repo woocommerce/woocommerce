@@ -52,14 +52,14 @@ trait OrderAbilityTrait {
 
 	/**
 	 * Status slugs (without the `wc-` prefix) that are registered with the
-	 * `wc-` prefix, including the statuses of other order types. Statuses that
-	 * are excluded from search are not included.
+	 * `wc-` prefix, including the statuses of other order types.
 	 *
+	 * @param array $args Arguments for get_post_stati().
 	 * @return array<int, string>
 	 */
-	protected static function get_order_type_status_slugs(): array {
+	protected static function get_order_type_status_slugs( array $args = array() ): array {
 		$statuses = array_filter(
-			array_diff( get_post_stati(), get_post_stati( array( 'exclude_from_search' => true ) ) ),
+			get_post_stati( $args ),
 			static function ( $status ): bool {
 				return 0 === strpos( $status, 'wc-' );
 			}
@@ -70,7 +70,7 @@ trait OrderAbilityTrait {
 
 	/**
 	 * Status slugs (without the `wc-` prefix) that the orders query accepts for
-	 * any order type.
+	 * any order type. Statuses that are excluded from search are not included.
 	 *
 	 * @return array<int, string>
 	 */
@@ -78,7 +78,8 @@ trait OrderAbilityTrait {
 		return array_values(
 			array_diff(
 				array_unique( array_merge( self::get_allowed_order_status_slugs(), self::get_order_type_status_slugs() ) ),
-				array( OrderStatus::CHECKOUT_DRAFT )
+				array( OrderStatus::CHECKOUT_DRAFT ),
+				self::get_order_type_status_slugs( array( 'exclude_from_search' => true ) )
 			)
 		);
 	}

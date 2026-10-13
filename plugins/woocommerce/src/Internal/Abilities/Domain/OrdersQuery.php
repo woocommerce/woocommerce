@@ -111,7 +111,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		if ( is_string( $status ) && '' !== $status ) {
 			$args['status'] = array( wc_clean( $status ) );
 		} elseif ( is_array( $status ) && ! empty( $status ) ) {
-			$args['status'] = array_map( 'wc_clean', array_filter( array_map( 'strval', $status ) ) );
+			$args['status'] = array_map( 'wc_clean', array_filter( array_map( 'strval', $status ), 'strlen' ) );
 		}
 
 		if ( empty( $args['status'] ) ) {
