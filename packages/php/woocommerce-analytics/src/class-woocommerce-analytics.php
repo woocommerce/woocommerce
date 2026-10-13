@@ -66,6 +66,13 @@ class Woocommerce_Analytics {
 	const PROXY_TRACKING_EVER_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_ever_enabled';
 
 	/**
+	 * Script handle for s.js. WordPress prints its tag with the id `{handle}-js`.
+	 *
+	 * @var string
+	 */
+	private const TRACKING_SCRIPT_HANDLE = 'woocommerce-analytics';
+
+	/**
 	 * Initializer.
 	 * Used to configure the WooCommerce Analytics package.
 	 *
@@ -180,7 +187,7 @@ class Woocommerce_Analytics {
 		}
 
 		wp_enqueue_script(
-			'woocommerce-analytics',
+			self::TRACKING_SCRIPT_HANDLE,
 			$url,
 			array(),
 			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- The version is set in the URL.
@@ -200,12 +207,12 @@ class Woocommerce_Analytics {
 	 * @return mixed
 	 */
 	public static function hold_tracking_script_until_consent( $attributes ) {
-		if ( ! is_array( $attributes ) || ( $attributes['id'] ?? '' ) !== 'woocommerce-analytics-js' ) {
+		if ( ! is_array( $attributes ) || ( $attributes['id'] ?? '' ) !== self::TRACKING_SCRIPT_HANDLE . '-js' ) {
 			return $attributes;
 		}
 
 		$attributes['type']                      = 'text/plain';
-		$attributes['data-wc-analytics-consent'] = 'statistics';
+		$attributes['data-wc-analytics-consent'] = Consent_Manager::WP_CONSENT_API_STATISTICS_TYPE;
 
 		return $attributes;
 	}
