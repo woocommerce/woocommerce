@@ -124,7 +124,6 @@ final class ContractRepository {
 
 		$this->assert_contract_exists( $id );
 
-		$this->write_due_moment( $id, $contract->get_next_payment_gmt() );
 		$this->update_contract_row( $contract );
 		$this->sync_children( $contract );
 
@@ -134,10 +133,10 @@ final class ContractRepository {
 	/**
 	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
 	 * and replace items / addresses when named. Unnamed columns keep their stored
-	 * values, so a concurrent write to them is not reverted. Writing a `next_payment_gmt`
-	 * that differs from the stored one (including null) also releases the due-dispatch
-	 * claim; re-saving the stored moment keeps it. Existence is checked only when the row
-	 * write changes nothing.
+	 * values, so a concurrent write to them is not reverted. The named columns land in one
+	 * statement, together or not at all. Writing a `next_payment_gmt` that differs from the
+	 * stored one (including null) also releases the due-dispatch claim; re-saving the stored
+	 * moment keeps it. Existence is checked only when the row write changes nothing.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -165,20 +164,7 @@ final class ContractRepository {
 			$columns[ $field ] = $storage[ $field ];
 		}
 
-		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
-			$this->write_due_moment( $id, $contract->get_next_payment_gmt() );
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge( $columns, array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) ) ),
-			array( 'id' => (int) $id )
-		);
-
-		if ( false === $updated ) {
-			throw new \RuntimeException( 'Failed to update contract.' );
-		}
+		$updated = $this->write_contract_row( $id, $columns );
 
 		// Zero changed rows: a missing row, or identical values written within the same second.
 		if ( 0 === $updated && ! $this->exists( $id ) ) {
@@ -1521,71 +1507,78 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update the contract row in place (no child rows). The claim column is not written:
-	 * {@see self::write_due_moment()} releases it when the due moment changes.
+	 * Update the contract row in place (no child rows), in one statement
+	 * ({@see self::write_contract_row()}).
 	 *
 	 * @param Contract $contract Contract whose row to update. Must have an id.
 	 * @throws \RuntimeException If the update fails.
 	 */
 	private function update_contract_row( Contract $contract ): void {
+		$this->write_contract_row( (int) $contract->get_id(), $contract->to_storage() );
+	}
+
+	/**
+	 * Write contract columns (plus `date_updated_gmt`) in one UPDATE statement, so the
+	 * row never lands half-written: a status and a due moment written together change
+	 * together or not at all.
+	 *
+	 * When `next_payment_gmt` is among the columns, the same statement releases the
+	 * due-dispatch claim only if the due moment really changes: a claim belongs to the
+	 * moment it was taken on, so moving or clearing that moment frees the contract for the
+	 * next scan, while re-saving it keeps the claim and a handler cannot jump the dispatch
+	 * queue by writing the same moment back. MySQL evaluates SET assignments left to
+	 * right, so the claim is assigned first, while `next_payment_gmt` still holds the
+	 * stored value; `<=>` keeps the comparison NULL-safe.
+	 *
+	 * @param int                  $id      Contract id.
+	 * @param array<string, mixed> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
+	 * @return int The number of rows the statement changed.
+	 * @throws \RuntimeException If a value is not scalar or null, or the write fails.
+	 */
+	private function write_contract_row( int $id, array $columns ): int {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge(
-				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array( 'id' => (int) $contract->get_id() )
-		);
+		$columns['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
+
+		$assignments = array();
+		$values      = array();
+
+		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
+			$next_payment = $columns['next_payment_gmt'];
+			if ( null === $next_payment ) {
+				$assignments[] = '`dispatch_claimed_until` = IF( `next_payment_gmt` <=> NULL, `dispatch_claimed_until`, NULL )';
+			} else {
+				$assignments[] = '`dispatch_claimed_until` = IF( `next_payment_gmt` <=> %s, `dispatch_claimed_until`, NULL )';
+				$values[]      = Coercion::coerce_string( $next_payment );
+			}
+		}
+
+		foreach ( $columns as $column => $value ) {
+			if ( null === $value ) {
+				$assignments[] = "`{$column}` = NULL";
+				continue;
+			}
+			if ( ! is_scalar( $value ) ) {
+				throw new \RuntimeException( esc_html( sprintf( 'Cannot write a non-scalar value to contract column "%s".', $column ) ) );
+			}
+			$assignments[] = "`{$column}` = %s";
+			$values[]      = (string) $value;
+		}
+
+		$values[] = $id;
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$set      = implode( ', ', $assignments );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET {$set} WHERE `id` = %d", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( 'Failed to update contract.' );
 		}
-	}
 
-	/**
-	 * Write a contract's due moment and release its due-dispatch claim, in one conditional
-	 * write that lands only when the value changes. A claim belongs to the due moment it
-	 * was taken on: moving or clearing that moment frees the contract for the next scan,
-	 * while re-saving it keeps the claim, so a handler cannot jump the dispatch queue by
-	 * writing the same moment back. The caller's row write repeats the value harmlessly.
-	 *
-	 * @param int         $id               Contract id.
-	 * @param string|null $next_payment_gmt The due moment to store (UTC, `Y-m-d H:i:s`), or null.
-	 * @throws \RuntimeException If the write fails.
-	 */
-	private function write_due_moment( int $id, ?string $next_payment_gmt ): void {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		if ( null === $next_payment_gmt ) {
-			$written = $wpdb->query(
-				$wpdb->prepare(
-					"UPDATE {$table} SET next_payment_gmt = NULL, dispatch_claimed_until = NULL
-					WHERE id = %d AND next_payment_gmt IS NOT NULL",
-					$id
-				)
-			);
-		} else {
-			$written = $wpdb->query(
-				$wpdb->prepare(
-					"UPDATE {$table} SET next_payment_gmt = %s, dispatch_claimed_until = NULL
-					WHERE id = %d AND ( next_payment_gmt IS NULL OR next_payment_gmt <> %s )",
-					$next_payment_gmt,
-					$id,
-					$next_payment_gmt
-				)
-			);
-		}
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		if ( false === $written ) {
-			throw new \RuntimeException( 'Failed to update contract.' );
-		}
+		return (int) $updated;
 	}
 
 	/**

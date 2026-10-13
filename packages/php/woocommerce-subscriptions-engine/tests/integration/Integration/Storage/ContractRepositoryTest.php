@@ -1371,6 +1371,46 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A contract write is one statement: when it is lost, neither the status nor the due moment changes.
+	 */
+	public function test_a_lost_contract_write_changes_neither_status_nor_due_moment(): void {
+		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$contract->set_next_payment_gmt( null );
+
+		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$statements = 0;
+		$drop       = static function ( string $query ) use ( $table, &$statements ): string {
+			if ( 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+				++$statements;
+				return '';
+			}
+			return $query;
+		};
+
+		add_filter( 'query', $drop );
+		try {
+			$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
+			$this->fail( 'Expected the lost write to throw.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Failed to update contract.', $e->getMessage() );
+		} finally {
+			remove_filter( 'query', $drop );
+		}
+
+		$this->assertSame( 1, $statements, 'The status, due moment and claim are one statement.' );
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
+		$this->assertNotNull( $this->stored_claim( $id ) );
+	}
+
+	/**
 	 * The stored due-dispatch claim of a contract.
 	 *
 	 * @param int $id Contract id.
