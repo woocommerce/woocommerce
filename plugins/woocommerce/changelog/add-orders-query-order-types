@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Let the order abilities list and change orders of the types that extensions register.
+Let the order abilities list and change orders of the types that extensions register, and let orders-query take a list of statuses.

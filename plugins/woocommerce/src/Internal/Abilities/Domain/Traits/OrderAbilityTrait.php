@@ -36,29 +36,30 @@ trait OrderAbilityTrait {
 	}
 
 	/**
-	 * Order types that the abilities can query, such as `shop_order` and the
-	 * types that extensions register. Refunds are not included.
+	 * Order types that the abilities can query: every registered order type
+	 * except refunds and the HPOS placeholder.
 	 *
 	 * @return array<int, string>
 	 */
 	protected static function get_order_type_slugs(): array {
 		return array_values(
 			array_diff(
-				wc_get_order_types( 'order-meta-boxes' ),
-				array( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE )
+				wc_get_order_types(),
+				array( 'shop_order_refund', DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE )
 			)
 		);
 	}
 
 	/**
 	 * Status slugs (without the `wc-` prefix) that are registered with the
-	 * `wc-` prefix, including the statuses of other order types.
+	 * `wc-` prefix, including the statuses of other order types. Statuses that
+	 * are excluded from search are not included.
 	 *
 	 * @return array<int, string>
 	 */
 	protected static function get_order_type_status_slugs(): array {
 		$statuses = array_filter(
-			get_post_stati(),
+			array_diff( get_post_stati(), get_post_stati( array( 'exclude_from_search' => true ) ) ),
 			static function ( $status ): bool {
 				return 0 === strpos( $status, 'wc-' );
 			}
