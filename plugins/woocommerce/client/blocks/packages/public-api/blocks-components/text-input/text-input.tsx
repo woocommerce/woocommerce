@@ -12,11 +12,10 @@ import type { InputHTMLAttributes, ReactNode } from 'react';
 import Label from '../label';
 import './style.scss';
 
-export interface TextInputProps
-	extends Omit<
-		InputHTMLAttributes< HTMLInputElement >,
-		'onChange' | 'onBlur'
-	> {
+export interface TextInputProps extends Omit<
+	InputHTMLAttributes< HTMLInputElement >,
+	'onChange' | 'onBlur'
+> {
 	id: string;
 	ariaLabel?: string;
 	label?: string | undefined;

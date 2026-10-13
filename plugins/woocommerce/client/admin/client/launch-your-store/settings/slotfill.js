@@ -209,15 +209,15 @@ const SiteVisibility = () => {
 										href: comingSoonTemplateId
 											? getAdminLink(
 													`site-editor.php?postType=wp_template&postId=${ comingSoonTemplateId }&canvas=edit`
-											  )
+												)
 											: getAdminLink( 'site-editor.php' ),
 									} ),
 								}
-						  )
+							)
 						: __(
 								'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing.',
 								'woocommerce'
-						  ) }
+							) }
 				</p>
 				<div
 					className={ clsx(

@@ -65,19 +65,19 @@ const SummaryNumber = ( {
 	let screenReaderLabel =
 		delta > 0
 			? // eslint-disable-next-line @wordpress/valid-sprintf -- false positive from %%
-			  sprintf(
+				sprintf(
 					/* translators: percentage change upwards */
 					__( 'Up %f%% from %s', 'woocommerce' ),
 					delta,
 					prevLabel
-			  )
+				)
 			: // eslint-disable-next-line @wordpress/valid-sprintf -- false positive from %%
-			  sprintf(
+				sprintf(
 					/* translators: percentage change downwards */
 					__( 'Down %f%% from %s', 'woocommerce' ),
 					Math.abs( delta ),
 					prevLabel
-			  );
+				);
 	if ( ! delta ) {
 		screenReaderLabel = sprintf(
 			/* translators: previous value */
@@ -116,10 +116,7 @@ const SummaryNumber = ( {
 						{ label }
 					</Text>
 					{ labelTooltipText && (
-						<Tooltip
-							text={ labelTooltipText }
-							position="top center"
-						>
+						<Tooltip text={ labelTooltipText } placement="top">
 							<div className="woocommerce-summary__info-tooltip">
 								<Icon
 									width={ 20 }
@@ -146,7 +143,7 @@ const SummaryNumber = ( {
 								? `${ prevLabel } ${ prevValue }`
 								: __( 'N/A', 'woocommerce' )
 						}
-						position="top center"
+						placement="top"
 					>
 						<div
 							className="woocommerce-summary__item-delta"
@@ -155,12 +152,11 @@ const SummaryNumber = ( {
 						>
 							<Text variant="caption" size="12" lineHeight="16px">
 								{ ! isNil( delta )
-									? // eslint-disable-next-line @wordpress/valid-sprintf -- false positive from %%
-									  sprintf(
+									? sprintf(
 											/* translators: percentage change */
 											__( '%f%%', 'woocommerce' ),
 											delta
-									  )
+										)
 									: __( 'N/A', 'woocommerce' ) }
 							</Text>
 						</div>

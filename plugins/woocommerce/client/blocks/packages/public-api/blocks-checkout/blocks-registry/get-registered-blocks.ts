@@ -22,6 +22,6 @@ export const getRegisteredBlocks = (
 	return hasInnerBlocks( block )
 		? Object.values( registeredBlocks ).filter( ( { metadata } ) =>
 				( metadata?.parent || [] ).includes( block )
-		  )
+			)
 		: [];
 };

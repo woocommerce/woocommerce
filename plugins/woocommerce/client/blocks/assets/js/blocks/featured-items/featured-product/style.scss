@@ -1,6 +1,6 @@
 @import "../style";
 
-.wp-block-woocommerce-featured-product {
+:where(.wp-block-woocommerce-featured-product) {
 	@extend %wp-block-featured-item;
 	background-color: transparent;
 }

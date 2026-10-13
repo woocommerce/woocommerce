@@ -740,53 +740,6 @@
 				);
 			}
 		} );
-
-		var marketplaceSectionDropdown = $(
-			'#marketplace-current-section-dropdown'
-		);
-		var marketplaceSectionName = $( '#marketplace-current-section-name' );
-		var marketplaceMenuIsOpen = false;
-
-		// Add event listener to toggle Marketplace menu on touch devices
-		if ( marketplaceSectionDropdown.length ) {
-			if ( isTouchDevice() ) {
-				marketplaceSectionName.on( 'click', function () {
-					marketplaceMenuIsOpen = ! marketplaceMenuIsOpen;
-					if ( marketplaceMenuIsOpen ) {
-						marketplaceSectionDropdown.addClass( 'is-open' );
-						$( document ).on( 'click', maybeToggleMarketplaceMenu );
-					} else {
-						marketplaceSectionDropdown.removeClass( 'is-open' );
-						$( document ).off(
-							'click',
-							maybeToggleMarketplaceMenu
-						);
-					}
-				} );
-			} else {
-				document.body.classList.add( 'no-touch' );
-			}
-		}
-
-		// Close menu if the user clicks outside it
-		function maybeToggleMarketplaceMenu( e ) {
-			if (
-				! marketplaceSectionDropdown.is( e.target ) &&
-				marketplaceSectionDropdown.has( e.target ).length === 0
-			) {
-				marketplaceSectionDropdown.removeClass( 'is-open' );
-				marketplaceMenuIsOpen = false;
-				$( document ).off( 'click', maybeToggleMarketplaceMenu );
-			}
-		}
-
-		function isTouchDevice() {
-			return (
-				'ontouchstart' in window ||
-				navigator.maxTouchPoints > 0 ||
-				navigator.msMaxTouchPoints > 0
-			);
-		}
 	} );
 
 	$( function() {
