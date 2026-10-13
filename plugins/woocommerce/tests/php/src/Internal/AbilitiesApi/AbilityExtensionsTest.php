@@ -454,16 +454,21 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the products whose IDs a filter returns, and refuse too many IDs or IDs that are not integers.
+	 * @testdox Should keep the products whose IDs a filter returns, refuse more than 1,000 IDs after the intersection, and refuse IDs that are not integers.
 	 */
 	public function test_product_ids_filter_and_its_limits(): void {
+		$coded = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen coded' ) );
+		$coded->update_meta_data( '_test_code', 'A1' );
+		$coded->save();
+		$plain = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
+		$broad = array_merge( range( 1000000, 1000999 ), array( $coded->get_id(), $plain->get_id() ) );
 		add_action(
 			'woocommerce_ability_extensions_init',
-			static function () {
+			static function () use ( $broad ) {
 				$callbacks = array(
-					'picked'   => static fn( array $ids ) => array( 'ids' => $ids ),
-					'too_many' => static fn() => array( 'ids' => range( 1, 1001 ) ),
-					'not_ids'  => static fn() => array( 'ids' => array( 'x' ) ),
+					'picked'  => static fn( array $ids ) => array( 'ids' => $ids ),
+					'broad'   => static fn() => array( 'ids' => $broad ),
+					'not_ids' => static fn() => array( 'ids' => array( 'x' ) ),
 				);
 				foreach ( $callbacks as $filter => $callback ) {
 					AbilityExtensions::register_query_filter(
@@ -481,10 +486,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				}
 			}
 		);
-		$coded = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen coded' ) );
-		$coded->update_meta_data( '_test_code', 'A1' );
-		$coded->save();
-		$plain   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
 		$filters = static fn( array $values ) => array(
 			'search'  => 'Pen',
 			'filters' => array( 'extensions' => array( 'test-ext' => $values ) ),
@@ -501,7 +502,16 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		$empty    = $this->run_ability( 'woocommerce/products-query', $filters( array( 'picked' => array() ) ) );
-		$too_many = $this->dispatch_ability( 'woocommerce/products-query', $filters( array( 'too_many' => true ) ) );
+		$too_many = $this->dispatch_ability( 'woocommerce/products-query', $filters( array( 'broad' => true ) ) );
+		$narrowed = $this->run_ability(
+			'woocommerce/products-query',
+			$filters(
+				array(
+					'broad'  => true,
+					'picked' => array( $coded->get_id() ),
+				)
+			)
+		);
 		$not_ids  = $this->dispatch_ability( 'woocommerce/products-query', $filters( array( 'not_ids' => true ) ) );
 
 		$this->assertEqualsCanonicalizing( array( $coded->get_id(), $plain->get_id() ), array_column( $picked['products'], 'id' ) );
@@ -509,6 +519,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array(), $empty['products'] );
 		$this->assertSame( 400, $too_many->get_status() );
 		$this->assertSame( 'woocommerce_ability_extension_filter_too_broad', $too_many->get_data()['code'] );
+		$this->assertSame( array( $coded->get_id() ), array_column( $narrowed['products'], 'id' ) );
 		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $not_ids->get_data()['code'] );
 	}
 

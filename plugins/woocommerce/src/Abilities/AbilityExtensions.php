@@ -75,7 +75,7 @@ class AbilityExtensions {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'ids' );
 
 	/**
-	 * Most IDs that one filter can return.
+	 * Most IDs that remain after Core keeps the IDs that every filter returns.
 	 */
 	private const MAX_FILTER_IDS = 1000;
 
@@ -182,11 +182,11 @@ class AbilityExtensions {
 	 *                               each one to the query with AND. Return a WP_Error to refuse the value.
 	 *                               A `tax_query` is accepted only for `product`. Any other key, or a
 	 *                               `tax_query` for another resource, fails the call.
-	 *                               `ids` is a list of up to 1,000 object IDs. Use it for data that is not
-	 *                               meta, such as order items or a table of the extension: query that data
-	 *                               and return the IDs that match. Core keeps the IDs that every filter
-	 *                               returns, and an empty list matches nothing. More IDs return an error
-	 *                               that asks for more filters.
+	 *                               `ids` is a list of object IDs. Use it for data that is not meta, such
+	 *                               as order items or a table of the extension: query that data and return
+	 *                               the IDs that match. Core keeps the IDs that every filter returns, and an
+	 *                               empty list matches nothing. When more than 1,000 IDs remain, the call
+	 *                               returns an error that asks for more filters.
 	 * }
 	 */
 	public static function register_query_filter( array $args ): void {
@@ -331,6 +331,14 @@ class AbilityExtensions {
 				}
 			}
 		}
+		if ( null !== $ids && count( $ids ) > self::MAX_FILTER_IDS ) {
+			return new \WP_Error(
+				'woocommerce_ability_extension_filter_too_broad',
+				/* translators: %d: maximum number of matches. */
+				sprintf( __( 'The filters match more than %d items. Add more filters to narrow the list.', 'woocommerce' ), self::MAX_FILTER_IDS ),
+				array( 'status' => 400 )
+			);
+		}
 		if ( null !== $ids ) {
 			$query_args['post__in'] = empty( $ids ) ? array( 0 ) : $ids;
 		}
@@ -342,17 +350,9 @@ class AbilityExtensions {
 	 *
 	 * @param array  $ids    IDs from the filter callback.
 	 * @param string $filter Filter name, such as `subscriptions.related_to`.
-	 * @return int[]|\WP_Error An error when an ID is not a positive integer, or when there are too many.
+	 * @return int[]|\WP_Error An error when an ID is not a positive integer.
 	 */
 	private static function get_filter_ids( array $ids, string $filter ) {
-		if ( count( $ids ) > self::MAX_FILTER_IDS ) {
-			return new \WP_Error(
-				'woocommerce_ability_extension_filter_too_broad',
-				/* translators: 1: filter name, such as subscriptions.related_to. 2: maximum number of matches. */
-				sprintf( __( 'The "%1$s" filter matches more than %2$d items. Add more filters to narrow the list.', 'woocommerce' ), $filter, self::MAX_FILTER_IDS ),
-				array( 'status' => 400 )
-			);
-		}
 		$valid = array_filter(
 			array_map(
 				static fn( $id ) => filter_var( $id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ),
