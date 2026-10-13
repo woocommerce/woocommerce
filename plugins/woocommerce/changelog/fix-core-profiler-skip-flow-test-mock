@@ -1,4 +1,3 @@
 Significance: patch
 Type: dev
-
-Match the core profiler skip-flow test stub to the actor's new return shape.
+Comment: Fix a core profiler unit test stub; no production change.
