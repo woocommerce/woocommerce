@@ -61,6 +61,21 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox supports_gateway with features needs the engine feature and every listed one.
+	 */
+	public function test_supports_gateway_checks_the_listed_features_with_the_engine_feature(): void {
+		$this->support_feature( self::GATEWAY, 'subscriptions' );
+
+		$this->assertFalse( Payments::supports_gateway( self::GATEWAY, 'subscriptions' ), 'A listed feature without the engine feature is not enough.' );
+
+		$this->support_engine_charges( self::GATEWAY );
+
+		$this->assertTrue( Payments::supports_gateway( self::GATEWAY, 'subscriptions' ) );
+		$this->assertFalse( Payments::supports_gateway( self::GATEWAY, 'subscriptions', 'subscription_payment_method_change' ), 'Every listed feature is needed.' );
+		$this->assertFalse( Payments::supports_gateway( 'bacs', 'subscriptions' ) );
+	}
+
+	/**
 	 * @testdox supports_gateway is false for an empty or unknown gateway id.
 	 */
 	public function test_supports_gateway_is_false_for_unknown_ids(): void {
@@ -203,10 +218,20 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	 * @param string $gateway_id Gateway id.
 	 */
 	private function support_engine_charges( string $gateway_id ): void {
+		$this->support_feature( $gateway_id, Payments::GATEWAY_FEATURE );
+	}
+
+	/**
+	 * Declare a gateway feature through core's supports filter.
+	 *
+	 * @param string $gateway_id Gateway id.
+	 * @param string $supported  Feature.
+	 */
+	private function support_feature( string $gateway_id, string $supported ): void {
 		add_filter(
 			'woocommerce_payment_gateway_supports',
-			static function ( $supports, $feature, $gateway ) use ( $gateway_id ) {
-				if ( Payments::GATEWAY_FEATURE === $feature && is_object( $gateway ) && isset( $gateway->id ) && $gateway_id === $gateway->id ) {
+			static function ( $supports, $feature, $gateway ) use ( $gateway_id, $supported ) {
+				if ( $supported === $feature && is_object( $gateway ) && isset( $gateway->id ) && $gateway_id === $gateway->id ) {
 					return true;
 				}
 				return $supports;

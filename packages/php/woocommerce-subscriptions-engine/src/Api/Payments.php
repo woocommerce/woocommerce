@@ -3,10 +3,13 @@
  * Payments - the engine's broker between extensions and payment gateways.
  *
  * Gateways integrate once: they declare the `subscriptions_engine` feature in their
- * `$supports`, charge on the scheduled-payment action and answer nothing else. Extensions
- * ask whether a gateway can charge off-session, request a charge for an order they built,
- * and answer whether an order needs a reusable payment method. The engine fires and
- * aggregates; it reads no outcome and writes nothing.
+ * `$supports`, charge on the scheduled-payment action and answer nothing else. What a
+ * gateway can do for a subscription (renewal payments, payment method changes, ...) it
+ * declares with the existing WooCommerce gateway features, which the engine does not
+ * interpret. Extensions ask whether a gateway supports the engine and the features an
+ * operation needs, request a charge for an order they built, and answer whether an order
+ * needs a reusable payment method. The engine fires and aggregates; it reads no outcome
+ * and writes nothing.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -29,8 +32,10 @@ defined( 'ABSPATH' ) || exit;
 final class Payments {
 
 	/**
-	 * The feature a gateway adds to its `$supports` to accept engine charges: it charges
-	 * an order off-session on `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}`.
+	 * The feature a gateway adds to its `$supports` to integrate with the engine: it charges
+	 * an order off-session on `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}`
+	 * and reports the outcome through the order status. It is the only feature the engine
+	 * defines; what the gateway can do beyond that it declares with existing gateway features.
 	 */
 	public const GATEWAY_FEATURE = 'subscriptions_engine';
 
@@ -40,16 +45,28 @@ final class Payments {
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
-	 * Whether a registered gateway supports engine charges ({@see self::GATEWAY_FEATURE}).
-	 * Reads the gateway's `supports()`, so core's `woocommerce_payment_gateway_supports`
-	 * filter applies. False for an empty or unknown id.
+	 * Whether a registered gateway supports the engine ({@see self::GATEWAY_FEATURE}) and
+	 * every feature in `$features`. The features are the caller's to choose (for example
+	 * `subscriptions` before charging a renewal); the engine passes them to the gateway's
+	 * `supports()` without interpreting them, so core's `woocommerce_payment_gateway_supports`
+	 * filter applies to each. False for an empty or unknown id.
 	 *
-	 * @param string $gateway_id Gateway id.
+	 * @param string $gateway_id  Gateway id.
+	 * @param string ...$features Gateway features the operation needs, besides the engine's.
 	 */
-	public static function supports_gateway( string $gateway_id ): bool {
+	public static function supports_gateway( string $gateway_id, string ...$features ): bool {
 		$gateway = self::get_gateway( $gateway_id );
+		if ( null === $gateway ) {
+			return false;
+		}
 
-		return null !== $gateway && $gateway->supports( self::GATEWAY_FEATURE );
+		foreach ( array( self::GATEWAY_FEATURE, ...$features ) as $feature ) {
+			if ( ! $gateway->supports( $feature ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -57,7 +74,9 @@ final class Payments {
 	 *
 	 * Fires `woocommerce_subscriptions_engine_scheduled_payment_{gateway_id}` only when the order
 	 * has a payment method, needs payment (`WC_Order::needs_payment()`, so the
-	 * `woocommerce_order_needs_payment` filter applies) and its gateway supports engine charges.
+	 * `woocommerce_order_needs_payment` filter applies) and its gateway supports the engine.
+	 * Which further gateway features the charge needs (such as `subscriptions` for a renewal)
+	 * is the caller's to check with {@see self::supports_gateway()} first.
 	 * The engine adds no amount check of its own: core already refuses a $0 order unless an
 	 * extension filtered it to need payment. A throwing gateway is logged.
 	 *
