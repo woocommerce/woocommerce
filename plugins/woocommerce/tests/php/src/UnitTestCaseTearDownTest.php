@@ -46,6 +46,9 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		wc_add_notice( 'Teardown coverage notice.' );
 		$this->assertSame( 1, wc_notice_count(), 'The notice should be queued.' );
 
+		$shipping_at_setup = WC()->customer->get_shipping( 'edit' );
+		WC()->customer->set_shipping_location( 'GB', '', 'LEAK 1', 'Leaked city' );
+
 		$clear_persistent_cart = null;
 		$cart_emptied_callback = function ( $should_clear_persistent_cart ) use ( &$clear_persistent_cart ) {
 			$clear_persistent_cart = $should_clear_persistent_cart;
@@ -64,10 +67,33 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'shortcode', WC()->cart->cart_context, 'The cart context should be back to shortcode.' );
 		$this->assertSame( 0, wc_notice_count(), 'The notice queue should have been cleared.' );
 		$this->assertFalse( $clear_persistent_cart, 'Teardown should leave persistent cart cleanup to the database rollback.' );
+		$this->assertSame( $shipping_at_setup, WC()->customer->get_shipping( 'edit' ), 'The customer shipping address should be back to what it was at setUp().' );
 		$this->assertNotSame(
 			self::LEAKED_LOCALE_LABEL,
 			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
+	}
+
+	/**
+	 * @testdox A test that swaps in another customer or changes its props leaves the setUp() customer behind, unchanged.
+	 */
+	public function test_clear_wc_singleton_state_restores_the_customer(): void {
+		$customer_at_setup = WC()->customer;
+		$data_at_setup     = $customer_at_setup->get_data();
+		$changes_at_setup  = $customer_at_setup->get_changes();
+		$vat_at_setup      = $customer_at_setup->get_is_vat_exempt();
+
+		$customer_at_setup->set_billing_country( 'MV' );
+		$customer_at_setup->set_shipping_country( 'NZ' );
+		$customer_at_setup->set_is_vat_exempt( ! $vat_at_setup );
+		WC()->customer = new \WC_Customer( 0, true );
+
+		$this->clear_wc_singleton_state();
+
+		$this->assertSame( $customer_at_setup, WC()->customer, 'The setUp() customer should be back on WC().' );
+		$this->assertSame( $data_at_setup, WC()->customer->get_data(), 'The customer data should be back to what it was at setUp().' );
+		$this->assertSame( $changes_at_setup, WC()->customer->get_changes(), 'Restoring should not add entries to the change set.' );
+		$this->assertSame( $vat_at_setup, WC()->customer->get_is_vat_exempt(), 'The tax exemption should be back to what it was at setUp().' );
 	}
 }

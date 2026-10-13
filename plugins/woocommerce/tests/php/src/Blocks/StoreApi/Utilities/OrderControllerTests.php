@@ -22,13 +22,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Set up before test.
 	 *
 	 * @return void
@@ -43,9 +36,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// The invalid-address tests need a shipping rate, and the flat rate only offers one for a
-		// country the store ships to. The cart ships to WC()->customer, which outlives a test, so
-		// give it a US/CA location here rather than depend on the address it arrives with.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		// country the store ships to. The cart ships to WC()->customer, so give it a US/CA location.
 		WC()->customer->set_shipping_location( 'US', 'CA' );
 
 		$this->sut = new class() extends OrderController {
@@ -60,19 +51,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
 		};
-	}
-
-	/**
-	 * Put back the customer shipping location that setUp() replaced.
-	 */
-	public function tearDown(): void {
-		try {
-			foreach ( $this->previous_shipping_address as $key => $value ) {
-				WC()->customer->{"set_shipping_{$key}"}( $value );
-			}
-		} finally {
-			parent::tearDown();
-		}
 	}
 
 	/**
