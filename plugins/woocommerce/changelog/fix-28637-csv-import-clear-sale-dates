@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clear a product's sale schedule when its sale date cells are empty in an imported CSV.

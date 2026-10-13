@@ -681,12 +681,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse dates from a CSV.
 	 * Dates can be Unix timestamps or in any format supported by strtotime().
+	 * An empty value returns an empty string, so the import clears the date.
 	 *
 	 * @param string $value Field value.
 	 *
 	 * @return string|null
 	 */
 	public function parse_datetime_field( $value ) {
+		// An empty cell clears the date. set_props() skips null values, so return an empty string instead.
+		if ( '' === trim( (string) $value ) ) {
+			return '';
+		}
+
 		try {
 			// If value is a Unix timestamp, convert it to a datetime string.
 			if ( is_numeric( $value ) ) {
