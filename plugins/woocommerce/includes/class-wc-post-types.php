@@ -467,6 +467,8 @@ class WC_Post_Types {
 					'publicly_queryable'  => false,
 					'exclude_from_search' => true,
 					'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+					// Only shown as a top-level item when the user can't see the WooCommerce menu.
+					'menu_icon'           => MenuIcons::get( 'core/receipt', 'dashicons-admin-post' ), // TODO(WOOPLUG-7938): prototype guard.
 					'hierarchical'        => false,
 					'show_in_nav_menus'   => false,
 					'rewrite'             => false,
