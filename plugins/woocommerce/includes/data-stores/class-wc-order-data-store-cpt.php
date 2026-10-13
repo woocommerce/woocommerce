@@ -939,41 +939,31 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Add the 'wc-' prefix to status if needed. Statuses arrive as an array or a
-		// comma-separated string; normalize to an array so the case normalization and prefix
-		// check only need to run once. Status slugs are stored lowercase, so an uppercase
-		// value like 'WC-COMPLETED' must be lowercased first — otherwise it is not recognized,
-		// and WP_Query's own sanitization strips the uppercase letters and drops the status
-		// clause, returning every order.
+		// Add the 'wc-' prefix to status if needed.
+		$status_error = null;
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			$statuses = is_string( $query_vars['post_status'] )
 				? explode( ',', $query_vars['post_status'] )
 				: (array) $query_vars['post_status'];
 
-			// Drop entries that can't be used as strings — arrays would cause a TypeError in
-			// strtolower(), and non-Stringable objects would fatal on trunk too.
-			$statuses = array_filter(
-				$statuses,
-				static function ( $s ) {
-					return is_string( $s ) || ( is_object( $s ) && method_exists( $s, '__toString' ) );
-				}
-			);
-
-			// If nothing remains, keep a sentinel so the guard below rejects the query
-			// instead of returning every order.
-			if ( empty( $statuses ) ) {
-				$statuses = array( '' );
+			$order_statuses            = array_keys( wc_get_order_statuses() );
+			$query_vars['post_status'] = array();
+			foreach ( array_filter( $statuses, 'is_string' ) as $status ) {
+				// Lowercase here, because WP_Query strips uppercase letters from a status instead of lowercasing them.
+				$status                      = strtolower( trim( $status ) );
+				$query_vars['post_status'][] = in_array( 'wc-' . $status, $order_statuses, true ) ? 'wc-' . $status : $status;
 			}
 
-			foreach ( $statuses as &$status ) {
-				$status = strtolower( (string) $status );
-				$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
+			if ( empty( $query_vars['post_status'] ) ) {
+				$status_error = new WP_Error( 'woocommerce_invalid_order_status', __( 'Order statuses must be strings.', 'woocommerce' ) );
 			}
-
-			$query_vars['post_status'] = $statuses;
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( $status_error ) {
+			$wp_query_args['errors'][] = $status_error;
+		}
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
