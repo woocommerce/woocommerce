@@ -1372,7 +1372,38 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A contract write is one statement: when it is lost, neither the status nor the due moment changes.
+	 * @testdox update_fields and update each write the contract row in exactly one UPDATE statement.
+	 */
+	public function test_a_contract_write_is_one_update_statement(): void {
+		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+
+		foreach ( array( 'update_fields', 'update' ) as $write ) {
+			$contract = $this->sut->find( $id );
+			$this->assertInstanceOf( Contract::class, $contract );
+			$on_hold = ContractStatus::ON_HOLD === $contract->get_status();
+			$contract->set_status( $on_hold ? ContractStatus::ACTIVE : ContractStatus::ON_HOLD );
+			$contract->set_next_payment_gmt( $on_hold ? '2026-06-15 00:00:00' : null );
+
+			$statements = $this->contract_updates_during(
+				function () use ( $write, $contract ): void {
+					if ( 'update_fields' === $write ) {
+						$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
+					} else {
+						$this->sut->update( $contract );
+					}
+				}
+			);
+
+			$this->assertCount( 1, $statements, "{$write}() writes status and due moment in one UPDATE." );
+			$stored = $this->sut->find( $id );
+			$this->assertInstanceOf( Contract::class, $stored );
+			$this->assertSame( $contract->get_status(), $stored->get_status() );
+			$this->assertSame( $contract->get_next_payment_gmt(), $stored->get_next_payment_gmt() );
+		}
+	}
+
+	/**
+	 * @testdox When the contract write is lost, neither the status nor the due moment nor the claim changes.
 	 */
 	public function test_a_lost_contract_write_changes_neither_status_nor_due_moment(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
@@ -1383,14 +1414,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract->set_status( ContractStatus::ON_HOLD );
 		$contract->set_next_payment_gmt( null );
 
-		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$statements = 0;
-		$drop       = static function ( string $query ) use ( $table, &$statements ): string {
-			if ( 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
-				++$statements;
-				return '';
-			}
-			return $query;
+		$drop = function ( string $query ): string {
+			return $this->is_contract_update( $query ) ? '' : $query;
 		};
 
 		add_filter( 'query', $drop );
@@ -1403,12 +1428,48 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			remove_filter( 'query', $drop );
 		}
 
-		$this->assertSame( 1, $statements, 'The status, due moment and claim are one statement.' );
 		$stored = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
 		$this->assertNotNull( $this->stored_claim( $id ) );
+	}
+
+	/**
+	 * The UPDATE statements against the contracts table that `$run` issues, in order. Counts
+	 * without dropping, so the count does not depend on how a write reacts to a lost statement.
+	 *
+	 * @param callable $run Code under test.
+	 * @return array<int, string>
+	 */
+	private function contract_updates_during( callable $run ): array {
+		$statements = array();
+		$count      = function ( string $query ) use ( &$statements ): string {
+			if ( $this->is_contract_update( $query ) ) {
+				$statements[] = $query;
+			}
+			return $query;
+		};
+
+		add_filter( 'query', $count );
+		try {
+			$run();
+		} finally {
+			remove_filter( 'query', $count );
+		}
+
+		return $statements;
+	}
+
+	/**
+	 * Whether a query is an UPDATE of the contracts table, with or without backtick quoting.
+	 *
+	 * @param string $query SQL statement.
+	 */
+	private function is_contract_update( string $query ): bool {
+		$table = preg_quote( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ), '/' );
+
+		return 1 === preg_match( "/^\\s*UPDATE\\s+`?{$table}`?\\s/i", $query );
 	}
 
 	/**
