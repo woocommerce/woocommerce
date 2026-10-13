@@ -16,4 +16,4 @@
 
 **How to confirm:** Check the package `index` exports and changelog. Does the published build use the classic JSX runtime? Grep `getSetting( 'key' )` readers. For published callback types under `strictFunctionTypes`, check whether an unchanged consumer with a narrower callback parameter still compiles: method parameters are bivariant, function-property parameters are contravariant. Confirm a concrete consumer compilation break before reporting.
 
-**Don't flag when:** Private (non-exported) modules. Additive exports. Type changes that preserve existing consumer assignability.
+**Don't flag when:** Private APIs not exposed through public exports, re-exports, or signatures. Additive exports. Type changes that preserve existing consumer assignability.
