@@ -130,9 +130,9 @@ describe( 'registerProductBlockType', () => {
 		expect( mockUnsubscribe ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'keeps the Single Product ancestor in the Cart page template', () => {
+	it( 'keeps the Single Product ancestor outside a Single Product template', () => {
 		mockPostType = 'wp_template';
-		mockTemplateSlug = 'twentytwentyfour//page-cart';
+		mockTemplateSlug = 'twentytwentyfour//coming-soon';
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 
@@ -154,7 +154,7 @@ describe( 'registerProductBlockType', () => {
 		expect( mockUnregisterBlockType ).not.toHaveBeenCalled();
 	} );
 
-	it( 'drops the Single Product ancestor in a per-product Single Product template', () => {
+	it( 'allows product blocks directly in a per-product template', () => {
 		mockPostType = 'wp_template';
 		mockTemplateSlug = 'single-product-v-neck-t-shirt';
 		mockIsSiteEditor = true;
@@ -179,7 +179,7 @@ describe( 'registerProductBlockType', () => {
 		);
 	} );
 
-	it( 'registers post-editor-enabled blocks with the Single Product ancestor while editing a pattern without the site editor store', () => {
+	it( 'registers eligible product blocks in the pattern editor without the Site Editor store', () => {
 		mockPostType = 'wp_block';
 		mockTemplateSlug = 'on-sale-products-pattern';
 		mockIsSiteEditor = false;
