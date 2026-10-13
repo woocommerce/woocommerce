@@ -682,7 +682,8 @@ class OrdersTableQuery {
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
-		if ( empty( $this->args['status'] ) ) {
+		// A supplied '0' is not a missing status; it falls through to the no-match check below.
+		if ( empty( $this->args['status'] ) && '0' !== ( $this->args['status'] ?? null ) ) {
 			$this->args['status'] = array();
 		}
 

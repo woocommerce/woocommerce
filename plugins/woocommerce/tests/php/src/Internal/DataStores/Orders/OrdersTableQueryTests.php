@@ -930,10 +930,10 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @testdox wc_get_orders returns no orders when every status value is an empty-like string.
 	 *
 	 * @dataProvider empty_like_status_provider
-	 * @param bool  $hpos_enabled Whether HPOS is enabled.
-	 * @param array $statuses     The status query var value.
+	 * @param bool         $hpos_enabled Whether HPOS is enabled.
+	 * @param string|array $statuses     The status query var value.
 	 */
-	public function test_wc_get_orders_returns_empty_when_all_status_values_are_empty_like( bool $hpos_enabled, array $statuses ): void {
+	public function test_wc_get_orders_returns_empty_when_all_status_values_are_empty_like( bool $hpos_enabled, $statuses ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
 		$this->create_orders_with_interleaved_statuses( 3 );
 
@@ -945,22 +945,24 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array(), $queried_order_ids, 'A status array with only empty-like strings should not drop the status condition and return every order.' );
+		$this->assertSame( array(), $queried_order_ids, 'A status with only empty-like strings should not drop the status condition and return every order.' );
 	}
 
 	/**
-	 * Provides status arrays whose values are dropped as empty, for both order storages.
+	 * Provides statuses whose values are dropped as empty, for both order storages.
 	 *
-	 * @return array<string, array{bool, array}>
+	 * @return array<string, array{bool, string|array}>
 	 */
 	public function empty_like_status_provider(): array {
 		return array(
-			'HPOS, zero'             => array( true, array( '0' ) ),
-			'HPOS, empty'            => array( true, array( '' ) ),
-			'HPOS, whitespace'       => array( true, array( '  ' ) ),
-			'legacy CPT, zero'       => array( false, array( '0' ) ),
-			'legacy CPT, empty'      => array( false, array( '' ) ),
-			'legacy CPT, whitespace' => array( false, array( '  ' ) ),
+			'HPOS, zero'              => array( true, array( '0' ) ),
+			'HPOS, scalar zero'       => array( true, '0' ),
+			'HPOS, empty'             => array( true, array( '' ) ),
+			'HPOS, whitespace'        => array( true, array( '  ' ) ),
+			'legacy CPT, zero'        => array( false, array( '0' ) ),
+			'legacy CPT, scalar zero' => array( false, '0' ),
+			'legacy CPT, empty'       => array( false, array( '' ) ),
+			'legacy CPT, whitespace'  => array( false, array( '  ' ) ),
 		);
 	}
 

@@ -1153,15 +1153,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return bool
 	 */
 	private function has_only_unknown_statuses( array $wp_query_args ): bool {
-		if ( empty( $wp_query_args['post_status'] ) ) {
+		$post_status = $wp_query_args['post_status'] ?? null;
+
+		// WP_Query treats '0' as no status and applies its defaults, so it counts as an unknown status here.
+		if ( empty( $post_status ) && '0' !== $post_status ) {
 			return false;
 		}
 
-		$statuses = is_string( $wp_query_args['post_status'] )
-			? explode( ',', $wp_query_args['post_status'] )
-			: (array) $wp_query_args['post_status'];
-
-		$requested_statuses = array_map( 'sanitize_key', array_filter( $statuses, 'is_string' ) );
+		// Normalize like WP_Query::parse_query(): arrays go through sanitize_key(), strings lose disallowed characters (including uppercase).
+		$requested_statuses = is_array( $post_status )
+			? array_map( 'sanitize_key', array_filter( $post_status, 'is_string' ) )
+			: explode( ',', (string) preg_replace( '|[^a-z0-9_,-]|', '', is_scalar( $post_status ) ? (string) $post_status : '' ) );
 		$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati(), array_keys( wc_get_order_statuses() ) );
 
 		return ! array_intersect( $requested_statuses, $known_statuses );

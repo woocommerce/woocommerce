@@ -1788,6 +1788,34 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CPT order queries return no orders when the "$filter" filter sets an uppercase status string, which WP_Query cannot match.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_return_empty_when_filter_sets_uppercase_status_string( string $filter ): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'WC-COMPLETED';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'WP_Query strips uppercase letters from a status string, so the status should be validated as WP_Query sees it.' );
+	}
+
+	/**
 	 * @testdox CPT order queries with default statuses still find orders before order statuses are registered, as during upgrades.
 	 */
 	public function test_cpt_order_queries_find_orders_before_order_statuses_are_registered(): void {
