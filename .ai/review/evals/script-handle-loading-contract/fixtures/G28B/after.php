@@ -1,6 +1,8 @@
 <?php
-/* Scenario context: Released gateway integration docs use wc-tokenization-form as a script dependency. Registration shown is the only registration. Rename is presented as internal cleanup and has no deprecation or compatibility alias; extensions keep the old handle. */
+/* Tokenization asset registration and an installed gateway’s frontend dependency. */
 function wc_register_checkout_assets() {
-    wp_register_script( 'wc-tokenization-ui', plugins_url( 'assets/js/tokenization.js', WC_PLUGIN_FILE ), array( 'jquery' ), '1.0', true );
+    wp_register_script( 'wc-tokenization-ui', plugins_url( 'assets/js/frontend/tokenization-form.js', WC_PLUGIN_FILE ), array( 'jquery' ), WC()->version, false );
 }
 add_action( 'wp_enqueue_scripts', 'wc_register_checkout_assets' );
+
+add_action( 'wp_enqueue_scripts', static function() { wp_enqueue_script( 'gateway-ui', plugins_url( 'gateway-ui.js', __FILE__ ), array( 'jquery', 'woocommerce-tokenization-form' ), '1.0', false ); }, 20 );

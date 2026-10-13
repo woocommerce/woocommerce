@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: This internal stock-label subsystem has exactly the shown writer. Object caching persists between requests; the cached numeric label is displayed on product pages. */
+/* Persistent object cache. This isolated stock-label subsystem has one writer, shown below. */
 function wc_stock_label( $id ) {
     $value = wp_cache_get( $id, 'stock_labels', false, $found );
     if ( $found ) { return $value; }

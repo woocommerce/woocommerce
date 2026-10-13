@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Synthetic production fixture. Callback is invoked exclusively by this route via WP REST dispatcher, which validates declared required string argument before callback. No direct calls. */
+/* REST search endpoint. */
 function wc_export_search_rest( $request ) {
     $term = $request->get_param( 'search' );
     return urldecode( $term );

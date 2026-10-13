@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: The admin UI sends _ajax_nonce for action wc-reset-store-label; legacy clients may send _wpnonce instead. Source precedence remains _ajax_nonce before _wpnonce. Both capability and nonce failure branches terminate before the mutation. Request method is unchanged; a valid nonce proves intent. */
+/* Admin clients submit _ajax_nonce; legacy clients may submit _wpnonce. */
 add_action( 'wp_ajax_wc_reset_store_label', 'wc_reset_store_label' );
 function wc_reset_store_label() {
     if ( ! current_user_can( 'manage_woocommerce' ) ) { wp_send_json_error( array(), 403 ); return; }

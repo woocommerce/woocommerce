@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G22A",
+			"id": "G22A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
 			"before": {
 				"file": "fixtures/G22A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G22B",
+			"id": "G22B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
 			"before": {
 				"file": "fixtures/G22B/before.php"
@@ -26,24 +26,24 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "group"
+				"contains": "stock_label"
 			}
 		},
 		{
-			"id": "G22C",
+			"id": "G22C-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
 			"before": {
-				"file": "fixtures/G22C/before.php"
+				"file": "fixtures/G22C-v4/before.php"
 			},
 			"after": {
-				"file": "fixtures/G22C/after.php"
+				"file": "fixtures/G22C-v4/after.php"
 			},
 			"expect": {
 				"outcome": "quiet"
 			}
 		},
 		{
-			"id": "G22D",
+			"id": "G22D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-22.php",
 			"before": {
 				"file": "fixtures/G22D/before.php"

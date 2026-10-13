@@ -1,2 +1,2 @@
-/* Scenario context: Before invoking this helper, checkout hides manual address inputs while suggestions load. restoreManualEntry reopens them. Caller starts the promise without awaiting/catching it; the only rejection handling/fallback is shown. URLs are a fixed same-origin trusted endpoint; response JSON is validated by setSuggestions. */
+/* Address suggestion widget hides the manual-entry panel while loading. Caller starts loadSuggestions without awaiting it. */
 export async function loadSuggestions( url, setSuggestions, restoreManualEntry ) { try { const response = await fetch( url ); if ( ! response.ok ) { throw new Error( 'Request failed' ); } setSuggestions( await response.json() ); } catch ( error ) { restoreManualEntry(); } }

@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G33A",
+			"id": "G33A-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
 			"before": {
 				"file": "fixtures/G33A/before.js"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G33B",
+			"id": "G33B-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
 			"before": {
 				"file": "fixtures/G33B/before.js"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "malformed"
+				"contains": "JSON.parse"
 			}
 		},
 		{
-			"id": "G33C",
+			"id": "G33C-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
 			"before": {
 				"file": "fixtures/G33C/before.js"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G33D",
+			"id": "G33D-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/address-suggestions.js",
 			"before": {
 				"file": "fixtures/G33D/before.js"

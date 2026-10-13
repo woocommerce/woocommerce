@@ -1,2 +1,2 @@
-/* Scenario context: loadSuggestions is the only entrypoint; requestSuggestions is private and only called as shown. Same-origin endpoint is fixed; suggestion validator is unchanged. Manual entry must be restored on network, HTTP, or malformed JSON errors. */
+/* Private request helper; loadSuggestions is its only caller. URL is a fixed same-origin endpoint. */
 export async function loadSuggestions( url, setSuggestions, restoreManualEntry ) { try { const response = await fetch( url ); if ( ! response.ok ) { throw new Error( 'Request failed' ); } setSuggestions( await response.json() ); } catch ( error ) { restoreManualEntry(); } }

@@ -1,7 +1,9 @@
 <?php
-/* Scenario context: Existing wc-tokenization-form public contract stays unchanged. The new tokenization-help.js release asset exists and is an optional internal helper. Nothing enqueues it yet. */
+/* Optional help script is included in this release’s assets. */
 function wc_register_checkout_assets() {
-    wp_register_script( 'wc-tokenization-form', plugins_url( 'assets/js/tokenization.js', WC_PLUGIN_FILE ), array( 'jquery' ), '1.0', true );
-    wp_register_script( 'wc-tokenization-help', plugins_url( 'assets/js/tokenization-help.js', WC_PLUGIN_FILE ), array( 'jquery' ), '1.0', true );
+    wp_register_script( 'woocommerce-tokenization-form', plugins_url( 'assets/js/frontend/tokenization-form.js', WC_PLUGIN_FILE ), array( 'jquery' ), WC()->version, false );
+    wp_register_script( 'wc-tokenization-help', plugins_url( 'assets/js/tokenization-help.js', WC_PLUGIN_FILE ), array( 'jquery' ), WC()->version, false );
 }
 add_action( 'wp_enqueue_scripts', 'wc_register_checkout_assets' );
+
+add_action( 'wp_enqueue_scripts', static function() { wp_enqueue_script( 'gateway-ui', plugins_url( 'gateway-ui.js', __FILE__ ), array( 'jquery', 'woocommerce-tokenization-form' ), '1.0', false ); }, 20 );

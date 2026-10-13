@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G01A",
+			"id": "G01A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
 			"before": {
 				"file": "fixtures/G01A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G01B",
+			"id": "G01B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
 			"before": {
 				"file": "fixtures/G01B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G01C",
+			"id": "G01C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
 			"before": {
 				"file": "fixtures/G01C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G01D",
+			"id": "G01D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
 			"before": {
 				"file": "fixtures/G01D/before.php"

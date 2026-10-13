@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: convert_catalog_price returns a numeric price converted into the supplied ISO currency. This group uses persistent cross-request object caching. Rates and base prices are immutable for the 60-second cache window. */
+/* Persistent object cache. Catalog prices and exchange rates are fixed during the 60-second cache window. */
 function wc_price_for_currency( $id, $currency ) {
     $key = $id . ':' . $currency;
     $value = wp_cache_get( $key, 'converted_prices', false, $found );

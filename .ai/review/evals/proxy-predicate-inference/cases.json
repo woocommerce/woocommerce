@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G12A",
+			"id": "G12A-v3",
 			"path": "plugins/woocommerce/includes/address-editor.php",
 			"before": {
 				"file": "fixtures/G12A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "linked"
+				"contains": "_copy_billing_to_shipping"
 			}
 		},
 		{
-			"id": "G12B",
+			"id": "G12B-v3",
 			"path": "plugins/woocommerce/includes/receipt-audience.php",
 			"before": {
 				"file": "fixtures/G12B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "guest"
+				"contains": "_placed_as_guest"
 			}
 		},
 		{
-			"id": "G12C",
+			"id": "G12C-v3",
 			"path": "plugins/woocommerce/includes/address-editor.php",
 			"before": {
 				"file": "fixtures/G12C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G12D",
+			"id": "G12D-v4",
 			"path": "plugins/woocommerce/includes/address-editor.php",
 			"before": {
 				"file": "fixtures/G12D/before.php"

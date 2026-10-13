@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G11A",
+			"id": "G11A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-install.php",
 			"before": {
 				"file": "fixtures/G11A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G11B",
+			"id": "G11B-v3",
 			"path": "plugins/woocommerce/includes/wc-update-functions.php",
 			"before": {
 				"file": "fixtures/G11B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "orphan"
+				"contains": "load_order"
 			}
 		},
 		{
-			"id": "G11C",
+			"id": "G11C-v3",
 			"path": "plugins/woocommerce/includes/wc-update-functions.php",
 			"before": {
 				"file": "fixtures/G11C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G11D",
+			"id": "G11D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-install.php",
 			"before": {
 				"file": "fixtures/G11D/before.php"

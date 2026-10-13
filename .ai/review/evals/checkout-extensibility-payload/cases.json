@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G31A",
+			"id": "G31A-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
 			"before": {
 				"file": "fixtures/G31A/before.js"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "numeric-string"
+				"contains": "amount"
 			}
 		},
 		{
-			"id": "G31B",
+			"id": "G31B-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
 			"before": {
 				"file": "fixtures/G31B/before.js"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G31C",
+			"id": "G31C-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
 			"before": {
 				"file": "fixtures/G31C/before.js"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G31D",
+			"id": "G31D-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
 			"before": {
 				"file": "fixtures/G31D/before.js"

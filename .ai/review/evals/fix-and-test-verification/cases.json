@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G24A",
+			"id": "G24A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc-cancelled"
+				"contains": "get_status"
 			}
 		},
 		{
-			"id": "G24B",
+			"id": "G24B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "paged"
+				"contains": "catalog_page"
 			}
 		},
 		{
-			"id": "G24C",
+			"id": "G24C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G24D",
+			"id": "G24D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
 			"before": {
 				"file": "fixtures/G24D/before.php"

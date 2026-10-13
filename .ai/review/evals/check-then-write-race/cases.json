@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G18A",
+			"id": "G18A-v3",
 			"path": "plugins/woocommerce/src/Internal/Stock/Reservation.php",
 			"before": {
 				"file": "fixtures/G18A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "concurrent"
+				"contains": "quantity"
 			}
 		},
 		{
-			"id": "G18B",
+			"id": "G18B-v3",
 			"path": "plugins/woocommerce/includes/coupon-usage.php",
 			"before": {
 				"file": "fixtures/G18B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G18C",
+			"id": "G18C-v3",
 			"path": "plugins/woocommerce/src/Internal/Stock/Reservation.php",
 			"before": {
 				"file": "fixtures/G18C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G18D",
+			"id": "G18D-v3",
 			"path": "plugins/woocommerce/includes/coupon-usage.php",
 			"before": {
 				"file": "fixtures/G18D/before.php"

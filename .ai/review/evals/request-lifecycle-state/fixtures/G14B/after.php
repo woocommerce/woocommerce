@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: register_sender is injected by bootstrap and registers senders for each supplied type. init callbacks run in numeric priority order. build_mailer memoizes first type snapshot for the request; the shipment sender is required after initialization. */
+/* Request bootstrap. register_sender receives the mailer type list. */
 $email_types = array();
 $build_mailer = static function () use ( &$email_types ) {
     static $snapshot;

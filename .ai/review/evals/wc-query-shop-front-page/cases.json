@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G13A",
+			"id": "G13A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-query.php",
 			"before": {
 				"file": "fixtures/G13A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G13B",
+			"id": "G13B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-query.php",
 			"before": {
 				"file": "fixtures/G13B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G13C",
+			"id": "G13C-v4",
 			"path": "plugins/woocommerce/includes/class-wc-query.php",
 			"before": {
 				"file": "fixtures/G13C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G13D",
+			"id": "G13D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-query.php",
 			"before": {
 				"file": "fixtures/G13D/before.php"

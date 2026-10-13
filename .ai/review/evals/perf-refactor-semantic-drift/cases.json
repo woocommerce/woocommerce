@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G23A",
+			"id": "G23A-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
 			"before": {
 				"file": "fixtures/G23A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "eligible"
+				"contains": "array_slice"
 			}
 		},
 		{
-			"id": "G23B",
+			"id": "G23B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
 			"before": {
 				"file": "fixtures/G23B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G23C",
+			"id": "G23C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
 			"before": {
 				"file": "fixtures/G23C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G23D",
+			"id": "G23D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
 			"before": {
 				"file": "fixtures/G23D/before.php"

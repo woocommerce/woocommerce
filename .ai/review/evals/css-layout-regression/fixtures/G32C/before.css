@@ -1,2 +1,2 @@
-/* Scenario context: wc-block-new-cart-help is a new block first introduced in this release; its class does not occur on existing content. Existing Cart markup/styles remain identical. */
+/* The new help block is introduced in this release; existing Cart markup is unchanged. */
 .wc-block-cart .wc-block-cart__coupon button { min-height: 44px; }

@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G03A",
+			"id": "G03A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
 			"before": {
 				"file": "fixtures/G03A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "numeric"
+				"contains": "wc_status_label"
 			}
 		},
 		{
-			"id": "G03B",
+			"id": "G03B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
 			"before": {
 				"file": "fixtures/G03B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G03C",
+			"id": "G03C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
 			"before": {
 				"file": "fixtures/G03C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G03D",
+			"id": "G03D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
 			"before": {
 				"file": "fixtures/G03D/before.php"

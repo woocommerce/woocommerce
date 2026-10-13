@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G25A",
+			"id": "G25A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
 			"before": {
 				"file": "fixtures/G25A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G25B",
+			"id": "G25B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
 			"before": {
 				"file": "fixtures/G25B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "draft"
+				"contains": "post_status"
 			}
 		},
 		{
-			"id": "G25C",
+			"id": "G25C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
 			"before": {
 				"file": "fixtures/G25C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G25D",
+			"id": "G25D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
 			"before": {
 				"file": "fixtures/G25D/before.php"

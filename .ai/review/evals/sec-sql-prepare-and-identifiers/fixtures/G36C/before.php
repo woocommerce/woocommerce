@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Public endpoint deliberately adds publication-date sorting. post_date is a real wp_posts column. Exact strict allowlist remains in the same function; all other strings fall back to ID. */
+/* Public catalog sort AJAX endpoint. */
 add_action( 'wp_ajax_nopriv_wc_catalog_sort', 'wc_catalog_sort' );
 function wc_catalog_sort() {
     global $wpdb;

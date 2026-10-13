@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G28A",
+			"id": "G28A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
 			"before": {
 				"file": "fixtures/G28A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc-tokenization-form"
+				"contains": "woocommerce-tokenization-form"
 			}
 		},
 		{
-			"id": "G28B",
+			"id": "G28B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
 			"before": {
 				"file": "fixtures/G28B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc-tokenization-form"
+				"contains": "woocommerce-tokenization-form"
 			}
 		},
 		{
-			"id": "G28C",
+			"id": "G28C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
 			"before": {
 				"file": "fixtures/G28C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G28D",
+			"id": "G28D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
 			"before": {
 				"file": "fixtures/G28D/before.php"

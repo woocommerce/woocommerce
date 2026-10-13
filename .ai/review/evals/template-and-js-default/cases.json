@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G15A",
+			"id": "G15A-v3",
 			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
 			"before": {
 				"file": "fixtures/G15A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G15B",
+			"id": "G15B-v3",
 			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
 			"before": {
 				"file": "fixtures/G15B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G15C",
+			"id": "G15C-v3",
 			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
 			"before": {
 				"file": "fixtures/G15C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G15D",
+			"id": "G15D-v3",
 			"path": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
 			"before": {
 				"file": "fixtures/G15D/before.php"

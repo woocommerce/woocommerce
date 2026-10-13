@@ -1,2 +1,0 @@
-/* Scenario context: Released @woocommerce/currency API explicitly accepts finite numeric amounts including 0; extensions use formatCurrency(0) for free products. Empty output is not documented for zero. This cleanup has no announced behavior change/deprecation. */
-export function formatCurrency( amount, symbol = '$' ) { if ( ! amount ) { return ''; } return symbol + Number( amount ).toFixed( 2 ); }

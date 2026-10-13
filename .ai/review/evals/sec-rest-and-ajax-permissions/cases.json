@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G37A",
+			"id": "G37A-v3",
 			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
 			"before": {
 				"file": "fixtures/G37A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G37B",
+			"id": "G37B-v3",
 			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
 			"before": {
 				"file": "fixtures/G37B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G37C",
+			"id": "G37C-v3",
 			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
 			"before": {
 				"file": "fixtures/G37C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G37D",
+			"id": "G37D-v3",
 			"path": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
 			"before": {
 				"file": "fixtures/G37D/before.php"

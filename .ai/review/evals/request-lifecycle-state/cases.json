@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G14A",
+			"id": "G14A-v3",
 			"path": "plugins/woocommerce/includes/order-fragment.php",
 			"before": {
 				"file": "fixtures/G14A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G14B",
+			"id": "G14B-v3",
 			"path": "plugins/woocommerce/includes/email-bootstrap.php",
 			"before": {
 				"file": "fixtures/G14B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G14C",
+			"id": "G14C-v3",
 			"path": "plugins/woocommerce/includes/order-fragment.php",
 			"before": {
 				"file": "fixtures/G14C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G14D",
+			"id": "G14D-v3",
 			"path": "plugins/woocommerce/includes/email-bootstrap.php",
 			"before": {
 				"file": "fixtures/G14D/before.php"

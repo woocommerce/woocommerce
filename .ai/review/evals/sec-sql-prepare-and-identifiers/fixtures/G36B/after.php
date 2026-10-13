@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Anonymous product-sort endpoint allows only ID and post_title ordering. It is read-only public data. esc_sql escapes quote characters but does not quote or validate a raw ORDER BY expression. There are published rows to evaluate sort expressions. */
+/* Public catalog sort AJAX endpoint; catalog contains published products. */
 add_action( 'wp_ajax_nopriv_wc_catalog_sort', 'wc_catalog_sort' );
 function wc_catalog_sort() {
     global $wpdb;

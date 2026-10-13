@@ -1,8 +1,14 @@
 <?php
-/* Scenario context: Synthetic production fixture. HPOS authoritative compatibility read sees reserved-ID placeholder posts of type shop_order_placehold with status draft. Real HPOS order has processing status. store.write_status writes HPOS status. Real CPT order statuses use same unprefixed format in this adapter. */
+/* Reduced HPOS compatibility synchronizer; HPOS is authoritative. */
 class OrderMetaSynchronizer {
     public function sync_post( $post, $order, $store ) {
-        if ( $post->post_status === $order->get_status() ) { return; }
-        $store->write_status( $order->get_id(), $post->post_status );
+        $status = preg_replace( '/^wc-/', '', $post->post_status );
+        if ( $status === $order->get_status() ) { return; }
+        $store->write_status( $order->get_id(), $status );
     }
+}
+
+function read_placeholder( $order, $store ) {
+    $post = (object) array( 'post_type' => 'shop_order_placehold', 'post_status' => 'draft' );
+    ( new OrderMetaSynchronizer() )->sync_post( $post, $order, $store );
 }

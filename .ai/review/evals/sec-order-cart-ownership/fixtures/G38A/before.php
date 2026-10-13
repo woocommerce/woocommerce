@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Any logged-in customer can invoke this read-only admin-ajax action. Core view_order capability mapping authorizes the owner or privileged staff. Numeric order IDs are enumerable. No nonce or unrelated authentication layer confers ownership. */
+/* Customer order-email lookup through admin-ajax. */
 add_action( 'wp_ajax_wc_private_order_email', 'wc_private_order_email' );
 function wc_private_order_email() {
     $id = isset( $_GET['order_id'] ) && is_scalar( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;

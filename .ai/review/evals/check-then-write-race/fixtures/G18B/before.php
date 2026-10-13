@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: lock serializes callbacks across processes per coupon key and releases on every exit. DB adapter has shown read/write semantics with no built-in locking; successful call authorizes discount redemption. Concurrent checkouts share coupon limit. */
+/* Coupon redemption adapter. lock serializes callbacks across processes per key and releases in finally. DB read/write operations do not lock. */
 function increase_usage_count( $db, $coupon_id, $lock ) {
     return $lock( 'coupon:' . $coupon_id, static function () use ( $db, $coupon_id ) {
         $row = $db->read_coupon( $coupon_id );

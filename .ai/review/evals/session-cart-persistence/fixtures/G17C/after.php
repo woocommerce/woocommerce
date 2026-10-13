@@ -1,9 +1,10 @@
 <?php
-/* Scenario context: All supported session handlers implement get(key,default) and may observe call order. Both cart and coupons default to empty arrays. */
-function read_cart_session( $session ) {
-    $data = array();
-    foreach ( array( 'cart', 'coupons' ) as $key ) {
-        $data[ $key ] = $session->get( $key, array() );
-    }
-    return $data;
+function read_cart_session( WC_Session $session ) {
+    return array( 'cart' => $session->get( 'cart', array() ), 'coupons' => $session->get( 'coupons', array() ) );
 }
+class Export_Custom_Session extends WC_Session {
+    public function init() {}
+}
+$session = new Export_Custom_Session();
+$session->set( 'cart', array( 'item-hash' => array( 'product_id' => 42, 'quantity' => 1 ) ) );
+$cart = read_cart_session( $session );

@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Public read-only endpoint returns only published product IDs. Scalar filtering, integer normalization, and empty-list early return remain in the shown function. Result ordering is unspecified. */
+/* Public product-ID lookup; result order is unspecified. */
 add_action( 'wp_ajax_nopriv_wc_catalog_ids', 'wc_catalog_ids' );
 function wc_catalog_ids() {
     global $wpdb;

@@ -1,8 +1,13 @@
 <?php
-/* Scenario context: Synthetic production fixture. WC_Export_Feed shipped in a previous release. External classes implement rows only. The complete core implementor is shown. */
+/* Public extension interface. */
 interface WC_Export_Feed {
     public function rows();
 }
 class WC_Core_Export_Feed implements WC_Export_Feed {
     public function rows() { return array(); }
+}
+
+// Extension implementation loaded through the export-feed registry.
+class Partner_Export_Feed implements WC_Export_Feed {
+    public function rows() { return array( array( 'id' => 42 ) ); }
 }

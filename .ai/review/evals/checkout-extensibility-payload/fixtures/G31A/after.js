@@ -1,2 +1,4 @@
-/* Scenario context: Released checkout payload contract permits amount as a finite number or a numeric decimal string from PHP. sample-shipping namespace is guaranteed present by registered schema. Client uses this amount for an extension fee preview; installed extension sends amount="5". No API change or deprecation is announced. */
+/* Checkout extension fee preview. Registered sample-shipping schema permits a finite number or decimal string for amount. */
 export function extensionAmount( extensions ) { const raw = extensions['sample-shipping'].amount; return typeof raw === 'number' && Number.isFinite( raw ) ? raw : 0; }
+
+export const extensionPayload = JSON.parse( '{"sample-shipping":{"amount":"5.00"}}' );

@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Hot listing function returns stock map for unique integer product IDs. Missing IDs are omitted and map iteration order is not part of the API. This patch batches lookups and guards empty input. */
+/* Product stock report returns a map keyed by ID. Map iteration order is not specified. */
 function wc_listing_totals( $ids ) {
     global $wpdb;
     $ids = array_map( 'absint', $ids );

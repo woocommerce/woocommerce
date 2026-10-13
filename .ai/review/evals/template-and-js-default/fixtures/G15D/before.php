@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Optional enhancement reveals purchase-progress during async submit when loaded. Form remains a native POST fallback; progress text is new and not a purchase control. */
+/* Page-builder purchase template; frontend scripts are optional. */
 /** Product purchase form. @version 1.0.0 */
 ?>
 <form method="post">

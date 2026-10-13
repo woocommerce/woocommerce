@@ -1,2 +1,4 @@
-/* Scenario context: This stylesheet is loaded on pages containing the Cart block and in the site editor. Theme navigation and unrelated editor block buttons are outside .wc-block-cart. Some intentionally use 24px height; no later rule resets min-height. */
+/* Theme header and Cart styles loaded together. */
+.site-header { height: 24px; overflow: hidden; }
+.site-header button { height: 24px; }
 button { min-height: 44px; }

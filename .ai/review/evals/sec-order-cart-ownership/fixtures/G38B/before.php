@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Public anonymous action returns guest-order data. Anonymous current user ID is 0, and guest orders have customer ID 0. Released guest access requires both secret order key and billing email; keys are nonempty strings. */
+/* Guest order-email lookup through admin-ajax. */
 add_action( 'wp_ajax_nopriv_wc_guest_order_email', 'wc_guest_order_email' );
 function wc_guest_order_email() {
     $id = isset( $_GET['order_id'] ) && is_scalar( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;

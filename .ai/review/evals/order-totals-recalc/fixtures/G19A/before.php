@@ -1,6 +1,12 @@
 <?php
-/* Scenario context: Admin note editing is allowed for already-paid historical orders. calculate_totals recomputes using current tax/coupon settings; save persists current stored totals unchanged unless recalculated. Released note edit preserves charged amounts. */
+/* Admin note editor for saved orders. */
 function save_order_note( $order, $note ) {
     $order->set_customer_note( $note );
     $order->save();
+}
+
+function edit_saved_order_note( $order_id, $note ) {
+    $order = wc_get_order( $order_id );
+    if ( ! $order ) { return; }
+    save_order_note( $order, $note );
 }

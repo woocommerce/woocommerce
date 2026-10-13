@@ -2,54 +2,54 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G30A",
-			"path": "packages/js/currency/src/index.js",
+			"id": "G30A-v3",
+			"path": "packages/js/currency/src/index.ts",
 			"before": {
-				"file": "fixtures/G30A/before.js"
+				"file": "fixtures/G30A/before.ts"
 			},
 			"after": {
-				"file": "fixtures/G30A/after.js"
+				"file": "fixtures/G30A/after.ts"
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "getCurrencySymbol"
+				"contains": "default"
 			}
 		},
 		{
-			"id": "G30B",
-			"path": "packages/js/currency/src/index.js",
+			"id": "G30B-v3",
+			"path": "packages/js/currency/src/utils.tsx",
 			"before": {
-				"file": "fixtures/G30B/before.js"
+				"file": "fixtures/G30B/before.tsx"
 			},
 			"after": {
-				"file": "fixtures/G30B/after.js"
+				"file": "fixtures/G30B/after.tsx"
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "zero"
+				"contains": "formatAmount"
 			}
 		},
 		{
-			"id": "G30C",
-			"path": "packages/js/currency/src/index.js",
+			"id": "G30C-v3",
+			"path": "packages/js/currency/src/index.ts",
 			"before": {
-				"file": "fixtures/G30C/before.js"
+				"file": "fixtures/G30C/before.ts"
 			},
 			"after": {
-				"file": "fixtures/G30C/after.js"
+				"file": "fixtures/G30C/after.ts"
 			},
 			"expect": {
 				"outcome": "quiet"
 			}
 		},
 		{
-			"id": "G30D",
-			"path": "packages/js/currency/src/index.js",
+			"id": "G30D-v3",
+			"path": "packages/js/currency/src/utils.tsx",
 			"before": {
-				"file": "fixtures/G30D/before.js"
+				"file": "fixtures/G30D/before.tsx"
 			},
 			"after": {
-				"file": "fixtures/G30D/after.js"
+				"file": "fixtures/G30D/after.tsx"
 			},
 			"expect": {
 				"outcome": "quiet"

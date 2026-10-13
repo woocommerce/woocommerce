@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Focused source for a product-only query pipeline. Released extension documentation permits posts_clauses callbacks at priority 20 to reference the wc_product_meta_lookup alias installed at priority 10. The shown extension is active. These callbacks run only for this catalog query. */
+/* Catalog-query callbacks; extensions can register posts_clauses callbacks. */
 function wc_catalog_clauses( $clauses ) {
     global $wpdb;
     $clauses['join'] .= " LEFT JOIN {$wpdb->prefix}wc_product_meta_lookup lookup ON {$wpdb->posts}.ID = lookup.product_id";

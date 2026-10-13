@@ -1,9 +1,7 @@
 <?php
-/* Scenario context: Synthetic production fixture. Cache writers store nonnegative integer IDs either as decimal strings or integers. False denotes cache miss. */
 declare(strict_types=1);
-function wc_parent_label( int $id ): string { return 'Parent ' . $id; }
-function wc_cached_parent_label( $key ): string {
-    $id = wp_cache_get( $key, 'parents' );
-    if ( false === $id ) { $id = 0; }
-    return wc_parent_label( absint( $id ) );
+function wc_status_label( string $status ): string { return 'Status: ' . $status; }
+function wc_status_labels( array $statuses ): array {
+    return array_map( 'wc_status_label', array_keys( $statuses ) );
 }
+$labels = wc_status_labels( array( '42' => 'Imported', 'pending' => 'Pending' ) );

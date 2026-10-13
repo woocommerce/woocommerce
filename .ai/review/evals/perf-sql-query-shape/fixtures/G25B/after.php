@@ -1,3 +1,3 @@
 <?php
-/* Scenario context: Hot catalog listing sums the returned stock quantities. Input IDs come from an upstream product query with post_status=any, including published and draft products. Private product lookup table contains rows for both. This performance refactor claims the posts join is redundant; no upstream publication restriction exists. */
+/* Product stock report receives IDs from a post_status=any query. */
 function wc_listing_published_stock( $ids ) { global $wpdb; $ids = array_map( 'absint', $ids ); if ( ! $ids ) { return array(); } return $wpdb->get_col( "SELECT l.stock_quantity FROM {$wpdb->prefix}wc_product_meta_lookup l WHERE l.product_id IN (" . implode( ',', $ids ) . ')' ); }

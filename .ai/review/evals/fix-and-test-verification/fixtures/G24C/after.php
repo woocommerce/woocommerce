@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Refactor-only PR with no claimed behavior change. Input $paged is a validated integer. WordPress reads the unchanged paged argument. */
+/* Refactor of catalog pagination; route passes integer page numbers. */
 function wc_catalog_page_args( $paged ) {
     return array( 'post_type' => 'product', 'posts_per_page' => 12, 'paged' => ( $paged < 1 ? 1 : $paged ) );
 }

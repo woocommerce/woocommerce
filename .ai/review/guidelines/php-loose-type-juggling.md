@@ -22,4 +22,6 @@
 
 **How to confirm:** Check the file for `strict_types`. Grep the value's producers: `apply_filters` sites, `get_option` defaults (often `''`), and `wp_cache_get` writers. For array keys, ask whether a key can be a numeric string. Check divisors for a zero guard.
 
+Check the immediate call site, not only the file declaring the typed function. Internal functions such as `array_map` invoke callbacks with scalar coercion: a direct string-typed callback accepts an integer key. A userland closure in a strict file that forwards that key to another typed function makes a strict call. Confirm the actual input is coercible; arrays, objects and incompatible return values can still fail.
+
 **Don't flag when:** The value is cast or validated on the same path (`(string)`, `absint`, `wc_format_decimal`) and that also covers the cached readback. A typed param on a private method whose callers all pass literals.

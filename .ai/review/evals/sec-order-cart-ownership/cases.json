@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G38A",
+			"id": "G38A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
 			"before": {
 				"file": "fixtures/G38A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "billing"
+				"contains": "view_order"
 			}
 		},
 		{
-			"id": "G38B",
+			"id": "G38B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
 			"before": {
 				"file": "fixtures/G38B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G38C",
+			"id": "G38C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
 			"before": {
 				"file": "fixtures/G38C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G38D",
+			"id": "G38D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
 			"before": {
 				"file": "fixtures/G38D/before.php"

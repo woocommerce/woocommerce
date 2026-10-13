@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Stock values are integer counts. wp_cache_get sets $found to a boolean, and this dedicated cache stores only integer counts. The shown writer remains the only writer. */
+/* Persistent object cache. This isolated stock-label subsystem has one writer, shown below. */
 function wc_stock_label( $id ) {
     $value = wp_cache_get( $id, 'stock_labels', false, $found );
     if ( true === $found ) { return (int) $value; }

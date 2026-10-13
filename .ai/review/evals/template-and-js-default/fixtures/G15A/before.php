@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Product 42 is a purchasable simple product. Server validates POST and processes add-to-cart. Page builders can render this template without any Woo frontend scripts; enabled native form submission is the released fallback. */
+/* Page-builder purchase template; frontend scripts are optional. */
 /** Product purchase form. @version 1.0.0 */
 ?>
 <form method="post">

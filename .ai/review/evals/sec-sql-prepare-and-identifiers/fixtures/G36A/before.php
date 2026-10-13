@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Public anonymous AJAX endpoint intentionally returns a count of published products matching slug. No earlier sanitizer or firewall rewrites slug. wp_unslash only removes request slashes. Admin-ajax dispatches wc_catalog_count via action=wc_catalog_count. */
+/* Public catalog count AJAX endpoint. */
 add_action( 'wp_ajax_nopriv_wc_catalog_count', 'wc_catalog_count' );
 function wc_catalog_count() {
     global $wpdb;

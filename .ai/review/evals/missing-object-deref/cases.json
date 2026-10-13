@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G08A",
+			"id": "G08A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
 			"before": {
 				"file": "fixtures/G08A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "deleted"
+				"contains": "get_product"
 			}
 		},
 		{
-			"id": "G08B",
+			"id": "G08B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
 			"before": {
 				"file": "fixtures/G08B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G08C",
+			"id": "G08C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
 			"before": {
 				"file": "fixtures/G08C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G08D",
+			"id": "G08D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
 			"before": {
 				"file": "fixtures/G08D/before.php"

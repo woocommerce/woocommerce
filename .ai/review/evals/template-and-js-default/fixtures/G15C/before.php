@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Template uses static English copy in this isolated fixture. Product 42 is purchasable and POST server contract unchanged. Button text is presentation; selectors use the unchanged class. */
+/* Page-builder purchase template. This reduced example uses static English labels. */
 /** Product purchase form. @version 1.0.0 */
 ?>
 <form method="post">

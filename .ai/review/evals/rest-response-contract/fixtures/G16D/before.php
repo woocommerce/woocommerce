@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: items is an ID-keyed string map. Bootstrap registers the exact route-to-callback map returned by item_response_routes; these are the only callers of the internal response helper. /wc/v3/items is released. The optional /wc/experimental/items-preview route has never shipped. Feature values come from trusted server configuration and default off; clients cannot override the boolean passed to the helper. */
+/* Route table consumed by the server bootstrap. wc/v3/items is released; the opt-in preview route is new in this change. items is an ID-keyed map. */
 function item_response_routes( $features ) {
     $routes = array( '/wc/v3/items' => static function ( $items ) {
         return prepare_item_for_response( $items, false );

@@ -1,2 +1,8 @@
-/* Scenario context: Released additional-fields registration accepts hidden=true or hidden=1. For these two values server excludes fields using empty($field["hidden"]); false and 0 remain visible. Active extension registers hidden=1 for its internal reference field. The client renders every returned field. */
-export function visibleAdditionalFields( additionalFields ) { return additionalFields.filter( ( field ) => ! field.hidden ); }
+/* Private extension adapter. Field definitions are serialized by the extension, not the WooCommerce Additional Fields API. */
+const extensionResponse = JSON.parse( '{"fields":[{"id":"reference","hidden":1},{"id":"note","hidden":0}]}' );
+export function visibleAdditionalFields( additionalFields ) {
+    return additionalFields.filter( ( field ) => ! field.hidden );
+}
+export function renderExtensionFields( render ) {
+    visibleAdditionalFields( extensionResponse.fields ).forEach( ( field ) => render( field.id ) );
+}

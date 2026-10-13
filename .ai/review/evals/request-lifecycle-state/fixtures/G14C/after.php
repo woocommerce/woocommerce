@@ -1,12 +1,14 @@
 <?php
-/* Scenario context: Locale switch succeeds and renderer returns a string or throws. Outer request can catch exceptions and continue rendering. */
-function render_order_fragment( $locale, $render ) {
-    switch_to_locale( $locale );
-    try {
-        $html = $render();
-        if ( '' === $html ) { return ''; }
-        return $html;
-    } finally {
-        restore_previous_locale();
+final class Order_Fragment_Renderer {
+    public function render( $locale, $render ) {
+        $switched = switch_to_locale( $locale );
+        try {
+            return $this->render_fragment( $render );
+        } finally {
+            if ( $switched ) { restore_previous_locale(); }
+        }
+    }
+    private function render_fragment( $render ) {
+        return $render();
     }
 }

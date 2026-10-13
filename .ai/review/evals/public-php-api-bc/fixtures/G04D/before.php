@@ -1,5 +1,10 @@
 <?php
-/* Scenario context: Synthetic production fixture. Released subclasses implement rows returning array. No subclass defines get_entry_count, which is new to this fixture ecosystem. */
-abstract class WC_Export_Base {
-    abstract public function rows();
+interface WC_Export_Feed {
+    public function rows();
+}
+class Partner_Export_Feed implements WC_Export_Feed {
+    public function rows() { return array( array( 'id' => 42 ) ); }
+}
+function export_row_count( WC_Export_Feed $feed ) {
+    return count( $feed->rows() );
 }

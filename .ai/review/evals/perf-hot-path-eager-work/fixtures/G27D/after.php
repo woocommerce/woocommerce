@@ -1,3 +1,13 @@
 <?php
-/* Scenario context: Service construction occurs on init, but this getter is invoked only when sending an actual email. No constructor calls the getter. WC mailer initialization is unchanged and remains lazy; returned array is unchanged. */
-class WC_Eval_Mailer_Service { private $emails = null; public function get_emails() { if ( null === $this->emails ) { $this->emails = WC()->mailer()->get_emails(); } $emails = $this->emails; return $emails; } }
+final class WC_Eval_Mailer_Service {
+    private $load;
+    public function __construct() {
+        $this->load = static function() {
+            static $emails = null;
+            if ( null === $emails ) { $emails = WC()->mailer()->get_emails(); }
+            return $emails;
+        };
+    }
+    public function get_emails() { return ( $this->load )(); }
+}
+add_action( 'init', static function() { $GLOBALS['wc_eval_mailer'] = new WC_Eval_Mailer_Service(); } );

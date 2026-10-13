@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G07A",
+			"id": "G07A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
 			"before": {
 				"file": "fixtures/G07A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G07B",
+			"id": "G07B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
 			"before": {
 				"file": "fixtures/G07B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "4-digit"
+				"contains": "postcode"
 			}
 		},
 		{
-			"id": "G07C",
+			"id": "G07C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
 			"before": {
 				"file": "fixtures/G07C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G07D",
+			"id": "G07D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
 			"before": {
 				"file": "fixtures/G07D/before.php"

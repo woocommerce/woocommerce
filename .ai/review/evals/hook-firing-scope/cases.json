@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G02A",
+			"id": "G02A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
 			"before": {
 				"file": "fixtures/G02A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "existing customer"
+				"contains": "woocommerce_analytics_new_customer"
 			}
 		},
 		{
-			"id": "G02B",
+			"id": "G02B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
 			"before": {
 				"file": "fixtures/G02B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G02C",
+			"id": "G02C-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
 			"before": {
 				"file": "fixtures/G02C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G02D",
+			"id": "G02D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
 			"before": {
 				"file": "fixtures/G02D/before.php"

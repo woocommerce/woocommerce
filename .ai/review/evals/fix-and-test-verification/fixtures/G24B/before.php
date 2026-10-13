@@ -1,6 +1,14 @@
 <?php
-/* Scenario context: PR claims to repair page-two catalog results. Standard WP_Query consumes paged for pagination. No pre_get_posts callback or custom query-var handler maps catalog_page to paged. Positive integer page input comes from the validated route. */
+/* Catalog pagination helper and its regression test, colocated for this eval. */
 function wc_catalog_page_args( $paged ) {
-    return array( 'post_type' => 'product', 'posts_per_page' => 12, 'paged' => max( 1, $paged ) );
+    return array( 'post_type' => 'product', 'posts_per_page' => 1, 'orderby' => 'ID', 'order' => 'ASC', 'paged' => max( 1, $paged ) );
 }
 function wc_catalog_page( $paged ) { return new WP_Query( wc_catalog_page_args( $paged ) ); }
+
+class CatalogPageTest extends WC_Unit_Test_Case {
+    public function test_second_page(): void {
+        $ids = self::factory()->post->create_many( 2, array( 'post_type' => 'product', 'post_status' => 'publish' ) );
+        $query = wc_catalog_page( 2 );
+        $this->assertSame( $ids[1], (int) $query->posts[0]->ID );
+    }
+}

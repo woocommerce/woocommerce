@@ -1,5 +1,10 @@
 <?php
-/* Scenario context: Synthetic production fixture. This legacy includes file is first included from its new on-disk contents during the in-place update request before it ends. CustomerAddress enum is introduced by this release; old in-memory classmap lacks it and has no PSR-4 fallback. Fresh requests map it. */
+// Historical in-place update harness: bootstrap started before the PSR-4 fallback was introduced.
+$boot_classmap = array( 'WC_Legacy_Settings' => __DIR__ . '/legacy-settings.php' );
+spl_autoload_register( static function ( $class ) use ( $boot_classmap ) {
+    if ( isset( $boot_classmap[ $class ] ) ) { require_once $boot_classmap[ $class ]; }
+} );
+// The updater has replaced files on disk; footer callbacks still run in this request.
 function wc_upgrade_footer_settings() {
     return array( 'default_customer_address' => 'base' );
 }

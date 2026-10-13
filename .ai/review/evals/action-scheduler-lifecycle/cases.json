@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G06A",
+			"id": "G06A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
 			"before": {
 				"file": "fixtures/G06A/before.php"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G06B",
+			"id": "G06B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
 			"before": {
 				"file": "fixtures/G06B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G06C",
+			"id": "G06C-v4",
 			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
 			"before": {
 				"file": "fixtures/G06C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G06D",
+			"id": "G06D-v4",
 			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
 			"before": {
 				"file": "fixtures/G06D/before.php"

@@ -1,2 +1,3 @@
-/* Scenario context: The cart editor wrapper is display:block from an unchanged editor stylesheet. Main and sidebar are consecutive block children stacked vertically in the editor. No other margin, padding, or row-gap supplies their 24px separation. Frontend grid layout is separately configured. */
+/* Main and sidebar are consecutive children in the cart editor. */
+.editor-styles-wrapper .wc-block-cart { display: block; }
 .wc-block-cart .wc-block-cart__main + .wc-block-cart__sidebar { margin-block-start: 24px; }

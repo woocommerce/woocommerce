@@ -1,3 +1,3 @@
 <?php
-/* Scenario context: Private product-list SQL builder. No SQL string or clauses from this helper pass through public filters, and extensions cannot call the private method. query() receives only trusted internal order terms such as post_title DESC; ties and unordered input have never had a promised order. This change deliberately stabilizes ties by post ID while preserving primary ordering. */
+/* Internal maintenance report; query receives trusted SQL order terms. Ties have no specified ordering. */
 class WC_Internal_Catalog_Order { private function build_orderby( $orderby ) { global $wpdb; return $orderby; } public function query( $orderby ) { global $wpdb; $order = $this->build_orderby( $orderby ); return $wpdb->get_col( "SELECT ID FROM {$wpdb->posts}" . ( $order ? ' ORDER BY ' . $order : '' ) ); } }

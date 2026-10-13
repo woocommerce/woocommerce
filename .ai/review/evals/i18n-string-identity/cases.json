@@ -2,21 +2,21 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G35A",
-			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+			"id": "G35A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-cross-sells-assets.php",
 			"before": {
-				"file": "fixtures/G35A/before.js"
+				"file": "fixtures/G35A/before.php"
 			},
 			"after": {
-				"file": "fixtures/G35A/after.js"
+				"file": "fixtures/G35A/after.php"
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "translation"
+				"contains": "wc-cross-sell"
 			}
 		},
 		{
-			"id": "G35B",
+			"id": "G35B-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
 			"before": {
 				"file": "fixtures/G35B/before.js"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G35C",
+			"id": "G35C-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
 			"before": {
 				"file": "fixtures/G35C/before.js"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G35D",
+			"id": "G35D-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
 			"before": {
 				"file": "fixtures/G35D/before.js"

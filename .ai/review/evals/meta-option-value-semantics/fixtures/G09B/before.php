@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Synthetic production fixture. Released option stores url and enabled; extensions and shown reader consume url. Admin save passes validated destination URL. */
+/* Export destination configuration. */
 function wc_save_export_settings( $url, $enabled ) {
     update_option( 'woocommerce_export_settings', array( 'url' => $url, 'enabled' => $enabled ) );
 }

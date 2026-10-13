@@ -1,2 +1,2 @@
-/* Scenario context: Private helper sends aggregate telemetry to a fixed trusted endpoint. Caller never awaited or used its return. Event delivery is explicitly best-effort and does not change orders, settings, or checkout state. Reporting failure is intentionally silent. */
+/* Aggregate best-effort telemetry; fixed trusted URL. Callers do not consume a result. */
 export function recordSuggestionOpened( url ) { return fetch( url, { method: 'POST' } ).catch( () => {} ); }

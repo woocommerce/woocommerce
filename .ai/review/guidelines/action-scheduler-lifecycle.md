@@ -13,9 +13,9 @@
 
 **Pattern to catch:** Any added or changed `as_schedule_*` / `as_enqueue_async_action` / WP-cron call or callback registration. Watch for:
 
-- a self-rescheduling job passing `unique = true` (5th arg);
+- a self-rescheduling job using `unique = true` where the next action collides with the running action’s actual uniqueness key;
 - a callback class not loaded in the AS runner request;
-- object or array args serialized into the queue;
+- payload values whose JSON round trip changes the type or shape expected by the callback, especially objects that become arrays; the required args array and JSON-compatible nested arrays are not intrinsically unsafe;
 - no has-scheduled check, so duplicates pile up;
 - `as_*` called before `action_scheduler_init`;
 - hooks moved from WP-cron to AS but not cleared from cron;
@@ -23,4 +23,6 @@
 
 **How to confirm:** Read the callback's `add_action` site and check which file loads it (see `register_recurring_actions` in `class-woocommerce.php`). Grep `uninstall.php` and `unschedule_*` for the hook name. Check for `function_exists( 'as_...' )` or the version-tolerant helper from #68523.
 
-**Don't flag when:** `unique = true` on a one-shot action that is not rescheduled from its own callback. A scalar ID arg that the callback re-fetches.
+Verify the installed Action Scheduler version, API signature, and store’s actual pending/running uniqueness key before claiming jobs collide. The position of the unique parameter differs across scheduling APIs, and arguments can be part of the uniqueness key.
+
+**Don't flag when:** `unique = true` on a one-shot action when jobs sharing its actual uniqueness key may safely be coalesced. A scalar ID argument that the callback re-fetches, or JSON-compatible data whose type and shape are preserved for the callback.

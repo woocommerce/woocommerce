@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: Runs on every product-list render; extensions can increase listing size without a fixed upper bound. IDs are unique product IDs. Returned rows and missing-ID behavior are unchanged. */
+/* Product-list stock renderer. IDs are unique product IDs; page size can be changed by extensions. */
 function wc_listing_totals( $ids ) {
     global $wpdb;
     $ids = array_map( 'absint', $ids );

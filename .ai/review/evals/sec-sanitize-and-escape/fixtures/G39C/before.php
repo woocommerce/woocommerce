@@ -1,3 +1,3 @@
 <?php
-/* Scenario context: The helper is a callback-local closure, unavailable to extensions, and its only use is shown. The public shortcode is the only sink. Request q is untrusted and can contain markup. Refactor moves escaping from helper to final HTML concatenation without further decoding. */
+/* Shortcode rendered on a public page; closure is local to this callback. */
 add_shortcode( 'wc_search_label', static function() { $label_text = static function( $value ) { return esc_html( $value ); }; $q = isset( $_GET['q'] ) && is_string( $_GET['q'] ) ? wp_unslash( $_GET['q'] ) : ''; return '<span>' . $label_text( $q ) . '</span>'; } );

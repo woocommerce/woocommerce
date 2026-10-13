@@ -1,5 +1,9 @@
 <?php
-/* Scenario context: Synthetic production fixture. Released export(id) defaults to csv; consumers may omit format. No BC notice or shim accompanies change. */
+/* Public export handler. */
 final class WC_Export_Handler {
     public function export( $id, $format = 'json' ) { return array( $id, $format ); }
+}
+
+function download_legacy_export( $id ) {
+    return ( new WC_Export_Handler() )->export( $id );
 }

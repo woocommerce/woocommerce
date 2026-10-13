@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G19A",
+			"id": "G19A-v3",
 			"path": "plugins/woocommerce/includes/wc-order-functions.php",
 			"before": {
 				"file": "fixtures/G19A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "recalculat"
+				"contains": "calculate_totals"
 			}
 		},
 		{
-			"id": "G19B",
+			"id": "G19B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-cart-totals.php",
 			"before": {
 				"file": "fixtures/G19B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "exempt"
+				"contains": "is_vat_exempt"
 			}
 		},
 		{
-			"id": "G19C-v2",
+			"id": "G19C-v3",
 			"path": "plugins/woocommerce/includes/wc-order-functions.php",
 			"before": {
 				"file": "fixtures/G19C-v2/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G19D",
+			"id": "G19D-v3",
 			"path": "plugins/woocommerce/includes/wc-order-functions.php",
 			"before": {
 				"file": "fixtures/G19D/before.php"

@@ -1,5 +1,11 @@
 <?php
-/* Scenario context: session may be any supported WC_Session subclass. The abstract contract includes get(key,default) but not get_session_data; custom handlers implementing only the abstract contract are supported in checkout. Default handler has get_session_data. */
+/* Checkout session adapter. */
 function read_cart_session( $session ) {
     return array( 'cart' => $session->get( 'cart', array() ) );
 }
+
+class Export_Custom_Session extends WC_Session {
+    public function init() {}
+    public function get_customer_id() { return 'export-customer'; }
+}
+$cart = read_cart_session( new Export_Custom_Session() );

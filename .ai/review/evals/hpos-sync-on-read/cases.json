@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G10A",
+			"id": "G10A-v3",
 			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
 			"before": {
 				"file": "fixtures/G10A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "object"
+				"contains": "hpos"
 			}
 		},
 		{
-			"id": "G10B",
+			"id": "G10B-v3",
 			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
 			"before": {
 				"file": "fixtures/G10B/before.php"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G10C",
+			"id": "G10C-v3",
 			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
 			"before": {
 				"file": "fixtures/G10C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G10D",
+			"id": "G10D-v3",
 			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
 			"before": {
 				"file": "fixtures/G10D/before.php"

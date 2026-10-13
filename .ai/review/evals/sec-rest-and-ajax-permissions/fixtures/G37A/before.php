@@ -1,5 +1,5 @@
 <?php
-/* Scenario context: WordPress REST route uses ordinary authentication; anonymous requests reach permission_callback. The label is a store-wide option editable only by manage_woocommerce users. No second permission check exists in callback. */
+/* Store-label settings endpoint. */
 add_action( 'rest_api_init', static function() {
     register_rest_route( 'wc-eval/v1', '/store-label', array(
         'methods' => 'POST',

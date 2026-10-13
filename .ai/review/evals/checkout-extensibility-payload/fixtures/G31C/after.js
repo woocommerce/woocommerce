@@ -1,3 +1,8 @@
-/* Scenario context: This module is private checkout implementation, not a published package API. The input is created exclusively by a core reducer with numeric finite total; extensions cannot write this state and no PHP serialization boundary is involved. The export is only for local module imports. */
+/* Core-owned private checkout reducer; extension payloads do not enter this state. */
 function normalizeCoreTotal( payload ) { return typeof payload.total === 'number' && Number.isFinite( payload.total ) ? payload.total : 0; }
-export function renderCoreTotal( payload ) { return normalizeCoreTotal( payload ); }
+function renderCoreTotal( payload ) { return normalizeCoreTotal( payload ); }
+
+export function selectTotal( linePrices ) {
+    const total = linePrices.reduce( ( sum, price ) => sum + Number( price ), 0 );
+    return renderCoreTotal( { total: Number.isFinite( total ) ? total : 0 } );
+}

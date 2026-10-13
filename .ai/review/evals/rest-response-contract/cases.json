@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G16A",
+			"id": "G16A-v3",
 			"path": "plugins/woocommerce/includes/rest-api/controllers/order-items.php",
 			"before": {
 				"file": "fixtures/G16A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "object"
+				"contains": "item_data"
 			}
 		},
 		{
-			"id": "G16B",
+			"id": "G16B-v3",
 			"path": "plugins/woocommerce/includes/rest-api/controllers/product-search.php",
 			"before": {
 				"file": "fixtures/G16B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "entit"
+				"contains": "name"
 			}
 		},
 		{
-			"id": "G16C",
+			"id": "G16C-v4",
 			"path": "plugins/woocommerce/includes/rest-api/controllers/product-search.php",
 			"before": {
 				"file": "fixtures/G16C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G16D",
+			"id": "G16D-v3",
 			"path": "plugins/woocommerce/src/StoreApi/Routes/ExperimentalItems.php",
 			"before": {
 				"file": "fixtures/G16D/before.php"

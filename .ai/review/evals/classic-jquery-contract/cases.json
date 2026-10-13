@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G29A",
+			"id": "G29A-v3",
 			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
 			"before": {
 				"file": "fixtures/G29A/before.js"
@@ -16,7 +16,7 @@
 			}
 		},
 		{
-			"id": "G29B",
+			"id": "G29B-v3",
 			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
 			"before": {
 				"file": "fixtures/G29B/before.js"
@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"id": "G29C",
+			"id": "G29C-v3",
 			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
 			"before": {
 				"file": "fixtures/G29C/before.js"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G29D",
+			"id": "G29D-v3",
 			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
 			"before": {
 				"file": "fixtures/G29D/before.js"

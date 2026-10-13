@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G20A",
+			"id": "G20A-v3",
 			"path": "plugins/woocommerce/includes/class-wc-shipping.php",
 			"before": {
 				"file": "fixtures/G20A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "local_pickup"
+				"contains": "flat_rate"
 			}
 		},
 		{
-			"id": "G20B",
+			"id": "G20B-v3",
 			"path": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
 			"before": {
 				"file": "fixtures/G20B/before.php"
@@ -26,11 +26,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "integer"
+				"contains": "total_cost"
 			}
 		},
 		{
-			"id": "G20C",
+			"id": "G20C-v4",
 			"path": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
 			"before": {
 				"file": "fixtures/G20C/before.php"
@@ -43,7 +43,7 @@
 			}
 		},
 		{
-			"id": "G20D",
+			"id": "G20D-v3",
 			"path": "plugins/woocommerce/includes/class-wc-shipping.php",
 			"before": {
 				"file": "fixtures/G20D/before.php"
