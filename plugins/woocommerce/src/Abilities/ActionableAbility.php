@@ -140,6 +140,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		$args['execute_callback'] = array( $this, 'execute_change' );
 		if ( is_array( $args['input_schema'] ?? null ) && AbilityContracts::is_enabled() ) {
 			$args['input_schema'] = $this->add_extensions_input_schema( $args['input_schema'] );
+			$args['input_schema'] = AbilityExtensions::add_descriptions_to_schema( $args['input_schema'], $this->get_resource(), 'write' );
 		}
 		return parent::prepare_properties( $args );
 	}

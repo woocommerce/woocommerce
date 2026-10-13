@@ -35,6 +35,19 @@ class AbilityExtensions {
 	private static array $fields = array();
 
 	/**
+	 * Longest description that describe() accepts, in characters.
+	 */
+	private const MAX_DESCRIPTION_LENGTH = 300;
+
+	/**
+	 * Descriptions keyed by resource, then field. Each entry has a `value`, which is null
+	 * for a note about the field, a list of `roles`, and a `description`.
+	 *
+	 * @var array<string, array<string, array<int, array{value: ?string, roles: string[], description: string}>>>
+	 */
+	private static array $descriptions = array();
+
+	/**
 	 * Registered resources, keyed by resource name. Core's resources are registered from the start.
 	 *
 	 * @var array<string, bool>
@@ -140,6 +153,153 @@ class AbilityExtensions {
 	}
 
 	/**
+	 * Describe a field of a resource, or one value of it, for agents.
+	 *
+	 * Use it for a value that an extension adds through WooCommerce's filters,
+	 * such as an order status from `wc_order_statuses`, or for a change that an
+	 * extension makes to how a field behaves. Every ability that declares the
+	 * resource adds the description to the field's `description`. A value
+	 * description is left out of a field whose `enum` does not list the value.
+	 *
+	 * Call it inside the `woocommerce_ability_extensions_init` action. A call after that action is refused.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Description arguments.
+	 *
+	 *     @type string   $resource    Resource that an ability formats, for example `product` or `order`.
+	 *     @type string   $field       Name of the field in the ability schema, for example `status` or `search`.
+	 *     @type string   $value       Optional. Value of the field, for example `pending-cancel`. Without it,
+	 *                                 the description is about the field.
+	 *     @type string[] $roles       Schemas that get the description: `query` for the input of a list
+	 *                                 ability, `write` for the input of an ActionableAbility, and `output`.
+	 *                                 A value description defaults to `query` and `write`, where agents
+	 *                                 pick values. A field description must list its roles.
+	 *     @type string   $description Plain text of up to 300 characters, such as one sentence.
+	 * }
+	 */
+	public static function describe( array $args ): void {
+		if ( did_action( 'woocommerce_ability_extensions_init' ) && ! doing_action( 'woocommerce_ability_extensions_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, 'Add a description inside the woocommerce_ability_extensions_init action, before the abilities build their schemas.', '11.3.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'field' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
+				return;
+			}
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" resource is not registered. Call AbilityExtensions::register_resource() first.', $args['resource'] ), '11.3.0' );
+			return;
+		}
+		$value = $args['value'] ?? null;
+		if ( null !== $value && ( ! is_string( $value ) || '' === $value ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "value" argument must be a non-empty string.', '11.3.0' );
+			return;
+		}
+		$roles = $args['roles'] ?? ( null === $value ? null : array( 'query', 'write' ) );
+		if ( ! is_array( $roles ) || empty( $roles ) || array_diff( $roles, array( 'query', 'write', 'output' ) ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "roles" argument must list "query", "write" or "output". A field description needs it.', '11.3.0' );
+			return;
+		}
+		$description = self::clean_description( $args['description'] ?? null );
+		if ( '' === $description ) {
+			wc_doing_it_wrong( __METHOD__, sprintf( 'The "description" argument must be plain text of 1 to %d characters.', self::MAX_DESCRIPTION_LENGTH ), '11.3.0' );
+			return;
+		}
+
+		foreach ( self::$descriptions[ $args['resource'] ][ $args['field'] ] ?? array() as $entry ) {
+			if ( $entry['value'] === $value && ! empty( array_intersect( $entry['roles'], $roles ) ) ) {
+				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" field of "%s" already has a description for this value and role.', $args['field'], $args['resource'] ), '11.3.0' );
+				return;
+			}
+		}
+
+		self::$descriptions[ $args['resource'] ][ $args['field'] ][] = array(
+			'value'       => $value,
+			'roles'       => array_values( $roles ),
+			'description' => $description,
+		);
+	}
+
+	/**
+	 * Add the descriptions to the top-level fields of a schema, and of its
+	 * `oneOf` and `anyOf` branches, when the feature is on. A value
+	 * description is added as `value: description`, and only when the field
+	 * has no `enum`, or its `enum` lists the value. Call it after the
+	 * `woocommerce_ability_extensions_init` action, when the ability builds its schema.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array<string, mixed> $schema        Object schema, such as an input schema.
+	 * @param string               $resource_name Resource.
+	 * @param string               $role          `query`, `write` or `output`.
+	 * @return array<string, mixed>
+	 */
+	public static function add_descriptions_to_schema( array $schema, string $resource_name, string $role ): array {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $schema;
+		}
+
+		foreach ( (array) ( $schema['properties'] ?? array() ) as $field => $property ) {
+			if ( is_array( $property ) ) {
+				$schema['properties'][ $field ] = self::add_descriptions( $property, $resource_name, (string) $field, $role );
+			}
+		}
+		foreach ( array( 'oneOf', 'anyOf' ) as $keyword ) {
+			foreach ( (array) ( $schema[ $keyword ] ?? array() ) as $index => $branch ) {
+				if ( is_array( $branch ) ) {
+					$schema[ $keyword ][ $index ] = self::add_descriptions_to_schema( $branch, $resource_name, $role );
+				}
+			}
+		}
+		return $schema;
+	}
+
+	/**
+	 * Add the descriptions of one field to its schema.
+	 *
+	 * @param array<string, mixed> $property      Schema of the field.
+	 * @param string               $resource_name Resource.
+	 * @param string               $field         Name of the field.
+	 * @param string               $role          `query`, `write` or `output`.
+	 * @return array<string, mixed>
+	 */
+	private static function add_descriptions( array $property, string $resource_name, string $field, string $role ): array {
+		$enum  = $property['enum'] ?? $property['items']['enum'] ?? $property['anyOf'][0]['enum'] ?? null;
+		$lines = array();
+		foreach ( self::$descriptions[ $resource_name ][ $field ] ?? array() as $entry ) {
+			if ( ! in_array( $role, $entry['roles'], true ) ) {
+				continue;
+			}
+			if ( null === $entry['value'] ) {
+				$lines[] = $entry['description'];
+			} elseif ( null === $enum || in_array( $entry['value'], $enum, true ) ) {
+				$lines[] = sprintf( '%s: %s', $entry['value'], $entry['description'] );
+			}
+		}
+		if ( empty( $lines ) ) {
+			return $property;
+		}
+
+		$property['description'] = trim( ( $property['description'] ?? '' ) . ' ' . implode( ' ', $lines ) );
+		return $property;
+	}
+
+	/**
+	 * A description as plain text, or an empty string when it is not a string or is too long.
+	 *
+	 * @param mixed $description Description.
+	 * @return string
+	 */
+	private static function clean_description( $description ): string {
+		$description = is_string( $description ) ? trim( wp_strip_all_tags( $description ) ) : '';
+		return mb_strlen( $description ) > self::MAX_DESCRIPTION_LENGTH ? '' : $description;
+	}
+
+	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
@@ -199,7 +359,11 @@ class AbilityExtensions {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_schema( array $schema, string $resource_name ): array {
-		if ( ! AbilityContracts::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
+		if ( ! AbilityContracts::is_enabled() ) {
+			return $schema;
+		}
+		$schema = self::add_descriptions_to_schema( $schema, $resource_name, 'output' );
+		if ( empty( self::$fields[ $resource_name ] ) ) {
 			return $schema;
 		}
 

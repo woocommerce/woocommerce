@@ -253,6 +253,144 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add descriptions to every ability of the resource by role, and leave out a value that a field does not accept.
+	 */
+	public function test_descriptions_follow_their_resource_value_and_role(): void {
+		$add_status = static function ( array $statuses ): array {
+			$statuses['wc-test-paused'] = 'Paused';
+			return $statuses;
+		};
+		$describe   = static function (): void {
+			$entries = array(
+				array( 'order', 'status', 'test-paused', null, 'Billing is paused.' ),
+				array( 'order', 'status', 'test-missing', null, 'Not on this store.' ),
+				array( 'order', 'status', null, array( 'query' ), 'Also lists paused orders.' ),
+				array( 'order', 'status', null, array( 'output' ), 'The status now.' ),
+				array( 'product', 'name', null, array( 'write' ), 'Shown on renewals.' ),
+			);
+			foreach ( $entries as list( $resource, $field, $value, $roles, $description ) ) {
+				AbilityExtensions::describe(
+					array_filter(
+						array(
+							'resource'    => $resource,
+							'field'       => $field,
+							'value'       => $value,
+							'roles'       => $roles,
+							'description' => $description,
+						)
+					)
+				);
+			}
+		};
+		add_filter( 'wc_order_statuses', $add_status );
+		add_action( 'woocommerce_ability_extensions_init', $describe );
+
+		$query   = $this->get_ability( 'woocommerce/orders-query' );
+		$update  = $this->get_ability( 'woocommerce/order-update-status' );
+		$product = $this->get_ability( 'woocommerce/product-update' );
+
+		remove_filter( 'wc_order_statuses', $add_status );
+		remove_action( 'woocommerce_ability_extensions_init', $describe );
+		$this->assertSame( 'Filter by order status slug without the wc- prefix. test-paused: Billing is paused. Also lists paused orders.', $query['input_schema']['properties']['status']['description'] );
+		$this->assertSame( 'Order status slug without the wc- prefix. test-paused: Billing is paused.', $update['input_schema']['properties']['status']['description'] );
+		$this->assertSame( 'The status now.', $query['output_schema']['properties']['orders']['items']['properties']['status']['description'] );
+		foreach ( $product['input_schema']['oneOf'] as $branch ) {
+			if ( isset( $branch['properties']['name'] ) ) {
+				$this->assertStringEndsWith( 'Shown on renewals.', $branch['properties']['name']['description'] );
+			}
+		}
+		$this->assertArrayNotHasKey( 'description', $product['output_schema']['properties']['product']['properties']['name'] );
+	}
+
+	/**
+	 * @testdox Should describe any value of a field that has no enum.
+	 */
+	public function test_a_value_description_applies_to_a_field_without_an_enum(): void {
+		$describe = static function (): void {
+			AbilityExtensions::describe(
+				array(
+					'resource'    => 'order',
+					'field'       => 'payment_method',
+					'value'       => 'test_gateway',
+					'description' => 'Test <b>gateway</b>.',
+				)
+			);
+		};
+		add_action( 'woocommerce_ability_extensions_init', $describe );
+		AbilitiesLoader::init_extensions();
+		remove_action( 'woocommerce_ability_extensions_init', $describe );
+
+		$schema = array( 'properties' => array( 'payment_method' => array( 'type' => 'string' ) ) );
+		$schema = AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'query' );
+
+		$this->assertSame( 'test_gateway: Test gateway.', $schema['properties']['payment_method']['description'] );
+	}
+
+	/**
+	 * @testdox Should refuse an invalid, duplicate or late description, and keep the first one.
+	 */
+	public function test_invalid_duplicate_and_late_descriptions_are_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::describe' );
+		$describe = static function (): void {
+			$valid = array(
+				'resource'    => 'order',
+				'field'       => 'status',
+				'value'       => 'pending',
+				'description' => 'First.',
+			);
+			AbilityExtensions::describe( $valid );
+			$invalid = array(
+				array( 'roles' => array( 'write' ) ),
+				array( 'resource' => 'customer' ),
+				array( 'roles' => array( 'input' ) ),
+				array( 'value' => '' ),
+				array( 'value' => null ),
+				array(
+					'value'       => 'processing',
+					'description' => str_repeat( 'a', 301 ),
+				),
+			);
+			foreach ( $invalid as $changes ) {
+				AbilityExtensions::describe( array_merge( $valid, $changes ) );
+			}
+		};
+		add_action( 'woocommerce_ability_extensions_init', $describe );
+
+		$this->get_output_schema( 'woocommerce/orders-query' );
+		AbilityExtensions::describe(
+			array(
+				'resource'    => 'order',
+				'field'       => 'status',
+				'value'       => 'completed',
+				'description' => 'Late.',
+			)
+		);
+		$schema = array( 'properties' => array( 'status' => array( 'enum' => array( 'pending', 'processing', 'completed' ) ) ) );
+
+		remove_action( 'woocommerce_ability_extensions_init', $describe );
+		$this->assertSame( 'pending: First.', AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'write' )['properties']['status']['description'] );
+		$this->assertSame( $schema, AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'output' ) );
+	}
+
+	/**
+	 * @testdox Should leave a schema unchanged when the feature is off.
+	 */
+	public function test_descriptions_do_nothing_with_the_feature_off(): void {
+		AbilityExtensions::describe(
+			array(
+				'resource'    => 'order',
+				'field'       => 'status',
+				'roles'       => array( 'query' ),
+				'description' => 'Note.',
+			)
+		);
+		$this->set_feature( false );
+		$schema = array( 'properties' => array( 'status' => array( 'type' => 'string' ) ) );
+
+		$this->assertSame( $schema, AbilityExtensions::add_descriptions_to_schema( $schema, 'order', 'query' ) );
+	}
+
+	/**
 	 * @testdox Should fire woocommerce_ability_extensions_init one time, before the abilities build their schemas.
 	 */
 	public function test_init_action_fires_once_before_the_schemas(): void {
@@ -937,7 +1075,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported' ) as $property ) {
+		foreach ( array( 'fields', 'descriptions', 'reported' ) as $property ) {
 			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
