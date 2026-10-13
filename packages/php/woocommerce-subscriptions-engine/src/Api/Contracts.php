@@ -4,7 +4,7 @@
  *
  * Extensions create and progressively build contracts from explicit argument arrays:
  * the engine records the facts it is given and decides nothing about them. Cycle tools
- * (claimed appends, leases, compare-and-set transitions) let an extension run its own
+ * (claimed appends, cycle claims, compare-and-set transitions) let an extension run its own
  * billing flow safely under concurrency. Any caller may read or write any contract
  * (authorization is the caller's concern). Reads return read-only views ({@see ContractView},
  * {@see CycleView}). The engine opens no transaction and keeps no cache. No hooks fire.
@@ -87,7 +87,7 @@ final class Contracts {
 		'expected_total' => true,
 		'currency'       => true,
 		'order_id'       => true,
-		'lease_seconds'  => true,
+		'claim_seconds'  => true,
 	);
 
 	/**
@@ -98,7 +98,7 @@ final class Contracts {
 	private const TRANSITION_KEYS = array(
 		'order_id'      => true,
 		'reason'        => true,
-		'lease_seconds' => true,
+		'claim_seconds' => true,
 	);
 
 	/**
@@ -195,7 +195,7 @@ final class Contracts {
 	 * `billing`; an absent or null `sequence_no` is assigned on append as the head's plus one;
 	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
 	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional.
-	 * `lease_seconds` (positive int) appends the cycle claimed: the caller holds its lease for
+	 * `claim_seconds` (positive int) appends the cycle claimed: the caller holds its claim for
 	 * that long, measured on the database clock like {@see self::claim_cycle()}. The contract is not read: appending to an
 	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()` notice
 	 * and are ignored.
@@ -224,8 +224,8 @@ final class Contracts {
 
 		$repository = new ContractRepository();
 
-		if ( array_key_exists( 'lease_seconds', $filtered_args ) ) {
-			$cycle_args['claimed_until'] = $repository->lease_until( ArgumentValidator::validate_positive_int( 'lease_seconds', $filtered_args['lease_seconds'] ) );
+		if ( array_key_exists( 'claim_seconds', $filtered_args ) ) {
+			$cycle_args['claimed_until'] = $repository->claim_until( ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] ) );
 		}
 
 		try {
@@ -244,32 +244,32 @@ final class Contracts {
 	}
 
 	/**
-	 * Take the lease of a cycle still in `$status` whose lease expired or was never set. A
-	 * compare-and-set on the status and the lease: of concurrent callers that read `$status`,
-	 * exactly one gets true and holds the cycle for `$lease_seconds`; the others get false.
-	 * Leases are measured on the database clock.
+	 * Take the claim on a cycle still in `$status` whose claim expired or was never set. A
+	 * compare-and-set on the status and the claim: of concurrent callers that read `$status`,
+	 * exactly one gets true and holds the cycle for `$claim_seconds`; the others get false.
+	 * Claims are measured on the database clock.
 	 *
 	 * @param int    $cycle_id      Cycle id.
 	 * @param string $status        The status the caller read; the cycle must still carry it.
-	 * @param int    $lease_seconds Lease length in seconds (positive).
+	 * @param int    $claim_seconds Claim length in seconds (positive).
 	 * @return bool True when the caller now holds the cycle.
-	 * @throws InvalidArgumentException If `$lease_seconds` is not positive.
+	 * @throws InvalidArgumentException If `$claim_seconds` is not positive.
 	 */
-	public static function claim_cycle( int $cycle_id, string $status, int $lease_seconds ): bool {
-		return ( new ContractRepository() )->claim_cycle( $cycle_id, $status, ArgumentValidator::validate_positive_int( 'lease_seconds', $lease_seconds ) );
+	public static function claim_cycle( int $cycle_id, string $status, int $claim_seconds ): bool {
+		return ( new ContractRepository() )->claim_cycle( $cycle_id, $status, ArgumentValidator::validate_positive_int( 'claim_seconds', $claim_seconds ) );
 	}
 
 	/**
 	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status: of
 	 * concurrent callers that read `$from_status`, exactly one gets true. `$args`: `order_id`
 	 * (?int) and `reason` (?string) are written when present (omitted keeps the stored value,
-	 * null clears it); `lease_seconds` (int) holds the cycle for that long, and without it the
-	 * lease is cleared. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
+	 * null clears it); `claim_seconds` (int) holds the cycle for that long, and without it the
+	 * claim is released. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read.
 	 * @param string               $to_status   The status to write; a registered cycle status.
-	 * @param array<string, mixed> $args        Optional `order_id`, `reason`, `lease_seconds`.
+	 * @param array<string, mixed> $args        Optional `order_id`, `reason`, `claim_seconds`.
 	 * @return bool True when this call made the transition.
 	 * @throws InvalidArgumentException If `$to_status` is not registered or a value is invalid.
 	 */
@@ -283,8 +283,8 @@ final class Contracts {
 		if ( array_key_exists( 'reason', $filtered_args ) ) {
 			$changes['reason'] = ArgumentValidator::validate_nullable_string( 'reason', $filtered_args['reason'] );
 		}
-		if ( array_key_exists( 'lease_seconds', $filtered_args ) ) {
-			$changes['lease_seconds'] = ArgumentValidator::validate_positive_int( 'lease_seconds', $filtered_args['lease_seconds'] );
+		if ( array_key_exists( 'claim_seconds', $filtered_args ) ) {
+			$changes['claim_seconds'] = ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] );
 		}
 
 		try {

@@ -40,7 +40,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Pin the session's database clock: `UTC_TIMESTAMP()` returns `$utc` until the next pin
-	 * or the end of the test. Dispatch claims and cycle leases are measured on this clock.
+	 * or the end of the test. Dispatch claims and cycle claims are measured on this clock.
 	 *
 	 * @param string $utc Moment (UTC, `Y-m-d H:i:s`).
 	 */

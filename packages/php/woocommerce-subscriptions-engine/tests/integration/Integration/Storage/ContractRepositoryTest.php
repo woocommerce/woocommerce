@@ -1032,12 +1032,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The cycle crash-recovery lease column round-trips through append and a transition.
+	 * @testdox The cycle crash-recovery claim column round-trips through append and a transition.
 	 */
 	public function test_cycle_claimed_until_round_trips(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		// Appended with a lease set.
+		// Appended with a claim set.
 		$cycle = Cycle::create(
 			array(
 				'contract_id'    => $id,
@@ -1057,7 +1057,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '2026-07-15 00:15:00', $reloaded->get_claimed_until_gmt() );
 
-		// Cleared by a transition without a lease (a settled cycle holds no lease).
+		// Cleared by a transition without a claim (a settled cycle holds no claim).
 		$this->assertTrue( $this->sut->transition_cycle( (int) $reloaded->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array() ) );
 
 		$settled = $this->sut->find_chain_head( $id );
@@ -1066,70 +1066,70 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox claim_cycle takes an expired lease once; a second caller loses.
+	 * @testdox claim_cycle takes an expired claim once; a second caller loses.
 	 *
-	 * The expiry check and the new lease use the database clock, so the lease is seeded
+	 * The expiry check and the new claim use the database clock, so the claim is seeded
 	 * relative to real time.
 	 */
-	public function test_claim_cycle_takes_an_expired_lease_once(): void {
+	public function test_claim_cycle_takes_an_expired_claim_once(): void {
 		$id       = $this->sut->insert( $this->make_contract() );
-		$cycle    = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
+		$cycle    = $this->append_pending_cycle_with_claim( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
 		$cycle_id = (int) $cycle->get_id();
 
-		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The first caller takes the expired lease.' );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The second caller finds a live lease.' );
+		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The first caller takes the expired claim.' );
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The second caller finds a live claim.' );
 
 		$reloaded = $this->sut->find_chain_head( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertNotNull( $reloaded->get_claimed_until_gmt() );
-		$this->assertGreaterThan( time() + 800, strtotime( $reloaded->get_claimed_until_gmt() . ' UTC' ), 'The lease runs a TTL into the future.' );
+		$this->assertGreaterThan( time() + 800, strtotime( $reloaded->get_claimed_until_gmt() . ' UTC' ), 'The claim runs a TTL into the future.' );
 	}
 
 	/**
-	 * @testdox claim_cycle takes a pending cycle that has no lease.
+	 * @testdox claim_cycle takes a pending cycle that has no claim.
 	 */
-	public function test_claim_cycle_takes_a_lease_less_pending_cycle(): void {
+	public function test_claim_cycle_takes_a_unclaimed_pending_cycle(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_lease( $id, null );
+		$cycle = $this->append_pending_cycle_with_claim( $id, null );
 
 		$this->assertTrue( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ) );
 		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ) );
 	}
 
 	/**
-	 * @testdox claim_cycle refuses a live lease and a cycle that left the status the caller read.
+	 * @testdox claim_cycle refuses a live claim and a cycle that left the status the caller read.
 	 */
-	public function test_claim_cycle_refuses_a_live_lease_and_a_settled_cycle(): void {
+	public function test_claim_cycle_refuses_a_live_claim_and_a_settled_cycle(): void {
 		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() + 600 ) );
+		$cycle = $this->append_pending_cycle_with_claim( $id, gmdate( 'Y-m-d H:i:s', time() + 600 ) );
 
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A live lease is held by someone else.' );
+		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A live claim is held by someone else.' );
 
 		$this->assertTrue( $this->sut->transition_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array() ) );
 		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A cycle no longer in the read status is not claimable.' );
 	}
 
 	/**
-	 * @testdox claim_cycle leases a cycle in whatever status the caller read, not only pending.
+	 * @testdox claim_cycle claims a cycle in whatever status the caller read, not only pending.
 	 */
 	public function test_claim_cycle_keys_on_the_callers_status(): void {
 		$id       = $this->sut->insert( $this->make_contract() );
-		$cycle_id = (int) $this->append_pending_cycle_with_lease( $id, null )->get_id();
+		$cycle_id = (int) $this->append_pending_cycle_with_claim( $id, null )->get_id();
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array() ) );
 
 		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'A stale read loses.' );
 		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'The current status wins.' );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'Only once while the lease is live.' );
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'Only once while the claim is live.' );
 		$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value(), 'Claiming does not change the status.' );
 	}
 
 	/**
-	 * Append a pending cycle 1 carrying a crash-recovery lease, returning it (with its id).
+	 * Append a pending cycle 1 carrying a crash-recovery claim, returning it (with its id).
 	 *
 	 * @param int         $contract_id   Contract id.
-	 * @param string|null $claimed_until The lease expiry GMT string to stamp, or null for none.
+	 * @param string|null $claimed_until The claim expiry GMT string to stamp, or null for none.
 	 */
-	private function append_pending_cycle_with_lease( int $contract_id, ?string $claimed_until ): Cycle {
+	private function append_pending_cycle_with_claim( int $contract_id, ?string $claimed_until ): Cycle {
 		$cycle = Cycle::create(
 			array(
 				'contract_id'    => $contract_id,
@@ -1312,7 +1312,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
 		$this->pin_db_clock( '2026-07-15 00:00:00' );
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
 
 		$this->pin_db_clock( '2026-07-15 00:14:59' );
 		$this->assertSame( array(), $this->due_ids( $now, 50 ), 'A live claim hides the contract.' );
@@ -1323,27 +1323,27 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox claim_for_dispatch wins once on the database clock; a second claim on the same due moment loses.
+	 * @testdox claim_contract wins once on the database clock; a second claim on the same due moment loses.
 	 */
-	public function test_claim_for_dispatch_wins_once(): void {
+	public function test_claim_contract_wins_once(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
-		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ), 'An overlapping dispatcher loses.' );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertFalse( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ), 'An overlapping dispatcher loses.' );
 		$this->assertSame( '2035-01-01 00:15:00', $this->stored_claim( $id ), 'The claim is stamped from the database clock at the write.' );
 
 		$this->pin_db_clock( '2035-01-01 00:15:00' );
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ), 'An expired claim can be taken again.' );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ), 'An expired claim can be taken again.' );
 	}
 
 	/**
-	 * @testdox claim_for_dispatch loses when the due moment changed since the scan read it.
+	 * @testdox claim_contract loses when the due moment changed since the scan read it.
 	 */
-	public function test_claim_for_dispatch_loses_when_the_due_moment_moved(): void {
+	public function test_claim_contract_loses_when_the_due_moment_moved(): void {
 		$id = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertFalse( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertFalse( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
 		$this->assertNull( $this->stored_claim( $id ) );
 	}
 
@@ -1353,7 +1353,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_due_moment_writes_release_the_claim(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_status( ContractStatus::ON_HOLD );
@@ -1378,12 +1378,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-16 00:00:00' ) );
 		$this->assertNull( $this->stored_claim( $id ), 'Moving the due moment releases the claim.' );
 
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-16 00:00:00', 900 ) );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-16 00:00:00', 900 ) );
 		Contracts::update( $id, array( 'next_payment_gmt' => null ) );
 		$this->assertNull( $this->stored_claim( $id ), 'Clearing the due moment releases the claim.' );
 
 		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
 		$moved = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $moved );
 		$moved->set_next_payment_gmt( '2026-07-01 00:00:00' );
@@ -1430,7 +1430,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_lost_contract_write_changes_neither_status_nor_due_moment(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$this->assertTrue( $this->sut->claim_for_dispatch( $id, '2026-06-15 00:00:00', 900 ) );
+		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -1569,7 +1569,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT dispatch_claimed_until FROM {$table} WHERE id = %d", $id ) );
+		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT claimed_until FROM {$table} WHERE id = %d", $id ) );
 
 		return null === $claim ? null : (string) $claim;
 	}
@@ -1578,14 +1578,14 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox transition_cycle is a compare-and-set: one caller wins, a caller that read the old status loses.
 	 */
 	public function test_transition_cycle_is_an_atomic_compare_and_set(): void {
-		$cycle_id = $this->leased_pending_cycle_id();
+		$cycle_id = $this->claimd_pending_cycle_id();
 
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 4242 ) ) );
 
 		$settled = $this->find_cycle( $cycle_id );
 		$this->assertSame( CycleStatus::BILLED, $settled->get_status()->get_value() );
 		$this->assertSame( 4242, $settled->get_order_id() );
-		$this->assertNull( $settled->get_claimed_until_gmt(), 'Without lease_seconds the lease is cleared.' );
+		$this->assertNull( $settled->get_claimed_until_gmt(), 'Without claim_seconds the claim is cleared.' );
 
 		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'order_id' => 9999 ) ) );
 
@@ -1598,7 +1598,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox transition_cycle keeps the stored order when order_id is omitted and clears it on null.
 	 */
 	public function test_transition_cycle_order_id_is_written_only_when_present(): void {
-		$cycle_id = $this->leased_pending_cycle_id();
+		$cycle_id = $this->claimd_pending_cycle_id();
 		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) );
 
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) );
@@ -1623,26 +1623,26 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox transition_cycle sets a lease from lease_seconds, e.g. retrying a failed cycle.
+	 * @testdox transition_cycle sets a claim from claim_seconds, e.g. retrying a failed cycle.
 	 */
-	public function test_transition_cycle_sets_a_lease(): void {
-		$cycle_id = $this->leased_pending_cycle_id();
+	public function test_transition_cycle_sets_a_claim(): void {
+		$cycle_id = $this->claimd_pending_cycle_id();
 		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array() );
 
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'lease_seconds' => 900 ) ) );
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'claim_seconds' => 900 ) ) );
 
 		$retried = $this->find_cycle( $cycle_id );
 		$this->assertSame( CycleStatus::PENDING, $retried->get_status()->get_value() );
 		$this->assertNotNull( $retried->get_claimed_until_gmt() );
 		$this->assertGreaterThan( time() + 800, strtotime( $retried->get_claimed_until_gmt() . ' UTC' ) );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the lease.' );
+		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the claim.' );
 	}
 
 	/**
 	 * @testdox transition_cycle rejects an unregistered target status and writes nothing.
 	 */
 	public function test_transition_cycle_rejects_an_unregistered_target(): void {
-		$cycle_id = $this->leased_pending_cycle_id();
+		$cycle_id = $this->claimd_pending_cycle_id();
 
 		try {
 			$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, 'never-registered', array( 'order_id' => 4242 ) );
@@ -1657,7 +1657,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_accepts_an_extension_registered_target(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
-		$cycle_id = $this->leased_pending_cycle_id();
+		$cycle_id = $this->claimd_pending_cycle_id();
 
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, 'disputed', array() ) );
 
@@ -1693,12 +1693,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * A pending cycle 1 with an expired lease on a new contract.
+	 * A pending cycle 1 with an expired claim on a new contract.
 	 */
-	private function leased_pending_cycle_id(): int {
+	private function claimd_pending_cycle_id(): int {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		return (int) $this->append_pending_cycle_with_lease( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) )->get_id();
+		return (int) $this->append_pending_cycle_with_claim( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) )->get_id();
 	}
 
 	/**
@@ -1808,7 +1808,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string      $status           The contract status (a ContractStatus value).
 	 * @param string      $schedule_source  Who keeps the schedule (the engine, or a gateway/extension slug).
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
-	 * @param string|null $claimed_until    The head cycle lease expiry, or null for none.
+	 * @param string|null $claimed_until    The head cycle claim expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
 	 * @param string      $owner            The owning extension slug; defaults to the registered test owner.
 	 */

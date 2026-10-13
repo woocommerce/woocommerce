@@ -314,18 +314,18 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Contracts carry a nullable dispatch_claimed_until column for the due-dispatch claim.
+	 * @testdox Contracts carry a nullable claimed_until column for the due-dispatch claim.
 	 */
-	public function test_contracts_dispatch_claimed_until_is_nullable(): void {
+	public function test_contracts_claimed_until_is_nullable(): void {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'dispatch_claimed_until' ), ARRAY_A );
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'claimed_until' ), ARRAY_A );
 
-		$this->assertIsArray( $row, 'Expected a contracts.dispatch_claimed_until column.' );
-		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected contracts.dispatch_claimed_until to be NULLable.' );
+		$this->assertIsArray( $row, 'Expected a contracts.claimed_until column.' );
+		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected contracts.claimed_until to be NULLable.' );
 		$this->assertSame( 'datetime', $row['Type'] ?? null );
 	}
 
@@ -392,7 +392,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The cycle dispatcher columns (claimed_until lease, reserved retry_at) are nullable.
+	 * @testdox The cycle dispatcher columns (claimed_until claim, reserved retry_at) are nullable.
 	 */
 	public function test_cycles_table_dispatcher_columns_are_nullable(): void {
 		global $wpdb;

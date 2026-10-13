@@ -34,7 +34,7 @@ final class SchemaInstaller {
 	 *         `(contract_id, kind)`; per-contract snapshots deduped by copy-forward.
 	 * 2.1.0 - rename `app_id` to `extension_slug` in plan_groups table.
 	 * 2.1.1 - add `status` and `sort_order` columns to plans table.
-	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery lease) and
+	 * 2.2.0 - dispatcher columns: cycle `claimed_until` (crash-recovery claim) and
 	 *         reserved `retry_at`; a `due_contract (status, next_payment_gmt)` index on
 	 *         contracts for the batch due scan.
 	 * 2.3.0 - catalog flatten: drop the plan_groups table; plans lose group_id and
@@ -50,7 +50,7 @@ final class SchemaInstaller {
 	 *         `inventory_policy` and their indexes; `billing_policy` nullable; an
 	 *         `extension_status (extension_slug, status)` index; new selling_plan_meta
 	 *         table (HPOS-style indexes); pre-freeze, recreate the tables.
-	 * 2.7.0 - due dispatch: contracts gain a nullable `dispatch_claimed_until` (the
+	 * 2.7.0 - due dispatch: contracts gain a nullable `claimed_until` (the
 	 *         due-dispatch claim); contracts `schedule_source` is VARCHAR(64) (it holds
 	 *         extension and gateway slugs) and defaults to 'subscriptions_engine' (was
 	 *         'primitive'); cycles drop the `due (kind, status, starts_at_gmt)` index (the
@@ -270,7 +270,7 @@ final class SchemaInstaller {
   payment_token_id BIGINT UNSIGNED NULL,
   start_gmt DATETIME NULL,
   next_payment_gmt DATETIME NULL,
-  dispatch_claimed_until DATETIME NULL,
+  claimed_until DATETIME NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   billing_total DECIMAL(26,8) NOT NULL DEFAULT 0,
@@ -342,7 +342,7 @@ final class SchemaInstaller {
 		// (e.g. future trial periods) coexist freely under MySQL's NULL-distinct rule.
 		// `order_id` is non-1:1 (an aggregate order may serve many cycles); `contract_kind`
 		// serves targeted per-chain reads (MAX(count), head). `claimed_until` is the cycle
-		// lease: stamped when a caller appends, claims or transitions a cycle with a lease,
+		// claim: stamped when a caller appends, claims or transitions a cycle with a claim,
 		// claimable again once it passes; the chain's UNIQUE positions remain the primary
 		// guard against a duplicate cycle.
 		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.

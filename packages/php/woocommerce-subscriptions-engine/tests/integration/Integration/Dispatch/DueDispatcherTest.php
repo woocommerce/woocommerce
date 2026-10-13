@@ -76,7 +76,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->register_recording_handler();
 		$id = $this->create_due_contract();
 
-		$this->assertTrue( ( new ContractRepository() )->claim_for_dispatch( $id, '2026-02-15 00:00:00', DueDispatcher::CLAIM_TTL_SECONDS ) );
+		$this->assertTrue( ( new ContractRepository() )->claim_contract( $id, '2026-02-15 00:00:00', DueDispatcher::CLAIM_TTL_SECONDS ) );
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
@@ -318,7 +318,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
+			$wpdb->update( $table, array( 'claimed_until' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
 		}
 
 		// A batch smaller than the stuck backlog: the fresh contract still makes it in.
@@ -343,10 +343,10 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
+			$wpdb->update( $table, array( 'claimed_until' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->update( $table, array( 'dispatch_claimed_until' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
+		$wpdb->update( $table, array( 'claimed_until' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
 
 		// A batch smaller than the stuck backlog: the retry still makes it in.
 		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
@@ -462,7 +462,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT dispatch_claimed_until FROM {$table} WHERE id = %d", $id ) );
+		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT claimed_until FROM {$table} WHERE id = %d", $id ) );
 
 		return null === $claim ? null : (string) $claim;
 	}

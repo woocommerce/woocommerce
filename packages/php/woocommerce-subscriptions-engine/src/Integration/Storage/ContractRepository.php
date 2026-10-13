@@ -581,7 +581,7 @@ final class ContractRepository {
 	 * the schedule source and the claim are residual filters.
 	 *
 	 * `$now` is the due cutoff only; claim liveness is read on the database clock
-	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_for_dispatch()} stamps claims on.
+	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_contract()} stamps claims on.
 	 *
 	 * Fairness: a handler is expected to move or clear the due moment it was notified for
 	 * (writing a different `next_payment_gmt` releases the claim). A contract whose handler
@@ -625,8 +625,8 @@ final class ContractRepository {
 				FROM {$contracts}
 				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
 				  AND schedule_source = %s
-				  AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= UTC_TIMESTAMP() )
-				ORDER BY dispatch_claimed_until ASC, next_payment_gmt ASC, id ASC
+				  AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )
+				ORDER BY claimed_until ASC, next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
 			),
@@ -665,7 +665,7 @@ final class ContractRepository {
 	 * `next_payment_gmt` the caller read and no live claim, so of two overlapping
 	 * dispatchers exactly one wins. The claim is stamped and its liveness compared on the
 	 * database clock (`UTC_TIMESTAMP()`) at the moment of the write, the same clock cycle
-	 * leases use, so a claim taken late in a slow batch still lives its full TTL. Writing a
+	 * claims use, so a claim taken late in a slow batch still lives its full TTL. Writing a
 	 * different `next_payment_gmt` (or null) releases the claim; re-saving the same moment
 	 * keeps it (see {@see self::update_fields()} and {@see self::update()}).
 	 *
@@ -674,7 +674,7 @@ final class ContractRepository {
 	 * @param int    $ttl_seconds           Claim lifetime in seconds.
 	 * @return bool True when this call took the claim.
 	 */
-	public function claim_for_dispatch( int $contract_id, string $seen_next_payment_gmt, int $ttl_seconds ): bool {
+	public function claim_contract( int $contract_id, string $seen_next_payment_gmt, int $ttl_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -682,8 +682,8 @@ final class ContractRepository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$updated = $wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$table} SET dispatch_claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )
-				WHERE id = %d AND next_payment_gmt = %s AND ( dispatch_claimed_until IS NULL OR dispatch_claimed_until <= UTC_TIMESTAMP() )",
+				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )
+				WHERE id = %d AND next_payment_gmt = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
 				$ttl_seconds,
 				$contract_id,
 				$seen_next_payment_gmt
@@ -1031,34 +1031,34 @@ final class ContractRepository {
 	}
 
 	/**
-	 * When a lease of `$lease_seconds` taken now ends, on the database clock that
-	 * {@see self::claim_cycle()} and {@see self::transition_cycle()} stamp and compare leases
-	 * on, so a lease set at append time is measured like every other.
+	 * When a claim of `$claim_seconds` taken now ends, on the database clock that
+	 * {@see self::claim_cycle()} and {@see self::transition_cycle()} stamp and compare claims
+	 * on, so a claim set at append time is measured like every other.
 	 *
-	 * @param int $lease_seconds Lease length in seconds.
+	 * @param int $claim_seconds Claim length in seconds.
 	 * @return string GMT `Y-m-d H:i:s`; the PHP clock only if the database cannot answer.
 	 */
-	public function lease_until( int $lease_seconds ): string {
+	public function claim_until( int $claim_seconds ): string {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$until = $wpdb->get_var( $wpdb->prepare( 'SELECT DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', $lease_seconds ) );
+		$until = $wpdb->get_var( $wpdb->prepare( 'SELECT DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', $claim_seconds ) );
 
-		return is_string( $until ) && '' !== $until ? $until : gmdate( 'Y-m-d H:i:s', time() + $lease_seconds );
+		return is_string( $until ) && '' !== $until ? $until : gmdate( 'Y-m-d H:i:s', time() + $claim_seconds );
 	}
 
 	/**
-	 * Take the lease of a cycle in `$status` whose lease has expired or was never set, for
-	 * `$lease_seconds`. A compare-and-set on the status and the lease: among concurrent
-	 * callers exactly one matches the row. The expiry check and the new lease use the
+	 * Take the claim on a cycle in `$status` whose claim has expired or was never set, for
+	 * `$claim_seconds`. A compare-and-set on the status and the claim: among concurrent
+	 * callers exactly one matches the row. The expiry check and the new claim use the
 	 * database clock (`UTC_TIMESTAMP()`), the one clock every worker shares.
 	 *
 	 * @param int    $cycle_id      Cycle id.
 	 * @param string $status        The status the caller read; the compare-and-set predicate (not validated).
-	 * @param int    $lease_seconds Lease length in seconds, from the database's now.
-	 * @return bool True when this caller took the lease.
+	 * @param int    $claim_seconds Claim length in seconds, from the database's now.
+	 * @return bool True when this caller took the claim.
 	 */
-	public function claim_cycle( int $cycle_id, string $status, int $lease_seconds ): bool {
+	public function claim_cycle( int $cycle_id, string $status, int $claim_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1068,7 +1068,7 @@ final class ContractRepository {
 			$wpdb->prepare(
 				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP()
 				WHERE id = %d AND status = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
-				$lease_seconds,
+				$claim_seconds,
 				$cycle_id,
 				$status
 			)
@@ -1082,13 +1082,13 @@ final class ContractRepository {
 	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status:
 	 * one UPDATE that lands only while the row still carries `$from_status`, so among
 	 * concurrent callers exactly one wins. `$changes` keys present are written: `order_id`
-	 * and `reason` (null clears); `lease_seconds` sets a lease from the database's now, and
-	 * without it the lease is cleared.
+	 * and `reason` (null clears); `claim_seconds` sets a claim from the database's now, and
+	 * without it the claim is released.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
 	 * @param string               $to_status   The status to write; must be a registered cycle status.
-	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string), `lease_seconds` (int).
+	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string), `claim_seconds` (int).
 	 * @return bool True when this caller won the transition.
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
@@ -1120,9 +1120,9 @@ final class ContractRepository {
 			}
 		}
 
-		if ( array_key_exists( 'lease_seconds', $changes ) ) {
+		if ( array_key_exists( 'claim_seconds', $changes ) ) {
 			$set[]    = 'claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
-			$values[] = Coercion::coerce_int( $changes['lease_seconds'] );
+			$values[] = Coercion::coerce_int( $changes['claim_seconds'] );
 		} else {
 			$set[] = 'claimed_until = NULL';
 		}
@@ -1453,9 +1453,9 @@ final class ContractRepository {
 		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
 			$next_payment = $columns['next_payment_gmt'];
 			if ( null === $next_payment ) {
-				$assignments[] = '`dispatch_claimed_until` = IF( `next_payment_gmt` <=> NULL, `dispatch_claimed_until`, NULL )';
+				$assignments[] = '`claimed_until` = IF( `next_payment_gmt` <=> NULL, `claimed_until`, NULL )';
 			} else {
-				$assignments[] = '`dispatch_claimed_until` = IF( `next_payment_gmt` <=> %s, `dispatch_claimed_until`, NULL )';
+				$assignments[] = '`claimed_until` = IF( `next_payment_gmt` <=> %s, `claimed_until`, NULL )';
 				$values[]      = (string) $next_payment;
 			}
 		}

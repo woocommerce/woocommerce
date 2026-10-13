@@ -5,7 +5,7 @@
  *
  * An immutable billing record frozen at billing (snapshot references, period
  * boundaries, `expected_total`). Only the repository's compare-and-set tools change a
- * stored cycle's `status`, `order_id`, `reason` and lease afterwards. The `count` is the chargeable number and idempotency anchor, nullable
+ * stored cycle's `status`, `order_id`, `reason` and claim afterwards. The `count` is the chargeable number and idempotency anchor, nullable
  * for non-counting cycles (e.g. a future trial). Money is a decimal-safe string;
  * timestamps are GMT strings (`Y-m-d H:i:s`).
  *
@@ -143,8 +143,8 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
-	 * Lease expiry (GMT string), or null. Set when a caller appends a cycle claimed, claims
-	 * it, or transitions it with a lease; once it passes, another caller may claim the
+	 * Claim expiry (GMT string), or null. Set when a caller appends a cycle claimed, claims
+	 * it, or transitions it with a claim; once it passes, another caller may claim the
 	 * cycle. The chain's UNIQUE positions remain the primary guard against a duplicate cycle.
 	 *
 	 * @var string|null
@@ -392,7 +392,7 @@ final class Cycle {
 	}
 
 	/**
-	 * Crash-recovery lease expiry (GMT string), or null.
+	 * Crash-recovery claim expiry (GMT string), or null.
 	 */
 	public function get_claimed_until_gmt(): ?string {
 		return $this->claimed_until_gmt;

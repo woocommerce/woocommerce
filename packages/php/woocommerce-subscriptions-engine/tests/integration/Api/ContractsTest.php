@@ -1065,16 +1065,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A claimed append holds a lease: claim_cycle fails until the lease expires.
+	 * @testdox A claimed append holds a claim: claim_cycle fails until the claim expires.
 	 */
-	public function test_a_claimed_append_holds_a_lease(): void {
+	public function test_a_claimed_append_holds_a_claim(): void {
 		$id    = $this->contract_with_currency();
 		$cycle = Contracts::add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
 					'status'        => CycleStatus::PENDING,
-					'lease_seconds' => 900,
+					'claim_seconds' => 900,
 				)
 			)
 		);
@@ -1084,15 +1084,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertGreaterThan( time() + 800, strtotime( $claimed_until . ' UTC' ) );
 		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'The appender holds the cycle.' );
 
-		$this->expire_lease( $cycle->get_id() );
-		$this->assertTrue( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'An expired lease can be taken.' );
+		$this->expire_claim( $cycle->get_id() );
+		$this->assertTrue( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'An expired claim can be taken.' );
 		$this->assertFalse( Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 900 ), 'Only once.' );
 	}
 
 	/**
-	 * @testdox A claimed append stamps its lease on the database clock, like claim_cycle.
+	 * @testdox A claimed append stamps its claim on the database clock, like claim_cycle.
 	 */
-	public function test_a_claimed_append_stamps_the_lease_on_the_database_clock(): void {
+	public function test_a_claimed_append_stamps_the_claim_on_the_database_clock(): void {
 		$id = $this->contract_with_currency();
 
 		// Pin the session's database clock far from PHP's; UTC_TIMESTAMP() follows it.
@@ -1102,7 +1102,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			$this->cycle_args(
 				array(
 					'status'        => CycleStatus::PENDING,
-					'lease_seconds' => 900,
+					'claim_seconds' => 900,
 				)
 			)
 		);
@@ -1111,13 +1111,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An invalid lease_seconds is rejected without a write.
+	 * @testdox An invalid claim_seconds is rejected without a write.
 	 */
-	public function test_an_invalid_lease_is_rejected(): void {
+	public function test_an_invalid_claim_is_rejected(): void {
 		$id = $this->contract_with_currency();
 
 		try {
-			Contracts::add_cycle( $id, $this->cycle_args( array( 'lease_seconds' => 0 ) ) );
+			Contracts::add_cycle( $id, $this->cycle_args( array( 'claim_seconds' => 0 ) ) );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertSame( array(), Contracts::get_cycles( $id ) );
@@ -1128,9 +1128,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox claim_cycle wins once on a lease-less cycle in the status the caller read.
+	 * @testdox claim_cycle wins once on an unclaimed cycle in the status the caller read.
 	 */
-	public function test_claim_cycle_on_lease_less_pending_and_billed_cycles(): void {
+	public function test_claim_cycle_on_unclaimed_pending_and_billed_cycles(): void {
 		$id      = $this->contract_with_currency();
 		$billed  = Contracts::add_cycle( $id, $this->cycle_args() );
 		$pending = Contracts::add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
@@ -1157,16 +1157,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox transition_cycle attaches an order under a lease, fails with a reason, and retries with a new lease.
+	 * @testdox transition_cycle attaches an order under a claim, fails with a reason, and retries with a new claim.
 	 */
-	public function test_transition_cycle_order_reason_and_lease(): void {
+	public function test_transition_cycle_order_reason_and_claim(): void {
 		$id       = $this->contract_with_currency();
 		$cycle    = Contracts::add_cycle(
 			$id,
 			$this->cycle_args(
 				array(
 					'status'        => CycleStatus::PENDING,
-					'lease_seconds' => 900,
+					'claim_seconds' => 900,
 				)
 			)
 		);
@@ -1179,23 +1179,23 @@ class ContractsTest extends EngineIntegrationTestCase {
 				CycleStatus::PENDING,
 				array(
 					'order_id'      => 77,
-					'lease_seconds' => 900,
+					'claim_seconds' => 900,
 				)
 			)
 		);
 		$attached = $this->cycle( $id, $cycle_id );
 		$this->assertSame( 77, $attached->get_order_id() );
-		$this->assertNotNull( $attached->get_claimed_until_gmt(), 'The lease is kept while attaching the order.' );
+		$this->assertNotNull( $attached->get_claimed_until_gmt(), 'The claim is kept while attaching the order.' );
 
 		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) );
 		$failed = Contracts::get_cycles( $id, 1 )[0];
 		$this->assertSame( CycleStatus::FAILED, $failed->get_status() );
 		$this->assertSame( 'payment-failed', $failed->get_reason() );
 		$this->assertSame( 77, $failed->get_order_id(), 'An omitted order_id keeps the stored one.' );
-		$this->assertNull( $this->cycle( $id, $cycle_id )->get_claimed_until_gmt(), 'No lease_seconds clears the lease.' );
+		$this->assertNull( $this->cycle( $id, $cycle_id )->get_claimed_until_gmt(), 'No claim_seconds clears the claim.' );
 
-		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'lease_seconds' => 900 ) ) );
-		$this->assertFalse( Contracts::claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the lease.' );
+		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'claim_seconds' => 900 ) ) );
+		$this->assertFalse( Contracts::claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the claim.' );
 
 		$this->assertTrue( Contracts::transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'reason' => null ) ) );
 		$this->assertNull( Contracts::get_cycles( $id, 1 )[0]->get_reason(), 'A null reason clears it.' );
@@ -1245,9 +1245,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function provide_invalid_transition_args(): array {
 		return array(
-			'zero lease'        => array( array( 'lease_seconds' => 0 ) ),
-			'negative lease'    => array( array( 'lease_seconds' => -1 ) ),
-			'non-numeric lease' => array( array( 'lease_seconds' => 'x' ) ),
+			'zero claim'        => array( array( 'claim_seconds' => 0 ) ),
+			'negative claim'    => array( array( 'claim_seconds' => -1 ) ),
+			'non-numeric claim' => array( array( 'claim_seconds' => 'x' ) ),
 			'zero order id'     => array( array( 'order_id' => 0 ) ),
 			'negative order id' => array( array( 'order_id' => -5 ) ),
 			'non-string reason' => array( array( 'reason' => array( 'payment-failed' ) ) ),
@@ -1302,11 +1302,11 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Move a cycle's lease into the past.
+	 * Move a cycle's claim into the past.
 	 *
 	 * @param int $cycle_id Cycle id.
 	 */
-	private function expire_lease( int $cycle_id ): void {
+	private function expire_claim( int $cycle_id ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
