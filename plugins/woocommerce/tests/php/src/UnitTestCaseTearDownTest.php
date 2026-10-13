@@ -136,8 +136,9 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	 * @testdox Block types a test registers, replaces or removes are put back as they were at setUp().
 	 */
 	public function test_restore_block_type_registry_undoes_registry_changes(): void {
-		$registry        = \WP_Block_Type_Registry::get_instance();
-		$types_at_setup  = $registry->get_all_registered();
+		$registry       = \WP_Block_Type_Registry::get_instance();
+		$types_at_setup = $registry->get_all_registered();
+		$this->assertGreaterThanOrEqual( 2, count( $types_at_setup ), 'The test replaces one block type registered at setUp() and removes another.' );
 		$replaced_name   = array_key_first( $types_at_setup );
 		$removed_name    = array_keys( $types_at_setup )[1];
 		$replaced_type   = $types_at_setup[ $replaced_name ];
