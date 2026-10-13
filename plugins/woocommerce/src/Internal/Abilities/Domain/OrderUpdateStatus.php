@@ -118,9 +118,7 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 
 	/**
 	 * Change the order status in memory. The order class must accept the
-	 * status. A clone checks this first and is never saved. set_status() without
-	 * the manual flag fires no action, so a refused status fires no
-	 * woocommerce_order_edit_status.
+	 * status, so a refused status fires no woocommerce_order_edit_status.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -132,9 +130,7 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			return $status;
 		}
 
-		$probe = clone $subject;
-		$probe->set_status( $status );
-		if ( $status !== $probe->get_status() ) {
+		if ( ! $subject->is_valid_status( $status ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_invalid',
 				/* translators: %s: order status slug. */
