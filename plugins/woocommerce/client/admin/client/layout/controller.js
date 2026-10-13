@@ -71,6 +71,21 @@ const CustomizeStore = lazy(
 		import( /* webpackChunkName: "customize-store" */ '../customize-store' )
 );
 
+const PurpleCysPrototype = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "purple-cys-prototype" */ '../customize-store/purple-prototype'
+		)
+);
+
+// Prototype only: the modal container keeps the CYS URL but renders Home behind the modal.
+const PurpleCysPrototypeOverHome = ( props ) => (
+	<>
+		<Homescreen { ...props } />
+		<PurpleCysPrototype { ...props } />
+	</>
+);
+
 const LaunchStore = lazy(
 	() =>
 		import(
@@ -248,6 +263,27 @@ export const getPages = ( reports = [] ) => {
 		},
 		capability: 'manage_woocommerce',
 	} );
+
+	if ( window.wcAdminFeatures?.[ 'purple-cys-prototype' ] ) {
+		const isModal =
+			getAdminSetting( 'purpleCysPrototype', {} ).container === 'modal';
+		// Prototype only: replace the CYS intro screen added above.
+		pages.pop();
+		pages.push( {
+			container: isModal
+				? PurpleCysPrototypeOverHome
+				: PurpleCysPrototype,
+			path: '/customize-store/*',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				isModal
+					? __( 'Home', 'woocommerce' )
+					: __( 'Customize your store', 'woocommerce' ),
+			],
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
+		} );
+	}
 
 	pages.push( {
 		container: LaunchStore,

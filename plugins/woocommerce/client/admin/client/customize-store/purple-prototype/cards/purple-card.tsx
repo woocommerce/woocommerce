@@ -1,0 +1,265 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { Badge, Button, Link, Notice, Text } from '@wordpress/ui';
+import { Icon, check } from '@wordpress/icons';
+import type { ComponentProps } from 'react';
+
+/**
+ * Internal dependencies
+ */
+import { ThemeCard, LinkButton } from './theme-card';
+import type { PurpleState } from '../settings';
+import { PURPLE_DEMO_URL, getLivePreviewUrl, getSiteEditorUrl } from '../urls';
+import purplePreview from '../assets/purple-preview.jpg';
+
+type PurpleCardProps = {
+	state: PurpleState;
+	slug: string;
+	homeUrl: string;
+	onInstall: () => void;
+	onActivate: () => void;
+	onRetry: () => void;
+};
+
+type BadgeIntent = ComponentProps< typeof Badge >[ 'intent' ];
+
+const getCopy = ( state: PurpleState ) => {
+	const freeTheme = {
+		badge: __( 'Free theme', 'woocommerce' ),
+		badgeIntent: 'informational' as BadgeIntent,
+		title: __( 'Built by WooCommerce, for your store', 'woocommerce' ),
+		description: __(
+			'The Purple theme gives your shop, product, cart and checkout pages a polished design from day one, so you can focus on your products.',
+			'woocommerce'
+		),
+	};
+	const installed = {
+		badge: __( 'Installed, not active yet', 'woocommerce' ),
+		badgeIntent: 'stable' as BadgeIntent,
+		title: __( 'Purple is ready to try', 'woocommerce' ),
+		description: __(
+			"Try it with your own products in Live Preview, then activate it when you're ready.",
+			'woocommerce'
+		),
+	};
+
+	switch ( state ) {
+		case 'installing':
+			return {
+				...freeTheme,
+				helper: __(
+					'Installing Purple. This takes a few seconds.',
+					'woocommerce'
+				),
+			};
+		case 'installed':
+			return {
+				...installed,
+				helper: __(
+					"Activating changes your store's design: layout, menus and homepage. Your products, orders and page content stay.",
+					'woocommerce'
+				),
+			};
+		case 'activating':
+			return {
+				...installed,
+				helper: __(
+					'Activating Purple. This takes a few seconds.',
+					'woocommerce'
+				),
+			};
+		case 'active':
+			return {
+				badge: __( 'Active theme', 'woocommerce' ),
+				badgeIntent: 'stable' as BadgeIntent,
+				title: __( 'Purple is your store theme', 'woocommerce' ),
+				description: __(
+					'Next, make it yours: pick colors and fonts, then edit your homepage and store pages.',
+					'woocommerce'
+				),
+				helper: __(
+					'Your products and orders stay as they are.',
+					'woocommerce'
+				),
+			};
+		case 'error':
+			return { ...freeTheme, helper: '' };
+		default:
+			return {
+				...freeTheme,
+				helper: __(
+					'Nothing changes on your store until you activate Purple.',
+					'woocommerce'
+				),
+			};
+	}
+};
+
+const Benefits = () => (
+	<ul className="purple-cys-benefits">
+		{ [
+			__(
+				'Every store page designed, from shop to checkout',
+				'woocommerce'
+			),
+			__( 'Ready-made color palettes and font styles', 'woocommerce' ),
+			__( 'Kept up to date by the WooCommerce team', 'woocommerce' ),
+		].map( ( benefit ) => (
+			<li key={ benefit }>
+				<Icon icon={ check } size={ 20 } />
+				<Text>{ benefit }</Text>
+			</li>
+		) ) }
+	</ul>
+);
+
+const Actions = ( {
+	state,
+	slug,
+	homeUrl,
+	onInstall,
+	onActivate,
+	onRetry,
+}: PurpleCardProps ) => {
+	const previewDemo = ( disabled = false ) => (
+		<LinkButton
+			variant="outline"
+			href={ PURPLE_DEMO_URL }
+			isExternal
+			disabled={ disabled }
+		>
+			{ __( 'Preview demo', 'woocommerce' ) }
+		</LinkButton>
+	);
+	const livePreview = ( disabled = false ) => (
+		<LinkButton
+			variant="outline"
+			href={ getLivePreviewUrl( slug ) }
+			disabled={ disabled }
+		>
+			{ __( 'Live Preview', 'woocommerce' ) }
+		</LinkButton>
+	);
+
+	switch ( state ) {
+		case 'installing':
+			return (
+				<>
+					<Button loading disabled>
+						{ __( 'Installing…', 'woocommerce' ) }
+					</Button>
+					{ previewDemo( true ) }
+				</>
+			);
+		case 'installed':
+			return (
+				<>
+					<Button onClick={ onActivate }>
+						{ __( 'Activate', 'woocommerce' ) }
+					</Button>
+					{ livePreview() }
+				</>
+			);
+		case 'activating':
+			return (
+				<>
+					<Button loading disabled>
+						{ __( 'Activating…', 'woocommerce' ) }
+					</Button>
+					{ livePreview( true ) }
+				</>
+			);
+		case 'active':
+			return (
+				<>
+					<LinkButton href={ getSiteEditorUrl() }>
+						{ __( 'Customize in Site Editor', 'woocommerce' ) }
+					</LinkButton>
+					<Link href={ homeUrl } openInNewTab>
+						{ __( 'View store', 'woocommerce' ) }
+					</Link>
+				</>
+			);
+		case 'error':
+			return (
+				<>
+					<Button onClick={ onRetry }>
+						{ __( 'Try again', 'woocommerce' ) }
+					</Button>
+					{ previewDemo() }
+				</>
+			);
+		default:
+			return (
+				<>
+					<Button onClick={ onInstall }>
+						{ __( 'Install Purple', 'woocommerce' ) }
+					</Button>
+					{ previewDemo() }
+				</>
+			);
+	}
+};
+
+export const PurpleCard = ( props: PurpleCardProps ) => {
+	const { state } = props;
+	const copy = getCopy( state );
+	const showBenefits = state === 'default' || state === 'installing';
+
+	return (
+		<ThemeCard
+			className="purple-cys-theme-card--purple"
+			media={
+				<img
+					src={ purplePreview }
+					alt={ __(
+						'Preview of a store using the Purple theme',
+						'woocommerce'
+					) }
+				/>
+			}
+		>
+			<Badge intent={ copy.badgeIntent }>{ copy.badge }</Badge>
+			<Text variant="heading-xl" render={ <h2 /> }>
+				{ copy.title }
+			</Text>
+			<Text
+				className="purple-cys-theme-card__description"
+				render={ <p /> }
+			>
+				{ copy.description }
+			</Text>
+			{ showBenefits && <Benefits /> }
+			{ state === 'error' && (
+				<Notice.Root
+					intent="error"
+					className="purple-cys-theme-card__notice"
+				>
+					<Notice.Title>
+						{ __( 'Something went wrong.', 'woocommerce' ) }
+					</Notice.Title>
+					<Notice.Description>
+						{ __(
+							"Purple couldn't be installed or activated. Your store hasn't changed. Try again, or use Appearance > Themes.",
+							'woocommerce'
+						) }
+					</Notice.Description>
+				</Notice.Root>
+			) }
+			<div className="purple-cys-theme-card__actions">
+				<Actions { ...props } />
+			</div>
+			{ copy.helper && (
+				<Text
+					variant="body-sm"
+					className="purple-cys-theme-card__helper"
+					render={ <p /> }
+				>
+					{ copy.helper }
+				</Text>
+			) }
+		</ThemeCard>
+	);
+};

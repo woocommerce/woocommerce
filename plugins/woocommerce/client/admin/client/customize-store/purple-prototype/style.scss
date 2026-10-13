@@ -1,0 +1,250 @@
+// Prototype styles for Purple in "Customize your store" (behind the purple-cys-prototype flag).
+
+.purple-cys-task-page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+	max-width: 1040px;
+	margin: var(--wpds-dimension-gap-2xl) auto;
+
+	h1 {
+		margin: 0;
+	}
+}
+
+.purple-cys-options {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+}
+
+.purple-cys-theme-card {
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__content {
+		display: flex;
+		gap: var(--wpds-dimension-gap-2xl);
+		align-items: stretch;
+	}
+
+	// The text column sets the card height, so the image is positioned out of the flow.
+	&__media {
+		position: relative;
+		flex: 0 0 360px;
+		border: 1px solid var(--wpds-color-stroke-surface-neutral);
+		border-radius: var(--wpds-border-radius-md);
+		overflow: hidden;
+		background: var(--wpds-color-background-track-neutral-weak);
+
+		> img {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: top left;
+		}
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-md);
+	}
+
+	&__description,
+	&__helper {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+	}
+
+	&--purple &__content {
+		min-height: 280px;
+	}
+
+	&--marketplace &__content,
+	&--current-theme &__content {
+		min-height: 160px;
+	}
+
+	&--marketplace &__media {
+		background: var(--wpds-color-background-track-neutral);
+	}
+
+	&__thumbnails {
+		position: absolute;
+		inset: var(--wpds-dimension-padding-lg);
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: repeat(2, minmax(0, 1fr));
+		gap: var(--wpds-dimension-gap-sm);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: top left;
+			border-radius: var(--wpds-border-radius-sm);
+		}
+	}
+
+	// wp-admin's unlayered link styles beat the `@wordpress/ui` button styles, which live in a cascade layer.
+	a.purple-cys-link-button {
+		&,
+		&:hover,
+		&:active,
+		&:focus {
+			color: revert-layer;
+			box-shadow: revert-layer;
+			outline: revert-layer;
+			text-decoration: revert-layer;
+		}
+	}
+
+	&__notice {
+		align-self: stretch;
+	}
+
+	@media (max-width: 782px) {
+		&__content {
+			flex-direction: column;
+		}
+
+		&__media {
+			flex-basis: auto;
+			aspect-ratio: 3 / 2;
+		}
+	}
+}
+
+.purple-cys-benefits {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-sm);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-md);
+		margin: 0;
+	}
+
+	svg {
+		flex-shrink: 0;
+		fill: currentColor;
+	}
+}
+
+.purple-cys-modal {
+	h1,
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__sidebar {
+		gap: var(--wpds-dimension-gap-lg);
+		padding: 42px var(--wpds-dimension-padding-2xl) 0;
+		box-sizing: border-box;
+	}
+
+	&__sidebar-description,
+	&__subtitle {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	&__steps {
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-sm);
+
+		ol {
+			display: flex;
+			flex-direction: column;
+			gap: var(--wpds-dimension-gap-sm);
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		li {
+			display: flex;
+			align-items: flex-start;
+			gap: var(--wpds-dimension-gap-sm);
+			margin: 0;
+		}
+	}
+
+	&__step-number {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		box-sizing: border-box;
+		border: 1px dashed var(--wpds-color-stroke-surface-neutral);
+		border-radius: 50%;
+		font-size: var(--wpds-typography-font-size-sm);
+		line-height: 16px;
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--wpds-dimension-gap-lg);
+		padding: var(--wpds-dimension-padding-3xl) var(--wpds-dimension-padding-3xl) var(--wpds-dimension-padding-2xl);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral);
+		flex-shrink: 0;
+	}
+
+	&__title {
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-sm);
+	}
+
+	// The three cards are taller than the Payments panel, so the body scrolls.
+	&__body {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-lg);
+		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-3xl);
+	}
+
+	// Cards share the panel with the 280px column, so the image column is a bit narrower.
+	.purple-cys-theme-card__media {
+		flex-basis: 320px;
+	}
+
+	@media (max-width: 768px) {
+		&__steps {
+			display: none;
+		}
+	}
+}
+
+// Keep the "Purple prototype" admin bar menu usable while the modal is open.
+body:has(.purple-cys-modal) #wpadminbar {
+	z-index: 100001;
+}

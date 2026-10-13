@@ -6,6 +6,7 @@
 		"store-alerts": true,
 		"rest-api-v4": false,
 		"order-detail-redesign": false,
-		"payment-settings-screen": true
+		"payment-settings-screen": true,
+		"purple-cys-prototype": true
 	}
 }
