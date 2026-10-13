@@ -55,13 +55,22 @@ describe( 'BusinessLocation country error help', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'shows no help when the countries load', () => {
-		mockOnboardingSetting.siteHealthUrl = SITE_HEALTH_URL;
+	it.each( [
+		[ 'can', SITE_HEALTH_URL ],
+		[ 'cannot', undefined ],
+	] )(
+		'shows no help when the countries load and the user %s open Site Health',
+		( _, siteHealthUrl ) => {
+			mockOnboardingSetting.siteHealthUrl = siteHealthUrl;
 
-		renderPage( [ { key: 'DE:DE-BE', label: 'Germany — Berlin' } ] );
+			renderPage( [ { key: 'DE:DE-BE', label: 'Germany — Berlin' } ] );
 
-		expect(
-			screen.queryByRole( 'link', { name: 'Check Site Health' } )
-		).not.toBeInTheDocument();
-	} );
+			expect(
+				screen.queryByRole( 'link', { name: 'Check Site Health' } )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByText( HOSTING_HELP )
+			).not.toBeInTheDocument();
+		}
+	);
 } );
