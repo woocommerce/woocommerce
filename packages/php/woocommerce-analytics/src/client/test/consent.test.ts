@@ -16,6 +16,7 @@ describe( 'ConsentManager.waitForConsentType', () => {
 	} );
 
 	it( 'runs right away without the WP Consent API', () => {
+		window.waitfor_consent_hook = '1';
 		const callback = jest.fn();
 
 		new ConsentManager().waitForConsentType( callback );

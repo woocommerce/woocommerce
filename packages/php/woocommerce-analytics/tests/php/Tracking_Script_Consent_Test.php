@@ -34,10 +34,12 @@ class Tracking_Script_Consent_Test extends BaseTestCase {
 	public function test_tracking_script_runs_without_the_consent_api(): void {
 		Woocommerce_Analytics::enqueue_tracking_script();
 
-		$output = $this->print_scripts();
+		$tracking = $this->get_script_attributes( $this->print_scripts(), 'woocommerce-analytics-js' );
 
-		$this->assertStringContainsString( 'src="https://stats.wp.com/s-' . gmdate( 'YW' ) . '.js"', $output );
-		$this->assertStringNotContainsString( 'text/plain', $output );
+		$this->assertIsArray( $tracking );
+		$this->assertMatchesRegularExpression( '#^https://stats\.wp\.com/s-\d+\.js$#', $tracking['src'] ?? '' );
+		$this->assertNotSame( 'text/plain', $tracking['type'] ?? null );
+		$this->assertArrayNotHasKey( 'data-wc-analytics-consent', $tracking );
 	}
 
 	/**
@@ -52,13 +54,18 @@ class Tracking_Script_Consent_Test extends BaseTestCase {
 		Woocommerce_Analytics::enqueue_tracking_script();
 		wp_enqueue_script( 'analytics-dependent', 'https://example.com/dependent.js', array( 'woocommerce-analytics' ), '1.0' );
 
-		$output = $this->print_scripts();
+		$output    = $this->print_scripts();
+		$tracking  = $this->get_script_attributes( $output, 'woocommerce-analytics-js' );
+		$dependent = $this->get_script_attributes( $output, 'analytics-dependent-js' );
 
-		$this->assertMatchesRegularExpression(
-			'#<script type="text/plain" src="https://stats\.wp\.com/s-\d+\.js" id="woocommerce-analytics-js"[^>]* data-wc-analytics-consent="statistics"#',
-			$output
-		);
-		$this->assertMatchesRegularExpression( '#<script (type="text/javascript" )?src="https://example\.com/dependent\.js\?ver=1\.0" id="analytics-dependent-js"#', $output );
+		$this->assertIsArray( $tracking );
+		$this->assertSame( 'text/plain', $tracking['type'] ?? null );
+		$this->assertSame( 'statistics', $tracking['data-wc-analytics-consent'] ?? null );
+		$this->assertMatchesRegularExpression( '#^https://stats\.wp\.com/s-\d+\.js$#', $tracking['src'] ?? '' );
+
+		$this->assertIsArray( $dependent );
+		$this->assertSame( 'https://example.com/dependent.js?ver=1.0', $dependent['src'] ?? null );
+		$this->assertNotSame( 'text/plain', $dependent['type'] ?? null );
 	}
 
 	/**
@@ -70,5 +77,29 @@ class Tracking_Script_Consent_Test extends BaseTestCase {
 		ob_start();
 		wp_print_scripts();
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Read the attributes of the script tag with the given id. WordPress 7.0+ prints them in a different order than 6.9.
+	 *
+	 * @param string $output Printed markup.
+	 * @param string $id     Script tag id.
+	 * @return array<string, string|true>|null Null when there is no such tag.
+	 */
+	private function get_script_attributes( string $output, string $id ): ?array {
+		$processor = new \WP_HTML_Tag_Processor( $output );
+		while ( $processor->next_tag( 'script' ) ) {
+			if ( $processor->get_attribute( 'id' ) !== $id ) {
+				continue;
+			}
+
+			$attributes = array();
+			foreach ( $processor->get_attribute_names_with_prefix( '' ) as $name ) {
+				$attributes[ $name ] = $processor->get_attribute( $name );
+			}
+			return $attributes;
+		}
+
+		return null;
 	}
 }

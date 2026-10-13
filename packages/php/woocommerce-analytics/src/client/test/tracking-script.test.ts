@@ -42,6 +42,16 @@ describe( 'activateTrackingScript', () => {
 		expect( scripts[ 0 ].getAttribute( 'crossorigin' ) ).toBe( 'anonymous' );
 	} );
 
+	it( 'keeps the nonce of the held tag', () => {
+		printHeldTag();
+		// Browsers hide the nonce attribute once the tag is parsed, leaving it only on the property.
+		Object.defineProperty( document.querySelector( 'script' )!, 'nonce', { value: 'abc123' } );
+
+		activateTrackingScript();
+
+		expect( getScripts()[ 0 ].nonce ).toBe( 'abc123' );
+	} );
+
 	it( 'adds s.js only once', () => {
 		printHeldTag();
 
