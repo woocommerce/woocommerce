@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	applyFormat,
-	insert,
-	create,
-	toHTMLString,
-} from '@wordpress/rich-text';
+import type { RichTextValue } from '@wordpress/rich-text/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
@@ -19,7 +14,7 @@ import * as React from '@wordpress/element';
  * Internal dependencies
  */
 import {
-	getCursorPosition,
+	insertPersonalizationTag,
 	replacePersonalizationTagsWithHTMLComments,
 } from '../../components/personalization-tags/rich-text-utils';
 import { PersonalizationTagsModal } from '../../components/personalization-tags/personalization-tags-modal';
@@ -53,6 +48,8 @@ function disableCertainRichTextFormats() {
 
 type Props = {
 	contentRef: React.RefObject< HTMLElement >;
+	value: RichTextValue;
+	onChange: ( value: RichTextValue ) => void;
 };
 
 /**
@@ -60,8 +57,10 @@ type Props = {
  *
  * @param root0
  * @param root0.contentRef
+ * @param root0.value
+ * @param root0.onChange
  */
-function PersonalizationTagsButton( { contentRef }: Props ) {
+function PersonalizationTagsButton( { contentRef, value, onChange }: Props ) {
 	const [ isModalOpened, setIsModalOpened ] = useState( false );
 	const selectedBlockId = useSelect( ( select ) =>
 		select( 'core/block-editor' ).getSelectedBlockClientId()
@@ -87,56 +86,9 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 		'';
 
 	const handleInsert = useCallback(
-		( tag: string, linkText: string | null ) => {
-			let { start, end } = getCursorPosition( contentRef, blockContent );
-
-			let updatedContent = '';
-			// When we pass linkText, we want to insert the tag as a link
-			if ( linkText ) {
-				let richTextValue = create( { html: blockContent } );
-
-				// Insert the new text into the current selection or at the cursor
-				richTextValue = insert( richTextValue, linkText, start, end );
-
-				end = start + linkText.length;
-				// The link is inserted via registered format type to avoid breaking the content
-				richTextValue = applyFormat(
-					richTextValue,
-					{
-						type: 'woocommerce-email-editor/link-shortcode',
-						// @ts-expect-error attributes property is missing in build type for WPFormat type
-						attributes: {
-							'data-link-href': tag,
-							contenteditable: 'false',
-							style: 'text-decoration: underline;',
-						},
-					},
-					start,
-					end
-				);
-				updatedContent = toHTMLString( { value: richTextValue } );
-			} else {
-				let richTextValue = create( { html: blockContent } );
-				richTextValue = insert(
-					richTextValue,
-					create( { html: `<!--${ tag }-->&nbsp;` } ), // Add a non-breaking space to avoid an issue when WP renderer removes blog containing only a comment
-					start,
-					end
-				);
-				updatedContent = toHTMLString( { value: richTextValue } );
-			}
-
-			void updateBlockAttributes( selectedBlockId, {
-				[ blockContentKey ]: updatedContent,
-			} );
-		},
-		[
-			blockContent,
-			blockContentKey,
-			contentRef,
-			selectedBlockId,
-			updateBlockAttributes,
-		]
+		( tag: string, linkText: string | null ) =>
+			onChange( insertPersonalizationTag( value, tag, linkText ) ),
+		[ value, onChange ]
 	);
 
 	return (
@@ -191,8 +143,8 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 				/>
 				<PersonalizationTagsModal
 					isOpened={ isModalOpened }
-					onInsert={ ( value, linkText ) => {
-						handleInsert( value, linkText );
+					onInsert={ ( tag, linkText ) => {
+						handleInsert( tag, linkText );
 						setIsModalOpened( false );
 					} }
 					closeCallback={ () => setIsModalOpened( false ) }

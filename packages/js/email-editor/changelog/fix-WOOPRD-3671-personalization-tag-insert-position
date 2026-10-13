@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Insert and edit personalization tags at the cursor instead of the end of the text, including in captions and button text.

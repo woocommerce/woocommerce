@@ -2,8 +2,11 @@
  * External dependencies
  */
 import * as React from '@wordpress/element';
-import { create } from '@wordpress/rich-text';
-import { RichTextFormatList } from '@wordpress/rich-text/build-types/types';
+import { applyFormat, create, insert } from '@wordpress/rich-text';
+import type {
+	RichTextFormatList,
+	RichTextValue,
+} from '@wordpress/rich-text/build-types/types';
 
 /**
  * Internal dependencies
@@ -188,4 +191,57 @@ const replacePersonalizationTagsWithHTMLComments = (
 	return content;
 };
 
-export { getCursorPosition, replacePersonalizationTagsWithHTMLComments };
+/**
+ * Insert a personalization tag (or a tag link when linkText is set) into a RichText value
+ * at its selection, or at the end when there is no selection.
+ *
+ * @param value
+ * @param tag
+ * @param linkText
+ */
+const insertPersonalizationTag = (
+	value: RichTextValue,
+	tag: string,
+	linkText?: string | null
+): RichTextValue => {
+	const start = value.start ?? value.text.length;
+	const end = value.end ?? start;
+
+	if ( ! linkText ) {
+		return {
+			// Non-breaking space avoids the WP renderer removing a block containing only a comment
+			...insert(
+				value,
+				create( { html: `<!--${ tag }-->&nbsp;` } ),
+				start,
+				end
+			),
+			activeFormats: [],
+		} as RichTextValue;
+	}
+
+	const inserted = insert( value, linkText, start, end );
+	return {
+		...applyFormat(
+			inserted,
+			{
+				type: 'woocommerce-email-editor/link-shortcode',
+				// @ts-expect-error attributes property is missing in build type for WPFormat type
+				attributes: {
+					'data-link-href': tag,
+					contenteditable: 'false',
+					style: 'text-decoration: underline;',
+				},
+			},
+			start,
+			start + linkText.length
+		),
+		activeFormats: [],
+	} as RichTextValue;
+};
+
+export {
+	getCursorPosition,
+	insertPersonalizationTag,
+	replacePersonalizationTagsWithHTMLComments,
+};
