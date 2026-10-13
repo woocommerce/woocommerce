@@ -1,4 +1,4 @@
-/* global Node, HTMLDivElement */
+/* global Node, HTMLDivElement, HTMLElement */
 /**
  * External dependencies
  */
@@ -12,6 +12,15 @@ import '@testing-library/jest-dom';
 import { RichTextWithButton } from '../rich-text-with-button';
 
 const TAG = '[woocommerce/customer-first-name]';
+
+const mockRenderCount = { count: 0 };
+const mockPopover: {
+	onUpdate?: (
+		original: string,
+		updated: string,
+		anchor?: HTMLElement
+	) => void;
+} = {};
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -47,16 +56,24 @@ jest.mock( '@wordpress/block-editor', () => {
 			(
 				{ value }: { value: string },
 				ref: React.Ref< HTMLDivElement >
-			) => (
-				<div
-					ref={ ref }
-					contentEditable
-					suppressContentEditableWarning
-					tabIndex={ -1 }
-					data-testid="field"
-					dangerouslySetInnerHTML={ { __html: value } }
-				/>
-			)
+			) => {
+				mockRenderCount.count++;
+				const html = value.replace(
+					/<!--(.*?)-->/g,
+					( _match, tag ) =>
+						`<span contenteditable="false" data-rich-text-comment="${ tag }"><span>${ tag }</span></span>`
+				);
+				return (
+					<div
+						ref={ ref }
+						contentEditable
+						suppressContentEditableWarning
+						tabIndex={ -1 }
+						data-testid="field"
+						dangerouslySetInnerHTML={ { __html: html } }
+					/>
+				);
+			}
 		),
 	};
 } );
@@ -78,7 +95,12 @@ jest.mock( '../personalization-tags-modal', () => ( {
 } ) );
 
 jest.mock( '../personalization-tags-popover', () => ( {
-	PersonalizationTagsPopover: () => null,
+	PersonalizationTagsPopover: ( props: {
+		onUpdate: typeof mockPopover.onUpdate;
+	} ) => {
+		mockPopover.onUpdate = props.onUpdate;
+		return null;
+	},
 } ) );
 
 jest.mock( '../../../store', () => ( { storeName: 'email-editor' } ) );
@@ -101,6 +123,7 @@ function Harness( {
 		<>
 			<input data-testid="outside-input" />
 			<button data-testid="outside-button">outside</button>
+			<button onClick={ () => setValue( 'Hi' ) }>shrink</button>
 			<RichTextWithButton
 				label="Subject"
 				placeholder=""
@@ -215,5 +238,38 @@ describe( 'RichTextWithButton caret tracking', () => {
 			`Hello <strong>there</strong> friend<!--${ TAG }-->`
 		);
 		expect( NBSP ).toHaveLength( 1 );
+	} );
+
+	it( 'edits only the clicked tag when the same tag appears twice', () => {
+		const field = setup( `<!--[a/one]-->, hi <!--[a/one]-->` );
+		const spans = field.querySelectorAll( '[data-rich-text-comment]' );
+
+		act( () => {
+			mockPopover.onUpdate( 'a/one', 'a/two', spans[ 1 ] as HTMLElement );
+		} );
+
+		expect( written ).toEqual( [ '<!--[a/one]-->, hi <!--[a/two]-->' ] );
+	} );
+
+	it( 'inserts at the end when the stored position is past the new text', () => {
+		const field = setup( 'Hello there friend' );
+		act( () => field.focus() );
+		placeCaret( field.childNodes[ 0 ], 15 );
+
+		fireEvent.click( screen.getByText( 'shrink' ) );
+		insertTag();
+
+		expect( written ).toEqual( [ `Hi<!--${ TAG }-->` ] );
+	} );
+
+	it( 'does not re-render the field when the caret moves', () => {
+		const field = setup( 'Hello there friend' );
+		act( () => field.focus() );
+		const before = mockRenderCount.count;
+
+		placeCaret( field.childNodes[ 0 ], 3 );
+		placeCaret( field.childNodes[ 0 ], 5 );
+
+		expect( mockRenderCount.count ).toBe( before );
 	} );
 } );

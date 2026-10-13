@@ -15,6 +15,8 @@ import { __ } from '@wordpress/i18n';
 import { PersonalizationTagsModal } from './personalization-tags-modal';
 import {
 	getCursorPosition,
+	getElementRange,
+	renameTagComment,
 	replacePersonalizationTagsWithHTMLComments,
 } from './rich-text-utils';
 import { storeName } from '../../store';
@@ -43,7 +45,9 @@ export function RichTextWithButton( {
 	attributeValue,
 	updateProperty = () => {},
 }: Props ) {
-	const [ selectionRange, setSelectionRange ] = useState( null );
+	const selectionRange = useRef< { start: number; end: number } | null >(
+		null
+	);
 	const [ isModalOpened, setIsModalOpened ] = useState( false );
 	const list = useSelect(
 		( select ) => select( storeName ).getPersonalizationTagsList(),
@@ -63,7 +67,7 @@ export function RichTextWithButton( {
 			}
 			const position = getCursorPosition( richTextRef );
 			if ( position ) {
-				setSelectionRange( position );
+				selectionRange.current = position;
 			}
 		};
 		doc.addEventListener( 'selectionchange', onSelectionChange );
@@ -89,7 +93,7 @@ export function RichTextWithButton( {
 			// Update the corresponding property
 			updateProperty( attributeName, updatedValue );
 
-			setSelectionRange( { start: start + 1, end: start + 1 } );
+			selectionRange.current = { start: start + 1, end: start + 1 };
 		},
 		[ attributeName, updateProperty ]
 	);
@@ -134,7 +138,7 @@ export function RichTextWithButton( {
 					handleInsertPersonalizationTag(
 						value,
 						attributeValue ?? '',
-						selectionRange
+						selectionRange.current
 					);
 					setIsModalOpened( false );
 					recordEvent(
@@ -150,14 +154,30 @@ export function RichTextWithButton( {
 			/>
 			<PersonalizationTagsPopover
 				contentRef={ richTextRef }
-				onUpdate={ ( originalTag, updatedTag ) => {
+				onUpdate={ ( originalTag, updatedTag, anchor ) => {
 					const currentValue = attributeValue ?? '';
+					if ( anchor ) {
+						const updated = renameTagComment(
+							create( { html: currentValue } ),
+							getElementRange( richTextRef.current, anchor ),
+							updatedTag
+						);
+						if ( updated ) {
+							updateProperty(
+								attributeName,
+								toHTMLString( { value: updated } )
+							);
+						}
+						return;
+					}
 					// When we update the tag, we need to add brackets to the tag, because the popover removes them
-					const updatedContent = currentValue.replace(
-						`<!--[${ originalTag }]-->`,
-						`<!--[${ updatedTag }]-->`
+					updateProperty(
+						attributeName,
+						currentValue.replace(
+							`<!--[${ originalTag }]-->`,
+							`<!--[${ updatedTag }]-->`
+						)
 					);
-					updateProperty( attributeName, updatedContent );
 				} }
 			/>
 			<RichText

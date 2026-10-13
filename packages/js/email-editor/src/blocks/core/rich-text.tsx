@@ -19,6 +19,7 @@ import * as React from '@wordpress/element';
  */
 import {
 	getElementRange,
+	renameTagComment,
 	insertPersonalizationTag,
 	replacePersonalizationTagsWithHTMLComments,
 } from '../../components/personalization-tags/rich-text-utils';
@@ -50,8 +51,6 @@ function disableCertainRichTextFormats() {
 		unregisterFormatForEmail( formatName );
 	} );
 }
-
-const OBJECT_REPLACEMENT_CHARACTER = '\ufffc';
 
 // The bundled RichText types omit these properties.
 type LooseFormat = {
@@ -98,36 +97,16 @@ function PersonalizationTagsButton( { contentRef, value, onChange }: Props ) {
 				<PersonalizationTagsPopover
 					contentRef={ contentRef }
 					onUpdate={ ( _originalTag, updatedTag, anchor ) => {
-						const range =
+						const updated =
 							anchor &&
-							getElementRange( contentRef.current, anchor );
-						if (
-							! range ||
-							range.end - range.start !== 1 ||
-							value.text[ range.start ] !==
-								OBJECT_REPLACEMENT_CHARACTER ||
-							value.replacements[ range.start ]?.type !==
-								'#comment'
-						) {
-							return;
+							renameTagComment(
+								value,
+								getElementRange( contentRef.current, anchor ),
+								updatedTag
+							);
+						if ( updated ) {
+							onChange( updated );
 						}
-						const replacements = (
-							value.replacements as LooseFormat[]
-						 ).slice();
-						const replacement = replacements[ range.start ];
-						replacements[ range.start ] = {
-							...replacement,
-							attributes: {
-								...replacement.attributes,
-								// The popover removes the brackets, so add them back.
-								'data-rich-text-comment': `[${ updatedTag }]`,
-							},
-						};
-						onChange( {
-							...value,
-							replacements,
-							activeFormats: [],
-						} as RichTextValue );
 					} }
 				/>
 				<PersonalizationTagsLinkPopover

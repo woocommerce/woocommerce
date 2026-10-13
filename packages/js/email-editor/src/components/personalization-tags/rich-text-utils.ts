@@ -96,6 +96,42 @@ const getElementRange = (
 };
 
 /**
+ * Rename the tag comment at the given range of a RichText value.
+ * Returns null when the range is not a single tag comment.
+ *
+ * @param value      The RichText value.
+ * @param range      Offsets of the tag, from getElementRange.
+ * @param updatedTag The new tag, without brackets.
+ */
+const renameTagComment = (
+	value: RichTextValue,
+	range: { start: number; end: number } | null,
+	updatedTag: string
+): RichTextValue | null => {
+	const replacement = ( range && value.replacements[ range.start ] ) as
+		{ type: string; attributes?: Record< string, string > } | undefined;
+	if (
+		! range ||
+		! replacement ||
+		range.end - range.start !== 1 ||
+		value.text[ range.start ] !== '\ufffc' ||
+		replacement.type !== '#comment'
+	) {
+		return null;
+	}
+	const replacements = value.replacements.slice();
+	replacements[ range.start ] = {
+		...replacement,
+		attributes: {
+			...replacement.attributes,
+			// The popover removes the brackets, so add them back.
+			'data-rich-text-comment': `[${ updatedTag }]`,
+		},
+	} as ( typeof replacements )[ number ];
+	return { ...value, replacements, activeFormats: [] } as RichTextValue;
+};
+
+/**
  * Replace registered personalization tags with HTML comments in content.
  *
  * @param content string The content to replace the tags in.
@@ -183,5 +219,6 @@ export {
 	getCursorPosition,
 	getElementRange,
 	insertPersonalizationTag,
+	renameTagComment,
 	replacePersonalizationTagsWithHTMLComments,
 };
