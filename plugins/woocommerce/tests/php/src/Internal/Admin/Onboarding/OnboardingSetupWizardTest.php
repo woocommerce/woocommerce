@@ -326,9 +326,9 @@ class OnboardingSetupWizardTest extends WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'store location', $unflagged_page, 'Without the flag, the confirmation should not mention the store location.' );
 		$this->assertStringContainsString(
-			'<p>Your store location and currency were not saved. Set them in ' . $settings_link . ', since taxes and prices depend on them.</p>',
+			'until that is fixed.</p><p>Your store location and currency were not saved. Set them in ' . $settings_link . ', since taxes and prices depend on them.</p><p>If WooCommerce screens keep failing to load',
 			$flagged_page,
-			'With the flag, the confirmation should link to the general settings.'
+			'With the flag, the confirmation should link to the general settings in its own paragraph, between the summary and the next step.'
 		);
 	}
 
