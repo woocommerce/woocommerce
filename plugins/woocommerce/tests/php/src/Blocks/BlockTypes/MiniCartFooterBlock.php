@@ -37,9 +37,8 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 
 		$registry = \WP_Block_Type_Registry::get_instance();
 
-		$this->original_block_type = null;
-		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
-			$this->original_block_type = $registry->get_registered( 'woocommerce/mini-cart-footer-block' );
+		$this->original_block_type = $registry->get_registered( 'woocommerce/mini-cart-footer-block' );
+		if ( $this->original_block_type ) {
 			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
 		}
 
