@@ -109,18 +109,16 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		try {
-			$probe = clone $order;
-			$probe->set_status( $status );
-			if ( $status !== $probe->get_status() ) {
-				return new \WP_Error(
-					'woocommerce_order_status_invalid',
-					/* translators: %s: order status slug. */
-					sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
-					array( 'status' => 400 )
-				);
-			}
+		if ( ! $order->is_valid_status( $status ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_invalid',
+				/* translators: %s: order status slug. */
+				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
+				array( 'status' => 400 )
+			);
+		}
 
+		try {
 			$updated = $order->update_status(
 				$status,
 				isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
@@ -162,7 +160,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'status' => array(
 					'type'        => 'string',
-					'description' => __( 'Order status slug without the wc- prefix. Each order type uses its own statuses.', 'woocommerce' ),
+					'description' => __( 'Order status slug without the wc- prefix. Custom order types may add their own statuses.', 'woocommerce' ),
 					'enum'        => self::get_query_order_status_slugs(),
 				),
 				'note'   => array(

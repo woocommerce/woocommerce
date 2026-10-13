@@ -392,7 +392,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
 
-		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['anyOf'][0]['enum'] ?? array() );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
 	}
 
@@ -426,9 +426,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			array(
 				'capability_type'          => 'shop_order',
 				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
 			)
 		);
-		register_post_status( 'wc-test-active', array( 'label' => 'Active' ) );
+		register_post_status(
+			'wc-test-active',
+			array(
+				'label'               => 'Active',
+				'exclude_from_search' => false,
+			)
+		);
 
 		try {
 			$this->register_domain_abilities();
@@ -438,7 +445,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
 
 			$this->assertContains( 'shop_test_contract', $input['type']['enum'] );
-			$this->assertContains( 'test-active', $input['status']['enum'] );
+			$this->assertContains( 'test-active', $input['status']['anyOf'][0]['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
 
 			$query_args = $this->capture_order_query_args(
@@ -460,6 +467,80 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use the same default statuses as before for shop_order.
+	 */
+	public function test_orders_query_default_statuses_match_trunk_for_shop_order(): void {
+		$expected = array();
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			if ( 'wc-checkout-draft' !== $status ) {
+				$expected[] = $status;
+			}
+		}
+
+		$query_args = $this->capture_order_query_args( array() );
+
+		$this->assertSame( $expected, $query_args['status'] ?? null );
+	}
+
+	/**
+	 * @testdox Should not accept a status that is excluded from search.
+	 */
+	public function test_a_status_excluded_from_search_is_not_queryable(): void {
+		global $wc_order_types, $post_type_meta_caps;
+
+		$meta_caps = $post_type_meta_caps;
+		$this->unregister_domain_abilities();
+		wc_register_order_type(
+			'shop_test_contract',
+			array(
+				'capability_type'          => 'shop_order',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		register_post_status(
+			'wc-test-hidden',
+			array(
+				'label'               => 'Hidden',
+				'exclude_from_search' => true,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$input = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema()['properties'];
+
+			$this->assertNotContains( 'test-hidden', $input['status']['anyOf'][0]['enum'] );
+
+			$query_args = $this->capture_order_query_args( array( 'type' => 'shop_test_contract' ) );
+
+			$this->assertNotContains( 'test-hidden', $query_args['status'] ?? array() );
+			$this->assertNotContains( 'wc-test-hidden', $query_args['status'] ?? array() );
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-hidden'] );
+			unregister_post_type( 'shop_test_contract' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+			$this->register_domain_abilities();
+		}
+	}
+
+	/**
+	 * @testdox Should accept a list of statuses and reject a list with an unknown status.
+	 */
+	public function test_orders_query_accepts_a_list_of_statuses(): void {
+		$query_args = $this->capture_order_query_args( array( 'status' => array( 'on-hold', 'processing' ) ) );
+
+		$this->assertSame( array( 'wc-on-hold', 'wc-processing' ), $query_args['status'] ?? null );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'status' => array( 'processing', 'not-a-status' ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should refuse a status that another order type registers, and keep the order status.
 	 */
 	public function test_order_update_status_refuses_status_of_another_order_type(): void {
@@ -468,7 +549,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$status_before             = $order->get_status();
 
 		$this->unregister_domain_abilities();
-		register_post_status( 'wc-test-active', array( 'label' => 'Active' ) );
+		register_post_status(
+			'wc-test-active',
+			array(
+				'label'               => 'Active',
+				'exclude_from_search' => false,
+			)
+		);
 
 		try {
 			$this->register_domain_abilities();

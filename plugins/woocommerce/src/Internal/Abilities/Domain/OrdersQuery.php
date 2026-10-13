@@ -101,14 +101,21 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'type'     => self::get_order_type_from_input( $input ),
 		);
 
-		foreach ( array( 'status', 'billing_email', 'order' ) as $field ) {
+		foreach ( array( 'billing_email', 'order' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) && is_scalar( $input[ $field ] ) ) {
 				$args[ $field ] = wc_clean( (string) $input[ $field ] );
 			}
 		}
 
+		$status = $input['status'] ?? array();
+		if ( is_string( $status ) && '' !== $status ) {
+			$args['status'] = array( wc_clean( $status ) );
+		} elseif ( is_array( $status ) && ! empty( $status ) ) {
+			$args['status'] = array_map( 'wc_clean', array_filter( array_map( 'strval', $status ) ) );
+		}
+
 		if ( empty( $args['status'] ) ) {
-			$args['status'] = self::get_query_order_status_slugs();
+			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
 		}
 
 		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
@@ -216,9 +223,20 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'default'     => 'shop_order',
 				),
 				'status'             => array(
-					'type'        => 'string',
-					'description' => __( 'Filter by order status slug without the wc- prefix. Each order type uses its own statuses.', 'woocommerce' ),
-					'enum'        => self::get_query_order_status_slugs(),
+					'description' => __( 'Filter by one order status slug, or a list of slugs, without the wc- prefix. Custom order types may add their own statuses.', 'woocommerce' ),
+					'anyOf'       => array(
+						array(
+							'type' => 'string',
+							'enum' => self::get_query_order_status_slugs(),
+						),
+						array(
+							'type'  => 'array',
+							'items' => array(
+								'type' => 'string',
+								'enum' => self::get_query_order_status_slugs(),
+							),
+						),
+					),
 				),
 				'customer_id'        => array(
 					'type'        => 'integer',
