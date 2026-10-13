@@ -194,7 +194,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Every returned variant must be justified by a request identifier via the
 	 * required `inputs` metadata. A product-level identifier resolves to all of
 	 * the product's variants as `featured` — server-selected representatives —
-	 * while an identifier naming a variant directly (variant id or SKU) resolves
+	 * while an identifier naming a variant directly by id resolves
 	 * only to that variant, as `exact`. Variants no identifier resolved to are
 	 * dropped, so a request naming only variations gets only those variations
 	 * back; several identifiers resolving to one variant all appear in its
@@ -216,8 +216,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				continue;
 			}
 
-			// A product-level identifier (product id or product SKU) needs the
-			// full variant list.
+			// A product-level identifier needs the full variant list.
 			$names_product = true;
 		}
 
@@ -239,8 +238,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 					continue;
 				}
 
-				$names_variant = $input['id'] === (string) $variant['id']
-					|| ( isset( $variant['sku'] ) && $input['id'] === $variant['sku'] );
+				$names_variant = $input['id'] === (string) $variant['id'];
 
 				$correlations[] = array(
 					'id'    => $input['id'],

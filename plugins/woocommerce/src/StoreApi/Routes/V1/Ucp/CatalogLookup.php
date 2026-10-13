@@ -19,10 +19,10 @@ class CatalogLookup extends AbstractCatalogRoute {
 	/**
 	 * Maximum number of `ids` honoured per lookup request.
 	 *
-	 * Each id costs a product load (and a SKU lookup when non-numeric) plus a full
-	 * transform on an unauthenticated endpoint. Unlike category filters, an
-	 * over-long list is rejected rather than truncated: silently dropping requested
-	 * ids would report existing products as missing.
+	 * Each id costs a product load plus a full transform on an unauthenticated
+	 * endpoint. Unlike category filters, an over-long list is rejected rather than
+	 * truncated: silently dropping requested ids would report existing products as
+	 * missing.
 	 */
 	const MAX_LOOKUP_IDS = 50;
 
@@ -66,7 +66,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 			parent::get_request_args(),
 			array(
 				'ids' => array(
-					'description' => __( 'Product, variant or SKU identifiers to look up.', 'woocommerce' ),
+					'description' => __( 'Product or variant identifiers to look up.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array( 'type' => array( 'string', 'integer' ) ),
 				),

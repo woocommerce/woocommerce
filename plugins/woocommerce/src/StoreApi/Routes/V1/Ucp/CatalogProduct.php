@@ -63,7 +63,7 @@ class CatalogProduct extends AbstractCatalogRoute {
 			parent::get_request_args(),
 			array(
 				'id'       => array(
-					'description' => __( 'Product, variant or SKU identifier.', 'woocommerce' ),
+					'description' => __( 'Product or variant identifier.', 'woocommerce' ),
 					'type'        => array( 'string', 'integer' ),
 				),
 				'selected' => array(

@@ -151,7 +151,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Resolve a catalog product by variant/product ID or SKU.
+	 * Resolve a catalog product by product or variation ID.
 	 *
 	 * The lookup schema requires variant identifiers to be resolvable, so an
 	 * identifier naming a variation resolves to its parent product — the variation
@@ -159,12 +159,12 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * of its own. Callers are told which variation was named so they can correlate
 	 * it back to the request.
 	 *
-	 * @param string $identifier Product ID, variation ID or SKU.
+	 * @param string $identifier Product ID or variation ID.
 	 * @return array|null `{ product, variation_id }`, where `variation_id` is 0 when the identifier
 	 *                    named the product itself, or null when nothing catalog-visible matched.
 	 */
 	protected function resolve_product( string $identifier ) {
-		$product_id   = ctype_digit( $identifier ) ? (int) $identifier : (int) wc_get_product_id_by_sku( $identifier );
+		$product_id   = ctype_digit( $identifier ) ? (int) $identifier : 0;
 		$product      = $product_id > 0 ? wc_get_product( $product_id ) : null;
 		$variation_id = 0;
 

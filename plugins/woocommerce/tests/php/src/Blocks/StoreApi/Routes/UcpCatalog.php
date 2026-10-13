@@ -165,22 +165,18 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
-	 * Lookup resolves both product IDs and SKUs, and reports misses as messages.
+	 * Lookup resolves product IDs only; a SKU is reported as a miss like any other unknown id.
 	 */
-	public function test_lookup_resolves_ids_and_skus(): void {
+	public function test_lookup_resolves_ids_and_reports_misses(): void {
 		$newest   = end( self::$product_ids );
-		$response = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $newest, self::SKU, 'no-such-sku' ) ) );
+		$response = $this->post( '/catalog/lookup', array( 'ids' => array( (string) $newest, self::SKU ) ) );
 		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status() );
 
-		// Both identifiers name the same product, so it appears once carrying both.
 		$this->assertCount( 1, $data['products'] );
 		$this->assertSame( (string) $newest, $data['products'][0]['id'] );
-		$this->assertSame(
-			array( (string) $newest, self::SKU ),
-			wp_list_pluck( $data['products'][0]['variants'][0]['inputs'], 'id' )
-		);
+		$this->assertSame( array( (string) $newest ), wp_list_pluck( $data['products'][0]['variants'][0]['inputs'], 'id' ) );
 
 		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
 		$this->assertSame( '$.ids', $data['messages'][0]['path'] );
