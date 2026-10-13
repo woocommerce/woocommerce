@@ -1517,15 +1517,27 @@ final class ContractRepository {
 	 * right, so the claim is assigned first, while `next_payment_gmt` still holds the
 	 * stored value; `<=>` keeps the comparison NULL-safe.
 	 *
+	 * A hand-built statement skips the per-column length check `$wpdb->update()` makes, and
+	 * WordPress runs without strict SQL modes, so MySQL would silently shorten an over-long
+	 * string. Each string is checked against its column length first and refused like
+	 * {@see self::insert()} refuses it.
+	 *
 	 * @param int                            $id      Contract id.
 	 * @param array<string, int|string|null> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
 	 * @return int The number of rows the statement changed.
-	 * @throws \RuntimeException If the write fails.
+	 * @throws \RuntimeException If a value is longer than its column, or the write fails.
 	 */
 	private function write_contract_row( int $id, array $columns ): int {
 		global $wpdb;
 
+		$table                       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$columns['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
+
+		foreach ( $columns as $column => $value ) {
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+		}
 
 		$assignments = array();
 		$values      = array();
@@ -1550,7 +1562,6 @@ final class ContractRepository {
 		}
 
 		$values[] = $id;
-		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$set      = implode( ', ', $assignments );
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
@@ -1563,6 +1574,33 @@ final class ContractRepository {
 		}
 
 		return (int) $updated;
+	}
+
+	/**
+	 * Refuse a string longer than its column, measured the way `$wpdb` measures it
+	 * (characters for CHAR/VARCHAR, bytes for TEXT/BLOB types). A column whose length
+	 * `$wpdb` cannot read (non-MySQL, or a non-string type such as DATETIME) is not checked.
+	 *
+	 * @param string $table  Prefixed table name.
+	 * @param string $column Column name.
+	 * @param string $value  Value about to be written.
+	 * @throws \RuntimeException If the value is longer than the column.
+	 */
+	private static function assert_fits_column( string $table, string $column, string $value ): void {
+		global $wpdb;
+
+		$length = $wpdb->get_col_length( $table, $column );
+		if ( ! is_array( $length ) ) {
+			return;
+		}
+
+		$max  = Coercion::coerce_int( $length['length'] ?? 0 );
+		$size = 'byte' === ( $length['type'] ?? '' ) ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
+		if ( $max > 0 && $size > $max ) {
+			throw new \RuntimeException(
+				esc_html( sprintf( 'Failed to update contract: the value for "%s" is longer than the column allows (%d).', $column, $max ) )
+			);
+		}
 	}
 
 	/**

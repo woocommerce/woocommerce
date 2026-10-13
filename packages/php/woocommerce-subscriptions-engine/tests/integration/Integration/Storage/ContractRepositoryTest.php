@@ -17,6 +17,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
@@ -1408,6 +1409,69 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
 		$this->assertNotNull( $this->stored_claim( $id ) );
+	}
+
+	/**
+	 * @testdox An over-long payment method or title is refused by insert, update_fields and update alike, and nothing is stored.
+	 * @dataProvider provide_over_long_payment_instruments
+	 *
+	 * @param string $method Payment method id.
+	 * @param string $title  Payment method title.
+	 */
+	public function test_an_over_long_payment_instrument_is_refused_on_insert_and_update( string $method, string $title ): void {
+		$over_long = new PaymentInstrumentRef( 55, $method, $title );
+
+		$fresh = $this->make_contract();
+		$fresh->set_payment_instrument( $over_long );
+		try {
+			$this->sut->insert( $fresh );
+			$this->fail( 'Expected insert() to refuse the over-long value.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertNull( $fresh->get_id(), 'Nothing is inserted.' );
+		}
+
+		$id = $this->sut->insert( $this->make_contract() );
+		foreach ( array( 'update_fields', 'update' ) as $write ) {
+			$contract = $this->sut->find( $id );
+			$this->assertInstanceOf( Contract::class, $contract );
+			$contract->set_payment_instrument( $over_long );
+			$contract->set_status( ContractStatus::ON_HOLD );
+
+			try {
+				if ( 'update_fields' === $write ) {
+					$this->sut->update_fields( $contract, array( 'status', 'payment_method', 'payment_method_title' ) );
+				} else {
+					$this->sut->update( $contract );
+				}
+				$this->fail( "Expected {$write}() to refuse the over-long value." );
+			} catch ( \RuntimeException $e ) {
+				$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
+			}
+
+			$stored = $this->sut->find( $id );
+			$this->assertInstanceOf( Contract::class, $stored );
+			$this->assertSame( 'woocommerce_payments', $stored->get_payment_instrument()->get_gateway(), "{$write}() wrote nothing." );
+			$this->assertSame( 'Credit card', $stored->get_payment_instrument()->get_title() );
+			$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		}
+
+		$fits = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $fits );
+		$fits->set_payment_instrument( new PaymentInstrumentRef( 55, str_repeat( 'm', 100 ), str_repeat( 'é', 200 ) ) );
+		$this->sut->update_fields( $fits, array( 'payment_method', 'payment_method_title' ) );
+		$written = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $written );
+		$this->assertSame( str_repeat( 'é', 200 ), $written->get_payment_instrument()->get_title(), 'A value at the column length (in characters) is written.' );
+	}
+
+	/**
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provide_over_long_payment_instruments(): array {
+		return array(
+			'payment method over 100'       => array( str_repeat( 'm', 101 ), 'Credit card' ),
+			'payment method title over 200' => array( 'woocommerce_payments', str_repeat( 't', 201 ) ),
+		);
 	}
 
 	/**
