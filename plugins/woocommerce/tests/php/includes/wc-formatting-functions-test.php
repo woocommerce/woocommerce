@@ -69,6 +69,8 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		$pt = array(
 			array( '1000-205', '1000205', 'PT' ),
+			array( '1000', '1000', 'PT' ),
+			array( '', '', 'PT' ),
 		);
 
 		$dk = array(

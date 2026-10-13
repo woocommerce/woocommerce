@@ -1038,7 +1038,7 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = substr_replace( $postcode, '-', 3, 0 );
 			break;
 		case 'PT':
-			$postcode = substr_replace( $postcode, '-', 4, 0 );
+			$postcode = rtrim( substr_replace( $postcode, '-', 4, 0 ), '-' );
 			break;
 		case 'PR':
 		case 'US':

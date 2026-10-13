@@ -477,6 +477,41 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Shortcode checkout uses the previous country rules when the experimental rules are off.
+	 */
+	public function test_validate_posted_data_uses_previous_postcode_rules_when_experimental_rules_are_off() {
+		add_filter( 'woocommerce_experimental_extensive_postcode_rules', '__return_false' );
+
+		try {
+			$data   = array(
+				'ship_to_different_address' => false,
+				'billing_country'           => 'CO',
+				'billing_postcode'          => '91001',
+			);
+			$errors = new WP_Error();
+
+			$this->sut->validate_posted_data( $data, $errors );
+			$this->assertEmpty( $errors->get_error_message( 'billing_postcode_validation' ) );
+
+			$data['billing_country']  = 'US';
+			$data['billing_postcode'] = '9021';
+			$errors                   = new WP_Error();
+
+			$this->sut->validate_posted_data( $data, $errors );
+			$this->assertNotEmpty( $errors->get_error_message( 'billing_postcode_validation' ) );
+		} finally {
+			remove_filter( 'woocommerce_experimental_extensive_postcode_rules', '__return_false' );
+		}
+
+		$data['billing_country']  = 'CO';
+		$data['billing_postcode'] = '91001';
+		$errors                   = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+		$this->assertNotEmpty( $errors->get_error_message( 'billing_postcode_validation' ) );
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' still falls back to the customer country for billing and shipping fields.
 	 *
 	 * @testWith ["billing", "GB", true]

@@ -668,7 +668,8 @@ class WC_Frontend_Scripts {
 				);
 				break;
 			case 'wc-checkout':
-				$params = array(
+				$is_checkout_form = empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] );
+				$params           = array(
 					'ajax_url'                  => WC()->ajax_url(),
 					'wc_ajax_url'               => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ),
@@ -676,14 +677,16 @@ class WC_Frontend_Scripts {
 					'remove_coupon_nonce'       => wp_create_nonce( 'remove-coupon' ),
 					'option_guest_checkout'     => get_option( 'woocommerce_enable_guest_checkout' ),
 					'checkout_url'              => WC_AJAX::get_endpoint( 'checkout' ),
-					'is_checkout'               => is_checkout() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
+					'is_checkout'               => is_checkout() && $is_checkout_form ? 1 : 0,
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
-					'postcode_rules'            => PostcodeValidation::get_rules_for_countries( array_keys( array_merge( WC()->countries->get_allowed_countries(), WC()->countries->get_shipping_countries() ) ) ),
-					'i18n_postcode_error'       => esc_attr__( 'Please enter a valid postcode / ZIP.', 'woocommerce' ),
 				);
+				if ( $is_checkout_form && PostcodeValidation::use_expanded_shortcode_rules() ) {
+					$params['postcode_rules']      = PostcodeValidation::get_client_rules( array_keys( array_merge( WC()->countries->get_allowed_countries(), WC()->countries->get_shipping_countries() ) ) );
+					$params['i18n_postcode_error'] = esc_attr__( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
+				}
 				break;
 			case 'wc-address-autocomplete-common':
 				$providers = array();

@@ -446,6 +446,66 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 		jest.clearAllMocks();
 	} );
 
+	describe( 'Postcode validation', () => {
+		test.each( [
+			[ 'opted out', undefined, '9021', false ],
+			[ 'missing country rule', {}, '9021', false ],
+			[ 'empty rule', { US: '' }, '90210', false ],
+			[ 'null rule', { US: null }, '90210', false ],
+			[ 'false rule', { US: false }, '90210', false ],
+			[ 'non-string rule', { US: 12345 }, '90210', false ],
+			[ 'valid postcode', { US: '[0-9]{5}' }, '90210', false ],
+			[ 'invalid postcode', { US: '[0-9]{5}' }, '9021', true ],
+			[ 'required field when opted out', undefined, '', true ],
+		] )( '%s', ( name, rules, postcode, invalid ) => {
+			window.wc_checkout_params.postcode_rules = rules;
+			const $row = {
+				is: jest.fn( ( selector ) =>
+					[ '.validate-postcode', '.validate-required' ].includes( selector )
+				),
+				find: jest.fn( () => ( { remove: jest.fn() } ) ),
+				append: jest.fn(),
+				addClass: jest.fn().mockReturnThis(),
+				removeClass: jest.fn().mockReturnThis(),
+			};
+			const $field = {
+				closest: jest.fn( () => $row ),
+				val: jest.fn( () => postcode ),
+				attr: jest.fn( ( key, value ) => {
+					if ( value !== undefined ) {
+						return $field;
+					}
+					return key === 'id' ? 'billing_postcode' : 'text';
+				} ),
+				removeAttr: jest.fn().mockReturnThis(),
+			};
+			const originalJQuery = jQueryMock.getMockImplementation();
+			jQueryMock.mockImplementation( ( selector ) =>
+				selector === $field ? $field : originalJQuery( selector )
+			);
+			const [ , , validateField ] = $form.on.mock.calls.find(
+				( [ events ] ) => events === 'input validate change focusout'
+			);
+
+			validateField.call( $field, { type: 'validate' } );
+
+			if ( invalid ) {
+				expect( $field.attr ).toHaveBeenCalledWith( 'aria-invalid', 'true' );
+			} else {
+				expect( $field.attr ).not.toHaveBeenCalledWith( 'aria-invalid', 'true' );
+				expect( $row.addClass ).toHaveBeenCalledWith( 'woocommerce-validated' );
+			}
+		} );
+
+		test( 'does not revalidate postcodes on country changes when opted out', () => {
+			const $wrapper = { find: jest.fn() };
+
+			mockBody.trigger( 'country_to_state_changing', [ 'US', $wrapper ] );
+
+			expect( $wrapper.find ).not.toHaveBeenCalled();
+		} );
+	} );
+
 	describe( 'Terms checkbox validation', () => {
 		test( 'should return hasError: true when terms checkbox is not checked', async () => {
 			$termsCheckbox.setChecked( false );

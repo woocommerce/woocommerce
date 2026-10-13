@@ -5,53 +5,98 @@
  */
 const fs = require( 'fs' );
 const path = require( 'path' );
-const {
-	POSTCODE_REGEXES,
-} = require( 'postcode-validator/lib/cjs/postcode-regexes.js' );
-const { version } = require( 'postcode-validator/package.json' );
-const { devDependencies } = require( '../package.json' );
 
 const OUTPUT_PATH = path.resolve( __dirname, '../../../i18n/postcodes.php' );
+const DATA_URL = 'https://chromium-i18n.appspot.com/ssl-address/data';
 
 const COMPATIBILITY_OVERRIDES = {
 	// Argentina still uses the old four digit codes alongside the lettered ones.
 	AR: '[A-HJ-NP-Z]?[0-9]{4}([A-Z]{3})?',
-	AT: '[0-9]{4}',
 	BA: '[7-8][0-9]{4}',
 	DE: '(?:0[1-9]|[1-9][0-9])[0-9]{3}',
-	DK: '(?:[1-24-9][0-9]{3}|3[0-8][0-9]{2})',
-	ES: '[0-9]{5}',
+	DK: '[1-24-9][0-9]{3}|3[0-8][0-9]{2}',
 	GB: '(?:[abcdefghijklmnoprstuwyz][abcdefghklmnopqrstuvwxy]?[0-9]{1,2}[0-9][abdefghjlnpqrstuwxyz]{2}|[abcdefghijklmnoprstuwyz][0-9][abcdefghjkpstuw][0-9][abdefghjlnpqrstuwxyz]{2}|[abcdefghijklmnoprstuwyz][abcdefghklmnopqrstuvwxy][0-9][abehmnprvwxy][0-9][abdefghjlnpqrstuwxyz]{2}|gir0aa|bfpo[0-9]{1,4}|bfpoc\\/o[0-9]{1,3})',
+	// Google accepts any seven characters; keep the Eircode routing key check.
+	IE: '(?:[AC-FHKNPRTV-Y][0-9]{2}|D6W)[0-9AC-FHKNPRTV-Y]{4}',
 	IN: '[1-9][0-9]{5}',
 	KH: '[0-9]{6}',
 	LI: '94[8-9][0-9]',
-	LV: '[1-9][0-9]{3}',
 	MN: '[0-9]{5}(?:[0-9]{4})?',
 	NI: '[1-9][0-9]{4}',
-	NL: '[1-9][0-9]{3}(?!SA|SD|SS)[A-Z]{2}',
 	PR: '[0-9]{5}(?:[0-9]{4})?',
 	SI: '[1-9][0-9]{3}',
 };
 
-if ( devDependencies[ 'postcode-validator' ] !== version ) {
-	throw new Error(
-		`Installed postcode-validator ${ version } does not match the ${ devDependencies[ 'postcode-validator' ] } pin`
-	);
-}
+// Prefixes that older WooCommerce versions accepted and Google does not list.
+const LEGACY_PREFIXES = {
+	CZ: 'CZ',
+	DK: 'DK',
+	SK: 'SK',
+	SV: 'CP',
+};
+
+// Formats that older WooCommerce versions accepted and Google's rule rejects.
+// The generator adds each one to the country's rule, so both formats pass.
+const LEGACY_FORMATS = {
+	AD: 'AD[0-9]{3}',
+	EC: '[A-Z][0-9]{4}[A-Z]|[A-Z]{2}[0-9]{6}',
+	GU: '969[1-3][0-9](?:[0-9]{4})?',
+	IL: '[0-9]{6}',
+	LV: '[0-9]{4}',
+	MU: '[A-Z][0-9]{4}',
+	PY: '[0-9]{4}',
+	SO: '[0-9]{5}',
+	XK: '[0-9]{5}',
+};
 
 /**
- * Remove the ECMAScript anchors supplied by postcode-validator. Consumers add
- * native anchors so PHP can use \A/\z while JavaScript uses ^/$.
+ * Fetch Google's postcode rule, examples and postal prefix for each country.
  *
- * @param {RegExp} regex Upstream regular expression.
- * @return {string} Portable, unanchored expression source.
+ * @return {Promise<Object>} Country data keyed by country code.
  */
-function removeAnchors( regex ) {
-	if ( ! regex.source.startsWith( '^' ) || ! regex.source.endsWith( '$' ) ) {
-		throw new Error( `Expected an anchored expression: ${ regex.source }` );
+async function fetchGoogleData() {
+	const response = await fetch( DATA_URL );
+	if ( ! response.ok ) {
+		throw new Error( `Google address data returned ${ response.status }` );
+	}
+	const { countries } = await response.json();
+	const countryCodes = countries.split( '~' ).sort();
+	const data = {};
+
+	for ( let i = 0; i < countryCodes.length; i += 12 ) {
+		const batch = countryCodes.slice( i, i + 12 );
+		const entries = await Promise.all(
+			batch.map( async ( countryCode ) => {
+				const countryResponse = await fetch(
+					`${ DATA_URL }/${ countryCode }`
+				);
+				if ( ! countryResponse.ok ) {
+					throw new Error(
+						`Google address data for ${ countryCode } returned ${ countryResponse.status }`
+					);
+				}
+				return [ countryCode, await countryResponse.json() ];
+			} )
+		);
+
+		for ( const [ countryCode, { zip, zipex, postprefix } ] of entries ) {
+			if ( typeof zip === 'string' && zip ) {
+				data[ countryCode ] = {
+					zip,
+					examples: typeof zipex === 'string' ? zipex : '',
+					prefix: typeof postprefix === 'string' ? postprefix : '',
+				};
+			}
+		}
 	}
 
-	return regex.source.slice( 1, -1 );
+	if ( Object.keys( data ).length < 100 ) {
+		throw new Error(
+			'Google address data returned too few postcode rules'
+		);
+	}
+
+	return data;
 }
 
 /**
@@ -100,70 +145,137 @@ function toPhpString( value ) {
 	return `'${ value.replaceAll( '\\', '\\\\' ).replaceAll( "'", "\\'" ) }'`;
 }
 
-// INTL is the package's catch-all, not a country.
-const countryCodes = [ ...POSTCODE_REGEXES.keys() ]
-	.filter( ( key ) => key !== 'INTL' )
-	.sort();
+/**
+ * Read the rules from the current output file.
+ *
+ * @return {Object} Rules keyed by country code.
+ */
+function readCurrentRules() {
+	if ( ! fs.existsSync( OUTPUT_PATH ) ) {
+		return {};
+	}
 
-const rules = Object.fromEntries(
-	countryCodes.map( ( countryCode ) => {
-		const upstream = stripSeparators(
-			removeAnchors( POSTCODE_REGEXES.get( countryCode ) )
+	const rules = {};
+	const source = fs.readFileSync( OUTPUT_PATH, 'utf8' );
+	for ( const [ , countryCode, literal ] of source.matchAll(
+		/^\t'([A-Z]{2})' => '((?:[^'\\]|\\.)*)',$/gm
+	) ) {
+		rules[ countryCode ] = literal.replace( /\\(['\\])/g, '$1' );
+	}
+
+	return rules;
+}
+
+async function generate() {
+	const sourceData = await fetchGoogleData();
+
+	const unknownOverrides = [
+		...Object.keys( COMPATIBILITY_OVERRIDES ),
+		...Object.keys( LEGACY_PREFIXES ),
+		...Object.keys( LEGACY_FORMATS ),
+	].filter( ( countryCode ) => ! sourceData[ countryCode ] );
+	if ( unknownOverrides.length ) {
+		throw new Error(
+			`Google has no postcode rule to override for ${ unknownOverrides.join(
+				', '
+			) }`
 		);
+	}
+
+	const rules = {};
+	for ( const countryCode of Object.keys( sourceData ) ) {
+		const { zip, examples, prefix } = sourceData[ countryCode ];
+		const upstream = stripSeparators( zip );
 		const override = COMPATIBILITY_OVERRIDES[ countryCode ];
 
 		if ( override === upstream ) {
 			throw new Error(
-				`The ${ countryCode } override matches upstream; remove it`
+				`The ${ countryCode } override matches Google; remove it`
 			);
 		}
 
-		// Postal conventions let a postcode carry its ISO country code, and
-		// wc_format_postcode() strips the separator after it (MD-2001 -> MD2001).
-		const selectedRule = override ?? upstream;
-		const hasCountryPrefix = new RegExp(
-			`^(?:\\((?:\\?:)?)?${ countryCode }`
-		).test( selectedRule );
-		const pattern = hasCountryPrefix
-			? selectedRule
-			: `(?:${ countryCode })?${ selectedRule }`;
+		// Google lists the prefix that goes before the postcode on an envelope,
+		// such as "L-" for Luxembourg. Shoppers may type it, so accept it.
+		const postalPrefix = prefix.replace( /[\s-]/g, '' );
+		if ( ! /^[A-Z]*$/.test( postalPrefix ) ) {
+			throw new Error(
+				`Unsupported postal prefix ${ prefix } for ${ countryCode }`
+			);
+		}
+
+		const legacyPrefix = LEGACY_PREFIXES[ countryCode ];
+		if ( postalPrefix && legacyPrefix ) {
+			throw new Error(
+				`Google now lists a postal prefix for ${ countryCode }; remove the legacy prefix`
+			);
+		}
+
+		const legacyFormat = LEGACY_FORMATS[ countryCode ];
+		const rule = legacyFormat
+			? `${ override ?? upstream }|${ legacyFormat }`
+			: override ?? upstream;
+		const anyPrefix = postalPrefix || legacyPrefix;
+		const pattern = anyPrefix
+			? `(?:${ anyPrefix })?${
+					rule.includes( '|' ) ? `(?:${ rule })` : rule
+			  }`
+			: rule;
 
 		// PHP wraps the rule in ~ delimiters.
 		if ( pattern.includes( '~' ) ) {
 			throw new Error( `Unsupported delimiter in ${ countryCode } rule` );
 		}
 
-		// Catch malformed generated rules before they reach either consumer.
-		new RegExp( `^(?:${ pattern })$`, 'i' );
+		// Catch malformed rules and examples that fail after normalization.
+		const regex = new RegExp( `^(?:${ pattern })$`, 'i' );
+		for ( const example of examples.split( ',' ).filter( Boolean ) ) {
+			const normalized = example.replace( /[\s-]/g, '' );
+			if (
+				! regex.test( normalized ) ||
+				! regex.test( postalPrefix + normalized )
+			) {
+				throw new Error(
+					`Google example ${ example } does not match ${ countryCode } rule`
+				);
+			}
+		}
 
-		return [ countryCode, pattern ];
-	} )
-);
+		rules[ countryCode ] = pattern;
+	}
 
-const unknownOverrides = Object.keys( COMPATIBILITY_OVERRIDES ).filter(
-	( countryCode ) => ! rules[ countryCode ]
-);
-if ( unknownOverrides.length ) {
-	throw new Error(
-		`No postcode-validator rule to override for ${ unknownOverrides.join(
-			', '
-		) }`
-	);
-}
+	// Google's data has no versions, so list every change for the reviewer.
+	const currentRules = readCurrentRules();
+	for ( const countryCode of new Set( [
+		...Object.keys( currentRules ),
+		...Object.keys( rules ),
+	] ) ) {
+		if ( currentRules[ countryCode ] !== rules[ countryCode ] ) {
+			process.stdout.write(
+				`${ countryCode }: ${
+					currentRules[ countryCode ] ?? '(none)'
+				} -> ${ rules[ countryCode ] ?? '(none)' }\n`
+			);
+		}
+	}
 
-const phpEntries = countryCodes
-	.map(
-		( countryCode ) =>
-			`\t'${ countryCode }' => ${ toPhpString( rules[ countryCode ] ) },`
-	)
-	.join( '\n' );
+	const phpEntries = Object.keys( rules )
+		.map(
+			( countryCode ) =>
+				`\t'${ countryCode }' => ${ toPhpString(
+					rules[ countryCode ]
+				) },`
+		)
+		.join( '\n' );
 
-const php = `<?php
+	const php = `<?php
 /**
  * Postcode validation rules.
  *
- * Generated from the postcode-validator npm package, version ${ version }
- * (https://www.npmjs.com/package/postcode-validator).
+ * Google libaddressinput data, CC BY 4.0. WooCommerce removes separators,
+ * accepts Google's postal prefixes and keeps some older postcode formats.
+ * Source and license:
+ * ${ DATA_URL }
+ * https://creativecommons.org/licenses/by/4.0/
  *
  * Do not edit this file by hand. Run \`pnpm --filter @woocommerce/block-library generate:postcode-validation\`
  * to rebuild it. To change a rule on a store, use the \`woocommerce_postcode_validation_rules\` filter.
@@ -178,4 +290,10 @@ ${ phpEntries }
 );
 `;
 
-fs.writeFileSync( OUTPUT_PATH, php );
+	fs.writeFileSync( OUTPUT_PATH, php );
+}
+
+generate().catch( ( error ) => {
+	process.stderr.write( `${ error.stack || error }\n` );
+	process.exitCode = 1;
+} );

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\Utilities\PostcodeValidation;
 
 /**
  * Checkout class.
@@ -407,6 +408,10 @@ class Checkout extends AbstractBlock {
 
 		$country_data    = CartCheckoutUtils::get_country_data();
 		$address_formats = WC()->countries->get_address_formats();
+
+		foreach ( PostcodeValidation::get_client_rules( array_keys( $country_data ) ) as $country_code => $rule ) {
+			$country_data[ $country_code ]['postcode'] = $rule;
+		}
 
 		// Move the address format into the 'countryData' setting.
 		// We need to skip 'default' because that's not a valid country.

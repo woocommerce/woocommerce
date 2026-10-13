@@ -550,18 +550,15 @@ jQuery( function ( $ ) {
 				return false;
 			}
 		},
-		get_field_country: function ( $field ) {
-			var id = ( $field.attr( 'id' ) || '' ).replace( /postcode$/, '' );
-
-			return $( '#' + id + 'country' ).val() || '';
-		},
 		is_valid_postcode: function ( postcode, country ) {
 			var rules = wc_checkout_params.postcode_rules;
 
 			// A country with no rule is valid, matching the server.
 			if (
 				! rules ||
-				! Object.prototype.hasOwnProperty.call( rules, country )
+				! Object.prototype.hasOwnProperty.call( rules, country ) ||
+				typeof rules[ country ] !== 'string' ||
+				rules[ country ] === ''
 			) {
 				return true;
 			}
@@ -597,7 +594,7 @@ jQuery( function ( $ ) {
 				.attr( 'aria-describedby', descriptionId );
 		},
 		revalidate_postcode: function ( event, country, $wrapper ) {
-			if ( ! $wrapper ) {
+			if ( ! wc_checkout_params.postcode_rules || ! $wrapper ) {
 				return;
 			}
 
@@ -616,6 +613,10 @@ jQuery( function ( $ ) {
 				validate_email = $parent.is( '.validate-email' ),
 				validate_phone = $parent.is( '.validate-phone' ),
 				validate_postcode = $parent.is( '.validate-postcode' ),
+				invalid_classes =
+					'woocommerce-invalid woocommerce-invalid-required-field ' +
+					'woocommerce-invalid-email woocommerce-invalid-phone ' +
+					'woocommerce-invalid-postcode',
 				pattern = '',
 				event_type = e.type;
 
@@ -624,10 +625,7 @@ jQuery( function ( $ ) {
 					.removeAttr( 'aria-invalid' )
 					.removeAttr( 'aria-describedby' );
 				$parent.find( '.checkout-inline-error-message' ).remove();
-				$parent.removeClass(
-					// eslint-disable-next-line max-len
-					'woocommerce-invalid woocommerce-invalid-required-field woocommerce-invalid-email woocommerce-invalid-phone woocommerce-invalid-postcode woocommerce-validated'
-				);
+				$parent.removeClass( invalid_classes + ' woocommerce-validated' );
 			}
 
 			if (
@@ -657,7 +655,7 @@ jQuery( function ( $ ) {
 						pattern = new RegExp(
 							// eslint-disable-next-line max-len
 							/^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[0-9a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i
-						); // eslint-disable-line max-len
+						);
 
 						if ( ! pattern.test( $this.val() ) ) {
 							$this.attr( 'aria-invalid', 'true' );
@@ -665,7 +663,7 @@ jQuery( function ( $ ) {
 								.removeClass( 'woocommerce-validated' )
 								.addClass(
 									'woocommerce-invalid woocommerce-invalid-email'
-								); // eslint-disable-line max-len
+								);
 							validated = false;
 						}
 					}
@@ -692,10 +690,11 @@ jQuery( function ( $ ) {
 				}
 
 				if ( validate_postcode && $this.val() ) {
+					var countryFieldId = ( $this.attr( 'id' ) || '' ).replace( /postcode$/, '' );
 					if (
 						! wc_checkout_form.is_valid_postcode(
 							$this.val(),
-							wc_checkout_form.get_field_country( $this )
+							$( '#' + countryFieldId + 'country' ).val() || ''
 						)
 					) {
 						$parent
@@ -718,11 +717,7 @@ jQuery( function ( $ ) {
 						.removeAttr( 'aria-describedby' );
 					$parent.find( '.checkout-inline-error-message' ).remove();
 					$parent
-						.removeClass(
-							'woocommerce-invalid woocommerce-invalid-required-field ' +
-								'woocommerce-invalid-email woocommerce-invalid-phone ' +
-								'woocommerce-invalid-postcode'
-						)
+						.removeClass( invalid_classes )
 						.addClass( 'woocommerce-validated' );
 				}
 			}
@@ -965,7 +960,7 @@ jQuery( function ( $ ) {
 							'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview">' +
 								data.messages +
 								'</div>'
-						); // eslint-disable-line max-len
+						);
 					} else if ( data && 'failure' === data.result ) {
 						// A response that reports a notice without carrying one: render it as-is.
 						$form.prepend( data );
@@ -1185,7 +1180,7 @@ jQuery( function ( $ ) {
 									'<div class="woocommerce-error">' +
 										wc_checkout_params.i18n_checkout_error +
 										'</div>'
-								); // eslint-disable-line max-len
+								);
 							}
 						}
 					},
@@ -1229,7 +1224,7 @@ jQuery( function ( $ ) {
 				'<div class="woocommerce-notices-wrapper woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' +
 					error_message +
 					'</div>'
-			); // eslint-disable-line max-len
+			);
 			wc_checkout_form.$checkout_form
 				.removeClass( 'processing' )
 				.unblock();

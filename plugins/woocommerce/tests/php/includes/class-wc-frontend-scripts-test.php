@@ -140,6 +140,59 @@ class WC_Frontend_Scripts_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The experimental filter stops inline postcode checks in shortcode checkout.
+	 */
+	public function test_checkout_script_data_omits_postcode_rules_when_experimental_rules_are_off(): void {
+		$this->assertArrayHasKey( 'postcode_rules', $this->get_script_data( 'wc-checkout' ) );
+
+		add_filter( 'woocommerce_experimental_extensive_postcode_rules', '__return_false' );
+
+		try {
+			$data = $this->get_script_data( 'wc-checkout' );
+
+			$this->assertArrayNotHasKey( 'postcode_rules', $data );
+			$this->assertArrayNotHasKey( 'i18n_postcode_error', $data );
+		} finally {
+			remove_filter( 'woocommerce_experimental_extensive_postcode_rules', '__return_false' );
+		}
+	}
+
+	/**
+	 * The browser cannot run woocommerce_validate_postcode callbacks, so inline checks stop when one exists.
+	 */
+	public function test_checkout_script_data_has_no_postcode_rules_when_postcode_filter_exists(): void {
+		$this->assertNotEmpty( $this->get_script_data( 'wc-checkout' )['postcode_rules'] );
+
+		add_filter( 'woocommerce_validate_postcode', '__return_true' );
+
+		try {
+			$this->assertSame( array(), $this->get_script_data( 'wc-checkout' )['postcode_rules'] );
+		} finally {
+			remove_filter( 'woocommerce_validate_postcode', '__return_true' );
+		}
+	}
+
+	/**
+	 * Order-pay and order-received pages have no address form, so they get no postcode rules.
+	 *
+	 * @testWith ["order-pay"]
+	 *           ["order-received"]
+	 *
+	 * @param string $query_var Endpoint query var.
+	 */
+	public function test_checkout_script_data_omits_postcode_rules_on_order_endpoints( string $query_var ): void {
+		global $wp;
+
+		$wp->query_vars[ $query_var ] = '1';
+
+		try {
+			$this->assertArrayNotHasKey( 'postcode_rules', $this->get_script_data( 'wc-checkout' ) );
+		} finally {
+			unset( $wp->query_vars[ $query_var ] );
+		}
+	}
+
+	/**
 	 * Test that script data for wc-add-payment-method includes gateways_with_custom_place_order_button key.
 	 */
 	public function test_add_payment_method_script_data_includes_gateways_with_custom_place_order_button_key(): void {
