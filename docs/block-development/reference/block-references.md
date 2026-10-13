@@ -387,7 +387,7 @@ Enable customers to change the sorting order of the products.
 
 - **Name:** woocommerce/catalog-sorting
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity, typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity, spacing (margin, padding), typography (fontSize, textAlign)
 - **Attributes:** fontSize, useLabel
 
 ## Product Category Description - woocommerce/category-description
@@ -1402,7 +1402,7 @@ Display the number of products on the archive page or search result page.
 
 - **Name:** woocommerce/product-results-count
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, textAlign)
 
 ## Product Reviews - woocommerce/product-reviews
 
