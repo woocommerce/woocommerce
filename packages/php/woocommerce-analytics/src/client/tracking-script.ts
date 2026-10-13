@@ -1,15 +1,26 @@
+const HELD_ATTRIBUTE = 'data-wc-analytics-consent';
+
 /**
- * Load s.js, which sets the Tracks referrer cookies as soon as it runs and then sends what is queued in `window._wca`.
+ * Run s.js, which PHP printed as `type="text/plain"` because it sets referrer cookies as soon as it runs.
  *
- * @param url - The weekly s.js URL from the page config.
+ * Replacing the held tag keeps its attributes (and nonce), and makes a second call a no-op.
  */
-export function loadTrackingScript( url: string ): void {
-	if ( Array.from( document.scripts ).some( script => script.src === url ) ) {
+export function activateTrackingScript(): void {
+	const held = document.querySelector< HTMLScriptElement >(
+		`script[type="text/plain"][${ HELD_ATTRIBUTE }]`
+	);
+
+	// No src means a consent plugin took the tag over and will run it itself.
+	if ( ! held || ! held.getAttribute( 'src' ) ) {
 		return;
 	}
 
 	const script = document.createElement( 'script' );
-	script.src = url;
-	script.async = true;
-	document.head.appendChild( script );
+	for ( const { name, value } of Array.from( held.attributes ) ) {
+		if ( name !== 'type' && name !== HELD_ATTRIBUTE ) {
+			script.setAttribute( name, value );
+		}
+	}
+	script.nonce = held.nonce;
+	held.replaceWith( script );
 }

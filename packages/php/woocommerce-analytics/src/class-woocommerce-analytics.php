@@ -166,35 +166,22 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Get the URL of s.js, Store Analytics.
-	 *
-	 * @since 0.18.1
-	 *
-	 * @return string
+	 * Place script to call s.js, Store Analytics.
 	 */
-	public static function get_tracking_script_url() {
-		return sprintf(
+	public static function enqueue_tracking_script() {
+		$url = sprintf(
 			'https://stats.wp.com/s-%d.js',
 			gmdate( 'YW' )
 		);
-	}
 
-	/**
-	 * Place script to call s.js, Store Analytics.
-	 *
-	 * The script sets referrer cookies as soon as it runs, so with a consent plugin the client loads it after statistics consent.
-	 * The handle is still enqueued there, without a source, so its dependents print and dequeuing it still turns s.js off.
-	 */
-	public static function enqueue_tracking_script() {
+		// s.js sets referrer cookies as soon as it runs, so with a consent plugin it prints inert for the client to run after consent.
 		if ( Consent_Manager::is_consent_api_active() ) {
-			wp_register_script( 'woocommerce-analytics', false, array(), null, false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- No source to version.
-			wp_enqueue_script( 'woocommerce-analytics' );
-			return;
+			add_filter( 'wp_script_attributes', array( __CLASS__, 'hold_tracking_script_until_consent' ) );
 		}
 
 		wp_enqueue_script(
 			'woocommerce-analytics',
-			self::get_tracking_script_url(),
+			$url,
 			array(),
 			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- The version is set in the URL.
 			array(
@@ -202,6 +189,25 @@ class Woocommerce_Analytics {
 				'strategy'  => 'defer',
 			)
 		);
+	}
+
+	/**
+	 * Print the s.js tag as `type="text/plain"` so it does not run until the client activates it after statistics consent.
+	 *
+	 * @since 0.18.1
+	 *
+	 * @param mixed $attributes The script tag attributes.
+	 * @return mixed
+	 */
+	public static function hold_tracking_script_until_consent( $attributes ) {
+		if ( ! is_array( $attributes ) || ( $attributes['id'] ?? '' ) !== 'woocommerce-analytics-js' ) {
+			return $attributes;
+		}
+
+		$attributes['type']                      = 'text/plain';
+		$attributes['data-wc-analytics-consent'] = 'statistics';
+
+		return $attributes;
 	}
 
 	/**

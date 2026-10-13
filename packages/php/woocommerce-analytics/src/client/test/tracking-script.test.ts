@@ -6,30 +6,58 @@ import { afterEach, describe, expect, it } from '@jest/globals';
 /**
  * Internal dependencies
  */
-import { loadTrackingScript } from '../tracking-script';
+import { activateTrackingScript } from '../tracking-script';
 
 const TRACKING_SCRIPT_URL = 'https://stats.wp.com/s-202642.js';
 
-const getTrackingScripts = () =>
-	document.querySelectorAll< HTMLScriptElement >( `script[src="${ TRACKING_SCRIPT_URL }"]` );
+function printHeldTag( attributes: Record< string, string > = { src: TRACKING_SCRIPT_URL } ) {
+	const held = document.createElement( 'script' );
+	held.setAttribute( 'type', 'text/plain' );
+	held.setAttribute( 'id', 'woocommerce-analytics-js' );
+	held.setAttribute( 'data-wc-analytics-consent', 'statistics' );
+	for ( const [ name, value ] of Object.entries( attributes ) ) {
+		held.setAttribute( name, value );
+	}
+	document.head.appendChild( held );
+}
 
-describe( 'loadTrackingScript', () => {
+const getScripts = () => Array.from( document.querySelectorAll( 'script' ) );
+
+describe( 'activateTrackingScript', () => {
 	afterEach( () => {
 		document.head.replaceChildren();
 	} );
 
-	it( 'adds s.js as an async script', () => {
-		loadTrackingScript( TRACKING_SCRIPT_URL );
+	it( 'replaces the held s.js tag with one that runs, keeping its attributes', () => {
+		printHeldTag( { src: TRACKING_SCRIPT_URL, crossorigin: 'anonymous' } );
 
-		const scripts = getTrackingScripts();
+		activateTrackingScript();
+
+		const scripts = getScripts();
 		expect( scripts ).toHaveLength( 1 );
-		expect( scripts[ 0 ].async ).toBe( true );
+		expect( scripts[ 0 ].getAttribute( 'type' ) ).toBeNull();
+		expect( scripts[ 0 ].hasAttribute( 'data-wc-analytics-consent' ) ).toBe( false );
+		expect( scripts[ 0 ].src ).toBe( TRACKING_SCRIPT_URL );
+		expect( scripts[ 0 ].id ).toBe( 'woocommerce-analytics-js' );
+		expect( scripts[ 0 ].getAttribute( 'crossorigin' ) ).toBe( 'anonymous' );
 	} );
 
 	it( 'adds s.js only once', () => {
-		loadTrackingScript( TRACKING_SCRIPT_URL );
-		loadTrackingScript( TRACKING_SCRIPT_URL );
+		printHeldTag();
 
-		expect( getTrackingScripts() ).toHaveLength( 1 );
+		activateTrackingScript();
+		activateTrackingScript();
+
+		expect( getScripts() ).toHaveLength( 1 );
+	} );
+
+	it( 'leaves a held tag alone once a consent plugin has moved its src', () => {
+		printHeldTag( { 'data-cmplz-src': TRACKING_SCRIPT_URL } );
+
+		activateTrackingScript();
+
+		const scripts = getScripts();
+		expect( scripts ).toHaveLength( 1 );
+		expect( scripts[ 0 ].getAttribute( 'type' ) ).toBe( 'text/plain' );
 	} );
 } );

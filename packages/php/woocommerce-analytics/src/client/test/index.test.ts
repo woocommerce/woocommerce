@@ -15,15 +15,28 @@ jest.mock( '../init', () => {
 
 const addedListeners: Array< [ string, EventListenerOrEventListenerObject ] > = [];
 
+const getTrackingScripts = () =>
+	Array.from( document.querySelectorAll< HTMLScriptElement >( 'script' ) ).filter(
+		script => script.getAttribute( 'src' ) === TRACKING_SCRIPT_URL
+	);
+
 const isTrackingScriptLoaded = () =>
-	document.querySelector( `script[src="${ TRACKING_SCRIPT_URL }"]` ) !== null;
+	getTrackingScripts().some( script => script.getAttribute( 'type' ) !== 'text/plain' );
 
 /**
- * Run the entry point as a fresh page load, then let its dynamic import settle.
+ * Print the s.js tag the way PHP does, then run the entry point as a fresh page load and let its dynamic import settle.
  *
- * @param trackingScriptUrl - The URL PHP hands over when the client must load s.js itself.
+ * @param printedTag - `held` with a consent plugin, `regular` without one.
  */
-async function loadPage( trackingScriptUrl: string | null = TRACKING_SCRIPT_URL ) {
+async function loadPage( printedTag: 'held' | 'regular' = 'held' ) {
+	const tag = document.createElement( 'script' );
+	tag.setAttribute( 'src', TRACKING_SCRIPT_URL );
+	if ( printedTag === 'held' ) {
+		tag.setAttribute( 'type', 'text/plain' );
+		tag.setAttribute( 'data-wc-analytics-consent', 'statistics' );
+	}
+	document.head.appendChild( tag );
+
 	window.wcAnalytics = {
 		trackEndpoint: '',
 		eventQueue: [],
@@ -31,7 +44,6 @@ async function loadPage( trackingScriptUrl: string | null = TRACKING_SCRIPT_URL 
 		features: {},
 		pages: {},
 		assets_url: '',
-		trackingScriptUrl,
 	};
 	// A fresh registry also makes the dynamic import of `../init` run its mock factory again.
 	jest.resetModules();
@@ -107,10 +119,10 @@ describe( 'client entry point', () => {
 		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'leaves s.js to the page when PHP already enqueued it', async () => {
-		await loadPage( null );
+	it( 'leaves a regular s.js tag alone when there is no consent plugin', async () => {
+		await loadPage( 'regular' );
 
-		expect( isTrackingScriptLoaded() ).toBe( false );
+		expect( getTrackingScripts() ).toHaveLength( 1 );
 		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
 	} );
 

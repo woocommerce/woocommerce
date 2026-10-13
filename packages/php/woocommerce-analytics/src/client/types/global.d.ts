@@ -12,7 +12,6 @@ declare global {
 			pages: Record< string, boolean >;
 			breadcrumbs?: string[];
 			assets_url: string;
-			trackingScriptUrl?: string | null;
 		};
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;
