@@ -93,12 +93,12 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	public function test_names_are_stable_across_call_order_and_count(): void {
 		$this->go_to( $this->page_url( 0 ) );
 
-		$first_a  = ProductScopes::get_scope_name( 'form-a' );
-		$first_b  = ProductScopes::get_scope_name( 'form-b' );
-		$global   = ProductScopes::get_scope_name();
-		$every_a  = ProductScopes::get_scope_name( 'form-a', false );
-		$second_b = ProductScopes::get_scope_name( 'form-b' );
-		$second_a = ProductScopes::get_scope_name( 'form-a' );
+		$first_a   = ProductScopes::get_scope_name( 'form-a' );
+		$first_b   = ProductScopes::get_scope_name( 'form-b' );
+		$page_only = ProductScopes::get_scope_name();
+		$every_a   = ProductScopes::get_scope_name( 'form-a', false );
+		$second_b  = ProductScopes::get_scope_name( 'form-b' );
+		$second_a  = ProductScopes::get_scope_name( 'form-a' );
 		ProductScopes::get_scope_name( 'form-a' );
 		ProductScopes::get_scope_name( 'form-c', false );
 
@@ -107,11 +107,12 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->assertSame( $first_a, ProductScopes::get_scope_name( 'form-a' ), 'Two callers passing the same form name should get one name.' );
 		$this->assertNotSame( $first_a, $first_b, 'Different form names should get different names.' );
 		$this->assertNotSame( $first_a, $every_a, 'The per-page and every-page names of a form name should differ.' );
-		$this->assertSame( ProductScopes::GLOBAL_SCOPE_NAME, $global );
+		$this->assertSame( $page_only, ProductScopes::get_scope_name(), 'The page-only name should keep its name.' );
+		$this->assertNotSame( $first_a, $page_only, 'A form name should not get the page-only name.' );
 	}
 
 	/**
-	 * @testdox Should give a form name the same per-page name for every spelling of the same page: $label.
+	 * @testdox Should give the same per-page names, with and without a form name, for every spelling of the same page: $label.
 	 * @dataProvider same_page_spellings
 	 *
 	 * @param string $label Description of the spelling.
@@ -119,11 +120,11 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	 */
 	public function test_same_page_gives_same_name( string $label, string $query ): void {
 		$this->go_to( $this->page_url( 0 ) );
-		$plain = ProductScopes::get_scope_name( 'sticky-bar' );
+		$plain = $this->get_per_page_names();
 
 		$this->go_to( $this->page_url( 0, $query ) );
 
-		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ) );
+		$this->assertSame( $plain, $this->get_per_page_names() );
 	}
 
 	/**
@@ -143,7 +144,7 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give a form name the same per-page name when pretty permalinks write the pagination in the path: $label.
+	 * @testdox Should give the same per-page names when pretty permalinks write the pagination in the path: $label.
 	 * @dataProvider path_pagination_spellings
 	 *
 	 * @param string $label    Description of the spelling.
@@ -153,12 +154,12 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	public function test_path_pagination_gives_same_name( string $label, string $path, string $variable ): void {
 		$this->set_permalink_structure( '/%postname%/' );
 		$this->go_to( $this->page_url( 0 ) );
-		$plain = ProductScopes::get_scope_name( 'sticky-bar' );
+		$plain = $this->get_per_page_names();
 
 		$this->go_to( trailingslashit( $this->page_url( 0 ) ) . $path );
 
 		$this->assertSame( '2', $GLOBALS['wp']->query_vars[ $variable ] ?? null, 'The path should resolve into the pagination variable.' );
-		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ) );
+		$this->assertSame( $plain, $this->get_per_page_names() );
 	}
 
 	/**
@@ -174,12 +175,12 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give the same per-page name when a non-public key is added through the request filter.
+	 * @testdox Should give the same per-page names when a non-public key is added through the request filter.
 	 */
 	public function test_non_public_key_added_by_request_filter_does_not_change_the_page(): void {
 		$url = $this->page_url( 0 );
 		$this->go_to( $url );
-		$plain = ProductScopes::get_scope_name( 'sticky-bar' );
+		$plain = $this->get_per_page_names();
 
 		add_filter(
 			'request',
@@ -191,7 +192,7 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->go_to( $url );
 
 		$this->assertArrayHasKey( 'not_a_public_var', $GLOBALS['wp']->query_vars, 'The filter should have added the key.' );
-		$this->assertSame( $plain, ProductScopes::get_scope_name( 'sticky-bar' ) );
+		$this->assertSame( $plain, $this->get_per_page_names() );
 	}
 
 	/**
@@ -213,7 +214,7 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$callback = $set_in_order( array( 'year', 'monthnum' ) );
 		add_filter( 'request', $callback );
 		$this->go_to( $this->page_url( 0 ) );
-		$first = ProductScopes::get_scope_name( 'sticky-bar' );
+		$first = $this->get_per_page_names();
 		remove_filter( 'request', $callback );
 
 		$callback = $set_in_order( array( 'monthnum', 'year' ) );
@@ -221,23 +222,24 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->go_to( $this->page_url( 0 ) );
 
 		$this->assertSame( array( 'monthnum', 'year' ), array_slice( array_keys( $GLOBALS['wp']->query_vars ), -2 ), 'The variables should be in the other order.' );
-		$this->assertSame( $first, ProductScopes::get_scope_name( 'sticky-bar' ) );
+		$this->assertSame( $first, $this->get_per_page_names() );
 	}
 
 	/**
-	 * @testdox Should give a form name a different per-page name on a different public query variable value.
+	 * @testdox Should give different per-page names, with and without a form name, on a different public query variable value.
 	 */
 	public function test_public_query_variable_makes_a_different_page(): void {
 		$this->go_to( '/?s=shoes' );
-		$shoes = ProductScopes::get_scope_name( 'sticky-bar' );
+		$shoes = $this->get_per_page_names();
 		$this->go_to( '/?s=hats' );
-		$hats = ProductScopes::get_scope_name( 'sticky-bar' );
+		$hats = $this->get_per_page_names();
 
-		$this->assertNotSame( $shoes, $hats );
+		$this->assertNotSame( $shoes['form name'], $hats['form name'] );
+		$this->assertNotSame( $shoes['page only'], $hats['page only'] );
 	}
 
 	/**
-	 * @testdox Should give the same form name a different per-page name on a different page under $label permalinks.
+	 * @testdox Should give different per-page names, with and without a form name, on a different page under $label permalinks.
 	 * @testWith ["plain", ""]
 	 *           ["pretty", "/%postname%/"]
 	 *
@@ -248,13 +250,36 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->set_permalink_structure( $structure );
 
 		$this->go_to( $this->page_url( 0 ) );
-		$first = ProductScopes::get_scope_name( 'sticky-bar' );
+		$first = $this->get_per_page_names();
 		$this->go_to( $this->page_url( 1 ) );
-		$second = ProductScopes::get_scope_name( 'sticky-bar' );
+		$second = $this->get_per_page_names();
 		$this->go_to( $this->page_url( 0 ) );
 
-		$this->assertNotSame( $first, $second );
-		$this->assertSame( $first, ProductScopes::get_scope_name( 'sticky-bar' ), 'Returning to the first page should give its name back.' );
+		$this->assertNotSame( $first['form name'], $second['form name'] );
+		$this->assertNotSame( $first['page only'], $second['page only'] );
+		$this->assertSame( $first, $this->get_per_page_names(), 'Returning to the first page should give its names back.' );
+	}
+
+	/**
+	 * @testdox Should give the page's own name without a form name, different from the names of a form name and from the global name.
+	 */
+	public function test_no_form_name_with_the_page_gives_the_page_only_name(): void {
+		$this->go_to( $this->page_url( 0 ) );
+		$page_only = ProductScopes::get_scope_name();
+
+		$this->assertIsString( $page_only );
+		$this->assertSame( $page_only, ProductScopes::get_scope_name( null ) );
+		$this->assertSame( $page_only, ProductScopes::get_scope_name( null, true ) );
+		$this->assertSame( $page_only, ProductScopes::get_scope_name( '' ) );
+		$this->assertSame( $page_only, ProductScopes::get_scope_name( '   ' ) );
+
+		$names = array(
+			'page only'            => $page_only,
+			'form name with page'  => ProductScopes::get_scope_name( 'sticky-bar' ),
+			'form name every page' => ProductScopes::get_scope_name( 'sticky-bar', false ),
+			'global'               => ProductScopes::GLOBAL_SCOPE_NAME,
+		);
+		$this->assertSame( $names, array_unique( $names ), 'The four kinds of name should be pairwise different.' );
 	}
 
 	/**
@@ -274,14 +299,16 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should never give an every-page name that equals a per-page name: $form_name.
-	 * @testWith ["sticky-bar"]
-	 *           ["12"]
-	 *           ["abcdef12"]
+	 * @testdox Should never give an accepted form name, with the page or without it, a name equal to a per-page name: $label.
+	 * @testWith ["a form name", "sticky-bar"]
+	 *           ["a numeric form name", "12"]
+	 *           ["a hexadecimal form name", "abcdef12"]
+	 *           ["no form name", null]
 	 *
-	 * @param string $form_name An accepted form name.
+	 * @param string      $label     Description of the per-page name checked.
+	 * @param string|null $form_name An accepted form name, or null for the page-only name.
 	 */
-	public function test_every_page_name_never_equals_a_per_page_name( string $form_name ): void {
+	public function test_accepted_form_name_never_equals_a_per_page_name( string $label, ?string $form_name ): void {
 		$this->go_to( $this->page_url( 0 ) );
 		$per_page = ProductScopes::get_scope_name( $form_name );
 		$checked  = 0;
@@ -296,36 +323,35 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 
 			++$checked;
 			$this->assertNotSame( $per_page, ProductScopes::get_scope_name( $candidate, false ), "The every-page name of '$candidate' should differ from the per-page name." );
+			$this->assertNotSame( $per_page, ProductScopes::get_scope_name( $candidate ), "The per-page name of '$candidate' should differ from the per-page name." );
 		}
 
 		$this->assertGreaterThan( 0, $checked, 'The name should have an ending that is an accepted form name.' );
 	}
 
 	/**
-	 * @testdox Should return the global scope name without a form name, for either flag and on every page.
+	 * @testdox Should return the global scope name, `wc:`, without a form name and without the page, on every page.
 	 * @testWith [null]
 	 *           [""]
 	 *           ["   "]
 	 *
 	 * @param string|null $form_name A form name that counts as none.
 	 */
-	public function test_no_form_name_gives_the_global_scope_name( $form_name ): void {
+	public function test_no_form_name_without_the_page_gives_the_global_scope_name( $form_name ): void {
+		$this->assertSame( 'wc:', ProductScopes::GLOBAL_SCOPE_NAME );
+
 		foreach ( array( 0, 1 ) as $page ) {
 			$this->go_to( $this->page_url( $page ) );
 
-			$this->assertSame( '_default', ProductScopes::GLOBAL_SCOPE_NAME );
-			$this->assertSame( '_default', ProductScopes::get_scope_name( $form_name ), 'Default flag.' );
-			$this->assertSame( '_default', ProductScopes::get_scope_name( $form_name, true ), 'Per-page flag.' );
-			$this->assertSame( '_default', ProductScopes::get_scope_name( $form_name, false ), 'Every-page flag.' );
+			$this->assertSame( 'wc:', ProductScopes::get_scope_name( $form_name, false ) );
 		}
-		$this->assertSame( '_default', ProductScopes::get_scope_name(), 'No arguments.' );
 	}
 
 	/**
-	 * @testdox Should never give the global scope name to an accepted form name, `_default` included.
-	 * @testWith ["_default"]
-	 *           ["_DEFAULT"]
+	 * @testdox Should never give the global scope name to an accepted form name, with the page or without it: $form_name.
+	 * @testWith ["wc"]
 	 *           ["0"]
+	 *           ["sticky-bar"]
 	 *
 	 * @param string $form_name An accepted form name.
 	 */
@@ -368,8 +394,9 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->assertNull( $result );
 		$this->assertSame( 1, $this->incorrect_usage_count, 'Exactly one notice should be raised.' );
 
-		$this->assertNull( ProductScopes::get_scope_name( $form_name, false ), 'The rejection should not depend on the flag.' );
-		$this->assertSame( 2, $this->incorrect_usage_count, 'Each call should raise one notice.' );
+		$this->assertNull( ProductScopes::get_scope_name( $form_name, true ), 'A rejected form name should not give the page-only name.' );
+		$this->assertNull( ProductScopes::get_scope_name( $form_name, false ), 'A rejected form name should not give the global name.' );
+		$this->assertSame( 3, $this->incorrect_usage_count, 'Each call should raise one notice.' );
 		$this->assertNotNull( ProductScopes::get_scope_name( 'sticky-bar' ), 'Execution should continue with later calls.' );
 	}
 
@@ -397,9 +424,16 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	 */
 	public function test_names_survive_json_and_context_attributes(): void {
 		$this->go_to( $this->page_url( 0 ) );
-		$form_name = 'shop/sticky-bar_2';
 
-		foreach ( array( true, false ) as $per_page ) {
+		// Every kind of name: with a form name, the page-only name, and the global name.
+		$cases = array(
+			array( 'shop/sticky-bar_2', true ),
+			array( 'shop/sticky-bar_2', false ),
+			array( null, true ),
+			array( null, false ),
+		);
+
+		foreach ( $cases as list( $form_name, $per_page ) ) {
 			$name = ProductScopes::get_scope_name( $form_name, $per_page );
 
 			$this->assertIsString( $name );
@@ -425,12 +459,15 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 	public function test_contexts_without_a_parsed_request_return_names_and_raise_nothing( string $label, callable $arrange ): void {
 		$arrange( $this );
 
-		$per_page = ProductScopes::get_scope_name( 'sticky-bar' );
-		$every    = ProductScopes::get_scope_name( 'sticky-bar', false );
+		$per_page  = ProductScopes::get_scope_name( 'sticky-bar' );
+		$every     = ProductScopes::get_scope_name( 'sticky-bar', false );
+		$page_only = ProductScopes::get_scope_name();
 
 		$this->assertIsString( $per_page );
 		$this->assertIsString( $every );
+		$this->assertIsString( $page_only );
 		$this->assertNotSame( $per_page, $every );
+		$this->assertNotSame( ProductScopes::GLOBAL_SCOPE_NAME, $page_only );
 		$this->assertSame( 0, $this->incorrect_usage_count, 'No notice should be raised.' );
 	}
 
@@ -476,8 +513,23 @@ class ProductScopesTest extends WC_Unit_Test_Case {
 		$this->replace_wp_global( new WP() );
 
 		ProductScopes::get_scope_name( 'sticky-bar' );
+		ProductScopes::get_scope_name( 'sticky-bar', false );
+		ProductScopes::get_scope_name();
+		ProductScopes::get_scope_name( null, false );
 
 		$this->assertSame( array(), $this->get_params_cache(), 'The helper should not warm the cached map.' );
+	}
+
+	/**
+	 * The per-page names of the current request: of a form name, and of no form name.
+	 *
+	 * @return string[] The names, keyed by kind.
+	 */
+	private function get_per_page_names(): array {
+		return array(
+			'form name' => (string) ProductScopes::get_scope_name( 'sticky-bar' ),
+			'page only' => (string) ProductScopes::get_scope_name(),
+		);
 	}
 
 	/**

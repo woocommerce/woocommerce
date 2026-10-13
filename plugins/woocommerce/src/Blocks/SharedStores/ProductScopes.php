@@ -17,19 +17,19 @@ use Automattic\WooCommerce\Internal\ProductFilters\Params;
 final class ProductScopes {
 
 	/**
-	 * The scope name the client store uses for a scope that declares no `scopeName`.
+	 * The name of the global scope: the name prefix alone, which is what a call with neither a
+	 * form name nor the page composes. The client store uses it for a scope that declares no `scopeName`.
 	 */
-	public const GLOBAL_SCOPE_NAME = '_default';
+	public const GLOBAL_SCOPE_NAME = self::NAME_PREFIX;
 
 	/**
-	 * Start of every name built from a form name. Its colon is outside the form-name alphabet,
-	 * so a built name never equals `GLOBAL_SCOPE_NAME`.
+	 * Start of every name. Its colon is outside the form-name alphabet.
 	 */
 	private const NAME_PREFIX = 'wc:';
 
 	/**
-	 * Separates the form name from the page hash. Its character is outside the form-name
-	 * alphabet, so a per-page name never equals an every-page name.
+	 * Separates the form name, which may be empty, from the page hash. Its character is outside the
+	 * form-name alphabet and the prefix, so a per-page name never equals an every-page name.
 	 */
 	private const PAGE_SEPARATOR = '@';
 
@@ -49,9 +49,9 @@ final class ProductScopes {
 	 *                                   with surrounding spaces ignored. `null`, an empty string and
 	 *                                   spaces only mean no form name. Any other type or character is rejected.
 	 * @param bool            $per_page  True: a name for this page only. False: a name for every page.
-	 *                                   Ignored without a form name.
-	 * @return string|null `GLOBAL_SCOPE_NAME` without a form name, otherwise a name built from the
-	 *                     form name, or null when the form name is rejected, which callers must not declare.
+	 * @return string|null The prefix, then the form name if any, then the separator and the page hash when
+	 *                     `$per_page` is true. With neither a form name nor the page that is `GLOBAL_SCOPE_NAME`.
+	 *                     Null when the form name is rejected, which callers must not declare.
 	 */
 	public static function get_scope_name( $form_name = null, bool $per_page = true ): ?string {
 		if ( is_int( $form_name ) ) {
@@ -59,7 +59,7 @@ final class ProductScopes {
 		}
 
 		if ( null === $form_name ) {
-			return self::GLOBAL_SCOPE_NAME;
+			$form_name = '';
 		}
 
 		if ( ! is_string( $form_name ) ) {
@@ -68,11 +68,7 @@ final class ProductScopes {
 
 		$form_name = trim( $form_name, ' ' );
 
-		if ( '' === $form_name ) {
-			return self::GLOBAL_SCOPE_NAME;
-		}
-
-		if ( 1 !== preg_match( '/\A[A-Za-z0-9_\/-]+\z/', $form_name ) ) {
+		if ( '' !== $form_name && 1 !== preg_match( '/\A[A-Za-z0-9_\/-]+\z/', $form_name ) ) {
 			return self::reject_form_name();
 		}
 
