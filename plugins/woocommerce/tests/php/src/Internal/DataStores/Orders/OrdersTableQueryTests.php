@@ -864,6 +864,27 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders matches a known status surrounded by whitespace.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_trims_status_values( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( ' ' . OrderStatus::COMPLETED . ' ' ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Whitespace around a known status should be ignored on both order storages.' );
+	}
+
+	/**
 	 * @testdox wc_get_orders ignores non-string values in the status array instead of throwing a TypeError.
 	 *
 	 * @dataProvider order_storage_provider
@@ -934,10 +955,12 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function empty_like_status_provider(): array {
 		return array(
-			'HPOS, zero'        => array( true, array( '0' ) ),
-			'HPOS, empty'       => array( true, array( '' ) ),
-			'legacy CPT, zero'  => array( false, array( '0' ) ),
-			'legacy CPT, empty' => array( false, array( '' ) ),
+			'HPOS, zero'             => array( true, array( '0' ) ),
+			'HPOS, empty'            => array( true, array( '' ) ),
+			'HPOS, whitespace'       => array( true, array( '  ' ) ),
+			'legacy CPT, zero'       => array( false, array( '0' ) ),
+			'legacy CPT, empty'      => array( false, array( '' ) ),
+			'legacy CPT, whitespace' => array( false, array( '  ' ) ),
 		);
 	}
 

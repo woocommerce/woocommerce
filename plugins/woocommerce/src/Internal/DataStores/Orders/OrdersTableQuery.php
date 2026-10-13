@@ -693,7 +693,12 @@ class OrdersTableQuery {
 		$requested_statuses = $this->args['status'];
 
 		// Only strings are accepted as statuses.
-		$this->args['status'] = array_map( 'strtolower', array_filter( $requested_statuses, 'is_string' ) );
+		$this->args['status'] = array_map(
+			static function ( string $status ): string {
+				return strtolower( trim( $status ) );
+			},
+			array_filter( $requested_statuses, 'is_string' )
+		);
 
 		if ( empty( $requested_statuses ) || in_array( 'any', $this->args['status'], true ) ) {
 			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses(),
