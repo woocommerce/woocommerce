@@ -720,6 +720,8 @@ class DataSynchronizerTests extends \HposTestCase {
 
 	/**
 	 * @testDox When HPOS is enabled, the custom orders table is created.
+	 *
+	 * @ddlInTransaction DataSynchronizer drops and creates the HPOS tables under test.
 	 */
 	public function test_tables_are_created_when_hpos_enabled() {
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
@@ -759,6 +761,8 @@ class DataSynchronizerTests extends \HposTestCase {
 	 *
 	 * @param bool  $auth_table_change_allowed_with_sync_pending True if changing the authoritative data source for orders while synchronization is pending is allowed, false otherwise.
 	 * @param array $expected_setting_disabled_status Expected value for the 'disabled' key in the setting configuration array.
+	 *
+	 * @ddlInTransaction DataSynchronizer drops and creates the HPOS tables under test.
 	 */
 	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders( $auth_table_change_allowed_with_sync_pending, $expected_setting_disabled_status ) {
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', fn() => $auth_table_change_allowed_with_sync_pending );

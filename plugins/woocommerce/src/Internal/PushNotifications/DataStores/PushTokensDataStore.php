@@ -472,6 +472,36 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Returns the IDs of the push tokens a user owns, most recently registered
+	 * first.
+	 *
+	 * Capped, because the step log read tests every line against every ID
+	 * returned. Re-registering a device updates its post, so ordering by
+	 * modification time keeps the devices still in use and drops the ones
+	 * abandoned longest ago.
+	 *
+	 * @since 11.3.0
+	 * @param int $user_id The user.
+	 * @param int $limit   The most IDs to return.
+	 * @return int[]
+	 */
+	public function get_token_ids_for_user( int $user_id, int $limit = 100 ): array {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' AND post_author = %d ORDER BY post_modified DESC LIMIT %d",
+					PushToken::POST_TYPE,
+					$user_id,
+					$limit
+				)
+			)
+		);
+	}
+
+	/**
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a

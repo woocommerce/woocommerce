@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show "No limit" instead of a low memory warning on the Status page when PHP has no memory limit.

@@ -28,7 +28,7 @@
 		"watch": "pnpm build --watch"
 	},
 	"dependencies": {
-		"@automattic/tracks-shared-utils": "^1.0.0",
+		"@automattic/tracks-shared-utils": "^1.1.0",
 		"debug": "4.4.3"
 	},
 	"devDependencies": {

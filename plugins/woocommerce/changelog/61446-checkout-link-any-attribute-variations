@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send shoppers to the product page to choose options when a checkout link includes a variation with an "Any" attribute.
