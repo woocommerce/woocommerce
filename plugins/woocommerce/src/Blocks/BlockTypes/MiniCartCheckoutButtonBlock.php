@@ -21,11 +21,11 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$default_go_to_checkout_text = __( 'Go to checkout', 'woocommerce' );
-		$go_to_checkout_text         = $attributes['checkoutButtonLabel'] ? $attributes['checkoutButtonLabel'] : $default_go_to_checkout_text;
-		$checkout_page_id            = wc_get_page_id( 'checkout' );
-		$checkout_page_url           = get_permalink( $checkout_page_id );
-		$wrapper_attributes          = get_block_wrapper_attributes(
+		$default_checkout_text = __( 'Checkout', 'woocommerce' );
+		$checkout_text         = $attributes['checkoutButtonLabel'] ? $attributes['checkoutButtonLabel'] : $default_checkout_text;
+		$checkout_page_id      = wc_get_page_id( 'checkout' );
+		$checkout_page_url     = get_permalink( $checkout_page_id );
+		$wrapper_attributes    = get_block_wrapper_attributes(
 			array(
 				'href'  => esc_url( $checkout_page_url ),
 				'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-checkout',
@@ -36,7 +36,7 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 		?>
 		<a <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-button__text">
-				<?php echo esc_html( $go_to_checkout_text ); ?>
+				<?php echo esc_html( $checkout_text ); ?>
 			</div>
 		</a>
 		<?php
