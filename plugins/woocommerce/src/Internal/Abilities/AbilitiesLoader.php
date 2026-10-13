@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
@@ -79,6 +80,7 @@ class AbilitiesLoader {
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		AbilitiesCategories::init();
+		add_action( 'woocommerce_ability_resources_init', array( __CLASS__, 'register_core_resources' ) );
 		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
@@ -88,7 +90,20 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Let extensions register their ability fields, before the abilities build their schemas.
+	 * Register the resources that Core's abilities format, so extensions can register fields on them.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function register_core_resources(): void {
+		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
+			AbilityExtensions::register_resource( $resource_name );
+		}
+	}
+
+	/**
+	 * Let extensions register their resources, then their ability fields, before the abilities build their schemas.
 	 *
 	 * @internal
 	 *
@@ -98,6 +113,16 @@ class AbilitiesLoader {
 		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityContracts::is_enabled() ) {
 			return;
 		}
+
+		/**
+		 * Fires when extensions can register their resources with AbilityExtensions.
+		 *
+		 * Fires one time, before `woocommerce_ability_extensions_init`, only when the
+		 * experimental `ability_contracts` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_ability_resources_init' );
 
 		/**
 		 * Fires when extensions can register their fields with AbilityExtensions.

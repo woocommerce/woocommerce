@@ -263,11 +263,13 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let an extension register a resource and fields on it.
+	 * @testdox Should let an extension register fields on a resource that another extension registers, whatever the hook priorities.
 	 */
 	public function test_register_resource_lets_an_extension_register_fields_on_its_own_resource(): void {
-		$register = static function () {
+		$register_resource = static function () {
 			AbilityExtensions::register_resource( 'ticket' );
+		};
+		$register_field    = static function () {
 			AbilityExtensions::register_field(
 				array(
 					'resource'     => 'ticket',
@@ -278,15 +280,31 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				)
 			);
 		};
-		add_action( 'woocommerce_ability_extensions_init', $register );
+		add_action( 'woocommerce_ability_resources_init', $register_resource, 99 );
+		add_action( 'woocommerce_ability_extensions_init', $register_field, 1 );
 		$this->get_output_schema( 'woocommerce/products-query' );
-		remove_action( 'woocommerce_ability_extensions_init', $register );
+		remove_action( 'woocommerce_ability_resources_init', $register_resource, 99 );
+		remove_action( 'woocommerce_ability_extensions_init', $register_field, 1 );
 
 		$output = AbilityExtensions::add_fields_to_object( array(), 'ticket', new \stdClass() );
 		$schema = AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
 
 		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $output['extensions'] );
 		$this->assertSame( array( 'type' => 'string' ), $schema['properties']['extensions']['properties']['test-ext']['properties']['code'] );
+	}
+
+	/**
+	 * @testdox Should refuse a resource that is registered after the resources action.
+	 */
+	public function test_a_resource_registered_after_the_resources_action_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_resource' );
+		$this->get_output_schema( 'woocommerce/products-query' );
+
+		AbilityExtensions::register_resource( 'late_resource' );
+
+		$resources = new \ReflectionProperty( AbilityExtensions::class, 'resources' );
+		$resources->setAccessible( true );
+		$this->assertSame( array( 'product', 'order', 'order_item' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**
@@ -308,6 +326,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			)
 		)['orders'];
 
+		$this->assertSame( 0, did_action( 'woocommerce_ability_resources_init' ) );
 		$this->assertSame( 0, did_action( 'woocommerce_ability_extensions_init' ) );
 		$this->assertArrayNotHasKey( 'extensions', $this->get_output_schema( 'woocommerce/products-query' )['properties']['products']['items']['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $products[0] );
@@ -372,6 +391,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			'schema'       => array( 'type' => 'string' ),
 			'get_callback' => static fn() => 'second',
 		);
+		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
 
 		AbilityExtensions::register_field( $valid );
@@ -401,6 +421,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
+		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
 		$fields = array(
 			'broken' => array(
@@ -550,7 +571,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 
 		$reflection = new \ReflectionProperty( AbilityExtensions::class, 'resources' );
 		$reflection->setAccessible( true );
-		$reflection->setValue( null, array_fill_keys( array( 'product', 'order', 'order_item' ), true ) );
+		$reflection->setValue( null, array() );
 
 		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
 			if ( class_exists( $registry ) ) {
@@ -559,6 +580,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				$instance->setValue( null, null );
 			}
 		}
-		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_ability_extensions_init'] );
+		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_ability_resources_init'], $wp_actions['woocommerce_ability_extensions_init'] );
 	}
 }
