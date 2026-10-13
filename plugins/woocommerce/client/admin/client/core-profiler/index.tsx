@@ -1536,6 +1536,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						PLUGINS_PAGE_COMPLETED_WITHOUT_SELECTING_PLUGINS: {
 							target: 'postPluginInstallation.noPluginsSelected',
 							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									params: { step: 'plugins' },
+								},
 								spawnChild( 'updateProfilerCompletedSteps', {
 									input: { step: 'plugins' },
 								} ),
