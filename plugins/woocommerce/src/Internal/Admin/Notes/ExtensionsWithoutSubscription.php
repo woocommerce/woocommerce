@@ -111,6 +111,18 @@ class ExtensionsWithoutSubscription {
 	}
 
 	/**
+	 * Whether the note should exist.
+	 *
+	 * The note follows the installed extensions through refresh_note(), so it's always
+	 * applicable once added.
+	 *
+	 * @return bool
+	 */
+	public static function is_applicable(): bool {
+		return true;
+	}
+
+	/**
 	 * Whether this page load may fetch the subscription list from WooCommerce.com.
 	 *
 	 * The fetch blocks the page, so a connected store without a cached list gets one a day, or one

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Notes\ExtensionsWithoutSubscription;
 use WC_Helper;
 use WC_Helper_Options;
@@ -47,6 +48,7 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 			// A request global and a static cache in WC_Helper, which no base class resets.
 			unset( $_GET['page'], $_GET['wc-helper-status'] );
 			WC_Helper::flush_local_woo_products_cache();
+			$this->reset_current_page();
 			if ( $this->http_filter ) {
 				remove_filter( 'pre_http_request', $this->http_filter );
 			}
@@ -249,6 +251,7 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 		$this->mock_active_woo_plugins( array( 'Product Add-Ons' ) );
 		unset( $_GET['page'] );
 		set_current_screen( 'dashboard' );
+		$this->reset_current_page();
 
 		$this->sut->refresh_note();
 
@@ -318,6 +321,20 @@ class ExtensionsWithoutSubscriptionTest extends WC_Unit_Test_Case {
 		add_filter( 'pre_http_request', $this->http_filter, 10, 3 );
 
 		return $requests;
+	}
+
+	/**
+	 * Makes the page controller resolve the current page again from the current screen.
+	 *
+	 * The PageController singleton caches the page it first resolved for the whole process, so
+	 * whichever test resolved it first would otherwise decide the answer for every later test.
+	 *
+	 * @return void
+	 */
+	private function reset_current_page(): void {
+		$current_page = new \ReflectionProperty( PageController::class, 'current_page' );
+		$current_page->setAccessible( true );
+		$current_page->setValue( PageController::get_instance(), null );
 	}
 
 	/**
