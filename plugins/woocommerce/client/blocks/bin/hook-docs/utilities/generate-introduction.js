@@ -56,7 +56,7 @@ const generateIntroduction = ( hook ) => {
 							? deprecated.content
 							: 'This hook is deprecated and will be removed'
 					}`,
-			  }
+				}
 			: null,
 		internal
 			? {
@@ -65,7 +65,7 @@ const generateIntroduction = ( hook ) => {
 							? internal.content
 							: 'This hook is for internal use only'
 					}`,
-			  }
+				}
 			: null,
 	];
 };

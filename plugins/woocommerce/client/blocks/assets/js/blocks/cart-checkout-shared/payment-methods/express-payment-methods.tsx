@@ -42,7 +42,7 @@ const ExpressPaymentMethods = () => {
 		? {
 				height: buttonHeight,
 				borderRadius: buttonBorderRadius,
-		  }
+			}
 		: undefined;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(

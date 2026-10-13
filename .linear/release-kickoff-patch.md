@@ -12,11 +12,11 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 1. Go/no-go
 
-For scheduled stable releases, hold this 24-48 hours before the release date with the Product DRIs named on the parent tracking issue - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. Bring in QualityOps and the Atomic contact when staging or monitoring left open questions. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details.
+For scheduled stable releases, hold this after the RC has finished its staging monitoring and before starting the build below, with the Product DRIs named on the parent tracking issue - ping `@woo-core-release` in Slack if you need to reach them or aren't sure who's available. Bring in QualityOps and the Atomic contact when staging or monitoring left open questions. See the [readiness guide](https://developer.woocommerce.com/docs/contribution/releases/readiness/) for details.
 
-- [ ] The readiness review is complete and its verdicts still hold.
-- [ ] No new blocking findings since the readiness review (check `#woo-core-releases` threads and the [newest issues]({repository_url}/issues?q=is%3Aissue%20state%3Aopen%20sort%3Acreated-desc)).
-- [ ] Decision recorded as a comment on this issue - **go**, **no-go**, or **go with conditions** - with the names behind it.
+- [ ] **Readiness still holds.** For a scheduled release, re-read the readiness comments on the RC sub-issue and record what changed since: new findings with their verdicts, and fixes merged into the release branch after the RC, noting whether each ran on staging. For a point release, run the readiness criteria as described below.
+- [ ] **RC evidence** (scheduled releases). Open the QIT sweep for the RC and the staging thread from step 5 of the RC sub-issue. Record both links and a verdict for anything new.
+- [ ] **Decision.** Comment on this GitHub issue: **go**, **no-go**, or **go with conditions** (list them), with the names behind it. A new comment thread started on the Linear mirror does not sync back here.
 
 For scheduled releases, the readiness review is the one in the RC sub-issue. Point releases have no RC: run the [readiness criteria](https://developer.woocommerce.com/docs/contribution/releases/readiness/) over the changes being shipped as part of this go/no-go, with verdicts per the [release decision matrix](https://developer.woocommerce.com/docs/contribution/releases/decision-matrix/). For unscheduled point releases shipping an urgent fix, a quick go/no-go with `@woo-core-release` in `#woo-core-releases` is enough - record the outcome here all the same.
 

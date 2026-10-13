@@ -130,6 +130,43 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Get the tax location of the parent order, since refunds have no address of their own.
+	 * In case of no parent order taxable location, return the store base location.
+	 *
+	 * @since 11.3.0
+	 * @param array $args Override the location.
+	 * @return array
+	 */
+	protected function get_tax_location( $args = array() ) {
+		$parent_order = wc_get_order( $this->get_parent_id() );
+
+		if ( $parent_order ) {
+			return $parent_order->get_taxable_location( $args );
+		}
+
+		return wp_parse_args(
+			$args,
+			array(
+				'country'  => WC()->countries->get_base_country(),
+				'state'    => WC()->countries->get_base_state(),
+				'postcode' => WC()->countries->get_base_postcode(),
+				'city'     => WC()->countries->get_base_city(),
+			)
+		);
+	}
+
+	/**
+	 * Coupons cannot be applied to refunds, so a refund never records coupon usage.
+	 *
+	 * @since 11.3.0
+	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
+	 * @return WP_Error
+	 */
+	public function apply_coupon( $raw_coupon ) {
+		return new WP_Error( 'invalid_coupon', __( 'Coupons cannot be applied to refunds.', 'woocommerce' ) );
+	}
+
+	/**
 	 * Get formatted refunded amount.
 	 *
 	 * @since 2.4

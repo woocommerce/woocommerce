@@ -167,8 +167,8 @@ export const PaymentExtensionSuggestionListItem = ( {
 										?.href ?? null,
 									pluginInstalled
 										? null
-										: suggestion._links?.attach?.href ??
-												null,
+										: ( suggestion._links?.attach?.href ??
+												null ),
 									'wc_settings_payments__main_suggestion'
 								);
 							} }

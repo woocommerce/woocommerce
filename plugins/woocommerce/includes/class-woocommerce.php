@@ -37,6 +37,7 @@ use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
@@ -474,6 +475,7 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
+		$container->get( PaymentSettingsScreen::class );
 
 		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-1' );
 		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-2' );
@@ -491,6 +493,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
 		$container->get( VisualAttributeTermAdmin::class )->register();
@@ -1215,7 +1218,10 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+		static $plugin_path = null;
+		$plugin_path        = $plugin_path ?? untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+
+		return $plugin_path;
 	}
 
 	/**
