@@ -939,8 +939,11 @@ class QueryBuilder {
 			return array();
 		}
 
+		$on_sale_ids = wc_get_product_ids_on_sale();
+
+		// An empty post__in is ignored when queries are merged, so use 0 to match no product.
 		return array(
-			'post__in' => wc_get_product_ids_on_sale(),
+			'post__in' => empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids,
 		);
 	}
 
@@ -1155,9 +1158,9 @@ class QueryBuilder {
 		if ( count( $post__in ) > 1 ) {
 			$post__in = array_intersect( ...$post__in );
 			// An empty array means that there was no overlap between the filters and so
-			// the query should return no results.
+			// the query should return no results. WP_Query applies absint(), so use 0.
 			if ( empty( $post__in ) ) {
-				return array( -1 );
+				return array( 0 );
 			}
 		} else {
 			$post__in = reset( $post__in );
