@@ -369,6 +369,150 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, with HPOS and with posts storage.
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 * @param bool $sync Whether HPOS and posts storage sync.
+	 */
+	public function test_order_ids_filter_intersects_with_other_filters( bool $hpos, bool $sync ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->setup_cot();
+		$this->toggle_cot_feature_and_usage( $hpos );
+		if ( $sync ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+		add_action( 'woocommerce_ability_extensions_init', array( $this, 'register_contains_product_filter' ) );
+
+		try {
+			$coffee = \WC_Helper_Product::create_simple_product();
+			$orders = array();
+			foreach ( array( 'gift', 'plain' ) as $tag ) {
+				$order = \WC_Helper_Order::create_order( 0, $coffee );
+				$order->update_meta_data( '_test_tag', $tag );
+				$order->save();
+				$orders[ $tag ] = $order->get_id();
+			}
+			\WC_Helper_Order::create_order()->save();
+			$filters = static fn( array $values ) => array( 'filters' => array( 'extensions' => array( 'test-ext' => $values ) ) );
+
+			$contains = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'contains_product' => $coffee->get_id() ) ) );
+			$both     = $this->run_ability(
+				'woocommerce/orders-query',
+				$filters(
+					array(
+						'contains_product' => $coffee->get_id(),
+						'tag'              => 'gift',
+					)
+				)
+			);
+			$none     = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'contains_product' => 999999 ) ) );
+
+			$this->assertEqualsCanonicalizing( array_values( $orders ), array_column( $contains['orders'], 'id' ) );
+			$this->assertSame( array( $orders['gift'] ), array_column( $both['orders'], 'id' ) );
+			$this->assertSame( array(), $none['orders'] );
+		} finally {
+			remove_action( 'woocommerce_ability_extensions_init', array( $this, 'register_contains_product_filter' ) );
+			$this->clean_up_cot_setup();
+			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Register an order filter that reads order items, which are not meta, and returns order IDs.
+	 *
+	 * @internal
+	 */
+	public function register_contains_product_filter(): void {
+		AbilityExtensions::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'test-ext',
+				'filter'    => 'contains_product',
+				'schema'    => array( 'type' => 'integer' ),
+				'callback'  => static function ( int $product_id ) {
+					global $wpdb;
+					return array(
+						'ids' => $wpdb->get_col(
+							$wpdb->prepare(
+								"SELECT DISTINCT items.order_id FROM {$wpdb->prefix}woocommerce_order_items AS items INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS meta ON meta.order_item_id = items.order_item_id WHERE meta.meta_key = '_product_id' AND meta.meta_value = %d",
+								$product_id
+							)
+						),
+					);
+				},
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should keep the products whose IDs a filter returns, and refuse too many IDs or IDs that are not integers.
+	 */
+	public function test_product_ids_filter_and_its_limits(): void {
+		add_action(
+			'woocommerce_ability_extensions_init',
+			static function () {
+				$callbacks = array(
+					'picked'   => static fn( array $ids ) => array( 'ids' => $ids ),
+					'too_many' => static fn() => array( 'ids' => range( 1, 1001 ) ),
+					'not_ids'  => static fn() => array( 'ids' => array( 'x' ) ),
+				);
+				foreach ( $callbacks as $filter => $callback ) {
+					AbilityExtensions::register_query_filter(
+						array(
+							'resource'  => 'product',
+							'namespace' => 'test-ext',
+							'filter'    => $filter,
+							'schema'    => 'picked' === $filter ? array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'integer' ),
+							) : array( 'type' => 'boolean' ),
+							'callback'  => $callback,
+						)
+					);
+				}
+			}
+		);
+		$coded = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen coded' ) );
+		$coded->update_meta_data( '_test_code', 'A1' );
+		$coded->save();
+		$plain   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
+		$filters = static fn( array $values ) => array(
+			'search'  => 'Pen',
+			'filters' => array( 'extensions' => array( 'test-ext' => $values ) ),
+		);
+
+		$picked   = $this->run_ability( 'woocommerce/products-query', $filters( array( 'picked' => array( $coded->get_id(), $plain->get_id() ) ) ) );
+		$both     = $this->run_ability(
+			'woocommerce/products-query',
+			$filters(
+				array(
+					'picked'   => array( $coded->get_id(), $plain->get_id() ),
+					'has_code' => true,
+				)
+			)
+		);
+		$empty    = $this->run_ability( 'woocommerce/products-query', $filters( array( 'picked' => array() ) ) );
+		$too_many = $this->dispatch_ability( 'woocommerce/products-query', $filters( array( 'too_many' => true ) ) );
+		$not_ids  = $this->dispatch_ability( 'woocommerce/products-query', $filters( array( 'not_ids' => true ) ) );
+
+		$this->assertEqualsCanonicalizing( array( $coded->get_id(), $plain->get_id() ), array_column( $picked['products'], 'id' ) );
+		$this->assertSame( array( $coded->get_id() ), array_column( $both['products'], 'id' ) );
+		$this->assertSame( array(), $empty['products'] );
+		$this->assertSame( 400, $too_many->get_status() );
+		$this->assertSame( 'woocommerce_ability_extension_filter_too_broad', $too_many->get_data()['code'] );
+		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $not_ids->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox Should list the filters in the input schemas, and refuse a filter that is not registered.
 	 */
 	public function test_input_schemas_list_filters_and_refuse_unknown_ones(): void {

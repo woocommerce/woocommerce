@@ -72,7 +72,12 @@ class AbilityExtensions {
 	/**
 	 * Query arguments that a filter callback can return.
 	 */
-	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query' );
+	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'ids' );
+
+	/**
+	 * Most IDs that one filter can return.
+	 */
+	private const MAX_FILTER_IDS = 1000;
 
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
@@ -173,10 +178,15 @@ class AbilityExtensions {
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
 	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
 	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
-	 *                               a `meta_query`, and for products also a `tax_query`. Core adds each one
-	 *                               to the query with AND. Return a WP_Error to refuse the value.
+	 *                               a `meta_query`, for products also a `tax_query`, or `ids`. Core adds
+	 *                               each one to the query with AND. Return a WP_Error to refuse the value.
 	 *                               A `tax_query` is accepted only for `product`. Any other key, or a
 	 *                               `tax_query` for another resource, fails the call.
+	 *                               `ids` is a list of up to 1,000 object IDs. Use it for data that is not
+	 *                               meta, such as order items or a table of the extension: query that data
+	 *                               and return the IDs that match. Core keeps the IDs that every filter
+	 *                               returns, and an empty list matches nothing. More IDs return an error
+	 *                               that asks for more filters.
 	 * }
 	 */
 	public static function register_query_filter( array $args ): void {
@@ -256,7 +266,9 @@ class AbilityExtensions {
 	/**
 	 * Get the query arguments of the filters in the input of a list ability.
 	 * Each key holds one clause for each filter, so `array_merge_recursive()`
-	 * adds them to WP_Query or wc_get_orders() arguments with AND.
+	 * adds them to WP_Query or wc_get_orders() arguments with AND. `post__in`
+	 * holds the IDs that every `ids` filter returned, or `0` when none match,
+	 * because an empty `post__in` does not filter.
 	 *
 	 * @since 11.3.0
 	 *
@@ -266,6 +278,7 @@ class AbilityExtensions {
 	 */
 	public static function get_query_args( string $resource_name, array $input ) {
 		$query_args = array();
+		$ids        = null;
 		if ( ! self::is_enabled() ) {
 			return $query_args;
 		}
@@ -302,6 +315,14 @@ class AbilityExtensions {
 						array( 'status' => 500 )
 					);
 				}
+				if ( isset( $clauses['ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $clauses['ids'], $namespace . '.' . $filter );
+					if ( is_wp_error( $filter_ids ) ) {
+						return $filter_ids;
+					}
+					$ids = null === $ids ? $filter_ids : array_values( array_intersect( $ids, $filter_ids ) );
+					unset( $clauses['ids'] );
+				}
 				foreach ( $clauses as $key => $clause ) {
 					if ( empty( $clause ) ) {
 						continue;
@@ -310,7 +331,43 @@ class AbilityExtensions {
 				}
 			}
 		}
+		if ( null !== $ids ) {
+			$query_args['post__in'] = empty( $ids ) ? array( 0 ) : $ids;
+		}
 		return $query_args;
+	}
+
+	/**
+	 * The IDs that a filter returned, as integers.
+	 *
+	 * @param array  $ids    IDs from the filter callback.
+	 * @param string $filter Filter name, such as `subscriptions.related_to`.
+	 * @return int[]|\WP_Error An error when an ID is not a positive integer, or when there are too many.
+	 */
+	private static function get_filter_ids( array $ids, string $filter ) {
+		if ( count( $ids ) > self::MAX_FILTER_IDS ) {
+			return new \WP_Error(
+				'woocommerce_ability_extension_filter_too_broad',
+				/* translators: 1: filter name, such as subscriptions.related_to. 2: maximum number of matches. */
+				sprintf( __( 'The "%1$s" filter matches more than %2$d items. Add more filters to narrow the list.', 'woocommerce' ), $filter, self::MAX_FILTER_IDS ),
+				array( 'status' => 400 )
+			);
+		}
+		$valid = array_filter(
+			array_map(
+				static fn( $id ) => filter_var( $id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ),
+				$ids
+			)
+		);
+		if ( count( $valid ) !== count( $ids ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_extension_filter_failed',
+				/* translators: %s: filter name, such as subscriptions.subscribable. */
+				sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $filter ),
+				array( 'status' => 500 )
+			);
+		}
+		return array_values( array_unique( $valid ) );
 	}
 
 	/**
