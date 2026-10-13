@@ -406,14 +406,8 @@ class LegacySelect2UsageTrackerTest extends WC_Unit_Test_Case {
 	private function reset_scripts(): void {
 		$wp_scripts = wp_scripts();
 
+		// dequeue() also clears the cached dependency list that wp_script_is( ..., 'enqueued' ) reads.
 		$wp_scripts->dequeue( $wp_scripts->queue );
-		// wp_script_is( ..., 'enqueued' ) reads this cache, and dequeue() only clears it for handles still
-		// in the queue. Tests that assign the queue directly can leave it stale with the queue empty.
-		if ( property_exists( $wp_scripts, 'all_queued_deps' ) ) {
-			$queued_deps = new \ReflectionProperty( \WP_Dependencies::class, 'all_queued_deps' );
-			$queued_deps->setAccessible( true );
-			$queued_deps->setValue( $wp_scripts, null );
-		}
 		$wp_scripts->to_do     = array();
 		$wp_scripts->done      = array();
 		$wp_scripts->groups    = array();
