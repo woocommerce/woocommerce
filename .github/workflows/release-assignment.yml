@@ -518,10 +518,69 @@ jobs:
       LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
       LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
 
+  check-release-comms-window:
+    name: Check for release comms kickoff
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      should-create-issue: ${{ steps.check-feature-freeze-one-week.outputs.should-create-issue }}
+      version: ${{ steps.check-feature-freeze-one-week.outputs.version }}
+      final-release-date: ${{ steps.check-feature-freeze-one-week.outputs.final-release-date }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
+
+      - name: Check for feature freeze in one week
+        id: check-feature-freeze-one-week
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const ical = require( 'node-ical' );
+
+            try {
+              const targetDate = new Date();
+              targetDate.setDate( targetDate.getDate() + 7 );
+
+              const events = await ical.async.fromURL( `https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics` );
+              const calendarEvents = Object.values( events )
+                .filter( ( event ) => event.type === 'VEVENT' && event.summary && event.start );
+
+              const featureFreezeEvent = calendarEvents.find( ( event ) => {
+                if ( ! /^WooCommerce \d+\.\d+ Feature Freeze$/i.test( event.summary.trim() ) ) {
+                  return false;
+                }
+
+                const diffDays = Math.ceil( Math.abs( new Date( event.start ) - targetDate ) / ( 1000 * 60 * 60 * 24 ) );
+                return diffDays <= 1;
+              } );
+
+              if ( ! featureFreezeEvent ) {
+                console.log( 'No feature freeze event found one week ahead.' );
+                core.setOutput( 'should-create-issue', 'false' );
+                return;
+              }
+
+              const version = featureFreezeEvent.summary.match( /\d+\.\d+/ )[ 0 ];
+              const finalReleaseEvent = calendarEvents.find( ( event ) =>
+                event.summary.trim() === `WooCommerce ${ version } Release`
+              );
+
+              if ( ! finalReleaseEvent ) {
+                core.setFailed( `No stable release calendar event found for WooCommerce ${ version }` );
+                return;
+              }
+
+              core.setOutput( 'should-create-issue', 'true' );
+              core.setOutput( 'version', version );
+              core.setOutput( 'final-release-date', new Date( finalReleaseEvent.start ).toISOString().split( 'T' )[ 0 ] );
+            } catch ( error ) {
+              core.setFailed( `Failed to check release comms calendar events: ${ error.message }` );
+            }
+
   create-release-comms-issue:
     name: Create release comms issue in Linear
-    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, create-parent-tracking-issue, create-sub-tracking-issues]
-    if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
+    needs: [check-release-comms-window]
+    if: ${{ needs.check-release-comms-window.outputs.should-create-issue == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -532,8 +591,8 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
-          RELEASE_VERSION: ${{ needs.check-upcoming-release-events.outputs.version }}
-          RELEASE_DATE: ${{ needs.check-upcoming-release-events.outputs.final-release-date }}
+          RELEASE_VERSION: ${{ needs.check-release-comms-window.outputs.version }}
+          RELEASE_DATE: ${{ needs.check-release-comms-window.outputs.final-release-date }}
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -635,7 +694,7 @@ jobs:
 
   notify-on-failure:
     name: Notify on failure
-    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues, create-release-comms-issue]
+    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues, check-release-comms-window, create-release-comms-issue]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
