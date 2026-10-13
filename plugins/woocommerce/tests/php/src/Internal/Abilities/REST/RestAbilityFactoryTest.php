@@ -56,13 +56,6 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 
 		$this->original_wp_abilities_api_init_action_count            = $wp_actions['wp_abilities_api_init'] ?? null;
 		$this->original_wp_abilities_api_categories_init_action_count = $wp_actions['wp_abilities_api_categories_init'] ?? null;
-
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$abilities_bootstrap = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $abilities_bootstrap ) ) {
-				require_once $abilities_bootstrap;
-			}
-		}
 	}
 
 	/**

@@ -21,8 +21,8 @@ The MCP implementation in WooCommerce is currently in developer preview. Impleme
 
 The Model Context Protocol (MCP) is an open standard that enables AI applications to securely connect to external data sources and tools. WooCommerce's MCP integration builds on two core technologies:
 
-- **[WordPress Abilities API](https://github.com/WordPress/abilities-api)** - A standardized system for registering capabilities in WordPress
-- **[WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation
+- **[WordPress Abilities API](https://github.com/WordPress/abilities-api)** - A standardized system for registering capabilities in WordPress, included in WordPress core
+- **[WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation, installed as the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/)
 
 This architecture allows WooCommerce to expose operations as MCP tools through the flexible WordPress Abilities system while maintaining existing security and permission models.
 
@@ -87,7 +87,7 @@ WooCommerce Core
 
 **Remote WordPress MCP Server** (`mcp-adapter`)
 
-- Is provided by the bundled WordPress MCP Adapter package
+- Is provided by the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/), which must be installed and active
 - Powers MCP tool discovery and execution for WordPress abilities
 - Creates the deprecated `/wp-json/woocommerce/mcp` endpoint for WooCommerce compatibility
 
@@ -101,7 +101,7 @@ WooCommerce Core
 
 **MCP Adapter Provider** ([`MCPAdapterProvider.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/MCP/MCPAdapterProvider.php))
 
-- Initializes the bundled MCP adapter when the `mcp_integration` feature flag is enabled
+- Initializes the MCP adapter when the `mcp_integration` feature flag is enabled and the MCP Adapter plugin is active
 - Creates the deprecated WooCommerce MCP endpoint
 - Handles feature flag checking (`mcp_integration`)
 - Provides deprecated endpoint exposure filtering
@@ -137,6 +137,14 @@ WooCommerce's preferred implementation path is purpose-built domain abilities. T
 REST-derived abilities remain available as a compatibility layer for the deprecated WooCommerce MCP endpoint. This keeps existing clients working while allowing new abilities to use the shared WordPress MCP adapter without expanding the deprecated endpoint by namespace alone.
 
 ## Enabling MCP Integration
+
+WooCommerce does not bundle the MCP adapter. Install and activate the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/) first:
+
+```bash
+wp plugin install mcp-adapter --activate
+```
+
+If WooCommerce MCP is enabled while the MCP Adapter plugin is inactive, WooCommerce shows a dismissible admin notice with a link to install it.
 
 The MCP feature is controlled by the `mcp_integration` feature flag. You can enable it programmatically:
 

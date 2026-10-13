@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
 use Automattic\WooCommerce\Internal\MCP\Transport\WooCommerceRestTransport;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -37,6 +38,13 @@ class MCPAdapterProvider {
 	const MCP_ROUTE = 'mcp';
 
 	/**
+	 * Name of the admin notice shown when the MCP Adapter plugin is missing.
+	 *
+	 * @var string
+	 */
+	const ADAPTER_MISSING_NOTICE = 'mcp_adapter_missing';
+
+	/**
 	 * Whether MCP adapter is initialized.
 	 *
 	 * @var bool
@@ -53,6 +61,46 @@ class MCPAdapterProvider {
 		 * This prevents unnecessary MCP initialization on favicon, cron, or admin requests.
 		 */
 		add_action( 'rest_api_init', array( $this, 'maybe_initialize' ), 10 );
+		add_action( 'admin_notices', array( $this, 'maybe_show_adapter_missing_notice' ) );
+	}
+
+	/**
+	 * Show an admin notice when WooCommerce MCP is enabled but the MCP Adapter plugin is not available.
+	 *
+	 * @internal
+	 */
+	public function maybe_show_adapter_missing_notice(): void {
+		if (
+			! current_user_can( 'manage_woocommerce' )
+			|| ! FeaturesUtil::feature_is_enabled( 'mcp_integration' )
+			|| self::is_mcp_adapter_available()
+			|| \WC_Admin_Notices::user_has_dismissed_notice( self::ADAPTER_MISSING_NOTICE )
+		) {
+			return;
+		}
+
+		$message = esc_html__( 'WooCommerce MCP is enabled, but the MCP Adapter plugin is not active. MCP clients can\'t connect to your store until you install and activate it.', 'woocommerce' );
+
+		if ( current_user_can( 'install_plugins' ) ) {
+			$message .= sprintf(
+				' <a href="%s">%s</a>',
+				esc_url( self::get_mcp_adapter_install_url() ),
+				esc_html__( 'Install MCP Adapter', 'woocommerce' )
+			);
+		}
+
+		$dismiss_url = wp_nonce_url(
+			add_query_arg( 'wc-hide-notice', self::ADAPTER_MISSING_NOTICE ),
+			'woocommerce_hide_notices_nonce',
+			'_wc_notice_nonce'
+		);
+
+		echo wp_kses_post(
+			'<div class="notice notice-warning is-dismissible">'
+			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '" aria-label="' . esc_attr__( 'Dismiss this notice', 'woocommerce' ) . '"></a>'
+			. '<p>' . $message . '</p>'
+			. '</div>'
+		);
 	}
 
 	/**
@@ -78,11 +126,12 @@ class MCPAdapterProvider {
 	 * Initialize the MCP adapter.
 	 */
 	private function initialize_mcp_adapter(): void {
-		// Check if MCP adapter class exists (should be autoloaded by WooCommerce's composer).
-		if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
+		// The MCP adapter is provided by the MCP Adapter plugin (https://wordpress.org/plugins/mcp-adapter/).
+		if ( ! self::is_mcp_adapter_available() ) {
+			// Only log for MCP endpoint requests to avoid a log entry on every REST request.
+			if ( self::is_mcp_request() && function_exists( 'wc_get_logger' ) ) {
 				wc_get_logger()->warning(
-					'MCP adapter class not found. Skipping MCP initialization.',
+					'MCP adapter not found. Install and activate the MCP Adapter plugin to use WooCommerce MCP.',
 					array( 'source' => 'woocommerce-mcp' )
 				);
 			}
@@ -206,6 +255,28 @@ class MCPAdapterProvider {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Check if the MCP adapter (provided by the MCP Adapter plugin) is available.
+	 *
+	 * @return bool Whether the MCP adapter is available.
+	 *
+	 * @since 11.3.0
+	 */
+	public static function is_mcp_adapter_available(): bool {
+		return (bool) wc_get_container()->get( LegacyProxy::class )->call_function( 'class_exists', 'WP\MCP\Core\McpAdapter' );
+	}
+
+	/**
+	 * Get the admin URL for installing the MCP Adapter plugin.
+	 *
+	 * @return string The plugin installer URL.
+	 *
+	 * @since 11.3.0
+	 */
+	public static function get_mcp_adapter_install_url(): string {
+		return admin_url( 'plugin-install.php?tab=search&type=term&s=mcp-adapter' );
 	}
 
 	/**

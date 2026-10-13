@@ -56,9 +56,7 @@
 		"opis/json-schema": "*",
 		"woocommerce/action-scheduler": "4.1.0",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "*",
-		"wordpress/abilities-api": "^0.4.0",
-		"wordpress/mcp-adapter": "^0.4.1"
+		"woocommerce/email-editor": "*"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -73,6 +71,8 @@
 		"spatie/phpunit-watcher": "^1.23",
 		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
+		"wordpress/abilities-api": "^0.4.0",
+		"wordpress/mcp-adapter": "^0.4.1",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
 	"config": {

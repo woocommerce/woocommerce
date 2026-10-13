@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\Features\Features as WCAdminFeatures;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
@@ -794,6 +795,17 @@ class FeaturesController {
 	 */
 	private function get_mcp_integration_description() {
 		$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
+
+		// The MCP adapter is no longer bundled with WooCommerce and is provided by the MCP Adapter plugin.
+		if ( ! MCPAdapterProvider::is_mcp_adapter_available() ) {
+			$base_description .= sprintf(
+				'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
+				__( 'Plugin required', 'woocommerce' ),
+				__( 'Install and activate the MCP Adapter plugin to use WooCommerce MCP.', 'woocommerce' ),
+				MCPAdapterProvider::get_mcp_adapter_install_url(),
+				__( 'Install MCP Adapter', 'woocommerce' )
+			);
+		}
 
 		// Check permalink structure requirement.
 		$permalink_structure = get_option( 'permalink_structure' );

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+WooCommerce no longer bundles the WordPress MCP Adapter or Abilities API packages. Stores using WooCommerce MCP must install and activate the MCP Adapter plugin from WordPress.org. An admin notice prompts stores that have WooCommerce MCP enabled without the plugin.

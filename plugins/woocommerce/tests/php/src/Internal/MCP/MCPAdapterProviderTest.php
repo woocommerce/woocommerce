@@ -88,14 +88,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
 		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		// Bootstrap the WordPress Abilities API for tests.
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$abilities_bootstrap = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $abilities_bootstrap ) ) {
-				require_once $abilities_bootstrap;
-			}
-		}
-
 		// Bootstrap the MCP Adapter for tests.
 		if ( ! class_exists( 'WP\\MCP\\Core\\McpAdapter' ) ) {
 			$mcp_bootstrap = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/mcp-adapter/includes/Autoloader.php';
@@ -155,6 +147,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Remove actions registered by the system under test.
 		remove_action( 'rest_api_init', array( $this->sut, 'maybe_initialize' ), 10 );
 		remove_action( 'mcp_adapter_init', array( $this->sut, 'initialize_mcp_server' ), 10 );
+		remove_action( 'admin_notices', array( $this->sut, 'maybe_show_adapter_missing_notice' ) );
+
+		$this->reset_legacy_proxy_mocks();
 
 		// Clean up feature flag options.
 		delete_option( 'woocommerce_feature_mcp_integration_enabled' );
@@ -203,6 +198,48 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_initialize();
 
 		$this->assertTrue( $this->sut->is_initialized(), 'Should initialize when feature flag is enabled' );
+	}
+
+	/**
+	 * @testdox Should show the adapter missing notice when MCP is enabled and the MCP Adapter plugin is missing.
+	 */
+	public function test_adapter_missing_notice_shown_when_enabled_and_adapter_missing(): void {
+		$this->set_up_adapter_missing_notice_conditions();
+
+		$output = $this->get_adapter_missing_notice_output();
+
+		$this->assertStringContainsString( 'MCP Adapter plugin is not active', $output );
+		$this->assertStringContainsString( 'wc-hide-notice=' . MCPAdapterProvider::ADAPTER_MISSING_NOTICE, $output );
+	}
+
+	/**
+	 * @testdox Should not show the adapter missing notice when the MCP Adapter plugin is available.
+	 */
+	public function test_adapter_missing_notice_hidden_when_adapter_available(): void {
+		$this->set_up_adapter_missing_notice_conditions();
+		$this->reset_legacy_proxy_mocks();
+
+		$this->assertSame( '', $this->get_adapter_missing_notice_output() );
+	}
+
+	/**
+	 * @testdox Should not show the adapter missing notice when the MCP feature flag is disabled.
+	 */
+	public function test_adapter_missing_notice_hidden_when_feature_disabled(): void {
+		$this->set_up_adapter_missing_notice_conditions();
+		update_option( 'woocommerce_feature_mcp_integration_enabled', 'no' );
+
+		$this->assertSame( '', $this->get_adapter_missing_notice_output() );
+	}
+
+	/**
+	 * @testdox Should not show the adapter missing notice after the user dismisses it.
+	 */
+	public function test_adapter_missing_notice_hidden_when_dismissed(): void {
+		$this->set_up_adapter_missing_notice_conditions();
+		update_user_meta( get_current_user_id(), 'dismissed_' . MCPAdapterProvider::ADAPTER_MISSING_NOTICE . '_notice', true );
+
+		$this->assertSame( '', $this->get_adapter_missing_notice_output() );
 	}
 
 	/**
@@ -517,6 +554,32 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertTrue( wp_has_ability_category( $category_id ), 'Test ability category should be available.' );
+	}
+
+	/**
+	 * Log in as an administrator, enable MCP, and make the MCP adapter appear missing.
+	 */
+	private function set_up_adapter_missing_notice_conditions(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'class_exists' => static function ( $class_name ) {
+					return 'WP\MCP\Core\McpAdapter' === $class_name ? false : class_exists( $class_name );
+				},
+			)
+		);
+	}
+
+	/**
+	 * Get the output of the adapter missing notice callback.
+	 *
+	 * @return string
+	 */
+	private function get_adapter_missing_notice_output(): string {
+		ob_start();
+		$this->sut->maybe_show_adapter_missing_notice();
+		return (string) ob_get_clean();
 	}
 
 	/**
