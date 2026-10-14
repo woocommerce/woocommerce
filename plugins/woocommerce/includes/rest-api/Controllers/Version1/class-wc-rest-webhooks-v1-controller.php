@@ -252,6 +252,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		if ( empty( $request['offset'] ) ) {
 			$args['offset'] = 1 < $request['page'] ? ( $request['page'] - 1 ) * $args['limit'] : 0;
+		} else {
+			$args['offset'] = $request['offset'];
 		}
 
 		/**
@@ -280,7 +282,11 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$page           = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
 		$total_webhooks = $results->total;
 		$max_pages      = $results->max_num_pages;
-		$base           = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		// The links below navigate by page, so the caller's offset must not ride along in
+		// them: it takes precedence over the page and would return this same slice again.
+		$link_params = $request->get_query_params();
+		unset( $link_params['offset'] );
+		$base = add_query_arg( $link_params, rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 
 		$response->header( 'X-WP-Total', $total_webhooks );
 		$response->header( 'X-WP-TotalPages', $max_pages );
@@ -741,7 +747,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset']  = array(
-			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'description'       => __( 'Offset the result set by a specific number of items. Takes precedence over the page parameter.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
