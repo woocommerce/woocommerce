@@ -1,10 +1,18 @@
 /**
  * Internal dependencies
  */
-import type { NoticeOptions } from '~/lib/notices/types';
+import type {
+	NoticeAction as BaseNoticeAction,
+	NoticeOptions as BaseNoticeOptions,
+} from '~/lib/notices/types';
 import { Subscription } from '../components/my-subscriptions/types';
 
-export type { NoticeAction, NoticeOptions } from '~/lib/notices/types';
+/** `openInNewTab` mirrors the @wordpress/components Notice action prop, which older WordPress versions ignore. */
+export type NoticeAction = BaseNoticeAction & { openInNewTab?: boolean };
+
+export type NoticeOptions = Omit< BaseNoticeOptions, 'actions' > & {
+	actions?: NoticeAction[];
+};
 
 /**
  * Notice key shared by everything that refreshes subscriptions, so a refresh

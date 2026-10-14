@@ -68,6 +68,7 @@ describe( 'getUpdateErrorNotice', () => {
 				{
 					label: 'Learn more',
 					url: 'https://wordpress.org/support/update-php/',
+					openInNewTab: true,
 				},
 			],
 		} );
@@ -82,7 +83,7 @@ describe( 'getUpdateErrorNotice', () => {
 			)
 		).toEqual( {
 			message: 'Product Add-Ons couldn’t be updated. Download failed.',
-			actions: [ { label: 'Try again', onClick: onRetry, url: '' } ],
+			actions: [ { label: 'Try again', onClick: onRetry } ],
 		} );
 	} );
 

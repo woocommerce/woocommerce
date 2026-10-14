@@ -72,7 +72,6 @@ export default function Update( props: UpdateProps ) {
 							onClick: () => {
 								window.location.reload();
 							},
-							url: '',
 						},
 					],
 				}

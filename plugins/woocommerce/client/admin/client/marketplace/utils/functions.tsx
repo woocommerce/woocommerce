@@ -582,6 +582,7 @@ const getUpdateErrorNotice = (
 						{
 							label: __( 'Learn more', 'woocommerce' ),
 							url: wccomSettings.updatePhpUrl,
+							openInNewTab: true,
 						},
 					]
 				: [],
@@ -603,7 +604,6 @@ const getUpdateErrorNotice = (
 			{
 				label: __( 'Try again', 'woocommerce' ),
 				onClick: onRetry,
-				url: '',
 			},
 		],
 	};
