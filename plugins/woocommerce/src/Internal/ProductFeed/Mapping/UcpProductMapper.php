@@ -262,6 +262,9 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Map a product for `POST /catalog/product`.
 	 *
+	 * A selection narrows the variants to those matching every selected option.
+	 * Non-matching selections are ignored.
+	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $selected Selected option values, each `{ name, label, id? }`.
 	 * @return array
@@ -269,14 +272,22 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	public function map_detail_product( \WC_Product $product, array $selected = array() ): array {
 		$base = $this->map_product( $product );
 
-		if ( ! empty( $selected ) && $product instanceof \WC_Product_Variable ) {
-			$base['selected'] = $selected;
+		if ( empty( $selected ) || ! $product instanceof \WC_Product_Variable ) {
+			return $base;
+		}
 
+		while ( ! empty( $selected ) ) {
 			$matched_variants = $this->filter_variants_by_selection( $product, $selected, $this->get_currency() );
+
 			if ( ! empty( $matched_variants ) ) {
 				$base['variants'] = $matched_variants;
+				break;
 			}
+
+			array_pop( $selected );
 		}
+
+		$base['selected'] = $selected;
 
 		return $base;
 	}

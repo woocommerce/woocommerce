@@ -172,4 +172,56 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( '', $mapped['description']['plain'] );
 	}
+
+	/**
+	 * UCP requires `selected` to describe the variants returned, so an
+	 * unmatched selection is relaxed from its last option rather than echoed.
+	 *
+	 * @testdox A selection matching no variation should be relaxed and reported as relaxed.
+	 */
+	public function test_detail_selection_is_relaxed_until_a_variation_matches(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Relaxed Selection' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ) ) );
+		$parent_id = $variable->save();
+
+		foreach ( array( 'small', 'large' ) as $size ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes( array( 'pa_size' => $size ) );
+			$variation->set_regular_price( '10' );
+			$variation->set_status( 'publish' );
+			$variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+		$mapper  = new UcpProductMapper( 'USD' );
+		$product = wc_get_product( $parent_id );
+
+		$size  = array(
+			'name'  => 'size',
+			'label' => 'large',
+		);
+		$color = array(
+			'name'  => 'color',
+			'label' => 'red',
+		);
+
+		$mapped = $mapper->map_detail_product( $product, array( $size, $color ) );
+		$this->assertSame( array( $size ), $mapped['selected'] );
+		$this->assertCount( 1, $mapped['variants'] );
+
+		$mapped = $mapper->map_detail_product(
+			$product,
+			array(
+				array(
+					'name'  => 'size',
+					'label' => 'medium',
+				),
+			)
+		);
+		$this->assertSame( array(), $mapped['selected'] );
+		$this->assertCount( 2, $mapped['variants'] );
+	}
 }
