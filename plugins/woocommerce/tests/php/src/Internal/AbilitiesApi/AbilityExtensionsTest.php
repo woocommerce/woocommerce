@@ -734,6 +734,59 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call WC_Order::update_status() with the feature off, and skip it with the feature on by design.
+	 */
+	public function test_the_feature_off_path_calls_update_status(): void {
+		$calls        = 0;
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Calls of update_status().
+				 *
+				 * @var int
+				 */
+				public static $calls = 0;
+
+				/**
+				 * Count the call, then update the status.
+				 *
+				 * @param string $new_status    Status to change the order to.
+				 * @param string $note          Optional note.
+				 * @param bool   $manual_update Whether a person made the change.
+				 * @return bool
+				 */
+				public function update_status( $new_status, $note = '', $manual_update = false ) {
+					++self::$calls;
+					return parent::update_status( $new_status, $note, $manual_update );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+
+		foreach ( array( false, true ) as $enabled ) {
+			$this->set_feature( $enabled );
+			$this->reset_registries();
+			$order_class::$calls = 0;
+			$order               = \WC_Helper_Order::create_order();
+
+			$this->run_ability(
+				'woocommerce/order-update-status',
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'completed',
+				)
+			);
+
+			$calls = $order_class::$calls;
+			$this->assertSame( $enabled ? 0 : 1, $calls, $enabled ? 'feature on' : 'feature off' );
+			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+		}
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+	}
+
+	/**
 	 * @testdox Should accept null for a field with an enum, to delete its value, and still refuse a value outside the enum.
 	 */
 	public function test_a_null_value_deletes_the_value_of_an_enum_field(): void {

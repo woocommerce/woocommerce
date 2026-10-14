@@ -86,6 +86,37 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
+	 * Run the ability with the feature off, exactly as before it: the order
+	 * status changes with WC_Order::update_status(), which sets it and saves.
+	 * With the feature on, CoreActionableAbility runs change() and save()
+	 * instead, so extension fields and validators run before the one save.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function execute( array $input ) {
+		$order = self::load( $input );
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		$status = self::get_new_status( $order, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		if ( ! $order->update_status( $status, self::get_note( $input ), true ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'Failed to update order status.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return self::prepare_response( $order );
+	}
+
+	/**
 	 * Change the order status in memory, as a manual change. The
 	 * woocommerce_order_edit_status action that a manual set_status() fires is
 	 * held back until save(), so a change that an extension refuses fires no action.
