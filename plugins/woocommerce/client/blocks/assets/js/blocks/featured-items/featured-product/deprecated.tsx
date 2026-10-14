@@ -77,8 +77,7 @@ const v1 = {
 				level: 2,
 				isLink: false,
 				textAlign: 'center',
-				__woocommerceNamespace:
-					'woocommerce/product-collection/product-title',
+				__woocommerceNamespace: 'woocommerce/product-title',
 			} )
 		);
 

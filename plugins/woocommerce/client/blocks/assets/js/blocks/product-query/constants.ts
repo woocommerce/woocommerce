@@ -9,7 +9,7 @@ import { isBoolean } from '@woocommerce/types';
  * Internal dependencies
  */
 import { QueryBlockAttributes } from './types';
-import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
+import { PRODUCT_TITLE_VARIATION_NAME } from '../product-elements-blocks/variations/constants';
 import { VARIATION_NAME as PRODUCT_TEMPLATE_ID } from './variations/elements/product-template';
 
 export const PRODUCT_QUERY_VARIATION_NAME = 'woocommerce/product-query';
@@ -116,7 +116,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 						},
 					},
 					isLink: true,
-					__woocommerceNamespace: PRODUCT_TITLE_ID,
+					__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 				},
 			],
 			[

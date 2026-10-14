@@ -5,13 +5,15 @@ import {
 	type BlockVariationScope,
 	registerBlockVariation,
 } from '@wordpress/blocks';
+import type { ReactElement } from '@wordpress/element';
 
 interface VariationDetails {
 	blockDescription: string;
-	blockIcon: JSX.Element;
+	blockIcon: ReactElement;
 	blockTitle: string;
 	variationName: string;
 	scope: BlockVariationScope[];
+	namespaces: string[];
 }
 
 export function registerElementVariation(
@@ -22,6 +24,7 @@ export function registerElementVariation(
 		blockTitle,
 		variationName,
 		scope,
+		namespaces,
 	}: VariationDetails
 ) {
 	registerBlockVariation( coreName, {
@@ -29,7 +32,7 @@ export function registerElementVariation(
 		name: variationName,
 		title: blockTitle,
 		isActive: ( blockAttributes ) =>
-			blockAttributes.__woocommerceNamespace === variationName,
+			namespaces.includes( blockAttributes.__woocommerceNamespace ),
 		icon: {
 			src: blockIcon,
 		},

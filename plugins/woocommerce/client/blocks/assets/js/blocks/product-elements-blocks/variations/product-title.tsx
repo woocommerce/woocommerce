@@ -3,26 +3,27 @@
  */
 import { Icon } from '@wordpress/components';
 import { heading } from '@wordpress/icons';
-import {
-	title,
-	description,
-} from '@woocommerce/product-elements/title/block.json';
+import metadata from '@woocommerce/product-elements/title/block.json';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { registerElementVariation } from './utils';
-import blockJson from '../../block.json';
+import {
+	PRODUCT_TITLE_VARIATION_NAME,
+	PRODUCT_TITLE_NAMESPACES,
+} from './constants';
 
 export const CORE_NAME = 'core/post-title';
-export const VARIATION_NAME = `${ blockJson.name }/product-title`;
 
 const registerProductTitle = () => {
 	registerElementVariation( CORE_NAME, {
-		blockDescription: description,
+		blockDescription: metadata.description,
 		blockIcon: <Icon icon={ heading } />,
-		blockTitle: title,
-		variationName: VARIATION_NAME,
+		blockTitle: __( 'Product Title', 'woocommerce' ),
+		variationName: PRODUCT_TITLE_VARIATION_NAME,
+		namespaces: PRODUCT_TITLE_NAMESPACES,
 		scope: [ 'block', 'inserter' ],
 	} );
 };

@@ -97,7 +97,15 @@ class Controller extends AbstractBlock {
 	 */
 	public function add_product_title_click_event_directives( $block_content, $block, $instance ) {
 		$namespace              = $instance->attributes['__woocommerceNamespace'] ?? '';
-		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
+		$is_product_title_block = in_array(
+			$namespace,
+			array(
+				'woocommerce/product-title',
+				'woocommerce/product-query/product-title',
+				'woocommerce/product-collection/product-title',
+			),
+			true
+		);
 		$is_link                = $instance->attributes['isLink'] ?? false;
 
 		// Only proceed if the block is a Product Title (Post Title variation) block.

@@ -359,13 +359,13 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 				<!-- wp:column -->
 				<div class="wp-block-column">
-					<!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+					<!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-title"} /-->
 
 					<!-- wp:woocommerce/product-rating /-->
 
 					<!-- wp:woocommerce/product-price {"fontSize":"large"} /-->
 
-					<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-collection/product-summary", "excerptLength":100} /-->
+					<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-summary", "excerptLength":100} /-->
 
 					<!-- wp:woocommerce/add-to-cart-form /-->
 
