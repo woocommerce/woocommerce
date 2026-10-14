@@ -114,7 +114,7 @@ test.describe( 'Mutation Batcher', () => {
 			);
 
 			// Refresh to start with known state.
-			await actions.refreshCartItems();
+			await actions.refreshCart();
 
 			// Remove all existing items to start clean.
 			const existingKeys = state.cart.items.map(
@@ -219,7 +219,7 @@ test.describe( 'Mutation Batcher', () => {
 					{ lock: unlockKey }
 				);
 
-				await actions.refreshCartItems();
+				await actions.refreshCart();
 				const existingKeys = state.cart.items.map(
 					( item: { key: string } ) => item.key
 				);
@@ -324,7 +324,7 @@ test.describe( 'Mutation Batcher', () => {
 					{ lock: unlockKey }
 				);
 
-				await actions.refreshCartItems();
+				await actions.refreshCart();
 				const existingKeys = state.cart.items.map(
 					( item: { key: string } ) => item.key
 				);
@@ -429,7 +429,7 @@ test.describe( 'Mutation Batcher', () => {
 					{ lock: unlockKey }
 				);
 
-				await actions.refreshCartItems();
+				await actions.refreshCart();
 				const existingKeys = state.cart.items.map(
 					( item: { key: string } ) => item.key
 				);
