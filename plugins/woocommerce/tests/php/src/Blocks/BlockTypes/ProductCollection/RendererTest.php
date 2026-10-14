@@ -25,6 +25,53 @@ class RendererTest extends WC_Unit_Test_Case {
 	);
 
 	/**
+	 * @testdox Should extend context only for Product Collection and its descendants, including through Group blocks.
+	 */
+	public function test_scopes_context_to_collection_descendants(): void {
+		remove_all_filters( 'render_block_context' );
+		new Renderer();
+		$contexts = array();
+		add_filter(
+			'render_block_context',
+			function ( $context, $parsed_block ) use ( &$contexts ) {
+				$anchor = $parsed_block['attrs']['anchor'] ?? '';
+				if ( $anchor ) {
+					$contexts[ $anchor ] = $context;
+				}
+				return $context;
+			},
+			12,
+			2
+		);
+
+		$markup = '<!-- wp:group {"anchor":"outside-group"} --><div class="wp-block-group">'
+			. '<!-- wp:paragraph {"anchor":"outside-child"} --><p>Outside</p><!-- /wp:paragraph -->'
+			. '<!-- wp:woocommerce/product-collection {"anchor":"collection","query":{"isProductCollectionBlock":false}} -->'
+			. '<div class="wp-block-woocommerce-product-collection">'
+			. '<!-- wp:group {"anchor":"inside-group"} --><div class="wp-block-group">'
+			. '<!-- wp:group {"anchor":"nested-group"} --><div class="wp-block-group">'
+			. '<!-- wp:paragraph {"anchor":"inside-child"} --><p>Inside</p><!-- /wp:paragraph -->'
+			. '</div><!-- /wp:group --></div><!-- /wp:group -->'
+			. '</div><!-- /wp:woocommerce/product-collection -->'
+			. '<!-- wp:paragraph {"anchor":"outside-sibling"} --><p>After</p><!-- /wp:paragraph -->'
+			. '</div><!-- /wp:group -->';
+
+		render_block( parse_blocks( $markup )[0] );
+
+		foreach ( array( 'collection', 'inside-group', 'nested-group', 'inside-child' ) as $anchor ) {
+			$this->assertArrayHasKey( $anchor, $contexts, "The {$anchor} block must render." );
+			$this->assertSame( 'woocommerce/product-collection', $contexts[ $anchor ]['iapi/provider'] ?? null, "The {$anchor} block should use Product Collection actions." );
+		}
+
+		foreach ( array( 'outside-group', 'outside-child', 'outside-sibling' ) as $anchor ) {
+			$this->assertArrayHasKey( $anchor, $contexts, "The {$anchor} block must render." );
+			$this->assertArrayNotHasKey( 'iapi/provider', $contexts[ $anchor ], "The {$anchor} block must not receive a Product Collection provider." );
+			$this->assertArrayNotHasKey( 'isProductCollectionInnerBlock', $contexts[ $anchor ], "The {$anchor} block must not be marked as a collection descendant." );
+			$this->assertArrayNotHasKey( 'productCollectionLocation', $contexts[ $anchor ], "The {$anchor} block must not receive a Product Collection location." );
+		}
+	}
+
+	/**
 	 * @testdox Should reset result and No Results state between Product Collection renders.
 	 */
 	public function test_resets_render_state_between_collections(): void {

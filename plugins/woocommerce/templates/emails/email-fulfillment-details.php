@@ -12,8 +12,10 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.7.0
+ * @version 11.3.0
  */
+
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,7 +33,7 @@ if ( null === $fulfillment->get_date_deleted() ) {
 		echo '<p>' . esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' ) . '</p>';
 	} else {
 		echo '<p><strong>' . esc_html__( 'Tracking Number', 'woocommerce' ) . ':</strong> ' . esc_attr( $tracking_number ) . '</p>';
-		echo '<p><strong>' . esc_html__( 'Shipment Provider', 'woocommerce' ) . ':</strong> ' . esc_html( $shipment_provider ) . '</p>';
+		echo '<p><strong>' . esc_html__( 'Shipment Provider', 'woocommerce' ) . ':</strong> ' . esc_html( FulfillmentUtils::get_provider_display_name( $fulfillment ) ) . '</p>';
 		echo '<p><a href="' . esc_url( $tracking_url ) . '" target="_blank">' . esc_attr__( 'Track your shipment', 'woocommerce' ) . '</a></p>';
 	}
 	echo '<br />';
