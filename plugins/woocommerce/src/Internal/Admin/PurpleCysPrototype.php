@@ -300,12 +300,6 @@ class PurpleCysPrototype {
 					'modal'     => __( 'Modal', 'woocommerce' ),
 				),
 			),
-			'layout'    => array(
-				'label'   => __( 'Layout', 'woocommerce' ),
-				'options' => array(
-					'stacked-images-left' => __( 'Stacked, images left (V3)', 'woocommerce' ),
-				),
-			),
 			'state'     => array(
 				'label'   => __( 'Purple state', 'woocommerce' ),
 				'options' => array(
@@ -451,6 +445,7 @@ class PurpleCysPrototype {
 			#wpadminbar .purple-cys-prototype-option > .ab-item::before {
 				content: "";
 				display: inline-block;
+				float: none;
 				width: 16px;
 				font-family: inherit;
 			}
