@@ -140,7 +140,7 @@ trait ProductAbilityTrait {
 	 * @return array<string, array>
 	 */
 	private static function get_product_mutation_field_schemas(): array {
-		return array(
+		$schemas = array(
 			'name'              => array( 'type' => 'string' ),
 			'sku'               => array( 'type' => 'string' ),
 			'regular_price'     => array(
@@ -242,6 +242,10 @@ trait ProductAbilityTrait {
 				'maxItems'    => 100,
 			),
 		);
+		if ( AbilityExtensions::is_enabled() ) {
+			$schemas['variations']['items']['properties']['extensions'] = AbilityExtensions::get_input_schema( 'product' );
+		}
+		return $schemas;
 	}
 
 	/**

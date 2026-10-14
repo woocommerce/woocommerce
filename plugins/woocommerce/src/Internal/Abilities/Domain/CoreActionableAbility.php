@@ -58,6 +58,17 @@ final class CoreActionableAbility extends ActionableAbility {
 	}
 
 	/**
+	 * The other objects that save() writes, each paired with its `extensions` input.
+	 *
+	 * @param \WC_Data $subject Changed subject.
+	 * @param array    $input   Ability input.
+	 * @return array<int, array{0: \WC_Data, 1: array}>
+	 */
+	public function pending_objects( $subject, array $input ): array {
+		return $this->definition()::pending_objects( $subject, $input );
+	}
+
+	/**
 	 * Save the changed object.
 	 *
 	 * @param \WC_Data $subject Changed object.

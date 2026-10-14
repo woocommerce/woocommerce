@@ -57,6 +57,18 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	abstract public static function prepare_response( $subject ): array;
 
 	/**
+	 * The other objects that save() writes, each paired with its `extensions` input.
+	 *
+	 * @param \WC_Data $subject Changed subject.
+	 * @param array    $input   Ability input.
+	 * @return array<int, array{0: \WC_Data, 1: array}>
+	 */
+	public static function pending_objects( $subject, array $input ): array {
+		unset( $subject, $input );
+		return array();
+	}
+
+	/**
 	 * Run the change.
 	 *
 	 * @param array $input Ability input.

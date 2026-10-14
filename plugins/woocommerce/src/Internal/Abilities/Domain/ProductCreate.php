@@ -220,6 +220,24 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * The variations of a variable product, each with the `extensions` input of its item.
+	 *
+	 * @param \WC_Product $subject Changed product.
+	 * @param array       $input   Ability input.
+	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
+	 */
+	public static function pending_objects( $subject, array $input ): array {
+		if ( ! $subject instanceof VariableProductDraft ) {
+			return array();
+		}
+		$objects = array();
+		foreach ( $subject->get_pending_variations() as $index => $variation ) {
+			$objects[] = array( $variation, $input['variations'][ $index ]['extensions'] ?? array() );
+		}
+		return $objects;
+	}
+
+	/**
 	 * Save the product.
 	 *
 	 * @param \WC_Product $subject Changed product.

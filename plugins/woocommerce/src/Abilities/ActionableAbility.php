@@ -75,6 +75,21 @@ abstract class ActionableAbility extends \WP_Ability {
 	abstract public function prepare_response( $subject );
 
 	/**
+	 * The other objects that save() writes, each paired with its `extensions`
+	 * input. The field writes and the validators of the resource run on each
+	 * one after the subject, before save(). The default saves the subject only.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Data $subject Changed subject.
+	 * @param array    $input   Ability input.
+	 * @return array<int, array{0: \WC_Data, 1: array}> Pairs of object and `extensions` input.
+	 */
+	public function pending_objects( $subject, array $input ): array {
+		return array();
+	}
+
+	/**
 	 * Save the changed object. The default saves a WC_Data object.
 	 *
 	 * @since 11.3.0
@@ -103,13 +118,10 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $subject;
 		}
 
-		$updates = array();
-		if ( AbilityExtensions::is_enabled() ) {
-			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-			$updates    = $this->prepare_fields( $extensions );
-			if ( is_wp_error( $updates ) ) {
-				return $updates;
-			}
+		$enabled = AbilityExtensions::is_enabled();
+		$updates = $enabled ? $this->prepare_fields( $input['extensions'] ?? null ) : array();
+		if ( is_wp_error( $updates ) ) {
+			return $updates;
 		}
 
 		$changed = $this->change( $subject, $input );
@@ -117,12 +129,23 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $changed;
 		}
 
-		$rejected = $this->apply_fields( $subject, $updates );
-		if ( null === $rejected && AbilityExtensions::is_enabled() ) {
-			$rejected = $this->validate( $subject );
+		$objects = array( array( $subject, $updates ) );
+		foreach ( $this->pending_objects( $subject, $input ) as list( $object, $extensions ) ) {
+			$pending = $enabled ? $this->prepare_fields( $extensions ) : array();
+			if ( is_wp_error( $pending ) ) {
+				return $pending;
+			}
+			$objects[] = array( $object, $pending );
 		}
-		if ( null !== $rejected ) {
-			return $rejected;
+
+		foreach ( $objects as list( $object, $fields ) ) {
+			$rejected = $this->apply_fields( $object, $fields );
+			if ( null === $rejected && $enabled ) {
+				$rejected = $this->validate( $object );
+			}
+			if ( null !== $rejected ) {
+				return $rejected;
+			}
 		}
 
 		wc_transaction_query( 'start' );
@@ -161,13 +184,13 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * each field, and cast them. No callback runs here. A null value is kept as
 	 * is, to delete the value.
 	 *
-	 * @param array<string, mixed> $values Values keyed by namespace, then field.
+	 * @param mixed $values Values keyed by namespace, then field. Anything but an array is ignored.
 	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
 	 */
-	private function prepare_fields( array $values ) {
+	private function prepare_fields( $values ) {
 		$registered = AbilityExtensions::get_fields( $this->get_resource() );
 		$updates    = array();
-		foreach ( $values as $namespace => $fields ) {
+		foreach ( is_array( $values ) ? $values : array() as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
 				if ( ! isset( $args['update_callback'] ) ) {
@@ -255,48 +278,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Add the `extensions` property to the input schema. It lists the fields
-	 * that have an update_callback, and allows null for each one. A schema with
-	 * `oneOf` gets the property in each branch.
+	 * Add the `extensions` property of the resource to the input schema. A
+	 * schema with `oneOf` gets the property in each branch.
 	 *
 	 * @param array<string, mixed> $schema Input schema.
 	 * @return array<string, mixed>
 	 */
 	private function add_extensions_input_schema( array $schema ): array {
-		$extensions = array(
-			'type'                 => 'object',
-			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
-			'additionalProperties' => false,
-		);
-		foreach ( AbilityExtensions::get_fields( $this->get_resource() ) as $namespace => $fields ) {
-			$writable = array_filter(
-				$fields,
-				static function ( array $args ): bool {
-					return isset( $args['update_callback'] );
-				}
-			);
-			if ( empty( $writable ) ) {
-				continue;
-			}
-			$extensions['properties'][ $namespace ] = array(
-				'type'                 => 'object',
-				'properties'           => array_map(
-					static function ( array $args ): array {
-						$field_schema = $args['schema'];
-						if ( isset( $field_schema['type'] ) ) {
-							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
-						}
-						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
-							$field_schema['enum'][] = null;
-						}
-						return $field_schema;
-					},
-					$writable
-				),
-				'additionalProperties' => false,
-			);
-		}
-
+		$extensions = AbilityExtensions::get_input_schema( $this->get_resource() );
 		if ( isset( $schema['oneOf'] ) ) {
 			foreach ( array_keys( $schema['oneOf'] ) as $index ) {
 				$schema['oneOf'][ $index ]['properties']['extensions'] = $extensions;
