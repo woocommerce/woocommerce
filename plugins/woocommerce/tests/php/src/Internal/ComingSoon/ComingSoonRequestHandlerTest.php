@@ -37,6 +37,13 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	private $visibility;
 
 	/**
+	 * Fixture theme folder created by use_fixture_theme(), removed in tearDown().
+	 *
+	 * @var string|null
+	 */
+	private $fixture_theme = null;
+
+	/**
 	 * Setup.
 	 */
 	public function setUp(): void {
@@ -50,6 +57,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			'get'        => $_GET, // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Snapshot simulated request data, not a submitted action.
 			'cookie'     => $_COOKIE,
 			'visibility' => $this->visibility->getValue(),
+			'paths'      => array( $GLOBALS['wp_stylesheet_path'] ?? null, $GLOBALS['wp_template_path'] ?? null ),
 		);
 		switch_theme( 'storefront' );
 		remove_theme_support( 'block-template-parts' );
@@ -75,6 +83,10 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			$_GET                          = $this->original_state['get'];
 			$_COOKIE                       = $this->original_state['cookie'];
 			$this->visibility->setValue( null, $this->original_state['visibility'] );
+			list( $GLOBALS['wp_stylesheet_path'], $GLOBALS['wp_template_path'] ) = $this->original_state['paths']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the theme paths a fixture theme replaced.
+			if ( $this->fixture_theme ) {
+				$this->remove_fixture_tree( $this->fixture_theme );
+			}
 		} finally {
 			parent::tearDown();
 		}
@@ -182,25 +194,9 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 * @param bool   $override Whether WooCommerce should load the file.
 	 */
 	public function test_theme_template_lookup( string $file, bool $override ): void {
-		$root  = $this->create_fixture_directory();
-		$path  = $root . '/' . $file;
-		$paths = array( $GLOBALS['wp_stylesheet_path'] ?? null, $GLOBALS['wp_template_path'] ?? null );
-		try {
-			$this->assertTrue( wp_mkdir_p( dirname( $path ) ) );
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write only a fresh task-owned theme file fixture.
-			$this->assertNotFalse( file_put_contents( $path, '<?php the_content();' ) );
-			// locate_template() reads these globals, not the theme directory filters.
-			$GLOBALS['wp_stylesheet_path'] = $root; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Point the template lookup at the fixture theme; restored below.
-			$GLOBALS['wp_template_path']   = $root; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Point the template lookup at the fixture theme; restored below.
+		$root = $this->use_fixture_theme( array( $file => '<?php the_content();' ) );
 
-			$this->assertSame( $override ? $path : self::ENTIRE_SITE_TEMPLATE, $this->sut->handle_classic_template_include( '/protected.php' ) );
-		} finally {
-			list( $GLOBALS['wp_stylesheet_path'], $GLOBALS['wp_template_path'] ) = $paths; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the theme paths.
-			wp_delete_file( $path );
-			foreach ( array( '/woocommerce/coming-soon', '/woocommerce', '' ) as $dir ) {
-				$this->remove_fixture_directory( $root . $dir );
-			}
-		}
+		$this->assertSame( $override ? $root . '/' . $file : self::ENTIRE_SITE_TEMPLATE, $this->sut->handle_classic_template_include( '/protected.php' ) );
 	}
 
 	/**
@@ -224,6 +220,43 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertFileDoesNotExist( $path );
 		$this->assertTrue( wp_mkdir_p( $path ) );
 		return $path;
+	}
+
+	/**
+	 * Point template lookups at a fresh theme folder holding the given files. tearDown() removes it.
+	 *
+	 * @param array<string, string> $files File contents keyed by path relative to the theme folder.
+	 * @return string Theme folder path.
+	 */
+	private function use_fixture_theme( array $files ): string {
+		$root                = $this->create_fixture_directory();
+		$this->fixture_theme = $root;
+		foreach ( $files as $file => $contents ) {
+			$this->assertTrue( wp_mkdir_p( dirname( $root . '/' . $file ) ) );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write only a fresh task-owned theme file fixture.
+			$this->assertNotFalse( file_put_contents( $root . '/' . $file, $contents ) );
+		}
+		// locate_template() reads these globals, not the theme directory filters.
+		$GLOBALS['wp_stylesheet_path'] = $root; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored in tearDown().
+		$GLOBALS['wp_template_path']   = $root; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored in tearDown().
+		return $root;
+	}
+
+	/**
+	 * Remove a fixture folder created by this test, with everything in it.
+	 *
+	 * @param string $root Task-owned directory.
+	 */
+	private function remove_fixture_tree( string $root ): void {
+		$items = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $root, \FilesystemIterator::SKIP_DOTS ), \RecursiveIteratorIterator::CHILD_FIRST );
+		foreach ( $items as $item ) {
+			if ( $item->isDir() ) {
+				$this->remove_fixture_directory( $item->getPathname() );
+			} else {
+				wp_delete_file( $item->getPathname() );
+			}
+		}
+		$this->remove_fixture_directory( $root );
 	}
 
 	/**
@@ -400,6 +433,37 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<script>alert(1)</script>', $output );
 		$this->assertStringNotContainsString( 'wp-block-woocommerce-coming-soon', $output );
 		$this->assertStringNotContainsString( 'facebook.com', $output );
+	}
+
+	/**
+	 * @testdox Should render the store-only message inside the theme's header and footer, with the Coming Soon marker in the head.
+	 */
+	public function test_store_only_php_output(): void {
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+		$shop_id = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_content' => 'WC50520 protected shop content',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		$this->go_to( get_permalink( $shop_id ) );
+		// The bootstrap does not load Storefront's functions.php, which its header.php needs.
+		$this->use_fixture_theme(
+			array(
+				'header.php' => '<!doctype html><html><head><?php wp_head(); ?></head><body>',
+				'footer.php' => '<?php wp_footer(); ?></body></html>',
+			)
+		);
+
+		$output = $this->render( $this->sut->handle_classic_template_include( '/original.php' ) );
+
+		$this->assertSame( 1, substr_count( strtolower( $output ), '<!doctype html>' ), 'The theme header must open the document once.' );
+		$this->assertSame( 1, substr_count( $output, '</html>' ), 'The theme footer must close the document once.' );
+		$this->assertSame( 1, substr_count( $output, "<meta name='woo-coming-soon-page' content='yes'>" ) );
+		$this->assertLessThan( strpos( $output, '</head>' ), strpos( $output, "<meta name='woo-coming-soon-page'" ), 'The marker must print inside the head.' );
+		$this->assertStringContainsString( 'Great things are on the horizon', $output );
+		$this->assertStringNotContainsString( 'WC50520 protected shop content', $output );
 	}
 
 	/**
