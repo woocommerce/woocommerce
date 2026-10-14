@@ -30,6 +30,13 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	private $created_stock_notification_ids = array();
 
 	/**
+	 * Locale filter callbacks added by a test, keyed by hook name.
+	 *
+	 * @var array<string, callable>
+	 */
+	private $locale_filters = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -56,6 +63,13 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		remove_all_actions( 'woocommerce_deferred_email_test_unknown_object_notification' );
 		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product' );
 		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product_notification' );
+		foreach ( $this->locale_filters as $hook => $callback ) {
+			remove_filter( $hook, $callback, 20 );
+		}
+		$this->locale_filters = array();
+		if ( is_locale_switched() ) {
+			restore_current_locale();
+		}
 		$this->set_wc_emails_deferred_queue( null );
 		$this->delete_stock_notifications();
 		$this->restore_stock_notifications_feature_option();
@@ -411,6 +425,54 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Dispatch stores the locale the email was queued in.
+	 */
+	public function test_dispatch_stores_the_queued_locale(): void {
+		$this->force_locale_filter( 'determine_locale', 'de_DE' );
+
+		$this->sut->push( 'woocommerce_order_status_pending_to_processing', array( 42 ) );
+		$this->sut->dispatch();
+
+		$action = $this->get_scheduled_email_action();
+
+		$this->assertArrayHasKey( 2, $action['args'], 'The queued locale should be scheduled with the email' );
+		$this->assertSame( 'de_DE', $action['args'][2] );
+	}
+
+	/**
+	 * @testdox Processing sends the email in the queued locale and restores the runner's locale afterwards.
+	 */
+	public function test_send_queued_transactional_email_uses_the_queued_locale(): void {
+		// The request running the queue is in another locale, as an async runner started from an admin's dashboard would be.
+		$this->force_locale_filter( 'pre_determine_locale', 'fr_FR' );
+
+		$seen = array();
+		$this->capture_locale_while_sending( $seen );
+
+		$this->sut->send_queued_transactional_email( 'woocommerce_order_status_pending_to_processing', array( 42 ), 'en_US' );
+
+		$this->assertCount( 1, $seen, 'Should process the email callback' );
+		$this->assertTrue( $seen[0]['switched'], 'The email should be sent with the queued locale switched in' );
+		$this->assertSame( 'en_US', $seen[0]['locale'] );
+		$this->assertFalse( is_locale_switched(), 'The runner locale should be restored after sending' );
+	}
+
+	/**
+	 * @testdox Processing does not switch locale for emails queued without one.
+	 */
+	public function test_send_queued_transactional_email_without_queued_locale_does_not_switch(): void {
+		$this->force_locale_filter( 'pre_determine_locale', 'fr_FR' );
+
+		$seen = array();
+		$this->capture_locale_while_sending( $seen );
+
+		$this->sut->send_queued_transactional_email( 'woocommerce_order_status_pending_to_processing', array( 42 ) );
+
+		$this->assertCount( 1, $seen, 'Should process the email callback' );
+		$this->assertFalse( $seen[0]['switched'], 'Emails queued without a locale should not switch locale' );
+	}
+
+	/**
 	 * @testdox Push can be called again after dispatch to queue new emails.
 	 */
 	public function test_push_after_dispatch_queues_new_emails(): void {
@@ -526,6 +588,41 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			10,
 			3
 		);
+	}
+
+	/**
+	 * Register a filter that records the active locale when an email reaches
+	 * send_queued_transactional_email, short-circuiting actual sending.
+	 *
+	 * @param array $seen Accumulator for the observed locale state (passed by reference).
+	 */
+	private function capture_locale_while_sending( array &$seen ): void {
+		add_filter(
+			'woocommerce_allow_send_queued_transactional_email',
+			function ( $allow ) use ( &$seen ) {
+				unset( $allow );
+				$seen[] = array(
+					'switched' => is_locale_switched(),
+					'locale'   => get_locale(),
+				);
+				return false;
+			}
+		);
+	}
+
+	/**
+	 * Force a locale filter to return the given locale until tear down.
+	 *
+	 * @param string $hook   The filter name (determine_locale or pre_determine_locale).
+	 * @param string $locale The locale to return.
+	 */
+	private function force_locale_filter( string $hook, string $locale ): void {
+		$callback = static function () use ( $locale ) {
+			return $locale;
+		};
+
+		add_filter( $hook, $callback, 20 );
+		$this->locale_filters[ $hook ] = $callback;
 	}
 
 	/**

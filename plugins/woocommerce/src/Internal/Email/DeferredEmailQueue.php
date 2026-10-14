@@ -36,7 +36,7 @@ final class DeferredEmailQueue {
 	/**
 	 * Queue of email callbacks collected during the current request.
 	 *
-	 * @var array<int, array{filter: string, args: array}>
+	 * @var array<int, array{filter: string, args: array, locale: string}>
 	 */
 	private array $queue = array();
 
@@ -55,7 +55,7 @@ final class DeferredEmailQueue {
 	final public function init(): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found
 		// Registered unconditionally so previously-scheduled AS jobs can still
 		// be processed even if the feature is later disabled.
-		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_email' ), 10, 2 );
+		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_email' ), 10, 3 );
 	}
 
 	/**
@@ -78,6 +78,7 @@ final class DeferredEmailQueue {
 		$this->queue[] = array(
 			'filter' => $filter,
 			'args'   => $args,
+			'locale' => determine_locale(),
 		);
 
 		if ( ! $this->shutdown_registered ) {
@@ -104,7 +105,7 @@ final class DeferredEmailQueue {
 		foreach ( $this->queue as $item ) {
 			\WC()->queue()->add(
 				self::AS_HOOK,
-				array( $item['filter'], $item['args'] ),
+				array( $item['filter'], $item['args'], $item['locale'] ),
 				self::AS_GROUP
 			);
 		}
@@ -116,12 +117,17 @@ final class DeferredEmailQueue {
 	/**
 	 * Process a single queued transactional email from Action Scheduler.
 	 *
+	 * The email is sent in the locale of the request that queued it. The request running the
+	 * queue can be in another locale, e.g. an async runner started from an admin's dashboard
+	 * runs with that admin's profile language.
+	 *
 	 * @internal
 	 *
 	 * @param mixed $filter The action hook name.
 	 * @param mixed $args   The arguments for the email callback.
+	 * @param mixed $locale The locale the email was queued in (since 11.3.0); empty for emails queued before.
 	 */
-	public function send_queued_transactional_email( $filter, $args ): void {
+	public function send_queued_transactional_email( $filter, $args, $locale = '' ): void {
 		if ( ! is_string( $filter ) || ! is_array( $args ) ) {
 			return;
 		}
@@ -131,7 +137,32 @@ final class DeferredEmailQueue {
 			return;
 		}
 
-		\WC_Emails::send_queued_transactional_email( $filter, $args );
+		$switched = $this->switch_to_queued_locale( $locale );
+
+		try {
+			\WC_Emails::send_queued_transactional_email( $filter, $args );
+		} finally {
+			if ( $switched ) {
+				restore_previous_locale();
+				\WC()->load_plugin_textdomain();
+			}
+		}
+	}
+
+	/**
+	 * Switch to the locale an email was queued in, when it differs from the current one.
+	 *
+	 * @param mixed $locale The locale stored with the queued email.
+	 * @return bool True if the locale was switched and must be restored.
+	 */
+	private function switch_to_queued_locale( $locale ): bool {
+		if ( ! is_string( $locale ) || '' === $locale || ! switch_to_locale( $locale ) ) {
+			return false;
+		}
+
+		\WC()->load_plugin_textdomain();
+
+		return true;
 	}
 
 	/**
