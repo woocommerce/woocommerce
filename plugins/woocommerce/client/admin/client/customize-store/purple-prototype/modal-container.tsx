@@ -14,12 +14,6 @@ import { ThemeOptions } from './theme-options';
 import { ResetNotice } from './reset-notice';
 import type { PurplePrototypeSettings } from './settings';
 
-const STEPS = [
-	__( 'Install a theme. Nothing changes yet.', 'woocommerce' ),
-	__( 'Preview it with your own products.', 'woocommerce' ),
-	__( "Activate it when you're ready.", 'woocommerce' ),
-];
-
 const goHome = () => getHistory().push( getNewPath( {}, '/', {} ) );
 
 /**
@@ -41,25 +35,10 @@ export const ModalContainer = ( {
 					render={ <p /> }
 				>
 					{ __(
-						'Pick the theme your store starts with. You can change it any time in Appearance > Themes.',
+						'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
 						'woocommerce'
 					) }
 				</Text>
-				<div className="purple-cys-modal__steps">
-					<Text variant="body-sm">
-						{ __( 'How it works', 'woocommerce' ) }
-					</Text>
-					<ol>
-						{ STEPS.map( ( step, index ) => (
-							<li key={ step }>
-								<span className="purple-cys-modal__step-number">
-									{ index + 1 }
-								</span>
-								<Text>{ step }</Text>
-							</li>
-						) ) }
-					</ol>
-				</div>
 			</div>
 			<div className="settings-payments-onboarding-modal__content purple-cys-modal__panel">
 				<div className="purple-cys-modal__header">

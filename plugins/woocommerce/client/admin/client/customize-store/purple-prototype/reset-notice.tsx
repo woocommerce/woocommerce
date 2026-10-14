@@ -18,7 +18,7 @@ export const ResetNotice = () => {
 	}
 
 	return result === 'done' ? (
-		<Notice.Root intent="success">
+		<Notice.Root intent="success" className="purple-cys-notice">
 			<Notice.Description>
 				{ __(
 					'Purple was reset. The site is back on Twenty Twenty-Four.',
@@ -27,7 +27,7 @@ export const ResetNotice = () => {
 			</Notice.Description>
 		</Notice.Root>
 	) : (
-		<Notice.Root intent="error">
+		<Notice.Root intent="error" className="purple-cys-notice">
 			<Notice.Description>
 				{ __(
 					"Purple couldn't be reset. Check that you can install, switch and delete themes.",

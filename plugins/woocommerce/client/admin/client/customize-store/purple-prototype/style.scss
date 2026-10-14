@@ -173,43 +173,6 @@
 		color: var(--wpds-color-foreground-content-neutral-weak);
 	}
 
-	&__steps {
-		display: flex;
-		flex-direction: column;
-		gap: var(--wpds-dimension-gap-sm);
-
-		ol {
-			display: flex;
-			flex-direction: column;
-			gap: var(--wpds-dimension-gap-sm);
-			margin: 0;
-			padding: 0;
-			list-style: none;
-		}
-
-		li {
-			display: flex;
-			align-items: flex-start;
-			gap: var(--wpds-dimension-gap-sm);
-			margin: 0;
-		}
-	}
-
-	&__step-number {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 20px;
-		height: 20px;
-		box-sizing: border-box;
-		border: 1px dashed var(--wpds-color-stroke-surface-neutral);
-		border-radius: 50%;
-		font-size: var(--wpds-typography-font-size-sm);
-		line-height: 16px;
-		color: var(--wpds-color-foreground-content-neutral-weak);
-	}
-
 	&__header {
 		display: flex;
 		align-items: flex-start;
@@ -226,26 +189,47 @@
 		gap: var(--wpds-dimension-gap-sm);
 	}
 
-	// The three cards are taller than the Payments panel, so the body scrolls.
+	// The three sections are taller than the Payments panel, so the body scrolls.
 	&__body {
 		flex: 1;
 		min-height: 0;
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-lg);
+
+		> .purple-cys-notice {
+			margin: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-3xl) 0;
+		}
+	}
+
+	// In the modal the cards are full-width sections split by dividers, without their own border.
+	.purple-cys-options {
+		gap: 0;
+	}
+
+	.purple-cys-theme-card {
+		min-height: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+
+		+ .purple-cys-theme-card {
+			border-top: 1px solid var(--wpds-color-stroke-surface-neutral);
+		}
+	}
+
+	.purple-cys-theme-card__content {
 		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-3xl);
 	}
 
-	// Cards share the panel with the 280px column, so the image column is a bit narrower.
+	// Sections share the panel with the 280px column, so the image column is a bit narrower.
 	.purple-cys-theme-card__media {
 		flex-basis: 320px;
 	}
 
-	@media (max-width: 768px) {
-		&__steps {
-			display: none;
-		}
+	.purple-cys-theme-card--marketplace .purple-cys-theme-card__content,
+	.purple-cys-theme-card--current-theme .purple-cys-theme-card__content {
+		min-height: 200px;
 	}
 }
 
