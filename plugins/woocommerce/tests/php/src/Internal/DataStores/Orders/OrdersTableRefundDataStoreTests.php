@@ -341,6 +341,33 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Suppressing filters during refund deletion does not fire woocommerce_order_refund_deleted.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_with_suppressed_filters_does_not_fire_order_refund_deleted( bool $hpos_on_or_off ): void {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$refund_deleted_count = did_action( 'woocommerce_delete_order_refund' );
+		$order_refund_deleted = did_action( 'woocommerce_order_refund_deleted' );
+
+		$refund->get_data_store()->delete( $refund, array( 'suppress_filters' => true ) );
+
+		$this->assertSame( 0, $refund->get_id(), 'The refund should be deleted.' );
+		$this->assertSame( $refund_deleted_count + 1, did_action( 'woocommerce_delete_order_refund' ), 'The existing refund deletion action should still fire.' );
+		$this->assertSame( $order_refund_deleted, did_action( 'woocommerce_order_refund_deleted' ), 'The new action should not fire when filters are suppressed.' );
+	}
+
+	/**
 	 * @testdox Deleting an order with HPOS does not fire woocommerce_order_refund_deleted for its refunds.
 	 */
 	public function test_order_deletion_does_not_fire_order_refund_deleted(): void {
