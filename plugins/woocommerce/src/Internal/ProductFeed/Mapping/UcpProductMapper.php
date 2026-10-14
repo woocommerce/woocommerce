@@ -866,7 +866,9 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Find the visible variations carrying every selected option value.
 	 *
 	 * Matches on the parent item's variation attributes, so no variation is loaded
-	 * to be rejected. A label matches a term's name or its slug, case-insensitively.
+	 * to be rejected. A label matches a term's name or its slug, case-insensitively,
+	 * and a variation left as "Any" for an attribute accepts every label, as the
+	 * storefront does.
 	 *
 	 * @param array $item Store API item response of the variable product.
 	 * @param array $selected Selected option values, each `{ name, label }`.
@@ -884,7 +886,15 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			return array();
 		}
 
-		$names    = $this->term_names( $item );
+		$names = $this->term_names( $item );
+
+		// A name no variation attribute carries can never match; without this
+		// check the "Any" rule below would accept it on every variation.
+		$known = array_fill_keys( array_map( 'strtolower', array_keys( $names ) ), true );
+		if ( array_diff_key( $selection, $known ) ) {
+			return array();
+		}
+
 		$matching = array();
 
 		foreach ( (array) $item['variations'] as $variation ) {
@@ -904,7 +914,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			}
 
 			foreach ( $selection as $name => $label ) {
-				if ( ! isset( $values[ $name ] ) || ! in_array( $label, $values[ $name ], true ) ) {
+				if ( isset( $values[ $name ] ) && ! in_array( $label, $values[ $name ], true ) ) {
 					continue 2;
 				}
 			}

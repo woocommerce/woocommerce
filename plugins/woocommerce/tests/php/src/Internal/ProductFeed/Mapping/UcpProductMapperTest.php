@@ -226,6 +226,57 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The storefront treats an "Any" variation attribute as a wildcard and
+	 * `options` advertises every term for it, so a selection must match it too.
+	 *
+	 * @testdox A variation left as "Any" for an attribute should match every selection of it.
+	 */
+	public function test_detail_selection_matches_any_variations(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Any Color' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes(
+			array(
+				WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ),
+				WC_Helper_Product::create_product_attribute_object( 'color', array( 'red', 'blue' ) ),
+			)
+		);
+		$parent_id = $variable->save();
+
+		foreach ( array( 'small', 'large' ) as $size ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes(
+				array(
+					'pa_size'  => $size,
+					'pa_color' => '',
+				)
+			);
+			$variation->set_regular_price( '10' );
+			$variation->set_status( 'publish' );
+			$variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+
+		$selected = array(
+			array(
+				'name'  => 'color',
+				'label' => 'red',
+			),
+			array(
+				'name'  => 'size',
+				'label' => 'large',
+			),
+		);
+		$mapped   = ( new UcpProductMapper( 'USD' ) )->map_detail_product( wc_get_product( $parent_id ), $selected );
+
+		$this->assertSame( $selected, $mapped['selected'] );
+		$this->assertCount( 1, $mapped['variants'] );
+		$this->assertCount( 2, $mapped['options'][1]['values'] );
+	}
+
+	/**
 	 * Agents compare titles, SKUs and option labels literally, so the storefront
 	 * HTML formatter must not reach them and both option lists must agree.
 	 *
