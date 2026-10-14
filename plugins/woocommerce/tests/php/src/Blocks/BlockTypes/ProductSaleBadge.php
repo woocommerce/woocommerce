@@ -151,9 +151,12 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		foreach ( $attributes['style']['spacing']['margin'] as $side => $value ) {
 			$this->assertStringContainsString( 'margin-' . $side . ':' . $value . ';', $style );
 		}
-		foreach ( array( 'color:#123456;', 'background-color:#abcdef;', 'border-color:#654321;', 'border-width:3px;', 'border-radius:8px;', 'font-size:24px;', 'line-height:1.5;' ) as $declaration ) {
+		foreach ( array( 'color:#123456;', 'background-color:#abcdef;', 'border-color:#654321;', 'border-width:3px;', 'border-radius:8px;', 'line-height:1.5;' ) as $declaration ) {
 			$this->assertStringContainsString( $declaration, $style, 'Supported styles should remain on the inner badge.' );
 		}
+		// WordPress may resolve the custom font size to a fluid clamp() value.
+		$font_size = (string) wp_get_typography_font_size_value( array( 'size' => $attributes['style']['typography']['fontSize'] ) );
+		$this->assertStringContainsString( 'font-size:' . str_replace( ' ', '', $font_size ) . ';', $style, 'The resolved font size should remain on the inner badge.' );
 	}
 
 	/**
