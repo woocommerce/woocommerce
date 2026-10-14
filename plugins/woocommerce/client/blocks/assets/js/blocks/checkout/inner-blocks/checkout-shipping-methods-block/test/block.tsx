@@ -4,6 +4,8 @@
 import { act, render, within } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
 import { cartStore } from '@woocommerce/block-data';
+import { store as noticesStore } from '@wordpress/notices';
+import { noticeContexts } from '@woocommerce/base-context';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 
 /**
@@ -91,6 +93,31 @@ describe( 'Checkout shipping methods block', () => {
 
 		expect( block.getByLabelText( skeletonLabel ) ).toBeInTheDocument();
 		expect( block.queryByText( warningText ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'keeps shipping method notices in the block while showing the skeleton', () => {
+		setUpCart( {
+			shippingAddress: completeAddress,
+			isUpdateQueued: true,
+		} );
+		dispatch( noticesStore ).createErrorNotice( 'Shipping method notice', {
+			id: 'shipping-method-notice',
+			context: noticeContexts.SHIPPING_METHODS,
+		} );
+
+		const block = renderBlock();
+
+		expect( block.getByLabelText( skeletonLabel ) ).toBeInTheDocument();
+		expect(
+			block.getByText( 'Shipping method notice' )
+		).toBeInTheDocument();
+
+		act( () => {
+			dispatch( noticesStore ).removeNotice(
+				'shipping-method-notice',
+				noticeContexts.SHIPPING_METHODS
+			);
+		} );
 	} );
 
 	it( 'shows the no-rates warning once the server has returned no rates for the completed address', () => {

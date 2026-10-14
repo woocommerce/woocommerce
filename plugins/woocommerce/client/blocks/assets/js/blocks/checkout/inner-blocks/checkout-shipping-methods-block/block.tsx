@@ -127,19 +127,27 @@ const Block = ( {
 	const shippingRatesPackageCount =
 		getShippingRatesPackageCount( shippingRates );
 
+	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
+
 	// Rates for a completed address are still on their way, so expect some rather than reporting there are none.
 	if (
 		isShippingRatesStale &&
-		! getShippingRatesRateCount( filteredShippingRates ) &&
-		hasAllFieldsForShippingRates( shippingAddress )
+		addressComplete &&
+		! getShippingRatesRateCount( filteredShippingRates )
 	) {
-		return <CheckoutShippingSkeleton />;
+		return (
+			<>
+				<StoreNoticesContainer
+					context={ noticeContexts.SHIPPING_METHODS }
+				/>
+				<CheckoutShippingSkeleton />
+			</>
+		);
 	}
 
 	if ( ! hasCalculatedShipping && ! shippingRatesPackageCount ) {
 		return <NoShippingAddressMessage />;
 	}
-	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
 
 	return (
 		<>
