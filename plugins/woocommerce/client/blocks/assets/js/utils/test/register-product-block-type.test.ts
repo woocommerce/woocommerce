@@ -158,10 +158,10 @@ describe( 'registerProductBlockType', () => {
 		mockIsSiteEditor = true;
 		const registerProductBlockType = loadRegistrationFunction();
 
-		registerProductBlockType(
-			'woocommerce/per-product-template-block',
-			blockSettings
-		);
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/per-product-template-block',
+		} );
 		mockContextSubscription();
 
 		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 2 );
@@ -169,9 +169,11 @@ describe( 'registerProductBlockType', () => {
 			'woocommerce/per-product-template-block'
 		);
 		expect( mockRegisterBlockType ).toHaveBeenLastCalledWith(
-			'woocommerce/per-product-template-block',
 			expect.objectContaining( {
+				name: 'woocommerce/per-product-template-block',
 				title: 'Test product block',
+			} ),
+			expect.objectContaining( {
 				ancestor: undefined,
 			} )
 		);
@@ -183,26 +185,33 @@ describe( 'registerProductBlockType', () => {
 		mockIsSiteEditor = false;
 		const registerProductBlockType = loadRegistrationFunction();
 
-		registerProductBlockType( 'woocommerce/pattern-block', {
-			...blockSettings,
-			isAvailableOnPostEditor: true,
-		} );
 		registerProductBlockType(
-			'woocommerce/site-editor-only-block',
-			blockSettings
+			{
+				...blockSettings,
+				name: 'woocommerce/pattern-block',
+			},
+			{ isAvailableOnPostEditor: true }
 		);
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/site-editor-only-block',
+		} );
 		mockContextSubscription();
 
 		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 1 );
 		expect( mockRegisterBlockType ).toHaveBeenCalledWith(
-			'woocommerce/pattern-block',
 			expect.objectContaining( {
+				name: 'woocommerce/pattern-block',
 				title: 'Test product block',
+			} ),
+			expect.objectContaining( {
 				ancestor: [ 'woocommerce/single-product' ],
 			} )
 		);
 		expect( mockRegisterBlockType ).not.toHaveBeenCalledWith(
-			'woocommerce/site-editor-only-block',
+			expect.objectContaining( {
+				name: 'woocommerce/site-editor-only-block',
+			} ),
 			expect.anything()
 		);
 	} );
