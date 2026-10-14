@@ -88,17 +88,13 @@ class Settings {
 	 * @return array Payment gateway titles, keyed by gateway id.
 	 */
 	private function get_payment_gateway_titles() {
-		global $wpdb;
-
 		$titles = array();
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			$titles[ $gateway->id ] = $gateway->get_method_title();
 		}
 
 		// A gateway that is no longer installed still has orders, so it stays in the filter under its id.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$stored = $wpdb->get_col( "SELECT DISTINCT payment_method FROM {$wpdb->prefix}wc_order_stats WHERE payment_method != '' ORDER BY payment_method" );
-
+		$stored  = OrdersDataStore::get_all_payment_methods();
 		$titles += array_combine( $stored, $stored );
 
 		return $titles;

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders;
 
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Query as OrdersQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
@@ -105,6 +106,41 @@ class PaymentMethodTest extends WC_REST_Unit_Test_Case {
 				'No gateway should be stored as NULL, not as an empty string.'
 			);
 		}
+	}
+
+	/**
+	 * @testdox The synced payment methods list each gateway once, and leave out a refund's repeat and an order without a gateway.
+	 */
+	public function test_get_all_payment_methods_lists_each_synced_gateway_once(): void {
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $this->orders['bacs']->get_id(),
+				'amount'   => 10.00,
+			)
+		);
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( '' );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+
+		$this->assertSame( array( 'bacs', 'cheque', 'cod' ), OrdersDataStore::get_all_payment_methods() );
+	}
+
+	/**
+	 * @testdox Syncing an order paid with a new gateway adds it to the cached payment methods.
+	 */
+	public function test_sync_adds_a_new_gateway_to_the_cached_payment_methods(): void {
+		OrdersDataStore::get_all_payment_methods();
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'a_new_gateway' );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$this->assertContains( 'a_new_gateway', wp_cache_get( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' ) );
 	}
 
 	/**
