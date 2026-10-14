@@ -44,7 +44,9 @@ jest.mock( '../components/task', () => ( {
 	Task: () => <div>task-screen</div>,
 } ) );
 
-jest.mock( '../setup-task-list', () => ( {} ) );
+jest.mock( '../setup-task-list', () => ( {
+	SetupTaskList: () => <div>setup-task-list</div>,
+} ) );
 
 jest.mock( '../components/placeholder', () => ( {
 	TasksPlaceholder: () => <div>task-placeholder</div>,
@@ -152,6 +154,22 @@ describe( 'Marketplace task experiment', () => {
 			);
 		}
 	);
+
+	it( 'renders the other task lists while the assignment loads', async () => {
+		mockAssignment( 'first_position' );
+		mockTaskLists( [
+			{ id: 'setup', isVisible: true, tasks: [] },
+			...makeTaskLists(),
+		] );
+		render( <TaskLists query={ {} } /> );
+
+		expect( screen.getByText( 'setup-task-list' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'task-placeholder' ) ).toBeInTheDocument();
+		await screen.findAllByRole( 'listitem' );
+		expect(
+			screen.queryByText( 'task-placeholder' )
+		).not.toBeInTheDocument();
+	} );
 
 	it.each( [
 		[

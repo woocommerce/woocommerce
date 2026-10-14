@@ -23,7 +23,7 @@ type Variation =
 	| typeof COPY_FREE_AND_PAID
 	| typeof FIRST_POSITION;
 
-const TASK_LIST_ID = 'extended';
+export const MARKETPLACE_TASK_LIST_ID = 'extended';
 const TASK_ID = 'extend-store';
 
 // 2027-03-01 00:00 UTC. No assignment is requested after this.
@@ -45,7 +45,7 @@ const toVariation = ( variationName: string | null ): Variation => {
 
 // The Marketplace task when `taskList` is the extended list.
 const findMarketplaceTask = ( taskList: TaskListType | undefined ) =>
-	taskList?.id === TASK_LIST_ID
+	taskList?.id === MARKETPLACE_TASK_LIST_ID
 		? taskList.tasks.find( ( { id } ) => id === TASK_ID )
 		: undefined;
 
@@ -57,7 +57,9 @@ const isMarketplaceTaskInTest = ( taskLists: TaskListType[] ): boolean => {
 		return false;
 	}
 
-	const taskList = taskLists.find( ( { id } ) => id === TASK_LIST_ID );
+	const taskList = taskLists.find(
+		( { id } ) => id === MARKETPLACE_TASK_LIST_ID
+	);
 	const task = taskList?.isVisible
 		? findMarketplaceTask( taskList )
 		: undefined;

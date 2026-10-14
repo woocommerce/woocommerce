@@ -25,6 +25,7 @@ import { TaskList } from './components/task-list';
 import { getAdminSetting } from '~/utils/admin-settings';
 import {
 	applyMarketplaceTaskVariation,
+	MARKETPLACE_TASK_LIST_ID,
 	useMarketplaceTaskVariation,
 } from './marketplace-task-experiment';
 
@@ -117,7 +118,7 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 			? SetupTaskListPlaceholder
 			: TasksPlaceholder;
 
-	if ( isResolving || isLoadingVariation ) {
+	if ( isResolving ) {
 		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
@@ -127,6 +128,15 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
+
+					// Only the list with the Marketplace task waits for the assignment.
+					if (
+						isLoadingVariation &&
+						id === MARKETPLACE_TASK_LIST_ID
+					) {
+						return <TasksPlaceholder key={ id } query={ query } />;
+					}
+
 					const TaskListComponent =
 						id === 'setup' ? SetupTaskList : TaskList;
 
