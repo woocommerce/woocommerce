@@ -133,7 +133,7 @@ const getDirtyPropsToValidate = (
 };
 
 const isShippingRatesUpdateQueued = () =>
-	select( cartStore ).getCartMeta().isShippingRatesUpdateQueued;
+	!! select( cartStore ).getCartMeta().isShippingRatesUpdateQueued;
 
 /**
  * Updates the queued shipping rates flag, skipping the dispatch when it is unchanged.
