@@ -229,7 +229,7 @@ class StockSyncController {
 			: admin_url( 'admin.php?page=wc-customer-stock-notifications&status=active_customer_stock_notifications' );
 
 		/* translators: 1: restocked product names, 2: URL of the Back in Stock Notifications page */
-		$notice_message = sprintf( __( 'Back-in-stock notifications for %1$s are now being processed. Subscribed customers will receive these emails over the next few minutes. You can monitor or manage individual subscriptions on the <a href="%2$s">Stock Notifications page</a>.', 'woocommerce' ), wp_sprintf( '%l', $product_names ), esc_url( $list_url ) );
+		$notice_message = sprintf( __( 'Back-in-stock notifications for %1$s have been queued. Subscribed customers will receive these emails shortly. You can monitor or manage individual subscriptions on the <a href="%2$s">Stock Notifications page</a>.', 'woocommerce' ), wp_sprintf( '%l', $product_names ), esc_url( $list_url ) );
 
 		\wp_admin_notice(
 			$notice_message,
