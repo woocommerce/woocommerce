@@ -216,6 +216,28 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_provider_display_name falls back to the slug for a custom provider with no name.
+	 */
+	public function test_get_provider_display_name_falls_back_to_slug_for_other_without_name(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'other',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'other', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
 	 * @testdox get_provider_display_name falls back to the provider name for an unknown slug.
 	 */
 	public function test_get_provider_display_name_falls_back_to_name_for_unknown_slug(): void {

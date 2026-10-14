@@ -745,8 +745,8 @@ class FulfillmentUtils {
 	 *
 	 * Unlike {@see self::resolve_provider_name()}, which returns the stable slug for
 	 * known providers, this returns the provider's display name (e.g. "DHL" for "dhl")
-	 * so it can be shown to customers. Custom ("other") providers use the merchant-entered
-	 * name, and an unknown slug falls back to that name or the slug itself.
+	 * so it can be shown to customers. Custom providers use the merchant-entered name,
+	 * and an unknown slug falls back to that name or the slug itself.
 	 *
 	 * @since 11.3.0
 	 *
@@ -758,14 +758,16 @@ class FulfillmentUtils {
 		$provider_slug = $fulfillment->get_shipment_provider() ?? '';
 		$provider_name = (string) $fulfillment->get_meta( '_provider_name', true );
 
+		// 'other' is the reserved sentinel for a merchant-entered custom provider, so its
+		// name always comes from meta, never from a provider that happens to share the key.
 		if ( 'other' === $provider_slug ) {
-			$label = $provider_name;
+			$label = '' !== $provider_name ? $provider_name : $provider_slug;
 		} else {
 			$known_providers = self::get_shipping_providers();
 			if ( isset( $known_providers[ $provider_slug ] ) ) {
 				$label = $known_providers[ $provider_slug ]->get_name();
 			} else {
-				$label = ! empty( $provider_name ) ? $provider_name : $provider_slug;
+				$label = '' !== $provider_name ? $provider_name : $provider_slug;
 			}
 		}
 
