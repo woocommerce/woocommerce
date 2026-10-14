@@ -455,8 +455,8 @@ final class WooCommerce {
 
 		$might_collect_wccom_tracker_data = $is_admin || $is_cli || defined( 'DOING_CRON' );
 		if ( $might_collect_wccom_tracker_data ) {
-			$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register(); // Perf: negligible — hooks woocommerce_tracker_data (weekly cron only); cost is one add_filter per request; not worth gating.
-			$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register(); // Perf: negligible — same as VariationGallery\Telemetry above.
+			$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
 		}
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
