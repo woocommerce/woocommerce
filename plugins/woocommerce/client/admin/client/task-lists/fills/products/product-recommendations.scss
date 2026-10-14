@@ -46,7 +46,7 @@
 		padding-inline-start: $gap;
 	}
 
-	// stack.scss hides the focus ring on cards; keep one on these links.
+	// stack.scss hides the focus ring on cards; keep one on these.
 	.woocommerce-list__item-inner:focus-visible {
 		@include button-style__focus();
 	}

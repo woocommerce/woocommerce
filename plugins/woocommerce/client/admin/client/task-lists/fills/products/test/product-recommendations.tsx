@@ -36,10 +36,21 @@ const items = [
 	},
 ];
 
-describe( 'ProductRecommendations', () => {
-	beforeEach( () => jest.clearAllMocks() );
+const bookingsClick = {
+	suggestion_slug: 'products-list-empty-body-bookings',
+	context: 'products-list-empty-body',
+	product: 'woocommerce-bookings',
+	promoted: '',
+	target: 'https://woocommerce.com/products/woocommerce-bookings/?utm=1',
+};
 
-	it( 'tracks each item as displayed and links out in a new tab', () => {
+describe( 'ProductRecommendations', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+		window.open = jest.fn();
+	} );
+
+	it( 'tracks each item as displayed', () => {
 		render( <ProductRecommendations items={ items } /> );
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 2 );
@@ -53,31 +64,44 @@ describe( 'ProductRecommendations', () => {
 				target: 'https://woocommerce.com/products/gift-cards/',
 			}
 		);
-
-		// Rows come from List, whose items carry role="menuitem".
-		const link = screen.getByText( 'Bookings' ).closest( 'a' );
-		expect( link ).toHaveAttribute( 'target', '_blank' );
-		expect( link ).toHaveAttribute(
-			'href',
-			'https://woocommerce.com/products/woocommerce-bookings/?utm=1'
-		);
 	} );
 
-	it( 'tracks clicks on an item and on the browse all link', async () => {
+	it( 'tracks a card click and opens the product in a new tab', async () => {
 		render( <ProductRecommendations items={ items } /> );
 		( recordEvent as jest.Mock ).mockClear();
 
 		await userEvent.click( screen.getByText( 'Bookings' ) );
-		expect( recordEvent ).toHaveBeenLastCalledWith(
+
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'marketplace_suggestion_clicked',
-			{
-				suggestion_slug: 'products-list-empty-body-bookings',
-				context: 'products-list-empty-body',
-				product: 'woocommerce-bookings',
-				promoted: '',
-				target: 'https://woocommerce.com/products/woocommerce-bookings/?utm=1',
-			}
+			bookingsClick
 		);
+		expect( window.open ).toHaveBeenCalledWith(
+			bookingsClick.target,
+			'_blank',
+			'noopener,noreferrer'
+		);
+	} );
+
+	it( 'handles Enter on a focused card once', async () => {
+		render( <ProductRecommendations items={ items } /> );
+		( recordEvent as jest.Mock ).mockClear();
+
+		screen.getByRole( 'menuitem', { name: /Bookings/ } ).focus();
+		await userEvent.keyboard( '{Enter}' );
+
+		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'marketplace_suggestion_clicked',
+			bookingsClick
+		);
+		expect( window.open ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'tracks the browse all link', async () => {
+		render( <ProductRecommendations items={ items } /> );
+		( recordEvent as jest.Mock ).mockClear();
 
 		await userEvent.click(
 			screen.getByRole( 'link', {
@@ -89,22 +113,6 @@ describe( 'ProductRecommendations', () => {
 			expect.objectContaining( {
 				suggestion_slug: 'products-empty-footer-browse-all',
 				context: 'products-list-empty-footer',
-			} )
-		);
-	} );
-
-	it( 'tracks a keyboard click on an item once', async () => {
-		render( <ProductRecommendations items={ items } /> );
-		( recordEvent as jest.Mock ).mockClear();
-
-		screen.getByText( 'Bookings' ).closest( 'a' )?.focus();
-		await userEvent.keyboard( '{Enter}' );
-
-		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'marketplace_suggestion_clicked',
-			expect.objectContaining( {
-				suggestion_slug: 'products-list-empty-body-bookings',
 			} )
 		);
 	} );
