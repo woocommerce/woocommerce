@@ -719,6 +719,25 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A product that is entirely out of stock is refused on add, mapped to `out_of_stock`.
+	 */
+	public function test_add_out_of_stock_product_is_reported_as_out_of_stock(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_name( 'UCP Sold Out' );
+		$product->set_regular_price( '7.00' );
+		$product->set_stock_status( 'outofstock' );
+		$sold_out_id = $product->save();
+
+		$response = $this->request( 'POST', '/carts', array( 'line_items' => array( array( 'item' => array( 'id' => (string) $sold_out_id ) ) ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'out_of_stock', $data['messages'][0]['code'] );
+		$this->assertSame( '$.line_items', $data['messages'][0]['path'] );
+	}
+
+	/**
 	 * An id this store never signed is reported as not found, in the envelope.
 	 */
 	public function test_unknown_cart_id_is_not_found(): void {
