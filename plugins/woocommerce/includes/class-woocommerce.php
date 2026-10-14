@@ -31,7 +31,6 @@ use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\LoggingUtil;
-use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
@@ -400,7 +399,6 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class ); // Performance note: can be gated with is_admin() once switched getting orders counts from a caching service.
 		$container->get( CustomerEmailVerification::class );
-		$container->get( OrderLogsCleanupHelper::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -456,8 +454,9 @@ final class WooCommerce {
 			$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register(); // hooks woocommerce_debug_tools (Status > Tools page).
 		}
 
-		$might_need_handling_action_scheduler_task = $is_admin || $is_cli || defined( 'DOING_CRON' ); // Weekly recurring action, the gate reflects how it can be triggered.
+		$might_need_handling_action_scheduler_task = $is_admin || $is_cli || defined( 'DOING_CRON' );
 		if ( $might_need_handling_action_scheduler_task ) {
+			$container->get( Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper::class );
 			$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
 		}
