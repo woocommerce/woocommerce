@@ -124,7 +124,10 @@ export const ProductRecommendations = ( {
 					id={ HEADING_ID }
 					className="woocommerce-task-products__title"
 				>
-					{ __( 'Expand your store', 'woocommerce' ) }
+					{ __(
+						'Expand your store with more product options',
+						'woocommerce'
+					) }
 				</Text>
 				<Text
 					as="p"

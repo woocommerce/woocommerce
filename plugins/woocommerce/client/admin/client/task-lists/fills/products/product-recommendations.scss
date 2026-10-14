@@ -15,9 +15,8 @@
 		}
 	}
 
-	// Secondary text on the page's gray background; $gray-700 drops below 4.5:1 there.
 	.woocommerce-product-recommendations__description {
-		color: #50575d;
+		color: $gray-700;
 	}
 
 	.woocommerce-products-stack {
