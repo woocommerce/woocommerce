@@ -33,9 +33,7 @@ const getDataMock = () => ( {
 		}
 
 		if ( storeName === 'core/edit-site' ) {
-			return mockIsSiteEditor
-				? { getEditedPostType: () => mockPostType }
-				: undefined;
+			return mockIsSiteEditor ? {} : undefined;
 		}
 
 		return undefined;
