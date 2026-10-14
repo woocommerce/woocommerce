@@ -40,6 +40,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
+		'woocommerce/order-notes-query',
 	);
 
 	/**
@@ -249,6 +250,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-add-note'      => array(
 				'readonly'    => false,
 				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
 				'destructive' => false,
 			),
 		);
@@ -670,6 +676,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'note' => 'denied',
 				),
 			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array(
+					'id' => 1,
+				),
+			),
 		);
 	}
 
@@ -1038,6 +1050,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
+			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array( 'id' => -123 ),
 			),
 		);
 	}
@@ -1846,6 +1862,47 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
 		$this->assertNotEmpty( $result['orders'][0]['line_items'] );
 		$this->assertNotEmpty( $result['orders'][0]['currency_symbol'] );
+	}
+
+	/**
+	 * @testdox Should list every note of an order, newest first.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_notes_query_lists_every_note( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$order->add_order_note( 'Internal note.' );
+		$order->add_order_note( 'Customer note.', true );
+
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+
+		$by_content = array_column( $result['notes'], 'customer_note', 'note' );
+		$this->assertTrue( $by_content['Customer note.'] );
+		$this->assertFalse( $by_content['Internal note.'] );
+
+		$ids    = array_column( $result['notes'], 'id' );
+		$sorted = $ids;
+		rsort( $sorted );
+		$this->assertContainsOnly( 'int', $ids );
+		$this->assertSame( $sorted, $ids, 'Notes should be newest first.' );
+	}
+
+	/**
+	 * @testdox Should return a not-found error when order-notes-query receives an unknown order ID.
+	 */
+	public function test_order_notes_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
 	}
 
 	/**
