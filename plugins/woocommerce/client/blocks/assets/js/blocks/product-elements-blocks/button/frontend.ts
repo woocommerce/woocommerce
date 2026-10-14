@@ -166,13 +166,13 @@ const productButtonStore = {
 
 			const context = getContext< Context >();
 
-			// Pass quantityToAdd as a delta. The cart store will add this
-			// to the current quantity, ensuring rapid clicks compound correctly.
+			// Pass the quantity to add as the delta `quantity`. The cart store
+			// adds it to the current quantity, ensuring rapid clicks compound
+			// correctly.
 			yield actions.addCartItem(
 				{
 					id: product.id,
-					quantityToAdd: context.quantityToAdd,
-					type: product.type,
+					quantity: context.quantityToAdd,
 				},
 				{
 					showCartUpdatesNotices: false,

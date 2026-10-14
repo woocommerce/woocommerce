@@ -306,9 +306,8 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				yield wooActions.addCartItem(
 					{
 						id: product.id,
-						quantityToAdd: quantity[ product.id ],
+						quantity: quantity[ product.id ],
 						variation: selectedAttributes,
-						type: product.type,
 					},
 					{
 						showCartUpdatesNotices: false,

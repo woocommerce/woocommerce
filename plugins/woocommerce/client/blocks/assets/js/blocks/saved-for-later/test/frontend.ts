@@ -137,6 +137,52 @@ describe( 'Saved-for-later onClickMoveToCart', () => {
 		jest.clearAllMocks();
 	} );
 
+	it( 'adds a simple entry with exactly { id, quantity } of the entry and no options', async () => {
+		mockContext.listItem = makeListItem( {
+			id: 42,
+			variation_id: 0,
+			quantity: 3,
+		} );
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickMoveToCart() );
+
+		expect( mockAddCartItem.mock.calls ).toStrictEqual( [
+			[ { id: 42, quantity: 3 } ],
+		] );
+	} );
+
+	it( 'adds a variation entry with exactly { id, quantity, variation } using the slug-form attribute names and no options', async () => {
+		mockContext.listItem = makeListItem( {
+			id: 99,
+			product_id: 42,
+			variation_id: 99,
+			quantity: 2,
+			variation: [
+				{
+					attribute: 'Color',
+					raw_attribute: 'attribute_pa_color',
+					value: 'blue',
+				},
+			],
+		} );
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickMoveToCart() );
+
+		expect( mockAddCartItem.mock.calls ).toStrictEqual( [
+			[
+				{
+					id: 99,
+					quantity: 2,
+					variation: [
+						{ attribute: 'attribute_pa_color', value: 'blue' },
+					],
+				},
+			],
+		] );
+	} );
+
 	it( 'removes the entry when addCartItem resolves a successful outcome', async () => {
 		mockContext.listItem = makeListItem();
 
