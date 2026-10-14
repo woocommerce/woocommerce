@@ -959,28 +959,27 @@ class FeaturesController {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public function feature_is_enabled( string $feature_id ): bool {
-		$feature = $this->get_feature_definition( $feature_id );
-
-		if ( null === $feature ) {
+		$definition = $this->get_feature_definition( $feature_id );
+		if ( null === $definition ) {
 			return false;
 		}
 
 		// Handle deprecated features - return the backwards-compatible value.
-		if ( ! empty( $feature['deprecated_since'] ) ) {
-			return (bool) ( $feature['deprecated_value'] ?? false );
+		if ( ! empty( $definition['deprecated_since'] ) ) {
+			return (bool) ( $definition['deprecated_value'] ?? false );
 		}
 
+		// Dedicated overrides to bypass the settings.
 		if ( 'analytics' === $feature_id && WCAdminFeatures::is_analytics_disabled_by_legacy_filters() ) {
 			return false;
 		}
-
-		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {
+		if ( 'email_improvements' === $feature_id && $this->is_preview_email_improvements_enabled() ) {
 			return true;
 		}
 
-		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
-		$value         = 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
-		return $value;
+		$default_value = ! empty( $definition['enabled_by_default'] ) ? 'yes' : 'no';
+		$option_key    = $definition['option_key'] ?? sprintf( 'woocommerce_feature_%s_enabled', $feature_id );
+		return 'yes' === get_option( $option_key, $default_value );
 	}
 
 	/**
@@ -2165,13 +2164,9 @@ class FeaturesController {
 	 * Check if the email improvements feature is enabled in preview mode in Settings > Emails.
 	 * This is used to force the email improvements feature without affecting shoppers.
 	 *
-	 * @param string $feature_id The feature id.
 	 * @return bool Whether the email improvements feature is enabled in preview mode.
 	 */
-	private function is_preview_email_improvements_enabled( string $feature_id ): bool {
-		if ( 'email_improvements' !== $feature_id ) {
-			return false;
-		}
+	private function is_preview_email_improvements_enabled(): bool {
 		/**
 		 * This filter is documented in templates/emails/email-styles.php
 		 *
