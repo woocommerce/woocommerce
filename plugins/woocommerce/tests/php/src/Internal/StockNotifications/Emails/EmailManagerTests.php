@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
+use WC_Helper_Customer;
 use WC_Helper_Product;
 
 /**
@@ -129,6 +130,54 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should include the unsubscribe link in the plain-text back-in-stock and verified emails sent to a guest.
+	 */
+	public function test_plain_text_emails_include_unsubscribe_link_for_guest() {
+		$notification = $this->build_notification();
+
+		foreach ( $this->get_plain_text_contents( $notification ) as $email_id => $plain_text ) {
+			$this->assertStringContainsString( 'To stop receiving these messages, unsubscribe here:', $plain_text, $email_id );
+			$this->assertStringContainsString( 'email_link_action=unsubscribe', $plain_text, $email_id );
+			$this->assertStringContainsString( 'notification_id=' . $notification->get_id(), $plain_text, $email_id );
+			$this->assertStringNotContainsString( '<a ', $plain_text, $email_id );
+		}
+	}
+
+	/**
+	 * @testdox Should include the manage-notifications link in the plain-text back-in-stock and verified emails sent to a linked shopper.
+	 */
+	public function test_plain_text_emails_include_manage_link_for_linked_shopper() {
+		$customer     = WC_Helper_Customer::create_customer();
+		$notification = $this->build_notification();
+		$notification->set_user_id( $customer->get_id() );
+		$notification->save();
+
+		foreach ( $this->get_plain_text_contents( $notification ) as $email_id => $plain_text ) {
+			$this->assertStringContainsString( 'To manage your notifications, log in to your account:', $plain_text, $email_id );
+			$this->assertStringContainsString( 'email_link_action=unsubscribe', $plain_text, $email_id );
+			$this->assertStringContainsString( 'notification_id=' . $notification->get_id(), $plain_text, $email_id );
+			$this->assertStringNotContainsString( '<a ', $plain_text, $email_id );
+		}
+	}
+
+	/**
+	 * Render the plain-text content of the back-in-stock and verified emails for a notification.
+	 *
+	 * @param Notification $notification The notification to render.
+	 * @return array<string,string> Plain-text content keyed by email ID.
+	 */
+	private function get_plain_text_contents( Notification $notification ): array {
+		$emails   = WC()->mailer()->get_emails();
+		$contents = array();
+		foreach ( array( 'WC_Email_Customer_Stock_Notification', 'WC_Email_Customer_Stock_Notification_Verified' ) as $email_id ) {
+			$email                 = $emails[ $email_id ];
+			$email->object         = $notification;
+			$contents[ $email_id ] = $email->get_content_plain();
+		}
+		return $contents;
 	}
 
 	/**
