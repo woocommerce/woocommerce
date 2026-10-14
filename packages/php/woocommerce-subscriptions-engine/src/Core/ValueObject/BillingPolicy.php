@@ -4,9 +4,9 @@
  *
  * An extension may use {@see self::from_array()} to parse its plan billing arrays. The
  * engine stores plan policies opaquely and does not construct this on plan writes. It
- * does read one payload with it: renewal and reactivation parse a contract's plan
- * snapshot `billing_policy`, and the live plan's `billing_policy` when the contract has
- * no usable snapshot policy, both through {@see self::from_array()}, so a plan whose
+ * does read one payload with it: renewal parses a contract's plan snapshot
+ * `billing_policy`, and the live plan's `billing_policy` when the contract has no usable
+ * snapshot policy, both through {@see self::from_array()}, so a plan whose
  * contracts the engine renews must store this shape there. A policy always has a
  * usable cadence: construction refuses an unknown period or a non-positive interval.
  * The array

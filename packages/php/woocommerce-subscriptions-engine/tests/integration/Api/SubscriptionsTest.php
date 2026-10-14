@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for the interim Subscriptions lifecycle and renewal facade.
+ * Integration tests for the interim Subscriptions renewal facade.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -15,7 +15,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Subscriptions;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Gateway\GatewayCapabilities;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Checkout\OrderLinkage;
@@ -27,7 +26,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepos
 class SubscriptionsTest extends EngineIntegrationTestCase {
 
 	/**
-	 * Gateway id used for the lifecycle charge - declares `recurring` and completes
+	 * Gateway id used for the renewal charge - declares `recurring` and completes
 	 * the charge inline (the dummy-gateway shape), matching the real gateway used in CI.
 	 */
 	private const GATEWAY = 'dummy';
@@ -203,13 +202,6 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox cancel returns false for an unknown contract.
-	 */
-	public function test_cancel_unknown_contract_returns_false(): void {
-		$this->assertFalse( Subscriptions::cancel( 999999 ) );
-	}
-
-	/**
 	 * @testdox renew_now returns null for an unknown contract.
 	 */
 	public function test_renew_now_unknown_contract_returns_null(): void {
@@ -217,9 +209,9 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The full lifecycle runs through the facade: buy, renew, cancel.
+	 * @testdox A purchased contract renews through the facade.
 	 */
-	public function test_full_lifecycle_buy_renew_cancel(): void {
+	public function test_buy_then_renew_through_the_facade(): void {
 		// Buy: signup builds cycle 1 (billed).
 		$contract    = $this->sign_up_contract();
 		$contract_id = $contract->get_id();
@@ -245,49 +237,5 @@ class SubscriptionsTest extends EngineIntegrationTestCase {
 		$after_renew = Contracts::get( $contract_id );
 		$this->assertInstanceOf( ContractView::class, $after_renew );
 		$this->assertSame( '2026-03-15 00:00:00', $after_renew->get_next_payment_gmt() );
-
-		// Cancel: the contract goes terminal.
-		$this->assertTrue( Subscriptions::cancel( $contract_id ) );
-
-		$after_cancel = Contracts::get( $contract_id );
-		$this->assertInstanceOf( ContractView::class, $after_cancel );
-		$this->assertSame( ContractStatus::CANCELLED, $after_cancel->get_status() );
-	}
-
-	/**
-	 * @testdox the lifecycle verbs return false for an unknown contract.
-	 */
-	public function test_lifecycle_actions_return_false_for_an_unknown_contract(): void {
-		$this->assertFalse( Subscriptions::hold( 987654 ) );
-		$this->assertFalse( Subscriptions::reactivate( 987654 ) );
-		$this->assertFalse( Subscriptions::cancel_at_period_end( 987654 ) );
-	}
-
-	/**
-	 * @testdox the portal lifecycle runs through the facade: hold, reactivate, cancel at period end.
-	 */
-	public function test_portal_lifecycle_hold_reactivate_cancel_at_period_end(): void {
-		$contract    = $this->sign_up_contract();
-		$contract_id = $contract->get_id();
-		$this->assertNotNull( $contract_id );
-
-		$this->assertTrue( Subscriptions::hold( $contract_id ) );
-		$held = Contracts::get( $contract_id );
-		$this->assertInstanceOf( ContractView::class, $held );
-		$this->assertSame( ContractStatus::ON_HOLD, $held->get_status() );
-		$this->assertNull( $held->get_next_payment_gmt(), 'Hold disarms the next-due moment.' );
-
-		$this->assertTrue( Subscriptions::reactivate( $contract_id ) );
-		$active = Contracts::get( $contract_id );
-		$this->assertInstanceOf( ContractView::class, $active );
-		$this->assertSame( ContractStatus::ACTIVE, $active->get_status() );
-		$this->assertNotNull( $active->get_next_payment_gmt(), 'Reactivate re-arms the next-due moment.' );
-
-		$this->assertTrue( Subscriptions::cancel_at_period_end( $contract_id ) );
-		$pending = Contracts::get( $contract_id );
-		$this->assertInstanceOf( ContractView::class, $pending );
-		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $pending->get_status() );
-		$this->assertNull( $pending->get_next_payment_gmt(), 'Cancel at period end disarms the next-due moment.' );
-		$this->assertNotNull( $pending->get_end_gmt(), 'The former next-due moment becomes the end date.' );
 	}
 }
