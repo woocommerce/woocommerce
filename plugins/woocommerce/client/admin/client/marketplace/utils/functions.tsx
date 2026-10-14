@@ -27,7 +27,7 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
-import { NoticeOptions, NoticeStatus } from '../contexts/types';
+import { NoticeAction, NoticeOptions, NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
@@ -356,6 +356,7 @@ type WpAjaxResponse = {
 };
 
 type WpAjaxResponseData = {
+	errorCode?: string;
 	errorMessage?: string;
 	activateUrl?: string;
 };
@@ -388,6 +389,7 @@ function wpAjax(
 					success: false,
 					data: {
 						message: error.errorMessage,
+						code: error.errorCode,
 					},
 				} );
 			},
@@ -526,6 +528,87 @@ const getRefreshErrorMessage = ( error: unknown ): string => {
 	return message ?? __( 'Unexpected error.', 'woocommerce' );
 };
 
+/**
+ * Build the notice for a failed My Subscriptions update. Core's `errorCode` tells us when the
+ * new version needs a newer WordPress or PHP; for anything else, core's message is appended.
+ *
+ * @param productName Product name shown in the notice.
+ * @param error       The rejection value from updateProduct().
+ * @param onRetry     Called by the "Try again" action.
+ * @return The notice message and its actions.
+ */
+const getUpdateErrorNotice = (
+	productName: string,
+	error: unknown,
+	onRetry: () => void
+): { message: string; actions: NoticeAction[] } => {
+	const data = ( error as { data?: { message?: unknown; code?: unknown } } )
+		?.data;
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	if ( data?.code === 'incompatible_wp_required_version' ) {
+		return {
+			message: sprintf(
+				// translators: %s is the product name.
+				__(
+					'%s couldn’t be updated. This version requires a newer version of WordPress.',
+					'woocommerce'
+				),
+				productName
+			),
+			actions: wccomSettings.updateCoreUrl
+				? [
+						{
+							label: __( 'Update WordPress', 'woocommerce' ),
+							url: wccomSettings.updateCoreUrl,
+						},
+					]
+				: [],
+		};
+	}
+
+	if ( data?.code === 'incompatible_php_required_version' ) {
+		return {
+			message: sprintf(
+				// translators: %s is the product name.
+				__(
+					'%s couldn’t be updated. This version requires a newer version of PHP.',
+					'woocommerce'
+				),
+				productName
+			),
+			actions: wccomSettings.updatePhpUrl
+				? [
+						{
+							label: __( 'Learn more', 'woocommerce' ),
+							url: wccomSettings.updatePhpUrl,
+						},
+					]
+				: [],
+		};
+	}
+
+	let message = sprintf(
+		// translators: %s is the product name.
+		__( '%s couldn’t be updated.', 'woocommerce' ),
+		productName
+	);
+	if ( typeof data?.message === 'string' && data.message !== '' ) {
+		message += ' ' + data.message;
+	}
+
+	return {
+		message,
+		actions: [
+			{
+				label: __( 'Try again', 'woocommerce' ),
+				onClick: onRetry,
+				url: '',
+			},
+		],
+	};
+};
+
 const removeNotice = ( productKey: string ) => {
 	void dispatch( noticeStore ).removeNotice( productKey );
 };
@@ -641,6 +724,7 @@ export {
 	updateProduct,
 	addNotice,
 	getRefreshErrorMessage,
+	getUpdateErrorNotice,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,

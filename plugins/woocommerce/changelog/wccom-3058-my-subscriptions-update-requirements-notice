@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show why an extension update failed on My Subscriptions when it needs a newer version of WordPress or PHP.

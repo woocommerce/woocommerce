@@ -16,6 +16,7 @@ import RenewModal from './renew-modal';
 import SubscribeModal from './subscribe-modal';
 import {
 	addNotice,
+	getUpdateErrorNotice,
 	removeNotice,
 	updateProduct,
 } from '../../../../utils/functions';
@@ -104,24 +105,17 @@ export default function Update( props: UpdateProps ) {
 					product_current_version: props.subscription.version,
 				} );
 			} )
-			.catch( () => {
+			.catch( ( error: unknown ) => {
+				const { message, actions } = getUpdateErrorNotice(
+					props.subscription.product_name,
+					error,
+					update
+				);
 				addNotice(
 					props.subscription.product_key,
-					sprintf(
-						// translators: %s is the product name.
-						__( '%s couldn’t be updated.', 'woocommerce' ),
-						props.subscription.product_name
-					),
+					message,
 					NoticeStatus.Error,
-					{
-						actions: [
-							{
-								label: __( 'Try again', 'woocommerce' ),
-								onClick: update,
-								url: '',
-							},
-						],
-					}
+					{ actions }
 				);
 				setIsUpdating( false );
 

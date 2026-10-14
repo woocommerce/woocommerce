@@ -99,6 +99,8 @@ class WC_Helper_Admin {
 			$settings['wccomHelper']['wooUpdateCount']          = WC_Helper_Updater::get_updates_count_based_on_site_status();
 			$settings['wccomHelper']['connected_notice']        = PluginsHelper::get_wccom_connected_notice( $auth_user_email );
 			$settings['wccomHelper']['woocomConnectNoticeType'] = WC_Helper_Updater::get_woo_connect_notice_type();
+			$settings['wccomHelper']['updateCoreUrl']           = current_user_can( 'update_core' ) ? network_admin_url( 'update-core.php' ) : '';
+			$settings['wccomHelper']['updatePhpUrl']            = wp_get_update_php_url();
 
 			if ( WC_Helper::is_site_connected() ) {
 				$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
