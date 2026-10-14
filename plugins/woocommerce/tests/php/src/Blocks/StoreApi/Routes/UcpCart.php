@@ -118,15 +118,31 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * The session, customer and cart the harness set up, so `simulate_new_request()`
+	 * can swap them for a test and tearDown can put them back.
+	 *
+	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null}
+	 */
+	private $wc_globals_backup = array();
+
+	/**
 	 * Enable the UCP routes before the REST server is built.
 	 */
 	protected function setUp(): void {
 		update_option( self::FEATURE_OPTION, 'yes' );
 		parent::setUp();
+
+		// A per-test DB transaction rolls back rows but not the WC() singletons, so a test
+		// that swaps them would leak into the next one. Keep the originals to restore.
+		$this->wc_globals_backup = array(
+			'session'  => WC()->session,
+			'customer' => WC()->customer,
+			'cart'     => WC()->cart,
+		);
 	}
 
 	/**
-	 * Restore the default disabled state and clear the cancellation marker.
+	 * Restore the default disabled state, the cancellation marker and the WC() singletons.
 	 */
 	protected function tearDown(): void {
 		delete_option( self::FEATURE_OPTION );
@@ -139,6 +155,12 @@ class UcpCart extends ControllerTestCase {
 		if ( WC()->cart instanceof \WC_Cart ) {
 			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
 		}
+
+		// Undo any `simulate_new_request()` swap so the next test gets the cart, session and
+		// customer the harness built, not a bare one left behind here.
+		WC()->session  = $this->wc_globals_backup['session'];
+		WC()->customer = $this->wc_globals_backup['customer'];
+		WC()->cart     = $this->wc_globals_backup['cart'];
 
 		parent::tearDown();
 	}
