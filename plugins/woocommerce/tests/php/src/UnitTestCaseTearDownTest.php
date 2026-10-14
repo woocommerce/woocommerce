@@ -77,18 +77,28 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	public function test_setup_drops_attribute_taxonomies_without_an_attribute_row(): void {
 		global $wc_product_attributes;
 
-		$kept   = \WC_Helper_Product::create_attribute( 'kept_with_a_row', array() )['attribute_taxonomy'];
+		$kept   = 'pa_kept_with_a_row';
 		$leaked = 'pa_leaked_without_a_row';
-		register_taxonomy( $leaked, 'product' );
-		$wc_product_attributes[ $leaked ] = (object) array( 'attribute_name' => 'leaked_without_a_row' );
 
-		$method = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'unregister_stale_attribute_taxonomies' );
-		$method->setAccessible( true );
-		$method->invoke( $this );
+		try {
+			\WC_Helper_Product::create_attribute( 'kept_with_a_row', array() );
+			register_taxonomy( $leaked, 'product' );
+			$wc_product_attributes[ $leaked ] = (object) array( 'attribute_name' => 'leaked_without_a_row' );
 
-		$this->assertFalse( taxonomy_exists( $leaked ), 'A pa_* taxonomy with no attribute row should be unregistered.' );
-		$this->assertArrayNotHasKey( $leaked, $wc_product_attributes, 'An attribute with no row should leave $wc_product_attributes.' );
-		$this->assertTrue( taxonomy_exists( $kept ), 'A pa_* taxonomy with an attribute row should stay registered.' );
-		$this->assertArrayHasKey( $kept, $wc_product_attributes, 'An attribute with a row should stay in $wc_product_attributes.' );
+			$method = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'unregister_stale_attribute_taxonomies' );
+			$method->setAccessible( true );
+			$method->invoke( $this );
+
+			$this->assertFalse( taxonomy_exists( $leaked ), 'A pa_* taxonomy with no attribute row should be unregistered.' );
+			$this->assertArrayNotHasKey( $leaked, $wc_product_attributes, 'An attribute with no row should leave $wc_product_attributes.' );
+			$this->assertTrue( taxonomy_exists( $kept ), 'A pa_* taxonomy with an attribute row should stay registered.' );
+			$this->assertArrayHasKey( $kept, $wc_product_attributes, 'An attribute with a row should stay in $wc_product_attributes.' );
+		} finally {
+			// The rollback drops the kept attribute's row but not its taxonomy, which a later test on another base class would still see.
+			foreach ( array( $kept, $leaked ) as $taxonomy ) {
+				unregister_taxonomy( $taxonomy );
+				unset( $wc_product_attributes[ $taxonomy ] );
+			}
+		}
 	}
 }
