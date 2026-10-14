@@ -20,7 +20,6 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -386,7 +385,7 @@ final class WooCommerce {
 		$container->get( ProductTermCacheInvalidator::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
-		$container->get( WebhookUtil::class ); // Perf: admin/CLI-only — hooks deleted_user + delete_user_form (admin user management); gate behind $is_admin || $is_cli.
+		$container->get( WebhookUtil::class );
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
@@ -395,7 +394,6 @@ final class WooCommerce {
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
-		$container->get( MCPAdapterProvider::class ); // Perf: REST-only — hooks rest_api_init; gate behind is_rest_api_request() to avoid container get + class autoload on frontend/admin.
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
@@ -430,6 +428,7 @@ final class WooCommerce {
 
 		$needs_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
 		if ( $needs_rest_routes_for_rest_initialization ) {
+			$container->get( Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class ); // Perf: REST-only — hooks rest_api_init; gate behind is_rest_api_request() to avoid container get + class autoload on frontend/admin.
 			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
