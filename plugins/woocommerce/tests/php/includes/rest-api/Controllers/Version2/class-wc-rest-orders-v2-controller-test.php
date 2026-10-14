@@ -125,6 +125,27 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	}
 
 	/**
+	 * @testdox Coupon discounts in the V2 order response use the requested decimal precision.
+	 */
+	public function test_coupon_lines_respect_decimal_precision() {
+		$order  = new WC_Order();
+		$coupon = new WC_Order_Item_Coupon();
+		$coupon->set_code( 'precision-coupon' );
+		$coupon->set_discount( '1.2345' );
+		$coupon->set_discount_tax( '0.2345' );
+		$order->add_item( $coupon );
+		$order->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() );
+		$request->set_param( 'dp', 5 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( '1.23450', $response->get_data()['coupon_lines'][0]['discount'] );
+		$this->assertSame( '0.23450', $response->get_data()['coupon_lines'][0]['discount_tax'] );
+	}
+
+	/**
 	 * Test that `order_item_display_meta` keeps a variation attribute whose value only appears in the
 	 * parent product name.
 	 */
