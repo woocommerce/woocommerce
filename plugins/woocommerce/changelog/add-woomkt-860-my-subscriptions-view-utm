@@ -1,4 +1,4 @@
-Significance: minor
+Significance: patch
 Type: dev
-Comment: Add the UTM parameters of in-admin links to the marketplace_view Tracks event, so arrivals from the dashboard widget, inbox note and Plugins screen can be attributed.
+Comment: Add in-admin link UTM parameters to the marketplace_view Tracks event; no merchant-facing change.
 
