@@ -426,8 +426,8 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
 
-		$needs_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
-		if ( $needs_rest_routes_for_rest_initialization ) {
+		$might_need_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
+		if ( $might_need_rest_routes_for_rest_initialization ) {
 			$container->get( Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class ); // Perf: REST-only — hooks rest_api_init; gate behind is_rest_api_request() to avoid container get + class autoload on frontend/admin.
 			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
