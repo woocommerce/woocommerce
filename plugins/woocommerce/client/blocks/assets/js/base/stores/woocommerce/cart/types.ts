@@ -78,6 +78,14 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => Promise< void >;
+		/**
+		 * Sets the quantity of the cart line with the given key. Rejects when
+		 * `key` is missing.
+		 */
+		updateCartItem: ( args: {
+			key: string;
+			quantity: number;
+		} ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions

@@ -52,9 +52,9 @@ type CartMutationMeta = {
 	/** The quantity changes this single mutation contributes, if it succeeds. */
 	quantityChanges: QuantityChanges;
 	/**
-	 * Whether this mutation was issued by an add-style action (`addCartItem`
-	 * or `batchAddCartItems`, regardless of whether it hit the `add-item` or
-	 * `update-item` endpoint) or by `removeCartItem`. Only `'add'`-origin
+	 * Whether this mutation was issued by an add-style action (`addCartItem`,
+	 * `updateCartItem` or `batchAddCartItems`, regardless of whether it hit the
+	 * `add-item` or `update-item` endpoint) or by `removeCartItem`. Only `'add'`-origin
 	 * successes trigger the legacy added-to-cart event and the screen-reader
 	 * announcement.
 	 */
@@ -185,7 +185,7 @@ let a11yPromise: Promise< typeof import( '@wordpress/a11y' ) > | null = null;
  * Kicks off (once) the dynamic import of `@wordpress/a11y` and stashes its
  * `speak` export into {@link speakFn} on resolution.
  *
- * Called at the start of `addCartItem` and `batchAddCartItems` so the module
+ * Called at the start of `addCartItem`, `updateCartItem` and `batchAddCartItems` so the module
  * is already loading — often already resolved — by the time the mutation
  * cycle settles and needs to announce. A rejected import (e.g. a chunk-load
  * failure) is swallowed: it degrades the eventual announcement to a no-op
@@ -375,6 +375,93 @@ const { actions } = store< Store >(
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// Show notices from server response.
+					const cart = result.data as Cart;
+					if ( cart && cartAfterOptimistic ) {
+						const infoNotices = getInfoNoticesFromCartUpdates(
+							cartAfterOptimistic,
+							cart
+						);
+						const errorNotices =
+							cart.errors.map( generateErrorNotice );
+						yield actions.updateNotices(
+							[ ...infoNotices, ...errorNotices ],
+							true
+						);
+					}
+				} catch ( error ) {
+					void actions.showNoticeError( error as Error );
+				}
+			},
+
+			/**
+			 * Sets the quantity of the cart line with the given key.
+			 *
+			 * Posts `update-item` with the rendered line carrying the new
+			 * quantity, or `{ key, quantity }` when no rendered line has that
+			 * key. The rendered quantity changes at once unless the line is sold
+			 * individually. A successful cycle fires the added-to-cart event and
+			 * announces `addedToCartText`. A rejected request shows an error
+			 * notice and the call still resolves.
+			 *
+			 * @param args          The update.
+			 * @param args.key      The key of the line to update. Required.
+			 * @param args.quantity The new absolute quantity of the line.
+			 * @throws {Error} When `key` is missing, before any request or change.
+			 */
+			*updateCartItem( {
+				key,
+				quantity,
+			}: {
+				key: string;
+				quantity: number;
+			} ): AsyncAction< void > {
+				if ( ! key ) {
+					throw new Error( 'updateCartItem: a key is required.' );
+				}
+
+				preloadA11y();
+
+				const existingItem = state.cart.items.find(
+					( item ) => item.key === key
+				);
+
+				// The rendered line echoed with the new quantity, so REST
+				// filters see the same body as for any rendered line. A key with
+				// no rendered line is posted bare.
+				const body = existingItem
+					? { ...existingItem, quantity }
+					: { key, quantity };
+
+				// Capture cart state after optimistic updates for notice comparison.
+				let cartAfterOptimistic: typeof state.cart | null = null;
+
+				try {
+					const result = ( yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/update-item',
+						method: 'POST',
+						body,
+						applyOptimistic: () => {
+							const isSoldIndividually =
+								!! existingItem &&
+								isCartItem( existingItem ) &&
+								existingItem.sold_individually;
+							if ( existingItem && ! isSoldIndividually ) {
+								existingItem.quantity = quantity;
+							}
+							cartAfterOptimistic = JSON.parse(
+								JSON.stringify( state.cart )
+							);
+						},
+						meta: {
+							quantityChanges: {
+								cartItemsPendingQuantity: existingItem
+									? [ key ]
+									: [],
+							},
+							origin: 'add',
+						},
+					} ) ) as TypeYield< typeof sendCartRequest >;
+
 					const cart = result.data as Cart;
 					if ( cart && cartAfterOptimistic ) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
