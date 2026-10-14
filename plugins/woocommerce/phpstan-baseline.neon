@@ -48610,12 +48610,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractBlock.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, array\|WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractBlock.php
-
-		-
 			message: '#^Parameter \#1 \$request of method WP_REST_Server\:\:get_namespace_index\(\) expects WP_REST_Request, array\<string, string\> given\.$#'
 			identifier: argument.type
 			count: 1

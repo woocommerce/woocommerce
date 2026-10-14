@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Pass the cart item and its key to the `woocommerce_cart_item_backorder_notification` filter, so the notice can vary per variation.
