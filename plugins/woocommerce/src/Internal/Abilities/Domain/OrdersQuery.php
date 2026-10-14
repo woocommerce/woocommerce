@@ -129,12 +129,6 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$created_date_arg = self::build_created_date_arg( $input );
 		if ( null !== $created_date_arg ) {
 			$args['date_created'] = $created_date_arg;
-		} else {
-			foreach ( array( 'date_after', 'date_before' ) as $field ) {
-				if ( ! empty( $input[ $field ] ) ) {
-					$args[ $field ] = wc_clean( $input[ $field ] );
-				}
-			}
 		}
 
 		$modified_date_query = self::build_modified_date_query_arg( $input );
@@ -223,22 +217,22 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 				'date_after'         => array(
 					'type'        => 'string',
-					'description' => __( 'Filter orders created after this date/time.', 'woocommerce' ),
+					'description' => __( 'Filter orders created after this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'date_before'        => array(
 					'type'        => 'string',
-					'description' => __( 'Filter orders created before this date/time.', 'woocommerce' ),
+					'description' => __( 'Filter orders created before this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'modified_after'     => array(
 					'type'        => 'string',
-					'description' => __( 'Filter orders modified after this date/time.', 'woocommerce' ),
+					'description' => __( 'Filter orders modified after this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'modified_before'    => array(
 					'type'        => 'string',
-					'description' => __( 'Filter orders modified before this date/time.', 'woocommerce' ),
+					'description' => __( 'Filter orders modified before this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.', 'woocommerce' ),
 					'format'      => 'date-time',
 				),
 				'orderby'            => array(
@@ -277,29 +271,20 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	/**
 	 * Build a date_created arg from date_after/date_before input.
 	 *
-	 * For values with a time, wc_get_orders() adds the store offset to date_after/date_before and then
-	 * compares them as UTC, so the offset is applied twice. UTC timestamps avoid that.
+	 * The timestamps are UTC, so wc_get_orders() compares them directly instead of
+	 * applying the store offset to the value a second time.
 	 *
 	 * @param array $input Ability input.
 	 * @return string|null Null when there is no valid created-date input.
 	 */
 	private static function build_created_date_arg( array $input ): ?string {
-		$after  = isset( $input['date_after'] ) && is_string( $input['date_after'] ) ? sanitize_text_field( $input['date_after'] ) : '';
-		$before = isset( $input['date_before'] ) && is_string( $input['date_before'] ) ? sanitize_text_field( $input['date_before'] ) : '';
+		$timestamps = self::resolve_date_range_timestamps( $input, 'date_after', 'date_before' );
 
-		if ( '' === $after && '' === $before ) {
+		if ( null === $timestamps ) {
 			return null;
 		}
 
-		$after_timestamp  = '' !== $after ? self::prepare_date_time_for_query( $after ) : null;
-		$before_timestamp = '' !== $before ? self::prepare_date_time_for_query( $before ) : null;
-
-		if (
-			( '' !== $after && null === $after_timestamp )
-			|| ( '' !== $before && null === $before_timestamp )
-		) {
-			return null;
-		}
+		list( $after_timestamp, $before_timestamp ) = $timestamps;
 
 		if ( null !== $after_timestamp && null !== $before_timestamp ) {
 			return $after_timestamp . '...' . $before_timestamp;
@@ -315,22 +300,13 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array|null
 	 */
 	private static function build_modified_date_query_arg( array $input ): ?array {
-		$after  = isset( $input['modified_after'] ) && is_string( $input['modified_after'] ) ? sanitize_text_field( $input['modified_after'] ) : '';
-		$before = isset( $input['modified_before'] ) && is_string( $input['modified_before'] ) ? sanitize_text_field( $input['modified_before'] ) : '';
+		$timestamps = self::resolve_date_range_timestamps( $input, 'modified_after', 'modified_before' );
 
-		if ( '' === $after && '' === $before ) {
+		if ( null === $timestamps ) {
 			return null;
 		}
 
-		$after_timestamp  = '' !== $after ? self::prepare_date_time_for_query( $after ) : null;
-		$before_timestamp = '' !== $before ? self::prepare_date_time_for_query( $before ) : null;
-
-		if (
-			( '' !== $after && null === $after_timestamp )
-			|| ( '' !== $before && null === $before_timestamp )
-		) {
-			return null;
-		}
+		list( $after_timestamp, $before_timestamp ) = $timestamps;
 
 		$date_query = array(
 			'column'    => 'post_modified_gmt',
@@ -349,14 +325,47 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Prepare a date-time string as a timestamp for second-precision order queries.
+	 * Resolve an after/before pair of input fields to UTC timestamps.
+	 *
+	 * @param array  $input        Ability input.
+	 * @param string $after_field  Input key for the lower bound.
+	 * @param string $before_field Input key for the upper bound.
+	 * @return array{0: int|null, 1: int|null}|null Null when neither field is set, or when a provided value is not a valid date-time.
+	 */
+	private static function resolve_date_range_timestamps( array $input, string $after_field, string $before_field ): ?array {
+		$after  = isset( $input[ $after_field ] ) && is_string( $input[ $after_field ] ) ? sanitize_text_field( $input[ $after_field ] ) : '';
+		$before = isset( $input[ $before_field ] ) && is_string( $input[ $before_field ] ) ? sanitize_text_field( $input[ $before_field ] ) : '';
+
+		if ( '' === $after && '' === $before ) {
+			return null;
+		}
+
+		$after_timestamp  = '' !== $after ? self::prepare_date_time_for_query( $after ) : null;
+		$before_timestamp = '' !== $before ? self::prepare_date_time_for_query( $before ) : null;
+
+		if (
+			( '' !== $after && null === $after_timestamp )
+			|| ( '' !== $before && null === $before_timestamp )
+		) {
+			return null;
+		}
+
+		return array( $after_timestamp, $before_timestamp );
+	}
+
+	/**
+	 * Parse a date-time string into a UTC timestamp for second-precision order queries.
+	 *
+	 * An explicit offset in the value (Z or ±HH:MM) is honoured; a value without one is read
+	 * in the store timezone. This covers every date-time format the input schema accepts and
+	 * applies the store offset only when the value omits its own.
 	 *
 	 * @param string $date_time Date-time string.
-	 * @return int|null
+	 * @return int|null Null when the value is not a valid date-time.
 	 */
 	private static function prepare_date_time_for_query( string $date_time ): ?int {
 		try {
-			return wc_string_to_datetime( $date_time )->getTimestamp();
+			return ( new \DateTimeImmutable( $date_time, wp_timezone() ) )->getTimestamp();
 		} catch ( \Exception $exception ) {
 			return null;
 		}
