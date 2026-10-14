@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the same order item IDs when a shopper retries a failed or unpaid order in the classic checkout with an unchanged cart.

@@ -747,6 +747,142 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
+	 */
+	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+
+		$resumed_id = $this->resume_order( $order_id );
+
+		$this->assertSame( $order_id, $resumed_id );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces the items whose cart section changed and keeps the line items.
+	 */
+	public function test_create_order_resume_replaces_changed_items_only(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( '_fees_hash', 'stale' );
+		$order->save();
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
+		$this->assertCount( 1, $after['fee'], 'The fee should be added again once, not duplicated.' );
+		$this->assertNotSame( $before['fee'], $after['fee'], 'The fee should be replaced.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order created before section hashes were stored keeps line items and replaces the rest.
+	 */
+	public function test_create_order_resume_without_stored_section_hashes_keeps_line_items(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		foreach ( array( '_shipping_hash', '_fees_hash', '_coupons_hash', '_taxes_hash' ) as $meta_key ) {
+			$order->delete_meta_data( $meta_key );
+		}
+		$order->save();
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( $before['line_item'], $after['line_item'] );
+		$this->assertCount( 1, $after['fee'] );
+		$this->assertNotSame( $before['fee'], $after['fee'] );
+		$this->assertNotEmpty( wc_get_order( $order_id )->get_meta( '_fees_hash' ), 'The section hashes should be stored again.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order removes item types the cart doesn't track, so extensions that add them at checkout don't duplicate them.
+	 */
+	public function test_create_order_resume_removes_untracked_item_types(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension item',
+				'order_item_type' => 'test_extension_item',
+			)
+		);
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertArrayNotHasKey( 'test_extension_item', $after );
+		$this->assertSame( $before['line_item'], $after['line_item'] );
+	}
+
+	/**
+	 * Creates an order from a cart with one product and one fee.
+	 *
+	 * @return int The order ID.
+	 */
+	private function create_order_with_line_item_and_fee(): int {
+		$product = WC_Helper_Product::create_simple_product();
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 5 );
+			}
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+
+		return $order_id;
+	}
+
+	/**
+	 * Runs checkout again with the order set as awaiting payment, as when a shopper retries a failed payment.
+	 *
+	 * @param int $order_id The order awaiting payment.
+	 * @return int|WP_Error The order ID returned by create_order().
+	 */
+	private function resume_order( int $order_id ) {
+		$original = WC()->session->get( 'order_awaiting_payment' );
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		try {
+			return $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		} finally {
+			WC()->session->set( 'order_awaiting_payment', $original );
+		}
+	}
+
+	/**
+	 * Reads an order's persisted item IDs, grouped by item type.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, int[]>
+	 */
+	private function get_order_item_ids_by_type( int $order_id ): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_item_id, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id",
+				$order_id
+			)
+		);
+
+		$ids_by_type = array();
+		foreach ( $rows as $row ) {
+			$ids_by_type[ $row->order_item_type ][] = (int) $row->order_item_id;
+		}
+		ksort( $ids_by_type );
+
+		return $ids_by_type;
+	}
+
+	/**
 	 * @testdox create_order_fee_lines sets tax status to 'none' for non-taxable cart fees and 'taxable' for taxable ones.
 	 *
 	 * @testWith [true, "taxable", ""]
