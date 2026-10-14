@@ -2879,7 +2879,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Percentage order fees added via AJAX are calculated on the net (ex-tax) order total.
+	 * @testdox Percentage order fees added via AJAX are calculated on the order items excluding tax.
 	 *
 	 * @testWith ["25%", 25.0, 5.0, 150.0]
 	 *           ["-25%", -25.0, -5.0, 90.0]
@@ -2889,20 +2889,20 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @param float  $expected_fee_tax Expected fee tax.
 	 * @param float  $expected_total  Expected order grand total.
 	 */
-	public function test_add_order_fee_percentage_uses_net_total( string $amount, float $expected_fee, float $expected_fee_tax, float $expected_total ): void {
+	public function test_add_order_fee_percentage_uses_items_excluding_tax( string $amount, float $expected_fee, float $expected_fee_tax, float $expected_total ): void {
 		$order = $this->create_order_with_20_percent_tax();
 
 		$fee = $this->add_order_fee_via_ajax( $order, $amount );
 
-		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Fee total should be a percentage of the net order total.' );
-		$this->assertEquals( $expected_fee_tax, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the net fee amount.' );
-		$this->assertEquals( $expected_total, (float) $fee->get_order()->get_total(), 'Order total should include the net-based fee and its tax.' );
+		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Fee total should be a percentage of the items excluding tax.' );
+		$this->assertEquals( $expected_fee_tax, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the fee amount.' );
+		$this->assertEquals( $expected_total, (float) $fee->get_order()->get_total(), 'Order total should include the fee and its tax.' );
 	}
 
 	/**
-	 * @testdox Percentage order fees include net shipping in their base.
+	 * @testdox Percentage order fees leave shipping out of their base.
 	 */
-	public function test_add_order_fee_percentage_includes_shipping_in_net_base(): void {
+	public function test_add_order_fee_percentage_excludes_shipping_from_base(): void {
 		$order = $this->create_order_with_20_percent_tax();
 
 		$shipping = new WC_Order_Item_Shipping();
@@ -2915,8 +2915,56 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
 
-		// Net base is items (100) + shipping (10) = 110; 10% of that is 11, not 13.20 (10% of tax-inclusive 132).
-		$this->assertEquals( 11.0, (float) $fee->get_total(), 'Percentage fee should use the net total including shipping.' );
+		// The base is the items (100), not items plus shipping (110), so 10% is 10, not 11.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should leave shipping out of its base.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees leave existing fees out of their base.
+	 */
+	public function test_add_order_fee_percentage_excludes_existing_fees_from_base(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->add_order_fee_via_ajax( $order, '10%' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The first fee (10) is not part of the base, so the second 10% is 10 again, not 11.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should leave existing fees out of its base.' );
+		$this->assertEquals( 144.0, (float) $fee->get_order()->get_total(), 'Order total should include both fees and their tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees are calculated on the items after coupon discounts.
+	 */
+	public function test_add_order_fee_percentage_uses_items_after_discounts(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$this->assertTrue( $order->apply_coupon( 'tenpercent' ), 'Fixture coupon should apply.' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The coupon brings the items to 90, so 10% is 9.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the items after discounts.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees use the items excluding tax when prices are entered including tax.
+	 */
+	public function test_add_order_fee_percentage_with_prices_including_tax(): void {
+		$order = $this->create_order_with_20_percent_tax( true );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The $100 price includes 16.67 tax, so the items are 83.33 and 10% is 8.33 plus 1.67 tax.
+		$this->assertEquals( 8.33, (float) $fee->get_total(), 'Fee total should be a percentage of the items excluding tax.' );
+		$this->assertEquals( 1.67, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the fee amount.' );
+		$this->assertEquals( 110.0, (float) $fee->get_order()->get_total(), 'Order total should include the fee and its tax.' );
 	}
 
 	/**
@@ -2946,13 +2994,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * Create a $100 order with a 20% tax line for order fee AJAX tests.
+	 * Create an order for one $100 product with a 20% tax rate for order fee AJAX tests.
 	 *
+	 * @param bool $prices_include_tax Whether the $100 price includes tax.
 	 * @return WC_Order
 	 */
-	private function create_order_with_20_percent_tax(): WC_Order {
+	private function create_order_with_20_percent_tax( bool $prices_include_tax = false ): WC_Order {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
 
 		WC_Tax::_insert_tax_rate(
 			array(
@@ -2977,22 +3026,24 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$order->calculate_totals( true );
 		$order->save();
 
-		$this->assertEquals( 20.0, (float) $order->get_total_tax(), 'Fixture order should have a $20 tax line.' );
-		$this->assertEquals( 120.0, (float) $order->get_total(), 'Fixture order should total $120 gross.' );
+		$this->assertEquals( $prices_include_tax ? 16.67 : 20.0, (float) $order->get_total_tax(), 'Fixture order should have a 20% tax line.' );
+		$this->assertEquals( $prices_include_tax ? 100.0 : 120.0, (float) $order->get_total(), 'Fixture order should have the expected gross total.' );
 
 		return $order;
 	}
 
 	/**
-	 * Add a fee to an order through the admin AJAX handler and return the stored fee line.
+	 * Add a fee to an order through the admin AJAX handler and return the new fee line.
 	 *
-	 * Asserts that the request succeeds and that the order then holds exactly one fee.
+	 * Asserts that the request succeeds and adds exactly one fee to the order.
 	 *
 	 * @param WC_Order $order  Order to add the fee to.
 	 * @param string   $amount Fee amount as typed in the admin prompt, fixed or with a trailing "%".
 	 * @return WC_Order_Item_Fee
 	 */
 	private function add_order_fee_via_ajax( WC_Order $order, string $amount ): WC_Order_Item_Fee {
+		$fee_count = count( wc_get_order( $order->get_id() )->get_fees() );
+
 		$this->_setRole( 'administrator' );
 		$_POST['security'] = wp_create_nonce( 'order-item' );
 		$_POST['order_id'] = $order->get_id();
@@ -3004,10 +3055,10 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$this->assertTrue( $response['success'] ?? false, 'Adding a fee via AJAX should succeed.' );
 
-		$fees = array_values( wc_get_order( $order->get_id() )->get_fees() );
-		$this->assertCount( 1, $fees, 'Exactly one fee should be added to the order.' );
+		$fees = wc_get_order( $order->get_id() )->get_fees();
+		$this->assertCount( $fee_count + 1, $fees, 'Exactly one fee should be added to the order.' );
 
-		return $fees[0];
+		return end( $fees );
 	}
 
 	/**
