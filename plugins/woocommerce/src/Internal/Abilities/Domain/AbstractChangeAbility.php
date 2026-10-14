@@ -63,6 +63,7 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	 * @return array|\WP_Error
 	 *
 	 * @since 10.9.0
+	 * @throws \Throwable When save() throws, after the rollback.
 	 */
 	public static function execute( array $input ) {
 		$subject = static::load( $input );
@@ -75,10 +76,18 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 			return $changed;
 		}
 
-		$saved = static::save( $subject );
+		wc_transaction_query( 'start' );
+		try {
+			$saved = static::save( $subject );
+		} catch ( \Throwable $e ) {
+			wc_transaction_query( 'rollback' );
+			throw $e;
+		}
 		if ( is_wp_error( $saved ) ) {
+			wc_transaction_query( 'rollback' );
 			return $saved;
 		}
+		wc_transaction_query( 'commit' );
 
 		return static::prepare_response( $subject );
 	}

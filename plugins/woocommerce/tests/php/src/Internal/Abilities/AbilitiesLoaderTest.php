@@ -1414,6 +1414,109 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create a variable product with its variations in one call.
+	 */
+	public function test_product_create_maps_variable_product_type_to_variable_product_with_variations(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'               => 'Variable Product',
+				'product_type_alias' => 'variable',
+				'attributes'         => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'Small', 'Large' ),
+					),
+				),
+				'variations'         => array(
+					array(
+						'attributes'    => array( 'Size' => 'Small' ),
+						'regular_price' => '10',
+						'sku'           => wp_unique_id( 'abilities-var-small-' ),
+					),
+					array(
+						'attributes'    => array( 'Size' => 'Large' ),
+						'regular_price' => '15',
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$this->assertSame( 'variable', $created['product']['type'] );
+		$this->assertCount( 2, $created['product']['variations'] );
+		$this->assertSame( '10', $created['product']['price'] );
+
+		$variation = wc_get_product( $created['product']['variations'][1] );
+		$this->assertSame( $created['product']['id'], $variation->get_parent_id() );
+		$this->assertSame( array( 'size' => 'Large' ), $variation->get_attributes() );
+		$this->assertSame( '15', $variation->get_regular_price() );
+	}
+
+	/**
+	 * @testdox Should reject a variation whose attribute option the product does not have.
+	 */
+	public function test_product_create_rejects_variation_with_unknown_attribute_option(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'               => 'Variable Product',
+				'product_type_alias' => 'variable',
+				'attributes'         => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'Small' ),
+					),
+				),
+				'variations'         => array(
+					array(
+						'attributes'    => array( 'Size' => 'Large' ),
+						'regular_price' => '10',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_variation_attribute_invalid', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return an error when a variation fails to save after the parent.
+	 */
+	public function test_product_create_returns_error_when_variation_save_fails(): void {
+		$fail_variations = static function ( bool $maybe_empty, array $postarr ): bool {
+			return 'product_variation' === $postarr['post_type'] ? true : $maybe_empty;
+		};
+		add_filter( 'wp_insert_post_empty_content', $fail_variations, 10, 2 );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'               => 'Variable Product',
+					'product_type_alias' => 'variable',
+					'attributes'         => array(
+						array(
+							'name'    => 'Size',
+							'options' => array( 'Small' ),
+						),
+					),
+					'variations'         => array(
+						array(
+							'attributes'    => array( 'Size' => 'Small' ),
+							'regular_price' => '10',
+						),
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'wp_insert_post_empty_content', $fail_variations, 10 );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_create_failed', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {

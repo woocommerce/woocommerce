@@ -24,8 +24,9 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
- * Only save() saves. The other steps must not save, send email or make HTTP
- * requests.
+ * Only save() saves, inside a database transaction. A WP_Error or an exception
+ * from save() rolls back every row it wrote. The other steps must not save,
+ * send email or make HTTP requests.
  *
  * The API is experimental while the `ability_contracts` feature exists.
  *
@@ -93,6 +94,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 *
 	 * @param mixed $input Ability input.
 	 * @return mixed
+	 * @throws \Throwable When save() throws, after the rollback.
 	 */
 	public function execute_change( $input = null ) {
 		$input   = is_array( $input ) ? $input : array();
@@ -123,10 +125,18 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $rejected;
 		}
 
-		$saved = $this->save( $subject );
+		wc_transaction_query( 'start' );
+		try {
+			$saved = $this->save( $subject );
+		} catch ( \Throwable $e ) {
+			wc_transaction_query( 'rollback' );
+			throw $e;
+		}
 		if ( is_wp_error( $saved ) ) {
+			wc_transaction_query( 'rollback' );
 			return $saved;
 		}
+		wc_transaction_query( 'commit' );
 
 		return $this->prepare_response( $subject );
 	}

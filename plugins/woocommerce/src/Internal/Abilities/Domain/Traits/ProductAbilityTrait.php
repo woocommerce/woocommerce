@@ -127,7 +127,7 @@ trait ProductAbilityTrait {
 		return array(
 			'type'        => 'string',
 			'description' => __(
-				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.',
+				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped; variable maps to a variable product with variations.',
 				'woocommerce'
 			),
 			'enum'        => null === $product_type_alias ? self::get_supported_product_type_aliases() : array( $product_type_alias ),
@@ -190,6 +190,56 @@ trait ProductAbilityTrait {
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
+			),
+			'attributes'        => array(
+				'type'        => 'array',
+				'description' => __( 'Attributes of a variable product. Each variation picks one option of each attribute.', 'woocommerce' ),
+				'items'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'name'    => array( 'type' => 'string' ),
+						'options' => array(
+							'type'     => 'array',
+							'items'    => array( 'type' => 'string' ),
+							'minItems' => 1,
+						),
+					),
+					'required'             => array( 'name', 'options' ),
+					'additionalProperties' => false,
+				),
+				'minItems'    => 1,
+			),
+			'variations'        => array(
+				'type'        => 'array',
+				'description' => __( 'Variations of a variable product. Each one maps attribute names to one option and sets its own price and stock.', 'woocommerce' ),
+				'items'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'attributes'     => array(
+							'type'                 => 'object',
+							'additionalProperties' => array( 'type' => 'string' ),
+						),
+						'sku'            => array( 'type' => 'string' ),
+						'regular_price'  => array(
+							'type'    => 'string',
+							'pattern' => self::get_product_price_input_pattern(),
+						),
+						'sale_price'     => array(
+							'type'    => 'string',
+							'pattern' => self::get_product_price_input_pattern(),
+						),
+						'manage_stock'   => array( 'type' => 'boolean' ),
+						'stock_quantity' => array( 'type' => self::get_product_stock_quantity_schema_type() ),
+						'stock_status'   => array(
+							'type' => 'string',
+							'enum' => array_keys( wc_get_product_stock_status_options() ),
+						),
+					),
+					'required'             => array( 'attributes', 'regular_price' ),
+					'additionalProperties' => false,
+				),
+				'minItems'    => 1,
+				'maxItems'    => 100,
 			),
 		);
 	}
@@ -312,6 +362,10 @@ trait ProductAbilityTrait {
 			return 'grouped';
 		}
 
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
+			return 'variable';
+		}
+
 		return new \WP_Error(
 			'woocommerce_product_type_unsupported',
 			__( 'Product type is not supported by this ability.', 'woocommerce' ),
@@ -397,6 +451,14 @@ trait ProductAbilityTrait {
 			'grouped'   => array(
 				'wc_type'       => ProductType::GROUPED,
 				'fields'        => array_merge( $common_fields, array( 'grouped_products' ) ),
+				'product_props' => array(
+					'manage_stock'   => false,
+					'stock_quantity' => '',
+				),
+			),
+			'variable'  => array(
+				'wc_type'       => ProductType::VARIABLE,
+				'fields'        => array_merge( $common_fields, array( 'attributes', 'variations' ) ),
 				'product_props' => array(
 					'manage_stock'   => false,
 					'stock_quantity' => '',
@@ -513,6 +575,7 @@ trait ProductAbilityTrait {
 			'external_url'      => 'set_product_url',
 			'button_text'       => 'set_button_text',
 			'grouped_products'  => 'set_children',
+			'attributes'        => 'set_attributes',
 		);
 
 		foreach ( $setters as $field => $setter ) {
@@ -634,6 +697,20 @@ trait ProductAbilityTrait {
 			}
 
 			return $grouped_product_ids;
+		}
+
+		if ( 'attributes' === $field ) {
+			$attributes = array();
+			foreach ( (array) $value as $position => $data ) {
+				$attribute = new \WC_Product_Attribute();
+				$attribute->set_name( wc_clean( $data['name'] ) );
+				$attribute->set_options( array_map( 'wc_clean', $data['options'] ) );
+				$attribute->set_position( $position );
+				$attribute->set_visible( true );
+				$attribute->set_variation( true );
+				$attributes[] = $attribute;
+			}
+			return $attributes;
 		}
 
 		if ( is_string( $value ) ) {
@@ -809,6 +886,7 @@ trait ProductAbilityTrait {
 			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
 			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'variations'        => $product instanceof \WC_Product_Variable ? array_map( 'absint', $product->get_children() ) : array(),
 			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
@@ -886,6 +964,11 @@ trait ProductAbilityTrait {
 					'grouped_products'  => array(
 						'type'        => 'array',
 						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
+						'items'       => array( 'type' => 'integer' ),
+					),
+					'variations'        => array(
+						'type'        => 'array',
+						'description' => __( 'Variation IDs of a variable product.', 'woocommerce' ),
 						'items'       => array( 'type' => 'integer' ),
 					),
 					'date_created'      => array(

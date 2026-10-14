@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the variable product type alias to the product abilities, create variations with the parent in one call, and roll back every row of a write ability when its save fails.
