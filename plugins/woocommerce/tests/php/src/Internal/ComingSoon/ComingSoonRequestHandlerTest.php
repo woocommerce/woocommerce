@@ -467,6 +467,42 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should hide the product from theme footer code on product pages, so it neither crashes nor shows product details.
+	 * @testWith ["no"]
+	 *           ["yes"]
+	 *
+	 * @param string $store_only Whether to restrict Coming Soon to store pages.
+	 */
+	public function test_product_page_clears_product_global( string $store_only ): void {
+		update_option( 'woocommerce_store_pages_only', $store_only );
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+		$this->assertIsString( $GLOBALS['product'] ?? null, 'WordPress must expose the product query var as the slug string.' );
+		$this->use_fixture_theme(
+			array(
+				'header.php' => '<!doctype html><html><head><?php wp_head(); ?></head><body>',
+				'footer.php' => '<?php wp_footer(); ?></body></html>',
+			)
+		);
+		// Mirrors theme footer code such as Storefront's sticky add-to-cart bar (#52375, #54294).
+		add_action(
+			'wp_footer',
+			function () {
+				global $product;
+				if ( $product && is_product() ) {
+					echo 'WC50520 product bar: ' . esc_html( $product->get_price() );
+				}
+			}
+		);
+
+		$output = $this->render( $this->sut->handle_classic_template_include( '/original.php' ) );
+
+		$this->assertNull( $GLOBALS['product'] ?? null, 'Theme code must see no product.' );
+		$this->assertStringContainsString( "<meta name='woo-coming-soon-page' content='yes'>", $output );
+		$this->assertStringNotContainsString( 'WC50520 product bar', $output );
+	}
+
+	/**
 	 * @testdox Should render one nonempty escaped document title with and without theme title support.
 	 * @testWith [false, "Shop & <launch>"]
 	 *           [true, "Shop &amp; &lt;launch&gt;"]

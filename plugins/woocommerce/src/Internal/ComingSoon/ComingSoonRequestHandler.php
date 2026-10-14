@@ -161,6 +161,9 @@ class ComingSoonRequestHandler {
 		wp_style_add_data( 'woocommerce-coming-soon-classic', 'rtl', 'replace' );
 		$this->add_coming_soon_meta();
 
+		// WordPress copies the product query var, a slug, into $product. Theme code expects a WC_Product or nothing.
+		unset( $GLOBALS['product'] );
+
 		return $selected;
 	}
 
