@@ -33,7 +33,7 @@
 	// The text column sets the card height, so the image is positioned out of the flow.
 	&__media {
 		position: relative;
-		flex: 0 0 360px;
+		flex: 0 0 320px;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -93,14 +93,9 @@
 		min-height: 280px;
 	}
 
-	&--marketplace,
-	&--current-theme {
-		min-height: 280px;
-	}
-
 	&--marketplace &__content,
 	&--current-theme &__content {
-		flex: 1;
+		min-height: 240px;
 	}
 
 	&--marketplace &__media {
@@ -266,7 +261,6 @@ a.purple-cys-link-button {
 	}
 
 	.purple-cys-theme-card {
-		min-height: 0;
 		border: 0;
 		border-radius: 0;
 		background: transparent;
@@ -286,15 +280,6 @@ a.purple-cys-link-button {
 		background: transparent;
 	}
 
-	// Sections share the panel with the 280px column, so the image column is a bit narrower.
-	.purple-cys-theme-card__media {
-		flex-basis: 320px;
-	}
-
-	.purple-cys-theme-card--marketplace .purple-cys-theme-card__content,
-	.purple-cys-theme-card--current-theme .purple-cys-theme-card__content {
-		min-height: 240px;
-	}
 }
 
 // Keep the "Purple prototype" admin bar menu usable while the modal is open.
