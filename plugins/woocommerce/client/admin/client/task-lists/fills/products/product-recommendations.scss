@@ -46,8 +46,8 @@
 		padding-inline-start: $gap;
 	}
 
-	// stack.scss hides the focus ring on cards; keep one on these.
-	.woocommerce-list__item-inner:focus-visible {
+	// stack.scss and List both style card focus at the same specificity; outrank them so the order stylesheets load in doesn't matter.
+	.woocommerce-list__item > .woocommerce-list__item-inner:focus-visible {
 		@include button-style__focus();
 	}
 
