@@ -104,6 +104,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
 				'email_restrictions'          => array(),
+				'auto_apply'                  => false,
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
 				'_links'                      => array(
@@ -173,6 +174,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
 				'email_restrictions'          => array(),
+				'auto_apply'                  => false,
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
 			),
@@ -249,6 +251,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
 				'email_restrictions'          => array(),
+				'auto_apply'                  => false,
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
 			),
@@ -460,6 +463,39 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the auto_apply flag can be written and read back over the REST API.
+	 * @since 11.3.0
+	 */
+	public function test_coupon_auto_apply_round_trip() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'       => 'auto-apply-rest',
+				'amount'     => '5.00',
+				'auto_apply' => true,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertTrue( $data['auto_apply'], 'auto_apply should be persisted on create' );
+		$this->assertTrue( ( new WC_Coupon( $data['id'] ) )->get_auto_apply(), 'auto_apply should be readable from the coupon object' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $data['id'] );
+		$request->set_body_params( array( 'auto_apply' => false ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( $response->get_data()['auto_apply'], 'auto_apply should be clearable over the API' );
+
+		// An auto-apply coupon left published would apply itself to the carts of later tests.
+		( new WC_Coupon( $data['id'] ) )->delete( true );
+	}
+
+	/**
 	 * Test coupon schema.
 	 * @since 3.5.0
 	 */
@@ -470,7 +506,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 28, count( $properties ) );
+		$this->assertEquals( 29, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'code', $properties );
 		$this->assertArrayHasKey( 'status', $properties );
@@ -497,6 +533,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'minimum_amount', $properties );
 		$this->assertArrayHasKey( 'maximum_amount', $properties );
 		$this->assertArrayHasKey( 'email_restrictions', $properties );
+		$this->assertArrayHasKey( 'auto_apply', $properties );
 		$this->assertArrayHasKey( 'used_by', $properties );
 	}
 

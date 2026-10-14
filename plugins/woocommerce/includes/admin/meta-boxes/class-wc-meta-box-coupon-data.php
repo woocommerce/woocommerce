@@ -162,6 +162,17 @@ class WC_Meta_Box_Coupon_Data {
 					)
 				);
 
+				// Auto apply. Sits with the restrictions because they are what decides which carts
+				// it lands on: with none set, it applies to every cart in the store.
+				woocommerce_wp_checkbox(
+					array(
+						'id'          => 'auto_apply',
+						'label'       => __( 'Apply coupon automatically', 'woocommerce' ),
+						'description' => __( 'Check this box to apply this coupon to every cart that meets the restrictions below, without the customer entering a code. Customers cannot remove it themselves. With no restrictions set, it applies to every cart in the store.', 'woocommerce' ),
+						'value'       => wc_bool_to_string( $coupon->get_auto_apply( 'edit' ) ),
+					)
+				);
+
 				// Individual use.
 				woocommerce_wp_checkbox(
 					array(
@@ -386,6 +397,7 @@ class WC_Meta_Box_Coupon_Data {
 				'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
 				'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
+				'auto_apply'                  => isset( $_POST['auto_apply'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The coupon nonce is verified before this method is called.
 			)
 		);
 

@@ -23,6 +23,7 @@ const EXAMPLE_COUPONS: CartResponseCouponItemWithLabel[] = [
 	{
 		code: 'AWSMSB',
 		discount_type: '',
+		is_removable: true,
 		label: 'Awesome Storybook coupon',
 		totals: {
 			...currencies.EUR,
@@ -33,6 +34,7 @@ const EXAMPLE_COUPONS: CartResponseCouponItemWithLabel[] = [
 	{
 		code: 'STONKS',
 		discount_type: '',
+		is_removable: true,
 		label: 'Most valuable coupon',
 		totals: {
 			...currencies.EUR,
