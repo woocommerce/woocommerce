@@ -11,6 +11,8 @@ class TextFieldType extends AbstractFieldType {
 	/**
 	 * Formats a stored text value with its input mask.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param mixed $value The stored value.
 	 * @param array $field The field.
 	 * @return mixed The formatted value.
