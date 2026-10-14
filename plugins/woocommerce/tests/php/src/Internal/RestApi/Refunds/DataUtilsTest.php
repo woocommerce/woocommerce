@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Refunds;
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Refunds;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use WC_Cache_Helper;
 use WC_Helper_Product;
 use WC_Order;

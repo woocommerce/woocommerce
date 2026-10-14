@@ -573,7 +573,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$schema_properties = wc_get_container()
-			->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class )
+			->get( \Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema::class )
 			->get_item_schema_properties();
 
 		$this->assertSchemaKeysMatchData( $schema_properties, $data, 'root' );
@@ -638,7 +638,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$item_id = $this->get_first_line_item_id( $order );
 
 		// Stub DataUtils so validate_preview_line_items passes but build_refund_preview throws.
-		$stub = new class() extends \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils {
+		$stub = new class() extends \Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils {
 			/**
 			 * Validation is forced to pass so the controller reaches the build step.
 			 *
@@ -667,7 +667,7 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
 			->init(
 				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema::class ),
-				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class ),
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema::class ),
 				wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery::class ),
 				$stub
 			);
@@ -691,9 +691,9 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 			wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller::class )
 				->init(
 					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema::class ),
-					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema::class ),
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Refunds\Schema\RefundPreviewSchema::class ),
 					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery::class ),
-					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils::class )
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils::class )
 				);
 		}
 	}
