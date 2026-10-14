@@ -768,7 +768,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'isUpdatingCart', () => {
+	describe( 'isCartUpdating', () => {
 		it( 'is true while a cart update request is in progress and false once it settles', async () => {
 			mockBatchFetch();
 			const batchFetch = global.fetch;
@@ -776,7 +776,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			global.fetch = jest.fn(
 				async ( url: RequestInfo | URL, init?: RequestInit ) => {
 					if ( init?.body ) {
-						duringRequest.push( mockState.isUpdatingCart );
+						duringRequest.push( mockState.isCartUpdating );
 					}
 					return batchFetch( url, init );
 				}
@@ -796,7 +796,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 
 			expect( duringRequest ).toEqual( [ true ] );
-			expect( mockState.isUpdatingCart ).toBe( false );
+			expect( mockState.isCartUpdating ).toBe( false );
 		} );
 	} );
 

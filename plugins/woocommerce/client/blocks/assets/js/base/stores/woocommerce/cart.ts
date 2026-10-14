@@ -92,7 +92,7 @@ export type Store = {
 		restUrl: string;
 		nonce: string;
 		// Whether a cart update request is in progress.
-		isUpdatingCart?: boolean;
+		isCartUpdating?: boolean;
 		findItemInCart: ( args: {
 			id: ClientCartItem[ 'id' ];
 			key?: ClientCartItem[ 'key' ];
@@ -516,7 +516,7 @@ async function sendCartRequest(
 				stateRef.cart = serverState;
 			},
 			onProcessingChange: ( isProcessing ) => {
-				stateRef.isUpdatingCart = isProcessing;
+				stateRef.isCartUpdating = isProcessing;
 			},
 			fetchHandler: async ( ...args ) => {
 				const response = await fetch( ...args );

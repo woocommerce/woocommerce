@@ -241,7 +241,7 @@ store< MiniCart >(
 
 			// The subtotal comes from the server, so it's out of date until a cart update finishes.
 			get isCartUpdating(): boolean {
-				return !! woocommerceState.isUpdatingCart;
+				return !! woocommerceState.isCartUpdating;
 			},
 
 			get drawerRole() {
