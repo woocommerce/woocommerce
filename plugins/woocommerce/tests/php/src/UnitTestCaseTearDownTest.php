@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Tests;
  * asserting it is gone in the next. A pair like that only holds under declaration order: run
  * the suite with --order-by=random or reverse and the assertion half runs first, passes
  * against state nothing has dirtied yet, and stops covering anything without ever going red.
+ * The one exception stages a leftover taxonomy before parent::setUp() in the same test, so it
+ * covers the setup call itself.
  */
 class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 
@@ -18,6 +20,38 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	 * Synthetic locale value, so the leak assertion cannot be satisfied by a WooCommerce default.
 	 */
 	private const LEAKED_LOCALE_LABEL = 'Leaked postcode label';
+
+	/**
+	 * A pa_* taxonomy with no attribute row, staged before every setup in this class.
+	 */
+	private const STALE_TAXONOMY = 'pa_stale_before_setup';
+
+	/**
+	 * Stage the leftover an earlier test would leave, then run the base setup.
+	 *
+	 * Only a registration is staged: an attribute row written here would land outside the
+	 * per-test transaction and persist.
+	 */
+	public function setUp(): void {
+		global $wc_product_attributes;
+
+		register_taxonomy( self::STALE_TAXONOMY, 'product' );
+		$wc_product_attributes[ self::STALE_TAXONOMY ] = (object) array( 'attribute_name' => 'stale_before_setup' );
+
+		parent::setUp();
+	}
+
+	/**
+	 * Drop the staged leftover in case setup did not.
+	 */
+	public function tearDown(): void {
+		global $wc_product_attributes;
+
+		unregister_taxonomy( self::STALE_TAXONOMY );
+		unset( $wc_product_attributes[ self::STALE_TAXONOMY ] );
+
+		parent::tearDown();
+	}
 
 	/**
 	 * Every piece of singleton state the teardown is responsible for is cleared.
@@ -69,6 +103,16 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 			WC()->countries->get_country_locale()['GB']['postcode']['label'] ?? null,
 			'The filtered locale should not still be cached.'
 		);
+	}
+
+	/**
+	 * @testdox Setup unregisters a pa_* taxonomy an earlier test left without an attribute row.
+	 */
+	public function test_setup_drops_a_leftover_attribute_taxonomy(): void {
+		global $wc_product_attributes;
+
+		$this->assertFalse( taxonomy_exists( self::STALE_TAXONOMY ), 'Setup should unregister a pa_* taxonomy with no attribute row.' );
+		$this->assertArrayNotHasKey( self::STALE_TAXONOMY, (array) $wc_product_attributes, 'Setup should drop its $wc_product_attributes entry.' );
 	}
 
 	/**
