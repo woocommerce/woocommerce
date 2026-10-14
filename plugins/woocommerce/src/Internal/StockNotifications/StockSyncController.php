@@ -183,7 +183,7 @@ class StockSyncController {
 			$transient_key = $this->get_notice_transient_key();
 			$pending_ids   = array_filter( array_map( 'absint', (array) get_transient( $transient_key ) ) );
 
-			set_transient( $transient_key, array_values( array_unique( array_merge( $pending_ids, $product_ids ) ) ), 5 * MINUTE_IN_SECONDS );
+			set_transient( $transient_key, array_values( array_unique( array_merge( $pending_ids, $product_ids ) ) ), DAY_IN_SECONDS );
 		} catch ( \Throwable $e ) {
 			$this->logger->error(
 				sprintf( 'StockSyncController: Failed to store the restock admin notice: %s', $e->getMessage() ),

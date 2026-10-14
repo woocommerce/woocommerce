@@ -310,6 +310,52 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that no notice is stored for restocks made outside wp-admin, without a user, or by a user who cannot manage the store.
+	 *
+	 * @testWith [ "front", "administrator" ]
+	 *           [ "dashboard", null ]
+	 *           [ "dashboard", "customer" ]
+	 *
+	 * @param string      $screen The current screen during the restock.
+	 * @param string|null $role   The role of the user making the restock, or null for no user.
+	 */
+	public function test_admin_notice_is_not_stored_outside_manager_admin_requests( string $screen, ?string $role ) {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$actor_id = null === $role ? 0 : ( 'administrator' === $role ? $admin_id : $this->factory->user->create( array( 'role' => $role ) ) );
+		wp_set_current_user( $actor_id );
+		set_current_screen( $screen );
+
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+		$this->sut->process_queue();
+
+		$this->assertFalse( get_transient( 'wc_customer_stock_notifications_product_sync_notice_' . $actor_id ) );
+
+		wp_set_current_user( $admin_id );
+		set_current_screen( 'dashboard' );
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		set_current_screen( 'front' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
 	 * Get a private property of an object.
 	 *
 	 * @param object $instance The object to get the property from.
