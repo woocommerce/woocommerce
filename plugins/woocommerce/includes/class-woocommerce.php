@@ -405,7 +405,7 @@ final class WooCommerce {
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
-		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register(); // Perf: admin/CLI-only — hooks after_plugin_row + upgrader_process_complete; gate behind $is_admin || $is_cli.
+		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
