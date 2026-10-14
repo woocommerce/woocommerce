@@ -153,6 +153,46 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should link to activate the MCP Adapter plugin, without the modal scripts, when it's installed but inactive.
+	 */
+	public function test_removed_notice_links_to_activate_installed_adapter(): void {
+		$this->set_up_removed_notice_conditions( false, true );
+		$this->register_plugin_install_script();
+
+		$output = $this->get_admin_notices_output();
+		$this->sut->handle_admin_enqueue_scripts();
+
+		$this->assertStringContainsString( 'Activate MCP Adapter', $output );
+		$this->assertStringContainsString( 'action=activate&amp;plugin=mcp-adapter%2Fmcp-adapter.php', $output );
+		$this->assertStringContainsString( '_wpnonce=', $output, 'The activation link should carry a nonce' );
+		$this->assertStringNotContainsString( 'Install MCP Adapter', $output );
+		$this->assertFalse( wp_script_is( 'plugin-install', 'enqueued' ), 'The modal scripts are only needed for the install link' );
+	}
+
+	/**
+	 * @testdox Should delete the old feature option once the MCP Adapter plugin is active, which hides the notice.
+	 */
+	public function test_admin_init_deletes_feature_option_when_adapter_plugin_active(): void {
+		$this->set_up_removed_notice_conditions( true, true, true );
+
+		$this->sut->handle_admin_init();
+
+		$this->assertFalse( get_option( 'woocommerce_feature_mcp_integration_enabled' ), 'The old feature option should be deleted' );
+		$this->assertSame( '', $this->get_admin_notices_output() );
+	}
+
+	/**
+	 * @testdox Should keep the old feature option while the MCP Adapter plugin isn't active.
+	 */
+	public function test_admin_init_keeps_feature_option_when_adapter_plugin_inactive(): void {
+		$this->set_up_removed_notice_conditions( false, true, false );
+
+		$this->sut->handle_admin_init();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_mcp_integration_enabled' ) );
+	}
+
+	/**
 	 * @testdox Should not show the removal notice when WooCommerce MCP wasn't enabled.
 	 */
 	public function test_removed_notice_hidden_when_feature_was_not_enabled(): void {
@@ -185,15 +225,23 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 	/**
 	 * Log in as an administrator, mark WooCommerce MCP as previously enabled, and control MCP adapter detection.
 	 *
-	 * @param bool $adapter_loaded Whether an MCP adapter should appear to be loaded.
+	 * @param bool $adapter_loaded   Whether an MCP adapter should appear to be loaded.
+	 * @param bool $plugin_installed Whether the MCP Adapter plugin should appear to be installed.
+	 * @param bool $plugin_active    Whether the MCP Adapter plugin should appear to be active.
 	 */
-	private function set_up_removed_notice_conditions( bool $adapter_loaded ): void {
+	private function set_up_removed_notice_conditions( bool $adapter_loaded, bool $plugin_installed = false, bool $plugin_active = false ): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'class_exists' => static function ( $class_name ) use ( $adapter_loaded ) {
+				'class_exists'     => static function ( $class_name ) use ( $adapter_loaded ) {
 					return 'WP\\MCP\\Core\\McpAdapter' === $class_name ? $adapter_loaded : class_exists( $class_name );
+				},
+				'file_exists'      => static function ( $path ) use ( $plugin_installed ) {
+					return WP_PLUGIN_DIR . '/mcp-adapter/mcp-adapter.php' === $path ? $plugin_installed : file_exists( $path );
+				},
+				'is_plugin_active' => static function ( $plugin ) use ( $plugin_active ) {
+					return 'mcp-adapter/mcp-adapter.php' === $plugin ? $plugin_active : is_plugin_active( $plugin );
 				},
 			)
 		);
