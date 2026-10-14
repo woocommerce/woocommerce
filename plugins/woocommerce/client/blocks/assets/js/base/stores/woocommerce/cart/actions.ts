@@ -27,15 +27,14 @@ import {
 	isCartItem,
 	lineMatchesProduct,
 } from './notices';
+import type { SelectedAttributes, WooCommerceConfig } from '../types';
 import type {
 	AddCartItemOutcome,
 	CartUpdateOptions,
 	ClientCartItem,
 	OptimisticCartItem,
-	SelectedAttributes,
 	Store,
-	WooCommerceConfig,
-} from '../types';
+} from './types';
 import { doesCartItemMatchAttributes } from '../../../utils/variations/does-cart-item-match-attributes';
 
 type QuantityChanges = {
