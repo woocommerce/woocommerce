@@ -687,6 +687,29 @@ function add_custom_providers( $providers ) {
 
 **Note:** `My_Custom_Shipping_Provider` class needs to extend `Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider` class to be able to run tracking number parsing.
 
+#### `woocommerce_fulfillment_shipment_provider_label`
+
+Filters the shipment provider label shown to customers and merchants (fulfillment emails, order notes, and the orders list column).
+
+**File:** `src/Admin/Features/Fulfillments/FulfillmentUtils.php`
+
+**Parameters:**
+
+-   `$label` (string) - The resolved provider label (display name for known providers, the merchant-entered name for custom "other" providers, or the slug as a last resort)
+-   `$fulfillment` (Fulfillment) - The fulfillment object
+
+**Return Value:** The provider label to display.
+
+**Purpose:** Adjust how a provider's name is displayed without overriding templates.
+
+```php
+add_filter( 'woocommerce_fulfillment_shipment_provider_label', 'customize_provider_label', 10, 2 );
+
+function customize_provider_label( $label, $fulfillment ) {
+    return 'usps' === $fulfillment->get_shipment_provider() ? 'USPS (Priority)' : $label;
+}
+```
+
 ### Privacy Filters
 
 #### `woocommerce_privacy_remove_fulfillment_personal_data_meta`
