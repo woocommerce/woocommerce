@@ -97,6 +97,7 @@ packages:
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
     - 'tools/monorepo-merge'
+    - 'themes/purple'
     - 'tools/theme-cli'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
