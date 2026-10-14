@@ -205,7 +205,7 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/widget-area/widget-area.classic_theme.spec.ts',
 
 	// Save site-wide templates, template parts or pages (single product, product
-	// archive, header, cart, checkout, order confirmation), or the
+	// archive, header, cart, checkout), or the
 	// `wc_blocks_use_blockified_product_grid_block_as_template` option. Every
 	// spec that visits those pages reads them.
 	'**/tests/blocks/add-to-cart-form/add-to-cart-form.block_theme.spec.ts',
@@ -230,8 +230,6 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
 	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
-	'**/tests/blocks/templates/order-confirmation.block_theme.spec.ts',
-	'**/tests/blocks/templates/single-product-template.block_theme.spec.ts',
 
 	// Activate test plugins that change every cart, checkout or product page, or
 	// race other specs on the `active_plugins` option.
@@ -264,21 +262,12 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/single-product-template/single-product-template.product-rating.spec.ts',
 	'**/tests/blocks/templates/shop-page.block_theme.spec.ts',
 
-	// Add to the cart as the admin user, whose cart all workers share.
-	'**/tests/blocks/cart-store/mutation-batcher.block_theme.spec.ts',
+	// Add to the cart as the admin user, whose cart all workers share, and
+	// place orders, which change the Best Sellers ranking.
 	'**/tests/blocks/cart/cart-checkout-block-coupons.shopper.block_theme.spec.ts',
 
 	// Create or edit products and categories that catalog specs count.
-	'**/tests/blocks/featured-category/featured-category.block_theme.spec.ts',
-	'**/tests/blocks/featured-product/featured-product.block_theme.spec.ts',
 	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
-
-	// Create a template or pattern with a fixed slug or name, which collides
-	// with other specs or with a retry.
-	'**/tests/blocks/breadcrumbs/breadcrumbs.block_theme.spec.ts',
-	'**/tests/blocks/catalog-sorting/catalog-sorting.block_theme.spec.ts',
-	'**/tests/blocks/patterns/add-new-pattern.block_theme.spec.ts',
-	'**/tests/blocks/product-results-count/product-results-count.block_theme.spec.ts',
 ];
 
 export default defineConfig< { resetDatabaseAfterEachTest: boolean } >( {
