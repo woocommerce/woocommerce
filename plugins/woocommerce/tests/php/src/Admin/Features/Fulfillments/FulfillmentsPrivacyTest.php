@@ -132,6 +132,22 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox register_eraser() hooks only the eraser, without the exporter.
+	 */
+	public function test_register_eraser_hooks_only_the_eraser(): void {
+		$this->sut->register_eraser();
+
+		$this->assertNotFalse(
+			has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'remove_fulfillment_personal_data' ) ),
+			'register_eraser should hook order anonymization.'
+		);
+		$this->assertFalse(
+			has_filter( 'wp_privacy_personal_data_exporters', array( $this->sut, 'register_exporter' ) ),
+			'register_eraser should not register the exporter.'
+		);
+	}
+
+	/**
 	 * @testdox The exporter includes the customer's fulfillment tracking data.
 	 */
 	public function test_exporter_includes_fulfillment_tracking_data(): void {
@@ -172,6 +188,26 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Fulfilled', $rows['Fulfillment status'] );
 		$this->assertArrayHasKey( 'Items in this shipment', $rows, 'The export should list the items shipped in the fulfillment.' );
 		$this->assertStringContainsString( ' x 1', $rows['Items in this shipment'], 'The shipment items should include the quantity.' );
+	}
+
+	/**
+	 * @testdox The exporter includes soft-deleted fulfillments, matching what the eraser clears.
+	 */
+	public function test_exporter_includes_soft_deleted_fulfillment(): void {
+		list( $order, $fulfillment ) = $this->create_order_with_fulfillment(
+			array( '_tracking_number' => 'TRACK123456' )
+		);
+
+		$datastore = WC_Data_Store::load( 'order-fulfillment' );
+		$datastore->delete( $fulfillment );
+
+		$result = $this->sut->fulfillment_data_exporter( $order->get_billing_email(), 1 );
+
+		$values = array();
+		foreach ( $result['data'] as $item ) {
+			$values = array_merge( $values, wp_list_pluck( $item['data'], 'value' ) );
+		}
+		$this->assertContains( 'TRACK123456', $values, 'A soft-deleted fulfillment should still appear in the export.' );
 	}
 
 	/**

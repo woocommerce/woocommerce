@@ -29,6 +29,17 @@ class FulfillmentsPrivacy {
 	 */
 	public function register(): void {
 		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporter' ) );
+		$this->register_eraser();
+	}
+
+	/**
+	 * Register only the erasure hook.
+	 *
+	 * Kept separate from {@see self::register()} so the eraser can stay active for stores
+	 * that created fulfillments before the feature was disabled, since the retained tracking
+	 * meta still needs to be redacted on a personal-data erasure.
+	 */
+	public function register_eraser(): void {
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this, 'remove_fulfillment_personal_data' ) );
 	}
 
@@ -80,7 +91,9 @@ class FulfillmentsPrivacy {
 			$datastore = WC_Data_Store::load( 'order-fulfillment' );
 
 			foreach ( $orders as $order ) {
-				$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id() );
+				// Include soft-deleted fulfillments: their tracking meta is retained and must
+				// be covered by the access request, mirroring what the eraser clears.
+				$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id(), true );
 
 				foreach ( $fulfillments as $fulfillment ) {
 					$data = $this->get_fulfillment_personal_data( $fulfillment, $order );

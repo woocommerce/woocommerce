@@ -70,6 +70,12 @@ class FulfillmentsController {
 
 		// If fulfillments feature is not enabled, do not add the DB tables, and don't register the controller.
 		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			// Keep clearing fulfillment tracking during personal-data erasure for stores that
+			// created fulfillments before the feature was disabled, so retained tracking data
+			// (which can resolve to a delivery address) is still erased.
+			if ( get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
+				$container->get( FulfillmentsPrivacy::class )->register_eraser();
+			}
 			return;
 		}
 
