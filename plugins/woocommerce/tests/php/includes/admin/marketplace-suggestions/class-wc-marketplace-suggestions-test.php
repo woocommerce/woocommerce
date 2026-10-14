@@ -7,10 +7,18 @@ declare( strict_types = 1 );
 class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Request query vars before the test, restored in tearDown().
+	 *
+	 * @var array
+	 */
+	private $original_get;
+
+	/**
 	 * Set up an admin user, one active extension and a fresh feed.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Snapshot for tearDown(), not form handling.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		update_option( 'active_plugins', array( 'woocommerce/woocommerce.php', 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) );
 		$this->set_feed(
@@ -28,10 +36,10 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up the request globals.
+	 * Restore the request query vars.
 	 */
 	public function tearDown(): void {
-		$_GET = array();
+		$_GET = $this->original_get;
 		parent::tearDown();
 	}
 
@@ -45,14 +53,22 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should cap results at the feed's recommendations-count.
+	 * @testdox Should cap results at a recommendations-count between 1 and 50, and at 5 otherwise.
+	 *
+	 * @testWith [1, 1]
+	 *           [51, 5]
+	 *
+	 * @param int $count    Feed recommendations-count.
+	 * @param int $expected Expected number of suggestions.
 	 */
-	public function test_caps_at_recommendations_count(): void {
-		$data = get_option( 'woocommerce_marketplace_suggestions' );
-		$data['suggestions'][0]['recommendations-count'] = 1;
-		update_option( 'woocommerce_marketplace_suggestions', $data );
+	public function test_caps_at_recommendations_count( int $count, int $expected ): void {
+		$items = array();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$items[] = $this->item( "item-$i", "plugin-$i" );
+		}
+		$this->set_feed( $items, $count );
 
-		$this->assertCount( 1, $this->get_products_list_suggestions() );
+		$this->assertCount( $expected, $this->get_products_list_suggestions() );
 	}
 
 	/**
@@ -104,12 +120,13 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	 * Store a feed in the suggestions option, marked fresh so no update gets queued.
 	 *
 	 * @param array $items Feed items.
+	 * @param int   $count Feed recommendations-count.
 	 */
-	private function set_feed( array $items ): void {
+	private function set_feed( array $items, int $count = 5 ): void {
 		update_option(
 			'woocommerce_marketplace_suggestions',
 			array(
-				'suggestions' => array_merge( array( array( 'recommendations-count' => 5 ) ), $items ),
+				'suggestions' => array_merge( array( array( 'recommendations-count' => $count ) ), $items ),
 				'updated'     => time(),
 			)
 		);

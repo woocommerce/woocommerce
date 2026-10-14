@@ -240,7 +240,7 @@ class WC_Marketplace_Suggestions {
 
 		$count = (int) ( $feed[0]['recommendations-count'] ?? 5 );
 
-		return array_slice( array_values( $suggestions ), 0, $count > 0 ? $count : 5 );
+		return array_slice( array_values( $suggestions ), 0, $count > 0 && $count <= 50 ? $count : 5 );
 	}
 
 	/**
