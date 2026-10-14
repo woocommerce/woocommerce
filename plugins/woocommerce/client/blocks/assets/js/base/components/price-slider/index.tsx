@@ -242,11 +242,11 @@ const PriceSlider = ( {
 				? [
 						Math.round( targetValue / stepValue ) * stepValue,
 						maxPrice,
-				  ]
+					]
 				: [
 						minPrice,
 						Math.round( targetValue / stepValue ) * stepValue,
-				  ];
+					];
 			const values = constrainRangeSliderValues(
 				currentValues,
 				minConstraint,

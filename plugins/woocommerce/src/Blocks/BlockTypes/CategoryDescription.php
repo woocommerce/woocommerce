@@ -24,7 +24,7 @@ class CategoryDescription extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$term_id       = $block->context['termId'] ?? 0;
-		$term_taxonomy = $block->context['termTaxonomy'] ?? 'product_cat';
+		$term_taxonomy = $block->context['termTaxonomy'] ?? $block->context['taxonomy'] ?? 'product_cat';
 
 		$text_align = isset( $attributes['textAlign'] ) ? sanitize_key( $attributes['textAlign'] ) : '';
 
@@ -58,15 +58,6 @@ class CategoryDescription extends AbstractBlock {
 			$wrapper_attributes,
 			wp_kses_post( wc_format_content( $description ) )
 		);
-	}
-
-	/**
-	 * Register the context used by this block.
-	 *
-	 * @return array
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'termId', 'termTaxonomy' ];
 	}
 
 	/**

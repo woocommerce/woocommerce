@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep WooCommerce.com extension updates visible when an update check fails, instead of hiding them for 12 hours.

@@ -25,7 +25,9 @@ export const useFeaturedItemStatus = ( {
 	itemId,
 	itemType,
 }: UseFeaturedItemProps ): UseFeaturedItemReturnType => {
-	const { product, isResolutionFinished } = useProduct( itemId );
+	const { product, isResolutionFinished } = useProduct(
+		itemType === BLOCK_NAMES.featuredProduct ? itemId : undefined
+	);
 	return useSelect(
 		( selectFunc ) => {
 			if ( ! itemId ) {

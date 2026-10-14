@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve product context in nested queries and Single Product blocks.

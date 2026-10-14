@@ -249,6 +249,81 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a review as a shop manager strips markup that user role cannot post.
+	 */
+	public function test_create_item_strips_disallowed_markup_for_shop_manager() {
+		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$review_content = '<a href="https://example.test" data-wp-bind--href="state.url" style="position:fixed;inset:0">Nice</a><strong>Good</strong><script>alert(1)</script>';
+		$response       = $this->create_review( $product_id, $review_content, 5 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$comment = get_comment( $response->get_data()['id'] );
+
+		$this->assertStringContainsString( '<strong>Good</strong>', $comment->comment_content );
+		$this->assertStringContainsString( 'href="https://example.test"', $comment->comment_content );
+		$this->assertStringNotContainsString( 'data-wp-bind', $comment->comment_content );
+		$this->assertStringNotContainsString( 'style=', $comment->comment_content );
+		$this->assertStringNotContainsString( '<script', $comment->comment_content );
+	}
+
+	/**
+	 * @testdox Creating a review keeps a literal backslash in the content.
+	 */
+	public function test_create_item_keeps_backslash_in_content() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$response = $this->create_review( $product_id, 'Rated 5\5', 5 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$comment = get_comment( $response->get_data()['id'] );
+		$this->assertStringContainsString( '5\5', $comment->comment_content );
+	}
+
+	/**
+	 * @testdox A rest_pre_insert_product_review filter returning a WP_Error short-circuits creation.
+	 */
+	public function test_create_item_returns_filtered_wp_error_without_creating_a_comment() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+
+		$filtered_error = new WP_Error( 'filtered_product_review_error', 'The filter rejected this review.' );
+		$return_error   = static function () use ( $filtered_error ) {
+			return $filtered_error;
+		};
+
+		$comments_before = get_comments(
+			array(
+				'post_id' => $product_id,
+				'count'   => true,
+			)
+		);
+
+		add_filter( 'rest_pre_insert_product_review', $return_error );
+		try {
+			$response = $this->create_review( $product_id, 'Should not be stored.', 5 );
+		} finally {
+			remove_filter( 'rest_pre_insert_product_review', $return_error );
+		}
+
+		$this->assertSame( $filtered_error, $response );
+		$this->assertSame(
+			$comments_before,
+			get_comments(
+				array(
+					'post_id' => $product_id,
+					'count'   => true,
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox A rating-only edit stores the rating and refreshes aggregates in one product save.
 	 */
 	public function test_update_item_accepts_an_edit_that_changes_only_the_rating() {
@@ -597,6 +672,36 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 
 		clean_post_cache( $source_id );
 		$this->assertSame( 0, (int) get_post( $source_id )->comment_count );
+	}
+
+	/**
+	 * @testdox Creating a review eagerly populates the verified-owner meta at creation time, not lazily during response preparation.
+	 */
+	public function test_create_item_populates_verified_meta(): void {
+		$product = ProductHelper::create_simple_product();
+		$order   = OrderHelper::create_order( 0, $product );
+		$order->set_billing_email( 'jane.smith@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Stub prepare_item_for_response so it cannot backfill the meta as a side effect.
+		$sut = new class() extends WC_REST_Product_Reviews_V1_Controller {
+			public function prepare_item_for_response( $review, $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return rest_ensure_response( array( 'id' => (int) $review->comment_ID ) );
+			}
+		};
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product->get_id() . '/reviews' );
+		$request->set_param( 'product_id', $product->get_id() );
+		$request->set_param( 'review', 'Great product, would buy again.' );
+		$request->set_param( 'name', 'Jane Smith' );
+		$request->set_param( 'email', 'jane.smith@example.org' );
+		$request->set_param( 'rating', 5 );
+
+		$response = $sut->create_item( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '1', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta must be populated eagerly at creation time.' );
 	}
 
 	/**

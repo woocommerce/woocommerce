@@ -64,8 +64,8 @@ class SignupRateLimiter {
 	 * @param string $user_email The e-mail address used to sign up.
 	 * @return bool True if the attempt must be rejected.
 	 */
-	public function is_rate_limited( string $user_email ): bool {
-		foreach ( array_keys( $this->get_rate_limits( $user_email ) ) as $rate_limit_id ) {
+	public static function is_rate_limited( string $user_email ): bool {
+		foreach ( array_keys( self::get_rate_limits( $user_email ) ) as $rate_limit_id ) {
 			if ( ! WC_Rate_Limiter::retried_too_soon( $rate_limit_id ) ) {
 				continue;
 			}
@@ -99,10 +99,10 @@ class SignupRateLimiter {
 	 * @param string $user_email The e-mail address used to sign up.
 	 * @return bool True if every rate limit was applied.
 	 */
-	public function apply( string $user_email ): bool {
+	public static function apply( string $user_email ): bool {
 		$applied_rate_limit_ids = array();
 
-		foreach ( $this->get_rate_limits( $user_email ) as $rate_limit_id => $delay ) {
+		foreach ( self::get_rate_limits( $user_email ) as $rate_limit_id => $delay ) {
 			if ( ! WC_Rate_Limiter::set_rate_limit( $rate_limit_id, $delay ) ) {
 				// Leave no partial window behind: a half-applied limit would block the
 				// customer on an attempt that never went through. The failed limit is
@@ -129,8 +129,8 @@ class SignupRateLimiter {
 	 * @param string $user_email The e-mail address used to sign up.
 	 * @return array<string, int>
 	 */
-	private function get_rate_limits( string $user_email ): array {
-		$options     = $this->get_options();
+	private static function get_rate_limits( string $user_email ): array {
+		$options     = self::get_options();
 		$rate_limits = array();
 
 		if ( ! $options['enabled'] ) {
@@ -141,7 +141,7 @@ class SignupRateLimiter {
 			if ( is_user_logged_in() ) {
 				$rate_limits[ self::RATE_LIMIT_USER_PREFIX . get_current_user_id() ] = $options['client_delay'];
 			} else {
-				$ip_address = $this->get_ip_address( $options['proxy_support'] );
+				$ip_address = self::get_ip_address( $options['proxy_support'] );
 				if ( '' !== $ip_address ) {
 					$rate_limits[ self::RATE_LIMIT_IP_PREFIX . hash( 'sha256', $ip_address ) ] = $options['client_delay'];
 				}
@@ -166,7 +166,7 @@ class SignupRateLimiter {
 	 * @param bool $proxy_support Whether to read the client address from forwarding headers.
 	 * @return string The IP address, or an empty string if it could not be resolved.
 	 */
-	private function get_ip_address( bool $proxy_support ): string {
+	private static function get_ip_address( bool $proxy_support ): string {
 		if ( $proxy_support ) {
 			return WC_Geolocation::get_ip_address();
 		}
@@ -181,7 +181,7 @@ class SignupRateLimiter {
 	 *
 	 * @return array{enabled: bool, proxy_support: bool, client_delay: int, email_delay: int}
 	 */
-	private function get_options(): array {
+	private static function get_options(): array {
 		$defaults = array(
 			'enabled'       => self::ENABLED,
 			'proxy_support' => self::PROXY_SUPPORT,
@@ -220,8 +220,8 @@ class SignupRateLimiter {
 		// default, and a negative delay would clear the limit instead of setting one, so it
 		// is clamped to zero.
 		return array(
-			'enabled'       => $this->to_bool( $options['enabled'] ?? $defaults['enabled'], $defaults['enabled'] ),
-			'proxy_support' => $this->to_bool( $options['proxy_support'] ?? $defaults['proxy_support'], $defaults['proxy_support'] ),
+			'enabled'       => self::to_bool( $options['enabled'] ?? $defaults['enabled'], $defaults['enabled'] ),
+			'proxy_support' => self::to_bool( $options['proxy_support'] ?? $defaults['proxy_support'], $defaults['proxy_support'] ),
 			'client_delay'  => is_numeric( $options['client_delay'] ?? null ) ? max( 0, (int) $options['client_delay'] ) : $defaults['client_delay'],
 			'email_delay'   => is_numeric( $options['email_delay'] ?? null ) ? max( 0, (int) $options['email_delay'] ) : $defaults['email_delay'],
 		);
@@ -233,7 +233,7 @@ class SignupRateLimiter {
 	 * @param mixed $value    The filtered value.
 	 * @param bool  $fallback The value to use when the filtered value spells no boolean.
 	 */
-	private function to_bool( $value, bool $fallback ): bool {
+	private static function to_bool( $value, bool $fallback ): bool {
 		if ( is_bool( $value ) ) {
 			return $value;
 		}

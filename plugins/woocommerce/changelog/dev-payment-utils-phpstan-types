@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Fix PaymentUtils docblock and return types that PHPStan reports; no production change.

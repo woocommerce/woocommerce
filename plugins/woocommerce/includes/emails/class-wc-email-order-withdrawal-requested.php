@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailDataFormatter;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -158,8 +159,10 @@ if ( ! class_exists( 'WC_Email_Order_Withdrawal_Requested', false ) ) :
 			$name    = $this->formatter->get_customer_name( $this->withdrawal_data );
 			$email   = $this->withdrawal_data[ OrderWithdrawalFormProcessor::FIELD_EMAIL ] ?? '';
 
-			if ( '' !== $name && is_email( $email ) ) {
-				$headers .= 'Reply-to: ' . sanitize_text_field( $name ) . ' <' . sanitize_email( $email ) . ">\r\n";
+			$cleaned_name = EmailHeaders::sanitize_reply_to_name( $name );
+
+			if ( '' !== $cleaned_name && is_email( $email ) ) {
+				$headers .= 'Reply-to: ' . $cleaned_name . ' <' . sanitize_email( $email ) . ">\r\n";
 			}
 
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {

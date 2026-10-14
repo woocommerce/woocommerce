@@ -53,6 +53,22 @@ describe( 'getUpdatedQuery', () => {
 		} );
 	} );
 
+	it( 'preserves existing taxonomy filters when adding product categories', () => {
+		expect(
+			getUpdatedQuery(
+				getQuery( {
+					taxQuery: { product_tag: [ 32 ] },
+				} ),
+				{
+					taxQuery: { product_cat: [ 31 ] },
+				}
+			).taxQuery
+		).toEqual( {
+			product_tag: [ 32 ],
+			product_cat: [ 31 ],
+		} );
+	} );
+
 	it( 'preserves taxQuery when an update does not include taxonomy changes', () => {
 		expect(
 			getUpdatedQuery(

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Deprecate the `type`, `autocompleter`, and `labels.placeholder` settings of Analytics report filters in favor of `settings.searchProps`, which the core report filters now use.

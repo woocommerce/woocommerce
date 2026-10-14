@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update plugin headers (GPL-2.0-or-later license, requires WordPress 6.8, tested up to WordPress 7.1 and WooCommerce 11.2) and add a readme.txt.

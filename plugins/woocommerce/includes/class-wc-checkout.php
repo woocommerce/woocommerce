@@ -1201,10 +1201,21 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
+	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			throw new Exception( esc_html__( 'Unable to process this order. Please try again.', 'woocommerce' ) );
+		}
+
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
+			throw new Exception( esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ) );
+		}
+
 		$order->payment_complete();
 		wc_empty_cart();
 
@@ -1438,6 +1449,18 @@ class WC_Checkout {
 					array( 'order_object' => $order )
 				);
 
+				/**
+				 * Fires after the checkout creates the order, but before payment is processed.
+				 *
+				 * Do not use this action for payment-completion logic or to call WC_Order::payment_complete().
+				 * Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
+				 *
+				 * @since 1.1.0
+				 *
+				 * @param int                      $order_id    Order ID.
+				 * @param array                    $posted_data Posted checkout data.
+				 * @param WC_Order|WC_Order_Refund $order       Order object.
+				 */
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				wc_log_order_step(

@@ -22,7 +22,7 @@ const completer: AutoCompleter = {
 					search,
 					per_page: 10,
 					orderby: 'count',
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/products/categories', query ),

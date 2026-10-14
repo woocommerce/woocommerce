@@ -2,19 +2,15 @@
  * External dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import { trackPluginNoticeLinks } from '~/utils/plugin-notice-tracking';
 
 domReady( () => {
-	const purchaseSubscriptionLink = document.querySelectorAll(
-		'.woocommerce-purchase-subscription'
+	trackPluginNoticeLinks(
+		'.woocommerce-purchase-subscription',
+		'woo_purchase_subscription_in_plugins'
 	);
-
-	if ( purchaseSubscriptionLink.length > 0 ) {
-		recordEvent( 'woo_purchase_subscription_in_plugins_shown' );
-		purchaseSubscriptionLink.forEach( ( link ) => {
-			link.addEventListener( 'click', function () {
-				recordEvent( 'woo_purchase_subscription_in_plugins_clicked' );
-			} );
-		} );
-	}
 } );

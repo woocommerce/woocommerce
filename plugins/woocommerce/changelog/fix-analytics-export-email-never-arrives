@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix emailed Analytics report exports never arriving on stores with a persistent object cache.

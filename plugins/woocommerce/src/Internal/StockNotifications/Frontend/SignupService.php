@@ -21,12 +21,10 @@ use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer
 class SignupService {
 
 	// phpcs:disable
-	public const SIGNUP_ALREADY_JOINED                        = 'already_joined';
-	public const SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN          = 'already_joined_double_opt_in';
-	public const SIGNUP_SUCCESS                               = 'success';
-	public const SIGNUP_SUCCESS_ACCOUNT_CREATED               = 'success_account_created';
-	public const SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN = 'success_account_created_double_opt_in';
-	public const SIGNUP_SUCCESS_DOUBLE_OPT_IN                 = 'success_double_opt_in';
+	public const SIGNUP_ALREADY_JOINED               = 'already_joined';
+	public const SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN = 'already_joined_double_opt_in';
+	public const SIGNUP_SUCCESS                      = 'success';
+	public const SIGNUP_SUCCESS_DOUBLE_OPT_IN        = 'success_double_opt_in';
 
 	public const ERROR_FAILED           = 'failed_to_signup';
 	public const ERROR_INVALID_REQUEST  = 'invalid_request';
@@ -35,8 +33,27 @@ class SignupService {
 	public const ERROR_RATE_LIMITED     = 'rate_limited';
 	public const ERROR_INVALID_USER     = 'invalid_user';
 	public const ERROR_INVALID_EMAIL    = 'invalid_email';
-	public const ERROR_INVALID_OPT_IN   = 'invalid_opt_in';
+
+	/**
+	 * @deprecated 11.2.0 Guest sign-ups no longer create accounts. Never emitted.
+	 */
+	public const SIGNUP_SUCCESS_ACCOUNT_CREATED = 'success_account_created';
+
+	/**
+	 * @deprecated 11.2.0 Guest sign-ups no longer create accounts. Never emitted.
+	 */
+	public const SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN = 'success_account_created_double_opt_in';
+
+	/**
+	 * @deprecated 11.2.0 The account-creation consent checkbox was removed. Never emitted.
+	 */
+	public const ERROR_INVALID_OPT_IN = 'invalid_opt_in';
 	// phpcs:enable
+
+	/**
+	 * Maximum length allowed for a single posted attribute value.
+	 */
+	private const MAX_ATTRIBUTE_LENGTH = 255;
 
 	/**
 	 * Eligibility service.
@@ -60,13 +77,6 @@ class SignupService {
 	private EmailManager $email_manager;
 
 	/**
-	 * Signup rate limiter.
-	 *
-	 * @var SignupRateLimiter
-	 */
-	private SignupRateLimiter $rate_limiter;
-
-	/**
 	 * The logger.
 	 *
 	 * @var \WC_Logger_Interface
@@ -81,18 +91,15 @@ class SignupService {
 	 * @param EligibilityService            $eligibility_service The eligibility service.
 	 * @param NotificationManagementService $notification_management_service The notification management service.
 	 * @param EmailManager                  $email_manager The email manager.
-	 * @param SignupRateLimiter             $rate_limiter The signup rate limiter.
 	 */
 	final public function init(
 		EligibilityService $eligibility_service,
 		NotificationManagementService $notification_management_service,
-		EmailManager $email_manager,
-		SignupRateLimiter $rate_limiter
+		EmailManager $email_manager
 	) {
 		$this->eligibility_service             = $eligibility_service;
 		$this->notification_management_service = $notification_management_service;
 		$this->email_manager                   = $email_manager;
-		$this->rate_limiter                    = $rate_limiter;
 		$this->logger                          = \wc_get_logger();
 	}
 
@@ -102,6 +109,9 @@ class SignupService {
 	 * Fail-closed: once the rate limit window is claimed it is not released, so a failure or an
 	 * exception raised further down still holds the customer back until the window expires. A
 	 * window that cannot be claimed at all is the exception, and lets the sign-up through.
+	 *
+	 * The rate limit is checked before the duplicate sign-up lookup, so a limited request is
+	 * rejected without also paying for that lookup.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
@@ -139,9 +149,13 @@ class SignupService {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
-		// Attempts that only find an existing active or pending sign-up, or activate an existing
-		// pending one, create nothing new and send no verification mail, so they are answered
-		// before the rate limit is consulted or claimed.
+		if ( SignupRateLimiter::is_rate_limited( $user_email ) ) {
+			return new \WP_Error( self::ERROR_RATE_LIMITED );
+		}
+
+		// An existing rate limit window blocks these attempts too, but attempts that only find
+		// an existing active or pending sign-up, or activate an existing pending one, never claim
+		// a window themselves: they create nothing new and send no verification mail.
 		$notification = $this->is_already_signed_up( $product_id, $user_id, $user_email, $posted_attributes );
 		if ( $notification instanceof Notification ) {
 			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
@@ -172,28 +186,18 @@ class SignupService {
 			}
 		}
 
-		if ( $this->rate_limiter->is_rate_limited( $user_email ) ) {
-			return new \WP_Error( self::ERROR_RATE_LIMITED );
-		}
-
-		// Claim the rate limit window before creating an account, storing a notification or
-		// sending mail. This narrows the window in which two near-simultaneous requests both
-		// get through; it does not close it.
+		// Claim the rate limit window before storing a notification or sending mail. This
+		// narrows the window in which two near-simultaneous requests both get through; it
+		// does not close it.
 		//
 		// A claim only fails when the rate limit table cannot be written to, which a shopper
 		// can neither cause nor resolve. Let the sign-up through rather than turn a broken
 		// limiter into a store-wide sign-up outage.
-		if ( ! $this->rate_limiter->apply( $user_email ) ) {
+		if ( ! SignupRateLimiter::apply( $user_email ) ) {
 			$this->logger->warning(
 				'Could not claim the stock notification sign-up rate limit window. Allowing the sign-up to proceed.',
 				array( 'source' => 'stock-notifications-signup-errors' )
 			);
-		}
-
-		$account_created = null;
-		if ( empty( $user_id ) && Config::creates_account_on_signup() ) {
-			$account_created = $this->create_customer( $user_email );
-			$user_id         = $account_created ? $account_created : $user_id;
 		}
 
 		$notification = new Notification();
@@ -203,6 +207,8 @@ class SignupService {
 		$notification->set_user_email( $user_email );
 
 		if ( ! empty( $posted_attributes ) ) {
+			// Sort by key so the stored blob matches what the duplicate lookup serializes.
+			ksort( $posted_attributes );
 			$notification->update_meta_data( 'posted_attributes', $posted_attributes );
 		}
 
@@ -228,19 +234,12 @@ class SignupService {
 			$this->email_manager->send_verify_email( $notification );
 		}
 
-		$signup_code = self::SIGNUP_SUCCESS;
-		if ( Config::requires_double_opt_in() ) {
-			$signup_code = $account_created
-				? self::SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN
-				: self::SIGNUP_SUCCESS_DOUBLE_OPT_IN;
-		} elseif ( $account_created ) {
-			$signup_code = self::SIGNUP_SUCCESS_ACCOUNT_CREATED;
-		}
+		$signup_code = Config::requires_double_opt_in() ? self::SIGNUP_SUCCESS_DOUBLE_OPT_IN : self::SIGNUP_SUCCESS;
 		return new SignupResult( $signup_code, $notification );
 	}
 
 	/**
-	 * Get the active notification for the request data.
+	 * Get the active or pending notification for the request data.
 	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
@@ -260,79 +259,35 @@ class SignupService {
 			return null;
 		}
 
-		$found = false;
+		// A customer may have signed up as a guest (user_id 0) before creating an account with the same
+		// email, or vice versa. Match on user ID first, then fall back to the email so both states are found.
+		$identities = array();
 		if ( ! empty( $user_id ) ) {
-			$found = NotificationQuery::notification_exists_by_user_id( $product_id, $user_id );
-		} else {
-			$found = NotificationQuery::notification_exists_by_email( $product_id, $user_email );
+			$identities[] = array(
+				'user_id'    => $user_id,
+				'user_email' => '',
+			);
 		}
-
-		if ( ! $found ) {
-			return null;
-		}
-
-		$query_args = array( 'product_id' => $product_id );
-		if ( ! empty( $user_id ) ) {
-			$query_args['user_id'] = $user_id;
-		} else {
-			$query_args['user_email'] = $user_email;
-		}
-
-		$query_args['return'] = 'ids';
-		$query_args['limit']  = 1;
-		if ( ! empty( $posted_attributes ) ) {
-			// Hint: We need to compare the posted attributes with the stored attributes to handle variations with "any" attributes.
-			$query_args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				array(
-					'key'     => 'posted_attributes',
-					'value'   => maybe_serialize( $posted_attributes ),
-					'compare' => '=',
-				),
+		if ( ! empty( $user_email ) ) {
+			$identities[] = array(
+				'user_id'    => 0,
+				'user_email' => $user_email,
 			);
 		}
 
-		$ids = NotificationQuery::get_notifications( $query_args );
-		if ( empty( $ids ) || ! is_numeric( $ids[0] ) ) {
-			return null;
-		}
-
-		$notification = Factory::get_notification( $ids[0] );
-		if ( ! $notification ) {
-			return null;
-		}
-
-		return $notification;
-	}
-
-	/**
-	 * Create a new customer.
-	 *
-	 * @param string $user_email The user email.
-	 * @return int|null The user ID if the customer was created, null otherwise.
-	 */
-	private function create_customer( string $user_email ) {
-
-		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
-			return null;
-		}
-
-		try {
-			$username = wc_create_new_customer_username( $user_email );
-			$username = sanitize_user( $username );
-			if ( empty( $username ) || ! validate_username( $username ) ) {
-				return null;
+		foreach ( $identities as $identity ) {
+			$notification_id = NotificationQuery::get_matching_notification_id( $product_id, $identity['user_id'], $identity['user_email'], $posted_attributes );
+			if ( empty( $notification_id ) ) {
+				continue;
 			}
 
-			$password = 'yes' === get_option( 'woocommerce_registration_generate_password' ) ? '' : wp_generate_password();
-			$user_id  = wc_create_new_customer( $user_email, $username, $password );
-			if ( is_a( $user_id, 'WP_Error' ) ) {
-				return null;
+			$notification = Factory::get_notification( $notification_id );
+			if ( $notification instanceof Notification ) {
+				return $notification;
 			}
-		} catch ( \Throwable $e ) {
-			return null;
 		}
 
-		return $user_id;
+		return null;
 	}
 
 	/**
@@ -363,6 +318,9 @@ class SignupService {
 		$parsed_data['product_id'] = $product->get_id();
 		if ( $product instanceof \WC_Product_Variation ) {
 			$posted_attributes = $this->parse_posted_attributes( $source, $product );
+			if ( \is_wp_error( $posted_attributes ) ) {
+				return $posted_attributes;
+			}
 
 			if ( ! empty( $posted_attributes ) ) {
 				$parsed_data['posted_attributes'] = $posted_attributes;
@@ -386,14 +344,6 @@ class SignupService {
 			return new \WP_Error( self::ERROR_REQUIRES_ACCOUNT );
 		}
 
-		// Check for valid privacy terms.
-		if ( ! $is_logged_in && Config::creates_account_on_signup() && ! Config::requires_account() ) {
-			$opt_in = isset( $source['wc_bis_opt_in'] ) ? wc_clean( wp_unslash( $source['wc_bis_opt_in'] ) ) : false;
-			if ( 'on' !== $opt_in ) {
-				return new \WP_Error( self::ERROR_INVALID_OPT_IN );
-			}
-		}
-
 		if ( ! $is_logged_in ) {
 			$posted_email = isset( $source['wc_bis_email'] ) && is_string( $source['wc_bis_email'] ) ? sanitize_email( wp_unslash( $source['wc_bis_email'] ) ) : '';
 			$email        = is_email( $posted_email ) ? EmailNormalizer::normalize( $posted_email ) : '';
@@ -401,15 +351,10 @@ class SignupService {
 				return new \WP_Error( self::ERROR_INVALID_EMAIL );
 			}
 
+			// A guest sign-up stays unlinked until the customer verifies the email: an address typed
+			// into a form proves nothing about who owns the matching account.
 			$data['user_id']    = 0;
 			$data['user_email'] = $email;
-
-			// Look up the account with the letter case as entered: `wp_users.user_email` is never
-			// normalized, so on a case-sensitive collation the lowercased form would miss it.
-			$user = get_user_by( 'email', $posted_email );
-			if ( $user ) {
-				$data['user_id'] = $user->ID;
-			}
 		} else {
 			$user = wp_get_current_user();
 			if ( ! $user ) {
@@ -461,13 +406,21 @@ class SignupService {
 	 * For example, if a t-shirt variation has 'any' size but a specific color, we need to capture
 	 * the chosen size from the form submission while the color comes from the variation itself.
 	 *
-	 * @see \WC_Cart::add_to_cart() for similar attribute parsing logic.
+	 * Only 'any' attributes are read from the request. Every attribute the variation fixes is
+	 * already identified by the variation ID, so a posted value for one carries no information
+	 * and is ignored.
+	 *
+	 * Posted values are checked against the attribute's declared values, the same way
+	 * `WC_Cart::add_to_cart()` checks them for an 'any' attribute, so a request cannot store a
+	 * value the store never offered and mint a sign-up row that no later request can match.
+	 *
+	 * @see \WC_Cart::add_to_cart() for similar attribute parsing and validation logic.
 	 *
 	 * @param array       $source The source data, e.g. $_POST or $_REQUEST.
 	 * @param \WC_Product $variation The variation.
-	 * @return array The posted attributes.
+	 * @return array|\WP_Error The posted attributes, or a WP_Error if a posted value is too long or not one the store offers.
 	 */
-	private function parse_posted_attributes( array $source, \WC_Product $variation ): array {
+	private function parse_posted_attributes( array $source, \WC_Product $variation ) {
 
 		if ( ! $variation instanceof \WC_Product_Variation ) {
 			return array();
@@ -478,34 +431,46 @@ class SignupService {
 			return array();
 		}
 
+		// Empty values are the 'any' attributes, so what is left is the set the variation fixes.
+		$fixed_attributes = array_filter( $variation->get_variation_attributes(), 'wc_array_filter_default_attributes' );
+
 		$posted_attributes = array();
 		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute['is_variation'] ) {
+			if ( ! $attribute instanceof \WC_Product_Attribute || ! $attribute['is_variation'] ) {
 				continue;
 			}
 
 			$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-			if ( isset( $source[ $attribute_key ] ) ) {
-				if ( $attribute['is_taxonomy'] ) {
-					$value = sanitize_title( wp_unslash( $source[ $attribute_key ] ) );
-				} else {
-					$value = html_entity_decode( wc_clean( wp_unslash( $source[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
-				}
-
-				// Don't include if it's empty.
-				if ( ! empty( $value ) || '0' === $value ) {
-					$posted_attributes[ $attribute_key ] = $value;
-				}
+			if ( isset( $fixed_attributes[ $attribute_key ] ) || ! isset( $source[ $attribute_key ] ) ) {
+				continue;
 			}
+
+			// A request can post the value as an array, which the string sanitizers below cannot take.
+			$raw_value = wp_unslash( $source[ $attribute_key ] );
+			if ( ! is_string( $raw_value ) ) {
+				return new \WP_Error( self::ERROR_INVALID_REQUEST );
+			}
+
+			if ( $attribute['is_taxonomy'] ) {
+				$value = sanitize_title( $raw_value );
+			} else {
+				$value = html_entity_decode( wc_clean( $raw_value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+			}
+
+			// Don't include if it's empty.
+			if ( empty( $value ) && '0' !== $value ) {
+				continue;
+			}
+
+			// Length first, so an oversized value is rejected without reading the declared ones.
+			if ( strlen( $value ) > self::MAX_ATTRIBUTE_LENGTH || ! in_array( $value, $attribute->get_slugs(), true ) ) {
+				return new \WP_Error( self::ERROR_INVALID_REQUEST );
+			}
+
+			$posted_attributes[ $attribute_key ] = $value;
 		}
 
-		$variation_attributes = $variation->get_variation_attributes();
-		// Filter out 'any' variations, which are empty.
-		$variation_attributes = array_filter( $variation_attributes );
-		$diff                 = array_diff( $posted_attributes, $variation_attributes );
-
-		// Return the posted attributes only if a variation with `any` attribute is detected.
-		return ! empty( $diff ) ? $diff : array();
+		return $posted_attributes;
 	}
 
 	/**
@@ -522,10 +487,10 @@ class SignupService {
 				return wp_kses_post( __( 'Invalid user.', 'woocommerce' ) );
 			case self::ERROR_INVALID_EMAIL:
 				return wp_kses_post( __( 'Invalid email address.', 'woocommerce' ) );
-			case self::ERROR_INVALID_OPT_IN:
-				return wp_kses_post( __( 'To proceed, please consent to the creation of a new account with your e-mail.', 'woocommerce' ) );
 			case self::ERROR_RATE_LIMITED:
 				return wp_kses_post( __( 'Please wait a moment before signing up again.', 'woocommerce' ) );
+			case self::ERROR_INVALID_OPT_IN: // Deprecated code kept for callers passing the old code.
+				return wp_kses_post( __( 'To proceed, please consent to the creation of a new account with your e-mail.', 'woocommerce' ) );
 			default:
 				return wp_kses_post( __( 'Failed to sign up. Please try again.', 'woocommerce' ) );
 		}
@@ -552,12 +517,12 @@ class SignupService {
 				$message = esc_html__( 'Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail.', 'woocommerce' );
 				break;
 
-			case self::SIGNUP_SUCCESS_ACCOUNT_CREATED:
+			case self::SIGNUP_SUCCESS_ACCOUNT_CREATED: // Deprecated code kept for callers passing the old code.
 				/* translators: Product name */
 				$message = sprintf( esc_html__( 'You have successfully signed up and will be notified when "%s" is back in stock! Note that a new account has been created for you; please check your e-mail for details.', 'woocommerce' ), $notification->get_product_name() );
 				break;
 
-			case self::SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN:
+			case self::SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN: // Deprecated code kept for callers passing the old code.
 				$message = esc_html__( 'Thanks for signing up! An account has been created for you. Please complete the sign-up process by following the verification link sent to your e-mail.', 'woocommerce' );
 				break;
 

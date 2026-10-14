@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Exclude the hook comment and hyphenated hook name phpcs sniffs for tests and remove the redundant inline ignores.

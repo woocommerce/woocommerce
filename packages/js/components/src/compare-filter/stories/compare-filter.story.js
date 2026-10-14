@@ -10,16 +10,18 @@ import { CompareFilter } from '../';
 
 const query = {};
 const compareFilter = {
-	type: 'products',
 	param: 'product',
 	getLabels() {
 		return Promise.resolve( [] );
 	},
 	labels: {
 		helpText: 'Select at least two products to compare',
-		placeholder: 'Search for products to compare',
 		title: 'Compare Products',
 		update: 'Compare',
+	},
+	searchProps: {
+		type: 'products',
+		placeholder: 'Search for products to compare',
 	},
 };
 

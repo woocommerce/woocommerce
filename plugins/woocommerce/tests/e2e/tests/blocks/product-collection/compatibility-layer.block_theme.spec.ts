@@ -8,73 +8,6 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage from './product-collection.page';
 
-type Scenario = {
-	title: string;
-	dataTestId: string;
-	content: string;
-	amount: number;
-};
-
-const singleOccurrenceScenarios: Scenario[] = [
-	{
-		title: 'Before Main Content',
-		dataTestId: 'woocommerce_before_main_content',
-		content: 'Hook: woocommerce_before_main_content',
-		amount: 1,
-	},
-	{
-		title: 'After Main Content',
-		dataTestId: 'woocommerce_after_main_content',
-		content: 'Hook: woocommerce_after_main_content',
-		amount: 1,
-	},
-	{
-		title: 'Before Shop Loop',
-		dataTestId: 'woocommerce_before_shop_loop',
-		content: 'Hook: woocommerce_before_shop_loop',
-		amount: 1,
-	},
-	{
-		title: 'After Shop Loop',
-		dataTestId: 'woocommerce_after_shop_loop',
-		content: 'Hook: woocommerce_after_shop_loop',
-		amount: 1,
-	},
-];
-
-const multipleOccurrenceScenarios: Scenario[] = [
-	{
-		title: 'Before Shop Loop Item Title',
-		dataTestId: 'woocommerce_before_shop_loop_item_title',
-		content: 'Hook: woocommerce_before_shop_loop_item_title',
-		amount: 16,
-	},
-	{
-		title: 'Shop Loop Item Title',
-		dataTestId: 'woocommerce_shop_loop_item_title',
-		content: 'Hook: woocommerce_shop_loop_item_title',
-		amount: 16,
-	},
-	{
-		title: 'After Shop Loop Item Title',
-		dataTestId: 'woocommerce_after_shop_loop_item_title',
-		content: 'Hook: woocommerce_after_shop_loop_item_title',
-		amount: 16,
-	},
-	{
-		title: 'Before Shop Loop Item',
-		dataTestId: 'woocommerce_before_shop_loop_item',
-		content: 'Hook: woocommerce_before_shop_loop_item',
-		amount: 16,
-	},
-	{
-		title: 'After Shop Loop Item',
-		dataTestId: 'woocommerce_after_shop_loop_item',
-		content: 'Hook: woocommerce_after_shop_loop_item',
-		amount: 16,
-	},
-];
-
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
@@ -94,25 +27,112 @@ test.describe( 'Product Collection: Compatibility Layer', () => {
 		await pageObject.goToProductCatalogFrontend();
 	} );
 
-	for ( const scenario of singleOccurrenceScenarios ) {
-		test( `${ scenario.title } is attached to the page`, async ( {
-			pageObject,
-		} ) => {
-			const hooks = pageObject.locateByTestId( scenario.dataTestId );
+	test( 'renders global compatibility hooks around the inherited collection and loop', async ( {
+		page,
+		pageObject,
+	} ) => {
+		const globalHooks = [
+			'woocommerce_before_main_content',
+			'woocommerce_before_shop_loop',
+			'woocommerce_after_shop_loop',
+			'woocommerce_after_main_content',
+		];
 
-			await expect( hooks ).toHaveCount( scenario.amount );
-			await expect( hooks ).toHaveText( scenario.content );
-		} );
-	}
+		for ( const hookName of globalHooks ) {
+			const hook = pageObject.locateByTestId( hookName );
+			await expect( hook ).toHaveCount( 1 );
+			await expect( hook ).toHaveText( `Hook: ${ hookName }` );
+		}
 
-	for ( const scenario of multipleOccurrenceScenarios ) {
-		test( `${ scenario.title } is attached to the page`, async ( {
-			pageObject,
-		} ) => {
-			const hooks = pageObject.locateByTestId( scenario.dataTestId );
+		await expect(
+			page.locator( '.wp-block-woocommerce-product-collection' )
+		).toHaveCount( 1 );
+		await expect( pageObject.productTemplate ).toHaveCount( 1 );
+		await expect( pageObject.products.first() ).toBeVisible();
 
-			await expect( hooks ).toHaveCount( scenario.amount );
-			await expect( hooks.first() ).toHaveText( scenario.content );
-		} );
-	}
+		const structureSelector = [
+			'[data-testid="woocommerce_before_main_content"]',
+			'.wp-block-woocommerce-product-collection',
+			'[data-testid="woocommerce_before_shop_loop"]',
+			'.wc-block-product-template',
+			'[data-testid="woocommerce_after_shop_loop"]',
+			'[data-testid="woocommerce_after_main_content"]',
+		].join( ', ' );
+		const structure = await page
+			.locator( structureSelector )
+			.evaluateAll( ( nodes ) =>
+				nodes.map( ( node ) => {
+					const testId = node.getAttribute( 'data-testid' );
+					if ( testId ) {
+						return testId;
+					}
+
+					return node.classList.contains(
+						'wp-block-woocommerce-product-collection'
+					)
+						? 'product-collection'
+						: 'product-template';
+				} )
+			);
+
+		expect( structure ).toEqual( [
+			'woocommerce_before_main_content',
+			'product-collection',
+			'woocommerce_before_shop_loop',
+			'product-template',
+			'woocommerce_after_shop_loop',
+			'woocommerce_after_main_content',
+		] );
+	} );
+
+	test( 'renders compatibility hooks in order for every product', async ( {
+		pageObject,
+	} ) => {
+		await expect( pageObject.products.first() ).toBeVisible();
+		const productCount = await pageObject.products.count();
+		expect( productCount ).toBeGreaterThan( 0 );
+
+		const itemHooks = [
+			'woocommerce_before_shop_loop_item',
+			'woocommerce_before_shop_loop_item_title',
+			'woocommerce_shop_loop_item_title',
+			'woocommerce_after_shop_loop_item_title',
+			'woocommerce_after_shop_loop_item',
+		];
+
+		for ( const hookName of itemHooks ) {
+			const hooks = pageObject.locateByTestId( hookName );
+			await expect( hooks ).toHaveCount( productCount );
+			await expect( hooks ).toHaveText(
+				Array( productCount ).fill( `Hook: ${ hookName }` )
+			);
+		}
+
+		const productSequences = await pageObject.products.evaluateAll(
+			( products ) =>
+				products.map( ( product ) =>
+					Array.from(
+						product.querySelectorAll(
+							'[data-testid="woocommerce_before_shop_loop_item"], [data-testid="woocommerce_before_shop_loop_item_title"], .wp-block-post-title, [data-testid="woocommerce_shop_loop_item_title"], [data-testid="woocommerce_after_shop_loop_item_title"], [data-testid="woocommerce_after_shop_loop_item"]'
+						)
+					).map(
+						( node ) =>
+							node.getAttribute( 'data-testid' ) ??
+							'product-title'
+					)
+				)
+		);
+		const expectedSequence = [
+			'woocommerce_before_shop_loop_item',
+			'woocommerce_before_shop_loop_item_title',
+			'product-title',
+			'woocommerce_shop_loop_item_title',
+			'woocommerce_after_shop_loop_item_title',
+			'woocommerce_after_shop_loop_item',
+		];
+
+		expect( productSequences ).toEqual(
+			Array.from( { length: productCount }, () => expectedSequence )
+		);
+	} );
 } );
