@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\MCP;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -52,10 +53,86 @@ class McpEndpointRemoval {
 	private const ENDPOINT_ROUTE = '/mcp';
 
 	/**
+	 * Option that stored whether the removed WooCommerce MCP feature was enabled.
+	 *
+	 * @var string
+	 */
+	private const FEATURE_OPTION = 'woocommerce_feature_mcp_integration_enabled';
+
+	/**
+	 * Name of the admin notice about the removal, used for dismissal.
+	 *
+	 * @var string
+	 */
+	public const REMOVED_NOTICE = 'mcp_endpoint_removed';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'handle_rest_api_init' ) );
+		add_action( 'admin_notices', array( $this, 'handle_admin_notices' ) );
+	}
+
+	/**
+	 * Handle the admin_notices hook.
+	 *
+	 * Tells stores that had the WooCommerce MCP feature enabled what was removed and how to keep using WooCommerce with MCP.
+	 *
+	 * @internal
+	 */
+	public function handle_admin_notices(): void {
+		if (
+			'yes' !== get_option( self::FEATURE_OPTION )
+			|| ! current_user_can( 'manage_woocommerce' )
+			|| \WC_Admin_Notices::user_has_dismissed_notice( self::REMOVED_NOTICE )
+		) {
+			return;
+		}
+
+		$message = sprintf(
+			'<strong>%1$s</strong> %2$s <a href="%3$s" target="_blank" rel="noopener noreferrer">%4$s</a>',
+			esc_html__( 'WooCommerce MCP has been removed.', 'woocommerce' ),
+			esc_html(
+				sprintf(
+					/* translators: %s: WooCommerce version. */
+					__( 'As of WooCommerce %s, the WooCommerce MCP endpoint (/wp-json/woocommerce/mcp), its REST API key authentication, and its REST-based product and order tools are no longer available. WooCommerce abilities are still available through the WordPress Abilities API. Use the MCP Adapter plugin to connect MCP clients to them.', 'woocommerce' ),
+					self::REMOVED_IN
+				)
+			),
+			esc_url( self::DOCS_URL ),
+			esc_html__( 'Learn more', 'woocommerce' )
+		);
+
+		if ( ! self::is_mcp_adapter_available() && current_user_can( 'install_plugins' ) ) {
+			$message .= sprintf(
+				' | <a href="%s">%s</a>',
+				esc_url( network_admin_url( 'plugin-install.php?tab=search&type=term&s=mcp-adapter' ) ),
+				esc_html__( 'Install MCP Adapter', 'woocommerce' )
+			);
+		}
+
+		$dismiss_url = wp_nonce_url(
+			add_query_arg( 'wc-hide-notice', self::REMOVED_NOTICE ),
+			'woocommerce_hide_notices_nonce',
+			'_wc_notice_nonce'
+		);
+
+		echo wp_kses_post(
+			'<div class="notice notice-warning is-dismissible">'
+			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '" aria-label="' . esc_attr__( 'Dismiss this notice', 'woocommerce' ) . '"></a>'
+			. '<p>' . $message . '</p>'
+			. '</div>'
+		);
+	}
+
+	/**
+	 * Check whether an MCP adapter is loaded, from the MCP Adapter plugin or any other plugin.
+	 *
+	 * @return bool
+	 */
+	private static function is_mcp_adapter_available(): bool {
+		return (bool) wc_get_container()->get( LegacyProxy::class )->call_function( 'class_exists', 'WP\MCP\Core\McpAdapter' );
 	}
 
 	/**
