@@ -419,13 +419,22 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 			return $validation_error;
 		}
 
+		$line_items = $request['line_items'];
+		if ( is_array( $line_items ) ) {
+			foreach ( $line_items as $item_id => $line ) {
+				if ( is_array( $line ) && ! isset( $line['refund_total'] ) && ! empty( $line['refund_tax'] ) ) {
+					$line_items[ $item_id ]['refund_total'] = 0;
+				}
+			}
+		}
+
 		// Create the refund.
 		$refund = wc_create_refund(
 			array(
 				'order_id'       => $order->get_id(),
 				'amount'         => $request['amount'],
 				'reason'         => $request['reason'],
-				'line_items'     => $request['line_items'],
+				'line_items'     => $line_items,
 				'refund_payment' => $request['api_refund'],
 				'restock_items'  => $request['api_restock'],
 			)
