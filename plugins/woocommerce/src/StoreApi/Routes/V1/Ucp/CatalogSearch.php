@@ -258,7 +258,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 			'order'              => 'desc',
 			'per_page'           => $limit,
 			'offset'             => $offset,
-			'catalog_visibility' => CatalogVisibility::CATALOG,
+			'catalog_visibility' => CatalogVisibility::SEARCH,
 		);
 
 		if ( '' !== $query ) {
