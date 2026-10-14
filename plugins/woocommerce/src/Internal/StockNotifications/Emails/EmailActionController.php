@@ -132,48 +132,115 @@ class EmailActionController {
 	}
 
 	/**
-	 * If the verification key matches, it updates the notification status to active.
+	 * Verifies a pending notification when the verification key matches.
+	 *
+	 * Expired, superseded or otherwise invalid keys, as well as notifications
+	 * that are no longer pending, redirect with a notice instead of failing silently.
 	 *
 	 * @param Notification $notification The notification to process.
 	 * @param string       $action_key The action key to verify.
 	 * @return void
 	 */
 	private function process_verification_action( Notification $notification, string $action_key ): void {
-		if ( $notification->check_verification_key( $action_key ) ) {
-			// Guard against re-hits of a still-valid verification URL (double-click, email prefetch,
-			// link-scanner bots). Without this, each hit would re-dispatch the verified email.
-			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
-				return;
-			}
+		if ( ! $notification->check_verification_key( $action_key ) ) {
+			$notice_text = $notification->is_verification_key_expired()
+				? esc_html__( 'This verification link has expired. Sign up again to request a new one.', 'woocommerce' )
+				: esc_html__( 'This verification link is no longer valid. Please use the link in the most recent verification email.', 'woocommerce' );
+			$this->redirect_with_notice( self::ACTION_VERIFY, $notice_text, 'error' );
+		}
 
-			$notification->set_status( NotificationStatus::ACTIVE );
-			$notification->set_date_confirmed( time() );
-			$notification->save();
+		// Guard against re-hits of a still-valid verification URL (double-click, email prefetch,
+		// link-scanner bots). Without this, each hit would re-dispatch the verified email.
+		$status = $notification->get_status();
+		if ( NotificationStatus::PENDING !== $status ) {
+			$notice_text = NotificationStatus::CANCELLED === $status
+				? esc_html__( 'This sign-up has been cancelled, so it can no longer be verified.', 'woocommerce' )
+				: esc_html__( 'This sign-up has already been verified.', 'woocommerce' );
+			$this->redirect_with_notice( self::ACTION_VERIFY, $notice_text, 'notice' );
+		}
 
-			/**
-			 * Action: woocommerce_customer_stock_notifications_verified
-			 *
-			 * Fires after a stock-notification signup has been verified via the
-			 * double opt-in email link. Mirrors `woocommerce_customer_stock_notifications_signup`.
-			 *
-			 * @since 10.9.0
-			 *
-			 * @param Notification $notification The notification.
-			 */
-			do_action( 'woocommerce_customer_stock_notifications_verified', $notification );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->set_date_confirmed( time() );
+		$notification->save();
 
-			$this->email_manager->send_verified_email( $notification );
+		/**
+		 * Action: woocommerce_customer_stock_notifications_verified
+		 *
+		 * Fires after a stock-notification signup has been verified via the
+		 * double opt-in email link. Mirrors `woocommerce_customer_stock_notifications_signup`.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param Notification $notification The notification.
+		 */
+		do_action( 'woocommerce_customer_stock_notifications_verified', $notification );
 
-			// We need a cookie-based session for notices to work on frontend pages.
-			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
-				WC()->session->set_customer_session_cookie( true );
-			}
+		$this->email_manager->send_verified_email( $notification );
 
-			$product = wc_get_product( $notification->get_product_id() );
+		$product = wc_get_product( $notification->get_product_id() );
 
-			/* translators: %s is product name */
-			$notice_text = sprintf( esc_html__( 'Successfully verified stock notifications for "%s".', 'woocommerce' ), $product->get_name() );
-			wc_add_notice( $notice_text );
+		/* translators: %s is product name */
+		$notice_text = sprintf( esc_html__( 'Successfully verified stock notifications for "%s".', 'woocommerce' ), $product->get_name() );
+		$this->redirect_with_notice( self::ACTION_VERIFY, $notice_text );
+	}
+
+	/**
+	 * If the unsubscribe key matches, it cancels the notification, unless it was already sent or cancelled.
+	 *
+	 * An invalid key redirects with a notice instead of failing silently.
+	 *
+	 * @param Notification $notification The Notification to process.
+	 * @param string       $action_key The action key to verify.
+	 * @return void
+	 */
+	private function process_unsubscribe_action( Notification $notification, string $action_key ): void {
+		if ( ! $notification->check_unsubscribe_key( $action_key ) ) {
+			$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, esc_html__( 'This unsubscribe link is no longer valid.', 'woocommerce' ), 'error' );
+		}
+
+		$status = $notification->get_status();
+
+		if ( NotificationStatus::SENT === $status ) {
+			$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, esc_html__( 'This notification has already been sent, so there is nothing to unsubscribe from.', 'woocommerce' ), 'notice' );
+		}
+
+		if ( NotificationStatus::ACTIVE !== $status && NotificationStatus::PENDING !== $status ) {
+			$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, esc_html__( 'You are already unsubscribed from this notification.', 'woocommerce' ), 'notice' );
+		}
+
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$notification->set_cancellation_source( NotificationCancellationSource::USER );
+		$notification->set_date_cancelled( time() );
+		$notification->save();
+
+		$product = wc_get_product( $notification->get_product_id() );
+
+		/* translators: %2$s product name, %1$s user email */
+		$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
+		$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, $notice_text );
+	}
+
+	/**
+	 * Adds a frontend notice and redirects to the destination page of the given email action.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $action      The email action: 'verify' or 'unsubscribe'.
+	 * @param string $notice_text The notice text to show after the redirect.
+	 * @param string $notice_type The notice type: 'success', 'notice' or 'error'.
+	 * @return never
+	 */
+	private function redirect_with_notice( string $action, string $notice_text, string $notice_type = 'success' ): void {
+		// We need a cookie-based session for notices to work on frontend pages.
+		if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
+			WC()->session->set_customer_session_cookie( true );
+		}
+
+		wc_add_notice( $notice_text, $notice_type );
+
+		$url = get_permalink( wc_get_page_id( 'shop' ) );
+
+		if ( self::ACTION_VERIFY === $action ) {
 			/**
 			 * `woocommerce_customer_stock_notification_verified_redirect_url` filter.
 			 *
@@ -182,44 +249,8 @@ class EmailActionController {
 			 * @param  string  $url
 			 * @return string
 			 */
-			$url = apply_filters( 'woocommerce_customer_stock_notification_verified_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
-			wp_safe_redirect( $url );
-			exit;
-		}
-	}
-
-	/**
-	 * If the unsubscribe key matches, it cancels the notification, unless it was already sent or cancelled.
-	 *
-	 * @param Notification $notification The Notification to process.
-	 * @param string       $action_key The action key to verify.
-	 * @return void
-	 */
-	private function process_unsubscribe_action( Notification $notification, string $action_key ): void {
-		if ( $notification->check_unsubscribe_key( $action_key ) ) {
-			// We need a cookie-based session for notices to work on frontend pages.
-			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
-				WC()->session->set_customer_session_cookie( true );
-			}
-
-			$status = $notification->get_status();
-
-			if ( NotificationStatus::SENT === $status ) {
-				wc_add_notice( esc_html__( 'This notification has already been sent, so there is nothing to unsubscribe from.', 'woocommerce' ), 'notice' );
-			} elseif ( NotificationStatus::ACTIVE !== $status && NotificationStatus::PENDING !== $status ) {
-				wc_add_notice( esc_html__( 'You are already unsubscribed from this notification.', 'woocommerce' ), 'notice' );
-			} else {
-				$notification->set_status( NotificationStatus::CANCELLED );
-				$notification->set_cancellation_source( NotificationCancellationSource::USER );
-				$notification->set_date_cancelled( time() );
-				$notification->save();
-
-				$product = wc_get_product( $notification->get_product_id() );
-
-				/* translators: %2$s product name, %1$s user email */
-				$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
-				wc_add_notice( $notice_text );
-			}
+			$url = apply_filters( 'woocommerce_customer_stock_notification_verified_redirect_url', $url );
+		} else {
 			/**
 			 * `woocommerce_customer_stock_notification_unsubscribe_redirect_url` filter.
 			 *
@@ -228,10 +259,11 @@ class EmailActionController {
 			 * @param  string  $url
 			 * @return string
 			 */
-			$url = apply_filters( 'woocommerce_customer_stock_notification_unsubscribe_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
-			wp_safe_redirect( $url );
-			exit;
+			$url = apply_filters( 'woocommerce_customer_stock_notification_unsubscribe_redirect_url', $url );
 		}
+
+		wp_safe_redirect( $url );
+		exit;
 	}
 
 	/**

@@ -473,14 +473,34 @@ class Notification extends \WC_Data {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $action_key, 2 );
-
-		$threshold = Config::get_verification_expiration_time_threshold();
-		if ( time() - (int) $timestamp > $threshold ) {
+		if ( $this->is_verification_key_expired() ) {
 			return false;
 		}
 
+		list( , $hash ) = explode( ':', $action_key, 2 );
+
 		return wp_verify_fast_hash( $key, $hash );
+	}
+
+	/**
+	 * Check whether the stored verification key is past its expiration time.
+	 *
+	 * A missing or malformed key is not reported as expired.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool True if a verification key is stored and has expired, false otherwise.
+	 */
+	public function is_verification_key_expired(): bool {
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
+
+		if ( ! str_contains( $action_key, ':' ) ) {
+			return false;
+		}
+
+		list( $timestamp ) = explode( ':', $action_key, 2 );
+
+		return time() - (int) $timestamp > Config::get_verification_expiration_time_threshold();
 	}
 
 	/**
