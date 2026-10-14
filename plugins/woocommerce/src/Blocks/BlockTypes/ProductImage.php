@@ -370,15 +370,15 @@ class ProductImage extends AbstractBlock {
 				array(
 					'wc-block-components-product-image wc-block-grid__product-image',
 					$aspect_ratio_class,
-					esc_attr( $classes_and_styles['classes'] ),
+					$classes_and_styles['classes'],
 				)
 			)
 		);
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => esc_attr( $classes ),
-				'style' => esc_attr( $classes_and_styles['styles'] ),
+				'class' => $classes,
+				'style' => $classes_and_styles['styles'],
 			)
 		);
 

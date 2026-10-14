@@ -38,7 +38,7 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 		);
 		$wrapper_attributes     = get_block_wrapper_attributes(
 			array(
-				'href'  => esc_url( $cart_page_url ),
+				'href'  => esc_url_raw( (string) $cart_page_url ),
 				'class' => $classes,
 			)
 		);

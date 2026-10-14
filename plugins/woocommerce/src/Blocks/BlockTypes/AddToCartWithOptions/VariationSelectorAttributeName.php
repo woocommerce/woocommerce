@@ -47,9 +47,9 @@ class VariationSelectorAttributeName extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => esc_attr( $classes_and_styles['classes'] ),
-				'id'    => esc_attr( $attribute_id . '_label' ),
-				'style' => esc_attr( $classes_and_styles['styles'] ),
+				'class' => $classes_and_styles['classes'],
+				'id'    => $attribute_id . '_label',
+				'style' => $classes_and_styles['styles'],
 			)
 		);
 

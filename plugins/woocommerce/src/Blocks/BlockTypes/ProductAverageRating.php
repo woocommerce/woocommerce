@@ -69,12 +69,12 @@ class ProductAverageRating extends AbstractBlock {
 					array_filter(
 						[
 							'wc-block-components-product-average-rating-counter',
-							esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-							esc_attr( $styles_and_classes['classes'] ),
+							$text_align_styles_and_classes['class'] ?? '',
+							$styles_and_classes['classes'],
 						]
 					)
 				),
-				'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
+				'style' => $styles_and_classes['styles'] ?? '',
 			)
 		);
 

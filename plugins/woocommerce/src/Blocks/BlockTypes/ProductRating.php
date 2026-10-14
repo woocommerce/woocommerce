@@ -157,8 +157,8 @@ class ProductRating extends AbstractBlock {
 				array_filter(
 					array(
 						'wc-block-components-product-rating wc-block-grid__product-rating',
-						esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-						esc_attr( $styles_and_classes['classes'] ),
+						$text_align_styles_and_classes['class'] ?? '',
+						$styles_and_classes['classes'],
 					)
 				)
 			);
@@ -166,7 +166,7 @@ class ProductRating extends AbstractBlock {
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
 					'class' => $classes,
-					'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
+					'style' => $styles_and_classes['styles'] ?? '',
 				)
 			);
 

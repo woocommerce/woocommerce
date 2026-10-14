@@ -64,8 +64,8 @@ class PaymentMethodIcons extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => esc_attr( $classes_and_styles['classes'] ),
-				'style' => esc_attr( $classes_and_styles['styles'] ),
+				'class' => $classes_and_styles['classes'],
+				'style' => $classes_and_styles['styles'],
 			)
 		);
 

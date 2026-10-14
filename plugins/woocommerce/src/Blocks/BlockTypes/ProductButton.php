@@ -254,11 +254,9 @@ class ProductButton extends AbstractBlock {
 			array(
 				'class' => implode(
 					' ',
-					array_filter(
-						array(
-							'wp-block-button wc-block-components-product-button',
-							esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
-						)
+					array(
+						'wp-block-button wc-block-components-product-button',
+						$classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes,
 					)
 				),
 			)
