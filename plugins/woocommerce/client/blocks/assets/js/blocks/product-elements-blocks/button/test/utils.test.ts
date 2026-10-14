@@ -27,6 +27,8 @@ jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
  * An optimistic cart item with optional response-only fields used by these tests.
  */
 type TestCartItem = OptimisticCartItem & {
+	/** Store API line type, such as `simple` or `variation`. */
+	type?: string;
 	/** Cart key of the parent line, when this line is a declared child. */
 	parent_item_key?: string | null;
 	/** Custom item data attached to the line. */
