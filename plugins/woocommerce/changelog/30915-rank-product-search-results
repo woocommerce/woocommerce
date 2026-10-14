@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show SKU and title matches first in admin product search boxes, so they are no longer cut off in large catalogs.
