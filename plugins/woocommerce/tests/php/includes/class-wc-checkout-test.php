@@ -934,20 +934,33 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				'tax_rate_class'    => '',
 			)
 		);
-		WC()->customer->set_billing_country( 'DE' );
-		WC()->customer->set_shipping_country( 'DE' );
-		WC()->customer->set_is_vat_exempt( false );
-		$order_id = $this->create_order_with_line_item_and_fee();
-		$before   = $this->get_order_item_ids_by_type( $order_id );
-		if ( $taxes_changed ) {
-			$order = wc_get_order( $order_id );
-			$order->update_meta_data( '_taxes_hash', 'stale' );
-			$order->save();
-		}
+		$customer          = WC()->customer;
+		$original_customer = array(
+			'billing_country'  => $customer->get_billing_country(),
+			'shipping_country' => $customer->get_shipping_country(),
+			'is_vat_exempt'    => $customer->get_is_vat_exempt(),
+		);
+		$customer->set_billing_country( 'DE' );
+		$customer->set_shipping_country( 'DE' );
+		$customer->set_is_vat_exempt( false );
+		try {
+			$order_id = $this->create_order_with_line_item_and_fee();
+			$before   = $this->get_order_item_ids_by_type( $order_id );
+			if ( $taxes_changed ) {
+				$order = wc_get_order( $order_id );
+				$order->update_meta_data( '_taxes_hash', 'stale' );
+				$order->save();
+			}
 
-		$this->resume_order( $order_id );
-		$after = $this->get_order_item_ids_by_type( $order_id );
-		$order = wc_get_order( $order_id );
+			$this->resume_order( $order_id );
+			$after    = $this->get_order_item_ids_by_type( $order_id );
+			$order    = wc_get_order( $order_id );
+			$cart_tax = (float) WC()->cart->get_total_tax();
+		} finally {
+			$customer->set_billing_country( $original_customer['billing_country'] );
+			$customer->set_shipping_country( $original_customer['shipping_country'] );
+			$customer->set_is_vat_exempt( $original_customer['is_vat_exempt'] );
+		}
 
 		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
 		$this->assertCount( 1, $after['tax'], 'The order should have one tax line.' );
@@ -957,7 +970,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( $before['tax'], $after['tax'], 'The tax line should keep its ID.' );
 		}
 		$this->assertSame( 'DE-VAT-1', array_values( $order->get_taxes() )[0]->get_rate_code() );
-		$this->assertEqualsWithDelta( (float) WC()->cart->get_total_tax(), (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
+		$this->assertEqualsWithDelta( $cart_tax, (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
 	}
 
 	/**
