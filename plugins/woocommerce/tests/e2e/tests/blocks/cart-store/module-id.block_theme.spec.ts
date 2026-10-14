@@ -55,53 +55,53 @@ test.describe( 'Cart store module id', () => {
 		);
 		expect( namesRemovedId ).toBe( false );
 
-		const storeShape = await page.evaluate( async () => {
-			const { store } = await import( '@wordpress/interactivity' );
-			const unlockKey =
-				'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+		const readStoreShape = () =>
+			page.evaluate( async () => {
+				const { store } = await import( '@wordpress/interactivity' );
+				const unlockKey =
+					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-			const { state, actions } = store(
-				'woocommerce',
-				{},
-				{ lock: unlockKey }
-			) as {
-				state: Record< string, unknown >;
-				actions: Record< string, unknown >;
-			};
+				const { state, actions } = store(
+					'woocommerce',
+					{},
+					{ lock: unlockKey }
+				) as {
+					state: Record< string, unknown >;
+					actions: Record< string, unknown >;
+				};
 
-			return {
-				stateKeys: [
-					'cart',
-					'restUrl',
-					'nonce',
-					'findItemInCart',
-				].filter( ( key ) => key in state ),
-				actionKeys: [
-					'removeCartItem',
-					'addCartItem',
-					'batchAddCartItems',
-					'refreshCartItems',
-					'waitForIdle',
-					'showNoticeError',
-					'updateNotices',
-				].filter( ( key ) => typeof actions[ key ] === 'function' ),
-			};
+				return {
+					stateKeys: [
+						'cart',
+						'restUrl',
+						'nonce',
+						'findItemInCart',
+					].filter( ( key ) => key in state ),
+					actionKeys: [
+						'removeCartItem',
+						'addCartItem',
+						'batchAddCartItems',
+						'refreshCartItems',
+						'waitForIdle',
+						'showNoticeError',
+						'updateNotices',
+					].filter( ( key ) => typeof actions[ key ] === 'function' ),
+				};
+			} );
+
+		// The store sets `nonce` from its first cart refresh, so it appears
+		// shortly after the page loads.
+		await expect.poll( readStoreShape ).toEqual( {
+			stateKeys: [ 'cart', 'restUrl', 'nonce', 'findItemInCart' ],
+			actionKeys: [
+				'removeCartItem',
+				'addCartItem',
+				'batchAddCartItems',
+				'refreshCartItems',
+				'waitForIdle',
+				'showNoticeError',
+				'updateNotices',
+			],
 		} );
-
-		expect( storeShape.stateKeys ).toEqual( [
-			'cart',
-			'restUrl',
-			'nonce',
-			'findItemInCart',
-		] );
-		expect( storeShape.actionKeys ).toEqual( [
-			'removeCartItem',
-			'addCartItem',
-			'batchAddCartItems',
-			'refreshCartItems',
-			'waitForIdle',
-			'showNoticeError',
-			'updateNotices',
-		] );
 	} );
 } );
