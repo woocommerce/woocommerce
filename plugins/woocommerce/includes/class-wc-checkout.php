@@ -689,6 +689,7 @@ class WC_Checkout {
 			$kept_types[] = $item_type;
 		}
 
+		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
 		$persisted_types = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
