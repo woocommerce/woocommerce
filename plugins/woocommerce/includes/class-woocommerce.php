@@ -1144,7 +1144,10 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+		static $plugin_path = null;
+		$plugin_path        = $plugin_path ?? untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+
+		return $plugin_path;
 	}
 
 	/**
