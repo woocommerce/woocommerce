@@ -318,6 +318,44 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Writing CSV data reports whether the data reached the export file.
+	 */
+	public function test_write_csv_data_reports_whether_the_data_was_written(): void {
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_filename( 'wc-csv-exporter-failed-write-test' );
+		$exporter->get_file();
+
+		$reflected_exporter = new ReflectionClass( WC_Product_CSV_Exporter::class );
+		$write_csv_data     = $reflected_exporter->getMethod( 'write_csv_data' );
+		$write_csv_data->setAccessible( true );
+		$get_file_path = $reflected_exporter->getMethod( 'get_file_path' );
+		$get_file_path->setAccessible( true );
+
+		$read_only_mode = static function () {
+			return 'r';
+		};
+
+		try {
+			$this->assertTrue( $write_csv_data->invoke( $exporter, "sku,name\n" ) );
+
+			// fwrite() fails on a read-only handle, and raises a notice.
+			add_filter( 'woocommerce_csv_exporter_fopen_mode', $read_only_mode );
+			set_error_handler( '__return_true', E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Keeps the notice from failing the test.
+
+			try {
+				$written = $write_csv_data->invoke( $exporter, "sku,name\n" );
+			} finally {
+				restore_error_handler();
+			}
+
+			$this->assertFalse( $written, 'A failed write must be reported, so a caller can stop instead of serving an incomplete file.' );
+		} finally {
+			remove_filter( 'woocommerce_csv_exporter_fopen_mode', $read_only_mode );
+			wp_delete_file( $get_file_path->invoke( $exporter ) );
+		}
+	}
+
+	/**
 	 * @testdox Exporting a product loaded before its global attribute is deleted leaves the value empty without a warning.
 	 */
 	public function test_export_row_for_product_loaded_before_its_global_attribute_is_deleted(): void {

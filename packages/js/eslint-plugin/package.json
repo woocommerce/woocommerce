@@ -30,7 +30,7 @@
 	"dependencies": {
 		"@wordpress/eslint-plugin": "25.6.0",
 		"eslint-plugin-testing-library": "^7.16.2",
-		"prettier": "npm:wp-prettier@3.0.3",
+		"prettier": "npm:wp-prettier@3.9.6",
 		"typescript-eslint": "^8.63.0"
 	},
 	"peerDependencies": {

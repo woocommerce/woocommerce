@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -176,6 +177,8 @@ class Checkout extends AbstractCartRoute {
 				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 			} catch ( \Exception $error ) {
 				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+			} catch ( \Throwable $error ) {
+				$response = UnexpectedErrorResponse::create( $error, static::class );
 			}
 		}
 
