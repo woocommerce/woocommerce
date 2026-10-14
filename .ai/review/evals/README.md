@@ -66,11 +66,11 @@ The runner creates an isolated Git repository containing the case file and confi
 
 A `finding` expectation requires a finding on that path containing the specified case-insensitive literal. A `quiet` expectation requires no findings, including suppressed ones. Wording changes can fail a case even when the reviewer detects the bug; an unrelated finding can pass if it contains the literal. Inspect the finding's reasoning against the fixture before treating the automated score as evidence of detection. Routing alone does not determine whether a case passes.
 
-## Fixture corrections and limitations
+## Limitations
 
-Cases use versioned IDs after adversarial fixture reviews. Revisions include concrete PHP callback boundaries, shipping normalization and filter consumers, actual currency package files, and regression tests with observable results. Fixture directory names may retain their original IDs; the suite identifies the current case version. Some safe cases deliberately exercise simple copy or private refactoring changes alongside harder boundaries.
+Case IDs are versioned. Fixture directories may retain their original names; the suite identifies the current case version. Evaluate revised cases again before relying on their results.
 
-The original experiment and its failed outcomes remain preserved separately. Revised scenarios have versioned case IDs and must be evaluated again. Earlier results do not establish the revised cases' results. These cases exercise review behavior on selected changes; they do not measure production-wide accuracy or isolate the effect of a guideline from the broader persona prompt.
+These cases exercise review behavior on selected changes. They do not measure production-wide accuracy or isolate a guideline's effect from the broader review prompt.
 
 ## Coverage
 
