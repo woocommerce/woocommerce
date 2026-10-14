@@ -31,6 +31,15 @@
 		object-fit: cover;
 	}
 
+	// Feed descriptions can be any length; keep the cards as tall as the product type cards.
+	.woocommerce-list__item-content {
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+
 	// Two-line descriptions otherwise run into the external-link icon.
 	.woocommerce-list__item-after {
 		padding-inline-start: 16px;
