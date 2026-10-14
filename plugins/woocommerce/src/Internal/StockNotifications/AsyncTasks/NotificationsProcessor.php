@@ -225,9 +225,8 @@ class NotificationsProcessor {
 				continue;
 			}
 
-			$is_sent = true;
 			try {
-				$this->email_manager->send_stock_notification_email( $notification );
+				$is_sent = $this->email_manager->send_stock_notification_email( $notification );
 			} catch ( \Throwable $e ) {
 				$is_sent = false;
 			}

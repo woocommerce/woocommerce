@@ -30,6 +30,13 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * What the short-circuited `wp_mail()` reports back.
+	 *
+	 * @var bool
+	 */
+	private $wp_mail_result = true;
+
+	/**
 	 * Set up test case
 	 */
 	public function setUp(): void {
@@ -37,13 +44,23 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$this->enable_stock_notifications_feature();
 		\WC()->queue()->cancel_all( JobManager::AS_JOB_SEND_STOCK_NOTIFICATIONS );
 
+		// Short-circuit `wp_mail()` so the tests never attempt a real send, while still
+		// letting each test choose what the mailer reports back.
+		$this->wp_mail_result = true;
+		add_filter( 'pre_wp_mail', array( $this, 'short_circuit_wp_mail' ) );
+
 		$eligibility_service = new EligibilityService();
 		$eligibility_service->init( new StockManagementHelper() );
 		$job_manager         = new JobManager();
 		$cycle_state_service = new CycleStateService();
 		$email_manager       = new EmailManager();
-		$this->sut           = new NotificationsProcessor();
+		$email_manager->init();
+		$this->sut = new NotificationsProcessor();
 		$this->sut->init( $eligibility_service, $job_manager, $cycle_state_service, $email_manager );
+
+		// Rebuild the `WC_Emails` singleton so the BIS email registered above is part of it.
+		$this->reset_email_singleton();
+		WC()->mailer();
 	}
 
 		/**
@@ -51,12 +68,31 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		 */
 	public function tearDown(): void {
 		unset( $this->sut );
+		$this->reset_email_singleton();
 		// Clean up all notifications.
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
+	}
+
+	/**
+	 * Reset the `WC_Emails` singleton so the next `WC()->mailer()` call rebuilds it.
+	 */
+	private function reset_email_singleton(): void {
+		$instance_property = ( new \ReflectionClass( \WC_Emails::class ) )->getProperty( 'instance' );
+		$instance_property->setAccessible( true );
+		$instance_property->setValue( null, null );
+	}
+
+	/**
+	 * `pre_wp_mail` filter: skip the actual send and report the configured result.
+	 *
+	 * @return bool
+	 */
+	public function short_circuit_wp_mail(): bool {
+		return $this->wp_mail_result;
 	}
 
 	/**
@@ -116,6 +152,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_user_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
@@ -152,12 +189,14 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$notification = new Notification();
 		$notification->set_product_id( $variation->get_id() );
 		$notification->set_user_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
 		$notification_on_parent = new Notification();
 		$notification_on_parent->set_product_id( $product->get_id() );
 		$notification_on_parent->set_user_id( 1 );
+		$notification_on_parent->set_user_email( 'test@test.com' );
 		$notification_on_parent->set_status( NotificationStatus::ACTIVE );
 		$notification_on_parent->save();
 
@@ -192,12 +231,14 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$notification = new Notification();
 		$notification->set_product_id( $variable->get_id() );
 		$notification->set_user_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
 		$notification_on_variation = new Notification();
 		$notification_on_variation->set_product_id( $last_variation->get_id() );
 		$notification_on_variation->set_user_id( 1 );
+		$notification_on_variation->set_user_email( 'test@test.com' );
 		$notification_on_variation->set_status( NotificationStatus::ACTIVE );
 		$notification_on_variation->save();
 
@@ -364,6 +405,61 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 				array( 'product_id' => $product->get_id() ),
 				JobManager::AS_JOB_GROUP
 			)
+		);
+	}
+
+	/**
+	 * @testdox Should mark a sign-up Sent only when the email actually goes out, and count it as failed otherwise.
+	 *
+	 * @dataProvider send_outcome_provider
+	 *
+	 * @param bool   $email_enabled   Whether the back-in-stock email is enabled.
+	 * @param bool   $wp_mail_result  What `wp_mail()` reports back.
+	 * @param string $expected_status The status the sign-up should end up in.
+	 * @param int    $expected_sent   Expected `sent_count` in the cycle state.
+	 * @param int    $expected_failed Expected `failed_count` in the cycle state.
+	 */
+	public function test_process_batch_marks_sent_only_when_email_is_sent( bool $email_enabled, bool $wp_mail_result, string $expected_status, int $expected_sent, int $expected_failed ): void {
+		// Batch size 1 keeps the cycle state around after the first run, so the counters can be inspected.
+		add_filter( 'woocommerce_customer_stock_notifications_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_email_enabled_customer_stock_notification', fn() => $email_enabled );
+		$this->wp_mail_result = $wp_mail_result;
+
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->sut->process_batch( $product->get_id() );
+
+		$notification = new Notification( $notification->get_id() );
+		$this->assertEquals( $expected_status, $notification->get_status() );
+		$this->assertEqualsWithDelta( time(), $notification->get_date_last_attempt()->getTimestamp(), 5 );
+		if ( NotificationStatus::SENT === $expected_status ) {
+			$this->assertEqualsWithDelta( time(), $notification->get_date_notified()->getTimestamp(), 5 );
+		} else {
+			$this->assertEmpty( $notification->get_date_notified(), 'A sign-up that was not emailed must not record a notified date.' );
+		}
+
+		$cycle_state = get_option( CycleStateService::STATE_OPTION_PREFIX . $product->get_id() );
+		$this->assertSame( $expected_sent, $cycle_state['sent_count'] );
+		$this->assertSame( $expected_failed, $cycle_state['failed_count'] );
+
+		WC()->queue()->cancel_all( JobManager::AS_JOB_SEND_STOCK_NOTIFICATIONS );
+	}
+
+	/**
+	 * Data provider for test_process_batch_marks_sent_only_when_email_is_sent.
+	 *
+	 * @return array[]
+	 */
+	public function send_outcome_provider(): array {
+		return array(
+			'email sent'     => array( true, true, NotificationStatus::SENT, 1, 0 ),
+			'email disabled' => array( false, true, NotificationStatus::CANCELLED, 0, 1 ),
+			'wp_mail failed' => array( true, false, NotificationStatus::CANCELLED, 0, 1 ),
 		);
 	}
 

@@ -31,6 +31,13 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	private $sent_to = array();
 
 	/**
+	 * What the short-circuited `wp_mail()` reports back.
+	 *
+	 * @var bool
+	 */
+	private $wp_mail_result = true;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -57,7 +64,8 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
-		$this->sent_to = array();
+		$this->sent_to        = array();
+		$this->wp_mail_result = true;
 		$this->restore_stock_notifications_feature_option();
 		// Discard this test's `WC_Emails` build so later tests rebuild their own from
 		// whatever filters are active for them, rather than inheriting this test's list.
@@ -87,7 +95,38 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		foreach ( $recipients as $recipient ) {
 			$this->sent_to[ $recipient ] = true;
 		}
-		return true;
+		return $this->wp_mail_result;
+	}
+
+	/**
+	 * @testdox Should report whether the back-in-stock email was actually sent when send_stock_notification_email is called.
+	 *
+	 * @dataProvider stock_notification_send_outcome_provider
+	 *
+	 * @param bool $email_enabled  Whether the back-in-stock email is enabled.
+	 * @param bool $wp_mail_result What `wp_mail()` reports back.
+	 * @param bool $expected       The expected return value.
+	 */
+	public function test_send_stock_notification_email_returns_whether_sent( bool $email_enabled, bool $wp_mail_result, bool $expected ): void {
+		add_filter( 'woocommerce_email_enabled_customer_stock_notification', fn() => $email_enabled );
+		$this->wp_mail_result = $wp_mail_result;
+		$notification         = $this->build_notification();
+
+		$this->assertSame( $expected, $this->sut->send_stock_notification_email( $notification ) );
+		$this->assertSame( $email_enabled, isset( $this->sent_to[ $notification->get_user_email() ] ), 'Mail should only be attempted when the email is enabled.' );
+	}
+
+	/**
+	 * Data provider for test_send_stock_notification_email_returns_whether_sent.
+	 *
+	 * @return array[]
+	 */
+	public function stock_notification_send_outcome_provider(): array {
+		return array(
+			'email sent'     => array( true, true, true ),
+			'email disabled' => array( false, true, false ),
+			'wp_mail failed' => array( true, false, false ),
+		);
 	}
 
 	/**
