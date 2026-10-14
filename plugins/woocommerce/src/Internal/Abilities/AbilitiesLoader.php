@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
@@ -38,6 +39,7 @@ class AbilitiesLoader {
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
 		OrderAddNote::class,
+		OrderNotesQuery::class,
 		OrderUpdateStatus::class,
 		ProductsQuery::class,
 		ProductCreate::class,
