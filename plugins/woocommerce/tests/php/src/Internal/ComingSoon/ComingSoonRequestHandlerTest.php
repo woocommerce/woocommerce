@@ -62,9 +62,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_store_pages_only', 'no' );
 		update_option( 'woocommerce_private_link', 'no' );
 		$this->sut = wc_get_container()->get( ComingSoonRequestHandler::class );
-		$renderer  = new \ReflectionProperty( ComingSoonRequestHandler::class, 'use_classic_templates' );
-		$renderer->setAccessible( true );
-		$renderer->setValue( $this->sut, null );
 	}
 
 	/**
@@ -163,78 +160,17 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should retain only applicable published saved Coming Soon designs.
-	 * @dataProvider saved_template_cases
+	 * @testdox Should use the PHP page even when a block Coming Soon design exists.
+	 * @testWith ["wp_template", "coming-soon"]
+	 *           ["wp_template_part", "coming-soon-social-links"]
 	 *
-	 * @param string $type      Saved template post type.
-	 * @param string $slug      Saved template slug.
-	 * @param string $status    Saved template status.
-	 * @param string $scope     Saved template theme or plugin scope.
-	 * @param bool   $preserved Whether to retain the block renderer.
+	 * @param string $type Saved template post type.
+	 * @param string $slug Saved template slug.
 	 */
-	public function test_saved_template_selection( string $type, string $slug, string $status, string $scope, bool $preserved ): void {
-		$this->create_saved_design( $type, $slug, $status, 'current' === $scope ? get_stylesheet() : $scope );
+	public function test_saved_design_uses_php_page( string $type, string $slug ): void {
+		$this->create_saved_design( $type, $slug );
 
-		$this->assert_classic_result( $preserved ? '/original.php' : self::ENTIRE_SITE_TEMPLATE );
-	}
-
-	/**
-	 * Saved template scope and status boundaries.
-	 *
-	 * @return array
-	 */
-	public function saved_template_cases(): array {
-		$cases = array();
-		$slugs = array(
-			'wp_template'      => 'coming-soon',
-			'wp_template_part' => 'coming-soon-social-links',
-		);
-		foreach ( $slugs as $type => $slug ) {
-			foreach ( array( 'current', 'woocommerce/woocommerce', 'woocommerce' ) as $scope ) {
-				$cases[ $type . '-' . $scope ] = array( $type, $slug, 'publish', $scope, true );
-			}
-			$cases[ $type . '-draft' ]       = array( $type, $slug, 'draft', 'current', false );
-			$cases[ $type . '-trash' ]       = array( $type, $slug, 'trash', 'current', false );
-			$cases[ $type . '-other-theme' ] = array( $type, $slug, 'publish', 'another-theme', false );
-			$cases[ $type . '-unrelated' ]   = array( $type, 'unrelated', 'publish', 'current', false );
-		}
-		$cases['wrong-post-type'] = array( 'wp_template_part', 'coming-soon', 'publish', 'current', false );
-		return $cases;
-	}
-
-	/**
-	 * @testdox Should preserve only filesystem Coming Soon roots without enabling block support.
-	 * @testWith ["child", "templates", "coming-soon", true]
-	 *           ["parent", "templates", "coming-soon", true]
-	 *           ["child", "block-templates", "coming-soon", true]
-	 *           ["parent", "block-templates", "coming-soon", true]
-	 *           ["child", "templates", "unrelated", false]
-	 *           ["parent", "templates", "unrelated", false]
-	 *           ["child", "parts", "coming-soon-social-links", false]
-	 *
-	 * @param string $theme     Theme directory holding the fixture.
-	 * @param string $directory Modern or deprecated template directory.
-	 * @param string $slug      Fixture template slug.
-	 * @param bool   $preserved Whether to retain the existing renderer.
-	 */
-	public function test_filesystem_template_selection( string $theme, string $directory, string $slug, bool $preserved ): void {
-		$root = $this->create_fixture_directory();
-		$path = $root . '/' . $theme . '/' . $directory . '/' . $slug . '.html';
-		try {
-			$this->assertTrue( wp_mkdir_p( dirname( $path ) ) );
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write only a fresh task-owned template fixture, never an installed theme design.
-			$this->assertNotFalse( file_put_contents( $path, '<!-- wp:paragraph --><p>WC50520 root design</p><!-- /wp:paragraph -->' ) );
-			add_filter( 'stylesheet_directory', fn() => $root . '/child' );
-			add_filter( 'template_directory', fn() => $root . '/parent' );
-
-			$this->assert_classic_result( $preserved ? '/original.php' : self::ENTIRE_SITE_TEMPLATE );
-			$this->assertFalse( current_theme_supports( 'block-templates' ) );
-		} finally {
-			wp_delete_file( $path );
-			$this->remove_fixture_directory( dirname( $path ) );
-			$this->remove_fixture_directory( $root . '/' . $theme );
-			$this->remove_fixture_directory( $root );
-		}
+		$this->assert_classic_result( self::ENTIRE_SITE_TEMPLATE );
 	}
 
 	/**
@@ -275,20 +211,18 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Create a saved Coming Soon design scoped to a theme or plugin.
 	 *
-	 * @param string      $type   Template post type.
-	 * @param string      $slug   Template slug.
-	 * @param string      $status Post status.
-	 * @param string|null $scope  `wp_theme` term; defaults to the active theme.
+	 * @param string $type Template post type.
+	 * @param string $slug Template slug.
 	 */
-	private function create_saved_design( string $type = 'wp_template', string $slug = 'coming-soon', string $status = 'publish', ?string $scope = null ): void {
+	private function create_saved_design( string $type, string $slug ): void {
 		$post_id = $this->factory->post->create(
 			array(
 				'post_type'   => $type,
 				'post_name'   => $slug,
-				'post_status' => $status,
+				'post_status' => 'publish',
 			)
 		);
-		wp_set_object_terms( $post_id, $scope ?? get_stylesheet(), 'wp_theme' );
+		wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
 	}
 
 	/**
@@ -507,62 +441,20 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			apply_filters( 'template_include', '/original.php' ),
 			'A later template_include callback must not replace the private page.'
 		);
-		$this->assertSame( 999, has_action( 'after_setup_theme', array( $handler, 'possibly_init_block_templates' ) ), 'The initializer must stay directly registered so it can be unhooked.' );
+		$this->assertFalse( has_action( 'after_setup_theme', array( $handler, 'possibly_init_block_templates' ) ), 'Classic themes must not start the block template classes.' );
 	}
 
 	/**
-	 * @testdox Should initialize block templates only when the legacy renderer is used.
-	 * @testWith [false, false]
-	 *           [true, true]
-	 *
-	 * @param bool $saved_design Whether a published Coming Soon design exists.
-	 * @param bool $initialized  Whether the block template controller should be initialized.
+	 * @testdox Should keep the deprecated block template initializer as a no-op.
 	 */
-	public function test_block_templates_initialize_only_for_legacy_renderer( bool $saved_design, bool $initialized ): void {
-		if ( $saved_design ) {
-			$this->create_saved_design();
-		}
+	public function test_possibly_init_block_templates_is_deprecated_noop(): void {
+		$this->setExpectedDeprecated( ComingSoonRequestHandler::class . '::possibly_init_block_templates' );
 		$controller = BlocksPackage::container()->get( BlockTemplatesController::class );
 		remove_all_filters( 'get_block_templates' );
-		// Earlier registry inits leave process-wide registrations; start from a clean slate and restore it after.
-		$registry      = \WP_Block_Templates_Registry::get_instance();
-		$template_name = 'woocommerce//coming-soon';
-		$original      = $registry->get_registered( $template_name );
-		if ( $original ) {
-			$registry->unregister( $template_name );
-		}
 
-		try {
-			$this->sut->possibly_init_block_templates();
+		$this->sut->possibly_init_block_templates();
 
-			$this->assertSame( $initialized, is_int( has_filter( 'get_block_templates', array( $controller, 'add_db_templates_with_woo_slug' ) ) ) );
-		} finally {
-			if ( $registry->is_registered( $template_name ) ) {
-				$registry->unregister( $template_name );
-			}
-			if ( $original ) {
-				$registry->register(
-					$template_name,
-					array(
-						'title'       => $original->title,
-						'description' => $original->description,
-						'content'     => $original->content,
-						'post_types'  => $original->post_types,
-						'plugin'      => $original->plugin,
-					)
-				);
-			}
-		}
-	}
-
-	/**
-	 * @testdox Should detect a saved design even when query filters would hide it.
-	 */
-	public function test_saved_template_detection_ignores_query_filters(): void {
-		$this->create_saved_design();
-		add_filter( 'posts_where', fn( $where ) => $where . ' AND 1 = 0' );
-
-		$this->assertSame( '/original.php', $this->sut->handle_classic_template_include( '/original.php' ) );
+		$this->assertFalse( has_filter( 'get_block_templates', array( $controller, 'add_db_templates_with_woo_slug' ) ) );
 	}
 
 	/**

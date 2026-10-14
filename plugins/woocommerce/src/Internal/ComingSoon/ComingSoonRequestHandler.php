@@ -1,9 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesController;
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\Jetpack\Constants;
 
@@ -26,13 +23,6 @@ class ComingSoonRequestHandler {
 	 * @var bool
 	 */
 	private static $show_coming_soon = false;
-
-	/**
-	 * Whether the classic PHP templates render the page, cached because saved templates do not change mid-request.
-	 *
-	 * @var bool|null
-	 */
-	private $use_classic_templates = null;
 
 	/**
 	 * Sets up the hook.
@@ -63,28 +53,17 @@ class ComingSoonRequestHandler {
 				);
 				add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-				add_action( 'after_setup_theme', array( $this, 'possibly_init_block_templates' ), 999 );
 			}
 		);
 	}
 
 	/**
-	 * Initializes block templates so we can show coming soon page in non-FSE themes.
-	 * Skipped when the classic PHP templates render the page instead.
+	 * Formerly initialized block templates so classic themes could show the block Coming Soon page.
+	 *
+	 * @deprecated 11.3.0 Classic themes now use PHP templates, and block themes initialize block templates in the Blocks bootstrap.
 	 */
 	public function possibly_init_block_templates() {
-		// No need to initialize block templates since we've already initialized them in the Block Bootstrap.
-		if ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) {
-			return;
-		}
-
-		if ( $this->should_use_classic_templates() ) {
-			return;
-		}
-
-		$container = BlocksPackage::container();
-		$container->get( BlockTemplatesRegistry::class )->init();
-		$container->get( BlockTemplatesController::class )->init();
+		wc_deprecated_function( __METHOD__, '11.3.0' );
 	}
 
 	/**
@@ -201,51 +180,12 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Keeps saved and theme-owned block designs on the legacy renderer even with an unsupported classic theme.
+	 * Classic themes without block template part support use the PHP templates.
 	 *
-	 * @return bool Whether the default PHP templates should be used.
+	 * @return bool Whether the PHP templates should be used.
 	 */
 	private function should_use_classic_templates() {
-		if ( null === $this->use_classic_templates ) {
-			$this->use_classic_templates = ! BlockTemplateUtils::supports_block_templates( 'wp_template_part' )
-				&& ! BlockTemplateUtils::theme_has_template( 'coming-soon' )
-				&& ! $this->has_published_block_customization( 'wp_template', 'coming-soon' )
-				&& ! $this->has_published_block_customization( 'wp_template_part', 'coming-soon-social-links' );
-		}
-
-		return $this->use_classic_templates;
-	}
-
-	/**
-	 * Detects applicable published templates before the block registry is initialized.
-	 * Query filters are skipped: this runs before `init`, and no filter should hide a saved design.
-	 *
-	 * @param string $post_type The template post type.
-	 * @param string $slug      The template slug.
-	 * @return bool Whether a saved design exists.
-	 */
-	private function has_published_block_customization( $post_type, $slug ) {
-		$query = new \WP_Query(
-			array(
-				'post_type'        => $post_type,
-				'post_status'      => 'publish',
-				'post_name__in'    => array( $slug ),
-				'suppress_filters' => true,
-				'posts_per_page'   => 1,
-				'fields'           => 'ids',
-				'no_found_rows'    => true,
-				'orderby'          => 'none',
-				'tax_query'        => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- A single published template ID is checked against its required theme scope.
-					array(
-						'taxonomy' => 'wp_theme',
-						'field'    => 'name',
-						'terms'    => array( get_stylesheet(), BlockTemplateUtils::PLUGIN_SLUG, BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG ),
-					),
-				),
-			)
-		);
-
-		return ! empty( $query->posts );
+		return ! BlockTemplateUtils::supports_block_templates( 'wp_template_part' );
 	}
 
 	/**
