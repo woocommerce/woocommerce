@@ -428,10 +428,13 @@ final class WooCommerce {
 
 		$might_need_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
 		if ( $might_need_rest_routes_for_rest_initialization ) {
-			$container->get( Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class ); // Perf: REST-only — hooks rest_api_init; gate behind is_rest_api_request() to avoid container get + class autoload on frontend/admin.
+			// MCP adapter routes.
+			$container->get( Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class );
+			// Public REST-routes.
 			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
+			// Admin routes (settings).
 			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
