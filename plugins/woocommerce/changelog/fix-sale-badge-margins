@@ -1,4 +1,3 @@
 Significance: patch
-Type: fix
-
-Prevent custom margins from being applied twice to sale badges.
+Type: dev
+Comment: Fix duplicate sale-badge margins in an unreleased change; no release-note entry.
