@@ -149,6 +149,47 @@ describe( 'Wishlist onClickAddToCart', () => {
 		);
 	} );
 
+	it( 'adds a simple entry with exactly { id, quantity: 1 } and no options', async () => {
+		mockContext.listItem = makeListItem( { id: 42, variation_id: 0 } );
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickAddToCart() );
+
+		expect( mockAddCartItem.mock.calls ).toStrictEqual( [
+			[ { id: 42, quantity: 1 } ],
+		] );
+	} );
+
+	it( 'adds a variation entry with exactly { id, quantity: 1, variation } using the slug-form attribute names and no options', async () => {
+		mockContext.listItem = makeListItem( {
+			id: 99,
+			product_id: 42,
+			variation_id: 99,
+			variation: [
+				{
+					attribute: 'Color',
+					raw_attribute: 'attribute_pa_color',
+					value: 'blue',
+				},
+			],
+		} );
+
+		const actions = loadBlockStore();
+		await runAction( actions.onClickAddToCart() );
+
+		expect( mockAddCartItem.mock.calls ).toStrictEqual( [
+			[
+				{
+					id: 99,
+					quantity: 1,
+					variation: [
+						{ attribute: 'attribute_pa_color', value: 'blue' },
+					],
+				},
+			],
+		] );
+	} );
+
 	it( 'removes the entry when the add succeeds for a product already in the cart as a meta line', async () => {
 		// A meta line (e.g. a bundle child) resolves the add into a brand-new
 		// standalone cart line rather than bumping the existing one; the
@@ -167,7 +208,7 @@ describe( 'Wishlist onClickAddToCart', () => {
 	} );
 
 	it( 'removes the entry when the add succeeds with a server-normalized quantity', async () => {
-		// Wishlist always requests quantityToAdd: 1, but the server may still
+		// Wishlist always requests quantity: 1, but the server may still
 		// resolve the line to a different final quantity (e.g. merging with
 		// an existing line); that is still a success and must not block
 		// removal.
