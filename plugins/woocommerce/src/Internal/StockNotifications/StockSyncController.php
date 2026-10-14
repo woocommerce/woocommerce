@@ -137,31 +137,26 @@ class StockSyncController {
 	 * @return void
 	 */
 	public function process_queue(): void {
-		$this->store_admin_notice();
-
-		if ( empty( $this->queue ) || ! is_array( $this->queue ) ) {
-			$this->queue = array();
-			return;
-		}
-
-		$product_ids = array_filter( array_keys( $this->queue ) );
-		if ( empty( $product_ids ) ) {
-			return;
-		}
-
-		foreach ( $product_ids as $product_id ) {
-			$this->job_manager->schedule_initial_job_for_product( $product_id );
-		}
-
-		/**
-		 * Allows for additional processing of the product IDs after they have been queued.
-		 *
-		 * @since 10.2.0
-		 *
-		 * @param array $product_ids The product IDs to process.
-		 */
-		do_action( 'woocommerce_customer_stock_notifications_product_sync', $product_ids );
+		$product_ids = is_array( $this->queue ) ? array_filter( array_keys( $this->queue ) ) : array();
 		$this->queue = array();
+
+		if ( ! empty( $product_ids ) ) {
+			foreach ( $product_ids as $product_id ) {
+				$this->job_manager->schedule_initial_job_for_product( $product_id );
+			}
+
+			/**
+			 * Allows for additional processing of the product IDs after they have been queued.
+			 *
+			 * @since 10.2.0
+			 *
+			 * @param array $product_ids The product IDs to process.
+			 */
+			do_action( 'woocommerce_customer_stock_notifications_product_sync', $product_ids );
+		}
+
+		// Store the notice last, so it can neither block the jobs above nor claim they are queued before they are.
+		$this->store_admin_notice();
 	}
 
 	/**
@@ -171,20 +166,30 @@ class StockSyncController {
 	 * import batch) writes once and lists all of them. Pending IDs from earlier requests are kept, so the
 	 * notice covers every product restocked since the user last loaded an admin page.
 	 *
+	 * Only store managers get a notice: a restock made by another user (for example, through an admin-ajax
+	 * action from the storefront or a logged-out request) stores nothing.
+	 *
 	 * @return void
 	 */
 	private function store_admin_notice(): void {
 		$product_ids              = array_keys( $this->notice_product_ids );
 		$this->notice_product_ids = array();
 
-		if ( empty( $product_ids ) || ! is_admin() || ! get_current_user_id() ) {
+		if ( empty( $product_ids ) || ! is_admin() || ! get_current_user_id() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		$transient_key = $this->get_notice_transient_key();
-		$pending_ids   = array_map( 'absint', (array) get_transient( $transient_key ) );
+		try {
+			$transient_key = $this->get_notice_transient_key();
+			$pending_ids   = array_filter( array_map( 'absint', (array) get_transient( $transient_key ) ) );
 
-		set_transient( $transient_key, array_values( array_unique( array_merge( $pending_ids, $product_ids ) ) ), 5 * MINUTE_IN_SECONDS );
+			set_transient( $transient_key, array_values( array_unique( array_merge( $pending_ids, $product_ids ) ) ), 5 * MINUTE_IN_SECONDS );
+		} catch ( \Throwable $e ) {
+			$this->logger->error(
+				sprintf( 'StockSyncController: Failed to store the restock admin notice: %s', $e->getMessage() ),
+				array( 'source' => 'wc-customer-stock-notifications' )
+			);
+		}
 	}
 
 	/**

@@ -256,6 +256,8 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Restocked product 3', $output );
 		$this->assertStringNotContainsString( 'Restocked product 4', $output );
 		$this->assertStringContainsString( '1 more product', $output );
+		$this->assertStringContainsString( 'page=wc-customer-stock-notifications', $output );
+		$this->assertStringNotContainsString( 'customer_stock_notifications_product_filter', $output );
 
 		// The notice is shown once.
 		ob_start();
@@ -299,7 +301,9 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 		ob_start();
 		$this->sut->output_admin_notice();
-		$this->assertStringContainsString( $product->get_name(), ob_get_clean() );
+		$output = ob_get_clean();
+		$this->assertStringContainsString( $product->get_name(), $output );
+		$this->assertStringContainsString( 'customer_stock_notifications_product_filter=' . $product->get_id(), $output );
 
 		set_current_screen( 'front' );
 		wp_set_current_user( 0 );
