@@ -136,6 +136,10 @@ class UcpCart extends ControllerTestCase {
 			WC()->session->set( AbstractCartRoute::CANCELLED_SESSION_KEY, null );
 		}
 
+		if ( WC()->cart instanceof \WC_Cart ) {
+			\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, true );
+		}
+
 		parent::tearDown();
 	}
 
@@ -294,6 +298,27 @@ class UcpCart extends ControllerTestCase {
 
 		// Exactly the ceiling is still accepted.
 		$this->create_cart( array_slice( $line_items, 0, AbstractCartRoute::LINE_ITEMS_MAX ) );
+	}
+
+	/**
+	 * A failure the Store API base class reports in its own shape is re-shaped for UCP.
+	 *
+	 * The parent refuses to load a cart whose session failed earlier in the process; that
+	 * is the same exit a throwing plugin or a session error reaches.
+	 */
+	public function test_errors_from_the_store_api_base_class_wear_the_ucp_envelope(): void {
+		$cart_id = $this->create_cart( array( $this->line_item( 0, 1 ) ) )['id'];
+
+		\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+
+		$response = $this->request( 'GET', '/carts/' . $cart_id );
+		$data     = $response->get_data();
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'TRANSPORT_ERROR', $data['messages'][0]['code'] );
+		$this->assertSame( 'unrecoverable', $data['messages'][0]['severity'] );
+		$this->assertArrayNotHasKey( 'code', $data, 'The Store API error shape must not leak through.' );
 	}
 
 	/**

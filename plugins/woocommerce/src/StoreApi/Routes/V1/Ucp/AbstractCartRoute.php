@@ -97,7 +97,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$inherited_token = CartTokenUtils::get_request_cart_token();
 
 		try {
-			return parent::get_response( $request );
+			return $this->ensure_ucp_envelope( parent::get_response( $request ) );
 		} finally {
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
@@ -327,6 +327,30 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			),
 			$status
 		);
+	}
+
+	/**
+	 * Re-shape an error the parent built outside the UCP envelope.
+	 *
+	 * A session that fails to load, or an exception a handler lets through, is turned into
+	 * a plain Store API error upstream. A UCP client reads `ucp.status` and `messages`
+	 * instead, so the same failure is reported the way `Carts` already reports its own.
+	 *
+	 * @param \WP_REST_Response $response Response the parent produced.
+	 * @return \WP_REST_Response
+	 */
+	private function ensure_ucp_envelope( \WP_REST_Response $response ): \WP_REST_Response {
+		$data = $response->get_data();
+
+		if ( $response->get_status() < 400 || ( is_array( $data ) && isset( $data['ucp'] ) ) ) {
+			return $response;
+		}
+
+		$message = is_array( $data ) && ! empty( $data['message'] ) && is_string( $data['message'] )
+			? $data['message']
+			: __( 'The cart could not be loaded. Please try again.', 'woocommerce' );
+
+		return $this->ucp_error( 'TRANSPORT_ERROR', $message, 'unrecoverable', $response->get_status() );
 	}
 
 	/**
