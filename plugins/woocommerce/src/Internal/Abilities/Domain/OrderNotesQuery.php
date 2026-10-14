@@ -79,7 +79,13 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 			return $order;
 		}
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'orderby'  => 'date_created_gmt',
+				'order'    => 'DESC',
+			)
+		);
 
 		return array(
 			'notes' => array_map(

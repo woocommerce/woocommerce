@@ -2117,8 +2117,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order                     = \WC_Helper_Order::create_order();
 		$this->created_order_ids[] = $order->get_id();
 
-		$order->add_order_note( 'Internal note.' );
+		$newer_note_id = $order->add_order_note( 'Internal note.' );
 		$order->add_order_note( 'Customer note.', true );
+
+		// A note with a higher ID but an older date must sort after the newer one.
+		wp_update_comment(
+			array(
+				'comment_ID'       => $newer_note_id,
+				'comment_date'     => '2030-01-01 00:00:00',
+				'comment_date_gmt' => '2030-01-01 00:00:00',
+			)
+		);
 
 		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
 
@@ -2128,11 +2137,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $by_content['Customer note.'] );
 		$this->assertFalse( $by_content['Internal note.'] );
 
-		$ids    = array_column( $result['notes'], 'id' );
-		$sorted = $ids;
-		rsort( $sorted );
-		$this->assertContainsOnly( 'int', $ids );
-		$this->assertSame( $sorted, $ids, 'Notes should be newest first.' );
+		$this->assertContainsOnly( 'int', array_column( $result['notes'], 'id' ) );
+		$this->assertSame( $newer_note_id, $result['notes'][0]['id'], 'Notes should be newest first by creation date.' );
 	}
 
 	/**
