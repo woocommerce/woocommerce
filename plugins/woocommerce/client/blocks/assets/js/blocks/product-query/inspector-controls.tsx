@@ -74,7 +74,7 @@ function useDefaultWooQueryParamsForVariation(
 				...NAMESPACED_CONTROLS.map( ( key ) => ( {
 					[ key ]: variationAttributes.query[ key ],
 				} ) )
-		  )
+			)
 		: {};
 }
 

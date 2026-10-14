@@ -77,16 +77,24 @@ describe( 'useTaskListsState', () => {
 			} ) )
 		);
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' ) return [];
-			if ( setting === 'completedTaskListIds' ) return [];
+			if ( setting === 'visibleTaskListIds' ) {
+				return [];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [];
+			}
 			return [];
 		} );
 	} );
 
 	it( 'should return default state when no task lists are visible', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' ) return [];
-			if ( setting === 'completedTaskListIds' ) return [];
+			if ( setting === 'visibleTaskListIds' ) {
+				return [];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [];
+			}
 			return [];
 		} );
 
@@ -105,8 +113,12 @@ describe( 'useTaskListsState', () => {
 
 	it( 'should return setup task list state when only setup is visible and not completed', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' ) return [ 'setup' ];
-			if ( setting === 'completedTaskListIds' ) return [];
+			if ( setting === 'visibleTaskListIds' ) {
+				return [ 'setup' ];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [];
+			}
 			return [];
 		} );
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
@@ -131,8 +143,12 @@ describe( 'useTaskListsState', () => {
 
 	it( 'should return extended task list state when only extended is visible and not completed', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' ) return [ 'extended' ];
-			if ( setting === 'completedTaskListIds' ) return [];
+			if ( setting === 'visibleTaskListIds' ) {
+				return [ 'extended' ];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [];
+			}
 			return [];
 		} );
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
@@ -162,9 +178,12 @@ describe( 'useTaskListsState', () => {
 
 	it( 'should return full state when both task lists are visible and not completed', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' )
+			if ( setting === 'visibleTaskListIds' ) {
 				return [ 'setup', 'extended' ];
-			if ( setting === 'completedTaskListIds' ) return [];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [];
+			}
 			return [];
 		} );
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
@@ -190,9 +209,12 @@ describe( 'useTaskListsState', () => {
 
 	it( 'should handle loading state correctly', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' )
+			if ( setting === 'visibleTaskListIds' ) {
 				return [ 'setup', 'extended' ];
-			if ( setting === 'completedTaskListIds' ) return [];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [];
+			}
 			return [];
 		} );
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
@@ -209,9 +231,12 @@ describe( 'useTaskListsState', () => {
 
 	it( 'should handle completed task lists correctly', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' )
+			if ( setting === 'visibleTaskListIds' ) {
 				return [ 'setup', 'extended' ];
-			if ( setting === 'completedTaskListIds' ) return [ 'setup' ];
+			}
+			if ( setting === 'completedTaskListIds' ) {
+				return [ 'setup' ];
+			}
 			return [];
 		} );
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
@@ -239,10 +264,12 @@ describe( 'useTaskListsState', () => {
 
 	it( 'should respect the options parameter when task lists are completed', () => {
 		( getAdminSetting as jest.Mock ).mockImplementation( ( setting ) => {
-			if ( setting === 'visibleTaskListIds' )
+			if ( setting === 'visibleTaskListIds' ) {
 				return [ 'setup', 'extended' ];
-			if ( setting === 'completedTaskListIds' )
+			}
+			if ( setting === 'completedTaskListIds' ) {
 				return [ 'setup', 'extended' ];
+			}
 			return [];
 		} );
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) =>

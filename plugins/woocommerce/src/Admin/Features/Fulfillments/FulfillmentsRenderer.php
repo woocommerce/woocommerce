@@ -193,13 +193,8 @@ class FulfillmentsRenderer {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
 			$provider_fulfillment   = reset( $providers );
-			$provider_slug          = $provider_fulfillment->get_shipment_provider();
-			$known_providers        = FulfillmentUtils::get_shipping_providers();
-			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
-			$provider_display_label = isset( $known_providers[ $provider_slug ] )
-				? $known_providers[ $provider_slug ]->get_name()
-				: ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
-			echo '<span>' . esc_html( $provider_display_label ) . '</span>';
+			$provider_display_label = FulfillmentUtils::get_provider_display_name( $provider_fulfillment );
+			echo '<span>' . esc_html( '' !== $provider_display_label ? $provider_display_label : '--' ) . '</span>';
 		} else {
 			echo '<span>--</span>';
 		}
@@ -693,14 +688,20 @@ class FulfillmentsRenderer {
 						INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
 						WHERE m.meta_key = %s
 						AND m.meta_value IS NOT NULL
-						AND m.meta_value != ''
+						AND m.meta_value NOT IN ( '', %s )
 						AND f.date_deleted IS NULL
 						AND m.date_deleted IS NULL",
-						'_shipment_provider'
+						'_shipment_provider',
+						wp_json_encode( '' )
 					)
 				);
 			} else {
-				$placeholders = implode( ',', array_fill( 0, count( $known_keys ), '%s' ) );
+				// Exclude known providers and both empty string and the JSON-encoded one the data store writes.
+				$excluded     = array_merge(
+					array( '', wp_json_encode( '' ) ),
+					array_map( 'wp_json_encode', $known_keys )
+				);
+				$placeholders = implode( ',', array_fill( 0, count( $excluded ), '%s' ) );
 				$results      = $wpdb->get_col(
 					$wpdb->prepare(
 						"SELECT DISTINCT f.entity_id
@@ -709,10 +710,9 @@ class FulfillmentsRenderer {
 						WHERE m.meta_key = '_shipment_provider'
 						AND m.meta_value NOT IN ({$placeholders})
 						AND m.meta_value IS NOT NULL
-						AND m.meta_value != ''
 						AND f.date_deleted IS NULL
 						AND m.date_deleted IS NULL",
-						...array_map( 'wp_json_encode', $known_keys )
+						...$excluded
 					)
 				);
 			}

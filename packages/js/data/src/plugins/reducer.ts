@@ -32,7 +32,7 @@ const reducer: Reducer< PluginsState, Actions > = (
 						: ( concat(
 								state.active,
 								payload.active
-						  ) as string[] ),
+							) as string[] ),
 					requesting: {
 						...state.requesting,
 						getActivePlugins: false,
@@ -53,7 +53,7 @@ const reducer: Reducer< PluginsState, Actions > = (
 						: ( concat(
 								state.installed,
 								payload.installed
-						  ) as string[] ),
+							) as string[] ),
 					requesting: {
 						...state.requesting,
 						getInstalledPlugins: false,
