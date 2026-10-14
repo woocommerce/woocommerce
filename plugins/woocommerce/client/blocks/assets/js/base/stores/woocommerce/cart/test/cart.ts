@@ -21,6 +21,26 @@ const mockState = {
 } as Store[ 'state' ];
 const mockActions = {} as Store[ 'actions' ];
 
+/**
+ * When true, `store()` exposes every generator action as a function that
+ * drives its generator to completion, as the Interactivity API runtime does.
+ * Otherwise a call returns the bare iterator, which runs only when a test
+ * drives it with {@link runAction}. The load-time refresh and the retry timer
+ * call the action without anyone to drive it, so the tests that observe them
+ * turn this on before loading the store.
+ */
+let mockDriveGeneratorActions = false;
+
+/**
+ * Hands a generator action's iterator to {@link runAction}. The `jest.mock()`
+ * factory below may only reference `mock`-prefixed names.
+ *
+ * @param iterator The iterator an action call returned.
+ */
+function mockDriveAction( iterator: unknown ): Promise< unknown > {
+	return runAction( iterator );
+}
+
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
@@ -41,9 +61,24 @@ jest.mock(
 				);
 			}
 			if ( definition?.actions ) {
+				const actions = Object.fromEntries(
+					Object.entries(
+						definition.actions as Record<
+							string,
+							( ...args: unknown[] ) => unknown
+						>
+					).map( ( [ name, action ] ) => [
+						name,
+						mockDriveGeneratorActions &&
+						action.constructor.name === 'GeneratorFunction'
+							? ( ...args: unknown[] ) =>
+									mockDriveAction( action( ...args ) )
+							: action,
+					] )
+				);
 				Object.defineProperties(
 					mockActions,
-					Object.getOwnPropertyDescriptors( definition.actions )
+					Object.getOwnPropertyDescriptors( actions )
 				);
 			}
 			mockRegisteredStore = {
@@ -160,7 +195,7 @@ function mockBatchFetch(): CapturedRequest[] {
  *
  * The module is re-required in isolation so each test starts from a clean
  * mutation queue and a fresh module-level nonce-ready promise. The initial
- * `refreshCartItems()` is then driven to completion so that the singleton
+ * `refreshCart()` is then driven to completion so that the singleton
  * nonce-ready promise resolves and queued mutations are allowed to flush; tests
  * seed `state.cart` afterwards via {@link seedCart}.
  *
@@ -170,7 +205,7 @@ async function loadCartStore(): Promise< Store[ 'actions' ] > {
 	jest.isolateModules( () => require( '../../index' ) );
 	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
 	// Drive the refresh so the module-level nonce-ready promise resolves.
-	await runAction( actions.refreshCartItems() );
+	await runAction( actions.refreshCart() );
 	return actions;
 }
 
@@ -513,7 +548,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
 	} );
 
-	it( 'refreshCartItems passes cache: no-store to fetch to prevent browser caching', () => {
+	it( 'refreshCart passes cache: no-store to fetch to prevent browser caching', () => {
 		const mockFetch = jest
 			.fn()
 			.mockResolvedValue(
@@ -525,7 +560,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		jest.isolateModules( () => require( '../../index' ) );
 
-		const iterator = mockRegisteredStore?.actions.refreshCartItems();
+		const iterator = mockRegisteredStore?.actions.refreshCart();
 
 		// Async actions are typed as void for consumers, but are actually generators internally.
 		( iterator as unknown as Iterator< void > ).next();
@@ -539,7 +574,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		);
 	} );
 
-	describe( 'refreshCartItems without restUrl in the interactivity state', () => {
+	describe( 'refreshCart without restUrl in the interactivity state', () => {
 		const originalRestUrl = mockState.restUrl;
 
 		afterEach( () => {
@@ -552,7 +587,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			global.fetch = mockFetch;
 
 			jest.isolateModules( () => require( '../../index' ) );
-			await runAction( mockRegisteredStore?.actions.refreshCartItems() );
+			await runAction( mockRegisteredStore?.actions.refreshCart() );
 
 			expect( mockFetch ).not.toHaveBeenCalled();
 		} );
@@ -565,7 +600,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			jest.isolateModules( () => require( '../../index' ) );
 			const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
-			await runAction( actions.refreshCartItems() );
+			await runAction( actions.refreshCart() );
 			seedCart( [] );
 
 			const outcome = await Promise.race( [
@@ -582,6 +617,333 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			] );
 
 			expect( outcome ).toBe( 'settled' );
+		} );
+	} );
+
+	describe( 'refreshCart requests', () => {
+		const SYNC_EVENT = 'wc-blocks_store_sync_required';
+		const CART_URL = 'https://example.com/wp-json/wc/store/v1/cart';
+
+		let addEventListenerSpy: jest.SpyInstance;
+
+		/**
+		 * Builds a successful `GET /cart` response carrying a fresh nonce.
+		 *
+		 * @param cart The cart the server reports.
+		 */
+		function cartResponse( cart: Cart ): Response {
+			return new Response( JSON.stringify( cart ), {
+				headers: { Nonce: 'test-nonce-123' },
+			} );
+		}
+
+		/**
+		 * Creates a promise a test settles by hand, to hold a request open.
+		 */
+		function deferred< T >(): {
+			promise: Promise< T >;
+			resolve: ( value: T ) => void;
+		} {
+			let resolve!: ( value: T ) => void;
+			const promise = new Promise< T >( ( res ) => {
+				resolve = res;
+			} );
+			return { promise, resolve };
+		}
+
+		/**
+		 * Waits, in real time, until `condition` holds.
+		 *
+		 * @param condition The check to poll.
+		 */
+		async function waitUntil( condition: () => boolean ): Promise< void > {
+			for ( let i = 0; i < 100 && ! condition(); i++ ) {
+				await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+			}
+			expect( condition() ).toBe( true );
+		}
+
+		/**
+		 * Returns the `GET` requests (those without a body) a fetch mock saw.
+		 *
+		 * @param fetchMock The mocked `fetch`.
+		 */
+		function getRequests( fetchMock: jest.Mock ): unknown[][] {
+			return fetchMock.mock.calls.filter(
+				( [ , init ] ) => ! ( init as RequestInit | undefined )?.body
+			);
+		}
+
+		/**
+		 * Tells whether a fetch mock has seen a batch `POST` (a request with a body).
+		 *
+		 * @param fetchMock The mocked `fetch`.
+		 */
+		function hasSentBatch( fetchMock: jest.Mock ): boolean {
+			return fetchMock.mock.calls.some(
+				( [ , init ] ) => ( init as RequestInit | undefined )?.body
+			);
+		}
+
+		/**
+		 * Loads the store under a runtime that drives its generator actions, so
+		 * the load-time refresh, the sync-event listener and the retry timer
+		 * send their requests without a test driving them.
+		 */
+		function loadStoreDrivingActions(): void {
+			mockDriveGeneratorActions = true;
+			jest.isolateModules( () => require( '../../index' ) );
+		}
+
+		beforeEach( () => {
+			addEventListenerSpy = jest.spyOn( window, 'addEventListener' );
+		} );
+
+		afterEach( () => {
+			mockDriveGeneratorActions = false;
+			jest.useRealTimers();
+			// Remove the sync listener the loaded module added so it does not
+			// react to the next test's events.
+			addEventListenerSpy.mock.calls
+				.filter( ( [ type ] ) => type === SYNC_EVENT )
+				.forEach( ( [ type, listener ] ) =>
+					window.removeEventListener( type, listener )
+				);
+			addEventListenerSpy.mockRestore();
+		} );
+
+		it( 'sends one no-store GET when the module loads and takes the response as state.cart', async () => {
+			const serverCart = makeServerCart( [
+				makeKeyedLine( { key: 'from-load' } ),
+			] );
+			const fetchMock = jest.fn( async () => cartResponse( serverCart ) );
+			global.fetch = fetchMock;
+
+			loadStoreDrivingActions();
+			await waitUntil( () => mockState.cart !== undefined );
+
+			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+			expect( fetchMock ).toHaveBeenCalledWith(
+				CART_URL,
+				expect.objectContaining( { method: 'GET', cache: 'no-store' } )
+			);
+			expect( mockState.cart ).toEqual( serverCart );
+		} );
+
+		it( 'sends one more GET on a from_@wordpress/data sync event and none on a from_iAPI one', async () => {
+			const fetchMock = jest.fn( async () =>
+				cartResponse( makeServerCart( [] ) )
+			);
+			global.fetch = fetchMock;
+			loadStoreDrivingActions();
+			await waitUntil( () => mockState.cart !== undefined );
+			fetchMock.mockClear();
+
+			window.dispatchEvent(
+				new CustomEvent( SYNC_EVENT, {
+					detail: { type: 'from_iAPI' },
+				} )
+			);
+			await new Promise( ( resolve ) => setTimeout( resolve, 20 ) );
+			expect( fetchMock ).not.toHaveBeenCalled();
+
+			window.dispatchEvent(
+				new CustomEvent( SYNC_EVENT, {
+					detail: { type: 'from_@wordpress/data' },
+				} )
+			);
+			await waitUntil( () => fetchMock.mock.calls.length === 1 );
+			await new Promise( ( resolve ) => setTimeout( resolve, 20 ) );
+
+			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+			expect( fetchMock ).toHaveBeenCalledWith(
+				CART_URL,
+				expect.objectContaining( { method: 'GET' } )
+			);
+		} );
+
+		it( 'requests the cart again after 3 s and then after 6 s when the GET keeps failing', async () => {
+			jest.useFakeTimers();
+			const fetchMock = jest
+				.fn()
+				.mockRejectedValue( new TypeError( 'Failed to fetch' ) );
+			global.fetch = fetchMock;
+
+			loadStoreDrivingActions();
+			await jest.advanceTimersByTimeAsync( 0 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+
+			await jest.advanceTimersByTimeAsync( 2999 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+			await jest.advanceTimersByTimeAsync( 1 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 2 );
+
+			await jest.advanceTimersByTimeAsync( 5999 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 2 );
+			await jest.advanceTimersByTimeAsync( 1 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 3 );
+		} );
+
+		it( 'sends no GET while a cart mutation request is in flight, and sends one once it settles', async () => {
+			const batchResponse = deferred< Response >();
+			const fetchMock = jest.fn(
+				async ( _url: RequestInfo | URL, init?: RequestInit ) =>
+					init?.body
+						? batchResponse.promise
+						: cartResponse( makeServerCart( [] ) )
+			);
+			global.fetch = fetchMock;
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			const add = runAction(
+				actions.addCartItem( {
+					id: 42,
+					quantityToAdd: 1,
+					type: 'simple',
+				} )
+			);
+			await waitUntil( () => hasSentBatch( fetchMock ) );
+			fetchMock.mockClear();
+
+			await runAction( actions.refreshCart() );
+			expect( fetchMock ).not.toHaveBeenCalled();
+
+			batchResponse.resolve(
+				new Response(
+					JSON.stringify( {
+						responses: [
+							{
+								status: 200,
+								body: JSON.parse(
+									JSON.stringify( mockState.cart )
+								),
+							},
+						],
+					} ),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				)
+			);
+			await add;
+
+			await runAction( actions.refreshCart() );
+			expect( getRequests( fetchMock ) ).toHaveLength( 1 );
+		} );
+
+		it( 'sends no second GET while an earlier refresh is still pending, and sends one once it settles', async () => {
+			global.fetch = jest.fn( async () =>
+				cartResponse( makeServerCart( [] ) )
+			);
+			const actions = await loadCartStore();
+
+			const firstResponse = deferred< Response >();
+			const fetchMock = jest
+				.fn( async () => cartResponse( makeServerCart( [] ) ) )
+				.mockReturnValueOnce( firstResponse.promise );
+			global.fetch = fetchMock;
+
+			const first = runAction( actions.refreshCart() );
+			await runAction( actions.refreshCart() );
+			expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+
+			firstResponse.resolve( cartResponse( makeServerCart( [] ) ) );
+			await first;
+
+			await runAction( actions.refreshCart() );
+			expect( fetchMock ).toHaveBeenCalledTimes( 2 );
+		} );
+
+		describe( 'a refresh response whose body is read', () => {
+			const refreshedCart = makeServerCart( [
+				makeKeyedLine( { key: 'from-refresh', id: 999 } ),
+			] );
+
+			/**
+			 * Installs a fetch whose `GET /cart` response body is read only when
+			 * the test releases it, and whose batch `POST` stays open until the
+			 * test releases it.
+			 */
+			function mockHeldRefresh() {
+				const body = deferred< Cart >();
+				const batch = deferred< Response >();
+				let bodyRead = false;
+				global.fetch = jest.fn(
+					async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+						if ( init?.body ) {
+							return batch.promise;
+						}
+						return {
+							ok: true,
+							status: 200,
+							headers: new Headers( { Nonce: 'test-nonce-123' } ),
+							json: () => {
+								bodyRead = true;
+								return body.promise;
+							},
+						} as unknown as Response;
+					}
+				);
+				return {
+					body,
+					batch,
+					hasReadBody: () => bodyRead,
+					hasSentBatch: () =>
+						hasSentBatch( global.fetch as jest.Mock ),
+				};
+			}
+
+			it( 'does not replace state.cart while a mutation cycle is in progress', async () => {
+				const actions = await loadCartStore();
+				seedCart( [] );
+				const held = mockHeldRefresh();
+
+				const refresh = runAction( actions.refreshCart() );
+				await waitUntil( held.hasReadBody );
+				const add = runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				);
+				await waitUntil( held.hasSentBatch );
+
+				held.body.resolve( refreshedCart );
+				await refresh;
+
+				expect(
+					mockState.cart.items.map( ( item ) => item.key )
+				).not.toContain( 'from-refresh' );
+
+				held.batch.resolve(
+					new Response(
+						JSON.stringify( {
+							responses: [
+								{
+									status: 200,
+									body: JSON.parse(
+										JSON.stringify( mockState.cart )
+									),
+								},
+							],
+						} )
+					)
+				);
+				await add;
+			} );
+
+			it( 'replaces state.cart when no mutation cycle is in progress', async () => {
+				const actions = await loadCartStore();
+				seedCart( [] );
+				const held = mockHeldRefresh();
+
+				const refresh = runAction( actions.refreshCart() );
+				await waitUntil( held.hasReadBody );
+				held.body.resolve( refreshedCart );
+				await refresh;
+
+				expect( mockState.cart ).toEqual( refreshedCart );
+			} );
 		} );
 	} );
 
