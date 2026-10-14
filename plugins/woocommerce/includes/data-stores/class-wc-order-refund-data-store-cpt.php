@@ -5,8 +5,6 @@
  * @package WooCommerce\DataStores
  */
 
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrderModifiedDateUpdater;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -71,8 +69,6 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		if ( ! $parent_order_id ) {
 			return;
 		}
-
-		wc_get_container()->get( OrderModifiedDateUpdater::class )->update_modified_date( $parent_order_id );
 
 		/**
 		 * Fires after a refund is deleted from an order, unless the order itself is being deleted.

@@ -110,8 +110,6 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 			return;
 		}
 
-		wc_get_container()->get( OrderModifiedDateUpdater::class )->update_modified_date( $parent_order_id );
-
 		/**
 		 * Fires after a refund is deleted from an order, unless the order itself is being deleted.
 		 *
