@@ -39,7 +39,7 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	 * @testdox Should return items for the context, skipping dismissed ones, active plugins and unmet show-if-active rules.
 	 */
 	public function test_filters_suggestions_for_context(): void {
-		$slugs = array_column( WC_Marketplace_Suggestions::get_suggestions_for_context( 'products-list-empty-body' ), 'slug' );
+		$slugs = array_column( $this->get_products_list_suggestions(), 'slug' );
 
 		$this->assertSame( array( 'bookings', 'memberships', 'gifting' ), $slugs );
 	}
@@ -52,21 +52,13 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 		$data['suggestions'][0]['recommendations-count'] = 1;
 		update_option( 'woocommerce_marketplace_suggestions', $data );
 
-		$this->assertCount( 1, WC_Marketplace_Suggestions::get_suggestions_for_context( 'products-list-empty-body' ) );
+		$this->assertCount( 1, $this->get_products_list_suggestions() );
 	}
 
 	/**
 	 * @testdox Should add the setting on the add products page reached from the products list.
 	 */
 	public function test_adds_setting_from_products_list(): void {
-		$_GET = array(
-			'page' => 'wc-admin',
-			'path' => '/add-product',
-			'from' => 'products-list',
-		);
-
-		$settings = WC_Marketplace_Suggestions::add_products_list_empty_suggestions_setting( array() );
-
 		$this->assertSame(
 			array(
 				'slug'     => 'bookings',
@@ -77,7 +69,7 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 				'url'      => 'https://woocommerce.com/products/woocommerce-bookings/',
 				'promoted' => '',
 			),
-			$settings['productsListEmptySuggestions'][0]
+			$this->get_products_list_suggestions()[0]
 		);
 	}
 
@@ -91,6 +83,21 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array(), WC_Marketplace_Suggestions::add_products_list_empty_suggestions_setting( array() ) );
+	}
+
+	/**
+	 * Get the productsListEmptySuggestions setting as added on the add products page reached from the products list.
+	 *
+	 * @return array[]
+	 */
+	private function get_products_list_suggestions(): array {
+		$_GET = array(
+			'page' => 'wc-admin',
+			'path' => '/add-product',
+			'from' => 'products-list',
+		);
+
+		return WC_Marketplace_Suggestions::add_products_list_empty_suggestions_setting( array() )['productsListEmptySuggestions'];
 	}
 
 	/**

@@ -215,15 +215,14 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Get feed suggestions for a display context, filtered like marketplace-suggestions.js: no dismissed ones, no active plugins, only when show-if-active plugins are active, capped at the feed's recommendations-count.
+	 * Get feed suggestions for a display context, filtered the same way as marketplace-suggestions.js.
 	 *
-	 * @internal
 	 * @since 11.3.0
 	 *
 	 * @param string $context Display context, for example products-list-empty-body.
 	 * @return array[] Feed items.
 	 */
-	public static function get_suggestions_for_context( $context ) {
+	private static function get_suggestions_for_context( $context ) {
 		$feed           = self::get_suggestions_api_data();
 		$dismissed      = self::get_dismissed_suggestions();
 		$active_plugins = array_map( 'dirname', (array) get_option( 'active_plugins', array() ) );
