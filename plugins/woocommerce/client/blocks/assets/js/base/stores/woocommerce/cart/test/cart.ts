@@ -99,6 +99,10 @@ jest.mock( '@wordpress/a11y', () => ( {
 	speak: jest.fn(),
 } ) );
 
+// The store-notices module registers a store that reads the DOM's block
+// contexts. Tests that need the notices supply the store's state and actions.
+jest.mock( '@woocommerce/stores/store-notices', () => ( {} ) );
+
 /**
  * Captured representation of a single mutation sent through the batch endpoint.
  */
@@ -537,6 +541,70 @@ function makeKeyedLine( overrides: Partial< CartItem > = {} ): CartItem {
 	} as CartItem;
 }
 
+/**
+ * Installs a `global.fetch` mock that holds every batch response until
+ * the test releases it, so a test can read the cart while a request is
+ * in flight. Released responses echo the post-optimistic cart.
+ *
+ * @return `hasBatch` tells whether a batch request has been sent;
+ *         `release` answers every held batch request; `captured`
+ *         accumulates the mutations the batch requests carried.
+ */
+function mockHeldBatchFetch(): {
+	hasBatch: () => boolean;
+	release: () => void;
+	captured: CapturedRequest[];
+} {
+	const captured: CapturedRequest[] = [];
+	const held: Array< () => void > = [];
+	global.fetch = jest.fn(
+		async ( _url: RequestInfo | URL, init?: RequestInit ) => {
+			if ( ! init?.body ) {
+				return new Response(
+					JSON.stringify( {
+						items: [],
+						totals: {},
+						errors: [],
+					} ),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			}
+			const parsed = JSON.parse( init.body as string ) as {
+				requests: CapturedRequest[];
+			};
+			parsed.requests.forEach( ( request ) => captured.push( request ) );
+			const serverCart = JSON.parse( JSON.stringify( mockState.cart ) );
+			await new Promise< void >( ( resolve ) => held.push( resolve ) );
+			return new Response(
+				JSON.stringify( {
+					responses: parsed.requests.map( () => ( {
+						status: 200,
+						body: serverCart,
+					} ) ),
+				} ),
+				{ headers: { Nonce: 'test-nonce-123' } }
+			);
+		}
+	) as unknown as typeof fetch;
+	return {
+		hasBatch: () => held.length > 0,
+		release: () => held.forEach( ( resolve ) => resolve() ),
+		captured,
+	};
+}
+
+/**
+ * Waits, in real time, until `condition` holds.
+ *
+ * @param condition The check to poll.
+ */
+async function waitUntil( condition: () => boolean ): Promise< void > {
+	for ( let i = 0; i < 100 && ! condition(); i++ ) {
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+	}
+	expect( condition() ).toBe( true );
+}
+
 describe( 'WooCommerce Cart Interactivity API Store', () => {
 	afterEach( () => {
 		jest.clearAllMocks();
@@ -546,6 +614,11 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		// tests.
 		( getConfig as jest.Mock ).mockReset();
 		delete ( mockState as Partial< Store[ 'state' ] > ).cart;
+		delete ( mockState as Record< string, unknown > ).notices;
+		delete ( mockActions as Record< string, unknown > ).addNotice;
+		delete ( mockActions as Record< string, unknown > ).removeNotice;
+		( triggerAddedToCartEvent as jest.Mock ).mockReset();
+		( speak as jest.Mock ).mockReset();
 	} );
 
 	it( 'refreshCart passes cache: no-store to fetch to prevent browser caching', () => {
@@ -607,8 +680,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				).then( () => 'settled' ),
 				new Promise( ( resolve ) =>
@@ -649,18 +721,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				resolve = res;
 			} );
 			return { promise, resolve };
-		}
-
-		/**
-		 * Waits, in real time, until `condition` holds.
-		 *
-		 * @param condition The check to poll.
-		 */
-		async function waitUntil( condition: () => boolean ): Promise< void > {
-			for ( let i = 0; i < 100 && ! condition(); i++ ) {
-				await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
-			}
-			expect( condition() ).toBe( true );
 		}
 
 		/**
@@ -799,8 +859,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const add = runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await waitUntil( () => hasSentBatch( fetchMock ) );
@@ -902,8 +961,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				const add = runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				);
 				await waitUntil( held.hasSentBatch );
@@ -984,8 +1042,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1002,8 +1059,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1023,15 +1079,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 			] );
@@ -1054,8 +1108,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1091,8 +1144,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1108,8 +1160,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 99,
-					quantityToAdd: 2,
-					type: 'simple',
+					quantity: 2,
 				} )
 			);
 
@@ -1138,8 +1189,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				withEmptyItemData.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1154,8 +1204,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				withRichItemData.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1198,72 +1247,238 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
+	describe( 'addCartItem add-only contract', () => {
+		/**
+		 * Routes `updateNotices` to the real action while the store-notices
+		 * store is replaced by recorders, so a test sees which notices the
+		 * action adds to and removes from the store.
+		 *
+		 * @param earlierIds The ids of the notices already shown.
+		 * @return The notices the store received and the ids it removed.
+		 */
+		function recordStoreNotices( earlierIds: string[] = [] ): {
+			added: Notice[];
+			removed: string[];
+		} {
+			const added: Notice[] = [];
+			const removed: string[] = [];
+			const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
+			const realUpdateNotices = actions.updateNotices;
+			actions.updateNotices = jest.fn(
+				( notices: Notice[] = [], removeOthers = false ) =>
+					runAction( realUpdateNotices( notices, removeOthers ) )
+			) as unknown as Store[ 'actions' ][ 'updateNotices' ];
+			Object.assign( mockActions, {
+				addNotice: ( notice: Notice ) => {
+					added.push( notice );
+					return `added-${ added.length }`;
+				},
+				removeNotice: ( id: string ) => {
+					removed.push( id );
+				},
+			} );
+			Object.assign( mockState, {
+				notices: earlierIds.map( ( id ) => ( {
+					id,
+					notice: 'An earlier notice.',
+					type: 'notice',
+					dismissible: true,
+				} ) ),
+			} );
+			return { added, removed };
+		}
+
+		it( 'posts exactly { id, quantity } with the quantity as the delta on an existing line, shows the sum at once, and resolves { success: true }', async () => {
+			const { hasBatch, release, captured } = mockHeldBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ) ] );
+
+			const running = runAction(
+				actions.addCartItem( { id: 42, quantity: 3 } )
+			);
+			await waitUntil( hasBatch );
+
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 5 );
+
+			release();
+			await expect( running ).resolves.toEqual( { success: true } );
+
+			expect( captured ).toHaveLength( 1 );
+			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
+			expect( captured[ 0 ].body ).toEqual( { id: 42, quantity: 3 } );
+		} );
+
+		it( 'posts exactly { id, quantity, variation } when a variation is given', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			const variation = [ { attribute: 'Color', value: 'Red' } ];
+
+			await runAction(
+				actions.addCartItem( { id: 55, quantity: 2, variation } )
+			);
+
+			expect( captured ).toHaveLength( 1 );
+			expect( captured[ 0 ].body ).toEqual( {
+				id: 55,
+				quantity: 2,
+				variation,
+			} );
+		} );
+
+		it( 'posts quantity 1 and adds one line of 1 when quantity is omitted', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ) ] );
+
+			await runAction( actions.addCartItem( { id: 77 } ) );
+
+			expect( captured[ 0 ].body ).toEqual( { id: 77, quantity: 1 } );
+			expect( mockState.cart.items ).toHaveLength( 2 );
+			expect(
+				mockState.cart.items.find( ( item ) => item.id === 77 )
+					?.quantity
+			).toBe( 1 );
+		} );
+
+		it( 'removes every earlier notice and adds no quantity-changed notice after an exact add with default options', async () => {
+			// P is at 2 on line K. The add of 1 is exact (the server holds 3 in
+			// total) but lands on a new line, so only the exact-add suppression
+			// keeps the optimistic bump of K from reading as a change.
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ),
+					makeKeyedLine( { key: 'K2', id: 42, quantity: 1 } ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ) ] );
+			const store = recordStoreNotices( [ 'earlier' ] );
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 1 } ) );
+
+			expect( store.added ).toEqual( [] );
+			expect( store.removed ).toEqual( [ 'earlier' ] );
+		} );
+
+		it( 'adds the quantity-changed notice when the server total differs from the expected one', async () => {
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( { key: 'K', id: 42, quantity: 4 } ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ) ] );
+			const store = recordStoreNotices();
+
+			await runAction( actions.addCartItem( { id: 42, quantity: 3 } ) );
+
+			expect( store.added.map( ( notice ) => notice.notice ) ).toEqual( [
+				'The quantity of "Test Product" was changed to 4.',
+			] );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+		} );
+
+		it( 'shows no info notice for a divergent total with showCartUpdatesNotices false', async () => {
+			mockBatchFetchReturning(
+				makeServerCart( [
+					makeKeyedLine( { key: 'K', id: 42, quantity: 4 } ),
+				] )
+			);
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ) ] );
+			const notices = spyOnUpdateNotices();
+
+			await expect(
+				runAction(
+					actions.addCartItem(
+						{ id: 42, quantity: 3 },
+						{ showCartUpdatesNotices: false }
+					)
+				)
+			).resolves.toEqual( { success: true } );
+
+			expect( notices ).toEqual( [] );
+		} );
+
+		it( 'still shows the error notice for a rejected add with showCartUpdatesNotices false', async () => {
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+				code: 'woocommerce_rest_cart_product_no_stock',
+				message: 'Out of stock.',
+			} );
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { key: 'K', id: 42, quantity: 2 } ) ] );
+			const errors = spyOnShowNoticeError();
+
+			const outcome = await runAction(
+				actions.addCartItem(
+					{ id: 42, quantity: 3 },
+					{ showCartUpdatesNotices: false }
+				)
+			);
+
+			expect( errors ).toHaveLength( 1 );
+			expect( outcome ).toEqual( {
+				success: false,
+				error: {
+					code: 'woocommerce_rest_cart_product_no_stock',
+					message: 'Out of stock.',
+				},
+			} );
+		} );
+
+		it( 'fires the legacy event, then the sync event for the product, then the announcement, and none of them when the add is rejected', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {
+				messages: { addedToCartText: 'Added to your cart.' },
+			} );
+			const order: string[] = [];
+			( triggerAddedToCartEvent as jest.Mock ).mockImplementation( () =>
+				order.push( 'legacy' )
+			);
+			( speak as jest.Mock ).mockImplementation( () =>
+				order.push( 'announcement' )
+			);
+			const { events, cleanup } = captureSyncEvents();
+			const onSync = () => order.push( 'sync' );
+			window.addEventListener( 'wc-blocks_store_sync_required', onSync );
+
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+			await runAction( actions.addCartItem( { id: 7, quantity: 1 } ) );
+			await flushMicrotasks();
+
+			expect( order ).toEqual( [ 'legacy', 'sync', 'announcement' ] );
+			expect( events ).toHaveLength( 1 );
+			expect( events[ 0 ] ).toEqual( {
+				type: 'from_iAPI',
+				quantityChanges: { productsPendingAdd: [ 7 ] },
+			} );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+			} );
+
+			order.length = 0;
+			mockBatchFetchFailing( {
+				failForPath: '/wc/store/v1/cart/add-item',
+			} );
+			await runAction( actions.addCartItem( { id: 8, quantity: 1 } ) );
+			await flushMicrotasks();
+
+			expect( order ).toEqual( [] );
+
+			window.removeEventListener(
+				'wc-blocks_store_sync_required',
+				onSync
+			);
+			cleanup();
+		} );
+	} );
+
 	describe( 'updateCartItem', () => {
 		const QUANTITY_CHANGED_FOR_LINE =
 			'The quantity of "Test Product" was changed to 4.';
-
-		/**
-		 * Installs a `global.fetch` mock that holds every batch response until
-		 * the test releases it, so a test can read the cart while a request is
-		 * in flight. Released responses echo the post-optimistic cart.
-		 *
-		 * @return `hasBatch` tells whether a batch request has been sent;
-		 *         `release` answers every held batch request.
-		 */
-		function mockHeldBatchFetch(): {
-			hasBatch: () => boolean;
-			release: () => void;
-		} {
-			const held: Array< () => void > = [];
-			global.fetch = jest.fn(
-				async ( _url: RequestInfo | URL, init?: RequestInit ) => {
-					if ( ! init?.body ) {
-						return new Response(
-							JSON.stringify( {
-								items: [],
-								totals: {},
-								errors: [],
-							} ),
-							{ headers: { Nonce: 'test-nonce-123' } }
-						);
-					}
-					const parsed = JSON.parse( init.body as string ) as {
-						requests: CapturedRequest[];
-					};
-					const serverCart = JSON.parse(
-						JSON.stringify( mockState.cart )
-					);
-					await new Promise< void >( ( resolve ) =>
-						held.push( resolve )
-					);
-					return new Response(
-						JSON.stringify( {
-							responses: parsed.requests.map( () => ( {
-								status: 200,
-								body: serverCart,
-							} ) ),
-						} ),
-						{ headers: { Nonce: 'test-nonce-123' } }
-					);
-				}
-			) as unknown as typeof fetch;
-			return {
-				hasBatch: () => held.length > 0,
-				release: () => held.forEach( ( resolve ) => resolve() ),
-			};
-		}
-
-		/**
-		 * Waits, in real time, until `condition` holds.
-		 *
-		 * @param condition The check to poll.
-		 */
-		async function waitUntil( condition: () => boolean ): Promise< void > {
-			for ( let i = 0; i < 100 && ! condition(); i++ ) {
-				await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
-			}
-			expect( condition() ).toBe( true );
-		}
 
 		it( 'posts the rendered line with the new quantity as the update-item body', async () => {
 			const captured = mockBatchFetch();
@@ -1456,79 +1671,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'addCartItem keyless-requires-delta invariant guard', () => {
-		it( 'throws when called keyless with an absolute quantity (no quantityToAdd)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantity: 5,
-						type: 'simple',
-					} )
-				)
-			).rejects.toThrow();
-		} );
-
-		it( 'does not throw and proceeds on the add-item path for a keyless quantityToAdd delta', async () => {
-			const captured = mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				)
-			).resolves.toEqual( { success: true } );
-
-			expect( captured ).toHaveLength( 1 );
-			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
-		} );
-
-		it( 'does not throw for an explicit key with an absolute quantity (key-first stepper path unaffected)', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [
-				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
-			] );
-
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						key: 'server-key-abc',
-						quantity: 5,
-						type: 'simple',
-					} )
-				)
-			).resolves.toEqual( { success: true } );
-		} );
-
-		it( 'still throws when both quantity and quantityToAdd are passed together', async () => {
-			mockBatchFetch();
-			const actions = await loadCartStore();
-			seedCart( [ makeKeyedLine( { id: 42, quantity: 3 } ) ] );
-
-			await expect(
-				runAction(
-					actions.addCartItem( {
-						id: 42,
-						quantity: 5,
-						quantityToAdd: 1,
-						type: 'simple',
-					} )
-				)
-			).rejects.toThrow();
-		} );
-	} );
-
 	describe( 'addCartItem resolved outcome', () => {
 		it( 'resolves { success: true } when the Store API accepts the request', async () => {
 			mockBatchFetch();
@@ -1538,8 +1680,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const outcome = await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1560,8 +1701,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const outcome = await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1583,8 +1723,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const outcome = ( await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			) ) as AddCartItemOutcome;
 
@@ -1612,15 +1751,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 			] );
@@ -1650,8 +1787,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const outcome = await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1675,8 +1811,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const outcome = await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1694,8 +1829,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [
 					{
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					},
 				] )
 			);
@@ -1714,8 +1848,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [
 					{
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					},
 				] )
 			);
@@ -1735,8 +1868,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [
 					{
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					},
 				] )
 			);
@@ -1744,29 +1876,32 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( captured[ 0 ].body.key ).toBeUndefined();
 		} );
 
-		it( 'issues update-item with the absolute quantity for a batch item that supplies an explicit key', async () => {
+		it( 'posts each item as exactly { id, quantity } or { id, quantity, variation }, with quantity 1 when omitted', async () => {
 			const captured = mockBatchFetch();
 			const actions = await loadCartStore();
 			seedCart( [
 				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
 			] );
+			const variation = [ { attribute: 'Color', value: 'Red' } ];
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{
-						id: 42,
-						key: 'server-key-abc',
-						quantity: 5,
-						type: 'simple',
-					},
+					{ id: 42, quantity: 2 },
+					{ id: 55, quantity: 1, variation },
+					{ id: 66 },
 				] )
 			);
 
-			expect( captured[ 0 ].path ).toBe(
-				'/wc/store/v1/cart/update-item'
-			);
-			expect( captured[ 0 ].body.quantity ).toBe( 5 );
-			expect( captured[ 0 ].body.key ).toBe( 'server-key-abc' );
+			expect( captured.map( ( request ) => request.path ) ).toEqual( [
+				'/wc/store/v1/cart/add-item',
+				'/wc/store/v1/cart/add-item',
+				'/wc/store/v1/cart/add-item',
+			] );
+			expect( captured.map( ( request ) => request.body ) ).toEqual( [
+				{ id: 42, quantity: 2 },
+				{ id: 55, quantity: 1, variation },
+				{ id: 66, quantity: 1 },
+			] );
 		} );
 
 		it( 'derives the keyless add-item delta identically to the single-item addCartItem path', async () => {
@@ -1778,8 +1913,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				singleActions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1790,8 +1924,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				batchActions.batchAddCartItems( [
 					{
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					},
 				] )
 			);
@@ -1816,8 +1949,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [
 					{
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					},
 				] )
 			);
@@ -1835,8 +1967,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [
 					{
 						id: 99,
-						quantityToAdd: 2,
-						type: 'simple',
+						quantity: 2,
 					},
 				] )
 			);
@@ -1883,8 +2014,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1930,8 +2060,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -1994,8 +2123,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -2037,8 +2165,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				actions.batchAddCartItems( [
 					{
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					},
 				] )
 			);
@@ -2076,8 +2203,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -2112,8 +2238,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantity: 1 },
+					{ id: 42, quantity: 1 },
 				] )
 			);
 
@@ -2146,8 +2272,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantity: 1 },
+					{ id: 42, quantity: 1 },
 				] )
 			);
 
@@ -2203,8 +2329,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -2253,9 +2378,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const notices = spyOnUpdateNotices();
 
 			await runAction(
-				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-				] )
+				actions.batchAddCartItems( [ { id: 42, quantity: 1 } ] )
 			);
 
 			// Server total (1+2=3) === expected total (1+1+1=3) → suppress.
@@ -2302,8 +2425,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'variation',
+					quantity: 1,
 					variation: colorRedVariation,
 				} )
 			);
@@ -2381,8 +2503,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -2420,8 +2541,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 
@@ -2443,8 +2563,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 1,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await flushMicrotasks();
@@ -2477,22 +2596,19 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 1,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 2,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 3,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 			] );
@@ -2519,15 +2635,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 			] );
@@ -2559,8 +2673,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 42,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await flushMicrotasks();
@@ -2595,8 +2708,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
@@ -2631,15 +2743,13 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction(
 					actions.addCartItem( {
 						id: 42,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 			] );
@@ -2700,8 +2810,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				runAction(
 					actions.addCartItem( {
 						id: 99,
-						quantityToAdd: 1,
-						type: 'simple',
+						quantity: 1,
 					} )
 				),
 				runAction( actions.removeCartItem( 'server-key-gone' ) ),
@@ -2731,8 +2840,8 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 			await runAction(
 				actions.batchAddCartItems( [
-					{ id: 42, quantityToAdd: 1, type: 'simple' },
-					{ id: 99, quantityToAdd: 1, type: 'simple' },
+					{ id: 42, quantity: 1 },
+					{ id: 99, quantity: 1 },
 				] )
 			);
 			await flushMicrotasks();
@@ -2772,8 +2881,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 1,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await flushMicrotasks();
@@ -2784,8 +2892,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 2,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await flushMicrotasks();
@@ -2810,8 +2917,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			await runAction(
 				actions.addCartItem( {
 					id: 1,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await flushMicrotasks();
@@ -2824,8 +2930,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const outcome = await runAction(
 				actions.addCartItem( {
 					id: 2,
-					quantityToAdd: 1,
-					type: 'simple',
+					quantity: 1,
 				} )
 			);
 			await flushMicrotasks();
