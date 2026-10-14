@@ -59,7 +59,7 @@ export function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( item.type === 'variation' ) {
+	if ( 'type' in item && item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||

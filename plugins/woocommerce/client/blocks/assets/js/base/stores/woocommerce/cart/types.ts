@@ -20,7 +20,6 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	type: string;
 };
 
 /**
