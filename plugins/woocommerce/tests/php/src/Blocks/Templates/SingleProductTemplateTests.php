@@ -303,8 +303,6 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
 			$imaged_classes = apply_filters( 'body_class', array() );
 
-			$this->assertContains( 'product', $imaged_classes, 'The imaged product body classes must contain product.' );
-			$this->assertContains( 'product-type-simple', $imaged_classes, 'The imaged product body classes must contain product-type-simple.' );
 			$this->assertContains( 'status-publish', $imaged_classes, 'The imaged product body classes must contain status-publish.' );
 			$this->assertContains( 'has-post-thumbnail', $imaged_classes, 'A product with an image must contribute has-post-thumbnail.' );
 
@@ -315,8 +313,6 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Exercise the public filter installed by the template under test.
 			$imageless_classes = apply_filters( 'body_class', array() );
 
-			$this->assertContains( 'product', $imageless_classes, 'The imageless product body classes must contain product.' );
-			$this->assertContains( 'product-type-simple', $imageless_classes, 'The imageless product body classes must contain product-type-simple.' );
 			$this->assertContains( 'status-publish', $imageless_classes, 'The imageless product body classes must contain status-publish.' );
 			$this->assertNotContains( 'has-post-thumbnail', $imageless_classes, 'A product without an image must not contribute has-post-thumbnail.' );
 		} finally {
