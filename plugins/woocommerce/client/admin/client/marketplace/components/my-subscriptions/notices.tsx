@@ -2,9 +2,8 @@
  * External dependencies
  */
 import { ComponentProps } from 'react';
-import { Notice, VisuallyHidden } from '@wordpress/components';
+import { ExternalLink, Notice } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -23,27 +22,8 @@ const toNoticeAction = ( {
 	label,
 	url,
 	onClick,
-	openInNewTab,
 }: NoticeAction ): WPNoticeAction => {
 	const common = { label, variant: 'link', className: 'is-link' } as const;
-
-	if ( url && openInNewTab ) {
-		// Notice can't set a link target, so open the tab from a link-styled button.
-		return {
-			...common,
-			// Notice renders `label` as the button's children, so a node works despite the string type.
-			label: (
-				<>
-					{ label }
-					<VisuallyHidden as="span">
-						{ __( '(opens in a new tab)', 'woocommerce' ) }
-					</VisuallyHidden>
-				</>
-			 ) as unknown as string,
-			noDefaultClasses: true,
-			onClick: () => window.open( url, '_blank', 'noopener' ),
-		};
-	}
 
 	if ( url ) {
 		return { ...common, url };
@@ -51,6 +31,11 @@ const toNoticeAction = ( {
 
 	return { ...common, onClick: () => onClick?.() };
 };
+
+const opensInNewTab = (
+	action: NoticeAction
+): action is NoticeAction & { url: string } =>
+	!! action.url && !! action.openInNewTab;
 
 export default function Notices() {
 	const notices: NoticeType[] = useSelect(
@@ -60,16 +45,34 @@ export default function Notices() {
 
 	const errorNotices = [];
 	for ( const notice of notices ) {
+		const actions = notice.options?.actions ?? [];
+		const newTabActions = actions.filter( opensInNewTab );
+
 		errorNotices.push(
 			<Notice
 				className="woocommerce-marketplace__notice--error"
 				status={ notice.status }
 				onRemove={ () => removeNotice( notice.productKey ) }
 				key={ notice.productKey }
-				actions={ notice.options?.actions?.map( toNoticeAction ) }
+				actions={ actions
+					.filter( ( action ) => ! opensInNewTab( action ) )
+					.map( toNoticeAction ) }
 			>
 				<img src={ Alert } alt="" width={ 24 } height={ 24 } />
 				{ notice.message }
+				{ newTabActions.length > 0 && (
+					<div className="components-notice__actions">
+						{ newTabActions.map( ( { label, url } ) => (
+							<ExternalLink
+								key={ label }
+								href={ url }
+								className="components-button components-notice__action is-link is-next-40px-default-size"
+							>
+								{ label }
+							</ExternalLink>
+						) ) }
+					</div>
+				) }
 			</Notice>
 		);
 	}

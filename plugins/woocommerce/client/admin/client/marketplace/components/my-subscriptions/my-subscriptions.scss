@@ -432,6 +432,10 @@
 			.components-notice__actions {
 				flex-shrink: 0;
 				margin-left: auto;
+
+				&:empty {
+					display: none;
+				}
 			}
 		}
 

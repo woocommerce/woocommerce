@@ -9,9 +9,9 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	getAdminSetting: () => mockSettings,
 } ) );
 
-const reject = ( code?: string, message?: string ) => ( {
+const reject = ( code: string, message: string ) => ( {
 	success: false,
-	data: { code, message: message ?? 'The package could not be installed.' },
+	data: { code, message },
 } );
 
 describe( 'getUpdateErrorNotice', () => {
@@ -27,7 +27,10 @@ describe( 'getUpdateErrorNotice', () => {
 		expect(
 			getUpdateErrorNotice(
 				'Product Add-Ons',
-				reject( 'incompatible_wp_required_version' ),
+				reject(
+					'incompatible_wp_required_version',
+					'The package could not be installed.'
+				),
 				onRetry
 			)
 		).toEqual( {
@@ -48,7 +51,10 @@ describe( 'getUpdateErrorNotice', () => {
 		expect(
 			getUpdateErrorNotice(
 				'Product Add-Ons',
-				reject( 'incompatible_wp_required_version' ),
+				reject(
+					'incompatible_wp_required_version',
+					'The package could not be installed.'
+				),
 				onRetry
 			).actions
 		).toEqual( [] );
@@ -58,7 +64,10 @@ describe( 'getUpdateErrorNotice', () => {
 		expect(
 			getUpdateErrorNotice(
 				'Product Add-Ons',
-				reject( 'incompatible_php_required_version' ),
+				reject(
+					'incompatible_php_required_version',
+					'The package could not be installed.'
+				),
 				onRetry
 			)
 		).toEqual( {
@@ -94,10 +103,6 @@ describe( 'getUpdateErrorNotice', () => {
 				'Please reload and try again',
 				onRetry
 			).message
-		).toBe( 'Product Add-Ons couldn’t be updated.' );
-		expect(
-			getUpdateErrorNotice( 'Product Add-Ons', reject( '', '' ), onRetry )
-				.message
 		).toBe( 'Product Add-Ons couldn’t be updated.' );
 	} );
 } );

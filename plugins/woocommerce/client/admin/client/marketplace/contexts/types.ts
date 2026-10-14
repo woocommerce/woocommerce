@@ -7,7 +7,7 @@ import type {
 } from '~/lib/notices/types';
 import { Subscription } from '../components/my-subscriptions/types';
 
-/** `openInNewTab` mirrors the @wordpress/components Notice action prop, which older WordPress versions ignore. */
+/** Notice can't set a link target, so `openInNewTab` actions are rendered separately as external links. */
 export type NoticeAction = BaseNoticeAction & { openInNewTab?: boolean };
 
 export type NoticeOptions = Omit< BaseNoticeOptions, 'actions' > & {

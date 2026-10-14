@@ -361,6 +361,14 @@ type WpAjaxResponseData = {
 	activateUrl?: string;
 };
 
+type WpAjaxError = {
+	success: false;
+	data: { message?: string; code?: string };
+};
+
+const isWpAjaxError = ( error: unknown ): error is WpAjaxError =>
+	typeof error === 'object' && error !== null && 'data' in error;
+
 function wpAjax(
 	action: string,
 	data: {
@@ -385,13 +393,14 @@ function wpAjax(
 				} );
 			},
 			error: ( error: WpAjaxResponseData ) => {
-				reject( {
+				const rejection: WpAjaxError = {
 					success: false,
 					data: {
 						message: error.errorMessage,
 						code: error.errorCode,
 					},
-				} );
+				};
+				reject( rejection );
 			},
 		} );
 	} );
@@ -529,63 +538,58 @@ const getRefreshErrorMessage = ( error: unknown ): string => {
 };
 
 /**
- * Build the notice for a failed My Subscriptions update. Core's `errorCode` tells us when the
- * new version needs a newer WordPress or PHP; for anything else, core's message is appended.
- *
- * @param productName Product name shown in the notice.
- * @param error       The rejection value from updateProduct().
- * @param onRetry     Called by the "Try again" action.
- * @return The notice message and its actions.
+ * Build the notice for a failed My Subscriptions update, explaining WordPress and PHP requirement failures by error code.
  */
 const getUpdateErrorNotice = (
 	productName: string,
 	error: unknown,
 	onRetry: () => void
 ): { message: string; actions: NoticeAction[] } => {
-	const data = ( error as { data?: { message?: unknown; code?: unknown } } )
-		?.data;
+	const data = isWpAjaxError( error ) ? error.data : undefined;
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-
-	if ( data?.code === 'incompatible_wp_required_version' ) {
-		return {
-			message: sprintf(
-				// translators: %s is the product name.
-				__(
-					'%s couldn’t be updated. This version requires a newer version of WordPress.',
-					'woocommerce'
+	const requirementNotices = new Map<
+		string,
+		{ message: string; label: string; url?: string; openInNewTab?: boolean }
+	>( [
+		[
+			'incompatible_wp_required_version',
+			{
+				message: sprintf(
+					// translators: %s is the product name.
+					__(
+						'%s couldn’t be updated. This version requires a newer version of WordPress.',
+						'woocommerce'
+					),
+					productName
 				),
-				productName
-			),
-			actions: wccomSettings.updateCoreUrl
-				? [
-						{
-							label: __( 'Update WordPress', 'woocommerce' ),
-							url: wccomSettings.updateCoreUrl,
-						},
-					]
-				: [],
-		};
-	}
-
-	if ( data?.code === 'incompatible_php_required_version' ) {
-		return {
-			message: sprintf(
-				// translators: %s is the product name.
-				__(
-					'%s couldn’t be updated. This version requires a newer version of PHP.',
-					'woocommerce'
+				label: __( 'Update WordPress', 'woocommerce' ),
+				url: wccomSettings.updateCoreUrl,
+			},
+		],
+		[
+			'incompatible_php_required_version',
+			{
+				message: sprintf(
+					// translators: %s is the product name.
+					__(
+						'%s couldn’t be updated. This version requires a newer version of PHP.',
+						'woocommerce'
+					),
+					productName
 				),
-				productName
-			),
-			actions: wccomSettings.updatePhpUrl
-				? [
-						{
-							label: __( 'Learn more', 'woocommerce' ),
-							url: wccomSettings.updatePhpUrl,
-							openInNewTab: true,
-						},
-					]
-				: [],
+				label: __( 'Learn more', 'woocommerce' ),
+				url: wccomSettings.updatePhpUrl,
+				openInNewTab: true,
+			},
+		],
+	] );
+
+	const requirement = requirementNotices.get( data?.code ?? '' );
+	if ( requirement ) {
+		const { message, url, ...action } = requirement;
+		return {
+			message,
+			actions: url ? [ { ...action, url } ] : [],
 		};
 	}
 
@@ -594,7 +598,7 @@ const getUpdateErrorNotice = (
 		__( '%s couldn’t be updated.', 'woocommerce' ),
 		productName
 	);
-	if ( typeof data?.message === 'string' && data.message !== '' ) {
+	if ( data?.message ) {
 		message += ' ' + data.message;
 	}
 

@@ -27,7 +27,10 @@ const showNotice = ( action: NoticeAction ) =>
 
 describe( 'Notices', () => {
 	afterEach( () => {
-		void dispatch( noticeStore ).removeNotice( 'product-key' );
+		act( () => {
+			void dispatch( noticeStore ).removeNotice( 'product-key' );
+		} );
+		jest.restoreAllMocks();
 	} );
 
 	it( 'renders an onClick-only action as a button, even with an empty url', () => {
@@ -56,8 +59,7 @@ describe( 'Notices', () => {
 		expect( link ).not.toHaveAttribute( 'target' );
 	} );
 
-	it( 'opens an openInNewTab action in a new tab', () => {
-		const open = jest.spyOn( window, 'open' ).mockReturnValue( null );
+	it( 'renders an openInNewTab action as a link that opens in a new tab', () => {
 		render( <Notices /> );
 		showNotice( {
 			label: 'Learn more',
@@ -65,17 +67,11 @@ describe( 'Notices', () => {
 			openInNewTab: true,
 		} );
 
-		fireEvent.click(
-			screen.getByRole( 'button', {
-				name: 'Learn more (opens in a new tab)',
-			} )
+		const link = screen.getByRole( 'link', { name: /Learn more/ } );
+		expect( link ).toHaveAttribute(
+			'href',
+			'https://wordpress.org/support/update-php/'
 		);
-
-		expect( open ).toHaveBeenCalledWith(
-			'https://wordpress.org/support/update-php/',
-			'_blank',
-			'noopener'
-		);
-		open.mockRestore();
+		expect( link ).toHaveAttribute( 'target', '_blank' );
 	} );
 } );
