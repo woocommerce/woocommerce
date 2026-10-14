@@ -46,6 +46,7 @@ export const getInCartQuantity = (
 
 		if (
 			target.selectedAttributes !== undefined &&
+			'type' in item &&
 			item.type === 'variation' &&
 			! doesCartItemMatchAttributes( item, target.selectedAttributes )
 		) {
