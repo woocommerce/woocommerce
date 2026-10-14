@@ -36,6 +36,10 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 		try {
 			// LegacyProxy mocks live on the container instance, which no base class resets.
 			$this->reset_legacy_proxy_mocks();
+			// Script queues are globals that no base class resets.
+			wp_dequeue_script( 'plugin-install' );
+			wp_dequeue_script( 'thickbox' );
+			wp_dequeue_style( 'thickbox' );
 		} finally {
 			parent::tearDown();
 		}
@@ -99,6 +103,8 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'WooCommerce MCP has been removed.', $output );
 		$this->assertStringContainsString( McpEndpointRemoval::DOCS_URL, $output );
 		$this->assertStringContainsString( 'Install MCP Adapter', $output, 'Should link to the installer when no MCP adapter is loaded' );
+		$this->assertStringContainsString( 'tab=plugin-information&amp;plugin=mcp-adapter', $output, 'Should link to the MCP Adapter plugin details, not a search' );
+		$this->assertStringContainsString( 'class="thickbox open-plugin-details-modal"', $output, 'Should open the plugin details in a modal' );
 		$this->assertStringContainsString( 'wc-hide-notice=' . McpEndpointRemoval::REMOVED_NOTICE, $output );
 	}
 
@@ -112,6 +118,38 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'WooCommerce MCP has been removed.', $output );
 		$this->assertStringNotContainsString( 'Install MCP Adapter', $output );
+	}
+
+	/**
+	 * @testdox Should load the plugin details modal scripts only when the notice shows the install link.
+	 *
+	 * @testWith [false, true]
+	 *           [true, false]
+	 *
+	 * @param bool $adapter_loaded  Whether an MCP adapter appears to be loaded.
+	 * @param bool $expect_enqueued Whether the modal scripts should be enqueued.
+	 */
+	public function test_modal_scripts_enqueued_only_with_install_link( bool $adapter_loaded, bool $expect_enqueued ): void {
+		$this->set_up_removed_notice_conditions( $adapter_loaded );
+		$this->register_plugin_install_script();
+
+		$this->sut->handle_admin_enqueue_scripts();
+
+		$this->assertSame( $expect_enqueued, wp_script_is( 'plugin-install', 'enqueued' ) );
+		$this->assertSame( $expect_enqueued, wp_script_is( 'thickbox', 'enqueued' ) );
+	}
+
+	/**
+	 * @testdox Should not load the plugin details modal scripts when the notice doesn't show.
+	 */
+	public function test_modal_scripts_not_enqueued_when_notice_hidden(): void {
+		$this->set_up_removed_notice_conditions( false );
+		update_option( 'woocommerce_feature_mcp_integration_enabled', 'no' );
+		$this->register_plugin_install_script();
+
+		$this->sut->handle_admin_enqueue_scripts();
+
+		$this->assertFalse( wp_script_is( 'plugin-install', 'enqueued' ) );
 	}
 
 	/**
@@ -159,6 +197,15 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 				},
 			)
 		);
+	}
+
+	/**
+	 * Register the plugin-install script, which core only registers in wp-admin.
+	 */
+	private function register_plugin_install_script(): void {
+		if ( ! wp_script_is( 'plugin-install', 'registered' ) ) {
+			wp_register_script( 'plugin-install', '/wp-admin/js/plugin-install.js', array( 'jquery', 'jquery-ui-core', 'thickbox' ), '1.0.0', true );
+		}
 	}
 
 	/**

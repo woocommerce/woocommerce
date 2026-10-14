@@ -72,6 +72,23 @@ class McpEndpointRemoval {
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'handle_rest_api_init' ) );
 		add_action( 'admin_notices', array( $this, 'handle_admin_notices' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'handle_admin_enqueue_scripts' ) );
+	}
+
+	/**
+	 * Handle the admin_enqueue_scripts hook.
+	 *
+	 * Loads the core scripts that open the MCP Adapter plugin details in a modal, only when the notice shows the install link.
+	 *
+	 * @internal
+	 */
+	public function handle_admin_enqueue_scripts(): void {
+		if ( ! $this->should_show_removed_notice() || ! $this->should_link_to_installer() ) {
+			return;
+		}
+
+		add_thickbox();
+		wp_enqueue_script( 'plugin-install' );
 	}
 
 	/**
@@ -82,11 +99,7 @@ class McpEndpointRemoval {
 	 * @internal
 	 */
 	public function handle_admin_notices(): void {
-		if (
-			'yes' !== get_option( self::FEATURE_OPTION )
-			|| ! current_user_can( 'manage_woocommerce' )
-			|| \WC_Admin_Notices::user_has_dismissed_notice( self::REMOVED_NOTICE )
-		) {
+		if ( ! $this->should_show_removed_notice() ) {
 			return;
 		}
 
@@ -104,10 +117,11 @@ class McpEndpointRemoval {
 			esc_html__( 'Learn more', 'woocommerce' )
 		);
 
-		if ( ! self::is_mcp_adapter_available() && current_user_can( 'install_plugins' ) ) {
+		if ( $this->should_link_to_installer() ) {
 			$message .= sprintf(
-				' | <a href="%s">%s</a>',
-				esc_url( network_admin_url( 'plugin-install.php?tab=search&type=term&s=mcp-adapter' ) ),
+				' | <a href="%1$s" class="thickbox open-plugin-details-modal" data-title="%2$s">%3$s</a>',
+				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=mcp-adapter&TB_iframe=true&width=600&height=550' ) ),
+				esc_attr__( 'MCP Adapter', 'woocommerce' ),
 				esc_html__( 'Install MCP Adapter', 'woocommerce' )
 			);
 		}
@@ -124,6 +138,26 @@ class McpEndpointRemoval {
 			. '<p>' . $message . '</p>'
 			. '</div>'
 		);
+	}
+
+	/**
+	 * Check whether the removal notice should show to the current user.
+	 *
+	 * @return bool
+	 */
+	private function should_show_removed_notice(): bool {
+		return 'yes' === get_option( self::FEATURE_OPTION )
+			&& current_user_can( 'manage_woocommerce' )
+			&& ! \WC_Admin_Notices::user_has_dismissed_notice( self::REMOVED_NOTICE );
+	}
+
+	/**
+	 * Check whether the removal notice should link to the MCP Adapter plugin details.
+	 *
+	 * @return bool
+	 */
+	private function should_link_to_installer(): bool {
+		return ! self::is_mcp_adapter_available() && current_user_can( 'install_plugins' );
 	}
 
 	/**
