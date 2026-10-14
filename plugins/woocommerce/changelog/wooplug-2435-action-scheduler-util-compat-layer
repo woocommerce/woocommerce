@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Expand ActionSchedulerUtil into a broader compatibility layer through which to use potentially risky Action Scheduler functions.
