@@ -800,7 +800,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				const { store } = await import( '@wordpress/interactivity' );
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions } = store(
 					'woocommerce',
 					{},

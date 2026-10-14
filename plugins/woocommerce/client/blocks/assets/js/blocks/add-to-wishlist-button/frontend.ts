@@ -10,7 +10,7 @@ import {
 import '@woocommerce/stores/woocommerce/products';
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce';
 import type {
 	RawShopperListItem,
 	Store as ShopperListsStore,
