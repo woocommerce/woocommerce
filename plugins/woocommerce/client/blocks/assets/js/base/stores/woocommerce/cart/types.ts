@@ -86,8 +86,13 @@ export type Store = {
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
 		) => Promise< void >;
+		/**
+		 * Replaces `state.cart` with a fresh GET of the Store API cart. It
+		 * does nothing while a cart mutation is in flight or another refresh is
+		 * pending, and retries after a delay when the request fails.
+		 */
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => Promise< void >;
+		refreshCart: () => Promise< void >;
 		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (

@@ -181,17 +181,6 @@ const productButtonStore = {
 
 			context.displayViewCart = true;
 		},
-		*refreshCartItems() {
-			// Todo: Use the module exports instead of `store()` once the
-			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
-			const { actions } = store< WooCommerce >(
-				'woocommerce',
-				{},
-				{ lock: universalLock }
-			);
-			void actions.refreshCartItems();
-		},
 		handleAnimationEnd( event: AnimationEvent ) {
 			const context = getContext< Context >();
 			if ( event.animationName === 'slideOut' ) {

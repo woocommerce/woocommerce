@@ -596,7 +596,7 @@ const { actions } = store< Store >(
 					// downgrade it to a failure.
 					outcome = { success: true };
 
-					// Success - handle side effects that don't trigger refreshCartItems
+					// Success - handle side effects that don't trigger refreshCart
 					const cart = result.data as Cart;
 
 					// Show notices if enabled
@@ -887,7 +887,13 @@ const { actions } = store< Store >(
 				}
 			},
 
-			*refreshCartItems(): AsyncAction< void > {
+			/**
+			 * Replaces `state.cart` with a fresh GET of the Store API cart and
+			 * adopts the response's nonce. Skips the request without `restUrl`,
+			 * while a mutation cycle is running, or while another refresh is
+			 * pending. A failed request is retried after 3 s, doubling each time.
+			 */
+			*refreshCart(): AsyncAction< void > {
 				// Skip when the server did not provide the interactivity
 				// state this store needs, e.g. when a block imports this
 				// store without loading the shared cart state. Release
@@ -951,7 +957,7 @@ const { actions } = store< Store >(
 					refreshTimeout = 3000;
 				} catch ( error ) {
 					// Tries again after the timeout.
-					setTimeout( actions.refreshCartItems, refreshTimeout );
+					setTimeout( actions.refreshCart, refreshTimeout );
 
 					// Increases the timeout exponentially.
 					refreshTimeout *= 2;
@@ -971,7 +977,7 @@ const { actions } = store< Store >(
 );
 
 // Trigger initial cart refresh.
-void actions.refreshCartItems();
+void actions.refreshCart();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
@@ -981,7 +987,7 @@ window.addEventListener(
 			id: number;
 		} >;
 		if ( customEvent.detail.type === 'from_@wordpress/data' ) {
-			void actions.refreshCartItems();
+			void actions.refreshCart();
 		}
 	}
 );
