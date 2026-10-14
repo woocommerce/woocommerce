@@ -652,9 +652,9 @@ class WC_Checkout {
 	/**
 	 * Removes the items of a resumed order that no longer match the cart, and returns the item types it kept.
 	 *
-	 * Line items always match, because an order is only resumed when its cart hash matches the cart. Every other
-	 * item type, including ones added by extensions, is removed unless its stored cart hash still matches. Only the
-	 * items the cart created are kept, so items an extension added at checkout are added again instead of duplicated.
+	 * Only cart-created items of unchanged types are kept: line items, whose cart hash already matches, and types whose
+	 * section hash matches. A type with a missing cart item is rebuilt, as is every type when the order has no record of
+	 * its cart items. Other items, such as ones extensions add at checkout, are removed so they aren't duplicated.
 	 *
 	 * @param WC_Abstract_Order     $order       The resumed order.
 	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().

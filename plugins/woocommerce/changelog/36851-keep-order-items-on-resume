@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep the same order item IDs when a shopper retries a failed or unpaid order in the classic checkout with an unchanged cart.
+Keep order items intact when a shopper retries a failed or unpaid classic checkout payment, so integrations still find them.
