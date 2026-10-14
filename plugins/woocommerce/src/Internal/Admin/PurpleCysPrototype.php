@@ -261,6 +261,9 @@ class PurpleCysPrototype {
 	 * @return bool Whether Purple is gone.
 	 */
 	private function delete_purple(): bool {
+		// Picking Purple in the setup wizard ticks the "Customize your store" task, so untick it too.
+		update_option( 'woocommerce_admin_customize_store_completed', 'no' );
+
 		if ( ! wp_get_theme( self::PURPLE_SLUG )->exists() ) {
 			return true;
 		}

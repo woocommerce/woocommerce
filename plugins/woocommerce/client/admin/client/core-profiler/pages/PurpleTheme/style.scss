@@ -77,6 +77,19 @@
 	padding: $gap-large;
 }
 
+// The badge sits on the title line, so both boxes keep the same layout.
+.woocommerce-profiler-purple-theme__title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: $gap-small;
+	width: 100%;
+
+	> span {
+		flex-shrink: 0;
+	}
+}
+
 .woocommerce-profiler-purple-theme__title {
 	margin: 0;
 	font-size: 16px;

@@ -104,6 +104,17 @@ export type PurpleThemeStepCompletedEvent = {
 	};
 };
 
+export type PurpleDemoSetupProgressEvent = {
+	type: 'PURPLE_DEMO_SETUP_PROGRESS';
+	payload: {
+		progress: number;
+	};
+};
+
+export type PurpleDemoSetupDoneEvent = {
+	type: 'PURPLE_DEMO_SETUP_DONE';
+};
+
 export type PluginInstalledAndActivatedEvent = {
 	type: 'PLUGIN_INSTALLED_AND_ACTIVATED';
 	payload: {
@@ -143,6 +154,8 @@ export type CoreProfilerEvents =
 	| PluginsPageSkippedEvent
 	| PluginsPageCompletedWithoutSelectingPluginsEvent
 	| PurpleThemeStepCompletedEvent
+	| PurpleDemoSetupProgressEvent
+	| PurpleDemoSetupDoneEvent
 	| PluginInstalledAndActivatedEvent
 	| PluginsInstallationCompletedEvent
 	| PluginsInstallationCompletedWithErrorsEvent
