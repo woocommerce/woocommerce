@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fall back to the email's theme color when a block's color can no longer be resolved, instead of rendering no color.
