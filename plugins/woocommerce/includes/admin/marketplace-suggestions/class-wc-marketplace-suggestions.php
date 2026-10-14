@@ -215,7 +215,7 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Get feed suggestions for a display context, filtered like marketplace-suggestions.js: no dismissed ones, no active plugins, capped at the feed's recommendations-count.
+	 * Get feed suggestions for a display context, filtered like marketplace-suggestions.js: no dismissed ones, no active plugins, only when show-if-active plugins are active, capped at the feed's recommendations-count.
 	 *
 	 * @internal
 	 * @since 11.3.0
@@ -234,7 +234,8 @@ class WC_Marketplace_Suggestions {
 				return isset( $item['slug'], $item['context'] )
 					&& in_array( $context, (array) $item['context'], true )
 					&& ! in_array( $item['slug'], $dismissed, true )
-					&& ! in_array( $item['product'] ?? '', $active_plugins, true );
+					&& ! in_array( $item['product'] ?? '', $active_plugins, true )
+					&& ( empty( $item['show-if-active'] ) || array() !== array_intersect( (array) $item['show-if-active'], $active_plugins ) );
 			}
 		);
 
@@ -247,6 +248,7 @@ class WC_Marketplace_Suggestions {
 	 * Add the productsListEmptySuggestions admin setting on the add products task page when it was reached from the empty products list.
 	 *
 	 * @internal
+	 * @since 11.3.0
 	 *
 	 * @param mixed $settings Admin shared settings.
 	 * @return mixed

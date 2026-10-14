@@ -20,6 +20,8 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 				$this->item( 'dismissed', 'product-bundles' ),
 				array_merge( $this->item( 'orders', 'shipstation' ), array( 'context' => 'orders-list-empty-body' ) ),
 				array_merge( $this->item( 'memberships', 'woocommerce-memberships' ), array( 'context' => array( 'products-list-empty-body', 'product-edit-meta-tab-body' ) ) ),
+				array_merge( $this->item( 'deposits', 'woocommerce-deposits' ), array( 'show-if-active' => array( 'woocommerce-bookings' ) ) ),
+				array_merge( $this->item( 'gifting', 'gifting-for-subscriptions' ), array( 'show-if-active' => array( 'woocommerce-subscriptions' ) ) ),
 			)
 		);
 		update_user_meta( get_current_user_id(), 'wc_marketplace_suggestions_dismissed_suggestions', array( 'dismissed' ) );
@@ -34,12 +36,12 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return items for the context, skipping dismissed ones and active plugins.
+	 * @testdox Should return items for the context, skipping dismissed ones, active plugins and unmet show-if-active rules.
 	 */
 	public function test_filters_suggestions_for_context(): void {
 		$slugs = array_column( WC_Marketplace_Suggestions::get_suggestions_for_context( 'products-list-empty-body' ), 'slug' );
 
-		$this->assertSame( array( 'bookings', 'memberships' ), $slugs );
+		$this->assertSame( array( 'bookings', 'memberships', 'gifting' ), $slugs );
 	}
 
 	/**
