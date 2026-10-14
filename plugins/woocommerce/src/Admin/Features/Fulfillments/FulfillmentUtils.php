@@ -739,4 +739,44 @@ class FulfillmentUtils {
 
 		return ! empty( $shipment_provider ) ? $shipment_provider : $provider_name;
 	}
+
+	/**
+	 * Resolve the human-readable provider label for display.
+	 *
+	 * Unlike {@see self::resolve_provider_name()}, which returns the stable slug for
+	 * known providers, this returns the provider's display name (e.g. "DHL" for "dhl")
+	 * so it can be shown to customers. Custom ("other") providers use the merchant-entered
+	 * name, and an unknown slug falls back to that name or the slug itself.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param Fulfillment $fulfillment The fulfillment object.
+	 *
+	 * @return string The provider label to display.
+	 */
+	public static function get_provider_display_name( Fulfillment $fulfillment ): string {
+		$provider_slug = $fulfillment->get_shipment_provider() ?? '';
+		$provider_name = (string) $fulfillment->get_meta( '_provider_name', true );
+
+		if ( 'other' === $provider_slug ) {
+			$label = $provider_name;
+		} else {
+			$known_providers = self::get_shipping_providers();
+			if ( isset( $known_providers[ $provider_slug ] ) ) {
+				$label = $known_providers[ $provider_slug ]->get_name();
+			} else {
+				$label = ! empty( $provider_name ) ? $provider_name : $provider_slug;
+			}
+		}
+
+		/**
+		 * Filters the shipment provider label shown to customers.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string      $label       The resolved provider label.
+		 * @param Fulfillment $fulfillment The fulfillment object.
+		 */
+		return (string) apply_filters( 'woocommerce_fulfillment_shipment_provider_label', $label, $fulfillment );
+	}
 }
