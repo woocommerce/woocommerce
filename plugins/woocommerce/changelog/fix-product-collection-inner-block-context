@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent Product Collection behavior from affecting blocks outside the collection.
