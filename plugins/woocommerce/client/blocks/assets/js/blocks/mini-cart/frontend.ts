@@ -10,12 +10,12 @@ import {
 	useRef,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
 import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
+} from '@woocommerce/stores/woocommerce';
 import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,

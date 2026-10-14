@@ -3,7 +3,7 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
@@ -167,7 +167,7 @@ const productButtonStore = {
 
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
+			yield import( '@woocommerce/stores/woocommerce' );
 
 			const { actions } = store< WooCommerce >(
 				'woocommerce',
@@ -195,7 +195,7 @@ const productButtonStore = {
 		*refreshCartItems() {
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
-			yield import( '@woocommerce/stores/woocommerce/cart' );
+			yield import( '@woocommerce/stores/woocommerce' );
 			const { actions } = store< WooCommerce >(
 				'woocommerce',
 				{},
