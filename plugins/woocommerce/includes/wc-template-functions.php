@@ -405,7 +405,8 @@ function wc_no_js() {
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
 			document.body.className = c;
 		})();
-		"
+		",
+		array( 'id' => 'wc-no-js' )
 	);
 }
 
