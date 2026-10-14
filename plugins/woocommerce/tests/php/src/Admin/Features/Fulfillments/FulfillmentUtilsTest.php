@@ -4,12 +4,27 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\USPSShippingProvider;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * FulfillmentUtilsTest class.
  */
 class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Register a known built-in provider so the registry lookup resolves its display name,
+	 * independently of whether the feature's own providers are registered in the test run.
+	 */
+	private function register_known_provider(): void {
+		add_filter(
+			'woocommerce_fulfillment_shipping_providers',
+			function ( $providers ) {
+				$providers[] = new USPSShippingProvider();
+				return $providers;
+			}
+		);
+	}
 	/**
 	 * Original value of the fulfillments feature flag.
 	 *
@@ -173,6 +188,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	 * @testdox get_provider_display_name returns the registered display name for a known provider slug.
 	 */
 	public function test_get_provider_display_name_returns_registered_name_for_known_provider(): void {
+		$this->register_known_provider();
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
 			array( 'entity_id' => 123 ),
 			array(
@@ -309,6 +325,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	 * @testdox get_provider_display_name passes the resolved label through the woocommerce_fulfillment_shipment_provider_label filter.
 	 */
 	public function test_get_provider_display_name_applies_label_filter(): void {
+		$this->register_known_provider();
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
 			array( 'entity_id' => 123 ),
 			array(
@@ -338,6 +355,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	 * @testdox get_provider_display_name keeps the resolved label when the filter returns a non-scalar.
 	 */
 	public function test_get_provider_display_name_ignores_non_scalar_filter_result(): void {
+		$this->register_known_provider();
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
 			array( 'entity_id' => 123 ),
 			array(
