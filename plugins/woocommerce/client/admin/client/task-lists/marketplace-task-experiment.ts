@@ -93,7 +93,7 @@ export const applyMarketplaceTaskVariation = (
 			? __(
 					'Add payments, shipping and marketing extensions',
 					'woocommerce'
-			  )
+				)
 			: __( 'Browse free and paid extensions', 'woocommerce' );
 
 	return {

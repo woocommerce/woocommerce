@@ -60,7 +60,7 @@ export const TaskLists = ( { query }: TaskListsProps ) => {
 				? []
 				: taskLists.map( ( taskList: TaskListType ) =>
 						applyMarketplaceTaskVariation( taskList, variation )
-				  ),
+					),
 		[ isResolving, taskLists, variation ]
 	);
 
