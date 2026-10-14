@@ -7,14 +7,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProductItemSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
@@ -24,32 +17,12 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 class AddToCartWithOptions extends \WP_UnitTestCase {
 
 	/**
-	 * Tracks whether blocks have been registered.
-	 *
-	 * @var bool
-	 */
-	protected static $are_blocks_registered = false;
-
-	/**
 	 * Initiate the mock object.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		if ( ! self::$are_blocks_registered ) {
-			// We need to register the blocks after set up. They are no registered
-			// on `init` because `init` is called with a classic theme.
-			new AddToCartWithOptionsMock();
-			new AddToCartWithOptionsQuantitySelectorMock();
-			new AddToCartWithOptionsGroupedProductSelectorMock();
-			new AddToCartWithOptionsGroupedProductItemMock();
-			new AddToCartWithOptionsGroupedProductItemSelectorMock();
-			new AddToCartWithOptionsVariationSelectorMock();
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-
-			self::$are_blocks_registered = true;
-		}
+		AddToCartWithOptionsMocks::register_all();
 	}
 
 	/**
