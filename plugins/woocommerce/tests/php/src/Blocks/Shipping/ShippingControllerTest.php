@@ -755,8 +755,9 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * This filter checks `instanceof WC_Shipping_Rate` before reading the rate, so an entry an
-	 * extension added that is not a rate is dropped. The sibling filter above has no such check,
-	 * so the guard is local to this method.
+	 * extension added that is not a rate is dropped. 
+	 * On a real request this guard is never reached: `filter_shipping_packages()`
+	 * runs first on the same hook and fatals on the same entry. It only protects direct calls.
 	 *
 	 * @testdox A non-rate entry in the rates array does not survive the hiding.
 	 */
