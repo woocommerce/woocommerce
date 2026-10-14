@@ -820,6 +820,57 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order doesn't duplicate items that an extension adds in woocommerce_checkout_create_order.
+	 */
+	public function test_create_order_resume_does_not_duplicate_items_added_in_create_order_action(): void {
+		add_action(
+			'woocommerce_checkout_create_order',
+			function ( WC_Order $order ) {
+				$fee = new WC_Order_Item_Fee();
+				$fee->set_name( 'Extension surcharge' );
+				$fee->set_total( '2' );
+				$order->add_item( $fee );
+
+				$line_item = new WC_Order_Item_Product();
+				$line_item->set_name( 'Extension gift' );
+				$line_item->set_quantity( 1 );
+				$order->add_item( $line_item );
+			}
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_names_by_id( $order_id );
+
+		$this->resume_order( $order_id );
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_names_by_id( $order_id );
+
+		$this->assertSame( array( 'Dummy Product', 'Extension gift' ), array_values( $after['line_item'] ), 'Each line item should exist once.' );
+		$this->assertSame( array( 'Handling', 'Extension surcharge' ), array_values( $after['fee'] ), 'Each fee should exist once.' );
+		$this->assertSame( array_search( 'Dummy Product', $before['line_item'], true ), array_search( 'Dummy Product', $after['line_item'], true ), 'The cart line item should keep its ID.' );
+		$this->assertSame( array_search( 'Handling', $before['fee'], true ), array_search( 'Handling', $after['fee'], true ), 'The cart fee should keep its ID.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order that has no record of its cart items replaces every item.
+	 */
+	public function test_create_order_resume_without_cart_item_ids_replaces_all_items(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$order->delete_meta_data( '_cart_order_item_ids' );
+		$order->save();
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( array_keys( $before ), array_keys( $after ), 'The same item types should exist.' );
+		foreach ( $before as $type => $ids ) {
+			$this->assertCount( count( $ids ), $after[ $type ], "Each {$type} item should be added again once." );
+			$this->assertEmpty( array_intersect( $ids, $after[ $type ] ), "Each {$type} item should be replaced." );
+		}
+	}
+
+	/**
 	 * Creates an order from a cart with one product and one fee.
 	 *
 	 * @return int The order ID.
@@ -880,6 +931,30 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		ksort( $ids_by_type );
 
 		return $ids_by_type;
+	}
+
+	/**
+	 * Reads an order's persisted item names, keyed by item ID and grouped by item type.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, array<int, string>>
+	 */
+	private function get_order_item_names_by_id( int $order_id ): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_item_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id",
+				$order_id
+			)
+		);
+
+		$names_by_type = array();
+		foreach ( $rows as $row ) {
+			$names_by_type[ $row->order_item_type ][ (int) $row->order_item_id ] = $row->order_item_name;
+		}
+
+		return $names_by_type;
 	}
 
 	/**

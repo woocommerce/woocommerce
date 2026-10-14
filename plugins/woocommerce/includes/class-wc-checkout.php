@@ -78,6 +78,12 @@ class WC_Checkout {
 	);
 
 	/**
+	 * Order meta that stores the IDs of the items created from the cart, grouped by item type. Items added later, for
+	 * example in the woocommerce_checkout_create_order action, aren't stored, so a resumed order doesn't keep them.
+	 */
+	private const CART_ORDER_ITEM_IDS_META_KEY = '_cart_order_item_ids';
+
+	/**
 	 * Item types that create_order() kept on a resumed order, so set_data_from_cart() doesn't add them again.
 	 *
 	 * @var string[]
@@ -500,6 +506,7 @@ class WC_Checkout {
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$this->set_data_from_cart( $order );
 			$this->kept_order_item_types = array();
+			$cart_order_items            = $order->get_items( $this->get_cart_order_item_types() );
 
 			foreach ( array_keys( self::CART_HASHED_ORDER_ITEM_TYPES ) as $hash_name ) {
 				$order->update_meta_data( "_{$hash_name}_hash", $cart_hashes[ $hash_name ] );
@@ -518,6 +525,13 @@ class WC_Checkout {
 
 			// Save the order.
 			$order_id = $order->save();
+
+			$cart_order_item_ids = array();
+			foreach ( $cart_order_items as $item ) {
+				$cart_order_item_ids[ $item->get_type() ][] = $item->get_id();
+			}
+			$order->update_meta_data( self::CART_ORDER_ITEM_IDS_META_KEY, $cart_order_item_ids );
+			$order->save_meta_data();
 
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
@@ -611,10 +625,20 @@ class WC_Checkout {
 	}
 
 	/**
+	 * The order item types that set_data_from_cart() creates from the cart.
+	 *
+	 * @return string[]
+	 */
+	private function get_cart_order_item_types(): array {
+		return array_merge( array( OrderItemType::LINE_ITEM ), array_values( self::CART_HASHED_ORDER_ITEM_TYPES ) );
+	}
+
+	/**
 	 * Removes the items of a resumed order that no longer match the cart, and returns the item types it kept.
 	 *
 	 * Line items always match, because an order is only resumed when its cart hash matches the cart. Every other
-	 * item type, including ones added by extensions, is removed unless its stored cart hash still matches.
+	 * item type, including ones added by extensions, is removed unless its stored cart hash still matches. Only the
+	 * items the cart created are kept, so items an extension added at checkout are added again instead of duplicated.
 	 *
 	 * @param WC_Abstract_Order     $order       The resumed order.
 	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
@@ -623,11 +647,30 @@ class WC_Checkout {
 	private function remove_changed_order_items( WC_Abstract_Order $order, array $cart_hashes ): array {
 		global $wpdb;
 
-		$kept_types = array( OrderItemType::LINE_ITEM );
-		foreach ( self::CART_HASHED_ORDER_ITEM_TYPES as $hash_name => $item_type ) {
-			if ( $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ] ) {
-				$kept_types[] = $item_type;
+		$cart_order_item_ids = $order->get_meta( self::CART_ORDER_ITEM_IDS_META_KEY );
+		if ( ! is_array( $cart_order_item_ids ) ) {
+			// Without a record of the cart's items, they can't be told apart from items added by extensions.
+			$order->remove_order_items();
+			return array();
+		}
+
+		$kept_types = array();
+		foreach ( $this->get_cart_order_item_types() as $item_type ) {
+			$hash_name     = array_search( $item_type, self::CART_HASHED_ORDER_ITEM_TYPES, true );
+			$cart_item_ids = array_map( 'absint', (array) ( $cart_order_item_ids[ $item_type ] ?? array() ) );
+			$order_items   = $order->get_items( $item_type );
+			// Line items have no section hash, since the order's cart hash already matches.
+			$is_unchanged = false === $hash_name || $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
+
+			// A cart item that's no longer on the order means the type has to be added again from the cart.
+			if ( ! $is_unchanged || array_diff( $cart_item_ids, array_keys( $order_items ) ) ) {
+				continue;
 			}
+
+			foreach ( array_diff( array_keys( $order_items ), $cart_item_ids ) as $item_id ) {
+				$order->remove_item( $item_id );
+			}
+			$kept_types[] = $item_type;
 		}
 
 		$persisted_types = $wpdb->get_col(
