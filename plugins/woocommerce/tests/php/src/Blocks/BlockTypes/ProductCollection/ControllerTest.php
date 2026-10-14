@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Controller;
+use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Renderer;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
@@ -35,17 +36,10 @@ class ControllerTest extends WC_Unit_Test_Case {
 
 		$this->sut = new class( $asset_api, $asset_data_registry, $integration_registry ) extends Controller {
 			/**
-			 * Skip normal hook registration for unit tests.
+			 * Initialize the renderer without registering the block again.
 			 */
-			protected function initialize() {
-				$this->renderer = new class() {
-					/**
-					 * Accept parsed block data from the controller under test.
-					 *
-					 * @param array $parsed_block The parsed block.
-					 */
-					public function set_parsed_block( array $parsed_block ): void {}
-				};
+			protected function initialize(): void {
+				$this->renderer = new Renderer();
 			}
 		};
 
@@ -150,20 +144,34 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a real Post Title block instance for the public render filter.
+	 * Create a Post Title block with context from rendering its parent Product Collection.
 	 *
 	 * @param array $attributes Block attributes.
 	 * @return \WP_Block
 	 */
 	private function create_post_title_block( array $attributes ): \WP_Block {
-		return new \WP_Block(
+		$product_collection = new \WP_Block(
 			array(
-				'blockName'    => 'core/post-title',
-				'attrs'        => $attributes,
-				'innerBlocks'  => array(),
+				'blockName'    => 'woocommerce/product-collection',
+				'attrs'        => array(),
+				'innerBlocks'  => array(
+					array(
+						'blockName'    => 'core/post-title',
+						'attrs'        => $attributes,
+						'innerBlocks'  => array(),
+						'innerHTML'    => '',
+						'innerContent' => array(),
+					),
+				),
 				'innerHTML'    => '',
-				'innerContent' => array(),
+				'innerContent' => array( null ),
 			)
 		);
+		$product_collection->render( array( 'dynamic' => false ) );
+
+		/** @var \WP_Block $instance */
+		$instance = $product_collection->inner_blocks[0];
+
+		return $instance;
 	}
 }
