@@ -121,6 +121,7 @@ declare global {
 			'store-alerts': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
+			'purple-cys-prototype'?: boolean;
 		};
 		wp: {
 			updates?: {

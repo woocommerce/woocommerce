@@ -97,6 +97,13 @@ export type PluginsPageCompletedWithoutSelectingPluginsEvent = {
 	type: 'PLUGINS_PAGE_COMPLETED_WITHOUT_SELECTING_PLUGINS';
 };
 
+export type PurpleThemeStepCompletedEvent = {
+	type: 'PURPLE_THEME_STEP_COMPLETED';
+	payload: {
+		usePurple: boolean;
+	};
+};
+
 export type PluginInstalledAndActivatedEvent = {
 	type: 'PLUGIN_INSTALLED_AND_ACTIVATED';
 	payload: {
@@ -135,6 +142,7 @@ export type CoreProfilerEvents =
 	| PluginsLearnMoreLinkClickedEvent
 	| PluginsPageSkippedEvent
 	| PluginsPageCompletedWithoutSelectingPluginsEvent
+	| PurpleThemeStepCompletedEvent
 	| PluginInstalledAndActivatedEvent
 	| PluginsInstallationCompletedEvent
 	| PluginsInstallationCompletedWithErrorsEvent

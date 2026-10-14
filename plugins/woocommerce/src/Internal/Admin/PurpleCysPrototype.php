@@ -320,6 +320,41 @@ class PurpleCysPrototype {
 
 		$wp_admin_bar->add_group(
 			array(
+				'id'     => $parent . '-wizard',
+				'parent' => $parent,
+				'meta'   => array( 'class' => 'ab-sub-secondary purple-cys-prototype-group' ),
+			)
+		);
+
+		$wp_admin_bar->add_node(
+			array(
+				'id'     => $parent . '-wizard-heading',
+				'parent' => $parent . '-wizard',
+				'title'  => __( 'Setup wizard', 'woocommerce' ),
+				'meta'   => array( 'class' => 'purple-cys-prototype-heading' ),
+			)
+		);
+
+		// The Purple step comes right after the extensions step, so open the wizard there.
+		$wp_admin_bar->add_node(
+			array(
+				'id'     => $parent . '-wizard-open',
+				'parent' => $parent . '-wizard',
+				'title'  => __( 'Open the Purple step', 'woocommerce' ),
+				'href'   => add_query_arg(
+					array(
+						'page' => 'wc-admin',
+						'path' => rawurlencode( '/setup-wizard' ),
+						'step' => 'plugins',
+					),
+					admin_url( 'admin.php' )
+				),
+				'meta'   => array( 'class' => 'purple-cys-prototype-option' ),
+			)
+		);
+
+		$wp_admin_bar->add_group(
+			array(
 				'id'     => $parent . '-reset-group',
 				'parent' => $parent,
 				'meta'   => array( 'class' => 'ab-sub-secondary purple-cys-prototype-group' ),
