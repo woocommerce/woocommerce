@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import Ajv from 'ajv';
+import { lintPHP } from './lint-php.mjs';
 import {
 	getThemeDirectory,
 	isMain,
@@ -267,6 +268,10 @@ if ( isMain( import.meta.url ) ) {
 			console.log(
 				`Validated ${ result.jsonFiles } JSON files, ${ result.patterns } patterns, and ${ result.assets } asset references.`
 			);
+		}
+		const lintStatus = await lintPHP( directory );
+		if ( lintStatus !== 0 ) {
+			process.exitCode = lintStatus;
 		}
 	} catch ( error ) {
 		console.error( error.message );

@@ -8,9 +8,8 @@
 	},
 	"scripts": {
 		"validate": "node scripts/validate-theme.mjs",
-		"lint:php": "node scripts/lint-php.mjs",
 		"changelog": "composer exec -- changelogger",
-		"lint": "prettier --check scripts package.json composer.json",
+		"lint": "prettier --check scripts package.json composer.json .wp-env.json",
 		"wp-env": "node scripts/env.mjs"
 	},
 	"devDependencies": {

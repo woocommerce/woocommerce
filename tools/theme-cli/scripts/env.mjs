@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { getThemeDirectory, isMain } from './theme-utils.mjs';
+import { getThemeDirectory, isMain, toolingRoot } from './theme-utils.mjs';
 
 const require = createRequire( import.meta.url );
 
@@ -18,10 +18,26 @@ export function environmentArgs( args ) {
 	return args;
 }
 
-export async function runEnvironment( slug, args ) {
+export async function prepareEnvironment( slug ) {
 	const directory = await getThemeDirectory( slug );
 	await fs.access( path.join( directory, 'style.css' ) );
 	await fs.access( path.join( directory, 'theme.json' ) );
+	const config = JSON.parse(
+		await fs.readFile( path.join( toolingRoot, '.wp-env.json' ), 'utf8' )
+	);
+	config.themes = [ directory ];
+	const configDirectory = path.join( toolingRoot, '.wp-env', slug );
+	await fs.mkdir( configDirectory, { recursive: true } );
+	const configPath = path.join( configDirectory, '.wp-env.json' );
+	await fs.writeFile(
+		configPath,
+		JSON.stringify( config, null, '\t' ) + '\n'
+	);
+	return configPath;
+}
+
+export async function runEnvironment( slug, args ) {
+	const configPath = await prepareEnvironment( slug );
 	const manifestPath = require.resolve( '@wordpress/env/package.json' );
 	const manifest = JSON.parse( await fs.readFile( manifestPath, 'utf8' ) );
 	const executable = path.resolve(
@@ -30,9 +46,9 @@ export async function runEnvironment( slug, args ) {
 	);
 	const result = spawnSync(
 		process.execPath,
-		[ executable, ...environmentArgs( args ) ],
+		[ executable, ...environmentArgs( args ), '--config', configPath ],
 		{
-			cwd: directory,
+			cwd: toolingRoot,
 			stdio: 'inherit',
 		}
 	);

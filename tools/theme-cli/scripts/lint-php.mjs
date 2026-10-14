@@ -1,15 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {
-	getThemeDirectory,
-	readThemeHeader,
-	toolingRoot,
-} from './theme-utils.mjs';
+import { readThemeHeader, toolingRoot } from './theme-utils.mjs';
 
-try {
-	const [ slug, ...args ] = process.argv.slice( 2 );
-	const directory = await getThemeDirectory( slug );
+export async function lintPHP( directory ) {
+	const slug = path.basename( directory );
 	const stylesheet = await fs.readFile(
 		path.join( directory, 'style.css' ),
 		'utf8'
@@ -30,15 +25,11 @@ try {
 			'minimum_wp_version',
 			minimum,
 			'.',
-			...args,
 		],
 		{ cwd: directory, stdio: 'inherit' }
 	);
 	if ( result.error ) {
 		throw result.error;
 	}
-	process.exitCode = result.status ?? 1;
-} catch ( error ) {
-	console.error( error.message );
-	process.exitCode = 1;
+	return result.status ?? 1;
 }
