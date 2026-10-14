@@ -8,6 +8,8 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpCartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\UcpIdempotencyStore;
+use Automattic\WooCommerce\StoreApi\Utilities\UcpRequestFingerprint;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
 /**
@@ -45,6 +47,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const LINE_ITEMS_MAX = 100;
 
 	/**
+	 * The idempotency key this request owns, or '' when it owns none.
+	 *
+	 * @var string
+	 */
+	private $claimed_key = '';
+
+	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
@@ -52,6 +61,42 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 */
 	protected function ucp_metadata( string $status ): array {
 		return UcpUtils::response_metadata( UcpUtils::CAPABILITY_CART, $status );
+	}
+
+	/**
+	 * Answer the request, under the `Idempotency-Key` it carries.
+	 *
+	 * The key is settled before anything else runs: a replay must not load a session or
+	 * resolve a cart id, since the write it is replaying may have ended the cart's life —
+	 * a retried `cancel` has to return the stored response, not the `not_found` its own
+	 * first run left behind.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		$settled = $this->claim_idempotency_key( $request );
+
+		if ( $settled instanceof \WP_REST_Response ) {
+			return $settled;
+		}
+
+		$response = $this->dispatch_ucp_request( $request );
+
+		if ( '' !== $this->claimed_key ) {
+			if ( $this->is_replayable( $response ) ) {
+				UcpIdempotencyStore::finalize( $this->claimed_key, $response->get_status(), $response->get_data() );
+			} else {
+				// Not replayable, so the key is released: the client's retry has to
+				// reprocess rather than be answered from storage.
+				UcpIdempotencyStore::delete( $this->claimed_key );
+			}
+		}
+
+		return $response;
 	}
 
 	/**
@@ -66,7 +111,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function get_response( \WP_REST_Request $request ) {
+	private function dispatch_ucp_request( \WP_REST_Request $request ): \WP_REST_Response {
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
 			return $this->ucp_not_found();
 		}
@@ -79,6 +124,154 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
+	}
+
+	/**
+	 * Settle the `Idempotency-Key` a write carries, before the write runs.
+	 *
+	 * Reads only: a `GET` changes nothing, so a retry needs no key and is never stored.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response|null A response settling the request on its own, or null to go on and process it.
+	 */
+	private function claim_idempotency_key( \WP_REST_Request $request ) {
+		if ( in_array( strtoupper( (string) $request->get_method() ), array( 'GET', 'HEAD' ), true ) ) {
+			return null;
+		}
+
+		/**
+		 * Filters whether UCP idempotency handling runs at all.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param bool $enabled Whether the `Idempotency-Key` header is honoured. Default true.
+		 */
+		if ( ! apply_filters( 'woocommerce_ucp_idempotency_enabled', true ) ) {
+			return null;
+		}
+
+		/**
+		 * Filters whether a UCP write must carry an `Idempotency-Key`.
+		 *
+		 * True, the default, matches the UCP OpenAPI document, which declares the header
+		 * required on every mutating cart operation: a missing or malformed key is refused
+		 * at 400. False honours a key when one is sent and lets a keyless write through.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param bool $strict Whether a key is required. Default true.
+		 */
+		$strict = (bool) apply_filters( 'woocommerce_ucp_idempotency_strict', true );
+		$key    = (string) $request->get_header( 'Idempotency-Key' );
+
+		if ( '' === $key || ! wp_is_uuid( $key ) ) {
+			if ( ! $strict ) {
+				// A key that is not a UUID is ignored rather than stored: the column is
+				// bounded, so a longer one would be truncated and could then collide with
+				// an unrelated request's key.
+				return null;
+			}
+
+			return $this->ucp_error(
+				'' === $key ? 'IDEMPOTENCY_KEY_REQUIRED' : 'IDEMPOTENCY_KEY_INVALID',
+				'' === $key
+					? __( 'The Idempotency-Key header is required.', 'woocommerce' )
+					: __( 'The Idempotency-Key header must be a UUID.', 'woocommerce' ),
+				'recoverable',
+				400
+			);
+		}
+
+		$fingerprint = UcpRequestFingerprint::compute( $request );
+
+		if ( UcpIdempotencyStore::try_begin( $key, $fingerprint ) ) {
+			$this->claimed_key = $key;
+
+			return null;
+		}
+
+		$existing = UcpIdempotencyStore::find( $key );
+
+		// A row that is gone was taken by someone, then purged: with a window measured in
+		// hours, that cannot be a key claimed moments ago, so it is reported as held.
+		if ( null === $existing ) {
+			return $this->idempotency_in_flight();
+		}
+
+		if ( (string) $existing['request_fingerprint'] !== $fingerprint ) {
+			return $this->ucp_error(
+				'IDEMPOTENCY_KEY_REUSED',
+				__( 'The Idempotency-Key was already used for a different request.', 'woocommerce' ),
+				'unrecoverable',
+				409
+			);
+		}
+
+		if ( UcpIdempotencyStore::STATE_COMPLETED !== (string) $existing['state'] ) {
+			return $this->idempotency_in_flight();
+		}
+
+		return $this->replay( $existing );
+	}
+
+	/**
+	 * Whether a response may be stored for replay.
+	 *
+	 * A refusal is not: UCP reports one as a business outcome, at 200 with `ucp.status` set
+	 * to `error`, and the cart is rolled back to where it started. Nothing happened, so a
+	 * retry has to be processed again — once the stock is back, or the quantity corrected,
+	 * the same request can succeed, and a stored refusal would stand in its way.
+	 *
+	 * @param \WP_REST_Response $response Response to inspect.
+	 * @return bool
+	 */
+	private function is_replayable( \WP_REST_Response $response ): bool {
+		$status = $response->get_status();
+
+		if ( $status < 200 || $status >= 300 ) {
+			return false;
+		}
+
+		$data = $response->get_data();
+
+		return ! is_array( $data ) || ! isset( $data['ucp']['status'] ) || 'error' !== $data['ucp']['status'];
+	}
+
+	/**
+	 * Replay a stored response.
+	 *
+	 * The original status is repeated, since that is the contract the first call published;
+	 * the `Idempotency-Replayed` header is what sets a replay apart from a fresh answer.
+	 *
+	 * @param array<string, mixed> $existing Stored record.
+	 * @return \WP_REST_Response
+	 */
+	private function replay( array $existing ): \WP_REST_Response {
+		$response = new \WP_REST_Response(
+			json_decode( (string) $existing['response_body'], true ),
+			isset( $existing['response_status'] ) ? (int) $existing['response_status'] : 200
+		);
+
+		$response->header( 'Idempotency-Replayed', 'true' );
+
+		return $response;
+	}
+
+	/**
+	 * Refuse a key another request is still working on.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	private function idempotency_in_flight(): \WP_REST_Response {
+		return $this->ucp_error(
+			'IDEMPOTENCY_CONFLICT',
+			__( 'A request with this Idempotency-Key is still being processed.', 'woocommerce' ),
+			'recoverable',
+			409
+		);
 	}
 
 	/**

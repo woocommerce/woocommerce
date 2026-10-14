@@ -49,6 +49,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\StoreApi\Utilities\UcpIdempotencyStore;
 
 /**
  * Main WooCommerce Class.
@@ -369,6 +370,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
+		add_action( UcpIdempotencyStore::CLEANUP_HOOK, array( UcpIdempotencyStore::class, 'cleanup' ) );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
 		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
 
@@ -1812,6 +1814,8 @@ final class WooCommerce {
 		$this->schedule_tracking_action();
 
 		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, UcpIdempotencyStore::CLEANUP_HOOK, array(), 'woocommerce', true );
 
 		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 

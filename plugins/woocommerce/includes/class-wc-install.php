@@ -2102,6 +2102,19 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   PRIMARY KEY  (rate_limit_id),
   UNIQUE KEY rate_limit_key (rate_limit_key($max_index_length))
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_ucp_idempotency_keys (
+  idempotency_key_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  idempotency_key varchar(191) NOT NULL,
+  request_fingerprint char(64) NOT NULL,
+  state varchar(16) NOT NULL DEFAULT 'in_progress',
+  response_status smallint(5) unsigned NULL,
+  response_body longtext NULL,
+  created_at datetime NOT NULL,
+  completed_at datetime NULL,
+  PRIMARY KEY  (idempotency_key_id),
+  UNIQUE KEY idempotency_key (idempotency_key),
+  KEY created_at (created_at)
+) $collate;
 $product_attributes_lookup_table_creation_sql
 CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	url_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2251,6 +2264,7 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}woocommerce_tax_rates",
 			"{$wpdb->prefix}wc_reserved_stock",
 			"{$wpdb->prefix}wc_rate_limits",
+			"{$wpdb->prefix}wc_ucp_idempotency_keys",
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
