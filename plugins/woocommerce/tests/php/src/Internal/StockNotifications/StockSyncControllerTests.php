@@ -210,6 +210,102 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the admin notice names the restocked products, accumulating across requests and capping at three names.
+	 */
+	public function test_admin_notice_names_restocked_products() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		set_current_screen( 'dashboard' );
+
+		$products = array();
+		for ( $i = 1; $i <= 4; $i++ ) {
+			$product = \WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'name'         => 'Restocked product ' . $i,
+					'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+				)
+			);
+
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_id( 1 );
+			$notification->set_status( NotificationStatus::ACTIVE );
+			$notification->save();
+
+			$products[] = $product;
+		}
+
+		// First request restocks one product, second request (e.g. the next CSV import batch) restocks three.
+		$products[0]->set_stock_status( ProductStockStatus::IN_STOCK );
+		$products[0]->save();
+		$this->sut->process_queue();
+
+		foreach ( array_slice( $products, 1 ) as $product ) {
+			$product->set_stock_status( ProductStockStatus::IN_STOCK );
+			$product->save();
+		}
+		$this->sut->process_queue();
+
+		ob_start();
+		$this->sut->output_admin_notice();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Restocked product 1', $output );
+		$this->assertStringContainsString( 'Restocked product 2', $output );
+		$this->assertStringContainsString( 'Restocked product 3', $output );
+		$this->assertStringNotContainsString( 'Restocked product 4', $output );
+		$this->assertStringContainsString( '1 more product', $output );
+
+		// The notice is shown once.
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		set_current_screen( 'front' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test that the admin notice is only shown to the user who restocked the product.
+	 */
+	public function test_admin_notice_is_per_user() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		set_current_screen( 'dashboard' );
+
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+		$this->sut->process_queue();
+
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		wp_set_current_user( $user_id );
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertStringContainsString( $product->get_name(), ob_get_clean() );
+
+		set_current_screen( 'front' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
 	 * Get a private property of an object.
 	 *
 	 * @param object $instance The object to get the property from.
