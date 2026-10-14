@@ -190,11 +190,13 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			$correlations = array();
 
 			foreach ( $inputs as $input ) {
-				if ( $input['variation_id'] > 0 && (string) $input['variation_id'] !== (string) $variant['id'] ) {
+				// The resolved variation decides the match: the raw id may carry
+				// leading zeros the resolver already normalized.
+				$names_variant = $input['variation_id'] > 0;
+
+				if ( $names_variant && (int) $input['variation_id'] !== (int) $variant['id'] ) {
 					continue;
 				}
-
-				$names_variant = $input['id'] === (string) $variant['id'];
 
 				$correlations[] = array(
 					'id'    => $input['id'],
