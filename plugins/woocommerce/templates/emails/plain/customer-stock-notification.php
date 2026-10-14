@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 10.2.0
+ * @version 11.3.0
  */
 
 // Exit if accessed directly.
@@ -35,6 +35,18 @@ echo "\n\n----------------------------------------\n\n";
  * @since 10.2.0
  */
 do_action( 'woocommerce_email_stock_notification_product', $product, $notification, true, $email );
+
+echo esc_html__( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' );
+echo "\n\n";
+
+if ( ! $is_guest ) {
+	echo esc_html__( 'To manage your notifications, log in to your account:', 'woocommerce' );
+} else {
+	echo esc_html__( 'To stop receiving these messages, unsubscribe here:', 'woocommerce' );
+}
+
+echo "\n" . esc_url( $unsubscribe_link ) . "\n";
+echo "\n----------------------------------------\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.
