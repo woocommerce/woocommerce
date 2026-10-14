@@ -755,14 +755,15 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should send only the file through any output buffers it can remove or clean, without raising errors.
+	 * @testdox Should send only the file through any output buffers it can remove or clean, without raising errors, and log a buffer whose output reaches the client.
 	 *
 	 * @dataProvider provider_output_buffer_stacks
 	 *
-	 * @param int[]  $buffer_flags  Flags for each output buffer, from the bottom of the stack up. Each buffer holds "[junk-<level>]".
-	 * @param string $expected_body Response body the client should receive.
+	 * @param int[]    $buffer_flags      Flags for each output buffer, from the bottom of the stack up. Each buffer holds "[junk-<level>]".
+	 * @param string   $expected_body     Response body the client should receive.
+	 * @param string[] $expected_warnings Warnings that should be logged.
 	 */
-	public function test_download_output_through_output_buffers( array $buffer_flags, string $expected_body ): void {
+	public function test_download_output_through_output_buffers( array $buffer_flags, string $expected_body, array $expected_warnings = array() ): void {
 		// Buffers that can't be removed would outlive this test, so run the download handler in its own process.
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open -- Runs the PHP CLI on a fixed script with no user input.
 		$process = proc_open(
@@ -784,12 +785,13 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $report, "The runner script did not complete: $stderr" );
 		$this->assertSame( $expected_body, $body, 'The client should receive the file without the content of buffers that could be cleaned.' );
 		$this->assertSame( array(), $report['errors'], 'Cleaning and flushing buffers should not raise errors, even silenced ones.' );
+		$this->assertSame( $expected_warnings, $report['warnings'], 'Only a buffer whose output reaches the client should be logged.' );
 	}
 
 	/**
 	 * Output buffer stacks a download can be served through.
 	 *
-	 * @return array<string, array{int[], string}>
+	 * @return array<string, array{0: int[], 1: string, 2?: string[]}>
 	 */
 	public function provider_output_buffer_stacks(): array {
 		$cleanable_flushable = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
@@ -801,6 +803,11 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			'cleanable only'                         => array( array( PHP_OUTPUT_HANDLER_CLEANABLE ), 'FILE-DATA' ),
 			'standard below non-removable'           => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, $cleanable_flushable ), '[junk-0]FILE-DATA' ),
 			'buffers from issue 51562'               => array( array( 0, 0, PHP_OUTPUT_HANDLER_CLEANABLE, PHP_OUTPUT_HANDLER_REMOVABLE ), '[junk-0][junk-1]FILE-DATA' ),
+			'not removable or cleanable'             => array(
+				array( 0, PHP_OUTPUT_HANDLER_REMOVABLE ),
+				'[junk-0]FILE-DATA',
+				array( 'Output buffer "default output handler" cannot be removed or cleaned, so 8 bytes of earlier output will be sent before the downloaded file.' ),
+			),
 		);
 	}
 

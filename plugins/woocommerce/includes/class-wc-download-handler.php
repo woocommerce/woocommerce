@@ -825,6 +825,15 @@ class WC_Download_Handler {
 			// This buffer can't be removed, and the ones below it can't be reached, so the file has to go through them.
 			if ( $flags & PHP_OUTPUT_HANDLER_CLEANABLE ) {
 				ob_clean();
+			} elseif ( $buffer['buffer_used'] > 0 ) {
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: %1$s: output buffer handler name, %2$d: number of bytes. */
+						__( 'Output buffer "%1$s" cannot be removed or cleaned, so %2$d bytes of earlier output will be sent before the downloaded file.', 'woocommerce' ),
+						$buffer['name'],
+						$buffer['buffer_used']
+					)
+				);
 			}
 
 			return;

@@ -8,7 +8,7 @@
  * flags value per buffer from the bottom of the stack up. Each buffer starts with "[junk-<level>]" in it.
  *
  * The process stdout is what a client would receive. A JSON report of the errors raised (including
- * @-suppressed ones) is written to stderr.
+ * @-suppressed ones) and the warnings logged is written to stderr.
  *
  * @package WooCommerce\Tests
  */
@@ -22,11 +22,40 @@ declare( strict_types = 1 );
  */
 function add_action() {}
 
+/**
+ * Translation stub.
+ *
+ * @param string $text Text to translate.
+ * @return string
+ */
+function __( $text ) {
+	return $text;
+}
+
+/**
+ * Logger stub that records warnings for the report.
+ *
+ * @return object
+ */
+function wc_get_logger() {
+	return new class() {
+		/**
+		 * Record a warning.
+		 *
+		 * @param string $message Message.
+		 */
+		public function warning( $message ) {
+			$GLOBALS['wc_warnings'][] = $message;
+		}
+	};
+}
+
 define( 'ABSPATH', __DIR__ . '/' );
 
 require dirname( __DIR__, 3 ) . '/includes/class-wc-download-handler.php';
 
 $wc_buffer_flags = '' === ( $argv[1] ?? '' ) ? array() : array_map( 'intval', explode( ',', $argv[1] ) );
+$wc_warnings     = array();
 $wc_errors       = array();
 $wc_file         = tempnam( sys_get_temp_dir(), 'wc-download-buffers' );
 file_put_contents( $wc_file, $argv[2] ?? '' );
@@ -58,7 +87,8 @@ fwrite(
 	STDERR,
 	json_encode(
 		array(
-			'errors' => $wc_errors,
+			'errors'   => $wc_errors,
+			'warnings' => $wc_warnings,
 		)
 	)
 );
