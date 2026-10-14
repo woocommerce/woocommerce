@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+DateRangeFilterPicker and the advanced date filter: accept zero-padded dates in D/M locales and ignore invalid date format translations.
