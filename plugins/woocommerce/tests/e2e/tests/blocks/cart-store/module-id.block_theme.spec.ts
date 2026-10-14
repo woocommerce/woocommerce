@@ -51,7 +51,7 @@ test.describe( 'Cart store module id', () => {
 			...moduleReferences.importMapIds,
 			...moduleReferences.preloadUrls,
 		].some( ( reference ) =>
-			reference.includes( '@woocommerce/stores/woocommerce/cart' )
+			/@woocommerce\/stores\/woocommerce\/cart/.test( reference )
 		);
 		expect( namesRemovedId ).toBe( false );
 
