@@ -203,19 +203,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
+		// These only put back saved values and don't throw, so they run first, ahead of the
+		// cleanup that can.
+		$this->restore_server_superglobal();
+		$this->restore_constant_overrides();
+		$this->restore_block_type_registry();
+
 		try {
 			$this->clear_wc_singleton_state();
 		} finally {
-			try {
-				$this->restore_server_superglobal();
-				$this->restore_constant_overrides();
-				$this->restore_block_type_registry();
-			} finally {
-				// The parent teardown must always run: it rolls back the database
-				// transaction and restores the hooks. Skipping it would poison every
-				// test that runs after this one.
-				parent::tearDown();
-			}
+			// The parent teardown must always run: it rolls back the database
+			// transaction and restores the hooks. Skipping it would poison every
+			// test that runs after this one.
+			parent::tearDown();
 		}
 	}
 
