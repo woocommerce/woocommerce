@@ -2,10 +2,26 @@
 
 This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks use on the frontend. All stores here are **locked** (`lock: true`) and private by design — they are not intended for third-party extension, and removing or changing their state is **not** a breaking change. See the "Interactivity API Stores" section in `client/blocks/CLAUDE.md` and the [WordPress Private Stores reference](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/api-reference#private-stores).
 
-Stores in this folder:
+Stores documented in this file:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
 -   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
+
+## Folder layout
+
+Each separate store is one file directly in this folder, named after its namespace:
+
+-   `products.ts` — the `woocommerce/products` store (module id `@woocommerce/stores/woocommerce/products`).
+-   `shopper-lists.ts` — the `woocommerce/shopper-lists` store (module id `@woocommerce/stores/woocommerce/shopper-lists`).
+-   `store-notices.ts` — the `woocommerce/store-notices` store (module id `@woocommerce/stores/store-notices`).
+
+The `woocommerce` store lives in `woocommerce/`:
+
+-   `index.ts` registers the whole store: it imports every file that adds members to the store and re-exports the store's public types from `types.ts`. The `@woocommerce/stores/woocommerce/cart` module id serves this file.
+-   `types.ts` declares the store's types, including the public ones `index.ts` re-exports.
+-   `cart/` holds the cart code, one file per concern: `actions.ts` (the cart actions, the mutation queue that sends their requests, and the cart refreshes that run when the module loads and on each `wc-blocks_store_sync_required` event from the `@wordpress/data` cart store), `notices.ts` (turning cart errors and updates into store notices, through the `showNoticeError` and `updateNotices` actions), `mutation-batcher.ts` (the queue that collects the mutations of one tick into a single `/wc/store/v1/batch` request) and `legacy-events.ts` (helpers that dispatch legacy DOM events such as `wc-blocks_added_to_cart`; the Mini-Cart block imports them too).
+
+Each file that adds members to the `woocommerce` store does so through its own `store( 'woocommerce', … )` call, and the Interactivity API merges the calls into one store. Every file that needs the store's `state` or `actions` reads them with `store( 'woocommerce', … )` too, instead of receiving them from another file. Files of the store import each other by relative path, never through a `@woocommerce/stores/` module id: the build does not bundle a module id's file, it loads that id's script module instead.
 
 ---
 
@@ -15,10 +31,10 @@ A locked, server-populated iAPI store that exposes WooCommerce products and vari
 
 **Source files:**
 
--   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts`
+-   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/products.ts`
 -   PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
 -   PHP procedural wrappers: `plugins/woocommerce/includes/wc-interactivity-api-functions.php`
--   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/products.test.ts`
+-   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/test/products.test.ts`
 
 ### When to use it
 
@@ -237,7 +253,7 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 ## `woocommerce/cart` store
 
-The `woocommerce` Interactivity API store (`base/stores/woocommerce/cart.ts`) holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
+The `woocommerce` Interactivity API store (`woocommerce/`, with its cart code in `woocommerce/cart/` — see [Folder layout](#folder-layout)) holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
 
 ### The `addCartItem` outcome contract
 
@@ -257,7 +273,7 @@ export type AddCartItemOutcome =
 	| { success: false; error: AddCartItemError };
 ```
 
-Both types are exported from the cart store module and reach consumers through the existing type-only import path:
+Both types are declared in `woocommerce/types.ts` and reach consumers through the cart store's module id, as type-only imports:
 
 ```ts
 import type { AddCartItemOutcome } from '@woocommerce/stores/woocommerce/cart';
@@ -298,9 +314,9 @@ The store emits three cart-wide side effects whenever a mutation succeeds:
 -   the legacy `wc-blocks_added_to_cart` event (payload `{ preserveCartData: true }`), consumed outside this store;
 -   the screen-reader "added to cart" announcement, made only when the store is configured with an `addedToCartText` message.
 
-These fire **exactly once per mutation batch cycle, not once per request**. When the mutation batcher (`mutation-batcher.ts`) coalesces several concurrent mutations — e.g. N concurrent `addCartItem` calls issued in the same tick — into one processing cycle and one `/wc/store/v1/batch` request, each of the three effects fires only once for that cycle, not once per coalesced request. Before this mechanism existed, each of the three effects was wired per request rather than per cycle, so N coalesced mutations produced N sync events (N redundant resync GETs), N legacy events, and N announcements; a single successful mutation still produces exactly one of each, unchanged.
+These fire **exactly once per mutation batch cycle, not once per request**. When the mutation batcher (`woocommerce/cart/mutation-batcher.ts`) coalesces several concurrent mutations — e.g. N concurrent `addCartItem` calls issued in the same tick — into one processing cycle and one `/wc/store/v1/batch` request, each of the three effects fires only once for that cycle, not once per coalesced request. Before this mechanism existed, each of the three effects was wired per request rather than per cycle, so N coalesced mutations produced N sync events (N redundant resync GETs), N legacy events, and N announcements; a single successful mutation still produces exactly one of each, unchanged.
 
-**Mechanism.** Every action that calls `sendCartRequest` attaches a per-request `meta: { quantityChanges, origin }` (type `CartMutationMeta`) describing that one mutation: `quantityChanges` is its contribution to the sync event's payload (`productsPendingAdd` / `cartItemsPendingQuantity` / `cartItemsPendingDelete`), and `origin` is `'add'` (set by `addCartItem` and `batchAddCartItems`, regardless of whether the mutation hit `add-item` or `update-item`) or `'remove'` (set by `removeCartItem`). The batcher carries `meta` through unchanged and, once a cycle settles — synchronously, after the cycle's server state is committed (or rolled back) and before the queue's `isProcessing` state clears — invokes the mutation queue's `onCycleSettled` config callback exactly once, with one `{ success, meta }` entry per request in the cycle. The `onCycleSettled` callback built into the queue passed to `createMutationQueue` inside `sendCartRequest` is the single place in `cart.ts` that emits the three effects; no action emits them itself.
+**Mechanism.** Every action that calls `sendCartRequest` attaches a per-request `meta: { quantityChanges, origin }` (type `CartMutationMeta`) describing that one mutation: `quantityChanges` is its contribution to the sync event's payload (`productsPendingAdd` / `cartItemsPendingQuantity` / `cartItemsPendingDelete`), and `origin` is `'add'` (set by `addCartItem` and `batchAddCartItems`, regardless of whether the mutation hit `add-item` or `update-item`) or `'remove'` (set by `removeCartItem`). The batcher carries `meta` through unchanged and, once a cycle settles — synchronously, after the cycle's server state is committed (or rolled back) and before the queue's `isProcessing` state clears — invokes the mutation queue's `onCycleSettled` config callback exactly once, with one `{ success, meta }` entry per request in the cycle. The `onCycleSettled` callback built into the queue passed to `createMutationQueue` inside `sendCartRequest` is the single place in the store (in `woocommerce/cart/actions.ts`) that emits the three effects; no action emits them itself.
 
 **Gates.** The callback applies three rules to the cycle's successful entries (`entry.success && entry.meta`):
 
