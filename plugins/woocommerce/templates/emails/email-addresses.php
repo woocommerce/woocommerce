@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.6.0
+ * @version 11.3.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -53,7 +53,7 @@ $display_section_divider = (bool) apply_filters( 'woocommerce_email_body_display
 					<br/><?php echo wc_make_phone_clickable( $order->get_billing_phone() ); ?>
 				<?php endif; ?>
 				<?php if ( $order->get_billing_email() ) : ?>
-					<br/><?php echo esc_html( $order->get_billing_email() ); ?>
+					<div class="address-email"><?php echo esc_html( $order->get_billing_email() ); ?></div>
 				<?php endif; ?>
 				<?php
 				/**

@@ -102,7 +102,7 @@ test( 'failed initialization stays retryable without automatically repeating rej
 			await jest.runOnlyPendingTimersAsync();
 		} );
 		const flatRate = screen.getByRole( 'radio', {
-			name: 'Flat rate $12.50',
+			name: 'Flat rate $ 12.50',
 		} );
 		expect( flatRate ).not.toBeChecked();
 		expect( apiFetch ).toHaveBeenCalledTimes( 1 );

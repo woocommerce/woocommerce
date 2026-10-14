@@ -58,9 +58,6 @@ export interface ProductGalleryContext {
 	isDialogOpen: boolean;
 	videoLocation?: 'dialog' | 'gallery';
 	productId: string;
-	touchStartX: number;
-	touchCurrentX: number;
-	isDragging: boolean;
 	imageData: number[];
 	thumbnailsOverflow: {
 		top: boolean;

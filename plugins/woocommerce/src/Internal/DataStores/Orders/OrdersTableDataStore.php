@@ -120,6 +120,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	protected $ephemeral_meta_keys = array(
 		EditLock::META_KEY_NAME,
+		'_wp_trash_meta_status',
+		'_wp_trash_meta_time',
+		'_wp_trash_meta_comments_status',
 	);
 
 	/**
@@ -2890,7 +2893,7 @@ FROM $order_meta_table
 				)
 			);
 
-			$previous_status = 'pending';
+			$previous_status = OrderInternalStatus::PENDING;
 		} elseif ( $previous_state_is_invalid ) {
 			// If we cannot restore to pending, we should probably stand back and let the merchant intervene some other way.
 			wc_get_logger()->warning(

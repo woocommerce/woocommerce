@@ -7,9 +7,7 @@ export function useCallbackOnLinkClick( onClick: ( link: string ) => void ) {
 	const onNodeClick = useCallback(
 		( event: MouseEvent ): void => {
 			const target = event.target as
-				| EventTarget
-				| HTMLAnchorElement
-				| null;
+				EventTarget | HTMLAnchorElement | null;
 			if ( target && 'href' in target ) {
 				const innerLink = target.href;
 				if ( innerLink && onClick ) {

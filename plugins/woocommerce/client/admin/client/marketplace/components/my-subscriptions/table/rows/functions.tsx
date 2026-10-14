@@ -18,6 +18,7 @@ import AutoRenewButton from '../actions/auto-renew-button';
 import SubscribeButton from '../actions/subscribe-button';
 import Update from '../actions/update';
 import StatusPopover from './status-popover';
+import AutoUpdateStatus from './auto-update-status';
 import ActionsDropdownMenu from './actions-dropdown-menu';
 import Version from './version';
 import {
@@ -420,6 +421,16 @@ export function version(
 ): TableRow {
 	return {
 		display: getVersion( subscription, table ),
+	};
+}
+
+export function autoUpdates( subscription: Subscription ): TableRow {
+	return {
+		display: (
+			<div className="woocommerce-marketplace__my-subscriptions__auto-updates">
+				<AutoUpdateStatus subscription={ subscription } />
+			</div>
+		),
 	};
 }
 

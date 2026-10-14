@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Redirect missing WooCommerce Admin task routes to Home instead of leaving a blank screen.

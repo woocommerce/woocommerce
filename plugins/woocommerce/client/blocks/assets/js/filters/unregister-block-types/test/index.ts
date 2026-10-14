@@ -122,7 +122,9 @@ describe( 'unregister block types', () => {
 		( adminPage ) => {
 			loadFilter( adminPage, [
 				'woocommerce/breadcrumbs',
+				'woocommerce/catalog-sorting',
 				'woocommerce/checkout',
+				'woocommerce/product-results-count',
 				'myplugin/client-only',
 			] );
 

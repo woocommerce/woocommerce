@@ -153,7 +153,7 @@ export default function Products( props: ProductsProps ) {
 				>
 					<b key="wp-theme-directory-heading">
 						{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }
-					</b>
+					</b>{ ' ' }
 					<span key="wp-theme-directory-copy">
 						{ createInterpolateElement(
 							__(

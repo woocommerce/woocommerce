@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Checkout block: stop Space scrolling the page and Enter submitting the form when toggling the collapsible order summary.

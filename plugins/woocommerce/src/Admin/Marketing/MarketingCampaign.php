@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\Marketing;
 /**
  * MarketingCampaign class
  *
- * @since x.x.x
+ * @since 7.4.0
  */
 class MarketingCampaign {
 	/**

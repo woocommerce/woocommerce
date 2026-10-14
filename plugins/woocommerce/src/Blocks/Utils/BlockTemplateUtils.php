@@ -623,8 +623,8 @@ class BlockTemplateUtils {
 	 * Determines whether the provided $blocks contains any of the $block_names,
 	 * or if they contain a pattern that contains any of the $block_names.
 	 *
-	 * @param string[]   $block_names Full block types to look for.
-	 * @param WP_Block[] $blocks      Array of block objects.
+	 * @param string[] $block_names Full block types to look for.
+	 * @param array    $blocks      Array of blocks as returned by parse_blocks().
 	 * @return bool Whether the content contains the specified block.
 	 */
 	public static function has_block_including_patterns( $block_names, $blocks ) {

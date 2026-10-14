@@ -1,12 +1,13 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
 	BIS_EMAIL_FOOTER,
 	BIS_EMAIL_LINKS,
+	BIS_FEATURE_OPTION,
 	bisAdminListUrl,
 	bisEmailBody,
 	bisEmailSubject,
@@ -24,26 +25,34 @@ import {
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail } from '../../utils/email';
+import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — receiving back-in-stock emails',
-	{ tag: [ tags.SERVICES ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
 			// Single opt-in so the notification becomes ACTIVE immediately
 			// (no verify step), which is what the back-in-stock dispatch needs.
 			await setBISOptions( request, baseURL!, {
 				allowSignups: true,
 				doubleOptIn: false,
 				requireAccount: false,
-				createAccountOnSignup: false,
 			} );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
-			await resetBISOptions( request, baseURL! );
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
 		} );
 
 		test( 'restocking a product dispatches the back-in-stock email with UTM params', async ( {

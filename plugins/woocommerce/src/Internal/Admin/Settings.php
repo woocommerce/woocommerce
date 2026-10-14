@@ -49,6 +49,8 @@ class Settings {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_component_settings' ) );
 		add_filter( 'woocommerce_settings_groups', array( $this, 'add_settings_group' ) );
 		add_filter( 'woocommerce_settings-wc_admin', array( $this, 'add_settings' ) );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_excluded_report_order_statuses', array( $this, 'maybe_forget_default_order_statuses' ), 10, 2 );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_actionable_order_statuses', array( $this, 'maybe_forget_default_order_statuses' ), 10, 2 );
 	}
 
 	/**
@@ -106,8 +108,8 @@ class Settings {
 	}
 
 	/**
-	 * The default order statuses excluded from Analytics report totals, before a merchant
-	 * saves the option. Single source of truth for the Settings UI and every runtime
+	 * The default order statuses excluded from Analytics report totals, used until a merchant
+	 * saves a different selection. Single source of truth for the Settings UI and every runtime
 	 * consumer, so the filtered value applies everywhere without saving the option.
 	 *
 	 * @since 11.2.0
@@ -130,8 +132,8 @@ class Settings {
 	}
 
 	/**
-	 * The default order statuses considered actionable in Analytics, before a merchant
-	 * saves the option. Single source of truth for the Settings UI and every runtime
+	 * The default order statuses considered actionable in Analytics, used until a merchant
+	 * saves a different selection. Single source of truth for the Settings UI and every runtime
 	 * consumer, so the filtered value applies everywhere without saving the option.
 	 *
 	 * @since 11.2.0
@@ -200,6 +202,46 @@ class Settings {
 		// A non-empty array whose elements are all unusable is treated as invalid, so a
 		// broken callback does not silently empty the selection.
 		return empty( $statuses ) ? $fallback : $statuses;
+	}
+
+	/**
+	 * Delete an Analytics order status option instead of saving it when the list matches the
+	 * default the Settings page shows.
+	 *
+	 * "Reset defaults", or saving the page without touching a list, sends that default back.
+	 * Storing it would freeze the current value and stop the default order status filters
+	 * from applying, so the option is deleted and the default keeps being resolved at runtime.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $value  Sanitized value about to be saved.
+	 * @param array $option Setting definition, including its resolved default.
+	 * @return mixed The value to save, or null to skip saving it.
+	 */
+	public function maybe_forget_default_order_statuses( $value, $option ) {
+		$default = $option['default'] ?? null;
+		if ( ! is_array( $value ) || ! is_array( $default ) ) {
+			return $value;
+		}
+
+		// Compare as sets, so the same statuses in another order still count as the default.
+		if ( array_diff( $value, $default ) || array_diff( $default, $value ) ) {
+			return $value;
+		}
+
+		// The page shows the built-in default when a filter returns only statuses it cannot display.
+		// Deleting the option then would switch reports to the filter's list, so store what was shown.
+		$runtime_default = 'woocommerce_excluded_report_order_statuses' === $option['id']
+			? self::get_default_excluded_order_statuses()
+			: self::get_default_actionable_order_statuses();
+		if ( array_diff( $default, $runtime_default ) ) {
+			return $value;
+		}
+
+		delete_option( $option['id'] );
+		return null;
 	}
 
 	/**
@@ -339,6 +381,7 @@ class Settings {
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
+			$settings['couponTypes']               = wc_get_coupon_types();
 		}
 
 		// The separator used for attributes found in Variation titles.
@@ -521,6 +564,10 @@ class Settings {
 	/**
 	 * Gets custom settings used for WC Admin.
 	 *
+	 * Exposes the current values as `wcAdminSettings` and the resolved defaults as
+	 * `wcAdminSettingsDefaults`, so the client can reset to the same (possibly filtered)
+	 * defaults the REST endpoint reports instead of a hardcoded copy.
+	 *
 	 * @param array $settings Array of settings to merge into.
 	 * @return array
 	 */
@@ -528,10 +575,15 @@ class Settings {
 		$wc_rest_settings_options_controller = new \WC_REST_Setting_Options_Controller();
 		$wc_admin_group_settings             = $wc_rest_settings_options_controller->get_group_settings( 'wc_admin' );
 		$settings['wcAdminSettings']         = array();
+		$settings['wcAdminSettingsDefaults'] = array();
 
 		foreach ( $wc_admin_group_settings as $setting ) {
-			if ( ! empty( $setting['id'] ) ) {
-				$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( empty( $setting['id'] ) ) {
+				continue;
+			}
+			$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+			if ( array_key_exists( 'default', $setting ) ) {
+				$settings['wcAdminSettingsDefaults'][ $setting['id'] ] = $setting['default'];
 			}
 		}
 		return $settings;

@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/check-alignment */
 /**
  * External dependencies
  */

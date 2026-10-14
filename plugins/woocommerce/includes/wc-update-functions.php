@@ -23,11 +23,13 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -2262,10 +2264,7 @@ function wc_update_450_sanitize_coupons_code() {
 		ARRAY_A
 	);
 
-	if ( empty( $coupons ) ) {
-		delete_option( 'woocommerce_update_450_last_coupon_id' );
-		return false;
-	}
+	$codes_changed = false;
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
@@ -2288,10 +2287,15 @@ function wc_update_450_sanitize_coupons_code() {
 				)
 			);
 
-			// Clean cache.
+			// Clean post cache.
 			clean_post_cache( $coupon_id );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+			$codes_changed = true;
 		}
+	}
+
+	// Remember the rewrite for the last batch, which is where the lookup cache is cleaned.
+	if ( $codes_changed ) {
+		update_option( 'woocommerce_update_450_codes_changed', 'yes' );
 	}
 
 	// Start the run again.
@@ -2300,6 +2304,19 @@ function wc_update_450_sanitize_coupons_code() {
 	}
 
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
+
+	/*
+	 * A rewritten code leaves its lookup entry behind under the old spelling, and those keys
+	 * cannot be deleted one by one: wc_get_coupon_id_by_code() hashes the caller's raw input, so
+	 * an entry can be keyed on a representation this function never sees. Rotating the group is
+	 * what reaches all of them, and it runs here, once per migration, rather than in every batch
+	 * that happened to rewrite something.
+	 */
+	if ( 'yes' === get_option( 'woocommerce_update_450_codes_changed' ) ) {
+		delete_option( 'woocommerce_update_450_codes_changed' );
+		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_all();
+	}
+
 	return false;
 }
 
@@ -3859,8 +3876,9 @@ function wc_update_11201_invalidate_analytics_reports_cache() {
  * now fall back to the order type for such rows; resetting the marker keeps them on the cheap path
  * and restores the Orders report fallback to the refunded order's value.
  *
- * Batches walk the table by order ID. A database error stops the migration and is logged instead
- * of retried, because the report queries stay correct without the reset.
+ * Batches walk the table by order ID. A database error is logged and stops the migration without a retry.
+ * Customer aggregates still use the order type, but unprocessed refunds keep their stale marker,
+ * so the Orders report can retain an incorrect customer_type until those rows are reset.
  *
  * @since 11.2.0
  *
@@ -3990,6 +4008,112 @@ function wc_update_11203_normalize_stock_notification_emails() {
 	}
 
 	delete_option( $last_id_option );
+
+	return false;
+}
+
+/**
+ * Persist the legacy variation price hash option for existing stores so get_option returns an explicit value.
+ *
+ * @return void
+ */
+function wc_update_1130_set_legacy_variation_price_hash_option() {
+	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
+	}
+}
+
+/**
+ * Delete the product attributes lookup rows of variations that are not published.
+ *
+ * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
+ * counted terms that only a disabled variation carried. Rows are now only written for published variations
+ * and a status change refreshes them, but rows written before that are never revisited.
+ *
+ * Runs in batches of unpublished variations, so the lookup table is never locked wholesale: it is one of the
+ * largest tables on a variation-heavy store, and every filtered catalogue page reads it. A database error, or a
+ * progress cursor that can't be saved, is logged and stops the migration without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is left to process, false when done or stopped.
+ */
+function wc_update_1130_delete_unpublished_variation_lookup_rows() {
+	global $wpdb;
+
+	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+	if ( ! $lookup_data_store->check_lookup_table_exists() ) {
+		return false;
+	}
+
+	$last_id_option = 'woocommerce_update_1130_last_unpublished_variation_id';
+	$lookup_table   = $lookup_data_store->get_lookup_table_name();
+
+	// Driving from the posts side keeps the batch bounded by unpublished variations, which are the selective
+	// set here, and lets the query use the post_type/post_status index instead of scanning the lookup table.
+	$variation_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE ID > %d AND post_type = 'product_variation' AND post_status != %s
+			ORDER BY ID ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 ),
+			ProductStatus::PUBLISH
+		)
+	);
+
+	if ( '' === $wpdb->last_error && ! empty( $variation_ids ) ) {
+		$variation_ids   = array_map( 'intval', $variation_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
+
+		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough. The
+		// status is checked again here: with direct updates on, a variation re-enabled since the batch was
+		// selected already has its rows back, and they must stay.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE lookup FROM {$lookup_table} AS lookup
+				INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
+				WHERE lookup.product_id IN ( {$id_placeholders} ) AND posts.post_status != %s",
+				array_merge( $variation_ids, array( ProductStatus::PUBLISH ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		if ( false !== $deleted ) {
+			// A concurrent run (the queue plus `wp wc update`) may already have saved this id or a later one, and update_option()
+			// reports that as false just like a failed write. It can also replace a later cursor with this one, which only makes a
+			// run reselect variations whose rows are already gone. The variations stay unpublished, so without a saved cursor the
+			// next run would pick the same batch again.
+			$cursor = end( $variation_ids );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor || update_option( $last_id_option, $cursor, false ) ) {
+				return true;
+			}
+			// Re-read from the database. If the other run created the option after this process found it missing, the stale
+			// "missing" entry sits in 'notoptions', not under the option's own key.
+			wp_cache_delete( $last_id_option, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor ) {
+				return true;
+			}
+			wc_get_logger()->error(
+				'Stopped deleting the lookup rows of unpublished variations: the progress cursor could not be saved.',
+				array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+			);
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped deleting the lookup rows of unpublished variations: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The layered nav counts cached from the deleted rows would otherwise be served until they expire, a day later.
+	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
 
 	return false;
 }

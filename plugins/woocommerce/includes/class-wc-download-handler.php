@@ -61,12 +61,13 @@ class WC_Download_Handler {
 		$downloads  = $product ? $product->get_downloads() : array();
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
-		$key = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$key       = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$order_key = empty( $_GET['order'] ) ? '' : wc_clean( wp_unslash( $_GET['order'] ) );
 
 		if (
 			! $product
 			|| empty( $key )
-			|| empty( $_GET['order'] )
+			|| empty( $order_key )
 			|| ! isset( $downloads[ $key ] )
 			|| ! $downloads[ $key ]->get_enabled()
 		) {
@@ -78,7 +79,7 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) );
+		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
 
 		if ( isset( $_GET['email'] ) ) {
@@ -95,10 +96,16 @@ class WC_Download_Handler {
 			}
 		}
 
+		$user_email = sanitize_email( str_replace( ' ', '+', $email_address ) );
+
+		if ( empty( $user_email ) ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
+
 		$download_ids = $data_store->get_downloads(
 			array(
-				'user_email'  => sanitize_email( str_replace( ' ', '+', $email_address ) ),
-				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ),
+				'user_email'  => $user_email,
+				'order_key'   => $order_key,
 				'product_id'  => $product_id,
 				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
@@ -318,17 +325,18 @@ class WC_Download_Handler {
 		 * via filters we can still do the string replacement on a HTTP file.
 		 */
 		$replacements = array(
-			$wp_uploads_url                                                   => $wp_uploads_dir,
-			network_site_url( '/', 'https' )                                  => ABSPATH,
+			$wp_uploads_url                  => $wp_uploads_dir,
+			network_site_url( '/', 'https' ) => ABSPATH,
 			str_replace( 'https:', 'http:', network_site_url( '/', 'http' ) ) => ABSPATH,
-			site_url( '/', 'https' )                                          => ABSPATH,
-			str_replace( 'https:', 'http:', site_url( '/', 'http' ) )         => ABSPATH,
+			site_url( '/', 'https' )         => ABSPATH,
+			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
 		);
 
-		$count            = 0;
-		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path, $count );
-		$parsed_file_path = wp_parse_url( $file_path );
-		$remote_file      = null === $count || 0 === $count; // Remote file only if there were no replacements.
+		$count             = 0;
+		$file_path         = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path, $count );
+		$parsed_file_path  = wp_parse_url( $file_path );
+		$remote_file       = null === $count || 0 === $count; // Remote file only if there were no replacements.
+		$decoded_file_path = str_replace( '%20', ' ', $file_path );
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
@@ -356,6 +364,10 @@ class WC_Download_Handler {
 		} elseif ( 0 === strpos( $file_path, $wp_content_dirname ) ) {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_dirname ) ) );
+
+			// A mapped local URL may encode spaces as "%20". Use the decoded path only when the literal path does not exist.
+		} elseif ( ! $remote_file && $decoded_file_path !== $file_path && ! file_exists( $file_path ) && file_exists( $decoded_file_path ) ) {
+			$file_path = $decoded_file_path;
 
 			// Check if we have an absolute path.
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) ) {
@@ -558,7 +570,7 @@ class WC_Download_Handler {
 				);
 				self::download_file_redirect( $file_path );
 			} else {
-				self::download_error( __( 'File not found', 'woocommerce' ) );
+				self::download_error( __( 'File not found', 'woocommerce' ), '', 404 );
 			}
 		}
 
@@ -766,7 +778,7 @@ class WC_Download_Handler {
 
 		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
 			if ( false === $download_range['is_range_valid'] ) {
-				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				status_header( 416 );
 				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
 				exit;
 			}
@@ -775,7 +787,7 @@ class WC_Download_Handler {
 			$end    = $download_range['start'] + $download_range['length'] - 1;
 			$length = $download_range['length'];
 
-			header( 'HTTP/1.1 206 Partial Content' );
+			status_header( 206 );
 			header( "Accept-Ranges: 0-$file_size" );
 			header( "Content-Range: bytes $start-$end/$file_size" );
 			header( "Content-Length: $length" );
@@ -820,7 +832,7 @@ class WC_Download_Handler {
 	 *
 	 * @return string Content disposition value.
 	 */
-	private static function get_content_disposition() : string {
+	private static function get_content_disposition(): string {
 		$disposition = 'attachment';
 		if ( 'yes' === get_option( 'woocommerce_downloads_deliver_inline' ) ) {
 			$disposition = 'inline';
@@ -907,7 +919,7 @@ class WC_Download_Handler {
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
 				$output_sent = $output_sent || '' !== $chunk;
-				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
 
 				if ( ob_get_length() ) {
 					ob_flush();
@@ -972,7 +984,7 @@ class WC_Download_Handler {
 	 * @param string  $title   Error title.
 	 * @param integer $status  Error status.
 	 */
-	private static function download_error( $message, $title = '', $status = 404 ) {
+	private static function download_error( $message, $title = '', $status = 403 ) {
 		/*
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.

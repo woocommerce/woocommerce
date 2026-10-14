@@ -37,12 +37,14 @@ use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
@@ -60,7 +62,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.2.0-dev';
+	public $version = '11.3.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -403,12 +405,14 @@ final class WooCommerce {
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
+		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
+		$container->get( PaymentSettingsScreen::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -423,6 +427,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( EmailLogger::class )->register();
 		$container->get( VisualAttributeTermAdmin::class )->register();
@@ -1139,7 +1144,10 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+		static $plugin_path = null;
+		$plugin_path        = $plugin_path ?? untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+
+		return $plugin_path;
 	}
 
 	/**
@@ -1596,7 +1604,7 @@ final class WooCommerce {
 	 *
 	 * @param string $old_value The old value for the woocommerce_allow_tracking option.
 	 * @param string $value The current value for the woocommerce_allow_tracking option.
-	 * @since x.x.x
+	 * @since 9.5.2
 	 *
 	 * @return void
 	 */

@@ -68,20 +68,16 @@ class OptionSanitizer {
 
 	/**
 	 * Rejects thousand and decimal separators that contain a number.
-	 * On rejection it adds a settings error and returns null, so the stored value is left untouched.
+	 * On rejection it adds a settings error and returns the stored separator, or an empty string when nothing is stored.
 	 *
 	 * @since 11.2.0
-	 * @param mixed $value     Option value.
-	 * @param mixed $raw_value Raw request value, null when the field was not submitted.
-	 * @return mixed
+	 * @param string $option_id Name of the option being saved.
+	 * @param mixed  $raw_value Raw request value, null when the field was not submitted.
+	 * @return string
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
-	public function sanitize_price_separator_setting( $value, $raw_value ) {
-		if ( null === $raw_value ) {
-			return $value;
-		}
-
+	public function sanitize_price_separator_setting( $option_id, $raw_value ) {
 		if ( is_string( $raw_value ) ) {
 			$separator = wp_kses( $raw_value, array() );
 			$decoded   = html_entity_decode( $separator, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
@@ -91,8 +87,12 @@ class OptionSanitizer {
 			}
 		}
 
-		\WC_Admin_Settings::add_error( __( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' ) );
+		if ( null !== $raw_value ) {
+			\WC_Admin_Settings::add_error( __( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' ) );
+		}
 
-		return null;
+		$stored = get_option( $option_id, '' );
+
+		return is_string( $stored ) ? $stored : '';
 	}
 }

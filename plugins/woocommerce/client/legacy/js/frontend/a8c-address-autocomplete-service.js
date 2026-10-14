@@ -318,6 +318,10 @@
 						// Handle errors using shared function
 						handleApiError( data, response );
 
+						if ( ! response.ok ) {
+							return [];
+						}
+
 						if ( Array.isArray( data ) ) {
 							data = data.map( ( item ) => ( {
 								id: item.id,
@@ -329,6 +333,7 @@
 							cacheResult( inputValue, country, data );
 							return data;
 						}
+						return [];
 					} catch ( e ) {
 						if ( e.name === 'AbortError' ) {
 							// Ignore abort errors from cancelled requests

@@ -385,7 +385,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order    = $this->create_complex_cot_order();
 		$order_id = $order->get_id();
 
-		$this->assertIsInteger( $order_id );
+		$this->assertIsInt( $order_id );
 		$this->assertLessThan( $order_id, 0 );
 
 		wp_cache_flush();
@@ -616,6 +616,98 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertSame( '1', get_comment( $note_id )->comment_approved, 'Order note should be restored when the order is untrashed' );
 		$this->assertSame( '1', get_comment( $third_party_comment_id )->comment_approved, 'Third-party comment should be restored when the order is untrashed' );
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testdox When the order's previous status is no longer registered, untrash falls back to pending and still reports success.
+	 */
+	public function test_cot_datastore_untrash_falls_back_to_pending_for_invalid_previous_status() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Simulate the plugin that registered the order's previous status being deactivated.
+		$order->update_meta_data( '_wp_trash_meta_status', 'wc-unregistered-status' );
+		$order->save_meta_data();
+
+		$this->sut->read( $order );
+		$result = $this->sut->untrash_order( $order );
+
+		$this->assertTrue( $result, 'untrash_order() should report success on the pending fallback path' );
+		$this->assertSame( OrderStatus::PENDING, $order->get_status() );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ), 'Trash meta should still be cleaned up on the pending fallback path' );
+	}
+
+	/**
+	 * Data provider for tests that run with the posts sync both on and off.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_sync_enabled(): array {
+		return array(
+			'sync off' => array( false ),
+			'sync on'  => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Untrash does not fire 'woocommerce_update_order' when the clock ticks over a second during the restore, but a later save does.
+	 * @dataProvider data_provider_sync_enabled
+	 *
+	 * @param bool $sync_enabled Whether the posts sync is on.
+	 */
+	public function test_cot_datastore_untrash_does_not_fire_update_hook_across_second_boundary( bool $sync_enabled ) {
+		$this->toggle_cot_feature_and_usage( true );
+		if ( $sync_enabled ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Make the post-save meta cleanup see a "later" time than the date_modified the save just wrote.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function ( $type, $gmt = 0 ) {
+					unset( $type, $gmt );
+					return gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS );
+				},
+			)
+		);
+
+		$update_count = 0;
+		$callback     = function () use ( &$update_count ) {
+			++$update_count;
+		};
+		add_action( 'woocommerce_update_order', $callback );
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+		$this->assertSame( 0, $update_count, 'Untrash should not fire woocommerce_update_order' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::ON_HOLD, $order->get_status() );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ) );
+		if ( $sync_enabled ) {
+			$this->assertSame( OrderInternalStatus::ON_HOLD, get_post_status( $order->get_id() ) );
+			$this->assertEmpty( get_post_meta( $order->get_id(), '_wp_trash_meta_status', true ) );
+		}
+
+		$order->set_customer_note( 'Edited after restore' );
+		$order->save();
+		remove_action( 'woocommerce_update_order', $callback );
+
+		$this->assertSame( 1, $update_count, 'A save after the restore should fire woocommerce_update_order' );
 	}
 
 	/**
@@ -2519,6 +2611,112 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$modified_date = $order->get_date_modified();
 		$modified_date->setTimezone( new DateTimeZone( 'GMT' ) );
 		$this->assertEquals( $modified_date->format( 'Y-m-d H:i:s' ), $post->post_modified_gmt );
+	}
+
+	/**
+	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
+	 */
+	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertTrue(
+				$r_order->get_prices_include_tax(),
+				'Persistence should use the default captured at construction, not the current store setting.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $r_order->get_changes() );
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
+	 */
+	public function test_create_keeps_explicit_prices_include_tax_value(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_prices_include_tax( false );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertFalse(
+				$r_order->get_prices_include_tax(),
+				'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+			);
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testdox An HPOS order with a null tax-mode column uses the store default without a pending edit.
+	 */
+	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
+		global $wpdb;
+
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			$operational_data_table = $this->sut::get_operational_data_table_name();
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$order->get_id()
+				)
+			);
+			wp_cache_flush();
+
+			$read_order = new WC_Order();
+			$read_order->set_id( $order->get_id() );
+			$this->switch_data_store( $read_order, $this->sut );
+			$this->sut->read( $read_order );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'A missing stored value should use the constructor default.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
 	}
 
 	/**

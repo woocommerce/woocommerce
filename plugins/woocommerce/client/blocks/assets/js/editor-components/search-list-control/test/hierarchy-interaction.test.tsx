@@ -29,8 +29,7 @@ const renderHierarchicalControl = ( {
 	selected = [] as SearchListItemType[],
 	onChange = jest.fn(),
 	renderItem = undefined as
-		| ( ( args: RenderItemArgs ) => JSX.Element )
-		| undefined,
+		( ( args: RenderItemArgs ) => JSX.Element ) | undefined,
 } = {} ) =>
 	render(
 		<SearchListControl

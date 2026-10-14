@@ -43,22 +43,6 @@ export async function triggerDetectionSweep(): Promise< {
 	};
 }
 
-export async function triggerBackfill(): Promise< {
-	ran: boolean;
-	stamped: number;
-} > {
-	const client = apiClient();
-	const res = await client.post(
-		`${ TEST_HELPER_API_BASE }/trigger-backfill`,
-		{}
-	);
-	const body = res?.data ?? {};
-	return {
-		ran: Boolean( body.ran ),
-		stamped: Number( body.stamped ?? 0 ),
-	};
-}
-
 /**
  * Simulate a core template version bump by seeding `oldHtml` as the active
  * canonical-content override for `emailId`. While the override is active, any

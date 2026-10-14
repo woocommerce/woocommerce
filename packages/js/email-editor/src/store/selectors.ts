@@ -175,8 +175,7 @@ export const getEditedEmailContent = createRegistrySelector(
 			postType,
 			postId
 		) as unknown as
-			| { content: string | unknown; blocks: BlockInstance[] }
-			| undefined;
+			{ content: string | unknown; blocks: BlockInstance[] } | undefined;
 
 		if ( record ) {
 			return getContentFromEntity( record );
@@ -332,7 +331,7 @@ export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
 		return select( coreDataStore ).getEditedEntityRecord(
 			'postType',
 			'wp_template',
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
 			templateId
 		) as unknown as EmailTemplate;
 	}
@@ -436,7 +435,6 @@ export function getInitialEditorSettings(
 export function getPaletteColors(
 	state: State
 ): State[ 'editorSettings' ][ '__experimentalFeatures' ][ 'color' ][ 'palette' ] {
-	// eslint-disable-next-line no-underscore-dangle
 	return state.editorSettings?.__experimentalFeatures?.color?.palette;
 }
 

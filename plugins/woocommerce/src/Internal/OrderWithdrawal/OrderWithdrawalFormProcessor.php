@@ -288,14 +288,18 @@ final class OrderWithdrawalFormProcessor {
 				'error'
 			);
 
-			$this->apply_rate_limits( $rate_limit_ids, -1 );
-
 			return false;
 		}
 
 		if ( ! $this->send_order_withdrawal_emails( $data, $matched_order ) ) {
-			wc_add_notice( __( 'We could not submit your withdrawal request. Please try again or contact us if the problem continues.', 'woocommerce' ), 'error' );
-			$this->apply_rate_limits( $rate_limit_ids, -1 );
+			wc_add_notice(
+				sprintf(
+					/* translators: %d: number of seconds before another withdrawal request can be submitted. */
+					__( 'We could not submit your withdrawal request. Please try again in %d seconds or contact us if the problem continues.', 'woocommerce' ),
+					self::RATE_LIMIT_DELAY
+				),
+				'error'
+			);
 
 			return false;
 		}

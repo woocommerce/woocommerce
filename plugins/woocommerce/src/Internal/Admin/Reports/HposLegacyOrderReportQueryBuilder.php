@@ -838,35 +838,34 @@ class HposLegacyOrderReportQueryBuilder {
 	}
 
 	/**
-	 * Translate legacy `posts.<col>` (and bare `ID` / `post_date`) references in an arbitrary SQL fragment.
+	 * Translate legacy `posts.<col>` and bare `<col>` references in an arbitrary SQL fragment.
 	 *
-	 * Matches are bounded by `\b` so tokens embedded in longer identifiers
-	 * (e.g. `product_ID`, `posts.post_date_gmt`) are left untouched.
+	 * Both passes cover every column in {@see self::legacy_to_hpos_column_map()}: legacy callers
+	 * often leave these unqualified (e.g. WooCommerce Subscriptions before 7.8.0 passed a bare
+	 * `post_status` where-key), and an untranslated bare token names a column `wc_orders` lacks.
+	 *
+	 * Tokens inside longer identifiers (`product_ID`, `posts.post_date_gmt`), qualified by another
+	 * table alias (`p.post_type`, joined via a query filter), or quoted are left untouched.
 	 *
 	 * @param string $fragment Caller-supplied SQL fragment.
 	 *
 	 * @return string Translated fragment safe to drop into an HPOS query.
 	 */
 	private function translate_legacy_sql_fragment( string $fragment ): string {
-		$map = $this->legacy_to_hpos_column_map();
+		$map         = $this->legacy_to_hpos_column_map();
+		$alternation = implode( '|', array_keys( $map ) );
 
 		// Qualified `posts.<col>` references first, then the bare tokens legacy
-		// callers use unqualified. Callbacks avoid `$`/`\` replacement-string pitfalls.
-		$fragment = (string) preg_replace_callback(
-			'/\bposts\.(ID|post_date|post_parent|post_status|post_type)\b/',
-			static function ( $matches ) use ( $map ) {
-				return $map[ $matches[1] ];
-			},
-			$fragment
-		);
+		// callers use unqualified. The callback avoids `$`/`\` replacement-string pitfalls.
+		$replace = static function ( $matches ) use ( $map ) {
+			return $map[ $matches[1] ];
+		};
 
-		return (string) preg_replace_callback(
-			'/\b(ID|post_date)\b/',
-			static function ( $matches ) use ( $map ) {
-				return $map[ $matches[1] ];
-			},
-			$fragment
-		);
+		// `\b` alone matches after `.` or a quote, which would rewrite `p.post_type`,
+		// a quoted alias like `post_status` or a string literal.
+		$fragment = (string) preg_replace_callback( '/(?<![\w.`\'"])posts\.(' . $alternation . ')\b/', $replace, $fragment );
+
+		return (string) preg_replace_callback( '/(?<![\w.`\'"])(' . $alternation . ')\b/', $replace, $fragment );
 	}
 
 	/**

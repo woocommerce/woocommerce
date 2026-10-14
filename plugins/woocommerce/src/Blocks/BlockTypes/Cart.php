@@ -68,10 +68,10 @@ class Cart extends AbstractBlock {
 	}
 
 	/**
-	 * Register the Cart heading and cross-sells message block patterns.
+	 * Register the Cart heading block pattern.
 	 *
-	 * The empty cart and "New in store" patterns the default Cart page references are registered
-	 * in BlockTypesController::register_block_patterns() instead, so they resolve even when the
+	 * The patterns the default Cart page references are registered in
+	 * BlockTypesController::register_block_patterns() instead, so they resolve even when the
 	 * Cart block type is not registered.
 	 */
 	public function register_patterns() {
@@ -81,14 +81,6 @@ class Cart extends AbstractBlock {
 				'title'    => '',
 				'inserter' => false,
 				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Cart', 'woocommerce' ) . '</h1><!-- /wp:heading -->',
-			)
-		);
-		register_block_pattern(
-			'woocommerce/cart-cross-sells-message',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"fontSize":"large"} --><h2 class="wp-block-heading has-large-font-size">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 	}
