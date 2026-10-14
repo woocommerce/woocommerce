@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_FEATURE_OPTION,
@@ -12,7 +12,7 @@ import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — feature disabled',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ], lock: locks.STOCK_NOTIFICATIONS },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Open the classic settings page from the "Edit" action for emails the block email editor does not support, instead of showing an error.

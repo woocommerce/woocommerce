@@ -137,7 +137,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Reset any filters that might have been added.
 		remove_all_filters( 'woocommerce_mcp_include_ability' );
 		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
-		remove_all_filters( 'mcp_validation_enabled' );
 
 		foreach ( $this->registered_ability_ids as $ability_id ) {
 			if ( function_exists( 'wp_unregister_ability' ) ) {
@@ -365,15 +364,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$this->assertContains( 'custom-plugin/special-action', $result, 'Should include abilities opted in by filter.' );
 		$this->assertNotContains( $deprecated_ability, $result, 'Should exclude abilities opted out by filter.' );
 		$this->assertSame( array( 0 ), array_keys( $result ), 'Should re-index array after filter override.' );
-	}
-
-	/**
-	 * @testdox Should disable MCP validation.
-	 */
-	public function test_disable_mcp_validation_returns_false(): void {
-		$result = MCPAdapterProvider::disable_mcp_validation();
-
-		$this->assertFalse( $result, 'disable_mcp_validation should always return false' );
 	}
 
 	/**

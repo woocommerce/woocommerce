@@ -74,7 +74,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 						? __(
 								'Where would you like to promote your products?',
 								'woocommerce'
-						  )
+							)
 						: __( 'No campaign types found.', 'woocommerce' ) }
 				</div>
 				{ campaignTypes?.map( ( el ) => (

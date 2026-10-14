@@ -398,16 +398,16 @@ function wc_body_class( $classes ) {
  * @return void
  */
 function wc_no_js() {
-	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
-	?>
-	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	wp_print_inline_script_tag(
+		"
 		(function () {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
 			document.body.className = c;
 		})();
-	</script>
-	<?php
+		",
+		array( 'id' => 'wc-no-js' )
+	);
 }
 
 /**
@@ -4306,7 +4306,8 @@ function wc_display_product_attributes( $product ) {
 				$value_name = esc_html( $attribute_value->name );
 
 				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
-					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+					$term_link = get_term_link( $attribute_value->term_id, $attribute->get_name() );
+					$values[]  = is_wp_error( $term_link ) ? $value_name : '<a href="' . esc_url( $term_link ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
 				}

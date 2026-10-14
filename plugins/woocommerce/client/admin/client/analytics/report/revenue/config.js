@@ -46,7 +46,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 			? __(
 					'Returns include returned shipping and tax amounts.',
 					'woocommerce'
-			  )
+				)
 			: null,
 	},
 	{
@@ -68,7 +68,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 			: __(
 					'Full refunds are not deducted from tax or net sales totals',
 					'woocommerce'
-			  ),
+				),
 	},
 	{
 		key: 'taxes',
@@ -82,7 +82,7 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 			: __(
 					'Full refunds are not deducted from tax or net sales totals',
 					'woocommerce'
-			  ),
+				),
 	},
 	{
 		key: 'shipping',

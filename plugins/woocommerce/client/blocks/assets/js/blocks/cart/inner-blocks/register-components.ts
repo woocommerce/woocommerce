@@ -29,7 +29,7 @@ import CartOrderSummaryTotalsFrontend from './cart-order-summary-totals/frontend
 import CartOrderSummaryTaxesFrontend from './cart-order-summary-taxes/frontend';
 
 // Modify webpack publicPath at runtime based on location of WordPress Plugin.
-// eslint-disable-next-line no-undef,camelcase
+// eslint-disable-next-line no-undef
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
 registerCheckoutBlock( {
