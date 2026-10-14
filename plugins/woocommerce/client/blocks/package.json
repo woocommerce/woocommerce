@@ -138,7 +138,7 @@
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/editor": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
-		"@wordpress/env": "11.9.0",
+		"@wordpress/env": "catalog:tooling",
 		"@wordpress/format-library": "catalog:wp-min",
 		"@wordpress/hooks": "catalog:wp-min",
 		"@wordpress/html-entities": "catalog:wp-min",
