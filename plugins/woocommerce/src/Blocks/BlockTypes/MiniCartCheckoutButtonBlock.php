@@ -27,8 +27,10 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 		$checkout_page_url           = get_permalink( $checkout_page_id );
 		$wrapper_attributes          = get_block_wrapper_attributes(
 			array(
-				'href'  => esc_url( $checkout_page_url ),
-				'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-checkout',
+				'href'                        => esc_url( $checkout_page_url ),
+				'class'                       => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-checkout',
+				'data-wp-bind--aria-disabled' => 'woocommerce/mini-cart::state.isCartUpdating',
+				'data-wp-on--click'           => 'woocommerce/mini-cart::actions.preventCheckoutWhileUpdating',
 			)
 		);
 
