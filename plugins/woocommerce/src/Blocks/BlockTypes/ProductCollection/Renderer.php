@@ -431,7 +431,8 @@ class Renderer {
 	 */
 	public function extend_context_for_inner_blocks( $context, $parsed_block = array() ) {
 		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
-		$context['iapi/provider'] = 'woocommerce/product-collection';
+		$context['iapi/provider']                 = 'woocommerce/product-collection';
+		$context['isProductCollectionInnerBlock'] = true;
 
 		$block_name = $parsed_block['blockName'] ?? '';
 
