@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Product;
 use WC_Helper_Product;
 
@@ -20,6 +21,8 @@ use WC_Helper_Product;
  * Tests for NotificationsProcessor class
  */
 class NotificationsProcessorTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * @var NotificationsProcessor
@@ -31,6 +34,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		\WC()->queue()->cancel_all( JobManager::AS_JOB_SEND_STOCK_NOTIFICATIONS );
 
 		$eligibility_service = new EligibilityService();
@@ -51,6 +55,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
@@ -203,6 +208,38 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$notification_on_variation = new Notification( $notification_on_variation->get_id() );
 		$this->assertEquals( NotificationStatus::SENT, $notification->get_status() );
 		$this->assertEquals( NotificationStatus::SENT, $notification_on_variation->get_status() );
+	}
+
+	/**
+	 * Test process_batch on a parent that does not manage stock leaves out-of-stock variations alone.
+	 */
+	public function test_process_batch_variable_without_parent_stock_skips_out_of_stock_siblings() {
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = array_map( 'wc_get_product', $variable->get_children() );
+		$this->assertFalse( $variable->get_manage_stock() );
+
+		$restocked = $variations[0];
+		$restocked->set_stock_status( ProductStockStatus::IN_STOCK );
+		$restocked->save();
+		$sibling = $variations[1];
+		$sibling->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$sibling->save();
+
+		\WC_Product_Variable::sync( $variable->get_id() );
+		$variable = wc_get_product( $variable->get_id() );
+		$this->assertEquals( ProductStockStatus::IN_STOCK, $variable->get_stock_status() );
+
+		$notification = new Notification();
+		$notification->set_product_id( $sibling->get_id() );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->sut->process_batch( $variable->get_id() );
+
+		$notification = new Notification( $notification->get_id() );
+		$this->assertEquals( NotificationStatus::ACTIVE, $notification->get_status() );
+		$this->assertEmpty( $notification->get_date_notified() );
 	}
 
 	/**

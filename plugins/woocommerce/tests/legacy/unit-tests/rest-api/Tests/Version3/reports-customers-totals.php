@@ -31,60 +31,73 @@ class WC_Tests_API_Reports_Customers_Totals extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting all product reviews.
+	 * Fetch the endpoint and index the totals by slug.
+	 *
+	 * @return array
+	 */
+	private function get_totals_by_slug() {
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/reports/customers/totals' ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		return wp_list_pluck( $response->get_data(), 'total', 'slug' );
+	}
+
+	/**
+	 * Test getting the customer totals.
 	 *
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
 		wp_set_current_user( $this->user );
 
-		$response        = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/reports/customers/totals' ) );
-		$report          = $response->get_data();
-		$users_count     = count_users();
-		$total_customers = 0;
-
-		foreach ( $users_count['avail_roles'] as $role => $total ) {
-			if ( in_array( $role, array( 'administrator', 'shop_manager' ), true ) ) {
-				continue;
-			}
-
-			$total_customers += (int) $total;
-		}
-
-		$customers_query = new WP_User_Query(
-			array(
-				'role__not_in' => array( 'administrator', 'shop_manager' ),
-				'number'       => 0,
-				'fields'       => 'ID',
-				'count_total'  => true,
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Test setup intentionally mirrors the legacy production query shape.
-					array(
-						'key'     => 'paying_customer',
-						'value'   => 1,
-						'compare' => '=',
-					),
-				),
-			)
-		);
-
-		$total_paying = (int) $customers_query->get_total();
-
-		$data = array(
-			array(
-				'slug'  => 'paying',
-				'name'  => __( 'Paying customer', 'woocommerce' ),
-				'total' => $total_paying,
-			),
-			array(
-				'slug'  => 'non_paying',
-				'name'  => __( 'Non-paying customer', 'woocommerce' ),
-				'total' => $total_customers - $total_paying,
-			),
-		);
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/reports/customers/totals' ) );
+		$report   = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $report ) );
-		$this->assertEquals( $data, $report );
+		$this->assertEquals( 'paying', $report[0]['slug'] );
+		$this->assertEquals( 'Paying customer', $report[0]['name'] );
+		$this->assertEquals( 'non_paying', $report[1]['slug'] );
+		$this->assertEquals( 'Non-paying customer', $report[1]['name'] );
+	}
+
+	/**
+	 * Only customers whose paying_customer meta is exactly "1" count as paying, and
+	 * administrators and shop managers stay out of both totals.
+	 */
+	public function test_get_reports_counts_paying_customers() {
+		wp_set_current_user( $this->user );
+
+		// Read the totals first so the users added below have to invalidate them.
+		$before = $this->get_totals_by_slug();
+
+		$paying = $this->factory->user->create( array( 'role' => 'customer' ) );
+		update_user_meta( $paying, 'paying_customer', 1 );
+
+		// Stored as a string and compared as one, so a padded value is not a match.
+		$padded = $this->factory->user->create( array( 'role' => 'customer' ) );
+		update_user_meta( $padded, 'paying_customer', '01' );
+
+		$not_paying = $this->factory->user->create( array( 'role' => 'customer' ) );
+		update_user_meta( $not_paying, 'paying_customer', 0 );
+
+		// No paying_customer meta at all.
+		$this->factory->user->create( array( 'role' => 'customer' ) );
+
+		$paying_manager = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		update_user_meta( $paying_manager, 'paying_customer', 1 );
+
+		$paying_admin = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		update_user_meta( $paying_admin, 'paying_customer', 1 );
+
+		$after = $this->get_totals_by_slug();
+
+		// Only the one customer with paying_customer set to 1.
+		$this->assertSame( 1, $after['paying'] - $before['paying'] );
+
+		// The other three customers; the shop manager and the administrator are excluded by role.
+		$this->assertSame( 3, $after['non_paying'] - $before['non_paying'] );
 	}
 
 	/**

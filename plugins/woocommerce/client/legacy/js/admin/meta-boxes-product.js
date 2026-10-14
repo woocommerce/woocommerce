@@ -1,4 +1,46 @@
 /*global woocommerce_admin_meta_boxes, _ */
+jQuery( document ).on( 'tinymce-editor-init', function ( event, editor ) {
+	if ( 'excerpt' !== editor.id ) {
+		return;
+	}
+
+	editor.getWin().addEventListener(
+		'pagehide',
+		function () {
+			const textarea = editor.getElement();
+			const restoreVisualMode = ! editor.isHidden();
+
+			// Moving the iframe unloads its document. Save before that document is lost.
+			if ( restoreVisualMode ) {
+				editor.save();
+			}
+			const content = textarea.value;
+
+			window.setTimeout( function () {
+				if (
+					! document.body.contains( textarea ) ||
+					window.tinymce.get( 'excerpt' ) !== editor
+				) {
+					return;
+				}
+
+				editor.remove();
+				// Removing a hidden editor can overwrite newer Text-mode content.
+				textarea.value = content;
+				textarea.removeAttribute( 'aria-hidden' );
+
+				// WordPress initializes Text-mode editors when the Visual tab is selected.
+				if ( restoreVisualMode ) {
+					window.tinymce.init(
+						window.tinyMCEPreInit.mceInit.excerpt
+					);
+				}
+			} );
+		},
+		{ once: true }
+	);
+} );
+
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
 
@@ -54,6 +96,26 @@ jQuery( function ( $ ) {
 			return false;
 		}
 	} );
+
+	// WordPress discards empty auto-drafts before WooCommerce can save the product data.
+	const postForm = document.getElementById( 'post' );
+	if ( postForm ) {
+		postForm.addEventListener( 'formdata', function ( event ) {
+			const title = event.formData.get( 'post_title' );
+
+			if (
+				'auto-draft' ===
+					event.formData.get( 'original_post_status' ) &&
+				typeof title === 'string' &&
+				'' === title.trim()
+			) {
+				event.formData.set(
+					'post_title',
+					woocommerce_admin_meta_boxes.i18n_no_title
+				);
+			}
+		} );
+	}
 
 	// Type box.
 	if ( $( 'body' ).hasClass( 'wc-wp-version-gte-55' ) ) {
@@ -1405,11 +1467,11 @@ jQuery( function ( $ ) {
 	function createProductGalleryMediaItem( attachment, $el, allowVideos ) {
 		const mediaType = attachment.type;
 
-		if ( 'image' === mediaType ) {
+		if ( 'video' !== mediaType ) {
 			return createProductGalleryImageItem( attachment, $el );
 		}
 
-		if ( allowVideos && 'video' === mediaType ) {
+		if ( allowVideos ) {
 			return createProductGalleryVideoItem( attachment, $el );
 		}
 
@@ -1479,9 +1541,6 @@ jQuery( function ( $ ) {
 			states: [
 				new wp.media.controller.Library( {
 					title: $el.data( 'choose' ),
-					library: wp.media.query( {
-						type: allowVideos ? [ 'image', 'video' ] : 'image',
-					} ),
 					filterable: 'all',
 					multiple: true,
 				} ),

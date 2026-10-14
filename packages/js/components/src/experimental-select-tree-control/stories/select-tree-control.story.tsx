@@ -87,10 +87,10 @@ export const MultipleSelectTree = () => {
 									( { value: removedValue } ) =>
 										item.value === removedValue
 								)
-					  )
+						)
 					: selected.filter(
 							( item ) => item.value !== removedItems.value
-					  );
+						);
 				setSelected( newValues );
 			} }
 		/>
@@ -148,11 +148,11 @@ export const SingleWithinModalUsingBodyDropdownPlacement = () => {
 												( { value: removedValue } ) =>
 													item.value === removedValue
 											)
-								  )
+									)
 								: selected.filter(
 										( item ) =>
 											item.value !== removedItems.value
-								  );
+									);
 							setSelected( newValues );
 						} }
 					/>

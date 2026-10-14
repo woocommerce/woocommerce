@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import type { NoticeAction } from '~/lib/notices/types';
 import {
-	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 	MARKETPLACE_SUPPORT_PATH,
 } from '../constants';
 import { ERROR_CODES_WITH_MESSAGES } from './constants';
@@ -129,7 +129,7 @@ function getConnectionErrorAction( error: ConnectError ): StoreAction | null {
 			label: __( 'Manage subscriptions', 'woocommerce' ),
 			onClick: () => {
 				trackConnectErrorActionClicked( 'manage_subscriptions', code );
-				window.location.assign( MARKETPLACE_RENEW_SUBSCRIPTON_PATH );
+				window.location.assign( MARKETPLACE_RENEW_SUBSCRIPTION_PATH );
 			},
 		};
 	}

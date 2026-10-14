@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Internal\ScheduledSaleRun;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -29,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for product retrieval so that we have a data agnostic
  * way to get a list of products.
  *
- * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-products/
+ * Args and usage: https://developer.woocommerce.com/docs/features/products/wc-get-products/
  *
  * @since  3.0.0
  * @param  array $args Array of args (above).
@@ -533,19 +534,33 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			$return = '<' . $list_type . ' class="variation">';
 		}
 
+		// Performance note: prefetch parent taxonomy terms to avoid per-attribute get_term_by queries.
+		$taxonomy_terms = array();
+		$parent_id      = $product instanceof WC_Product_Variation ? $product->get_parent_id() : 0;
+		if ( $parent_id ) {
+			foreach ( array_filter( array_keys( $variation_attributes ), 'taxonomy_exists' ) as $taxonomy ) {
+				$terms = get_the_terms( $parent_id, $taxonomy );
+				if ( is_array( $terms ) ) {
+					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) { // @phpstan-ignore instanceof.alwaysTrue (defensive checks agains get_the_terms filter)
+						$taxonomy_terms[ $taxonomy ][ $term->slug ] = $term;
+					}
+				}
+			}
+		}
+
 		$variation_list = array();
 
 		foreach ( $variation_attributes as $name => $value ) {
 			// If this is a term slug, get the term's nice name.
 			if ( taxonomy_exists( $name ) ) {
-				$term = get_term_by( 'slug', $value, $name );
+				$term = $taxonomy_terms[ $name ][ $value ] ?? get_term_by( 'slug', $value, $name );
 				if ( ! is_wp_error( $term ) && $term && null !== $term->name && '' !== $term->name ) {
 					$value = $term->name;
 				}
 			}
 
 			// Do not list attributes already part of the variation name.
-			if ( '' === $value || ( $skip_attributes_in_name && wc_is_attribute_in_product_name( $value, $variation_name ) ) ) {
+			if ( '' === $value || ( $skip_attributes_in_name && wc_is_attribute_in_product_name( $value, $variation_name, $product ? $product : null ) ) ) {
 				continue;
 			}
 
@@ -846,33 +861,24 @@ add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change',
  * when this cron finds products to process. If per-product AS events handled sales
  * on time, these hooks may not fire.
  *
+ * Products are processed in batches by ScheduledSaleRun. Before hooks run
+ * before any batch is primed; after hooks run after the last batch's caches are cleared.
+ *
  * @since 3.0.0
  */
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
 
-	$product_util           = wc_get_container()->get( ProductUtil::class );
 	$must_refresh_transient = false;
 
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		( new ScheduledSaleRun( $product_ids, ScheduledSaleRun::MODE_START ) )->process();
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'start' );
-				// Note: wc_apply_sale_state_for_product() calls save(), which writes sale
-				// date meta and triggers wc_maybe_schedule_sale_events_on_meta_change(),
-				// which schedules the end AS event.
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -880,19 +886,11 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
-		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
-		foreach ( $product_ids as $product_id ) {
-			$product = wc_get_product( $product_id );
+		( new ScheduledSaleRun( $product_ids, ScheduledSaleRun::MODE_END ) )->process();
 
-			if ( $product ) {
-				wc_apply_sale_state_for_product( $product, 'end' );
-			}
-
-			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
-		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 		delete_transient( 'wc_products_onsale' );
 	}
@@ -1616,7 +1614,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  *
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @param  array      $args Optional quantity, price, order, and tax location arguments.
  * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
@@ -1648,21 +1646,30 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		} elseif ( $customer_id ) {
+		} elseif ( $customer_id && empty( $args['tax_location']['country'] ) ) {
 			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
 		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
-			$tax_location = $order->get_taxable_location();
+			$tax_location = $order->get_taxable_location( ! empty( $args['tax_location']['country'] ) ? $args['tax_location'] : array() );
 			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
-				$tax_rates = WC_Tax::find_rates(
-					array(
-						'country'   => $tax_location['country'],
-						'state'     => $tax_location['state'] ?? '',
-						'postcode'  => $tax_location['postcode'] ?? '',
-						'city'      => $tax_location['city'] ?? '',
-						'tax_class' => $product->get_tax_class(),
-					)
-				);
+				if ( $customer_id ) {
+					$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
+					$tax_rates = WC_Tax::get_rates_from_location(
+						$product->get_tax_class(),
+						array( $tax_location['country'], $tax_location['state'] ?? '', $tax_location['postcode'] ?? '', $tax_location['city'] ?? '' ),
+						$customer
+					);
+				} else {
+					$tax_rates = WC_Tax::find_rates(
+						array(
+							'country'   => $tax_location['country'],
+							'state'     => $tax_location['state'] ?? '',
+							'postcode'  => $tax_location['postcode'] ?? '',
+							'city'      => $tax_location['city'] ?? '',
+							'tax_class' => $product->get_tax_class(),
+						)
+					);
+				}
 			}
 		}
 

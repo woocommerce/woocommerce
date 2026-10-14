@@ -87,6 +87,76 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches return a partial title match.
+	 */
+	public function test_product_search_returns_partial_title_match(): void {
+		$target_token = wp_generate_password( 16, false );
+		$search_term  = substr( $target_token, 4, 8 );
+		$target_name  = 'Search target ' . $target_token;
+		$control_name = 'Unrelated fixture';
+		$target       = null;
+		$control      = null;
+
+		$this->assertFalse(
+			false !== stripos( $control_name, $search_term ),
+			'The control title must not contain the target search substring.'
+		);
+
+		try {
+			$target = WC_Helper_Product::create_simple_product();
+			$target->set_name( $target_name );
+			$target->set_status( 'publish' );
+			$target->set_date_created( '2024-01-02 00:00:00' );
+			$target->save();
+
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( $control_name );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array( $target->get_id() ),
+				$this->get_search_results( $search_term ),
+				'A strict interior title substring should return only its matching product.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+
+			if ( $target instanceof WC_Product ) {
+				$target->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product searches return no results for a missing term.
+	 */
+	public function test_product_search_returns_no_results_for_missing_term(): void {
+		$control = null;
+
+		try {
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( 'Product Search Control ' . wp_generate_password( 8, false ) );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array(),
+				$this->get_search_results( 'Missing Product Search ' . wp_generate_password( 8, false ) ),
+				'A missing product search term should not admit unrelated published products.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Product searches prioritize titles that match parsed search terms.
 	 * @dataProvider parsed_search_term_provider
 	 *
@@ -895,6 +965,60 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			$out_of_stock->get_id(),
 			$ids,
 			'A posts_clauses callback that references wc_product_meta_lookup without joining it should still produce a valid query.'
+		);
+	}
+
+	/**
+	 * @testdox An extension join to the lookup table under another alias does not suppress WooCommerce's aliased join.
+	 */
+	public function test_stock_status_filter_joins_despite_a_foreign_alias_lookup_join(): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status(
+			ProductStockStatus::IN_STOCK,
+			array(
+				'join'  => " LEFT JOIN {$wpdb->wc_product_meta_lookup} extension_lookup ON {$wpdb->posts}.ID = extension_lookup.product_id ",
+				'where' => '',
+			)
+		);
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			'A join to the lookup table under another alias must not suppress the wc_product_meta_lookup alias the filter references.'
+		);
+	}
+
+	/**
+	 * @testdox In-stock filtering still lists products when an earlier callback joins the lookup table under its own alias.
+	 */
+	public function test_stock_status_filter_survives_an_extension_join_under_another_alias(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		$in_stock = WC_Helper_Product::create_simple_product();
+		$in_stock->set_manage_stock( false );
+		$in_stock->set_stock_status( ProductStockStatus::IN_STOCK );
+		$in_stock->save();
+
+		// The callback stands in for an extension that joins the lookup table under its own alias before WooCommerce's callback runs.
+		$extension_join = static function ( $clauses ) use ( $wpdb ) {
+			$clauses['join'] .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} extension_lookup ON {$wpdb->posts}.ID = extension_lookup.product_id ";
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $extension_join, 5 );
+
+		try {
+			$ids = $this->query_product_ids_for_stock_status( ProductStockStatus::IN_STOCK );
+		} finally {
+			remove_filter( 'posts_clauses', $extension_join, 5 );
+		}
+
+		$this->assertContains(
+			$in_stock->get_id(),
+			$ids,
+			'The in-stock filter should keep producing a valid query when an extension has already joined the lookup table under a different alias.'
 		);
 	}
 

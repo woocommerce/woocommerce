@@ -360,6 +360,51 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
+	// Locale-formatted amounts (comma decimal separator).
+	// -------------------------------------------------------------------------
+
+	/**
+	 * @testdox set_minimum_amount throws exception when a comma-decimal minimum exceeds existing maximum.
+	 */
+	public function test_set_minimum_amount_throws_when_comma_decimal_exceeds_maximum(): void {
+		$original_decimal_separator = get_option( 'woocommerce_price_decimal_sep' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		try {
+			$coupon = new WC_Coupon();
+			$coupon->set_maximum_amount( '100,00' );
+
+			try {
+				$coupon->set_minimum_amount( '100,50' );
+				$this->fail( 'Expected WC_Data_Exception was not thrown.' );
+			} catch ( \WC_Data_Exception $e ) {
+				$this->assertSame( 'coupon_invalid_minimum_amount', $e->getErrorCode() );
+			}
+		} finally {
+			update_option( 'woocommerce_price_decimal_sep', $original_decimal_separator );
+		}
+	}
+
+	/**
+	 * @testdox set_maximum_amount succeeds and stores the normalized value when a comma-decimal maximum satisfies the existing minimum.
+	 */
+	public function test_set_maximum_amount_succeeds_when_comma_decimal_satisfies_minimum(): void {
+		$original_decimal_separator = get_option( 'woocommerce_price_decimal_sep' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		try {
+			$coupon = new WC_Coupon();
+			$coupon->set_minimum_amount( '100.50' );
+
+			$coupon->set_maximum_amount( '100,75' );
+
+			$this->assertSame( '100.75', $coupon->get_maximum_amount() );
+		} finally {
+			update_option( 'woocommerce_price_decimal_sep', $original_decimal_separator );
+		}
+	}
+
+	// -------------------------------------------------------------------------
 	// Atomic set_props() validation (both amounts supplied together).
 	// -------------------------------------------------------------------------
 
@@ -506,5 +551,45 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		// The valid min/max pair should still be applied.
 		$this->assertSame( '50.00', $coupon->get_minimum_amount() );
 		$this->assertSame( '100.00', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox Loading a coupon whose stored minimum exceeds its stored maximum keeps the minimum and drops the maximum.
+	 */
+	public function test_loading_inverted_stored_amounts_keeps_minimum_spend(): void {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'inverted-spend-limits',
+			array(
+				'minimum_amount' => '150',
+				'maximum_amount' => '100',
+			)
+		);
+
+		$this->assertSame( '150', $coupon->get_minimum_amount() );
+		$this->assertSame( '0', $coupon->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox set_props still rejects an inverted min/max pair on a coupon loaded from the database.
+	 */
+	public function test_set_props_rejects_inverted_pair_on_loaded_coupon(): void {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'loaded-spend-limits',
+			array(
+				'minimum_amount' => '50',
+				'maximum_amount' => '100',
+			)
+		);
+
+		$result = $coupon->set_props(
+			array(
+				'minimum_amount' => '150',
+				'maximum_amount' => '100',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( '50', $coupon->get_minimum_amount() );
+		$this->assertSame( '100', $coupon->get_maximum_amount() );
 	}
 }

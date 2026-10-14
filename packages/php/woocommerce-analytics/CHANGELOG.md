@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.18.0 - 2026-09-24
+### Security
+- Always initialize the front-end `window.wcAnalytics` object from scratch and only accept a string as the webpack public path. [#68346]
+- Bound what the unauthenticated tracking proxy endpoint accepts: events per request, properties per event, array members, value and name lengths, an encoded payload budget per event, and a ceiling on the pixel URL that is fired. [#68314]
+- Keep the tracking proxy route registered once a site has used proxy tracking and answer 403 while the feature is off, so events from pages still held in a cache fail visibly instead of disappearing into a 404. Mirrors the speed module's authorization into an option it can read before plugins load, and has an unauthorized module fall through to the REST route rather than refuse on its own. [#68315]
+- Stop the tracking proxy endpoint from accepting client-supplied values for server-derived event properties, and register it only on sites with proxy tracking enabled. Adds `WC_Analytics_Tracking::record_client_event()` and a third `$is_client_supplied` argument to the `jetpack_woocommerce_analytics_event_props` filter. [#68313]
+
+### Added
+- Send the package version on every event as `package_version`, so Tracks data can be attributed to the package release that emitted it. The published copy has `PACKAGE_VERSION` stamped from `composer.json` at build time. [#68908]
+
+### Fixed
+- Rename the store search event so Tracks ingest stops rejecting it. [#68313]
+- Stop URL-encoding array event properties twice so Tracks stores the plain comma-joined value. [#69027]
+
 ## 0.17.0 - 2026-08-24
 ### Security
 - Update wp-coding-standards/wpcs to 3.4.1 (security release). [#67036]

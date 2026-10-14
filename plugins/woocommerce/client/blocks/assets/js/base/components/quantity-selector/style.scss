@@ -11,14 +11,19 @@
 	}
 }
 
+// Default border lives in :where() so user/theme styles for the Product
+// Quantity block (applied via block.json selectors, including Cart) override it.
+:where(.wc-block-components-quantity-selector:has(input:not([type="hidden"]))) {
+	border: 1px solid $universal-translucent-border-color;
+	border-radius: $universal-border-radius;
+}
+
 .wc-block-components-quantity-selector {
 	&:where(:has(input:not([type="hidden"]))) {
-		border: 1px solid $universal-translucent-border-color;
-		border-radius: $universal-border-radius;
 		box-sizing: border-box;
 		display: flex;
 		position: relative;
-		width: 107px;
+		min-width: 107px;
 	}
 
 	// Extra label for specificity needed in the editor.

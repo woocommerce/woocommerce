@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -36,6 +37,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
+			}
+
+			public function process_order_without_payment( $order_id ) {
+				return parent::process_order_without_payment( $order_id );
+			}
+
+			public function process_customer( $data ) {
+				parent::process_customer( $data );
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
@@ -142,6 +151,91 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
 		$this->assertStringNotContainsString( '<script>', $content );
 		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should not complete a cancelled unpaid non-zero order without payment.' );
+		} catch ( Exception $exception ) {
+			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::CANCELLED, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to complete a pending non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_allows_pending_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
+	 */
+	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'classic_vat_exempt', 'password', 'classic-vat-exempt@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer_id, true );
+
+		try {
+			WC()->customer->set_is_vat_exempt( true );
+			WC()->customer->save();
+
+			$this->sut->process_customer(
+				array(
+					'billing_first_name' => 'Classic',
+					'billing_address_1'  => '456 Classic Road',
+					'billing_email'      => 'classic-vat-exempt@example.com',
+				)
+			);
+
+			// The session customer is saved on shutdown in a real request.
+			WC()->customer->save();
+
+			$reloaded_customer = new WC_Customer( $customer_id, true );
+			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+		} finally {
+			WC()->customer = $original_customer;
+		}
 	}
 
 	/**
@@ -782,5 +876,158 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * @testdox Checkout tolerates non-array cart variation data when building contextual item names.
+	 */
+	public function test_create_order_line_items_tolerates_malformed_variation_data(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Checkout Malformed Variation Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$order = wc_create_order();
+
+		$malformed_variation_filter = function ( $cart_contents ) {
+			foreach ( $cart_contents as &$cart_item ) {
+				$cart_item['variation'] = 'malformed variation data';
+			}
+			unset( $cart_item );
+
+			return $cart_contents;
+		};
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+			add_filter( 'woocommerce_get_cart_contents', $malformed_variation_filter );
+
+			$this->sut->create_order_line_items( $order, WC()->cart );
+			$order->save();
+
+			$items = array_values( wc_get_order( $order->get_id() )->get_items() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $variation->get_name(), $items[0]->get_name() );
+			$this->assertCount( 0, $items[0]->get_meta_data(), 'Malformed variation data should not be stored as item meta.' );
+		} finally {
+			WC()->cart->empty_cart();
+			$order->delete( true );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Checkout merges selected taxonomy Any attributes into the item name without duplicating them as metadata.
+	 */
+	public function test_create_order_line_items_merges_taxonomy_any_attributes_and_dedupes_meta(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Checkout Taxonomy Any Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$order = wc_create_order();
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+			$this->sut->create_order_line_items( $order, WC()->cart );
+			$order->save();
+
+			$items = array_values( $order->get_items() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( 'Checkout Taxonomy Any Product - huge, 1', $items[0]->get_name() );
+			$this->assertSame( '1', $items[0]->get_meta( 'pa_number' ), 'The selected Any value should remain stored as item meta.' );
+			$this->assertCount( 0, $items[0]->get_formatted_meta_data(), 'Selected Any values included in the item name should not be duplicated as metadata.' );
+		} finally {
+			WC()->cart->empty_cart();
+			$order->delete( true );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Persisted order item names use raw custom Any values so order meta dedup keeps working.
+	 *
+	 * @dataProvider custom_any_value_provider
+	 *
+	 * @param string $selected_value Selected custom attribute value.
+	 * @param string $expected_name  Expected persisted order item name.
+	 */
+	public function test_create_order_line_items_persists_raw_custom_any_values( string $selected_value, string $expected_name ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'finish' );
+		$attribute->set_options( array( 'gloss', 'matte', 'Black & White' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Canonical Name Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => '' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$filter_option_name = static function ( $value ) {
+			return 'gloss' === $value ? 'Polished' : $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $filter_option_name );
+
+		$order = wc_create_order();
+
+		try {
+			$this->add_variation_to_cart( $product, $variation, array( 'attribute_finish' => $selected_value ) );
+			$this->sut->create_order_line_items( $order, WC()->cart );
+			$order->save();
+
+			$items = array_values( $order->get_items() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $expected_name, $items[0]->get_name(), 'Persisted names must use raw values, not woocommerce_variation_option_name output.' );
+			$this->assertCount( 0, $items[0]->get_formatted_meta_data(), 'The raw value in the name must keep order meta dedup working.' );
+		} finally {
+			WC()->cart->empty_cart();
+			$order->delete( true );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides selected custom Any values and their expected persisted names.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function custom_any_value_provider(): array {
+		return array(
+			'raw value wins over filtered label' => array( 'gloss', 'Canonical Name Product - gloss' ),
+			'entity-bearing value dedupes'       => array( 'Black & White', 'Canonical Name Product - Black & White' ),
+		);
+	}
+
+	/**
+	 * Adds a variation to the cart, asserting success, and calculates totals.
+	 *
+	 * @param WC_Product $product    Variable product.
+	 * @param WC_Product $variation  Variation to add.
+	 * @param array      $attributes Selected variation attributes.
+	 */
+	private function add_variation_to_cart( $product, $variation, array $attributes = array(
+		'attribute_pa_size'   => 'huge',
+		'attribute_pa_number' => '1',
+	) ): void {
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+		WC()->cart->calculate_totals();
 	}
 }

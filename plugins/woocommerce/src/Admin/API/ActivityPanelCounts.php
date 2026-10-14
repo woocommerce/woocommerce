@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Internal\Admin\Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -173,11 +175,12 @@ class ActivityPanelCounts extends \WC_REST_Data_Controller {
 	private function get_default_order_statuses() {
 		$actionable = get_option( 'woocommerce_actionable_order_statuses', false );
 
-		// Any array is respected as-is, including an explicitly empty one: the merchant
+		// Any valid array is respected as-is, including an explicitly empty one: the merchant
 		// intentionally cleared all actionable statuses, so there is nothing to fulfill,
 		// matching the previous client-side behaviour. A missing (never configured) or
-		// malformed option falls back to the built-in defaults.
-		return is_array( $actionable ) ? $actionable : array( 'processing', 'on-hold' );
+		// malformed option falls back to the filtered default, matching the Analytics
+		// Settings screen and the reports.
+		return Settings::get_valid_order_statuses_or_default( $actionable, Settings::get_default_actionable_order_statuses() );
 	}
 
 	/**

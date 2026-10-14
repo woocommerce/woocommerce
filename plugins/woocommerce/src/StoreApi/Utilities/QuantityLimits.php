@@ -186,7 +186,32 @@ final class QuantityLimits {
 			return new \WP_Error( 'invalid_quantity', sprintf( __( 'The quantity of &quot;%1$s&quot; must be a multiple of %2$s', 'woocommerce' ), $product->get_name(), $limits['multiple_of'] ) );
 		}
 
-		return true;
+		/**
+		 * Filters the validation result for a cart item quantity being updated via the Store API.
+		 *
+		 * Return a \WP_Error to reject the new quantity; the Store API sends its code and message in a 400
+		 * response. Throwing a RouteException works too. Any other return value, including false, is
+		 * ignored and the quantity is accepted. Notices added with wc_add_notice() are not read here.
+		 * Core validation failures (min, max, multiple_of, read-only), and cart items whose data key is
+		 * not a WC_Product, return early and never reach this filter.
+		 *
+		 * This does not run when a product is first added to the cart; use the
+		 * woocommerce_store_api_validate_add_to_cart action for that. When an already-in-cart item is
+		 * topped up, $quantity is the new total while $cart_item['quantity'] is still the pre-existing
+		 * quantity.
+		 *
+		 * @since 11.2.0
+		 *
+		 * @param true        $valid     Always true; core validation failures bypass this filter.
+		 * @param int|float   $quantity  The new quantity, already normalized through wc_stock_amount().
+		 * @param \WC_Product $product   The product object.
+		 * @param array       $cart_item Cart item.
+		 * @return \WP_Error|true
+		 */
+		$valid = apply_filters( 'woocommerce_store_api_cart_item_quantity_validation', true, $quantity, $product, $cart_item );
+
+		// Like the other filters in this class, unexpected return values fall back to the original value.
+		return is_wp_error( $valid ) ? $valid : true;
 	}
 
 	/**

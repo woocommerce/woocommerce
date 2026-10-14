@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep customer names used in email Reply-to headers on a single line and sanitize Store API address fields like classic checkout.

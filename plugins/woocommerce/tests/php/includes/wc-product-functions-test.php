@@ -48,6 +48,39 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_formatted_variation() lists an attribute whose value only appears in the parent product name.
+	 */
+	public function test_wc_get_formatted_variation_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black"
+		// and the "black" colour must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+			$this->assertSame(
+				'size: huge, number: 1, colour: black',
+				wc_get_formatted_variation( $variation, true, true, true ),
+				'Every attribute is listed when the variation name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -1439,6 +1472,80 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Assigned-customer orders apply matched rates for the editor tax location and pass the order customer to the filter.
+	 */
+	public function test_wc_get_price_excluding_tax_editor_location_filters_customer_rates(): void {
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$customer = WC_Helper_Customer::create_customer();
+		$order    = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->set_billing_country( 'DE' );
+		$order->save();
+
+		$product = new WC_Product_Simple();
+		$product->set_price( 100 );
+		$product->set_tax_status( 'taxable' );
+
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$filter_calls = array();
+		$filter       = function ( $rates, $tax_class, $filtered_customer ) use ( &$filter_calls ) {
+			$filter_calls[] = array( $rates, $tax_class, $filtered_customer );
+			foreach ( $rates as &$rate ) {
+				$rate['rate'] = 25.0;
+			}
+			return $rates;
+		};
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $filter, 10, 3 );
+
+		try {
+			$net_price = wc_get_price_excluding_tax(
+				$product,
+				array(
+					'order'        => $order,
+					'tax_location' => array(
+						'country'  => 'FR',
+						'state'    => '',
+						'postcode' => '75001',
+						'city'     => 'Paris',
+					),
+				)
+			);
+
+			$this->assertCount( 1, $filter_calls, 'The matched rates filter should run for an assigned-customer order.' );
+			$this->assertSame( '', $filter_calls[0][1], 'The filter should receive the product tax class.' );
+			$this->assertInstanceOf( WC_Customer::class, $filter_calls[0][2] );
+			$this->assertSame( $customer->get_id(), $filter_calls[0][2]->get_id(), 'The filter should receive the order customer.' );
+			$this->assertArrayHasKey( $french_tax_rate_id, $filter_calls[0][0], 'The editor location should determine the matched rate.' );
+			$this->assertEquals( 80, $net_price, 'The filtered 25% rate should determine the net price.' );
+		} finally {
+			remove_filter( 'woocommerce_matched_rates', $filter );
+			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+			WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+			$order->delete( true );
+			wp_delete_user( $customer->get_id() );
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		}
+	}
+
+	/**
 	 * @testDox Test 'wc_get_related_products' with actual related products.
 	 */
 	public function test_wc_get_related_products_with_actual_related_products() {
@@ -2749,5 +2856,129 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_user( $subscriber_id );
 			delete_option( 'woocommerce_product_match_featured_image_by_sku' );
 		}
+	}
+
+	/**
+	 * @testdox Every product is processed when the backlog spans more than one batch.
+	 */
+	public function test_wc_scheduled_sales_processes_every_product_across_batches(): void {
+		$ids = array();
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = WC_Helper_Product::create_missed_sale_end_product();
+			$ids[]   = $product->get_id();
+		}
+
+		$before_payloads = array();
+		$after_payloads  = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			function ( $hook_ids ) use ( &$before_payloads ) {
+				$before_payloads[] = $hook_ids;
+			}
+		);
+		add_action(
+			'wc_after_products_ending_sales',
+			function ( $hook_ids ) use ( &$after_payloads ) {
+				$after_payloads[] = $hook_ids;
+			}
+		);
+
+		wc_scheduled_sales();
+
+		foreach ( $ids as $id ) {
+			$this->assertEquals(
+				100,
+				get_post_meta( $id, '_price', true ),
+				"Product {$id} was not processed, so a batch boundary dropped it."
+			);
+		}
+
+		$this->assertCount( 1, $before_payloads, 'The before hook must fire once, not once per batch.' );
+		$this->assertCount( 1, $after_payloads, 'The after hook must fire once, not once per batch.' );
+
+		$expected_ids = array_map( 'intval', $ids );
+		$before_ids   = array_map( 'intval', $before_payloads[0] );
+		$after_ids    = array_map( 'intval', $after_payloads[0] );
+
+		$this->assertEqualsCanonicalizing( $expected_ids, $before_ids, 'The before hook must receive the whole backlog.' );
+		$this->assertEqualsCanonicalizing( $expected_ids, $after_ids, 'The after hook must receive the whole backlog.' );
+		$this->assertSame( $before_payloads[0], $after_payloads[0], 'The hook payload must not change while batches are processed.' );
+	}
+
+	/**
+	 * @testdox Priming happens per batch, not once for the whole backlog.
+	 */
+	public function test_wc_scheduled_sales_primes_one_batch_at_a_time(): void {
+		$ids = array();
+
+		for ( $i = 0; $i < 51; $i++ ) {
+			$product = WC_Helper_Product::create_missed_sale_end_product();
+			$ids[]   = $product->get_id();
+		}
+
+		$queued = array();
+		add_action(
+			'wc_before_products_ending_sales',
+			static function ( $product_ids ) use ( &$queued ) {
+				$queued = $product_ids;
+			}
+		);
+
+		$cache_state_during_first_save = null;
+		add_action(
+			'woocommerce_update_product',
+			static function () use ( &$queued, &$cache_state_during_first_save ) {
+				if ( null !== $cache_state_during_first_save || count( $queued ) < 51 ) {
+					return;
+				}
+
+				$cache_state_during_first_save = array(
+					'first_batch_peer'      => false !== wp_cache_get( (int) $queued[1], 'posts' ),
+					'first_batch_peer_meta' => false !== wp_cache_get( (int) $queued[1], 'post_meta' ),
+					'next_batch'            => false !== wp_cache_get( (int) end( $queued ), 'posts' ),
+				);
+			}
+		);
+
+		// Fixture creation warms the cache; emulate a fresh cron request.
+		wp_cache_flush();
+
+		wc_scheduled_sales();
+
+		$this->assertCount( 51, $queued, 'Fixture precondition: the backlog must exceed one batch.' );
+		$this->assertIsArray( $cache_state_during_first_save, 'The cache state should be captured during the first save.' );
+		$this->assertTrue(
+			$cache_state_during_first_save['first_batch_peer'],
+			'A product in the first batch should already be primed during the first save.'
+		);
+		$this->assertTrue(
+			$cache_state_during_first_save['first_batch_peer_meta'],
+			'A product meta in the first batch should already be primed during the first save.'
+		);
+		$this->assertFalse(
+			$cache_state_during_first_save['next_batch'],
+			'The next batch must not be primed while the first batch is processing.'
+		);
+	}
+
+	/**
+	 * @testdox wc_get_formatted_variation resolves taxonomy term slugs to human-readable names via the prefetch cache.
+	 */
+	public function test_wc_get_formatted_variation_resolves_taxonomy_term_names(): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'Dark Blue', 'Light Green' ) );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'dark-blue' ) );
+		$variation->save();
+
+		$this->assertSame( 'color: Dark Blue', wc_get_formatted_variation( wc_get_product( $variation->get_id() ), true ) );
+
+		$product->delete( true );
 	}
 }

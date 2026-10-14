@@ -26,6 +26,223 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	private $registered_order_statuses = array();
 
 	/**
+	 * @testdox Order coupon amounts and totals respect the filtered VAT exemption when applied and recalculated.
+	 * @testWith ["yes", "yes", null, true]
+	 *           ["no", "yes", null, true]
+	 *           ["yes", "no", true, true]
+	 *           ["no", "no", true, true]
+	 *           ["yes", "yes", false, false]
+	 *           ["no", "yes", false, false]
+	 *           ["yes", "no", null, false]
+	 *           ["no", "no", null, false]
+	 *
+	 * @param string    $prices_include_tax Whether store prices include tax.
+	 * @param string    $exemption_meta     Stored order VAT exemption.
+	 * @param bool|null $filtered_exemption Optional filter override.
+	 * @param bool      $is_exempt          Expected effective exemption.
+	 */
+	public function test_coupon_amounts_respect_order_vat_exemption( string $prices_include_tax, string $exemption_meta, ?bool $filtered_exemption, bool $is_exempt ): void {
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->update_meta_data( 'is_vat_exempt', $exemption_meta );
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+
+		if ( null !== $filtered_exemption ) {
+			add_filter(
+				'woocommerce_order_is_vat_exempt',
+				static function ( $exempt, $filtered_order ) use ( $order, $filtered_exemption ) {
+					return $filtered_order->get_id() === $order->get_id() ? $filtered_exemption : $exempt;
+				},
+				10,
+				2
+			);
+		}
+
+		$order->calculate_totals();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'vat-exemption-coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 20 );
+		$coupon->save();
+
+		$this->assertTrue( $order->apply_coupon( $coupon ), 'The percentage coupon should apply successfully.' );
+
+		foreach ( array( 'applied', 'recalculated' ) as $operation ) {
+			if ( 'recalculated' === $operation ) {
+				$order = wc_get_order( $order->get_id() );
+				$order->recalculate_coupons();
+			}
+
+			$coupon_items = $order->get_items( 'coupon' );
+			$coupon_item  = reset( $coupon_items );
+			$this->assertEquals( 20, $coupon_item->get_discount(), "The $operation coupon should discount the net subtotal by 20%." );
+			$this->assertEquals( $is_exempt ? 0 : 4, $coupon_item->get_discount_tax(), "The $operation coupon tax should respect the effective exemption." );
+			$this->assertEquals( 20, $order->get_discount_total(), "The $operation order should retain the complete discount." );
+			$this->assertEquals( $is_exempt ? 0 : 4, $order->get_discount_tax(), "The $operation order discount tax should match the coupon." );
+			$this->assertEquals( $is_exempt ? 80 : 96, $order->get_total(), "The $operation order should have the correct discounted total." );
+		}
+	}
+
+	/**
+	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
+	 * @dataProvider provide_order_tax_defaults
+	 *
+	 * @param string $order_class Order class.
+	 * @param string $tax_mode Store tax mode.
+	 * @param bool   $expected Expected order tax mode.
+	 * @phpstan-param class-string<WC_Abstract_Order> $order_class
+	 */
+	public function test_constructor_initializes_prices_include_tax( string $order_class, string $tax_mode, bool $expected ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$sut = new $order_class();
+
+			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ) );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $sut->get_changes(), 'Initialization must not be a pending edit.' );
+
+			update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'The default must be captured at construction, not at read time.' );
+		} finally {
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * Provides order classes and store tax modes.
+	 *
+	 * @return array<string, array{class-string<WC_Abstract_Order>, string, bool}>
+	 */
+	public static function provide_order_tax_defaults(): array {
+		return array(
+			'inclusive order'  => array( WC_Order::class, 'yes', true ),
+			'exclusive order'  => array( WC_Order::class, 'no', false ),
+			'inclusive refund' => array( WC_Order_Refund::class, 'yes', true ),
+			'exclusive refund' => array( WC_Order_Refund::class, 'no', false ),
+		);
+	}
+
+	/**
+	 * @testdox CRUD persists the initial tax mode or explicit override independently of later store settings.
+	 * @dataProvider provide_order_tax_persistence
+	 *
+	 * @param string    $tax_mode Store tax mode at construction.
+	 * @param bool|null $override Explicit tax mode, or null to leave the default untouched.
+	 * @param bool      $expected Expected persisted tax mode.
+	 */
+	public function test_prices_include_tax_persists_initial_value( string $tax_mode, ?bool $override, bool $expected ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$sut               = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$sut = new WC_Order();
+			if ( null !== $override ) {
+				$sut->set_prices_include_tax( $override );
+			}
+			update_option( 'woocommerce_prices_include_tax', $expected ? 'no' : 'yes' );
+			$sut->save();
+
+			$reloaded_order = new WC_Order( $sut->get_id() );
+			$this->assertSame( $expected, $reloaded_order->get_prices_include_tax( 'edit' ), 'Saving and loading must preserve the order value, not use the current store setting.' );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $reloaded_order->get_changes(), 'Loading a persisted value must not mark it as changed.' );
+		} finally {
+			if ( $sut ) {
+				$sut->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * Provides tax defaults and explicit overrides.
+	 *
+	 * @return array<string, array{string, bool|null, bool}>
+	 */
+	public static function provide_order_tax_persistence(): array {
+		return array(
+			'inclusive default' => array( 'yes', null, true ),
+			'exclusive default' => array( 'no', null, false ),
+			'explicit false'    => array( 'yes', false, false ),
+			'explicit true'     => array( 'no', true, true ),
+		);
+	}
+
+	/**
+	 * @testdox Refund creation preserves the parent order tax mode despite a different store default.
+	 * @dataProvider provide_order_tax_persistence
+	 *
+	 * @param string    $tax_mode Store tax mode at parent construction.
+	 * @param bool|null $override Explicit parent tax mode, or null for the default.
+	 * @param bool      $expected Expected refund tax mode.
+	 */
+	public function test_refund_inherits_parent_prices_include_tax( string $tax_mode, ?bool $override, bool $expected ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+		$sut               = null;
+
+		// This persistence test must not leave email logs for subsequent logging tests.
+		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$order = new WC_Order();
+			if ( null !== $override ) {
+				$order->set_prices_include_tax( $override );
+			}
+			$order->set_total( '10' );
+			$order->save();
+			update_option( 'woocommerce_prices_include_tax', $expected ? 'no' : 'yes' );
+
+			$sut = wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 1,
+				)
+			);
+			$this->assertInstanceOf( WC_Order_Refund::class, $sut );
+			$reloaded_refund = new WC_Order_Refund( $sut->get_id() );
+			$this->assertSame( $expected, $reloaded_refund->get_prices_include_tax( 'edit' ) );
+			$this->assertArrayNotHasKey( 'prices_include_tax', $reloaded_refund->get_changes() );
+		} finally {
+			if ( $sut instanceof WC_Order_Refund ) {
+				$sut->delete( true );
+			}
+			if ( $order ) {
+				$order->delete( true );
+			}
+			remove_filter( 'woocommerce_email_log_enabled', '__return_false' );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
@@ -121,7 +338,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		update_user_meta( $admin_id, 'billing_country', 'MV' ); // Different than customer's address and base location.
+		update_user_meta( $admin_id, 'billing_country', 'MV' );
+		// Different than customer's address and base location.
 		wp_set_current_user( $admin_id );
 		WC()->customer = null;
 		WC()->initialize_cart();
@@ -317,6 +535,217 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$coupon_info = json_decode( $coupon_info, true );
 		$this->assertEquals( $coupon->get_id(), $coupon_info[0] );
 		$this->assertEquals( $coupon_code, $coupon_info[1] );
+	}
+
+	/**
+	 * Data provider for refund coupon tests.
+	 *
+	 * @return array
+	 */
+	public function provide_refund_parent_customer_ids(): array {
+		return array(
+			'guest parent order'      => array( 0 ),
+			'registered parent order' => array( 1 ),
+		);
+	}
+
+	/**
+	 * Create a refund for one line item of a new order.
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 * @return WC_Order_Refund
+	 */
+	private function create_line_item_refund( int $customer_id ): WC_Order_Refund {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$item  = current( $order->get_items() );
+
+		return wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => $item->get_quantity(),
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Applying a coupon to a refund returns an error and records no coupon usage.
+	 * @dataProvider provide_refund_parent_customer_ids
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 */
+	public function test_apply_coupon_on_refund_returns_error( int $customer_id ) {
+		$coupon_code = 'coupon_test_refund_' . $customer_id;
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$refund = $this->create_line_item_refund( $customer_id );
+
+		$result = $refund->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_coupon', $result->get_error_code() );
+		$this->assertCount( 0, $refund->get_items( 'coupon' ) );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A refund uses the tax location of its parent order.
+	 */
+	public function test_refund_get_taxable_location_returns_parent_tax_location() {
+		$refund       = $this->create_line_item_refund( 1 );
+		$parent_order = wc_get_order( $refund->get_parent_id() );
+
+		$this->assertSame( 'US', $parent_order->get_taxable_location()['country'] );
+		$this->assertSame( $parent_order->get_taxable_location(), $refund->get_taxable_location() );
+	}
+
+	/**
+	 * @testdox A refund without a parent order uses the store base address as its tax location.
+	 */
+	public function test_refund_get_taxable_location_without_parent_returns_base_address() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$refund = new WC_Order_Refund();
+
+		$this->assertSame(
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94110',
+				'city'     => 'San Francisco',
+			),
+			$refund->get_taxable_location()
+		);
+	}
+
+	/**
+	 * @testdox A coupon can be applied to a custom order type that has no customer ID or billing email.
+	 */
+	public function test_apply_coupon_on_custom_order_type_without_customer() {
+		$coupon_code = 'coupon_test_custom_order_type';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order = $this->create_custom_order();
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+		$this->assertFalse( is_callable( array( $order, 'get_billing_email' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Create and save a CustomerlessTestOrder with one line item.
+	 *
+	 * @param string|null $billing_email When set, the order type also has get_billing_email() returning this.
+	 * @return CustomerlessTestOrder
+	 */
+	private function create_custom_order( ?string $billing_email = null ): CustomerlessTestOrder {
+		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
+		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $data_store ) {
+				$stores['test-custom-order'] = $data_store;
+				return $stores;
+			}
+		);
+
+		if ( null === $billing_email ) {
+			$order = new CustomerlessTestOrder();
+		} else {
+			$order = new class() extends CustomerlessTestOrder {
+				/**
+				 * Billing email returned by get_billing_email().
+				 *
+				 * @var string
+				 */
+				public $test_billing_email = '';
+
+				/**
+				 * Get the billing email.
+				 *
+				 * @return string
+				 */
+				public function get_billing_email() {
+					return $this->test_billing_email;
+				}
+			};
+
+			$order->test_billing_email = $billing_email;
+		}
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox The per-email coupon usage limit applies to a custom order type that has a billing email but no customer ID.
+	 */
+	public function test_apply_coupon_enforces_email_usage_limit_on_custom_order_type_without_customer_id() {
+		$coupon_code = 'coupon_test_custom_order_type_email_limit';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code, array( 'usage_limit_per_user' => '1' ) );
+		$coupon->increase_usage_count( 'guest@example.com' );
+		$order = $this->create_custom_order( 'guest@example.com' );
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $coupon->get_coupon_error( 106 ), $result->get_error_message() );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
+	 */
+	public function test_remove_coupon_fires_order_removed_coupon_hook() {
+		$coupon_code = 'remove_hook_test';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order       = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$order->apply_coupon( $coupon_code );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+
+		$hook_fired  = false;
+		$hook_coupon = null;
+		$hook_order  = null;
+
+		add_action(
+			'woocommerce_order_removed_coupon',
+			function ( $coupon_obj, $order_obj ) use ( &$hook_fired, &$hook_coupon, &$hook_order ) {
+				$hook_fired  = true;
+				$hook_coupon = $coupon_obj;
+				$hook_order  = $order_obj;
+			},
+			10,
+			2
+		);
+
+		try {
+			$result = $order->remove_coupon( $coupon_code );
+
+			$this->assertTrue( $result );
+			$this->assertTrue( $hook_fired, 'woocommerce_order_removed_coupon hook did not fire.' );
+			$this->assertInstanceOf( WC_Coupon::class, $hook_coupon, 'First parameter should be a WC_Coupon instance.' );
+			$this->assertEquals( $coupon->get_code(), $hook_coupon->get_code(), 'Hook coupon code should match.' );
+			$this->assertSame( $order, $hook_order, 'Second parameter should be the same WC_Order instance.' );
+			$this->assertCount( 0, $order->get_items( 'coupon' ) );
+		} finally {
+			remove_all_actions( 'woocommerce_order_removed_coupon' );
+		}
 	}
 
 	/**
@@ -671,7 +1100,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testDox Test that order items are not mixed when order_id is zero.
 	 */
-	public function test_order_items_shouldnot_mix_with_zero_id() {
+	public function test_order_items_should_not_mix_with_zero_id() {
 		$order1 = new WC_Order();
 		$order2 = new WC_Order();
 
@@ -766,7 +1195,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->add_product_with_cogs_to_order( $order, 12.34, 2 );
 		$this->add_product_with_cogs_to_order( $order, 56.78, 3 );
 
-		$fee = new WC_Order_Item_Fee(); // Example of line item without COGS.
+		$fee = new WC_Order_Item_Fee();
+		// Example of line item without COGS.
 		$order->add_item( $fee );
 
 		$calculated_value = $order->calculate_cogs_total_value();
@@ -827,7 +1257,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Add a product order item with a given Cost of Goods Sold to an exising order.
+	 * Add a product order item with a given Cost of Goods Sold to an existing order.
 	 *
 	 * @param WC_Order $order The target order.
 	 * @param float    $cogs_value The COGS value of the product.

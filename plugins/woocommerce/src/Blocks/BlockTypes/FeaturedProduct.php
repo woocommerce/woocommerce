@@ -2,6 +2,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -111,9 +112,14 @@ class FeaturedProduct extends FeaturedItem {
 				! isset( $attributes['showDesc'] ) ||
 				( isset( $attributes['showDesc'] ) && false !== $attributes['showDesc'] )
 			) {
-				$desc_str = sprintf(
-					'<div class="wc-block-featured-product__description">%s</div>',
-					wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
+				$desc_str = ProductDescriptionUtils::guarded_format(
+					$product,
+					function () use ( $product ) {
+						return sprintf(
+							'<div class="wc-block-featured-product__description">%s</div>',
+							wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
+						);
+					}
 				);
 				$output  .= $desc_str;
 			}

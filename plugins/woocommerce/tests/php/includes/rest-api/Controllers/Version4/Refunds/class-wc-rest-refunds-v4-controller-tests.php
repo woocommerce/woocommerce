@@ -298,6 +298,32 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report refunded_by as null when no user issued the refund.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36329
+	 */
+	public function test_refunds_get_endpoint_reports_null_refunded_by_when_no_user_issued_the_refund(): void {
+		$order = $this->create_test_order();
+
+		// A refund with no recorded user, as a gateway webhook or cron run produces.
+		$refund = new WC_Order_Refund();
+		$refund->set_amount( 5 );
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_refunded_by( 0 );
+		$refund->save();
+		$this->created_refunds[] = $refund->get_id();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/refunds/' . $refund->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNull(
+			$response->get_data()['refunded_by'],
+			'An unattributed refund reports a null refunded_by rather than an object for user 1.'
+		);
+	}
+
+	/**
 	 * Test POST /wc/v4/refunds endpoint creates refund.
 	 */
 	public function test_refunds_create_endpoint(): void {

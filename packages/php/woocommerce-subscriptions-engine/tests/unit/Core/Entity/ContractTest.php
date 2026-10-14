@@ -19,13 +19,19 @@ use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract
  */
 class ContractTest extends TestCase {
+
+	protected function tearDown(): void {
+		StatusRegistry::reset();
+		parent::tearDown();
+	}
 
 	/**
 	 * A complete, valid contract row.
@@ -60,6 +66,7 @@ class ContractTest extends TestCase {
 	private function make_contract(): Contract {
 		return Contract::create(
 			array(
+				'status'           => ContractStatus::ACTIVE,
 				'customer_id'      => 1,
 				'currency'         => 'USD',
 				'selling_plan_id'  => 2,
@@ -72,9 +79,152 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox create() builds an active contract from its identity and live config.
+	 * @testdox create() with no attributes yields a draft with no customer, currency, plan or start.
 	 */
-	public function test_create_builds_an_active_contract(): void {
+	public function test_create_with_no_args_is_an_empty_draft(): void {
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
+
+		$this->assertSame( ContractStatus::DRAFT, $contract->get_status() );
+		$this->assertNull( $contract->get_customer_id() );
+		$this->assertNull( $contract->get_currency() );
+		$this->assertNull( $contract->get_selling_plan_id() );
+		$this->assertNull( $contract->get_start_gmt() );
+
+		$row = $contract->to_storage();
+		$this->assertNull( $row['customer_id'] );
+		$this->assertNull( $row['currency'] );
+		$this->assertNull( $row['selling_plan_id'] );
+		$this->assertNull( $row['start_gmt'] );
+	}
+
+	/**
+	 * @testdox create() rejects a non-zero total without a currency.
+	 */
+	public function test_create_rejects_a_non_zero_total_without_a_currency(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'money totals require a currency' );
+
+		Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'billing_total'  => '10',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Zero totals need no currency.
+	 */
+	public function test_zero_totals_need_no_currency(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'billing_total'  => '0',
+			)
+		);
+
+		$contract->assert_money_has_currency();
+		$this->assertNull( $contract->get_currency() );
+	}
+
+	/**
+	 * @testdox Clearing the currency while a total is non-zero is refused.
+	 */
+	public function test_clearing_the_currency_with_a_non_zero_total_is_refused(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'currency'       => 'USD',
+				'billing_total'  => '10',
+			)
+		);
+		$contract->set_currency( null );
+
+		$this->expectException( DomainException::class );
+		$contract->assert_money_has_currency();
+	}
+
+	/**
+	 * @testdox create() requires an extension_slug.
+	 */
+	public function test_create_requires_an_extension_slug(): void {
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'Contract: extension_slug is required' );
+
+		Contract::create( array() );
+	}
+
+	/**
+	 * @testdox create() rejects an empty extension_slug.
+	 */
+	public function test_create_rejects_an_empty_extension_slug(): void {
+		$this->expectException( DomainException::class );
+
+		Contract::create( array( 'extension_slug' => '' ) );
+	}
+
+	/**
+	 * @testdox from_storage() hydrates a row with no extension_slug.
+	 */
+	public function test_from_storage_allows_a_null_extension_slug(): void {
+		$contract = Contract::from_storage( array( 'id' => 1 ) );
+
+		$this->assertNull( $contract->get_extension_slug() );
+	}
+
+	/**
+	 * @testdox The facade setters round-trip their values.
+	 */
+	public function test_setters_round_trip(): void {
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
+
+		$contract->set_customer_id( 7 );
+		$contract->set_currency( 'EUR' );
+		$contract->set_selling_plan_id( 8 );
+		$contract->set_origin_order_id( 9 );
+		$contract->set_start_gmt( '2026-03-01 00:00:00' );
+		$contract->set_schedule_source( Contract::SCHEDULE_SOURCE_GATEWAY );
+		$contract->set_items( array( array( 'item_name' => 'Coffee' ), 'skipped' ) );
+		$contract->set_addresses( array( Contract::ADDRESS_BILLING => array( 'city' => 'Lisbon' ) ) );
+
+		$this->assertSame( 7, $contract->get_customer_id() );
+		$this->assertSame( 'EUR', $contract->get_currency() );
+		$this->assertSame( 8, $contract->get_selling_plan_id() );
+		$this->assertSame( 9, $contract->get_origin_order_id() );
+		$this->assertSame( '2026-03-01 00:00:00', $contract->get_start_gmt() );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $contract->get_schedule_source() );
+		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $contract->get_items() );
+		$this->assertSame( array( 'billing' => array( 'city' => 'Lisbon' ) ), $contract->get_addresses() );
+
+		$contract->set_customer_id( null );
+		$contract->set_currency( null );
+		$contract->set_selling_plan_id( null );
+		$contract->set_origin_order_id( null );
+		$contract->set_start_gmt( null );
+
+		$this->assertNull( $contract->get_customer_id() );
+		$this->assertNull( $contract->get_currency() );
+		$this->assertNull( $contract->get_selling_plan_id() );
+		$this->assertNull( $contract->get_origin_order_id() );
+		$this->assertNull( $contract->get_start_gmt() );
+	}
+
+	/**
+	 * @testdox set_schedule_source() refuses an unknown source.
+	 */
+	public function test_set_schedule_source_rejects_an_unknown_source(): void {
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
+
+		$this->expectException( DomainException::class );
+		$this->expectExceptionMessage( 'Contract: invalid schedule source "bogus".' );
+
+		$contract->set_schedule_source( 'bogus' );
+	}
+
+	/**
+	 * @testdox create() builds a contract from its identity and live config.
+	 */
+	public function test_create_builds_a_contract_from_its_identity(): void {
 		$contract = $this->make_contract();
 
 		$this->assertNull( $contract->get_id() );
@@ -95,6 +245,7 @@ class ContractTest extends TestCase {
 	public function test_create_defaults_live_config(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -103,7 +254,6 @@ class ContractTest extends TestCase {
 		);
 
 		$this->assertNull( $contract->get_next_payment_gmt() );
-		$this->assertNull( $contract->get_extension_slug() );
 		$this->assertNull( $contract->get_origin_order_id() );
 		$this->assertNull( $contract->get_plan_snapshot_id() );
 		$this->assertNull( $contract->get_items_snapshot_id() );
@@ -123,6 +273,7 @@ class ContractTest extends TestCase {
 	public function test_create_normalizes_live_totals(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -147,6 +298,7 @@ class ContractTest extends TestCase {
 	public function test_create_allows_a_null_origin_order_id(): void {
 		$contract = Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -165,6 +317,7 @@ class ContractTest extends TestCase {
 
 		Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -183,6 +336,7 @@ class ContractTest extends TestCase {
 
 		Contract::create(
 			array(
+				'extension_slug'  => 'acme-subs',
 				'customer_id'     => 1,
 				'currency'        => 'USD',
 				'selling_plan_id' => 2,
@@ -194,12 +348,12 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox The payment instrument round-trips through an InstrumentRef.
+	 * @testdox The payment instrument round-trips through a PaymentInstrumentRef.
 	 */
 	public function test_payment_instrument_round_trips(): void {
 		$contract = $this->make_contract();
 
-		$contract->set_payment_instrument( new InstrumentRef( 99, 'dummy', 'Dummy Gateway' ) );
+		$contract->set_payment_instrument( new PaymentInstrumentRef( 99, 'dummy', 'Dummy Gateway' ) );
 
 		$instrument = $contract->get_payment_instrument();
 		$this->assertSame( 99, $instrument->get_token_id() );
@@ -302,20 +456,18 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox from_storage() hydrates the plan snapshot, items, addresses, and meta children.
+	 * @testdox from_storage() hydrates the plan snapshot, items, and addresses.
 	 */
 	public function test_from_storage_hydrates_children(): void {
 		$snapshot  = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
 		$items     = array( array( 'product_id' => 42 ) );
 		$addresses = array( 'billing' => array( 'first_name' => 'Ada' ) );
-		$meta      = array( 'flag' => 'on' );
 
-		$contract = Contract::from_storage( $this->valid_row(), $snapshot, $items, $addresses, $meta );
+		$contract = Contract::from_storage( $this->valid_row(), $snapshot, $items, $addresses );
 
 		$this->assertSame( $snapshot, $contract->get_plan_snapshot() );
 		$this->assertSame( $items, $contract->get_items() );
 		$this->assertSame( $addresses, $contract->get_addresses() );
-		$this->assertSame( $meta, $contract->get_meta() );
 	}
 
 	/**
@@ -400,5 +552,94 @@ class ContractTest extends TestCase {
 		$contract->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 2 ) ) );
 
 		$this->assertArrayNotHasKey( 'plan_snapshot', $contract->to_storage(), 'plan_snapshot is a hydrated read-only field, not a stored column.' );
+	}
+
+	/**
+	 * Hydrate a stored contract row with the given status.
+	 *
+	 * @param string $status Stored status.
+	 */
+	private function stored_contract( string $status ): Contract {
+		$row           = $this->valid_row();
+		$row['status'] = $status;
+
+		return Contract::from_storage( $row );
+	}
+
+	/**
+	 * @testdox set_status() moves between any two registered statuses (no transition table).
+	 */
+	public function test_set_status_moves_between_any_registered_statuses(): void {
+		$cancelled = $this->stored_contract( ContractStatus::CANCELLED );
+		$cancelled->set_status( ContractStatus::ACTIVE );
+		$this->assertSame( ContractStatus::ACTIVE, $cancelled->get_status() );
+
+		$pending_cancellation = $this->stored_contract( ContractStatus::PENDING_CANCELLATION );
+		$pending_cancellation->set_status( ContractStatus::ON_HOLD );
+		$this->assertSame( ContractStatus::ON_HOLD, $pending_cancellation->get_status() );
+	}
+
+	/**
+	 * @testdox set_status() with the current status is a no-op.
+	 */
+	public function test_set_status_to_the_same_status_is_a_no_op(): void {
+		$contract = $this->make_contract();
+
+		$contract->set_status( ContractStatus::ACTIVE );
+
+		$this->assertSame( ContractStatus::ACTIVE, $contract->get_status() );
+	}
+
+	/**
+	 * @testdox set_status() rejects an unregistered status and leaves the status unchanged.
+	 */
+	public function test_set_status_rejects_an_unregistered_status(): void {
+		$contract = $this->make_contract();
+
+		try {
+			$contract->set_status( 'never-registered' );
+			$this->fail( 'Expected a DomainException for an unregistered status.' );
+		} catch ( DomainException $e ) {
+			$this->assertSame( ContractStatus::ACTIVE, $contract->get_status() );
+		}
+	}
+
+	/**
+	 * @testdox An extension-registered status is accepted by create() and set_status().
+	 */
+	public function test_an_extension_registered_status_is_writable(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
+
+		$created = Contract::create(
+			array(
+				'extension_slug'  => 'acme-subs',
+				'customer_id'     => 1,
+				'currency'        => 'USD',
+				'selling_plan_id' => 2,
+				'start_gmt'       => '2026-01-01 00:00:00',
+				'status'          => 'paused-by-merchant',
+			)
+		);
+		$this->assertSame( 'paused-by-merchant', $created->get_status() );
+
+		$contract = $this->make_contract();
+		$contract->set_status( 'paused-by-merchant' );
+		$this->assertSame( 'paused-by-merchant', $contract->get_status() );
+	}
+
+	/**
+	 * @testdox from_storage() hydrates an unregistered stored status and to_storage() returns it verbatim.
+	 */
+	public function test_an_unregistered_stored_status_round_trips(): void {
+		$contract = $this->stored_contract( 'legacy-paused' );
+
+		$this->assertSame( 'legacy-paused', $contract->get_status() );
+		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
+
+		$contract->set_next_payment_gmt( '2026-03-01 00:00:00' );
+		// Setting the same unregistered value is a no-op, not a registration failure.
+		$contract->set_status( 'legacy-paused' );
+
+		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
 	}
 }

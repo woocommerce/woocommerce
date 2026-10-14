@@ -165,7 +165,7 @@ function ProductCardFooter( props: { product: Product } ) {
 
 		if ( product.price !== 0 && product.freemium_type !== 'primary' ) {
 			return sprintf(
-				//translators: %1$s is the price of the product, %2$s is the billing period
+				/* eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace */ /* translators: %1$s is the price of the product, %2$s is the billing period */
 				__( ' %1$s, %2$s ', 'woocommerce' ),
 				getPriceLabel(),
 				getBillingText()
@@ -199,6 +199,9 @@ function ProductCardFooter( props: { product: Product } ) {
 		);
 	}
 
+	// Ratings run 1-5, so 0 -- like a missing value -- means "no rating".
+	const averageRating = product.averageRating ?? 0;
+
 	return (
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
@@ -230,18 +233,18 @@ function ProductCardFooter( props: { product: Product } ) {
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ product.averageRating !== null && (
+				{ Number.isFinite( averageRating ) && averageRating > 0 && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							<span aria-hidden>{ product.averageRating }</span>
+							<span aria-hidden>{ averageRating }</span>
 							<span className="screen-reader-text">
 								{ sprintf(
 									// translators: %.1f: average rating
 									__( '%.1f stars', 'woocommerce' ),
-									product.averageRating ?? 0
+									averageRating
 								) }
 							</span>
 						</span>

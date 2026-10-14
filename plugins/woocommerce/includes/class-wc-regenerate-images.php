@@ -427,7 +427,8 @@ class WC_Regenerate_Images {
 			}
 		}
 
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+		// Unfiltered: this is the base for a write, so it must be the stored value.
+		$metadata = wp_get_attachment_metadata( $attachment_id, true );
 
 		// Fix for images with no metadata.
 		if ( ! is_array( $metadata ) ) {
@@ -445,6 +446,8 @@ class WC_Regenerate_Images {
 
 		// If something went wrong lets just return the original image.
 		if ( is_wp_error( $new_metadata ) || empty( $new_metadata ) ) {
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+
 			return $image;
 		}
 

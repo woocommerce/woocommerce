@@ -170,8 +170,11 @@
 				).length > 0;
 
 				if ( ! isFormField && ! inEnhancedSelect ) {
-					if ( $( '#btn-ok' ).length ) {
-						this.addButton( e );
+					var $okButton = this.$( '#btn-ok' );
+					if ( $okButton.length ) {
+						if ( ! $okButton.prop( 'disabled' ) ) {
+							this.addButton( e );
+						}
 					}	else if ( $( '#btn-next' ).length ) {
 						this.nextButton( e );
 					}

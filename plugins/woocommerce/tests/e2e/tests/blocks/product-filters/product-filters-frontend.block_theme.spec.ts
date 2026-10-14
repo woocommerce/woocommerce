@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
+import {
+	TemplateCompiler,
+	getProductAttributeIds,
+	test as base,
+	expect,
+} from '@woocommerce/e2e-utils';
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
@@ -15,9 +20,10 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Overlay', () => {
 		test.beforeEach( async ( { templateCompiler, page } ) => {
+			const { colorAttributeId } = await getProductAttributeIds();
 			await templateCompiler.compile( {
 				attributes: {
-					attributeId: 1,
+					attributeId: colorAttributeId,
 				},
 			} );
 
@@ -139,10 +145,11 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const templateCompiler = await requestUtils.createTemplateFromFile(
 				'archive-product_multiple-product-filters'
 			);
+			const { colorAttributeId } = await getProductAttributeIds();
 
 			await templateCompiler.compile( {
 				attributes: {
-					attributeId: 1,
+					attributeId: colorAttributeId,
 				},
 			} );
 

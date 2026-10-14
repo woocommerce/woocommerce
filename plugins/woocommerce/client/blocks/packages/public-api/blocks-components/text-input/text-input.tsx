@@ -12,11 +12,10 @@ import type { InputHTMLAttributes, ReactNode } from 'react';
 import Label from '../label';
 import './style.scss';
 
-export interface TextInputProps
-	extends Omit<
-		InputHTMLAttributes< HTMLInputElement >,
-		'onChange' | 'onBlur'
-	> {
+export interface TextInputProps extends Omit<
+	InputHTMLAttributes< HTMLInputElement >,
+	'onChange' | 'onBlur'
+> {
 	id: string;
 	ariaLabel?: string;
 	label?: string | undefined;
@@ -57,6 +56,13 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 		ref
 	) => {
 		const [ isActive, setIsActive ] = useState( false );
+
+		// Date-like inputs report a value the browser can't parse (e.g. the 31st of a 30-day month) as an
+		// empty `value`, so the input is asked directly. Focus and blur both re-render, which is when this
+		// can have changed while the field is not active.
+		const input = typeof ref === 'object' ? ref?.current : null;
+		const isFieldActive =
+			isActive || !! value || !! input?.validity?.badInput;
 
 		const inputWithLabel = (
 			<>
@@ -100,7 +106,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 		return (
 			<div
 				className={ clsx( 'wc-block-components-text-input', className, {
-					'is-active': isActive || value,
+					'is-active': isFieldActive,
 				} ) }
 			>
 				{ isValidElement( icon ) ? (

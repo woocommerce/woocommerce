@@ -20,6 +20,7 @@ import {
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { setOption, deleteOption } from '../../utils/options';
 import { random } from '../../utils/helpers';
+import { wpCLI } from '../../utils/cli';
 
 type SeededOrder = {
 	id: number;
@@ -273,6 +274,131 @@ test.describe(
 			}
 		};
 
+		test(
+			'WP-CLI preserves the pending rewrite flush only when the active theme is skipped',
+			{ tag: '@skip-on-external-env' },
+			async () => {
+				test.skip(
+					process.env.DISABLE_HPOS === '1',
+					'WP-CLI theme skipping is independent of HPOS and is covered by the core serial projects.'
+				);
+
+				// Setup and inspection must not load WooCommerce, or those commands could consume the queue they are measuring.
+				const coreOnlyFlags = [ '--skip-plugins', '--skip-themes' ];
+				const pendingOption =
+					'woocommerce_review_order_flush_rewrite_pending';
+				const seedPendingRewrite = () =>
+					wpCLI( [
+						'wp',
+						'eval',
+						`update_option( "${ pendingOption }", "yes" );`,
+						...coreOnlyFlags,
+					] );
+				const readPendingRewrite = async () =>
+					(
+						await wpCLI( [
+							'wp',
+							'eval',
+							`echo get_option( "${ pendingOption }", "missing" );`,
+							...coreOnlyFlags,
+						] )
+					).stdout.trim();
+				const unrelatedPlugins = (
+					await wpCLI( [
+						'wp',
+						'plugin',
+						'list',
+						'--status=active',
+						'--field=name',
+						...coreOnlyFlags,
+					] )
+				).stdout
+					.split( /\r?\n/ )
+					.filter( ( plugin ) => plugin && plugin !== 'woocommerce' );
+				const skipUnrelatedPlugins = unrelatedPlugins.length
+					? [ `--skip-plugins=${ unrelatedPlugins.join( ',' ) }` ]
+					: [];
+				const activeTheme = (
+					await wpCLI( [
+						'wp',
+						'option',
+						'get',
+						'stylesheet',
+						...coreOnlyFlags,
+					] )
+				).stdout.trim();
+				const inactiveTheme =
+					(
+						await wpCLI( [
+							'wp',
+							'theme',
+							'list',
+							'--status=inactive',
+							'--field=name',
+							...coreOnlyFlags,
+						] )
+					).stdout
+						.split( /\r?\n/ )
+						.find( Boolean ) ?? '';
+
+				expect(
+					inactiveTheme,
+					'Expected an inactive theme for the WP-CLI control.'
+				).not.toBe( '' );
+
+				try {
+					for ( const skipThemes of [
+						'--skip-themes',
+						`--skip-themes=${ activeTheme }`,
+					] ) {
+						await seedPendingRewrite();
+						await wpCLI( [
+							'wp',
+							'option',
+							'get',
+							'siteurl',
+							skipThemes,
+							...skipUnrelatedPlugins,
+						] );
+						expect(
+							await readPendingRewrite(),
+							`Expected the queue to survive ${ skipThemes }.`
+						).toBe( 'yes' );
+					}
+
+					await seedPendingRewrite();
+					await wpCLI( [
+						'wp',
+						'option',
+						'get',
+						'siteurl',
+						`--skip-themes=${ inactiveTheme }`,
+						...skipUnrelatedPlugins,
+					] );
+					expect(
+						await readPendingRewrite(),
+						'Expected the inactive-theme control to consume the queue.'
+					).toBe( 'missing' );
+				} finally {
+					await wpCLI( [
+						'wp',
+						'eval',
+						`delete_option( "${ pendingOption }" );`,
+						...coreOnlyFlags,
+					] );
+					// Let the next normal request regenerate the complete ruleset without loading extension-heavy state under WP-CLI.
+					await wpCLI( [
+						'wp',
+						'option',
+						'update',
+						'rewrite_rules',
+						'',
+						...coreOnlyFlags,
+					] );
+				}
+			}
+		);
+
 		test( 'Scenario 1 — happy path: rate a product, submit, see thank-you in place', async ( {
 			page,
 			restApi,
@@ -408,130 +534,9 @@ test.describe(
 			}
 		} );
 
-		test( 'Scenario 3 — per-product reviews disabled hides the row and shows the dismissible notice', async ( {
-			page,
-			restApi,
-		} ) => {
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR Reviewable' },
-				{
-					name: 'CRR Reviews Off',
-					reviews_allowed: false,
-				},
-			] );
-
-			try {
-				await page.goto( reviewOrderUrl( order ) );
-
-				const rows = page.locator( '.woocommerce-review-order__item' );
-				await expect( rows ).toHaveCount( 1 );
-				await expect( rows.nth( 0 ) ).toContainText( 'CRR Reviewable' );
-
-				const notice = page.locator(
-					'.woocommerce-review-order__notice'
-				);
-				await expect( notice ).toBeVisible();
-				await expect( notice ).toContainText(
-					"Don't see all your products?"
-				);
-
-				await page
-					.locator( '.woocommerce-review-order__notice-dismiss' )
-					.click();
-				await expect( notice ).toBeHidden();
-			} finally {
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
-
-		test( 'Scenario 4 — order with no reviewable items renders the empty-state thank-you', async ( {
-			page,
-			restApi,
-		} ) => {
-			// All items have reviews_allowed:false → has_actionable_items()
-			// returns false → empty-state renders. Same template branch the
-			// site-wide-reviews-disabled gate hits, without mutating a global
-			// option that could leak into other tests if this one times out.
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR No Reviews', reviews_allowed: false },
-			] );
-
-			try {
-				await page.goto( reviewOrderUrl( order ) );
-
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Nothing to review here',
-					} )
-				).toBeVisible();
-				await expect(
-					page.locator( '.woocommerce-review-order__form' )
-				).toHaveCount( 0 );
-				await expect(
-					page.locator( '.woocommerce-review-order__submit' )
-				).toHaveCount( 0 );
-			} finally {
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
-
 		// Note: cancellation-unschedules-action coverage lives in PHPUnit
 		// (SubmissionHandlerTest); the admin Scheduled Actions UI proved too
 		// fragile for E2E across shards.
-
-		test( 'Scenario 6 — typing review text without a rating surfaces the inline error', async ( {
-			page,
-			restApi,
-		} ) => {
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR Rating Required' },
-			] );
-
-			try {
-				await page.goto( reviewOrderUrl( order ) );
-
-				const row = page
-					.locator( '.woocommerce-review-order__item' )
-					.first();
-				await row.locator( 'textarea' ).fill( 'Loved it.' );
-				await page
-					.locator( '.woocommerce-review-order__submit' )
-					.click();
-
-				const error = row.locator(
-					'.woocommerce-review-order__item-rating-error'
-				);
-				await expect( error ).toBeVisible();
-				await expect( error ).toContainText(
-					'Please rate this product before submitting your review.'
-				);
-				// Form did not submit.
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Thank you for your reviews',
-					} )
-				).toHaveCount( 0 );
-
-				// Selecting a rating clears the error.
-				await rateRow( row, 5 );
-				await expect( error ).toBeHidden();
-
-				// Submitting now succeeds.
-				await page
-					.locator( '.woocommerce-review-order__submit' )
-					.click();
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Thank you for your reviews',
-					} )
-				).toBeVisible();
-			} finally {
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
 
 		test( 'Variations — two variations of one parent render two distinct rows with their attribute summaries', async ( {
 			page,

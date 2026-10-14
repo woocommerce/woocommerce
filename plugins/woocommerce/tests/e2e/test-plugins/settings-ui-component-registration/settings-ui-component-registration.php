@@ -41,7 +41,7 @@ final class WC_Settings_UI_Component_Registration_Test_Plugin {
 		wp_add_inline_script(
 			self::REGISTERED_HANDLE,
 			<<<'JS'
-window.wcSettingsUI.registerSettingsExtension( {
+window.wc.settingsUi.registerSettingsExtension( {
 	scope: { page: 'products', section: 'settings_ui_component_registered' },
 	components: {
 		'woocommerce/settings-ui-component-test': function SettingsUIComponentTest( props ) {
@@ -51,8 +51,12 @@ window.wcSettingsUI.registerSettingsExtension( {
 				'Registered settings UI component',
 				window.wp.element.createElement( 'input', {
 					'aria-label': 'Registered component value',
-					onChange: function ( event ) { props.onChange( event.target.value ); },
-					value: typeof props.value === 'string' ? props.value : '',
+					onChange: function ( event ) {
+						var change = {};
+						change[ props.field.id ] = event.target.value;
+						props.onChange( change );
+					},
+					value: String( props.field.getValue( { item: props.data } ) ?? '' ),
 				} )
 			);
 		},

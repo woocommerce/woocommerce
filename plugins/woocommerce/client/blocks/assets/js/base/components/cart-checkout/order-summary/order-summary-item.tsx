@@ -57,7 +57,7 @@ const OrderSummaryItem = ( {
 
 	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { receiveCart, ...cart } = useStoreCart();
 
 	const arg = useMemo(
@@ -190,13 +190,13 @@ const OrderSummaryItem = ( {
 		? {
 				itemData,
 				variation,
-		  }
+			}
 		: {
 				itemData,
 				variation,
 				shortDescription,
 				fullDescription,
-		  };
+			};
 
 	return (
 		<div

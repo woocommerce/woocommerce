@@ -24,6 +24,26 @@ class ProductUtil {
 	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
 
 	/**
+	 * Get a product ID from a product, post, or numeric value.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $product Product instance, post instance, or numeric ID.
+	 * @return int Product ID, or 0 when no ID is available.
+	 */
+	public function get_product_id( $product ): int {
+		if ( is_numeric( $product ) ) {
+			return (int) $product;
+		} elseif ( $product instanceof \WC_Product ) {
+			return (int) $product->get_id();
+		} elseif ( is_object( $product ) && ! empty( $product->ID ) ) {
+			return (int) $product->ID;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
 	 * Delete all product transients for a set of products.
 	 *
 	 * Fixed-name transients are deleted once for the whole set, and the
@@ -72,7 +92,7 @@ class ProductUtil {
 	 * Delete the transients related to a specific product.
 	 * If the product is a variation, delete the transients for the parent too.
 	 *
-	 * @param WC_Product|int $product_or_id The product or the product id.
+	 * @param \WC_Product|int $product_or_id The product or the product id.
 	 * @return void
 	 */
 	public function delete_product_specific_transients( $product_or_id ) {
@@ -145,6 +165,31 @@ class ProductUtil {
 	}
 
 	/**
+	 * Append the product meta lookup join unless the clause mentions wc_product_meta_lookup as a standalone token.
+	 * References, SQL literals and comments also count as mentions; this is not an SQL parser.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @param mixed $join SQL JOIN clause supplied by query filters.
+	 * @return string
+	 */
+	public function append_product_sorting_table_join( $join ): string {
+		global $wpdb;
+
+		// Preserve stringable clauses: discarding a join can break a WHERE clause that still references it.
+		if ( ! is_string( $join ) ) {
+			$stringable = is_object( $join ) && method_exists( $join, '__toString' );
+			$join       = $stringable ? (string) $join : '';
+		}
+
+		// A non-empty wpdb prefix prevents a table-name match. Empty prefixes retain the old guard's limitation.
+		if ( ! preg_match( '/\bwc_product_meta_lookup\b/', $join ) ) {
+			$join .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $join;
+	}
+
+	/**
 	 * Counts per-status number of products of a given post type.
 	 *
 	 * @since 11.0.0
@@ -158,7 +203,7 @@ class ProductUtil {
 
 		if ( null === $count_per_status ) {
 			// Defensive perimeter: dirty product data (running/crushed product data import/migration/mocking utilities).
-			// We passed on adding wc_doing_it_wrong as it'll add assymetric friction to already running customers fleet.
+			// We passed on adding wc_doing_it_wrong as it'll add asymmetric friction to already running customers fleet.
 			// Enforce strict typing to prevent PHP from silently casting numeric-string array keys to integers, and to normalize inconsistent types from WordPress APIs.
 			$count_per_status = (array) wp_count_posts( $post_type ) + array_fill_keys( array_keys( get_post_stati() ), 0 );
 			foreach ( $count_per_status as $status => $count ) {

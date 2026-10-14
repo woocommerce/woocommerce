@@ -48,4 +48,9 @@ export interface PackageProps {
 	showItems?: TernaryFlag;
 	// Should the selected rate be highlighted.
 	highlightChecked?: boolean;
+	// Whether this control owns its selection state. When true it selects a rate
+	// on mount, mirrors later store changes into local state, and renders that
+	// local value so clicks show instantly. When false it renders the store's
+	// selected rate and leaves initial selection to the parent.
+	manageSelectionLocally?: boolean;
 }

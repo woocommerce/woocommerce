@@ -236,11 +236,14 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		);
 		if ( method_exists( 'WC_Install', 'verify_base_tables' ) ) {
 			$tools['verify_db_tables'] = array(
-				'name'   => __( 'Verify base database tables', 'woocommerce' ),
-				'button' => __( 'Verify database', 'woocommerce' ),
-				'desc'   => sprintf(
+				'name'             => __( 'Verify base database tables', 'woocommerce' ),
+				'button'           => __( 'Verify database', 'woocommerce' ),
+				'desc'             => sprintf(
 					__( 'Verify if all base database tables are present.', 'woocommerce' )
 				),
+				// Re-creating tables changes what schema-dependent tools can offer, so re-render
+				// the list this tool is part of.
+				'requires_refresh' => true,
 			);
 		}
 

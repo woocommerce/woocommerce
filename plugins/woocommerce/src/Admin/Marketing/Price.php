@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Admin\Marketing;
 /**
  * Price class
  *
- * @since x.x.x
+ * @since 7.4.0
  */
 class Price {
 	/**

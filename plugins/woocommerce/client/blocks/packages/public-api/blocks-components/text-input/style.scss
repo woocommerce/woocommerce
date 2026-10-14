@@ -40,7 +40,8 @@
 	input[type="text"],
 	input[type="number"],
 	input[type="password"],
-	input[type="email"] {
+	input[type="email"],
+	input[type="date"] {
 		@include reset-typography();
 		@include font-for-inputs-locked();
 		padding: $gap $gap-small;
@@ -56,7 +57,7 @@
 
 		height: 50px;
 
-		&:focus {
+		&:focus-within {
 			background-color: $input-background-light;
 			color: $input-text-light;
 			border: 1.5px solid currentColor;
@@ -67,11 +68,94 @@
 			border-color: $input-border-dark;
 			color: $input-text-dark;
 
-			&:focus {
+			&:focus-within {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
 				border: 1.5px solid currentColor;
 			}
+		}
+	}
+
+	&:not(.is-active) input[type="date"] {
+		// Hide browser default mask (dd/mm/YYYY) when a date field is not active (no value, not focused).
+		text-indent: -9999px;
+
+		&::-webkit-datetime-edit {
+			// Focusing the input would cause browsers to highlight the dd before it's done animating, so we hide it as well.
+			opacity: 0;
+			transition: none;
+		}
+	}
+
+	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
+	input[type="date"]::-webkit-datetime-edit {
+		transition: opacity 150ms ease 150ms;
+	}
+
+	@media screen and (prefers-reduced-motion: reduce) {
+		input[type="date"]::-webkit-datetime-edit {
+			transition: none;
+		}
+	}
+
+	// Clean out chrome default padding on segments that makes the field visually off compared to other fields.
+	input[type="date"] {
+		// Chrome moves focus into the calendar button, so :focus no longer matches the input.
+		&:focus-within:not(:focus) {
+			outline: 1px auto -webkit-focus-ring-color;
+		}
+
+		&::-webkit-datetime-edit,
+		&::-webkit-datetime-edit-fields-wrapper {
+			padding: 0;
+		}
+
+		&::-webkit-datetime-edit-day-field,
+		&::-webkit-datetime-edit-month-field,
+		&::-webkit-datetime-edit-year-field,
+		&::-webkit-datetime-edit-text {
+			padding-inline: 0;
+			// Overrides the tabular figures back to normal.
+			font-variant-numeric: normal;
+		}
+	}
+
+	// Keep the native calendar button and the custom icon aligned.
+	@mixin date-icon-position {
+		position: absolute;
+		top: 25px;
+		inset-inline-end: $gap-small;
+		transform: translateY(-50%);
+		width: 24px;
+		height: 24px;
+	}
+
+	// Hide only the native image so the calendar button keeps its focus ring.
+	input[type="date"]::-webkit-calendar-picker-indicator {
+		@include date-icon-position;
+		margin: 0;
+		padding: 0;
+		background-image: none;
+		cursor: pointer;
+	}
+
+	.wc-block-components-text-input__date-icon {
+		@include date-icon-position;
+		// Let clicks reach the native calendar button.
+		pointer-events: none;
+		color: $input-text-light;
+
+		@supports (-moz-appearance: none) {
+			display: none;
+		}
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
 		}
 	}
 
@@ -92,10 +176,11 @@
 	&.is-active input[type="text"],
 	&.is-active input[type="number"],
 	&.is-active input[type="password"],
-	&.is-active input[type="email"] {
+	&.is-active input[type="email"],
+	&.is-active input[type="date"] {
 		padding: $gap-large $gap-smaller + 1px $gap-smaller;
 
-		&:focus {
+		&:focus-within {
 			padding-top: $gap-large;
 			padding-left: $gap-smaller + 0.5px;
 		}
@@ -111,22 +196,22 @@
 	&.has-error input {
 		&,
 		&:hover,
-		&:focus,
+		&:focus-within,
 		&:active {
 			border-color: $alert-red;
 		}
-		&:focus {
+		&:focus-within {
 			box-shadow: 0 0 0 0.5px $alert-red;
 		}
 
 		.has-dark-controls &,
 		.has-dark-controls &:hover,
-		.has-dark-controls &:focus,
+		.has-dark-controls &:focus-within,
 		.has-dark-controls &:active {
 			border-color: color.adjust($alert-red, $lightness: 30%);
 		}
 
-		.has-dark-controls &:focus {
+		.has-dark-controls &:focus-within {
 			box-shadow: 0 0 0 0.5px color.adjust($alert-red, $lightness: 30%);
 		}
 	}

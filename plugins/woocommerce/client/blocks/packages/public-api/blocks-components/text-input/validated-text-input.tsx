@@ -25,6 +25,18 @@ import { ValidationInputError } from '../validation-input-error';
 import { getValidityMessageForInput } from '../../blocks-checkout/utils';
 import { ValidatedTextInputProps } from './types';
 
+/**
+ * Input types whose value the browser parses rather than storing verbatim. Assigning to `value` on these
+ * clears anything the shopper has partially entered, so their value is left untouched before validating.
+ */
+const PARSED_INPUT_TYPES = [
+	'date',
+	'datetime-local',
+	'month',
+	'time',
+	'week',
+];
+
 export type ValidatedTextInputHandle = {
 	focus?: () => void;
 	revalidate: () => void;
@@ -118,7 +130,9 @@ const ValidatedTextInput = forwardRef<
 				}
 
 				// Trim white space before validation.
-				inputObject.value = inputObject.value.trim();
+				if ( ! PARSED_INPUT_TYPES.includes( inputObject.type ) ) {
+					inputObject.value = inputObject.value.trim();
+				}
 				inputObject.setCustomValidity( '' );
 
 				if (
@@ -301,7 +315,11 @@ const ValidatedTextInput = forwardRef<
 					}
 				} }
 				onBlur={ () => {
-					const isEmpty = ! inputRef.current?.value.trim();
+					// A value the browser can't parse reads back as an empty `value`, but the shopper did
+					// enter something, so it gets the same immediate error as any other invalid entry.
+					const isEmpty =
+						! inputRef.current?.value.trim() &&
+						! inputRef.current?.validity?.badInput;
 
 					if ( isEmpty ) {
 						// If the error was already shown (e.g. after form

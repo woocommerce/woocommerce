@@ -227,7 +227,7 @@ export const Layout = compose(
 	window.wcSettings.admin
 		? withOptionsHydration( {
 				...getAdminSetting( 'preloadOptions', {} ),
-		  } )
+			} )
 		: identity,
 	withPluginsHydration( {
 		...getAdminSetting( 'plugins', {} ),

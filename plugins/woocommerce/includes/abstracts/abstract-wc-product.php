@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 
 /**
  * Legacy product contains all deprecated methods for this class and can be
@@ -61,59 +62,62 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @var array
 	 */
 	protected $data = array(
-		'name'               => '',
-		'slug'               => '',
-		'date_created'       => null,
-		'date_modified'      => null,
-		'status'             => false,
-		'featured'           => false,
-		'catalog_visibility' => CatalogVisibility::VISIBLE,
-		'description'        => '',
-		'short_description'  => '',
-		'sku'                => '',
-		'global_unique_id'   => '',
-		'price'              => '',
-		'regular_price'      => '',
-		'sale_price'         => '',
-		'date_on_sale_from'  => null,
-		'date_on_sale_to'    => null,
-		'total_sales'        => '0',
-		'tax_status'         => ProductTaxStatus::TAXABLE,
-		'tax_class'          => '',
-		'manage_stock'       => false,
-		'stock_quantity'     => null,
-		'stock_status'       => ProductStockStatus::IN_STOCK,
-		'backorders'         => 'no',
-		'low_stock_amount'   => '',
-		'sold_individually'  => false,
-		'weight'             => '',
-		'length'             => '',
-		'width'              => '',
-		'height'             => '',
-		'upsell_ids'         => array(),
-		'cross_sell_ids'     => array(),
-		'parent_id'          => 0,
-		'reviews_allowed'    => true,
-		'purchase_note'      => '',
-		'attributes'         => array(),
-		'default_attributes' => array(),
-		'menu_order'         => 0,
-		'post_password'      => '',
-		'virtual'            => false,
-		'downloadable'       => false,
-		'category_ids'       => array(),
-		'tag_ids'            => array(),
-		'brand_ids'          => array(),
-		'shipping_class_id'  => 0,
-		'downloads'          => array(),
-		'image_id'           => '',
-		'gallery_image_ids'  => array(),
-		'download_limit'     => -1,
-		'download_expiry'    => -1,
-		'rating_counts'      => array(),
-		'average_rating'     => 0,
-		'review_count'       => 0,
-		'cogs_value'         => null,
+		'name'                      => '',
+		'slug'                      => '',
+		'date_created'              => null,
+		'date_modified'             => null,
+		'status'                    => false,
+		'featured'                  => false,
+		'catalog_visibility'        => CatalogVisibility::VISIBLE,
+		'description'               => '',
+		'short_description'         => '',
+		'sku'                       => '',
+		'global_unique_id'          => '',
+		'price'                     => '',
+		'regular_price'             => '',
+		'sale_price'                => '',
+		'date_on_sale_from'         => null,
+		'date_on_sale_to'           => null,
+		'total_sales'               => '0',
+		'tax_status'                => ProductTaxStatus::TAXABLE,
+		'tax_class'                 => '',
+		'manage_stock'              => false,
+		'stock_quantity'            => null,
+		'stock_status'              => ProductStockStatus::IN_STOCK,
+		'backorders'                => 'no',
+		'low_stock_amount'          => '',
+		'sold_individually'         => false,
+		'weight'                    => '',
+		'length'                    => '',
+		'width'                     => '',
+		'height'                    => '',
+		'upsell_ids'                => array(),
+		'cross_sell_ids'            => array(),
+		'parent_id'                 => 0,
+		'reviews_allowed'           => true,
+		'purchase_note'             => '',
+		'attributes'                => array(),
+		'default_attributes'        => array(),
+		'menu_order'                => 0,
+		'post_password'             => '',
+		'virtual'                   => false,
+		'downloadable'              => false,
+		'category_ids'              => array(),
+		'tag_ids'                   => array(),
+		'brand_ids'                 => array(),
+		'shipping_class_id'         => 0,
+		'downloads'                 => array(),
+		'image_id'                  => '',
+		'gallery_image_ids'         => array(),
+		'download_limit'            => -1,
+		'download_expiry'           => -1,
+		'rating_counts'             => array(),
+		'average_rating'            => 0,
+		'review_count'              => 0,
+		'cogs_value'                => null,
+		'customs_commodity_code'    => null,
+		'customs_country_of_origin' => null,
+		'customs_description'       => null,
 	);
 
 	/**
@@ -278,6 +282,42 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_global_unique_id( $context = 'view' ) {
 		return $this->get_prop( 'global_unique_id', $context );
+	}
+
+	/**
+	 * Gets the customs commodity code.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_commodity_code( $context = 'view' ) {
+		return $this->get_prop( 'customs_commodity_code', $context );
+	}
+
+	/**
+	 * Gets the customs country of origin.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_country_of_origin( $context = 'view' ) {
+		return $this->get_prop( 'customs_country_of_origin', $context );
+	}
+
+	/**
+	 * Gets the customs description.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_description( $context = 'view' ) {
+		return $this->get_prop( 'customs_description', $context );
 	}
 
 	/**
@@ -914,6 +954,54 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			);
 		}
 		$this->set_prop( 'global_unique_id', $global_unique_id );
+	}
+
+	/**
+	 * Sets the customs commodity code.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string|null $code Commodity code, or null to clear it.
+	 * @throws WC_Data_Exception When the commodity code is invalid.
+	 * @return void
+	 */
+	public function set_customs_commodity_code( $code ) {
+		$this->set_prop(
+			'customs_commodity_code',
+			$this->get_object_read() ? CustomsDataValidator::normalize_commodity_code( $code ) : CustomsDataValidator::normalize_stored_value( 'customs_commodity_code', $code )
+		);
+	}
+
+	/**
+	 * Sets the customs country of origin.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string|null $country Country code, or null to clear it.
+	 * @throws WC_Data_Exception When the country code is invalid.
+	 * @return void
+	 */
+	public function set_customs_country_of_origin( $country ) {
+		$this->set_prop(
+			'customs_country_of_origin',
+			$this->get_object_read() ? CustomsDataValidator::normalize_country_of_origin( $country ) : CustomsDataValidator::normalize_stored_value( 'customs_country_of_origin', $country )
+		);
+	}
+
+	/**
+	 * Sets the customs description.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string|null $description Plain text description, or null to clear it.
+	 * @throws WC_Data_Exception When the description is not valid text or exceeds thirty-five characters.
+	 * @return void
+	 */
+	public function set_customs_description( $description ) {
+		$this->set_prop(
+			'customs_description',
+			$this->get_object_read() ? CustomsDataValidator::normalize_description( $description ) : CustomsDataValidator::normalize_stored_value( 'customs_description', $description )
+		);
 	}
 
 	/**
@@ -1715,29 +1803,31 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Whether the current user can view this product: it is published, or they can edit it.
-	 * A variation additionally requires its parent to be viewable.
+	 * A variation additionally requires its parent product to be viewable.
 	 *
 	 * @since 11.1.0
 	 * @return bool
 	 */
 	public function is_viewable() {
-		$parent_id = $this->get_parent_id();
+		$parent_id          = $this->get_parent_id();
+		$has_product_parent = $parent_id && in_array( get_post_type( $parent_id ), array( 'product', 'product_variation' ), true );
 
 		return ( ProductStatus::PUBLISH === $this->get_status() || current_user_can( 'edit_post', $this->get_id() ) )
-			&& ( ! $parent_id || ProductStatus::PUBLISH === get_post_status( $parent_id ) || current_user_can( 'edit_post', $parent_id ) );
+			&& ( ! $has_product_parent || ProductStatus::PUBLISH === get_post_status( $parent_id ) || current_user_can( 'edit_post', $parent_id ) );
 	}
 
 	/**
-	 * Whether this product is publicly viewable: the product and its parent (if it has one) are published.
+	 * Whether this product is publicly viewable: the product and its parent product (if it has one) are published.
 	 *
 	 * @since 11.1.0
 	 * @return bool
 	 */
 	public function is_publicly_viewable() {
-		$parent_id = $this->get_parent_id();
+		$parent_id          = $this->get_parent_id();
+		$has_product_parent = $parent_id && in_array( get_post_type( $parent_id ), array( 'product', 'product_variation' ), true );
 
 		return ProductStatus::PUBLISH === $this->get_status()
-			&& ( ! $parent_id || ProductStatus::PUBLISH === get_post_status( $parent_id ) );
+			&& ( ! $has_product_parent || ProductStatus::PUBLISH === get_post_status( $parent_id ) );
 	}
 
 	/**
@@ -2225,16 +2315,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
-		$image = '';
-		if ( $this->get_image_id() ) {
-			$image_alt = get_post_meta( $this->get_image_id(), '_wp_attachment_image_alt', true );
+		$image    = '';
+		$image_id = (int) $this->get_image_id();
+		if ( $image_id ) {
+			$image_alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 			$attr      = wp_parse_args(
 				$attr,
 				array(
 					'alt' => $image_alt ? $image_alt : $this->get_name(),
 				)
 			);
-			$image     = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
+			$image     = wp_get_attachment_image( $image_id, $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 			if ( $parent_product ) {

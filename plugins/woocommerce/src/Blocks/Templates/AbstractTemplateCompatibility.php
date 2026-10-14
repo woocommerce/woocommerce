@@ -110,11 +110,11 @@ abstract class AbstractTemplateCompatibility {
 	 *
 	 * The array format:
 	 * [
-	 *   `<hook-name>` => [
-	 *     block_names => [ `<block-name>`, ... ],
+	 *   <hook-name> => [
+	 *     block_names => [ <block-name>, ... ],
 	 *     position => before|after,
 	 *     hooked => [
-	 *       `<function-name>` => `<priority>`,
+	 *       <function-name> => <priority>,
 	 *        ...
 	 *     ],
 	 *  ],
@@ -154,14 +154,18 @@ abstract class AbstractTemplateCompatibility {
 		 *
 		 * Accepts an array of hooked data. The array should be in the following
 		 * format:
+		 *
+		 * ```text
 		 * [
 		 *   [
-		 *     hook => `<hook-name>`,
-		 *     function => `<function-name>`,
-		 *     priority => `<priority>`,
+		 *     hook => <hook-name>,
+		 *     function => <function-name>,
+		 *     priority => <priority>,
 		 *  ],
 		 *  ...
 		 * ]
+		 * ```
+		 *
 		 * Where:
 		 * - hook-name is the name of the hook that have the functions hooked to.
 		 * - function-name is the hooked function name.

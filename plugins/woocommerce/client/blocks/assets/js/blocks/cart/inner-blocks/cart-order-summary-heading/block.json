@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-order-summary-heading-block",
-	"version": "1.0.0",
 	"title": "Heading",
 	"description": "Shows the heading row.",
 	"category": "woocommerce",

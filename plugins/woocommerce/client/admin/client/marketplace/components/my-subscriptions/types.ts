@@ -46,6 +46,12 @@ export interface SubscriptionLocal {
 	type: string;
 	slug: string;
 	path: string;
+	/** Whether WordPress will auto-update this plugin, mirroring the Plugins screen. */
+	auto_update: boolean;
+	/** Whether auto-updates can be changed from here: not forced, not disabled site-wide, and the user may update plugins. */
+	auto_update_manageable: boolean;
+	/** Whether the installed copy carries a Woo header, so WooCommerce.com delivers its updates rather than WordPress.org. */
+	updates_from_wccom: boolean;
 }
 
 export interface SubscriptionShare {

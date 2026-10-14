@@ -29,6 +29,9 @@
 			},
 			"allowEditing": false
 		},
+		"position": {
+			"sticky": true
+		},
 		"spacing": {
 			"blockGap": true
 		}

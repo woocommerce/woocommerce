@@ -17,7 +17,6 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── .eslintrc
 ├── .gitattributes
 ├── .gitignore
-├── .prettierrc.js
 ├── .stylelintrc.json
 ├── phpcs.xml.dist
 │ Dot files and config files used to configure the various linting tools
@@ -85,9 +84,8 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/_
 │ The React components of the WooCommerce Blocks plugin.
 │
-├── assets/js/atomic
-│ The atomic components such as product title, product rating, product
-│ image, etc. These atomic components are used by the product blocks.
+├── assets/js/utils
+│ Shared helpers, including product block registration and rendering.
 │
 ├── assets/js/base
 │ Base contains components specific to the frontend of the store.
@@ -97,6 +95,10 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 ├── assets/js/blocks
 │ The main blocks of the WooCommerce Blocks plugin such as the Active
 │ Filters Block.
+│
+│   └── product-elements-blocks
+│   Reusable blocks for individual product elements such as title, rating,
+│   and image.
 │
 ├── assets/js/editor-components
 │ Editor components such as the block-title component.

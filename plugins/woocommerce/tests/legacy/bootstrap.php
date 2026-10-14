@@ -42,7 +42,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		$this->register_autoloader_for_testing_tools();
 
-		$this->initialize_code_hacker();
+		$this->maybe_initialize_code_hacker();
 
 		ini_set( 'display_errors', 'on' ); // phpcs:ignore WordPress.PHP.IniSet.display_errors_Blacklisted
 		error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
@@ -92,8 +92,6 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
-		$this->maybe_announce_skipped_graphql_tests();
-
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -106,6 +104,7 @@ class WC_Unit_Tests_Bootstrap {
 		$this->initialize_dependency_injection();
 
 		$this->maybe_initialize_hpos();
+		$this->register_ddl_guard();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -149,7 +148,23 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize the code hacker.
+	 * Initialize the code hacker unless the WC_TEST_DISABLE_CODE_HACKER environment variable is set.
+	 *
+	 * The code hacker owns PHP's file stream wrapper, so tools that need that wrapper
+	 * themselves (for example mutation testers, which swap mutated files in at include
+	 * time) cannot run alongside it.
+	 */
+	private function maybe_initialize_code_hacker() {
+		if ( empty( getenv( 'WC_TEST_DISABLE_CODE_HACKER' ) ) ) {
+			$this->initialize_code_hacker();
+			return;
+		}
+
+		echo 'Not enabling the code hacker (WC_TEST_DISABLE_CODE_HACKER is set). Tests that mock functions or static methods, or that subclass final classes, will fail.' . PHP_EOL;
+	}
+
+	/**
+	 * Initialize the code hacker and register the hacks.
 	 *
 	 * @throws Exception Error when initializing one of the hacks.
 	 */
@@ -174,6 +189,23 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Fail tests that run DDL inside their transaction. WC_DDL_GUARD=report lists
+	 * offenders instead, for seeding and triage, and is ignored when CI is set so
+	 * the guard always enforces there. There is no off switch: tests declare DDL
+	 * with @ddlInTransaction, and the shrink-only allowlist holds the rest.
+	 */
+	private function register_ddl_guard() {
+		$mode = WC_DDL_In_Transaction_Guard::MODE_ENFORCE;
+		if ( WC_DDL_In_Transaction_Guard::MODE_REPORT === getenv( 'WC_DDL_GUARD' ) && ! getenv( 'CI' ) ) {
+			$mode = WC_DDL_In_Transaction_Guard::MODE_REPORT;
+		}
+		WC_DDL_In_Transaction_Guard::register(
+			include $this->tests_dir . '/framework/ddl-in-transaction-allowlist.php',
+			$mode
+		);
+	}
+
+	/**
 	 * Configure the order datastore based on the DISABLE_HPOS environment variable.
 	 *
 	 * @return void
@@ -181,45 +213,6 @@ class WC_Unit_Tests_Bootstrap {
 	private function maybe_initialize_hpos() {
 		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
-	}
-
-	/**
-	 * Echo a "Not running GraphQL …" message when an explicit `--testsuite`
-	 * filter is given that omits `wc-phpunit-graphql`, mirroring the "Not
-	 * running ajax tests" line printed by WP's own bootstrap for the `ajax`,
-	 * `ms-files` and `external-http` groups.
-	 *
-	 * The GraphQL suite is kept separate because it requires PHP 8.1+, so
-	 * PHP 7.4 / 8.0 CI jobs point `--testsuite` at the legacy + main suites
-	 * only. A default run (no `--testsuite` filter) runs the full suite list,
-	 * which includes the GraphQL suite, so there is nothing to announce. The
-	 * `--testsuite` value may be a comma-joined suite list, hence the substring
-	 * match rather than an exact comparison.
-	 */
-	private function maybe_announce_skipped_graphql_tests() {
-		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
-
-		$has_testsuite_filter = false;
-		$running_graphql      = false;
-		foreach ( $argv as $arg ) {
-			if ( ! is_string( $arg ) ) {
-				continue;
-			}
-			if ( false !== strpos( $arg, '--testsuite' ) ) {
-				$has_testsuite_filter = true;
-			}
-			if ( false !== strpos( $arg, 'wc-phpunit-graphql' ) ) {
-				$running_graphql = true;
-			}
-		}
-
-		// Without an explicit --testsuite filter the default suite list runs,
-		// which already includes the GraphQL suite: nothing is skipped.
-		if ( ! $has_testsuite_filter || $running_graphql ) {
-			return;
-		}
-
-		echo 'Not running GraphQL tests. To execute these, add wc-phpunit-graphql to --testsuite (a default run without --testsuite includes it).' . PHP_EOL;
 	}
 
 	/**
@@ -294,11 +287,6 @@ class WC_Unit_Tests_Bootstrap {
 		// set in time for ProductCacheController::on_init() to register its invalidation hooks.
 		update_option( 'woocommerce_feature_product_instance_caching_enabled', 'yes' );
 
-		// Enable Back In Stock Notifications during tests. Set here rather than in load_wc()
-		// because install_wc() includes uninstall.php, which deletes every 'woocommerce_%'
-		// option. This still runs on `setup_theme`, in time for the `init` feature check.
-		update_option( 'woocommerce_feature_customer_stock_notifications_enabled', 'yes' );
-
 		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
 			$GLOBALS['wp_roles']->reinit();
@@ -343,6 +331,7 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases.
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
+		require_once $this->tests_dir . '/framework/class-wc-ddl-in-transaction-guard.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.
@@ -367,6 +356,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/ImageAttachmentTrait.php';
 	}
 
 	/**

@@ -66,7 +66,6 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
         -   [Taxes](internal-developers/testing/cart-checkout/taxes.md)
         -   [Coupons](internal-developers/testing/cart-checkout/coupons.md)
         -   [Compatibility](internal-developers/testing/cart-checkout/compatibility.md)
-    -   [Releases](internal-developers/testing/releases/README.md)
 -   [Translations](internal-developers/translations/README.md)
     -   [Translation basics](internal-developers/translations/translation-basics.md)
     -   [Translations in PHP files](internal-developers/translations/translations-in-PHP-files.md)

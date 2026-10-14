@@ -204,7 +204,7 @@ export function getFileChanges(
 							? new RegExp(
 									re.source,
 									re.flags.replace( /[gy]/g, '' )
-							  )
+								)
 							: re
 					);
 				}

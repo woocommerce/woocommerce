@@ -22,6 +22,13 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Customer shipping address before the test, restored at teardown.
+	 *
+	 * @var array<string, string>
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Set up before test.
 	 *
 	 * @return void
@@ -35,6 +42,12 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		// The per-test database rollback restores the option.
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
+		// The invalid-address tests need a shipping rate, and the flat rate only offers one for a
+		// country the store ships to. The cart ships to WC()->customer, which outlives a test, so
+		// give it a US/CA location here rather than depend on the address it arrives with.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		WC()->customer->set_shipping_location( 'US', 'CA' );
+
 		$this->sut = new class() extends OrderController {
 			/**
 			 * Check all required address fields are set and return errors if not. Parent is protected.
@@ -47,6 +60,19 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
 		};
+	}
+
+	/**
+	 * Put back the customer shipping location that setUp() replaced.
+	 */
+	public function tearDown(): void {
+		try {
+			foreach ( $this->previous_shipping_address as $key => $value ) {
+				WC()->customer->{"set_shipping_{$key}"}( $value );
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -298,6 +324,48 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order->save();
 
 		$this->sut->validate_order_before_payment( $order );
+	}
+
+	/**
+	 * @testdox validate_address_fields() enforces the default required fields when the default locale entry is missing or not an array.
+	 *
+	 * @dataProvider provide_broken_default_locale_entries
+	 *
+	 * @param mixed $default_entry Value to put in the default locale entry, or null to remove the entry.
+	 */
+	public function test_validate_address_fields_enforces_default_fields_without_a_default_locale_entry( $default_entry ): void {
+		$countries = wc()->countries;
+		$countries->get_country_locale();
+		if ( null === $default_entry ) {
+			unset( $countries->locale['default'] );
+		} else {
+			$countries->locale['default'] = $default_entry;
+		}
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_postcode( '' );
+		$errors = new \WP_Error();
+
+		try {
+			$this->sut->validate_address_fields( $order, 'billing', $errors );
+		} finally {
+			// Drop the broken settings so the next lookup rebuilds them.
+			$countries->locale = array();
+		}
+
+		$this->assertCount( 1, $errors->get_error_messages( 'billing' ), 'Only the missing default field should be reported.' );
+		$this->assertSame( 'postcode', $errors->get_error_data( 'billing' ), 'The default required fields should still be enforced.' );
+	}
+
+	/**
+	 * Broken values for the default entry of the country locale settings.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provide_broken_default_locale_entries(): array {
+		return array(
+			'entry removed'      => array( null ),
+			'entry not an array' => array( false ),
+		);
 	}
 
 	/**

@@ -11,16 +11,15 @@ use ReflectionClass;
 use ReflectionException;
 use Spy_REST_Server;
 use WP_REST_Server;
-use WP_Test_REST_TestCase;
 
 /**
  * ControllerTests
  */
-class RateLimitsTests extends WP_Test_REST_TestCase {
+class RateLimitsTests extends \WC_Unit_Test_Case {
 	/**
 	 * Setup Rest API server.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		/** @var WP_REST_Server $wp_rest_server */
@@ -89,7 +88,7 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 
 		$body = json_decode( $spy_rest_server->sent_body );
 		$this->assertEquals( JSON_ERROR_NONE, json_last_error() );
-		$this->assertEquals( 400, $body->data->status );
+		$this->assertEquals( 429, $body->data->status );
 
 		$this->assertEquals( $rate_limiting_options->limit, $spy_rest_server->sent_headers['RateLimit-Limit'] );
 		$this->assertIsInt( $spy_rest_server->sent_headers['RateLimit-Reset'] );

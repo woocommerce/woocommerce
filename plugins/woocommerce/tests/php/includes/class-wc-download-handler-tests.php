@@ -27,6 +27,28 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Encoded spaces in a local URL resolve to an existing file with spaces in its name.
+	 */
+	public function test_parse_file_path_for_encoded_space_in_existing_file(): void {
+		$uploads       = wp_upload_dir();
+		$filename      = 'wc download ' . wp_generate_uuid4() . '.pdf';
+		$absolute_path = trailingslashit( $uploads['basedir'] ) . $filename;
+		$file_url      = trailingslashit( $uploads['baseurl'] ) . rawurlencode( $filename );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture in the uploads directory.
+		$this->assertNotFalse( file_put_contents( $absolute_path, 'download fixture' ) );
+
+		try {
+			$parsed_file_path = WC_Download_Handler::parse_file_path( $file_url );
+			$this->assertFalse( $parsed_file_path['remote_file'] );
+			$this->assertSame( $absolute_path, $parsed_file_path['file_path'] );
+		} finally {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Remove test fixtures from the uploads directory.
+			unlink( $absolute_path );
+		}
+	}
+
+	/**
 	 * Test for local file with `file` protocol.
 	 */
 	public function test_parse_file_path_for_local_file_protocol() {
@@ -616,6 +638,209 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox readfile_chunked() should push each chunk through a flushable output buffer instead of holding the whole file in it.
+	 *
+	 * @dataProvider provider_download_sources
+	 *
+	 * @param bool $unknown_size Whether to stream from a source with no known size, which reads until EOF.
+	 */
+	public function test_readfile_chunked_flushes_each_chunk_through_output_buffer( bool $unknown_size ): void {
+		$chunk_size = defined( 'WC_CHUNK_SIZE' ) ? (int) WC_CHUNK_SIZE : 1024 * 1024;
+		$contents   = str_repeat( 'a', $chunk_size ) . str_repeat( 'b', $chunk_size ) . 'c';
+		$source     = $this->create_download_source( $contents, $unknown_size );
+		$flushed    = array();
+
+		ob_start(
+			function ( $buffer, $phase ) use ( &$flushed ) {
+				if ( $phase & PHP_OUTPUT_HANDLER_FLUSH ) {
+					$flushed[] = $buffer;
+				}
+				return '';
+			}
+		);
+
+		try {
+			$served = WC_Download_Handler::readfile_chunked( $source );
+		} finally {
+			ob_end_clean();
+			$this->delete_download_source( $source );
+		}
+
+		$this->assertTrue( $served, 'The file should be reported as served.' );
+		$this->assertGreaterThan( 1, count( $flushed ), 'Each chunk should be flushed as it is read.' );
+		$this->assertTrue( implode( '', $flushed ) === $contents, 'Every byte of the file should pass through the buffer by being flushed.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should not try to flush an output buffer that can't be flushed.
+	 *
+	 * @dataProvider provider_download_sources
+	 *
+	 * @param bool $unknown_size Whether to stream from a source with no known size, which reads until EOF.
+	 */
+	public function test_readfile_chunked_does_not_flush_unflushable_output_buffer( bool $unknown_size ): void {
+		$source = $this->create_download_source( 'file-data', $unknown_size );
+		$errors = array();
+
+		// WordPress hides notices unless WP_DEBUG is on, and sites that turn it on get them printed into the download.
+		$error_reporting = error_reporting( E_ALL ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+		ob_start( null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Records notices rather than letting the first one abort the download mid-stream.
+		set_error_handler(
+			function ( $errno, $errstr ) use ( &$errors ) {
+				// Leave out errors silenced with @, such as filesize() failing on a stream of unknown size.
+				if ( error_reporting() & $errno ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+					$errors[] = $errstr;
+				}
+				return true;
+			}
+		);
+
+		try {
+			$served   = WC_Download_Handler::readfile_chunked( $source );
+			$buffered = ob_get_contents();
+		} finally {
+			restore_error_handler();
+			error_reporting( $error_reporting ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
+			ob_end_clean();
+			$this->delete_download_source( $source );
+		}
+
+		$this->assertSame( array(), $errors, 'Streaming into a buffer that cannot be flushed should not raise notices, which would be written into the download.' );
+		$this->assertTrue( $served, 'The file should be reported as served.' );
+		$this->assertSame( 'file-data', $buffered, 'The file should be left intact in the buffer.' );
+	}
+
+	/**
+	 * @testdox readfile_chunked() should not flush until file data has been read, so a failed read can still send an error page.
+	 *
+	 * @dataProvider provider_download_sources
+	 *
+	 * @param bool $unknown_size Whether to stream from a source with no known size, which reads until EOF.
+	 */
+	public function test_readfile_chunked_does_not_flush_before_file_data( bool $unknown_size ): void {
+		// An empty source gives one empty read before EOF.
+		$source  = $this->create_download_source( '', $unknown_size );
+		$flushes = 0;
+
+		ob_start(
+			function ( $buffer, $phase ) use ( &$flushes ) {
+				if ( $phase & PHP_OUTPUT_HANDLER_FLUSH ) {
+					++$flushes;
+				}
+				return '';
+			}
+		);
+
+		try {
+			WC_Download_Handler::readfile_chunked( $source );
+		} finally {
+			ob_end_clean();
+			$this->delete_download_source( $source );
+		}
+
+		$this->assertSame( 0, $flushes, 'Some servers send the headers on flush(), so nothing should be flushed before file data is output.' );
+	}
+
+	/**
+	 * Download sources for streaming coverage.
+	 *
+	 * @return array<string, array<bool>>
+	 */
+	public function provider_download_sources(): array {
+		return array(
+			'local file of known size' => array( false ),
+			'stream of unknown size'   => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Should send only the file through any output buffers it can remove or clean, without raising errors, and log a buffer whose output reaches the client.
+	 *
+	 * @dataProvider provider_output_buffer_stacks
+	 *
+	 * @param int[]    $buffer_flags      Flags for each output buffer, from the bottom of the stack up. Each buffer holds "[junk-<level>]".
+	 * @param string   $expected_body     Response body the client should receive.
+	 * @param string[] $expected_warnings Warnings that should be logged.
+	 */
+	public function test_download_output_through_output_buffers( array $buffer_flags, string $expected_body, array $expected_warnings = array() ): void {
+		// Buffers that can't be removed would outlive this test, so run the download handler in its own process.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_proc_open -- Runs the PHP CLI on a fixed script with no user input.
+		$process = proc_open(
+			array( PHP_BINARY, '-d', 'display_errors=stderr', dirname( __DIR__ ) . '/helpers/download-handler-buffer-runner.php', implode( ',', $buffer_flags ), 'FILE-DATA' ),
+			array(
+				1 => array( 'pipe', 'w' ),
+				2 => array( 'pipe', 'w' ),
+			),
+			$pipes
+		);
+		$body    = stream_get_contents( $pipes[1] );
+		$stderr  = stream_get_contents( $pipes[2] );
+		fclose( $pipes[1] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		fclose( $pipes[2] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		proc_close( $process );
+
+		$report = json_decode( $stderr, true );
+
+		$this->assertIsArray( $report, "The runner script did not complete: $stderr" );
+		$this->assertSame( $expected_body, $body, 'The client should receive the file without the content of buffers that could be cleaned.' );
+		$this->assertSame( array(), $report['errors'], 'Cleaning and flushing buffers should not raise errors, even silenced ones.' );
+		$this->assertSame( $expected_warnings, $report['warnings'], 'Only a buffer whose output reaches the client should be logged.' );
+	}
+
+	/**
+	 * Output buffer stacks a download can be served through.
+	 *
+	 * @return array<string, array{0: int[], 1: string, 2?: string[]}>
+	 */
+	public function provider_output_buffer_stacks(): array {
+		$cleanable_flushable = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
+
+		return array(
+			'no buffers'                             => array( array(), 'FILE-DATA' ),
+			'standard buffers'                       => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, PHP_OUTPUT_HANDLER_STDFLAGS ), 'FILE-DATA' ),
+			'cleanable and flushable, not removable' => array( array( $cleanable_flushable ), 'FILE-DATA' ),
+			'cleanable only'                         => array( array( PHP_OUTPUT_HANDLER_CLEANABLE ), 'FILE-DATA' ),
+			'standard below non-removable'           => array( array( PHP_OUTPUT_HANDLER_STDFLAGS, $cleanable_flushable ), '[junk-0]FILE-DATA' ),
+			'buffers from issue 51562'               => array( array( 0, 0, PHP_OUTPUT_HANDLER_CLEANABLE, PHP_OUTPUT_HANDLER_REMOVABLE ), '[junk-0][junk-1]FILE-DATA' ),
+			'not removable or cleanable'             => array(
+				array( 0, PHP_OUTPUT_HANDLER_REMOVABLE ),
+				'[junk-0]FILE-DATA',
+				array( 'Output buffer "default output handler" cannot be removed or cleaned, so 8 bytes of earlier output will be sent before the downloaded file.' ),
+			),
+		);
+	}
+
+	/**
+	 * Create a download source holding the given contents.
+	 *
+	 * @param string $contents     File contents.
+	 * @param bool   $unknown_size Whether to use a data: URL, which has no size, instead of a temporary file.
+	 * @return string File path or URL.
+	 */
+	private function create_download_source( string $contents, bool $unknown_size ): string {
+		if ( $unknown_size ) {
+			return 'data://application/octet-stream;base64,' . base64_encode( $contents ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		}
+
+		$file = wp_tempnam( 'wc-download-handler-streaming' );
+		file_put_contents( $file, $contents ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp directory.
+
+		return $file;
+	}
+
+	/**
+	 * Delete a download source created by create_download_source().
+	 *
+	 * @param string $source File path or URL.
+	 */
+	private function delete_download_source( string $source ): void {
+		if ( is_file( $source ) ) {
+			wp_delete_file( $source );
+		}
+	}
+
+	/**
 	 * @testdox The Content-Type fallback to the resolved filename should apply to remote files only.
 	 */
 	public function test_content_type_fallback_applies_only_to_remote_files(): void {
@@ -652,6 +877,225 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox download_product() should treat array query args as an invalid download link.
+	 */
+	public function test_download_product_rejects_array_query_args(): void {
+		$string_args = array(
+			'download_file' => '1',
+			'order'         => 'wc_order_x',
+			'key'           => 'k',
+			'email'         => 'a@example.org',
+		);
+
+		$product_was_looked_up = false;
+		$lookup_watcher        = function ( $type ) use ( &$product_was_looked_up ) {
+			$product_was_looked_up = true;
+			return $type;
+		};
+
+		add_filter( 'woocommerce_product_type_query', $lookup_watcher );
+
+		try {
+			foreach ( array( 'download_file', 'order', 'key', 'email', 'uid' ) as $arg ) {
+				$_GET = $string_args;
+
+				if ( 'uid' === $arg ) {
+					// The UID is only consulted when no email address is supplied.
+					unset( $_GET['email'] );
+				}
+
+				$_GET[ $arg ]          = array( 'x' );
+				$wp_die_message        = '';
+				$product_was_looked_up = false;
+
+				// We do not use expectException() here because every argument is checked in turn.
+				try {
+					WC_Download_Handler::download_product();
+				} catch ( WPDieException $e ) {
+					$wp_die_message = $e->getMessage();
+				}
+
+				$this->assertStringContainsString(
+					'Invalid download link',
+					$wp_die_message,
+					"An array value for the \"$arg\" query argument should render the invalid download link error."
+				);
+
+				$this->assertFalse(
+					$product_was_looked_up,
+					"Array query arguments are rejected before any product lookup, but the \"$arg\" case reached one."
+				);
+			}
+		} finally {
+			remove_filter( 'woocommerce_product_type_query', $lookup_watcher );
+			$_GET = array();
+		}
+	}
+
+	/**
+	 * @testdox download_product() should reject authorization values that sanitize to empty.
+	 *
+	 * @dataProvider provider_authorization_values_that_sanitize_to_empty
+	 *
+	 * @param string $argument Query argument under test.
+	 * @param string $value    Query argument value.
+	 */
+	public function test_download_product_rejects_authorization_values_that_sanitize_to_empty( string $argument, string $value ): void {
+		self::remove_download_handlers();
+
+		try {
+			list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+				array(
+					array(
+						'name' => 'Protected download',
+						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+					),
+				)
+			);
+
+			$download_key = current( array_keys( $product->get_downloads() ) );
+			$download     = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'product_id' => $product->get_id() ) ) );
+			$download->set_downloads_remaining( 5 );
+			$download->save();
+
+			$_GET = array(
+				'download_file' => $product->get_id(),
+				'order'         => $order->get_order_key(),
+				'email'         => $order->get_billing_email(),
+				'key'           => $download_key,
+			);
+
+			$_GET[ $argument ] = $value;
+
+			$wp_die_message = '';
+
+			try {
+				WC_Download_Handler::download_product();
+			} catch ( WPDieException $e ) {
+				$wp_die_message = $e->getMessage();
+			}
+
+			$this->assertStringContainsString( 'Invalid download link', $wp_die_message, 'The malformed authorization value should render the invalid download link error.' );
+
+			$download = new WC_Customer_Download( $download->get_id() );
+			$this->assertSame( 5, $download->get_downloads_remaining(), 'A rejected request must not consume the customer\'s remaining downloads.' );
+		} finally {
+			self::restore_download_handlers();
+			$_GET = array();
+		}
+	}
+
+	/**
+	 * @testdox download_product() should authorize the current email download URL format.
+	 */
+	public function test_download_product_accepts_current_email_download_url(): void {
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+				),
+			)
+		);
+
+		$download_key = current( array_keys( $product->get_downloads() ) );
+		$order_item   = current( $order->get_items() );
+		$download_url = $order_item->get_item_download_url( $download_key );
+		$query_args   = array();
+
+		parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+
+		$this->assertArrayHasKey( 'email', $query_args, 'The current email download URL should contain an email argument.' );
+		$this->assertArrayNotHasKey( 'uid', $query_args, 'The email download URL should exercise the email authorization path.' );
+		$this->assert_download_url_is_authorized( $download_url );
+	}
+
+	/**
+	 * @testdox download_product() should authorize the current UID download URL format.
+	 */
+	public function test_download_product_accepts_current_uid_download_url(): void {
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Protected download',
+					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+				),
+			)
+		);
+
+		$downloadable_items = $order->get_downloadable_items();
+		$download_url       = current( $downloadable_items )['download_url'];
+		$query_args         = array();
+
+		parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+
+		$this->assertArrayHasKey( 'uid', $query_args, 'The current UID download URL should contain a UID argument.' );
+		$this->assertArrayNotHasKey( 'email', $query_args, 'The UID download URL should exercise the UID authorization path.' );
+		$this->assert_download_url_is_authorized( $download_url );
+	}
+
+	/**
+	 * @testdox download_product() should reject a generated UID link when the order billing email is empty.
+	 */
+	public function test_download_product_rejects_generated_uid_link_when_billing_email_is_empty(): void {
+		self::remove_download_handlers();
+
+		try {
+			list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+				array(
+					array(
+						'name' => 'Protected download',
+						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+					),
+				)
+			);
+
+			$download = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'product_id' => $product->get_id() ) ) );
+			$download->set_downloads_remaining( 5 );
+			$download->save();
+
+			$order->set_customer_id( 0 );
+			$order->set_billing_email( '' );
+			$order->save();
+
+			$downloadable_items = $order->get_downloadable_items();
+			$download_url       = current( $downloadable_items )['download_url'];
+			$query_args         = array();
+
+			parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+			$_GET = $query_args;
+
+			$wp_die_message = '';
+
+			try {
+				WC_Download_Handler::download_product();
+			} catch ( WPDieException $e ) {
+				$wp_die_message = $e->getMessage();
+			}
+
+			$this->assertStringContainsString( 'Invalid download link', $wp_die_message, 'A UID derived from an empty billing email should be rejected.' );
+
+			$download = new WC_Customer_Download( $download->get_id() );
+			$this->assertSame( 5, $download->get_downloads_remaining(), 'A rejected UID request must not consume the customer\'s remaining downloads.' );
+		} finally {
+			self::restore_download_handlers();
+			$_GET = array();
+		}
+	}
+
+	/**
+	 * Values which are present in the request but empty after sanitization.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_authorization_values_that_sanitize_to_empty(): array {
+		return array(
+			'order key' => array( 'order', ' ' ),
+			'email'     => array( 'email', 'x' ),
+		);
+	}
+
+	/**
 	 * Creates a downloadable product, and then places (and completes) an order for that
 	 * object.
 	 *
@@ -673,6 +1117,38 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			$product,
 			$order,
 		);
+	}
+
+	/**
+	 * Assert that a generated download URL passes authorization without serving a file.
+	 *
+	 * @param string $download_url Generated download URL.
+	 */
+	private function assert_download_url_is_authorized( string $download_url ): void {
+		$downloads_dispatched = 0;
+		$download_method      = function () {
+			return 'test';
+		};
+		$download_counter     = function () use ( &$downloads_dispatched ) {
+			++$downloads_dispatched;
+		};
+
+		add_filter( 'woocommerce_file_download_method', $download_method );
+		add_action( 'woocommerce_download_file_test', $download_counter );
+
+		try {
+			$query_args = array();
+			parse_str( wp_parse_url( $download_url, PHP_URL_QUERY ), $query_args );
+			$_GET = $query_args;
+
+			WC_Download_Handler::download_product();
+
+			$this->assertSame( 1, $downloads_dispatched, 'An authorized URL should reach the download dispatch without serving a file.' );
+		} finally {
+			remove_filter( 'woocommerce_file_download_method', $download_method );
+			remove_action( 'woocommerce_download_file_test', $download_counter );
+			$_GET = array();
+		}
 	}
 
 	/**
