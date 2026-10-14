@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G19A-v3",
+			"id": "G19A-v4",
 			"path": "plugins/woocommerce/includes/wc-order-functions.php",
 			"before": {
 				"file": "fixtures/G19A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "calculate_totals"
+				"contains": "note-only"
 			}
 		},
 		{

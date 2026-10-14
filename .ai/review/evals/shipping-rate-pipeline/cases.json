@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G20A-v3",
+			"id": "G20A-v4",
 			"path": "plugins/woocommerce/includes/class-wc-shipping.php",
 			"before": {
 				"file": "fixtures/G20A/before.php"
@@ -12,11 +12,11 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "flat_rate"
+				"contains": "Express"
 			}
 		},
 		{
-			"id": "G20B-v3",
+			"id": "G20B-v4",
 			"path": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
 			"before": {
 				"file": "fixtures/G20B/before.php"
@@ -26,7 +26,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "total_cost"
+				"contains": "TypeError"
 			}
 		},
 		{

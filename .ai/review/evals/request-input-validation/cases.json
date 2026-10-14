@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G07A-v3",
+			"id": "G07A-v4",
 			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
 			"before": {
 				"file": "fixtures/G07A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "urldecode"
+				"contains": "search[]"
 			}
 		},
 		{

@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G12A-v3",
+			"id": "G12A-v4",
 			"path": "plugins/woocommerce/includes/address-editor.php",
 			"before": {
 				"file": "fixtures/G12A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "_copy_billing_to_shipping"
+				"contains": "address equality"
 			}
 		},
 		{
