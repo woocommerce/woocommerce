@@ -529,7 +529,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			);
 			expect( request.data.country ).toBeUndefined();
 			expect( request.data.state ).toBeUndefined();
-			expect( request.wc_encode_apostrophes ).toBe( true );
+			expect( request.wc_form_encoding ).toBe( true );
 		} );
 
 		test( 'should send the serialized form when placing an order', () => {
@@ -546,7 +546,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 
 			expect( request ).toBeDefined();
 			expect( request.data ).toBe( serializedCheckoutData );
-			expect( request.wc_encode_apostrophes ).toBe( true );
+			expect( request.wc_form_encoding ).toBe( true );
 		} );
 
 		test( 'should send apply coupon data as an object', () => {
@@ -568,7 +568,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 					billing_email: BILLING_EMAIL,
 				} )
 			);
-			expect( request.wc_encode_apostrophes ).toBe( true );
+			expect( request.wc_form_encoding ).toBe( true );
 		} );
 
 		test( 'should send remove coupon data as an object', () => {
@@ -586,7 +586,7 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 			expect( request.data ).toEqual(
 				expect.objectContaining( { coupon: COUPON_CODE } )
 			);
-			expect( request.wc_encode_apostrophes ).toBe( true );
+			expect( request.wc_form_encoding ).toBe( true );
 		} );
 	} );
 

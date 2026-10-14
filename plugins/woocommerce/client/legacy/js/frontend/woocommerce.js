@@ -1,22 +1,48 @@
 /* global Cookies */
 
 /**
- * Encode apostrophes in the body of requests that opt in with the
- * `wc_encode_apostrophes` option.
+ * Encode the body of requests that opt in with the `wc_form_encoding` option
+ * the way a browser form submission would.
  *
- * jQuery leaves `'` alone when it serializes data, so bodies can reach the
- * server with literal apostrophes that some WAF rules reject. Running as a
- * prefilter lets jQuery serialize the request first, so removed (undefined)
- * fields are dropped and `originalOptions.data` stays the object the caller
- * passed. `beforeSend` handlers and `'*'` prefilters that run after this one
- * see the encoded string in `options.data`. Prefilters for a specific data
- * type, or added earlier or with `'+*'`, run first and see the unencoded one.
+ * jQuery serializes with encodeURIComponent(), which leaves !'()~ literal,
+ * while a browser's form serializer percent-encodes them, and some WAF rules
+ * reject bodies with the literal characters. jQuery 1.x and 3.x serialize the
+ * data before prefilters run; jQuery 4 runs prefilters first, so plain object
+ * data is serialized here from the copy jQuery already made, which has removed
+ * (undefined) fields dropped. `originalOptions.data` stays the object the
+ * caller passed, and only form-encoded bodies are touched.
  */
-jQuery.ajaxPrefilter( function ( options ) {
-	if ( options.wc_encode_apostrophes && 'string' === typeof options.data ) {
-		options.data = options.data.split( "'" ).join( '%27' );
-	}
-} );
+if ( 'function' === typeof jQuery.ajaxPrefilter ) {
+	jQuery.ajaxPrefilter( function ( options ) {
+		if (
+			! options.wc_form_encoding ||
+			! options.processData ||
+			0 !==
+				( options.contentType || '' ).indexOf(
+					'application/x-www-form-urlencoded'
+				)
+		) {
+			return;
+		}
+		if (
+			jQuery.isPlainObject( options.data ) ||
+			Array.isArray( options.data )
+		) {
+			options.data = jQuery.param( options.data, options.traditional );
+		}
+		if ( 'string' === typeof options.data ) {
+			options.data = options.data.replace(
+				/[!'()~]/g,
+				function ( character ) {
+					return (
+						'%' +
+						character.charCodeAt( 0 ).toString( 16 ).toUpperCase()
+					);
+				}
+			);
+		}
+	} );
+}
 
 jQuery( function ( $ ) {
 	// Orderby

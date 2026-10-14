@@ -228,10 +228,9 @@ describe( 'cart.js request data', () => {
 
 	// Every request site passes the data to $.ajax() as jQuery would get it from
 	// the shopper (the serialized form, or the data object) and sets the
-	// wc_encode_apostrophes option, so the woocommerce.js prefilter encodes the
-	// apostrophes after jQuery has serialized the request. Passing objects keeps
-	// undefined fields out of the body and lets other prefilters read
-	// originalOptions.data.
+	// wc_form_encoding option, so the woocommerce.js prefilter encodes the body
+	// like a browser form post. Passing objects keeps undefined fields out of
+	// the body and lets other prefilters read originalOptions.data.
 	test( 'should send the serialized shipping calculator form with the encoding opt-in', () => {
 		const submit = findDocumentHandler(
 			'submit',
@@ -247,7 +246,7 @@ describe( 'cart.js request data', () => {
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).toBe( SHIPPING_FORM_SERIALIZED );
-		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( request.wc_form_encoding ).toBe( true );
 		expect( global.jQuery.param ).not.toHaveBeenCalled();
 	} );
 
@@ -262,7 +261,7 @@ describe( 'cart.js request data', () => {
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).toBe( CART_FORM_SERIALIZED );
-		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( request.wc_form_encoding ).toBe( true );
 	} );
 
 	test( 'should send the serialized quantity update form with the encoding opt-in', () => {
@@ -282,7 +281,7 @@ describe( 'cart.js request data', () => {
 		const request = capturedAjaxRequests[ 0 ];
 		expect( request.url ).toBe( CART_URL );
 		expect( request.data ).toBe( QUANTITY_FORM_SERIALIZED );
-		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( request.wc_form_encoding ).toBe( true );
 	} );
 
 	test( 'should send the chosen shipping method as an object with the encoding opt-in', () => {
@@ -302,7 +301,7 @@ describe( 'cart.js request data', () => {
 			security: 'nonce',
 			shipping_method: { 0: "flat_rate:O'Fallon" },
 		} );
-		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( request.wc_form_encoding ).toBe( true );
 	} );
 
 	test( 'should send apply coupon data as an object with the encoding opt-in', () => {
@@ -323,7 +322,7 @@ describe( 'cart.js request data', () => {
 			security: 'nonce',
 			coupon_code: COUPON_CODE,
 		} );
-		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( request.wc_form_encoding ).toBe( true );
 		expect( global.jQuery.param ).not.toHaveBeenCalled();
 	} );
 
@@ -347,6 +346,6 @@ describe( 'cart.js request data', () => {
 			security: 'nonce',
 			coupon: COUPON_CODE,
 		} );
-		expect( request.wc_encode_apostrophes ).toBe( true );
+		expect( request.wc_form_encoding ).toBe( true );
 	} );
 } );

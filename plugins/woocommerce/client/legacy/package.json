@@ -40,6 +40,7 @@
 		"grunt-stylelint": "0.20.1",
 		"jest-fixed-jsdom": "^0.0.10",
 		"jquery": "3.7.1",
+		"jquery4": "npm:jquery@4.0.0",
 		"sass": "^1.69.5",
 		"stylelint": "catalog:tooling"
 	},
