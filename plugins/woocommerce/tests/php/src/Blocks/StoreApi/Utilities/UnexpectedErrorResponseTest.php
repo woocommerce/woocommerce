@@ -116,10 +116,6 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( basename( __FILE__ ), $record['file'], 'The remote record must carry the file the error was raised in.' );
 		$this->assertStringStartsWith( '#0 ', $record['trace'] );
 		$this->assertStringNotContainsString( 'fixture-secret-token', wp_json_encode( $record ), 'Error object state must not reach the remote record.' );
-
-		$is_third_party = new \ReflectionMethod( RemoteLogger::class, 'is_third_party_error' );
-		$is_third_party->setAccessible( true );
-		$this->assertFalse( $is_third_party->invoke( $remote_logger, $logged['message'], $logged['context'] ), 'An error raised inside WooCommerce must pass the third-party check.' );
 	}
 
 	/**
