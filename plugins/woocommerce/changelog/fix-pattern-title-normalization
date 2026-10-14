@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure bundled pattern titles containing HTML entities or tags can be translated in the editor.
