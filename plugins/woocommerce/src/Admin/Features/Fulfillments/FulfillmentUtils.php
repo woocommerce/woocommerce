@@ -780,6 +780,9 @@ class FulfillmentUtils {
 		 * @param string      $label       The resolved provider label.
 		 * @param Fulfillment $fulfillment The fulfillment object.
 		 */
-		return (string) apply_filters( 'woocommerce_fulfillment_shipment_provider_label', $label, $fulfillment );
+		$filtered_label = apply_filters( 'woocommerce_fulfillment_shipment_provider_label', $label, $fulfillment );
+
+		// Keep the resolved label if a callback returns something that can't be rendered as text.
+		return is_scalar( $filtered_label ) ? (string) $filtered_label : $label;
 	}
 }

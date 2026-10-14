@@ -333,4 +333,33 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'USPS (via API)', FulfillmentUtils::get_provider_display_name( $reloaded ) );
 	}
+
+	/**
+	 * @testdox get_provider_display_name keeps the resolved label when the filter returns a non-scalar.
+	 */
+	public function test_get_provider_display_name_ignores_non_scalar_filter_result(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'usps',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		add_filter(
+			'woocommerce_fulfillment_shipment_provider_label',
+			static function () {
+				return array( 'unexpected' );
+			}
+		);
+
+		$this->assertSame( 'USPS', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
 }
