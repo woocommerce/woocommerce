@@ -94,7 +94,10 @@ class Typography_Preprocessor implements Preprocessor {
 			$email_attrs['color'] = $block['attrs']['style']['color']['text'];
 		}
 		if ( isset( $block['attrs']['textColor'] ) && is_string( $block['attrs']['textColor'] ) && ! isset( $email_attrs['color'] ) ) {
-			$email_attrs['color'] = $this->settings_controller->translate_slug_to_color( $block['attrs']['textColor'] );
+			$text_color = $this->settings_controller->translate_slug_to_color( $block['attrs']['textColor'] );
+			if ( '' !== $text_color ) {
+				$email_attrs['color'] = $text_color;
+			}
 		}
 		// In case the fontSize is set via a slug (small, medium, large, etc.) we translate it to a number
 		// The font size slug is set in $block['attrs']['fontSize'] and value in $block['attrs']['style']['typography']['fontSize'].

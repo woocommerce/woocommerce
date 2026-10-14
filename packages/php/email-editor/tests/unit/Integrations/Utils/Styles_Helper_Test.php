@@ -123,6 +123,362 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it tells a literal color from a palette slug.
+	 */
+	public function testItIdentifiesColorLiterals(): void {
+		$this->assertTrue( Styles_Helper::is_color_literal( '#abcdef' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '#abc' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '#abcd' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '#aabbccdd' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( '  #abcdef  ' ) );
+
+		// Any functional notation, including CSS Color 4/5 forms and nesting.
+		$this->assertTrue( Styles_Helper::is_color_literal( 'rgb(1, 2, 3)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'rgba(1, 2, 3, 0.5)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'hsl(1, 2%, 3%)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'oklch(0.7 0.1 200)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'var(--wp--preset--color--base)' ) );
+		$this->assertTrue( Styles_Helper::is_color_literal( 'color-mix(in srgb, red, blue)' ) );
+
+		// Incomplete values are not colors, and emitting one is the invalid declaration this check
+		// exists to prevent.
+		$this->assertFalse( Styles_Helper::is_color_literal( '#' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( '#zz' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( '#abcd1' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'rgb(' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'oklch(' ) );
+
+		// A bare word is a slug, including one that names a CSS color or keyword. Classic themes
+		// register such slugs in PHP, and the email palette does not carry their colors.
+		$this->assertFalse( Styles_Helper::is_color_literal( 'blue' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'gray' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'rebeccapurple' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'transparent' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'currentColor' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'buttontext' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'theme-4' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'primary' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( 'dark-gray' ) );
+		$this->assertFalse( Styles_Helper::is_color_literal( '' ) );
+	}
+
+	/**
+	 * Test it resolves a slug against every palette origin, highest priority first.
+	 */
+	public function testItResolvesColorsFromEveryPaletteOrigin(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'default' => array(
+						array(
+							'slug'  => 'core-slug',
+							'color' => '#111111',
+						),
+						array(
+							'slug'  => 'shared',
+							'color' => '#aaaaaa',
+						),
+					),
+					'theme'   => array(
+						array(
+							'slug'  => 'theme-slug',
+							'color' => '#222222',
+						),
+						array(
+							'slug'  => 'shared',
+							'color' => '#bbbbbb',
+						),
+					),
+					'blocks'  => array(
+						array(
+							'slug'  => 'block-slug',
+							'color' => '#333333',
+						),
+					),
+					'custom'  => array(
+						array(
+							'slug'  => 'user-slug',
+							'color' => '#DDEEFF',
+						),
+						array(
+							'slug'  => 'shared',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		// A color the user defined in the email's own global styles resolves, not just the theme's.
+		$this->assertSame( '#ddeeff', Styles_Helper::resolve_color_from_palette( $settings, 'user-slug' ) );
+		$this->assertSame( '#222222', Styles_Helper::resolve_color_from_palette( $settings, 'theme-slug' ) );
+		$this->assertSame( '#333333', Styles_Helper::resolve_color_from_palette( $settings, 'block-slug' ) );
+		$this->assertSame( '#111111', Styles_Helper::resolve_color_from_palette( $settings, 'core-slug' ) );
+
+		// On a slug several origins define, the highest priority origin wins.
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'shared' ) );
+
+		// A slug no origin defines yields nothing, so the caller skips the declaration.
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'theme-4' ) );
+
+		// A literal still passes through, and an absent palette is not a fatal.
+		$this->assertSame( '#012345', Styles_Helper::resolve_color_from_palette( $settings, '#012345' ) );
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( array(), 'theme-4' ) );
+		$this->assertSame( '#012345', Styles_Helper::resolve_color_from_palette( array(), '#012345' ) );
+
+		// A bare word is a slug even when it names a CSS color, so it resolves to nothing.
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'blue' ) );
+	}
+
+	/**
+	 * Color slug values observed on real emails, and what each resolves to.
+	 *
+	 * Drawn from a read-only sample of sent newsletters whose blocks name a color slug. Append new
+	 * values found in the wild rather than reasoning about whether the matcher covers their shape.
+	 *
+	 * `null` means the value resolves to nothing, so the caller omits the declaration and the block
+	 * keeps the surrounding theme color.
+	 *
+	 * @return array<string, array{string, string|null}>
+	 */
+	public function observedColorSlugProvider(): array {
+		return array(
+			// Palette slugs the email cannot resolve: left behind by a theme switch, or registered
+			// by a classic theme in PHP, which the email palette does not carry.
+			'theme palette slug'          => array( 'theme-4', null ),
+			'semantic slug'               => array( 'primary', null ),
+			'semantic slug, foreground'   => array( 'foreground', null ),
+			'hyphenated gray slug'        => array( 'dark-gray', null ),
+			'hyphenated gray slug, light' => array( 'light-gray', null ),
+
+			// Classic themes' palette slugs that happen to name a CSS color. They are slugs like any
+			// other, and the CSS color is not the color the theme defines.
+			'named color, gray'           => array( 'gray', null ),
+			'named color, blue'           => array( 'blue', null ),
+			'named color, green'          => array( 'green', null ),
+			'named color, orange'         => array( 'orange', null ),
+
+			// Literal colors, which reach these attributes too and pass through untouched.
+			'hex'                         => array( '#abcdef', '#abcdef' ),
+			'rgb'                         => array( 'rgb(1, 2, 3)', 'rgb(1, 2, 3)' ),
+			'preset variable'             => array( 'var(--wp--preset--color--base)', 'var(--wp--preset--color--base)' ),
+		);
+	}
+
+	/**
+	 * Test every observed slug value resolves the way it should against a palette that defines none of them.
+	 *
+	 * @dataProvider observedColorSlugProvider
+	 *
+	 * @param string      $value    Value of a color block attribute.
+	 * @param string|null $expected Expected color, or null when nothing should be emitted.
+	 */
+	public function testItResolvesObservedColorSlugs( string $value, ?string $expected ): void {
+		// A palette that defines none of the values above.
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'theme' => array(
+						array(
+							'slug'  => 'base',
+							'color' => '#ffffff',
+						),
+						array(
+							'slug'  => 'contrast',
+							'color' => '#000000',
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertSame(
+			null === $expected ? '' : $expected,
+			Styles_Helper::resolve_color_from_palette( $settings, $value )
+		);
+	}
+
+	/**
+	 * Test a palette origin that is not an array does not take the render down.
+	 *
+	 * The palette arrives through the `woocommerce_email_editor_theme_json` filter, and a non-array
+	 * origin reaching array_merge() is a TypeError rather than a warning.
+	 */
+	public function testItSurvivesAPaletteOriginThatIsNotAnArray(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'custom' => 'not-an-array',
+					'theme'  => array(
+						array(
+							'slug'  => 'usable',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'usable' ) );
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'theme-4' ) );
+	}
+
+	/**
+	 * Test a literal is returned trimmed but not case-folded.
+	 *
+	 * A palette color is lowercased; a literal cannot be, because the custom property name inside
+	 * `var()` is case-sensitive.
+	 */
+	public function testItTrimsButDoesNotCaseFoldALiteral(): void {
+		$this->assertSame( '#ABCDEF', Styles_Helper::resolve_color_from_palette( array(), '  #ABCDEF  ' ) );
+		$this->assertSame(
+			'var(--wp--preset--color--myBrand)',
+			Styles_Helper::resolve_color_from_palette( array(), ' var(--wp--preset--color--myBrand) ' )
+		);
+	}
+
+	/**
+	 * Test a slug several origins define yields exactly one definition, the highest priority one.
+	 *
+	 * A lookup reads the first entry and the stylesheet's cascade reads the last, so one entry per
+	 * slug is what stops a block's color depending on which route it arrives through.
+	 */
+	public function testItReturnsOneDefinitionPerSlug(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'default' => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#aaaaaa',
+						),
+						array(
+							'slug'  => 'core-only',
+							'color' => '#111111',
+						),
+					),
+					'theme'   => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#bbbbbb',
+						),
+					),
+					'custom'  => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		$definitions = Styles_Helper::palette_definitions( $settings );
+		$slugs       = array_column( $definitions, 'slug' );
+
+		$this->assertSame( array( 'shared', 'core-only' ), $slugs );
+		$this->assertCount( 1, array_keys( $slugs, 'shared', true ) );
+
+		// The one definition kept is the one the lookup resolves to, so both agree.
+		$this->assertSame( '#cccccc', $definitions[0]['color'] );
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'shared' ) );
+	}
+
+	/**
+	 * Test a palette entry without a usable slug and color is dropped rather than reaching a caller.
+	 *
+	 * The palette arrives through a filter, and callers read `slug` and `color` directly.
+	 */
+	public function testItDropsUnusablePaletteEntries(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'theme' => array(
+						array( 'color' => '#aaaaaa' ),
+						array(
+							'slug'  => 123,
+							'color' => '#bbbbbb',
+						),
+						array( 'slug' => 'no-color' ),
+						array(
+							'slug'  => 'empty-color',
+							'color' => '   ',
+						),
+						array(
+							'slug'  => 'array-color',
+							'color' => array( '#dddddd' ),
+						),
+						'not-an-array',
+						array(
+							'slug'  => 'usable',
+							'color' => '#cccccc',
+						),
+					),
+				),
+			),
+		);
+
+		$definitions = Styles_Helper::palette_definitions( $settings );
+
+		$this->assertSame( array( 'usable' ), array_column( $definitions, 'slug' ) );
+		$this->assertSame( '#cccccc', Styles_Helper::resolve_color_from_palette( $settings, 'usable' ) );
+		$this->assertSame( '', Styles_Helper::resolve_color_from_palette( $settings, 'no-color' ) );
+	}
+
+	/**
+	 * Test an incomplete higher-priority entry does not shut out an origin that defines the slug.
+	 *
+	 * An entry that only names the slug must not discard the `default` color, which the palette
+	 * does define.
+	 */
+	public function testItPrefersALowerPriorityOriginOverAColorlessDuplicate(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'default' => array(
+						array(
+							'slug'  => 'shared',
+							'color' => '#aaaaaa',
+						),
+					),
+					'custom'  => array(
+						array( 'slug' => 'shared' ),
+					),
+				),
+			),
+		);
+
+		$definitions = Styles_Helper::palette_definitions( $settings );
+
+		$this->assertCount( 1, $definitions );
+		$this->assertSame( '#aaaaaa', $definitions[0]['color'] );
+		$this->assertSame( '#aaaaaa', Styles_Helper::resolve_color_from_palette( $settings, 'shared' ) );
+	}
+
+	/**
+	 * Test a slug that names a CSS color still resolves from the palette.
+	 *
+	 * Classic themes register slugs like `blue`, so the lookup has to reach the palette rather than
+	 * read the word as a color.
+	 */
+	public function testItResolvesASlugThatNamesACssColorFromThePalette(): void {
+		$settings = array(
+			'color' => array(
+				'palette' => array(
+					'theme' => array(
+						array(
+							'slug'  => 'blue',
+							'color' => '#0000AA',
+						),
+					),
+				),
+			),
+		);
+
+		$this->assertSame( '#0000aa', Styles_Helper::resolve_color_from_palette( $settings, 'blue' ) );
+	}
+
+	/**
 	 * Test it gets normalized block styles with color translations.
 	 */
 	public function testItGetsNormalizedBlockStylesWithColorTranslations(): void {
@@ -161,6 +517,54 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 			),
 			'border'  => array(
 				'color' => '#0000ff',
+			),
+			'spacing' => array(
+				'padding' => '10px',
+			),
+		);
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * Test that a color slug the palette cannot resolve produces no declaration.
+	 *
+	 * The slug as a value (`background-color: theme-4`) is invalid CSS that mail clients drop, which
+	 * costs the block its color. Omitting the declaration lets the surrounding theme color show
+	 * through, which is what the editor previews.
+	 */
+	public function testItOmitsUnresolvedColorSlugsFromNormalizedBlockStyles(): void {
+		$block_attributes = array(
+			'backgroundColor' => 'theme-4',
+			'textColor'       => 'primary',
+			'borderColor'     => 'theme-9',
+			'style'           => array(
+				'spacing' => array(
+					'padding' => '10px',
+				),
+			),
+		);
+
+		/**
+		 * Rendering_Context mock for using in test.
+		 *
+		 * @var Rendering_Context&\PHPUnit\Framework\MockObject\MockObject $rendering_context
+		 */
+		$rendering_context = $this->createMock( Rendering_Context::class );
+		$rendering_context->method( 'translate_slug_to_color' )
+			->willReturnMap(
+				array(
+					array( 'primary', '#00ff00' ),
+					array( 'theme-4', '' ),
+					array( 'theme-9', '' ),
+				)
+			);
+
+		$result = Styles_Helper::get_normalized_block_styles( $block_attributes, $rendering_context );
+
+		$expected = array(
+			'color'   => array(
+				'text' => '#00ff00',
 			),
 			'spacing' => array(
 				'padding' => '10px',
