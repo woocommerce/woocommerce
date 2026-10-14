@@ -22,6 +22,7 @@ class FulfillmentsController {
 		FulfillmentsRenderer::class,
 		FulfillmentsSettings::class,
 		OrderFulfillmentsRestController::class,
+		FulfillmentsPrivacy::class,
 	);
 
 	/**
