@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,13 +20,6 @@ defined( 'ABSPATH' ) || exit;
 class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 
 	use ProductAbilityTrait;
-
-	/**
-	 * Variations built in change() and saved in save(), keyed by the parent object id.
-	 *
-	 * @var array<int, \WC_Product_Variation[]>
-	 */
-	private static $variations = array();
 
 	/**
 	 * Get the ability name.
@@ -94,7 +88,9 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 			return $product_config;
 		}
 
-		$product = wc_get_product_object( $product_config['wc_type'] );
+		$product = ProductType::VARIABLE === $product_config['wc_type']
+			? new VariableProductDraft()
+			: wc_get_product_object( $product_config['wc_type'] );
 
 		if ( ! $product ) {
 			return new \WP_Error(
@@ -129,12 +125,12 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 				return $error;
 			}
 
-			if ( $subject instanceof \WC_Product_Variable ) {
+			if ( $subject instanceof VariableProductDraft ) {
 				$variations = self::build_variations( $subject, $input['variations'] ?? array() );
 				if ( is_wp_error( $variations ) ) {
 					return $variations;
 				}
-				self::$variations[ spl_object_id( $subject ) ] = $variations;
+				$subject->set_pending_variations( $variations );
 			}
 
 			return null;
@@ -235,8 +231,7 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 			return $error;
 		}
 
-		$variations = self::$variations[ spl_object_id( $subject ) ] ?? array();
-		unset( self::$variations[ spl_object_id( $subject ) ] );
+		$variations = $subject instanceof VariableProductDraft ? $subject->get_pending_variations() : array();
 		foreach ( $variations as $variation ) {
 			$variation->set_parent_id( $subject->get_id() );
 			$error = self::save_product( $variation, 'woocommerce_product_create_failed' );
