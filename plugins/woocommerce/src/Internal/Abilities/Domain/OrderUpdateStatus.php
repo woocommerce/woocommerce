@@ -117,14 +117,18 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Change the order status in memory. The order class must accept the
-	 * status, so a refused status fires no woocommerce_order_edit_status.
+	 * Change the order status in memory, as a manual change. The order class
+	 * must accept the status. The woocommerce_order_edit_status action that a
+	 * manual set_status() fires is held back until save(), so a change that an
+	 * extension refuses fires no action.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
 	 */
 	public static function change( $subject, array $input ) {
+		global $wp_filter;
+
 		$status = self::get_new_status( $subject, $input );
 		if ( is_wp_error( $status ) ) {
 			return $status;
@@ -139,7 +143,15 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			);
 		}
 
-		$subject->set_status( $status, self::get_note( $input ), true );
+		$listeners = $wp_filter['woocommerce_order_edit_status'] ?? null;
+		unset( $wp_filter['woocommerce_order_edit_status'] );
+		try {
+			$subject->set_status( $status, self::get_note( $input ), true );
+		} finally {
+			if ( null !== $listeners ) {
+				$wp_filter['woocommerce_order_edit_status'] = $listeners; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
 
 		return null;
 	}
@@ -195,12 +207,15 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Save the order, as WC_Order::update_status() does.
+	 * Fire woocommerce_order_edit_status for the accepted change, and save the
+	 * order as WC_Order::update_status() does.
 	 *
 	 * @param \WC_Order $subject Changed order.
 	 * @return null|\WP_Error
 	 */
 	public static function save( $subject ) {
+		do_action( 'woocommerce_order_edit_status', $subject->get_id(), $subject->get_status() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
 		try {
 			$subject->save();
 		} catch ( \Exception $e ) {

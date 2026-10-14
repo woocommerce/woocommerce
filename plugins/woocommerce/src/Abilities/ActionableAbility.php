@@ -230,6 +230,9 @@ abstract class ActionableAbility extends \WP_Ability {
 						if ( isset( $field_schema['type'] ) ) {
 							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
 						}
+						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
+							$field_schema['enum'][] = null;
+						}
 						return $field_schema;
 					},
 					$writable
