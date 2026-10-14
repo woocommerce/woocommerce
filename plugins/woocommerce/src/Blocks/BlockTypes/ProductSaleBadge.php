@@ -134,11 +134,24 @@ class ProductSaleBadge extends AbstractBlock {
 		$sale_text = apply_filters( 'woocommerce_sale_badge_text', $sale_text, $product );
 
 		/* translators: %s: sale badge text. */
-		$screen_reader_text     = sprintf( __( 'Product on sale: %s', 'woocommerce' ), $sale_text );
-		$is_interactive         = $product instanceof \WC_Product_Variable
+		$screen_reader_text = sprintf( __( 'Product on sale: %s', 'woocommerce' ), $sale_text );
+		$is_interactive     = $product instanceof \WC_Product_Variable
 			&& ! isset( $block->context['query']['isProductCollectionBlock'] )
 			&& ! isset( $block->context['isDescendantOfGroupedProductSelector'] );
-		$interactive_attributes = '';
+
+		$wrapper_attributes = array();
+		if ( '' !== $classname ) {
+			$wrapper_attributes['class'] = $classname;
+		}
+		$context_directive        = '';
+		$label_attributes         = array(
+			'class'       => 'wc-block-components-product-sale-badge__text',
+			'aria-hidden' => 'true',
+		);
+		$screen_reader_attributes = array(
+			'class' => 'screen-reader-text',
+		);
+
 		if ( $is_interactive ) {
 			wp_enqueue_script_module( 'woocommerce/product-sale-badge' );
 			wp_interactivity_config(
@@ -162,7 +175,11 @@ class ProductSaleBadge extends AbstractBlock {
 					'isSaleBadgeHidden'         => false,
 				)
 			);
-			$interactive_attributes = ' data-wp-interactive="woocommerce/product-sale-badge" data-wp-bind--hidden="state.isSaleBadgeHidden" aria-live="polite" aria-atomic="true" ' . wp_interactivity_data_wp_context(
+			$wrapper_attributes['data-wp-interactive']  = 'woocommerce/product-sale-badge';
+			$wrapper_attributes['data-wp-bind--hidden'] = 'state.isSaleBadgeHidden';
+			$wrapper_attributes['aria-live']            = 'polite';
+			$wrapper_attributes['aria-atomic']          = 'true';
+			$context_directive                          = wp_interactivity_data_wp_context(
 				array(
 					'saleBadgeText'             => $sale_text,
 					'saleBadgeScreenReaderText' => $screen_reader_text,
@@ -171,13 +188,31 @@ class ProductSaleBadge extends AbstractBlock {
 					'suffix'                    => $attributes['suffix'] ?? '',
 				)
 			);
+			$label_attributes['data-wp-text']           = 'state.saleBadgeText';
+			$screen_reader_attributes['data-wp-text']   = 'state.saleBadgeScreenReaderText';
 		}
 
-		$output  = '<div class="wp-block-woocommerce-product-sale-badge ' . esc_attr( $classname ) . '"' . $interactive_attributes . '>';
-		$output .= sprintf( '<div class="wc-block-components-product-sale-badge %1$s wc-block-components-product-sale-badge--align-%2$s" style="%3$s">', esc_attr( $classes_and_styles['classes'] ), esc_attr( $align ), esc_attr( $classes_and_styles['styles'] ) );
-		$output .= '<span' . ( $is_interactive ? ' data-wp-text="state.saleBadgeText"' : '' ) . ' class="wc-block-components-product-sale-badge__text" aria-hidden="true">' . esc_html( $sale_text ) . '</span>';
-
-		$output .= '<span' . ( $is_interactive ? ' data-wp-text="state.saleBadgeScreenReaderText"' : '' ) . ' class="screen-reader-text">' . esc_html( $screen_reader_text ) . '</span>';
+		$output  = sprintf(
+			'<div %1$s %2$s>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			$context_directive
+		);
+		$output .= sprintf(
+			'<div class="wc-block-components-product-sale-badge %1$s wc-block-components-product-sale-badge--align-%2$s" style="%3$s">',
+			esc_attr( $classes_and_styles['classes'] ),
+			esc_attr( $align ),
+			esc_attr( $classes_and_styles['styles'] )
+		);
+		$output .= sprintf(
+			'<span %1$s>%2$s</span>',
+			wc_implode_html_attributes( $label_attributes ),
+			esc_html( $sale_text )
+		);
+		$output .= sprintf(
+			'<span %1$s>%2$s</span>',
+			wc_implode_html_attributes( $screen_reader_attributes ),
+			esc_html( $screen_reader_text )
+		);
 		$output .= '</div></div>';
 
 		return $output;
