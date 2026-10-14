@@ -43,38 +43,24 @@
 }
 
 .woocommerce-profiler-purple-theme__option {
-	position: relative;
 	display: flex;
 	flex-direction: column;
 	border: 1px solid $gray-200;
 	border-radius: 4px;
 	overflow: hidden;
-	cursor: pointer;
 	background: $white;
-
-	&.is-selected,
-	&:focus-within {
-		border-color: var(--wp-admin-theme-color);
-		box-shadow: 0 0 0 1px var(--wp-admin-theme-color);
-	}
 }
 
-.woocommerce-profiler-purple-theme__radio {
-	flex-shrink: 0;
-	width: 20px;
-	height: 20px;
-	margin: 0;
-	accent-color: var(--wp-admin-theme-color);
-}
-
+// Both images use the Purple preview's proportions, so the two boxes line up.
 .woocommerce-profiler-purple-theme__image {
-	display: block;
-	aspect-ratio: 3 / 2;
+	position: relative;
+	aspect-ratio: 872 / 582;
 	border-bottom: 1px solid $gray-200;
 	background: $gray-100;
 
 	img {
-		display: block;
+		position: absolute;
+		inset: 0;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
@@ -83,16 +69,16 @@
 }
 
 .woocommerce-profiler-purple-theme__body {
+	flex: 1;
 	display: flex;
 	flex-direction: column;
+	align-items: flex-start;
 	gap: $gap-smaller;
 	padding: $gap-large;
 }
 
 .woocommerce-profiler-purple-theme__title {
-	display: flex;
-	align-items: center;
-	gap: $gap-small;
+	margin: 0;
 	font-size: 16px;
 	font-weight: 500;
 	line-height: 24px;
@@ -100,34 +86,36 @@
 }
 
 .woocommerce-profiler-purple-theme__description {
+	margin: 0;
 	font-size: 14px;
 	line-height: 20px;
 	color: $gray-700;
 }
 
-.woocommerce-profiler-purple-theme__footer {
+// Pushed to the bottom so the buttons line up across the two boxes.
+.woocommerce-profiler-purple-theme__actions {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	width: 100%;
-	margin-block: 48px;
+	align-items: flex-start;
+	gap: $gap-smaller;
+	margin-block-start: auto;
+	padding-block-start: $gap;
 
-	.woocommerce-profiler-purple-theme__continue {
+	.woocommerce-profiler-purple-theme__button {
 		justify-content: center;
-		width: 200px;
-		height: 48px;
+		height: 40px;
+		padding-inline: $gap-large;
 		font-size: 14px;
 	}
+}
 
-	.woocommerce-profiler-purple-theme__note {
-		margin: $gap 0 0;
-		font-size: 12px;
-		color: $gray-700;
-	}
+.woocommerce-profiler-purple-theme__note {
+	margin: 0;
+	font-size: 12px;
+	line-height: 16px;
+	color: $gray-700;
+}
 
-	@include breakpoint("<782px") {
-		.woocommerce-profiler-purple-theme__continue {
-			width: 100%;
-		}
-	}
+.woocommerce-profiler-purple-theme__options {
+	margin-block-end: 48px;
 }
