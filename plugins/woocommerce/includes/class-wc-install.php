@@ -1499,7 +1499,7 @@ class WC_Install {
 		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
 	KEY idx_date_paid_status_parent (date_paid, status, parent_id),
-	KEY idx_payment_method_date_paid (payment_method, date_paid)
+	KEY idx_payment_method_date_paid_status (payment_method, date_paid, status)
 ) $collate;";
 	}
 
