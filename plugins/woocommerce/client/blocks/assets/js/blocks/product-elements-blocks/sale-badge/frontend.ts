@@ -68,36 +68,37 @@ const { state } = store(
 				const config = getConfig(
 					'woocommerce/product-sale-badge'
 				) as SaleBadgeConfig;
-				const value =
-					context.badgeContent === 'percentage'
-						? config.saleBadgePercentageTemplate.replace(
-								'%s',
-								String( discount.percentage )
-						  )
-						: formatPriceWithCurrency( discount.amount, {
-								code: prices.currency_code,
-								symbol: prices.currency_symbol,
-								minorUnit: prices.currency_minor_unit,
-								decimalSeparator:
-									prices.currency_decimal_separator,
-								thousandSeparator:
-									prices.currency_thousand_separator,
-								prefix: prices.currency_prefix,
-								suffix: prices.currency_suffix,
-						  } );
+				let value: string;
+				if ( context.badgeContent === 'percentage' ) {
+					value = config.saleBadgePercentageTemplate.replace(
+						'%s',
+						String( discount.percentage )
+					);
+				} else {
+					value = formatPriceWithCurrency( discount.amount, {
+						code: prices.currency_code,
+						symbol: prices.currency_symbol,
+						minorUnit: prices.currency_minor_unit,
+						decimalSeparator: prices.currency_decimal_separator,
+						thousandSeparator: prices.currency_thousand_separator,
+						prefix: prices.currency_prefix,
+						suffix: prices.currency_suffix,
+					} );
+				}
 				return `${ context.prefix }${ value }${ context.suffix }`;
 			},
 			get saleBadgeScreenReaderText(): string {
 				const config = getConfig(
 					'woocommerce/product-sale-badge'
 				) as SaleBadgeConfig;
-				return productsState.productVariationInContext
-					? config.saleBadgeScreenReaderTemplate.replace(
-							'%s',
-							() => state.saleBadgeText ?? ''
-					  )
-					: getContext< SaleBadgeContext >()
-							.saleBadgeScreenReaderText;
+				if ( ! productsState.productVariationInContext ) {
+					return getContext< SaleBadgeContext >()
+						.saleBadgeScreenReaderText;
+				}
+				return config.saleBadgeScreenReaderTemplate.replace(
+					'%s',
+					() => state.saleBadgeText ?? ''
+				);
 			},
 			get isSaleBadgeHidden(): boolean {
 				return state.saleBadgeText === null;

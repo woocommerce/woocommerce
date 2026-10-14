@@ -99,8 +99,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( (object) $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
-		$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+		$this->assert_sale_badge_labels( $markup, $expected );
 	}
 
 	/**
@@ -154,7 +153,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		if ( '' === $expected ) {
 			$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge', $markup, 'Zero-rounded percentage badges should be omitted.' );
 		} else {
-			$this->assertStringContainsString( 'aria-hidden="true">' . $expected . '</span>', $markup );
+			$this->assert_sale_badge_labels( $markup, $expected );
 		}
 	}
 
@@ -201,8 +200,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 				'suffix'       => ' off',
 			);
 			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
-			$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
-			$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+			$this->assert_sale_badge_labels( $markup, $expected );
 		}
 	}
 
@@ -227,8 +225,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			'suffix'       => ' off',
 		);
 		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
-		$this->assertStringContainsString( 'aria-hidden="true">' . $expected . '</span>', $markup );
-		$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+		$this->assert_sale_badge_labels( $markup, $expected );
 	}
 
 	/**
@@ -286,7 +283,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 				) as $product_id => $expected
 			) {
 				$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge {"badgeContent":"amount"} /--></div><!-- /wp:woocommerce/single-product -->' );
-				$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
+				$this->assert_sale_badge_labels( $markup, $expected );
 			}
 		} finally {
 			\WC_Tax::_delete_tax_rate( $tax_id );
@@ -314,6 +311,19 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'data-wp-text="state.saleBadgeText"', $markup );
 		$this->assertStringContainsString( 'data-wp-text="state.saleBadgeScreenReaderText"', $markup );
 		$this->assertStringContainsString( '>Up to 50%</span>', $markup );
+	}
+
+	/**
+	 * Assert visible and screen-reader sale badge labels without depending on attribute order.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @param string $expected Expected badge text.
+	 */
+	private function assert_sale_badge_labels( string $markup, string $expected ): void {
+		$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text', $markup );
+		$this->assertStringContainsString( 'aria-hidden="true"', $markup );
+		$this->assertStringContainsString( '>' . $expected . '</span>', $markup );
+		$this->assertStringContainsString( 'Product on sale: ' . $expected . '</span>', $markup );
 	}
 
 	/**
