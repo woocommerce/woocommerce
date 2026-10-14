@@ -23,7 +23,7 @@ final class ProductScopes {
 	public const GLOBAL_SCOPE_NAME = self::NAME_PREFIX;
 
 	/**
-	 * Start of every name. Its colon is outside the form-name alphabet.
+	 * Start of every name. On its own it is the global scope's name.
 	 */
 	private const NAME_PREFIX = 'wc:';
 
