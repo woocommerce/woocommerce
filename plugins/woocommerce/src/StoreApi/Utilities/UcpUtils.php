@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -96,5 +97,50 @@ class UcpUtils {
 	 */
 	private static function capability_declaration( string $capability ): array {
 		return self::capability_declarations()[ $capability ] ?? array( 'version' => self::VERSION );
+	}
+
+	/**
+	 * Build a UCP error response.
+	 *
+	 * The envelope shape every route shares. `$status` follows the UCP split: a malformed
+	 * request keeps a non-2xx status, a valid request that ends in a refusal is a business
+	 * outcome reported at 200 through `ucp.status` and `messages`.
+	 *
+	 * @param string $capability One of the CAPABILITY_* constants.
+	 * @param string $code Error code.
+	 * @param string $message Error message.
+	 * @param string $severity Error severity.
+	 * @param int    $status HTTP status.
+	 * @param string $path JSONPath of the offending field.
+	 * @return \WP_REST_Response
+	 */
+	public static function error_response( string $capability, string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
+		return new \WP_REST_Response(
+			array(
+				'ucp'      => self::response_metadata( $capability, 'error' ),
+				'messages' => array(
+					array(
+						'type'         => 'error',
+						'code'         => $code,
+						'content'      => $message,
+						'severity'     => $severity,
+						'path'         => $path,
+						'content_type' => 'plain',
+					),
+				),
+			),
+			$status
+		);
+	}
+
+	/**
+	 * Convert a WooCommerce amount to UCP minor units.
+	 *
+	 * @param MoneyFormatter $money Money formatter configured for the store.
+	 * @param mixed          $amount Amount in major units, as WooCommerce reports it.
+	 * @return int
+	 */
+	public static function to_minor_units( MoneyFormatter $money, $amount ): int {
+		return (int) $money->format( is_scalar( $amount ) ? (string) $amount : '0' );
 	}
 }

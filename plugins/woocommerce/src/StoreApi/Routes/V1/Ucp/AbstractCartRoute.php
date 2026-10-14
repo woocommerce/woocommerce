@@ -311,22 +311,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
-		return new \WP_REST_Response(
-			array(
-				'ucp'      => $this->ucp_metadata( 'error' ),
-				'messages' => array(
-					array(
-						'type'         => 'error',
-						'code'         => $code,
-						'content'      => $message,
-						'severity'     => $severity,
-						'path'         => $path,
-						'content_type' => 'plain',
-					),
-				),
-			),
-			$status
-		);
+		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
 	}
 
 	/**
@@ -362,22 +347,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_not_found(): \WP_REST_Response {
-		return new \WP_REST_Response(
-			array(
-				'ucp'      => $this->ucp_metadata( 'error' ),
-				'messages' => array(
-					array(
-						'type'         => 'error',
-						'code'         => 'not_found',
-						'content'      => __( 'Cart not found.', 'woocommerce' ),
-						'severity'     => 'unrecoverable',
-						'path'         => '$.id',
-						'content_type' => 'plain',
-					),
-				),
-			),
-			200
-		);
+		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
 	}
 
 	/**

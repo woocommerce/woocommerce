@@ -206,6 +206,6 @@ class UcpCartTransformer {
 	 * @return int
 	 */
 	private function to_minor_units( $amount ): int {
-		return (int) $this->money->format( is_scalar( $amount ) ? (string) $amount : '0' );
+		return UcpUtils::to_minor_units( $this->money, $amount );
 	}
 }

@@ -139,22 +139,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status ): \WP_REST_Response {
-		return new \WP_REST_Response(
-			array(
-				'ucp'      => $this->ucp_metadata( 'error' ),
-				'messages' => array(
-					array(
-						'type'         => 'error',
-						'code'         => $code,
-						'content'      => $message,
-						'severity'     => $severity,
-						'path'         => '$',
-						'content_type' => 'plain',
-					),
-				),
-			),
-			$status
-		);
+		return UcpUtils::error_response( $this->get_capability(), $code, $message, $severity, $status );
 	}
 
 	/**
