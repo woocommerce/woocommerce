@@ -27,7 +27,6 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
-use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
@@ -386,10 +385,9 @@ final class WooCommerce {
 		$container->get( CustomOrdersTableController::class );
 		$container->get( ProductCacheController::class );
 		$container->get( ProductTermCacheInvalidator::class );
-		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
-		$container->get( WebhookUtil::class );
+		$container->get( WebhookUtil::class ); // Perf: admin/CLI-only — hooks deleted_user + delete_user_form (admin user management); gate behind $is_admin || $is_cli.
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
@@ -410,11 +408,10 @@ final class WooCommerce {
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
-		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register(); // Perf: admin/CLI-only — hooks after_plugin_row + upgrader_process_complete; gate behind $is_admin || $is_cli.
 		$container->get( Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
@@ -446,6 +443,7 @@ final class WooCommerce {
 		if ( $is_admin ) {
 			$container->get( Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU::class ); // Perf: admin-only — hooks woocommerce_get_settings_products (admin settings page filter); gate behind is_admin().
 			$container->get( Automattic\WooCommerce\Internal\Admin\Marketplace::class ); // Perf: admin-only — self-gates via init→is_admin() but still instantiates + hooks init on frontend; gate the container get behind is_admin().
+			$container->get( Automattic\WooCommerce\Internal\Settings\OptionSanitizer::class ); // Perf: admin-only — 6 woocommerce_admin_settings_sanitize_option_* filters that only fire during admin settings save; gate behind $is_admin.
 			$container->get( Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements::class ); // Perf: admin-only — hooks admin_init; gate behind is_admin().
 
 			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen::class ); // Perf: admin-only — hooks init just to check is_admin() inside; gate the container get behind is_admin().
@@ -453,6 +451,7 @@ final class WooCommerce {
 			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register(); // Perf: admin-only — hooks admin_init; gate behind is_admin().
 
 			$container->get( Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin::class )->register(); // Perf: admin-only (self-gates) but calls wc_get_attribute_taxonomies() eagerly on every admin load; defer to admin_init or a late admin hook so it only runs when needed.
+			$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register(); // Perf: admin-only — hooks woocommerce_debug_tools (Status > Tools page); gate behind $is_admin.
 			$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register(); // Perf: admin-only — hooks woocommerce_debug_tools (WooCommerce > Status > Tools); gate behind is_admin().
 		}
 
