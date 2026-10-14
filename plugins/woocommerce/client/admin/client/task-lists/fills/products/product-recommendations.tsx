@@ -33,7 +33,7 @@ export type ProductRecommendation = {
 const CONTEXT = 'products-list-empty-body';
 const HEADING_ID = 'woocommerce-product-recommendations-heading';
 const BROWSE_ALL_URL = getAdminLink(
-	'admin.php?page=wc-admin&tab=extensions&path=/extensions'
+	'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 );
 
 // Same UTM values the legacy marketplace suggestions used for the empty products list.
