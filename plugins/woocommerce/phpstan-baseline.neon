@@ -65929,12 +65929,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
 
 		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_title\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
 			message: '#^Parameter \#1 \$price of method WC_Product\:\:set_price\(\) expects string, int given\.$#'
 			identifier: argument.type
 			count: 1

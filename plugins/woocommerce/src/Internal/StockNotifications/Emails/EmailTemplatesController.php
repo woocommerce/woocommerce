@@ -74,7 +74,7 @@ class EmailTemplatesController {
 
 		ob_start();
 		?>
-		<div id="notification__product__title"><?php echo esc_html( $product->get_title() ); ?></div>
+		<div id="notification__product__title"><?php echo esc_html( $product->get_name() ); ?></div>
 		<?php
 		$html = ob_get_clean();
 		echo wp_kses_post( $html );
