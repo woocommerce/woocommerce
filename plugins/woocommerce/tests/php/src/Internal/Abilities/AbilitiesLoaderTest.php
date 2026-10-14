@@ -2137,6 +2137,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $by_content['Customer note.'] );
 		$this->assertFalse( $by_content['Internal note.'] );
 
+		$dates_by_content = array_column( $result['notes'], 'date_created', 'note' );
+		$this->assertSame( wc_rest_prepare_date_response( '2030-01-01 00:00:00', false ), $dates_by_content['Internal note.'] );
+
 		$this->assertContainsOnly( 'int', array_column( $result['notes'], 'id' ) );
 		$this->assertSame( $newer_note_id, $result['notes'][0]['id'], 'Notes should be newest first by creation date.' );
 	}
