@@ -407,21 +407,19 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 				continue;
 			}
 
-			$item_id    = (string) $line_item['item']['id'];
-			$product_id = $this->resolve_item_id( $item_id );
+			$item_id = (string) $line_item['item']['id'];
+			$product = $this->get_item_product( $item_id );
 
-			if ( 0 === $product_id ) {
-				// The payload is well formed; the store simply has nothing orderable under
-				// that id. A business outcome, so 200 like every other refusal. An id that
-				// matches no product is `not_found`; one that matches a product a cart line
-				// cannot hold — a variable parent, grouped, external or otherwise
-				// unpurchasable — exists but is unavailable.
-				$product = $this->get_item_product( $item_id );
+			// The payload is well formed; the store simply has nothing orderable under that
+			// id. A business outcome, so 200 like every other refusal. An id matching no
+			// product is `not_found`; one matching a product a cart line cannot hold — a
+			// variable parent, grouped, external or otherwise unpurchasable — exists but is
+			// unavailable.
+			if ( ! $product instanceof \WC_Product ) {
+				return $this->ucp_error( 'not_found', __( 'Product not found.', 'woocommerce' ), 'unrecoverable', 200, $path . '.item.id' );
+			}
 
-				if ( ! $product instanceof \WC_Product ) {
-					return $this->ucp_error( 'not_found', __( 'Product not found.', 'woocommerce' ), 'unrecoverable', 200, $path . '.item.id' );
-				}
-
+			if ( $product instanceof \WC_Product_Variable || ! $product->is_purchasable() ) {
 				$message = $product instanceof \WC_Product_Variable
 					? __( 'This product is only orderable as one of its variants. Use a variant id from the catalog.', 'woocommerce' )
 					: __( 'This product cannot be added to a cart.', 'woocommerce' );
@@ -431,30 +429,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 			// Repeating an id is additive, matching how a cart treats two adds of the
 			// same product.
+			$product_id                           = (int) $product->get_id();
 			$desired['by_product'][ $product_id ] = ( $desired['by_product'][ $product_id ] ?? 0 ) + $quantity;
 		}
 
 		return $desired;
-	}
-
-	/**
-	 * Resolve a UCP item id to an orderable product id.
-	 *
-	 * Accepts anything catalog hands out: product id, variation id or SKU. A variable
-	 * parent is refused — it reports a price and so passes `is_purchasable()`, but a cart
-	 * line needs one of its variants.
-	 *
-	 * @param string $item_id Item identifier.
-	 * @return int Product id, or 0 when nothing orderable matched.
-	 */
-	protected function resolve_item_id( string $item_id ): int {
-		$product = $this->get_item_product( $item_id );
-
-		if ( ! $product instanceof \WC_Product || $product instanceof \WC_Product_Variable || ! $product->is_purchasable() ) {
-			return 0;
-		}
-
-		return (int) $product->get_id();
 	}
 
 	/**
