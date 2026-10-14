@@ -112,8 +112,24 @@ class CatalogSearch extends AbstractCatalogRoute {
 		$limit  = isset( $pagination['limit'] ) ? min( max( (int) $pagination['limit'], 1 ), 100 ) : 10;
 		$offset = $this->decode_cursor( isset( $pagination['cursor'] ) ? (string) $pagination['cursor'] : '' );
 
-		$results = $this->query_products( $this->store_api_params( $query, $filters, $limit, $offset ) );
-		$mapped  = $this->mapper()->map_products( $results['objects'] );
+		$category_slugs = null;
+
+		if ( ! empty( $filters['categories'] ) && is_array( $filters['categories'] ) ) {
+			$category_slugs = $this->resolve_category_slugs( $filters['categories'] );
+		}
+
+		// A category list naming no existing term can match nothing; querying
+		// without the filter would return the whole catalog instead.
+		if ( null !== $category_slugs && empty( $category_slugs ) ) {
+			$results = array(
+				'objects' => array(),
+				'total'   => 0,
+			);
+		} else {
+			$results = $this->query_products( $this->store_api_params( $query, $filters, $category_slugs, $limit, $offset ) );
+		}
+
+		$mapped = $this->mapper()->map_products( $results['objects'] );
 
 		$pagination_result = array( 'has_next_page' => $offset + $limit < $results['total'] );
 
@@ -229,13 +245,14 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * Like core's other price filters it matches on range overlap: a variable product
 	 * qualifies when its min–max span intersects the bounds, even with no variation inside them.
 	 *
-	 * @param string $query Free-text search term.
-	 * @param array  $filters Request filters.
-	 * @param int    $limit Page size.
-	 * @param int    $offset Offset of the first result.
+	 * @param string     $query Free-text search term.
+	 * @param array      $filters Request filters.
+	 * @param array|null $category_slugs Resolved category slugs, or null when none were requested.
+	 * @param int        $limit Page size.
+	 * @param int        $offset Offset of the first result.
 	 * @return array
 	 */
-	private function store_api_params( string $query, array $filters, int $limit, int $offset ): array {
+	private function store_api_params( string $query, array $filters, ?array $category_slugs, int $limit, int $offset ): array {
 		$params = array(
 			'orderby'            => 'date',
 			'order'              => 'desc',
@@ -248,12 +265,8 @@ class CatalogSearch extends AbstractCatalogRoute {
 			$params['search'] = $query;
 		}
 
-		if ( ! empty( $filters['categories'] ) && is_array( $filters['categories'] ) ) {
-			$slugs = $this->resolve_category_slugs( $filters['categories'] );
-
-			if ( ! empty( $slugs ) ) {
-				$params['category'] = $slugs;
-			}
+		if ( ! empty( $category_slugs ) ) {
+			$params['category'] = $category_slugs;
 		}
 
 		if ( isset( $filters['price'] ) && is_array( $filters['price'] ) ) {

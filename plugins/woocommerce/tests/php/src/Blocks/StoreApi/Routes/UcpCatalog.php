@@ -201,6 +201,22 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * A category list resolving to no existing term matches nothing rather than everything.
+	 */
+	public function test_search_unknown_category_returns_no_products(): void {
+		$newest = end( self::$product_ids );
+		$term   = wp_insert_term( 'UCP Mugs', 'product_cat', array( 'slug' => 'ucp-mugs' ) );
+		wp_set_object_terms( $newest, (int) $term['term_id'], 'product_cat' );
+
+		$data = $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( 'ucp-mugs' ) ) ) )->get_data();
+		$this->assertSame( array( (string) $newest ), wp_list_pluck( $data['products'], 'id' ) );
+
+		$data = $this->post( '/catalog/search', array( 'filters' => array( 'categories' => array( 'does-not-exist' ) ) ) )->get_data();
+		$this->assertSame( array(), $data['products'] );
+		$this->assertFalse( $data['pagination']['has_next_page'] );
+	}
+
+	/**
 	 * Search needs a query or a supported filter; an unrecognized filter alone does not count.
 	 */
 	public function test_search_without_recognized_input_returns_ucp_validation_error(): void {
