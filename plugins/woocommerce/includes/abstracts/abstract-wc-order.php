@@ -817,18 +817,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Whether the order can have a status.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param string $status Status slug, with or without the `wc-` prefix.
-	 * @return bool
-	 */
-	public function is_valid_status( string $status ): bool {
-		return in_array( 'wc-' . OrderUtil::remove_status_prefix( $status ), $this->get_valid_statuses(), true );
-	}
-
-	/**
 	 * Get user ID. Used by orders, not other order types like refunds.
 	 *
 	 * @param  string $context View or edit context.
