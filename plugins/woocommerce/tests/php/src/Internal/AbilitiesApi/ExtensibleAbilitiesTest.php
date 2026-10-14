@@ -152,6 +152,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$writable = array(
 			array( 'product', 'test-ext', 'color', array( 'type' => 'string' ) ),
 			array( 'product', 'other_ext', 'count', array( 'type' => 'integer' ) ),
+			array(
+				'product',
+				'other_ext',
+				'size',
+				array(
+					'type' => 'string',
+					'enum' => array( 'small', 'large' ),
+				),
+			),
 			array( 'order', 'test-ext', 'tag', array( 'type' => 'string' ) ),
 		);
 		foreach ( $writable as list( $resource, $namespace, $field, $schema ) ) {
@@ -667,6 +676,46 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_order_edit_status one time for an accepted status change, and not at all when an extension refuses it.
+	 */
+	public function test_order_status_update_fires_the_edit_action_only_for_an_accepted_change(): void {
+		$order    = \WC_Helper_Order::create_order();
+		$edits    = array();
+		$listener = static function ( $order_id, $status ) use ( &$edits ) {
+			$edits[] = array( $order_id, $status );
+		};
+		add_action( 'woocommerce_order_edit_status', $listener, 10, 2 );
+
+		try {
+			$refused = $this->run_ability_response(
+				'woocommerce/order-update-status',
+				array(
+					'id'         => $order->get_id(),
+					'status'     => 'completed',
+					'extensions' => array( 'test-ext' => array( 'tag' => 'reject' ) ),
+				)
+			);
+			$this->assertSame( 400, $refused->get_status() );
+			$this->assertSame( 'test_rejected', $refused->get_data()['code'] );
+			$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+			$this->assertSame( array(), $edits );
+
+			$this->run_ability(
+				'woocommerce/order-update-status',
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'completed',
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_order_edit_status', $listener, 10 );
+		}
+
+		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+		$this->assertSame( array( array( $order->get_id(), 'completed' ) ), $edits );
+	}
+
+	/**
 	 * @testdox Should refuse a status that the order object does not accept, and keep the order status.
 	 */
 	public function test_order_status_update_refuses_a_status_the_order_does_not_accept(): void {
@@ -861,6 +910,35 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_color' ) );
 		$this->assertArrayNotHasKey( 'extensions', $output['product'] );
+	}
+
+	/**
+	 * @testdox Should accept null for a field with an enum, to delete its value, and still refuse a value outside the enum.
+	 */
+	public function test_a_null_value_deletes_the_value_of_an_enum_field(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( '_test_size', 'small' );
+		$product->save();
+
+		$schema   = $this->get_ability( 'woocommerce/product-update' )['input_schema']['oneOf'][0]['properties']['extensions']['properties']['other_ext']['properties']['size'];
+		$rejected = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'other_ext' => array( 'size' => 'medium' ) ),
+			)
+		);
+		$this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'other_ext' => array( 'size' => null ) ),
+			)
+		);
+
+		$this->assertSame( array( 'small', 'large', null ), $schema['enum'] );
+		$this->assertSame( 400, $rejected->get_status() );
+		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_size' ) );
 	}
 
 	/**
