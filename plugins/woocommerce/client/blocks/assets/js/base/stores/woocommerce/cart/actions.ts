@@ -30,8 +30,8 @@ import {
 import type { SelectedAttributes, WooCommerceConfig } from '../types';
 import type {
 	AddCartItemOutcome,
+	AddCartItemPayload,
 	CartUpdateOptions,
-	ClientCartItem,
 	OptimisticCartItem,
 	Store,
 } from './types';
@@ -53,10 +53,9 @@ type CartMutationMeta = {
 	quantityChanges: QuantityChanges;
 	/**
 	 * Whether this mutation was issued by an add-style action (`addCartItem`,
-	 * `updateCartItem` or `batchAddCartItems`, regardless of whether it hit the
-	 * `add-item` or `update-item` endpoint) or by `removeCartItem`. Only `'add'`-origin
-	 * successes trigger the legacy added-to-cart event and the screen-reader
-	 * announcement.
+	 * `updateCartItem` or `batchAddCartItems`) or by `removeCartItem`. Only
+	 * `'add'`-origin successes trigger the legacy added-to-cart event and the
+	 * screen-reader announcement.
 	 */
 	origin: 'add' | 'remove';
 };
@@ -321,9 +320,9 @@ const { actions } = store< Store >(
 				key,
 				variation,
 			}: {
-				id: ClientCartItem[ 'id' ];
-				key?: ClientCartItem[ 'key' ];
-				variation?: ClientCartItem[ 'variation' ];
+				id: number;
+				key?: string | undefined;
+				variation?: SelectedAttributes[] | undefined;
 			} ) {
 				return state.cart.items.find( ( cartItem ) => {
 					if ( key ) {
@@ -403,9 +402,9 @@ const { actions } = store< Store >(
 			 * announces `addedToCartText`. A rejected request shows an error
 			 * notice and the call still resolves.
 			 *
-			 * @param args          The update.
-			 * @param args.key      The key of the line to update. Required.
-			 * @param args.quantity The new absolute quantity of the line.
+			 * @param  args          The update.
+			 * @param  args.key      The key of the line to update. Required.
+			 * @param  args.quantity The new absolute quantity of the line.
 			 * @throws {Error} When `key` is missing, before any request or change.
 			 */
 			*updateCartItem( {
@@ -480,157 +479,84 @@ const { actions } = store< Store >(
 				}
 			},
 
+			/**
+			 * Adds `quantity` units of a product to the cart.
+			 *
+			 * Always posts `add-item` with `{ id, quantity, variation? }`, where
+			 * `quantity` is the amount to add (1 when omitted) whatever line
+			 * already holds the product. The matching rendered line rises by
+			 * that amount at once, so rapid calls compound. A successful cycle
+			 * fires the added-to-cart event and announces `addedToCartText`.
+			 * Never rejects on a request failure: the outcome carries it.
+			 *
+			 * @param payload                        The product to add.
+			 * @param payload.id                     The product or variation id.
+			 * @param payload.quantity               The amount to add. Defaults to 1.
+			 * @param payload.variation              The selected attributes of a variation.
+			 * @param options                        The call options.
+			 * @param options.showCartUpdatesNotices Whether to show the notices for
+			 *                                       the cart update. Defaults to true.
+			 * @return `{ success: true }` once the request is accepted, or
+			 *         `{ success: false, error }` when it is rejected.
+			 */
 			*addCartItem(
-				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
+				{ id, quantity, variation }: AddCartItemPayload,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			): AsyncAction< AddCartItemOutcome > {
-				if ( quantity !== undefined && quantityToAdd !== undefined ) {
-					throw new Error(
-						'addCartItem: pass either quantity or quantityToAdd, not both.'
-					);
-				}
-
-				// Keyless-requires-delta invariant. A keyless add always issues
-				// `add-item`, whose quantity is a delta added to the existing
-				// line; rapid-click compounding relies on that — each click sends
-				// its own delta and the server sums them (N -> N+1 -> N+2). An
-				// absolute `quantity` on a keyless add would be misread as a delta
-				// and corrupt that compounding, so keyless callers must pass
-				// `quantityToAdd`. An absolute `quantity` is legitimate only when
-				// paired with an explicit `key`: that is the keyed-stepper path
-				// (mini-cart / cart-block quantity controls), which targets one
-				// known line via `update-item` and sets its quantity outright.
-				// Those keyed callers are intentionally exempt from this guard.
-				if (
-					key === undefined &&
-					quantity !== undefined &&
-					quantityToAdd === undefined
-				) {
-					throw new Error(
-						'addCartItem: a keyless add must pass quantityToAdd (a delta), not an absolute quantity.'
-					);
-				}
-
 				preloadA11y();
 
 				// Find existing item
-				const existingItem = state.findItemInCart( {
-					id,
-					key,
-					variation,
-				} );
+				const existingItem = state.findItemInCart( { id, variation } );
 
-				// Determine the target quantity.
-				// If quantityToAdd is provided, calculate target based on current
-				// cart state (which includes optimistic updates from previous clicks).
-				// This ensures rapid clicks compound correctly.
-				let targetQuantity: number;
-				if ( typeof quantityToAdd === 'number' ) {
-					const currentQuantity = existingItem?.quantity ?? 0;
-					targetQuantity = currentQuantity + quantityToAdd;
-				} else if ( typeof quantity === 'number' ) {
-					targetQuantity = quantity;
-				} else {
-					// Neither provided - default to 1
-					targetQuantity = 1;
-				}
-
-				// Endpoint selection is a pure function of the caller-supplied
-				// `key`, never of a line matched by id/variation. A keyless add
-				// always issues `add-item` with a delta, even when an existing
-				// line (including a server-keyed one) matches by product id, so
-				// the server owns cart-line identity for adds. Only an explicit
-				// caller `key` targets a specific line via `update-item`.
-				const isUpdate = !! key;
-				const endpoint = isUpdate ? 'update-item' : 'add-item';
+				// The amount posted is always the caller's delta, never a
+				// function of the matched line. The rendered quantity is the
+				// current one (which includes optimistic updates from previous
+				// clicks) plus that delta, so rapid clicks compound.
+				const delta = quantity ?? 1;
+				const targetQuantity = ( existingItem?.quantity ?? 0 ) + delta;
 
 				// Track what changes we're making for notice comparison.
-				const quantityChanges: QuantityChanges = isUpdate
-					? {
-							cartItemsPendingQuantity: existingItem?.key
-								? [ existingItem.key ]
-								: [],
-						}
-					: { productsPendingAdd: [ id ] };
+				const quantityChanges: QuantityChanges = {
+					productsPendingAdd: [ id ],
+				};
 
-				// Prepare the item to send.
-				let itemToSend: OptimisticCartItem;
-				if ( isUpdate && existingItem ) {
-					// Caller-keyed update: target the exact line by key and send
-					// the absolute target quantity to the update-item endpoint.
-					itemToSend = { ...existingItem, quantity: targetQuantity };
-				} else {
-					// Keyless add: build a fresh payload for the add-item
-					// endpoint and never copy the matched line's key. The amount
-					// sent is always a delta — add-item adds to the existing
-					// quantity rather than setting it — so a match (by
-					// id/variation, possibly carrying a server key) only tells us
-					// how much delta is already accounted for in the running
-					// optimistic total; with no match we post the full target
-					// quantity. The matched line is never sent as an absolute
-					// quantity: the posted amount is a function of the delta,
-					// not of the match.
-					const quantityToSend = existingItem
-						? targetQuantity - existingItem.quantity
-						: targetQuantity;
-
-					itemToSend = {
-						id,
-						quantity: quantityToSend,
-						...( variation && { variation } ),
-					} as OptimisticCartItem;
-				}
+				// A fresh payload for the add-item endpoint. It never copies the
+				// matched line's key, so the server owns cart-line identity.
+				const itemToSend = {
+					id,
+					quantity: delta,
+					...( variation && { variation } ),
+				} as OptimisticCartItem;
 
 				// Capture cart state after optimistic updates for notice comparison.
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
-				// Per-product capture for the keyless-add exactness test.
-				// On the keyless path (!isUpdate), capture by value — before the
-				// optimistic bump mutates `existingItem.quantity` in place — the
-				// set of pre-existing matching line keys and their summed quantity.
-				// This is the single error-prone hotspot: `existingItem` is a live
-				// reference into `state.cart.items`; reading `.quantity` after the
-				// bump yields the post-bump value and silently corrupts the math.
-				// Stays empty on the keyed `update-item` path so the "your change
-				// was undone" notice keeps firing for steppers.
-				type ProductCapture = {
-					id: number;
-					variation?:
-						CartVariationItem[] | SelectedAttributes[] | undefined;
-					preAddTotal: number;
-					deltaTotal: number;
-					preExistingKeys: string[];
-				};
-				const productCaptures: ProductCapture[] = [];
-				if ( ! isUpdate ) {
-					// Sum all pre-add quantities across every cart line matching
-					// this product (id + variation). A single product can occupy
-					// multiple lines (e.g. a meta line ordered before a standalone
-					// line). The per-product total lets us verify exactness even
-					// when the server grows a different line than the one the
-					// client bumped optimistically.
-					const preExistingKeys: string[] = [];
-					let preAddTotal = 0;
-					for ( const cartLine of state.cart.items ) {
-						if ( lineMatchesProduct( cartLine, id, variation ) ) {
-							preAddTotal += cartLine.quantity;
-							if ( cartLine.key ) {
-								preExistingKeys.push( cartLine.key );
-							}
+				// Per-product capture for the exact-add test. Sum, by value and
+				// before the optimistic bump mutates `existingItem.quantity` in
+				// place, the quantity and keys of every pre-existing line matching
+				// this product (id + variation). A product can occupy several lines
+				// (e.g. a meta line ordered before a standalone line), and the
+				// per-product total verifies exactness even when the server grows
+				// a different line than the one bumped optimistically.
+				const preExistingKeys: string[] = [];
+				let preAddTotal = 0;
+				for ( const cartLine of state.cart.items ) {
+					if ( lineMatchesProduct( cartLine, id, variation ) ) {
+						preAddTotal += cartLine.quantity;
+						if ( cartLine.key ) {
+							preExistingKeys.push( cartLine.key );
 						}
 					}
-					// `itemToSend.quantity` is the posted delta (quantityToSend
-					// computed above). It is already computed before this capture
-					// block and does not depend on the optimistic state, so it is
-					// safe to read here.
-					productCaptures.push( {
+				}
+				const productCaptures = [
+					{
 						id,
 						variation,
 						preAddTotal,
-						deltaTotal: itemToSend.quantity,
+						deltaTotal: delta,
 						preExistingKeys,
-					} );
-				}
+					},
+				];
 
 				// Captured at the request-settlement boundary (the line right
 				// after the request-sending yield resolves/throws) and never
@@ -641,24 +567,18 @@ const { actions } = store< Store >(
 
 				try {
 					const result = ( yield sendCartRequest( state, {
-						path: `/wc/store/v1/cart/${ endpoint }`,
+						path: '/wc/store/v1/cart/add-item',
 						method: 'POST',
 						body: itemToSend,
 						applyOptimistic: () => {
 							if ( existingItem ) {
-								// This in-place bump is render-only. It
-								// makes the common re-add flicker-free, but it must
-								// never feed back into endpoint selection or the
-								// posted amount — those are already fixed above as a
-								// pure function of key-presence and the delta. On a
-								// keyless add the match may bump a server-keyed line's
-								// rendered quantity (the accepted, self-correcting
-								// meta-only blip the server reconciles away); it must
-								// not flip the add into `update-item` or supply an
-								// absolute quantity. A future edit that lets this
-								// match drive the endpoint or the posted amount
-								// resurrects the original "cannot update bundle item"
-								// / wrong-line bug.
+								// This in-place bump is render-only. It makes
+								// the common re-add flicker-free, but it must
+								// never feed back into the posted amount, which
+								// is already fixed above as the delta. It may
+								// bump a server-keyed line's rendered quantity
+								// (the accepted, self-correcting meta-only blip
+								// the server reconciles away).
 								const isSoldIndividually =
 									isCartItem( existingItem ) &&
 									existingItem.sold_individually;
@@ -736,23 +656,35 @@ const { actions } = store< Store >(
 				return outcome as AddCartItemOutcome;
 			},
 
+			/**
+			 * Adds several products to the cart in one cycle.
+			 *
+			 * Each item posts `add-item` with `{ id, quantity, variation? }`,
+			 * where `quantity` is the amount to add (1 when omitted), with the
+			 * same optimistic update and notices as `addCartItem`. A request
+			 * failure shows an error notice and never rejects.
+			 *
+			 * @param items                          The products to add.
+			 * @param options                        The call options.
+			 * @param options.showCartUpdatesNotices Whether to show the notices for
+			 *                                       the cart update. Defaults to true.
+			 */
 			*batchAddCartItems(
-				items: ClientCartItem[],
+				items: AddCartItemPayload[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			): AsyncAction< void > {
 				preloadA11y();
 
 				try {
-					// Per-product capture for the keyless-add exactness test,
-					// accumulated across all keyless batch items. The map key is a
-					// canonical product token (productToken(id, variation)) so that
-					// multiple batch items for the same product accumulate into one
-					// entry. The capture runs synchronously in the .map() below,
-					// before applyOptimistic runs (applyOptimistic is gated behind
+					// Per-product capture for the exact-add test, accumulated
+					// across all batch items. The map key is a canonical product
+					// token (productToken(id, variation)) so that multiple batch
+					// items for the same product accumulate into one entry. The
+					// capture runs synchronously in the .map() below, before
+					// applyOptimistic runs (applyOptimistic is gated behind
 					// `await isNonceReady` inside sendCartRequest, so every
 					// existingItem.quantity read during the .map() sees the same
-					// pre-add cart). Keyed `update-item` items never contribute to
-					// this map, so the "your change was undone" notice keeps firing.
+					// pre-add cart).
 					type BatchProductCapture = {
 						id: number;
 						variation?:
@@ -770,139 +702,79 @@ const { actions } = store< Store >(
 					const promises = items.map( ( item ) => {
 						const existingItem = state.findItemInCart( {
 							id: item.id,
-							key: item.key,
 							variation: item.variation,
 						} );
 
-						let quantity: number;
-						if ( typeof item.quantityToAdd === 'number' ) {
-							const currentQuantity = existingItem?.quantity ?? 0;
-							quantity = currentQuantity + item.quantityToAdd;
-						} else {
-							quantity = item.quantity ?? 1;
-						}
-						// Endpoint selection is a pure function of the
-						// caller-supplied `key`, never of a line matched by
-						// id/variation. This mirrors the single-item
-						// `addCartItem` path: a keyless batch item always
-						// issues `add-item` with a delta, even when an existing
-						// line (including a server-keyed one) matches by product
-						// id, so the server owns cart-line identity for adds.
-						// Only an explicit caller `key` targets a specific line
-						// via `update-item`.
-						const isUpdate = !! item.key;
-						const endpoint = isUpdate ? 'update-item' : 'add-item';
+						// As in `addCartItem`, the amount posted is the item's
+						// delta, never a function of the matched line.
+						const delta = item.quantity ?? 1;
+						const targetQuantity =
+							( existingItem?.quantity ?? 0 ) + delta;
 
-						let itemToSend: OptimisticCartItem;
-						let itemMeta: CartMutationMeta;
-						if ( isUpdate && existingItem ) {
-							// Caller-keyed update: target the exact line by key
-							// and send the absolute target quantity to the
-							// update-item endpoint.
-							itemToSend = {
-								key: existingItem.key,
-								id: existingItem.id,
-								quantity,
-							} as OptimisticCartItem;
-							itemMeta = {
-								quantityChanges: {
-									cartItemsPendingQuantity: [
-										existingItem.key as string,
-									],
-								},
-								origin: 'add',
-							};
-						} else {
-							// Keyless add: build a fresh payload for the add-item
-							// endpoint and never copy the matched line's key. As in
-							// addCartItem, the amount sent is always a delta —
-							// add-item adds to the existing quantity rather than
-							// setting it — so a match (by id/variation, possibly
-							// carrying a server key) only tells us how much delta is
-							// already accounted for; with no match we post the full
-							// target quantity. The matched line is never sent as an
-							// absolute quantity.
-							const quantityToSend = existingItem
-								? quantity - existingItem.quantity
-								: quantity;
-							itemToSend = {
-								id: item.id,
-								quantity: quantityToSend,
-								...( item.variation && {
-									variation: item.variation,
-								} ),
-							} as OptimisticCartItem;
-							itemMeta = {
-								quantityChanges: {
-									productsPendingAdd: [ item.id ],
-								},
-								origin: 'add',
-							};
+						// A fresh payload for the add-item endpoint that never
+						// copies the matched line's key.
+						const itemToSend = {
+							id: item.id,
+							quantity: delta,
+							...( item.variation && {
+								variation: item.variation,
+							} ),
+						} as OptimisticCartItem;
+						const itemMeta: CartMutationMeta = {
+							quantityChanges: {
+								productsPendingAdd: [ item.id ],
+							},
+							origin: 'add',
+						};
 
-							// Accumulate the per-product capture for the exactness
-							// test. On the first encounter of each product token,
-							// sum all pre-add quantities across every matching line
-							// and collect their keys — both captured as primitives
-							// here, before applyOptimistic mutates the cart. On
-							// subsequent encounters of the same product, add only
-							// the posted delta to the running deltaTotal.
-							const token = productToken(
-								item.id,
-								item.variation
-							);
-							if ( ! batchProductCaptures.has( token ) ) {
-								const preExistingKeys: string[] = [];
-								let preAddTotal = 0;
-								for ( const cartLine of state.cart.items ) {
-									if (
-										lineMatchesProduct(
-											cartLine,
-											item.id,
-											item.variation
-										)
-									) {
-										preAddTotal += cartLine.quantity;
-										if ( cartLine.key ) {
-											preExistingKeys.push(
-												cartLine.key
-											);
-										}
+						// Accumulate the per-product capture for the exactness
+						// test. On the first encounter of each product token,
+						// sum all pre-add quantities across every matching line
+						// and collect their keys — both captured as primitives
+						// here, before applyOptimistic mutates the cart. On
+						// subsequent encounters of the same product, add only
+						// the posted delta to the running deltaTotal.
+						const token = productToken( item.id, item.variation );
+						const capture = batchProductCaptures.get( token );
+						if ( capture ) {
+							capture.deltaTotal += delta;
+						} else {
+							const preExistingKeys: string[] = [];
+							let preAddTotal = 0;
+							for ( const cartLine of state.cart.items ) {
+								if (
+									lineMatchesProduct(
+										cartLine,
+										item.id,
+										item.variation
+									)
+								) {
+									preAddTotal += cartLine.quantity;
+									if ( cartLine.key ) {
+										preExistingKeys.push( cartLine.key );
 									}
 								}
-								batchProductCaptures.set( token, {
-									id: item.id,
-									variation: item.variation,
-									preAddTotal,
-									deltaTotal: quantityToSend,
-									preExistingKeys,
-								} );
-							} else {
-								// Same product seen again in this batch — add delta.
-								const capture =
-									batchProductCaptures.get( token );
-								if ( capture ) {
-									capture.deltaTotal += quantityToSend;
-								}
 							}
+							batchProductCaptures.set( token, {
+								id: item.id,
+								variation: item.variation,
+								preAddTotal,
+								deltaTotal: delta,
+								preExistingKeys,
+							} );
 						}
 
 						return sendCartRequest( state, {
-							path: `/wc/store/v1/cart/${ endpoint }`,
+							path: '/wc/store/v1/cart/add-item',
 							method: 'POST',
 							body: itemToSend,
 							applyOptimistic: () => {
 								if ( existingItem ) {
-									// As in addCartItem, this in-place
-									// bump is render-only and must never feed back into
-									// endpoint selection or the posted amount, which are
-									// already fixed above as a pure function of
-									// key-presence and the delta. Bumping a server-keyed
-									// line's rendered quantity on a keyless add is the
-									// accepted meta-only blip the server reconciles; it
-									// must not flip the add into `update-item` or post an
-									// absolute quantity. Letting this match drive the
-									// endpoint or amount reintroduces the bug.
-									existingItem.quantity = quantity;
+									// As in addCartItem, this in-place bump is
+									// render-only and must never feed back into the
+									// posted amount, which is already fixed above as
+									// the delta.
+									existingItem.quantity = targetQuantity;
 								} else {
 									state.cart.items.push( itemToSend );
 								}

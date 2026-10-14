@@ -23,15 +23,16 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type ClientCartItem = Omit<
-	OptimisticCartItem,
-	'variation' | 'quantity'
-> & {
-	variation?: SelectedAttributes[];
-	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
+/**
+ * The product `addCartItem` and `batchAddCartItems` add to the cart.
+ */
+export type AddCartItemPayload = {
+	/** The product or variation id. */
+	id: number;
+	/** The amount to add to the cart. Defaults to 1 when omitted. */
 	quantity?: number;
-	/** Optional: add this delta to current quantity instead of setting absolute quantity */
-	quantityToAdd?: number;
+	/** The selected attributes, when the product is a variation. */
+	variation?: SelectedAttributes[];
 };
 
 export type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
@@ -67,9 +68,9 @@ export type Store = {
 		restUrl: string;
 		nonce: string;
 		findItemInCart: ( args: {
-			id: ClientCartItem[ 'id' ];
-			key?: ClientCartItem[ 'key' ];
-			variation?: ClientCartItem[ 'variation' ];
+			id: number;
+			key?: string | undefined;
+			variation?: SelectedAttributes[] | undefined;
 		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
@@ -86,12 +87,20 @@ export type Store = {
 			key: string;
 			quantity: number;
 		} ) => Promise< void >;
+		/**
+		 * Adds `quantity` units (1 when omitted) of a product to the cart.
+		 * Resolves the outcome and never rejects on a request failure.
+		 */
 		addCartItem: (
-			args: ClientCartItem,
+			args: AddCartItemPayload,
 			options?: CartUpdateOptions
 		) => Promise< AddCartItemOutcome >;
+		/**
+		 * Adds several products to the cart in one cycle, each by its
+		 * `quantity` (1 when omitted).
+		 */
 		batchAddCartItems: (
-			items: ClientCartItem[],
+			items: AddCartItemPayload[],
 			options?: CartUpdateOptions
 		) => Promise< void >;
 		/**
