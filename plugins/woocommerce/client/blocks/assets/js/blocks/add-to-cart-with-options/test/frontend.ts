@@ -196,7 +196,8 @@ describe( 'Add to Cart + Options interactivity store', () => {
 		{
 			title: 'simple product',
 			type: 'simple',
-			selectedAttributes: [],
+			// The server renders no `selectedAttributes` for a simple product.
+			selectedAttributes: undefined,
 		},
 		{
 			title: 'selected variation',
@@ -209,7 +210,11 @@ describe( 'Add to Cart + Options interactivity store', () => {
 	] )(
 		'forwards the exact $title cart payload',
 		async ( { type, selectedAttributes } ) => {
-			mockContext.selectedAttributes = selectedAttributes;
+			if ( selectedAttributes ) {
+				mockContext.selectedAttributes = selectedAttributes;
+			} else {
+				delete ( mockContext as Partial< Context > ).selectedAttributes;
+			}
 			mockProductsState.productInContext = {
 				...mockProductsState.productInContext,
 				id: 42,
@@ -227,9 +232,8 @@ describe( 'Add to Cart + Options interactivity store', () => {
 			expect( mockAddCartItem ).toHaveBeenCalledWith(
 				{
 					id: 42,
-					quantityToAdd: 2,
+					quantity: 2,
 					variation: selectedAttributes,
-					type,
 				},
 				{ showCartUpdatesNotices: false }
 			);

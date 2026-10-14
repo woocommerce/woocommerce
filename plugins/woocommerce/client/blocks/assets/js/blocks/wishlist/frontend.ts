@@ -218,8 +218,7 @@ store< BlockStore >(
 					// sum the cart ourselves.
 					const outcome = ( yield cartActions.addCartItem( {
 						id: listItem.id,
-						quantityToAdd: 1,
-						type: isVariation ? 'variation' : 'simple',
+						quantity: 1,
 						...( isVariation && { variation } ),
 					} ) ) as AddCartItemOutcome;
 
