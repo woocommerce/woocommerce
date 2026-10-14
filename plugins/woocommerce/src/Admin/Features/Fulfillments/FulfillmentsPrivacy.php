@@ -83,7 +83,7 @@ class FulfillmentsPrivacy {
 				$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id() );
 
 				foreach ( $fulfillments as $fulfillment ) {
-					$data = $this->get_fulfillment_personal_data( $fulfillment );
+					$data = $this->get_fulfillment_personal_data( $fulfillment, $order );
 					if ( empty( $data ) ) {
 						continue;
 					}
@@ -91,7 +91,7 @@ class FulfillmentsPrivacy {
 					$data_to_export[] = array(
 						'group_id'          => 'woocommerce_customer_fulfillments',
 						'group_label'       => __( 'Fulfillments', 'woocommerce' ),
-						'group_description' => __( 'User&#8217;s WooCommerce fulfillment (shipment tracking) data.', 'woocommerce' ),
+						'group_description' => __( 'User&#8217;s WooCommerce fulfillment (shipment) data.', 'woocommerce' ),
 						'item_id'           => 'fulfillment-' . $fulfillment->get_id(),
 						'data'              => $data,
 					);
@@ -113,11 +113,44 @@ class FulfillmentsPrivacy {
 	/**
 	 * Build the exportable rows for a single fulfillment.
 	 *
+	 * The order's items cover everything purchased, but an order can be split across
+	 * several fulfillments, so the shipment-level breakdown (which items shipped where,
+	 * and with what tracking) is not otherwise in the export.
+	 *
 	 * @param Fulfillment $fulfillment The fulfillment.
+	 * @param WC_Order    $order       The order the fulfillment belongs to.
 	 * @return array<int, array{name: string, value: string}>
 	 */
-	private function get_fulfillment_personal_data( Fulfillment $fulfillment ): array {
+	private function get_fulfillment_personal_data( Fulfillment $fulfillment, WC_Order $order ): array {
 		$data = array();
+
+		$status = (string) $fulfillment->get_status();
+		if ( '' !== $status ) {
+			$statuses = FulfillmentUtils::get_fulfillment_statuses();
+			$data[]   = array(
+				'name'  => __( 'Fulfillment status', 'woocommerce' ),
+				'value' => $statuses[ $status ]['label'] ?? $status,
+			);
+		}
+
+		$item_names = array();
+		foreach ( $fulfillment->get_items() as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+			$item_id    = isset( $item['item_id'] ) ? (int) $item['item_id'] : 0;
+			$order_item = $item_id > 0 ? $order->get_item( $item_id ) : false;
+			if ( $order_item ) {
+				$quantity     = isset( $item['qty'] ) ? (int) $item['qty'] : 0;
+				$item_names[] = $order_item->get_name() . ' x ' . $quantity;
+			}
+		}
+		if ( ! empty( $item_names ) ) {
+			$data[] = array(
+				'name'  => __( 'Items in this shipment', 'woocommerce' ),
+				'value' => implode( ', ', $item_names ),
+			);
+		}
 
 		$tracking_number = $fulfillment->get_tracking_number();
 		if ( ! empty( $tracking_number ) ) {

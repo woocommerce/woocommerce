@@ -70,13 +70,21 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	 */
 	private function create_order_with_fulfillment( array $meta ): array {
 		$order       = OrderHelper::create_order();
+		$order_items = $order->get_items();
+		$order_item  = reset( $order_items );
+		$item_id     = $order_item ? $order_item->get_id() : 1;
+
 		$fulfillment = FulfillmentsHelper::create_fulfillment(
-			array( 'entity_id' => (string) $order->get_id() ),
+			array(
+				'entity_id'    => (string) $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			),
 			array_merge(
 				array(
 					'_items' => array(
 						array(
-							'item_id' => 1,
+							'item_id' => $item_id,
 							'qty'     => 1,
 						),
 					),
@@ -143,6 +151,27 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 		$values = wp_list_pluck( $result['data'][0]['data'], 'value' );
 		$this->assertContains( 'TRACK123456', $values, 'The export should include the tracking number.' );
 		$this->assertContains( 'https://example.com/track/TRACK123456', $values, 'The export should include the tracking URL.' );
+	}
+
+	/**
+	 * @testdox The exporter includes the fulfillment status and the items shipped in it.
+	 */
+	public function test_exporter_includes_status_and_items(): void {
+		list( $order ) = $this->create_order_with_fulfillment(
+			array( '_tracking_number' => 'TRACK123456' )
+		);
+
+		$result = $this->sut->fulfillment_data_exporter( $order->get_billing_email(), 1 );
+
+		$rows = array();
+		foreach ( $result['data'][0]['data'] as $row ) {
+			$rows[ $row['name'] ] = $row['value'];
+		}
+
+		$this->assertArrayHasKey( 'Fulfillment status', $rows, 'The export should include the fulfillment status.' );
+		$this->assertSame( 'Fulfilled', $rows['Fulfillment status'] );
+		$this->assertArrayHasKey( 'Items in this shipment', $rows, 'The export should list the items shipped in the fulfillment.' );
+		$this->assertStringContainsString( ' x 1', $rows['Items in this shipment'], 'The shipment items should include the quantity.' );
 	}
 
 	/**
