@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update wordpress/mcp-adapter to 0.4.1, so the mcp-adapter-execute-ability tool returns the error message of a failed ability, and MCP clients receive the readOnlyHint tool annotation.

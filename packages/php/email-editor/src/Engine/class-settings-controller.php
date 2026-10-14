@@ -185,10 +185,12 @@ class Settings_Controller {
 	}
 
 	/**
-	 * Translate slug to color.
+	 * Translate a color slug to the color the palette gives it.
 	 *
-	 * @param string $color_slug Color slug.
-	 * @return string
+	 * {@see Theme_Controller::translate_slug_to_color()}.
+	 *
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
 		return $this->theme_controller->translate_slug_to_color( $color_slug );
