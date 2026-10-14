@@ -439,18 +439,18 @@ final class WooCommerce {
 		}
 
 		if ( $is_admin ) {
-			$container->get( Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU::class ); // Perf: admin-only — hooks woocommerce_get_settings_products (admin settings page filter); gate behind is_admin().
-			$container->get( Automattic\WooCommerce\Internal\Admin\Marketplace::class ); // Perf: admin-only — self-gates via init→is_admin() but still instantiates + hooks init on frontend; gate the container get behind is_admin().
-			$container->get( Automattic\WooCommerce\Internal\Settings\OptionSanitizer::class ); // Perf: admin-only — 6 woocommerce_admin_settings_sanitize_option_* filters that only fire during admin settings save; gate behind $is_admin.
-			$container->get( Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements::class ); // Perf: admin-only — hooks admin_init; gate behind is_admin().
+			$container->get( Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU::class ); // hooks woocommerce_get_settings_products (admin settings page filter).
+			$container->get( Automattic\WooCommerce\Internal\Admin\Marketplace::class ); // hooks admin_menu + admin_enqueue_scripts via init→on_init.
+			$container->get( Automattic\WooCommerce\Internal\Settings\OptionSanitizer::class ); // 6 woocommerce_admin_settings_sanitize_option_* filters, only fire during admin settings save.
+			$container->get( Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements::class ); // hooks admin_init.
 
-			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen::class ); // Perf: admin-only — hooks init just to check is_admin() inside; gate the container get behind is_admin().
-			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register(); // Perf: admin-only — hooks admin_menu, admin_body_class, woocommerce_admin_shared_settings; gate behind is_admin().
-			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register(); // Perf: admin-only — hooks admin_init; gate behind is_admin().
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen::class ); // hooks admin_menu + admin_head.
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register(); // hooks admin_menu, admin_body_class, woocommerce_admin_shared_settings.
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register(); // hooks admin_init.
 
-			$container->get( Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin::class )->register(); // Perf: admin-only (self-gates) but calls wc_get_attribute_taxonomies() eagerly on every admin load; defer to admin_init or a late admin hook so it only runs when needed.
-			$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register(); // Perf: admin-only — hooks woocommerce_debug_tools (Status > Tools page); gate behind $is_admin.
-			$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register(); // Perf: admin-only — hooks woocommerce_debug_tools (WooCommerce > Status > Tools); gate behind is_admin().
+			$container->get( Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin::class )->register(); // TODO: calls wc_get_attribute_taxonomies() (DB query) eagerly on every admin load; defer to admin_init.
+			$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register(); // hooks woocommerce_debug_tools (Status > Tools page).
+			$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register(); // hooks woocommerce_debug_tools (Status > Tools page).
 		}
 
 		$might_collect_wccom_tracker_data = $is_admin || $is_cli || defined( 'DOING_CRON' );
