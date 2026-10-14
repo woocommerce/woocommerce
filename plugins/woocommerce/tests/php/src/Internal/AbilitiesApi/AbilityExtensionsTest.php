@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
-use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 /**
  * Namespaced extension fields in the output of the product and order abilities, read through the REST route.
@@ -418,6 +417,45 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run the prime_callback one time with every product of the page, before the get_callbacks.
+	 */
+	public function test_prime_callback_runs_once_with_every_object_of_the_list(): void {
+		$first  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
+		$second = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+		$primed = array();
+		$cache  = array();
+		add_action(
+			'woocommerce_ability_extensions_init',
+			static function () use ( &$primed, &$cache ) {
+				AbilityExtensions::register_field(
+					array(
+						'resource'       => 'product',
+						'namespace'      => 'primed_ext',
+						'field'          => 'rank',
+						'schema'         => array( 'type' => 'integer' ),
+						'prime_callback' => static function ( array $products ) use ( &$primed, &$cache ) {
+							$primed[] = array_map( static fn( \WC_Product $product ) => $product->get_id(), $products );
+							foreach ( $products as $rank => $product ) {
+								$cache[ $product->get_id() ] = $rank + 1;
+							}
+						},
+						'get_callback'   => static function ( \WC_Product $product ) use ( &$cache ) {
+							return $cache[ $product->get_id() ] ?? null;
+						},
+					)
+				);
+			}
+		);
+
+		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'], null, 'id' );
+
+		$this->assertCount( 1, $primed );
+		$this->assertEqualsCanonicalizing( array( $first->get_id(), $second->get_id() ), $primed[0] );
+		$this->assertSame( $cache[ $first->get_id() ], $products[ $first->get_id() ]['extensions']['primed_ext']['rank'] );
+		$this->assertSame( $cache[ $second->get_id() ], $products[ $second->get_id() ]['extensions']['primed_ext']['rank'] );
+	}
+
+	/**
 	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
@@ -554,7 +592,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @param bool $enabled Whether the feature is on.
 	 */
 	private function set_feature( bool $enabled ): void {
-		update_option( 'woocommerce_feature_' . AbilityContracts::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+		update_option( 'woocommerce_feature_' . AbilityExtensions::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
 	}
 
 	/**

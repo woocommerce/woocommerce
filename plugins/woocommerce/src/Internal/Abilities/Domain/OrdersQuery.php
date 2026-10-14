@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -157,6 +158,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			)
 		);
 		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
+
+		AbilityExtensions::prime( 'order', $orders );
 
 		return array(
 			'orders'      => array_map(
