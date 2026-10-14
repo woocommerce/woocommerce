@@ -145,7 +145,6 @@ For private stores:
 - `assets/js/base/stores/` holds each separate store as one file (`products.ts`, `shopper-lists.ts`, `store-notices.ts`)
 - The `woocommerce` store lives in `assets/js/base/stores/woocommerce/`: `index.ts` registers it, `types.ts` declares its types, and `cart/` holds the cart code split by concern
 - Cart store uses mutation batching for performance
-- `assets/js/base/stores/README.md` documents the folder layout, each store's module id, and how to add code to the `woocommerce` store
 
 ### IntegrationRegistry (Extension API)
 
