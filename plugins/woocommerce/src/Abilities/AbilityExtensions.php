@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
-use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,11 +20,13 @@ defined( 'ABSPATH' ) || exit;
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  *
- * The API is experimental while the `ability_contracts` feature exists.
+ * The API is experimental while the `ability_extensions` feature exists.
  *
  * @since 11.3.0
  */
 class AbilityExtensions {
+
+	public const FEATURE_ID = 'ability_extensions';
 
 	/**
 	 * Fields keyed by resource, then namespace, then field name.
@@ -46,6 +48,17 @@ class AbilityExtensions {
 	 * @var array<string, bool>
 	 */
 	private static array $reported = array();
+
+	/**
+	 * Whether the store enabled the experimental feature.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled(): bool {
+		return FeaturesUtil::feature_is_enabled( self::FEATURE_ID );
+	}
 
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
@@ -95,6 +108,9 @@ class AbilityExtensions {
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
 	 *                                  keeps it. It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
+	 *     @type callable $prime_callback Optional. Receives every object of a list before the get_callback runs for
+	 *                                    each one, so the extension loads its data in one query and caches it.
+	 *                                    It must not change the objects.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -120,12 +136,48 @@ class AbilityExtensions {
 			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
 			return;
 		}
+		if ( isset( $args['prime_callback'] ) && ! is_callable( $args['prime_callback'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "prime_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
 			wc_doing_it_wrong( __METHOD__, sprintf( 'The field "%s.%s" of "%s" is already registered.', $args['namespace'], $args['field'], $args['resource'] ), '11.3.0' );
 			return;
 		}
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+	}
+
+	/**
+	 * Run the prime_callback of every field of a resource with the objects of a
+	 * list, before the list is formatted. A callback that throws is logged and
+	 * skipped, and its get_callback still runs for each object.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string        $resource_name Resource.
+	 * @param array<object> $subjects      Objects of the list.
+	 */
+	public static function prime( string $resource_name, array $subjects ): void {
+		if ( empty( $subjects ) || ! self::is_enabled() ) {
+			return;
+		}
+
+		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+			foreach ( $fields as $field => $args ) {
+				if ( ! isset( $args['prime_callback'] ) ) {
+					continue;
+				}
+				try {
+					call_user_func( $args['prime_callback'], $subjects );
+				} catch ( \Throwable $e ) {
+					wc_get_logger()->error(
+						sprintf( 'Ability field "%s.%s" of "%s" failed to prime: %s', $namespace, $field, $resource_name, $e->getMessage() ),
+						array( 'source' => 'ability-extensions' )
+					);
+				}
+			}
+		}
 	}
 
 	/**
@@ -144,7 +196,7 @@ class AbilityExtensions {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
-		if ( ! AbilityContracts::is_enabled() ) {
+		if ( ! self::is_enabled() ) {
 			return $output;
 		}
 
@@ -188,7 +240,7 @@ class AbilityExtensions {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_schema( array $schema, string $resource_name ): array {
-		if ( ! AbilityContracts::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
+		if ( ! self::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
 			return $schema;
 		}
 

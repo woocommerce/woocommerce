@@ -16,7 +16,6 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
-use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -110,7 +109,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function init_extensions(): void {
-		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityContracts::is_enabled() ) {
+		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityExtensions::is_enabled() ) {
 			return;
 		}
 
@@ -118,7 +117,7 @@ class AbilitiesLoader {
 		 * Fires when extensions can register their resources with AbilityExtensions.
 		 *
 		 * Fires one time, before `woocommerce_ability_extensions_init`, only when the
-		 * experimental `ability_contracts` feature is on.
+		 * experimental `ability_extensions` feature is on.
 		 *
 		 * @since 11.3.0
 		 */
@@ -127,7 +126,7 @@ class AbilitiesLoader {
 		/**
 		 * Fires when extensions can register their fields with AbilityExtensions.
 		 *
-		 * Fires one time, only when the experimental `ability_contracts` feature is on.
+		 * Fires one time, only when the experimental `ability_extensions` feature is on.
 		 *
 		 * @since 11.3.0
 		 */
