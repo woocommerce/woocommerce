@@ -458,6 +458,30 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Processing restores the runner's locale when sending throws.
+	 */
+	public function test_send_queued_transactional_email_restores_locale_when_sending_throws(): void {
+		$this->force_locale_filter( 'pre_determine_locale', 'fr_FR' );
+
+		add_filter(
+			'woocommerce_allow_send_queued_transactional_email',
+			function () {
+				throw new \RuntimeException( 'Sending failed.' );
+			}
+		);
+
+		$thrown = null;
+		try {
+			$this->sut->send_queued_transactional_email( 'woocommerce_order_status_pending_to_processing', array( 42 ), 'en_US' );
+		} catch ( \RuntimeException $e ) {
+			$thrown = $e;
+		}
+
+		$this->assertInstanceOf( \RuntimeException::class, $thrown, 'The sending exception should propagate' );
+		$this->assertFalse( is_locale_switched(), 'The runner locale should be restored even when sending throws' );
+	}
+
+	/**
 	 * @testdox Processing does not switch locale for emails queued without one.
 	 */
 	public function test_send_queued_transactional_email_without_queued_locale_does_not_switch(): void {

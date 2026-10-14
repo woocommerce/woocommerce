@@ -140,6 +140,10 @@ final class DeferredEmailQueue {
 		$switched = $this->switch_to_queued_locale( $locale );
 
 		try {
+			if ( $switched ) {
+				\WC()->load_plugin_textdomain();
+			}
+
 			\WC_Emails::send_queued_transactional_email( $filter, $args );
 		} finally {
 			if ( $switched ) {
@@ -156,13 +160,7 @@ final class DeferredEmailQueue {
 	 * @return bool True if the locale was switched and must be restored.
 	 */
 	private function switch_to_queued_locale( $locale ): bool {
-		if ( ! is_string( $locale ) || '' === $locale || ! switch_to_locale( $locale ) ) {
-			return false;
-		}
-
-		\WC()->load_plugin_textdomain();
-
-		return true;
+		return is_string( $locale ) && '' !== $locale && switch_to_locale( $locale );
 	}
 
 	/**
