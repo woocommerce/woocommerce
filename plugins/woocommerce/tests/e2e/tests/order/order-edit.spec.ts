@@ -228,13 +228,14 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.locator( 'select[name="wc_order_action"]' )
 			.selectOption( 'send_order_details' );
 
-		// Hold the save request so the second click lands on the same page, like a double-click on a slow site.
+		// Hold the save request (admin.php for HPOS, post.php for posts storage) so the second click
+		// lands on the same page, like a double-click on a slow site.
 		let releaseSave = () => {};
 		const saveReleased = new Promise< void >( ( resolve ) => {
 			releaseSave = resolve;
 		} );
 		await page.route(
-			( url ) => url.searchParams.get( 'page' ) === 'wc-orders',
+			( url ) => /\/wp-admin\/(admin|post)\.php$/.test( url.pathname ),
 			async ( route ) => {
 				await saveReleased;
 				await route.continue().catch( () => undefined );
@@ -256,7 +257,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Order updated.' } )
+				.filter( { hasText: /^Order updated/ } )
 		).toBeVisible();
 		const orderDetailsSentNotes = page
 			.locator( '#woocommerce-order-notes .note_content' )
