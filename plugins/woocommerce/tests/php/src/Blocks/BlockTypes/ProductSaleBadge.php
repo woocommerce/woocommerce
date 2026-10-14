@@ -64,7 +64,11 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			$markup         = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge {"align":"' . $align . '"} /--></div><!-- /wp:woocommerce/single-product -->' );
 			$expected_class = 'wc-block-components-product-sale-badge--align-' . $align;
 
-			$this->assertStringContainsString( $expected_class, $markup );
+			if ( '' === $align ) {
+				$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge--align-', $markup );
+			} else {
+				$this->assertStringContainsString( $expected_class, $markup );
+			}
 			foreach ( array_diff( array( 'left', 'center', 'right' ), array( $align ) ) as $other_align ) {
 				$this->assertStringNotContainsString(
 					'wc-block-components-product-sale-badge--align-' . $other_align,
@@ -333,6 +337,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	 */
 	public function provider_product_sale_badge_alignment(): array {
 		return array(
+			'empty'  => array( '' ),
 			'left'   => array( 'left' ),
 			'center' => array( 'center' ),
 			'right'  => array( 'right' ),

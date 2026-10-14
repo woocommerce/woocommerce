@@ -192,15 +192,17 @@ class ProductSaleBadge extends AbstractBlock {
 			$screen_reader_attributes['data-wp-text']   = 'state.saleBadgeScreenReaderText';
 		}
 
+		$alignment_class = '' !== $align ? ' wc-block-components-product-sale-badge--align-' . esc_attr( $align ) : '';
+
 		$output  = sprintf(
 			'<div %1$s %2$s>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$context_directive
 		);
 		$output .= sprintf(
-			'<div class="wc-block-components-product-sale-badge %1$s wc-block-components-product-sale-badge--align-%2$s" style="%3$s">',
+			'<div class="wc-block-components-product-sale-badge %1$s%2$s" style="%3$s">',
 			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $align ),
+			$alignment_class,
 			esc_attr( $classes_and_styles['styles'] )
 		);
 		$output .= sprintf(
