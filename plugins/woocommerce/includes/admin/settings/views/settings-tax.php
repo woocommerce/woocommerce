@@ -10,6 +10,13 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
+// Read-only estimate shown under "Calculate tax based on": what an un-addressed shopper is quoted,
+// how it follows the Default customer location setting, and the per-class rates at the store address.
+// Display only; it does not change how tax is calculated.
+$shop_base_tax_notice          = ( new Automattic\WooCommerce\Internal\Tax\ShopBaseTaxEstimateNotice() )->get_notice();
+$base_location_estimate_text   = $shop_base_tax_notice['estimate'];
+$base_location_no_rate_warning = $shop_base_tax_notice['warning'];
+
 $settings = array(
 
 	array(
@@ -34,6 +41,7 @@ $settings = array(
 	array(
 		'title'    => __( 'Calculate tax based on', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
+		'desc'     => $base_location_estimate_text,
 		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => TaxBasedOn::SHIPPING,
 		'type'     => 'select',
@@ -45,7 +53,13 @@ $settings = array(
 		),
 	),
 
-	'shipping-tax-class' => array(
+	'base-location-tax-estimate-warning' => array(
+		'type'        => 'notice',
+		'notice_type' => 'warning',
+		'text'        => $base_location_no_rate_warning,
+	),
+
+	'shipping-tax-class'                 => array(
 		'title'    => __( 'Shipping tax class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
@@ -134,6 +148,10 @@ $settings = array(
 
 if ( ! wc_shipping_enabled() ) {
 	unset( $settings['shipping-tax-class'] );
+}
+
+if ( '' === $base_location_no_rate_warning ) {
+	unset( $settings['base-location-tax-estimate-warning'] );
 }
 
 return apply_filters( 'woocommerce_tax_settings', $settings );
