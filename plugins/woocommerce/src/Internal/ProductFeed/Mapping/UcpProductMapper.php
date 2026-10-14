@@ -3,13 +3,18 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ProductFeed\Mapping;
 
-use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Maps WooCommerce products to the UCP catalog product shape.
  *
- * Instances carry per-response state (variant budget, truncation records), so a
- * caller assembling one response reuses one instance and calls
+ * Field values are read from Store API product item responses, so tax display,
+ * password protection, description formatting and attribute labels follow the
+ * storefront. Instances carry per-response state (variant budget, truncation
+ * records), so a caller assembling one response reuses one instance and calls
  * {@see self::begin_response()} before its first mapping call.
  *
  * @since 11.3.0
@@ -46,11 +51,11 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	private $currency;
 
 	/**
-	 * Minor-unit formatter.
+	 * Store API product schema the item responses are read from.
 	 *
-	 * @var MoneyFormatter
+	 * @var ProductSchema|null
 	 */
-	private $money;
+	private $schema;
 
 	/**
 	 * Products whose variant list was cut short, keyed by product id.
@@ -69,11 +74,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $currency ISO 4217 currency code; '' uses the store currency.
+	 * @param string             $currency ISO 4217 currency code; '' uses the store currency.
+	 * @param ProductSchema|null $schema Product schema; null resolves the UCP product schema.
 	 */
-	public function __construct( string $currency = '' ) {
+	public function __construct( string $currency = '', ?ProductSchema $schema = null ) {
 		$this->currency = $currency;
-		$this->money    = new MoneyFormatter();
+		$this->schema   = $schema;
 	}
 
 	/**
@@ -135,57 +141,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @return array The mapped product data.
 	 */
 	public function map_product( \WC_Product $product, array $required_variation_ids = array(), bool $only_required = false ): array {
-		$currency = $this->get_currency();
-
-		$mapped = array(
-			'id'          => (string) $product->get_id(),
-			'title'       => $product->get_name(),
-			'description' => $this->build_description( $product ),
-			'price_range' => $this->build_price_range( $product, $currency ),
-			'variants'    => $this->build_variants( $product, $currency, $required_variation_ids, $only_required ),
-		);
-
-		$handle = $product->get_slug();
-		if ( '' !== $handle ) {
-			$mapped['handle'] = $handle;
-		}
-
-		$url = $product->get_permalink();
-		if ( is_string( $url ) && '' !== $url ) {
-			$mapped['url'] = $url;
-		}
-
-		$categories = $this->build_categories( $product );
-		if ( ! empty( $categories ) ) {
-			$mapped['categories'] = $categories;
-		}
-
-		$media = $this->build_media( $product );
-		if ( ! empty( $media ) ) {
-			$mapped['media'] = $media;
-		}
-
-		$options = $this->build_options( $product );
-		if ( ! empty( $options ) ) {
-			$mapped['options'] = $options;
-		}
-
-		$list_price_range = $this->build_list_price_range( $product, $currency );
-		if ( null !== $list_price_range ) {
-			$mapped['list_price_range'] = $list_price_range;
-		}
-
-		$rating = $this->build_rating( $product );
-		if ( null !== $rating ) {
-			$mapped['rating'] = $rating;
-		}
-
-		$tags = $this->build_tags( $product );
-		if ( ! empty( $tags ) ) {
-			$mapped['tags'] = $tags;
-		}
-
-		return $mapped;
+		return $this->map_item( $product, $this->item( $product ), $required_variation_ids, $only_required );
 	}
 
 	/**
@@ -263,33 +219,35 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Map a product for `POST /catalog/product`.
 	 *
 	 * A selection narrows the variants to those matching every selected option.
-	 * Non-matching selections are ignored.
+	 * One matching no variation is relaxed from its last option until one does,
+	 * and `selected` reports the options kept, as UCP requires.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $selected Selected option values, each `{ name, label, id? }`.
 	 * @return array
 	 */
 	public function map_detail_product( \WC_Product $product, array $selected = array() ): array {
-		$base = $this->map_product( $product );
-
 		if ( empty( $selected ) || ! $product instanceof \WC_Product_Variable ) {
-			return $base;
+			return $this->map_product( $product );
 		}
 
-		while ( ! empty( $selected ) ) {
-			$matched_variants = $this->filter_variants_by_selection( $product, $selected, $this->get_currency() );
+		$item     = $this->item( $product );
+		$matching = array();
 
-			if ( ! empty( $matched_variants ) ) {
-				$base['variants'] = $matched_variants;
+		while ( ! empty( $selected ) ) {
+			$matching = $this->match_selection( $item, $selected );
+
+			if ( ! empty( $matching ) ) {
 				break;
 			}
 
 			array_pop( $selected );
 		}
 
-		$base['selected'] = $selected;
+		$mapped             = $this->map_item( $product, $item, array(), false, empty( $matching ) ? null : $matching );
+		$mapped['selected'] = $selected;
 
-		return $base;
+		return $mapped;
 	}
 
 	/**
@@ -315,13 +273,92 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Convert a major-unit store amount to the integer minor units UCP requires.
+	 * Get the product schema, resolving the UCP one from the Store API container on first use.
 	 *
-	 * @param mixed $amount Monetary amount with decimals.
-	 * @return int
+	 * @return ProductSchema
 	 */
-	public function to_minor_units( $amount ): int {
-		return (int) $this->money->format( is_scalar( $amount ) ? (string) $amount : '0' );
+	private function schema(): ProductSchema {
+		if ( null === $this->schema ) {
+			$this->schema = StoreApi::container()->get( SchemaController::class )->get( UcpProductSchema::IDENTIFIER );
+		}
+
+		return $this->schema;
+	}
+
+	/**
+	 * Build the Store API item response for a product or variation, as nested arrays.
+	 *
+	 * @param \WC_Product $product WooCommerce product.
+	 * @return array
+	 */
+	private function item( \WC_Product $product ): array {
+		// Nested values are stdClass; decode through JSON for uniform array access.
+		return (array) json_decode( (string) wp_json_encode( $this->schema()->get_item_response( $product ) ), true );
+	}
+
+	/**
+	 * Map a product from its item response.
+	 *
+	 * @param \WC_Product $product The product to map.
+	 * @param array       $item Its Store API item response.
+	 * @param array       $required_variation_ids Variation ids the per-product cap must not drop.
+	 * @param bool        $only_required Build only the named variations.
+	 * @param array|null  $candidates Variation ids to build from, or null for every visible one.
+	 * @return array
+	 */
+	private function map_item( \WC_Product $product, array $item, array $required_variation_ids, bool $only_required, ?array $candidates = null ): array {
+		$currency = $this->get_currency();
+		$variants = $this->build_variants( $product, $item, $currency, $required_variation_ids, $only_required, $candidates );
+
+		$mapped = array(
+			'id'          => (string) $item['id'],
+			'title'       => (string) $item['name'],
+			'description' => $this->build_description( $item ),
+			'price_range' => $this->build_price_range( $item['prices'], $currency ),
+			'variants'    => $variants,
+		);
+
+		$handle = (string) $item['slug'];
+		if ( '' !== $handle ) {
+			$mapped['handle'] = $handle;
+		}
+
+		$url = $item['permalink'];
+		if ( is_string( $url ) && '' !== $url ) {
+			$mapped['url'] = $url;
+		}
+
+		$categories = $this->build_categories( (array) $item['categories'] );
+		if ( ! empty( $categories ) ) {
+			$mapped['categories'] = $categories;
+		}
+
+		$media = $this->build_media( (array) $item['images'] );
+		if ( ! empty( $media ) ) {
+			$mapped['media'] = $media;
+		}
+
+		$options = $this->build_options( $item );
+		if ( ! empty( $options ) ) {
+			$mapped['options'] = $options;
+		}
+
+		$list_price_range = $this->build_list_price_range( $variants );
+		if ( null !== $list_price_range ) {
+			$mapped['list_price_range'] = $list_price_range;
+		}
+
+		$rating = $this->build_rating( $item );
+		if ( null !== $rating ) {
+			$mapped['rating'] = $rating;
+		}
+
+		$tags = $this->build_tags( (array) $item['tags'] );
+		if ( ! empty( $tags ) ) {
+			$mapped['tags'] = $tags;
+		}
+
+		return $mapped;
 	}
 
 	/**
@@ -334,110 +371,104 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Build a `price` object.
+	 * Build a `price` object from a Store API minor-unit amount.
 	 *
-	 * @param mixed  $amount Monetary amount with decimals.
+	 * @param mixed  $amount Amount in minor units, as the Store API formats it.
 	 * @param string $currency ISO 4217 currency code.
 	 * @return array
 	 */
 	private function price( $amount, string $currency ): array {
 		return array(
-			'amount'   => $this->to_minor_units( $amount ),
+			'amount'   => (int) $amount,
 			'currency' => $currency,
 		);
 	}
 
 	/**
-	 * Build description object from product.
+	 * Build the description object, preferring the short description.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
+	 * @param array $item Store API item response.
 	 * @return array
 	 */
-	private function build_description( \WC_Product $product ): array {
-		$short = $product->get_short_description();
-		$full  = $product->get_description();
+	private function build_description( array $item ): array {
+		$html = trim( (string) $item['short_description'] );
+		if ( '' === $html ) {
+			$html = trim( (string) $item['description'] );
+		}
 
 		// Entities would reach the agent literally, so decode after stripping tags.
-		$plain = html_entity_decode( wp_strip_all_tags( '' !== $short ? $short : $full ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+		$plain = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES, get_bloginfo( 'charset' ) );
 
 		// Decoded `&nbsp;` is U+00A0. Agents match on this text, so normalize it to a
 		// plain space rather than leaving a character that breaks string comparison.
 		$plain = str_replace( "\xc2\xa0", ' ', $plain );
 
-		return array(
-			'plain' => trim( $plain ),
-		);
-	}
+		$description = array( 'plain' => trim( $plain ) );
 
-	/**
-	 * Build price range from product.
-	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @param string      $currency ISO 4217 currency code.
-	 * @return array
-	 */
-	private function build_price_range( \WC_Product $product, string $currency ): array {
-		if ( $product instanceof \WC_Product_Variable ) {
-			$prices     = $product->get_variation_prices( true );
-			$price_list = isset( $prices['price'] ) && is_array( $prices['price'] ) ? $prices['price'] : array();
-
-			if ( ! empty( $price_list ) ) {
-				return array(
-					'min' => $this->price( min( $price_list ), $currency ),
-					'max' => $this->price( max( $price_list ), $currency ),
-				);
-			}
+		if ( '' !== $html ) {
+			$description['html'] = $html;
 		}
 
-		$price = $product->get_price();
-
-		return array(
-			'min' => $this->price( $price, $currency ),
-			'max' => $this->price( $price, $currency ),
-		);
+		return $description;
 	}
 
 	/**
-	 * Build list price range (sale price comparison) from product.
+	 * Build the price range from Store API prices.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @param string      $currency ISO 4217 currency code.
-	 * @return array|null
+	 * `price_range` is only set for variable products whose variations differ in
+	 * price; everything else is a single price.
+	 *
+	 * @param array  $prices Store API `prices` data.
+	 * @param string $currency ISO 4217 currency code.
+	 * @return array
 	 */
-	private function build_list_price_range( \WC_Product $product, string $currency ) {
-		if ( $product instanceof \WC_Product_Variable ) {
-			$prices       = $product->get_variation_prices( true );
-			$regular_list = isset( $prices['regular_price'] ) && is_array( $prices['regular_price'] ) ? $prices['regular_price'] : array();
-			$price_list   = isset( $prices['price'] ) && is_array( $prices['price'] ) ? $prices['price'] : array();
+	private function build_price_range( $prices, string $currency ): array {
+		$range = $prices['price_range'] ?? null;
 
-			if ( empty( $regular_list ) ) {
-				return null;
-			}
-
-			// Compare against the effective prices so expired or scheduled sales are excluded.
-			$has_discount = false;
-			foreach ( $regular_list as $variation_id => $regular_price ) {
-				if ( isset( $price_list[ $variation_id ] ) && (float) $regular_price > (float) $price_list[ $variation_id ] ) {
-					$has_discount = true;
-					break;
-				}
-			}
-
-			if ( ! $has_discount ) {
-				return null;
-			}
-
+		if ( is_array( $range ) ) {
 			return array(
-				'min' => $this->price( min( $regular_list ), $currency ),
-				'max' => $this->price( max( $regular_list ), $currency ),
+				'min' => $this->price( $range['min_amount'], $currency ),
+				'max' => $this->price( $range['max_amount'], $currency ),
 			);
 		}
 
-		$list_price = $this->build_variant_list_price( $product, $currency );
+		return array(
+			'min' => $this->price( $prices['price'], $currency ),
+			'max' => $this->price( $prices['price'], $currency ),
+		);
+	}
 
-		return null === $list_price ? null : array(
-			'min' => $list_price,
-			'max' => $list_price,
+	/**
+	 * Build the list price range from the variants built for the product.
+	 *
+	 * Spans every variant's regular price, but only when some variant is genuinely
+	 * discounted; a variant carries `list_price` only in that case.
+	 *
+	 * @param array $variants Built variants.
+	 * @return array|null
+	 */
+	private function build_list_price_range( array $variants ) {
+		$has_discount = false;
+		$regular      = array();
+
+		foreach ( $variants as $variant ) {
+			if ( isset( $variant['list_price'] ) ) {
+				$has_discount = true;
+				$regular[]    = $variant['list_price']['amount'];
+			} else {
+				$regular[] = $variant['price']['amount'];
+			}
+		}
+
+		if ( ! $has_discount || empty( $regular ) ) {
+			return null;
+		}
+
+		$currency = $variants[0]['price']['currency'];
+
+		return array(
+			'min' => $this->price( min( $regular ), $currency ),
+			'max' => $this->price( max( $regular ), $currency ),
 		);
 	}
 
@@ -449,23 +480,26 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * can only drop variants nobody asked for by id.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
+	 * @param array       $item Its Store API item response.
 	 * @param string      $currency ISO 4217 currency code.
 	 * @param array       $required_variation_ids Variation ids the request named directly.
 	 * @param bool        $only_required Build nothing beyond $required_variation_ids.
+	 * @param array|null  $candidates Variation ids to build from, or null for every visible one.
 	 * @return array
 	 */
-	private function build_variants( \WC_Product $product, string $currency, array $required_variation_ids = array(), bool $only_required = false ): array {
+	private function build_variants( \WC_Product $product, array $item, string $currency, array $required_variation_ids, bool $only_required, ?array $candidates ): array {
 		if ( ! $product instanceof \WC_Product_Variable ) {
-			return array( $this->build_simple_variant( $product, $currency ) );
+			return array( $this->build_simple_variant( $item, $currency ) );
 		}
 
-		$children = array_map( 'intval', $product->get_visible_children() );
+		$children = array_map( 'intval', null === $candidates ? $product->get_visible_children() : $candidates );
 		$required = array_values( array_intersect( $children, array_map( 'intval', $required_variation_ids ) ) );
+		$options  = $this->variation_options_by_id( $item );
 
 		if ( $only_required && ! empty( $required ) ) {
 			// Bounded by the request's own id cap; nothing left out, nothing to
 			// disclose.
-			$variants              = $this->build_variation_list( $required, $currency );
+			$variants              = $this->build_variation_list( $required, $options, $currency );
 			$this->variant_budget -= count( $variants );
 
 			return $variants;
@@ -477,11 +511,11 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		// `variants` array would violate the schema's `minItems: 1`.
 		$floor    = max( 1, count( $required ) );
 		$cap      = max( $floor, min( self::MAX_VARIANTS_PER_PRODUCT, $this->variant_budget ) );
-		$variants = $this->build_variation_list( $required_first, $currency, $cap );
+		$variants = $this->build_variation_list( $required_first, $options, $currency, $cap );
 
 		$this->variant_budget -= count( $variants );
 
-		$this->record_truncation( $product, count( $variants ) );
+		$this->record_truncation( $item, count( $variants ), count( $children ) );
 
 		return $variants;
 	}
@@ -493,11 +527,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * variations past it are never loaded.
 	 *
 	 * @param array    $variation_ids Variation ids, in the order to build them.
+	 * @param array    $options Selected options keyed by variation id, from the parent item.
 	 * @param string   $currency ISO 4217 currency code.
 	 * @param int|null $limit Maximum variants to build, or null for no limit.
 	 * @return array
 	 */
-	private function build_variation_list( array $variation_ids, string $currency, ?int $limit = null ): array {
+	private function build_variation_list( array $variation_ids, array $options, string $currency, ?int $limit = null ): array {
 		$variants = array();
 
 		foreach ( $variation_ids as $variation_id ) {
@@ -510,7 +545,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				continue;
 			}
 
-			$variants[] = $this->build_variation_variant( $variation, $currency );
+			$variants[] = $this->build_variation_variant( $this->item( $variation ), $options[ (int) $variation_id ] ?? array(), $currency );
 		}
 
 		return $variants;
@@ -519,45 +554,44 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Note that a product's variant list came back short, for the caller to report.
 	 *
-	 * @param \WC_Product_Variable $product WooCommerce variable product.
-	 * @param int                  $returned Number of variants actually built.
+	 * @param array $item Store API item response of the variable product.
+	 * @param int   $returned Number of variants actually built.
+	 * @param int   $total Number of variants there were to build.
 	 */
-	private function record_truncation( \WC_Product_Variable $product, int $returned ): void {
-		$total = count( $product->get_visible_children() );
-
+	private function record_truncation( array $item, int $returned, int $total ): void {
 		if ( $returned >= $total ) {
 			return;
 		}
 
-		$this->truncations[ (int) $product->get_id() ] = array(
-			'title'    => $product->get_name(),
+		$this->truncations[ (int) $item['id'] ] = array(
+			'title'    => (string) $item['name'],
 			'returned' => $returned,
 			'total'    => $total,
 		);
 	}
 
 	/**
-	 * Build a variant entry from a simple product.
+	 * Build a variant entry from a simple product's item response.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @param string      $currency ISO 4217 currency code.
+	 * @param array  $item Store API item response.
+	 * @param string $currency ISO 4217 currency code.
 	 * @return array
 	 */
-	private function build_simple_variant( \WC_Product $product, string $currency ): array {
+	private function build_simple_variant( array $item, string $currency ): array {
 		$variant = array(
-			'id'           => (string) $product->get_id(),
-			'title'        => $product->get_name(),
-			'description'  => $this->build_description( $product ),
-			'price'        => $this->price( $product->get_price(), $currency ),
-			'availability' => array( 'available' => $product->is_purchasable() && $product->is_in_stock() ),
+			'id'           => (string) $item['id'],
+			'title'        => (string) $item['name'],
+			'description'  => $this->build_description( $item ),
+			'price'        => $this->price( $item['prices']['price'], $currency ),
+			'availability' => array( 'available' => $item['is_purchasable'] && $item['is_in_stock'] ),
 		);
 
-		$sku = $product->get_sku();
+		$sku = (string) $item['sku'];
 		if ( '' !== $sku ) {
 			$variant['sku'] = $sku;
 		}
 
-		$list_price = $this->build_variant_list_price( $product, $currency );
+		$list_price = $this->build_variant_list_price( $item['prices'], $currency );
 		if ( null !== $list_price ) {
 			$variant['list_price'] = $list_price;
 		}
@@ -566,46 +600,39 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Build a variant entry from a product variation.
+	 * Build a variant entry from a variation's item response.
 	 *
-	 * @param \WC_Product_Variation $variation WooCommerce variation.
-	 * @param string                $currency ISO 4217 currency code.
+	 * @param array  $item Store API item response of the variation.
+	 * @param array  $options Selected options, each `{ name, label }`.
+	 * @param string $currency ISO 4217 currency code.
 	 * @return array
 	 */
-	private function build_variation_variant( \WC_Product_Variation $variation, string $currency ): array {
-		$attributes = $variation->get_attributes();
-
-		$option_labels = array();
-		foreach ( $attributes as $value ) {
-			if ( '' !== (string) $value ) {
-				$option_labels[] = (string) $value;
-			}
-		}
+	private function build_variation_variant( array $item, array $options, string $currency ): array {
+		$labels = array_column( $options, 'label' );
 
 		$variant = array(
-			'id'           => (string) $variation->get_id(),
-			'title'        => empty( $option_labels ) ? $variation->get_name() : implode( ' / ', $option_labels ),
-			'description'  => $this->build_description( $variation ),
-			'price'        => $this->price( $variation->get_price(), $currency ),
-			'availability' => array( 'available' => $variation->is_purchasable() && $variation->is_in_stock() ),
+			'id'           => (string) $item['id'],
+			'title'        => empty( $labels ) ? (string) $item['name'] : implode( ' / ', $labels ),
+			'description'  => $this->build_description( $item ),
+			'price'        => $this->price( $item['prices']['price'], $currency ),
+			'availability' => array( 'available' => $item['is_purchasable'] && $item['is_in_stock'] ),
 		);
 
-		$sku = $variation->get_sku();
+		$sku = (string) $item['sku'];
 		if ( '' !== $sku ) {
 			$variant['sku'] = $sku;
 		}
 
-		$list_price = $this->build_variant_list_price( $variation, $currency );
+		$list_price = $this->build_variant_list_price( $item['prices'], $currency );
 		if ( null !== $list_price ) {
 			$variant['list_price'] = $list_price;
 		}
 
-		$options = $this->build_variation_options( $variation );
 		if ( ! empty( $options ) ) {
 			$variant['options'] = $options;
 		}
 
-		$media = $this->build_image_media( (int) $variation->get_image_id() );
+		$media = $this->build_media( array_slice( (array) $item['images'], 0, 1 ) );
 		if ( ! empty( $media ) ) {
 			$variant['media'] = $media;
 		}
@@ -614,156 +641,126 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Build variant list price for sale comparison.
+	 * Build a variant's list price when it is genuinely discounted.
 	 *
-	 * @param \WC_Product $product WooCommerce product or variation.
-	 * @param string      $currency ISO 4217 currency code.
+	 * Compares against the effective price so expired or scheduled sales are excluded.
+	 *
+	 * @param array  $prices Store API `prices` data.
+	 * @param string $currency ISO 4217 currency code.
 	 * @return array|null
 	 */
-	private function build_variant_list_price( \WC_Product $product, string $currency ) {
-		$regular_price = $product->get_regular_price();
-
-		// Compare against the effective price so expired or scheduled sales are excluded.
-		if ( '' === $regular_price || (float) $regular_price <= (float) $product->get_price() ) {
+	private function build_variant_list_price( $prices, string $currency ) {
+		if ( (int) $prices['regular_price'] <= (int) $prices['price'] ) {
 			return null;
 		}
 
-		return $this->price( $regular_price, $currency );
+		return $this->price( $prices['regular_price'], $currency );
 	}
 
 	/**
-	 * Build selected options from a variation's attributes.
+	 * Index term names by slug for each variation attribute of a product.
 	 *
-	 * @param \WC_Product_Variation $variation WooCommerce variation.
-	 * @return array
+	 * @param array $item Store API item response of the variable product.
+	 * @return array Attribute label => [ slug => term name ].
 	 */
-	private function build_variation_options( \WC_Product_Variation $variation ): array {
-		$options = array();
+	private function term_names( array $item ): array {
+		$names = array();
 
-		foreach ( $variation->get_attributes() as $attribute_name => $value ) {
-			if ( '' === (string) $value ) {
+		foreach ( (array) $item['attributes'] as $attribute ) {
+			if ( empty( $attribute['has_variations'] ) ) {
 				continue;
 			}
 
-			$options[] = array(
-				'name'  => $this->option_name( (string) $attribute_name ),
-				'label' => (string) $value,
-			);
+			foreach ( (array) $attribute['terms'] as $term ) {
+				$names[ (string) $attribute['name'] ][ (string) $term['slug'] ] = (string) $term['name'];
+			}
+		}
+
+		return $names;
+	}
+
+	/**
+	 * Build each visible variation's selected options from the parent item.
+	 *
+	 * An attribute left as "Any" on a variation has a null value and is omitted.
+	 *
+	 * @param array $item Store API item response of the variable product.
+	 * @return array Variation id => list of `{ name, label }`.
+	 */
+	private function variation_options_by_id( array $item ): array {
+		$names   = $this->term_names( $item );
+		$options = array();
+
+		foreach ( (array) $item['variations'] as $variation ) {
+			$selected = array();
+
+			foreach ( (array) $variation['attributes'] as $attribute ) {
+				if ( null === $attribute['value'] || '' === (string) $attribute['value'] ) {
+					continue;
+				}
+
+				$name       = (string) $attribute['name'];
+				$value      = (string) $attribute['value'];
+				$selected[] = array(
+					'name'  => $name,
+					'label' => $names[ $name ][ $value ] ?? $value,
+				);
+			}
+
+			$options[ (int) $variation['id'] ] = $selected;
 		}
 
 		return $options;
 	}
 
 	/**
-	 * Turn a WooCommerce attribute key into a UCP option name.
-	 *
-	 * @param string $attribute_name Attribute key, e.g. `pa_shirt-size`.
-	 * @return string
-	 */
-	private function option_name( string $attribute_name ): string {
-		return ucfirst( str_replace( array( '-', '_' ), ' ', str_replace( 'pa_', '', $attribute_name ) ) );
-	}
-
-	/**
-	 * Build a one-entry media list from an attachment id.
-	 *
-	 * @param int $image_id Attachment id, or 0 for none.
-	 * @return array
-	 */
-	private function build_image_media( int $image_id ): array {
-		if ( $image_id <= 0 ) {
-			return array();
-		}
-
-		$url = wp_get_attachment_url( $image_id );
-		if ( ! is_string( $url ) || '' === $url ) {
-			return array();
-		}
-
-		$media = array(
-			'type' => 'image',
-			'url'  => $url,
-		);
-
-		$alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-		if ( is_string( $alt ) && '' !== $alt ) {
-			$media['alt_text'] = $alt;
-		}
-
-		return array( $media );
-	}
-
-	/**
-	 * Build product categories.
-	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @return array
-	 */
-	private function build_categories( \WC_Product $product ): array {
-		$categories = array();
-
-		foreach ( array_slice( $product->get_category_ids(), 0, self::MAX_TERMS_PER_PRODUCT ) as $term_id ) {
-			$term = get_term( $term_id, 'product_cat' );
-			if ( ! $term instanceof \WP_Term ) {
-				continue;
-			}
-
-			$categories[] = array(
-				'id'    => (string) $term->term_id,
-				'name'  => $term->name,
-				'value' => $term->slug,
-			);
-		}
-
-		return $categories;
-	}
-
-	/**
-	 * Build product media from the featured image and gallery.
-	 *
-	 * @param \WC_Product $product WooCommerce product.
-	 * @return array
-	 */
-	private function build_media( \WC_Product $product ): array {
-		$media = $this->build_image_media( (int) $product->get_image_id() );
-
-		// The featured image is already in $media, hence the remaining room.
-		$gallery_ids = array_slice(
-			$product->get_gallery_image_ids(),
-			0,
-			max( 0, self::MAX_MEDIA_PER_PRODUCT - count( $media ) )
-		);
-
-		foreach ( $gallery_ids as $gallery_id ) {
-			$media = array_merge( $media, $this->build_image_media( (int) $gallery_id ) );
-		}
-
-		return $media;
-	}
-
-	/**
 	 * Build product options for variable products.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
+	 * Lists the values the visible variations actually use, in the attribute's
+	 * own term order; an "Any" variation offers every term.
+	 *
+	 * @param array $item Store API item response.
 	 * @return array
 	 */
-	private function build_options( \WC_Product $product ): array {
-		if ( ! $product instanceof \WC_Product_Variable ) {
+	private function build_options( array $item ): array {
+		$variations = (array) $item['variations'];
+		if ( empty( $variations ) ) {
 			return array();
+		}
+
+		$used = array();
+		$any  = array();
+		foreach ( $variations as $variation ) {
+			foreach ( (array) $variation['attributes'] as $attribute ) {
+				$name = (string) $attribute['name'];
+				if ( null === $attribute['value'] || '' === (string) $attribute['value'] ) {
+					$any[ $name ] = true;
+					continue;
+				}
+				$used[ $name ][ (string) $attribute['value'] ] = true;
+			}
 		}
 
 		$options = array();
 
-		foreach ( $product->get_variation_attributes() as $attribute_name => $values ) {
-			$option_values = array();
-			foreach ( $values as $value ) {
-				$option_values[] = array( 'label' => (string) $value );
+		foreach ( (array) $item['attributes'] as $attribute ) {
+			if ( empty( $attribute['has_variations'] ) ) {
+				continue;
 			}
 
-			if ( ! empty( $option_values ) ) {
+			$name   = (string) $attribute['name'];
+			$values = array();
+
+			foreach ( (array) $attribute['terms'] as $term ) {
+				if ( isset( $any[ $name ] ) || isset( $used[ $name ][ (string) $term['slug'] ] ) ) {
+					$values[] = array( 'label' => (string) $term['name'] );
+				}
+			}
+
+			if ( ! empty( $values ) ) {
 				$options[] = array(
-					'name'   => $this->option_name( (string) $attribute_name ),
-					'values' => $option_values,
+					'name'   => $name,
+					'values' => $values,
 				);
 			}
 		}
@@ -772,13 +769,63 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
+	 * Build media entries from Store API images.
+	 *
+	 * @param array $images Store API image objects.
+	 * @return array
+	 */
+	private function build_media( array $images ): array {
+		$media = array();
+
+		foreach ( array_slice( $images, 0, self::MAX_MEDIA_PER_PRODUCT ) as $image ) {
+			$url = $image['src'] ?? '';
+			if ( ! is_string( $url ) || '' === $url ) {
+				continue;
+			}
+
+			$entry = array(
+				'type' => 'image',
+				'url'  => $url,
+			);
+
+			if ( is_string( $image['alt'] ) && '' !== $image['alt'] ) {
+				$entry['alt_text'] = $image['alt'];
+			}
+
+			$media[] = $entry;
+		}
+
+		return $media;
+	}
+
+	/**
+	 * Build product categories from Store API terms.
+	 *
+	 * @param array $terms Store API category objects.
+	 * @return array
+	 */
+	private function build_categories( array $terms ): array {
+		$categories = array();
+
+		foreach ( array_slice( $terms, 0, self::MAX_TERMS_PER_PRODUCT ) as $term ) {
+			$categories[] = array(
+				'id'    => (string) $term['id'],
+				'name'  => (string) $term['name'],
+				'value' => (string) $term['slug'],
+			);
+		}
+
+		return $categories;
+	}
+
+	/**
 	 * Build product rating.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
+	 * @param array $item Store API item response.
 	 * @return array|null
 	 */
-	private function build_rating( \WC_Product $product ) {
-		$average = (float) $product->get_average_rating();
+	private function build_rating( array $item ) {
+		$average = (float) $item['average_rating'];
 		if ( $average <= 0 ) {
 			return null;
 		}
@@ -789,7 +836,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			'scale_max' => 5,
 		);
 
-		$count = (int) $product->get_review_count();
+		$count = (int) $item['review_count'];
 		if ( $count > 0 ) {
 			$rating['count'] = $count;
 		}
@@ -798,94 +845,71 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Build product tags.
+	 * Build product tags from Store API terms.
 	 *
-	 * @param \WC_Product $product WooCommerce product.
+	 * @param array $terms Store API tag objects.
 	 * @return array
 	 */
-	private function build_tags( \WC_Product $product ): array {
+	private function build_tags( array $terms ): array {
 		$tags = array();
 
-		foreach ( array_slice( $product->get_tag_ids(), 0, self::MAX_TERMS_PER_PRODUCT ) as $term_id ) {
-			$term = get_term( $term_id, 'product_tag' );
-			if ( $term instanceof \WP_Term ) {
-				$tags[] = $term->name;
-			}
+		foreach ( array_slice( $terms, 0, self::MAX_TERMS_PER_PRODUCT ) as $term ) {
+			$tags[] = (string) $term['name'];
 		}
 
 		return $tags;
 	}
 
 	/**
-	 * Filter variants by selected option values.
+	 * Find the visible variations carrying every selected option value.
 	 *
-	 * @param \WC_Product_Variable $product Variable product.
-	 * @param array                $selected Selected option values.
-	 * @param string               $currency ISO 4217 currency code.
-	 * @return array
+	 * Matches on the parent item's variation attributes, so no variation is loaded
+	 * to be rejected. A label matches a term's name or its slug, case-insensitively.
+	 *
+	 * @param array $item Store API item response of the variable product.
+	 * @param array $selected Selected option values, each `{ name, label }`.
+	 * @return array Matching variation ids.
 	 */
-	private function filter_variants_by_selection( \WC_Product_Variable $product, array $selected, string $currency ): array {
-		$selection_map = array();
+	private function match_selection( array $item, array $selected ): array {
+		$selection = array();
 		foreach ( $selected as $option ) {
 			if ( isset( $option['name'], $option['label'] ) ) {
-				$selection_map[ strtolower( (string) $option['name'] ) ] = strtolower( (string) $option['label'] );
+				$selection[ strtolower( (string) $option['name'] ) ] = strtolower( (string) $option['label'] );
 			}
 		}
 
-		if ( empty( $selection_map ) ) {
+		if ( empty( $selection ) ) {
 			return array();
 		}
 
-		$variants = array();
+		$names    = $this->term_names( $item );
+		$matching = array();
 
-		foreach ( $product->get_visible_children() as $child_id ) {
-			// Same output bound as build_variants(). Matching is on hydrated
-			// attributes, so a selection matching nothing still walks every
-			// child — bounding that needs the match pushed into the query.
-			if ( count( $variants ) >= self::MAX_VARIANTS_PER_PRODUCT ) {
-				$this->record_truncation( $product, count( $variants ) );
-				break;
+		foreach ( (array) $item['variations'] as $variation ) {
+			$values = array();
+			foreach ( (array) $variation['attributes'] as $attribute ) {
+				if ( null === $attribute['value'] || '' === (string) $attribute['value'] ) {
+					continue;
+				}
+
+				$name  = (string) $attribute['name'];
+				$value = (string) $attribute['value'];
+
+				$values[ strtolower( $name ) ] = array(
+					strtolower( $value ),
+					strtolower( $names[ $name ][ $value ] ?? $value ),
+				);
 			}
 
-			$variation = wc_get_product( $child_id );
-			if ( ! $variation instanceof \WC_Product_Variation ) {
-				continue;
-			}
-
-			if ( $this->variation_matches_selection( $variation, $selection_map ) ) {
-				$variants[] = $this->build_variation_variant( $variation, $currency );
-			}
-		}
-
-		return $variants;
-	}
-
-	/**
-	 * Whether a variation carries every selected option value.
-	 *
-	 * @param \WC_Product_Variation $variation WooCommerce variation.
-	 * @param array                 $selection_map Lowercased option name => lowercased label.
-	 * @return bool
-	 */
-	private function variation_matches_selection( \WC_Product_Variation $variation, array $selection_map ): bool {
-		$attributes = $variation->get_attributes();
-
-		foreach ( $selection_map as $name => $label ) {
-			$found = false;
-
-			foreach ( $attributes as $attr_name => $attr_value ) {
-				$clean = strtolower( str_replace( array( 'pa_', '-', '_' ), array( '', ' ', ' ' ), (string) $attr_name ) );
-				if ( $clean === $name && strtolower( (string) $attr_value ) === $label ) {
-					$found = true;
-					break;
+			foreach ( $selection as $name => $label ) {
+				if ( ! isset( $values[ $name ] ) || ! in_array( $label, $values[ $name ], true ) ) {
+					continue 2;
 				}
 			}
 
-			if ( ! $found ) {
-				return false;
-			}
+			$matching[] = (int) $variation['id'];
 		}
 
-		return true;
+		return $matching;
 	}
 }

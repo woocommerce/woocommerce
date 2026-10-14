@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
 /**
@@ -80,7 +81,13 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 */
 	protected function mapper(): UcpProductMapper {
 		if ( null === $this->mapper ) {
-			$this->mapper = new UcpProductMapper( $this->store_currency() );
+			/**
+			 * The controller returns the registered subclass; typed for static analysis.
+			 *
+			 * @var UcpProductSchema $schema
+			 */
+			$schema       = $this->schema_controller->get( UcpProductSchema::IDENTIFIER );
+			$this->mapper = new UcpProductMapper( $this->store_currency(), $schema );
 		}
 
 		return $this->mapper;

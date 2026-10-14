@@ -60,6 +60,7 @@ class SchemaController {
 				Schemas\V1\ShopperListSchema::IDENTIFIER   => Schemas\V1\ShopperListSchema::class,
 				Schemas\V1\ShopperListItemSchema::IDENTIFIER => Schemas\V1\ShopperListItemSchema::class,
 				Schemas\V1\Ucp\UcpCatalogSchema::IDENTIFIER => Schemas\V1\Ucp\UcpCatalogSchema::class,
+				Schemas\V1\Ucp\UcpProductSchema::IDENTIFIER => Schemas\V1\Ucp\UcpProductSchema::class,
 			],
 		];
 	}

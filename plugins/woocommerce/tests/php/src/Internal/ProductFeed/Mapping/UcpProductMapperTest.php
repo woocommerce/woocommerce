@@ -224,4 +224,51 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $mapped['selected'] );
 		$this->assertCount( 2, $mapped['variants'] );
 	}
+
+	/**
+	 * Agents compare titles, SKUs and option labels literally, so the storefront
+	 * HTML formatter must not reach them and both option lists must agree.
+	 *
+	 * @testdox Mapped strings should be raw and option labels should be term names on both lists.
+	 */
+	public function test_strings_are_raw_and_option_labels_are_term_names(): void {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Frame 10x20 "Classic"' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes( array( WC_Helper_Product::create_product_attribute_object( 'size', array( 'Extra Large' ) ) ) );
+		$parent_id = $variable->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $parent_id );
+		$variation->set_attributes( array( 'pa_size' => 'extra-large' ) );
+		$variation->set_regular_price( '10' );
+		$variation->set_sku( 'FRAME-10x20' );
+		$variation->set_status( 'publish' );
+		$variation->save();
+
+		\WC_Product_Variable::sync( $parent_id );
+
+		$mapped = ( new UcpProductMapper( 'USD' ) )->map_product( wc_get_product( $parent_id ) );
+
+		$this->assertSame( 'Frame 10x20 "Classic"', $mapped['title'] );
+		$this->assertSame( 'FRAME-10x20', $mapped['variants'][0]['sku'] );
+		$this->assertSame(
+			array(
+				array(
+					'name'   => 'size',
+					'values' => array( array( 'label' => 'Extra Large' ) ),
+				),
+			),
+			$mapped['options']
+		);
+		$this->assertSame(
+			array(
+				array(
+					'name'  => 'size',
+					'label' => 'Extra Large',
+				),
+			),
+			$mapped['variants'][0]['options']
+		);
+	}
 }
