@@ -301,6 +301,34 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A quantity-limit refusal is reported as `invalid_quantity`, distinct from a gone item.
+	 *
+	 * An agent can act on the two differently — fix the quantity vs. drop the line — so the
+	 * mapping keeps them apart instead of collapsing both to `item_unavailable`.
+	 */
+	public function test_update_cart_reports_a_quantity_limit_as_invalid_quantity(): void {
+		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+
+		// Cap the product at one per cart, then ask for two.
+		$cap = static function () {
+			return 1;
+		};
+		add_filter( 'woocommerce_store_api_product_quantity_maximum', $cap );
+
+		$response = $this->request( 'PUT', '/carts/' . $created['id'], array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+		$data     = $response->get_data();
+
+		remove_filter( 'woocommerce_store_api_product_quantity_maximum', $cap );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'invalid_quantity', $data['messages'][0]['code'] );
+
+		// A refused update leaves the cart alone.
+		$this->assertCount( 1, $this->request( 'GET', '/carts/' . $created['id'] )->get_data()['line_items'] );
+	}
+
+	/**
 	 * A failure the Store API base class reports in its own shape is re-shaped for UCP.
 	 *
 	 * The parent refuses to load a cart whose session failed earlier in the process; that
