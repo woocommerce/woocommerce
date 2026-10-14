@@ -202,7 +202,9 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 
 	return (
 		<ThemeCard
-			className="purple-cys-theme-card--purple"
+			className={ clsx( 'purple-cys-theme-card--purple', {
+				'is-active': state === 'active',
+			} ) }
 			media={
 				<img
 					src={ purplePreview }
@@ -230,16 +232,18 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 			<div className="purple-cys-theme-card__actions">
 				<Actions { ...props } />
 			</div>
-			<Text
-				variant="body-sm"
-				className={ clsx( 'purple-cys-theme-card__helper', {
-					'is-error': state === 'error',
-				} ) }
-				render={ <p /> }
-			>
-				{ state === 'error' && <Icon icon={ error } size={ 16 } /> }
-				{ copy.helper }
-			</Text>
+			{ copy.helper && (
+				<Text
+					variant="body-sm"
+					className={ clsx( 'purple-cys-theme-card__helper', {
+						'is-error': state === 'error',
+					} ) }
+					render={ <p /> }
+				>
+					{ state === 'error' && <Icon icon={ error } size={ 16 } /> }
+					{ copy.helper }
+				</Text>
+			) }
 		</ThemeCard>
 	);
 };

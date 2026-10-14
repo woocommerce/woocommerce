@@ -74,10 +74,7 @@
 		margin-block-start: var(--wpds-dimension-gap-md);
 	}
 
-	// Reserve two lines so the card keeps its height when the helper text changes.
 	&--purple &__helper {
-		min-height: calc(2 * var(--wpds-typography-line-height-xs));
-
 		&.is-error {
 			color: var(--wpds-color-foreground-content-error);
 
@@ -89,8 +86,11 @@
 		}
 	}
 
-	&--purple &__content {
-		min-height: 280px;
+	// Fits the tallest install state (a two-line helper) plus padding, so the card keeps its
+	// height while installing and the shorter states sit centered. Active has no helper line
+	// and isn't part of that flow, so it ends flush with its buttons.
+	&--purple:not(.is-active) &__content {
+		min-height: 356px;
 	}
 
 	&--marketplace &__content,
@@ -98,9 +98,6 @@
 		min-height: 240px;
 	}
 
-	&--marketplace &__media {
-		background: var(--wpds-color-background-track-neutral);
-	}
 
 	&__thumbnails {
 		position: absolute;
@@ -161,8 +158,10 @@
 		color: var(--wpds-color-foreground-content-neutral-weak);
 	}
 
+	// The link sits under the main button.
 	&__actions {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		gap: var(--wpds-dimension-gap-md);
 		margin-block-start: var(--wpds-dimension-gap-md);
