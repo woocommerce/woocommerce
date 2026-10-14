@@ -19,7 +19,7 @@ The MCP implementation in WooCommerce is currently in developer preview. Impleme
 
 ## Background
 
-The Model Context Protocol (MCP) is an open standard that enables AI applications to securely connect to external data sources and tools. WooCommerce's MCP integration builds on two core technologies:
+The Model Context Protocol (MCP) is an open standard that enables AI applications to securely connect to external data sources and tools. Using MCP with WooCommerce relies on two core technologies:
 
 - **[WordPress Abilities API](https://github.com/WordPress/abilities-api)** - A standardized system for registering capabilities in WordPress, included in WordPress core
 - **[WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation, installed as the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/)
@@ -52,8 +52,9 @@ All operations respect WooCommerce's existing permission system. MCP clients aut
 WooCommerce 11.3 removed the deprecated WooCommerce MCP endpoint and everything that only existed to support it:
 
 - The `/wp-json/woocommerce/mcp` endpoint and its WooCommerce REST API key authentication (`X-MCP-API-Key`). Requests to the endpoint now return HTTP 410 with a JSON-RPC error that explains how to connect through the MCP Adapter.
-- The **WooCommerce MCP** feature (`mcp_integration`). WooCommerce abilities no longer need a feature flag.
 - The REST-derived product and order abilities (`woocommerce/products-list`, `woocommerce/orders-get`, and similar), along with the `woocommerce_mcp_include_ability`, `woocommerce_mcp_allow_insecure_transport`, and `woocommerce_check_rest_ability_permissions_for_method` filters and the `expose_in_deprecated_woocommerce_mcp` ability metadata.
+
+Custom abilities registered by extensions or custom code that appeared in the removed endpoint don't carry over automatically. Before WooCommerce 10.9, the endpoint included abilities in the `woocommerce/` namespace; from 10.9, it included abilities with `expose_in_deprecated_woocommerce_mcp` set to `true`; and the `woocommerce_mcp_include_ability` filter could add or remove abilities in either version. The MCP Adapter's default server ignores all of these. It only exposes an ability when its `meta.mcp.public` is `true` (if `meta.mcp.public` is not set, the adapter falls back to the top-level `meta.public`). To keep a custom ability available to MCP clients, set that metadata as shown in [Adding Custom Abilities](#adding-custom-abilities).
 
 To keep using WooCommerce with MCP, install the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/) and connect your MCP client to its default server, as described in [Connecting to the MCP Server](#connecting-to-the-mcp-server). Stores that had the WooCommerce MCP feature enabled see an admin notice about the change.
 
