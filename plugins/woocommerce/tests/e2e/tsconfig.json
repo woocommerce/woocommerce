@@ -8,7 +8,7 @@
 		"paths": {
 			"@woocommerce/e2e-utils": [ "./utils/blocks" ],
 			"@woocommerce/stores/woocommerce/cart": [
-				"../../client/blocks/assets/js/base/stores/woocommerce/cart"
+				"../../client/blocks/assets/js/base/stores/woocommerce/index"
 			]
 		},
 		"esModuleInterop": true,

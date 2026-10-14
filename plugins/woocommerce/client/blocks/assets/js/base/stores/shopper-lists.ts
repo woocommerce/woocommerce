@@ -170,7 +170,7 @@ async function restRequest< T >(
 // JS-supplied state win over the existing (PHP-seeded) state for primitives,
 // so an empty-string default would clobber the values seeded server-side via
 // `wp_interactivity_state`. State for those fields comes purely from PHP. Same
-// reason the cart store doesn't ship state defaults — see cart.ts.
+// reason the cart store doesn't ship state defaults — see woocommerce/cart/actions.ts.
 const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
@@ -289,7 +289,7 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			// Mirrors `cart.ts::showNoticeError`.
+			// Mirrors `woocommerce/cart/notices.ts::showNoticeError`.
 			*showNoticeError( error: Error ): AsyncAction< void > {
 				yield import( '@woocommerce/stores/store-notices' );
 				const { actions: noticeActions } = store< StoreNotices >(
