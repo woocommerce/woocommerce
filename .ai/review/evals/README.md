@@ -113,6 +113,6 @@ The original experiment and its failed outcomes remain preserved separately. Rev
 | [i18n-string-identity](i18n-string-identity/cases.json) | G35A-v3, G35B-v3 | G35C-v3, G35D-v3 |
 | [sec-sql-prepare-and-identifiers](sec-sql-prepare-and-identifiers/cases.json) | G36A-v3, G36B-v4 | G36C-v3, G36D-v3 |
 | [sec-rest-and-ajax-permissions](sec-rest-and-ajax-permissions/cases.json) | G37A-v5, G37B-v3 | G37C-v3, G37D-v3 |
-| [sec-order-cart-ownership](sec-order-cart-ownership/cases.json) | G38A-v3, G38B-v3 | G38C-v3, G38D-v3 |
+| [sec-order-cart-ownership](sec-order-cart-ownership/cases.json) | G38A-v4, G38B-v3 | G38C-v3, G38D-v3 |
 | [sec-sanitize-and-escape](sec-sanitize-and-escape/cases.json) | G39A-v5, G39B-v3 | G39C-v3, G39D-v3 |
 | [sec-auth-tokens-and-cookies](sec-auth-tokens-and-cookies/cases.json) | G40A-v3, G40B-v4 | G40C-v3, G40D-v3 |

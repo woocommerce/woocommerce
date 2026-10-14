@@ -2,7 +2,7 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G38A-v3",
+			"id": "G38A-v4",
 			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
 			"before": {
 				"file": "fixtures/G38A/before.php"
@@ -12,7 +12,7 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "view_order"
+				"contains": "order-specific authorization"
 			}
 		},
 		{
