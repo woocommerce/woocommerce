@@ -1060,7 +1060,7 @@ Display a collection of products from your store.
 - **Name:** woocommerce/product-collection
 - **Category:** woocommerce
 - **Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
-- **Attributes:** __privatePreviewState, collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
+- **Attributes:** collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
 
 ## No results - woocommerce/product-collection-no-results
 
