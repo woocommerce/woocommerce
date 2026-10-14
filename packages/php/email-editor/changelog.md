@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.0](https://github.com/woocommerce/email-editor/releases/tag/2.19.0) - 2026-10-14 
+
+-   Patch - Fall back to the email's theme color when a block's color can no longer be resolved, instead of rendering no color. [#69617]
+-   Patch - Fix the plain-text version of emails corrupting every personalization tag after the tenth. [#69006]
+-   Patch - Match personalization tag chips in the email editor canvas to the admin color scheme, as in the sidebar. [#69604]
+-   Minor - translate_slug_to_color() on Theme_Controller, Settings_Controller and Rendering_Context now returns an empty string for a palette slug no origin defines, rather than the slug itself. Callers should treat an empty string as "omit the declaration". [#69766]
+
 ## [2.18.0](https://github.com/woocommerce/email-editor/releases/tag/2.18.0) - 2026-10-05 
 
 -   Minor - Add the woocommerce_email_editor_render_end action, fired when rendering an email has finished, so integrations can restore state they changed for the render. [#69003]
