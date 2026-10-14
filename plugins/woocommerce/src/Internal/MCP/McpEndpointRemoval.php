@@ -74,27 +74,50 @@ class McpEndpointRemoval {
 	private const ADAPTER_PLUGIN_FILE = 'mcp-adapter/mcp-adapter.php';
 
 	/**
+	 * Query argument added to the notice's activation link, so activations started from the notice can be recognized.
+	 *
+	 * @var string
+	 */
+	private const NOTICE_ACTIVATION_ARG = 'wc-mcp-removal-notice';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'handle_rest_api_init' ) );
 		add_action( 'admin_notices', array( $this, 'handle_admin_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'handle_admin_enqueue_scripts' ) );
-		add_action( 'admin_init', array( $this, 'handle_admin_init' ) );
+		add_action( 'activated_plugin', array( $this, 'handle_activated_plugin' ) );
+		add_action( 'woocommerce_hide_' . self::REMOVED_NOTICE . '_notice', array( $this, 'handle_woocommerce_hide_mcp_endpoint_removed_notice' ) );
 	}
 
 	/**
-	 * Handle the admin_init hook.
+	 * Handle the activated_plugin hook.
 	 *
-	 * Once the MCP Adapter plugin is active, the store has acted on the removal notice, so delete the old
-	 * feature option that triggers it.
+	 * When the MCP Adapter plugin is activated from the removal notice's link, the store has acted on the notice,
+	 * so delete the old feature option that triggers it for every admin.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $plugin Path to the activated plugin file, relative to the plugins directory.
+	 */
+	public function handle_activated_plugin( $plugin ): void {
+		// Core verified the activation nonce before activating; the argument only identifies where the activation started.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( self::ADAPTER_PLUGIN_FILE === $plugin && isset( $_GET[ self::NOTICE_ACTIVATION_ARG ] ) ) {
+			delete_option( self::FEATURE_OPTION );
+		}
+	}
+
+	/**
+	 * Handle the woocommerce_hide_mcp_endpoint_removed_notice hook.
+	 *
+	 * Dismissing the removal notice acts on it for the whole store, so delete the old feature option that triggers it.
 	 *
 	 * @internal
 	 */
-	public function handle_admin_init(): void {
-		if ( 'yes' === get_option( self::FEATURE_OPTION ) && $this->is_mcp_adapter_plugin_active() ) {
-			delete_option( self::FEATURE_OPTION );
-		}
+	public function handle_woocommerce_hide_mcp_endpoint_removed_notice(): void {
+		delete_option( self::FEATURE_OPTION );
 	}
 
 	/**
@@ -150,7 +173,7 @@ class McpEndpointRemoval {
 		} elseif ( 'activate' === $link_type ) {
 			$message .= sprintf(
 				' | <a href="%1$s">%2$s</a>',
-				esc_url( wp_nonce_url( admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( self::ADAPTER_PLUGIN_FILE ) ), 'activate-plugin_' . self::ADAPTER_PLUGIN_FILE ) ),
+				esc_url( wp_nonce_url( admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( self::ADAPTER_PLUGIN_FILE ) . '&' . self::NOTICE_ACTIVATION_ARG . '=1' ), 'activate-plugin_' . self::ADAPTER_PLUGIN_FILE ) ),
 				esc_html__( 'Activate MCP Adapter', 'woocommerce' )
 			);
 		}
@@ -198,19 +221,6 @@ class McpEndpointRemoval {
 		}
 
 		return current_user_can( 'install_plugins' ) ? 'install' : '';
-	}
-
-	/**
-	 * Check whether the MCP Adapter plugin is active on this site or network.
-	 *
-	 * @return bool
-	 */
-	private function is_mcp_adapter_plugin_active(): bool {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		return (bool) wc_get_container()->get( LegacyProxy::class )->call_function( 'is_plugin_active', self::ADAPTER_PLUGIN_FILE );
 	}
 
 	/**

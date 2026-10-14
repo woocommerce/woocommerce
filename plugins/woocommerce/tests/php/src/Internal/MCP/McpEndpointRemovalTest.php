@@ -170,26 +170,62 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should delete the old feature option once the MCP Adapter plugin is active, which hides the notice.
+	 * @testdox Should delete the old feature option when the MCP Adapter plugin is activated from the notice's link.
 	 */
-	public function test_admin_init_deletes_feature_option_when_adapter_plugin_active(): void {
-		$this->set_up_removed_notice_conditions( true, true, true );
+	public function test_activating_adapter_from_notice_deletes_feature_option(): void {
+		$this->set_up_removed_notice_conditions( false, true );
+		$this->assertStringContainsString( 'wc-mcp-removal-notice=1', $this->get_admin_notices_output(), 'The activation link should identify the notice as its source' );
 
-		$this->sut->handle_admin_init();
+		$this->simulate_adapter_activation( true );
 
 		$this->assertFalse( get_option( 'woocommerce_feature_mcp_integration_enabled' ), 'The old feature option should be deleted' );
 		$this->assertSame( '', $this->get_admin_notices_output() );
 	}
 
 	/**
-	 * @testdox Should keep the old feature option while the MCP Adapter plugin isn't active.
+	 * @testdox Should keep the old feature option when the MCP Adapter plugin is activated outside the notice.
 	 */
-	public function test_admin_init_keeps_feature_option_when_adapter_plugin_inactive(): void {
-		$this->set_up_removed_notice_conditions( false, true, false );
+	public function test_activating_adapter_outside_notice_keeps_feature_option(): void {
+		$this->set_up_removed_notice_conditions( false, true );
 
-		$this->sut->handle_admin_init();
+		$this->simulate_adapter_activation( false );
 
 		$this->assertSame( 'yes', get_option( 'woocommerce_feature_mcp_integration_enabled' ) );
+	}
+
+	/**
+	 * @testdox Should keep the old feature option when another plugin is activated from a link with the notice argument.
+	 */
+	public function test_activating_other_plugin_keeps_feature_option(): void {
+		$this->set_up_removed_notice_conditions( false, true );
+		$_GET['wc-mcp-removal-notice'] = '1';
+
+		try {
+			$this->sut->handle_activated_plugin( 'hello.php' );
+		} finally {
+			unset( $_GET['wc-mcp-removal-notice'] );
+		}
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_mcp_integration_enabled' ) );
+	}
+
+	/**
+	 * @testdox Should delete the old feature option for the whole store when an admin dismisses the notice.
+	 */
+	public function test_dismissing_notice_deletes_feature_option(): void {
+		$this->set_up_removed_notice_conditions( false );
+		$_GET['wc-hide-notice']   = McpEndpointRemoval::REMOVED_NOTICE;
+		$_GET['_wc_notice_nonce'] = wp_create_nonce( 'woocommerce_hide_notices_nonce' );
+
+		try {
+			\WC_Admin_Notices::hide_notices();
+		} finally {
+			unset( $_GET['wc-hide-notice'], $_GET['_wc_notice_nonce'] );
+		}
+
+		$this->assertFalse( get_option( 'woocommerce_feature_mcp_integration_enabled' ), 'The old feature option should be deleted' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( '', $this->get_admin_notices_output(), 'Other admins should no longer see the notice' );
 	}
 
 	/**
@@ -227,24 +263,37 @@ class McpEndpointRemovalTest extends WC_Unit_Test_Case {
 	 *
 	 * @param bool $adapter_loaded   Whether an MCP adapter should appear to be loaded.
 	 * @param bool $plugin_installed Whether the MCP Adapter plugin should appear to be installed.
-	 * @param bool $plugin_active    Whether the MCP Adapter plugin should appear to be active.
 	 */
-	private function set_up_removed_notice_conditions( bool $adapter_loaded, bool $plugin_installed = false, bool $plugin_active = false ): void {
+	private function set_up_removed_notice_conditions( bool $adapter_loaded, bool $plugin_installed = false ): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'class_exists'     => static function ( $class_name ) use ( $adapter_loaded ) {
+				'class_exists' => static function ( $class_name ) use ( $adapter_loaded ) {
 					return 'WP\\MCP\\Core\\McpAdapter' === $class_name ? $adapter_loaded : class_exists( $class_name );
 				},
-				'file_exists'      => static function ( $path ) use ( $plugin_installed ) {
+				'file_exists'  => static function ( $path ) use ( $plugin_installed ) {
 					return WP_PLUGIN_DIR . '/mcp-adapter/mcp-adapter.php' === $path ? $plugin_installed : file_exists( $path );
-				},
-				'is_plugin_active' => static function ( $plugin ) use ( $plugin_active ) {
-					return 'mcp-adapter/mcp-adapter.php' === $plugin ? $plugin_active : is_plugin_active( $plugin );
 				},
 			)
 		);
+	}
+
+	/**
+	 * Fire activated_plugin for the MCP Adapter plugin, as core does during activation.
+	 *
+	 * @param bool $from_notice Whether the activation request came from the notice's link.
+	 */
+	private function simulate_adapter_activation( bool $from_notice ): void {
+		if ( $from_notice ) {
+			$_GET['wc-mcp-removal-notice'] = '1';
+		}
+
+		try {
+			$this->sut->handle_activated_plugin( 'mcp-adapter/mcp-adapter.php' );
+		} finally {
+			unset( $_GET['wc-mcp-removal-notice'] );
+		}
 	}
 
 	/**
