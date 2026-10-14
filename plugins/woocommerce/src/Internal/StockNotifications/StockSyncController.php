@@ -137,7 +137,7 @@ class StockSyncController {
 	 * @return void
 	 */
 	public function process_queue(): void {
-		$product_ids = is_array( $this->queue ) ? array_filter( array_keys( $this->queue ) ) : array();
+		$product_ids = array_filter( array_keys( $this->queue ) );
 		$this->queue = array();
 
 		if ( ! empty( $product_ids ) ) {
