@@ -393,7 +393,7 @@ class Notification extends \WC_Data {
 			return '';
 		}
 
-		$attributes = $this->get_variation_attributes_with_posted( $product );
+		$attributes = $this->get_variation_attributes_with_posted_data( $product );
 		if ( empty( $attributes ) ) {
 			return '';
 		}
@@ -431,7 +431,7 @@ class Notification extends \WC_Data {
 			return (string) $product->get_permalink();
 		}
 
-		return (string) $product->get_permalink( array( 'variation' => $this->get_variation_attributes_with_posted( $product ) ) );
+		return (string) $product->get_permalink( array( 'variation' => $this->get_variation_attributes_with_posted_data( $product ) ) );
 	}
 
 	/**
@@ -443,7 +443,7 @@ class Notification extends \WC_Data {
 	 * @param \WC_Product_Variation $product The notification's variation.
 	 * @return array
 	 */
-	private function get_variation_attributes_with_posted( \WC_Product_Variation $product ): array {
+	private function get_variation_attributes_with_posted_data( \WC_Product_Variation $product ): array {
 		$variation_attributes = $product->get_variation_attributes();
 		$posted_attributes    = $this->get_meta( 'posted_attributes' );
 		if ( empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
