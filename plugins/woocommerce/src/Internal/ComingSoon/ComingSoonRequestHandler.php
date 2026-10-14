@@ -135,21 +135,18 @@ class ComingSoonRequestHandler {
 		}
 
 		/*
-		 * Fire core's get_query_template( 'coming-soon' ) hooks, which the block renderer already fires,
-		 * so callbacks on either renderer see the same contract.
+		 * A theme's root coming-soon.php is deliberately not looked up: some classic themes ship a page template
+		 * with that name that prints the current post, which would expose the protected page.
+		 */
+		$template_name = $this->coming_soon_helper->is_store_coming_soon() ? 'coming-soon-store-only.php' : 'coming-soon-entire-site.php';
+		$selected      = wc_locate_template( 'coming-soon/' . $template_name );
+
+		/*
+		 * Fire core's coming-soon_template filter with the arguments the block renderer passes through
+		 * get_query_template( 'coming-soon' ), so callbacks see the same contract on either renderer.
 		 */
 		/** This filter is documented in wp-includes/template.php */
-		$templates = apply_filters( 'coming-soon_template_hierarchy', array( 'coming-soon.php' ) ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
-		$templates = is_array( $templates ) ? array_filter( $templates, 'is_string' ) : array( 'coming-soon.php' );
-		$selected  = locate_template( $templates );
-
-		if ( ! $selected ) {
-			$template_name = $this->coming_soon_helper->is_store_coming_soon() ? 'coming-soon-store-only.php' : 'coming-soon-entire-site.php';
-			$selected      = wc_locate_template( 'coming-soon/' . $template_name );
-		}
-
-		/** This filter is documented in wp-includes/template.php */
-		$selected = apply_filters( 'coming-soon_template', $selected, 'coming-soon', $templates ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$selected = apply_filters( 'coming-soon_template', $selected, 'coming-soon', array( 'coming-soon.php' ) ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		if ( ! is_string( $selected ) || ! is_file( $selected ) || ! is_readable( $selected ) ) {
 			// Never fall back to protected content when a template override cannot be loaded.
 			return '';

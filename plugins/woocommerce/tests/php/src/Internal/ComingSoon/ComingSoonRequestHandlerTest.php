@@ -174,6 +174,36 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should ignore a theme's root coming-soon.php and load a theme override from the WooCommerce folder.
+	 * @testWith ["coming-soon.php", false]
+	 *           ["woocommerce/coming-soon/coming-soon-entire-site.php", true]
+	 *
+	 * @param string $file     Theme file to create, relative to the theme folder.
+	 * @param bool   $override Whether WooCommerce should load the file.
+	 */
+	public function test_theme_template_lookup( string $file, bool $override ): void {
+		$root  = $this->create_fixture_directory();
+		$path  = $root . '/' . $file;
+		$paths = array( $GLOBALS['wp_stylesheet_path'] ?? null, $GLOBALS['wp_template_path'] ?? null );
+		try {
+			$this->assertTrue( wp_mkdir_p( dirname( $path ) ) );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write only a fresh task-owned theme file fixture.
+			$this->assertNotFalse( file_put_contents( $path, '<?php the_content();' ) );
+			// locate_template() reads these globals, not the theme directory filters.
+			$GLOBALS['wp_stylesheet_path'] = $root; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Point the template lookup at the fixture theme; restored below.
+			$GLOBALS['wp_template_path']   = $root; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Point the template lookup at the fixture theme; restored below.
+
+			$this->assertSame( $override ? $path : self::ENTIRE_SITE_TEMPLATE, $this->sut->handle_classic_template_include( '/protected.php' ) );
+		} finally {
+			list( $GLOBALS['wp_stylesheet_path'], $GLOBALS['wp_template_path'] ) = $paths; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the theme paths.
+			wp_delete_file( $path );
+			foreach ( array( '/woocommerce/coming-soon', '/woocommerce', '' ) as $dir ) {
+				$this->remove_fixture_directory( $root . $dir );
+			}
+		}
+	}
+
+	/**
 	 * Assert the classic template result, and that its stylesheet is enqueued only when the WooCommerce page is selected.
 	 *
 	 * @param string $expected Expected template path.
@@ -256,18 +286,10 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass the original query-template filter arguments exactly once and honor a replacement.
+	 * @testdox Should pass the original coming-soon_template filter arguments exactly once and honor a replacement.
 	 */
-	public function test_classic_query_template_filters(): void {
-		$hierarchy_calls = array();
-		$template_calls  = array();
-		add_filter(
-			'coming-soon_template_hierarchy',
-			function ( $templates ) use ( &$hierarchy_calls ) {
-				$hierarchy_calls[] = $templates;
-				return $templates;
-			}
-		);
+	public function test_classic_query_template_filter(): void {
+		$template_calls = array();
 		add_filter(
 			'coming-soon_template',
 			function ( $template, $type, $templates ) use ( &$template_calls ) {
@@ -279,7 +301,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( WC_ABSPATH . 'templates/single-product.php', $this->sut->handle_classic_template_include( '/original.php' ) );
-		$this->assertSame( array( array( 'coming-soon.php' ) ), $hierarchy_calls );
 		$this->assertSame( array( array( self::ENTIRE_SITE_TEMPLATE, 'coming-soon', array( 'coming-soon.php' ) ) ), $template_calls );
 	}
 
