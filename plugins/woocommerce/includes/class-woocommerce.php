@@ -453,7 +453,7 @@ final class WooCommerce {
 			$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register(); // hooks woocommerce_debug_tools (Status > Tools page).
 		}
 
-		$might_collect_wccom_tracker_data = $is_admin || $is_cli || defined( 'DOING_CRON' );
+		$might_collect_wccom_tracker_data = $is_admin || $is_cli || defined( 'DOING_CRON' ); // Weekly recurring action, the gate reflects how it can be triggered.
 		if ( $might_collect_wccom_tracker_data ) {
 			$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
