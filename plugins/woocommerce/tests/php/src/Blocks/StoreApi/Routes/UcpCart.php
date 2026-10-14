@@ -301,6 +301,37 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A product that exists but no cart line can hold — here a grouped product — is
+	 * reported `item_unavailable`, not `not_found`: the id resolves, it just is not orderable.
+	 */
+	public function test_create_cart_refuses_an_unpurchasable_product_type(): void {
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'UCP Grouped' );
+		$grouped_id = $grouped->save();
+
+		$response = $this->request( 'POST', '/carts', array( 'line_items' => array( array( 'item' => array( 'id' => (string) $grouped_id ) ) ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'item_unavailable', $data['messages'][0]['code'] );
+		$this->assertSame( '$.line_items[0].item.id', $data['messages'][0]['path'] );
+	}
+
+	/**
+	 * An id that matches no product at all stays `not_found`, keeping it apart from a
+	 * product that exists but cannot be ordered.
+	 */
+	public function test_create_cart_reports_an_unknown_product_id_as_not_found(): void {
+		$response = $this->request( 'POST', '/carts', array( 'line_items' => array( array( 'item' => array( 'id' => '99999999' ) ) ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
+	}
+
+	/**
 	 * A quantity-limit refusal is reported as `invalid_quantity`, distinct from a gone item.
 	 *
 	 * An agent can act on the two differently — fix the quantity vs. drop the line — so the
