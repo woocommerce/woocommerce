@@ -1677,7 +1677,7 @@ class WooPaymentsService {
 	 * @throws ApiException If the site could not be registered or the authorization URL could not be generated.
 	 */
 	public function onboarding_wpcom_connection_authorize( ?string $source = null ): array {
-		if ( ! $this->wpcom_connection_manager->is_connected() && ! $this->register_site_with_wpcom( true ) ) {
+		if ( ! $this->is_store_registered_with_wpcom() && ! $this->register_site_with_wpcom( true ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_action_error',
 				esc_html__( 'Failed to register the store with WordPress.com.', 'woocommerce' ),
@@ -2248,7 +2248,7 @@ class WooPaymentsService {
 				),
 			);
 
-			if ( $this->wpcom_connection_manager->is_connected() ) {
+			if ( $this->is_store_registered_with_wpcom() ) {
 				// The site is already registered, so generating the authorization URL will not register it.
 				$wpcom_connection = $this->get_wpcom_connection_authorization( $this->get_wpcom_connection_return_url( $source ) );
 				if ( ! $wpcom_connection['success'] ) {
@@ -2911,6 +2911,18 @@ class WooPaymentsService {
 	 */
 	private function has_working_wpcom_connection(): bool {
 		return $this->wpcom_connection_manager->is_connected() && $this->wpcom_connection_manager->has_connected_owner();
+	}
+
+	/**
+	 * Check if the store is registered with WPCOM (blog ID and tokens are set), with or without a connected owner.
+	 *
+	 * @return bool Whether the store is registered with WPCOM.
+	 */
+	private function is_store_registered_with_wpcom(): bool {
+		/** @var WPCOM_Connection_Manager $wpcom_connection_manager */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$wpcom_connection_manager = $this->wpcom_connection_manager;
+
+		return (bool) $wpcom_connection_manager->is_connected();
 	}
 
 	/**

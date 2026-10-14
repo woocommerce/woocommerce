@@ -705,6 +705,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	 * Handle the onboarding WPCOM connection authorize action.
 	 *
 	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @return WP_Error|WP_REST_Response The response or error.
 	 */
