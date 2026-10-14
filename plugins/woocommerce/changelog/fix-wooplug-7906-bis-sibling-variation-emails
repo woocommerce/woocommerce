@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop sending back-in-stock emails for out-of-stock variations when a sibling variation is restocked.

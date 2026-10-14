@@ -19,21 +19,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	private ShippingController $shipping_controller;
 
 	/**
-	 * The old checkout page ID.
-	 *
-	 * @var int $original_checkout_page_id
-	 */
-	private $original_checkout_page_id;
-
-	/**
-	 * The new checkout page ID.
-	 *
-	 * @var int $block_checkout_page_id
-	 */
-	private $block_checkout_page_id;
-
-
-	/**
 	 * Mock logger instance.
 	 *
 	 * @var \WC_Logger_Interface $mock_logger
@@ -46,6 +31,13 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	 * @var \WC $backup_wc
 	 */
 	private $backup_wc;
+
+	/**
+	 * Customer shipping address before the test, restored at teardown.
+	 *
+	 * @var array<string, string>
+	 */
+	private $previous_shipping_address = array();
 
 	/**
 	 * Initialize the registry instance.
@@ -66,8 +58,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		$this->backup_wc = WC();
 
 		// Local pickup only works with the checkout block.
-		$this->original_checkout_page_id = get_option( 'woocommerce_checkout_page_id' );
-		$this->block_checkout_page_id    = $this->factory->post->create(
+		$block_checkout_page_id = $this->factory->post->create(
 			array(
 				'post_type'    => 'page',
 				'post_title'   => 'Checkout',
@@ -75,12 +66,17 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 				'post_status'  => 'publish',
 			)
 		);
-		update_option( 'woocommerce_checkout_page_id', $this->block_checkout_page_id );
+		update_option( 'woocommerce_checkout_page_id', $block_checkout_page_id );
+		// An earlier test class may have loaded the shipping methods while the checkout was a
+		// shortcode page, which skips local pickup. Unload them so the next read registers it.
+		WC()->shipping()->unregister_shipping_methods();
 
 		$this->shipping_controller = new ShippingController(
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
 		);
+		// WC()->customer outlives the test, so keep its location to restore at teardown.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 		WC()->customer->set_shipping_postcode( '' );
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
@@ -95,11 +91,18 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $woocommerce;
 
-		update_option( 'woocommerce_checkout_page_id', $this->original_checkout_page_id );
-		wp_delete_post( $this->block_checkout_page_id );
-		remove_filter( 'woocommerce_logging_class', array( $this, 'override_wc_logger' ) );
-		$woocommerce = $this->backup_wc;
-		parent::tearDown();
+		try {
+			$woocommerce = $this->backup_wc;
+			foreach ( $this->previous_shipping_address as $key => $value ) {
+				WC()->customer->{"set_shipping_{$key}"}( $value );
+			}
+			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
+			// and register a lone pickup method on the shared WC_Shipping. Undo both.
+			unset( WC()->shipping );
+			WC()->shipping()->unregister_shipping_methods();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**

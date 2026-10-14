@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore translated names for product, Cart, Checkout blocks and related product patterns in the editor.

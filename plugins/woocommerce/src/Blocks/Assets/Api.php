@@ -337,10 +337,9 @@ class Api {
 	 * @param boolean $rtl   Optional. Whether or not to register RTL styles.
 	 */
 	public function register_style( $handle, $relative_src, $deps = [], $media = 'all', $rtl = false ) {
-		$filename = str_replace( plugins_url( '/', dirname( __DIR__ ) ), '', $relative_src );
-		$src      = $this->get_asset_url( $relative_src );
-		$ver      = $this->get_file_version( $filename );
-		wp_register_style( $handle, $src, $deps, $ver, $media );
+		$src     = $this->get_asset_url( $relative_src );
+		$version = $this->get_file_version( $relative_src );
+		wp_register_style( $handle, $src, $deps, $version, $media );
 
 		if ( $rtl ) {
 			wp_style_add_data( $handle, 'rtl', 'replace' );

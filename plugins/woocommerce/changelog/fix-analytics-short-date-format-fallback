@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: typed dates in the historical data import and advanced date filters now work in Czech, Croatian and other locales.
