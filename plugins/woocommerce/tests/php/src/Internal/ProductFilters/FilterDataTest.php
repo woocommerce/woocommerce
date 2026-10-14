@@ -111,15 +111,15 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$key_method->setAccessible( true );
 
 		$rename = static function ( array $params ): array {
-			$params['product_brand'] = 'wc_brands';
+			$params['taxonomy']['product_brand'] = 'wc_brands';
 			return $params;
 		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		add_filter( 'woocommerce_product_filter_params', $rename );
 
 		$renamed_key = $key_method->invoke( $this->sut, $query_vars, 'price' );
 		$unfiltered  = (array) $this->sut->get_filtered_price( $query_vars );
 
-		remove_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		remove_filter( 'woocommerce_product_filter_params', $rename );
 		$this->clear_params_cache();
 
 		$this->assertNotSame( $renamed_key, $key_method->invoke( $this->sut, $query_vars, 'price' ) );

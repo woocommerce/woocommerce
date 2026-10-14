@@ -119,6 +119,7 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@wordpress/env",
 				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
 				"postcss",
@@ -403,15 +404,6 @@
 				"**"
 			],
 			"pinVersion": "25.6.0"
-		},
-		{
-			"dependencies": [
-				"@wordpress/env"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "11.9.0"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",

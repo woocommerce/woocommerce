@@ -101,7 +101,13 @@ class EligibilityServiceTests extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->assertEquals( array( $product->get_id() ), $this->sut->get_target_product_ids( $product ) );
 
-		$variable           = WC_Helper_Product::create_variation_product();
+		$variable = WC_Helper_Product::create_variation_product();
+		$this->assertFalse( $variable->get_manage_stock() );
+		$this->assertEquals( array( $variable->get_id() ), $this->sut->get_target_product_ids( $variable ), 'Variations of a parent that does not manage stock keep their own stock status.' );
+
+		$variable->set_manage_stock( true );
+		$variable->set_stock_quantity( 10 );
+		$variable->save();
 		$managed_variations = array_filter(
 			array_map(
 				function ( $variation ) {
@@ -115,6 +121,7 @@ class EligibilityServiceTests extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotEmpty( $managed_variations );
 		$this->assertEquals( array( $variable->get_id(), ...$managed_variations ), $this->sut->get_target_product_ids( $variable ) );
 
 		$variation = $variable->get_children()[0];

@@ -6,11 +6,12 @@ import {
 	useStoreAddToCart,
 	useStoreEvents,
 } from '@woocommerce/base-context/hooks';
+import { useStyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
  */
-import { AddToCartButton } from '../block';
+import { AddToCartButton, Block } from '../block';
 import type { AddToCartButtonAttributes } from '../types';
 
 jest.mock( '@woocommerce/base-context/hooks', () => ( {
@@ -18,7 +19,18 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	useStoreEvents: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/base-hooks', () => ( {} ) );
+jest.mock( '@woocommerce/base-hooks', () => ( {
+	useStyleProps: jest.fn(),
+} ) );
+
+jest.mock( '@woocommerce/shared-context', () => ( {
+	useInnerBlockLayoutContext: () => ( {} ),
+	useProductDataContext: () => ( {} ),
+} ) );
+
+jest.mock( '../../../../shared/stores/product-type-template-state', () => ( {
+	useProductTypeSelector: () => ( {} ),
+} ) );
 
 jest.mock( '@woocommerce/block-settings', () => ( {
 	CART_URL: '/cart/',
@@ -84,4 +96,25 @@ describe( 'AddToCartButton', () => {
 		expect( link ).toHaveAttribute( 'href', '/cart/' );
 		expect( link ).toHaveAttribute( 'rel', 'nofollow' );
 	} );
+} );
+
+describe( 'Product Button spacing', () => {
+	it.each( [ true, false ] )(
+		'keeps padding on the button and leaves editor margin to block supports (isAdmin=%s)',
+		( isAdmin ) => {
+			( useStyleProps as jest.Mock ).mockReturnValue( {
+				className: '',
+				style: { marginTop: '12px', paddingTop: '10px' },
+			} );
+
+			const { container } = render( <Block isAdmin={ isAdmin } /> );
+			const wrapper = container.firstElementChild as HTMLElement;
+			const button = screen.getByRole( 'button' );
+
+			expect( wrapper.style.marginTop ).toBe( isAdmin ? '' : '12px' );
+			expect( wrapper.style.paddingTop ).toBe( '' );
+			expect( button.style.marginTop ).toBe( '' );
+			expect( button ).toHaveStyle( { paddingTop: '10px' } );
+		}
+	);
 } );

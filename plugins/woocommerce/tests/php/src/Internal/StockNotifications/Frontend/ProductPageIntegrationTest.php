@@ -6,11 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Unit_Test_Case;
 
@@ -29,20 +25,28 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * REQUEST_URI before the test, restored at teardown.
+	 *
+	 * @var string|null
+	 */
+	private $request_uri_at_setup;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		// The blocks are not registered on `init` because `init` runs with a classic theme.
-		// Other test classes may have registered them already.
-		if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options' ) ) {
-			new AddToCartWithOptionsMock();
-			new AddToCartWithOptionsQuantitySelectorMock();
-			new AddToCartWithOptionsVariationSelectorMock();
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-		}
+		// go_to() sets REQUEST_URI and no base test case puts it back.
+		$this->request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+		AddToCartWithOptionsMocks::register(
+			'add-to-cart-with-options',
+			'add-to-cart-with-options-quantity-selector',
+			'add-to-cart-with-options-variation-selector',
+			'add-to-cart-with-options-variation-selector-attribute',
+			'add-to-cart-with-options-variation-selector-attribute-name'
+		);
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 
@@ -59,6 +63,11 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			if ( null === $this->request_uri_at_setup ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $this->request_uri_at_setup;
+			}
 			$this->restore_stock_notifications_feature_option();
 		} finally {
 			parent::tearDown();

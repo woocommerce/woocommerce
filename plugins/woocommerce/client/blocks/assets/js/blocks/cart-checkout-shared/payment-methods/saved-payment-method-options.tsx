@@ -21,7 +21,10 @@ import { isNull } from '@woocommerce/types';
  * Internal dependencies
  */
 import { getCanMakePaymentArg } from '@woocommerce/block-data/payment/utils/check-payment-methods';
-import { CustomerPaymentMethodConfiguration } from '@woocommerce/block-data/payment/types';
+import type {
+	CustomerPaymentMethodConfiguration,
+	SavedPaymentMethod,
+} from '@woocommerce/block-data/payment/types';
 
 /**
  * Returns the option object for a cc or echeck saved payment method token.
@@ -45,11 +48,13 @@ const getCcOrEcheckLabel = ( {
 /**
  * Returns the option object for any non specific saved payment method.
  */
-const getDefaultLabel = ( {
-	method,
-}: {
-	method: CustomerPaymentMethodConfiguration;
-} ): string => {
+const getDefaultLabel = (
+	{
+		method,
+		display_name: displayName,
+	}: Pick< SavedPaymentMethod, 'method' | 'display_name' >,
+	type: string
+): string => {
 	/* For saved payment methods with brand & last 4 */
 	if ( method.brand && method.last4 ) {
 		return sprintf(
@@ -58,6 +63,16 @@ const getDefaultLabel = ( {
 			method.brand,
 			method.last4
 		);
+	}
+
+	/* For saved payment methods that provide their own display name. The default WC_Payment_Token::get_display_name() returns the token type, which is not a label. */
+	const trimmedDisplayName =
+		typeof displayName === 'string' ? displayName.trim() : '';
+	if (
+		trimmedDisplayName !== '' &&
+		trimmedDisplayName.toLowerCase() !== type.toLowerCase()
+	) {
+		return trimmedDisplayName;
 	}
 
 	/* For saved payment methods without brand & last 4 */
@@ -120,7 +135,7 @@ const SavedPaymentMethodOptions = () => {
 					name: `wc-saved-payment-method-token-${ paymentMethodSlug }`,
 					label: isCC
 						? getCcOrEcheckLabel( paymentMethod )
-						: getDefaultLabel( paymentMethod ),
+						: getDefaultLabel( paymentMethod, type ),
 					value: paymentMethod.tokenId.toString(),
 					onChange: ( token: string ) => {
 						const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;

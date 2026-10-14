@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import moment from 'moment';
+import { getShortDateFormat } from '@woocommerce/date';
 import type { Reducer } from 'redux';
 
 /**
@@ -20,7 +20,7 @@ const reducer: Reducer< ImportState, Action > = (
 		errors: {},
 		lastImportStartTimestamp: 0,
 		period: {
-			date: moment().format( __( 'MM/DD/YYYY', 'woocommerce' ) ),
+			date: moment().format( getShortDateFormat() ),
 			label: 'all',
 		},
 		skipPrevious: true,
