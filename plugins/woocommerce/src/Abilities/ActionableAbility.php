@@ -116,7 +116,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$rejected = $this->apply_fields( $subject, $updates );
-		if ( null === $rejected && AbilityContracts::is_enabled() ) {
+		if ( null === $rejected && AbilityExtensions::is_enabled() ) {
 			$rejected = $this->validate( $subject );
 		}
 		if ( null !== $rejected ) {
