@@ -833,7 +833,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$product->update_meta_data( '_test_size', 'small' );
 		$product->save();
 
-		$schema   = $this->get_ability( 'woocommerce/product-update' )['input_schema']['oneOf'][0]['properties']['extensions']['properties']['other_ext']['properties']['size'];
+		$schema   = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties']['other_ext']['properties']['size'];
 		$rejected = $this->run_ability_response(
 			'woocommerce/product-update',
 			array(
