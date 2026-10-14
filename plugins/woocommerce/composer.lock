@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5fb928a8368274de843fdd9037bfdc40",
+    "content-hash": "3d2aab352543dade8fac919263db0017",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -5406,100 +5406,6 @@
                 "source": "https://github.com/WordPress/abilities-api"
             },
             "time": "2025-10-29T05:35:31+00:00"
-        },
-        {
-            "name": "wordpress/mcp-adapter",
-            "version": "v0.4.1",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:WordPress/mcp-adapter.git",
-                "reference": "1a0f9ab868e34b4375be42e873f60765e6632505"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/1a0f9ab868e34b4375be42e873f60765e6632505",
-                "reference": "1a0f9ab868e34b4375be42e873f60765e6632505",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.4 || ^8.0"
-            },
-            "require-dev": {
-                "automattic/vipwpcs": "^3.0",
-                "php-stubs/wp-cli-stubs": "^2.12",
-                "phpcompatibility/php-compatibility": "10.x-dev as 9.99.99",
-                "phpcompatibility/phpcompatibility-wp": "^2.1",
-                "phpstan/extension-installer": "^1.3",
-                "phpstan/php-8-stubs": "^0.4.24",
-                "phpstan/phpstan": "^2.1.22",
-                "phpstan/phpstan-deprecation-rules": "^2.0.3",
-                "phpunit/phpunit": "^9.6",
-                "slevomat/coding-standard": "^8.0",
-                "szepeviktor/phpstan-wordpress": "^2.0",
-                "wp-phpunit/wp-phpunit": "^6.5",
-                "wpackagist-plugin/plugin-check": "^1.6",
-                "yoast/phpunit-polyfills": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "installer-paths": {
-                    "vendor/{$vendor}/{$name}/": [
-                        "wpackagist-plugin/plugin-check"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "WP\\MCP\\": "includes/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "WP\\MCP\\Tests\\": [
-                        "tests/"
-                    ]
-                }
-            },
-            "scripts": {
-                "lint:php": [
-                    "phpcs"
-                ],
-                "lint:php:fix": [
-                    "phpcbf"
-                ],
-                "lint:php:stan": [
-                    "vendor/bin/phpstan analyse --memory-limit=1G"
-                ],
-                "test": [
-                    "phpunit --strict-coverage"
-                ]
-            },
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "WordPress AI Team",
-                    "homepage": "https://make.wordpress.org/ai/"
-                }
-            ],
-            "description": "Adapter for Abilities API, letting WordPress abilities to be used as MCP tools, resources or prompts",
-            "homepage": "https://github.com/wordpress/mcp-adapter",
-            "keywords": [
-                "abilities-api",
-                "adapter",
-                "ai",
-                "api",
-                "integration",
-                "mcp",
-                "model-context-protocol",
-                "wordpress"
-            ],
-            "support": {
-                "issues": "https://github.com/wordpress/mcp-adapter/issues",
-                "source": "https://github.com/wordpress/mcp-adapter"
-            },
-            "time": "2025-12-09T06:56:51+00:00"
         },
         {
             "name": "yoast/phpunit-polyfills",

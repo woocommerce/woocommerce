@@ -35,10 +35,6 @@
 		},
 		{
 			"type": "vcs",
-			"url": "https://github.com/WordPress/mcp-adapter.git"
-		},
-		{
-			"type": "vcs",
 			"url": "https://github.com/WordPress/abilities-api"
 		}
 	],
@@ -72,7 +68,6 @@
 		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
 		"wordpress/abilities-api": "^0.4.0",
-		"wordpress/mcp-adapter": "^0.4.1",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
 	"config": {
