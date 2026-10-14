@@ -324,6 +324,253 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Record what the shopper picked, the way the checkout stores it.
+	 *
+	 * @param string $rate_id Chosen rate id, e.g. 'pickup_location:1'.
+	 */
+	private function shopper_chose( string $rate_id ): void {
+		WC()->session->set( 'chosen_shipping_methods', array( $rate_id ) );
+	}
+
+	/**
+	 * Save pickup locations the way the settings screen stores them.
+	 *
+	 * @param array $locations Locations, each an address keyed by country/state/postcode/city.
+	 */
+	private function pickup_locations_at( array $locations ): void {
+		update_option(
+			'pickup_location_pickup_locations',
+			array_map(
+				static function ( $address, $index ) {
+					return array(
+						'name'    => 'Branch ' . $index,
+						'address' => $address,
+						'details' => '',
+						'enabled' => true,
+					);
+				},
+				$locations,
+				array_keys( $locations )
+			)
+		);
+	}
+
+	/**
+	 * The address the shopper gave, as WC_Customer::get_taxable_address() hands it to the filter.
+	 *
+	 * @return array
+	 */
+	private function the_shoppers_address(): array {
+		return array( 'US', 'NY', '10001', 'New York' );
+	}
+
+	/**
+	 * A branch in a state of its own, different from both the shopper's and the shop base's, so
+	 * that taxing at the branch is visibly not taxing at either of the other two. Tax tables are
+	 * usually keyed on country and state, so a branch sharing the base's state would leave the
+	 * difference showing only in the postcode.
+	 *
+	 * @return array
+	 */
+	private function a_branch_address(): array {
+		return array(
+			'country'  => 'US',
+			'state'    => 'WA',
+			'postcode' => '98101',
+			'city'     => 'Seattle',
+		);
+	}
+
+	/**
+	 * "This option determines which address is used to calculate tax." Nothing chosen means nothing
+	 * to override it with.
+	 *
+	 * @testdox With nothing chosen, tax is worked out from the address the shopper gave.
+	 */
+	public function test_with_nothing_chosen_the_shoppers_address_is_used(): void {
+		$this->pickup_locations_at( array( $this->a_branch_address() ) );
+
+		$this->assertSame(
+			$this->the_shoppers_address(),
+			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
+			'Nothing has been chosen, so nothing should move the tax location.'
+		);
+	}
+
+	/**
+	 * Tax gets worked out in places that have no shopper session at all, such as an admin screen, a
+	 * cron run or WP-CLI, and there is no chosen method to read there.
+	 *
+	 * @testdox Without a session there is no chosen method to move the tax location.
+	 */
+	public function test_without_a_session_the_tax_location_is_left_alone(): void {
+		$this->pickup_locations_at( array( $this->a_branch_address() ) );
+		$this->shopper_chose( 'pickup_location:0' );
+
+		$session      = WC()->session;
+		WC()->session = null;
+
+		try {
+			$address = $this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() );
+		} finally {
+			WC()->session = $session;
+		}
+
+		$this->assertSame(
+			$this->the_shoppers_address(),
+			$address,
+			'With no session to ask, nothing is known to have been chosen.'
+		);
+	}
+
+	/**
+	 * A delivery method carries an instance id of its own, and it has nothing to do with the
+	 * position of a branch in the pickup list. Taxing a delivered order at whichever branch happens
+	 * to sit at that index would be wrong twice over.
+	 *
+	 * @testdox A delivery method is not taxed at the branch sitting at its instance id.
+	 */
+	public function test_a_delivery_method_is_not_taxed_at_the_branch_at_its_instance_id(): void {
+		$this->pickup_locations_at( array( $this->a_branch_address() ) );
+		$this->shopper_chose( 'flat_rate:0' );
+
+		$this->assertSame(
+			$this->the_shoppers_address(),
+			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
+			'The order is being delivered, so no branch address should come into it.'
+		);
+	}
+
+	/**
+	 * The shopper collects from the branch, so that is where the sale happens and where tax is
+	 * worked out, whatever "Calculate tax based on" says.
+	 *
+	 * @testdox Collection is taxed at the branch the shopper picked.
+	 */
+	public function test_collection_is_taxed_at_the_chosen_branch(): void {
+		$this->pickup_locations_at( array( $this->a_branch_address() ) );
+		$this->shopper_chose( 'pickup_location:0' );
+
+		$this->assertSame(
+			array( 'US', 'WA', '98101', 'Seattle' ),
+			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
+			'Tax should be worked out where the order is collected.'
+		);
+	}
+
+	/**
+	 * @testdox Each branch is taxed at its own address, not at the first one on the list.
+	 */
+	public function test_each_branch_is_taxed_at_its_own_address(): void {
+		$this->pickup_locations_at(
+			array(
+				$this->a_branch_address(),
+				array(
+					'country'  => 'US',
+					'state'    => 'TX',
+					'postcode' => '73301',
+					'city'     => 'Austin',
+				),
+			)
+		);
+		$this->shopper_chose( 'pickup_location:1' );
+
+		$this->assertSame(
+			array( 'US', 'TX', '73301', 'Austin' ),
+			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
+			'The second branch should be taxed where the second branch is.'
+		);
+	}
+
+	/**
+	 * Without a country there is nothing to work a tax rate out from, so whatever arrived stands.
+	 * This calls the filter directly, so what arrives here is the shopper's own address; in a real
+	 * request `WC_Customer::get_taxable_address()` has already substituted the shop base for a
+	 * collected order, and the filter declines to refine that in the same way.
+	 *
+	 * @testdox A branch saved without a country leaves the tax location as it arrived.
+	 *
+	 * @dataProvider provider_branches_without_a_usable_country
+	 *
+	 * @param array  $locations What is saved under the pickup locations option.
+	 * @param string $chosen    The rate the shopper picked.
+	 * @param string $why       What makes this case the shape it is.
+	 */
+	public function test_a_branch_without_a_country_leaves_the_tax_location_alone( array $locations, string $chosen, string $why ): void {
+		$this->pickup_locations_at( $locations );
+		$this->shopper_chose( $chosen );
+
+		$this->assertSame(
+			$this->the_shoppers_address(),
+			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
+			'There is no branch address to tax at: ' . $why
+		);
+	}
+
+	/**
+	 * Branches that cannot say where they are.
+	 *
+	 * @return array
+	 */
+	public function provider_branches_without_a_usable_country(): array {
+		$no_country = array(
+			'country'  => '',
+			'state'    => 'CA',
+			'postcode' => '90210',
+			'city'     => 'Beverly Hills',
+		);
+
+		return array(
+			'a branch with no country'   => array( array( $no_country ), 'pickup_location:0', 'the branch has no country saved' ),
+			'a branch with no address'   => array( array( array() ), 'pickup_location:0', 'the branch has no address at all' ),
+			'a branch that is not there' => array( array(), 'pickup_location:4', 'the chosen branch no longer exists' ),
+		);
+	}
+
+	/**
+	 * `woocommerce_apply_base_tax_for_local_pickup` is the documented seam for stores that do not
+	 * want collection taxed at the shop, and it has to switch off the branch address too.
+	 *
+	 * @testdox An extension can stop collection being taxed at the branch.
+	 */
+	public function test_an_extension_can_stop_collection_being_taxed_at_the_branch(): void {
+		$this->pickup_locations_at( array( $this->a_branch_address() ) );
+		$this->shopper_chose( 'pickup_location:0' );
+
+		add_filter( 'woocommerce_apply_base_tax_for_local_pickup', '__return_false' );
+
+		$this->assertSame(
+			$this->the_shoppers_address(),
+			$this->shipping_controller->filter_taxable_address( $this->the_shoppers_address() ),
+			'With the filter switched off, the shopper\'s own address should decide the tax again.'
+		);
+	}
+
+	/**
+	 * The filter is attached to `woocommerce_customer_taxable_address`, so what decides a shopper's
+	 * tax is the address that comes back from the customer, not this method read on its own.
+	 *
+	 * @testdox Asking the customer where they are taxed gives the branch they are collecting from.
+	 */
+	public function test_the_customers_taxable_address_becomes_the_branch(): void {
+		$this->shipping_controller->init();
+		$this->pickup_locations_at( array( $this->a_branch_address() ) );
+		$this->shopper_chose( 'pickup_location:0' );
+
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_state( 'NY' );
+		WC()->customer->set_shipping_postcode( '10001' );
+		WC()->customer->set_shipping_city( 'New York' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+
+		$this->assertSame(
+			array( 'US', 'WA', '98101', 'Seattle' ),
+			WC()->customer->get_taxable_address(),
+			'A shopper collecting from the branch should be taxed at the branch, not at their own address.'
+		);
+	}
+
+	/**
 	 * Build a shipping package the way WC_Shipping hands one to the filters.
 	 *
 	 * @param array $rate_keys Rate ids, e.g. array( 'flat_rate:1', 'pickup_location:0' ).
