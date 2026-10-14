@@ -1242,6 +1242,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
 			->method( 'try_registration' )
+			->with( true, false )
 			->willReturn( true );
 
 		// Act.

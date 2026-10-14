@@ -10649,11 +10649,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connected' )
 			->willReturn( false );
-		// The preload runs on the merchant's click, so the attempt must not be held back by an earlier failure.
+		// The preload runs in the background, so the attempt is not forced.
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
 			->method( 'try_registration' )
-			->with( true, true )
+			->with( true, false )
 			->willReturn( $expected_wpcom_registration_result );
 
 		// Arrange the onboarding locked DB option.

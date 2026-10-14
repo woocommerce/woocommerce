@@ -1654,8 +1654,9 @@ class WooPaymentsService {
 		// Register the site to WPCOM if it is not already registered.
 		// This sets up the site for connection. For new sites, this tends to take a while.
 		// It is a prerequisite to generating the WPCOM/Jetpack authorization URL.
+		// Not forced: the preload runs in the background, before the merchant asks to connect.
 		if ( ! $this->wpcom_connection_manager->is_connected() ) {
-			$result = $this->register_site_with_wpcom();
+			$result = $this->register_site_with_wpcom( false );
 		}
 
 		return array(
@@ -1676,7 +1677,7 @@ class WooPaymentsService {
 	 * @throws ApiException If the site could not be registered or the authorization URL could not be generated.
 	 */
 	public function onboarding_wpcom_connection_authorize( ?string $source = null ): array {
-		if ( ! $this->wpcom_connection_manager->is_connected() && ! $this->register_site_with_wpcom() ) {
+		if ( ! $this->wpcom_connection_manager->is_connected() && ! $this->register_site_with_wpcom( true ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_action_error',
 				esc_html__( 'Failed to register the store with WordPress.com.', 'woocommerce' ),
@@ -1702,15 +1703,15 @@ class WooPaymentsService {
 	/**
 	 * Register the site to WPCOM.
 	 *
-	 * Only call this from a merchant's action: the attempt is forced past any failure the Jetpack
-	 * connection package remembers from an earlier, unattended attempt, and past its offline mode check.
+	 * @param bool $force Whether the merchant asked to connect. A forced attempt skips the Jetpack connection
+	 *                    package's offline mode check and the backoff after an earlier failed attempt.
 	 *
 	 * @return bool The registration result.
 	 * @throws ApiException If the registration failed.
 	 */
-	private function register_site_with_wpcom(): bool {
+	private function register_site_with_wpcom( bool $force ): bool {
 		// Jetpack connection package versions without the `$force` parameter ignore the extra argument.
-		$result = $this->wpcom_connection_manager->try_registration( true, true );
+		$result = $this->wpcom_connection_manager->try_registration( true, $force );
 		if ( is_wp_error( $result ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_action_error',
