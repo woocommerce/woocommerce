@@ -74,12 +74,14 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 
 		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Simulates the request the handler verifies.
 
-		$before = time();
+		$before     = time();
+		$redirected = false;
 		try {
 			$this->sut->process_edit_form( $notification );
 		} catch ( \Exception $e ) {
-			$this->assertSame( 'redirect', $e->getMessage() );
+			$redirected = 'redirect' === $e->getMessage();
 		}
+		$this->assertTrue( $redirected, 'Expected the handler to redirect.' );
 
 		$sent_at = (int) ( new Notification( $notification_id ) )->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META );
 		$this->assertGreaterThanOrEqual( $before, $sent_at );

@@ -129,9 +129,10 @@ class NotificationEditPage {
 					break;
 				}
 
-				$this->email_manager->send_verify_email( $notification );
+				// Record the resend before dispatching the email so retention cleanup can't delete the row mid-send.
 				$notification->update_meta_data( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META, (string) time() );
 				$notification->save();
+				$this->email_manager->send_verify_email( $notification );
 				// translators: %s user email.
 				$notice_message = sprintf( __( 'Verification email sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 				NotificationsPage::add_notice( $notice_message, 'success' );
