@@ -11,6 +11,7 @@ import {
 	changeCartItemQuantity,
 	receiveCart,
 	applyExtensionCartUpdate,
+	syncCartWithIAPIStore,
 } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
 import { getIsCustomerDataDirty } from '../utils';
@@ -389,12 +390,14 @@ describe( 'receiveCart', () => {
 			pendingDelete: [ 'bundle-parent' ],
 		} );
 		const previousCart = select.getCartData();
+		let pendingDeleteClearedFirst = false;
+		// Record the state instead of asserting here, since errors thrown by callbacks are caught and logged.
 		const callback = jest.fn( () => {
-			// Pending deletes are already cleared when extensions are told about the update.
-			expect( dispatch.itemIsPendingDelete ).toHaveBeenCalledWith(
-				'bundle-parent',
-				false
-			);
+			pendingDeleteClearedFirst =
+				dispatch.itemIsPendingDelete.mock.calls.some(
+					( [ key, isPending ] ) =>
+						key === 'bundle-parent' && isPending === false
+				);
 		} );
 		addAction(
 			'experimental__woocommerce_blocks-cart-updated',
@@ -419,6 +422,7 @@ describe( 'receiveCart', () => {
 			storeCart: select.getCartData(),
 			previousStoreCart: previousCart,
 		} );
+		expect( pendingDeleteClearedFirst ).toBe( true );
 	} );
 
 	it( 'should still update the cart when a cart-updated callback throws', () => {
@@ -463,6 +467,106 @@ describe( 'receiveCart', () => {
 		} as never )( { dispatch, select } as never );
 
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'syncCartWithIAPIStore', () => {
+	const createSyncMocks = () => {
+		let cartData = {
+			items: [ { key: 'item-1', quantity: 1 } ],
+			errors: [] as never[],
+		};
+
+		const dispatch = {
+			setCartData: jest.fn( ( newCart ) => {
+				cartData = newCart;
+			} ),
+			setProductsPendingAdd: jest.fn(),
+			itemIsPendingQuantity: jest.fn(),
+			itemIsPendingDelete: jest.fn(),
+			setErrorData: jest.fn(),
+			receiveError: jest.fn(),
+		};
+		const select = {
+			getCartData: jest.fn( () => cartData ),
+			getCartErrors: jest.fn( () => [] ),
+		};
+
+		return { dispatch, select };
+	};
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'should fire the cart-updated action with the new and previous cart after clearing pending quantities', async () => {
+		mockApiFetchWithHeaders.mockResolvedValue( {
+			response: {
+				items: [ { key: 'item-1', quantity: 2 } ],
+				errors: [],
+			},
+		} );
+		const { dispatch, select } = createSyncMocks();
+		const previousCart = select.getCartData();
+		let pendingQuantityClearedFirst = false;
+		const callback = jest.fn( () => {
+			pendingQuantityClearedFirst =
+				dispatch.itemIsPendingQuantity.mock.calls.some(
+					( [ key, isPending ] ) =>
+						key === 'item-1' && isPending === false
+				);
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-sync',
+			callback
+		);
+
+		try {
+			await syncCartWithIAPIStore( {
+				cartItemsPendingQuantity: [ 'item-1' ],
+			} )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-sync'
+			);
+		}
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith( {
+			storeCart: select.getCartData(),
+			previousStoreCart: previousCart,
+		} );
+		expect( pendingQuantityClearedFirst ).toBe( true );
+	} );
+
+	it( 'should not fire the cart-updated action when the cart request fails', async () => {
+		mockApiFetchWithHeaders.mockRejectedValue(
+			new Error( 'Request failed' )
+		);
+		const { dispatch, select } = createSyncMocks();
+		const callback = jest.fn();
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-sync-fails',
+			callback
+		);
+
+		try {
+			await expect(
+				syncCartWithIAPIStore( {
+					cartItemsPendingQuantity: [ 'item-1' ],
+				} )( { dispatch, select } as never )
+			).rejects.toThrow( 'Request failed' );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-sync-fails'
+			);
+		}
+
+		expect( callback ).not.toHaveBeenCalled();
 	} );
 } );
 
