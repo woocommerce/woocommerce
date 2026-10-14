@@ -750,13 +750,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
 	 */
 	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
-		$order_id = $this->create_order_with_line_item_and_fee();
-		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order_id        = $this->create_order_with_line_item_and_fee();
+		$before          = $this->get_order_item_ids_by_type( $order_id );
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+		$fee_item_calls  = did_action( 'woocommerce_checkout_create_order_fee_item' );
 
 		$resumed_id = $this->resume_order( $order_id );
 
 		$this->assertSame( $order_id, $resumed_id );
 		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
+		$this->assertSame( $fee_item_calls, did_action( 'woocommerce_checkout_create_order_fee_item' ), 'Kept fees should not be created again.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
 	}
 
 	/**
@@ -768,13 +773,51 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$order    = wc_get_order( $order_id );
 		$order->update_meta_data( '_fees_hash', 'stale' );
 		$order->save();
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+		$fee_item_calls  = did_action( 'woocommerce_checkout_create_order_fee_item' );
 
 		$this->resume_order( $order_id );
 		$after = $this->get_order_item_ids_by_type( $order_id );
+		$order = wc_get_order( $order_id );
 
 		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
 		$this->assertCount( 1, $after['fee'], 'The fee should be added again once, not duplicated.' );
 		$this->assertNotSame( $before['fee'], $after['fee'], 'The fee should be replaced.' );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
+		$this->assertSame( $fee_item_calls + 1, did_action( 'woocommerce_checkout_create_order_fee_item' ), 'The replaced fee should be created once.' );
+		$this->assertSame( 5.0, (float) array_values( $order->get_fees() )[0]->get_total(), 'The replaced fee should keep the cart amount.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps every original item when checkout fails before the order is saved.
+	 */
+	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( '_fees_hash', 'stale' );
+		$order->save();
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension gift',
+				'order_item_type' => 'line_item',
+			)
+		);
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_action(
+			'woocommerce_checkout_create_order',
+			function () {
+				throw new Exception( 'Simulated checkout failure' );
+			}
+		);
+
+		$result = $this->resume_order( $order_id );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Simulated checkout failure', $result->get_error_message() );
+		$this->assertCount( 2, $before['line_item'], 'The extension line item should be on the order before resuming.' );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'The changed fee and the extension line item should not be deleted.' );
 	}
 
 	/**
