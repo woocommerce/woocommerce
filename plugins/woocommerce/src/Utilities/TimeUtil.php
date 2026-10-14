@@ -22,7 +22,6 @@ class TimeUtil {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		self::$utc_date_time_zone = new DateTimeZone( 'UTC' );
 	}
 
 	/**
@@ -31,6 +30,8 @@ class TimeUtil {
 	 * @return DateTimeZone DateTimeZone object representing UTC.
 	 */
 	public static function get_utc_date_time_zone(): DateTimeZone {
+		self::$utc_date_time_zone = self::$utc_date_time_zone ?? new DateTimeZone( 'UTC' );
+
 		return self::$utc_date_time_zone;
 	}
 
