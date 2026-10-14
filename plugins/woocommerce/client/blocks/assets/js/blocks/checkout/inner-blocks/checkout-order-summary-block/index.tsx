@@ -14,9 +14,7 @@ import deprecated from './deprecated';
 import './style.scss';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/checkout-order-summary-block', {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
