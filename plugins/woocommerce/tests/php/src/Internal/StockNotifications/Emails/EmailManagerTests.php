@@ -102,6 +102,16 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not register any back-in-stock action names via the woocommerce_email_actions filter.
+	 */
+	public function test_does_not_register_bis_email_actions() {
+		$actions = apply_filters( 'woocommerce_email_actions', array() );
+
+		$this->assertNotContains( 'woocommerce_customer_stock_notification_verify', $actions );
+		$this->assertNotContains( 'woocommerce_customer_stock_notification_verified', $actions );
+	}
+
+	/**
 	 * @testdox Should dispatch the verify email to the notification's user email when send_verify_email is called.
 	 */
 	public function test_send_verify_email_prepares_verify_email_for_notification() {
