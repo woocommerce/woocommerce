@@ -8,12 +8,11 @@
 import './cart/notices';
 import './cart/actions';
 
+export type { WooCommerceConfig, SelectedAttributes } from './types';
 export type {
-	WooCommerceConfig,
-	SelectedAttributes,
 	OptimisticCartItem,
 	ClientCartItem,
 	AddCartItemError,
 	AddCartItemOutcome,
 	Store,
-} from './types';
+} from './cart/types';

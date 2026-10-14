@@ -17,7 +17,8 @@ import type {
 /**
  * Internal dependencies
  */
-import type { OptimisticCartItem, SelectedAttributes, Store } from '../types';
+import type { SelectedAttributes } from '../types';
+import type { OptimisticCartItem, Store } from './types';
 import { doesCartItemMatchAttributes } from '../../../utils/variations/does-cart-item-match-attributes';
 
 // Guard to distinguish between optimistic and cart items.

@@ -9,11 +9,7 @@ import { speak } from '@wordpress/a11y';
 /**
  * Internal dependencies
  */
-import type {
-	Store,
-	OptimisticCartItem,
-	AddCartItemOutcome,
-} from '../../types';
+import type { Store, OptimisticCartItem, AddCartItemOutcome } from '../types';
 import { triggerAddedToCartEvent } from '../legacy-events';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
