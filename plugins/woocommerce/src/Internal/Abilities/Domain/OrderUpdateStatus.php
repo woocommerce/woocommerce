@@ -86,41 +86,9 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Change the order status with WC_Order::update_status(). This is the path
-	 * with the ability contracts feature off. It calls update_status() so an
-	 * order class such as a subscription applies its own rules. With the feature
-	 * on, CoreActionableAbility runs change() and save() instead.
-	 *
-	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 */
-	public static function execute( array $input ) {
-		$order = self::load( $input );
-		if ( is_wp_error( $order ) ) {
-			return $order;
-		}
-
-		$status = self::get_new_status( $order, $input );
-		if ( is_wp_error( $status ) ) {
-			return $status;
-		}
-
-		if ( ! $order->update_status( $status, self::get_note( $input ), true ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				__( 'Failed to update order status.', 'woocommerce' ),
-				array( 'status' => 500 )
-			);
-		}
-
-		return self::prepare_response( $order );
-	}
-
-	/**
-	 * Change the order status in memory, as a manual change. The order class
-	 * must accept the status. The woocommerce_order_edit_status action that a
-	 * manual set_status() fires is held back until save(), so a change that an
-	 * extension refuses fires no action.
+	 * Change the order status in memory, as a manual change. The
+	 * woocommerce_order_edit_status action that a manual set_status() fires is
+	 * held back until save(), so a change that an extension refuses fires no action.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -132,15 +100,6 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 		$status = self::get_new_status( $subject, $input );
 		if ( is_wp_error( $status ) ) {
 			return $status;
-		}
-
-		if ( ! $subject->is_valid_status( $status ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_invalid',
-				/* translators: %s: order status slug. */
-				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
-				array( 'status' => 400 )
-			);
 		}
 
 		$listeners = $wp_filter['woocommerce_order_edit_status'] ?? null;
