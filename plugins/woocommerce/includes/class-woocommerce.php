@@ -20,7 +20,6 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
@@ -392,7 +391,6 @@ final class WooCommerce {
 		$container->get( ProductCountCacheService::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
-		$container->get( AbilitiesRegistry::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
@@ -427,6 +425,7 @@ final class WooCommerce {
 		$might_need_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
 		if ( $might_need_rest_routes_for_rest_initialization ) {
 			// MCP adapter routes.
+			$container->get( Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry::class );
 			$container->get( Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class );
 			// Public REST-routes.
 			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
