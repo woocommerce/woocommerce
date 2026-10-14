@@ -321,8 +321,9 @@ final class WooCommerce {
 	 * @return void
 	 */
 	private function init_hooks() {
-		$is_admin = is_admin();
-		$is_cli   = defined( 'WP_CLI' ) && WP_CLI;
+		$is_admin        = is_admin();
+		$is_cli          = defined( 'WP_CLI' ) && WP_CLI;
+		$is_rest_request = $this->is_rest_api_request();
 
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
@@ -341,7 +342,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'init', array( $this, 'load_rest_api' ) );
-		if ( $is_admin || $is_cli || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) ) {
+		if ( $is_admin || $is_cli || ( $is_rest_request && ! $this->is_store_api_request() ) ) {
 			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		}
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
@@ -424,19 +425,19 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 
-		// Classes inheriting from RestApiControllerBase.
-		// Perf: gate this block behind is_admin() || is_rest_api_request() — these call register_rest_route() which is a no-op
-		// on pure frontend page loads; saves ~7 container resolutions + class autoloads per frontend request.
-		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
-
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		$is_rest_request_context = $is_rest_request || $is_admin; // See explanatin about rest_api_init + admin_init coupling above.
+		if ( $is_rest_request_context ) {
+			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
+		}
 
 		if ( $is_admin ) {
 			$container->get( Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU::class ); // Perf: admin-only — hooks woocommerce_get_settings_products (admin settings page filter); gate behind is_admin().
