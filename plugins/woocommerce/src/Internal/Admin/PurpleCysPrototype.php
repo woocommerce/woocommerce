@@ -48,6 +48,7 @@ class PurpleCysPrototype {
 	 */
 	public function register_hooks(): void {
 		add_action( 'admin_init', array( $this, 'handle_request' ) );
+		add_action( 'wp_ajax_woocommerce_purple_cys_prototype_save_state', array( $this, 'handle_save_state' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 999 );
 		add_action( 'admin_head', array( $this, 'output_admin_bar_css' ) );
 		add_action( 'wp_head', array( $this, 'output_admin_bar_css' ) );
@@ -131,14 +132,55 @@ class PurpleCysPrototype {
 
 		if ( 'reset' === $key ) {
 			$args['purple_cys_reset'] = $this->reset_purple() ? 'done' : 'failed';
-		} elseif ( isset( self::SETTINGS[ $key ] ) && in_array( $value, self::SETTINGS[ $key ], true ) ) {
-			$settings         = $this->get_settings();
-			$settings[ $key ] = $value;
-			update_user_meta( get_current_user_id(), self::USER_META_KEY, $settings );
+			// A forced state goes back to the start too, so the flow can be tested again.
+			if ( 'real' !== $this->get_settings()['state'] ) {
+				$this->save_setting( 'state', 'default' );
+			}
+		} else {
+			$this->save_setting( $key, $value );
 		}
 
 		wp_safe_redirect( $this->get_cys_url( $args ) );
 		exit;
+	}
+
+	/**
+	 * Save the forced Purple state after a fake install or activate, so it survives a reload.
+	 */
+	public function handle_save_state(): void {
+		check_ajax_referer( self::NONCE_ACTION );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( null, 403 );
+		}
+
+		$value = isset( $_POST['state'] ) ? sanitize_key( wp_unslash( $_POST['state'] ) ) : '';
+
+		// Only a forced state is saved. With "Real", the site itself holds the state.
+		if ( 'real' === $this->get_settings()['state'] || 'real' === $value || ! $this->save_setting( 'state', $value ) ) {
+			wp_send_json_error( null, 400 );
+		}
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * Save one prototype setting for the current user.
+	 *
+	 * @param string $key   Setting key.
+	 * @param string $value Setting value.
+	 * @return bool Whether the value was valid.
+	 */
+	private function save_setting( string $key, string $value ): bool {
+		if ( ! isset( self::SETTINGS[ $key ] ) || ! in_array( $value, self::SETTINGS[ $key ], true ) ) {
+			return false;
+		}
+
+		$settings         = $this->get_settings();
+		$settings[ $key ] = $value;
+		update_user_meta( get_current_user_id(), self::USER_META_KEY, $settings );
+
+		return true;
 	}
 
 	/**
@@ -374,6 +416,8 @@ class PurpleCysPrototype {
 					'isBlockTheme' => $active_theme->is_block_theme(),
 				),
 				'homeUrl'         => home_url( '/' ),
+				'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
+				'nonce'           => wp_create_nonce( self::NONCE_ACTION ),
 			)
 		);
 

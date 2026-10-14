@@ -24,6 +24,8 @@ export type PurplePrototypeSettings = {
 		isBlockTheme: boolean;
 	};
 	homeUrl: string;
+	ajaxUrl: string;
+	nonce: string;
 };
 
 const DEFAULT_SETTINGS: PurplePrototypeSettings = {
@@ -40,6 +42,8 @@ const DEFAULT_SETTINGS: PurplePrototypeSettings = {
 		isBlockTheme: true,
 	},
 	homeUrl: '/',
+	ajaxUrl: '',
+	nonce: '',
 };
 
 /**

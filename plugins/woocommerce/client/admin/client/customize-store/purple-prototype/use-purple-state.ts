@@ -16,6 +16,26 @@ type PurpleAction = 'install' | 'activate';
 const wait = ( ms: number ) =>
 	new Promise( ( resolve ) => setTimeout( resolve, ms ) );
 
+/**
+ * Save a forced state after a fake step, so a reload shows where the flow got to.
+ */
+const saveForcedState = (
+	settings: PurplePrototypeSettings,
+	state: PurpleState
+) => {
+	const body = new window.FormData();
+	body.append( 'action', 'woocommerce_purple_cys_prototype_save_state' );
+	body.append( '_ajax_nonce', settings.nonce );
+	body.append( 'state', state );
+	return window
+		.fetch( settings.ajaxUrl, {
+			method: 'POST',
+			credentials: 'same-origin',
+			body,
+		} )
+		.catch( () => undefined );
+};
+
 const getRealState = ( settings: PurplePrototypeSettings ): PurpleState => {
 	if ( settings.purpleActive ) {
 		return 'active';
@@ -50,14 +70,18 @@ export const usePurpleState = ( settings: PurplePrototypeSettings ) => {
 						data: { theme: settings.purpleSlug },
 					} );
 				}
-				setState( isInstall ? 'installed' : 'active' );
+				const nextState = isInstall ? 'installed' : 'active';
+				setState( nextState );
 				setJustActivated( ! isInstall );
+				if ( isForced ) {
+					void saveForcedState( settings, nextState );
+				}
 			} catch {
 				failedAction.current = action;
 				setState( 'error' );
 			}
 		},
-		[ isForced, settings.purpleSlug ]
+		[ isForced, settings ]
 	);
 
 	return {
