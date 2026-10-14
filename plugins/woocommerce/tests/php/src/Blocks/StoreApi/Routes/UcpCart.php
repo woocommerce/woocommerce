@@ -373,6 +373,10 @@ class UcpCart extends ControllerTestCase {
 
 		$this->assertSame( 3998, $this->total( $data['totals'], 'subtotal' ) );
 		$this->assertSame( 3998, $this->total( $data['totals'], 'total' ) );
+
+		// `tax` is always present, zero included (schema allows it); a zero `discount` is omitted.
+		$this->assertSame( 0, $this->total( $data['totals'], 'tax' ) );
+		$this->assertNull( $this->total( $data['totals'], 'discount' ) );
 	}
 
 	/**

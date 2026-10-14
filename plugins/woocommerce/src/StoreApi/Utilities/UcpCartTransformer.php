@@ -108,9 +108,11 @@ class UcpCartTransformer {
 	/**
 	 * Build the totals breakdown.
 	 *
-	 * Exactly one `subtotal` and one `total`, per the schema; detail entries only when
-	 * non-zero, since it forbids a zero `discount`. Discounts stay order-level: no agent
-	 * can apply a code without the discounts extension, so there is nothing to attribute.
+	 * `subtotal`, `tax` and `total` are always present; a zero `tax` is valid (schema
+	 * `minimum` 0) and tells the agent no tax applied. `discount`/`fulfillment`/`fee` are
+	 * dropped when zero — the schema forbids a zero `discount` (`exclusiveMaximum` 0), and a
+	 * zero shipping or fee is nothing to show. Discounts stay order-level: no agent can apply
+	 * a code without the discounts extension, so there is nothing to attribute.
 	 *
 	 * @param \WC_Cart $cart Cart instance.
 	 * @return array
