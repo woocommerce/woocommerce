@@ -436,7 +436,8 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#bar&lt;script&gt;alert();&lt;/script&gt;', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
+		// Since WordPress 7.2, wp_kses() also removes the contents of disallowed script elements.
+		$this->assertContains( wc_format_coupon_code( 'foo#bar<script>alert();</script>' ), array( 'foo#baralert();', 'foo#bar' ) );
 	}
 
 	/**

@@ -52,7 +52,7 @@ class WC_Post_Data {
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
-		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ), 10, 3 );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
 		add_filter( 'edit_post_title', array( __CLASS__, 'handle_edit_post_title' ), 10, 2 );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
 		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
@@ -350,15 +350,11 @@ class WC_Post_Data {
 	/**
 	 * Forces the order posts to have a title in a certain format (containing the date).
 	 * Forces certain product data based on the product's type, e.g. grouped products cannot have a parent.
-	 * Sanitizes coupon codes with wc_sanitize_coupon_code() so they are stored the same way for every user.
 	 *
 	 * @param array $data An array of slashed post data.
 	 * @return array
 	 */
 	public static function wp_insert_post_data( $data ) {
-		// Read the hook's third argument without changing the signature that subclasses may override.
-		$unsanitized_postarr = func_get_args()[2] ?? array();
-
 		if ( 'shop_order' === $data['post_type'] && isset( $data['post_date'] ) ) {
 			$order_title = 'Order';
 			if ( $data['post_date'] ) {
@@ -376,35 +372,18 @@ class WC_Post_Data {
 		} elseif ( 'product' === $data['post_type'] && ProductStatus::AUTO_DRAFT === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
 		} elseif ( 'shop_coupon' === $data['post_type'] ) {
-			$data['post_title'] = self::get_coupon_post_title( $data['post_title'], $unsanitized_postarr );
+			global $wpdb;
+
+			// Coupons should never allow unfiltered HTML.
+			$data['post_title'] = wp_filter_kses( $data['post_title'] );
+
+			// Since WordPress 7.2, kses decodes the emoji wp_insert_post() encoded for columns that can't store them.
+			if ( in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true ) ) {
+				$data['post_title'] = wp_encode_emoji( $data['post_title'] );
+			}
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Get the post title to save for a coupon, sanitized with wc_sanitize_coupon_code().
-	 *
-	 * WordPress runs post titles through kses only for users without the unfiltered_html capability, so the title is
-	 * taken from the data passed to wp_insert_post() instead. That data is slashed, and wp_insert_post() unslashes the
-	 * result of the wp_insert_post_data filter, so the title is unslashed to sanitize it and slashed again afterwards.
-	 *
-	 * @param string $sanitized_title     Slashed title, already sanitized by WordPress.
-	 * @param mixed  $unsanitized_postarr Slashed post data as passed to wp_insert_post().
-	 * @return string Slashed coupon code.
-	 */
-	private static function get_coupon_post_title( $sanitized_title, $unsanitized_postarr ) {
-		global $wpdb;
-
-		$title = is_array( $unsanitized_postarr ) && is_scalar( $unsanitized_postarr['post_title'] ?? null ) ? $unsanitized_postarr['post_title'] : $sanitized_title;
-		$title = wc_sanitize_coupon_code( wp_unslash( (string) $title ) );
-
-		// Like wp_insert_post(), encode emoji when the column can't store them.
-		if ( in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true ) ) {
-			$title = wp_encode_emoji( $title );
-		}
-
-		return wp_slash( $title );
 	}
 
 	/**

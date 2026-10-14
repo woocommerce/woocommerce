@@ -21,22 +21,20 @@ class WC_Coupon_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_existing_coupon_codes(): array {
 		return array(
-			'plain code'                            => array( 'SUMMER10', 'summer10' ),
-			'ampersand'                             => array( 'B&amp;Q', 'B&Q' ),
-			'apostrophe'                            => array( "TEST'S", "test's" ),
-			'ampersand and apostrophe'              => array( "M&amp;M'S", "M&M'S" ),
-			'double quotes'                         => array( 'TEST"2024"', 'TEST"2024"' ),
-			'percent followed by digits'            => array( '%20TEST', '%20TEST' ),
-			'percent sign'                          => array( '50%OFF', '50%off' ),
-			'non-ASCII'                             => array( 'CAFÉ', 'café' ),
-			'non-ASCII with ampersand'              => array( 'ÜBER&amp;ÄRGER', 'über&ärger' ),
-			'decoded entity'                        => array( '©2024', '©2024' ),
-			'greater-than sign'                     => array( 'a&gt;b', 'a>b' ),
-			'less-than sign before a digit'         => array( '10&lt;20', '10<20' ),
-			'less-than sign before a letter'        => array( 'a&lt;b', 'a<b' ),
-			'ampersand before a legacy entity name' => array( '50&amp;cent', '50&cent' ),
-			'ampersand before a semicolon'          => array( 'R&amp;D;x', 'R&D;x' ),
-			'backslash saved by an administrator'   => array( 'a\\b', 'a\\b' ),
+			'plain code'                          => array( 'SUMMER10', 'summer10' ),
+			'ampersand'                           => array( 'B&amp;Q', 'B&Q' ),
+			'apostrophe'                          => array( "TEST'S", "test's" ),
+			'ampersand and apostrophe'            => array( "M&amp;M'S", "M&M'S" ),
+			'double quotes'                       => array( 'TEST"2024"', 'TEST"2024"' ),
+			'percent followed by digits'          => array( '%20TEST', '%20TEST' ),
+			'percent sign'                        => array( '50%OFF', '50%off' ),
+			'non-ASCII'                           => array( 'CAFÉ', 'café' ),
+			'non-ASCII with ampersand'            => array( 'ÜBER&amp;ÄRGER', 'über&ärger' ),
+			'decoded entity'                      => array( '©2024', '©2024' ),
+			'greater-than sign'                   => array( 'a&gt;b', 'a>b' ),
+			'less-than sign before a digit'       => array( '10&lt;20', '10<20' ),
+			'ampersand before a semicolon'        => array( 'R&amp;D;x', 'R&D;x' ),
+			'backslash saved by an administrator' => array( 'a\\b', 'a\\b' ),
 		);
 	}
 
@@ -49,6 +47,54 @@ class WC_Coupon_Functions_Test extends \WC_Unit_Test_Case {
 	 * @param string $shown_code   Code as shown to the merchant, and so as entered by customers.
 	 */
 	public function test_existing_coupon_is_found_by_the_code_shown_to_merchants( string $stored_title, string $shown_code ): void {
+		$coupon_id = $this->create_coupon_with_stored_title( $stored_title );
+
+		wp_set_current_user( 0 );
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( $shown_code ) ) );
+	}
+
+	/**
+	 * @testdox Should only find coupons whose codes WordPress 7.2's kses reads differently after they're saved again.
+	 *
+	 * @testWith ["a&lt;b", "a<b"]
+	 *           ["50&amp;cent", "50&cent"]
+	 *
+	 * @param string $stored_title Post title as saved by an earlier version.
+	 * @param string $shown_code   Code as shown to the merchant, and so as entered by customers.
+	 */
+	public function test_existing_coupon_read_differently_by_html_api_kses( string $stored_title, string $shown_code ): void {
+		$coupon_id = $this->create_coupon_with_stored_title( $stored_title );
+
+		wp_set_current_user( 0 );
+		if ( ! self::uses_html_api_kses() ) {
+			$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( $shown_code ) ) );
+			return;
+		}
+
+		$this->assertSame( 0, wc_get_coupon_id_by_code( wc_format_coupon_code( $shown_code ) ), 'Known: the stored code no longer matches' );
+
+		// Saving the coupon from the edit screen stores the code in the new format.
+		$this->login_as_administrator();
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'         => $coupon_id,
+					'post_title' => $shown_code,
+				)
+			)
+		);
+
+		wp_set_current_user( 0 );
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( $shown_code ) ), 'Saving the coupon again should fix the lookup' );
+	}
+
+	/**
+	 * Create a coupon and write its title directly, as an earlier version would have stored it.
+	 *
+	 * @param string $title Raw post title to store.
+	 * @return int Coupon ID.
+	 */
+	private function create_coupon_with_stored_title( string $title ): int {
 		global $wpdb;
 
 		$coupon_id = wp_insert_post(
@@ -58,10 +104,18 @@ class WC_Coupon_Functions_Test extends \WC_Unit_Test_Case {
 				'post_status' => 'publish',
 			)
 		);
-		$wpdb->update( $wpdb->posts, array( 'post_title' => $stored_title ), array( 'ID' => $coupon_id ) );
+		$wpdb->update( $wpdb->posts, array( 'post_title' => $title ), array( 'ID' => $coupon_id ) );
 		clean_post_cache( $coupon_id );
 
-		wp_set_current_user( 0 );
-		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( $shown_code ) ) );
+		return $coupon_id;
+	}
+
+	/**
+	 * Whether wp_kses() parses text like WordPress 7.2's HTML API implementation, which decodes `&cent` without a semicolon.
+	 *
+	 * @return bool
+	 */
+	private static function uses_html_api_kses(): bool {
+		return '50¢' === wp_kses( '50&cent', array() );
 	}
 }
