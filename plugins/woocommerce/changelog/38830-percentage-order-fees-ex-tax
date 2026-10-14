@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Calculate percentage-based order fees added in admin on the net order total instead of the tax-inclusive total.
+Calculate percentage fees added in the order editor on the order items before tax, without shipping or other fees.
