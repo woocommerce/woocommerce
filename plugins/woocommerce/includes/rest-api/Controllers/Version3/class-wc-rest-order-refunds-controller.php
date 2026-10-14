@@ -478,9 +478,10 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		$price_decimals = wc_get_price_decimals();
 		$refund_data    = null;
 		foreach ( $line_items as $item_id => $line ) {
-			if ( ! is_array( $line ) || ! isset( $line['refund_total'] ) ) {
+			if ( ! is_array( $line ) || ( ! isset( $line['refund_total'] ) && empty( $line['refund_tax'] ) ) ) {
 				continue;
 			}
+			$line['refund_total'] = $line['refund_total'] ?? 0;
 
 			if ( ! is_numeric( $line['refund_total'] ) ) {
 				return new WP_Error( 'woocommerce_rest_invalid_refund_total', __( 'refund_total must be a number.', 'woocommerce' ), array( 'status' => 400 ) );

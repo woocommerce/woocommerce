@@ -833,6 +833,57 @@ class WC_REST_Order_Refunds_Computed_Totals_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox A line with refund_tax but no refund_total is still checked against the refund amount and line sign.
+	 */
+	public function test_unflagged_tax_only_line_is_validated(): void {
+		$tax_rate_id = $this->create_tax_rate( 10.0 );
+		$order       = $this->create_order_with_product_and_tax( 100.00, 1, $tax_rate_id, 10.00 );
+		$item_id     = $this->get_first_line_item_id( $order );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '3',
+				'line_items' => array(
+					array(
+						'id'         => $item_id,
+						'refund_tax' => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => 50,
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'Refund amount cannot be less than the total of line items.', $response->get_data()['message'] );
+
+		$response = $this->do_create_request(
+			$order->get_id(),
+			array(
+				'amount'     => '1',
+				'line_items' => array(
+					array(
+						'id'         => $item_id,
+						'quantity'   => 1,
+						'refund_tax' => array(
+							array(
+								'id'           => $tax_rate_id,
+								'refund_total' => -40,
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'Refund tax total has the wrong sign for this line item.', $response->get_data()['message'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * @testdox An omitted amount that cannot be calculated from every line requests an explicit amount.
 	 */
 	public function test_unflagged_missing_amount_with_incomplete_lines_is_required(): void {
