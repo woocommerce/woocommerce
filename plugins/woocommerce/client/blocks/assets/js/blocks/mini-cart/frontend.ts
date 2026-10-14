@@ -25,7 +25,7 @@ import {
  * Internal dependencies
  */
 import type { CartItem, Currency } from '@woocommerce/types';
-import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
+import { translateJQueryEventToNative } from '../../base/stores/woocommerce/cart/legacy-events';
 import {
 	getEntryFieldRaw,
 	isItemDataEntryVisible,
