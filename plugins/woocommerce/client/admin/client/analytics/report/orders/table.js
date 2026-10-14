@@ -67,12 +67,6 @@ class OrdersReportTable extends Component {
 				isSortable: false,
 			},
 			{
-				label: __( 'Payment method', 'woocommerce' ),
-				key: 'payment_method',
-				required: false,
-				isSortable: false,
-			},
-			{
 				label: __( 'Product(s)', 'woocommerce' ),
 				screenReaderLabel: __( 'Products', 'woocommerce' ),
 				key: 'products',
@@ -105,6 +99,12 @@ class OrdersReportTable extends Component {
 				label: __( 'Attribution', 'woocommerce' ),
 				screenReaderLabel: __( 'Attribution', 'woocommerce' ),
 				key: 'attribution',
+				required: false,
+				isSortable: false,
+			},
+			{
+				label: __( 'Payment method', 'woocommerce' ),
+				key: 'payment_method',
 				required: false,
 				isSortable: false,
 			},
@@ -211,10 +211,6 @@ class OrdersReportTable extends Component {
 					value: customerType,
 				},
 				{
-					display: getPaymentMethodTitle( paymentMethod ),
-					value: getPaymentMethodTitle( paymentMethod ),
-				},
-				{
 					display: this.renderList(
 						formattedProducts.length
 							? [ formattedProducts[ 0 ] ]
@@ -266,6 +262,10 @@ class OrdersReportTable extends Component {
 				{
 					display: extendedInfo.attribution.origin,
 					value: extendedInfo.attribution.origin,
+				},
+				{
+					display: getPaymentMethodTitle( paymentMethod ),
+					value: getPaymentMethodTitle( paymentMethod ),
 				},
 			];
 		} );

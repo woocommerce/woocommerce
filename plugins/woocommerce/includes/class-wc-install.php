@@ -1495,8 +1495,7 @@ class WC_Install {
 	PRIMARY KEY (order_id),
 	KEY date_created (date_created),
 	KEY customer_id (customer_id),
-	KEY status (status),
-	KEY payment_method (payment_method)' .
+	KEY status (status)' .
 		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
 	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
@@ -1820,6 +1819,7 @@ class WC_Install {
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
 		TaxesDataStore::flush_lookup_columns_cache();
+		OrdersStatsDataStore::flush_payment_method_column_cache();
 
 		return $db_delta_result;
 	}

@@ -1256,6 +1256,9 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			);
 		}
 
+		// Start past the rows other tests may have left, so the batches hold only the rows above.
+		update_option( $cursor, $first_id - 1, false );
+
 		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'A full batch leaves work for another run.' );
 		$this->assertSame( $first_id + 499, (int) get_option( $cursor ), 'The cursor is saved at the last id of the batch.' );
 
