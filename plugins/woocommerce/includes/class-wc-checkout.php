@@ -463,8 +463,24 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// Keep the items the cart hasn't changed, so their IDs stay the same. The rest are added again later.
-				$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
+				/**
+				 * Filters whether a resumed classic checkout order keeps the items the cart hasn't changed, so their
+				 * IDs stay the same. Return false to remove every item and add it again from the cart, which also
+				 * fires the woocommerce_checkout_create_order_*_item hooks for every item again.
+				 *
+				 * @since 11.3.0
+				 *
+				 * @param bool              $keep_items Whether to keep unchanged items. Default true.
+				 * @param WC_Abstract_Order $order      The resumed order.
+				 */
+				$keep_items = apply_filters( 'woocommerce_checkout_keep_order_items_on_resume', true, $order );
+
+				if ( true === $keep_items ) {
+					// The rest of the items are added again from the cart later.
+					$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
+				} else {
+					$order->remove_order_items();
+				}
 			} else {
 				$order = new WC_Order();
 			}
