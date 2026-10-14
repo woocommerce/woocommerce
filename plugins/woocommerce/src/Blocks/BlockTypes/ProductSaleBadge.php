@@ -65,8 +65,6 @@ class ProductSaleBadge extends AbstractBlock {
 
 		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 
-		$align = isset( $attributes['align'] ) ? $attributes['align'] : '';
-
 		$sale_text     = $attributes['saleText'] ?? '';
 		$sale_text     = '' === $sale_text ? __( 'Sale', 'woocommerce' ) : $sale_text;
 		$badge_content = $attributes['badgeContent'] ?? 'text';
@@ -192,7 +190,9 @@ class ProductSaleBadge extends AbstractBlock {
 			$screen_reader_attributes['data-wp-text']   = 'state.saleBadgeScreenReaderText';
 		}
 
-		$alignment_class = '' !== $align ? ' wc-block-components-product-sale-badge--align-' . esc_attr( $align ) : '';
+		$alignment_class = isset( $attributes['align'] ) && '' !== $attributes['align']
+			? ' wc-block-components-product-sale-badge--align-' . esc_attr( $attributes['align'] )
+			: '';
 
 		$output  = sprintf(
 			'<div %1$s %2$s>',
