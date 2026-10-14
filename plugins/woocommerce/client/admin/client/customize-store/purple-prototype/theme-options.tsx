@@ -9,6 +9,7 @@ import type { ComponentType } from 'react';
 import { PurpleCard } from './cards/purple-card';
 import { MarketplaceCard } from './cards/marketplace-card';
 import { CurrentThemeCard } from './cards/current-theme-card';
+import { PurpleSuccess } from './cards/purple-success';
 import { usePurpleState } from './use-purple-state';
 import type { PurpleLayout, PurplePrototypeSettings } from './settings';
 
@@ -20,7 +21,12 @@ type LayoutProps = {
  * V3: the three cards stacked, each with its image on the left.
  */
 const StackedImagesLeft = ( { settings }: LayoutProps ) => {
-	const { state, install, activate, retry } = usePurpleState( settings );
+	const { state, justActivated, install, activate, retry } =
+		usePurpleState( settings );
+
+	if ( justActivated ) {
+		return <PurpleSuccess homeUrl={ settings.homeUrl } />;
+	}
 
 	return (
 		<div className="purple-cys-options purple-cys-options--stacked-images-left">

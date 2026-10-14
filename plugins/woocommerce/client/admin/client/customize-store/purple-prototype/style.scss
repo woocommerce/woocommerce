@@ -70,6 +70,25 @@
 		gap: var(--wpds-dimension-gap-md);
 	}
 
+	&--purple &__actions {
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
+
+	// Reserve two lines so the card keeps its height when the helper text changes.
+	&--purple &__helper {
+		min-height: calc(2 * var(--wpds-typography-line-height-xs));
+
+		&.is-error {
+			color: var(--wpds-color-foreground-content-error);
+
+			svg {
+				fill: currentColor;
+				vertical-align: top;
+				margin-inline-end: var(--wpds-dimension-gap-xs);
+			}
+		}
+	}
+
 	&--purple &__content {
 		min-height: 280px;
 	}
@@ -105,22 +124,6 @@
 		}
 	}
 
-	// wp-admin's unlayered link styles beat the `@wordpress/ui` button styles, which live in a cascade layer.
-	a.purple-cys-link-button {
-		&,
-		&:hover,
-		&:active,
-		&:focus {
-			color: revert-layer;
-			box-shadow: revert-layer;
-			outline: revert-layer;
-			text-decoration: revert-layer;
-		}
-	}
-
-	&__notice {
-		align-self: stretch;
-	}
 
 	@media (max-width: 782px) {
 		&__content {
@@ -131,6 +134,61 @@
 			flex-basis: auto;
 			aspect-ratio: 3 / 2;
 		}
+	}
+}
+
+.purple-cys-success {
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+		padding-block: var(--wpds-dimension-padding-3xl) 48px;
+		text-align: center;
+	}
+
+	&__image {
+		display: block;
+		width: 100%;
+		max-width: 560px;
+		margin-block-end: var(--wpds-dimension-gap-md);
+		border: 1px solid var(--wpds-color-stroke-surface-neutral);
+		border-radius: var(--wpds-border-radius-md);
+	}
+
+	&__description {
+		max-width: 480px;
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
+}
+
+// The `@wordpress/ui` button icon has no fill rule here, so it would fall back to black.
+.purple-cys-link-button svg {
+	fill: currentColor;
+}
+
+// wp-admin's unlayered link styles beat the `@wordpress/ui` button styles, which live in a cascade layer.
+a.purple-cys-link-button {
+	&,
+	&:hover,
+	&:active,
+	&:focus {
+		color: revert-layer;
+		box-shadow: revert-layer;
+		outline: revert-layer;
+		text-decoration: revert-layer;
 	}
 }
 
@@ -222,6 +280,12 @@
 		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-3xl);
 	}
 
+	.purple-cys-success {
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+	}
+
 	// Sections share the panel with the 280px column, so the image column is a bit narrower.
 	.purple-cys-theme-card__media {
 		flex-basis: 320px;
@@ -229,7 +293,7 @@
 
 	.purple-cys-theme-card--marketplace .purple-cys-theme-card__content,
 	.purple-cys-theme-card--current-theme .purple-cys-theme-card__content {
-		min-height: 200px;
+		min-height: 240px;
 	}
 }
 

@@ -32,6 +32,7 @@ export const usePurpleState = ( settings: PurplePrototypeSettings ) => {
 	const [ state, setState ] = useState< PurpleState >(
 		isForced ? ( settings.state as PurpleState ) : getRealState( settings )
 	);
+	const [ justActivated, setJustActivated ] = useState( false );
 	const failedAction = useRef< PurpleAction >( 'install' );
 
 	const run = useCallback(
@@ -50,6 +51,7 @@ export const usePurpleState = ( settings: PurplePrototypeSettings ) => {
 					} );
 				}
 				setState( isInstall ? 'installed' : 'active' );
+				setJustActivated( ! isInstall );
 			} catch {
 				failedAction.current = action;
 				setState( 'error' );
@@ -60,6 +62,8 @@ export const usePurpleState = ( settings: PurplePrototypeSettings ) => {
 
 	return {
 		state,
+		// True once Purple is activated from this screen, as opposed to already active on load.
+		justActivated,
 		install: () => run( 'install' ),
 		activate: () => run( 'activate' ),
 		retry: () => run( failedAction.current ),

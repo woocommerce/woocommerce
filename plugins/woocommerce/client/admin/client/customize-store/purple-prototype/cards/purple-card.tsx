@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Badge, Button, Link, Notice, Text } from '@wordpress/ui';
-import { Icon, check } from '@wordpress/icons';
+import { Badge, Button, Link, Text } from '@wordpress/ui';
+import { Icon, check, error } from '@wordpress/icons';
+import clsx from 'clsx';
 import type { ComponentProps } from 'react';
 
 /**
@@ -26,7 +27,8 @@ type PurpleCardProps = {
 type BadgeIntent = ComponentProps< typeof Badge >[ 'intent' ];
 
 /**
- * Badge and helper text for each state. The title, description and benefits stay the same.
+ * Badge and helper text for each state. The title, description and benefits stay the same,
+ * so the card keeps its height when the state changes.
  */
 const getStatusCopy = ( state: PurpleState ) => {
 	const freeTheme = {
@@ -67,13 +69,16 @@ const getStatusCopy = ( state: PurpleState ) => {
 			return {
 				badge: __( 'Active theme', 'woocommerce' ),
 				badgeIntent: 'stable' as BadgeIntent,
+				helper: '',
+			};
+		case 'error':
+			return {
+				...freeTheme,
 				helper: __(
-					'Your products and orders stay as they are.',
+					"Something went wrong. Purple couldn't be installed or activated. Your store hasn't changed. Try again, or use Appearance > Themes.",
 					'woocommerce'
 				),
 			};
-		case 'error':
-			return { ...freeTheme, helper: '' };
 		default:
 			return {
 				...freeTheme,
@@ -222,34 +227,19 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 				) }
 			</Text>
 			<Benefits />
-			{ state === 'error' && (
-				<Notice.Root
-					intent="error"
-					className="purple-cys-theme-card__notice"
-				>
-					<Notice.Title>
-						{ __( 'Something went wrong.', 'woocommerce' ) }
-					</Notice.Title>
-					<Notice.Description>
-						{ __(
-							"Purple couldn't be installed or activated. Your store hasn't changed. Try again, or use Appearance > Themes.",
-							'woocommerce'
-						) }
-					</Notice.Description>
-				</Notice.Root>
-			) }
 			<div className="purple-cys-theme-card__actions">
 				<Actions { ...props } />
 			</div>
-			{ copy.helper && (
-				<Text
-					variant="body-sm"
-					className="purple-cys-theme-card__helper"
-					render={ <p /> }
-				>
-					{ copy.helper }
-				</Text>
-			) }
+			<Text
+				variant="body-sm"
+				className={ clsx( 'purple-cys-theme-card__helper', {
+					'is-error': state === 'error',
+				} ) }
+				render={ <p /> }
+			>
+				{ state === 'error' && <Icon icon={ error } size={ 16 } /> }
+				{ copy.helper }
+			</Text>
 		</ThemeCard>
 	);
 };

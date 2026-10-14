@@ -35,7 +35,7 @@ export const ModalContainer = ( {
 					render={ <p /> }
 				>
 					{ __(
-						'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
+						'Choose the look your store starts with: Purple, the free theme built by WooCommerce, another theme from the Marketplace, or the theme you have now. You can change it any time.',
 						'woocommerce'
 					) }
 				</Text>
