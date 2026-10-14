@@ -407,6 +407,8 @@
 		border: 1px solid var(--gutenberg-gray-100, #f0f0f0);
 		padding-right: $grid-unit-15;
 		position: relative;
+		display: flex;
+		align-items: center;
 
 		&::before {
 			content: "";
@@ -426,17 +428,24 @@
 
 		.components-notice__content {
 			display: flex;
+			flex-grow: 1;
 			align-items: center;
 			gap: $grid-unit-15;
+		}
 
-			.components-notice__actions {
-				flex-shrink: 0;
-				margin-left: auto;
+		// Core renders the actions inside the content before WordPress 7.1, and after it from 7.1 on.
+		.components-notice__actions {
+			flex-shrink: 0;
+			margin-block-start: 0;
+			margin-inline-start: auto;
 
-				&:empty {
-					display: none;
-				}
+			&:empty {
+				display: none;
 			}
+		}
+
+		.components-notice__content + .components-notice__actions {
+			margin-inline-start: $grid-unit-15;
 		}
 
 		.components-notice__dismiss.has-icon {
@@ -450,9 +459,16 @@
 			}
 		}
 	}
+	// WordPress 7.1 makes core's actions compact (32px tall), so match the text-height "Learn more" link.
 	.components-notice__action.components-button.is-link {
+		height: auto;
 		margin: 0;
 		padding: 0;
+
+		// Link buttons on this page aren't underlined, but ExternalLink underlines its text.
+		.components-external-link__contents {
+			text-decoration: none;
+		}
 	}
 }
 
