@@ -887,7 +887,7 @@ export const bisNotice = {
 	 * notification that was already sent.
 	 */
 	alreadySent:
-		/This notification has already been sent, so there is nothing to unsubscribe from\./,
+		'This notification has already been sent, so there is nothing to unsubscribe from.',
 	errors: {
 		invalidEmail: /Invalid email address\./,
 		invalidProduct: /Invalid product\./,

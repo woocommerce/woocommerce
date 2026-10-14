@@ -172,7 +172,7 @@ test.describe(
 
 			// The shopper sees the outcome on the shop page they are sent to.
 			await expect(
-				page.getByText( bisNotice.alreadySent )
+				page.getByText( bisNotice.alreadySent, { exact: true } )
 			).toBeVisible();
 
 			await page.goto( bisAdminListUrl( product.id ) );
@@ -209,9 +209,9 @@ test.describe(
 
 			// A rejected key is a no-op: no redirect to the shop, no notice.
 			await expect( page ).toHaveURL( /notification_id=/ );
-			await expect( page.getByText( bisNotice.alreadySent ) ).toHaveCount(
-				0
-			);
+			await expect(
+				page.getByText( bisNotice.alreadySent, { exact: true } )
+			).toHaveCount( 0 );
 
 			await page.goto( bisAdminListUrl( product.id ) );
 			const row = page
@@ -225,7 +225,7 @@ test.describe(
 			// link is broken.
 			await page.goto( unsubscribeLink );
 			await expect(
-				page.getByText( bisNotice.alreadySent )
+				page.getByText( bisNotice.alreadySent, { exact: true } )
 			).toBeVisible();
 		} );
 	}
