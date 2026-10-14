@@ -426,8 +426,6 @@ class Renderer {
 			return $context;
 		}
 
-		$context['isProductCollectionInnerBlock'] = true;
-
 		return $this->extend_context_for_inner_blocks( $context, $parsed_block );
 	}
 
