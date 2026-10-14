@@ -978,7 +978,7 @@ abstract class WC_Data {
 				return;
 			}
 
-			if ( is_a( $value, 'WC_DateTime', true ) ) {
+			if ( $value instanceof WC_DateTime ) {
 				$datetime = $value;
 			} elseif ( is_numeric( $value ) ) {
 				// Timestamps are handled as UTC timestamps in all cases.
