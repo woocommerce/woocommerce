@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
-use Automattic\WooCommerce\Internal\AbilitiesApi\AbilityContracts;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -103,7 +102,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$updates = array();
-		if ( AbilityContracts::is_enabled() ) {
+		if ( AbilityExtensions::is_enabled() ) {
 			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
 			$updates    = $this->prepare_fields( $extensions );
 			if ( is_wp_error( $updates ) ) {
@@ -138,7 +137,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	protected function prepare_properties( array $args ): array {
 		$args['execute_callback'] = array( $this, 'execute_change' );
-		if ( is_array( $args['input_schema'] ?? null ) && AbilityContracts::is_enabled() ) {
+		if ( is_array( $args['input_schema'] ?? null ) && AbilityExtensions::is_enabled() ) {
 			$args['input_schema'] = $this->add_extensions_input_schema( $args['input_schema'] );
 		}
 		return parent::prepare_properties( $args );

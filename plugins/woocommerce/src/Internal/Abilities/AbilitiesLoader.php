@@ -187,7 +187,7 @@ class AbilitiesLoader {
 			}
 
 			$args = $class_name::get_registration_args();
-			if ( $is_core_ability && AbilityContracts::is_enabled() && isset( CoreActionableAbility::DEFINITIONS[ $ability_name ] ) ) {
+			if ( $is_core_ability && AbilityExtensions::is_enabled() && isset( CoreActionableAbility::DEFINITIONS[ $ability_name ] ) ) {
 				$args['ability_class'] = CoreActionableAbility::class;
 			}
 
