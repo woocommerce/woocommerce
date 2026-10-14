@@ -87,7 +87,7 @@ class Renderer {
 			1
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
-		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 2 );
+		add_filter( 'render_block_context', array( $this, 'handle_render_block_context' ), 11, 3 );
 	}
 
 	/**
@@ -400,6 +400,37 @@ class Renderer {
 		}
 
 		return $block_content;
+	}
+
+	/**
+	 * Extend context only for Product Collection blocks and their descendants.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param array          $context      The block context.
+	 * @param array          $parsed_block The parsed block being rendered.
+	 * @param \WP_Block|null $parent_block The parent block instance, or null for a top-level block.
+	 * @return array
+	 */
+	public function handle_render_block_context( $context, $parsed_block, $parent_block = null ) {
+		$block_name = $parsed_block['blockName'] ?? '';
+
+		if (
+			'woocommerce/product-collection' !== $block_name &&
+			(
+				! $parent_block instanceof \WP_Block ||
+				( 'woocommerce/product-collection' !== $parent_block->name && true !== ( $parent_block->context['isProductCollectionInnerBlock'] ?? false ) )
+			)
+		) {
+			return $context;
+		}
+
+		if ( 'woocommerce/product-collection' !== $block_name ) {
+			$context['isProductCollectionInnerBlock'] = true;
+		}
+
+		return $this->extend_context_for_inner_blocks( $context, $parsed_block );
 	}
 
 	/**
