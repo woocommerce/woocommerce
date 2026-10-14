@@ -420,15 +420,13 @@ class Renderer {
 			'woocommerce/product-collection' !== $block_name &&
 			(
 				! $parent_block instanceof \WP_Block ||
-				( 'woocommerce/product-collection' !== $parent_block->name && true !== ( $parent_block->context['isProductCollectionInnerBlock'] ?? false ) )
+				( 'woocommerce/product-collection' !== $parent_block->name && ( ! isset( $parent_block->context['isProductCollectionInnerBlock'] ) || true !== ( $parent_block->context['isProductCollectionInnerBlock'] ) ) )
 			)
 		) {
 			return $context;
 		}
 
-		if ( 'woocommerce/product-collection' !== $block_name ) {
-			$context['isProductCollectionInnerBlock'] = true;
-		}
+		$context['isProductCollectionInnerBlock'] = true;
 
 		return $this->extend_context_for_inner_blocks( $context, $parsed_block );
 	}
