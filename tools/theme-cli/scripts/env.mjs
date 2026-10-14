@@ -1,0 +1,53 @@
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { getThemeDirectory, isMain } from './theme-utils.mjs';
+
+const require = createRequire( import.meta.url );
+
+export function environmentArgs( args ) {
+	if (
+		args[ 0 ] === 'start' &&
+		! args.some(
+			( arg ) => arg === '--runtime' || arg.startsWith( '--runtime=' )
+		)
+	) {
+		return [ ...args, '--runtime=playground' ];
+	}
+	return args;
+}
+
+export async function runEnvironment( slug, args ) {
+	const directory = await getThemeDirectory( slug );
+	await fs.access( path.join( directory, 'style.css' ) );
+	await fs.access( path.join( directory, 'theme.json' ) );
+	const manifestPath = require.resolve( '@wordpress/env/package.json' );
+	const manifest = JSON.parse( await fs.readFile( manifestPath, 'utf8' ) );
+	const executable = path.resolve(
+		path.dirname( manifestPath ),
+		manifest.bin[ 'wp-env' ]
+	);
+	const result = spawnSync(
+		process.execPath,
+		[ executable, ...environmentArgs( args ) ],
+		{
+			cwd: directory,
+			stdio: 'inherit',
+		}
+	);
+	if ( result.error ) {
+		throw result.error;
+	}
+	return result.status ?? 1;
+}
+
+if ( isMain( import.meta.url ) ) {
+	try {
+		const [ command, slug, ...args ] = process.argv.slice( 2 );
+		process.exitCode = await runEnvironment( slug, [ command, ...args ] );
+	} catch ( error ) {
+		console.error( error.message );
+		process.exitCode = 1;
+	}
+}
