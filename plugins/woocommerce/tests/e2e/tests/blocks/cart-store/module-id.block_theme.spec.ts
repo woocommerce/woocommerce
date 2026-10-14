@@ -19,8 +19,14 @@ test.describe( 'Cart store module id', () => {
 		page,
 		frontendUtils,
 	} ) => {
-		// The block theme header renders the Mini-Cart block on the shop page.
 		await frontendUtils.goToShop();
+
+		// The block theme header renders the Mini-Cart block on the shop page.
+		// Product Button blocks load the same store, so the page only proves
+		// the Mini-Cart's module resolution when the Mini-Cart block is there.
+		await expect(
+			await frontendUtils.getBlockByName( 'woocommerce/mini-cart' )
+		).toBeVisible();
 
 		const moduleReferences = await page.evaluate( () => {
 			const importMapText =
