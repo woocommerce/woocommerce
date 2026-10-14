@@ -201,6 +201,18 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * Search needs a query or a supported filter; an unrecognized filter alone does not count.
+	 */
+	public function test_search_without_recognized_input_returns_ucp_validation_error(): void {
+		$response = $this->post( '/catalog/search', array( 'filters' => array( 'brand' => 'acme' ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+	}
+
+	/**
 	 * A missing `ids` list is a UCP validation error, not a WordPress one.
 	 */
 	public function test_lookup_without_ids_returns_ucp_validation_error(): void {
@@ -239,7 +251,13 @@ class UcpCatalog extends ControllerTestCase {
 	 * The opaque cursor walks forward through the result set.
 	 */
 	public function test_search_cursor_advances_to_the_next_page(): void {
-		$first = $this->post( '/catalog/search', array( 'pagination' => array( 'limit' => 1 ) ) )->get_data();
+		$first = $this->post(
+			'/catalog/search',
+			array(
+				'query'      => 'UCP',
+				'pagination' => array( 'limit' => 1 ),
+			)
+		)->get_data();
 
 		$this->assertCount( 1, $first['products'] );
 		$this->assertTrue( $first['pagination']['has_next_page'] );
@@ -248,6 +266,7 @@ class UcpCatalog extends ControllerTestCase {
 		$second = $this->post(
 			'/catalog/search',
 			array(
+				'query'      => 'UCP',
 				'pagination' => array(
 					'limit'  => 1,
 					'cursor' => $first['pagination']['cursor'],

@@ -167,7 +167,21 @@ class CatalogSearch extends AbstractCatalogRoute {
 			);
 		}
 
-		if ( ! isset( $filters['price'] ) || ! is_array( $filters['price'] ) ) {
+		$has_categories = ! empty( $filters['categories'] ) && is_array( $filters['categories'] );
+		$has_price      = isset( $filters['price'] ) && is_array( $filters['price'] ) && ( isset( $filters['price']['min'] ) || isset( $filters['price']['max'] ) );
+
+		// UCP requires at least one recognized input; an unknown filter on its
+		// own would otherwise browse the whole catalog.
+		if ( '' === $query && ! $has_categories && ! $has_price ) {
+			return $this->ucp_error(
+				'VALIDATION_ERROR',
+				__( 'A query or at least one supported filter (categories, price) is required.', 'woocommerce' ),
+				'recoverable',
+				400
+			);
+		}
+
+		if ( ! $has_price ) {
 			return null;
 		}
 
