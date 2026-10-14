@@ -144,6 +144,37 @@ class PaymentMethodTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Syncing an order and its refund before the update adds the payment method column still writes their rows.
+	 */
+	public function test_sync_writes_the_row_while_the_payment_method_column_is_missing(): void {
+		global $wpdb;
+
+		$order  = $this->orders['cheque'];
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10.00,
+			)
+		);
+
+		$hide_column = function ( $query ) use ( $wpdb ) {
+			return str_replace( "SHOW COLUMNS FROM `{$wpdb->prefix}wc_order_stats` LIKE 'payment_method'", 'SELECT NULL', $query );
+		};
+		add_filter( 'query', $hide_column );
+		OrdersStatsDataStore::flush_payment_method_column_cache();
+
+		try {
+			foreach ( array( $order->get_id(), $refund->get_id() ) as $id ) {
+				$this->assertTrue( OrdersStatsDataStore::sync_order( $id ), 'The row should be written without the payment method.' );
+				$this->assertNull( $this->get_stored_payment_method( $id ), 'The backfill fills the payment method once the column exists.' );
+			}
+		} finally {
+			remove_filter( 'query', $hide_column );
+			OrdersStatsDataStore::flush_payment_method_column_cache();
+		}
+	}
+
+	/**
 	 * @testdox The Orders report endpoint returns the gateway of each row.
 	 */
 	public function test_orders_endpoint_returns_the_payment_method_of_each_row(): void {

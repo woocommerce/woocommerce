@@ -19,6 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
@@ -4200,7 +4201,7 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 	delete_option( $last_id_option );
 
 	// The report rows cached before the column was filled would otherwise be served for a week.
-	wc_update_11201_invalidate_analytics_reports_cache();
+	ReportsCache::invalidate();
 	// The same goes for the Orders report payment method filter, cached for a year.
 	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
 

@@ -563,7 +563,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%s',
 			'%d',
 			'%d',
-			'%s',
 		);
 
 		$data = array(
@@ -581,10 +580,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'status'             => self::normalize_order_status( $order->get_status() ),
 			'customer_id'        => $order->get_report_customer_id(),
 			'returning_customer' => $order->is_returning_customer(),
+		);
+
+		if ( self::has_payment_method_column() ) {
 			// An order without a gateway is stored as NULL, the same as the backfill leaves it. A refund
 			// carries no payment method of its own; the refund branch below takes the parent's.
-			'payment_method'     => $order instanceof WC_Order && $order->get_payment_method() ? $order->get_payment_method() : null,
-		);
+			$data['payment_method'] = $order instanceof WC_Order && $order->get_payment_method() ? $order->get_payment_method() : null;
+			$format[]               = '%s';
+		}
 
 		$order_fulfillment_status = '';
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
@@ -610,7 +613,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 
-				if ( $parent_order instanceof WC_Order ) {
+				if ( $parent_order instanceof WC_Order && array_key_exists( 'payment_method', $data ) ) {
 					$data['payment_method'] = $parent_order->get_payment_method() ? $parent_order->get_payment_method() : null;
 				}
 
@@ -811,6 +814,47 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_total  = wc_format_decimal( (float) $parent_order->get_total() );
 
 		return $refund_total === $order_total;
+	}
+
+	/**
+	 * Whether the wc_order_stats table has the payment_method column, read once per request and keyed by blog id.
+	 *
+	 * @var array<int, bool>
+	 */
+	private static $has_payment_method_column = array();
+
+	/**
+	 * Forget whether the payment_method column exists, so the next check asks the schema again.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function flush_payment_method_column_cache() {
+		self::$has_payment_method_column = array();
+	}
+
+	/**
+	 * Check if the wc_order_stats table has the payment_method column.
+	 *
+	 * An order synced after an update and before dbDelta adds the column would otherwise lose its whole row.
+	 *
+	 * @return bool
+	 */
+	private static function has_payment_method_column(): bool {
+		global $wpdb;
+
+		$blog_id = get_current_blog_id();
+
+		if ( ! isset( self::$has_payment_method_column[ $blog_id ] ) ) {
+			$table_name = self::get_db_table_name();
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			self::$has_payment_method_column[ $blog_id ] = (bool) $wpdb->get_var( "SHOW COLUMNS FROM `{$table_name}` LIKE 'payment_method'" );
+		}
+
+		return self::$has_payment_method_column[ $blog_id ];
 	}
 
 	/**
