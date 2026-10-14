@@ -755,8 +755,9 @@ class FulfillmentUtils {
 	 * @return string The provider label to display.
 	 */
 	public static function get_provider_display_name( Fulfillment $fulfillment ): string {
-		$provider_slug = $fulfillment->get_shipment_provider() ?? '';
-		$provider_name = (string) $fulfillment->get_meta( '_provider_name', true );
+		$provider_slug     = $fulfillment->get_shipment_provider() ?? '';
+		$provider_name_raw = $fulfillment->get_meta( '_provider_name', true );
+		$provider_name     = is_scalar( $provider_name_raw ) ? (string) $provider_name_raw : '';
 
 		// 'other' is the reserved sentinel for a merchant-entered custom provider, so its
 		// name always comes from meta, never from a provider that happens to share the key.

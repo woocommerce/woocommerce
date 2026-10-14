@@ -238,6 +238,29 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_provider_display_name ignores a non-scalar provider name instead of casting it to "Array".
+	 */
+	public function test_get_provider_display_name_ignores_non_scalar_provider_name(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'other',
+				'_provider_name'     => array( 'unexpected', 'array' ),
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'other', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
 	 * @testdox get_provider_display_name falls back to the provider name for an unknown slug.
 	 */
 	public function test_get_provider_display_name_falls_back_to_name_for_unknown_slug(): void {
