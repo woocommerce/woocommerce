@@ -203,7 +203,8 @@ final class Contracts {
 	 * Losing the append race is an outcome, not an error: when the chain position or count is
 	 * already taken (another caller appended it first), nothing is written and the call returns
 	 * null, as {@see self::claim_cycle()} and {@see self::transition_cycle()} return false when
-	 * their compare-and-set loses.
+	 * their compare-and-set loses. A storage failure, such as a value longer than its column
+	 * (`kind`), throws a `RuntimeException` and writes nothing.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
@@ -267,12 +268,15 @@ final class Contracts {
 	 * (?int) and `reason` (?string) are written when present (omitted keeps the stored value,
 	 * null clears it); `claim_seconds` (int) holds the cycle for that long, and without it the
 	 * claim is released. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
+	 * A same-status call (`$from_status === $to_status`) only writes `$args`, so it returns
+	 * true whenever the cycle still carries the status, even when the values were already stored.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read.
 	 * @param string               $to_status   The status to write; a registered cycle status.
 	 * @param array<string, mixed> $args        Optional `order_id`, `reason`, `claim_seconds`.
-	 * @return bool True when this call made the transition.
+	 * @return bool True when this call made the transition, or for a same-status call when the
+	 *              cycle carries the status.
 	 * @throws InvalidArgumentException If `$to_status` is not registered or a value is invalid.
 	 */
 	public static function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $args = array() ): bool {

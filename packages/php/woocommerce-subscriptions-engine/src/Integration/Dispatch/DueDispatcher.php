@@ -104,8 +104,9 @@ final class DueDispatcher {
 	 * Enqueue the recurring scan action when an owner has a due handler, or remove it when none does.
 	 *
 	 * A positive check is cached in an autoloaded option and re-verified once per re-check
-	 * window, so most requests skip the Action Scheduler store query. Call once Action
-	 * Scheduler is available (`action_scheduler_init`). Without Action Scheduler (for
+	 * window, so most requests skip the Action Scheduler store query. Runs on `wp_loaded`,
+	 * once consumers have registered, and again when a due handler registers after that
+	 * ({@see ConsumerRegistry::register()}). Without Action Scheduler (for
 	 * example from a deactivation hook while WooCommerce is inactive) it does nothing.
 	 */
 	public static function ensure_scheduled(): void {

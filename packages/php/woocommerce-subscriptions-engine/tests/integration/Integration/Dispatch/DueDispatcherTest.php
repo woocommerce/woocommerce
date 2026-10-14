@@ -241,6 +241,32 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Each due contract goes to its own owner's handler when several owners have one.
+	 */
+	public function test_each_contract_goes_to_its_owner_s_handler(): void {
+		$received = array(
+			'owner-a' => array(),
+			'owner-b' => array(),
+		);
+		foreach ( array_keys( $received ) as $owner ) {
+			ConsumerRegistry::register(
+				$owner,
+				array(
+					'contract_due_handler' => function ( ContractView $contract ) use ( &$received, $owner ): void {
+						$received[ $owner ][] = $contract->get_id();
+					},
+				)
+			);
+		}
+		$a = $this->create_due_contract( '2026-02-15 00:00:00', array( 'extension_slug' => 'owner-a' ) );
+		$b = $this->create_due_contract( '2026-02-15 00:00:00', array( 'extension_slug' => 'owner-b' ) );
+
+		$this->assertSame( 2, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( array( $a ), $received['owner-a'] );
+		$this->assertSame( array( $b ), $received['owner-b'] );
+	}
+
+	/**
 	 * @testdox A contract whose schedule a gateway or extension keeps is not dispatched.
 	 */
 	public function test_a_contract_with_another_schedule_source_is_not_dispatched(): void {
@@ -351,6 +377,21 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		// A batch smaller than the stuck backlog: the retry still makes it in.
 		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
 		$this->assertSame( $retry, $this->calls[0]['contract']->get_id(), 'The least recently notified contract goes first despite its later due moment.' );
+	}
+
+	/**
+	 * @testdox A due handler registered after the boot-time check (which found none) schedules the scan itself.
+	 */
+	public function test_a_handler_registered_after_the_boot_check_schedules_the_scan(): void {
+		$this->assertGreaterThan( 0, did_action( 'wp_loaded' ), 'The test runs after wp_loaded, like a late registration.' );
+		delete_option( self::SCHEDULE_CHECK_OPTION );
+
+		DueDispatcher::ensure_scheduled();
+		$this->assertFalse( as_next_scheduled_action( DueDispatcher::HOOK, array(), DueDispatcher::GROUP ), 'The boot check found no handler.' );
+
+		$this->register_recording_handler();
+
+		$this->assertNotFalse( as_next_scheduled_action( DueDispatcher::HOOK, array(), DueDispatcher::GROUP ), 'The late registration scheduled the scan.' );
 	}
 
 	/**

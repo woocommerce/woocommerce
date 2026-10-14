@@ -1072,13 +1072,14 @@ final class ContractRepository {
 	 * one UPDATE that lands only while the row still carries `$from_status`, so among
 	 * concurrent callers exactly one wins. `$changes` keys present are written: `order_id`
 	 * and `reason` (null clears); `claim_seconds` sets a claim from the database's now, and
-	 * without it the claim is released.
+	 * without it the claim is released. A same-status call only writes `$changes`, so it
+	 * returns true whenever the row still carries the status, even when nothing changed.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
 	 * @param string               $to_status   The status to write; must be a registered cycle status.
 	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string), `claim_seconds` (int).
-	 * @return bool True when this caller won the transition.
+	 * @return bool True when this caller won the transition (for a same-status call: the row carries the status).
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
 	public function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $changes ): bool {
@@ -1129,7 +1130,19 @@ final class ContractRepository {
 		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET {$set_clause} WHERE id = %d AND status = %s", $values ) );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		return false !== $result && 1 === $wpdb->rows_affected;
+		if ( false === $result ) {
+			return false;
+		}
+
+		if ( 1 === $wpdb->rows_affected ) {
+			return true;
+		}
+
+		// MySQL counts changed rows, not matched ones: a same-status call whose values are
+		// already stored matches the row but changes nothing. It still succeeded when the row
+		// carries the status.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $from_status === $to_status && null !== $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND status = %s", $cycle_id, $to_status ) );
 	}
 
 	/**

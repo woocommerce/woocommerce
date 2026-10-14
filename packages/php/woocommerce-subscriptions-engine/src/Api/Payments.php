@@ -77,13 +77,14 @@ final class Payments {
 	 * when the order's gateway supports the engine. Everything else is the caller's: whether
 	 * the order should be paid at all (paid, $0 or already in flight) and which further
 	 * gateway features the payment needs (such as `subscriptions` for a renewal, checked with
-	 * {@see self::gateway_supports()} first). A throwing gateway is logged.
+	 * {@see self::gateway_supports()} first). Both false cases below are logged.
 	 *
 	 * The return says whether the request reached the gateway cleanly, never whether the
 	 * payment succeeded; in every case the caller reads the outcome from the order status.
 	 * - True: the action fired and no callback threw.
 	 * - False, either of two cases the return does not tell apart:
-	 *   - the order's gateway does not support the engine (nothing was fired), or
+	 *   - the order's gateway does not support the engine (nothing was fired; logged as a
+	 *     warning with the order id), or
 	 *   - the gateway threw (logged with the order id): the outcome is unknown, since the
 	 *     gateway may have charged before throwing.
 	 * A caller that sees false and an order still needing payment should not assume the
@@ -97,6 +98,14 @@ final class Payments {
 		$gateway_id = $order->get_payment_method();
 
 		if ( ! self::gateway_supports( $gateway_id ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Payments::process_scheduled_payment(): order %d was not sent for payment because its gateway "%s" does not support the engine.', $order->get_id(), $gateway_id ),
+				array(
+					'source'   => self::LOG_SOURCE,
+					'order_id' => $order->get_id(),
+				)
+			);
+
 			return false;
 		}
 

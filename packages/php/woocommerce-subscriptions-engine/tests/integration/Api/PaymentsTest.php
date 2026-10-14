@@ -109,7 +109,7 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox process_scheduled_payment does not fire when the order's gateway does not support the engine.
+	 * @testdox process_scheduled_payment does not fire, and logs a warning, when the order's gateway does not support the engine.
 	 *
 	 * @dataProvider provide_unsupported_payment_methods
 	 *
@@ -118,8 +118,16 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	public function test_process_scheduled_payment_does_not_fire_without_engine_support( string $method ): void {
 		$order = $this->make_order( $method );
 
-		$this->assertFalse( Payments::process_scheduled_payment( $order ) );
+		$warnings = $this->capture_engine_log(
+			'warning',
+			array( 'order_id' => $order->get_id() ),
+			function () use ( $order ): void {
+				$this->assertFalse( Payments::process_scheduled_payment( $order ) );
+			}
+		);
+
 		$this->assertSame( array(), $this->charges );
+		$this->assertNotSame( array(), $warnings, 'The unsent payment is logged.' );
 	}
 
 	/**

@@ -131,6 +131,25 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * Build a first billing-style cycle on a chain of the given kind.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $kind        Chain kind.
+	 */
+	private function make_cycle_of_kind( int $contract_id, string $kind ): Cycle {
+		return Cycle::create(
+			array(
+				'contract_id'   => $contract_id,
+				'kind'          => $kind,
+				'sequence_no'   => 1,
+				'starts_at_gmt' => '2026-07-15 00:00:00',
+				'ends_at_gmt'   => '2026-08-15 00:00:00',
+				'currency'      => 'USD',
+			)
+		);
+	}
+
+	/**
 	 * Store the sample plan and items snapshot rows for a contract.
 	 *
 	 * @param int $contract_id Contract id.
@@ -1585,6 +1604,27 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox An over-long cycle kind is refused by append_cycle and nothing is stored; one at the column length is written.
+	 */
+	public function test_an_over_long_cycle_kind_is_refused_on_append(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+
+		$over_long = $this->make_cycle_of_kind( $id, str_repeat( 'k', 21 ) );
+		try {
+			$this->sut->append_cycle( $over_long );
+			$this->fail( 'Expected append_cycle() to refuse the over-long kind.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
+		}
+		$this->assertNull( $over_long->get_id(), 'Nothing is inserted.' );
+		$this->assertSame( array(), $this->sut->find_cycle_history( $id, str_repeat( 'k', 21 ) ) );
+
+		$fits = $this->make_cycle_of_kind( $id, str_repeat( 'k', 20 ) );
+		$this->sut->append_cycle( $fits );
+		$this->assertNotNull( $fits->get_id(), 'A kind at the column length is written.' );
+	}
+
+	/**
 	 * @return array<string, array{0: string, 1: string}>
 	 */
 	public function provide_over_long_payment_instruments(): array {
@@ -1628,6 +1668,24 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$after = $this->find_cycle( $cycle_id );
 		$this->assertSame( CycleStatus::BILLED, $after->get_status()->get_value(), 'The losing transition writes nothing.' );
 		$this->assertSame( 4242, $after->get_order_id() );
+	}
+
+	/**
+	 * @testdox A same-status transition_cycle that changes nothing still returns true; on a cycle in another status it returns false.
+	 */
+	public function test_a_same_status_transition_that_changes_nothing_returns_true(): void {
+		$cycle_id = $this->claimd_pending_cycle_id();
+
+		// Start early in a second so both calls stamp the same date_updated_gmt and the
+		// second one matches the row without changing it.
+		while ( fmod( microtime( true ), 1.0 ) > 0.5 ) {
+			usleep( 50000 );
+		}
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ) );
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ), 'Writing the stored values again still succeeds.' );
+
+		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::BILLED, CycleStatus::BILLED, array( 'order_id' => 4242 ) ), 'A cycle in another status is not matched.' );
+		$this->assertSame( CycleStatus::PENDING, $this->find_cycle( $cycle_id )->get_status()->get_value() );
 	}
 
 	/**

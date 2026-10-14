@@ -610,6 +610,20 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * The number of stored cycles of a contract, on any chain.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function stored_cycle_count( int $contract_id ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $contract_id ) );
+	}
+
+	/**
 	 * Run a contract write while every insert into a child table fails, asserting it throws.
 	 *
 	 * @param string   $child_table Child table constant of SchemaInstaller.
@@ -883,6 +897,19 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->assertNull( Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A lost append returns null.' );
 		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
+	}
+
+	public function test_an_over_long_kind_is_refused_and_nothing_is_written(): void {
+		$id   = $this->contract_with_currency();
+		$kind = str_repeat( 'k', 21 );
+
+		try {
+			Contracts::add_cycle( $id, $this->cycle_args( array( 'kind' => $kind ) ) );
+			$this->fail( 'Expected add_cycle() to refuse a kind longer than its column.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
+		}
+		$this->assertSame( 0, $this->stored_cycle_count( $id ), 'Nothing is written.' );
 	}
 
 	public function test_a_null_sequence_no_takes_the_next_position(): void {

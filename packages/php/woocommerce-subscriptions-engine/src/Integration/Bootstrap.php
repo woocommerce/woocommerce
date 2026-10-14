@@ -51,19 +51,20 @@ final class Bootstrap {
 		( new DueDispatcher() )->register_hooks();
 
 		// Deferred boot work, each on the moment it needs: the schema install reads options
-		// and runs dbDelta, so it waits for `init`; the recurring-action enqueue needs the
-		// `as_*` functions, so it waits for `action_scheduler_init`. Run immediately when a
-		// consumer boots the engine after a hook already fired.
+		// and runs dbDelta, so it waits for `init`; the recurring-scan check waits for
+		// `wp_loaded`, when Action Scheduler is up and consumers registering on `init` have
+		// registered their due handlers (one registered later schedules the scan itself).
+		// Run immediately when a consumer boots the engine after a hook already fired.
 		if ( did_action( 'init' ) ) {
 			SchemaInstaller::maybe_install();
 		} else {
 			add_action( 'init', array( SchemaInstaller::class, 'maybe_install' ) );
 		}
 
-		if ( did_action( 'action_scheduler_init' ) ) {
+		if ( did_action( 'wp_loaded' ) ) {
 			DueDispatcher::ensure_scheduled();
 		} else {
-			add_action( 'action_scheduler_init', array( DueDispatcher::class, 'ensure_scheduled' ) );
+			add_action( 'wp_loaded', array( DueDispatcher::class, 'ensure_scheduled' ) );
 		}
 	}
 }

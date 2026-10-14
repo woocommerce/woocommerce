@@ -17,6 +17,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership;
 
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
 
 defined( 'ABSPATH' ) || exit;
@@ -47,7 +48,8 @@ final class ConsumerRegistry {
 	 * when one of the consumer's contracts is due (`$context['due_at']` is the due moment, UTC).
 	 * The slug is trimmed; an empty slug is ignored. A repeat registration, an unknown key or a
 	 * non-callable handler raises a `_doing_it_wrong()` notice (the first registration is kept;
-	 * the invalid key is dropped and the slug still registers).
+	 * the invalid key is dropped and the slug still registers). Register by `init`; a handler
+	 * registered after `wp_loaded` schedules the recurring due scan right away.
 	 *
 	 * @param string               $slug   The consumer extension's registered slug.
 	 * @param array<string, mixed> $config Consumer configuration.
@@ -76,6 +78,10 @@ final class ConsumerRegistry {
 		}
 
 		self::$consumers[ $slug ] = $registration;
+
+		if ( isset( $registration['contract_due_handler'] ) && did_action( 'wp_loaded' ) ) {
+			DueDispatcher::ensure_scheduled();
+		}
 	}
 
 	/**
