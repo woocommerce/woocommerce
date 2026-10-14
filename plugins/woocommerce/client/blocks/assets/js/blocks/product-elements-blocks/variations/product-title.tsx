@@ -3,7 +3,6 @@
  */
 import { Icon } from '@wordpress/components';
 import { heading } from '@wordpress/icons';
-import metadata from '@woocommerce/product-elements/title/block.json';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -19,11 +18,15 @@ export const CORE_NAME = 'core/post-title';
 
 const registerProductTitle = () => {
 	registerElementVariation( CORE_NAME, {
-		blockDescription: metadata.description,
+		blockDescription: __(
+			'Display the title of a product.',
+			'woocommerce'
+		),
 		blockIcon: <Icon icon={ heading } />,
 		blockTitle: __( 'Product Title', 'woocommerce' ),
 		variationName: PRODUCT_TITLE_VARIATION_NAME,
 		namespaces: PRODUCT_TITLE_NAMESPACES,
+
 		scope: [ 'block', 'inserter' ],
 	} );
 };

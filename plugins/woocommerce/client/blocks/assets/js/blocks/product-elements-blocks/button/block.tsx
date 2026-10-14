@@ -286,6 +286,21 @@ const AddToCartButtonPlaceholder = ( {
 export const Block = ( props: BlockAttributes ): JSX.Element => {
 	const { className, textAlign, blockClientId, collection } = props;
 	const styleProps = useStyleProps( props );
+	const {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+		...buttonStyle
+	} = styleProps.style;
+	const blockMarginStyle = {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+	};
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext( {
 		product: props.product,
@@ -307,11 +322,12 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 					[ `align-${ textAlign }` ]: textAlign,
 				}
 			) }
+			style={ props.isAdmin ? undefined : blockMarginStyle }
 		>
 			{ isLoading ? (
 				<LoadingAddToCartButton
 					className={ styleProps.className }
-					style={ styleProps.style }
+					style={ buttonStyle }
 				/>
 			) : (
 				<>
@@ -330,7 +346,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 						( product && product?.id ? (
 							<AddToCartButton
 								product={ product }
-								style={ styleProps.style }
+								style={ buttonStyle }
 								className={ styleProps.className }
 								isAdmin={ props.isAdmin }
 								isDescendantOfAddToCartWithOptions={
@@ -343,7 +359,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 							/>
 						) : (
 							<AddToCartButtonPlaceholder
-								style={ styleProps.style }
+								style={ buttonStyle }
 								className={ styleProps.className }
 								isLoading={ isLoading ?? false }
 								blockClientId={ blockClientId }
