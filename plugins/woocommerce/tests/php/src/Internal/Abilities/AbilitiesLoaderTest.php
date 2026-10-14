@@ -86,7 +86,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $original_cot_state = null;
 
 	/**
-	 * Whether HPOS/COT tables were set up by the current test.
+	 * Whether the current test uses the permanent HPOS/COT tables.
 	 *
 	 * @var bool
 	 */
@@ -99,6 +99,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
 		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::setup_cot_tables();
 	}
 
 	/**
@@ -2702,9 +2703,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		if ( $hpos_enabled && ! $this->cot_setup_for_test ) {
-			$this->setup_cot();
+			// Keep the permanent HPOS tables outside the per-test transaction.
+			remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 			$this->cot_setup_for_test = true;
-			return;
 		}
 
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
