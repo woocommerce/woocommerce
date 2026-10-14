@@ -48,6 +48,7 @@ class PurpleCysPrototype {
 	 */
 	public function register_hooks(): void {
 		add_action( 'admin_init', array( $this, 'handle_request' ) );
+		add_action( 'admin_init', array( $this, 'reset_purple_on_wizard_open' ) );
 		add_action( 'wp_ajax_woocommerce_purple_cys_prototype_save_state', array( $this, 'handle_save_state' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 999 );
 		add_action( 'admin_head', array( $this, 'output_admin_bar_css' ) );
@@ -184,17 +185,45 @@ class PurpleCysPrototype {
 	}
 
 	/**
+	 * Remove Purple whenever the setup wizard opens, so its Purple step can be tested from the start.
+	 */
+	public function reset_purple_on_wizard_open(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only check of the current admin page.
+		$is_wizard = isset( $_GET['page'], $_GET['path'] )
+			&& 'wc-admin' === $_GET['page']
+			&& '/setup-wizard' === wc_clean( wp_unslash( $_GET['path'] ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! $is_wizard || wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		if ( wp_get_theme( self::PURPLE_SLUG )->exists() ) {
+			$this->reset_purple( true );
+		}
+
+		if ( 'real' !== $this->get_settings()['state'] ) {
+			$this->save_setting( 'state', 'default' );
+		}
+	}
+
+	/**
 	 * Switch the site back to Twenty Twenty-Four and delete Purple.
 	 *
+	 * @param bool $only_if_active Only switch themes when Purple is the active theme.
 	 * @return bool Whether the site ended up without Purple.
 	 */
-	private function reset_purple(): bool {
+	private function reset_purple( bool $only_if_active = false ): bool {
 		if ( ! current_user_can( 'switch_themes' ) || ! current_user_can( 'delete_themes' ) ) {
 			return false;
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/theme.php';
+
+		if ( $only_if_active && self::PURPLE_SLUG !== get_stylesheet() ) {
+			return $this->delete_purple();
+		}
 
 		if ( ! wp_get_theme( self::RESET_THEME_SLUG )->exists() && current_user_can( 'install_themes' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
@@ -223,14 +252,20 @@ class PurpleCysPrototype {
 			switch_theme( $fallback->get_stylesheet() );
 		}
 
-		if ( wp_get_theme( self::PURPLE_SLUG )->exists() ) {
-			$result = delete_theme( self::PURPLE_SLUG );
-			if ( true !== $result ) {
-				return false;
-			}
+		return $this->delete_purple();
+	}
+
+	/**
+	 * Delete Purple if it's installed and not active.
+	 *
+	 * @return bool Whether Purple is gone.
+	 */
+	private function delete_purple(): bool {
+		if ( ! wp_get_theme( self::PURPLE_SLUG )->exists() ) {
+			return true;
 		}
 
-		return true;
+		return true === delete_theme( self::PURPLE_SLUG );
 	}
 
 	/**
