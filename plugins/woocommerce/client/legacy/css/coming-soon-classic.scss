@@ -1,3 +1,5 @@
+@import "variables";
+
 .woocommerce-coming-soon-classic-page {
 	margin: 0;
 }
@@ -19,7 +21,7 @@
 		min-height: 100vh;
 		min-height: 100svh;
 		padding-inline: clamp(24px, 5vw, 80px);
-		color: #1e1e1e;
+		color: $gray-900;
 		background: #fff;
 
 		a {
