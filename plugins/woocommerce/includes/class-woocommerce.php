@@ -428,8 +428,8 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
 
-		$is_rest_request_context = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
-		if ( $is_rest_request_context ) {
+		$needs_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
+		if ( $needs_rest_routes_for_rest_initialization ) {
 			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 			$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
