@@ -39,4 +39,12 @@ Playground uses SQLite and does not support `wp-env run`; use wp-admin for setup
 
 3. Review and commit the generated history and version updates, preserving the imported release history in `readme.txt`. Run the development checks above.
 
-Packaging, release tags, and publishing automation are deferred in this layer. Development manifests, changelog fragments, and this guide are excluded from installable theme archives.
+4. Build the committed release artifact from the repository root:
+
+    ```bash
+    pnpm --filter=@woocommerce/theme-purple build:zip "$(git rev-parse HEAD)"
+    ```
+
+5. Install and verify `themes/purple/artifacts/purple-<version>.zip` on a separate WordPress site. Use a theme-specific release tag such as `purple/1.0.4` so another theme can release independently.
+
+Publishing automation and its destination remain deferred. Development manifests, changelog fragments, and this guide are excluded from the archive.

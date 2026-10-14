@@ -13,7 +13,8 @@
 		"lint": "prettier --check package.json composer.json .wp-env.json",
 		"changelog": "composer exec -- changelogger",
 		"env:start": "pnpm --filter=@woocommerce/theme-cli wp-env start purple",
-		"env:stop": "pnpm --filter=@woocommerce/theme-cli wp-env stop purple"
+		"env:stop": "pnpm --filter=@woocommerce/theme-cli wp-env stop purple",
+		"build:zip": "pnpm --filter=@woocommerce/theme-cli build:zip purple"
 	},
 	"devDependencies": {
 		"@woocommerce/theme-cli": "workspace:*"

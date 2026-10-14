@@ -11,7 +11,8 @@
 		"lint:php": "node scripts/lint-php.mjs",
 		"changelog": "composer exec -- changelogger",
 		"lint": "prettier --check scripts package.json composer.json",
-		"wp-env": "node scripts/env.mjs"
+		"wp-env": "node scripts/env.mjs",
+		"build:zip": "node scripts/build-zip.mjs"
 	},
 	"devDependencies": {
 		"@wordpress/env": "catalog:tooling",

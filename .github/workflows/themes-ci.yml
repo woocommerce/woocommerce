@@ -1,0 +1,86 @@
+name: Theme CI
+
+on:
+    pull_request:
+    push:
+        branches:
+            - trunk
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: themes-ci-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    discover:
+        name: Select themes
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        outputs:
+            themes: ${{ steps.themes.outputs.themes }}
+            has-themes: ${{ steps.themes.outputs.has-themes }}
+        steps:
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+              with:
+                  fetch-depth: 0
+            - uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  php-version: 'false'
+            - name: Discover changed themes
+              id: themes
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+                  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+              run: node tools/theme-cli/scripts/ci-themes.mjs "$BASE_SHA" "$HEAD_SHA"
+
+    tooling:
+        name: Shared theme tooling
+        needs: discover
+        if: needs.discover.outputs.has-themes == 'true'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  php-version: '7.4'
+            - run: pnpm install --filter=@woocommerce/theme-cli --frozen-lockfile --ignore-scripts
+            - run: composer install --working-dir=tools/theme-cli --prefer-dist --no-interaction --no-progress
+            - run: pnpm --filter=@woocommerce/theme-cli changelog validate
+            - run: pnpm --filter=@woocommerce/theme-cli lint
+
+    source:
+        name: Validate ${{ matrix.theme.slug }}
+        needs: discover
+        if: needs.discover.outputs.has-themes == 'true'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        strategy:
+            fail-fast: false
+            matrix:
+                theme: ${{ fromJSON(needs.discover.outputs.themes) }}
+        env:
+            THEME: ${{ matrix.theme.slug }}
+        steps:
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  php-version: '7.4'
+            - run: pnpm install --filter="./themes/$THEME..." --frozen-lockfile --ignore-scripts
+            - run: composer install --working-dir=tools/theme-cli --prefer-dist --no-interaction --no-progress
+            - run: composer install --working-dir="themes/$THEME" --prefer-dist --no-interaction --no-progress
+            - run: pnpm --dir "themes/$THEME" lint
+            - run: pnpm --dir "themes/$THEME" changelog validate
+            - run: pnpm --dir "themes/$THEME" validate
+            - name: Check minimum PHP syntax
+              run: find "themes/$THEME" -path '*/vendor' -prune -o -path '*/node_modules' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+            - run: pnpm --dir "themes/$THEME" lint:php
+            - run: pnpm --dir "themes/$THEME" build:zip "$(git rev-parse HEAD)"
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+              with:
+                  name: theme-${{ matrix.theme.slug }}
+                  path: themes/${{ matrix.theme.slug }}/artifacts/*.zip
+                  if-no-files-found: error
