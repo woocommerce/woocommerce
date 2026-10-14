@@ -399,7 +399,8 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				$order->save();
 				$orders[ $tag ] = $order->get_id();
 			}
-			\WC_Helper_Order::create_order()->save();
+			$other = \WC_Helper_Order::create_order();
+			$other->save();
 			$filters = static fn( array $values ) => array( 'filters' => array( 'extensions' => array( 'test-ext' => $values ) ) );
 
 			$contains = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'contains_product' => $coffee->get_id() ) ) );
@@ -413,10 +414,12 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				)
 			);
 			$none     = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'contains_product' => 999999 ) ) );
+			$without  = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 
 			$this->assertEqualsCanonicalizing( array_values( $orders ), array_column( $contains['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $both['orders'], 'id' ) );
 			$this->assertSame( array(), $none['orders'] );
+			$this->assertEqualsCanonicalizing( array( $orders['gift'], $other->get_id() ), array_column( $without['orders'], 'id' ) );
 		} finally {
 			remove_action( 'woocommerce_ability_extensions_init', array( $this, 'register_contains_product_filter' ) );
 			$this->clean_up_cot_setup();
@@ -427,11 +430,24 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Register an order filter that reads order items, which are not meta, and returns order IDs.
+	 * Register an order filter that reads order items, which are not meta, and returns order IDs,
+	 * and one that excludes the order IDs it receives.
 	 *
 	 * @internal
 	 */
 	public function register_contains_product_filter(): void {
+		AbilityExtensions::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'test-ext',
+				'filter'    => 'without',
+				'schema'    => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'integer' ),
+				),
+				'callback'  => static fn( array $ids ) => array( 'exclude_ids' => $ids ),
+			)
+		);
 		AbilityExtensions::register_query_filter(
 			array(
 				'resource'  => 'order',
@@ -441,7 +457,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				'callback'  => static function ( int $product_id ) {
 					global $wpdb;
 					return array(
-						'ids' => $wpdb->get_col(
+						'include_ids' => $wpdb->get_col(
 							$wpdb->prepare(
 								"SELECT DISTINCT items.order_id FROM {$wpdb->prefix}woocommerce_order_items AS items INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS meta ON meta.order_item_id = items.order_item_id WHERE meta.meta_key = '_product_id' AND meta.meta_value = %d",
 								$product_id
@@ -454,21 +470,20 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the products whose IDs a filter returns, refuse more than 1,000 IDs after the intersection, and refuse IDs that are not integers.
+	 * @testdox Should keep the products whose IDs a filter includes, drop the IDs a filter excludes, and refuse IDs that are not integers.
 	 */
-	public function test_product_ids_filter_and_its_limits(): void {
+	public function test_product_ids_filters_include_and_exclude(): void {
 		$coded = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen coded' ) );
 		$coded->update_meta_data( '_test_code', 'A1' );
 		$coded->save();
 		$plain = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen plain' ) );
-		$broad = array_merge( range( 1000000, 1000999 ), array( $coded->get_id(), $plain->get_id() ) );
 		add_action(
 			'woocommerce_ability_extensions_init',
-			static function () use ( $broad ) {
+			static function () use ( $plain ) {
 				$callbacks = array(
-					'picked'  => static fn( array $ids ) => array( 'ids' => $ids ),
-					'broad'   => static fn() => array( 'ids' => $broad ),
-					'not_ids' => static fn() => array( 'ids' => array( 'x' ) ),
+					'picked'    => static fn( array $ids ) => array( 'include_ids' => $ids ),
+					'not_plain' => static fn() => array( 'exclude_ids' => array( $plain->get_id() ) ),
+					'not_ids'   => static fn() => array( 'include_ids' => array( 'x' ) ),
 				);
 				foreach ( $callbacks as $filter => $callback ) {
 					AbilityExtensions::register_query_filter(
@@ -502,13 +517,22 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		$empty    = $this->run_ability( 'woocommerce/products-query', $filters( array( 'picked' => array() ) ) );
-		$too_many = $this->dispatch_ability( 'woocommerce/products-query', $filters( array( 'broad' => true ) ) );
+		$excluded = $this->run_ability( 'woocommerce/products-query', $filters( array( 'not_plain' => true ) ) );
 		$narrowed = $this->run_ability(
 			'woocommerce/products-query',
 			$filters(
 				array(
-					'broad'  => true,
-					'picked' => array( $coded->get_id() ),
+					'not_plain' => true,
+					'picked'    => array( $coded->get_id(), $plain->get_id() ),
+				)
+			)
+		);
+		$nothing  = $this->run_ability(
+			'woocommerce/products-query',
+			$filters(
+				array(
+					'not_plain' => true,
+					'picked'    => array( $plain->get_id() ),
 				)
 			)
 		);
@@ -517,9 +541,9 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->assertEqualsCanonicalizing( array( $coded->get_id(), $plain->get_id() ), array_column( $picked['products'], 'id' ) );
 		$this->assertSame( array( $coded->get_id() ), array_column( $both['products'], 'id' ) );
 		$this->assertSame( array(), $empty['products'] );
-		$this->assertSame( 400, $too_many->get_status() );
-		$this->assertSame( 'woocommerce_ability_extension_filter_too_broad', $too_many->get_data()['code'] );
+		$this->assertSame( array( $coded->get_id() ), array_column( $excluded['products'], 'id' ) );
 		$this->assertSame( array( $coded->get_id() ), array_column( $narrowed['products'], 'id' ) );
+		$this->assertSame( array(), $nothing['products'] );
 		$this->assertSame( 'woocommerce_ability_extension_filter_failed', $not_ids->get_data()['code'] );
 	}
 

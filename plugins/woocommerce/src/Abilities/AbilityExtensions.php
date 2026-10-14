@@ -72,12 +72,7 @@ class AbilityExtensions {
 	/**
 	 * Query arguments that a filter callback can return.
 	 */
-	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'ids' );
-
-	/**
-	 * Most IDs that remain after Core keeps the IDs that every filter returns.
-	 */
-	private const MAX_FILTER_IDS = 1000;
+	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
@@ -178,15 +173,15 @@ class AbilityExtensions {
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
 	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
 	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
-	 *                               a `meta_query`, for products also a `tax_query`, or `ids`. Core adds
-	 *                               each one to the query with AND. Return a WP_Error to refuse the value.
-	 *                               A `tax_query` is accepted only for `product`. Any other key, or a
-	 *                               `tax_query` for another resource, fails the call.
-	 *                               `ids` is a list of object IDs. Use it for data that is not meta, such
-	 *                               as order items or a table of the extension: query that data and return
-	 *                               the IDs that match. Core keeps the IDs that every filter returns, and an
-	 *                               empty list matches nothing. When more than 1,000 IDs remain, the call
-	 *                               returns an error that asks for more filters.
+	 *                               a `meta_query`, for products also a `tax_query`, `include_ids` or
+	 *                               `exclude_ids`. Core adds each one to the query with AND. Return a
+	 *                               WP_Error to refuse the value. A `tax_query` is accepted only for
+	 *                               `product`. Any other key, or a `tax_query` for another resource, fails the call.
+	 *                               `include_ids` and `exclude_ids` are lists of object IDs. Use them for
+	 *                               data that is not meta, such as order items or a table of the extension:
+	 *                               query that data and return the IDs that match. Core keeps the IDs that
+	 *                               every `include_ids` filter returns, then drops the IDs that any
+	 *                               `exclude_ids` filter returns. An empty `include_ids` matches nothing.
 	 * }
 	 */
 	public static function register_query_filter( array $args ): void {
@@ -267,8 +262,10 @@ class AbilityExtensions {
 	 * Get the query arguments of the filters in the input of a list ability.
 	 * Each key holds one clause for each filter, so `array_merge_recursive()`
 	 * adds them to WP_Query or wc_get_orders() arguments with AND. `post__in`
-	 * holds the IDs that every `ids` filter returned, or `0` when none match,
-	 * because an empty `post__in` does not filter.
+	 * holds the IDs that every `include_ids` filter returned, without the IDs
+	 * that any `exclude_ids` filter returned, or `0` when none remain, because
+	 * an empty `post__in` does not filter. Without `include_ids`, the excluded
+	 * IDs go to `post__not_in`, which WP_Query ignores next to `post__in`.
 	 *
 	 * @since 11.3.0
 	 *
@@ -278,7 +275,8 @@ class AbilityExtensions {
 	 */
 	public static function get_query_args( string $resource_name, array $input ) {
 		$query_args = array();
-		$ids        = null;
+		$include    = null;
+		$exclude    = array();
 		if ( ! self::is_enabled() ) {
 			return $query_args;
 		}
@@ -315,13 +313,21 @@ class AbilityExtensions {
 						array( 'status' => 500 )
 					);
 				}
-				if ( isset( $clauses['ids'] ) ) {
-					$filter_ids = self::get_filter_ids( $clauses['ids'], $namespace . '.' . $filter );
+				if ( isset( $clauses['include_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $clauses['include_ids'], $namespace . '.' . $filter );
 					if ( is_wp_error( $filter_ids ) ) {
 						return $filter_ids;
 					}
-					$ids = null === $ids ? $filter_ids : array_values( array_intersect( $ids, $filter_ids ) );
-					unset( $clauses['ids'] );
+					$include = null === $include ? $filter_ids : array_values( array_intersect( $include, $filter_ids ) );
+					unset( $clauses['include_ids'] );
+				}
+				if ( isset( $clauses['exclude_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $clauses['exclude_ids'], $namespace . '.' . $filter );
+					if ( is_wp_error( $filter_ids ) ) {
+						return $filter_ids;
+					}
+					$exclude = array_merge( $exclude, $filter_ids );
+					unset( $clauses['exclude_ids'] );
 				}
 				foreach ( $clauses as $key => $clause ) {
 					if ( empty( $clause ) ) {
@@ -331,16 +337,11 @@ class AbilityExtensions {
 				}
 			}
 		}
-		if ( null !== $ids && count( $ids ) > self::MAX_FILTER_IDS ) {
-			return new \WP_Error(
-				'woocommerce_ability_extension_filter_too_broad',
-				/* translators: %d: maximum number of matches. */
-				sprintf( __( 'The filters match more than %d items. Add more filters to narrow the list.', 'woocommerce' ), self::MAX_FILTER_IDS ),
-				array( 'status' => 400 )
-			);
-		}
-		if ( null !== $ids ) {
-			$query_args['post__in'] = empty( $ids ) ? array( 0 ) : $ids;
+		if ( null !== $include ) {
+			$include                = array_values( array_diff( $include, $exclude ) );
+			$query_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		} elseif ( ! empty( $exclude ) ) {
+			$query_args['post__not_in'] = array_values( array_unique( $exclude ) );
 		}
 		return $query_args;
 	}
