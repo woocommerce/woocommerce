@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a logged-in customer's VAT exemption after a failed payment, so the retry isn't charged tax.
