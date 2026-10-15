@@ -4,8 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupRateLimiter;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService;
@@ -40,6 +42,13 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	private $email_manager;
 
 	/**
+	 * Customer email verification service.
+	 *
+	 * @var EmailVerificationService
+	 */
+	private $email_verification_service;
+
+	/**
 	 * The remote address seen before the test replaced it.
 	 *
 	 * @var string|null
@@ -66,8 +75,10 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$notification_management_service = new NotificationManagementService();
 		$notification_management_service->init( $this->email_manager );
 
+		$this->email_verification_service = wc_get_container()->get( EmailVerificationService::class );
+
 		$this->sut = new SignupService();
-		$this->sut->init( $eligibility_service, $notification_management_service, $this->email_manager );
+		$this->sut->init( $eligibility_service, $notification_management_service, $this->email_manager, $this->email_verification_service );
 	}
 
 	/**
@@ -133,13 +144,14 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should skip double opt-in for a logged-in customer and activate the sign-up straight away.
+	 * @testdox Should skip double opt-in for a verified logged-in customer and activate the sign-up straight away.
 	 */
-	public function test_logged_in_signup_skips_double_opt_in(): void {
+	public function test_verified_logged_in_signup_skips_double_opt_in(): void {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
 		$product = $this->create_out_of_stock_product();
 		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+		$this->email_verification_service->mark_verified( $user_id, 'customer@example.com' );
 
 		$this->email_manager
 			->expects( $this->never() )
@@ -153,18 +165,42 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep double opt-in for a logged-in customer when the filter opts them in.
+	 * @testdox Should keep double opt-in for a logged-in customer whose account email is not verified.
+	 */
+	public function test_unverified_logged_in_signup_requires_double_opt_in(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+		$this->assertFalse( $this->email_verification_service->is_verified( $user_id ) );
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertNotWPError( $result );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS_DOUBLE_OPT_IN, $result->get_code() );
+		$this->assertSame( NotificationStatus::PENDING, $result->get_notification()->get_status() );
+		$this->assertSame( $user_id, $result->get_notification()->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should keep double opt-in for a verified logged-in customer when the filter opts them in.
 	 */
 	public function test_logged_in_signup_requires_double_opt_in_when_filtered(): void {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
 		$product = $this->create_out_of_stock_product();
 		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+		$this->email_verification_service->mark_verified( $user_id, 'customer@example.com' );
 
+		$filtered_default = null;
 		$filtered_user_id = null;
 		add_filter(
 			'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users',
-			static function ( $required, $filter_user_id ) use ( &$filtered_user_id ) {
+			static function ( $required, $filter_user_id ) use ( &$filtered_default, &$filtered_user_id ) {
+				$filtered_default = $required;
 				$filtered_user_id = $filter_user_id;
 				return true;
 			},
@@ -180,7 +216,48 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertSame( SignupService::SIGNUP_SUCCESS_DOUBLE_OPT_IN, $result->get_code() );
 		$this->assertSame( NotificationStatus::PENDING, $result->get_notification()->get_status() );
+		$this->assertFalse( $filtered_default );
 		$this->assertSame( $user_id, $filtered_user_id );
+	}
+
+	/**
+	 * @testdox Should skip double opt-in for an unverified logged-in customer when the filter opts them out.
+	 */
+	public function test_unverified_logged_in_signup_skips_double_opt_in_when_filtered(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+		add_filter( 'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users', '__return_false' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertNotWPError( $result );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
+		$this->assertSame( NotificationStatus::ACTIVE, $result->get_notification()->get_status() );
+	}
+
+	/**
+	 * @testdox Should not consult the logged-in filter when the store does not require double opt-in.
+	 */
+	public function test_logged_in_filter_cannot_enable_double_opt_in_when_store_setting_is_off(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'no' );
+		add_filter( 'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users', '__return_true' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertNotWPError( $result );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
+		$this->assertSame( NotificationStatus::ACTIVE, $result->get_notification()->get_status() );
 	}
 
 	/**
@@ -212,7 +289,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should activate a pending guest signup when the same email later signs up as a logged-in user with double opt-in enabled.
+	 * @testdox Should activate a pending guest signup when the same email later signs up as a verified logged-in user with double opt-in enabled.
 	 */
 	public function test_pending_guest_signup_activated_for_logged_in_user_with_double_opt_in(): void {
 		$this->disable_signup_rate_limiting();
@@ -229,11 +306,51 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$this->assertSame( SignupService::SIGNUP_SUCCESS_DOUBLE_OPT_IN, $guest_result->get_code() );
 		$this->assertSame( NotificationStatus::PENDING, $guest_result->get_notification()->get_status() );
 
+		$this->email_verification_service->mark_verified( $user_id, 'customer@example.com' );
+
 		$user_result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
 		$this->assertSame( SignupService::SIGNUP_SUCCESS, $user_result->get_code() );
 		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
 		$this->assertSame( NotificationStatus::ACTIVE, $user_result->get_notification()->get_status() );
 		$this->assertSame( $user_id, $user_result->get_notification()->get_user_id() );
+
+		$reloaded = Factory::get_notification( $guest_result->get_notification()->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $reloaded->get_status() );
+		$this->assertSame( $user_id, $reloaded->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should activate but not re-own a pending signup owned by another user who shares the email.
+	 */
+	public function test_pending_signup_owned_by_another_user_is_not_claimed(): void {
+		$this->disable_signup_rate_limiting();
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+
+		$product  = $this->create_out_of_stock_product();
+		$owner_id = $this->factory->user->create( array( 'user_email' => 'owner@example.com' ) );
+		$user_id  = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );
+
+		// A pending row left by the owner before their email moved to the other account.
+		$notification = new Notification();
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_id( $owner_id );
+		$notification->set_user_email( 'customer@example.com' );
+		$notification->save();
+
+		$this->email_verification_service->mark_verified( $user_id, 'customer@example.com' );
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->signup( $product->get_id(), $user_id, 'customer@example.com' );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
+		$this->assertSame( $notification->get_id(), $result->get_notification()->get_id() );
+
+		$reloaded = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $reloaded->get_status() );
+		$this->assertSame( $owner_id, $reloaded->get_user_id() );
 	}
 
 	/**
@@ -260,12 +377,11 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should detect an existing pending guest signup when the same email later signs up as a logged-in user who is kept on double opt-in.
+	 * @testdox Should detect an existing pending guest signup when the same email later signs up as a logged-in user with double opt-in enabled.
 	 */
 	public function test_pending_guest_signup_detected_for_logged_in_user_with_double_opt_in() {
 		$this->disable_signup_rate_limiting();
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
-		add_filter( 'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users', '__return_true' );
 
 		$product = $this->create_out_of_stock_product();
 		$user_id = $this->factory->user->create( array( 'user_email' => 'customer@example.com' ) );

@@ -10,7 +10,9 @@ import {
 	bisFormLocator,
 	bisNotice,
 	bisTargetProductInput,
+	clearCustomerEmailVerified,
 	expectEmailAsAdmin,
+	markCustomerEmailVerified,
 	requireDoubleOptInForLoggedIn,
 	resetBISOptions,
 	setBISOptions,
@@ -18,7 +20,7 @@ import {
 	test,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
-import { clearFilters, setFilterValue } from '../../utils/filters';
+import { clearFilters } from '../../utils/filters';
 import { setOption } from '../../utils/options';
 
 /**
@@ -145,7 +147,7 @@ test.describe(
 				).toHaveAttribute( 'href', /stock-notifications/ );
 			} );
 
-			test( 'a repeated signup surfaces the "already joined" notice', async ( {
+			test( 'reloading the product page after signing up shows the "already joined" state instead of the form', async ( {
 				page,
 				product,
 			} ) => {
@@ -159,32 +161,23 @@ test.describe(
 					page.getByText( bisNotice.success( product.name ) )
 				).toBeVisible();
 
-				// Submitting the form a second time (the "already joined"
-				// notice only renders as a form-submit response; the cached
-				// state shown on page reload is behind the off-by-default
-				// `woocommerce_customer_stock_notifications_personalization_enabled`
-				// filter).
+				// Personalization is on by default for logged-in shoppers, so
+				// a reload renders the "already joined" notice in place of the
+				// form rather than letting the customer submit it again.
 				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
 				await expect(
-					page.getByText( bisNotice.alreadyJoined )
+					page.getByText( bisNotice.alreadyJoinedOnReload )
 				).toBeVisible();
+				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 			} );
 
 			test( 'a missing nonce is rejected once nonce checks are on', async ( {
 				page,
 				product,
 			} ) => {
-				// Core only verifies the signup nonce when personalization is
-				// on and the shopper is logged in (or an account is required),
-				// so guest forms survive HTML caching. Turn personalization on
-				// through the test helper's filter cookie to reach that branch.
-				await setFilterValue(
-					page,
-					'woocommerce_customer_stock_notifications_personalization_enabled',
-					true
-				);
-
+				// Core verifies the signup nonce for logged-in shoppers by
+				// default (and whenever an account is required); guest forms
+				// skip it so they survive HTML caching.
 				await page.goto( product.permalink );
 
 				// Blank the nonce the form posts, the way a stale cached page
@@ -207,8 +200,6 @@ test.describe(
 				await expect(
 					page.getByText( bisNotice.success( product.name ) )
 				).toBeVisible();
-
-				await clearFilters( page );
 			} );
 		} );
 
@@ -223,37 +214,63 @@ test.describe(
 				} );
 			} );
 
-			test( 'the signup is active straight away and no verification is requested', async ( {
+			test( "a verified customer's signup is active straight away and no verification is requested", async ( {
 				page,
 				product,
 			} ) => {
-				// The sign-up uses the account email, so there is nothing to
-				// verify: the single opt-in notice renders, not the
-				// "follow the verification link" one.
-				await page.goto( product.permalink );
-				await signUpOnProductPage( page );
+				// wpCLI calls must run one at a time, so the customer is
+				// verified inside the test rather than in a hook.
+				await markCustomerEmailVerified();
+				try {
+					// The account e-mail is already verified, so there is
+					// nothing to confirm: the single opt-in notice renders,
+					// not the "follow the verification link" one.
+					await page.goto( product.permalink );
+					await signUpOnProductPage( page );
 
-				await expect(
-					page.getByText( bisNotice.success( product.name ) )
-				).toBeVisible();
-				await expect(
-					page.getByText( bisNotice.doubleOptIn )
-				).toHaveCount( 0 );
+					await expect(
+						page.getByText( bisNotice.success( product.name ) )
+					).toBeVisible();
+					await expect(
+						page.getByText( bisNotice.doubleOptIn )
+					).toHaveCount( 0 );
+				} finally {
+					await clearCustomerEmailVerified();
+				}
 			} );
 
-			test( 'the signup stays pending when the store keeps double opt-in on for logged-in customers', async ( {
+			test( "an unverified customer's signup stays pending", async ( {
 				page,
 				product,
 			} ) => {
+				// The e2e customer has never verified its account e-mail, so
+				// double opt-in still applies to its logged-in sign-ups.
 				await page.goto( product.permalink );
-				await requireDoubleOptInForLoggedIn( page );
 				await signUpOnProductPage( page );
 
 				await expect(
 					page.getByText( bisNotice.doubleOptIn )
 				).toBeVisible();
+			} );
 
-				await clearFilters( page );
+			test( 'the signup stays pending when the store keeps double opt-in on for verified customers', async ( {
+				page,
+				product,
+			} ) => {
+				await markCustomerEmailVerified();
+				try {
+					await page.goto( product.permalink );
+					await requireDoubleOptInForLoggedIn( page );
+					await signUpOnProductPage( page );
+
+					await expect(
+						page.getByText( bisNotice.doubleOptIn )
+					).toBeVisible();
+
+					await clearFilters( page );
+				} finally {
+					await clearCustomerEmailVerified();
+				}
 			} );
 		} );
 

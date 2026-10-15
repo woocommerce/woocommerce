@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
@@ -199,5 +200,24 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup            = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-form /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render inside the legacy Add to Cart Form block for an out of stock simple product.' );
+	}
+
+	/**
+	 * @testdox Should verify the sign-up nonce for logged-in shoppers by default, but not for guests when no account is required.
+	 */
+	public function test_nonce_check_is_required_for_logged_in_shoppers_by_default(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_account', 'no' );
+
+		$this->assertTrue( ProductPageIntegration::is_personalization_enabled() );
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( FormHandlerService::requires_nonce_check() );
+
+		wp_set_current_user( $this->factory->user->create() );
+		try {
+			$this->assertTrue( FormHandlerService::requires_nonce_check() );
+		} finally {
+			wp_set_current_user( 0 );
+		}
 	}
 }

@@ -256,7 +256,10 @@ class ProductPageIntegration {
 	/**
 	 * Whether personalization is enabled.
 	 *
-	 * Personalization includes checking if the user is already signed up and displaying the 'already signed up' message.
+	 * Personalization only affects logged-in shoppers: the product page shows the "already signed up"
+	 * notice instead of the form when they have joined the waitlist, and the sign-up nonce is verified
+	 * (see FormHandlerService::requires_nonce_check()). Logged-in pages bypass page caches, so it is
+	 * safe to have on by default; guest pages stay cacheable either way.
 	 *
 	 * @return bool True if personalization is enabled, false otherwise.
 	 */
@@ -265,11 +268,15 @@ class ProductPageIntegration {
 		/**
 		 * Filter whether personalization is enabled while rendering the form.
 		 *
+		 * Personalization only applies to logged-in shoppers, whose pages bypass page caches, so it is
+		 * enabled by default. Stores whose cache serves logged-in pages too can return false to keep
+		 * the product page free of per-customer state and skip the sign-up nonce check.
+		 *
 		 * @since 10.2.0
 		 *
-		 * @param bool $enabled Whether personalization is enabled.
+		 * @param bool $enabled Whether personalization is enabled. Default true.
 		 * @return bool
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', false );
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_personalization_enabled', true );
 	}
 }

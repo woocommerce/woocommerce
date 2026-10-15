@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Internal\CustomerEmailVerification\EmailVerificationService;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -77,6 +78,13 @@ class SignupService {
 	private EmailManager $email_manager;
 
 	/**
+	 * Customer email verification service.
+	 *
+	 * @var EmailVerificationService
+	 */
+	private EmailVerificationService $email_verification_service;
+
+	/**
 	 * The logger.
 	 *
 	 * @var \WC_Logger_Interface
@@ -91,15 +99,18 @@ class SignupService {
 	 * @param EligibilityService            $eligibility_service The eligibility service.
 	 * @param NotificationManagementService $notification_management_service The notification management service.
 	 * @param EmailManager                  $email_manager The email manager.
+	 * @param EmailVerificationService      $email_verification_service The customer email verification service.
 	 */
 	final public function init(
 		EligibilityService $eligibility_service,
 		NotificationManagementService $notification_management_service,
-		EmailManager $email_manager
+		EmailManager $email_manager,
+		EmailVerificationService $email_verification_service
 	) {
 		$this->eligibility_service             = $eligibility_service;
 		$this->notification_management_service = $notification_management_service;
 		$this->email_manager                   = $email_manager;
+		$this->email_verification_service      = $email_verification_service;
 		$this->logger                          = \wc_get_logger();
 	}
 
@@ -170,7 +181,11 @@ class SignupService {
 				}
 
 				// Double opt-in is not required for this customer, so activate the pending notification instead of creating one.
-				$notification->set_user_id( $user_id );
+				// The email identity can match a row owned by another account (an email that moved between accounts),
+				// so only unowned guest rows are claimed for this customer.
+				if ( 0 === $notification->get_user_id() ) {
+					$notification->set_user_id( $user_id );
+				}
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$saved = $notification->save();
 				if ( \is_wp_error( $saved ) || ! $saved ) {
@@ -244,8 +259,11 @@ class SignupService {
 	/**
 	 * Whether a sign-up by the given customer has to be verified by email.
 	 *
-	 * Logged-in customers sign up with their account email, so by default they skip double opt-in
-	 * even when the store requires it. Stores with strict consent rules can keep it on for them.
+	 * Logged-in customers sign up with their account email, but WooCommerce accounts can be
+	 * registered with an unverified address. So a logged-in customer skips double opt-in only
+	 * when their account email has been verified through WooCommerce's customer email
+	 * verification; an unverified account still gets the verification step. The filter can
+	 * force either way.
 	 *
 	 * @param int $user_id The user ID, or 0 for a guest.
 	 * @return bool
@@ -262,16 +280,22 @@ class SignupService {
 		/**
 		 * Filter: woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users
 		 *
-		 * Whether logged-in customers have to verify their back-in-stock sign-ups by email when the
-		 * store requires double opt-in. Logged-in sign-ups use the account email, so they skip the
-		 * verification step by default.
+		 * Whether a logged-in customer has to verify their back-in-stock sign-up by email when the
+		 * store requires double opt-in. By default only customers whose account email has been
+		 * verified through WooCommerce's customer email verification skip the step; unverified
+		 * accounts still get it. Return true to keep double opt-in on for every logged-in
+		 * customer, or false to skip it regardless of verification.
 		 *
 		 * @since 11.3.0
 		 *
-		 * @param bool $required Whether double opt-in applies to logged-in customers. Default false.
+		 * @param bool $required Whether double opt-in applies to this customer. Default: whether their account email is unverified.
 		 * @param int  $user_id  The user ID.
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users', false, $user_id );
+		return (bool) apply_filters(
+			'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users',
+			! $this->email_verification_service->is_verified( $user_id ),
+			$user_id
+		);
 	}
 
 	/**

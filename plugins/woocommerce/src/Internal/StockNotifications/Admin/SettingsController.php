@@ -167,7 +167,7 @@ class SettingsController {
 
 				array(
 					'title'   => __( 'Require double opt-in to sign up', 'woocommerce' ),
-					'desc'    => __( 'To complete the sign-up process, customers must follow a verification link sent to their e-mail after submitting the sign-up form.', 'woocommerce' ),
+					'desc'    => __( 'Customers must follow a verification link sent to their e-mail to complete the sign-up. Logged-in customers who have already verified their account e-mail skip this step.', 'woocommerce' ),
 					'id'      => 'woocommerce_customer_stock_notifications_require_double_opt_in',
 					'default' => 'no',
 					'type'    => 'checkbox',

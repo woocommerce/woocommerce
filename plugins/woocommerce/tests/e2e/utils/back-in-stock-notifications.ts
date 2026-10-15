@@ -16,7 +16,7 @@ import { expectEmail } from './email';
 import { setFilterValue } from './filters';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
-import { admin } from '../test-data/data';
+import { admin, customer } from '../test-data/data';
 import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../playwright.config';
 
 /**
@@ -494,9 +494,11 @@ export async function disableSignupRateLimit( page: Page ): Promise< void > {
 /**
  * Keep double opt-in on for logged-in sign-ups made from this page's context.
  *
- * Logged-in customers skip double opt-in by default, since the sign-up uses their
- * account email. Specs that need a logged-in sign-up to land PENDING opt them
- * back in through the `woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users`
+ * Logged-in customers skip double opt-in only once their account e-mail is
+ * verified through WooCommerce's customer email verification. The e2e customer
+ * is unverified, so its logged-in sign-ups land PENDING by default; this helper
+ * forces double opt-in on regardless, through the
+ * `woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users`
  * filter, set via the `e2e-filters` cookie the test helper plugin reads.
  *
  * @param {Page} page Playwright page whose context will submit the form.
@@ -509,6 +511,51 @@ export async function requireDoubleOptInForLoggedIn(
 		'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users',
 		true
 	);
+}
+
+/**
+ * User meta key core reads for a verified account e-mail.
+ *
+ * `EmailVerificationService` stores it per site as
+ * `_wc_email_verified_<blog prefix>`; the wp-env table prefix is `wp_`.
+ *
+ * @see src/Internal/CustomerEmailVerification/EmailVerificationService.php
+ */
+const CUSTOMER_EMAIL_VERIFIED_META = '_wc_email_verified_wp';
+
+/**
+ * Mark the shared e2e customer's account e-mail as verified.
+ *
+ * Verified logged-in customers skip double opt-in, so their sign-ups land
+ * ACTIVE straight away. The meta value is the lower-cased account e-mail,
+ * which is how core self-invalidates the status when the address changes.
+ * Pair with `clearCustomerEmailVerified()` so other specs keep the unverified
+ * default.
+ */
+export async function markCustomerEmailVerified(): Promise< void > {
+	await wpCLI( [
+		'wp',
+		'user',
+		'meta',
+		'update',
+		customer.username,
+		CUSTOMER_EMAIL_VERIFIED_META,
+		customer.email.toLowerCase(),
+	] );
+}
+
+/**
+ * Put the shared e2e customer back in the unverified state.
+ */
+export async function clearCustomerEmailVerified(): Promise< void > {
+	await wpCLI( [
+		'wp',
+		'user',
+		'meta',
+		'delete',
+		customer.username,
+		CUSTOMER_EMAIL_VERIFIED_META,
+	] );
 }
 
 /**
@@ -552,7 +599,7 @@ export async function signUpOnProductPage(
  * @param {Object}  [opts.storageState]              Storage state for the signup context; a logged-out guest by default.
  * @param {string}  [opts.email]                     Email to enter; omit for a logged-in signup, where the field isn't rendered.
  * @param {RegExp}  [opts.expectedNotice]            Notice to wait for after the post; a generic success match by default.
- * @param {boolean} [opts.requireDoubleOptIn]        Keep double opt-in on for a logged-in sign-up, so it lands PENDING.
+ * @param {boolean} [opts.requireDoubleOptIn]        Force double opt-in on for a logged-in sign-up, even for a verified customer.
  * @param {Object}  [opts.selectVariation]           Variation to pick before submitting, for variable products.
  * @param {Object}  [opts.selectVariation.product]   The variable product handle.
  * @param {Object}  [opts.selectVariation.variation] The variation to select.
@@ -643,7 +690,7 @@ export async function signUpAsGuest(
  * @param {Browser} browser                   The test's browser fixture.
  * @param {string}  permalink                 The product permalink.
  * @param {Object}  [opts]                    Signup options.
- * @param {boolean} [opts.requireDoubleOptIn] Keep double opt-in on so the sign-up lands PENDING and a verify email is sent.
+ * @param {boolean} [opts.requireDoubleOptIn] Force double opt-in on, even for a verified customer, so the sign-up lands PENDING and a verify email is sent.
  */
 export async function signUpAsCustomer(
 	browser: Browser,
@@ -886,6 +933,11 @@ export const bisNotice = {
 	doubleOptIn:
 		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
 	alreadyJoined: /You have already joined this waitlist\./,
+	/**
+	 * Rendered in place of the form when a logged-in shopper reloads a
+	 * product page they have already joined the waitlist for.
+	 */
+	alreadyJoinedOnReload: /You have already joined the waitlist!/,
 	accountRequired: /Please log in to sign up for stock notifications\./,
 	/**
 	 * Printed on the shop page after a verify link is followed.

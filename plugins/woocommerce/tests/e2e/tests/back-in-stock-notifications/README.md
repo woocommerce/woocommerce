@@ -36,28 +36,32 @@ Covers the scenarios from the original plugin test plan that have a target in co
   that walks up to the parent — is only reached on the signup POST, which the
   form's absence makes unreachable from the UI.
 - The plugin's "already signed up for this variation" scenario has no core
-  target: that message is only rendered when the
-  `woocommerce_customer_stock_notifications_personalization_enabled` filter is
-  enabled (it defaults to `false`) and it resolves against the parent product on
-  a variable PDP, not the selected variation.
+  target: the "already joined" state rendered for logged-in shoppers (behind the
+  `woocommerce_customer_stock_notifications_personalization_enabled` filter,
+  on by default) resolves against the parent product on a variable PDP, not the
+  selected variation.
 
 ## Configuration-branch notes
 
-- The signup nonce is only verified when the
-  `woocommerce_customer_stock_notifications_personalization_enabled` filter is
-  on and the shopper is logged in (or an account is required), so guest forms
-  survive HTML caching. The nonce test turns personalization on through the
-  test helper's `e2e-filters` cookie (`setFilterValue()`), which is why it runs
-  in the logged-in describe.
+- The signup nonce is verified for logged-in shoppers (and whenever an account
+  is required) by default, through the
+  `woocommerce_customer_stock_notifications_personalization_enabled` filter;
+  guest forms skip it so they survive HTML caching. That is why the nonce test
+  runs in the logged-in describe.
 - Verify-link expiry is a filter
   (`woocommerce_customer_stock_notifications_verification_expiration_time_threshold`),
   not an option, so `expireVerificationLinks()` sets it to a negative value
   through the same cookie. Both tests clear the cookie afterwards with
   `clearFilters()`.
-- Logged-in customers skip double opt-in by default (the sign-up uses their
-  account email). Specs that need a logged-in sign-up to land PENDING turn the
+- Logged-in customers skip double opt-in only once their account e-mail is
+  verified through WooCommerce's customer email verification. The e2e customer
+  is unverified, so its logged-in sign-ups land PENDING by default.
+  `markCustomerEmailVerified()` sets the verified-email user meta through
+  WP-CLI so a sign-up lands ACTIVE, and `clearCustomerEmailVerified()` puts the
+  customer back; call them sequentially (one `wpCLI` call at a time) and clear
+  in a `finally`. To keep double opt-in on for a verified customer, set the
   `woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users`
-  filter on through the same cookie with `requireDoubleOptInForLoggedIn()`, or
+  filter through the same cookie with `requireDoubleOptInForLoggedIn()`, or
   `signUpAsCustomer( browser, permalink, { requireDoubleOptIn: true } )` for a
   sign-up made in a fresh context.
 - Sign-ups are rate limited per client and per e-mail
