@@ -176,6 +176,31 @@ describe.each( [
 			);
 		} );
 
+		test( 'should honour the traditional option when it serializes array values', () => {
+			// Only jQuery 4 hands the prefilter unserialized data, so this pins
+			// the `options.traditional` pass-through on that path.
+			$.ajax( {
+				type: 'POST',
+				url: '/?wc-ajax=update_order_review',
+				data: { ids: [ 1, 2 ], city: "O'Fallon" },
+				traditional: true,
+				wc_form_encoding: true,
+			} );
+
+			expect( sent[ 0 ].body ).toBe( 'ids=1&ids=2&city=O%27Fallon' );
+		} );
+
+		test( 'should serialize an array of name/value pairs like serializeArray()', () => {
+			$.ajax( {
+				type: 'POST',
+				url: '/?wc-ajax=update_order_review',
+				data: [ { name: 'city', value: "O'Fallon" }, { name: 'state', value: 'NY' } ],
+				wc_form_encoding: true,
+			} );
+
+			expect( sent[ 0 ].body ).toBe( 'city=O%27Fallon&state=NY' );
+		} );
+
 		test( 'should leave a JSON body from an earlier json prefilter alone', () => {
 			// A dataType-specific prefilter runs before the '*' ones whatever the
 			// load order; a body it turned into JSON must not be rewritten.

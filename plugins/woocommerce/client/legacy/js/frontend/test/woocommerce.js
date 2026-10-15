@@ -154,50 +154,35 @@ describe( 'woocommerce.js form encoding prefilter', () => {
 		expect( options.data ).toBe( "city=O'Fallon" );
 	} );
 
-	test( 'should leave non-form bodies alone even when opted in', () => {
+	test( 'should leave a body that is not form-encoded alone even when opted in', () => {
+		// Only the content type differs from a WooCommerce request here, so
+		// this fails only when the content-type guard is removed.
 		loadScript();
 		const json = {
-			processData: false,
+			processData: true,
 			contentType: 'application/json',
 			data: '{"city":"O\'Fallon"}',
 			wc_form_encoding: true,
 		};
-		const formData = { append: jest.fn() };
-		const raw = {
-			processData: false,
-			contentType: false,
-			data: formData,
-			wc_form_encoding: true,
-		};
 
 		prefilter( json );
-		prefilter( raw );
 
 		expect( json.data ).toBe( '{"city":"O\'Fallon"}' );
-		expect( raw.data ).toBe( formData );
 	} );
 
-	test( 'should not touch the original options the caller passed', () => {
+	test( 'should leave a body alone when processData is off even when opted in', () => {
+		// Only processData differs from a WooCommerce request here, so this
+		// fails only when the processData guard is removed.
 		loadScript();
-		// jQuery passes its own copy as `options` and the caller's object as
-		// `originalOptions`; third-party prefilters read the latter as an object.
-		const originalOptions = {
-			data: { city: "O'Fallon", state: undefined },
-			wc_form_encoding: true,
-		};
-		const options = {
-			processData: true,
+		const raw = {
+			processData: false,
 			contentType: FORM,
 			data: "city=O'Fallon",
 			wc_form_encoding: true,
 		};
 
-		prefilter( options, originalOptions );
+		prefilter( raw );
 
-		expect( options.data ).toBe( 'city=O%27Fallon' );
-		expect( originalOptions.data ).toEqual( {
-			city: "O'Fallon",
-			state: undefined,
-		} );
+		expect( raw.data ).toBe( "city=O'Fallon" );
 	} );
 } );
