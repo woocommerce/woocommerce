@@ -378,6 +378,18 @@ class WC_Shipping {
 				'class' => get_class( $value ),
 				'data'  => array_replace( $value->get_data(), $value->get_changes() ),
 			);
+		} elseif ( $value instanceof WC_Meta_Data ) {
+			$normalized_value = array(
+				'class' => get_class( $value ),
+				'data'  => array_replace( $value->get_data(), $value->get_changes() ),
+			);
+		} elseif ( $value instanceof WC_DateTime ) {
+			$normalized_value = array(
+				'class'     => get_class( $value ),
+				'timestamp' => $value->getTimestamp(),
+				'timezone'  => $value->getTimezone()->getName(),
+				'offset'    => $value->getOffset(),
+			);
 		} elseif ( $value instanceof JsonSerializable ) {
 			$normalized_value = array(
 				'class' => get_class( $value ),

@@ -582,6 +582,68 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product dates are included in the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_memoizes_product_dates(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$date_created = new WC_DateTime( '2026-01-01 00:00:00', new DateTimeZone( 'UTC' ) );
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->set_date_created( $date_created );
+		$product->apply_changes();
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 1, $filter_calls, 'A product date should not disable memoization.' );
+
+		$date_created->modify( '+1 day' );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Changing a product date should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox Pending product metadata changes invalidate the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_product_metadata_changes(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			$shipping_packages[0]['observed_metadata'] = $shipping_packages[0]['contents']['test_item']['data']->get_meta( 'shipping_cache_test' );
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->add_meta_data( 'shipping_cache_test', 'before', true );
+		$metadata = $product->get_meta_data()[0];
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first           = $this->sut->calculate_shipping( $packages );
+		$metadata->value = 'after';
+		$second          = $this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Pending metadata changes should invalidate the memo.' );
+		$this->assertSame( 'before', $first[0]['observed_metadata'], 'The first result should use the original metadata.' );
+		$this->assertSame( 'after', $second[0]['observed_metadata'], 'The second result should use the pending metadata.' );
+	}
+
+	/**
 	 * @testdox Unsupported objects anywhere in package metadata disable the shipping packages filter memo.
 	 */
 	public function test_calculate_shipping_does_not_memoize_unsupported_package_metadata_objects(): void {
