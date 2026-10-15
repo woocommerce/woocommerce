@@ -221,35 +221,121 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * Map a product for `POST /catalog/product`.
 	 *
 	 * A selection narrows the variants to those matching every selected option.
-	 * One matching no variation is relaxed from its last option until one does,
-	 * and `selected` reports the options kept, as UCP requires.
+	 * One matching no variation is relaxed and `selected` reports the options
+	 * kept, as UCP requires. With `preferences` the option named last there is
+	 * dropped first, options it does not name before any it does. Without them
+	 * the variations satisfying the most options win, whatever the order.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $selected Selected option values, each `{ name, label, id? }`.
+	 * @param array       $preferences Option names in relaxation priority order.
 	 * @return array
 	 */
-	public function map_detail_product( \WC_Product $product, array $selected = array() ): array {
+	public function map_detail_product( \WC_Product $product, array $selected = array(), array $preferences = array() ): array {
 		if ( empty( $selected ) || ! $product instanceof \WC_Product_Variable ) {
 			return $this->map_product( $product );
 		}
 
-		$item     = $this->item( $product );
-		$matching = array();
+		$item = $this->item( $product );
+		$hits = $this->selection_hits( $item, $selected );
 
-		while ( ! empty( $selected ) ) {
-			$matching = $this->match_selection( $item, $selected );
-
-			if ( ! empty( $matching ) ) {
-				break;
-			}
-
-			array_pop( $selected );
+		if ( empty( $preferences ) ) {
+			list( $kept, $matching ) = $this->best_fit( $hits );
+		} else {
+			list( $kept, $matching ) = $this->relax_by_preference( $hits, $selected, $preferences );
 		}
 
-		$mapped             = $this->map_item( $product, $item, array(), false, empty( $matching ) ? null : $matching );
-		$mapped['selected'] = $selected;
+		// No option satisfiable: every visible variant, nothing selected.
+		$mapped             = $this->map_item( $product, $item, array(), false, empty( $kept ) ? null : $matching );
+		$mapped['selected'] = array_values( array_intersect_key( $selected, $kept ) );
 
 		return $mapped;
+	}
+
+	/**
+	 * Keep the variations satisfying the most selected options.
+	 *
+	 * `selected` reports only options every kept variation satisfies, so ties
+	 * between variations that satisfy different options report neither.
+	 *
+	 * @param array $hits Variation id => satisfied option indexes.
+	 * @return array `[ kept option indexes => true, matching variation ids ]`.
+	 */
+	private function best_fit( array $hits ): array {
+		$best = 0;
+		foreach ( $hits as $satisfied ) {
+			$best = max( $best, count( $satisfied ) );
+		}
+
+		if ( 0 === $best ) {
+			return array( array(), array() );
+		}
+
+		// Options every best-scoring variation satisfies.
+		$kept = null;
+		foreach ( $hits as $satisfied ) {
+			if ( count( $satisfied ) === $best ) {
+				$kept = null === $kept ? $satisfied : array_intersect_key( $kept, $satisfied );
+			}
+		}
+
+		return array( $kept, $this->satisfying( $hits, $kept ) );
+	}
+
+	/**
+	 * Variations satisfying every kept option.
+	 *
+	 * @param array $hits Variation id => satisfied option indexes.
+	 * @param array $kept Kept option indexes => true.
+	 * @return array Variation ids.
+	 */
+	private function satisfying( array $hits, array $kept ): array {
+		$matching = array();
+		foreach ( $hits as $variation_id => $satisfied ) {
+			if ( ! array_diff_key( $kept, $satisfied ) ) {
+				$matching[] = $variation_id;
+			}
+		}
+
+		return $matching;
+	}
+
+	/**
+	 * Drop options in `preferences` order, last named first, until some variation
+	 * satisfies every option left.
+	 *
+	 * @param array $hits Variation id => satisfied option indexes.
+	 * @param array $selected Selected option values.
+	 * @param array $preferences Option names in relaxation priority order.
+	 * @return array `[ kept option indexes => true, matching variation ids ]`.
+	 */
+	private function relax_by_preference( array $hits, array $selected, array $preferences ): array {
+		$rank = array_flip( array_map( 'strtolower', array_map( 'strval', $preferences ) ) );
+
+		// Highest-priority first; options `preferences` does not name go last.
+		$order = array_keys( $selected );
+		usort(
+			$order,
+			function ( $a, $b ) use ( $selected, $rank ) {
+				$ra = $rank[ strtolower( (string) $selected[ $a ]['name'] ) ] ?? PHP_INT_MAX;
+				$rb = $rank[ strtolower( (string) $selected[ $b ]['name'] ) ] ?? PHP_INT_MAX;
+
+				return $ra === $rb ? $a <=> $b : $ra <=> $rb;
+			}
+		);
+
+		while ( ! empty( $order ) ) {
+			$kept     = array_fill_keys( $order, true );
+			$matching = $this->satisfying( $hits, $kept );
+
+			if ( ! empty( $matching ) ) {
+				return array( $kept, $matching );
+			}
+
+			array_pop( $order );
+		}
+
+		return array( array(), array() );
 	}
 
 	/**
@@ -863,39 +949,30 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Find the visible variations carrying every selected option value.
+	 * Find, for each visible variation, which selected options it satisfies.
 	 *
 	 * Matches on the parent item's variation attributes, so no variation is loaded
 	 * to be rejected. A label matches a term's name or its slug, case-insensitively,
 	 * and a variation left as "Any" for an attribute accepts every label, as the
-	 * storefront does.
+	 * storefront does. An option naming an attribute no variation carries is
+	 * never satisfied.
 	 *
 	 * @param array $item Store API item response of the variable product.
 	 * @param array $selected Selected option values, each `{ name, label }`.
-	 * @return array Matching variation ids.
+	 * @return array Variation id => `[ selected index => true ]`.
 	 */
-	private function match_selection( array $item, array $selected ): array {
+	private function selection_hits( array $item, array $selected ): array {
+		$names = $this->term_names( $item );
+		$known = array_fill_keys( array_map( 'strtolower', array_keys( $names ) ), true );
+
 		$selection = array();
-		foreach ( $selected as $option ) {
+		foreach ( $selected as $index => $option ) {
 			if ( isset( $option['name'], $option['label'] ) ) {
-				$selection[ strtolower( (string) $option['name'] ) ] = strtolower( (string) $option['label'] );
+				$selection[ $index ] = array( strtolower( (string) $option['name'] ), strtolower( (string) $option['label'] ) );
 			}
 		}
 
-		if ( empty( $selection ) ) {
-			return array();
-		}
-
-		$names = $this->term_names( $item );
-
-		// A name no variation attribute carries can never match; without this
-		// check the "Any" rule below would accept it on every variation.
-		$known = array_fill_keys( array_map( 'strtolower', array_keys( $names ) ), true );
-		if ( array_diff_key( $selection, $known ) ) {
-			return array();
-		}
-
-		$matching = array();
+		$hits = array();
 
 		foreach ( (array) $item['variations'] as $variation ) {
 			$values = array();
@@ -913,15 +990,20 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				);
 			}
 
-			foreach ( $selection as $name => $label ) {
-				if ( isset( $values[ $name ] ) && ! in_array( $label, $values[ $name ], true ) ) {
-					continue 2;
+			$satisfied = array();
+			foreach ( $selection as $index => list( $name, $label ) ) {
+				if ( ! isset( $known[ $name ] ) ) {
+					continue;
+				}
+
+				if ( ! isset( $values[ $name ] ) || in_array( $label, $values[ $name ], true ) ) {
+					$satisfied[ $index ] = true;
 				}
 			}
 
-			$matching[] = (int) $variation['id'];
+			$hits[ (int) $variation['id'] ] = $satisfied;
 		}
 
-		return $matching;
+		return $hits;
 	}
 }

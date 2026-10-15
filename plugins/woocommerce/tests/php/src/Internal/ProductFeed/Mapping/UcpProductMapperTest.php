@@ -277,6 +277,151 @@ class UcpProductMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a variable product with size and intensity attributes.
+	 *
+	 * @param array $variations Each `[ size, intensity ]`; '' leaves the attribute as "Any".
+	 * @return \WC_Product_Variable
+	 */
+	private function create_size_intensity_product( array $variations ): \WC_Product_Variable {
+		$variable = new \WC_Product_Variable();
+		$variable->set_name( 'Roast' );
+		$variable->set_status( 'publish' );
+		$variable->set_attributes(
+			array(
+				WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) ),
+				WC_Helper_Product::create_product_attribute_object( 'intensity', array( 'mild', 'bold' ) ),
+			)
+		);
+		$parent_id = $variable->save();
+
+		foreach ( $variations as list( $size, $intensity ) ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_parent_id( $parent_id );
+			$variation->set_attributes(
+				array(
+					'pa_size'      => $size,
+					'pa_intensity' => $intensity,
+				)
+			);
+			$variation->set_regular_price( '10' );
+			$variation->set_status( 'publish' );
+			$variation->save();
+		}
+
+		\WC_Product_Variable::sync( $parent_id );
+
+		return wc_get_product( $parent_id );
+	}
+
+	/**
+	 * Selected option helper.
+	 *
+	 * @param string $name Option name.
+	 * @param string $label Option label.
+	 * @return array
+	 */
+	private function option( string $name, string $label ): array {
+		return array(
+			'name'  => $name,
+			'label' => $label,
+		);
+	}
+
+	/**
+	 * Variant titles of a mapped product.
+	 *
+	 * @param array $mapped Mapped product.
+	 * @return array
+	 */
+	private function titles( array $mapped ): array {
+		return array_column( $mapped['variants'], 'title' );
+	}
+
+	/**
+	 * UCP gives `selected` order no meaning, so relaxation must not depend on it.
+	 *
+	 * @testdox Without preferences, relaxation should keep the satisfiable option whatever the selection order.
+	 */
+	public function test_detail_relaxation_is_order_independent_without_preferences(): void {
+		$product = $this->create_size_intensity_product( array( array( 'small', 'mild' ), array( 'large', 'mild' ) ) );
+		$mapper  = new UcpProductMapper( 'USD' );
+		$size    = $this->option( 'size', 'large' );
+		$bold    = $this->option( 'intensity', 'bold' );
+
+		foreach ( array( array( $size, $bold ), array( $bold, $size ) ) as $selected ) {
+			$mapped = $mapper->map_detail_product( $product, $selected );
+
+			$this->assertSame( array( $size ), $mapped['selected'] );
+			$this->assertSame( array( 'large / mild' ), $this->titles( $mapped ) );
+		}
+	}
+
+	/**
+	 * @testdox Without preferences, variations satisfying different options should tie and report no selection.
+	 */
+	public function test_detail_relaxation_tie_reports_no_selection(): void {
+		$product = $this->create_size_intensity_product( array( array( 'small', 'bold' ), array( 'large', 'mild' ) ) );
+
+		$mapped = ( new UcpProductMapper( 'USD' ) )->map_detail_product(
+			$product,
+			array( $this->option( 'size', 'large' ), $this->option( 'intensity', 'bold' ) )
+		);
+
+		$this->assertSame( array(), $mapped['selected'] );
+		$this->assertCount( 2, $mapped['variants'] );
+	}
+
+	/**
+	 * UCP: "the server drops options from the end of this list first".
+	 *
+	 * @testdox With preferences, the option named last should be dropped first.
+	 */
+	public function test_detail_relaxation_follows_preferences(): void {
+		$product = $this->create_size_intensity_product( array( array( 'small', 'bold' ), array( 'large', 'mild' ) ) );
+		$mapper  = new UcpProductMapper( 'USD' );
+		$size    = $this->option( 'size', 'large' );
+		$bold    = $this->option( 'intensity', 'bold' );
+
+		$mapped = $mapper->map_detail_product( $product, array( $size, $bold ), array( 'Size', 'Intensity' ) );
+		$this->assertSame( array( $size ), $mapped['selected'] );
+		$this->assertSame( array( 'large / mild' ), $this->titles( $mapped ) );
+
+		$mapped = $mapper->map_detail_product( $product, array( $size, $bold ), array( 'Intensity', 'Size' ) );
+		$this->assertSame( array( $bold ), $mapped['selected'] );
+		$this->assertSame( array( 'small / bold' ), $this->titles( $mapped ) );
+	}
+
+	/**
+	 * @testdox With preferences, an option they do not name should be dropped before any they do.
+	 */
+	public function test_detail_relaxation_drops_unlisted_options_first(): void {
+		$product = $this->create_size_intensity_product( array( array( 'small', 'bold' ), array( 'large', 'mild' ) ) );
+		$size    = $this->option( 'size', 'large' );
+		$bold    = $this->option( 'intensity', 'bold' );
+
+		$mapped = ( new UcpProductMapper( 'USD' ) )->map_detail_product( $product, array( $size, $bold ), array( 'Intensity' ) );
+
+		$this->assertSame( array( $bold ), $mapped['selected'] );
+		$this->assertSame( array( 'small / bold' ), $this->titles( $mapped ) );
+	}
+
+	/**
+	 * @testdox A selection nothing satisfies should report no selection and every variant, with or without preferences.
+	 */
+	public function test_detail_relaxation_to_nothing_returns_every_variant(): void {
+		$product  = $this->create_size_intensity_product( array( array( 'small', 'mild' ), array( 'large', 'mild' ) ) );
+		$mapper   = new UcpProductMapper( 'USD' );
+		$selected = array( $this->option( 'size', 'medium' ), $this->option( 'intensity', 'bold' ) );
+
+		foreach ( array( array(), array( 'Size', 'Intensity' ) ) as $preferences ) {
+			$mapped = $mapper->map_detail_product( $product, $selected, $preferences );
+
+			$this->assertSame( array(), $mapped['selected'] );
+			$this->assertCount( 2, $mapped['variants'] );
+		}
+	}
+
+	/**
 	 * Agents compare titles, SKUs and option labels literally, so the storefront
 	 * HTML formatter must not reach them and both option lists must agree.
 	 *
