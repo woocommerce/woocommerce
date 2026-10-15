@@ -43,6 +43,10 @@ const entries = {
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/blocks/product-elements-blocks/frontend.ts',
+	// Sale badge frontend module. Built separately so collection badges can
+	// skip loading variation-only label logic.
+	'woocommerce/product-sale-badge':
+		'./assets/js/blocks/product-elements-blocks/sale-badge/frontend.ts',
 	// Add to cart with options quantity selector frontend module used by the
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':

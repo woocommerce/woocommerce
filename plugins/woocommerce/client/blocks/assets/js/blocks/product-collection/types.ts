@@ -42,8 +42,6 @@ export interface ProductCollectionAttributes {
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
 	filterable: boolean;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {

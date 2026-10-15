@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\ListTable;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 
 /**
  * Notification create page for Customer Stock Notifications.
@@ -128,6 +129,9 @@ class NotificationEditPage {
 					break;
 				}
 
+				// Record the resend before dispatching the email so retention cleanup can't delete the row mid-send.
+				$notification->update_meta_data( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META, (string) time() );
+				$notification->save();
 				$this->email_manager->send_verify_email( $notification );
 				// translators: %s user email.
 				$notice_message = sprintf( __( 'Verification email sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
