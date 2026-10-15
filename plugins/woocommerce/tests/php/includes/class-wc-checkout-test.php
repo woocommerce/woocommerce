@@ -46,6 +46,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function process_customer( $data ) {
 				parent::process_customer( $data );
 			}
+
+			public function update_session( $data ) {
+				return parent::update_session( $data );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -729,6 +733,90 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$errors->get_error_message( 'shipping' )
 		);
 		remove_all_filters( 'woocommerce_countries_allowed_countries' );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a shippable order when hidden shipping costs leave the cart without a shipping package.
+	 */
+	public function test_validate_checkout_refuses_order_without_shipping_package_when_costs_need_an_address(): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', "O'Fallon" );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The order review should show a shipping rate once the cart calculator address is set.' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			delete_option( 'woocommerce_shipping_cost_requires_address' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Placing the order blanks the shipping address, so shipping is no longer calculated.' );
+		$this->assertSame(
+			'Please enter an address to continue.',
+			$errors->get_error_message( 'shipping' ),
+			'Checkout must not accept a shippable order that has no shipping package.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
+	 */
+	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', 'New York' );
+
+		try {
+			WC()->cart->calculate_totals();
+
+			$data   = array(
+				'ship_to_different_address' => false,
+				'billing_country'           => 'US',
+				'shipping_country'          => 'US',
+				'payment_method'            => 'cod',
+			);
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+			delete_option( 'woocommerce_shipping_cost_requires_address' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'The filter should stop shipping from being calculated.' );
+		$this->assertSame( '', $errors->get_error_message( 'shipping' ), 'Stores that turn off shipping calculation on purpose must still be able to take orders.' );
 	}
 
 	/**

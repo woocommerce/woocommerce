@@ -4117,3 +4117,15 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 
 	return false;
 }
+
+/**
+ * Delete the option that used to hold the back-in-stock restock admin notice.
+ *
+ * The notice is now stored per user in a transient. A notice pending at upgrade time would otherwise leave
+ * an autoloaded row behind that nothing reads or deletes any more.
+ *
+ * @since 11.3.0
+ */
+function wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+	delete_option( 'wc_customer_stock_notifications_product_sync_notice' );
+}
