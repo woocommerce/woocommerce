@@ -175,7 +175,7 @@ class SettingsController {
 
 				array(
 					'title'   => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
-					'desc'    => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce' ),
+					'desc'    => __( 'Controls how long unverified notification sign-ups are stored in the database. Enter zero, or leave this field empty, to store unverified sign-up requests indefinitely.', 'woocommerce' ),
 					'id'      => 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
 					'default' => Config::get_unverified_deletion_days_threshold(),
 					'type'    => 'number',

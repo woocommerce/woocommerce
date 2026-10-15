@@ -369,6 +369,7 @@ class WC_Install {
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
 			'wc_update_1130_split_tax_lookup_taxable_amount',
+			'wc_update_1130_delete_stock_notification_sync_notice_option',
 		),
 	);
 
