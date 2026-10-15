@@ -3,12 +3,36 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for WC_Webhook class.
  */
 class WC_Webhook_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Whether HPOS was in use before a test changed the order storage, or null if it did not.
+	 *
+	 * @var bool|null
+	 */
+	private $prev_hpos_enabled = null;
+
+	/**
+	 * Restore the order storage a test switched with use_order_storage().
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->prev_hpos_enabled ) {
+				OrderHelper::toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
+				$this->prev_hpos_enabled = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
 
 	/**
 	 * @testdox Check that post-action validation uses the affected post ID.
@@ -403,6 +427,70 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		wp_delete_post( $coupon_id, true );
 
 		$this->assertSame( array( $coupon_id ), $delivered_ids, 'The variation-only check should not apply to coupon webhooks' );
+	}
+
+	/**
+	 * @testdox Order updated webhooks are not delivered while the order is a checkout draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_skips_checkout_draft_orders( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$created_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+		$this->record_deliveries( $this->create_active_webhook( 'order.created' ), $created_ids );
+
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+
+		$this->assertSame( array(), $updated_ids, 'Saving a checkout draft should not deliver order.updated' );
+		$this->assertSame( array( $order->get_id() ), $created_ids, 'Leaving checkout draft should deliver order.created' );
+	}
+
+	/**
+	 * @testdox Order updated webhooks skipped for a checkout draft are still delivered once the order leaves draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_delivers_after_checkout_draft( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+
+		$order->set_billing_email( 'draft@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+
+		$this->assertSame( array( $order->get_id() ), $updated_ids, 'The first save after leaving draft should deliver order.updated once' );
+	}
+
+	/**
+	 * Store orders in the HPOS tables or in posts for the current test.
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	private function use_order_storage( bool $hpos_enabled ): void {
+		if ( null === $this->prev_hpos_enabled ) {
+			$this->prev_hpos_enabled = OrderUtil::custom_orders_table_usage_is_enabled();
+		}
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
 	}
 
 	/**
