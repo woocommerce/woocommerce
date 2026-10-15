@@ -15,11 +15,9 @@ const expect = baseExpect.extend( {
 	anyOf( received, expectedTypes ) {
 		const assertionName = 'anyOf';
 		let pass: boolean;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let matcherResult: any;
 
 		try {
-			// eslint-disable-next-line playwright/no-standalone-expect -- Custom matcher definition, not a standalone assertion.
 			baseExpect( expectedTypes ).toContain( typeof received );
 			pass = true;
 		} catch ( e ) {
@@ -43,7 +41,7 @@ const expect = baseExpect.extend( {
 					( matcherResult
 						? `Received: ${ this.utils.printReceived(
 								matcherResult.actual
-						  ) }`
+							) }`
 						: '' )
 			: () =>
 					this.utils.matcherHint(
@@ -60,7 +58,7 @@ const expect = baseExpect.extend( {
 					( matcherResult
 						? `Received: ${ this.utils.printReceived(
 								matcherResult.actual
-						  ) }`
+							) }`
 						: '' );
 
 		return {
@@ -79,6 +77,7 @@ const schemas = {
 		{ field: 'home_url', type: any( String ) },
 		{ field: 'site_url', type: any( String ) },
 		{ field: 'version', type: any( String ) },
+		{ field: 'action_scheduler', type: anything() },
 		{ field: 'log_directory', type: any( String ) },
 		{ field: 'log_directory_writable', type: any( Boolean ) },
 		{ field: 'wp_version', type: any( String ) },
@@ -113,6 +112,14 @@ const schemas = {
 			field: 'remote_get_response',
 			type: anyOf( [ 'boolean', 'string', 'number' ] ),
 		},
+	],
+	environment_action_scheduler: [
+		{ field: 'version', type: any( String ) },
+		{ field: 'registered_version', type: any( String ) },
+		{ field: 'source_type', type: any( String ) },
+		{ field: 'source_name', type: any( String ) },
+		{ field: 'source_path', type: any( String ) },
+		{ field: 'is_risky', type: any( Boolean ) },
 	],
 	database: [
 		{ field: 'wc_database_version', type: any( String ) },
@@ -258,7 +265,6 @@ const getExpectedWooCommerceTables = ( dbPrefix ) => {
 /* eslint-disable playwright/no-nested-step */
 test.describe( 'System Status API tests', () => {
 	test( 'can view all system status items', async ( { request } ) => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let responseJSON: any,
 			databasePrefix,
 			databaseSize,
@@ -302,6 +308,20 @@ test.describe( 'System Status API tests', () => {
 						external_object_cache === null,
 					`Expect "environment.external_object_cache" to be either null or a boolean.`
 				).toBeTruthy();
+			} );
+
+			await test.step( 'Verify "environment.action_scheduler" fields', () => {
+				const { action_scheduler } = environment;
+
+				for ( const {
+					field,
+					type,
+				} of schemas.environment_action_scheduler ) {
+					expect(
+						action_scheduler[ field ],
+						`Verify type of "environment.action_scheduler.${ field }"`
+					).toEqual( type );
+				}
 			} );
 		} );
 
@@ -429,6 +449,7 @@ test.describe( 'System Status API tests', () => {
 
 			for ( const dropin of dropins ) {
 				const { name, plugin } = dropin;
+
 				await test.step( `Verify dropin "${ name }"`, async () => {
 					expect( name, `Verify type of "name"` ).toEqual(
 						any( String )

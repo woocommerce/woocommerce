@@ -7939,12 +7939,6 @@ parameters:
 			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
-			message: '#^Variable \$path might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
 			message: '#^Variable \$tools might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
