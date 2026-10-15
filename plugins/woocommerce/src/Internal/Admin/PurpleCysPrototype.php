@@ -283,6 +283,39 @@ class PurpleCysPrototype {
 		if ( 'real' !== $this->get_settings()['state'] ) {
 			$this->save_setting( 'state', 'default' );
 		}
+
+		$this->deactivate_wizard_extensions();
+	}
+
+	/**
+	 * Deactivate the extensions the setup wizard recommends, so its extensions step shows again.
+	 * When they're all active, the wizard skips that step.
+	 */
+	private function deactivate_wizard_extensions(): void {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$slugs = array();
+		foreach ( \Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init::get_extensions( array( 'obw/core-profiler' ) ) as $bundle ) {
+			foreach ( $bundle['plugins'] ?? array() as $extension ) {
+				$slugs[] = explode( ':', (string) ( $extension->key ?? '' ) )[0];
+			}
+		}
+
+		$to_deactivate = array();
+		foreach ( array_keys( get_plugins() ) as $file ) {
+			$slug = dirname( $file );
+			if ( 'woocommerce' !== $slug && in_array( $slug, $slugs, true ) && is_plugin_active( $file ) ) {
+				$to_deactivate[] = $file;
+			}
+		}
+
+		if ( $to_deactivate ) {
+			deactivate_plugins( $to_deactivate, true );
+		}
 	}
 
 	/**

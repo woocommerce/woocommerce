@@ -41,10 +41,10 @@ const ThemeOption = ( {
 		</div>
 		<div className="woocommerce-profiler-purple-theme__body">
 			<div className="woocommerce-profiler-purple-theme__title-row">
+				{ badge && <Badge intent="informational">{ badge }</Badge> }
 				<h2 className="woocommerce-profiler-purple-theme__title">
 					{ title }
 				</h2>
-				{ badge && <Badge intent="informational">{ badge }</Badge> }
 			</div>
 			<p className="woocommerce-profiler-purple-theme__description">
 				{ description }
