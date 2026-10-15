@@ -244,7 +244,8 @@ class NotificationsProcessor {
 			// Always save the notification to reflect last attempt time.
 			$notification->save();
 
-			if ( $is_sent ) {
+			$notification_product = $notification->get_product();
+			if ( $is_sent && $notification_product instanceof \WC_Product ) {
 				/**
 				 * Action: woocommerce_customer_stock_notification_sent
 				 *
@@ -255,7 +256,7 @@ class NotificationsProcessor {
 				 * @param Notification $notification The notification that was sent.
 				 * @param WC_Product   $product      The product the notification is about.
 				 */
-				do_action( 'woocommerce_customer_stock_notification_sent', $notification, $notification->get_product() );
+				do_action( 'woocommerce_customer_stock_notification_sent', $notification, $notification_product );
 			}
 		}
 
