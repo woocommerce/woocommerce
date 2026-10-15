@@ -12,6 +12,9 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
+use RuntimeException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
@@ -164,5 +167,120 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 			'update' => array( 'update_meta' ),
 			'delete' => array( 'delete_meta' ),
 		);
+	}
+
+	/**
+	 * @testdox Each meta write lands with the live lock.
+	 */
+	public function test_meta_writes_with_the_lock_land(): void {
+		$lock = $this->lock();
+
+		$this->assertIsInt( $this->sut->add_meta( $this->id, 'note', 'one', false, $lock ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'two', null, $lock ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'other', 'added', null, $lock ) );
+		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'note' ) );
+		$this->assertTrue( $this->sut->delete_meta( $this->id, 'note', null, $lock ) );
+		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
+	 * @testdox Unlocked meta writes are refused while another lock lives and land after release.
+	 */
+	public function test_unlocked_meta_writes_are_refused_while_locked(): void {
+		$this->sut->add_meta( $this->id, 'note', 'one' );
+		$lock = $this->lock();
+
+		$writes = array(
+			'add'            => function (): void {
+				$this->sut->add_meta( $this->id, 'note', 'two' );
+			},
+			'update'         => function (): void {
+				$this->sut->update_meta( $this->id, 'note', 'two' );
+			},
+			'add via update' => function (): void {
+				$this->sut->update_meta( $this->id, 'fresh', 'two' );
+			},
+			'delete'         => function (): void {
+				$this->sut->delete_meta( $this->id, 'note' );
+			},
+		);
+
+		foreach ( $writes as $name => $write ) {
+			try {
+				$write();
+				$this->fail( "Expected the unlocked {$name} to be refused." );
+			} catch ( ContractLockedException $e ) {
+				$this->assertSame( 'hold', $e->get_operation() );
+			}
+		}
+		$this->assertSame( array( 'note' => array( 'one' ) ), $this->sut->get_meta( $this->id ), 'Nothing was written.' );
+
+		$lock->release();
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'two' ) );
+		$this->assertIsInt( $this->sut->add_meta( $this->id, 'note', 'three' ) );
+		$this->assertTrue( $this->sut->delete_meta( $this->id, 'note', 'two' ) );
+		$this->assertSame( array( 'three' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
+	 * @testdox A meta add for an unknown contract throws and inserts nothing.
+	 */
+	public function test_a_meta_add_for_an_unknown_contract_throws(): void {
+		foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
+			try {
+				$this->sut->{$method}( 999999, 'note', 'orphan' );
+				$this->fail( "Expected {$method}() to refuse an unknown contract." );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertSame( array(), $this->sut->get_meta( 999999 ) );
+			}
+		}
+		$this->assertFalse( $this->sut->delete_meta( 999999, 'note' ) );
+	}
+
+	/**
+	 * @testdox A meta write with a lock for another contract is refused.
+	 */
+	public function test_a_meta_write_with_another_contracts_lock_is_refused(): void {
+		$other = $this->sut->insert( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
+		$lock  = $this->sut->acquire_lock( $other, 'hold' );
+		$this->assertInstanceOf( ContractLock::class, $lock );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->sut->add_meta( $this->id, 'note', 'one', false, $lock );
+	}
+
+	/**
+	 * @testdox A failed meta write throws.
+	 */
+	public function test_a_failed_meta_write_throws(): void {
+		global $wpdb;
+
+		$this->sut->add_meta( $this->id, 'note', 'one' );
+
+		$break = static function ( string $query ): string {
+			return 1 === preg_match( '/^\s*(UPDATE|DELETE)\s/i', $query ) && false !== strpos( $query, 'contract_meta' ) ? 'SELECT * FROM table_that_does_not_exist_for_tests' : $query;
+		};
+		add_filter( 'query', $break );
+		$suppress = $wpdb->suppress_errors( true );
+		try {
+			foreach ( array( 'update_meta', 'delete_meta' ) as $method ) {
+				try {
+					$this->sut->{$method}( $this->id, 'note', 'two' );
+					$this->fail( "Expected {$method}() to throw." );
+				} catch ( RuntimeException $e ) {
+					$this->assertStringContainsString( 'contract meta', $e->getMessage() );
+				}
+			}
+		} finally {
+			$wpdb->suppress_errors( $suppress );
+			remove_filter( 'query', $break );
+		}
+	}
+
+	private function lock(): ContractLock {
+		$lock = $this->sut->acquire_lock( $this->id, 'hold' );
+		$this->assertInstanceOf( ContractLock::class, $lock );
+
+		return $lock;
 	}
 }

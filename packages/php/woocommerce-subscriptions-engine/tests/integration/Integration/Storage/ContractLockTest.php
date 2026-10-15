@@ -1,0 +1,360 @@
+<?php
+/**
+ * Integration tests for the per-contract lock primitives in ContractRepository.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
+
+use EngineIntegrationTestCase;
+use InvalidArgumentException;
+use LogicException;
+use ReflectionProperty;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+
+/**
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock
+ */
+class ContractLockTest extends EngineIntegrationTestCase {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var ContractRepository
+	 */
+	private $sut;
+
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = new ContractRepository();
+	}
+
+	private function insert_contract( string $next_payment_gmt = '2026-06-15 00:00:00' ): int {
+		return $this->sut->insert(
+			Contract::create(
+				array(
+					'extension_slug'   => 'engine-tests',
+					'status'           => ContractStatus::ACTIVE,
+					'next_payment_gmt' => $next_payment_gmt,
+				)
+			)
+		);
+	}
+
+	/**
+	 * The raw lock columns of a contract row.
+	 *
+	 * @param int $id Contract id.
+	 * @return array<string, mixed>
+	 */
+	private function lock_columns( int $id ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT lock_token, locked_until, lock_operation FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+		$this->assertIsArray( $row );
+
+		return $row;
+	}
+
+	/**
+	 * End a lock's trust window without waiting (the trust clock is monotonic real time).
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	private function age_trust( ContractLock $lock ): void {
+		$deadline = new ReflectionProperty( ContractLock::class, 'trust_deadline_ns' );
+		$deadline->setAccessible( true );
+		$deadline->setValue( $lock, 0 );
+	}
+
+	private function acquire( int $id, string $operation = 'hold' ): ContractLock {
+		$lock = $this->sut->acquire_lock( $id, $operation );
+		$this->assertInstanceOf( ContractLock::class, $lock );
+
+		return $lock;
+	}
+
+	/**
+	 * @testdox A lock is acquired once; a second acquire returns null while it lives.
+	 */
+	public function test_acquire_wins_once(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+
+		$lock = $this->acquire( $id );
+
+		$this->assertSame( $id, $lock->get_contract_id() );
+		$this->assertSame( 'hold', $lock->get_operation() );
+		$this->assertNull( $this->sut->acquire_lock( $id, 'cancel' ) );
+		$this->assertSame(
+			array(
+				'exists'       => true,
+				'live'         => true,
+				'operation'    => 'hold',
+				'locked_until' => '2035-01-01 00:10:00',
+			),
+			$this->sut->lock_holder( $id )
+		);
+	}
+
+	/**
+	 * @testdox An expired lock is taken over, and the old holder's row writes are then refused.
+	 */
+	public function test_an_expired_lock_is_taken_over(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->acquire( $id );
+
+		$this->pin_db_clock( '2035-01-01 00:09:59' );
+		$this->assertNull( $this->sut->acquire_lock( $id, 'cancel' ), 'Still live one second before expiry.' );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$new = $this->acquire( $id, 'cancel' );
+		$this->assertSame( 'cancel', $this->sut->lock_holder( $id )['operation'] );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+
+		try {
+			$this->sut->update_fields( $contract, array( 'status' ), $old );
+			$this->fail( 'Expected the taken-over lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $new ) );
+	}
+
+	/**
+	 * @testdox An acquire bound to a seen due moment fails once the due moment moved.
+	 */
+	public function test_acquire_with_a_seen_due_moment(): void {
+		$id = $this->insert_contract( '2026-06-20 00:00:00' );
+
+		$this->assertNull( $this->sut->acquire_lock( $id, 'due', '2026-06-15 00:00:00' ) );
+		$this->assertFalse( $this->sut->lock_holder( $id )['live'] );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'due', '2026-06-20 00:00:00' ) );
+	}
+
+	/**
+	 * @testdox An unknown contract cannot be locked and reads as missing.
+	 */
+	public function test_unknown_contract(): void {
+		$this->assertNull( $this->sut->acquire_lock( 999999, 'hold' ) );
+		$this->assertFalse( $this->sut->lock_holder( 999999 )['exists'] );
+	}
+
+	/**
+	 * @testdox Operation labels must be 1-64 characters.
+	 */
+	public function test_operation_label_is_validated(): void {
+		$id = $this->insert_contract();
+
+		foreach ( array( '', str_repeat( 'o', 65 ) ) as $operation ) {
+			try {
+				$this->sut->acquire_lock( $id, $operation );
+				$this->fail( 'Expected an invalid label to be refused.' );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertFalse( $this->sut->lock_holder( $id )['live'] );
+			}
+		}
+
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, str_repeat( 'o', 64 ) ) );
+	}
+
+	/**
+	 * @testdox Release clears the token and operation and keeps the release moment; it is idempotent.
+	 */
+	public function test_release_records_the_release_moment(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+
+		$this->pin_db_clock( '2035-01-01 00:02:00' );
+		$lock->release();
+		$lock->release();
+
+		$this->assertSame(
+			array(
+				'lock_token'     => null,
+				'locked_until'   => '2035-01-01 00:02:00',
+				'lock_operation' => null,
+			),
+			$this->lock_columns( $id )
+		);
+		$this->assertTrue( $lock->is_released() );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'cancel' ), 'A released contract can be locked again at once.' );
+	}
+
+	/**
+	 * @testdox Releasing a taken-over lock does not clear the new holder.
+	 */
+	public function test_release_is_token_guarded(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->acquire( $id );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->acquire( $id, 'cancel' );
+		$old->release();
+
+		$holder = $this->sut->lock_holder( $id );
+		$this->assertTrue( $holder['live'] );
+		$this->assertSame( 'cancel', $holder['operation'] );
+	}
+
+	/**
+	 * @testdox A lock extends once from the database's now; a second extend is a caller error.
+	 */
+	public function test_extend_once(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+
+		$this->pin_db_clock( '2035-01-01 00:05:00' );
+		$lock->extend();
+		$this->assertSame( '2035-01-01 00:15:00', $this->sut->lock_holder( $id )['locked_until'] );
+		$this->assertTrue( $lock->has_extended() );
+
+		$this->expectException( LogicException::class );
+		$lock->extend();
+	}
+
+	/**
+	 * @testdox Extending a lock acquired in the same second still succeeds.
+	 */
+	public function test_extend_in_the_acquire_second(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+
+		$lock->extend();
+
+		$this->assertTrue( $lock->has_extended() );
+		$this->assertTrue( $this->sut->lock_holder( $id )['live'] );
+	}
+
+	/**
+	 * @testdox Extending a lost lock throws ContractLockedException.
+	 */
+	public function test_extend_a_lost_lock(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+
+		$this->expectException( ContractLockedException::class );
+		$lock->extend();
+	}
+
+	/**
+	 * @testdox The child fence trusts a fresh lock without a query, extends once past the window, then verifies.
+	 */
+	public function test_fence_children_trust_extend_verify(): void {
+		global $wpdb;
+
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+
+		$queries = $wpdb->num_queries;
+		$this->sut->fence_children( $lock );
+		$this->assertSame( $queries, $wpdb->num_queries, 'A trusted lock costs no query.' );
+
+		$this->pin_db_clock( '2035-01-01 00:09:30' );
+		$this->age_trust( $lock );
+		$this->sut->fence_children( $lock );
+		$this->assertTrue( $lock->has_extended(), 'Past the window the fence extends once.' );
+		$this->assertSame( '2035-01-01 00:19:30', $this->sut->lock_holder( $id )['locked_until'] );
+		$this->assertTrue( $lock->is_trusted() );
+
+		$this->pin_db_clock( '2035-01-01 00:15:00' );
+		$this->age_trust( $lock );
+		$this->sut->fence_children( $lock );
+		$this->assertTrue( $lock->is_trusted(), 'With 270 s left the verify trusts it again.' );
+
+		$this->pin_db_clock( '2035-01-01 00:18:31' );
+		$this->age_trust( $lock );
+		$this->expectException( ContractLockedException::class );
+		$this->sut->fence_children( $lock );
+	}
+
+	/**
+	 * @testdox The child fence refuses an extended lock whose stored lock expired.
+	 */
+	public function test_fence_children_refuses_an_expired_lock(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+		$lock->extend();
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->age_trust( $lock );
+
+		$this->expectException( ContractLockedException::class );
+		$this->sut->fence_children( $lock );
+	}
+
+	/**
+	 * @testdox The child fence refuses a released lock.
+	 */
+	public function test_fence_children_refuses_a_released_lock(): void {
+		$lock = $this->acquire( $this->insert_contract() );
+		$lock->release();
+
+		$this->expectException( ContractLockedException::class );
+		$this->sut->fence_children( $lock );
+	}
+
+	/**
+	 * @testdox Reads expose the lock state only while the lock lives, and never the token.
+	 */
+	public function test_reads_expose_lock_state_not_token(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+
+		$unlocked = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $unlocked );
+		$this->assertNull( $unlocked->get_lock_state() );
+
+		$this->acquire( $id );
+		$token = $this->lock_columns( $id )['lock_token'];
+		$this->assertIsString( $token );
+
+		$reads = array(
+			$this->sut->find( $id ),
+			$this->sut->find_summary( $id ),
+			$this->sut->query( array( 'search' => (string) $id ) )[0] ?? null,
+		);
+		foreach ( $reads as $contract ) {
+			$this->assertInstanceOf( Contract::class, $contract );
+			$this->assertSame(
+				array(
+					'locked_until' => '2035-01-01 00:10:00',
+					'operation'    => 'hold',
+				),
+				$contract->get_lock_state()
+			);
+			$this->assertStringNotContainsString( $token, print_r( $contract, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			$this->assertStringNotContainsString( $token, (string) wp_json_encode( $contract->to_storage() ) );
+		}
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$expired = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $expired );
+		$this->assertNull( $expired->get_lock_state(), 'An expired lock reads as unlocked.' );
+	}
+}

@@ -10,7 +10,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -294,7 +296,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Meta written through the meta methods survives whole-contract writes.
+	 * @testdox Meta written through the meta methods survives contract writes.
 	 */
 	public function test_meta_survives_a_whole_entity_update(): void {
 		$id = $this->sut->insert( $this->make_contract() );
@@ -303,7 +305,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_status( ContractStatus::ON_HOLD );
-		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'items', 'addresses' ) ) );
 		$this->assertSame( 'pdp', $this->sut->get_meta( $id, 'source_channel', true ) );
 
 		$contract->set_status( ContractStatus::ACTIVE );
@@ -761,9 +763,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update persists the contract-row cache without touching the cycle rows.
+	 * @testdox update_fields persists the named contract columns.
 	 */
-	public function test_update_persists_the_contract_cache(): void {
+	public function test_update_fields_persists_the_contract_row(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
 		$contract = $this->sut->find( $id );
@@ -771,7 +773,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract->set_status( ContractStatus::ON_HOLD );
 		$contract->set_next_payment_gmt( '2026-08-15 00:00:00' );
 
-		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) ) );
 
 		$reloaded = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
@@ -780,59 +782,43 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update leaves unchanged child rows in place (no churn).
+	 * @testdox A row-only update_fields leaves the item rows in place.
 	 */
-	public function test_update_does_not_churn_unchanged_children(): void {
-		global $wpdb;
-
+	public function test_a_row_only_update_leaves_children_in_place(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		$items_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$item_id_before = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$items_table} WHERE contract_id = %d", $id ) );
+		$item_ids_before = $this->item_ids( $id );
 
-		// A cache-only update (status) must not delete-and-reinsert the items row.
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_status( ContractStatus::ON_HOLD );
-		$this->sut->update( $contract );
+		$this->sut->update_fields( $contract, array( 'status' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$item_id_after = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$items_table} WHERE contract_id = %d", $id ) );
-
-		$this->assertSame( $item_id_before, $item_id_after, 'An unchanged item set must keep its row id (not be rewritten).' );
+		$this->assertSame( $item_ids_before, $this->item_ids( $id ), 'A row-only write must not rewrite the items.' );
 	}
 
 	/**
-	 * @testdox update rewrites child rows when they change.
+	 * @testdox update_fields replaces the items when named.
 	 */
-	public function test_update_rewrites_changed_children(): void {
+	public function test_update_fields_replaces_named_children(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		$mutated = Contract::create(
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_items(
 			array(
-				'extension_slug'  => 'engine-tests',
-				'status'          => ContractStatus::ACTIVE,
-				'customer_id'     => 42,
-				'currency'        => 'USD',
-				'selling_plan_id' => 7,
-				'origin_order_id' => 1001,
-				'start_gmt'       => '2026-06-15 00:00:00',
-				'items'           => array(
-					array(
-						'item_name'  => 'Tea tin',
-						'item_type'  => 'line_item',
-						'product_id' => 300,
-						'quantity'   => '2',
-						'subtotal'   => '24.00',
-						'total'      => '24.00',
-					),
+				array(
+					'item_name'  => 'Tea tin',
+					'item_type'  => 'line_item',
+					'product_id' => 300,
+					'quantity'   => '2',
+					'subtotal'   => '24.00',
+					'total'      => '24.00',
 				),
 			)
 		);
-		$mutated->set_id( $id );
 
-		$this->assertTrue( $this->sut->update( $mutated ) );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'items' ) ) );
 
 		$reloaded = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $reloaded );
@@ -842,37 +828,45 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update throws when the contract has no id.
+	 * @testdox update_fields throws when the contract has no id.
 	 */
-	public function test_update_throws_without_id(): void {
+	public function test_update_fields_throws_without_id(): void {
 		$this->expectException( \RuntimeException::class );
-		$this->sut->update( $this->make_contract() );
+		$this->sut->update_fields( $this->make_contract(), array( 'status' ) );
 	}
 
 	/**
-	 * @testdox update rejects a deleted contract and writes no orphan child rows.
+	 * @testdox update_fields refuses the create-only creation key and extension slug.
 	 */
-	public function test_update_rejects_deleted_contract_and_writes_no_orphans(): void {
+	public function test_update_fields_refuses_create_only_fields(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		foreach ( array( 'creation_key', 'extension_slug' ) as $field ) {
+			try {
+				$this->sut->update_fields( $contract, array( $field ) );
+				$this->fail( "Expected {$field} to be refused." );
+			} catch ( \InvalidArgumentException $e ) {
+				$this->assertStringContainsString( $field, $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * The item row ids of a contract, oldest first.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return array<int, int>
+	 */
+	private function item_ids( int $contract_id ): array {
 		global $wpdb;
 
-		$id = $this->sut->insert( $this->make_contract() );
-		$this->assertTrue( $this->sut->delete( $id ) );
-
-		$stale = $this->make_contract();
-		$stale->set_id( $id );
-
-		try {
-			$this->sut->update( $stale );
-			$this->fail( 'Expected RuntimeException when updating a contract whose row no longer exists.' );
-		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'no longer exists', $e->getMessage() );
-		}
-
-		$items_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$items_table} WHERE contract_id = %d", $id ) );
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ) );
 
-		$this->assertSame( '0', $remaining );
+		return array_map( 'intval', $ids );
 	}
 
 	/**
@@ -1051,93 +1045,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A claimed append stamps the cycle claim on the database clock; a transition without a claim releases it.
-	 */
-	public function test_cycle_claimed_until_round_trips(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		// Appended claimed: the INSERT stamps the claim from the database clock.
-		$this->pin_db_clock( '2026-07-15 00:00:00' );
-		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
-		$this->sut->append_cycle( $cycle, 900 );
-
-		$reloaded = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $reloaded );
-		$this->assertSame( '2026-07-15 00:15:00', $reloaded->get_claimed_until_gmt() );
-
-		// Cleared by a transition without a claim (a settled cycle holds no claim).
-		$this->assertTrue( $this->sut->transition_cycle( (int) $reloaded->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array() ) );
-
-		$settled = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $settled );
-		$this->assertNull( $settled->get_claimed_until_gmt() );
-	}
-
-	/**
-	 * @testdox claim_cycle takes an expired claim once; a second caller loses.
+	 * Append a pending cycle 1, returning it (with its id).
 	 *
-	 * The expiry check and the new claim use the database clock, so the claim is seeded
-	 * relative to real time.
+	 * @param int $contract_id Contract id.
 	 */
-	public function test_claim_cycle_takes_an_expired_claim_once(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
-		$cycle    = $this->append_pending_cycle_with_claim( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) );
-		$cycle_id = (int) $cycle->get_id();
-
-		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The first caller takes the expired claim.' );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The second caller finds a live claim.' );
-
-		$reloaded = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $reloaded );
-		$this->assertNotNull( $reloaded->get_claimed_until_gmt() );
-		$this->assertGreaterThan( time() + 800, strtotime( $reloaded->get_claimed_until_gmt() . ' UTC' ), 'The claim runs a TTL into the future.' );
-	}
-
-	/**
-	 * @testdox claim_cycle takes a pending cycle that has no claim.
-	 */
-	public function test_claim_cycle_takes_a_unclaimed_pending_cycle(): void {
-		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_claim( $id, null );
-
-		$this->assertTrue( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ) );
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ) );
-	}
-
-	/**
-	 * @testdox claim_cycle refuses a live claim and a cycle that left the status the caller read.
-	 */
-	public function test_claim_cycle_refuses_a_live_claim_and_a_settled_cycle(): void {
-		$id    = $this->sut->insert( $this->make_contract() );
-		$cycle = $this->append_pending_cycle_with_claim( $id, gmdate( 'Y-m-d H:i:s', time() + 600 ) );
-
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A live claim is held by someone else.' );
-
-		$this->assertTrue( $this->sut->transition_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, CycleStatus::BILLED, array() ) );
-		$this->assertFalse( $this->sut->claim_cycle( (int) $cycle->get_id(), CycleStatus::PENDING, 900 ), 'A cycle no longer in the read status is not claimable.' );
-	}
-
-	/**
-	 * @testdox claim_cycle claims a cycle in whatever status the caller read, not only pending.
-	 */
-	public function test_claim_cycle_keys_on_the_callers_status(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
-		$cycle_id = (int) $this->append_pending_cycle_with_claim( $id, null )->get_id();
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array() ) );
-
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'A stale read loses.' );
-		$this->assertTrue( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'The current status wins.' );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::FAILED, 900 ), 'Only once while the claim is live.' );
-		$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value(), 'Claiming does not change the status.' );
-	}
-
-	/**
-	 * Append a pending cycle 1 carrying a crash-recovery claim, returning it (with its id).
-	 *
-	 * @param int         $contract_id   Contract id.
-	 * @param string|null $claimed_until The claim expiry GMT string to stamp, or null for none.
-	 */
-	private function append_pending_cycle_with_claim( int $contract_id, ?string $claimed_until ): Cycle {
+	private function append_pending_cycle( int $contract_id ): Cycle {
 		$cycle = Cycle::create(
 			array(
 				'contract_id'    => $contract_id,
@@ -1151,56 +1063,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->sut->append_cycle( $cycle );
-		$this->stamp_cycle_claim( (int) $cycle->get_id(), $claimed_until );
 
 		return $cycle;
-	}
-
-	/**
-	 * Seed a cycle's stored claim expiry directly (fixtures need claims in the past).
-	 *
-	 * @param int         $cycle_id      Cycle id.
-	 * @param string|null $claimed_until Claim expiry GMT string, or null for none.
-	 */
-	private function stamp_cycle_claim( int $cycle_id, ?string $claimed_until ): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->update( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ), array( 'claimed_until' => $claimed_until ), array( 'id' => $cycle_id ) );
-	}
-
-	/**
-	 * @testdox A claimed append is one INSERT: the claim is stamped in the same statement, with no read or follow-up write.
-	 */
-	public function test_a_claimed_append_is_one_insert(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$cycles  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$queries = array();
-		$capture = static function ( string $query ) use ( &$queries ): string {
-			$queries[] = $query;
-			return $query;
-		};
-
-		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
-		add_filter( 'query', $capture );
-		try {
-			$this->sut->append_cycle( $cycle, 900 );
-		} finally {
-			remove_filter( 'query', $capture );
-		}
-
-		$writes = array_values(
-			array_filter(
-				$queries,
-				static function ( string $query ) use ( $cycles ): bool {
-					return false !== strpos( $query, $cycles ) || false !== stripos( $query, 'UTC_TIMESTAMP' );
-				}
-			)
-		);
-		$this->assertCount( 1, $writes, 'Only the INSERT touches the cycles table or the database clock.' );
-		$this->assertStringStartsWith( "INSERT INTO `{$cycles}`", $writes[0] );
-		$this->assertStringContainsString( 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL 900 SECOND )', $writes[0] );
 	}
 
 	/**
@@ -1263,7 +1127,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_find_due_skips_an_unlisted_owner_until_it_is_listed(): void {
 		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_ENGINE, CycleStatus::BILLED, null, null, 'other-ext' );
+		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE, Contract::SCHEDULE_SOURCE_ENGINE, CycleStatus::BILLED, null, 'other-ext' );
 
 		$this->assertNotContains( $id, $this->due_ids( $now, 50 ) );
 
@@ -1360,132 +1224,36 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A live dispatch claim hides the contract from find_due until the claim expires on the database clock.
-	 */
-	public function test_a_live_claim_hides_the_contract_until_it_expires(): void {
-		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
-		$id  = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-
-		$this->pin_db_clock( '2026-07-15 00:00:00' );
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
-
-		$this->pin_db_clock( '2026-07-15 00:14:59' );
-		$this->assertSame( array(), $this->due_ids( $now, 50 ), 'A live claim hides the contract.' );
-		$this->assertSame( array(), $this->due_ids( $now->modify( '+1 day' ), 50 ), 'A later scan cutoff does not expire the claim; the database clock does.' );
-
-		$this->pin_db_clock( '2026-07-15 00:15:00' );
-		$this->assertSame( array( $id ), $this->due_ids( $now, 50 ), 'An expired claim no longer hides it.' );
-	}
-
-	/**
-	 * @testdox claim_contract wins once on the database clock; a second claim on the same due moment loses.
-	 */
-	public function test_claim_contract_wins_once(): void {
-		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-
-		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
-		$this->assertFalse( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ), 'An overlapping dispatcher loses.' );
-		$this->assertSame( '2035-01-01 00:15:00', $this->stored_claim( $id ), 'The claim is stamped from the database clock at the write.' );
-
-		$this->pin_db_clock( '2035-01-01 00:15:00' );
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ), 'An expired claim can be taken again.' );
-	}
-
-	/**
-	 * @testdox claim_contract loses when the due moment changed since the scan read it.
-	 */
-	public function test_claim_contract_loses_when_the_due_moment_moved(): void {
-		$id = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
-
-		$this->assertFalse( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
-		$this->assertNull( $this->stored_claim( $id ) );
-	}
-
-	/**
-	 * @testdox Moving or clearing next_payment_gmt releases the claim; re-saving it or other writes keep it.
-	 */
-	public function test_due_moment_writes_release_the_claim(): void {
-		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
-		$contract = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $contract );
-		$contract->set_status( ContractStatus::ON_HOLD );
-		$this->sut->update_fields( $contract, array( 'status' ) );
-		$this->assertNotNull( $this->stored_claim( $id ), 'A write that leaves the due moment alone keeps the claim.' );
-
-		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
-		$this->assertNotNull( $this->stored_claim( $id ), 'Re-saving the same due moment keeps the claim (no queue jump).' );
-
-		$this->sut->update( $contract );
-		$this->assertNotNull( $this->stored_claim( $id ), 'A full update() with the same due moment keeps the claim.' );
-
-		$reformatted = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $reformatted );
-		$reformatted->set_next_payment_gmt( '2026-06-15T00:00:00' );
-		$this->sut->update_fields( $reformatted, array( 'next_payment_gmt' ) );
-		$this->assertNotNull( $this->stored_claim( $id ), 'The same moment in another DATETIME literal form keeps the claim (MySQL compares DATETIME values).' );
-		$stored = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $stored );
-		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
-
-		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-16 00:00:00' ) );
-		$this->assertNull( $this->stored_claim( $id ), 'Moving the due moment releases the claim.' );
-
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-16 00:00:00', 900 ) );
-		Contracts::update( $id, array( 'next_payment_gmt' => null ) );
-		$this->assertNull( $this->stored_claim( $id ), 'Clearing the due moment releases the claim.' );
-
-		Contracts::update( $id, array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) );
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
-		$moved = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $moved );
-		$moved->set_next_payment_gmt( '2026-07-01 00:00:00' );
-		$this->sut->update( $moved );
-		$this->assertNull( $this->stored_claim( $id ), 'A full update() that moves the due moment releases the claim.' );
-		$stored = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $stored );
-		$this->assertSame( '2026-07-01 00:00:00', $stored->get_next_payment_gmt() );
-	}
-
-	/**
-	 * @testdox update_fields and update each write the contract row in exactly one UPDATE statement.
+	 * @testdox update_fields writes the contract row in exactly one UPDATE statement.
 	 */
 	public function test_a_contract_write_is_one_update_statement(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 
-		foreach ( array( 'update_fields', 'update' ) as $write ) {
-			$contract = $this->sut->find( $id );
-			$this->assertInstanceOf( Contract::class, $contract );
-			$on_hold = ContractStatus::ON_HOLD === $contract->get_status();
-			$contract->set_status( $on_hold ? ContractStatus::ACTIVE : ContractStatus::ON_HOLD );
-			$contract->set_next_payment_gmt( $on_hold ? '2026-06-15 00:00:00' : null );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+		$contract->set_next_payment_gmt( null );
 
-			$statements = $this->contract_updates_during(
-				function () use ( $write, $contract ): void {
-					if ( 'update_fields' === $write ) {
-						$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
-					} else {
-						$this->sut->update( $contract );
-					}
-				}
-			);
+		$statements = $this->contract_updates_during(
+			function () use ( $contract ): void {
+				$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
+			}
+		);
 
-			$this->assertCount( 1, $statements, "{$write}() writes status and due moment in one UPDATE." );
-			$stored = $this->sut->find( $id );
-			$this->assertInstanceOf( Contract::class, $stored );
-			$this->assertSame( $contract->get_status(), $stored->get_status() );
-			$this->assertSame( $contract->get_next_payment_gmt(), $stored->get_next_payment_gmt() );
-		}
+		$this->assertCount( 1, $statements, 'update_fields() writes status and due moment in one UPDATE.' );
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( ContractStatus::ON_HOLD, $stored->get_status() );
+		$this->assertNull( $stored->get_next_payment_gmt() );
 	}
 
 	/**
-	 * @testdox When the contract write is lost, neither the status nor the due moment nor the claim changes.
+	 * @testdox When the contract write is lost, neither the status nor the due moment changes, and the lock stays.
 	 */
 	public function test_a_lost_contract_write_changes_neither_status_nor_due_moment(): void {
-		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$this->assertTrue( $this->sut->claim_contract( $id, '2026-06-15 00:00:00', 900 ) );
+		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$lock = $this->sut->acquire_lock( $id, 'test' );
+		$this->assertNotNull( $lock );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -1498,7 +1266,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		add_filter( 'query', $drop );
 		try {
-			$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) );
+			$this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ), $lock );
 			$this->fail( 'Expected the lost write to throw.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertSame( 'Failed to update contract.', $e->getMessage() );
@@ -1510,7 +1278,26 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertNotNull( $this->stored_claim( $id ) );
+		$this->assertTrue( $this->sut->lock_holder( $id )['live'] );
+	}
+
+	/**
+	 * @testdox Writing next_payment_gmt touches no lock column.
+	 */
+	public function test_due_moment_writes_leave_the_lock_alone(): void {
+		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$lock = $this->sut->acquire_lock( $id, 'due' );
+		$this->assertNotNull( $lock );
+		$before = $this->sut->lock_holder( $id );
+
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_next_payment_gmt( '2026-07-15 00:00:00' );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'next_payment_gmt' ), $lock ) );
+		$contract->set_next_payment_gmt( null );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'next_payment_gmt' ), $lock ) );
+
+		$this->assertSame( $before, $this->sut->lock_holder( $id ) );
 	}
 
 	/**
@@ -1551,7 +1338,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An over-long payment method or title is refused by insert, update_fields and update alike, and nothing is stored.
+	 * @testdox An over-long payment method or title is refused by insert and update_fields alike, and nothing is stored.
 	 * @dataProvider provide_over_long_payment_instruments
 	 *
 	 * @param string $method Payment method id.
@@ -1569,30 +1356,24 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			$this->assertNull( $fresh->get_id(), 'Nothing is inserted.' );
 		}
 
-		$id = $this->sut->insert( $this->make_contract() );
-		foreach ( array( 'update_fields', 'update' ) as $write ) {
-			$contract = $this->sut->find( $id );
-			$this->assertInstanceOf( Contract::class, $contract );
-			$contract->set_payment_instrument( $over_long );
-			$contract->set_status( ContractStatus::ON_HOLD );
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_payment_instrument( $over_long );
+		$contract->set_status( ContractStatus::ON_HOLD );
 
-			try {
-				if ( 'update_fields' === $write ) {
-					$this->sut->update_fields( $contract, array( 'status', 'payment_method', 'payment_method_title' ) );
-				} else {
-					$this->sut->update( $contract );
-				}
-				$this->fail( "Expected {$write}() to refuse the over-long value." );
-			} catch ( \RuntimeException $e ) {
-				$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
-			}
-
-			$stored = $this->sut->find( $id );
-			$this->assertInstanceOf( Contract::class, $stored );
-			$this->assertSame( 'woocommerce_payments', $stored->get_payment_instrument()->get_gateway(), "{$write}() wrote nothing." );
-			$this->assertSame( 'Credit card', $stored->get_payment_instrument()->get_title() );
-			$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
+		try {
+			$this->sut->update_fields( $contract, array( 'status', 'payment_method', 'payment_method_title' ) );
+			$this->fail( 'Expected update_fields() to refuse the over-long value.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
 		}
+
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( 'woocommerce_payments', $stored->get_payment_instrument()->get_gateway(), 'update_fields() wrote nothing.' );
+		$this->assertSame( 'Credit card', $stored->get_payment_instrument()->get_title() );
+		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 
 		$fits = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $fits );
@@ -1635,33 +1416,16 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * The stored due-dispatch claim of a contract.
-	 *
-	 * @param int $id Contract id.
-	 */
-	private function stored_claim( int $id ): ?string {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT claimed_until FROM {$table} WHERE id = %d", $id ) );
-
-		return null === $claim ? null : (string) $claim;
-	}
-
-	/**
 	 * @testdox transition_cycle is a compare-and-set: one caller wins, a caller that read the old status loses.
 	 */
 	public function test_transition_cycle_is_an_atomic_compare_and_set(): void {
-		$cycle_id = $this->claimd_pending_cycle_id();
+		$cycle_id = $this->pending_cycle_id();
 
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 4242 ) ) );
 
 		$settled = $this->find_cycle( $cycle_id );
 		$this->assertSame( CycleStatus::BILLED, $settled->get_status()->get_value() );
 		$this->assertSame( 4242, $settled->get_order_id() );
-		$this->assertNull( $settled->get_claimed_until_gmt(), 'Without claim_seconds the claim is cleared.' );
 
 		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'order_id' => 9999 ) ) );
 
@@ -1674,7 +1438,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A same-status transition_cycle that changes nothing still returns true; on a cycle in another status it returns false.
 	 */
 	public function test_a_same_status_transition_that_changes_nothing_returns_true(): void {
-		$cycle_id = $this->claimd_pending_cycle_id();
+		$cycle_id = $this->pending_cycle_id();
 
 		// Start early in a second so both calls stamp the same date_updated_gmt and the
 		// second one matches the row without changing it.
@@ -1692,7 +1456,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox transition_cycle keeps the stored order when order_id is omitted and clears it on null.
 	 */
 	public function test_transition_cycle_order_id_is_written_only_when_present(): void {
-		$cycle_id = $this->claimd_pending_cycle_id();
+		$cycle_id = $this->pending_cycle_id();
 		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) );
 
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) );
@@ -1717,26 +1481,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox transition_cycle sets a claim from claim_seconds, e.g. retrying a failed cycle.
-	 */
-	public function test_transition_cycle_sets_a_claim(): void {
-		$cycle_id = $this->claimd_pending_cycle_id();
-		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array() );
-
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array( 'claim_seconds' => 900 ) ) );
-
-		$retried = $this->find_cycle( $cycle_id );
-		$this->assertSame( CycleStatus::PENDING, $retried->get_status()->get_value() );
-		$this->assertNotNull( $retried->get_claimed_until_gmt() );
-		$this->assertGreaterThan( time() + 800, strtotime( $retried->get_claimed_until_gmt() . ' UTC' ) );
-		$this->assertFalse( $this->sut->claim_cycle( $cycle_id, CycleStatus::PENDING, 900 ), 'The retrier holds the claim.' );
-	}
-
-	/**
 	 * @testdox transition_cycle rejects an unregistered target status and writes nothing.
 	 */
 	public function test_transition_cycle_rejects_an_unregistered_target(): void {
-		$cycle_id = $this->claimd_pending_cycle_id();
+		$cycle_id = $this->pending_cycle_id();
 
 		try {
 			$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, 'never-registered', array( 'order_id' => 4242 ) );
@@ -1751,7 +1499,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_accepts_an_extension_registered_target(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
-		$cycle_id = $this->claimd_pending_cycle_id();
+		$cycle_id = $this->pending_cycle_id();
 
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, 'disputed', array() ) );
 
@@ -1787,12 +1535,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * A pending cycle 1 with an expired claim on a new contract.
+	 * A pending cycle 1 on a new contract.
 	 */
-	private function claimd_pending_cycle_id(): int {
+	private function pending_cycle_id(): int {
 		$id = $this->sut->insert( $this->make_contract() );
 
-		return (int) $this->append_pending_cycle_with_claim( $id, gmdate( 'Y-m-d H:i:s', time() - 60 ) )->get_id();
+		return (int) $this->append_pending_cycle( $id )->get_id();
 	}
 
 	/**
@@ -1832,7 +1580,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'legacy-paused', $contract->get_status() );
 
 		$contract->set_next_payment_gmt( '2026-09-15 00:00:00' );
-		$this->assertTrue( $this->sut->update( $contract ) );
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) ) );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$stored = $wpdb->get_row( $wpdb->prepare( "SELECT status, next_payment_gmt FROM {$table} WHERE id = %d", $id ), ARRAY_A );
@@ -1902,7 +1650,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param string      $status           The contract status (a ContractStatus value).
 	 * @param string      $schedule_source  Who keeps the schedule (the engine, or a gateway/extension slug).
 	 * @param string      $head_status      The head cycle status (a CycleStatus value).
-	 * @param string|null $claimed_until    The head cycle claim expiry, or null for none.
 	 * @param string|null $head_ends_at     The head period end; defaults to `$next_payment_gmt`.
 	 * @param string      $owner            The owning extension slug; defaults to the registered test owner.
 	 */
@@ -1911,7 +1658,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		string $status,
 		string $schedule_source = Contract::SCHEDULE_SOURCE_ENGINE,
 		string $head_status = CycleStatus::BILLED,
-		?string $claimed_until = null,
 		?string $head_ends_at = null,
 		string $owner = self::OWNER
 	): int {
@@ -1945,11 +1691,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 					)
 				)
 			);
-			if ( null !== $claimed_until ) {
-				$head = $this->sut->find_chain_head( $id );
-				$this->assertInstanceOf( Cycle::class, $head );
-				$this->stamp_cycle_claim( (int) $head->get_id(), $claimed_until );
-			}
 		}
 
 		return $id;
@@ -2025,7 +1766,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	/**
 	 * @testdox append_cycle surfaces a UNIQUE collision as DuplicateCycleException.
 	 *
-	 * The create-as-claim race signal must be distinguishable from any other write failure,
+	 * The append race signal must be distinguishable from any other write failure,
 	 * so the money-path can treat the collision as benign without masking real errors.
 	 */
 	public function test_append_cycle_throws_duplicate_cycle_exception_on_collision(): void {
@@ -2129,5 +1870,495 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $id ) );
 			$this->assertSame( '0', $remaining, "Rows must be removed from {$table} when the contract is deleted." );
 		}
+	}
+
+	/**
+	 * Acquire a lock, asserting it was granted.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   Operation label.
+	 */
+	private function lock( int $contract_id, string $operation = 'test' ): ContractLock {
+		$lock = $this->sut->acquire_lock( $contract_id, $operation );
+		$this->assertInstanceOf( ContractLock::class, $lock );
+
+		return $lock;
+	}
+
+	/**
+	 * Run `$run` with the next query matching `$pattern` replaced by invalid SQL.
+	 *
+	 * @param string   $pattern Regex the statement to break must match.
+	 * @param callable $run     Code under test.
+	 */
+	private function with_failing_query( string $pattern, callable $run ): void {
+		$broken = false;
+		$break  = static function ( string $query ) use ( $pattern, &$broken ): string {
+			if ( ! $broken && 1 === preg_match( $pattern, $query ) ) {
+				$broken = true;
+				return 'SELECT * FROM table_that_does_not_exist_for_tests';
+			}
+			return $query;
+		};
+
+		add_filter( 'query', $break );
+		$suppress = $GLOBALS['wpdb']->suppress_errors( true );
+		try {
+			$run();
+		} finally {
+			$GLOBALS['wpdb']->suppress_errors( $suppress );
+			remove_filter( 'query', $break );
+		}
+		$this->assertTrue( $broken, 'The targeted statement ran.' );
+	}
+
+	/**
+	 * A stored contract with its status changed in memory.
+	 *
+	 * @param int    $id     Contract id.
+	 * @param string $status New status.
+	 */
+	private function with_status( int $id, string $status ): Contract {
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( $status );
+
+		return $contract;
+	}
+
+	/**
+	 * The stored status of a contract.
+	 *
+	 * @param int $id Contract id.
+	 */
+	private function stored_status( int $id ): string {
+		$contract = $this->sut->find_summary( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract->get_status();
+	}
+
+	/**
+	 * @testdox A row write with the live lock lands; without a lock it is refused while the lock lives and lands after.
+	 */
+	public function test_contract_row_writes_are_fenced(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->lock( $id, 'hold' );
+
+		$this->assertTrue( $this->sut->update_fields( $this->with_status( $id, ContractStatus::ON_HOLD ), array( 'status' ), $lock ) );
+		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
+
+		try {
+			$this->sut->update_fields( $this->with_status( $id, ContractStatus::CANCELLED ), array( 'status' ) );
+			$this->fail( 'Expected an unlocked write to be refused while the lock lives.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'hold', $e->get_operation() );
+			$this->assertSame( '2035-01-01 00:10:00', $e->get_locked_until() ? $e->get_locked_until()->format( 'Y-m-d H:i:s' ) : null );
+		}
+		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->assertTrue( $this->sut->update_fields( $this->with_status( $id, ContractStatus::CANCELLED ), array( 'status' ) ) );
+		$this->assertSame( ContractStatus::CANCELLED, $this->stored_status( $id ) );
+
+		try {
+			$this->sut->update_fields( $this->with_status( $id, ContractStatus::ACTIVE ), array( 'status' ), $lock );
+			$this->fail( 'Expected the expired lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertNull( $e->get_operation(), 'No live holder.' );
+		}
+		$this->assertSame( ContractStatus::CANCELLED, $this->stored_status( $id ) );
+	}
+
+	/**
+	 * @testdox A lock for another contract is refused before any write.
+	 */
+	public function test_a_lock_for_another_contract_is_refused(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$other = $this->sut->insert( $this->make_contract() );
+		$lock  = $this->lock( $other );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->sut->update_fields( $this->with_status( $id, ContractStatus::ON_HOLD ), array( 'status' ), $lock );
+	}
+
+	/**
+	 * @testdox An identical same-second write with the lock is a no-op that returns true.
+	 */
+	public function test_an_identical_locked_write_is_a_no_op(): void {
+		global $wpdb;
+
+		$id       = $this->sut->insert( $this->make_contract() );
+		$lock     = $this->lock( $id );
+		$contract = $this->with_status( $id, ContractStatus::ACTIVE );
+
+		$zero_rows = false;
+		for ( $i = 0; $i < 3 && ! $zero_rows; $i++ ) {
+			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
+			$zero_rows = 0 === $wpdb->rows_affected;
+		}
+		$this->assertTrue( $zero_rows, 'A write changed no rows.' );
+	}
+
+	/**
+	 * @testdox A write to a deleted contract returns false with and without a lock.
+	 */
+	public function test_a_missing_row_returns_false(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->with_status( $id, ContractStatus::ON_HOLD );
+		$lock     = $this->lock( $id );
+		$this->sut->delete( $id );
+
+		$this->assertFalse( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
+		$this->assertFalse( $this->sut->update_fields( $contract, array( 'status' ) ) );
+	}
+
+	/**
+	 * @testdox An unlocked items replacement runs under an internal lock: refused while another lock lives, released after.
+	 */
+	public function test_an_unlocked_children_write_takes_an_internal_lock(): void {
+		$id    = $this->sut->insert( $this->make_contract() );
+		$items = $this->item_ids( $id );
+		$lock  = $this->lock( $id, 'hold' );
+
+		$contract = $this->with_status( $id, ContractStatus::ON_HOLD );
+		try {
+			$this->sut->update_fields( $contract, array( 'status', 'items' ) );
+			$this->fail( 'Expected the write to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'hold', $e->get_operation() );
+		}
+		$this->assertSame( $items, $this->item_ids( $id ), 'Nothing is written.' );
+		$this->assertSame( ContractStatus::ACTIVE, $this->stored_status( $id ) );
+
+		$lock->release();
+		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'items' ) ) );
+		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
+		$this->assertFalse( $this->sut->lock_holder( $id )['live'], 'The internal lock is released.' );
+	}
+
+	/**
+	 * @testdox Locked cycle appends and transitions land; unlocked ones are refused while another lock lives.
+	 */
+	public function test_cycle_writes_are_fenced(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->lock( $id, 'renewal' );
+
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
+		$this->sut->append_cycle( $cycle, $lock );
+		$cycle_id = (int) $cycle->get_id();
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array(), $lock ) );
+
+		try {
+			$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
+			$this->fail( 'Expected an unlocked append to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'renewal', $e->get_operation() );
+		}
+		$this->assertCount( 1, $this->sut->find_cycle_history( $id ), 'Nothing is appended.' );
+
+		try {
+			$this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array() );
+			$this->fail( 'Expected an unlocked transition to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value() );
+		}
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array() ) );
+		$next = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' );
+		$this->sut->append_cycle( $next );
+		$this->assertNotNull( $next->get_id() );
+	}
+
+	/**
+	 * @testdox An unlocked append to an unknown contract throws and writes no orphan row.
+	 */
+	public function test_an_append_to_an_unknown_contract_throws(): void {
+		global $wpdb;
+
+		try {
+			$this->sut->append_cycle( $this->make_cycle( 999999, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+			$this->fail( 'Expected an append to an unknown contract to throw.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", 999999 ) ) );
+		}
+	}
+
+	/**
+	 * @testdox A lock for one contract cannot append to or transition another contract's cycles.
+	 */
+	public function test_a_lock_cannot_write_another_contracts_cycles(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$other    = $this->sut->insert( $this->make_contract() );
+		$cycle_id = (int) $this->append_pending_cycle( $other )->get_id();
+		$lock     = $this->lock( $id );
+
+		try {
+			$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array(), $lock );
+			$this->fail( 'Expected another contract\'s cycle to be refused.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->assertSame( CycleStatus::PENDING, $this->find_cycle( $cycle_id )->get_status()->get_value() );
+		}
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->sut->append_cycle( $this->make_cycle( $other, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ), $lock );
+	}
+
+	/**
+	 * @testdox A lost compare-and-set under the lock returns false; a missing cycle throws.
+	 */
+	public function test_a_lost_locked_transition_returns_false(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$cycle_id = (int) $this->append_pending_cycle( $id )->get_id();
+		$lock     = $this->lock( $id );
+
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array(), $lock ) );
+		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array(), $lock ) );
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->sut->transition_cycle( 999999, CycleStatus::PENDING, CycleStatus::BILLED, array(), $lock );
+	}
+
+	/**
+	 * @testdox A database failure in a cycle transition throws instead of returning false.
+	 */
+	public function test_a_failed_transition_throws(): void {
+		$cycle_id = $this->pending_cycle_id();
+
+		$this->with_failing_query(
+			'/^\s*UPDATE\s+\S*cycles/i',
+			function () use ( $cycle_id ): void {
+				try {
+					$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array() );
+					$this->fail( 'Expected a RuntimeException.' );
+				} catch ( \RuntimeException $e ) {
+					$this->assertStringContainsString( 'Failed to transition cycle', $e->getMessage() );
+				}
+			}
+		);
+		$this->assertSame( CycleStatus::PENDING, $this->find_cycle( $cycle_id )->get_status()->get_value() );
+	}
+
+	/**
+	 * @testdox Replacing items leaves exactly the new rows, in order.
+	 */
+	public function test_replacing_items_leaves_the_new_rows_in_order(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_items( $this->two_items() );
+		$lock = $this->lock( $id );
+
+		$this->sut->update_fields( $contract, array( 'items' ), $lock );
+
+		$this->assertSame( array( 'Tea tin', 'Mug' ), $this->item_names( $id ) );
+	}
+
+	/**
+	 * @testdox A failed item delete leaves old and new rows side by side, and the next replacement repairs it.
+	 */
+	public function test_a_failed_item_delete_is_repaired_by_the_next_replacement(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_items( $this->two_items() );
+		$lock = $this->lock( $id );
+
+		$this->with_failing_query(
+			'/^\s*DELETE\s+FROM\s+\S*contract_items/i',
+			function () use ( $contract, $lock ): void {
+				try {
+					$this->sut->update_fields( $contract, array( 'items' ), $lock );
+					$this->fail( 'Expected the failed delete to throw.' );
+				} catch ( \RuntimeException $e ) {
+					$this->assertStringContainsString( 'Failed to delete item rows', $e->getMessage() );
+				}
+			}
+		);
+		$this->assertSame( array( 'Coffee bag', 'Tea tin', 'Mug' ), $this->item_names( $id ), 'Old and new rows side by side, never an empty set.' );
+
+		$this->sut->update_fields( $contract, array( 'items' ), $lock );
+		$this->assertSame( array( 'Tea tin', 'Mug' ), $this->item_names( $id ) );
+	}
+
+	/**
+	 * @testdox A failed item insert keeps the old item set.
+	 */
+	public function test_a_failed_item_insert_keeps_the_old_items(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_items( $this->two_items() );
+		$lock = $this->lock( $id );
+
+		$this->with_failing_query(
+			'/^\s*INSERT\s+INTO\s+\S*contract_items/i',
+			function () use ( $contract, $lock ): void {
+				try {
+					$this->sut->update_fields( $contract, array( 'items' ), $lock );
+					$this->fail( 'Expected the failed insert to throw.' );
+				} catch ( \RuntimeException $e ) {
+					$this->assertStringContainsString( 'Failed to insert item row', $e->getMessage() );
+				}
+			}
+		);
+		$this->assertSame( array( 'Coffee bag' ), $this->item_names( $id ) );
+	}
+
+	/**
+	 * @testdox Replacing addresses upserts the given types in place and removes the others.
+	 */
+	public function test_replacing_addresses_upserts_and_prunes(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$lock = $this->lock( $id );
+
+		$contract->set_addresses(
+			array(
+				Contract::ADDRESS_BILLING => array(
+					'first_name' => 'Grace',
+					'last_name'  => 'Hopper',
+					'country'    => 'US',
+				),
+			)
+		);
+		$this->sut->update_fields( $contract, array( 'addresses' ), $lock );
+
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$addresses = $stored->get_addresses();
+		$this->assertSame( array( Contract::ADDRESS_BILLING ), array_keys( $addresses ) );
+		$this->assertSame( 'Grace', $addresses[ Contract::ADDRESS_BILLING ]['first_name'] );
+		$this->assertNull( $addresses[ Contract::ADDRESS_BILLING ]['email'], 'An omitted column is cleared on upsert.' );
+
+		$contract->set_addresses( array() );
+		$this->sut->update_fields( $contract, array( 'addresses' ), $lock );
+		$cleared = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $cleared );
+		$this->assertSame( array(), $cleared->get_addresses() );
+	}
+
+	/**
+	 * @testdox A creation key is unique per extension; a duplicate carries the existing contract id.
+	 */
+	public function test_creation_key_is_unique_per_extension(): void {
+		global $wpdb;
+
+		$first = $this->sut->insert( $this->keyed_contract( 'lite', 'order:42' ) );
+
+		try {
+			$this->sut->insert( $this->keyed_contract( 'lite', 'order:42' ) );
+			$this->fail( 'Expected a duplicate creation key to be refused.' );
+		} catch ( DuplicateContractException $e ) {
+			$this->assertSame( $first, $e->get_existing_contract_id() );
+			$this->assertSame( 'order:42', $e->get_creation_key() );
+		}
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s AND extension_slug = %s", 'order:42', 'lite' ) ) );
+
+		$this->assertGreaterThan( 0, $this->sut->insert( $this->keyed_contract( 'other-ext', 'order:42' ) ), 'Another extension may use the same key.' );
+		$this->assertGreaterThan( 0, $this->sut->insert( $this->keyed_contract( 'lite', null ) ) );
+		$this->assertGreaterThan( 0, $this->sut->insert( $this->keyed_contract( 'lite', null ) ), 'Null keys never collide.' );
+	}
+
+	/**
+	 * @testdox A locked insert creates the contract locked from birth.
+	 */
+	public function test_a_locked_insert_is_locked_from_birth(): void {
+		$contract = $this->make_contract();
+		$lock     = $this->sut->insert_locked( $contract, 'checkout' );
+		$id       = (int) $contract->get_id();
+
+		$this->assertSame( $id, $lock->get_contract_id() );
+		$this->assertSame( 'checkout', $this->sut->lock_holder( $id )['operation'] );
+		$this->assertCount( 1, $this->item_ids( $id ), 'Items are written under the lock.' );
+
+		try {
+			$this->sut->update_fields( $this->with_status( $id, ContractStatus::ON_HOLD ), array( 'status' ) );
+			$this->fail( 'Expected an unlocked write to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'checkout', $e->get_operation() );
+		}
+
+		$lock->release();
+		$this->assertTrue( $this->sut->update_fields( $this->with_status( $id, ContractStatus::ON_HOLD ), array( 'status' ) ) );
+	}
+
+	/**
+	 * @testdox A locked insert with a taken creation key throws and leaves no lock behind.
+	 */
+	public function test_a_locked_insert_with_a_duplicate_key_throws(): void {
+		$first = $this->sut->insert( $this->keyed_contract( 'lite', 'order:7' ) );
+
+		try {
+			$this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' );
+			$this->fail( 'Expected a duplicate creation key to be refused.' );
+		} catch ( DuplicateContractException $e ) {
+			$this->assertSame( $first, $e->get_existing_contract_id() );
+		}
+		$this->assertFalse( $this->sut->lock_holder( $first )['live'] );
+	}
+
+	/**
+	 * A minimal contract with a creation key.
+	 *
+	 * @param string      $extension_slug Owning extension.
+	 * @param string|null $creation_key   Creation key, or null.
+	 */
+	private function keyed_contract( string $extension_slug, ?string $creation_key ): Contract {
+		return Contract::create(
+			array(
+				'extension_slug' => $extension_slug,
+				'creation_key'   => $creation_key,
+			)
+		);
+	}
+
+	/**
+	 * Two replacement items.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function two_items(): array {
+		return array(
+			array(
+				'item_name' => 'Tea tin',
+				'item_type' => 'line_item',
+				'quantity'  => '1',
+				'total'     => '10.00',
+			),
+			array(
+				'item_name' => 'Mug',
+				'item_type' => 'line_item',
+				'quantity'  => '1',
+				'total'     => '5.00',
+			),
+		);
+	}
+
+	/**
+	 * The item names of a contract, oldest row first.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return array<int, string>
+	 */
+	private function item_names( int $contract_id ): array {
+		$contract = $this->sut->find( $contract_id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return array_map(
+			static function ( array $item ): string {
+				return (string) $item['item_name'];
+			},
+			$contract->get_items()
+		);
 	}
 }
