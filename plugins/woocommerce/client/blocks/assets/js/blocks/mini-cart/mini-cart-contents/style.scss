@@ -142,6 +142,7 @@ h2.wc-block-mini-cart__title {
 	.wc-block-mini-cart__footer-actions,
 	.wc-block-mini-cart__footer-actions > .block-editor-inner-blocks > .block-editor-block-list__layout {
 		display: flex;
+		flex-wrap: wrap;
 		gap: $gap;
 
 		.wc-block-components-button,
@@ -149,12 +150,8 @@ h2.wc-block-mini-cart__title {
 		.wp-block-woocommerce-mini-cart-cart-button-block,
 		.wp-block-woocommerce-mini-cart-checkout-button-block {
 			flex: 1 1 0;
-			min-width: 0;
+			min-width: min-content;
 			display: inline-flex;
-		}
-
-		.wc-block-components-button__text {
-			overflow-wrap: anywhere;
 		}
 	}
 
