@@ -4,14 +4,9 @@
 	&.is-dropdown {
 		display: flex;
 	}
-}
-
-.wc-block-product-categories__dropdown {
-	@include opinionated-select-arrow;
-	margin-inline-end: 0.5em;
 
 	select {
-		@include opinionated-select;
+		margin-inline-end: 0.5em;
 	}
 }
 
@@ -68,7 +63,6 @@
 }
 
 .wc-block-product-categories__button {
-	background-color: var(--wp--preset--color--white, #fff);
 	display: flex;
 	align-items: center;
 	margin: 0;

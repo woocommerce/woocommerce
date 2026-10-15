@@ -12,38 +12,6 @@ $fontSizes: (
 	"larger": 2,
 );
 
-$opinionated-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-
-// Adapted from the legacy Add to Cart with Options variation select styles:
-// Chevron: https://github.com/woocommerce/woocommerce/blob/fa3e1dff6030ec3bfeae6c821823e02ab4bfaee3/plugins/woocommerce/client/legacy/css/woocommerce.scss#L482-L503
-@mixin opinionated-select {
-	appearance: none;
-	height: 3em;
-	padding-block: 0.25em;
-	padding-inline: 1em 3em;
-	font-size: var(--wp--preset--font-size--small, inherit);
-	background-image: none;
-}
-
-// Keep the chevron visible when a theme uses a dark select background.
-@mixin opinionated-select-arrow {
-	display: inline-block;
-	position: relative;
-
-	&::after {
-		content: "";
-		position: absolute;
-		inset-inline-end: 12px;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 16px;
-		height: 16px;
-		background-color: currentColor;
-		mask: $opinionated-select-chevron center / contain no-repeat;
-		pointer-events: none;
-	}
-}
-
 // Maps a named font-size to its predefined size. Units default to em, but can
 // be changed using the multiplier parameter.
 @mixin font-size($sizeName, $multiplier: 1em) {
