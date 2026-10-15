@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -656,5 +658,161 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			$returning_flag( $order_2->get_id() ),
 			'The next oldest order should be reassigned as the customer\'s first order.'
 		);
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns the same row that update() writes for an order and its refund.
+	 */
+	public function test_get_order_stats_row_data_matches_stored_row(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( 'completed' );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		foreach ( array( $order, $refund ) as $object ) {
+			$data = OrdersStatsDataStore::get_order_stats_row_data( $object );
+			$this->assertIsArray( $data, 'A saved, non-test order should produce a row.' );
+
+			OrdersStatsDataStore::update( $object );
+			$row = $wpdb->get_row(
+				$wpdb->prepare( "SELECT * FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $object->get_id() ),
+				ARRAY_A
+			);
+
+			foreach ( $data as $column => $value ) {
+				if ( is_numeric( $value ) ) {
+					$value          = (float) $value;
+					$row[ $column ] = (float) $row[ $column ];
+				}
+				$this->assertEquals( $value, $row[ $column ], "Column {$column} should match the stored row for #{$object->get_id()}." );
+			}
+		}
+
+		$refund_data = OrdersStatsDataStore::get_order_stats_row_data( $refund );
+		$this->assertSame( $order->get_id(), $refund_data['parent_id'], 'A refund row should point at its parent order.' );
+		$this->assertSame( OrderInternalStatus::COMPLETED, $refund_data['status'], 'A refund row should carry the parent order status.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() does not write to the stats table.
+	 */
+	public function test_get_order_stats_row_data_does_not_write(): void {
+		global $wpdb;
+
+		$order = WC_Helper_Order::create_order();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $order->get_id() ) );
+
+		OrdersStatsDataStore::get_order_stats_row_data( $order );
+
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order->get_id() )
+		);
+		$this->assertSame( 0, $count, 'Building the row should not store it.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() does not change the returning-customer flags of the customer's other orders.
+	 */
+	public function test_get_order_stats_row_data_does_not_reassign_first_order(): void {
+		global $wpdb;
+
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$first_order = WC_Helper_Order::create_order( $customer_id );
+		$first_order->set_date_created( '2024-01-10 10:00:00' );
+		$first_order->set_status( OrderStatus::PROCESSING );
+		$first_order->save();
+		OrdersStatsDataStore::sync_order( $first_order->get_id() );
+
+		// An older order that analytics has not imported yet.
+		$older_order = WC_Helper_Order::create_order( $customer_id );
+		$older_order->set_date_created( '2024-01-01 10:00:00' );
+		$older_order->set_status( OrderStatus::PROCESSING );
+		$older_order->save();
+		$wpdb->delete( "{$wpdb->prefix}wc_order_stats", array( 'order_id' => $older_order->get_id() ) );
+
+		$returning_flag = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT returning_customer FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+		$this->assertSame( '0', $returning_flag( $first_order->get_id() ), 'The imported order should start as the first order.' );
+
+		$data = OrdersStatsDataStore::get_order_stats_row_data( $older_order );
+
+		$this->assertFalse( $data['returning_customer'], 'The older order should be reported as the first order.' );
+		$this->assertSame( '0', $returning_flag( $first_order->get_id() ), 'Building a row should not change other stats rows.' );
+
+		OrdersStatsDataStore::update( $older_order );
+
+		$this->assertSame( '1', $returning_flag( $first_order->get_id() ), 'update() should still mark the later order as returning.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() uses unsaved changes on the order passed in.
+	 */
+	public function test_get_order_stats_row_data_uses_unsaved_changes(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_total( 123.45 );
+
+		$data = OrdersStatsDataStore::get_order_stats_row_data( $order );
+
+		$this->assertEquals( 123.45, $data['total_sales'], 'The row should use the in-memory total.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false when the order stats data filter returns a non-array.
+	 */
+	public function test_get_order_stats_row_data_returns_false_for_non_array_filter_result(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->update_status( OrderStatus::COMPLETED );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+		add_filter( 'woocommerce_analytics_update_order_stats_data', '__return_null' );
+
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A non-array order row should be returned as false.' );
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $refund ), 'A non-array refund row should be returned as false.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() applies the woocommerce_analytics_update_order_stats_data filter.
+	 */
+	public function test_get_order_stats_row_data_applies_filter(): void {
+		$order = WC_Helper_Order::create_order();
+		add_filter(
+			'woocommerce_analytics_update_order_stats_data',
+			static function ( $data ) {
+				$data['num_items_sold'] = 99;
+				return $data;
+			}
+		);
+
+		$data = OrdersStatsDataStore::get_order_stats_row_data( $order );
+
+		$this->assertSame( 99, $data['num_items_sold'], 'The filtered value should be returned.' );
+	}
+
+	/**
+	 * @testdox get_order_stats_row_data() returns false for unsaved and test orders, and update() then skips them.
+	 */
+	public function test_get_order_stats_row_data_returns_false_for_untracked_orders(): void {
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( new \WC_Order() ), 'An unsaved order has no row.' );
+		$this->assertSame( -1, OrdersStatsDataStore::update( new \WC_Order() ), 'update() should skip an unsaved order.' );
+
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$this->assertFalse( OrdersStatsDataStore::get_order_stats_row_data( $order ), 'A test order has no row.' );
+		$this->assertSame( -1, OrdersStatsDataStore::update( $order ), 'update() should skip a test order.' );
 	}
 }
