@@ -54,6 +54,42 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_stock_notification_erased with the original email before anonymizing.
+	 */
+	public function test_privacy_eraser_fires_erased_action_before_anonymizing(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_user_id( 5 );
+		$notification->set_product_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification_id = $notification->save();
+
+		$erased = array();
+		add_action(
+			'woocommerce_stock_notification_erased',
+			function ( $id, $original_email, $notification ) use ( &$erased ) {
+				$erased[] = array( $id, $original_email, $notification->get_user_email(), $notification->get_user_id(), $notification->get_status() );
+			},
+			10,
+			3
+		);
+		$status_changes = array();
+		add_action(
+			'woocommerce_stock_notification_status_changed',
+			function ( $id, $from, $to, $notification ) use ( &$status_changes ) {
+				$status_changes[] = array( $id, $from, $to, $notification->get_user_email() );
+			},
+			10,
+			4
+		);
+
+		PrivacyEraser::erase_notification_data( 'jon@doe.com' );
+
+		$this->assertSame( array( array( $notification_id, 'jon@doe.com', 'jon@doe.com', 5, NotificationStatus::ACTIVE ) ), $erased );
+		$this->assertSame( array( array( $notification_id, NotificationStatus::ACTIVE, NotificationStatus::CANCELLED, wp_privacy_anonymize_data( 'email', '' ) ) ), $status_changes );
+	}
+
+	/**
 	 * @testdox Should keep a sent notification sent, with its sent date, while still anonymizing it.
 	 */
 	public function test_privacy_eraser_keeps_sent_notification_sent(): void {

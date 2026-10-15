@@ -88,6 +88,22 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 				continue;
 			}
 
+			/**
+			 * Action: woocommerce_stock_notification_erased
+			 *
+			 * Fires before a stock notification is anonymized by the privacy eraser, while it still
+			 * holds the original email and user ID. The save that follows fires
+			 * `woocommerce_stock_notification_status_changed` with the anonymized row, which cannot
+			 * identify the shopper any more.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The notification ID.
+			 * @param string       $original_email  The email stored on the notification before anonymization.
+			 * @param Notification $notification    The notification, not yet anonymized.
+			 */
+			do_action( 'woocommerce_stock_notification_erased', $notification->get_id(), $notification->get_user_email(), $notification );
+
 			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );

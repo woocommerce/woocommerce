@@ -215,6 +215,119 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_new_stock_notification with the ID once a notification is created.
+	 */
+	public function test_create_fires_new_stock_notification_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_new_stock_notification',
+			function ( $id, $notification ) use ( &$fired ) {
+				$fired[] = array( $id, $notification );
+			},
+			10,
+			2
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+
+		$this->assertCount( 1, $fired );
+		$this->assertSame( $notification->get_id(), $fired[0][0] );
+		$this->assertSame( $notification, $fired[0][1] );
+
+		// Updating the same notification does not fire it again.
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertCount( 1, $fired );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_stock_notification_status_changed only when a different status is persisted.
+	 */
+	public function test_update_fires_status_changed_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_stock_notification_status_changed',
+			function ( $id, $from, $to, $notification ) use ( &$fired ) {
+				$fired[] = array( $id, $from, $to, $notification );
+			},
+			10,
+			4
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+		$this->assertCount( 0, $fired, 'Creating does not fire a status change.' );
+
+		// A non-status change does not fire it.
+		$notification->set_product_id( 2 );
+		$notification->save();
+		$this->assertCount( 0, $fired );
+
+		// Re-setting the current status does not fire it.
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification->save();
+		$this->assertCount( 0, $fired );
+
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertCount( 1, $fired );
+		$this->assertSame( array( $notification->get_id(), NotificationStatus::PENDING, NotificationStatus::ACTIVE, $notification ), $fired[0] );
+
+		// The admin list table updates through the data store directly.
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$this->data_store->update( $notification );
+		$this->assertCount( 2, $fired );
+		$this->assertSame( NotificationStatus::ACTIVE, $fired[1][1] );
+		$this->assertSame( NotificationStatus::CANCELLED, $fired[1][2] );
+		$this->assertSame( NotificationStatus::CANCELLED, $fired[1][3]->get_status() );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_delete_stock_notification with the ID once a notification is deleted.
+	 */
+	public function test_delete_fires_delete_stock_notification_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_delete_stock_notification',
+			function ( $id, $notification ) use ( &$fired ) {
+				$fired[] = array( $id, $notification );
+			},
+			10,
+			2
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+		$notification_id = $notification->get_id();
+
+		$notification->delete();
+		$this->assertCount( 1, $fired );
+		$this->assertSame( $notification_id, $fired[0][0] );
+		$this->assertSame( $notification, $fired[0][1] );
+
+		// Deleting a row that is already gone does not fire it.
+		$notification->set_id( $notification_id );
+		$this->data_store->delete( $notification );
+		$this->assertCount( 1, $fired );
+
+		// The admin list table deletes through the data store directly.
+		$other = new Notification();
+		$other->set_product_id( 1 );
+		$other->set_user_email( 'other@test.com' );
+		$other->save();
+		$this->data_store->delete( $other );
+		$this->assertCount( 2, $fired );
+		$this->assertSame( $other->get_id(), $fired[1][0] );
+	}
+
+	/**
 	 * Test reading a non-existent notification.
 	 */
 	public function test_read_nonexistent_notification() {

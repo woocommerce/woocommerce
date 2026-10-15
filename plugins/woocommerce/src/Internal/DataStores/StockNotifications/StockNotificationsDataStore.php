@@ -198,7 +198,19 @@ CREATE TABLE $meta_table_name (
 		$notification->save_meta_data();
 		$notification->apply_changes();
 
-		return $notification->get_id();
+		/**
+		 * Action: woocommerce_new_stock_notification
+		 *
+		 * Fires after a stock notification is created, whatever created it (shopper sign-up or admin).
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int          $notification_id The notification ID.
+		 * @param Notification $notification    The notification.
+		 */
+		do_action( 'woocommerce_new_stock_notification', $notification_id, $notification );
+
+		return $notification_id;
 	}
 
 	/**
@@ -263,8 +275,9 @@ CREATE TABLE $meta_table_name (
 			return new \WP_Error( 'invalid_stock_notification', 'Invalid notification ID.' );
 		}
 
-		$changes = $notification->get_changes();
-		$result  = 0;
+		$changes     = $notification->get_changes();
+		$result      = 0;
+		$status_from = $notification->get_data()['status'];
 
 		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
 
@@ -303,6 +316,25 @@ CREATE TABLE $meta_table_name (
 			$notification->apply_changes();
 		}
 
+		$status_to = $notification->get_status( 'edit' );
+		if ( array_key_exists( 'status', $changes ) && $status_from !== $status_to ) {
+			/**
+			 * Action: woocommerce_stock_notification_status_changed
+			 *
+			 * Fires after a stock notification's status is persisted with a different value, whatever
+			 * changed it: verification, unsubscribe, My Account or admin cancel, admin activate, a sent
+			 * or failed email, retention cleanup or privacy erasure.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The notification ID.
+			 * @param string       $status_from     The previous status.
+			 * @param string       $status_to       The new status.
+			 * @param Notification $notification    The notification.
+			 */
+			do_action( 'woocommerce_stock_notification_status_changed', $notification->get_id(), $status_from, $status_to, $notification );
+		}
+
 		return $result;
 	}
 
@@ -316,10 +348,24 @@ CREATE TABLE $meta_table_name (
 	public function delete( &$notification, $args = array() ) {
 		global $wpdb;
 
-		$deleted = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification->get_id() ), array( '%d' ) );
+		$notification_id = $notification->get_id();
+		$deleted         = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification_id ), array( '%d' ) );
 
 		if ( $deleted > 0 ) {
-			$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
+			$this->data_store_meta->delete_by_notification_id( $notification_id );
+
+			/**
+			 * Action: woocommerce_delete_stock_notification
+			 *
+			 * Fires after a stock notification is deleted, whatever deleted it (admin delete, bulk delete
+			 * or retention cleanup).
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The deleted notification ID.
+			 * @param Notification $notification    The notification, as it was before deletion.
+			 */
+			do_action( 'woocommerce_delete_stock_notification', $notification_id, $notification );
 		}
 	}
 

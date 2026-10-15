@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Fire ID-based lifecycle actions when a stock notification is created, changes status, is deleted or is erased by the privacy eraser.
