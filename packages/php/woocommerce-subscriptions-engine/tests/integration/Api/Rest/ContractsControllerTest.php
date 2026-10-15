@@ -1,9 +1,6 @@
 <?php
 /**
- * Integration tests for the lifecycle-actions REST controller: the auth + ownership
- * matrix (anonymous 401, valid owner 200, foreign owner 404, unknown id 404), the
- * action round-trips with their domain-summary responses, and the
- * precondition 409.
+ * Integration tests for the contracts REST controller.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -13,12 +10,15 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api\Rest;
 
 use EngineIntegrationTestCase;
+use RuntimeException;
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractActions;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\ContractActionRegistry;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Rest\ContractsController
@@ -27,234 +27,697 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 
 	private const BASE = '/wc/v3/subscriptions-engine/contracts';
 
-	/**
-	 * @var ContractRepository
-	 */
-	private $contracts;
+	private const EXTENSION_SLUG = 'test-extension';
 
 	/**
-	 * @var int
+	 * Action callback calls, as `array( action, contract id, action_args )`.
+	 *
+	 * @var array<int, array{0: string, 1: int, 2: array<string, mixed>}>
 	 */
-	private $owner_id;
-
-	/**
-	 * @var int
-	 */
-	private $other_id;
+	private $calls = array();
 
 	public function set_up(): void {
 		parent::set_up();
 
-		$this->contracts = new ContractRepository();
+		ContractActionRegistry::reset();
+		$this->calls = array();
 
-		// Register the controller on `rest_api_init` (where core requires routes to be
-		// registered) and re-fire the action so the routes exist on the live server for
-		// this test. Mirrors how Bootstrap wires it in production.
-		add_action(
-			'rest_api_init',
-			static function (): void {
-				( new ContractsController() )->register_routes();
-			}
-		);
-		do_action( 'rest_api_init' );
-
-		$this->owner_id = $this->create_customer();
-		$this->other_id = $this->create_customer();
+		// A fresh server fires `rest_api_init`, so the routes come from the engine's own wiring.
+		$GLOBALS['wp_rest_server'] = null;
+		rest_get_server();
 	}
 
 	public function tear_down(): void {
+		ContractActionRegistry::reset();
+		$GLOBALS['wp_rest_server'] = null;
 		wp_set_current_user( 0 );
 		parent::tear_down();
 	}
 
 	/**
-	 * Create a customer user and return its id.
+	 * A store manager reads the stored contract facts, children included.
 	 */
-	private function create_customer(): int {
-		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+	public function test_get_returns_the_contract_to_a_store_manager(): void {
+		$contract = Contracts::create(
+			array(
+				'extension_slug'   => 'test-extension',
+				'status'           => 'active',
+				'customer_id'      => 7,
+				'currency'         => 'EUR',
+				'next_payment_gmt' => '2026-11-01 10:00:00',
+				'billing_total'    => '20.00',
+				'items'            => array(
+					array(
+						'item_name'  => 'Coffee',
+						'product_id' => 9,
+						'quantity'   => '2',
+						'total'      => '20',
+					),
+				),
+				'addresses'        => array(
+					'billing' => array(
+						'first_name' => 'Ada',
+						'country'    => 'PT',
+					),
+				),
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$response = $this->get( $contract->get_id() );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $this->response_data( $response );
+		$this->assertSame( $contract->get_id(), $data['id'] );
+		$this->assertSame( 'test-extension', $data['extension_slug'] );
+		$this->assertSame( 'active', $data['status'] );
+		$this->assertSame( 7, $data['customer_id'] );
+		$this->assertSame( 'EUR', $data['currency'] );
+		$this->assertSame( '2026-11-01T10:00:00', $data['next_payment_gmt'] );
+		$this->assertNull( $data['end_gmt'] );
+		$stored = Contracts::get( $contract->get_id() );
+		$this->assertNotNull( $stored );
+		$this->assertSame( $stored->get_billing_total(), $data['billing_total'] );
+		$this->assertSame( $stored->get_items(), $data['items'] );
+		$this->assertSame( $stored->get_addresses(), $data['addresses'] );
+		$this->assertNotEmpty( $stored->get_items() );
+		$this->assertNotEmpty( $stored->get_addresses() );
+	}
+
+	/**
+	 * A contract without addresses encodes them as an empty JSON object.
+	 */
+	public function test_get_encodes_no_addresses_as_an_object(): void {
+		$contract = Contracts::create(
+			array(
+				'extension_slug' => 'test-extension',
+				'status'         => 'active',
+				'customer_id'    => 7,
+				'currency'       => 'EUR',
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$response = $this->get( $contract->get_id() );
+
+		$this->assertStringContainsString( '"addresses":{}', (string) wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * An unknown id is a 404.
+	 */
+	public function test_get_unknown_contract_is_not_found(): void {
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$response = $this->get( 999999 );
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_contract_not_found', $this->response_data( $response )['code'] );
+	}
+
+	/**
+	 * The contract's customer reads it; guests get a 401 and other customers the same 404 as an
+	 * unknown contract.
+	 */
+	public function test_get_needs_read_subscription_contract(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+
+		$this->assertSame( 401, $this->get( $contract->get_id() )->get_status() );
+
+		wp_set_current_user( $customer_id );
+		$this->assertSame( 200, $this->get( $contract->get_id() )->get_status() );
+
+		wp_set_current_user( $this->create_user( 'customer' ) );
+		$response = $this->get( $contract->get_id() );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_contract_not_found', $this->response_data( $response )['code'] );
+	}
+
+	/**
+	 * A `map_meta_cap` filter on the read capability decides the read.
+	 */
+	public function test_get_follows_read_subscription_contract_filters(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$deny        = static function ( $caps, $cap ) {
+			return 'read_subscription_contract' === $cap ? array( 'do_not_allow' ) : $caps;
+		};
+		add_filter( 'map_meta_cap', $deny, 20, 2 );
+		wp_set_current_user( $customer_id );
+
+		try {
+			$this->assertSame( 404, $this->get( $contract->get_id() )->get_status() );
+		} finally {
+			remove_filter( 'map_meta_cap', $deny, 20 );
+		}
+	}
+
+	/**
+	 * The engine serves the read route and the action route, nothing else.
+	 */
+	public function test_registers_the_read_and_action_routes(): void {
+		$routes = array_filter(
+			array_keys( rest_get_server()->get_routes() ),
+			static function ( string $route ): bool {
+				return 0 === strpos( $route, self::BASE );
+			}
+		);
+
+		$this->assertSame( array( self::BASE . '/(?P<id>[\d]+)', self::BASE . '/(?P<id>[\d]+)/action' ), array_values( $routes ) );
+	}
+
+	/**
+	 * Anonymous callers get a 401 on both action routes.
+	 */
+	public function test_actions_require_a_logged_in_user(): void {
+		$this->register_action( 'pause', 'manage_subscription_contract' );
+		$contract = $this->create_contract( $this->create_user( 'customer' ) );
+
+		$this->assertSame( 401, $this->list_actions( $contract->get_id() )->get_status() );
+		$this->assertSame( 401, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+		$this->assertSame( array(), $this->calls );
+	}
+
+	/**
+	 * A run without an action is a 404 even past the route schema, never the first permitted action.
+	 */
+	public function test_run_without_an_action_resolves_nothing(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$this->register_action( 'pause', 'manage_subscription_contract' );
+		wp_set_current_user( $customer_id );
+		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $contract->get_id() . '/action' );
+		$request->set_url_params( array( 'id' => (string) $contract->get_id() ) );
+		$request->set_body_params( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+
+		$result = ( new ContractsController() )->run_action_permissions_check( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$error_data = $result->get_error_data();
+		$this->assertIsArray( $error_data );
+		$this->assertSame( 404, $error_data['status'] ?? null );
+		$this->assertSame( array(), $this->calls );
+	}
+
+	/**
+	 * `manage_subscription_contract` lets the contract's customer run the action: the callback gets the
+	 * contract and the validated args, and the response is the resulting id and status.
+	 */
+	public function test_customer_runs_an_action_on_their_contract(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$this->register_action( 'pause', 'manage_subscription_contract', array( 'args' => array( 'note' => array( 'type' => 'string' ) ) ) );
+		wp_set_current_user( $customer_id );
+
+		$response = $this->run_action( $contract->get_id(), 'pause', array( 'note' => 'Away' ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			array(
+				'id'     => $contract->get_id(),
+				'status' => 'on-hold',
+			),
+			$response->get_data()
+		);
+		$this->assertSame( array( array( 'pause', $contract->get_id(), array( 'note' => 'Away' ) ) ), $this->calls );
+	}
+
+	/**
+	 * Unknown contract, a contract of another customer, an unregistered action and a wrong
+	 * `extension_slug` all get the same 404, and nothing runs.
+	 */
+	public function test_post_hides_contracts_the_caller_cannot_act_on(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$foreign     = $this->create_contract( $this->create_user( 'customer' ) );
+		$this->register_action( 'pause', 'manage_subscription_contract' );
+		wp_set_current_user( $customer_id );
+
+		$responses = array(
+			$this->run_action( 999999, 'pause' ),
+			$this->run_action( $foreign->get_id(), 'pause' ),
+			$this->run_action( $contract->get_id(), 'resume' ),
+			$this->run_action( $contract->get_id(), 'pause', array(), 'other-extension' ),
+		);
+
+		$not_found = $this->response_data( $responses[0] );
+		$this->assertSame( 'woocommerce_subscriptions_engine_contract_not_found', $not_found['code'] );
+		foreach ( $responses as $response ) {
+			$this->assertSame( 404, $response->get_status() );
+			$this->assertSame( $not_found, $response->get_data() );
+		}
+		$this->assertSame( array(), $this->calls );
+	}
+
+	/**
+	 * Only the contract owner's action runs, even when another extension registered the same name.
+	 */
+	public function test_dispatches_only_to_the_contract_owner(): void {
+		$this->register_action( 'pause', 'manage_woocommerce' );
+		ContractActions::register(
+			'other-extension',
+			'pause',
+			array(
+				'callback'   => function ( ContractView $contract ): ContractView {
+					$this->calls[] = array( 'other-extension', $contract->get_id(), array() );
+					return $contract;
+				},
+				'permission' => 'manage_woocommerce',
+			)
+		);
+		$contract = $this->create_contract( null, 'other-extension' );
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$this->assertSame( 404, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+		$this->assertSame( 200, $this->run_action( $contract->get_id(), 'pause', array(), 'other-extension' )->get_status() );
+		$this->assertSame( array( array( 'other-extension', $contract->get_id(), array() ) ), $this->calls );
+	}
+
+	/**
+	 * A capability permission is checked for the current user: `manage_woocommerce` admits store
+	 * managers and hides the contract from its own customer.
+	 */
+	public function test_capability_permission(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$this->register_action( 'pause', 'manage_woocommerce' );
+
+		wp_set_current_user( $customer_id );
+		$this->assertSame( 404, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+
+		wp_set_current_user( $this->create_user( 'shop_manager' ) );
+		$this->assertSame( 200, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+	}
+
+	/**
+	 * A callable permission gets the contract and the request; anything but true is a 404.
+	 */
+	public function test_callable_permission(): void {
+		$contract = $this->create_contract( null );
+		$seen     = array();
+		$this->register_action(
+			'pause',
+			static function ( ContractView $view, WP_REST_Request $request ) use ( &$seen ): bool {
+				$seen[] = array( $view->get_id(), $request->get_param( 'action' ) );
+				return 'yes' === $request->get_header( 'x-test-permission' );
+			}
+		);
+		wp_set_current_user( $this->create_user( 'customer' ) );
+
+		$this->assertSame( 404, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+
+		$request = $this->action_request( $contract->get_id(), 'pause' );
+		$request->set_header( 'x-test-permission', 'yes' );
+		$this->assertSame( 200, rest_get_server()->dispatch( $request )->get_status() );
+		$this->assertSame( array( array( $contract->get_id(), 'pause' ), array( $contract->get_id(), 'pause' ) ), $seen );
+	}
+
+	/**
+	 * An action that is not available for the contract is a 409, and nothing runs.
+	 */
+	public function test_unavailable_action_is_a_conflict(): void {
+		$contract = $this->create_contract( null );
+		$this->register_action(
+			'pause',
+			'manage_woocommerce',
+			array(
+				'is_available' => static function ( ContractView $view ): bool {
+					return 'on-hold' !== $view->get_status();
+				},
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+		$this->assertSame( 200, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+
+		$response = $this->run_action( $contract->get_id(), 'pause' );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_action_not_available', $this->response_data( $response )['code'] );
+		$this->assertCount( 1, $this->calls );
+	}
+
+	/**
+	 * `action_args` are checked against the schema: required and typed properties reject with a
+	 * 400, defaults fill in, and unknown keys are dropped.
+	 */
+	public function test_action_args_are_validated_against_the_schema(): void {
+		$contract = $this->create_contract( null );
+		$this->register_action(
+			'cancel',
+			'manage_woocommerce',
+			array(
+				'args' => array(
+					'at_period_end' => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'reason'        => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$missing = $this->run_action( $contract->get_id(), 'cancel' );
+		$this->assertSame( 400, $missing->get_status() );
+		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_action_args', $this->response_data( $missing )['code'] );
+
+		$mistyped = $this->run_action(
+			$contract->get_id(),
+			'cancel',
+			array(
+				'reason'        => 'Moving',
+				'at_period_end' => 'sometimes',
+			)
+		);
+		$this->assertSame( 400, $mistyped->get_status() );
+		$this->assertCount( 0, $this->calls );
+
+		$response = $this->run_action(
+			$contract->get_id(),
+			'cancel',
+			array(
+				'reason' => 'Moving',
+				'extra'  => 'dropped',
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			array(
+				'reason'        => 'Moving',
+				'at_period_end' => true,
+			),
+			$this->get_recorded_action_args( 0 )
+		);
+
+		$this->assertSame(
+			200,
+			$this->run_action(
+				$contract->get_id(),
+				'cancel',
+				array(
+					'reason'        => 'Moving',
+					'at_period_end' => 'false',
+				)
+			)->get_status()
+		);
+		$this->assertFalse( $this->get_recorded_action_args( 1 )['at_period_end'] );
+	}
+
+	/**
+	 * A callable `args` resolves per contract, the same way for discovery and for running.
+	 */
+	public function test_callable_args_resolve_per_contract(): void {
+		$contract = $this->create_contract( null );
+		$this->register_action(
+			'cancel',
+			'manage_woocommerce',
+			array(
+				'args' => static function ( ContractView $view ): array {
+					return array(
+						'at_period_end' => array(
+							'type'    => 'boolean',
+							'default' => 'active' === $view->get_status(),
+						),
+					);
+				},
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$actions = $this->response_data( $this->list_actions( $contract->get_id() ) )['actions'];
+		$this->assertEquals(
+			array(
+				array(
+					'action'         => 'cancel',
+					'extension_slug' => self::EXTENSION_SLUG,
+					'description'    => '',
+					'args'           => (object) array(
+						'at_period_end' => array(
+							'type'     => 'boolean',
+							'default'  => true,
+							'required' => false,
+						),
+					),
+				),
+			),
+			$actions
+		);
+
+		$this->assertSame( 200, $this->run_action( $contract->get_id(), 'cancel' )->get_status() );
+		$this->assertSame( array( 'at_period_end' => true ), $this->get_recorded_action_args( 0 ) );
+	}
+
+	/**
+	 * A callback `WP_Error` passes through with its status, or 400 without one.
+	 */
+	public function test_callback_errors_pass_through(): void {
+		$contract = $this->create_contract( null );
+		ContractActions::register(
+			self::EXTENSION_SLUG,
+			'teapot',
+			array(
+				'callback'   => static function (): WP_Error {
+					return new WP_Error( 'teapot', 'Short and stout.', array( 'status' => 418 ) );
+				},
+				'permission' => 'manage_woocommerce',
+			)
+		);
+		ContractActions::register(
+			self::EXTENSION_SLUG,
+			'refuse',
+			array(
+				'callback'   => static function (): WP_Error {
+					return new WP_Error( 'refused', 'No.' );
+				},
+				'permission' => 'manage_woocommerce',
+			)
+		);
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$teapot = $this->run_action( $contract->get_id(), 'teapot' );
+		$this->assertSame( 418, $teapot->get_status() );
+		$this->assertSame( 'teapot', $this->response_data( $teapot )['code'] );
+
+		$refused = $this->run_action( $contract->get_id(), 'refuse' );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'refused', $this->response_data( $refused )['code'] );
+	}
+
+	/**
+	 * A throwing callback, availability check or permission callable is a generic 500.
+	 */
+	public function test_throwing_extension_callables_are_a_server_error(): void {
+		$contract = $this->create_contract( null );
+		$throw    = static function (): bool {
+			throw new RuntimeException( 'Boom.' );
+		};
+		ContractActions::register(
+			self::EXTENSION_SLUG,
+			'callback',
+			array(
+				'callback'   => $throw,
+				'permission' => 'manage_woocommerce',
+			)
+		);
+		$this->register_action( 'availability', 'manage_woocommerce', array( 'is_available' => $throw ) );
+		$this->register_action( 'permission', $throw );
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		foreach ( array( 'callback', 'availability', 'permission' ) as $action ) {
+			$response = $this->run_action( $contract->get_id(), $action );
+			$this->assertSame( 500, $response->get_status(), $action );
+			$this->assertSame( 'woocommerce_subscriptions_engine_action_failed', $this->response_data( $response )['code'] );
+		}
+	}
+
+	/**
+	 * Discovery lists the owner's available actions to a store manager, whatever their permission.
+	 */
+	public function test_discovery_lists_available_actions(): void {
+		$contract = $this->create_contract( $this->create_user( 'customer' ) );
+		$this->register_action( 'pause', 'manage_subscription_contract', array( 'description' => 'Pause deliveries.' ) );
+		$this->register_action( 'resume', 'manage_subscription_contract', array( 'is_available' => '__return_false' ) );
+		$this->register_action( 'refund', '__return_false' );
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+
+		$response = $this->list_actions( $contract->get_id() );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEquals(
+			array(
+				'actions' => array(
+					array(
+						'action'         => 'pause',
+						'extension_slug' => self::EXTENSION_SLUG,
+						'description'    => 'Pause deliveries.',
+						'args'           => new \stdClass(),
+					),
+					array(
+						'action'         => 'refund',
+						'extension_slug' => self::EXTENSION_SLUG,
+						'description'    => '',
+						'args'           => new \stdClass(),
+					),
+				),
+			),
+			$response->get_data()
+		);
+		$this->assertStringContainsString( '"args":{}', (string) wp_json_encode( $response->get_data() ), 'No args encode as an empty JSON object.' );
+		$this->assertSame( 404, $this->list_actions( 999999 )->get_status() );
+	}
+
+	/**
+	 * Discovery has the contract read's permission: its customer lists the actions, guests get a
+	 * 401 and other customers a 404.
+	 */
+	public function test_discovery_needs_read_subscription_contract(): void {
+		$customer_id = $this->create_user( 'customer' );
+		$contract    = $this->create_contract( $customer_id );
+		$this->register_action( 'pause', 'manage_woocommerce' );
+
+		$this->assertSame( 401, $this->list_actions( $contract->get_id() )->get_status() );
+
+		wp_set_current_user( $customer_id );
+		$response = $this->list_actions( $contract->get_id() );
+		$this->assertSame( 200, $response->get_status() );
+		$actions = $this->response_data( $response )['actions'];
+		$this->assertIsArray( $actions );
+		$this->assertSame( array( 'pause' ), array_column( $actions, 'action' ) );
+
+		wp_set_current_user( $this->create_user( 'customer' ) );
+		$this->assertSame( 404, $this->list_actions( $contract->get_id() )->get_status() );
+	}
+
+	/**
+	 * An action registered after the routes still dispatches.
+	 */
+	public function test_actions_registered_after_rest_api_init_dispatch(): void {
+		$contract = $this->create_contract( null );
+		wp_set_current_user( $this->create_user( 'administrator' ) );
+		$this->assertSame( 404, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+
+		$this->register_action( 'pause', 'manage_woocommerce' );
+
+		$this->assertSame( 200, $this->run_action( $contract->get_id(), 'pause' )->get_status() );
+	}
+
+	/**
+	 * Register a test-extension action whose callback records the call and puts the contract on hold.
+	 *
+	 * @param string               $action     Action slug.
+	 * @param string|callable      $permission Permission.
+	 * @param array<string, mixed> $extra      Further registration args.
+	 */
+	private function register_action( string $action, $permission, array $extra = array() ): void {
+		ContractActions::register(
+			self::EXTENSION_SLUG,
+			$action,
+			array(
+				'callback'   => function ( ContractView $contract, array $action_args ) use ( $action ): ?ContractView {
+					$this->calls[] = array( $action, $contract->get_id(), $action_args );
+					return Contracts::update( $contract->get_id(), array( 'status' => 'on-hold' ) );
+				},
+				'permission' => $permission,
+			) + $extra
+		);
+	}
+
+	/**
+	 * The `action_args` an action callback received, by call order.
+	 *
+	 * @param int $index Call index.
+	 * @return array<string, mixed>
+	 */
+	private function get_recorded_action_args( int $index ): array {
+		$this->assertArrayHasKey( $index, $this->calls );
+
+		return $this->calls[ $index ][2];
+	}
+
+	/**
+	 * An active contract.
+	 *
+	 * @param int|null $customer_id    Customer user id.
+	 * @param string   $extension_slug Owning extension.
+	 */
+	private function create_contract( ?int $customer_id, string $extension_slug = self::EXTENSION_SLUG ): ContractView {
+		return Contracts::create(
+			array(
+				'extension_slug' => $extension_slug,
+				'status'         => 'active',
+				'customer_id'    => $customer_id,
+			)
+		);
+	}
+
+	/**
+	 * Build a POST to the action route.
+	 *
+	 * @param int                  $contract_id    Contract id.
+	 * @param string               $action         Action slug.
+	 * @param array<string, mixed> $action_args    Action args.
+	 * @param string               $extension_slug Extension slug sent in the body.
+	 */
+	private function action_request( int $contract_id, string $action, array $action_args = array(), string $extension_slug = self::EXTENSION_SLUG ): WP_REST_Request {
+		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $contract_id . '/action' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			(string) wp_json_encode(
+				array(
+					'action'         => $action,
+					'extension_slug' => $extension_slug,
+					'action_args'    => (object) $action_args,
+				)
+			)
+		);
+
+		return $request;
+	}
+
+	/**
+	 * POST an action.
+	 *
+	 * @param int                  $contract_id    Contract id.
+	 * @param string               $action         Action slug.
+	 * @param array<string, mixed> $action_args    Action args.
+	 * @param string               $extension_slug Extension slug sent in the body.
+	 */
+	private function run_action( int $contract_id, string $action, array $action_args = array(), string $extension_slug = self::EXTENSION_SLUG ): WP_REST_Response {
+		return rest_get_server()->dispatch( $this->action_request( $contract_id, $action, $action_args, $extension_slug ) );
+	}
+
+	/**
+	 * GET the action list.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function list_actions( int $contract_id ): WP_REST_Response {
+		return rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/' . $contract_id . '/action' ) );
+	}
+
+	/**
+	 * Create a user with a role.
+	 *
+	 * @param string $role Role slug.
+	 */
+	private function create_user( string $role ): int {
+		$user_id = self::factory()->user->create( array( 'role' => $role ) );
 		$this->assertIsInt( $user_id );
 
 		return $user_id;
 	}
 
 	/**
-	 * Seed a contract for a customer.
+	 * Get response data as an array.
 	 *
-	 * @param int    $customer_id Owning customer.
-	 * @param string $status      Status.
+	 * @param WP_REST_Response $response Response.
+	 * @return array<array-key, mixed>
 	 */
-	private function seed( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
-		$contract = Contract::create(
-			array(
-				'customer_id'          => $customer_id,
-				'status'               => $status,
-				'currency'             => 'USD',
-				'selling_plan_id'      => 1,
-				'payment_method_title' => 'Visa ending in 4242',
-				'start_gmt'            => '2026-01-01 00:00:00',
-				'next_payment_gmt'     => '2099-02-01 00:00:00',
-				'billing_total'        => '19.99',
-			)
-		);
-
-		return $this->contracts->insert( $contract );
-	}
-
-	public function test_anonymous_request_is_unauthorized(): void {
-		wp_set_current_user( 0 );
-		$id = $this->seed( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
-
-		$this->assertSame( 401, $response->get_status() );
-		// The contract is untouched.
-		$this->assertSame( ContractStatus::ACTIVE, $this->reload( $id )->get_status() );
-	}
-
-	public function test_unknown_contract_is_not_found_indistinguishably_from_foreign(): void {
-		wp_set_current_user( $this->other_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/4242424/hold' ) );
-
-		$this->assertSame( 404, $response->get_status() );
-	}
-
-	public function test_options_exposes_the_action_schema(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'OPTIONS', self::BASE . '/' . $id . '/hold' ) );
-
-		$this->assertSame( 200, $response->get_status() );
-		$data = $this->data_array( $response );
-		$this->assertIsArray( $data['schema'] );
-		$this->assertSame( 'subscription_engine_contract_action', $data['schema']['title'] );
-	}
-
-	public function test_hold_action_on_a_foreign_contract_is_not_found(): void {
-		wp_set_current_user( $this->other_id );
-		$id = $this->seed( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
-
-		$this->assertSame( 404, $response->get_status() );
-		// The contract is untouched.
-		$this->assertSame( ContractStatus::ACTIVE, $this->reload( $id )->get_status() );
-	}
-
-	public function test_owner_hold_transitions_and_returns_the_domain_summary(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
-
-		$this->assertSame( 200, $response->get_status() );
-		$data = $this->data_array( $response );
-		// The action response is a domain summary: id + resulting status slug,
-		// no view-model fields (labels, formatted values, visibility flags).
-		$this->assertSame( $id, $data['id'] );
-		$this->assertSame( ContractStatus::ON_HOLD, $data['status'] );
-		$this->assertArrayNotHasKey( 'status_label', $data );
-		$this->assertArrayNotHasKey( 'related_orders', $data );
-		$this->assertSame( ContractStatus::ON_HOLD, $this->reload( $id )->get_status() );
-	}
-
-	public function test_owner_reactivate_transitions_and_returns_the_domain_summary(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id, ContractStatus::ON_HOLD );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/reactivate' ) );
-
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( ContractStatus::ACTIVE, $this->data_array( $response )['status'] );
-		$this->assertSame( ContractStatus::ACTIVE, $this->reload( $id )->get_status() );
-	}
-
-	public function test_reactivate_on_an_already_active_contract_is_a_conflict(): void {
-		// An active contract must never reach the date recompute (a past-due date
-		// rolled forward would skip a charge); the guard maps to a 409.
-		wp_set_current_user( $this->owner_id );
-		$id     = $this->seed( $this->owner_id, ContractStatus::ACTIVE );
-		$before = $this->reload( $id )->get_next_payment_gmt();
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/reactivate' ) );
-
-		$this->assertSame( 409, $response->get_status() );
-		$this->assertSame( $before, $this->reload( $id )->get_next_payment_gmt(), 'The schedule is untouched.' );
-	}
-
-	public function test_cancel_at_period_end_winds_down_the_contract(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id );
-
-		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/cancel' );
-		$request->set_body_params( array( 'at_period_end' => true ) );
-		$response = rest_get_server()->dispatch( $request );
-
-		$this->assertSame( 200, $response->get_status() );
-		// The summary status tells the caller which cancel mode landed.
-		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $this->data_array( $response )['status'] );
-		$this->assertSame( ContractStatus::PENDING_CANCELLATION, $this->reload( $id )->get_status() );
-	}
-
-	public function test_cancel_now_terminates_the_contract(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id, ContractStatus::ON_HOLD );
-
-		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/cancel' );
-		$request->set_body_params( array( 'at_period_end' => false ) );
-		$response = rest_get_server()->dispatch( $request );
-
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( ContractStatus::CANCELLED, $this->data_array( $response )['status'] );
-		$this->assertSame( ContractStatus::CANCELLED, $this->reload( $id )->get_status() );
-	}
-
-	public function test_illegal_transition_is_a_conflict(): void {
-		// There is no status state machine: each flow guards its own preconditions, and
-		// a precondition the current state does not meet (holding a cancelled contract)
-		// surfaces as a 409.
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id, ContractStatus::CANCELLED );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
-
-		$this->assertSame( 409, $response->get_status() );
-	}
-
-	public function test_hold_on_an_expired_contract_is_a_conflict(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id, ContractStatus::EXPIRED );
-
-		$response = rest_get_server()->dispatch( new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/hold' ) );
-
-		$this->assertSame( 409, $response->get_status() );
-		$stored = $this->reload( $id );
-		$this->assertSame( ContractStatus::EXPIRED, $stored->get_status() );
-		$this->assertSame( '2099-02-01 00:00:00', $stored->get_next_payment_gmt(), 'The rejected action writes nothing.' );
-	}
-
-	public function test_cancel_on_an_expired_contract_is_a_conflict(): void {
-		wp_set_current_user( $this->owner_id );
-		$id = $this->seed( $this->owner_id, ContractStatus::EXPIRED );
-
-		$request = new WP_REST_Request( 'POST', self::BASE . '/' . $id . '/cancel' );
-		$request->set_body_params( array( 'at_period_end' => false ) );
-		$response = rest_get_server()->dispatch( $request );
-
-		$this->assertSame( 409, $response->get_status() );
-		$stored = $this->reload( $id );
-		$this->assertSame( ContractStatus::EXPIRED, $stored->get_status() );
-		$this->assertSame( '2099-02-01 00:00:00', $stored->get_next_payment_gmt(), 'The rejected action writes nothing.' );
-	}
-
-	/**
-	 * The response body as an array (asserts it is one, narrowing offset access).
-	 *
-	 * @param WP_REST_Response $response The dispatched response.
-	 * @return array<int|string, mixed>
-	 */
-	private function data_array( WP_REST_Response $response ): array {
+	private function response_data( WP_REST_Response $response ): array {
 		$data = $response->get_data();
 		$this->assertIsArray( $data );
 
@@ -262,14 +725,11 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Reload a contract, asserting it still exists (narrows the nullable read).
+	 * Dispatch a GET for one contract.
 	 *
-	 * @param int $id Contract id.
+	 * @param int $contract_id Contract id.
 	 */
-	private function reload( int $id ): Contract {
-		$contract = $this->contracts->find( $id );
-		$this->assertInstanceOf( Contract::class, $contract );
-
-		return $contract;
+	private function get( int $contract_id ): WP_REST_Response {
+		return rest_get_server()->dispatch( new WP_REST_Request( 'GET', self::BASE . '/' . $contract_id ) );
 	}
 }

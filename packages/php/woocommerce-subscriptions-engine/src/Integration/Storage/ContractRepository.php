@@ -1,15 +1,19 @@
 <?php
 /**
- * Persistence for the live {@see Contract} (row + items / addresses / meta) plus
- * targeted cycle access. Owns the $wpdb access across the contract-side tables.
+ * Persistence for the live {@see Contract} (row + items / addresses) plus contract
+ * meta and targeted cycle access. Owns the $wpdb access across the contract-side tables.
  *
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_chain_head()}, {@see self::max_count()},
- * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
- * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
- * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
+ * through purpose-built reads ({@see self::find_chain_head()}, etc.), appended one at a
+ * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
+ * ({@see self::claim_cycle()}, {@see self::transition_cycle()}).
+ * There is no whole-graph `save()`. Cycle snapshot ids are stored as given and their
+ * value objects attached on read; nothing writes snapshot rows on append.
+ * Meta is read and written only through the meta methods ({@see self::add_meta()} etc.),
+ * so a whole-contract write never rewrites meta. It opens no transactions and keeps no
+ * object cache; a caller may wrap several calls in its own transaction.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage
  */
@@ -24,7 +28,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -36,48 +40,12 @@ defined( 'ABSPATH' ) || exit;
 final class ContractRepository {
 
 	/**
-	 * Address columns persisted to the addresses table.
-	 *
-	 * @var array<int, string>
-	 */
-	private const ADDRESS_COLUMNS = array(
-		'first_name',
-		'last_name',
-		'company',
-		'address_1',
-		'address_2',
-		'city',
-		'state',
-		'postcode',
-		'country',
-		'email',
-		'phone',
-	);
-
-	/**
 	 * Logger source tag.
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
-	 * The per-contract typed snapshot store.
-	 *
-	 * @var SnapshotStore
-	 */
-	private $snapshots;
-
-	/**
-	 * Build a repository over the given snapshot store.
-	 *
-	 * @param SnapshotStore|null $snapshots Snapshot store; a default instance is
-	 *                                      created when omitted.
-	 */
-	public function __construct( ?SnapshotStore $snapshots = null ) {
-		$this->snapshots = $snapshots ?? new SnapshotStore();
-	}
-
-	/**
-	 * Insert a new contract and its items, addresses, and meta.
+	 * Insert a new contract and its items and addresses.
 	 *
 	 * Durable-intent-first (parent row, then children) and the seam a later
 	 * transaction-handling change wraps; it does not open a transaction now (a naive
@@ -86,7 +54,7 @@ final class ContractRepository {
 	 *
 	 * @param Contract $contract Contract to insert.
 	 * @return int The new contract id.
-	 * @throws \RuntimeException If the contract insert fails.
+	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
 	public function insert( Contract $contract ): int {
 		global $wpdb;
@@ -115,56 +83,21 @@ final class ContractRepository {
 
 		$this->insert_items( $id, $contract->get_items() );
 		$this->insert_addresses( $id, $contract->get_addresses() );
-		$this->insert_meta( $id, $contract->get_meta() );
 
 		return $id;
 	}
 
 	/**
-	 * Insert a contract together with its signup cycle (cycle 1) - the checkout
-	 * create path.
-	 *
-	 * Durable-intent-first: insert the contract -> freeze the signup cycle's snapshots
-	 * (which need the contract id) -> record those ids on the contract and update its
-	 * row -> insert cycle 1 (which carries the same snapshot ids by construction). The
-	 * cycle is taken as built by the caller; this only stamps its contract id, resolves
-	 * its snapshots, and inserts it. The seam a later transaction-handling change wraps.
-	 *
-	 * @param Contract $contract The contract to insert.
-	 * @param Cycle    $cycle    The signup cycle (cycle 1), carrying its snapshot value objects.
-	 * @return int The new contract id.
-	 * @throws \RuntimeException If a contract, snapshot, or cycle write fails.
-	 */
-	public function insert_with_origin_cycle( Contract $contract, Cycle $cycle ): int {
-		$contract_id = $this->insert( $contract );
-
-		// First cycle in its chain: no previous to copy-forward from, so its snapshots
-		// are inserted fresh and their ids stamped onto it.
-		$cycle->set_contract_id( $contract_id );
-		$this->resolve_cycle_snapshots( $cycle, null );
-
-		// Record the signup snapshots as the contract's latest/live references, then
-		// persist the contract row before the cycle row (durable-intent-first).
-		$contract->set_plan_snapshot_id( $cycle->get_plan_snapshot_id() );
-		$contract->set_items_snapshot_id( $cycle->get_items_snapshot_id() );
-		$this->update_contract_row( $contract );
-
-		$this->insert_cycle( $cycle );
-
-		return $contract_id;
-	}
-
-	/**
 	 * Persist changes to an existing contract and its child rows.
 	 *
-	 * Updates the contract row in place, then reconciles items / addresses / meta only
-	 * when they differ - so the common renewal-cache write (status, next_payment_gmt)
-	 * does not churn child rows. The write seam a later transaction-handling change
-	 * wraps; no transaction now (see {@see self::insert()}).
+	 * Updates the contract row in place, then reconciles items / addresses only when
+	 * they differ (meta is never touched). A `next_payment_gmt` that differs from the stored
+	 * one (including null) releases the due-dispatch claim; re-saving the stored moment keeps
+	 * it. No transaction (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
-	 * @throws \RuntimeException If the contract has no id, or its row no longer exists.
+	 * @throws \RuntimeException If the contract has no id, its row no longer exists, or a write fails.
 	 */
 	public function update( Contract $contract ): bool {
 		$id = $contract->get_id();
@@ -174,78 +107,65 @@ final class ContractRepository {
 
 		$this->assert_contract_exists( $id );
 
-		$this->update_contract_row( $contract );
+		$this->write_contract_row( $id, $contract->to_storage() );
 		$this->sync_children( $contract );
 
 		return true;
 	}
 
 	/**
-	 * Update the contract row (and children) ONLY while its stored status still matches
-	 * `$expected_status` - the optimistic compare-and-set for status-sensitive writes,
-	 * mirroring {@see self::transition_cycle_status()} on the cycle side.
+	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
+	 * and replace items / addresses when named. Unnamed columns keep their stored
+	 * values, so a concurrent write to them is not reverted. The named columns land in one
+	 * statement, together or not at all. Writing a `next_payment_gmt` that differs from the
+	 * stored one (including null) also releases the due-dispatch claim; re-saving the stored
+	 * moment keeps it. Existence is checked only when the row write changes nothing.
 	 *
-	 * The lifecycle transitions (hold / reactivate / cancel) and the renewal engine's
-	 * schedule advances all read-validate-write the contract row; unconditioned, the
-	 * slower writer silently clobbers the faster one - a customer cancel lost to a
-	 * concurrent settle would resurrect the contract into future billing. Keying the
-	 * write on the status the caller read makes the race lose LOUDLY: no row matches,
-	 * false comes back, and the caller reports a conflict or re-reads instead of
-	 * overwriting.
-	 *
-	 * A zero-row result is disambiguated with a follow-up status read (an update whose
-	 * values happen to be byte-identical also reports zero rows), so false always means
-	 * "the stored status is no longer `$expected_status`, or the row is gone" - never a
-	 * false conflict.
-	 *
-	 * @param Contract $contract        Contract to write. Must have an id.
-	 * @param string   $expected_status The status the caller read; the write lands only while the row still carries it.
-	 * @return bool True when the row was written (children synced); false when the condition missed.
-	 * @throws \RuntimeException If the contract has no id, or the write itself errors.
+	 * @param Contract           $contract Contract carrying the values. Must have an id.
+	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
+	 * @return bool False when the contract row no longer exists (nothing is written).
+	 * @throws \InvalidArgumentException If a field is not a writable contract column.
+	 * @throws \RuntimeException If the contract has no id or the write fails.
 	 */
-	public function update_if_status( Contract $contract, string $expected_status ): bool {
-		global $wpdb;
-
+	public function update_fields( Contract $contract, array $fields ): bool {
 		$id = $contract->get_id();
 		if ( null === $id ) {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge(
-				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array(
-				'id'     => (int) $id,
-				'status' => $expected_status,
-			)
-		);
-
-		if ( false === $updated ) {
-			throw new \RuntimeException( 'Failed to update contract.' );
-		}
-
-		if ( 0 === $updated ) {
-			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$current = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d", $id ) );
-			if ( $expected_status !== $current ) {
-				return false;
+		$storage = $contract->to_storage();
+		$columns = array();
+		foreach ( $fields as $field ) {
+			if ( 'items' === $field || 'addresses' === $field ) {
+				continue;
 			}
+			if ( 'extension_slug' === $field || ! array_key_exists( $field, $storage ) ) {
+				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update contract field "%s".', $field ) ) );
+			}
+			$columns[ $field ] = $storage[ $field ];
 		}
 
-		$this->sync_children( $contract );
+		$updated = $this->write_contract_row( $id, $columns );
+
+		// Zero changed rows: a missing row, or identical values written within the same second.
+		if ( 0 === $updated && ! $this->exists( $id ) ) {
+			return false;
+		}
+
+		if ( in_array( 'items', $fields, true ) ) {
+			$this->replace_items( $id, $contract->get_items() );
+		}
+
+		if ( in_array( 'addresses', $fields, true ) ) {
+			$this->replace_addresses( $id, $contract->get_addresses() );
+		}
 
 		return true;
 	}
 
 	/**
-	 * Fetch a contract by id, hydrating the live entity with its items / addresses /
-	 * meta, plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
+	 * Fetch a contract by id, hydrating the live entity with its items / addresses,
+	 * plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
 	 * `plan_snapshot_id` - so every full read carries the billing cadence off the
 	 * snapshot, with no live {@see PlanRepository} join. Cycles are NOT hydrated - they
 	 * are reached on demand through the targeted cycle reads. For list / guard paths
@@ -287,24 +207,23 @@ final class ContractRepository {
 			return null;
 		}
 
-		return $this->hydrate_row( self::as_string_keyed( $row ) );
+		return $this->hydrate_row( Coercion::coerce_string_keyed( $row ) );
 	}
 
 	/**
 	 * Hydrate a fetched contract row into the full live entity: frozen plan terms,
-	 * items, addresses, and meta - the one full-read construction path.
+	 * items and addresses - the one full-read construction path.
 	 *
 	 * @param array<string, mixed> $row Contract row.
 	 */
 	private function hydrate_row( array $row ): Contract {
-		$id = ScalarCoercion::coerce_int( $row['id'] ?? 0 );
+		$id = Coercion::coerce_int( $row['id'] ?? 0 );
 
 		return Contract::from_storage(
 			$row,
-			$this->find_plan_snapshot( ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
+			$this->find_plan_snapshot( Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null ) ),
 			$this->find_items( $id ),
-			$this->find_addresses( $id ),
-			$this->find_meta( $id )
+			$this->find_addresses( $id )
 		);
 	}
 
@@ -525,11 +444,11 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$status = ScalarCoercion::coerce_string( $row['status'] ?? '' );
+			$status = Coercion::coerce_string( $row['status'] ?? '' );
 			// A row whose stored status is not registered is ignored, not added as a
 			// stray key - the map stays exactly ContractStatus::get_all().
 			if ( array_key_exists( $status, $counts ) ) {
-				$counts[ $status ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+				$counts[ $status ] = Coercion::coerce_int( $row['total'] ?? 0 );
 			}
 		}
 
@@ -561,7 +480,7 @@ final class ContractRepository {
 			$total = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE {$where_sql}", $params ) );
 		}
 
-		return ScalarCoercion::coerce_int( $total );
+		return Coercion::coerce_int( $total );
 	}
 
 	/**
@@ -607,9 +526,9 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$cid = ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 );
+			$cid = Coercion::coerce_int( $row['contract_id'] ?? 0 );
 			if ( array_key_exists( $cid, $counts ) ) {
-				$counts[ $cid ] = ScalarCoercion::coerce_int( $row['total'] ?? 0 );
+				$counts[ $cid ] = Coercion::coerce_int( $row['total'] ?? 0 );
 			}
 		}
 
@@ -628,13 +547,13 @@ final class ContractRepository {
 		$clean_rows = array();
 		foreach ( $rows as $row ) {
 			if ( is_array( $row ) ) {
-				$clean_rows[] = self::as_string_keyed( $row );
+				$clean_rows[] = Coercion::coerce_string_keyed( $row );
 			}
 		}
 
 		$snapshot_ids = array();
 		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$snapshot_id = Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
 			if ( null !== $snapshot_id ) {
 				$snapshot_ids[ $snapshot_id ] = $snapshot_id;
 			}
@@ -643,7 +562,7 @@ final class ContractRepository {
 
 		$contracts = array();
 		foreach ( $clean_rows as $row ) {
-			$snapshot_id = ScalarCoercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
+			$snapshot_id = Coercion::coerce_nullable_int( $row['plan_snapshot_id'] ?? null );
 			$contracts[] = Contract::from_storage( $row, null !== $snapshot_id ? ( $snapshots[ $snapshot_id ] ?? null ) : null );
 		}
 
@@ -651,39 +570,33 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
+	 * Contracts due at `$now`, never-notified first, then least recently notified - the due dispatcher's scan.
 	 *
-	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
-	 * (`extension_slug`) is one of `$owners` - the dispatcher passes the registered consumers.
-	 * A contract with a null or unlisted owner waits untouched (its next-due moment is never
-	 * rewritten) until its owner is listed; with no owners the scan returns nothing. A null
-	 * `next_payment_gmt` never matches the `<=` comparison.
+	 * A contract is due when its `next_payment_gmt` is at or before `$now`, its owner
+	 * (`extension_slug`) is one of `$owners`, the engine keeps its schedule (`schedule_source`
+	 * is {@see Contract::SCHEDULE_SOURCE_ENGINE}), and it carries no live due-dispatch claim.
+	 * A contract whose schedule a gateway or extension keeps is never selected: that party
+	 * triggers its own renewals. Status is not read: whether a due contract acts is its
+	 * owner's decision. Driven by the `due_owner (extension_slug, next_payment_gmt)` index;
+	 * the schedule source and the claim are residual filters.
 	 *
-	 * Interim: moves out of the engine with the renewal flow (the predicates below; the scan
-	 * then stays owner-scoped only). Until then the scan's only caller is the engine renewal
-	 * flow, so it keeps just what that flow can charge now:
+	 * `$now` is the due cutoff only; claim liveness is read on the database clock
+	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_contract()} stamps claims on.
 	 *
-	 * - the contract is `active` (status is otherwise opaque engine data; a contract in any other
-	 *   status, including an extension-registered one, is simply not selected and its next-due
-	 *   moment is left as is);
-	 * - the contract is not gateway-scheduled (the gateway owns its renewal);
-	 * - its head cycle is chargeable now:
+	 * Fairness: a handler is expected to move or clear the due moment it was notified for
+	 * (writing a different `next_payment_gmt` releases the claim). A contract whose handler
+	 * leaves it in place keeps its expired claim. Rows sort by that claim, oldest first, with
+	 * a null claim (never notified for the current due moment) ahead of all of them, then by
+	 * due moment: fresh contracts lead, and among repeats the least recently notified goes
+	 * next, so contracts stuck on an older due moment cannot starve a later-due retry. The
+	 * sort reads the owners' whole due backlog and filesorts it rather than walking
+	 * `due_owner` in order; measured cheap at realistic backlogs (about 13 ms warm for
+	 * 20,000 due rows) and acceptable before the schema freeze. `LIMIT` bounds the result.
 	 *
-	 *   - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
-	 *   - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
-	 *
-	 * Any other head (`failed` awaiting dunning, `processing` awaiting its gateway, `pending` with
-	 * a live lease) is excluded in SQL, so `LIMIT` counts only actionable rows and a cluster of
-	 * non-actionable heads cannot starve healthy renewals. Driven by the
-	 * `due_owner (extension_slug, next_payment_gmt)` index (status and `schedule_source` are
-	 * residual filters); the head cycle is joined per candidate
-	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
-	 * does not re-load the head to decide what to bill.
-	 *
-	 * @param DateTimeImmutable  $now   The cutoff moment; contracts due at or before it.
+	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
-	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
+	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, never-notified first, then least recently notified, then oldest-due.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -698,41 +611,22 @@ final class ContractRepository {
 		global $wpdb;
 
 		$contracts          = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$cycles             = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$cutoff             = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$cutoff             = self::format_utc( $now );
 		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
 
-		$args = array_merge(
-			array( Cycle::KIND_BILLING, Cycle::KIND_BILLING ),
-			$owners,
-			array(
-				ContractStatus::ACTIVE,
-				Contract::SCHEDULE_SOURCE_GATEWAY,
-				$cutoff,
-				CycleStatus::BILLED,
-				$cutoff,
-				CycleStatus::PENDING,
-				$cutoff,
-				$limit,
-			)
-		);
+		$args = array_merge( $owners, array( $cutoff, Contract::SCHEDULE_SOURCE_ENGINE, $limit ) );
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
-		// The owner placeholder list is generated, one `%s` per registered owner in `$args`.
+		// The owner placeholder list is generated, one `%s` per owner in `$args`.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
-				FROM {$contracts} c
-				JOIN {$cycles} cy
-				  ON cy.contract_id = c.id AND cy.kind = %s
-				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
-				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
-				  AND (
-				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
-				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
-				      )
-				ORDER BY c.next_payment_gmt ASC, c.id ASC
+				"SELECT id, extension_slug, next_payment_gmt
+				FROM {$contracts}
+				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
+				  AND schedule_source = %s
+				  AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )
+				ORDER BY claimed_until ASC, next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
 			),
@@ -740,11 +634,11 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
+		// A failed scan otherwise reads exactly like "nothing due" and dispatch stalls
 		// store-wide with no signal; the return stays empty either way.
 		if ( '' !== $wpdb->last_error ) {
 			wc_get_logger()->error(
-				sprintf( 'ContractRepository::find_due(): due-index scan failed - renewals may stall until this is fixed. %s', $wpdb->last_error ),
+				sprintf( 'ContractRepository::find_due(): due-index scan failed - due dispatch may stall until this is fixed. %s', $wpdb->last_error ),
 				array( 'source' => self::LOG_SOURCE )
 			);
 		}
@@ -754,16 +648,59 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$head_count = $row['head_count'] ?? null;
-			$result[]   = new RenewalCandidate(
-				ScalarCoercion::coerce_int( $row['contract_id'] ?? 0 ),
-				null === $head_count ? null : ScalarCoercion::coerce_int( $head_count ),
-				ScalarCoercion::coerce_string( $row['head_status'] ?? '' ),
-				ScalarCoercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+			$result[] = array(
+				'id'               => Coercion::coerce_int( $row['id'] ?? 0 ),
+				'extension_slug'   => Coercion::coerce_string( $row['extension_slug'] ?? '' ),
+				'next_payment_gmt' => Coercion::coerce_string( $row['next_payment_gmt'] ?? '' ),
 			);
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Take the due-dispatch claim on a contract for `$ttl_seconds`.
+	 *
+	 * One conditional write: it lands only while the contract still carries the
+	 * `next_payment_gmt` the caller read and no live claim, so of two overlapping
+	 * dispatchers exactly one wins. The claim is stamped and its liveness compared on the
+	 * database clock (`UTC_TIMESTAMP()`) at the moment of the write, the same clock cycle
+	 * claims use, so a claim taken late in a slow batch still lives its full TTL. Writing a
+	 * different `next_payment_gmt` (or null) releases the claim; re-saving the same moment
+	 * keeps it (see {@see self::update_fields()} and {@see self::update()}).
+	 *
+	 * @param int    $contract_id           Contract id.
+	 * @param string $seen_next_payment_gmt The `next_payment_gmt` the caller read (UTC, `Y-m-d H:i:s`).
+	 * @param int    $ttl_seconds           Claim lifetime in seconds.
+	 * @return bool True when this call took the claim.
+	 */
+	public function claim_contract( int $contract_id, string $seen_next_payment_gmt, int $ttl_seconds ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )
+				WHERE id = %d AND next_payment_gmt = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
+				$ttl_seconds,
+				$contract_id,
+				$seen_next_payment_gmt
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return 1 === $updated;
+	}
+
+	/**
+	 * Format a moment as a UTC `Y-m-d H:i:s` column value.
+	 *
+	 * @param DateTimeImmutable $moment Moment to format.
+	 */
+	private static function format_utc( DateTimeImmutable $moment ): string {
+		return $moment->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
 
 	/**
@@ -779,7 +716,7 @@ final class ContractRepository {
 	 * args, so the shape can widen without a signature change. Ordered by id DESC (monotonic
 	 * with creation) so the list is newest-first and stable for paging.
 	 *
-	 * Each row is row-only (no items / addresses / meta), but its frozen plan terms are
+	 * Each row is row-only (no items / addresses), but its frozen plan terms are
 	 * hydrated ({@see Contract::get_plan_snapshot()}) so the list rows carry the billing
 	 * cadence off the snapshot - batch-loaded in ONE `IN()` read for the whole page, not
 	 * one read per row.
@@ -790,17 +727,28 @@ final class ContractRepository {
 	 *
 	 *     @type int    $limit  Maximum contracts to return. Default 20.
 	 *     @type int    $offset Rows to skip (for paging). Default 0.
-	 *     @type string $status Optional status filter (one of {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus}).
+	 *     @type string|string[] $status Optional status filter: one status or a list of them
+	 *                                   ({@see ContractStatus}). Unregistered values are dropped;
+	 *                                   ignored when none remain.
 	 * }
 	 * @return array<int, Contract> Contracts the customer owns, newest first.
 	 */
 	public function find_by_customer_id( int $customer_id, ?array $args = null ): array {
 		global $wpdb;
 
-		$args   = $args ?? array();
-		$limit  = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
-		$offset = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
-		$status = isset( $args['status'] ) && is_string( $args['status'] ) && '' !== $args['status'] ? $args['status'] : null;
+		$args     = $args ?? array();
+		$limit    = isset( $args['limit'] ) && is_numeric( $args['limit'] ) ? (int) $args['limit'] : 20;
+		$offset   = isset( $args['offset'] ) && is_numeric( $args['offset'] ) ? (int) $args['offset'] : 0;
+		$statuses = array_values(
+			array_unique(
+				array_filter(
+					(array) ( $args['status'] ?? array() ),
+					static function ( $status ): bool {
+						return is_string( $status ) && ContractStatus::is_registered( $status );
+					}
+				)
+			)
+		);
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
@@ -809,9 +757,9 @@ final class ContractRepository {
 		// interpolated).
 		$where  = 'customer_id = %d';
 		$params = array( $customer_id );
-		if ( null !== $status ) {
-			$where   .= ' AND status = %s';
-			$params[] = $status;
+		if ( array() !== $statuses ) {
+			$where .= ' AND status IN (' . implode( ', ', array_fill( 0, count( $statuses ), '%s' ) ) . ')';
+			$params = array_merge( $params, $statuses );
 		}
 		$params[] = $limit;
 		$params[] = $offset;
@@ -830,6 +778,24 @@ final class ContractRepository {
 			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
+	}
+
+	/**
+	 * Contracts whose `origin_order_id` is `$order_id`, oldest first. Row-only reads
+	 * (no items / addresses) with their frozen plan terms batch-hydrated.
+	 *
+	 * @param int $order_id Origin order id.
+	 * @return array<int, Contract>
+	 */
+	public function find_by_origin_order( int $order_id ): array {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE origin_order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
 	}
@@ -879,155 +845,311 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Append a cycle to its chain `(contract_id, kind)`, copy-forwarding snapshots.
+	 * Add a meta row for a contract, like `add_post_meta()`.
 	 *
-	 * Resolves the cycle's snapshots (reused from `$previous` when unchanged, else
-	 * inserted fresh) then inserts the cycle row and stamps the generated id back onto
-	 * the entity. The seam a later transaction-handling change wraps.
-	 *
-	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
-	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
-	 *                             snapshot ids should be considered; null for the first cycle.
-	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
-	 *                                 position is already claimed - the create-as-claim race).
-	 * @throws \RuntimeException If a snapshot write or the cycle insert fails for any
-	 *                          other reason (the database error is in the message).
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       Meta value; serialized when not scalar.
+	 * @param bool   $unique      When true, add nothing if the key already exists. Advisory:
+	 *                            checked before the insert with no unique index.
+	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If the insert fails.
 	 */
-	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
-		$this->resolve_cycle_snapshots( $cycle, $previous );
-		$this->insert_cycle( $cycle );
+	public function add_meta( int $contract_id, string $key, $value, bool $unique = false ): ?int {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
+		}
+
+		if ( $unique && array() !== $this->find_meta_values( $contract_id, $key ) ) {
+			return null;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$inserted = $wpdb->insert(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
+			array(
+				'contract_id' => $contract_id,
+				'meta_key'    => $key,
+				'meta_value'  => maybe_serialize( $value ),
+			)
+		);
+
+		if ( false === $inserted ) {
+			throw new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return (int) $wpdb->insert_id;
 	}
 
 	/**
-	 * Update an existing cycle row.
+	 * Update a contract's meta rows for `$key`, like `update_post_meta()`: adds a row when
+	 * the key is absent, else rewrites every row for the key, or only the rows holding
+	 * `$prev_value`. The absent-key check runs before the write with no unique index.
 	 *
-	 * @param Cycle $cycle Cycle to update. Must have an id whose row still exists.
-	 * @throws \RuntimeException If the cycle has no id, the update fails, or its row
-	 *                          no longer exists (stale id or concurrent delete).
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       New value; serialized when not scalar.
+	 * @param mixed  $prev_value  Only update rows holding this value; null updates all rows for the key.
+	 *                            Any other value ('' and false included) matches literally.
+	 * @return bool True when a row was added or at least one row changed.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If a write fails.
 	 */
-	public function update_cycle( Cycle $cycle ): void {
+	public function update_meta( int $contract_id, string $key, $value, $prev_value = null ): bool {
 		global $wpdb;
 
-		$id = $cycle->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot update a cycle that has no id. Use ContractRepository::append_cycle() for a new cycle.' );
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
+		}
+
+		if ( array() === $this->find_meta_values( $contract_id, $key ) ) {
+			$this->add_meta( $contract_id, $key, $value );
+			return true;
+		}
+
+		$where = array(
+			'contract_id' => $contract_id,
+			'meta_key'    => $key,
+		);
+		if ( null !== $prev_value ) {
+			$where['meta_value'] = maybe_serialize( $prev_value );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$updated = $wpdb->update(
+			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
+			array( 'meta_value' => maybe_serialize( $value ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			$where
+		);
+
+		if ( false === $updated ) {
+			throw new \RuntimeException( sprintf( 'Failed to update contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return $updated > 0;
+	}
+
+	/**
+	 * Delete a contract's meta rows for `$key`, like `delete_post_meta()`.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @param mixed  $value       Only delete rows holding this value; null deletes every row for the key.
+	 *                            Any other value ('' and false included) matches literally.
+	 * @return bool True when at least one row was deleted.
+	 * @throws \InvalidArgumentException If `$key` is empty.
+	 * @throws \RuntimeException If the delete fails.
+	 */
+	public function delete_meta( int $contract_id, string $key, $value = null ): bool {
+		global $wpdb;
+
+		if ( '' === $key ) {
+			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
+		}
+
+		$where = array(
+			'contract_id' => $contract_id,
+			'meta_key'    => $key,
+		);
+		if ( null !== $value ) {
+			$where['meta_value'] = maybe_serialize( $value );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ),
-			array_merge(
-				$cycle->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array( 'id' => (int) $id )
-		);
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), $where );
 
-		// date_updated_gmt always changes, so a matched row reports 1 affected row; 0
-		// means no row matched (stale id or concurrent delete) and must fail loudly.
-		if ( false === $updated || 0 === $updated ) {
-			throw new \RuntimeException( 'Cycle row not found during update (concurrent delete or stale id).' );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
+
+		return $deleted > 0;
 	}
 
 	/**
-	 * Atomically reclaim a stalled `pending` cycle whose crash-recovery lease has expired,
-	 * extending the lease by `$lease_ttl_seconds`. The compare-and-set that makes reclaim
-	 * race-safe: the predicate keys on `claimed_until <= now`, so among concurrent workers
-	 * only the first to run the UPDATE matches a row - it writes the future lease, after
-	 * which every other worker's `<=` predicate matches zero rows.
+	 * Read contract meta (WordPress `get_post_meta()` semantics), values unserialized,
+	 * oldest row first.
 	 *
-	 * Both the expiry predicate and the fresh lease anchor on the DATABASE clock
-	 * (`UTC_TIMESTAMP()`) - the one clock every worker shares - so a worker whose PHP clock
-	 * runs fast cannot take over a lease that is still live in real terms, and the lease it
-	 * stamps means the same thing to every other worker.
-	 *
-	 * @param int $cycle_id          The stalled cycle's id.
-	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
-	 * @return bool True when this caller won the reclaim (exactly one row updated); false
-	 *              when another worker already reclaimed it (zero rows matched).
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key; empty for every key.
+	 * @param bool   $single      With a key: return the first value only.
+	 * @return mixed Empty key: `array<string, array<int, mixed>>` of all keys. Key + `$single`:
+	 *               the first value, or '' when absent. Key only: the list of values (`[]` when absent).
 	 */
-	public function reclaim_expired_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
+	public function get_meta( int $contract_id, string $key = '', bool $single = false ) {
+		if ( '' === $key ) {
+			$all = array();
+			foreach ( $this->find_meta_rows( $contract_id, null ) as $row ) {
+				$all[ $row['meta_key'] ][] = maybe_unserialize( $row['meta_value'] );
+			}
+
+			return $all;
+		}
+
+		$values = $this->find_meta_values( $contract_id, $key );
+
+		if ( $single ) {
+			return array() === $values ? '' : $values[0];
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Append a cycle to its chain `(contract_id, kind)`.
+	 *
+	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), then inserts
+	 * the cycle row and stamps the generated id back onto the entity. The chain's
+	 * UNIQUE indexes guard concurrent appends and duplicate counts. The seam a later
+	 * transaction-handling change wraps.
+	 *
+	 * With `$claim_seconds`, the cycle is appended claimed: the same INSERT stamps
+	 * `claimed_until` from the database clock, like {@see self::claim_cycle()} and
+	 * {@see self::transition_cycle()}, so the claim and the row land together. The entity's
+	 * own claim value is never written.
+	 *
+	 * @param Cycle    $cycle         Cycle to append. Carries its contract id and kind.
+	 * @param int|null $claim_seconds Claim length in seconds from the database's now, or null to append unclaimed.
+	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
+	 *                                 position is already claimed - the create-as-claim race).
+	 * @throws \RuntimeException If the cycle insert fails for any other reason (the
+	 *                          database error is in the message).
+	 */
+	public function append_cycle( Cycle $cycle, ?int $claim_seconds = null ): void {
+		$this->assign_next_sequence_no( $cycle );
+		$this->insert_cycle( $cycle, $claim_seconds );
+	}
+
+	/**
+	 * Assign the chain's next `sequence_no` to a cycle that awaits one.
+	 *
+	 * @param Cycle $cycle Cycle about to be appended.
+	 */
+	private function assign_next_sequence_no( Cycle $cycle ): void {
+		if ( ! $cycle->awaits_sequence_no() ) {
+			return;
+		}
+
+		$head = $this->find_chain_head( $cycle->get_contract_id(), $cycle->get_kind() );
+		$cycle->assign_sequence_no( null === $head ? 1 : $head->get_sequence_no() + 1 );
+	}
+
+	/**
+	 * Take the claim on a cycle in `$status` whose claim has expired or was never set, for
+	 * `$claim_seconds`. A compare-and-set on the status and the claim: among concurrent
+	 * callers exactly one matches the row. The expiry check and the new claim use the
+	 * database clock (`UTC_TIMESTAMP()`), the one clock every worker shares.
+	 *
+	 * @param int    $cycle_id      Cycle id.
+	 * @param string $status        The status the caller read; the compare-and-set predicate (not validated).
+	 * @param int    $claim_seconds Claim length in seconds, from the database's now.
+	 * @return bool True when this caller took the claim.
+	 */
+	public function claim_cycle( int $cycle_id, string $status, int $claim_seconds ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= UTC_TIMESTAMP()", $lease_ttl_seconds, $cycle_id, CycleStatus::PENDING ) );
-
-		// Exactly one row matched means this caller won the CAS; 0 means another worker
-		// already extended the lease (or the cycle settled) between read and write.
-		return false !== $result && 1 === $wpdb->rows_affected;
-	}
-
-	/**
-	 * Re-claim a failed cycle for an admin-triggered retry, as an atomic compare-and-set:
-	 * flip it back to `pending` and stamp a fresh lease only while it is still `failed`.
-	 * Returns true when this caller won (exactly one row matched), false when it was already
-	 * re-claimed or has since moved on.
-	 *
-	 * The fresh lease anchors on the DATABASE clock (`UTC_TIMESTAMP()`), the shared reference
-	 * clock for all lease arbitration.
-	 *
-	 * @param int $cycle_id          The cycle to re-claim.
-	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
-	 */
-	public function reclaim_failed_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s", CycleStatus::PENDING, $lease_ttl_seconds, $cycle_id, CycleStatus::FAILED ) );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP()
+				WHERE id = %d AND status = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
+				$claim_seconds,
+				$cycle_id,
+				$status
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return false !== $result && 1 === $wpdb->rows_affected;
 	}
 
 	/**
-	 * Settle a cycle's outcome as an atomic compare-and-set on its status: move it from
-	 * `$from_status` to `$to_status`, stamp the settling order and reason, and clear the
-	 * crash-recovery lease - all in one UPDATE gated on the row still being in `$from_status`.
-	 * Among concurrent settlers (the post-charge reconciliation and the order-status listener
-	 * can race across workers), exactly one caller matches the row and wins; the rest match
-	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
+	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status:
+	 * one UPDATE that lands only while the row still carries `$from_status`, so among
+	 * concurrent callers exactly one wins. `$changes` keys present are written: `order_id`
+	 * and `reason` (null clears); `claim_seconds` sets a claim from the database's now, and
+	 * without it the claim is released. A same-status call only writes `$changes`, so it
+	 * returns true whenever the row still carries the status, even when nothing changed.
 	 *
-	 * `$to_status` must be a registered cycle status (the write-path allowlist). `$from_status`
-	 * is only the CAS predicate and is not validated, so a cycle carrying an unknown stored
-	 * status can still be settled out of it.
-	 *
-	 * @param int         $cycle_id    The cycle to settle.
-	 * @param string      $from_status The status the caller read; the CAS predicate.
-	 * @param string      $to_status   The settled status to write; must be registered.
-	 * @param int         $order_id    The renewal order carrying the outcome.
-	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
+	 * @param string               $to_status   The status to write; must be a registered cycle status.
+	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string), `claim_seconds` (int).
+	 * @return bool True when this caller won the transition (for a same-status call: the row carries the status).
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
-	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
+	public function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $changes ): bool {
 		global $wpdb;
 
 		if ( ! CycleStatus::is_registered( $to_status ) ) {
-			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle_status(): cycle status "%s" is not registered.', $to_status ) ) );
+			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ) ) );
 		}
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$set    = array( 'status = %s' );
+		$values = array( $to_status );
 
-		if ( null === $reason ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = NULL, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		if ( array_key_exists( 'order_id', $changes ) ) {
+			if ( null === $changes['order_id'] ) {
+				$set[] = 'order_id = NULL';
+			} else {
+				$set[]    = 'order_id = %d';
+				$values[] = Coercion::coerce_int( $changes['order_id'] );
+			}
+		}
+
+		if ( array_key_exists( 'reason', $changes ) ) {
+			if ( null === $changes['reason'] ) {
+				$set[] = 'reason = NULL';
+			} else {
+				$set[]    = 'reason = %s';
+				$values[] = Coercion::coerce_string( $changes['reason'] );
+			}
+		}
+
+		if ( array_key_exists( 'claim_seconds', $changes ) ) {
+			$set[]    = 'claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
+			$values[] = Coercion::coerce_int( $changes['claim_seconds'] );
 		} else {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = %s, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, $reason, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+			$set[] = 'claimed_until = NULL';
 		}
 
-		return false !== $result && 1 === $wpdb->rows_affected;
+		$set[]    = 'date_updated_gmt = %s';
+		$values[] = gmdate( 'Y-m-d H:i:s' );
+		$values[] = $cycle_id;
+		$values[] = $from_status;
+
+		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$set_clause = implode( ', ', $set );
+
+		// The SET clause is built from fixed fragments above; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET {$set_clause} WHERE id = %d AND status = %s", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		if ( false === $result ) {
+			return false;
+		}
+
+		if ( 1 === $wpdb->rows_affected ) {
+			return true;
+		}
+
+		// MySQL counts changed rows, not matched ones: a same-status call whose values are
+		// already stored matches the row but changes nothing. It still succeeded when the row
+		// carries the status.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $from_status === $to_status && null !== $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND status = %s", $cycle_id, $to_status ) );
 	}
 
 	/**
 	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
 	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
-	 * necessarily the cycle current by date (a forced early renewal bills a head whose
-	 * period lies ahead). Snapshots are decoded into typed value objects only for an
-	 * in-flight cycle (see {@see self::hydrate_cycle()}).
+	 * necessarily the cycle current by date (an extension may append a head whose
+	 * period lies ahead).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1050,7 +1172,7 @@ final class ContractRepository {
 
 	/**
 	 * A window of a chain's cycle history, newest first - the paginated read for
-	 * history screens. Snapshots are decoded only for any in-flight cycle in the window.
+	 * history screens.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1069,7 +1191,7 @@ final class ContractRepository {
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$cycles[] = $this->hydrate_cycle( self::as_string_keyed( $row ) );
+				$cycles[] = $this->hydrate_cycle( Coercion::coerce_string_keyed( $row ) );
 			}
 		}
 
@@ -1077,32 +1199,12 @@ final class ContractRepository {
 	}
 
 	/**
-	 * The highest `count` in a chain `(contract_id, kind)` - the chargeable counter the
-	 * dispatcher advances (next chargeable cycle is `MAX(count) + 1`). Returns null for a
-	 * chain with no counting cycles (e.g. one holding only non-counting trial periods).
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $kind        Chain kind. Defaults to billing.
-	 * @return int|null The highest count, or null when the chain has no counting cycle.
-	 */
-	public function max_count( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?int {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$max = $wpdb->get_var( $wpdb->prepare( "SELECT MAX(count) FROM {$table} WHERE contract_id = %d AND kind = %s", $contract_id, $kind ) );
-
-		return null === $max ? null : (int) $max;
-	}
-
-	/**
 	 * All cycles linked to `$order_id`, across kinds and contracts. `order_id` is a
 	 * non-1:1 reference (an aggregate order may serve many cycles), so this returns
-	 * every match. Snapshots are decoded for any in-flight cycle.
+	 * every match.
 	 *
 	 * @param int $order_id WooCommerce order id.
-	 * @return array<int, Cycle> Cycles linked to the order, oldest first.
+	 * @return array<int, Cycle> Cycles linked to the order, newest first.
 	 */
 	public function find_cycles_by_order_id( int $order_id ): array {
 		global $wpdb;
@@ -1110,12 +1212,12 @@ final class ContractRepository {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id DESC", $order_id ), ARRAY_A );
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$cycles[] = $this->hydrate_cycle( self::as_string_keyed( $row ) );
+				$cycles[] = $this->hydrate_cycle( Coercion::coerce_string_keyed( $row ) );
 			}
 		}
 
@@ -1123,81 +1225,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Resolve a cycle's in-memory snapshot value objects into stored row ids (write-once).
-	 *
-	 * Per snapshot type: when the cycle carries a fresh value object and no stored id
-	 * yet, the id is copy-forwarded from `$previous` (when payload + schema version
-	 * match) or freshly inserted, then stamped onto the cycle. A cycle that already
-	 * carries an id is left as is - a frozen reference is never re-pointed.
-	 *
-	 * @param Cycle      $cycle    Cycle whose snapshots to resolve.
-	 * @param Cycle|null $previous The previous cycle to copy-forward from, or null.
-	 */
-	private function resolve_cycle_snapshots( Cycle $cycle, ?Cycle $previous ): void {
-		$contract_id = $cycle->get_contract_id();
-
-		$plan = $cycle->get_plan_snapshot();
-		if ( $plan instanceof PlanSnapshot && null === $cycle->get_plan_snapshot_id() ) {
-			$cycle->set_plan_snapshot_id(
-				$this->copy_forward_or_insert(
-					$contract_id,
-					SnapshotStore::TYPE_PLAN,
-					$plan->get_selling_plan_id(),
-					$plan->to_payload(),
-					$plan->get_schema_version(),
-					null === $previous ? null : $previous->get_plan_snapshot_id()
-				)
-			);
-		}
-
-		$items = $cycle->get_items_snapshot();
-		if ( $items instanceof ItemsSnapshot && null === $cycle->get_items_snapshot_id() ) {
-			$cycle->set_items_snapshot_id(
-				$this->copy_forward_or_insert(
-					$contract_id,
-					SnapshotStore::TYPE_ITEMS,
-					null,
-					$items->to_payload(),
-					$items->get_schema_version(),
-					null === $previous ? null : $previous->get_items_snapshot_id()
-				)
-			);
-		}
-	}
-
-	/**
-	 * Reuse the previous cycle's snapshot id when its payload + schema version match,
-	 * else insert a fresh row.
-	 *
-	 * The match is a strict comparison against the JSON-decoded stored payload, so
-	 * payload values must be JSON-round-trip-safe scalars: ints and strings (money as
-	 * decimal strings, never PHP floats - a float may not decode back identical,
-	 * defeating the reuse).
-	 *
-	 * @param int                      $contract_id          Owning contract id.
-	 * @param string                   $snapshot_type        Snapshot type (`plan` | `items`).
-	 * @param int|null                 $parent_id            Weak link to the source, or null.
-	 * @param array<int|string, mixed> $payload              The new snapshot payload.
-	 * @param int                      $schema_version       Payload-format version.
-	 * @param int|null                 $previous_snapshot_id The previous cycle's snapshot id, or null.
-	 * @return int The reused or newly-inserted snapshot id.
-	 */
-	private function copy_forward_or_insert( int $contract_id, string $snapshot_type, ?int $parent_id, array $payload, int $schema_version, ?int $previous_snapshot_id ): int {
-		if ( null !== $previous_snapshot_id ) {
-			$previous = $this->find_snapshot_payload( $previous_snapshot_id );
-			if ( null !== $previous && $previous['schema_version'] === $schema_version && $previous['payload'] === $payload ) {
-				return $previous_snapshot_id;
-			}
-		}
-
-		return $this->snapshots->insert( $contract_id, $snapshot_type, $parent_id, $payload, $schema_version );
-	}
-
-	/**
-	 * Hydrate a cycle row, attaching typed snapshot value objects only for an in-flight
-	 * (non-terminal) cycle. A settled record keeps its snapshot ids but skips the extra
-	 * reads to decode their payloads. {@see CycleStatus::is_terminal()} is false for an
-	 * unknown or extension-registered status, so such a cycle's snapshots are decoded.
+	 * Hydrate a cycle row, attaching typed snapshot value objects for the snapshot ids
+	 * it carries (a cycle without snapshot ids costs no extra read).
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
@@ -1205,46 +1234,75 @@ final class ContractRepository {
 	private function hydrate_cycle( array $row ): Cycle {
 		$cycle = Cycle::from_storage( $row );
 
-		if ( CycleStatus::is_terminal( $cycle->get_status()->get_value() ) ) {
-			return $cycle;
+		$plan_snapshot_id = $cycle->get_plan_snapshot_id();
+		if ( null !== $plan_snapshot_id ) {
+			$plan = $this->find_plan_snapshot( $plan_snapshot_id );
+			if ( $plan instanceof PlanSnapshot ) {
+				$cycle->set_plan_snapshot( $plan );
+			}
 		}
 
-		$plan = $this->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
-		if ( $plan instanceof PlanSnapshot ) {
-			$cycle->set_plan_snapshot( $plan );
-		}
-
-		$items = $this->find_items_snapshot( $cycle->get_items_snapshot_id() );
-		if ( $items instanceof ItemsSnapshot ) {
-			$cycle->set_items_snapshot( $items );
+		$items_snapshot_id = $cycle->get_items_snapshot_id();
+		if ( null !== $items_snapshot_id ) {
+			$items = $this->find_items_snapshot( $items_snapshot_id );
+			if ( $items instanceof ItemsSnapshot ) {
+				$cycle->set_items_snapshot( $items );
+			}
 		}
 
 		return $cycle;
 	}
 
 	/**
-	 * Insert a cycle row and stamp the generated id back onto the entity.
+	 * Insert a cycle row and stamp the generated id back onto the entity. Hand-built so
+	 * a claim can be stamped from `UTC_TIMESTAMP()` in the same statement; string values
+	 * are checked against their column lengths first, as `$wpdb->insert()` would.
 	 *
-	 * @param Cycle $cycle Cycle to insert. Carries its contract id and kind.
+	 * @param Cycle    $cycle         Cycle to insert. Carries its contract id and kind.
+	 * @param int|null $claim_seconds Claim length in seconds from the database's now, or null for none.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
-	 * @throws \RuntimeException If the insert fails for any other reason.
+	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
 	 */
-	private function insert_cycle( Cycle $cycle ): void {
+	private function insert_cycle( Cycle $cycle, ?int $claim_seconds ): void {
 		global $wpdb;
 
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$now   = gmdate( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$inserted = $wpdb->insert(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ),
-			array_merge(
-				$cycle->to_storage(),
-				array(
-					'date_created_gmt' => $now,
-					'date_updated_gmt' => $now,
-				)
-			)
-		);
+		$columns = $cycle->to_storage();
+		unset( $columns['claimed_until'] );
+		$columns['date_created_gmt'] = $now;
+		$columns['date_updated_gmt'] = $now;
+
+		$names        = array();
+		$placeholders = array();
+		$values       = array();
+		foreach ( $columns as $column => $value ) {
+			$names[] = "`{$column}`";
+			if ( null === $value ) {
+				$placeholders[] = 'NULL';
+				continue;
+			}
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+			$placeholders[] = '%s';
+			$values[]       = (string) $value;
+		}
+
+		if ( null !== $claim_seconds ) {
+			$names[]        = '`claimed_until`';
+			$placeholders[] = 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
+			$values[]       = $claim_seconds;
+		}
+
+		$name_list        = implode( ', ', $names );
+		$placeholder_list = implode( ', ', $placeholders );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false === $inserted ) {
 			$db_error = $wpdb->last_error;
@@ -1261,19 +1319,16 @@ final class ContractRepository {
 	/**
 	 * Decode a stored plan snapshot row into a typed value object.
 	 *
-	 * Public so the renewal money-path can resolve a contract's own frozen plan terms
-	 * (the cadence to bill the next cycle under) from its `plan_snapshot_id`.
-	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return PlanSnapshot|null The decoded value object, or null.
 	 */
-	public function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
+	private function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
 		if ( null === $decoded ) {
 			return null;
 		}
 
-		return PlanSnapshot::from_payload( self::as_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
+		return PlanSnapshot::from_payload( Coercion::coerce_string_keyed( $decoded['payload'] ), $decoded['schema_version'] );
 	}
 
 	/**
@@ -1313,11 +1368,11 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$payload = json_decode( ScalarCoercion::coerce_string( $row['payload'] ?? null ), true );
+			$payload = json_decode( Coercion::coerce_string( $row['payload'] ?? null ), true );
 
-			$snapshots[ ScalarCoercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
-				self::as_string_keyed( is_array( $payload ) ? $payload : array() ),
-				ScalarCoercion::coerce_int( $row['schema_version'] ?? 0 )
+			$snapshots[ Coercion::coerce_int( $row['id'] ?? 0 ) ] = PlanSnapshot::from_payload(
+				Coercion::coerce_string_keyed( is_array( $payload ) ? $payload : array() ),
+				Coercion::coerce_int( $row['schema_version'] ?? 0 )
 			);
 		}
 
@@ -1336,7 +1391,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		return ItemsSnapshot::from_payload( self::as_item_rows( $decoded['payload'] ), $decoded['schema_version'] );
+		return ItemsSnapshot::from_payload( Coercion::coerce_list_of_arrays( $decoded['payload'] ), $decoded['schema_version'] );
 	}
 
 	/**
@@ -1370,42 +1425,6 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Re-key a decoded payload as a string-keyed map. A no-op at runtime (decoded JSON
-	 * object keys are already strings); it recovers the string-keyed type that
-	 * json_decode erases to `array<int|string, mixed>`.
-	 *
-	 * @param array<int|string, mixed> $payload Decoded payload.
-	 * @return array<string, mixed>
-	 */
-	private static function as_string_keyed( array $payload ): array {
-		$result = array();
-		foreach ( $payload as $key => $value ) {
-			$result[ (string) $key ] = $value;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Shape a decoded payload as an ordered list of item rows: each array element is
-	 * re-keyed as a string-keyed row, non-array elements skipped. Recovers the value
-	 * object's modelled shape without trusting the erased JSON types.
-	 *
-	 * @param array<int|string, mixed> $payload Decoded payload.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private static function as_item_rows( array $payload ): array {
-		$rows = array();
-		foreach ( $payload as $row ) {
-			if ( is_array( $row ) ) {
-				$rows[] = self::as_string_keyed( $row );
-			}
-		}
-
-		return $rows;
-	}
-
-	/**
 	 * Read the contract row by id.
 	 *
 	 * @param int $id Contract id.
@@ -1423,34 +1442,109 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update the contract row in place (no child rows).
+	 * Write contract columns (plus `date_updated_gmt`) in one UPDATE statement, so the
+	 * row never lands half-written: a status and a due moment written together change
+	 * together or not at all.
 	 *
-	 * @param Contract $contract Contract whose row to update. Must have an id.
-	 * @throws \RuntimeException If the update fails.
+	 * When `next_payment_gmt` is among the columns, the same statement releases the
+	 * due-dispatch claim only if the due moment really changes: a claim belongs to the
+	 * moment it was taken on, so moving or clearing that moment frees the contract for the
+	 * next scan, while re-saving it keeps the claim and a handler cannot jump the dispatch
+	 * queue by writing the same moment back. MySQL evaluates SET assignments left to
+	 * right, so the claim is assigned first, while `next_payment_gmt` still holds the
+	 * stored value; `<=>` keeps the comparison NULL-safe.
+	 *
+	 * A hand-built statement skips the per-column length check `$wpdb->update()` makes, and
+	 * WordPress runs without strict SQL modes, so MySQL would silently shorten an over-long
+	 * string. Each string is checked against its column length first and refused like
+	 * {@see self::insert()} refuses it.
+	 *
+	 * @param int                            $id      Contract id.
+	 * @param array<string, int|string|null> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
+	 * @return int The number of rows the statement changed.
+	 * @throws \RuntimeException If a value is longer than its column, or the write fails.
 	 */
-	private function update_contract_row( Contract $contract ): void {
+	private function write_contract_row( int $id, array $columns ): int {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge(
-				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array( 'id' => (int) $contract->get_id() )
-		);
+		$table                       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$columns['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
+
+		foreach ( $columns as $column => $value ) {
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+		}
+
+		$assignments = array();
+		$values      = array();
+
+		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
+			$next_payment = $columns['next_payment_gmt'];
+			if ( null === $next_payment ) {
+				$assignments[] = '`claimed_until` = IF( `next_payment_gmt` <=> NULL, `claimed_until`, NULL )';
+			} else {
+				$assignments[] = '`claimed_until` = IF( `next_payment_gmt` <=> %s, `claimed_until`, NULL )';
+				$values[]      = (string) $next_payment;
+			}
+		}
+
+		foreach ( $columns as $column => $value ) {
+			if ( null === $value ) {
+				$assignments[] = "`{$column}` = NULL";
+				continue;
+			}
+			$assignments[] = "`{$column}` = %s";
+			$values[]      = (string) $value;
+		}
+
+		$values[] = $id;
+		$set      = implode( ', ', $assignments );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET {$set} WHERE `id` = %d", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		return (int) $updated;
+	}
+
+	/**
+	 * Refuse a string longer than its column, measured the way `$wpdb` measures it
+	 * (characters for CHAR/VARCHAR, bytes for TEXT/BLOB types). A column whose length
+	 * `$wpdb` cannot read (non-MySQL, or a non-string type such as DATETIME) is not checked.
+	 *
+	 * @param string $table  Prefixed table name.
+	 * @param string $column Column name.
+	 * @param string $value  Value about to be written.
+	 * @throws \RuntimeException If the value is longer than the column.
+	 */
+	private static function assert_fits_column( string $table, string $column, string $value ): void {
+		global $wpdb;
+
+		$length = $wpdb->get_col_length( $table, $column );
+		if ( ! is_array( $length ) ) {
+			return;
+		}
+
+		$max  = Coercion::coerce_int( $length['length'] ?? 0 );
+		$size = 'byte' === ( $length['type'] ?? '' ) ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
+		if ( $max > 0 && $size > $max ) {
+			throw new \RuntimeException(
+				esc_html( sprintf( 'Failed to write %s: the value for "%s" is longer than the column allows (%d).', $table, $column, $max ) )
+			);
 		}
 	}
 
 	/**
 	 * Guard against a stale id / concurrent delete before touching any table.
 	 *
-	 * `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no row
-	 * matched", so on its own it cannot tell the parent is gone - and a child reconcile
+	 * The contract row UPDATE reports 0 changed rows for both "matched, nothing changed" and
+	 * "no row matched", so on its own it cannot tell the parent is gone - and a child reconcile
 	 * would then write orphan rows (no FK enforces the relation). This narrows but does
 	 * not fully close the race; the complete fix (a transaction with SELECT ... FOR UPDATE)
 	 * is the seam a later transaction-handling change wraps.
@@ -1467,7 +1561,7 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Reconcile a contract's items, addresses, and meta rows only when they differ.
+	 * Reconcile a contract's items and address rows only when they differ.
 	 *
 	 * Each child set is compared via a normalized signature both the loaded rows and
 	 * the entity's arrays are projected through, so MySQL's column coercion (DECIMAL
@@ -1475,6 +1569,7 @@ final class ContractRepository {
 	 * equal. Only a changed set is rewritten (delete-then-reinsert for that one table).
 	 *
 	 * @param Contract $contract Contract whose children to reconcile. Must have an id.
+	 * @throws \RuntimeException If a child row write fails.
 	 */
 	private function sync_children( Contract $contract ): void {
 		$id = (int) $contract->get_id();
@@ -1486,10 +1581,6 @@ final class ContractRepository {
 		if ( $this->addresses_signature( $this->find_addresses( $id ) ) !== $this->addresses_signature( $contract->get_addresses() ) ) {
 			$this->replace_addresses( $id, $contract->get_addresses() );
 		}
-
-		if ( $this->meta_signature( $this->find_meta( $id ) ) !== $this->meta_signature( $contract->get_meta() ) ) {
-			$this->replace_meta( $id, $contract->get_meta() );
-		}
 	}
 
 	/**
@@ -1497,12 +1588,17 @@ final class ContractRepository {
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @throws \RuntimeException If the delete or an insert fails.
 	 */
 	private function replace_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ), array( 'contract_id' => $contract_id ) );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ), array( 'contract_id' => $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
 		$this->insert_items( $contract_id, $items );
 	}
 
@@ -1511,29 +1607,18 @@ final class ContractRepository {
 	 *
 	 * @param int                                 $contract_id Contract id.
 	 * @param array<string, array<string, mixed>> $addresses   Address rows keyed by type.
+	 * @throws \RuntimeException If the delete or an insert fails.
 	 */
 	private function replace_addresses( int $contract_id, array $addresses ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
-		$this->insert_addresses( $contract_id, $addresses );
-	}
-
-	/**
-	 * Delete-then-reinsert a contract's meta rows.
-	 *
-	 * @param int                   $contract_id Contract id.
-	 * @param array<string, string> $meta        Meta as key => value.
-	 */
-	private function replace_meta( int $contract_id, array $meta ): void {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( false === $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ), array( 'contract_id' => $contract_id ) ) ) {
-			$this->log_meta_write_failure( $contract_id, 'delete' );
+		$deleted = $wpdb->delete( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), array( 'contract_id' => $contract_id ) );
+		if ( false === $deleted ) {
+			throw new \RuntimeException( sprintf( 'Failed to delete address rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
-		$this->insert_meta( $contract_id, $meta );
+
+		$this->insert_addresses( $contract_id, $addresses );
 	}
 
 	/**
@@ -1541,26 +1626,31 @@ final class ContractRepository {
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @throws \RuntimeException If an insert fails.
 	 */
 	private function insert_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
 		foreach ( $items as $item ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert(
+			$inserted = $wpdb->insert(
 				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 				array(
 					'contract_id'  => $contract_id,
-					'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
-					'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-					'product_id'   => isset( $item['product_id'] ) ? ScalarCoercion::coerce_int( $item['product_id'] ) : null,
-					'variation_id' => isset( $item['variation_id'] ) ? ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
-					'quantity'     => ScalarCoercion::coerce_string( $item['quantity'] ?? null, '1' ),
-					'subtotal'     => ScalarCoercion::coerce_string( $item['subtotal'] ?? null, '0' ),
-					'total'        => ScalarCoercion::coerce_string( $item['total'] ?? null, '0' ),
+					'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
+					'item_type'    => Coercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+					'product_id'   => isset( $item['product_id'] ) ? Coercion::coerce_int( $item['product_id'] ) : null,
+					'variation_id' => isset( $item['variation_id'] ) ? Coercion::coerce_int( $item['variation_id'] ) : null,
+					'quantity'     => Coercion::coerce_string( $item['quantity'] ?? null, '1' ),
+					'subtotal'     => Coercion::coerce_string( $item['subtotal'] ?? null, '0' ),
+					'total'        => Coercion::coerce_string( $item['total'] ?? null, '0' ),
 					'taxes'        => isset( $item['taxes'] ) ? wp_json_encode( $item['taxes'] ) : null,
 				)
 			);
+
+			if ( false === $inserted ) {
+				throw new \RuntimeException( sprintf( 'Failed to insert item row for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			}
 		}
 	}
 
@@ -1569,6 +1659,7 @@ final class ContractRepository {
 	 *
 	 * @param int                                 $contract_id Contract id.
 	 * @param array<string, array<string, mixed>> $addresses   Address rows keyed by type.
+	 * @throws \RuntimeException If an insert fails.
 	 */
 	private function insert_addresses( int $contract_id, array $addresses ): void {
 		global $wpdb;
@@ -1579,61 +1670,16 @@ final class ContractRepository {
 				'address_type' => (string) $type,
 			);
 
-			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$record[ $column ] = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : null;
+			foreach ( Contract::ADDRESS_FIELDS as $column ) {
+				$record[ $column ] = isset( $address[ $column ] ) ? Coercion::coerce_string( $address[ $column ] ) : null;
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
-		}
-	}
-
-	/**
-	 * Insert meta for a contract.
-	 *
-	 * @param int                   $contract_id Contract id.
-	 * @param array<string, string> $meta        Meta as key => value.
-	 */
-	private function insert_meta( int $contract_id, array $meta ): void {
-		global $wpdb;
-
-		foreach ( $meta as $key => $value ) {
-			// The engine's own contract-meta columns, not post/order meta; the
-			// slow-meta-query heuristic does not apply.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			$inserted = $wpdb->insert(
-				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ),
-				array(
-					'contract_id' => $contract_id,
-					'meta_key'    => (string) $key,
-					'meta_value'  => (string) $value,
-				)
-			);
+			$inserted = $wpdb->insert( SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ), $record );
 			if ( false === $inserted ) {
-				$this->log_meta_write_failure( $contract_id, 'insert', (string) $key );
+				throw new \RuntimeException( sprintf( 'Failed to insert %s address row for contract %d: %s', esc_html( (string) $type ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 			}
 		}
-	}
-
-	/**
-	 * Log a failed contract-meta write. Meta writes follow the row write without a
-	 * transaction, so a failure here leaves the row and its meta out of step; logging it
-	 * makes that visible.
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $operation   The failed operation (`delete` or `insert`).
-	 * @param string $meta_key    The meta key being inserted, if any.
-	 */
-	private function log_meta_write_failure( int $contract_id, string $operation, string $meta_key = '' ): void {
-		global $wpdb;
-
-		wc_get_logger()->error(
-			sprintf( 'ContractRepository: contract meta %s failed for contract %d%s - %s', $operation, $contract_id, '' === $meta_key ? '' : sprintf( ' (key %s)', $meta_key ), $wpdb->last_error ),
-			array(
-				'source'      => self::LOG_SOURCE,
-				'contract_id' => $contract_id,
-			)
-		);
 	}
 
 	/**
@@ -1650,7 +1696,7 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
 
-		return self::as_item_rows( is_array( $rows ) ? $rows : array() );
+		return Coercion::coerce_list_of_arrays( $rows );
 	}
 
 	/**
@@ -1670,7 +1716,7 @@ final class ContractRepository {
 		$by_type = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$by_type[ ScalarCoercion::coerce_string( $row['address_type'] ?? null ) ] = self::as_string_keyed( $row );
+				$by_type[ Coercion::coerce_string( $row['address_type'] ?? null ) ] = Coercion::coerce_string_keyed( $row );
 			}
 		}
 
@@ -1678,29 +1724,54 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Load meta for a contract as key => value.
+	 * Unserialized values stored under `$key` for a contract, oldest first.
 	 *
-	 * @param int $contract_id Contract id.
-	 * @return array<string, string>
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @return array<int, mixed>
 	 */
-	private function find_meta( int $contract_id ): array {
+	private function find_meta_values( int $contract_id, string $key ): array {
+		$values = array();
+		foreach ( $this->find_meta_rows( $contract_id, $key ) as $row ) {
+			$values[] = maybe_unserialize( $row['meta_value'] );
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Raw meta rows for a contract, optionally for one key, by id ascending.
+	 *
+	 * @param int         $contract_id Contract id.
+	 * @param string|null $key         Meta key, or null for every key.
+	 * @return array<int, array{meta_key: string, meta_value: string}>
+	 */
+	private function find_meta_rows( int $contract_id, ?string $key ): array {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 
-		// The engine's own contract-meta columns, not post/order meta; the
-		// slow-meta-query heuristic does not apply.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d", $contract_id ), ARRAY_A );
+		if ( null === $key ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d ORDER BY id ASC", $contract_id ), ARRAY_A );
+		} else {
+			// The engine's own contract-meta columns, not post/order meta; the
+			// slow-meta-query heuristic does not apply.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d AND meta_key = %s ORDER BY id ASC", $contract_id, $key ), ARRAY_A );
+		}
 
-		$meta = array();
+		$result = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
 			if ( is_array( $row ) ) {
-				$meta[ ScalarCoercion::coerce_string( $row['meta_key'] ?? null ) ] = ScalarCoercion::coerce_string( $row['meta_value'] ?? null );
+				$result[] = array(
+					'meta_key'   => Coercion::coerce_string( $row['meta_key'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => Coercion::coerce_string( $row['meta_value'] ?? null ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				);
 			}
 		}
 
-		return $meta;
+		return $result;
 	}
 
 	/**
@@ -1717,13 +1788,13 @@ final class ContractRepository {
 
 		foreach ( $items as $item ) {
 			$signature[] = array(
-				'item_name'    => ScalarCoercion::coerce_string( $item['item_name'] ?? null ),
-				'item_type'    => ScalarCoercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
-				'product_id'   => isset( $item['product_id'] ) ? (string) ScalarCoercion::coerce_int( $item['product_id'] ) : null,
-				'variation_id' => isset( $item['variation_id'] ) ? (string) ScalarCoercion::coerce_int( $item['variation_id'] ) : null,
-				'quantity'     => number_format( ScalarCoercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
-				'subtotal'     => number_format( ScalarCoercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
-				'total'        => number_format( ScalarCoercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
+				'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
+				'item_type'    => Coercion::coerce_string( $item['item_type'] ?? null, 'line_item' ),
+				'product_id'   => isset( $item['product_id'] ) ? (string) Coercion::coerce_int( $item['product_id'] ) : null,
+				'variation_id' => isset( $item['variation_id'] ) ? (string) Coercion::coerce_int( $item['variation_id'] ) : null,
+				'quantity'     => number_format( Coercion::coerce_float( $item['quantity'] ?? 1 ), 4, '.', '' ),
+				'subtotal'     => number_format( Coercion::coerce_float( $item['subtotal'] ?? 0 ), 8, '.', '' ),
+				'total'        => number_format( Coercion::coerce_float( $item['total'] ?? 0 ), 8, '.', '' ),
 				'taxes'        => $this->taxes_signature( $item['taxes'] ?? null ),
 			);
 		}
@@ -1746,30 +1817,12 @@ final class ContractRepository {
 
 		foreach ( $addresses as $type => $address ) {
 			$record = array();
-			foreach ( self::ADDRESS_COLUMNS as $column ) {
-				$value             = isset( $address[ $column ] ) ? ScalarCoercion::coerce_string( $address[ $column ] ) : '';
+			foreach ( Contract::ADDRESS_FIELDS as $column ) {
+				$value             = isset( $address[ $column ] ) ? Coercion::coerce_string( $address[ $column ] ) : '';
 				$record[ $column ] = '' !== $value ? $value : null;
 			}
 
 			$signature[ (string) $type ] = $record;
-		}
-
-		ksort( $signature );
-
-		return $signature;
-	}
-
-	/**
-	 * A change-detection signature for a meta set.
-	 *
-	 * @param array<string, string> $meta Meta as key => value.
-	 * @return array<string, string> Comparable projection (key-sorted).
-	 */
-	private function meta_signature( array $meta ): array {
-		$signature = array();
-
-		foreach ( $meta as $key => $value ) {
-			$signature[ (string) $key ] = (string) $value;
 		}
 
 		ksort( $signature );

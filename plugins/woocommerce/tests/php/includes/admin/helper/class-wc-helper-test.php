@@ -84,6 +84,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function cleanup_helper_transients(): void {
 		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
@@ -1034,6 +1035,95 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			(array) get_site_option( 'auto_update_plugins' ),
 			'Resolution has to go through the same local data the row is built from.'
 		);
+	}
+
+	/**
+	 * @testdox Subscription list data reports whether the site's PHP meets the available update's requirement.
+	 */
+	public function test_subscription_list_data_reports_whether_update_requires_php_is_met(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					'needs-new-php/needs-new-php.php' => array(
+						'Name'    => 'Needs New PHP',
+						'Version' => '1.0.0',
+						'Woo'     => '900101:abc',
+					),
+					'any-php/any-php.php'             => array(
+						'Name'    => 'Any PHP',
+						'Version' => '1.0.0',
+						'Woo'     => '900102:def',
+					),
+				),
+			),
+			'plugins'
+		);
+		WC_Helper::flush_local_woo_products_cache();
+		delete_transient( '_woocommerce_helper_updates' );
+
+		$subscription = array(
+			'product_key'  => '',
+			'product_name' => '',
+			'connections'  => array(),
+			'expires'      => 0,
+			'expired'      => false,
+		);
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array_merge(
+					$subscription,
+					array(
+						'product_id' => 900101,
+						'zip_slug'   => 'needs-new-php',
+					)
+				),
+				array_merge(
+					$subscription,
+					array(
+						'product_id' => 900102,
+						'zip_slug'   => 'any-php',
+					)
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$http_mock = static function ( $preempt, $args, $url ) {
+			if ( false === strpos( $url, 'update-check' ) ) {
+				return new WP_Error( 'test', 'Mocked error' );
+			}
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode(
+					array(
+						900101 => array(
+							'version'      => '2.0.0',
+							'requires_php' => '99.0',
+						),
+						900102 => array(
+							'version'      => '2.0.0',
+							'requires_php' => array( '99.0' ),
+						),
+					)
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			$result = array_column( WC_Helper::get_subscription_list_data(), null, 'product_id' );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertTrue( $result[900101]['has_update'] );
+		$this->assertFalse( $result[900101]['update_requires_php_met'], 'An update needing a newer PHP than this site runs is not installable.' );
+		$this->assertTrue( $result[900102]['has_update'] );
+		$this->assertTrue( $result[900102]['update_requires_php_met'], 'A malformed PHP requirement does not block the update.' );
 	}
 
 	/**

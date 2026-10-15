@@ -24,7 +24,7 @@ describe( 'EllipsisMenu', () => {
 		expect( menu ).toBeInTheDocument();
 	} );
 
-	it( 'should call onToggle when clicking on the ellipsis', () => {
+	it( 'should call onToggle when clicking on the ellipsis', async () => {
 		const onClickMock = jest.fn();
 		const { getByTitle } = render(
 			<EllipsisMenu
@@ -34,11 +34,11 @@ describe( 'EllipsisMenu', () => {
 			/>
 		);
 
-		userEvent.click( getByTitle( 'foo' ) );
+		await userEvent.click( getByTitle( 'foo' ) );
 		expect( onClickMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'should render content when clicking on the ellipsis', () => {
+	it( 'should render content when clicking on the ellipsis', async () => {
 		const { getByTitle, getByText } = render(
 			<EllipsisMenu
 				label={ 'foo' }
@@ -46,7 +46,7 @@ describe( 'EllipsisMenu', () => {
 			/>
 		);
 
-		userEvent.click( getByTitle( 'foo' ) );
+		await userEvent.click( getByTitle( 'foo' ) );
 		expect( getByText( 'content' ) ).toBeInTheDocument();
 	} );
 } );

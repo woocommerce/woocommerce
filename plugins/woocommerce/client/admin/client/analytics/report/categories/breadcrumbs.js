@@ -15,7 +15,9 @@ export default class CategoryBreadcrumbs extends Component {
 
 		while ( parent ) {
 			const parentCategory = categories.get( parent );
-			if ( ! parentCategory ) break;
+			if ( ! parentCategory ) {
+				break;
+			}
 			ancestors.unshift( parent );
 			parent = parentCategory.parent;
 		}
