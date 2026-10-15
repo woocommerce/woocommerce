@@ -489,4 +489,87 @@ class UcpIdempotency extends ControllerTestCase {
 		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
 		$this->assertSame( 1, $this->stored_record_count() );
 	}
+
+	/**
+	 * A claim left behind by a dead process is taken over, not refused forever.
+	 */
+	public function test_a_stale_claim_is_taken_over(): void {
+		global $wpdb;
+
+		$key  = wp_generate_uuid4();
+		$body = $this->cart_body( 0 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( $body ) );
+
+		$this->assertTrue( UcpIdempotencyStore::try_begin( $key, UcpRequestFingerprint::compute( $request ) ) );
+
+		// Age the claim past the orphan window, as a process that died would leave it.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET created_at = %s WHERE idempotency_key = %s",
+				gmdate( 'Y-m-d H:i:s', time() - ( UcpIdempotencyStore::STALE_CLAIM_SECONDS + 60 ) ),
+				$key
+			)
+		);
+
+		$response = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( UcpIdempotencyStore::STATE_COMPLETED, UcpIdempotencyStore::find( $key )['state'] );
+	}
+
+	/**
+	 * A claim younger than the orphan window is still refused.
+	 */
+	public function test_a_fresh_claim_is_not_taken_over(): void {
+		$key  = wp_generate_uuid4();
+		$body = $this->cart_body( 0 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( $body ) );
+
+		UcpIdempotencyStore::try_begin( $key, UcpRequestFingerprint::compute( $request ) );
+
+		$response = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( array( 'IDEMPOTENCY_CONFLICT' ), $this->message_codes( $response ) );
+	}
+
+	/**
+	 * A shortened retention window must not free a claim whose request is still running:
+	 * that would let a retry run the same write a second time.
+	 */
+	public function test_cleanup_spares_a_running_claim_under_short_retention(): void {
+		global $wpdb;
+
+		add_filter( 'woocommerce_ucp_idempotency_retention_seconds', static fn () => 1 );
+
+		$running  = wp_generate_uuid4();
+		$finished = wp_generate_uuid4();
+
+		UcpIdempotencyStore::try_begin( $running, str_repeat( 'a', 64 ) );
+		UcpIdempotencyStore::try_begin( $finished, str_repeat( 'b', 64 ) );
+		UcpIdempotencyStore::finalize( $finished, 200, array( 'ok' => true ) );
+
+		// Older than the one-second window the filter sets, so the completed record is due
+		// for deletion while the claim beside it is seconds old.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET created_at = %s WHERE idempotency_key = %s",
+				gmdate( 'Y-m-d H:i:s', time() - 30 ),
+				$finished
+			)
+		);
+
+		UcpIdempotencyStore::cleanup();
+
+		$this->assertNotNull( UcpIdempotencyStore::find( $running ), 'A running claim must survive a shortened retention window.' );
+		$this->assertNull( UcpIdempotencyStore::find( $finished ) );
+	}
 }

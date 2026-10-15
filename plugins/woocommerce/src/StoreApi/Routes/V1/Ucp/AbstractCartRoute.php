@@ -227,6 +227,12 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		if ( UcpIdempotencyStore::STATE_COMPLETED !== (string) $existing['state'] ) {
+			// A claim past the orphan window belonged to a process that died, so it may be taken
+			// over rather than waiting for the sweep. Only one of several callers wins.
+			if ( UcpIdempotencyStore::try_take_over_stale( $key, UcpIdempotencyStore::STALE_CLAIM_SECONDS ) ) {
+				return $key;
+			}
+
 			return $this->idempotency_in_flight();
 		}
 

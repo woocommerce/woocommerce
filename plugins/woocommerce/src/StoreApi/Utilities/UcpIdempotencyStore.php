@@ -28,6 +28,14 @@ class UcpIdempotencyStore {
 	const CLEANUP_HOOK = 'woocommerce_cleanup_ucp_idempotency_keys';
 
 	/**
+	 * How long a claim may sit unanswered before another request may take it over.
+	 *
+	 * Bounds a claim orphaned by a process that died mid-request, which would otherwise answer
+	 * `409` until the next sweep. Far above any PHP execution limit, so live work is never taken.
+	 */
+	const STALE_CLAIM_SECONDS = 300;
+
+	/**
 	 * Claim a key for processing.
 	 *
 	 * Three outcomes: an `INSERT IGNORE` that inserts nothing cannot say by itself whether the
@@ -83,6 +91,34 @@ class UcpIdempotencyStore {
 		);
 
 		return false;
+	}
+
+	/**
+	 * Take over a claim whose owner has gone away.
+	 *
+	 * The `UPDATE` is the test: the row lock serialises competing takeovers and the `created_at`
+	 * predicate matches only the first, so exactly one caller wins — as in `try_begin()`.
+	 *
+	 * @param string $key Idempotency key.
+	 * @param int    $stale_after_seconds Age past which an unanswered claim may be taken over.
+	 * @return bool True when this caller now owns the claim.
+	 */
+	public static function try_take_over_stale( string $key, int $stale_after_seconds ): bool {
+		global $wpdb;
+
+		$taken = self::write(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys
+					SET created_at = %s
+					WHERE idempotency_key = %s AND state = %s AND created_at < %s",
+				gmdate( 'Y-m-d H:i:s' ),
+				$key,
+				self::STATE_IN_PROGRESS,
+				gmdate( 'Y-m-d H:i:s', time() - max( 1, $stale_after_seconds ) )
+			)
+		);
+
+		return $taken && 1 === (int) $wpdb->rows_affected;
 	}
 
 	/**
@@ -187,8 +223,13 @@ class UcpIdempotencyStore {
 
 		self::write(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys WHERE created_at < %s",
-				gmdate( 'Y-m-d H:i:s', time() - $retention )
+				"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys
+					WHERE ( state = %s AND created_at < %s )
+						OR ( state = %s AND created_at < %s )",
+				self::STATE_COMPLETED,
+				gmdate( 'Y-m-d H:i:s', time() - $retention ),
+				self::STATE_IN_PROGRESS,
+				gmdate( 'Y-m-d H:i:s', time() - self::STALE_CLAIM_SECONDS )
 			)
 		);
 	}
