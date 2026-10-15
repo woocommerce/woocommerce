@@ -4117,3 +4117,12 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 
 	return false;
 }
+
+/**
+ * Re-run the autoload migration for options whose settings definitions reverted it on save.
+ *
+ * @since 11.3.0
+ */
+function wc_update_1130_re_enable_autoload_options(): void {
+	wc_update_1050_enable_autoload_options();
+}

@@ -103,7 +103,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							),
 					),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -123,7 +123,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							),
 					),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -143,7 +143,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							),
 					),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -156,7 +156,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type'     => 'single_select_page_with_search',
 					'args'     => array( 'exclude' => wc_get_page_id( 'checkout' ) ),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -417,7 +417,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
 					'default'       => 'yes',
-					'autoload'      => false,
+					'autoload'      => true,
 				),
 				array(
 					'type' => 'sectionend',
