@@ -96,6 +96,28 @@ describe( 'getUpdateErrorNotice', () => {
 		} );
 	} );
 
+	it( 'decodes HTML entities in core’s message', () => {
+		expect(
+			getUpdateErrorNotice(
+				'Product Add-Ons',
+				reject( 'folder_exists', 'Can&#039;t replace the folder.' ),
+				onRetry
+			).message
+		).toBe(
+			"Product Add-Ons couldn’t be updated. Can't replace the folder."
+		);
+	} );
+
+	it( 'ignores a message that isn’t a string', () => {
+		expect(
+			getUpdateErrorNotice(
+				'Product Add-Ons',
+				{ success: false, data: { message: { text: 'Nope' } } },
+				onRetry
+			).message
+		).toBe( 'Product Add-Ons couldn’t be updated.' );
+	} );
+
 	it( 'falls back to the base sentence when there is no message', () => {
 		expect(
 			getUpdateErrorNotice(

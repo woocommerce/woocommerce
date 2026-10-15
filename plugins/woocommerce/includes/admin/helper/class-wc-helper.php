@@ -2302,9 +2302,12 @@ class WC_Helper {
 
 			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
-			$subscription['has_update'] = false;
+			$subscription['has_update']              = false;
+			$subscription['update_requires_php_met'] = true;
 			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
+				// Mirrors core's check, which refuses the update before downloading it and gives no error code.
+				$subscription['update_requires_php_met'] = is_php_version_compatible( $updates[ $subscription['product_id'] ]['requires_php'] ?? '' );
 			}
 
 			if ( ! empty( $updates[ $subscription['product_id'] ] ) ) {

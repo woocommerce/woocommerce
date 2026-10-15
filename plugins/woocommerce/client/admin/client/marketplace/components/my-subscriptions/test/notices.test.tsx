@@ -30,7 +30,6 @@ describe( 'Notices', () => {
 		act( () => {
 			void dispatch( noticeStore ).removeNotice( 'product-key' );
 		} );
-		jest.restoreAllMocks();
 	} );
 
 	it( 'renders an onClick-only action as a button, even with an empty url', () => {

@@ -17,6 +17,8 @@ import SubscribeModal from './subscribe-modal';
 import {
 	addNotice,
 	getUpdateErrorNotice,
+	getWpAjaxErrorData,
+	PHP_REQUIREMENT_ERROR_CODE,
 	removeNotice,
 	updateProduct,
 } from '../../../../utils/functions';
@@ -40,6 +42,31 @@ export default function Update( props: UpdateProps ) {
 		props.subscription.local.path &&
 		props.wooUpdateManagerActive;
 
+	function showUpdateError( error: unknown, onRetry: () => void ) {
+		const { message, actions } = getUpdateErrorNotice(
+			props.subscription.product_name,
+			error,
+			onRetry
+		);
+		addNotice(
+			props.subscription.product_key,
+			message,
+			NoticeStatus.Error,
+			{
+				actions,
+			}
+		);
+		setIsUpdating( false );
+
+		recordEvent( 'marketplace_product_update_failed', {
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
+			product_installed_version: props.subscription.local.installed,
+			product_current_version: props.subscription.version,
+			error_code: getWpAjaxErrorData( error ).code || '',
+		} );
+	}
+
 	function update() {
 		recordEvent( 'marketplace_product_update_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
@@ -53,6 +80,17 @@ export default function Update( props: UpdateProps ) {
 			return;
 		}
 		removeNotice( props.subscription.product_key );
+		// Core refuses this update before downloading it, with no error code to explain why.
+		if ( props.subscription.update_requires_php_met === false ) {
+			showUpdateError(
+				{
+					success: false,
+					data: { code: PHP_REQUIREMENT_ERROR_CODE },
+				},
+				update
+			);
+			return;
+		}
 		if ( ! window.wp.updates ) {
 			addNotice(
 				props.subscription.product_key,
@@ -104,28 +142,7 @@ export default function Update( props: UpdateProps ) {
 					product_current_version: props.subscription.version,
 				} );
 			} )
-			.catch( ( error: unknown ) => {
-				const { message, actions } = getUpdateErrorNotice(
-					props.subscription.product_name,
-					error,
-					update
-				);
-				addNotice(
-					props.subscription.product_key,
-					message,
-					NoticeStatus.Error,
-					{ actions }
-				);
-				setIsUpdating( false );
-
-				recordEvent( 'marketplace_product_update_failed', {
-					product_zip_slug: props.subscription.zip_slug,
-					product_id: props.subscription.product_id,
-					product_installed_version:
-						props.subscription.local.installed,
-					product_current_version: props.subscription.version,
-				} );
-			} );
+			.catch( ( error: unknown ) => showUpdateError( error, update ) );
 	}
 
 	const modal = () => {
