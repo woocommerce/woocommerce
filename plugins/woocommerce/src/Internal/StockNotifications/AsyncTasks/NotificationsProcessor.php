@@ -226,7 +226,7 @@ class NotificationsProcessor {
 			}
 
 			try {
-				$is_sent = $this->email_manager->send_stock_notification_email( $notification );
+				$is_sent = $this->email_manager->deliver_stock_notification( $notification );
 			} catch ( \Throwable $e ) {
 				$is_sent = false;
 			}
@@ -243,6 +243,20 @@ class NotificationsProcessor {
 
 			// Always save the notification to reflect last attempt time.
 			$notification->save();
+
+			if ( $is_sent ) {
+				/**
+				 * Action: woocommerce_customer_stock_notification_sent
+				 *
+				 * @since 11.3.0
+				 *
+				 * Fires once a stock notification has been delivered and saved as sent.
+				 *
+				 * @param Notification $notification The notification that was sent.
+				 * @param WC_Product   $product      The product the notification is about.
+				 */
+				do_action( 'woocommerce_customer_stock_notification_sent', $notification, $notification->get_product() );
+			}
 		}
 
 		if ( count( $notifications ) === $this->get_batch_size() ) {

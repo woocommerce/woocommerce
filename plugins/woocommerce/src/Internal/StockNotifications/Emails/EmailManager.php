@@ -292,6 +292,53 @@ class EmailManager {
 	}
 
 	/**
+	 * Deliver a stock notification, letting an integration take over delivery.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return bool Whether the notification was delivered.
+	 */
+	public function deliver_stock_notification( Notification $notification ): bool {
+		$product = $notification->get_product();
+		if ( ! $product instanceof \WC_Product ) {
+			return false;
+		}
+
+		/**
+		 * Filter: woocommerce_customer_stock_notification_pre_send
+		 *
+		 * @since 11.3.0
+		 *
+		 * Take over delivery of a stock notification instead of sending the Core email.
+		 *
+		 * @param null|bool|\WP_Error $handled      Null to let Core send its own email. True when the notification was delivered
+		 *                                          externally and should be marked sent. False or a WP_Error when delivery failed.
+		 * @param Notification        $notification The notification being delivered.
+		 * @param \WC_Product         $product      The product the notification is about.
+		 * @return null|bool|\WP_Error
+		 */
+		$handled = apply_filters( 'woocommerce_customer_stock_notification_pre_send', null, $notification, $product );
+
+		if ( null === $handled ) {
+			return $this->send_stock_notification_email( $notification );
+		}
+
+		if ( is_wp_error( $handled ) ) {
+			wc_get_logger()->warning(
+				sprintf( 'Delivery of notification %d failed: %s', $notification->get_id(), $handled->get_error_message() ),
+				array(
+					'source'          => 'wc-customer-stock-notifications',
+					'notification_id' => $notification->get_id(),
+				)
+			);
+			return false;
+		}
+
+		return true === $handled;
+	}
+
+	/**
 	 * Send the double opt-in verification email for a stock notification.
 	 *
 	 * @param Notification $notification The notification object.

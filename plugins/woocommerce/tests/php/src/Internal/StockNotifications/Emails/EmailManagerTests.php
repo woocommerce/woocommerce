@@ -150,6 +150,49 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send the Core email when the pre-send filter returns null, and otherwise report what the filter decided.
+	 *
+	 * @dataProvider pre_send_filter_provider
+	 *
+	 * @param mixed $handled        What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param bool  $wp_mail_result What `wp_mail()` reports back when Core sends.
+	 * @param bool  $expected       The expected return value of deliver_stock_notification.
+	 */
+	public function test_deliver_stock_notification_honours_pre_send_filter( $handled, bool $wp_mail_result, bool $expected ): void {
+		$this->wp_mail_result = $wp_mail_result;
+		$notification         = $this->build_notification();
+		$received             = array();
+		add_filter(
+			'woocommerce_customer_stock_notification_pre_send',
+			function ( $pre, $filtered_notification, $product ) use ( $handled, &$received ) {
+				$received = array( $pre, $filtered_notification->get_id(), $product->get_id() );
+				return $handled;
+			},
+			10,
+			3
+		);
+
+		$this->assertSame( $expected, $this->sut->deliver_stock_notification( $notification ) );
+		$this->assertSame( array( null, $notification->get_id(), $notification->get_product_id() ), $received );
+		$this->assertSame( null === $handled, isset( $this->sent_to[ $notification->get_user_email() ] ), 'The Core email should only go out when the filter returns null.' );
+	}
+
+	/**
+	 * Data provider for test_deliver_stock_notification_honours_pre_send_filter.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_provider(): array {
+		return array(
+			'null: Core sends'          => array( null, true, true ),
+			'null: Core email not sent' => array( null, false, false ),
+			'true: handled'             => array( true, true, true ),
+			'false: failed'             => array( false, true, false ),
+			'WP_Error: failed'          => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), true, false ),
+		);
+	}
+
+	/**
 	 * @testdox Should log a warning instead of failing silently when the email class is missing from the mailer.
 	 */
 	public function test_send_verify_email_logs_a_warning_when_the_email_is_not_registered() {

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Utilities\StockManagement
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
@@ -460,6 +461,70 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 			'email sent'     => array( true, true, NotificationStatus::SENT, 1, 0 ),
 			'email disabled' => array( false, true, NotificationStatus::CANCELLED, 0, 1 ),
 			'wp_mail failed' => array( true, false, NotificationStatus::CANCELLED, 0, 1 ),
+		);
+	}
+
+	/**
+	 * @testdox Should mark a sign-up Sent and fire the sent action when the pre-send filter takes over delivery, and take the failure branch when it reports a failure.
+	 *
+	 * @dataProvider pre_send_filter_provider
+	 *
+	 * @param mixed  $handled         What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param string $expected_status The status the sign-up should end up in.
+	 */
+	public function test_process_batch_honours_pre_send_filter( $handled, string $expected_status ): void {
+		// Batch size 1 keeps the cycle state around after the first run, so the counters can be inspected.
+		add_filter( 'woocommerce_customer_stock_notifications_batch_size', fn() => 1 );
+		add_filter( 'woocommerce_customer_stock_notification_pre_send', fn() => $handled );
+		$sent_action_args = array();
+		add_action(
+			'woocommerce_customer_stock_notification_sent',
+			function ( $notification, $product ) use ( &$sent_action_args ) {
+				$sent_action_args[] = array( $notification->get_id(), $product->get_id() );
+			},
+			10,
+			2
+		);
+
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->sut->process_batch( $product->get_id() );
+
+		$notification = new Notification( $notification->get_id() );
+		$cycle_state  = get_option( CycleStateService::STATE_OPTION_PREFIX . $product->get_id() );
+		$this->assertEquals( $expected_status, $notification->get_status() );
+		$this->assertEqualsWithDelta( time(), $notification->get_date_last_attempt()->getTimestamp(), 5 );
+		if ( NotificationStatus::SENT === $expected_status ) {
+			$this->assertEqualsWithDelta( time(), $notification->get_date_notified()->getTimestamp(), 5 );
+			$this->assertSame( array( array( $notification->get_id(), $product->get_id() ) ), $sent_action_args );
+			$this->assertSame( 1, $cycle_state['sent_count'] );
+			$this->assertSame( 0, $cycle_state['failed_count'] );
+		} else {
+			$this->assertEmpty( $notification->get_date_notified() );
+			$this->assertSame( NotificationCancellationSource::SYSTEM, $notification->get_cancellation_source() );
+			$this->assertSame( array(), $sent_action_args, 'The sent action must not fire for a failed delivery.' );
+			$this->assertSame( 0, $cycle_state['sent_count'] );
+			$this->assertSame( 1, $cycle_state['failed_count'] );
+		}
+
+		WC()->queue()->cancel_all( JobManager::AS_JOB_SEND_STOCK_NOTIFICATIONS );
+	}
+
+	/**
+	 * Data provider for test_process_batch_honours_pre_send_filter.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_provider(): array {
+		return array(
+			'true: handled externally' => array( true, NotificationStatus::SENT ),
+			'false: failed'            => array( false, NotificationStatus::CANCELLED ),
+			'WP_Error: failed'         => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), NotificationStatus::CANCELLED ),
 		);
 	}
 
