@@ -133,7 +133,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $action_scheduler['registered_version'] );
 		$this->assertSame( 'woocommerce', $action_scheduler['source_type'] );
 		$this->assertSame( 'WooCommerce', $action_scheduler['source_name'] );
-		$this->assertSame( ActionSchedulerUtil::get_loaded_path(), $action_scheduler['source_path'] );
+		$this->assertSame( trailingslashit( wp_normalize_path( ActionScheduler::plugin_path( '' ) ) ), $action_scheduler['source_path'] );
 		$this->assertFalse( $action_scheduler['is_risky'] );
 	}
 

@@ -194,7 +194,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 									'readonly'    => true,
 								),
 								'source_name'        => array(
-									'description' => __( 'Name of the plugin or theme that loads the copy.', 'woocommerce' ),
+									'description' => __( 'Name of the plugin or theme that loads the copy. Empty when unknown.', 'woocommerce' ),
 									'type'        => array( 'string', 'null' ),
 									'context'     => array( 'view' ),
 									'readonly'    => true,
