@@ -1601,6 +1601,8 @@ class WC_Checkout {
 						$this->recover_order_that_moved_past_payment( $refreshed_order, $e );
 					}
 				} else {
+					// No gateway runs, but payment_complete() still runs the status change a plugin can die in.
+					PaymentRecovery::remember_order_sent_to_gateway( (int) $order_id );
 					$this->process_order_without_payment( $order_id );
 				}
 			}

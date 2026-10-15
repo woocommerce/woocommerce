@@ -1049,6 +1049,46 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox process_checkout() answers a repeat submit for a free order whose request died after it moved past payment.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_for_a_free_order(): void {
+		$this->use_real_session();
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'       => true,
+				'regular_price' => 0,
+				'price'         => 0,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id() );
+		$this->post_checkout_form( '' );
+		// A free order skips the gateway, but payment_complete() still runs its status change; a plugin dying there is the reported shape.
+		$die_in_transition = function () {
+			throw new Error( 'Call to a member function push_order() on null' );
+		};
+		add_action( 'woocommerce_order_status_processing', $die_in_transition );
+
+		try {
+			$this->submit_checkout_over_ajax();
+			$this->fail( 'A free order is not recovered on the first attempt, so the Error should escape.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Call to a member function push_order() on null', $e->getMessage() );
+		}
+		remove_action( 'woocommerce_order_status_processing', $die_in_transition );
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->post_checkout_form( '' );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertTrue( $order->has_status( OrderStatus::PROCESSING ), 'The first submit completed the free order before the request died.' );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build a second free order.' );
+	}
+
+	/**
 	 * @testdox process_checkout() recovers an order the gateway moved on when an Error is raised inside the status transition.
 	 */
 	public function test_process_checkout_recovers_an_order_the_gateway_moved_on_when_the_transition_throws(): void {

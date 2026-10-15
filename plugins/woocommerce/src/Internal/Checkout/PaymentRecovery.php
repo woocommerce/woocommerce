@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 final class PaymentRecovery {
 
 	/**
-	 * Session key holding the order last handed to a gateway.
+	 * Session key holding the order last handed to a gateway, or completed without one when it was free.
 	 *
 	 * Unlike order_awaiting_payment, which WC_Order::payment_complete() clears before the status
 	 * change, this survives a request that dies inside that change, so a repeat submit can still
