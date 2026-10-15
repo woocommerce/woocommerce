@@ -48,6 +48,20 @@ final class DeferredEmailQueue {
 	private bool $shutdown_registered = false;
 
 	/**
+	 * The locale of the queued email being sent, empty when it was queued without one.
+	 *
+	 * @var string
+	 */
+	private string $sending_locale = '';
+
+	/**
+	 * Object IDs of the emails switched to the queued locale, most recent last.
+	 *
+	 * @var int[]
+	 */
+	private array $switched_emails = array();
+
+	/**
 	 * Initialize hooks.
 	 *
 	 * @internal
@@ -117,9 +131,9 @@ final class DeferredEmailQueue {
 	/**
 	 * Process a single queued transactional email from Action Scheduler.
 	 *
-	 * The email is sent in the locale of the request that queued it. The request running the
-	 * queue can be in another locale, e.g. an async runner started from an admin's dashboard
-	 * runs with that admin's profile language.
+	 * Emails that are not sent to the customer use the locale of the request that queued them, as
+	 * they would without deferral. The request running the queue can be in another locale, e.g. an
+	 * async runner started from an admin's dashboard runs with that admin's profile language.
 	 *
 	 * @internal
 	 *
@@ -137,30 +151,80 @@ final class DeferredEmailQueue {
 			return;
 		}
 
-		$switched = $this->switch_to_queued_locale( $locale );
+		if ( ! is_string( $locale ) || '' === $locale ) {
+			\WC_Emails::send_queued_transactional_email( $filter, $args );
+			return;
+		}
+
+		// Switch per email rather than for the whole action: customer emails switch to the site locale
+		// through get_locale(), which would return the queued locale while it is switched in.
+		$this->sending_locale = $locale;
+		add_filter( 'woocommerce_allow_switching_email_locale', array( $this, 'switch_email_to_queued_locale' ), PHP_INT_MAX, 2 );
+		add_filter( 'woocommerce_allow_restoring_email_locale', array( $this, 'restore_email_from_queued_locale' ), PHP_INT_MAX, 2 );
 
 		try {
-			if ( $switched ) {
-				\WC()->load_plugin_textdomain();
-			}
-
 			\WC_Emails::send_queued_transactional_email( $filter, $args );
 		} finally {
-			if ( $switched ) {
-				restore_previous_locale();
-				\WC()->load_plugin_textdomain();
+			remove_filter( 'woocommerce_allow_switching_email_locale', array( $this, 'switch_email_to_queued_locale' ), PHP_INT_MAX );
+			remove_filter( 'woocommerce_allow_restoring_email_locale', array( $this, 'restore_email_from_queued_locale' ), PHP_INT_MAX );
+
+			// An email that threw while sending never reached restore_locale().
+			while ( array() !== $this->switched_emails ) {
+				array_pop( $this->switched_emails );
+				$this->restore_runner_locale();
 			}
+			$this->sending_locale = '';
 		}
 	}
 
 	/**
-	 * Switch to the locale an email was queued in, when it differs from the current one.
+	 * Switch an email that is not sent to the customer to the queued locale, from WC_Email::setup_locale().
 	 *
-	 * @param mixed $locale The locale stored with the queued email.
-	 * @return bool True if the locale was switched and must be restored.
+	 * Hooked last, so an email whose locale switching was turned off, e.g. by a translation plugin, is left alone.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $allow Whether the email may switch its locale.
+	 * @param mixed $email The email being set up.
+	 * @return mixed The unchanged $allow.
 	 */
-	private function switch_to_queued_locale( $locale ): bool {
-		return is_string( $locale ) && '' !== $locale && switch_to_locale( $locale );
+	public function switch_email_to_queued_locale( $allow, $email ) {
+		if ( ! $allow || ! $email instanceof \WC_Email || $email->is_customer_email() ) {
+			return $allow;
+		}
+
+		if ( switch_to_locale( $this->sending_locale ) ) {
+			$this->switched_emails[] = spl_object_id( $email );
+			\WC()->load_plugin_textdomain();
+		}
+
+		return $allow;
+	}
+
+	/**
+	 * Restore the runner's locale after an email switched by switch_email_to_queued_locale(), from WC_Email::restore_locale().
+	 *
+	 * @internal
+	 *
+	 * @param mixed $allow Whether the email may restore its locale.
+	 * @param mixed $email The email being restored.
+	 * @return mixed The unchanged $allow.
+	 */
+	public function restore_email_from_queued_locale( $allow, $email ) {
+		if ( is_object( $email ) && end( $this->switched_emails ) === spl_object_id( $email ) ) {
+			array_pop( $this->switched_emails );
+			$this->restore_runner_locale();
+		}
+
+		return $allow;
+	}
+
+	/**
+	 * Undo one switch to the queued locale and reload WooCommerce translations for the runner's locale.
+	 */
+	private function restore_runner_locale(): void {
+		restore_previous_locale();
+		\WC()->load_plugin_textdomain();
 	}
 
 	/**
