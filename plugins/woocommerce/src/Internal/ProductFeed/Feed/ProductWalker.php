@@ -296,6 +296,31 @@ class ProductWalker {
 	}
 
 	/**
+	 * Walks the first chunk of products and reports it as the whole feed.
+	 *
+	 * This class is internal and nothing outside WooCommerce should call this method. It's kept only
+	 * so that any unexpected caller gets a deprecation notice instead of a fatal error that takes the
+	 * site down. Resuming from a page is no longer supported, so `$start_page` is ignored.
+	 *
+	 * @since 11.0.0
+	 * @deprecated 11.3.0 Use walk_chunk(), which resumes after a product ID instead of a page.
+	 *
+	 * @param callable|null $callback    The callback to call after each batch of products is processed.
+	 * @param int           $start_page  Ignored.
+	 * @param int           $max_batches The maximum number of batches to process in this call.
+	 * @return WalkerProgress
+	 */
+	public function walk_batches( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
+		wc_deprecated_function( __METHOD__, '11.3.0', __CLASS__ . '::walk_chunk' );
+
+		$progress                    = $this->walk_chunk( $callback, 0, $max_batches );
+		$progress->total_count       = $progress->processed_items;
+		$progress->total_batch_count = $progress->processed_batches;
+
+		return $progress;
+	}
+
+	/**
 	 * Iterates through a batch of products.
 	 *
 	 * @param array $args     The arguments to pass to wc_get_products().
