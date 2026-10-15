@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Product;
 use WC_Helper_Product;
@@ -23,6 +24,7 @@ use WC_Helper_Product;
 class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 
 	use StockNotificationsFeatureTrait;
+	use LoggerSpyTrait;
 
 	/**
 	 * @var NotificationsProcessor
@@ -56,7 +58,6 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 		$this->restore_stock_notifications_feature_option();
-		remove_all_filters( 'woocommerce_logging_class' );
 		remove_all_filters( 'woocommerce_customer_stock_notifications_product_is_valid' );
 		parent::tearDown();
 	}
@@ -588,24 +589,19 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$product->save();
 
-		$logger = $this->createMock( \WC_Logger_Interface::class );
-		$logger->expects( $this->once() )
-			->method( 'log' )
-			->with( \WC_Log_Levels::INFO, $this->stringContains( 'stock status is not eligible' ) );
+		$this->sut->process_batch( $product->get_id() );
 
-		$this->create_processor_with_logger( $logger )->process_batch( $product->get_id() );
+		$this->assertLogged( 'info', 'stock status is not eligible' );
+		$this->assertNoErrorLogged();
 	}
 
 	/**
 	 * Test process_batch logs a missing product at error level.
 	 */
 	public function test_process_batch_logs_missing_product_at_error_level() {
-		$logger = $this->createMock( \WC_Logger_Interface::class );
-		$logger->expects( $this->once() )
-			->method( 'log' )
-			->with( \WC_Log_Levels::ERROR, $this->stringContains( 'Product 123 not found' ) );
+		$this->sut->process_batch( 123 );
 
-		$this->create_processor_with_logger( $logger )->process_batch( 123 );
+		$this->assertLogged( 'error', 'Product 123 not found' );
 	}
 
 	/**
@@ -621,34 +617,9 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 			}
 		);
 
-		$logger = $this->createMock( \WC_Logger_Interface::class );
-		$logger->expects( $this->once() )
-			->method( 'log' )
-			->with( \WC_Log_Levels::ERROR, $this->stringContains( 'Callback failed.' ) );
+		$this->sut->process_batch( $product->get_id() );
 
-		$this->create_processor_with_logger( $logger )->process_batch( $product->get_id() );
-	}
-
-	/**
-	 * Create a processor that logs to the given logger.
-	 *
-	 * @param \WC_Logger_Interface $logger The logger.
-	 * @return NotificationsProcessor
-	 */
-	private function create_processor_with_logger( \WC_Logger_Interface $logger ): NotificationsProcessor {
-		add_filter(
-			'woocommerce_logging_class',
-			function () use ( $logger ) {
-				return $logger;
-			}
-		);
-
-		$eligibility_service = new EligibilityService();
-		$eligibility_service->init( new StockManagementHelper() );
-		$sut = new NotificationsProcessor();
-		$sut->init( $eligibility_service, new JobManager(), new CycleStateService(), new EmailManager() );
-
-		return $sut;
+		$this->assertLogged( 'error', 'Callback failed.' );
 	}
 
 	/**
