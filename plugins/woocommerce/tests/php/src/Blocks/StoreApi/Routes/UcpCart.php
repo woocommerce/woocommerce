@@ -121,7 +121,7 @@ class UcpCart extends ControllerTestCase {
 	 * The session, customer and cart the harness set up, so `simulate_new_request()`
 	 * can swap them for a test and tearDown can put them back.
 	 *
-	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null}
+	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null, loaded: int|null}
 	 */
 	private $wc_globals_backup = array();
 
@@ -138,7 +138,10 @@ class UcpCart extends ControllerTestCase {
 			'session'  => WC()->session,
 			'customer' => WC()->customer,
 			'cart'     => WC()->cart,
+			'loaded'   => $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null,
 		);
+
+		$this->simulate_new_request();
 	}
 
 	/**
@@ -161,6 +164,16 @@ class UcpCart extends ControllerTestCase {
 		WC()->session  = $this->wc_globals_backup['session'];
 		WC()->customer = $this->wc_globals_backup['customer'];
 		WC()->cart     = $this->wc_globals_backup['cart'];
+		$markers       = array(
+			'woocommerce_load_cart_from_session' => 'loaded',
+		);
+		foreach ( $markers as $action => $key ) {
+			if ( null === $this->wc_globals_backup[ $key ] ) {
+				unset( $GLOBALS['wp_actions'][ $action ] );
+			} else {
+				$GLOBALS['wp_actions'][ $action ] = $this->wc_globals_backup[ $key ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the per-process markers the harness cleared.
+			}
+		}
 
 		parent::tearDown();
 	}
@@ -210,11 +223,13 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
-	 * Start a session the way a fresh HTTP request would.
+	 * Start a request the way a fresh HTTP request would.
 	 *
-	 * The session and cart are loaded once per process, so a test that needs a second
-	 * request has to rebuild them: persist what the current request would save on
-	 * shutdown, then construct the handler the next request would pick.
+	 * The session and cart are loaded once per process. Persist what the current
+	 * request would save on shutdown, then drop them and the "loaded" marker so the
+	 * next route builds its own session handler through `wc_load_cart()`, exactly as a
+	 * real REST request does; a UCP route then binds the token handler to the token it
+	 * minted or was given.
 	 *
 	 * @param string $cart_token Cart token the next request carries, or '' for none.
 	 */
@@ -238,12 +253,11 @@ class UcpCart extends ControllerTestCase {
 			$_SERVER['HTTP_CART_TOKEN'] = $cart_token;
 		}
 
-		$session = '' === $cart_token ? new \WC_Session_Handler() : new SessionHandler();
-		$session->init();
-
-		WC()->session  = $session;
-		WC()->customer = new \WC_Customer( get_current_user_id(), true );
-		WC()->cart     = new \WC_Cart();
+		WC()->session  = null;
+		WC()->customer = null;
+		WC()->cart     = null;
+		// Per-process "already done" markers a real request would not carry over.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 	}
 
 	/**
@@ -801,24 +815,65 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
-	 * A session that outlives a cancellation can still create carts.
+	 * A caller can still create carts after cancelling one.
 	 *
-	 * Only a logged-in caller keeps a session across UCP requests, keyed to the user, so
-	 * there the sticky marker must be cleared or every later cart would be not_found.
+	 * Creation never inherits a session, so the sticky cancellation marker on the old
+	 * cart's row cannot reach the new cart.
 	 */
 	public function test_a_cart_can_be_created_after_cancelling_one(): void {
 		$cancelled = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
 		$this->request( 'POST', '/carts/' . $cancelled['id'] . '/cancel' );
 
+		$this->simulate_new_request();
 		$fresh = $this->create_cart( array( $this->line_item( 1, 2 ) ) );
 
 		$this->assertCount( 1, $fresh['line_items'] );
 		$this->assertSame( 2, $fresh['line_items'][0]['quantity'] );
+		$this->assertFalse( (bool) WC()->session->get( AbstractCartRoute::CANCELLED_SESSION_KEY ) );
 
+		$this->simulate_new_request( $fresh['id'] );
 		$read_back = $this->request( 'GET', '/carts/' . $fresh['id'] )->get_data();
 		$this->assertSame( $fresh['id'], $read_back['id'] );
 		$this->assertSame( $fresh['line_items'], $read_back['line_items'] );
-		$this->assertFalse( (bool) WC()->session->get( AbstractCartRoute::CANCELLED_SESSION_KEY ) );
+	}
+
+	/**
+	 * Creating a cart as a logged-in user must not touch that user's own session.
+	 *
+	 * The token handler keys a tokenless session on the user id, so without a minted
+	 * guest id the empty new session would be saved over the shopper's stored cart.
+	 */
+	public function test_create_cart_while_logged_in_leaves_the_user_session_alone(): void {
+		global $wpdb;
+
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$stored = maybe_serialize( array( 'cart' => array( 'keep-me' => array( 'quantity' => 3 ) ) ) );
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => (string) $user_id,
+				'session_value'  => $stored,
+				'session_expiry' => time() + DAY_IN_SECONDS,
+			)
+		);
+
+		try {
+			$this->simulate_new_request();
+			$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+			$this->assertNotSame( (string) $user_id, CartTokenUtils::get_cart_token_payload( $created['id'] )['user_id'] );
+
+			// What shutdown would write.
+			WC()->session->save_data();
+		} finally {
+			wp_set_current_user( 0 );
+		}
+
+		$this->assertSame(
+			$stored,
+			$wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$wpdb->prefix}woocommerce_sessions WHERE session_key = %s", (string) $user_id ) ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
 	}
 
 	/**

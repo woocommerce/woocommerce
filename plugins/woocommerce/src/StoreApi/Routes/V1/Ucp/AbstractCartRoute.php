@@ -128,15 +128,21 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	protected function load_cart_session( \WP_REST_Request $request ) {
 		$cart_id = $this->validated_cart_id( $request );
 
-		if ( '' !== $cart_id ) {
-			$request->set_header( 'Cart-Token', $cart_id );
-			// phpcs:ignore WooCommerceStoreApi.StoreApi.CartTokenSource.ServerSuperglobalWrite -- Signature checked in validated_cart_id(); this is the route's own path segment, promoted to the slot PHP would have filled from a Cart-Token header.
-			$_SERVER['HTTP_CART_TOKEN'] = $cart_id;
+		if ( '' === $cart_id ) {
+			// Creation starts from a fresh guest session: the id is minted here, never
+			// inherited from a Cart-Token header or from the logged-in user. Without this the
+			// token handler would key an empty session on the user id and overwrite the
+			// shopper's own session row on save.
+			$cart_id = CartTokenUtils::get_cart_token( wc_rand_hash( 't_', 30 ) );
 		}
 
+		$request->set_header( 'Cart-Token', $cart_id );
+		// phpcs:ignore WooCommerceStoreApi.StoreApi.CartTokenSource.ServerSuperglobalWrite -- Either the route's own path segment, signature checked in validated_cart_id(), or a token minted just above; promoted to the slot PHP would have filled from a Cart-Token header.
+		$_SERVER['HTTP_CART_TOKEN'] = $cart_id;
+
 		// The parent promotes the token handler only for a request that carries a token,
-		// which leaves cart creation on the cookie handler. UCP has no cookie to trust:
-		// the id is the only credential, so the handler is fixed for every route here.
+		// which would leave cart creation on the cookie handler. UCP has no cookie to
+		// trust: the id is the only credential, so the handler is fixed for every route.
 		add_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 
 		parent::load_cart_session( $request );
@@ -197,7 +203,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * Safe because `load_cart_session()` binds every route to the token-keyed session
 	 * handler, so no request here reads the browser's session cookie: there is no ambient
 	 * credential for a cross-site request to ride on. Cart creation is left open
-	 * deliberately — with no token it mints an empty session of its own.
+	 * deliberately — it mints a guest session of its own, whoever is logged in.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -247,18 +253,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$session = WC()->session;
 
 		return $session ? (bool) $session->get( self::CANCELLED_SESSION_KEY ) : false;
-	}
-
-	/**
-	 * Clear the cancellation marker from a session a new cart is created in.
-	 *
-	 * A guest never reaches it: creation mints a fresh session. A logged-in session is
-	 * keyed to the user, so there the marker would make every later cart `not_found`.
-	 */
-	protected function release_cancelled_session(): void {
-		if ( WC()->session && $this->cart_is_cancelled() ) {
-			WC()->session->set( self::CANCELLED_SESSION_KEY, null );
-		}
 	}
 
 	/**

@@ -3,8 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\StoreApi\SessionHandler;
-
 /**
  * UCP `POST /carts` route.
  */
@@ -57,47 +55,6 @@ class Carts extends AbstractCartRoute {
 	}
 
 	/**
-	 * Bind creation to a fresh session, whatever token the request carried.
-	 *
-	 * UCP addresses carts by path id only. A `Cart-Token` header here would attach the
-	 * new cart to a caller-chosen session, reviving a cancelled one.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 *
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 *
-	 * @return void
-	 */
-	protected function load_cart_session( \WP_REST_Request $request ) {
-		// phpcs:ignore WooCommerceStoreApi.StoreApi.CartTokenSource.ServerSuperglobal -- Clearing the slot, not reading the token from it.
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
-
-		// The bootstrap binds a token session from the header before any route runs, so
-		// clearing the slot is not enough: that session, and the customer read from it,
-		// are replaced by ones built from the empty slot.
-		if ( WC()->session instanceof SessionHandler ) {
-			WC()->session = new SessionHandler();
-			WC()->session->init();
-
-			if ( WC()->customer instanceof \WC_Customer ) {
-				remove_action( 'shutdown', array( WC()->customer, 'save' ), 10 );
-
-				$customer      = new \WC_Customer( get_current_user_id(), true );
-				WC()->customer = $customer;
-				add_action(
-					'shutdown',
-					function () use ( $customer ) {
-						$customer->save();
-					},
-					10
-				);
-			}
-		}
-
-		parent::load_cart_session( $request );
-	}
-
-	/**
 	 * Create a cart.
 	 *
 	 * The id is minted from the session the cart was loaded into, so it is the token
@@ -111,8 +68,6 @@ class Carts extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$this->release_cancelled_session();
-
 		$line_items = $request->get_param( 'line_items' );
 
 		if ( null !== $line_items ) {
