@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce order update status ability.
  */
-class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefinition {
+class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefinition {
 
 	use OrderAbilityTrait;
 
@@ -66,20 +67,93 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Update an order status.
+	 * Resource that the ability changes.
+	 *
+	 * @return string
+	 */
+	public static function get_resource(): string {
+		return 'order';
+	}
+
+	/**
+	 * Load the order to change.
+	 *
+	 * @param array $input Ability input.
+	 * @return \WC_Order|\WP_Error
+	 */
+	public static function load( array $input ) {
+		return self::get_order_from_input( $input );
+	}
+
+	/**
+	 * Run the ability with the feature off, exactly as before it: the order
+	 * status changes with WC_Order::update_status(), which sets it and saves.
+	 * With the feature on, CoreActionableAbility runs change() and save()
+	 * instead, so extension fields and validators run before the one save.
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
-	 *
-	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$order = self::get_order_from_input( $input );
-
+		$order = self::load( $input );
 		if ( is_wp_error( $order ) ) {
 			return $order;
 		}
 
+		$status = self::get_new_status( $order, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		if ( ! $order->update_status( $status, self::get_note( $input ), true ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'Failed to update order status.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return self::prepare_response( $order );
+	}
+
+	/**
+	 * Change the order status in memory, as a manual change. The
+	 * woocommerce_order_edit_status action that a manual set_status() fires is
+	 * held back until save(), so a change that an extension refuses fires no action.
+	 *
+	 * @param \WC_Order $subject Order.
+	 * @param array     $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	public static function change( $subject, array $input ) {
+		global $wp_filter;
+
+		$status = self::get_new_status( $subject, $input );
+		if ( is_wp_error( $status ) ) {
+			return $status;
+		}
+
+		$listeners = $wp_filter['woocommerce_order_edit_status'] ?? null;
+		unset( $wp_filter['woocommerce_order_edit_status'] );
+		try {
+			$subject->set_status( $status, self::get_note( $input ), true );
+		} finally {
+			if ( null !== $listeners ) {
+				$wp_filter['woocommerce_order_edit_status'] = $listeners; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the new status of the order from the input.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @param array     $input Ability input.
+	 * @return string|\WP_Error
+	 */
+	private static function get_new_status( $order, array $input ) {
 		if ( empty( $input['status'] ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_required',
@@ -109,13 +183,41 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		$updated = $order->update_status(
-			$status,
-			isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
-			true
-		);
+		return $status;
+	}
 
-		if ( ! $updated ) {
+	/**
+	 * Get the status change note from the input.
+	 *
+	 * @param array $input Ability input.
+	 * @return string
+	 */
+	private static function get_note( array $input ): string {
+		return isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '';
+	}
+
+	/**
+	 * Fire woocommerce_order_edit_status for the accepted change, and save the
+	 * order as WC_Order::update_status() does.
+	 *
+	 * @param \WC_Order $subject Changed order.
+	 * @return null|\WP_Error
+	 */
+	public static function save( $subject ) {
+		do_action( 'woocommerce_order_edit_status', $subject->get_id(), $subject->get_status() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		try {
+			$subject->save();
+		} catch ( \Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Error updating status for order #%d', $subject->get_id() ),
+				array(
+					'order' => $subject,
+					'error' => $e,
+				)
+			);
+			$subject->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+
 			return new \WP_Error(
 				'woocommerce_order_status_update_failed',
 				__( 'Failed to update order status.', 'woocommerce' ),
@@ -123,8 +225,18 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
+		return null;
+	}
+
+	/**
+	 * The ability output for the saved order.
+	 *
+	 * @param \WC_Order $subject Saved order.
+	 * @return array
+	 */
+	public static function prepare_response( $subject ): array {
 		return array(
-			'order' => self::format_order_for_response( $order, false ),
+			'order' => self::format_order_for_response( $subject, false ),
 		);
 	}
 
