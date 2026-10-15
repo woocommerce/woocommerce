@@ -354,7 +354,7 @@ trait SchedulerTraits {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		if ( version_compare( \ActionScheduler_Versions::instance()->latest_version(), '3.0', '>=' ) ) {
+		if ( method_exists( \ActionScheduler::store(), 'cancel_actions_by_group' ) ) {
 			\ActionScheduler::store()->cancel_actions_by_group( static::$group );
 		} else {
 			$actions = static::get_actions();
