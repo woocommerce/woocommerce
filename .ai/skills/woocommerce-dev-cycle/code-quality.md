@@ -6,6 +6,7 @@
 - [PHP Linting](#php-linting)
 - [JavaScript Linting](#javascript-linting)
 - [Markdown Linting](#markdown-linting)
+- [Dependency Changes](#dependency-changes)
 - [Important Linting Guidelines](#important-linting-guidelines)
 - [Example Workflow](#example-workflow)
 - [Understanding Linting Output](#understanding-linting-output)
@@ -80,6 +81,8 @@ This command:
 - Identifies code style and potential issues
 - Does not modify files
 
+**Important:** CI's "Lint - @woocommerce/plugin-woocommerce" job runs this same script, with the plugin-level ESLint config in `plugins/woocommerce`. That config enforces rules a sub-package's own `lint:lang:js` may not, such as `max-len` (140). A clean `pnpm --filter=@woocommerce/classic-assets lint:lang:js` run on `client/legacy` does not mean CI will pass; run `lint:changes:branch:js` from `plugins/woocommerce` before pushing.
+
 **Important:** The plugin-level `.eslintignore` excludes `client/blocks/`, so `lint:changes:branch:js` will not catch eslint or prettier issues in blocks code. For blocks changes, also run the blocks package lint:
 
 ```bash
@@ -105,6 +108,32 @@ markdownlint --fix path/to/file.md
 # Check for remaining errors
 markdownlint path/to/file.md
 ```
+
+## Dependency Changes
+
+Until the lockfile is re-settled, a non-frozen `pnpm install` after any `package.json` change also rewrites unrelated `pnpm-lock.yaml` lines: pnpm recomputes peer-dependency suffixes for packages that other importers share and writes the consistent result back for all of them. The churn is pre-existing lockfile state, not part of your change. Keep it out of your PR:
+
+1. Add the dependency as usual, for example `pnpm --filter=@woocommerce/classic-assets add -D jquery4@npm:jquery@4.0.0`, then check the lockfile diff against trunk:
+
+   ```bash
+   git diff --stat origin/trunk -- pnpm-lock.yaml
+   ```
+
+2. If the diff is larger than your own entries, restore trunk's lockfile and add those entries by hand. For one dependency that is the importer block under your package (`specifier` and `version`), the `packages:` entry with its `resolution` line, and the `snapshots:` line. Copy them from the lockfile pnpm just wrote before restoring:
+
+   ```bash
+   git checkout origin/trunk -- pnpm-lock.yaml
+   ```
+
+3. Validate the hand-built lockfile. A frozen install refuses a lockfile that disagrees with any manifest, so a clean run proves the edit:
+
+   ```bash
+   pnpm install --frozen-lockfile
+   ```
+
+4. Re-check `git diff --stat origin/trunk -- pnpm-lock.yaml`. Two devDependencies came to 16 added lines and nothing removed.
+
+Do not run `pnpm dedupe` or delete the lockfile to "clean it up": both pull newer transitive versions and are a toolchain upgrade, not a cleanup.
 
 ## Important Linting Guidelines
 
@@ -207,7 +236,8 @@ Before committing your changes:
 
 - [ ] Run `pnpm run lint:changes:branch:php`
 - [ ] Run `pnpm run lint:php:fix` if issues found
-- [ ] Run `pnpm run lint:changes:branch:js` if you modified JS files
+- [ ] Run `pnpm run lint:changes:branch:js` from `plugins/woocommerce` if you modified JS files (this is what CI runs)
+- [ ] Check `git diff --stat origin/trunk -- pnpm-lock.yaml` holds only your entries if you changed a `package.json`
 - [ ] Run `pnpm --filter=@woocommerce/block-library lint:js-fix` if you modified blocks JS/TS files
 - [ ] Review all automatic fixes with `git diff`
 - [ ] Address any remaining issues that can't be auto-fixed

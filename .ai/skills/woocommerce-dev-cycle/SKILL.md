@@ -23,7 +23,7 @@ The standard development workflow:
 
 1. Make code changes
 2. Run relevant tests: `pnpm run test:php:env -- --filter YourTestClass`
-3. Run linting/type checking: `pnpm run lint:changes:branch:php`
+3. Run linting: `pnpm run lint:changes:branch` (PHP and JS, the same command CI's Lint job runs)
 4. Fix any issues: `pnpm run lint:php:fix`
 5. Commit changes only after tests pass
 

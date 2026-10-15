@@ -326,6 +326,8 @@ This is part of the WooCommerce monorepo:
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages
 
+**Dependency changes and `pnpm-lock.yaml`.** Until the lockfile is re-settled, a non-frozen `pnpm install` after any manifest change also rewrites unrelated lockfile lines: peer-suffix repairs for packages that other importers share. That churn is pre-existing lockfile state, not part of your change, and reviewers will ask for a lockfile diff that holds only your entries. Follow "Dependency Changes" in `code-quality.md` of the `woocommerce-dev-cycle` skill to produce one.
+
 ## Historical Context
 
 **Why two code styles?** The `plugins/woocommerce/includes/` directory predates modern PHP practices. New code uses PSR-4 and dependency injection in `plugins/woocommerce/src/`.
