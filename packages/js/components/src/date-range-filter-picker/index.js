@@ -7,29 +7,13 @@ import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 import clsx from 'clsx';
-import moment from 'moment';
+import { getShortDateFormat } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
 import DatePickerContent from './content';
 import DropdownButton from '../dropdown-button';
-
-const defaultShortDateFormat = 'MM/DD/YYYY';
-const formatCheckDate = moment( '2001-02-03', 'YYYY-MM-DD' );
-
-/**
- * Format shown as the input hint and used to parse typed dates, so both always agree.
- * Some translations aren't Moment.js formats (e.g. "MM/DD/RRRR"), so fall back unless the translation round-trips a date.
- */
-const getShortDateFormat = () => {
-	/* translators: Moment.js date format for typed dates. Keep the DD, MM and YYYY tokens. */
-	const format = __( 'MM/DD/YYYY', 'woocommerce' );
-	const parsed = moment( formatCheckDate.format( format ), format, true );
-	return parsed.isSame( formatCheckDate, 'day' )
-		? format
-		: defaultShortDateFormat;
-};
 
 /**
  * Select a range of dates or single dates.
