@@ -77,7 +77,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 			foreach ( $notification_ids as $notification_id ) {
 				$notification = Factory::get_notification( (int) $notification_id );
-				if ( ! $notification instanceof Notification ) {
+				if ( ! $notification instanceof Notification || ! self::belongs_to_customer( $notification, $customer ) ) {
 					continue;
 				}
 
@@ -187,6 +187,25 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	}
 
 	/**
+	 * Check that a sign-up belongs to the customer being exported or erased.
+	 *
+	 * The data store can be replaced through the `woocommerce_stock_notification_data_store`
+	 * filter, and a replacement that ignores the `customer` query argument would return every
+	 * sign-up. Checking each row keeps both paths from touching other customers' data.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param Notification      $notification The sign-up.
+	 * @param array<int|string> $customer     The `customer` query values from `get_customer()`.
+	 *
+	 * @return bool
+	 */
+	private static function belongs_to_customer( Notification $notification, array $customer ): bool {
+		return in_array( (int) $notification->get_user_id(), $customer, true )
+			|| in_array( EmailNormalizer::normalize( (string) $notification->get_user_email() ), $customer, true );
+	}
+
+	/**
 	 * Erase customer stock notification data for a given email address and the account it belongs to.
 	 *
 	 * This method anonymizes the user email and sets the status of the notifications to 'cancelled'.
@@ -209,7 +228,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 		foreach ( $notifications as $notification_id ) {
 			$notification = Factory::get_notification( (int) $notification_id );
-			if ( ! $notification instanceof Notification ) {
+			if ( ! $notification instanceof Notification || ! self::belongs_to_customer( $notification, $customer ) ) {
 				continue;
 			}
 

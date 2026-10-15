@@ -3,6 +3,9 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Privacy;
 
+use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsMetaDataStore;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
@@ -302,5 +305,43 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $response['data'] );
 		$this->assertTrue( $response['done'] );
+	}
+
+	/**
+	 * @testdox Should skip sign-ups of other customers when the data store ignores the `customer` query argument.
+	 */
+	public function test_privacy_export_and_erase_skip_other_customers_rows(): void {
+		$mine = new Notification();
+		$mine->set_user_email( 'jon@doe.com' );
+		$mine->set_product_id( 1 );
+		$mine_id = $mine->save();
+
+		$other = new Notification();
+		$other->set_user_email( 'other@doe.com' );
+		$other->set_product_id( 1 );
+		$other_id = $other->save();
+
+		$store = new class() extends StockNotificationsDataStore {
+			/**
+			 * Query like a store written before the `customer` argument existed.
+			 *
+			 * @param array $args The arguments.
+			 * @return array<int>|array<Notification>|int
+			 */
+			public function query( array $args ) {
+				unset( $args['customer'] );
+				return parent::query( $args );
+			}
+		};
+		$store->init( wc_get_container()->get( StockNotificationsMetaDataStore::class ), wc_get_container()->get( DatabaseUtil::class ) );
+		add_filter( 'woocommerce_stock_notification_data_store', fn() => $store );
+
+		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
+		$this->assertSame( array( 'stock-notification-' . $mine_id ), array_column( $response['data'], 'item_id' ) );
+
+		$erased = PrivacyEraser::erase_notification_data( 'jon@doe.com' );
+		$this->assertTrue( $erased['items_removed'] );
+		$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $mine_id ) )->get_status() );
+		$this->assertSame( 'other@doe.com', ( new Notification( $other_id ) )->get_user_email() );
 	}
 }
