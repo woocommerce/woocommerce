@@ -3,11 +3,11 @@
  * Contracts - the engine's public contract facade (reads and writes).
  *
  * Extensions create and progressively build contracts from explicit argument arrays:
- * the engine records the facts it is given and decides nothing about them. Any caller
- * may read or write any contract (authorization is the caller's concern). Reads return
- * read-only views ({@see ContractView}, {@see CycleView}). The engine opens no
- * transaction and keeps no cache, so a caller may wrap several calls in its own
- * transaction. No hooks fire.
+ * the engine records the facts it is given and decides nothing about them. Cycle tools
+ * (claimed appends, cycle claims, compare-and-set transitions) let an extension run its own
+ * billing flow safely under concurrency. Any caller may read or write any contract
+ * (authorization is the caller's concern). Reads return read-only views ({@see ContractView},
+ * {@see CycleView}). The engine opens no transaction and keeps no cache. No hooks fire.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -87,6 +87,18 @@ final class Contracts {
 		'expected_total' => true,
 		'currency'       => true,
 		'order_id'       => true,
+		'claim_seconds'  => true,
+	);
+
+	/**
+	 * Keys accepted by {@see self::transition_cycle()}, as a key map.
+	 *
+	 * @var array<string, true>
+	 */
+	private const TRANSITION_KEYS = array(
+		'order_id'      => true,
+		'reason'        => true,
+		'claim_seconds' => true,
 	);
 
 	/**
@@ -95,10 +107,14 @@ final class Contracts {
 	 * Only `extension_slug` is required; the status defaults to `draft`. Dates accept a
 	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
 	 * strings, and a non-null money value requires a currency. `items` is a list of item
-	 * rows; `addresses` is keyed `billing` / `shipping`. Unknown keys, also inside item rows
-	 * and addresses, raise a `_doing_it_wrong()` notice and are ignored. The contract row,
-	 * items and addresses are separate writes and the engine opens no transaction: wrap the
-	 * call in one when a failed write must leave nothing behind.
+	 * rows; `addresses` is keyed `billing` / `shipping`. `schedule_source` says who keeps the
+	 * payment schedule: `subscriptions_engine` (the default; the engine notifies the owner when
+	 * `next_payment_gmt` passes) or the slug (1-64 of `a-z0-9_-`) of a gateway or extension that
+	 * keeps its own schedule and triggers its own renewals; the engine never dispatches those
+	 * contracts. Unknown keys, also inside item rows and addresses, raise a `_doing_it_wrong()`
+	 * notice and are ignored. The contract row, items and addresses are separate writes and the
+	 * engine opens no transaction: wrap the call in one when a failed write must leave nothing
+	 * behind.
 	 *
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
@@ -178,17 +194,24 @@ final class Contracts {
 	 * `status` (a registered cycle status) defaults to `pending`; `kind` defaults to
 	 * `billing`; an absent or null `sequence_no` is assigned on append as the head's plus one;
 	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
-	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional. The contract is not
-	 * read: appending to an unknown contract id is a caller error. Unknown keys raise a
-	 * `_doing_it_wrong()` notice and are ignored.
+	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional.
+	 * `claim_seconds` (positive int) appends the cycle claimed: the caller holds its claim for
+	 * that long, measured on the database clock like {@see self::claim_cycle()}. The contract is not read: appending to an
+	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()` notice
+	 * and are ignored.
+	 *
+	 * Losing the append race is an outcome, not an error: when the chain position or count is
+	 * already taken (another caller appended it first), nothing is written and the call returns
+	 * null, as {@see self::claim_cycle()} and {@see self::transition_cycle()} return false when
+	 * their compare-and-set loses. A storage failure, such as a value longer than its column
+	 * (`kind`), throws a `RuntimeException` and writes nothing.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.
-	 * @return CycleView The appended cycle.
+	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid.
-	 * @throws DomainException If the chain position or count is already taken.
 	 */
-	public static function add_cycle( int $contract_id, array $args ): CycleView {
+	public static function add_cycle( int $contract_id, array $args ): ?CycleView {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$cycle_args = array(
@@ -204,6 +227,10 @@ final class Contracts {
 			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
+		$claim_seconds = array_key_exists( 'claim_seconds', $filtered_args )
+			? ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] )
+			: null;
+
 		try {
 			$cycle = Cycle::create( $cycle_args );
 		} catch ( DomainException $e ) {
@@ -211,12 +238,77 @@ final class Contracts {
 		}
 
 		try {
-			( new ContractRepository() )->append_cycle( $cycle, null );
+			( new ContractRepository() )->append_cycle( $cycle, $claim_seconds );
 		} catch ( DuplicateCycleException $e ) {
-			throw new DomainException( 'Contracts: the cycle position or count already exists.' );
+			return null;
 		}
 
 		return CycleView::from_cycle( $cycle );
+	}
+
+	/**
+	 * Take the claim on a cycle still in `$status` whose claim expired or was never set. A
+	 * compare-and-set on the status and the claim: of concurrent callers that read `$status`,
+	 * exactly one gets true and holds the cycle for `$claim_seconds`; the others get false.
+	 * Claims are measured on the database clock.
+	 *
+	 * @param int    $cycle_id      Cycle id.
+	 * @param string $status        The status the caller read; the cycle must still carry it.
+	 * @param int    $claim_seconds Claim length in seconds (positive).
+	 * @return bool True when the caller now holds the cycle.
+	 * @throws InvalidArgumentException If `$claim_seconds` is not positive.
+	 */
+	public static function claim_cycle( int $cycle_id, string $status, int $claim_seconds ): bool {
+		return ( new ContractRepository() )->claim_cycle( $cycle_id, $status, ArgumentValidator::validate_positive_int( 'claim_seconds', $claim_seconds ) );
+	}
+
+	/**
+	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status: of
+	 * concurrent callers that read `$from_status`, exactly one gets true. `$args`: `order_id`
+	 * (?int) and `reason` (?string) are written when present (omitted keeps the stored value,
+	 * null clears it); `claim_seconds` (int) holds the cycle for that long, and without it the
+	 * claim is released. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
+	 * A same-status call (`$from_status === $to_status`) only writes `$args`, so it returns
+	 * true whenever the cycle still carries the status, even when the values were already stored.
+	 *
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status The status the caller read.
+	 * @param string               $to_status   The status to write; a registered cycle status.
+	 * @param array<string, mixed> $args        Optional `order_id`, `reason`, `claim_seconds`.
+	 * @return bool True when this call made the transition, or for a same-status call when the
+	 *              cycle carries the status.
+	 * @throws InvalidArgumentException If `$to_status` is not registered or a value is invalid.
+	 */
+	public static function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $args = array() ): bool {
+		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
+		$changes       = array();
+
+		if ( array_key_exists( 'order_id', $filtered_args ) ) {
+			$changes['order_id'] = ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] );
+		}
+		if ( array_key_exists( 'reason', $filtered_args ) ) {
+			$changes['reason'] = ArgumentValidator::validate_nullable_string( 'reason', $filtered_args['reason'] );
+		}
+		if ( array_key_exists( 'claim_seconds', $filtered_args ) ) {
+			$changes['claim_seconds'] = ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] );
+		}
+
+		try {
+			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the repository message is not output.
+		}
+	}
+
+	/**
+	 * The cycles linked to an order, newest first, across contracts and chain kinds (one
+	 * order may serve several cycles).
+	 *
+	 * @param int $order_id Order id.
+	 * @return array<int, CycleView>
+	 */
+	public static function find_cycles_by_order( int $order_id ): array {
+		return self::cycle_views( ( new ContractRepository() )->find_cycles_by_order_id( $order_id ) );
 	}
 
 	/**
@@ -414,19 +506,19 @@ final class Contracts {
 	}
 
 	/**
-	 * Fetch a window of the contract's billing cycles, newest first.
+	 * Fetch a window of the contract's billing cycles, newest first. A negative `$limit` or
+	 * `$offset` throws an InvalidArgumentException.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $limit       Maximum cycles to return.
+	 * @param int $offset      Cycles to skip (for paging).
 	 * @return array<int, CycleView> Cycles newest first.
 	 */
-	public static function get_cycles( int $contract_id, int $limit = 20 ): array {
-		return array_map(
-			static function ( Cycle $cycle ): CycleView {
-				return CycleView::from_cycle( $cycle );
-			},
-			( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit )
-		);
+	public static function get_cycles( int $contract_id, int $limit = 20, int $offset = 0 ): array {
+		$limit  = ArgumentValidator::validate_non_negative_int( 'limit', $limit );
+		$offset = ArgumentValidator::validate_non_negative_int( 'offset', $offset );
+
+		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
@@ -527,6 +619,21 @@ final class Contracts {
 	 */
 	private static function view( ?Contract $contract, bool $with_children ): ?ContractView {
 		return null === $contract ? null : ContractView::from_contract( $contract, $with_children );
+	}
+
+	/**
+	 * Views of cycles.
+	 *
+	 * @param array<int, Cycle> $cycles Cycles.
+	 * @return array<int, CycleView>
+	 */
+	private static function cycle_views( array $cycles ): array {
+		return array_map(
+			static function ( Cycle $cycle ): CycleView {
+				return CycleView::from_cycle( $cycle );
+			},
+			$cycles
+		);
 	}
 
 	/**
