@@ -736,7 +736,13 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 	public function test_cart_totals_use_maximum_discount(): void {
 		WC()->cart->empty_cart();
 		foreach ( array( 400, 100 ) as $price ) {
-			$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+			$product = WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'regular_price' => $price,
+					'virtual'       => true,
+				)
+			);
 			WC()->cart->add_to_cart( $product->get_id(), 1 );
 		}
 		$coupon = new WC_Coupon();
