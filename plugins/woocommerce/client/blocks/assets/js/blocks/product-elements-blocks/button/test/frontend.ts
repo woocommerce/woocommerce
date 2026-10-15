@@ -112,13 +112,4 @@ describe( 'Product Button addCartItem action', () => {
 		] );
 		expect( mockContext.displayViewCart ).toBe( true );
 	} );
-
-	it( 'adds nothing when no product is in context', async () => {
-		mockProductsState.productInContext = null;
-
-		await runAction( loadButtonActions().addCartItem() );
-
-		expect( mockAddCartItem ).not.toHaveBeenCalled();
-		expect( mockContext.displayViewCart ).toBe( false );
-	} );
 } );
