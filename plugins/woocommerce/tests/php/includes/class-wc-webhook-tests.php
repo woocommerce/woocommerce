@@ -385,18 +385,24 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Action webhooks on the variation delete hook are still delivered for trashed variations.
+	 * @testdox Non-product webhooks that add before_delete_post by filter still deliver for trashed posts.
 	 */
-	public function test_action_webhook_on_variation_delete_hook_delivers_for_trashed_variation(): void {
-		$product       = WC_Helper_Product::create_variation_product();
-		$variation_id  = $product->get_children()[0];
+	public function test_non_product_webhook_on_before_delete_post_delivers_for_trashed_post(): void {
+		$coupon_id     = WC_Helper_Coupon::create_coupon()->get_id();
 		$delivered_ids = array();
-		wc_get_product( $variation_id )->delete();
-		$this->record_deliveries( $this->create_active_webhook( 'action.woocommerce_before_delete_product_variation' ), $delivered_ids );
+		wp_trash_post( $coupon_id );
+		add_filter(
+			'woocommerce_webhook_topic_hooks',
+			function ( $topic_hooks ) {
+				$topic_hooks['coupon.deleted'][] = 'before_delete_post';
+				return $topic_hooks;
+			}
+		);
+		$this->record_deliveries( $this->create_active_webhook( 'coupon.deleted' ), $delivered_ids );
 
-		wc_get_product( $variation_id )->delete( true );
+		wp_delete_post( $coupon_id, true );
 
-		$this->assertSame( array( $variation_id ), $delivered_ids );
+		$this->assertSame( array( $coupon_id ), $delivered_ids, 'The variation-only check should not apply to coupon webhooks' );
 	}
 
 	/**
