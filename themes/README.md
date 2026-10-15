@@ -28,14 +28,14 @@ Changelog entries for shared tooling live in `tools/theme-cli/changelog/`, with 
 
 ## Local environments
 
-The shared CLI starts a theme's environment from that theme's directory. For example, once a theme is added:
+The shared CLI starts an environment for the selected theme from `tools/theme-cli/`. For example, once a theme is added:
 
 ```bash
 pnpm --filter=@woocommerce/theme-cli wp-env start <slug>
 pnpm --filter=@woocommerce/theme-cli wp-env stop <slug>
 ```
 
-The CLI owns the wp-env dependency and forwards its arguments. Start uses Playground by default; pass `--runtime=docker` to use Docker. Each theme owns its `.wp-env.json` configuration and can expose shortcuts to these commands.
+The CLI owns the wp-env dependency and forwards its arguments. Start uses Playground by default; pass `--runtime=docker` to use Docker.
 
 ## Adding a theme
 
