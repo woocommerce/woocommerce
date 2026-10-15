@@ -1104,7 +1104,10 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 							'version'      => '2.0.0',
 							'requires_php' => '99.0',
 						),
-						900102 => array( 'version' => '2.0.0' ),
+						900102 => array(
+							'version'      => '2.0.0',
+							'requires_php' => array( '99.0' ),
+						),
 					)
 				),
 			);
@@ -1120,7 +1123,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( $result[900101]['has_update'] );
 		$this->assertFalse( $result[900101]['update_requires_php_met'], 'An update needing a newer PHP than this site runs is not installable.' );
 		$this->assertTrue( $result[900102]['has_update'] );
-		$this->assertTrue( $result[900102]['update_requires_php_met'], 'An update without a PHP requirement is installable.' );
+		$this->assertTrue( $result[900102]['update_requires_php_met'], 'A malformed PHP requirement does not block the update.' );
 	}
 
 	/**
