@@ -46,7 +46,7 @@ class ComingSoonRequestHandler {
 				add_action(
 					'template_redirect',
 					function () {
-						// Registered last so no other template_include callback can replace the private page.
+						// Adds the template_include callback this late so it runs after the ones other plugins register, and none of them can replace the private page.
 						add_filter( 'template_include', array( $this, 'handle_classic_template_include' ), PHP_INT_MAX );
 					},
 					PHP_INT_MAX
@@ -180,7 +180,8 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Classic themes without block template part support use the PHP templates.
+	 * Uses the PHP templates on classic themes without block template part support.
+	 * Themes with that support load WooCommerce block templates in the Blocks bootstrap, so they keep the block page.
 	 *
 	 * @return bool Whether the PHP templates should be used.
 	 */
