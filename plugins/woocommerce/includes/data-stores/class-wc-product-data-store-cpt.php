@@ -2140,19 +2140,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$search_terms = array( $term_group );
 			}
 
-			$term_group_query   = array();
-			$title_match_query  = array();
-			$term_group_trimmed = trim( $term_group );
+			$term_group_query  = array();
+			$title_match_query = array();
 
-			if ( '' !== $term_group_trimmed ) {
-				$group_like = $wpdb->esc_like( $term_group_trimmed );
+			// Rank on the raw term as well as the parsed one: parsing strips quotes, but also splits SKUs like "AB+12".
+			$rank_phrases = array_unique(
+				array_filter(
+					array( trim( $term_group ), implode( ' ', $search_terms ) ),
+					static function ( $phrase ) {
+						return '' !== $phrase;
+					}
+				)
+			);
+
+			foreach ( $rank_phrases as $rank_phrase ) {
+				$phrase_like = $wpdb->esc_like( $rank_phrase );
 
 				foreach ( $identifier_columns as $column ) {
-					$rank_tiers['identifier_exact'][]  = $wpdb->prepare( "{$column} LIKE %s", $group_like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$rank_tiers['identifier_prefix'][] = $wpdb->prepare( "{$column} LIKE %s", $group_like . '%' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$rank_tiers['identifier_exact'][]  = $wpdb->prepare( "{$column} LIKE %s", $phrase_like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$rank_tiers['identifier_prefix'][] = $wpdb->prepare( "{$column} LIKE %s", $phrase_like . '%' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				}
 
-				$rank_tiers['title_prefix'][] = $wpdb->prepare( 'posts.post_title LIKE %s', $group_like . '%' );
+				$rank_tiers['title_prefix'][] = $wpdb->prepare( 'posts.post_title LIKE %s', $phrase_like . '%' );
 			}
 
 			foreach ( $search_terms as $search_term ) {
