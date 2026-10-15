@@ -2,6 +2,7 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Tests for WC_REST_System_Status_V2_Controller.
@@ -25,12 +26,27 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	private const TEST_PLUGIN_FILE = 'sample-woo-plugin/sample-woo-plugin.php';
 
 	/**
+	 * Directory, inside WP_PLUGIN_DIR, of the fake plugin that bundles a simulated Action Scheduler copy.
+	 *
+	 * @var string
+	 */
+	private const FAKE_PLUGIN_DIR = 'wc-ssr-test-plugin';
+
+	/**
+	 * Path of the simulated Action Scheduler copy, relative to the fake plugin directory.
+	 *
+	 * @var string
+	 */
+	private const FAKE_ACTION_SCHEDULER_DIR = 'vendor/woocommerce/action-scheduler';
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new WC_REST_System_Status_V2_Controller();
 		delete_transient( 'wc_system_status_theme_info' );
+		ActionSchedulerUtil::reset_cache();
 	}
 
 	/**
@@ -40,6 +56,10 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		try {
 			remove_all_filters( 'wc_get_template' );
 			delete_transient( 'wc_system_status_theme_info' );
+			ActionSchedulerUtil::reset_cache();
+			$this->reset_legacy_proxy_mocks();
+
+			$this->remove_fake_action_scheduler();
 
 			if ( file_exists( WP_PLUGIN_DIR . '/' . self::TEST_PLUGIN_FILE ) ) {
 				delete_plugins( array( self::TEST_PLUGIN_FILE ) );
@@ -227,5 +247,132 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$environment = $this->sut->get_environment_info_per_fields( array() );
 
 		$this->assertSame( $expected, $environment['wp_memory_limit'] );
+	}
+
+	/**
+	 * @testdox Should report the bundled Action Scheduler copy as loaded from WooCommerce and not risky.
+	 */
+	public function test_get_environment_info_reports_the_bundled_action_scheduler_copy(): void {
+		$environment = $this->sut->get_environment_info_per_fields( array() );
+
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $environment['action_scheduler']['version'] );
+		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $environment['action_scheduler']['registered_version'] );
+		$this->assertSame( 'woocommerce', $environment['action_scheduler']['source_type'] );
+		$this->assertSame( 'WooCommerce', $environment['action_scheduler']['source_name'] );
+		$this->assertSame( trailingslashit( wp_normalize_path( ActionScheduler::plugin_path( '' ) ) ), $environment['action_scheduler']['source_path'] );
+		$this->assertFalse( $environment['action_scheduler']['is_risky'] );
+	}
+
+	/**
+	 * @testdox Should report the version, plugin and path of an older loaded Action Scheduler copy, and flag it as risky.
+	 */
+	public function test_get_environment_info_reports_an_older_loaded_action_scheduler_copy(): void {
+		$path = $this->simulate_loaded_action_scheduler( '3.2.0' );
+		$this->register_legacy_proxy_function_mocks(
+			array( 'get_plugins' => fn( string $folder ) => '/' . self::FAKE_PLUGIN_DIR === $folder ? array( 'some-plugin.php' => array( 'Name' => 'Some Plugin' ) ) : array() )
+		);
+
+		$environment = $this->sut->get_environment_info_per_fields( array() );
+
+		$this->assertSame( '3.2.0', $environment['action_scheduler']['version'] );
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $environment['action_scheduler']['registered_version'], 'The registry still reports the bundled copy as the highest version' );
+		$this->assertSame( 'plugin', $environment['action_scheduler']['source_type'] );
+		$this->assertSame( 'Some Plugin', $environment['action_scheduler']['source_name'] );
+		$this->assertSame( trailingslashit( wp_normalize_path( $path ) ), $environment['action_scheduler']['source_path'] );
+		$this->assertTrue( $environment['action_scheduler']['is_risky'] );
+	}
+
+	/**
+	 * @testdox Should report null Action Scheduler details and a risky state when no copy is loaded.
+	 */
+	public function test_get_environment_info_reports_no_action_scheduler_when_none_is_loaded(): void {
+		$this->register_legacy_proxy_function_mocks(
+			array( 'function_exists' => fn( string $name ) => 0 !== strpos( $name, 'as_' ) && 0 !== strpos( $name, 'wc_schedule' ) && function_exists( $name ) )
+		);
+
+		$environment = $this->sut->get_environment_info_per_fields( array() );
+
+		$this->assertNull( $environment['action_scheduler']['version'] );
+		$this->assertNull( $environment['action_scheduler']['source_type'] );
+		$this->assertNull( $environment['action_scheduler']['source_name'] );
+		$this->assertNull( $environment['action_scheduler']['source_path'] );
+		$this->assertTrue( $environment['action_scheduler']['is_risky'] );
+	}
+
+	/**
+	 * Make ActionSchedulerUtil see a loaded Action Scheduler copy of the given version, bundled by a fake plugin.
+	 *
+	 * Writes a plugin file with that version header under WP_PLUGIN_DIR for the header read, and mocks
+	 * through the legacy proxy the loaded path and the probes a copy of that version answers.
+	 *
+	 * @param string $version The version to simulate, 3.0.0 or newer.
+	 *
+	 * @return string The directory of the simulated copy, without a trailing slash.
+	 */
+	private function simulate_loaded_action_scheduler( string $version ): string {
+		$path = WP_PLUGIN_DIR . '/' . self::FAKE_PLUGIN_DIR . '/' . self::FAKE_ACTION_SCHEDULER_DIR;
+		wp_mkdir_p( $path );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		file_put_contents( $path . '/action-scheduler.php', "<?php\n/**\n * Plugin Name: Action Scheduler\n * Version: {$version}\n */\n" );
+
+		$functions  = array( 'as_has_scheduled_action' => version_compare( $version, '3.3.0', '>=' ) );
+		$parameters = version_compare( $version, '3.6.0', '>=' ) ? 6 : ( version_compare( $version, '3.5.0', '>=' ) ? 5 : 4 );
+
+		$this->register_legacy_proxy_function_mocks( array( 'function_exists' => fn( string $name ) => $functions[ $name ] ?? function_exists( $name ) ) );
+		$this->register_legacy_proxy_class_mocks(
+			array(
+				ReflectionFunction::class => fn() => new class( $parameters ) {
+					/**
+					 * The number of parameters to report.
+					 *
+					 * @var int
+					 */
+					private int $count;
+
+					/**
+					 * Constructor.
+					 *
+					 * @param int $count The number of parameters to report.
+					 */
+					public function __construct( int $count ) {
+						$this->count = $count;
+					}
+
+					/**
+					 * Mirror of ReflectionFunction::getNumberOfParameters().
+					 *
+					 * @return int
+					 */
+					public function getNumberOfParameters(): int { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+						return $this->count;
+					}
+				},
+			)
+		);
+		$this->register_legacy_proxy_static_mocks(
+			array( 'ActionScheduler' => array( 'plugin_path' => fn( string $relative ) => $relative ? "$path/$relative" : $path ) )
+		);
+		ActionSchedulerUtil::reset_cache();
+
+		return $path;
+	}
+
+	/**
+	 * Remove the fake plugin written by simulate_loaded_action_scheduler(), if any.
+	 */
+	private function remove_fake_action_scheduler(): void {
+		$plugin_dir = WP_PLUGIN_DIR . '/' . self::FAKE_PLUGIN_DIR;
+		if ( ! is_dir( $plugin_dir ) ) {
+			return;
+		}
+
+		wp_delete_file( $plugin_dir . '/' . self::FAKE_ACTION_SCHEDULER_DIR . '/action-scheduler.php' );
+		$dir  = $plugin_dir . '/' . self::FAKE_ACTION_SCHEDULER_DIR;
+		$stop = dirname( $plugin_dir );
+		while ( $stop !== $dir ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			rmdir( $dir );
+			$dir = dirname( $dir );
+		}
 	}
 }
