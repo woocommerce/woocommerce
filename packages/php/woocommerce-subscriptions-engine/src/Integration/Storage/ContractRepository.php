@@ -183,10 +183,17 @@ final class ContractRepository {
 		$name_list        = implode( ', ', $names );
 		$placeholder_list = implode( ', ', $placeholders );
 
-		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		// A duplicate creation key is an expected outcome, so `$wpdb` must not print or log it;
+		// every failure is still read from `last_error` and thrown below.
+		$suppressed = $wpdb->suppress_errors( true );
+		try {
+			// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+		}
 
 		if ( false === $inserted ) {
 			$db_error     = $wpdb->last_error;

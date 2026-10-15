@@ -1362,6 +1362,36 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A duplicate creation key prints no database error and restores the error suppression setting.
+	 */
+	public function test_a_duplicate_creation_key_is_quiet(): void {
+		global $wpdb;
+
+		$args  = array(
+			'extension_slug' => self::EXTENSION_SLUG,
+			'creation_key'   => 'order:10',
+		);
+		$first = Contracts::create( $args )->get_id();
+
+		$show_errors = $wpdb->show_errors( true );
+		$suppressed  = $wpdb->suppress_errors( false );
+		ob_start();
+		try {
+			Contracts::create_locked( $args, 'checkout' );
+			$this->fail( 'Expected the duplicate to be refused.' );
+		} catch ( DuplicateContractException $e ) {
+			$this->assertSame( $first, $e->get_existing_contract_id() );
+		} finally {
+			$output            = (string) ob_get_clean();
+			$still_suppressing = $wpdb->suppress_errors( $suppressed );
+			$wpdb->show_errors( $show_errors );
+		}
+
+		$this->assertSame( '', $output, 'A duplicate creation key must not print a database error.' );
+		$this->assertFalse( $still_suppressing, 'The previous error suppression setting must be restored.' );
+	}
+
+	/**
 	 * @testdox An unlocked update with items while another lock lives throws, writes nothing and leaves no internal lock.
 	 */
 	public function test_an_unlocked_items_update_conflicts_cleanly(): void {
