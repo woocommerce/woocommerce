@@ -1159,4 +1159,15 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
 	}
+
+	/**
+	 * @testdox wc_update_1130_delete_stock_notification_sync_notice_option deletes the old restock notice option.
+	 */
+	public function test_wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', '<p>pending</p>' );
+		wc_update_1130_delete_stock_notification_sync_notice_option();
+		$this->assertFalse( get_option( 'wc_customer_stock_notifications_product_sync_notice' ) );
+	}
 }
