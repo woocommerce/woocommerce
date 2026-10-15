@@ -776,9 +776,12 @@ class WC_Checkout {
 			}
 		}
 
-		$kept_types = array_values(
-			array_diff( $this->remove_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes ), $incomplete_types )
-		);
+		// Incomplete types still have to be removed when the cart check kept them; types it removed aren't removed again.
+		$matching_types = $this->remove_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes );
+		foreach ( array_intersect( $matching_types, $incomplete_types ) as $item_type ) {
+			$order->remove_order_items( $item_type );
+		}
+		$kept_types = array_values( array_diff( $matching_types, $incomplete_types ) );
 
 		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
 		$persisted_types = $wpdb->get_col(
@@ -788,7 +791,8 @@ class WC_Checkout {
 			)
 		);
 
-		foreach ( array_diff( $persisted_types, $kept_types ) as $item_type ) {
+		// Cart item types were handled above. Their removed rows are still in the table until the order is saved.
+		foreach ( array_diff( $persisted_types, $kept_types, $this->get_cart_order_item_types() ) as $item_type ) {
 			$order->remove_order_items( $item_type );
 		}
 

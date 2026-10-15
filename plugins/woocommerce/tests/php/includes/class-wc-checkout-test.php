@@ -918,6 +918,30 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order fires woocommerce_remove_order_items once for each item type it replaces.
+	 */
+	public function test_create_order_resume_removes_each_changed_item_type_once(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( '_fees_hash', 'stale' );
+		$order->save();
+		$removed_types = array();
+		add_action(
+			'woocommerce_remove_order_items',
+			function ( $order, $type ) use ( &$removed_types ) {
+				unset( $order );
+				$removed_types[] = $type;
+			},
+			10,
+			2
+		);
+
+		$this->resume_order( $order_id );
+
+		$this->assertSame( array( 'fee' ), $removed_types, 'Only the changed fee type should be removed, once.' );
+	}
+
+	/**
 	 * @testdox Resuming a pending order keeps every original item when checkout fails before the order is saved.
 	 */
 	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
