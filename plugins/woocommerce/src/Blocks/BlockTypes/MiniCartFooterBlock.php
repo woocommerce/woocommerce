@@ -72,11 +72,14 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="wc-block-components-totals-item wc-block-mini-cart__footer-subtotal">
+			<div class="wc-block-components-totals-item wc-block-mini-cart__footer-subtotal" data-wp-bind--aria-busy="woocommerce/mini-cart::state.isCartUpdating">
 				<span class="wc-block-components-totals-item__label">
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
-				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value notranslate">
+				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" data-wp-class--is-loading="woocommerce/mini-cart::state.isCartUpdating" data-wp-bind--aria-hidden="woocommerce/mini-cart::state.isCartUpdating" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value notranslate">
+				</span>
+				<span class="screen-reader-text" hidden data-wp-bind--hidden="woocommerce/mini-cart::!state.isCartUpdating">
+					<?php echo esc_html_x( 'Updating', 'Mini-Cart subtotal while the cart is being updated', 'woocommerce' ); ?>
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>

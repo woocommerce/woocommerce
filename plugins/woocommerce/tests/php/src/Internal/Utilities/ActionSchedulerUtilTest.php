@@ -16,6 +16,19 @@ use WC_Unit_Test_Case;
  */
 class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 
+	/**
+	 * Every feature core relies on, in the order the util probes them.
+	 *
+	 * @var string[]
+	 */
+	private const FEATURES = array(
+		ActionSchedulerFeature::UNIQUE,
+		ActionSchedulerFeature::PRIORITY,
+		ActionSchedulerFeature::UNIQUE_ARGS,
+		ActionSchedulerFeature::HAS_SCHEDULED_ACTION,
+		ActionSchedulerFeature::ASYNC,
+	);
+
 	private const HOOK  = 'woocommerce_action_scheduler_util_test';
 	private const GROUP = 'woocommerce_action_scheduler_util_test_group';
 
@@ -75,7 +88,7 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 		$this->assertContains( ActionSchedulerUtil::get_loaded_version(), ActionSchedulerUtil::get_registered_sources() );
 
 		$this->assertFalse( ActionSchedulerUtil::is_risky() );
-		foreach ( ActionSchedulerFeature::ALL as $feature ) {
+		foreach ( self::FEATURES as $feature ) {
 			$this->assertTrue( ActionSchedulerUtil::supports( $feature ), "The bundled copy should support $feature" );
 		}
 		$this->assertFalse( ActionSchedulerUtil::supports( 'no_such_feature' ) );
@@ -110,7 +123,7 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( ActionSchedulerUtil::is_loaded() );
 		$this->assertSame( $version, ActionSchedulerUtil::get_loaded_version() );
-		foreach ( ActionSchedulerFeature::ALL as $feature ) {
+		foreach ( self::FEATURES as $feature ) {
 			$this->assertSame( ! in_array( $feature, $expected_missing, true ), ActionSchedulerUtil::supports( $feature ), "Support for $feature on $version" );
 		}
 		$this->assertSame( ! empty( $expected_missing ), ActionSchedulerUtil::is_risky() );
@@ -123,7 +136,7 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 	 */
 	public function provider_loaded_copies(): array {
 		return array(
-			'2.1.0: the floor'                   => array( '2.1.0', ActionSchedulerFeature::ALL ),
+			'2.1.0: the floor'                   => array( '2.1.0', self::FEATURES ),
 			'3.0.0: async only'                  => array( '3.0.0', array( ActionSchedulerFeature::UNIQUE, ActionSchedulerFeature::PRIORITY, ActionSchedulerFeature::UNIQUE_ARGS, ActionSchedulerFeature::HAS_SCHEDULED_ACTION ) ),
 			'3.2.0: async only, lab fixture'     => array( '3.2.0', array( ActionSchedulerFeature::UNIQUE, ActionSchedulerFeature::PRIORITY, ActionSchedulerFeature::UNIQUE_ARGS, ActionSchedulerFeature::HAS_SCHEDULED_ACTION ) ),
 			'3.5.4: unique by hook, no priority' => array( '3.5.4', array( ActionSchedulerFeature::PRIORITY, ActionSchedulerFeature::UNIQUE_ARGS ) ),

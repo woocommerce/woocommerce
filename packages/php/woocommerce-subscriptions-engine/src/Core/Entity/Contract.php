@@ -41,8 +41,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Contract {
 
-	public const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
-	public const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
+	/**
+	 * Schedule source for a contract whose payment schedule the engine keeps
+	 * (through its due moment). The only source the engine dispatches.
+	 */
+	public const SCHEDULE_SOURCE_ENGINE = 'subscriptions_engine';
 
 	public const ADDRESS_BILLING  = 'billing';
 	public const ADDRESS_SHIPPING = 'shipping';
@@ -139,8 +142,8 @@ final class Contract {
 	private $start_gmt;
 
 	/**
-	 * Live schedule: when the next renewal fires, or null. GMT string. The due scan
-	 * keys on this; a billing cycle freezes its period from it.
+	 * The next due moment, or null. GMT string. The due dispatcher notifies the owner
+	 * once it has passed; what happens then is the owner's decision.
 	 *
 	 * @var string|null
 	 */
@@ -227,7 +230,9 @@ final class Contract {
 	private $end_gmt;
 
 	/**
-	 * Who runs renewals: 'primitive' (this engine) or 'gateway'.
+	 * Who keeps the payment schedule: 'subscriptions_engine' (the engine, through its
+	 * due moment) or the slug of a gateway or extension that keeps its own schedule
+	 * and triggers its own renewals. The engine dispatches only 'subscriptions_engine'.
 	 *
 	 * @var string
 	 */
@@ -276,7 +281,7 @@ final class Contract {
 		$this->last_attempt_gmt     = Coercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
 		$this->trial_end_gmt        = Coercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
 		$this->end_gmt              = Coercion::coerce_nullable_string( $data['end_gmt'] ?? null );
-		$this->schedule_source      = Coercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
+		$this->schedule_source      = Coercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_ENGINE );
 		$this->items                = Coercion::coerce_list_of_arrays( $data['items'] ?? null );
 		$this->addresses            = Coercion::coerce_map_of_arrays( $data['addresses'] ?? null );
 		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
@@ -485,14 +490,14 @@ final class Contract {
 	}
 
 	/**
-	 * Next renewal attempt, or null.
+	 * The next due moment, or null.
 	 */
 	public function get_next_payment_gmt(): ?string {
 		return $this->next_payment_gmt;
 	}
 
 	/**
-	 * Set the live schedule (when the next renewal fires).
+	 * Set the next due moment.
 	 *
 	 * @param string|null $next_payment_gmt GMT string or null.
 	 */
@@ -695,17 +700,19 @@ final class Contract {
 	}
 
 	/**
-	 * Who runs renewals: 'primitive' or 'gateway'.
+	 * Who keeps the payment schedule: 'subscriptions_engine' or the slug of the
+	 * gateway or extension that keeps its own.
 	 */
 	public function get_schedule_source(): string {
 		return $this->schedule_source;
 	}
 
 	/**
-	 * Set who runs renewals.
+	 * Set who keeps the payment schedule.
 	 *
-	 * @param string $schedule_source 'primitive' or 'gateway'.
-	 * @throws DomainException If `$schedule_source` is neither.
+	 * @param string $schedule_source 'subscriptions_engine' or the slug of the gateway or
+	 *                                extension that keeps its own schedule.
+	 * @throws DomainException If `$schedule_source` is not a valid slug.
 	 */
 	public function set_schedule_source( string $schedule_source ): void {
 		self::assert_schedule_source( $schedule_source );
@@ -752,7 +759,7 @@ final class Contract {
 	/**
 	 * Serialize the contract row (excluding generated id/timestamps).
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, int|string|null>
 	 */
 	public function to_storage(): array {
 		return array(
@@ -806,13 +813,15 @@ final class Contract {
 	}
 
 	/**
-	 * Refuse a schedule source other than 'primitive' or 'gateway'.
+	 * Refuse a schedule source that is not a slug of 1-64 lowercase letters, digits,
+	 * underscores or hyphens (the column is VARCHAR(64), wide enough for extension and
+	 * gateway slugs).
 	 *
 	 * @param string $schedule_source Schedule source to check.
-	 * @throws DomainException If `$schedule_source` is neither.
+	 * @throws DomainException If `$schedule_source` is not a valid slug.
 	 */
 	private static function assert_schedule_source( string $schedule_source ): void {
-		if ( ! in_array( $schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
+		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $schedule_source ) ) {
 			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
 		}
 	}

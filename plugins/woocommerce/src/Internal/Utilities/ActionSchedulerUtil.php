@@ -7,17 +7,22 @@ use Automattic\WooCommerce\Enums\ActionSchedulerFeature;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Compatibility layer over the copy of Action Scheduler that is actually loaded.
+ * Compatibility layer over whichever copy of Action Scheduler is loaded.
  *
- * Many plugins bundle Action Scheduler. The highest registered copy normally initializes, but a copy
- * loaded atypically can define the classes and functions first, and the newer copies then stand down.
- * The API answering calls can therefore be older than the copy WooCommerce bundles, and older than
- * what `ActionScheduler_Versions::latest_version()` reports, which only knows what was registered.
+ * Many plugins bundle Action Scheduler, and the copy that gets loaded is not always the newest one
+ * registered, nor the one WooCommerce bundles. The functions answering our calls can therefore be older
+ * than expected and lack features core relies on, such as the `unique` and `priority` arguments.
  *
- * This class reports facts about the loaded copy, probes the features core relies on
- * ({@see ActionSchedulerFeature}), tells callers when the loaded copy is ready, and wraps the calls
- * that an older copy handles wrongly: async enqueue, and scheduling with `unique` or `priority`.
- * Calls that pass neither can go to Action Scheduler directly.
+ * In essence this class replaces as_enqueue_async_action(), as_schedule_single_action(),
+ * as_schedule_recurring_action(), as_schedule_cron_action() and as_has_scheduled_action(). The wrappers
+ * emulate or drop what the loaded copy cannot do. Scheduling calls that pass neither `unique` nor
+ * `priority` can still go to Action Scheduler directly. The class also reports what is loaded, probes
+ * the features core relies on ({@see ActionSchedulerFeature}) and says when the loaded copy is ready.
+ *
+ * The rest of the API has kept the same signature since Action Scheduler 2.1.0 and can be called
+ * directly: as_unschedule_action(), as_unschedule_all_actions(), as_next_scheduled_action(),
+ * as_get_scheduled_actions() and as_get_datetime_object(). The exception is as_supports(), which only
+ * exists from 3.9.3. Use {@see ActionSchedulerUtil::supports()} instead.
  *
  * Every probe and call goes through {@see LegacyProxy}, so tests can simulate an older loaded copy.
  */
@@ -36,6 +41,20 @@ class ActionSchedulerUtil {
 	 * @var string
 	 */
 	private const BUNDLED_PLUGIN_FILE = 'packages/action-scheduler/action-scheduler.php';
+
+	/**
+	 * The features {@see self::is_risky()} probes, in order. Kept here rather than in the enum
+	 * because the list changes as core comes to rely on more of Action Scheduler.
+	 *
+	 * @var string[]
+	 */
+	private const PROBED_FEATURES = array(
+		ActionSchedulerFeature::UNIQUE,
+		ActionSchedulerFeature::PRIORITY,
+		ActionSchedulerFeature::UNIQUE_ARGS,
+		ActionSchedulerFeature::HAS_SCHEDULED_ACTION,
+		ActionSchedulerFeature::ASYNC,
+	);
 
 	/**
 	 * Per-request memo of feature probes, keyed by ActionSchedulerFeature value.
@@ -215,7 +234,7 @@ class ActionSchedulerUtil {
 	 * @return bool
 	 */
 	public static function is_risky(): bool {
-		foreach ( ActionSchedulerFeature::ALL as $feature ) {
+		foreach ( self::PROBED_FEATURES as $feature ) {
 			if ( ! self::supports( $feature ) ) {
 				return true;
 			}
@@ -355,7 +374,7 @@ class ActionSchedulerUtil {
 	 *   checks uniqueness by hook alone (before 4.0.0): emulated by checking
 	 *   {@see self::has_scheduled_action()} first, which returns 0 without scheduling when a match
 	 *   exists. The check is not atomic, so two concurrent requests can both schedule; on copies
-	 *   before 3.3.0 it sees pending actions only, so an action can be scheduled again while a
+	 *   before 3.0.0 it sees pending actions only, so an action can be scheduled again while a
 	 *   previous run is in progress; and with an empty `$group` it matches a pending action in any
 	 *   group, where native unique matches only ungrouped actions.
 	 * - `$priority` on a copy without it (before 3.6.0): dropped, so the action takes the default
@@ -425,8 +444,8 @@ class ActionSchedulerUtil {
 	 * Is a matching action currently scheduled (pending or in-progress)?
 	 *
 	 * Prefers `as_has_scheduled_action`, which only exists since Action Scheduler 3.3.0. Falls back
-	 * to the much older `as_next_scheduled_action`, which on such a copy may report only pending
-	 * actions, not in-progress ones - an accepted trade.
+	 * to the much older `as_next_scheduled_action`, which also reports in-progress actions from 3.0.0;
+	 * copies before that see pending actions only - an accepted trade.
 	 *
 	 * Reports false when Action Scheduler is not loaded at all, indistinguishable from "nothing is
 	 * scheduled", and raises a doing-it-wrong notice so the condition is visible under debugging.

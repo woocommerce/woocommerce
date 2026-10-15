@@ -45,17 +45,4 @@ final class ActionSchedulerFeature {
 	 * @var string
 	 */
 	public const ASYNC = 'async';
-
-	/**
-	 * Every feature, in the order they are probed and reported.
-	 *
-	 * @var string[]
-	 */
-	public const ALL = array(
-		self::UNIQUE,
-		self::PRIORITY,
-		self::UNIQUE_ARGS,
-		self::HAS_SCHEDULED_ACTION,
-		self::ASYNC,
-	);
 }
