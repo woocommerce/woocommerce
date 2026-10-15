@@ -4,6 +4,8 @@
  * @package WooCommerce\Tests\Webhook
  */
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Webhook
@@ -16,6 +18,15 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * @var array
 	 */
 	public $delivery_counter = array();
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$this->reset_legacy_proxy_mocks();
+		ActionSchedulerUtil::reset_cache();
+		parent::tearDown();
+	}
 
 	/**
 	 * Data provider for test_wc_is_webhook_valid_topic.
@@ -322,6 +333,130 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 
 		$webhook_one->delete( true );
 		$this->assertFalse( wc_load_webhooks( $status, 1 ) );
+	}
+
+	/**
+	 * Overflowing values are clamped before the int cast: cast first and PHP_INT_MAX + 1 wraps to
+	 * PHP_INT_MIN, landing at 0, the highest priority, instead of 255.
+	 *
+	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, clamped to 0-255, defaulting to 10 when unfiltered, non-numeric or non-finite.
+	 * @testWith ["unhooked", 10]
+	 *           [3, 3]
+	 *           ["7", 7]
+	 *           [-5, 0]
+	 *           [300, 255]
+	 *           [9223372036854775808, 255]
+	 *           ["1e309", 10]
+	 *           [null, 10]
+	 *           ["high", 10]
+	 *
+	 * @param mixed $filtered_priority Value returned by the filter, or "unhooked" to leave the filter unhooked.
+	 * @param int   $expected_priority Priority Action Scheduler is expected to store.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_at_filtered_priority( $filtered_priority, $expected_priority ) {
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_priority' );
+		$arg     = 123;
+
+		if ( 'unhooked' !== $filtered_priority ) {
+			add_filter(
+				'woocommerce_webhook_delivery_priority',
+				function ( $priority, $filtered_webhook, $filtered_arg ) use ( $webhook, $arg, $filtered_priority ) {
+					return $webhook->get_id() === $filtered_webhook->get_id() && $arg === $filtered_arg ? $filtered_priority : $priority;
+				},
+				10,
+				3
+			);
+		}
+
+		$action_id = $this->execute_webhook_queue_for( $webhook, $arg );
+
+		$this->assertSame( $expected_priority, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
+	}
+
+	/**
+	 * @testdox Should keep one pending delivery per webhook and argument, and schedule a new one while a delivery is in progress.
+	 */
+	public function test_wc_webhook_execute_queue_keeps_one_pending_delivery_per_webhook_and_argument() {
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_dedupe' );
+
+		$first = $this->execute_webhook_queue_for( $webhook, 123 );
+		$this->assertSame( $first, $this->execute_webhook_queue_for( $webhook, 123 ), 'A second event for the same resource should reuse the pending delivery' );
+		$this->assertNotSame( $first, $this->execute_webhook_queue_for( $webhook, 456 ), 'A different argument should get its own delivery' );
+
+		ActionScheduler::store()->log_execution( $first );
+		$this->assertNotSame( $first, $this->execute_webhook_queue_for( $webhook, 123 ), 'An in-progress delivery should not block a new one' );
+	}
+
+	/**
+	 * @testdox Should still schedule the delivery, at the default priority, on a loaded Action Scheduler without priority support.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_at_default_priority_on_a_copy_without_priority_support() {
+		$webhook     = $this->create_webhook( 'action.wc_test_webhook_priority_legacy' );
+		$filter_runs = 0;
+		add_filter(
+			'woocommerce_webhook_delivery_priority',
+			function () use ( &$filter_runs ) {
+				++$filter_runs;
+				return 1;
+			}
+		);
+
+		// The util probes priority support by counting the parameters of as_schedule_single_action(); four is a copy before 3.5.0.
+		$this->register_legacy_proxy_class_mocks(
+			array(
+				ReflectionFunction::class => fn() => new class() {
+					/**
+					 * Mirror of ReflectionFunction::getNumberOfParameters().
+					 *
+					 * @return int
+					 */
+					public function getNumberOfParameters(): int { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+						return 4;
+					}
+				},
+			)
+		);
+		ActionSchedulerUtil::reset_cache();
+
+		$action_id = $this->execute_webhook_queue_for( $webhook, 123 );
+
+		$this->assertSame( 1, $filter_runs, 'The filter should run regardless of the loaded copy' );
+		$this->assertSame( 10, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
+	}
+
+	/**
+	 * Run wc_webhook_execute_queue() for one queued webhook and return the ID of its pending delivery.
+	 *
+	 * @param WC_Webhook $webhook The webhook to queue.
+	 * @param mixed      $arg     The delivery argument.
+	 * @return int
+	 */
+	private function execute_webhook_queue_for( $webhook, $arg ) {
+		global $wc_queued_webhooks;
+		$wc_queued_webhooks = array(
+			array(
+				'webhook' => $webhook,
+				'arg'     => $arg,
+			),
+		);
+		wc_webhook_execute_queue();
+		$wc_queued_webhooks = null;
+
+		$action_ids = as_get_scheduled_actions(
+			array(
+				'hook'   => 'woocommerce_deliver_webhook_async',
+				'args'   => array(
+					'webhook_id' => $webhook->get_id(),
+					'arg'        => $arg,
+				),
+				'group'  => 'woocommerce-webhooks',
+				'status' => ActionScheduler_Store::STATUS_PENDING,
+			),
+			'ids'
+		);
+		$this->assertCount( 1, $action_ids, 'Exactly one pending delivery should exist for the webhook and argument' );
+
+		return (int) reset( $action_ids );
 	}
 
 	/**
