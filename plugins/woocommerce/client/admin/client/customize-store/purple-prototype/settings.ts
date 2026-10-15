@@ -46,10 +46,24 @@ const DEFAULT_SETTINGS: PurplePrototypeSettings = {
 	nonce: '',
 };
 
+// Changes made on this page load. wc-admin switches screens without reloading, so the
+// settings printed with the page would otherwise go stale after an install or activation.
+let sessionChanges: Partial< PurplePrototypeSettings > = {};
+
 /**
  * Prototype settings saved by the "Purple prototype" admin bar menu, plus the real theme state.
  */
 export const getPurplePrototypeSettings = (): PurplePrototypeSettings => ( {
 	...DEFAULT_SETTINGS,
 	...getAdminSetting( 'purpleCysPrototype', {} ),
+	...sessionChanges,
 } );
+
+/**
+ * Record a change in Purple's state, so the next visit to the screen in this page load sees it.
+ */
+export const updatePurplePrototypeSettings = (
+	changes: Partial< PurplePrototypeSettings >
+) => {
+	sessionChanges = { ...sessionChanges, ...changes };
+};

@@ -6,7 +6,11 @@ import { useCallback, useRef, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import type { PurplePrototypeSettings, PurpleState } from './settings';
+import {
+	updatePurplePrototypeSettings,
+	type PurplePrototypeSettings,
+	type PurpleState,
+} from './settings';
 import { isForcedState, runPurpleAction, PurpleAction } from './purple-actions';
 import { completeCustomizeStoreTask } from './task-completion';
 
@@ -38,8 +42,14 @@ export const usePurpleState = ( settings: PurplePrototypeSettings ) => {
 
 			try {
 				await runPurpleAction( settings, action );
-				setState( isInstall ? 'installed' : 'active' );
+				const nextState = isInstall ? 'installed' : 'active';
+				setState( nextState );
 				setJustActivated( ! isInstall );
+				updatePurplePrototypeSettings(
+					isForcedState( settings )
+						? { state: nextState }
+						: { purpleInstalled: true, purpleActive: ! isInstall }
+				);
 			} catch {
 				failedAction.current = action;
 				setState( 'error' );
