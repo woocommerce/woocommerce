@@ -30,11 +30,22 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	protected const PLAN_OWNER = 'engine-tests';
 
 	/**
+	 * The `$wpdb` error suppression to restore after {@see self::fail_next_query()}.
+	 *
+	 * @var bool|null
+	 */
+	private $suppressed_errors = null;
+
+	/**
 	 * Return the session's database clock to the server clock after each test.
 	 */
 	public function tear_down(): void {
 		global $wpdb;
 
+		if ( null !== $this->suppressed_errors ) {
+			$wpdb->suppress_errors( $this->suppressed_errors );
+			$this->suppressed_errors = null;
+		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( 'SET timestamp = DEFAULT' );
 		parent::tear_down();
@@ -95,6 +106,30 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 			return $query;
 		};
 		add_filter( 'query', $refuse );
+	}
+
+	/**
+	 * Replace the next statement matching `$pattern` (after `$skip` matches) with invalid SQL, so
+	 * it fails with a database error. Error output is suppressed until the test ends.
+	 *
+	 * @param string $pattern Regex the statement to break must match.
+	 * @param int    $skip    Matching statements to let through first.
+	 */
+	protected function fail_next_query( string $pattern, int $skip = 0 ): void {
+		global $wpdb;
+
+		$break = static function ( $query ) use ( $pattern, &$skip, &$break ) {
+			if ( is_string( $query ) && 1 === preg_match( $pattern, $query ) && 0 === $skip-- ) {
+				remove_filter( 'query', $break );
+				return 'SELECT * FROM table_that_does_not_exist_for_tests';
+			}
+			return $query;
+		};
+		add_filter( 'query', $break );
+
+		if ( null === $this->suppressed_errors ) {
+			$this->suppressed_errors = $wpdb->suppress_errors( true );
+		}
 	}
 
 	/**

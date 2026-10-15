@@ -21,6 +21,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch;
 use DateTimeImmutable;
 use DateTimeZone;
 use Throwable;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -163,12 +164,14 @@ final class DueDispatcher {
 	 * skipped), then read and passed to its owner's handler with
 	 * `array( 'due_at' => DateTimeImmutable, 'lock' => ContractLock )`. The lock is released when
 	 * the handler returns. A throwing handler is logged and its lock kept until it expires, so
-	 * the contract stays closed while its state is unknown and one contract never stalls the batch.
+	 * the contract stays closed while its state is unknown. Lock, read and release failures are
+	 * logged per contract; one contract never stalls the batch.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
 	 * @param int                    $limit Maximum due contracts this tick; non-positive is a no-op.
-	 * @return int The number of contracts whose handler returned without throwing; lost
-	 *             locks, missing contracts or handlers, and throwing handlers are not counted.
+	 * @return int The number of contracts whose handler returned without throwing (a failed
+	 *             release afterwards still counts); lost locks, missing contracts or handlers,
+	 *             failed locks or reads, and throwing handlers are not counted.
 	 */
 	public function run_batch( ?DateTimeImmutable $now = null, int $limit = self::BATCH_SIZE ): int {
 		if ( $limit < 1 ) {
@@ -195,16 +198,30 @@ final class DueDispatcher {
 		foreach ( $due_rows as $row ) {
 			$contract_id = $row['id'];
 
-			$lock = $this->contracts->acquire_lock( $contract_id, self::LOCK_OPERATION, $row['next_payment_gmt'] );
-			if ( null === $lock ) {
-				++$skipped;
+			try {
+				$lock = $this->contracts->acquire_lock( $contract_id, self::LOCK_OPERATION, $row['next_payment_gmt'] );
+				if ( null === $lock ) {
+					++$skipped;
+					continue;
+				}
+			} catch ( Throwable $e ) {
+				++$failed;
+				$this->log_failure( $contract_id, 'could not be locked', $e );
 				continue;
 			}
 
-			$contract = $this->contracts->find( $contract_id );
-			$handler  = ConsumerRegistry::get_contract_due_handler( $row['extension_slug'] );
+			try {
+				$contract = $this->contracts->find( $contract_id );
+			} catch ( Throwable $e ) {
+				++$failed;
+				$this->log_failure( $contract_id, 'could not be read', $e );
+				$this->release( $lock );
+				continue;
+			}
+
+			$handler = ConsumerRegistry::get_contract_due_handler( $row['extension_slug'] );
 			if ( null === $contract || null === $handler ) {
-				$this->contracts->release_lock( $lock );
+				$this->release( $lock );
 				++$skipped;
 				continue;
 			}
@@ -217,18 +234,15 @@ final class DueDispatcher {
 						'lock'   => $lock,
 					)
 				);
-				$this->contracts->release_lock( $lock );
-				++$notified;
 			} catch ( Throwable $e ) {
+				// The lock is kept until it expires: the contract stays closed while its state is unknown.
 				++$failed;
-				wc_get_logger()->error(
-					sprintf( 'DueDispatcher::run_batch(): the due handler for contract %d threw: %s', $contract_id, $e->getMessage() ),
-					array(
-						'source'      => self::LOG_SOURCE,
-						'contract_id' => $contract_id,
-					)
-				);
+				$this->log_failure( $contract_id, 'threw in its due handler', $e );
+				continue;
 			}
+
+			++$notified;
+			$this->release( $lock );
 		}
 
 		if ( array() !== $due_rows ) {
@@ -239,5 +253,43 @@ final class DueDispatcher {
 		}
 
 		return $notified;
+	}
+
+	/**
+	 * Release a dispatch lock in its own guarded step: a failed release is logged and the lock
+	 * expires on its own, without failing the notification or the batch.
+	 *
+	 * @param ContractLock $lock The dispatch lock.
+	 */
+	private function release( ContractLock $lock ): void {
+		try {
+			$this->contracts->release_lock( $lock );
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'DueDispatcher::run_batch(): failed to release the due lock on contract %d; it expires on its own. %s', $lock->get_contract_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $lock->get_contract_id(),
+					'stage'       => 'release',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Log a contract that failed this tick.
+	 *
+	 * @param int       $contract_id Contract id.
+	 * @param string    $what        What went wrong, e.g. "could not be read".
+	 * @param Throwable $e           The failure.
+	 */
+	private function log_failure( int $contract_id, string $what, Throwable $e ): void {
+		wc_get_logger()->error(
+			sprintf( 'DueDispatcher::run_batch(): contract %d %s: %s', $contract_id, $what, $e->getMessage() ),
+			array(
+				'source'      => self::LOG_SOURCE,
+				'contract_id' => $contract_id,
+			)
+		);
 	}
 }

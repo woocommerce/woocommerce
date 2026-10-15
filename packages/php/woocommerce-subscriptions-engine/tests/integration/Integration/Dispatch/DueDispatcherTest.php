@@ -290,6 +290,54 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A failed release after the handler is logged as a release failure and does not stop the batch.
+	 */
+	public function test_a_failed_release_is_logged_and_the_batch_continues(): void {
+		$this->register_recording_handler();
+		$first  = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$second = $this->create_due_contract( '2026-02-15 00:00:00' );
+
+		$this->fail_next_query( '/^\s*UPDATE\s+\S*contracts\s+SET\s+lock_token\s*=\s*NULL/i' );
+		$errors = $this->capture_engine_log(
+			'error',
+			array( 'contract_id' => $first ),
+			function (): void {
+				$this->assertSame( 2, $this->sut->run_batch( $this->now() ), 'A failed release still counts as notified.' );
+			}
+		);
+
+		$this->assertNotSame( array(), $errors );
+		foreach ( $errors as $error ) {
+			$this->assertSame( 'release', $error['stage'] ?? null, 'Logged as a release failure, not a handler failure.' );
+		}
+		$this->assertSame( array( $first, $second ), $this->notified_ids() );
+		$this->assertTrue( $this->lock_holder( $first )['live'], 'The unreleased lock expires on its own.' );
+		$this->assertFalse( $this->lock_holder( $second )['live'] );
+	}
+
+	/**
+	 * @testdox A failed contract read after the lock is logged per contract; the lock is released and the batch continues.
+	 */
+	public function test_a_failed_read_after_the_lock_is_caught_per_contract(): void {
+		$this->register_recording_handler();
+		$first  = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$second = $this->create_due_contract( '2026-02-15 00:00:00' );
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token/i' );
+		$errors = $this->capture_engine_log(
+			'error',
+			array( 'contract_id' => $first ),
+			function (): void {
+				$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
+			}
+		);
+
+		$this->assertNotSame( array(), $errors );
+		$this->assertSame( array( $second ), $this->notified_ids() );
+		$this->assertFalse( $this->lock_holder( $first )['live'], 'Nothing ran, so the lock is released.' );
+	}
+
+	/**
 	 * @testdox An owner registered without a handler is not dispatched and its contracts stay untouched.
 	 */
 	public function test_an_owner_without_a_handler_is_not_dispatched(): void {

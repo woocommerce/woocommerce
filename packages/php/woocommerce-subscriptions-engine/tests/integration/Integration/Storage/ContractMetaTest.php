@@ -99,6 +99,18 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'locked' ) );
 	}
 
+	/**
+	 * @testdox A failed meta read throws instead of reading as an absent key.
+	 */
+	public function test_a_failed_meta_read_throws(): void {
+		$this->sut->add_meta( $this->id, 'note', 'one' );
+
+		$this->fail_next_query( '/^\s*SELECT\s+meta_key,\s*meta_value/i' );
+
+		$this->expectException( \RuntimeException::class );
+		$this->sut->get_meta( $this->id, 'note' );
+	}
+
 	public function test_update_meta_adds_when_absent(): void {
 		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'one' ) );
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );

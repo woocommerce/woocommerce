@@ -329,6 +329,7 @@ final class ContractRepository {
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null Hydrated contract, or null if not found.
+	 * @throws \RuntimeException If the contract row read fails.
 	 */
 	public function find( int $id ): ?Contract {
 		$row = $this->find_contract_row( $id );
@@ -390,6 +391,7 @@ final class ContractRepository {
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null The contract (row only), or null if not found.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public function find_summary( int $id ): ?Contract {
 		$row = $this->find_contract_row( $id );
@@ -1316,7 +1318,8 @@ final class ContractRepository {
 			$values[] = $key;
 		}
 
-		$sql = "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT c.id, %s, %s FROM {$contracts} c WHERE {$where}";
+		// LOCK IN SHARE MODE makes the guard read block on a concurrent lock write under READ COMMITTED too.
+		$sql = "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT c.id, %s, %s FROM {$contracts} c WHERE {$where} LOCK IN SHARE MODE";
 
 		// Fixed SQL fragments only; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -1540,6 +1543,7 @@ final class ContractRepository {
 	 * @param bool   $single      With a key: return the first value only.
 	 * @return mixed Empty key: `array<string, array<int, mixed>>` of all keys. Key + `$single`:
 	 *               the first value, or '' when absent. Key only: the list of values (`[]` when absent).
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public function get_meta( int $contract_id, string $key = '', bool $single = false ) {
 		if ( '' === $key ) {
@@ -1750,6 +1754,7 @@ final class ContractRepository {
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
 	 * @return Cycle|null The head cycle, or null if the chain has none.
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public function find_chain_head( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?Cycle {
 		global $wpdb;
@@ -1758,6 +1763,11 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d AND kind = %s ORDER BY sequence_no DESC LIMIT 1", $contract_id, $kind ), ARRAY_A );
+
+		// Callers decide appends from the head; a failed read must not look like an empty chain.
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the chain head of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		if ( null === $row ) {
 			return null;
@@ -1902,7 +1912,8 @@ final class ContractRepository {
 		$values[]         = $cycle->get_contract_id();
 		$fence            = $guard_no_lock ? ' AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )' : '';
 
-		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d{$fence}";
+		// LOCK IN SHARE MODE makes the guard read block on a concurrent lock write under READ COMMITTED too.
+		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d{$fence} LOCK IN SHARE MODE";
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -2067,6 +2078,7 @@ final class ContractRepository {
 	 *
 	 * @param int $id Contract id.
 	 * @return array<string, mixed>|null
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_contract_row( int $id ): ?array {
 		global $wpdb;
@@ -2076,6 +2088,11 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT {$select} FROM {$table} WHERE id = %d", $id ), ARRAY_A );
+
+		// A failed read must not look like a missing contract.
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read contract %d: %s', $id, $wpdb->last_error ) ) );
+		}
 
 		return is_array( $row ) ? self::strip_lock_token( Coercion::coerce_string_keyed( $row ) ) : null;
 	}
@@ -2400,6 +2417,7 @@ final class ContractRepository {
 	 * @param int    $contract_id Contract id.
 	 * @param string $key         Meta key.
 	 * @return array<int, mixed>
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_meta_values( int $contract_id, string $key ): array {
 		$values = array();
@@ -2416,6 +2434,7 @@ final class ContractRepository {
 	 * @param int         $contract_id Contract id.
 	 * @param string|null $key         Meta key, or null for every key.
 	 * @return array<int, array{meta_key: string, meta_value: string}>
+	 * @throws \RuntimeException If the read fails.
 	 */
 	private function find_meta_rows( int $contract_id, ?string $key ): array {
 		global $wpdb;
@@ -2430,6 +2449,11 @@ final class ContractRepository {
 			// slow-meta-query heuristic does not apply.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$table} WHERE contract_id = %d AND meta_key = %s ORDER BY id ASC", $contract_id, $key ), ARRAY_A );
+		}
+
+		// Callers decide writes from meta; a failed read must not look like an absent key.
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read contract meta for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 
 		$result = array();

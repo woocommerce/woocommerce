@@ -1875,6 +1875,26 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A failed chain head or contract read throws instead of reading as empty or missing.
+	 */
+	public function test_failed_deciding_reads_throw(): void {
+		$id = $this->sut->insert( $this->make_contract() );
+		$this->sut->append_cycle( $this->make_unpositioned_cycle( $id ) );
+
+		$this->fail_next_query( '/ORDER BY sequence_no DESC LIMIT 1/i' );
+		try {
+			$this->sut->find_chain_head( $id );
+			$this->fail( 'Expected the failed head read to throw.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'chain head', $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token/i' );
+		$this->expectException( \RuntimeException::class );
+		$this->sut->find( $id );
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {

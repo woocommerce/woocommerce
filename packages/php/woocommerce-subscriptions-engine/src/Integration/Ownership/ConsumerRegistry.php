@@ -46,7 +46,9 @@ final class ConsumerRegistry {
 	 *
 	 * `contract_due_handler`: `callable( ContractView $contract, array $context ): void`, called
 	 * when one of the consumer's contracts is due (`$context['due_at']` is the due moment, UTC;
-	 * `$context['lock']` is the dispatcher's `ContractLock`, released when the handler returns).
+	 * `$context['lock']` is the dispatcher's `ContractLock`). The handler may release the lock
+	 * early; otherwise the dispatcher releases it when the handler returns, and keeps it until it
+	 * expires when the handler throws.
 	 * The slug is trimmed; an empty slug is ignored. A repeat registration, an unknown key or a
 	 * non-callable handler raises a `_doing_it_wrong()` notice (the first registration is kept;
 	 * the invalid key is dropped and the slug still registers). Register by `init`; a handler
