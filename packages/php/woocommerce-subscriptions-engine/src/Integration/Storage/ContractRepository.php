@@ -70,7 +70,9 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until > UTC_TIMESTAMP()';
 
 	/**
-	 * Insert a new, unlocked contract and its items and addresses (parent row first).
+	 * Insert a new, unlocked contract and its items and addresses (parent row first). When a
+	 * child insert fails, the new contract is deleted again, so a retry is not blocked by its
+	 * own creation key.
 	 *
 	 * @param Contract $contract Contract to insert.
 	 * @return int The new contract id.
@@ -81,15 +83,15 @@ final class ContractRepository {
 		$this->insert_row( $contract, null );
 
 		$id = (int) $contract->get_id();
-		$this->insert_items( $id, $contract->get_items() );
-		$this->insert_addresses( $id, $contract->get_addresses() );
+		$this->insert_children_or_discard( $id, $contract );
 
 		return $id;
 	}
 
 	/**
 	 * Insert a new contract locked from birth: the row INSERT stamps the lock, then items and
-	 * addresses follow under it.
+	 * addresses follow under it. When a child insert fails, the new contract (and its lock) is
+	 * deleted again.
 	 *
 	 * @param Contract $contract  Contract to insert.
 	 * @param string   $operation Operation label, 1-64 characters.
@@ -113,11 +115,27 @@ final class ContractRepository {
 		$id   = (int) $contract->get_id();
 		$lock = self::new_lock( $id, $operation, $token );
 
-		$this->fence_children( $lock );
-		$this->insert_items( $id, $contract->get_items() );
-		$this->insert_addresses( $id, $contract->get_addresses() );
+		$this->insert_children_or_discard( $id, $contract );
 
 		return $lock;
+	}
+
+	/**
+	 * Insert a new contract's items and addresses; on a failure, best-effort delete the new
+	 * contract with its children, then rethrow.
+	 *
+	 * @param int      $id       The new contract id.
+	 * @param Contract $contract Contract carrying the children.
+	 * @throws \Throwable The child insert failure, rethrown (a `RuntimeException` for a failed insert).
+	 */
+	private function insert_children_or_discard( int $id, Contract $contract ): void {
+		try {
+			$this->insert_items( $id, $contract->get_items() );
+			$this->insert_addresses( $id, $contract->get_addresses() );
+		} catch ( \Throwable $e ) {
+			$this->delete( $id );
+			throw $e;
+		}
 	}
 
 	/**
@@ -2161,33 +2179,25 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Replace a contract's item rows: insert the new rows, then delete the rows that existed
-	 * before. A failure in between leaves old and new rows side by side, never an empty set,
-	 * and the next replacement repairs it.
+	 * Replace a contract's item rows: insert the new rows, then delete every other row of the
+	 * contract. A failed insert removes the rows it added and keeps the old set; a failed delete
+	 * leaves old and new rows side by side, never an empty set, and the next replacement repairs it.
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
-	 * @throws \RuntimeException If a read, an insert or the delete fails.
+	 * @throws \RuntimeException If an insert or the delete fails.
 	 */
 	private function replace_items( int $contract_id, array $items ): void {
 		global $wpdb;
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+		$new_ids = $this->insert_items( $contract_id, $items );
+		$values  = array_merge( array( $contract_id ), $new_ids );
+		$keep    = array() === $new_ids ? '' : ' AND id NOT IN ( ' . implode( ', ', array_fill( 0, count( $new_ids ), '%d' ) ) . ' )';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$previous_max = $wpdb->get_var( $wpdb->prepare( "SELECT MAX(id) FROM {$table} WHERE contract_id = %d", $contract_id ) );
-		if ( '' !== $wpdb->last_error ) {
-			throw new \RuntimeException( sprintf( 'Failed to read item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
-		}
-
-		$this->insert_items( $contract_id, $items );
-
-		if ( null === $previous_max ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE contract_id = %d AND id <= %d", $contract_id, Coercion::coerce_int( $previous_max ) ) );
+		// The NOT IN placeholders join dynamically, so the sniff cannot count them.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE contract_id = %d{$keep}", $values ) );
 		if ( false === $deleted ) {
 			throw new \RuntimeException( sprintf( 'Failed to delete item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
@@ -2257,19 +2267,24 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert line items for a contract.
+	 * Insert line items for a contract. A failed insert best-effort deletes the rows this call
+	 * added, then throws.
 	 *
 	 * @param int                              $contract_id Contract id.
 	 * @param array<int, array<string, mixed>> $items       Item rows.
+	 * @return array<int, int> The new row ids, in order.
 	 * @throws \RuntimeException If an insert fails.
 	 */
-	private function insert_items( int $contract_id, array $items ): void {
+	private function insert_items( int $contract_id, array $items ): array {
 		global $wpdb;
+
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+		$new_ids = array();
 
 		foreach ( $items as $item ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$inserted = $wpdb->insert(
-				SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
+				$table,
 				array(
 					'contract_id'  => $contract_id,
 					'item_name'    => Coercion::coerce_string( $item['item_name'] ?? null ),
@@ -2284,9 +2299,18 @@ final class ContractRepository {
 			);
 
 			if ( false === $inserted ) {
-				throw new \RuntimeException( sprintf( 'Failed to insert item row for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+				$error = $wpdb->last_error;
+				if ( array() !== $new_ids ) {
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+					$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id IN ( " . implode( ', ', array_fill( 0, count( $new_ids ), '%d' ) ) . ' )', $new_ids ) );
+				}
+				throw new \RuntimeException( sprintf( 'Failed to insert item row for contract %d: %s', (int) $contract_id, esc_html( $error ) ) );
 			}
+
+			$new_ids[] = (int) $wpdb->insert_id;
 		}
+
+		return $new_ids;
 	}
 
 	/**

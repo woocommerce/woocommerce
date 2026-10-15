@@ -1933,13 +1933,14 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 *
 	 * @param string   $pattern Regex the statement to break must match.
 	 * @param callable $run     Code under test.
+	 * @param int      $skip    Matching statements to let through first.
 	 */
-	private function with_failing_query( string $pattern, callable $run ): void {
+	private function with_failing_query( string $pattern, callable $run, int $skip = 0 ): void {
 		global $wpdb;
 
 		$broken = false;
-		$break  = static function ( string $query ) use ( $pattern, &$broken ): string {
-			if ( ! $broken && 1 === preg_match( $pattern, $query ) ) {
+		$break  = static function ( string $query ) use ( $pattern, &$broken, &$skip ): string {
+			if ( ! $broken && 1 === preg_match( $pattern, $query ) && 0 === $skip-- ) {
 				$broken = true;
 				return 'SELECT * FROM table_that_does_not_exist_for_tests';
 			}
@@ -2251,6 +2252,83 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			}
 		);
 		$this->assertSame( array( 'Coffee bag' ), $this->item_names( $id ) );
+	}
+
+	/**
+	 * @testdox A failed second item insert removes the first new row and leaves exactly the old set.
+	 */
+	public function test_a_failed_second_item_insert_leaves_exactly_the_old_items(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_items( $this->two_items() );
+		$lock = $this->lock( $id );
+
+		$this->with_failing_query(
+			'/^\s*INSERT\s+INTO\s+\S*contract_items/i',
+			function () use ( $contract, $lock ): void {
+				try {
+					$this->sut->update_fields( $contract, array( 'items' ), $lock );
+					$this->fail( 'Expected the failed insert to throw.' );
+				} catch ( \RuntimeException $e ) {
+					$this->assertStringContainsString( 'Failed to insert item row', $e->getMessage() );
+				}
+			},
+			1
+		);
+		$this->assertSame( array( 'Coffee bag' ), $this->item_names( $id ) );
+
+		$this->sut->update_fields( $contract, array( 'items' ), $lock );
+		$this->assertSame( array( 'Tea tin', 'Mug' ), $this->item_names( $id ) );
+	}
+
+	/**
+	 * @testdox A failed address insert on create leaves no contract, and a retry with the same creation key succeeds.
+	 */
+	public function test_a_failed_create_is_discarded_and_can_be_retried(): void {
+		global $wpdb;
+
+		foreach ( array( 'insert', 'insert_locked' ) as $method ) {
+			$key   = 'order:' . $method;
+			$build = function () use ( $key ): Contract {
+				$contract = $this->make_contract();
+				$storage  = $contract->to_storage();
+				return Contract::create(
+					array(
+						'extension_slug' => 'lite',
+						'creation_key'   => $key,
+						'items'          => $contract->get_items(),
+						'addresses'      => $contract->get_addresses(),
+						'currency'       => $storage['currency'],
+					)
+				);
+			};
+
+			$this->with_failing_query(
+				'/^\s*INSERT\s+INTO\s+\S*contract_addresses/i',
+				function () use ( $build, $method ): void {
+					try {
+						'insert' === $method ? $this->sut->insert( $build() ) : $this->sut->insert_locked( $build(), 'checkout' );
+						$this->fail( 'Expected the failed address insert to throw.' );
+					} catch ( \RuntimeException $e ) {
+						$this->assertStringContainsString( 'address row', $e->getMessage() );
+					}
+				},
+				1
+			);
+
+			$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+			$items     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$contracts} WHERE creation_key = %s", $key ) ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$items} WHERE contract_id NOT IN ( SELECT id FROM {$contracts} )" ), 'No orphaned items.' );
+
+			$retry = $build();
+			'insert' === $method ? $this->sut->insert( $retry ) : $this->sut->insert_locked( $retry, 'checkout' );
+			$this->assertIsInt( $retry->get_id() );
+			$this->assertSame( array( 'Coffee bag' ), $this->item_names( (int) $retry->get_id() ) );
+		}
 	}
 
 	/**
