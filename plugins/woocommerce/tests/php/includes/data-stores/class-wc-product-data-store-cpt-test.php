@@ -419,6 +419,25 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Search for $term should rank the exact SKU match ahead of title matches.
+	 *
+	 * @testWith ["\"lamp\"", "LAMP", "Lamp shade"]
+	 *           ["AB+12", "AB+12", "AB 12 holder"]
+	 *
+	 * @param string $term             Search term, as typed.
+	 * @param string $sku              SKU that exactly matches the term.
+	 * @param string $title_match_name Name of a product that only matches by title.
+	 */
+	public function test_search_products_ranks_exact_sku_first_for_quoted_and_split_terms( string $term, string $sku, string $title_match_name ): void {
+		$title_match = $this->create_search_test_product( $title_match_name );
+		$exact_sku   = $this->create_search_test_product( 'Zzz item', 'publish', array( 'sku' => $sku ) );
+
+		$results = WC_Data_Store::load( 'product' )->search_products( $term, '', false, false );
+
+		$this->assertSame( array( $exact_sku->get_id(), $title_match->get_id() ), array_values( array_filter( $results ) ), 'The exact SKU match should rank first' );
+	}
+
+	/**
 	 * @testdox Limited search should keep a GTIN match when a description-only match sorts ahead of it by title.
 	 */
 	public function test_search_products_limit_keeps_gtin_matches_over_description_matches(): void {
