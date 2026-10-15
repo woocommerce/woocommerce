@@ -423,13 +423,16 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Load the product an item id names, by id or SKU.
+	 * Load the product an item id names.
+	 *
+	 * Ids only, as the catalog routes resolve them: the catalog hands out no SKU
+	 * identifier, and a SKU fallback would let a numeric SKU resolve as a post id.
 	 *
 	 * @param string $item_id Item identifier.
 	 * @return \WC_Product|null
 	 */
 	private function get_item_product( string $item_id ) {
-		$product_id = ctype_digit( $item_id ) ? (int) $item_id : (int) wc_get_product_id_by_sku( $item_id );
+		$product_id = ctype_digit( $item_id ) ? (int) $item_id : 0;
 		$product    = $product_id > 0 ? wc_get_product( $product_id ) : null;
 
 		return $product instanceof \WC_Product ? $product : null;

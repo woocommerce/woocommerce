@@ -868,6 +868,17 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * Items are named by id only; a SKU is not an identifier the catalog hands out.
+	 */
+	public function test_create_cart_does_not_resolve_items_by_sku(): void {
+		$data = $this->request( 'POST', '/carts', array( 'line_items' => array( array( 'item' => array( 'id' => 'ucp-cart-mug' ) ) ) ) )->get_data();
+
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
+		$this->assertSame( '$.line_items[0].item.id', $data['messages'][0]['path'] );
+	}
+
+	/**
 	 * Creating a cart as a logged-in user must not touch that user's own session.
 	 *
 	 * The token handler keys a tokenless session on the user id, so without a minted
