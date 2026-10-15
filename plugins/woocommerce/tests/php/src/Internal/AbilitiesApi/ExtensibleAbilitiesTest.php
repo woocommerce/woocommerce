@@ -161,7 +161,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'enum' => array( 'small', 'large' ),
 				),
 			),
-			array( 'order', 'test-ext', 'tag', array( 'type' => 'string' ) ),
 		);
 		foreach ( $writable as list( $resource, $namespace, $field, $schema ) ) {
 			AbilityExtensions::register_field(
@@ -648,9 +647,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept extension fields in product create and order status update.
+	 * @testdox Should accept extension fields in product create, and none in order status update.
 	 */
-	public function test_product_create_and_order_status_update_write_fields(): void {
+	public function test_product_create_writes_fields_and_order_status_update_does_not(): void {
 		$order = \WC_Helper_Order::create_order();
 
 		$created = $this->run_ability(
@@ -660,59 +659,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
 			)
 		);
-		$this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'         => $order->get_id(),
-				'status'     => 'completed',
-				'extensions' => array( 'test-ext' => array( 'tag' => 'vip' ) ),
-			)
-		);
+		$schema  = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
 
-		$saved_order = wc_get_order( $order->get_id() );
 		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
-		$this->assertSame( 'completed', $saved_order->get_status() );
-		$this->assertSame( 'vip', $saved_order->get_meta( '_test_tag' ) );
-	}
-
-	/**
-	 * @testdox Should fire woocommerce_order_edit_status one time for an accepted status change, and not at all when an extension refuses it.
-	 */
-	public function test_order_status_update_fires_the_edit_action_only_for_an_accepted_change(): void {
-		$order    = \WC_Helper_Order::create_order();
-		$edits    = array();
-		$listener = static function ( $order_id, $status ) use ( &$edits ) {
-			$edits[] = array( $order_id, $status );
-		};
-		add_action( 'woocommerce_order_edit_status', $listener, 10, 2 );
-
-		try {
-			$refused = $this->run_ability_response(
-				'woocommerce/order-update-status',
-				array(
-					'id'         => $order->get_id(),
-					'status'     => 'completed',
-					'extensions' => array( 'test-ext' => array( 'tag' => 'reject' ) ),
-				)
-			);
-			$this->assertSame( 400, $refused->get_status() );
-			$this->assertSame( 'test_rejected', $refused->get_data()['code'] );
-			$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
-			$this->assertSame( array(), $edits );
-
-			$this->run_ability(
-				'woocommerce/order-update-status',
-				array(
-					'id'     => $order->get_id(),
-					'status' => 'completed',
-				)
-			);
-		} finally {
-			remove_action( 'woocommerce_order_edit_status', $listener, 10 );
-		}
-
-		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
-		$this->assertSame( array( array( $order->get_id(), 'completed' ) ), $edits );
+		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] );
 	}
 
 	/**
@@ -788,7 +738,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call WC_Order::update_status() with the feature off, and skip it with the feature on by design.
+	 * @testdox Should call WC_Order::update_status() with the feature off and on.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
 		$calls        = 0;
@@ -833,7 +783,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$calls = $order_class::$calls;
-			$this->assertSame( $enabled ? 0 : 1, $calls, $enabled ? 'feature on' : 'feature off' );
+			$this->assertSame( 1, $calls, $enabled ? 'feature on' : 'feature off' );
 			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 		}
 
@@ -938,7 +888,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertNotInstanceOf( ActionableAbility::class, wp_get_ability( 'woocommerce/product-update' ) );
+		$this->assertInstanceOf( ActionableAbility::class, wp_get_ability( 'woocommerce/product-update' ) );
 		$this->assertArrayNotHasKey( 'extensions', $schema['oneOf'][0]['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
