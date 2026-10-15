@@ -125,24 +125,33 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 	}
 
 	/**
-	 * @testdox Coupon discounts in the V2 order response use the requested decimal precision.
+	 * @testdox Coupon discounts in the V2 order response are rounded to the requested decimal precision.
+	 *
+	 * @testWith [0, "1", "0"]
+	 *           [3, "1.235", "0.235"]
+	 *           [5, "1.23460", "0.23460"]
+	 *
+	 * @param int    $dp                    Requested decimal precision.
+	 * @param string $expected_discount     Expected formatted discount.
+	 * @param string $expected_discount_tax Expected formatted discount tax.
 	 */
-	public function test_coupon_lines_respect_decimal_precision() {
+	public function test_coupon_lines_respect_decimal_precision( int $dp, string $expected_discount, string $expected_discount_tax ) {
 		$order  = new WC_Order();
 		$coupon = new WC_Order_Item_Coupon();
 		$coupon->set_code( 'precision-coupon' );
-		$coupon->set_discount( '1.2345' );
-		$coupon->set_discount_tax( '0.2345' );
+		$coupon->set_discount( '1.2346' );
+		$coupon->set_discount_tax( '0.2346' );
 		$order->add_item( $coupon );
 		$order->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() );
-		$request->set_param( 'dp', 5 );
+		$request->set_param( 'dp', $dp );
 		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( '1.23450', $response->get_data()['coupon_lines'][0]['discount'] );
-		$this->assertSame( '0.23450', $response->get_data()['coupon_lines'][0]['discount_tax'] );
+		$this->assertSame( $expected_discount, $data['coupon_lines'][0]['discount'] );
+		$this->assertSame( $expected_discount_tax, $data['coupon_lines'][0]['discount_tax'] );
 	}
 
 	/**
