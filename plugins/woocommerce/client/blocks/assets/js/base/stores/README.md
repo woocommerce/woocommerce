@@ -286,7 +286,7 @@ if ( ! outcome.success ) {
 
 **`addCartItem` only adds.** It takes an `AddCartItemPayload` — `{ id, quantity?, variation? }` — and always posts to `add-item`, where `quantity` is the amount to add (1 when omitted), never the line's new total. To set a cart line's quantity, call `updateCartItem( { key, quantity } )`, which posts to `update-item`.
 
-**`updateCartItem`, `removeCartItem` and `batchAddCartItems` do not share this contract.** All three remain typed `Promise<void>` and swallow their own request errors the way `addCartItem` used to; `updateCartItem` rejects only when called without a `key`, before sending anything. Don't assume parity when touching any of them — extending this contract to other cart actions is a separate decision, not something the store does today.
+**`updateCartItem`, `removeCartItem` and `batchAddCartItems` do not share this contract.** All three are typed `Promise<void>` and swallow their own request errors: a failed request shows an error notice and the call still resolves. `updateCartItem` rejects only when called without a `key`, before sending anything. Don't assume parity when touching any of them — extending this contract to other cart actions is a separate decision, not something the store does today.
 
 For a worked example, see `onClickMoveToCart` in `saved-for-later/frontend.ts` and `onClickAddToCart` in `wishlist/frontend.ts` — both read the outcome and gate a destructive list-removal on `outcome.success`.
 
