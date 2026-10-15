@@ -186,7 +186,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * The id of the extension's contract holding `$creation_key`, or null.
+	 * The id of the extension's contract holding `$creation_key`, or null. Shapes the
+	 * duplicate error only; it may lag on a replica.
 	 *
 	 * @param string $extension_slug Owning extension slug.
 	 * @param string $creation_key   Creation key.
@@ -833,7 +834,8 @@ final class ContractRepository {
 
 	/**
 	 * Whether the contract exists and who holds its lock, read on the database clock. The
-	 * operation and expiry are set only while the lock is live.
+	 * operation and expiry are set only while the lock is live. Writes use it to shape errors
+	 * only (it may lag on a replica), never to decide that a write landed.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array{exists: bool, live: bool, operation: ?string, locked_until: ?string}
@@ -1233,14 +1235,14 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Add a meta row for a contract, like `add_post_meta()`. Without `$lock` the insert
-	 * selects from the contract row, so it lands only while no lock lives.
+	 * Add a meta row for a contract, like `add_post_meta()`. The insert selects from the contract
+	 * row, so without `$lock` it lands only while no lock lives; with `$unique` the same statement
+	 * checks the key is absent.
 	 *
 	 * @param int               $contract_id Contract id.
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       Meta value; serialized when not scalar.
-	 * @param bool              $unique      When true, add nothing if the key already exists. Checked before
-	 *                                       the insert with no unique index; the lock serializes facade writers.
+	 * @param bool              $unique      When true, add nothing if the key already exists.
 	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
 	 * @throws \InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
@@ -1256,51 +1258,86 @@ final class ContractRepository {
 
 		$this->fence_meta( $contract_id, $lock );
 
-		if ( $unique && array() !== $this->find_meta_values( $contract_id, $key ) ) {
+		if ( 1 === $this->insert_meta_row( $contract_id, $key, $value, $unique, $lock ) ) {
+			return (int) $wpdb->insert_id;
+		}
+
+		if ( $unique && $this->meta_key_exists( $contract_id, $key ) ) {
 			return null;
 		}
 
-		$meta         = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
-		$contracts    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$no_live_lock = self::NO_LIVE_LOCK;
+		$this->throw_unguarded_insert( $contract_id );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
-		if ( null !== $lock ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			$inserted = $wpdb->insert(
-				$meta,
-				array(
-					'contract_id' => $contract_id,
-					'meta_key'    => $key,
-					'meta_value'  => maybe_serialize( $value ),
-				)
-			);
-		} else {
-			$sql    = "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT id, %s, %s FROM {$contracts} WHERE id = %d AND {$no_live_lock}";
-			$values = array( $key, maybe_serialize( $value ), $contract_id );
+	/**
+	 * Insert one meta row as `INSERT ... SELECT` from the contract row: without `$lock` only while
+	 * no lock lives, with `$if_absent` only while the key has no row, both in the one statement.
+	 *
+	 * @param int               $contract_id Contract id.
+	 * @param string            $key         Meta key.
+	 * @param mixed             $value       Meta value; serialized when not scalar.
+	 * @param bool              $if_absent   Whether to insert only when the key has no row.
+	 * @param ContractLock|null $lock        The caller's (fenced) lock, or null.
+	 * @return int The number of rows inserted (0 or 1).
+	 * @throws \RuntimeException If the insert fails.
+	 */
+	private function insert_meta_row( int $contract_id, string $key, $value, bool $if_absent, ?ContractLock $lock ): int {
+		global $wpdb;
 
-			// Fixed SQL fragments only; every value is a placeholder.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-			$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
+		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$values    = array( $key, maybe_serialize( $value ), $contract_id );
+		$where     = 'c.id = %d';
+		if ( null === $lock ) {
+			$where .= ' AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )';
 		}
+		if ( $if_absent ) {
+			$where   .= " AND NOT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.contract_id = %d AND m.meta_key = %s )";
+			$values[] = $contract_id;
+			$values[] = $key;
+		}
+
+		$sql = "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT c.id, %s, %s FROM {$contracts} c WHERE {$where}";
+
+		// Fixed SQL fragments only; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 
 		if ( false === $inserted ) {
 			throw new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		if ( 0 === $inserted ) {
-			$this->throw_unguarded_insert( $contract_id );
+		return (int) $inserted;
+	}
+
+	/**
+	 * Whether the contract has a meta row for `$key`. Shapes errors only, so a lagging replica
+	 * can at worst misname a failure.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $key         Meta key.
+	 * @throws \RuntimeException If the read fails.
+	 */
+	private function meta_key_exists( int $contract_id, string $key ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$table} WHERE contract_id = %d AND meta_key = %s LIMIT 1", $contract_id, $key ) );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( sprintf( 'Failed to read contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		return (int) $wpdb->insert_id;
+		return null !== $found;
 	}
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Update a contract's meta rows for `$key`, like `update_post_meta()`: adds a row when
-	 * the key is absent, else rewrites every row for the key, or only the rows holding
-	 * `$prev_value`. The absent-key check runs before the write with no unique index; the lock
-	 * serializes facade writers (direct SQL is out of scope).
+	 * the key is absent (one insert that checks the absence itself), else rewrites every row for
+	 * the key, or only the rows holding `$prev_value`.
 	 *
 	 * @param int               $contract_id Contract id.
 	 * @param string            $key         Meta key.
@@ -1322,9 +1359,11 @@ final class ContractRepository {
 
 		$this->fence_meta( $contract_id, $lock );
 
-		if ( array() === $this->find_meta_values( $contract_id, $key ) ) {
-			$this->add_meta( $contract_id, $key, $value, false, $lock );
+		if ( 1 === $this->insert_meta_row( $contract_id, $key, $value, true, $lock ) ) {
 			return true;
+		}
+		if ( ! $this->meta_key_exists( $contract_id, $key ) ) {
+			$this->throw_unguarded_insert( $contract_id );
 		}
 
 		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
@@ -1506,10 +1545,10 @@ final class ContractRepository {
 	/**
 	 * Append a cycle to its chain `(contract_id, kind)`.
 	 *
-	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), then inserts
-	 * the cycle row and stamps the generated id back onto the entity. The chain's UNIQUE
-	 * indexes guard concurrent appends and duplicate counts. Without `$lock` the INSERT
-	 * selects from the contract row, so it lands only while no lock lives.
+	 * Inserts the cycle row, assigning an unassigned `sequence_no` in the same statement (the
+	 * chain's highest plus one, or 1), and stamps the generated id and position back onto the
+	 * entity. The chain's UNIQUE indexes guard concurrent appends and duplicate counts. The
+	 * INSERT selects from the contract row, so without `$lock` it lands only while no lock lives.
 	 *
 	 * @param Cycle             $cycle Cycle to append. Carries its contract id and kind.
 	 * @param ContractLock|null $lock  The caller's lock on the cycle's contract, or null.
@@ -1524,22 +1563,7 @@ final class ContractRepository {
 			$this->fence_children( $lock );
 		}
 
-		$this->assign_next_sequence_no( $cycle );
 		$this->insert_cycle( $cycle, null === $lock );
-	}
-
-	/**
-	 * Assign the chain's next `sequence_no` to a cycle that awaits one.
-	 *
-	 * @param Cycle $cycle Cycle about to be appended.
-	 */
-	private function assign_next_sequence_no( Cycle $cycle ): void {
-		if ( ! $cycle->awaits_sequence_no() ) {
-			return;
-		}
-
-		$head = $this->find_chain_head( $cycle->get_contract_id(), $cycle->get_kind() );
-		$cycle->assign_sequence_no( null === $head ? 1 : $head->get_sequence_no() + 1 );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
@@ -1809,15 +1833,15 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Insert a cycle row and stamp the generated id back onto the entity. Hand-built so an
-	 * unlocked append can select from the contract row (it lands only while no lock lives);
-	 * string values are checked against their column lengths first, as `$wpdb->insert()` would.
+	 * Insert a cycle row as `INSERT ... SELECT` from the contract row and stamp the generated id
+	 * (and an assigned `sequence_no`) back onto the entity. String values are checked against
+	 * their column lengths first, as `$wpdb->insert()` would.
 	 *
 	 * @param Cycle $cycle         Cycle to insert. Carries its contract id and kind.
 	 * @param bool  $guard_no_lock Whether the insert must find the contract with no live lock.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
 	 * @throws ContractLockedException If `$guard_no_lock` and another operation holds the lock.
-	 * @throws \InvalidArgumentException If `$guard_no_lock` and the contract does not exist.
+	 * @throws \InvalidArgumentException If the contract does not exist.
 	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
 	 */
 	private function insert_cycle( Cycle $cycle, bool $guard_no_lock ): void {
@@ -1826,6 +1850,7 @@ final class ContractRepository {
 		$table     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$now       = gmdate( 'Y-m-d H:i:s' );
+		$assign    = $cycle->awaits_sequence_no();
 
 		$columns                     = $cycle->to_storage();
 		$columns['date_created_gmt'] = $now;
@@ -1836,6 +1861,13 @@ final class ContractRepository {
 		$values       = array();
 		foreach ( $columns as $column => $value ) {
 			$names[] = "`{$column}`";
+			if ( 'sequence_no' === $column && $assign ) {
+				// The next position in the chain, read by the inserting statement itself.
+				$placeholders[] = "( SELECT COALESCE( MAX( s.sequence_no ), 0 ) + 1 FROM `{$table}` s WHERE s.contract_id = %d AND s.kind = %s )";
+				$values[]       = $cycle->get_contract_id();
+				$values[]       = $cycle->get_kind();
+				continue;
+			}
 			if ( null === $value ) {
 				$placeholders[] = 'NULL';
 				continue;
@@ -1849,14 +1881,10 @@ final class ContractRepository {
 
 		$name_list        = implode( ', ', $names );
 		$placeholder_list = implode( ', ', $placeholders );
+		$values[]         = $cycle->get_contract_id();
+		$fence            = $guard_no_lock ? ' AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )' : '';
 
-		if ( $guard_no_lock ) {
-			$values[]     = $cycle->get_contract_id();
-			$no_live_lock = self::NO_LIVE_LOCK;
-			$sql          = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` WHERE id = %d AND {$no_live_lock}";
-		} else {
-			$sql = "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )";
-		}
+		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d{$fence}";
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -1875,14 +1903,25 @@ final class ContractRepository {
 			$this->throw_unguarded_insert( $cycle->get_contract_id() );
 		}
 
-		$cycle->set_id( (int) $wpdb->insert_id );
+		$id = (int) $wpdb->insert_id;
+		$cycle->set_id( $id );
+
+		if ( $assign ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$sequence_no = $wpdb->get_var( $wpdb->prepare( "SELECT sequence_no FROM `{$table}` WHERE id = %d", $id ) );
+			if ( null === $sequence_no ) {
+				throw new \RuntimeException( esc_html( sprintf( 'Failed to read the position of appended cycle %d. %s', $id, $wpdb->last_error ) ) );
+			}
+			$cycle->assign_sequence_no( Coercion::coerce_int( $sequence_no ) );
+		}
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Explain an unlocked child insert that selected no contract row: the contract is
-	 * missing, or another operation holds its lock.
+	 * Explain a child insert that selected no contract row: the contract is missing, or another
+	 * operation holds its lock. The lookup shapes the error only; a lagging replica can at
+	 * worst misname it.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return never

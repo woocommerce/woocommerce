@@ -61,6 +61,44 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
+	/**
+	 * @testdox A repeated unique add, with or without the lock, keeps one row and checks the key in its insert.
+	 */
+	public function test_unique_add_is_idempotent(): void {
+		global $wpdb;
+
+		$this->assertIsInt( $this->sut->add_meta( $this->id, 'note', 'one', true ) );
+		$this->assertNull( $this->sut->add_meta( $this->id, 'note', 'two', true ) );
+
+		$lock = $this->lock();
+		$this->assertNull( $this->sut->add_meta( $this->id, 'note', 'three', true, $lock ) );
+		$lock->release();
+
+		$this->assertIsInt( $this->sut->add_meta( $this->id, 'fresh', 'x', true ) );
+
+		$queries = $wpdb->num_queries;
+		$this->assertIsInt( $this->sut->add_meta( $this->id, 'single', 'x', true ) );
+		$this->assertSame( 1, $wpdb->num_queries - $queries, 'One statement: no read before the insert.' );
+
+		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
+	 * @testdox update_meta on an absent key adds once; a repeat updates instead of duplicating.
+	 */
+	public function test_update_meta_does_not_duplicate(): void {
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'one' ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'two' ) );
+
+		$lock = $this->lock();
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'locked', 'one', null, $lock ) );
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'locked', 'two', null, $lock ) );
+		$lock->release();
+
+		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'note' ) );
+		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'locked' ) );
+	}
+
 	public function test_update_meta_adds_when_absent(): void {
 		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'one' ) );
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );

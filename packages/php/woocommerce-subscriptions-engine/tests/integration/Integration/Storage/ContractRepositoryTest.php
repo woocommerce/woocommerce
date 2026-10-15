@@ -1848,6 +1848,33 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Appends without a sequence_no, locked or not, take the next position in one insert.
+	 */
+	public function test_append_without_a_sequence_no_takes_the_next_position(): void {
+		global $wpdb;
+
+		$id = $this->sut->insert( $this->make_contract() );
+
+		$first = $this->make_unpositioned_cycle( $id );
+		$this->sut->append_cycle( $first );
+
+		$lock   = $this->lock( $id );
+		$second = $this->make_unpositioned_cycle( $id );
+		$this->sut->append_cycle( $second, $lock );
+		$lock->release();
+
+		$third   = $this->make_unpositioned_cycle( $id );
+		$queries = $wpdb->num_queries;
+		$this->sut->append_cycle( $third );
+
+		$this->assertSame( array( 1, 2, 3 ), array( $first->get_sequence_no(), $second->get_sequence_no(), $third->get_sequence_no() ) );
+		$this->assertSame( 2, $wpdb->num_queries - $queries, 'The insert, then the read of its assigned position.' );
+		$head = $this->sut->find_chain_head( $id );
+		$this->assertInstanceOf( Cycle::class, $head );
+		$this->assertSame( $third->get_id(), $head->get_id() );
+	}
+
+	/**
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {
