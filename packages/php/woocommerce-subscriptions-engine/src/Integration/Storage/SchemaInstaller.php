@@ -58,13 +58,17 @@ final class SchemaInstaller {
 	 *         dbDelta adds the column and widens `schedule_source` in place, but does not
 	 *         drop the index or rename stored 'primitive' rows (which the due scan skips):
 	 *         pre-freeze, recreate the tables.
+	 * 2.8.0 - contract lock: contracts gain `lock_token`, `locked_until`, `lock_operation`
+	 *         and a `creation_key` with a `creation (extension_slug, creation_key)` UNIQUE
+	 *         index; contracts and cycles drop `claimed_until`. Pre-freeze, recreate the
+	 *         tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
 	 * on an earlier schema must drop and recreate the tables (and clear VERSION_OPTION)
 	 * to pick up such changes - in-place ALTERs and backfills arrive with the freeze.
 	 */
-	private const VERSION = '2.7.0';
+	private const VERSION = '2.8.0';
 
 	/**
 	 * Option key tracking the installed schema version.
@@ -257,6 +261,10 @@ final class SchemaInstaller {
 		// recurring; today the store base currency). `schedule_source` records
 		// who keeps the payment schedule: the engine ('subscriptions_engine', the only
 		// source the due scan dispatches) or a gateway or extension that keeps its own.
+		// `lock_token` / `locked_until` / `lock_operation` hold the per-contract lock (live
+		// while `locked_until` is ahead of the DB clock). `creation` makes an extension's
+		// optional `creation_key` unique (NULL keys never collide); 64 + 100 characters
+		// stay within the 767-byte key limit of older InnoDB row formats.
 		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
@@ -270,7 +278,10 @@ final class SchemaInstaller {
   payment_token_id BIGINT UNSIGNED NULL,
   start_gmt DATETIME NULL,
   next_payment_gmt DATETIME NULL,
-  claimed_until DATETIME NULL,
+  lock_token CHAR(32) NULL,
+  locked_until DATETIME NULL,
+  lock_operation VARCHAR(64) NULL,
+  creation_key VARCHAR(100) NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   billing_total DECIMAL(26,8) NOT NULL DEFAULT 0,
@@ -288,7 +299,8 @@ final class SchemaInstaller {
   KEY customer_status (customer_id, status),
   KEY due (next_payment_gmt, status),
   KEY due_owner (extension_slug, next_payment_gmt),
-  KEY origin_order (origin_order_id)
+  KEY origin_order (origin_order_id),
+  UNIQUE KEY creation (extension_slug, creation_key)
 ) {$collate};";
 
 		$contract_items_sql = "CREATE TABLE {$contract_items} (
@@ -341,10 +353,7 @@ final class SchemaInstaller {
 		// per-charge idempotency anchor, with `count` nullable so non-counting cycles
 		// (e.g. future trial periods) coexist freely under MySQL's NULL-distinct rule.
 		// `order_id` is non-1:1 (an aggregate order may serve many cycles); `contract_kind`
-		// serves targeted per-chain reads (MAX(count), head). `claimed_until` is the cycle
-		// claim: stamped when a caller appends, claims or transitions a cycle with a claim,
-		// claimable again once it passes; the chain's UNIQUE positions remain the primary
-		// guard against a duplicate cycle.
+		// serves targeted per-chain reads (MAX(count), head).
 		// `retry_at` is reserved (additive) for a later retry/dunning pass - not wired yet.
 		$cycles_sql = "CREATE TABLE {$cycles} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -362,7 +371,6 @@ final class SchemaInstaller {
   items_snapshot_id BIGINT UNSIGNED NULL,
   order_id BIGINT UNSIGNED NULL,
   extension_slug VARCHAR(64) NULL,
-  claimed_until DATETIME NULL,
   retry_at DATETIME NULL,
   date_created_gmt DATETIME NOT NULL,
   date_updated_gmt DATETIME NOT NULL,

@@ -291,10 +291,10 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.7.0 (due dispatch).
+	 * @testdox The schema version is 2.8.0 (contract lock).
 	 */
-	public function test_schema_version_is_2_7_0(): void {
-		$this->assertSame( '2.7.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_8_0(): void {
+		$this->assertSame( '2.8.0', SchemaInstaller::get_version() );
 	}
 
 	/**
@@ -314,19 +314,39 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Contracts carry a nullable claimed_until column for the due-dispatch claim.
+	 * @testdox Contracts carry nullable lock and creation-key columns and no claimed_until.
 	 */
-	public function test_contracts_claimed_until_is_nullable(): void {
+	public function test_contracts_lock_and_creation_key_columns_are_nullable(): void {
 		global $wpdb;
 
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$expected = array(
+			'lock_token'     => 'char(32)',
+			'locked_until'   => 'datetime',
+			'lock_operation' => 'varchar(64)',
+			'creation_key'   => 'varchar(100)',
+		);
+
+		foreach ( $expected as $column => $type ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a contracts.{$column} column." );
+			$this->assertSame( 'YES', $row['Null'] ?? null, "Expected contracts.{$column} to be NULLable." );
+			$this->assertSame( $type, $row['Type'] ?? null );
+		}
+
+		$this->assertFalse( $this->has_column( $table, 'claimed_until' ) );
+	}
+
+	/**
+	 * @testdox The creation index makes (extension_slug, creation_key) unique.
+	 */
+	public function test_contracts_creation_index_is_unique(): void {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'claimed_until' ), ARRAY_A );
-
-		$this->assertIsArray( $row, 'Expected a contracts.claimed_until column.' );
-		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected contracts.claimed_until to be NULLable.' );
-		$this->assertSame( 'datetime', $row['Type'] ?? null );
+		$this->assertSame( array( 'extension_slug', 'creation_key' ), $this->index_columns( $table, 'creation' ) );
+		$this->assertTrue( $this->index_is_unique( $table, 'creation' ) );
 	}
 
 	/**
@@ -382,24 +402,25 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 			'items_snapshot_id',
 			'order_id',
 			'extension_slug',
-			'claimed_until',
 			'retry_at',
 		);
 
 		foreach ( $columns as $column ) {
 			$this->assertTrue( $this->has_column( $table, $column ), "Expected cycles.{$column} column." );
 		}
+
+		$this->assertFalse( $this->has_column( $table, 'claimed_until' ), 'Cycles carry no claim column.' );
 	}
 
 	/**
-	 * @testdox The cycle dispatcher columns (claimed_until claim, reserved retry_at) are nullable.
+	 * @testdox The reserved cycle retry_at column is nullable.
 	 */
 	public function test_cycles_table_dispatcher_columns_are_nullable(): void {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
-		foreach ( array( 'claimed_until', 'retry_at' ) as $column ) {
+		foreach ( array( 'retry_at' ) as $column ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
 
