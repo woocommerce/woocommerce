@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  10.2.0
  * @package  WooCommerce\Abstracts
  */
-abstract class WC_Data {
+abstract class WC_Data implements \Automattic\WooCommerce\Abilities\SupportsStagedChanges {
 
 	/**
 	 * Clone mode constant: Duplicate mode clears meta IDs (default, for backward compatibility).

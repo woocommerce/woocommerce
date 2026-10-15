@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -115,28 +114,6 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 		}
 
 		return self::prepare_response( $order );
-	}
-
-	/**
-	 * Order classes of Core that take staged changes.
-	 *
-	 * @var string[]
-	 */
-	private const CORE_ORDER_CLASSES = array(
-		\WC_Order::class,
-		\Automattic\WooCommerce\Admin\Overrides\Order::class,
-	);
-
-	/**
-	 * Whether the order takes staged changes. The order classes of Core do. Any
-	 * other class does once it declares SupportsStagedChanges. Until then, it
-	 * keeps its update_status() path, where a class keeps its own rules.
-	 *
-	 * @param \WC_Order $subject Loaded order.
-	 * @return bool
-	 */
-	public static function supports_staged_changes( $subject ): bool {
-		return $subject instanceof SupportsStagedChanges || in_array( get_class( $subject ), self::CORE_ORDER_CLASSES, true );
 	}
 
 	/**

@@ -88,16 +88,6 @@ final class CoreActionableAbility extends ActionableAbility {
 	}
 
 	/**
-	 * Ask the definition whether the object takes staged changes.
-	 *
-	 * @param \WC_Data $subject Loaded object.
-	 * @return bool
-	 */
-	protected function supports_staged_changes( $subject ): bool {
-		return $this->definition()::supports_staged_changes( $subject );
-	}
-
-	/**
 	 * Definition class of the ability.
 	 *
 	 * @return class-string<AbstractChangeAbility>

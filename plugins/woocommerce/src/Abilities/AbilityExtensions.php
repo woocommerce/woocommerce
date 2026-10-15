@@ -52,6 +52,13 @@ class AbilityExtensions {
 	private static array $reported = array();
 
 	/**
+	 * Classes that take staged changes, keyed by class name.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static array $staged_classes = array();
+
+	/**
 	 * Whether the store enabled the experimental feature.
 	 *
 	 * @since 11.3.0
@@ -86,6 +93,43 @@ class AbilityExtensions {
 		}
 
 		self::$resources[ $resource_name ] = true;
+	}
+
+	/**
+	 * Register a class whose objects take staged changes: an ActionableAbility
+	 * stages a change on them in memory, writes the extension fields, and
+	 * commits in one write. Only the exact class is registered. A class that
+	 * extends it keeps the path it has today until it is registered too, so a
+	 * class that keeps its own rules in a method that sets and saves at once,
+	 * such as an update_status() override, is never skipped by accident.
+	 *
+	 * Call it inside the `woocommerce_ability_resources_init` action. The class
+	 * must satisfy SupportsStagedChanges, which every WC_Data object does.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $class_name Class name.
+	 */
+	public static function register_staged_class( string $class_name ): void {
+		if ( did_action( 'woocommerce_ability_resources_init' ) && ! doing_action( 'woocommerce_ability_resources_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, 'Register a class inside the woocommerce_ability_resources_init action.', '11.3.0' );
+			return;
+		}
+
+		self::$staged_classes[ ltrim( $class_name, '\\' ) ] = true;
+	}
+
+	/**
+	 * Whether an object takes staged changes: its exact class is registered
+	 * with register_staged_class() and it satisfies SupportsStagedChanges.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param object $subject Object to change.
+	 * @return bool
+	 */
+	public static function is_staged_class( $subject ): bool {
+		return $subject instanceof SupportsStagedChanges && isset( self::$staged_classes[ get_class( $subject ) ] );
 	}
 
 	/**

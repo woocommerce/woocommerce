@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
-use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
@@ -663,9 +662,9 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the update_status() path of an order class that does not declare SupportsStagedChanges, and refuse extension fields for it.
+	 * @testdox Should keep the update_status() path of an order class that is not registered as a staged class, and refuse extension fields for it.
 	 */
-	public function test_an_order_class_without_the_interface_keeps_update_status(): void {
+	public function test_an_unregistered_order_class_keeps_update_status(): void {
 		$order = \WC_Helper_Order::create_order();
 		$this->use_order_class( LegacyStatusOrder::class );
 		LegacyStatusOrder::$calls = array();
@@ -696,9 +695,9 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the update_status() path of an order class that overrides nothing but does not declare SupportsStagedChanges.
+	 * @testdox Should keep the update_status() path of an order class that overrides nothing but is not registered as a staged class.
 	 */
-	public function test_an_order_class_without_the_interface_is_not_assumed_to_take_staged_changes(): void {
+	public function test_an_unregistered_order_class_is_not_assumed_to_take_staged_changes(): void {
 		$order = \WC_Helper_Order::create_order();
 		$this->use_order_class( get_class( new class() extends \WC_Order {} ) );
 		$edits = 0;
@@ -732,11 +731,45 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should stage and commit the change of an order class that declares SupportsStagedChanges, without calling its update_status().
+	 * @testdox Should refuse to register a staged class outside the woocommerce_ability_resources_init action.
 	 */
-	public function test_an_order_class_with_the_interface_takes_the_staged_change(): void {
+	public function test_a_staged_class_registers_only_inside_the_resources_action(): void {
 		$order = \WC_Helper_Order::create_order();
 		$this->use_order_class( StagedStatusOrder::class );
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'on-hold',
+			)
+		);
+
+		$this->setExpectedIncorrectUsage( 'Automattic\\WooCommerce\\Abilities\\AbilityExtensions::register_staged_class' );
+		AbilityExtensions::register_staged_class( StagedStatusOrder::class );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'tag' => 'vip' ) ),
+			)
+		);
+		$this->assertSame( 'woocommerce_ability_extensions_unsupported', $refused->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should stage and commit the change of a registered order class, without calling its update_status().
+	 */
+	public function test_a_registered_order_class_takes_the_staged_change(): void {
+		$order = \WC_Helper_Order::create_order();
+		$this->use_order_class( StagedStatusOrder::class );
+		add_action(
+			'woocommerce_ability_resources_init',
+			static function () {
+				AbilityExtensions::register_staged_class( StagedStatusOrder::class );
+			}
+		);
 		StagedStatusOrder::$calls = array();
 
 		$this->run_ability(
@@ -841,7 +874,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call update_status() with the feature off and on, for an order class that overrides it and does not declare SupportsStagedChanges.
+	 * @testdox Should call update_status() with the feature off and on, for an order class that overrides it and is not registered as a staged class.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
 		$calls        = 0;
@@ -1070,7 +1103,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported' ) as $property ) {
+		foreach ( array( 'fields', 'reported', 'staged_classes' ) as $property ) {
 			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

@@ -62,6 +62,23 @@ class AbilitiesLoader {
 	private static array $registered_core_abilities = array();
 
 	/**
+	 * Classes of Core whose objects the actionable abilities change in one write.
+	 * Each product and order class is listed on its own: a class that extends
+	 * one of them, in Core or in an extension, is registered separately.
+	 *
+	 * @var string[]
+	 */
+	private const STAGED_CLASSES = array(
+		\WC_Order::class,
+		\Automattic\WooCommerce\Admin\Overrides\Order::class,
+		\WC_Product_Simple::class,
+		\WC_Product_External::class,
+		\WC_Product_Grouped::class,
+		\WC_Product_Variable::class,
+		\WC_Product_Variation::class,
+	);
+
+	/**
 	 * Initialize ability registration hooks.
 	 *
 	 * @internal
@@ -99,6 +116,9 @@ class AbilitiesLoader {
 	public static function register_core_resources(): void {
 		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
 			AbilityExtensions::register_resource( $resource_name );
+		}
+		foreach ( self::STAGED_CLASSES as $class_name ) {
+			AbilityExtensions::register_staged_class( $class_name );
 		}
 	}
 

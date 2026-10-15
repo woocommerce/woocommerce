@@ -7,8 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
-use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
-
 /**
  * An order class that keeps its own rules in update_status(), like an extension that has not adapted.
  */

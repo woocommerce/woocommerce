@@ -10,15 +10,17 @@ namespace Automattic\WooCommerce\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * An object that takes a change in memory first, and saves it later in one
+ * An object that takes changes in memory first, and saves them later in one
  * write. An ActionableAbility stages the change, writes the extension fields,
  * runs the validators, and then commits. Nothing is saved, and no action that
  * announces the change fires, before commit_changes().
  *
- * A class that extends a Core object and keeps its own rules in a method that
- * sets and saves at once, such as an update_status() override, declares this
- * interface once those rules run from stage_changes() and commit_changes().
- * Until then, the ability keeps calling the method it called before.
+ * Every WC_Data object satisfies this contract: stage_changes() sets props and
+ * commit_changes() saves. Satisfying it is not enough for an ability to use
+ * it. The exact class is registered with
+ * AbilityExtensions::register_staged_class(), so a class that extends a
+ * registered one, and may keep its own rules in a method that sets and saves
+ * at once, keeps its current path until it is registered too.
  *
  * @since 11.3.0
  */

@@ -7,12 +7,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
-use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
-
 /**
- * An order class that has adapted: it declares SupportsStagedChanges.
+ * An order class that has adapted: the test registers it with register_staged_class().
  */
-class StagedStatusOrder extends \WC_Order implements SupportsStagedChanges {
+class StagedStatusOrder extends \WC_Order {
 	/**
 	 * Recorded calls.
 	 *

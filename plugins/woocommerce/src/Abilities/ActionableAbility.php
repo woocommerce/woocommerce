@@ -101,7 +101,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-		if ( ! $this->supports_staged_changes( $subject ) ) {
+		if ( ! AbilityExtensions::is_staged_class( $subject ) ) {
 			if ( ! empty( $extensions ) ) {
 				return new \WP_Error(
 					'woocommerce_ability_extensions_unsupported',
@@ -139,23 +139,10 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Whether the loaded object takes staged changes. By default, only an
-	 * object that declares SupportsStagedChanges does. Override it for a
-	 * resource whose objects are known to save once.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param \WC_Data $subject Loaded object.
-	 * @return bool
-	 */
-	protected function supports_staged_changes( $subject ): bool {
-		return $subject instanceof SupportsStagedChanges;
-	}
-
-	/**
-	 * Run the change for an object that does not take staged changes. The
-	 * default refuses it. Override it to run the change the way it ran before
-	 * the ability was actionable.
+	 * Run the change for an object whose class is not registered with
+	 * AbilityExtensions::register_staged_class(). The default refuses it.
+	 * Override it to run the change the way it ran before the ability was
+	 * actionable.
 	 *
 	 * @since 11.3.0
 	 *
