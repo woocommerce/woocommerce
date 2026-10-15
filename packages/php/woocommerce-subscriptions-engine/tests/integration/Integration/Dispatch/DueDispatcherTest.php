@@ -420,6 +420,20 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Unregistering the last owner with a due handler removes the scan right away.
+	 */
+	public function test_unregistering_the_last_handler_owner_removes_the_scan(): void {
+		delete_option( self::SCHEDULE_CHECK_OPTION );
+		$this->register_recording_handler();
+		DueDispatcher::ensure_scheduled();
+		$this->assertNotFalse( as_next_scheduled_action( DueDispatcher::HOOK, array(), DueDispatcher::GROUP ) );
+
+		ConsumerRegistry::unregister( self::OWNER );
+
+		$this->assertFalse( as_next_scheduled_action( DueDispatcher::HOOK, array(), DueDispatcher::GROUP ), 'No owner has a handler, so the scan is gone.' );
+	}
+
+	/**
 	 * @testdox handle_tick runs a batch at the current moment.
 	 */
 	public function test_handle_tick_routes_to_run_batch(): void {

@@ -506,7 +506,8 @@ final class Contracts {
 	}
 
 	/**
-	 * Fetch a window of the contract's billing cycles, newest first.
+	 * Fetch a window of the contract's billing cycles, newest first. A negative `$limit` or
+	 * `$offset` throws an InvalidArgumentException.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $limit       Maximum cycles to return.
@@ -514,6 +515,9 @@ final class Contracts {
 	 * @return array<int, CycleView> Cycles newest first.
 	 */
 	public static function get_cycles( int $contract_id, int $limit = 20, int $offset = 0 ): array {
+		$limit  = ArgumentValidator::validate_non_negative_int( 'limit', $limit );
+		$offset = ArgumentValidator::validate_non_negative_int( 'offset', $offset );
+
 		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
 	}
 

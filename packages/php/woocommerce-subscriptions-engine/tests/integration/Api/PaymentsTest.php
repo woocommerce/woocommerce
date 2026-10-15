@@ -165,6 +165,25 @@ class PaymentsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox process_scheduled_payment returns false, and logs an error, when a supported gateway has no callback on its action.
+	 */
+	public function test_a_supported_gateway_without_a_callback_is_logged(): void {
+		$this->support_engine_charges( self::GATEWAY );
+		remove_all_actions( self::CHARGE_HOOK );
+		$order = $this->make_order();
+
+		$errors = $this->capture_engine_log(
+			'error',
+			array( 'order_id' => $order->get_id() ),
+			function () use ( $order ): void {
+				$this->assertFalse( Payments::process_scheduled_payment( $order ), 'Nothing was sent for payment.' );
+			}
+		);
+
+		$this->assertNotSame( array(), $errors );
+	}
+
+	/**
 	 * @testdox requires_reusable_payment_method is false by default and casts the filter answer to bool.
 	 */
 	public function test_requires_reusable_payment_method_answers(): void {

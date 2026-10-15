@@ -85,14 +85,20 @@ final class ConsumerRegistry {
 	}
 
 	/**
-	 * Remove a consumer registration. A deactivating consumer deregisters itself so the
-	 * engine's gates re-evaluate while its code is still loaded (e.g. the due dispatcher
-	 * removes its recurring scan when the last handler-owner leaves). An unknown slug is a no-op.
+	 * Remove a consumer registration. A deactivating consumer deregisters itself while its code
+	 * is still loaded; when it had a due handler, the due dispatcher re-checks its recurring scan
+	 * right away and removes it once no owner has a handler. An unknown slug is a no-op.
 	 *
 	 * @param string $slug The consumer extension's registered slug.
 	 */
 	public static function unregister( string $slug ): void {
-		unset( self::$consumers[ trim( $slug ) ] );
+		$slug        = trim( $slug );
+		$had_handler = isset( self::$consumers[ $slug ]['contract_due_handler'] );
+		unset( self::$consumers[ $slug ] );
+
+		if ( $had_handler ) {
+			DueDispatcher::ensure_scheduled();
+		}
 	}
 
 	/**

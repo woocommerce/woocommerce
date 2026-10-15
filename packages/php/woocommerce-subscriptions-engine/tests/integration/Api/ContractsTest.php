@@ -1090,6 +1090,30 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox get_cycles refuses a negative limit or offset.
+	 *
+	 * @dataProvider provide_negative_cycle_windows
+	 *
+	 * @param int $limit  Window size.
+	 * @param int $offset Cycles to skip.
+	 */
+	public function test_get_cycles_refuses_a_negative_window( int $limit, int $offset ): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::get_cycles( $this->contract_with_currency(), $limit, $offset );
+	}
+
+	/**
+	 * @return array<string, array{0: int, 1: int}>
+	 */
+	public function provide_negative_cycle_windows(): array {
+		return array(
+			'negative limit'  => array( -1, 0 ),
+			'negative offset' => array( 20, -1 ),
+		);
+	}
+
+	/**
 	 * @testdox A claimed append holds a claim: claim_cycle fails until the claim expires.
 	 */
 	public function test_a_claimed_append_holds_a_claim(): void {

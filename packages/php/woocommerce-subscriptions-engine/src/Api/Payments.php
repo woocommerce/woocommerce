@@ -77,14 +77,16 @@ final class Payments {
 	 * when the order's gateway supports the engine. Everything else is the caller's: whether
 	 * the order should be paid at all (paid, $0 or already in flight) and which further
 	 * gateway features the payment needs (such as `subscriptions` for a renewal, checked with
-	 * {@see self::gateway_supports()} first). Both false cases below are logged.
+	 * {@see self::gateway_supports()} first). Every false case below is logged.
 	 *
 	 * The return says whether the request reached the gateway cleanly, never whether the
 	 * payment succeeded; in every case the caller reads the outcome from the order status.
 	 * - True: the action fired and no callback threw.
-	 * - False, either of two cases the return does not tell apart:
+	 * - False, in any of three cases the return does not tell apart:
 	 *   - the order's gateway does not support the engine (nothing was fired; logged as a
-	 *     warning with the order id), or
+	 *     warning with the order id),
+	 *   - the gateway declares support but registered no callback on the action (nothing
+	 *     was fired; logged as an error with the order id), or
 	 *   - the gateway threw (logged with the order id): the outcome is unknown, since the
 	 *     gateway may have charged before throwing.
 	 * A caller that sees false and an order still needing payment should not assume the
@@ -92,7 +94,7 @@ final class Payments {
 	 *
 	 * @param WC_Order $order Order to pay, carrying the payment method and token.
 	 * @return bool True when the action fired and no callback threw; false when the gateway
-	 *              does not support the engine or threw (outcome unknown).
+	 *              does not support the engine, has no callback, or threw (outcome unknown).
 	 */
 	public static function process_scheduled_payment( WC_Order $order ): bool {
 		$gateway_id = $order->get_payment_method();
@@ -100,6 +102,19 @@ final class Payments {
 		if ( ! self::gateway_supports( $gateway_id ) ) {
 			wc_get_logger()->warning(
 				sprintf( 'Payments::process_scheduled_payment(): order %d was not sent for payment because its gateway "%s" does not support the engine.', $order->get_id(), $gateway_id ),
+				array(
+					'source'   => self::LOG_SOURCE,
+					'order_id' => $order->get_id(),
+				)
+			);
+
+			return false;
+		}
+
+		$hook = 'woocommerce_subscriptions_engine_scheduled_payment_' . $gateway_id;
+		if ( ! has_action( $hook ) ) {
+			wc_get_logger()->error(
+				sprintf( 'Payments::process_scheduled_payment(): order %d was not sent for payment because the "%s" gateway declares engine support but has no callback on %s.', $order->get_id(), $gateway_id, $hook ),
 				array(
 					'source'   => self::LOG_SOURCE,
 					'order_id' => $order->get_id(),
