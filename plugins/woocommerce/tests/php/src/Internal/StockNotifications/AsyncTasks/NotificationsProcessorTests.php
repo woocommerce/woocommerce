@@ -57,6 +57,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 		$this->restore_stock_notifications_feature_option();
 		remove_all_filters( 'woocommerce_logging_class' );
+		remove_all_filters( 'woocommerce_customer_stock_notifications_product_is_valid' );
 		parent::tearDown();
 	}
 
@@ -605,6 +606,27 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 			->with( \WC_Log_Levels::ERROR, $this->stringContains( 'Product 123 not found' ) );
 
 		$this->create_processor_with_logger( $logger )->process_batch( 123 );
+	}
+
+	/**
+	 * Test process_batch logs an exception thrown by an eligibility filter callback at error level.
+	 */
+	public function test_process_batch_logs_filter_exception_at_error_level() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_customer_stock_notifications_product_is_valid',
+			function () {
+				throw new \RuntimeException( 'Callback failed.' );
+			}
+		);
+
+		$logger = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->once() )
+			->method( 'log' )
+			->with( \WC_Log_Levels::ERROR, $this->stringContains( 'Callback failed.' ) );
+
+		$this->create_processor_with_logger( $logger )->process_batch( $product->get_id() );
 	}
 
 	/**

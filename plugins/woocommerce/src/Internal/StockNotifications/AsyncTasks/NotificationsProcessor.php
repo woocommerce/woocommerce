@@ -136,7 +136,7 @@ class NotificationsProcessor {
 	 * @param int $product_id The product ID.
 	 * @return \WC_Product
 	 * @throws \Exception If the product is not found.
-	 * @throws \RuntimeException If the product or its stock status is no longer eligible, which is an expected outcome.
+	 * @throws ExpectedSkipException If the product or its stock status is no longer eligible, which is an expected outcome.
 	 */
 	private function parse_product( int $product_id ): WC_Product {
 
@@ -146,11 +146,11 @@ class NotificationsProcessor {
 		}
 
 		if ( ! $this->eligibility_service->is_product_eligible( $product ) ) {
-			throw new \RuntimeException( sprintf( 'Product %d is not eligible for notifications.', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new ExpectedSkipException( sprintf( 'Product %d is not eligible for notifications.', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		if ( ! $this->eligibility_service->is_stock_status_eligible( $product->get_stock_status() ) ) {
-			throw new \RuntimeException( sprintf( 'Product %d stock status is not eligible for notifications (i.e. not in stock).', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new ExpectedSkipException( sprintf( 'Product %d stock status is not eligible for notifications (i.e. not in stock).', $product->get_id() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return $product;
@@ -171,7 +171,7 @@ class NotificationsProcessor {
 		} catch ( \Throwable $e ) {
 			$product_id = (int) $product_id;
 			// An ineligible product or stock status is a normal outcome (e.g. stock went back out before the job ran).
-			$level = $e instanceof \RuntimeException ? \WC_Log_Levels::INFO : \WC_Log_Levels::ERROR;
+			$level = $e instanceof ExpectedSkipException ? \WC_Log_Levels::INFO : \WC_Log_Levels::ERROR;
 			$this->logger->log(
 				$level,
 				sprintf( 'Background process for product %s terminated. Reason: %s', $product_id, $e->getMessage() ),
