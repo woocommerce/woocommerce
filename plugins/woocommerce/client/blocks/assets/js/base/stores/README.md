@@ -246,7 +246,7 @@ The `woocommerce` store holds the same product and variation data as `woocommerc
 
 -   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts` (declares the members and their type, `WooCommerceProductData`, re-exported from `woocommerce/index.ts`)
 -   PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
--   Tests: `plugins/woocommerce/tests/php/src/Blocks/SharedStores/ProductsStore.php` and `plugins/woocommerce/tests/e2e/tests/blocks/woocommerce-store/product-data.block_theme.spec.ts`
+-   Tests: `plugins/woocommerce/tests/php/src/Blocks/SharedStores/ProductsStore.php` (each loader seeds both stores with equal values, and adds no getters or selection to `woocommerce`)
 
 ### How it is populated
 
