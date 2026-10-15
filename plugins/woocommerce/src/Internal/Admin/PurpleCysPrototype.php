@@ -140,8 +140,11 @@ class PurpleCysPrototype {
 			if ( 'real' !== $this->get_settings()['state'] ) {
 				$this->save_setting( 'state', 'default' );
 			}
-		} else {
-			$this->save_setting( $key, $value );
+		} elseif ( $this->save_setting( $key, $value ) && 'state' === $key ) {
+			// Start each picked state with the task matching it: done only when Purple is (or is
+			// faked as) active. Clicking any action on the CYS screen then marks it done.
+			$is_active = 'real' === $value ? self::PURPLE_SLUG === get_stylesheet() : 'active' === $value;
+			update_option( self::CYS_TASK_OPTION, $is_active ? 'yes' : 'no' );
 		}
 
 		wp_safe_redirect( $this->get_cys_url( $args ) );

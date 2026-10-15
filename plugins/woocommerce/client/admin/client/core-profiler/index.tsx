@@ -13,6 +13,7 @@ import {
 	ErrorActorEvent,
 	fromCallback,
 	or,
+	and,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -1604,6 +1605,27 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						{
 							src: 'getPlugins',
 							onDone: [
+								{
+									// Prototype only: when there are no extensions to offer, still show the
+									// Purple step instead of finishing setup.
+									target: 'purpleTheme',
+									guard: and( [
+										'isPurpleThemeStepEnabled',
+										( {
+											event,
+										}: {
+											event: DoneActorEvent<
+												Extension[]
+											>;
+										} ) =>
+											event.output.length === 0 ||
+											event.output.every(
+												( plugin: Extension ) =>
+													plugin.is_activated
+											),
+									] ),
+									actions: 'handlePlugins',
+								},
 								{
 									target: 'pluginsSkipped',
 									guard: ( {
