@@ -49,6 +49,11 @@ class StockNotifications implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function register(): void {
+		// Core enqueues the active webhooks on `init` priority 0, before maybe_init_services()
+		// runs, so the webhook filters must be in place already. The controller checks the
+		// feature itself.
+		wc_get_container()->get( WebhooksController::class );
+
 		add_action( 'init', array( $this, 'maybe_init_services' ), 1 );
 		add_action( 'woocommerce_installed', array( $this, 'on_install_or_update' ) );
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'on_feature_enabled_changed' ), 10, 2 );
@@ -176,10 +181,8 @@ class StockNotifications implements RegisterHooksInterface {
 	public function register_data_stores( $data_stores ) {
 		// WC_Data_Store::__construct() re-applies this filter on every data store load,
 		// so re-check the feature: it can be switched off after this callback was
-		// attached at `init`. Read the option directly rather than through
-		// feature_is_enabled(): a data store can be loaded before `init`, and building
-		// the translated feature definitions that early is not safe.
-		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) && ! self::is_alpha_enabled() ) {
+		// attached at `init`.
+		if ( ! self::is_feature_option_enabled() ) {
 			return $data_stores;
 		}
 
@@ -201,6 +204,21 @@ class StockNotifications implements RegisterHooksInterface {
 	 */
 	private static function is_enabled(): bool {
 		return FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) || self::is_alpha_enabled();
+	}
+
+	/**
+	 * Check whether the feature is enabled, from the option alone.
+	 *
+	 * For callbacks that can run before `init` (data store loading, webhook enqueueing):
+	 * feature_is_enabled() builds the translated feature definitions, which is not safe
+	 * that early. Every other caller should use is_enabled().
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public static function is_feature_option_enabled(): bool {
+		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' ) || self::is_alpha_enabled();
 	}
 
 	/**
