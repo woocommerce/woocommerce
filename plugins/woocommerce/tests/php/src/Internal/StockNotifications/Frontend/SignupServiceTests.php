@@ -135,7 +135,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should skip double opt-in for a logged-in customer and activate the sign-up straight away.
 	 */
-	public function test_logged_in_signup_skips_double_opt_in() {
+	public function test_logged_in_signup_skips_double_opt_in(): void {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
 		$product = $this->create_out_of_stock_product();
@@ -155,7 +155,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should keep double opt-in for a logged-in customer when the filter opts them in.
 	 */
-	public function test_logged_in_signup_requires_double_opt_in_when_filtered() {
+	public function test_logged_in_signup_requires_double_opt_in_when_filtered(): void {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
 		$product = $this->create_out_of_stock_product();
@@ -186,7 +186,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not consult the logged-in filter for guest sign-ups.
 	 */
-	public function test_guest_signup_ignores_logged_in_double_opt_in_filter() {
+	public function test_guest_signup_ignores_logged_in_double_opt_in_filter(): void {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
 		$product = $this->create_out_of_stock_product();
@@ -214,7 +214,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should activate a pending guest signup when the same email later signs up as a logged-in user with double opt-in enabled.
 	 */
-	public function test_pending_guest_signup_activated_for_logged_in_user_with_double_opt_in() {
+	public function test_pending_guest_signup_activated_for_logged_in_user_with_double_opt_in(): void {
 		$this->disable_signup_rate_limiting();
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
@@ -233,6 +233,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$this->assertSame( SignupService::SIGNUP_SUCCESS, $user_result->get_code() );
 		$this->assertSame( $guest_result->get_notification()->get_id(), $user_result->get_notification()->get_id() );
 		$this->assertSame( NotificationStatus::ACTIVE, $user_result->get_notification()->get_status() );
+		$this->assertSame( $user_id, $user_result->get_notification()->get_user_id() );
 	}
 
 	/**

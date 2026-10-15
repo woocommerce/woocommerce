@@ -170,6 +170,7 @@ class SignupService {
 				}
 
 				// Double opt-in is not required for this customer, so activate the pending notification instead of creating one.
+				$notification->set_user_id( $user_id );
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$saved = $notification->save();
 				if ( \is_wp_error( $saved ) || ! $saved ) {
