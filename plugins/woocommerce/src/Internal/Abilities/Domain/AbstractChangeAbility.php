@@ -57,6 +57,16 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	abstract public static function prepare_response( $subject ): array;
 
 	/**
+	 * Whether the loaded object takes staged changes. The default accepts every object.
+	 *
+	 * @param \WC_Data $subject Loaded object.
+	 * @return bool
+	 */
+	public static function supports_staged_changes( $subject ): bool {
+		return true;
+	}
+
+	/**
 	 * Run the change.
 	 *
 	 * @param array $input Ability input.

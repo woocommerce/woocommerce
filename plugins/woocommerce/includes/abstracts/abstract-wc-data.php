@@ -850,6 +850,29 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Take changes in memory, keyed by prop name. Nothing is saved.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $changes Changes keyed by prop name.
+	 * @return bool|WP_Error True, or a WP_Error that refuses the changes.
+	 */
+	public function stage_changes( array $changes ) {
+		return $this->set_props( $changes );
+	}
+
+	/**
+	 * Save the staged changes in one write.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int Object ID.
+	 */
+	public function commit_changes() {
+		return $this->save();
+	}
+
+	/**
 	 * Set a collection of props in one go, collect any errors, and return the result.
 	 * Only sets using public methods.
 	 *

@@ -100,10 +100,21 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $subject;
 		}
 
+		$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
+		if ( ! $this->supports_staged_changes( $subject ) ) {
+			if ( ! empty( $extensions ) ) {
+				return new \WP_Error(
+					'woocommerce_ability_extensions_unsupported',
+					__( 'This object does not take extension fields yet.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+			return $this->execute_unstaged( $input );
+		}
+
 		$updates = array();
 		if ( AbilityExtensions::is_enabled() ) {
-			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-			$updates    = $this->prepare_fields( $extensions );
+			$updates = $this->prepare_fields( $extensions );
 			if ( is_wp_error( $updates ) ) {
 				return $updates;
 			}
@@ -125,6 +136,38 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		return $this->prepare_response( $subject );
+	}
+
+	/**
+	 * Whether the loaded object takes staged changes. A Core object does. A
+	 * class that extends one takes them once it declares SupportsStagedChanges.
+	 * The default accepts every object.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Data $subject Loaded object.
+	 * @return bool
+	 */
+	protected function supports_staged_changes( $subject ): bool {
+		return true;
+	}
+
+	/**
+	 * Run the change for an object that does not take staged changes. The
+	 * default refuses it. Override it to run the change the way it ran before
+	 * the ability was actionable.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $input Ability input, with no `extensions`.
+	 * @return mixed
+	 */
+	protected function execute_unstaged( array $input ) {
+		return new \WP_Error(
+			'woocommerce_ability_object_unsupported',
+			__( 'This object cannot be changed by this ability.', 'woocommerce' ),
+			array( 'status' => 400 )
+		);
 	}
 
 	/**

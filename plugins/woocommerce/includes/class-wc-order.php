@@ -426,6 +426,45 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Take changes in memory. A `status` change is a manual one, with the
+	 * `note` change as its note, and woocommerce_order_edit_status waits for
+	 * commit_changes(). Nothing is saved.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $changes Changes keyed by prop name, plus `note` for a status change.
+	 * @return bool|WP_Error True, or a WP_Error that refuses the changes.
+	 */
+	public function stage_changes( array $changes ) {
+		$note = isset( $changes['note'] ) ? (string) $changes['note'] : '';
+		unset( $changes['note'] );
+
+		$result = parent::stage_changes( $changes );
+
+		if ( isset( $changes['status'] ) && ! empty( $this->status_transition ) ) {
+			$this->status_transition['note']   = $note;
+			$this->status_transition['manual'] = true;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Fire woocommerce_order_edit_status for a staged manual status change, and save.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int Order ID.
+	 */
+	public function commit_changes() {
+		if ( ! empty( $this->status_transition['manual'] ) && ! empty( $this->status_transition['to'] ) ) {
+			do_action( 'woocommerce_order_edit_status', $this->get_id(), $this->status_transition['to'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		}
+
+		return parent::commit_changes();
+	}
+
+	/**
 	 * Handle the status transition.
 	 *
 	 * @return void

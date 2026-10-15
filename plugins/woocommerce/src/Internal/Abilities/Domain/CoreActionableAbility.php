@@ -78,6 +78,26 @@ final class CoreActionableAbility extends ActionableAbility {
 	}
 
 	/**
+	 * Run the definition the way it runs with the feature off.
+	 *
+	 * @param array $input Ability input.
+	 * @return mixed
+	 */
+	protected function execute_unstaged( array $input ) {
+		return $this->definition()::execute( $input );
+	}
+
+	/**
+	 * Ask the definition whether the object takes staged changes.
+	 *
+	 * @param \WC_Data $subject Loaded object.
+	 * @return bool
+	 */
+	protected function supports_staged_changes( $subject ): bool {
+		return $this->definition()::supports_staged_changes( $subject );
+	}
+
+	/**
 	 * Definition class of the ability.
 	 *
 	 * @return class-string<AbstractChangeAbility>

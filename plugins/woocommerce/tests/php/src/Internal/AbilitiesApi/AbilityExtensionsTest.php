@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
@@ -662,6 +663,112 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the update_status() path of an order class that does not declare SupportsStagedChanges, and refuse extension fields for it.
+	 */
+	public function test_an_order_class_without_the_interface_keeps_update_status(): void {
+		$order = \WC_Helper_Order::create_order();
+		$this->use_order_class( LegacyStatusOrder::class );
+		LegacyStatusOrder::$calls = array();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'tag' => 'vip' ) ),
+			)
+		);
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_ability_extensions_unsupported', $refused->get_data()['code'] );
+		$this->assertSame( array(), LegacyStatusOrder::$calls );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+				'note'   => 'Done',
+			)
+		);
+		$this->assertSame( array( array( 'completed', 'Done', true ) ), LegacyStatusOrder::$calls );
+		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should keep the update_status() path of an order class that overrides nothing but does not declare SupportsStagedChanges.
+	 */
+	public function test_an_order_class_without_the_interface_is_not_assumed_to_take_staged_changes(): void {
+		$order = \WC_Helper_Order::create_order();
+		$this->use_order_class( get_class( new class() extends \WC_Order {} ) );
+		$edits = 0;
+		add_action(
+			'woocommerce_order_edit_status',
+			static function () use ( &$edits ) {
+				++$edits;
+			}
+		);
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'tag' => 'vip' ) ),
+			)
+		);
+		$this->assertSame( 'woocommerce_ability_extensions_unsupported', $refused->get_data()['code'] );
+		$this->assertSame( 0, $edits );
+
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+		$this->assertSame( 1, $edits );
+	}
+
+	/**
+	 * @testdox Should stage and commit the change of an order class that declares SupportsStagedChanges, without calling its update_status().
+	 */
+	public function test_an_order_class_with_the_interface_takes_the_staged_change(): void {
+		$order = \WC_Helper_Order::create_order();
+		$this->use_order_class( StagedStatusOrder::class );
+		StagedStatusOrder::$calls = array();
+
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'tag' => 'vip' ) ),
+			)
+		);
+
+		$saved_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'completed', $saved_order->get_status() );
+		$this->assertSame( 'vip', $saved_order->get_meta( '_test_tag' ) );
+		$this->assertSame( array( 'stage_changes:completed', 'commit_changes' ), StagedStatusOrder::$calls );
+	}
+
+	/**
+	 * Load every shop order as the given class for the rest of the test.
+	 *
+	 * @param string $class_name Order class.
+	 */
+	private function use_order_class( string $class_name ): void {
+		add_filter(
+			'woocommerce_order_class',
+			static function () use ( $class_name ) {
+				return $class_name;
+			}
+		);
+	}
+
+	/**
 	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {
@@ -734,7 +841,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call WC_Order::update_status() with the feature off, and skip it with the feature on by design.
+	 * @testdox Should call update_status() with the feature off and on, for an order class that overrides it and does not declare SupportsStagedChanges.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
 		$calls        = 0;
@@ -779,7 +886,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$calls = $order_class::$calls;
-			$this->assertSame( $enabled ? 0 : 1, $calls, $enabled ? 'feature on' : 'feature off' );
+			$this->assertSame( 1, $calls, $enabled ? 'feature on' : 'feature off' );
 			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 		}
 

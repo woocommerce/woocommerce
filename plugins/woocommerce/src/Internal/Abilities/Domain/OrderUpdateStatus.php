@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -117,33 +118,50 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Change the order status in memory, as a manual change. The
-	 * woocommerce_order_edit_status action that a manual set_status() fires is
-	 * held back until save(), so a change that an extension refuses fires no action.
+	 * Order classes of Core that take staged changes.
+	 *
+	 * @var string[]
+	 */
+	private const CORE_ORDER_CLASSES = array(
+		\WC_Order::class,
+		\Automattic\WooCommerce\Admin\Overrides\Order::class,
+	);
+
+	/**
+	 * Whether the order takes staged changes. The order classes of Core do. Any
+	 * other class does once it declares SupportsStagedChanges. Until then, it
+	 * keeps its update_status() path, where a class keeps its own rules.
+	 *
+	 * @param \WC_Order $subject Loaded order.
+	 * @return bool
+	 */
+	public static function supports_staged_changes( $subject ): bool {
+		return $subject instanceof SupportsStagedChanges || in_array( get_class( $subject ), self::CORE_ORDER_CLASSES, true );
+	}
+
+	/**
+	 * Stage the status change in memory, as a manual change. The order fires
+	 * woocommerce_order_edit_status when it commits, so a change that an
+	 * extension refuses fires no action.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
 	 */
 	public static function change( $subject, array $input ) {
-		global $wp_filter;
-
 		$status = self::get_new_status( $subject, $input );
 		if ( is_wp_error( $status ) ) {
 			return $status;
 		}
 
-		$listeners = $wp_filter['woocommerce_order_edit_status'] ?? null;
-		unset( $wp_filter['woocommerce_order_edit_status'] );
-		try {
-			$subject->set_status( $status, self::get_note( $input ), true );
-		} finally {
-			if ( null !== $listeners ) {
-				$wp_filter['woocommerce_order_edit_status'] = $listeners; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			}
-		}
+		$staged = $subject->stage_changes(
+			array(
+				'status' => $status,
+				'note'   => self::get_note( $input ),
+			)
+		);
 
-		return null;
+		return is_wp_error( $staged ) ? $staged : null;
 	}
 
 	/**
@@ -197,17 +215,16 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Fire woocommerce_order_edit_status for the accepted change, and save the
-	 * order as WC_Order::update_status() does.
+	 * Commit the staged change, which saves the order and fires
+	 * woocommerce_order_edit_status, with the error handling of
+	 * WC_Order::update_status().
 	 *
 	 * @param \WC_Order $subject Changed order.
 	 * @return null|\WP_Error
 	 */
 	public static function save( $subject ) {
-		do_action( 'woocommerce_order_edit_status', $subject->get_id(), $subject->get_status() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-
 		try {
-			$subject->save();
+			$subject->commit_changes();
 		} catch ( \Exception $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Error updating status for order #%d', $subject->get_id() ),
