@@ -141,6 +141,10 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 *           [true, false, "restock-alerts"]
 	 *           [false, true, "stock-notifications"]
 	 *           [true, true, "stock-notifications"]
+	 *           [false, false, ""]
+	 *           [true, false, ""]
+	 *           [false, true, ""]
+	 *           [true, true, ""]
 	 *
 	 * @param bool   $verified Whether to render the confirmation email.
 	 * @param bool   $guest Whether the signup belongs to a guest.
@@ -148,6 +152,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint ): void {
 		update_option( MyAccountEndpoint::ENDPOINT_OPTION, $endpoint );
+		new MyAccountEndpoint();
 		WC()->query->init_query_vars();
 		$notification = $this->build_notification();
 		if ( ! $guest ) {
@@ -165,14 +170,17 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
 		$this->assertSame( 'email', $query['utm_medium'] );
-		if ( $guest ) {
+		if ( $guest || '' === $endpoint ) {
 			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
-			$this->assertTrue( wp_verify_fast_hash( $query['email_link_action_key'], $notification->get_meta( 'unsubscribe_action_key' ) ), 'The guest link must contain the persisted unsubscribe key.' );
+			$this->assertTrue( ( new Notification( $notification->get_id() ) )->check_unsubscribe_key( $query['email_link_action_key'] ), 'The unsubscribe link must contain the persisted unsubscribe key.' );
 			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
+			$this->assertStringContainsString( 'to unsubscribe.', $html );
+			$this->assertStringNotContainsString( 'to log in to your account.', $html );
 		} else {
 			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
 			$this->assertArrayNotHasKey( 'email_link_action', $query );
 			$this->assertArrayNotHasKey( 'email_link_action_key', $query );
+			$this->assertStringContainsString( 'to log in to your account.', $html );
 		}
 	}
 
