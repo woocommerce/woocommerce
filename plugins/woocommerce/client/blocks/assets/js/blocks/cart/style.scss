@@ -50,9 +50,17 @@
 		min-width: 33%;
 	}
 	.wc-block-components-product-price,
-	.wc-block-components-product-metadata,
+	.wc-block-components-product-metadata {
+		@include skeleton-animation();
+	}
 	.wc-block-components-quantity-selector {
 		@include skeleton-animation();
+
+		// The quantity controls (input and +/- buttons) are always rendered,
+		// so hide them to show a clean, aligned placeholder box.
+		> * {
+			visibility: hidden;
+		}
 	}
 	.wc-block-components-product-name {
 		@include skeleton-animation();
@@ -66,6 +74,15 @@
 	}
 	.wc-block-cart-item__remove-link {
 		visibility: hidden;
+	}
+	.wc-block-components-sale-badge {
+		@include skeleton-animation();
+		@include force-content();
+
+		// Clip the badge label so only the placeholder pill is shown.
+		min-width: 3em;
+		text-indent: 100%;
+		white-space: nowrap;
 	}
 	.wc-block-cart-item__image > a {
 		@include skeleton-animation();
