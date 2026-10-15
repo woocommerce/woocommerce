@@ -51,10 +51,10 @@
 	background: $white;
 }
 
-// Both images use the Purple preview's proportions, so the two boxes line up.
+// 4:3, like the Purple preview and theme screenshots, so both show whole and the boxes line up.
 .woocommerce-profiler-purple-theme__image {
 	position: relative;
-	aspect-ratio: 872 / 582;
+	aspect-ratio: 4 / 3;
 	border-bottom: 1px solid $gray-200;
 	background: $gray-100;
 
