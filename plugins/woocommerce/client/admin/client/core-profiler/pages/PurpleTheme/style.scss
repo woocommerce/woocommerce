@@ -15,8 +15,9 @@
 		}
 	}
 
+	// Wide enough for the subtitle to fit on one line instead of two short balanced ones.
 	.woocommerce-profiler-heading {
-		max-width: 615px;
+		max-width: 760px;
 		margin: 58px 0 0 0;
 	}
 
@@ -112,13 +113,6 @@
 	gap: $gap-smaller;
 	margin-block-start: auto;
 	padding-block-start: $gap;
-
-	.woocommerce-profiler-purple-theme__button {
-		justify-content: center;
-		height: 40px;
-		padding-inline: $gap-large;
-		font-size: 14px;
-	}
 }
 
 .woocommerce-profiler-purple-theme__note {

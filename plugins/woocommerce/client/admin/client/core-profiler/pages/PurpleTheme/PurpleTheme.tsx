@@ -114,6 +114,7 @@ export const PurpleTheme = ( {
 						<Button
 							className="woocommerce-profiler-purple-theme__button"
 							variant="primary"
+							__next40pxDefaultSize
 							onClick={ () => complete( true ) }
 						>
 							{ __( 'Install Purple', 'woocommerce' ) }
@@ -137,6 +138,7 @@ export const PurpleTheme = ( {
 						<Button
 							className="woocommerce-profiler-purple-theme__button"
 							variant="secondary"
+							__next40pxDefaultSize
 							onClick={ () => complete( false ) }
 						>
 							{ __( 'Keep current theme', 'woocommerce' ) }
