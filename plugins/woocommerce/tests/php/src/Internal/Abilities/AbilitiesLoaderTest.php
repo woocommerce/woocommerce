@@ -40,6 +40,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
+		'woocommerce/order-notes-query',
 	);
 
 	/**
@@ -85,7 +86,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $original_cot_state = null;
 
 	/**
-	 * Whether HPOS/COT tables were set up by the current test.
+	 * Whether the current test uses the permanent HPOS/COT tables.
 	 *
 	 * @var bool
 	 */
@@ -98,6 +99,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
 		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::setup_cot_tables();
 	}
 
 	/**
@@ -249,6 +251,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-add-note'      => array(
 				'readonly'    => false,
 				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
 				'destructive' => false,
 			),
 		);
@@ -917,6 +924,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'note' => 'denied',
 				),
 			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array(
+					'id' => 1,
+				),
+			),
 		);
 	}
 
@@ -1285,6 +1298,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
+			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array( 'id' => -123 ),
 			),
 		);
 	}
@@ -2096,6 +2113,56 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list every note of an order, newest first.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_notes_query_lists_every_note( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$newer_note_id = $order->add_order_note( 'Internal note.' );
+		$order->add_order_note( 'Customer note.', true );
+
+		// A note with a higher ID but an older date must sort after the newer one.
+		wp_update_comment(
+			array(
+				'comment_ID'       => $newer_note_id,
+				'comment_date'     => '2030-01-01 00:00:00',
+				'comment_date_gmt' => '2030-01-01 00:00:00',
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+
+		$by_content = array_column( $result['notes'], 'customer_note', 'note' );
+		$this->assertTrue( $by_content['Customer note.'] );
+		$this->assertFalse( $by_content['Internal note.'] );
+
+		$dates_by_content = array_column( $result['notes'], 'date_created', 'note' );
+		$this->assertSame( wc_rest_prepare_date_response( '2030-01-01 00:00:00', false ), $dates_by_content['Internal note.'] );
+
+		$this->assertContainsOnly( 'int', array_column( $result['notes'], 'id' ) );
+		$this->assertSame( $newer_note_id, $result['notes'][0]['id'], 'Notes should be newest first by creation date.' );
+	}
+
+	/**
+	 * @testdox Should return a not-found error when order-notes-query receives an unknown order ID.
+	 */
+	public function test_order_notes_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should exclude checkout-draft orders from default order queries.
 	 *
 	 * @dataProvider provider_order_storage_engines
@@ -2643,9 +2710,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		if ( $hpos_enabled && ! $this->cot_setup_for_test ) {
-			$this->setup_cot();
+			// Keep the permanent HPOS tables outside the per-test transaction.
+			remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 			$this->cot_setup_for_test = true;
-			return;
 		}
 
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
