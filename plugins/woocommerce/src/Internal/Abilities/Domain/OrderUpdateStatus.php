@@ -89,7 +89,8 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 	 * Change the status with WC_Order::update_status(), as a manual change,
 	 * exactly as before the feature. An order class that overrides it keeps
 	 * its own rules. With the feature on, the extension fields are already on
-	 * the order, and its one save writes them too.
+	 * the order, and its one save writes them too. An order class that throws
+	 * to refuse the change gets a 400 with a fixed message.
 	 *
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
@@ -101,7 +102,17 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			return $status;
 		}
 
-		if ( ! $subject->update_status( $status, self::get_note( $input ), true ) ) {
+		try {
+			$updated = $subject->update_status( $status, self::get_note( $input ), true );
+		} catch ( \Exception $e ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'The order refused this status change.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! $updated ) {
 			return new \WP_Error(
 				'woocommerce_order_status_update_failed',
 				__( 'Failed to update order status.', 'woocommerce' ),

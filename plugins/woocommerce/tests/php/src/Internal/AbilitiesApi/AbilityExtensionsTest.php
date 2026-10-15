@@ -798,6 +798,51 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a 400 with a fixed message when the order class throws in update_status(), with the feature off and on.
+	 */
+	public function test_an_order_class_that_throws_gets_a_400(): void {
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Refuse every status change, as WC_Subscription does for a change it does not allow.
+				 *
+				 * @param string $new_status    Status to change the order to.
+				 * @param string $note          Optional note.
+				 * @param bool   $manual_update Whether a person made the change.
+				 * @throws \Exception Always.
+				 */
+				public function update_status( $new_status, $note = '', $manual_update = false ) {
+					throw new \Exception( 'Internal refusal text.' );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+
+		foreach ( array( false, true ) as $enabled ) {
+			$this->set_feature( $enabled );
+			$this->reset_registries();
+			$order = \WC_Helper_Order::create_order();
+
+			$response = $this->run_ability_response(
+				'woocommerce/order-update-status',
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'completed',
+				)
+			);
+
+			$label = $enabled ? 'feature on' : 'feature off';
+			$this->assertSame( 400, $response->get_status(), $label );
+			$this->assertSame( 'woocommerce_order_status_update_failed', $response->get_data()['code'], $label );
+			$this->assertStringNotContainsString( 'Internal refusal text.', $response->get_data()['message'], $label );
+			$this->assertNotSame( 'completed', wc_get_order( $order->get_id() )->get_status(), $label );
+		}
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+	}
+
+	/**
 	 * @testdox Should accept null for a field with an enum, to delete its value, and still refuse a value outside the enum.
 	 */
 	public function test_a_null_value_deletes_the_value_of_an_enum_field(): void {
