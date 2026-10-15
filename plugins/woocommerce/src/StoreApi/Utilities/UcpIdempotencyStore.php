@@ -36,6 +36,11 @@ class UcpIdempotencyStore {
 	const STALE_CLAIM_SECONDS = 300;
 
 	/**
+	 * Rows the cleanup sweep deletes per statement.
+	 */
+	const CLEANUP_BATCH_SIZE = 100;
+
+	/**
 	 * Claim a key for processing.
 	 *
 	 * Three outcomes: an `INSERT IGNORE` that inserts nothing cannot say by itself whether the
@@ -221,16 +226,33 @@ class UcpIdempotencyStore {
 			$retention = DAY_IN_SECONDS;
 		}
 
-		self::write(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys
-					WHERE ( state = %s AND created_at < %s )
-						OR ( state = %s AND created_at < %s )",
-				self::STATE_COMPLETED,
-				gmdate( 'Y-m-d H:i:s', time() - $retention ),
-				self::STATE_IN_PROGRESS,
-				gmdate( 'Y-m-d H:i:s', time() - self::STALE_CLAIM_SECONDS )
-			)
-		);
+		$completed_cutoff = gmdate( 'Y-m-d H:i:s', time() - $retention );
+		$claim_cutoff     = gmdate( 'Y-m-d H:i:s', time() - self::STALE_CLAIM_SECONDS );
+
+		// Deleted in batches, after WC_Session_Handler::cleanup_sessions(): a row here holds a
+		// whole stored response, so a single unbounded DELETE over a busy day's records would
+		// hold locks and generate replication lag far longer than a sweep needs to.
+		do {
+			$written = self::write(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys
+						WHERE ( state = %s AND created_at < %s )
+							OR ( state = %s AND created_at < %s )
+						ORDER BY created_at
+						LIMIT %d",
+					self::STATE_COMPLETED,
+					$completed_cutoff,
+					self::STATE_IN_PROGRESS,
+					$claim_cutoff,
+					self::CLEANUP_BATCH_SIZE
+				)
+			);
+
+			if ( ! $written ) {
+				return;
+			}
+
+			$deleted = (int) $wpdb->rows_affected;
+		} while ( self::CLEANUP_BATCH_SIZE === $deleted );
 	}
 }
