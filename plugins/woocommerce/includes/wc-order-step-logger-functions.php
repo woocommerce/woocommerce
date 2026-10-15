@@ -73,7 +73,7 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			$context = array_merge( extract_order_safe_data( $order ), $context );
 			unset( $context['order_object'] ); // This is super-important to avoid logging sensitive data.
 			// Save only the meta: a full save fires woocommerce_update_order, and with it the order.updated webhook.
-			if ( $order->get_id() > 0 ) {
+			if ( $order->get_id() > 0 && $order->get_meta( '_debug_log_source' ) !== $context['source'] ) {
 				$order->add_meta_data( '_debug_log_source', $context['source'], true );
 				$order->save_meta_data();
 			}
