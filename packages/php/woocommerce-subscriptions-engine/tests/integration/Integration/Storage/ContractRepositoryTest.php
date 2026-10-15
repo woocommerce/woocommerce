@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 use EngineIntegrationTestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -2386,28 +2385,31 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A creation key is unique per extension; a duplicate carries the existing contract id.
+	 * @testdox A creation key is unique per extension; a duplicate inserts nothing and returns null.
 	 */
 	public function test_creation_key_is_unique_per_extension(): void {
 		global $wpdb;
 
-		$first = $this->sut->insert( $this->keyed_contract( 'lite', 'order:42' ) );
-
-		try {
-			$this->sut->insert( $this->keyed_contract( 'lite', 'order:42' ) );
-			$this->fail( 'Expected a duplicate creation key to be refused.' );
-		} catch ( DuplicateContractException $e ) {
-			$this->assertSame( $first, $e->get_existing_contract_id() );
-			$this->assertSame( 'order:42', $e->get_creation_key() );
-		}
+		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:42' ), 'checkout' ) );
+		$this->assertNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:42' ), 'checkout' ) );
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s AND extension_slug = %s", 'order:42', 'lite' ) ) );
 
-		$this->assertGreaterThan( 0, $this->sut->insert( $this->keyed_contract( 'other-ext', 'order:42' ) ), 'Another extension may use the same key.' );
-		$this->assertGreaterThan( 0, $this->sut->insert( $this->keyed_contract( 'lite', null ) ) );
-		$this->assertGreaterThan( 0, $this->sut->insert( $this->keyed_contract( 'lite', null ) ), 'Null keys never collide.' );
+		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
+		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ) );
+		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
+	}
+
+	/**
+	 * @testdox An unlocked insert of a keyed contract whose key is taken throws instead of returning no id.
+	 */
+	public function test_an_unlocked_insert_with_a_taken_key_throws(): void {
+		$this->sut->insert( $this->keyed_contract( 'lite', 'order:43' ) );
+
+		$this->expectException( \RuntimeException::class );
+		$this->sut->insert( $this->keyed_contract( 'lite', 'order:43' ) );
 	}
 
 	/**
@@ -2418,6 +2420,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock     = $this->sut->insert_locked( $contract, 'checkout' );
 		$id       = (int) $contract->get_id();
 
+		$this->assertNotNull( $lock );
 		$this->assertSame( $id, $lock->get_contract_id() );
 		$this->assertSame( 'checkout', $this->sut->lock_holder( $id )['operation'] );
 		$this->assertCount( 1, $this->item_ids( $id ), 'Items are written under the lock.' );
@@ -2434,18 +2437,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A locked insert with a taken creation key throws and leaves no lock behind.
+	 * @testdox A locked insert with a taken creation key returns null and locks nothing.
 	 */
-	public function test_a_locked_insert_with_a_duplicate_key_throws(): void {
+	public function test_a_locked_insert_with_a_duplicate_key_returns_null(): void {
 		$first = $this->sut->insert( $this->keyed_contract( 'lite', 'order:7' ) );
 
-		try {
-			$this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' );
-			$this->fail( 'Expected a duplicate creation key to be refused.' );
-		} catch ( DuplicateContractException $e ) {
-			$this->assertSame( $first, $e->get_existing_contract_id() );
-		}
-		$this->assertFalse( $this->sut->lock_holder( $first )['live'] );
+		$this->assertNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' ) );
+		$this->assertNull( $this->sut->lock_holder( $first )['operation'] );
 	}
 
 	/**

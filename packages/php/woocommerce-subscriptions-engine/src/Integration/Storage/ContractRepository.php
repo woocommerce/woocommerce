@@ -27,7 +27,6 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -71,16 +70,16 @@ final class ContractRepository {
 
 	/**
 	 * Insert a new, unlocked contract and its items and addresses (parent row first). When a
-	 * child insert fails, the new contract is deleted again, so a retry is not blocked by its
-	 * own creation key.
+	 * child insert fails, the new contract is deleted again.
 	 *
-	 * @param Contract $contract Contract to insert.
+	 * @param Contract $contract Contract to insert, without a creation key.
 	 * @return int The new contract id.
-	 * @throws DuplicateContractException If the extension already holds the contract's creation key.
 	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
 	public function insert( Contract $contract ): int {
-		$this->insert_row( $contract, null );
+		if ( ! $this->insert_row( $contract, null ) ) {
+			throw new \RuntimeException( 'Failed to insert contract: its creation key is taken.' );
+		}
 
 		$id = (int) $contract->get_id();
 		$this->insert_children_or_discard( $id, $contract );
@@ -91,26 +90,28 @@ final class ContractRepository {
 	/**
 	 * Insert a new contract locked from birth: the row INSERT stamps the lock, then items and
 	 * addresses follow under it. When a child insert fails, the new contract (and its lock) is
-	 * deleted again.
+	 * deleted again, so a retry is not blocked by its own creation key.
 	 *
 	 * @param Contract $contract  Contract to insert.
 	 * @param string   $operation Operation label, 1-64 characters.
-	 * @return ContractLock The lock on the new contract.
-	 * @throws DuplicateContractException If the extension already holds the contract's creation key.
+	 * @return ContractLock|null The lock on the new contract; null when the extension already holds its creation key.
 	 * @throws \InvalidArgumentException If `$operation` is empty or longer than 64 characters.
 	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
-	public function insert_locked( Contract $contract, string $operation ): ContractLock {
+	public function insert_locked( Contract $contract, string $operation ): ?ContractLock {
 		self::assert_operation( $operation );
 
-		$token = bin2hex( random_bytes( 16 ) );
-		$this->insert_row(
+		$token    = bin2hex( random_bytes( 16 ) );
+		$inserted = $this->insert_row(
 			$contract,
 			array(
 				'token'     => $token,
 				'operation' => $operation,
 			)
 		);
+		if ( ! $inserted ) {
+			return null;
+		}
 
 		$id   = (int) $contract->get_id();
 		$lock = self::new_lock( $id, $operation, $token );
@@ -145,10 +146,10 @@ final class ContractRepository {
 	 *
 	 * @param Contract                                     $contract Contract to insert.
 	 * @param array{token: string, operation: string}|null $lock     Lock to stamp, or null.
-	 * @throws DuplicateContractException If the `(extension_slug, creation_key)` pair is taken.
+	 * @return bool False when the `(extension_slug, creation_key)` pair is taken (nothing inserted).
 	 * @throws \RuntimeException If the insert fails for any other reason.
 	 */
-	private function insert_row( Contract $contract, ?array $lock ): void {
+	private function insert_row( Contract $contract, ?array $lock ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -196,36 +197,17 @@ final class ContractRepository {
 		}
 
 		if ( false === $inserted ) {
-			$db_error     = $wpdb->last_error;
-			$creation_key = $contract->get_creation_key();
-			if ( null !== $creation_key && false !== stripos( $db_error, 'Duplicate entry' ) && false !== stripos( $db_error, "creation'" ) ) {
-				$existing_id = $this->find_id_by_creation_key( (string) $contract->get_extension_slug(), $creation_key );
-				if ( null !== $existing_id ) {
-					throw new DuplicateContractException( $existing_id, $creation_key ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception escapes nothing it outputs.
-				}
+			$db_error = $wpdb->last_error;
+			// Only the `creation` UNIQUE index can reject a new row as a duplicate.
+			if ( false !== stripos( $db_error, 'Duplicate entry' ) && false !== stripos( $db_error, "creation'" ) ) {
+				return false;
 			}
 			throw new \RuntimeException( esc_html( 'Failed to insert contract. ' . $db_error ) );
 		}
 
 		$contract->set_id( (int) $wpdb->insert_id );
-	}
 
-	/**
-	 * The id of the extension's contract holding `$creation_key`, or null. Shapes the
-	 * duplicate error only; it may lag on a replica.
-	 *
-	 * @param string $extension_slug Owning extension slug.
-	 * @param string $creation_key   Creation key.
-	 */
-	private function find_id_by_creation_key( string $extension_slug, string $creation_key ): ?int {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$id = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE extension_slug = %s AND creation_key = %s", $extension_slug, $creation_key ) );
-
-		return null === $id ? null : Coercion::coerce_int( $id );
+		return true;
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.

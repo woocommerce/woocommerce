@@ -17,7 +17,6 @@ use InvalidArgumentException;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
@@ -1276,27 +1275,25 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox lock() conflicts carry the holder's operation and expiry; an unknown contract and bad labels are invalid.
+	 * @testdox lock() returns null while another operation holds the lock and for an unknown contract; bad labels are invalid.
 	 */
-	public function test_lock_conflict_and_validation(): void {
+	public function test_lock_lost_race_and_validation(): void {
 		$id = $this->contract_with_currency();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		$lock = Contracts::lock( $id, 'hold' );
+		$lock = $this->take_lock( $id, 'hold' );
 		$this->assertSame( $id, $lock->get_contract_id() );
 
-		try {
-			Contracts::lock( $id, 'cancel' );
-			$this->fail( 'Expected a conflict.' );
-		} catch ( ContractLockedException $e ) {
-			$this->assertSame( $id, $e->get_contract_id() );
-			$this->assertSame( 'hold', $e->get_operation() );
-			$this->assertNotNull( $e->get_locked_until() );
-			$this->assertSame( '2035-01-01 00:10:00', $e->get_locked_until()->format( 'Y-m-d H:i:s' ) );
-		}
+		$this->assertNull( Contracts::lock( $id, 'cancel' ), 'A held lock is a lost race.' );
+		$this->assertNull( Contracts::lock( 999999, 'hold' ), 'An unknown contract has no lock to take.' );
 
-		foreach ( array( array( 999999, 'hold' ), array( $id, '' ), array( $id, str_repeat( 'x', 65 ) ) ) as $call ) {
+		$lock_state = $this->view( $id )->get_lock_state();
+		$this->assertNotNull( $lock_state );
+		$this->assertSame( 'hold', $lock_state['operation'] );
+		$this->assertSame( '2035-01-01 00:10:00', $lock_state['locked_until']->format( 'Y-m-d H:i:s' ) );
+
+		foreach ( array( '', str_repeat( 'x', 65 ) ) as $label ) {
 			try {
-				Contracts::lock( ...$call );
+				Contracts::lock( $id, $label );
 				$this->fail( 'Expected an InvalidArgumentException.' );
 			} catch ( InvalidArgumentException $e ) {
 				$this->assertStringNotContainsString( 'lock_token', $e->getMessage() );
@@ -1305,10 +1302,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox create_locked() returns a lock on the new contract; writes with it land, others are refused until release.
+	 * @testdox create_locked() returns the new contract and its lock; writes with it land, others are refused until release.
 	 */
 	public function test_create_locked(): void {
-		$lock = Contracts::create_locked(
+		$created = Contracts::create_locked(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
@@ -1316,8 +1313,12 @@ class ContractsTest extends EngineIntegrationTestCase {
 			),
 			'checkout'
 		);
-		$id   = $lock->get_contract_id();
+		$this->assertNotNull( $created );
+		$lock = $created['lock'];
+		$id   = $created['contract']->get_id();
 
+		$this->assertSame( $id, $lock->get_contract_id() );
+		$this->assertSame( 'USD', $created['contract']->get_currency() );
 		$this->assertSame( ContractStatus::DRAFT, $this->view( $id )->get_status() );
 		$this->assertInstanceOf( CycleView::class, Contracts::add_cycle( $id, $this->cycle_args(), $lock ) );
 		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ), $lock ) );
@@ -1334,31 +1335,48 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A duplicate creation key is refused through create() and create_locked(), carrying the first contract.
+	 * @testdox A duplicate creation key is a lost race: create_locked() returns null and writes nothing; an invalid key throws.
 	 */
-	public function test_a_duplicate_creation_key_is_refused(): void {
-		$args  = array(
+	public function test_a_duplicate_creation_key_returns_null(): void {
+		global $wpdb;
+
+		$args    = array(
 			'extension_slug' => self::EXTENSION_SLUG,
 			'creation_key'   => 'order:9',
 		);
-		$first = Contracts::create( $args )->get_id();
+		$created = Contracts::create_locked( $args, 'checkout' );
+		$this->assertNotNull( $created );
 
-		foreach ( array( 'create', 'create_locked' ) as $method ) {
-			try {
-				'create' === $method ? Contracts::create( $args ) : Contracts::create_locked( $args, 'checkout' );
-				$this->fail( "Expected {$method}() to refuse the duplicate." );
-			} catch ( DuplicateContractException $e ) {
-				$this->assertSame( $first, $e->get_existing_contract_id() );
-			}
-		}
+		$this->assertNull( Contracts::create_locked( $args, 'checkout' ) );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s", 'order:9' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$this->expectException( InvalidArgumentException::class );
-		Contracts::create(
+		Contracts::create_locked(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'creation_key'   => str_repeat( 'k', 101 ),
-			)
+			),
+			'checkout'
 		);
+	}
+
+	/**
+	 * @testdox create() does not take a creation key: it is an unknown key, noticed and ignored.
+	 */
+	public function test_create_ignores_a_creation_key(): void {
+		global $wpdb;
+
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$args = array(
+			'extension_slug' => self::EXTENSION_SLUG,
+			'creation_key'   => 'order:11',
+		);
+		Contracts::create( $args );
+		Contracts::create( $args );
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s", 'order:11' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -1367,20 +1385,17 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_a_duplicate_creation_key_is_quiet(): void {
 		global $wpdb;
 
-		$args  = array(
+		$args = array(
 			'extension_slug' => self::EXTENSION_SLUG,
 			'creation_key'   => 'order:10',
 		);
-		$first = Contracts::create( $args )->get_id();
+		$this->assertNotNull( Contracts::create_locked( $args, 'checkout' ) );
 
 		$show_errors = $wpdb->show_errors( true );
 		$suppressed  = $wpdb->suppress_errors( false );
 		ob_start();
 		try {
-			Contracts::create_locked( $args, 'checkout' );
-			$this->fail( 'Expected the duplicate to be refused.' );
-		} catch ( DuplicateContractException $e ) {
-			$this->assertSame( $first, $e->get_existing_contract_id() );
+			$this->assertNull( Contracts::create_locked( $args, 'checkout' ) );
 		} finally {
 			$output            = (string) ob_get_clean();
 			$still_suppressing = $wpdb->suppress_errors( $suppressed );
@@ -1401,7 +1416,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				'items'          => array( array( 'item_name' => 'Coffee' ) ),
 			)
 		)->get_id();
-		$lock = Contracts::lock( $id, 'renewal' );
+		$lock = $this->take_lock( $id, 'renewal' );
 
 		try {
 			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
@@ -1414,7 +1429,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$lock->release();
 		Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
 		$this->assertSame( array( 'Cocoa' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
-		$this->assertSame( $id, Contracts::lock( $id, 'next' )->get_contract_id(), 'The internal lock was released.' );
+		$this->assertSame( $id, $this->take_lock( $id, 'next' )->get_contract_id(), 'The internal lock was released.' );
 	}
 
 	/**
@@ -1423,7 +1438,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_every_write_refuses_another_contracts_lock(): void {
 		$id       = $this->contract_with_currency();
 		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) )->get_id();
-		$lock     = Contracts::lock( $this->contract_with_currency(), 'hold' );
+		$lock     = $this->take_lock( $this->contract_with_currency(), 'hold' );
 
 		$writes = array(
 			'update'           => static function () use ( $id, $lock ): void {

@@ -18,8 +18,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use DomainException;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
@@ -70,15 +68,22 @@ final class Contracts {
 	);
 
 	/**
-	 * Keys accepted by {@see self::create()}: the update keys plus the create-only
-	 * `extension_slug` and `creation_key`.
+	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`.
 	 *
 	 * @var array<string, true>
 	 */
 	private const CREATE_KEYS = array(
 		'extension_slug' => true,
-		'creation_key'   => true,
 	) + self::CONTRACT_KEYS;
+
+	/**
+	 * Keys accepted by {@see self::create_locked()}: the create keys plus `creation_key`.
+	 *
+	 * @var array<string, true>
+	 */
+	private const CREATE_LOCKED_KEYS = array(
+		'creation_key' => true,
+	) + self::CREATE_KEYS;
 
 	/**
 	 * Keys accepted by {@see self::add_cycle()}, as a key map.
@@ -116,24 +121,11 @@ final class Contracts {
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $operation   Operation label (1-64 characters), shown to callers that conflict.
-	 * @return ContractLock The held lock.
-	 * @throws ContractLockedException If another operation holds the lock.
-	 * @throws InvalidArgumentException If the contract does not exist or the label is invalid.
+	 * @return ContractLock|null The held lock; null when another operation holds it or the contract does not exist.
+	 * @throws InvalidArgumentException If the label is invalid.
 	 */
-	public static function lock( int $contract_id, string $operation ): ContractLock {
-		$repository = new ContractRepository();
-		$lock       = $repository->acquire_lock( $contract_id, $operation );
-		if ( null !== $lock ) {
-			return $lock;
-		}
-
-		$holder = $repository->lock_holder( $contract_id );
-		if ( ! $holder['exists'] ) {
-			throw new InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
-		}
-
-		$locked_until = null === $holder['locked_until'] ? null : new DateTimeImmutable( $holder['locked_until'], new DateTimeZone( 'UTC' ) );
-		throw new ContractLockedException( $contract_id, $holder['operation'], $locked_until ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the message is not output.
+	public static function lock( int $contract_id, string $operation ): ?ContractLock {
+		return ( new ContractRepository() )->acquire_lock( $contract_id, $operation );
 	}
 
 	/**
@@ -145,20 +137,18 @@ final class Contracts {
 	 * rows; `addresses` is keyed `billing` / `shipping`. `schedule_source` says who keeps the
 	 * payment schedule: `subscriptions_engine` (the default; the engine notifies the owner when
 	 * `next_payment_gmt` passes) or the slug (1-64 of `a-z0-9_-`) of a gateway or extension that
-	 * keeps its own schedule; the engine never dispatches those contracts. `creation_key` (1-100
-	 * characters) makes the create idempotent per extension. Unknown keys, also inside item rows
-	 * and addresses, raise a `_doing_it_wrong()` notice and are ignored.
+	 * keeps its own schedule; the engine never dispatches those contracts. Unknown keys, also
+	 * inside item rows and addresses, raise a `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
-	 *                                   default `draft`), `creation_key`, and any of {@see self::CONTRACT_KEYS}.
+	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
 	 * @return ContractView The new contract, built from the written fields (no re-read): items
 	 *                      and addresses as given.
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
-	 * @throws DuplicateContractException If the extension already created a contract with this `creation_key`.
 	 */
 	public static function create( array $args ): ContractView {
-		$contract = self::build( __METHOD__, $args );
+		$contract = self::build( __METHOD__, $args, self::CREATE_KEYS );
 
 		( new ContractRepository() )->insert( $contract );
 
@@ -166,27 +156,35 @@ final class Contracts {
 	}
 
 	/**
-	 * Create a contract locked from birth: like {@see self::create()}, but the new contract is
-	 * held by the returned lock (read its id with {@see ContractLock::get_contract_id()}), so an
-	 * extension can finish building it (cycles, status) before anyone else writes to it.
+	 * Create a contract locked from birth, so an extension can finish building it (cycles,
+	 * status) before anyone else writes to it. Takes the keys of {@see self::create()} plus
+	 * `creation_key` (1-100 characters), which makes the create idempotent per extension.
 	 *
-	 * @param array<string, mixed> $args      Contract fields, as for {@see self::create()}.
+	 * @param array<string, mixed> $args      Contract fields, as for {@see self::create()}, plus `creation_key`.
 	 * @param string               $operation Operation label (1-64 characters).
-	 * @return ContractLock The lock on the new contract.
+	 * @return array{contract: ContractView, lock: ContractLock}|null The new contract and its lock;
+	 *                                                                null when the extension already created a contract with this `creation_key`.
 	 * @throws InvalidArgumentException If `extension_slug` is missing, a value or the label is invalid.
-	 * @throws DuplicateContractException If the extension already created a contract with this `creation_key`.
 	 */
-	public static function create_locked( array $args, string $operation ): ContractLock {
-		$contract = self::build( __METHOD__, $args );
+	public static function create_locked( array $args, string $operation ): ?array {
+		$contract = self::build( __METHOD__, $args, self::CREATE_LOCKED_KEYS );
 
-		return ( new ContractRepository() )->insert_locked( $contract, $operation );
+		$lock = ( new ContractRepository() )->insert_locked( $contract, $operation );
+		if ( null === $lock ) {
+			return null;
+		}
+
+		return array(
+			'contract' => ContractView::from_contract( $contract, true ),
+			'lock'     => $lock,
+		);
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Write the given fields to an existing contract.
 	 *
-	 * Takes the keys of {@see self::create()} except `extension_slug` and `creation_key`. Only
+	 * Takes the keys of {@see self::create()} except `extension_slug`. Only
 	 * the columns of the present keys are written, so fields another writer changed in between
 	 * keep its values; `items` and `addresses` replace the whole set; `null` clears a nullable
 	 * field (and resets a money field to 0). Unknown keys raise a `_doing_it_wrong()` notice and
@@ -559,10 +557,11 @@ final class Contracts {
 	 *
 	 * @param string               $method Calling method, for unknown-key notices.
 	 * @param array<string, mixed> $args   Caller fields.
+	 * @param array<string, true>  $keys   The keys the calling method accepts.
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
 	 */
-	private static function build( string $method, array $args ): Contract {
-		$filtered_args  = ArgumentValidator::filter_known_keys( $method, $args, self::CREATE_KEYS );
+	private static function build( string $method, array $args, array $keys ): Contract {
+		$filtered_args  = ArgumentValidator::filter_known_keys( $method, $args, $keys );
 		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$creation_key   = ArgumentValidator::validate_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
 		unset( $filtered_args['extension_slug'], $filtered_args['creation_key'] );

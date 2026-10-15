@@ -20,13 +20,11 @@ use ReflectionProperty;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState
  */
 class ContractLockTest extends TestCase {
@@ -224,16 +222,5 @@ class ContractLockTest extends TestCase {
 		$unknown = new ContractLockedException( 7, null, null );
 		$this->assertNull( $unknown->get_operation() );
 		$this->assertNull( $unknown->get_locked_until() );
-	}
-
-	/**
-	 * @testdox DuplicateContractException carries the existing contract id and the key.
-	 */
-	public function test_duplicate_exception_exposes_the_existing_contract(): void {
-		$exception = new DuplicateContractException( 42, 'order:9' );
-
-		$this->assertSame( 42, $exception->get_existing_contract_id() );
-		$this->assertSame( 'order:9', $exception->get_creation_key() );
-		$this->assertStringContainsString( '42', $exception->getMessage() );
 	}
 }

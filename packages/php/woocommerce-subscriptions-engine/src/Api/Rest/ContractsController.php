@@ -17,7 +17,6 @@ use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
@@ -224,9 +223,8 @@ final class ContractsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Run the action: 409 when it is not available or another operation holds the contract's
-	 * lock, 400 for invalid `action_args`, then the callback's result. A `WP_Error` passes
-	 * through (status 400 unless it has one).
+	 * Run the action: 409 when it is not available, 400 for invalid `action_args`, then the
+	 * callback's result. A `WP_Error` passes through (status 400 unless it has one).
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response|WP_Error
@@ -254,8 +252,6 @@ final class ContractsController extends WP_REST_Controller {
 			}
 
 			$result = ( $definition['callback'] )( $contract, $action_args );
-		} catch ( ContractLockedException $e ) {
-			return $this->get_contract_locked_error( $e );
 		} catch ( Throwable $e ) {
 			return $this->get_action_failed_error( $e, $request );
 		}
@@ -559,26 +555,6 @@ final class ContractsController extends WP_REST_Controller {
 			'woocommerce_subscriptions_engine_action_failed',
 			__( 'The action could not be completed.', 'woocommerce-subscriptions-engine' ),
 			array( 'status' => 500 )
-		);
-	}
-
-	/**
-	 * A 409 for an action refused because another operation holds the contract's lock: an
-	 * expected conflict, not a failure, so nothing is logged.
-	 *
-	 * @param ContractLockedException $e The conflict.
-	 */
-	private function get_contract_locked_error( ContractLockedException $e ): WP_Error {
-		$locked_until = $e->get_locked_until();
-
-		return new WP_Error(
-			'woocommerce_subscriptions_engine_contract_locked',
-			__( 'Another operation on this contract is in progress. Try again shortly.', 'woocommerce-subscriptions-engine' ),
-			array(
-				'status'       => 409,
-				'operation'    => $e->get_operation(),
-				'locked_until' => null === $locked_until ? null : $locked_until->format( 'Y-m-d H:i:s' ),
-			)
 		);
 	}
 }

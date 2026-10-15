@@ -67,6 +67,19 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Take a contract's lock through the facade, failing the test when the race is lost.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   Operation label.
+	 */
+	protected function take_lock( int $contract_id, string $operation ): ContractLock {
+		$lock = Contracts::lock( $contract_id, $operation );
+		$this->assertNotNull( $lock, 'Expected to take the lock.' );
+
+		return $lock;
+	}
+
+	/**
 	 * A lock's private state, read through reflection (tests only).
 	 *
 	 * @param ContractLock $lock The lock.

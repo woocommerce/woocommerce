@@ -92,7 +92,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->register_recording_handler();
 		$id = $this->create_due_contract();
 
-		Contracts::lock( $id, 'hold' );
+		$this->take_lock( $id, 'hold' );
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
@@ -117,7 +117,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 					if ( $first === $contract->get_id() ) {
 						// Other writers act on the next contracts after the scan read them.
 						Contracts::update( $second, array( 'next_payment_gmt' => '2026-02-14 12:00:00' ) );
-						Contracts::lock( $third, 'cancel' );
+						$this->take_lock( $third, 'cancel' );
 					}
 				},
 			)
@@ -236,7 +236,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 			array(
 				'contract_due_handler' => function ( ContractView $contract, array $context ): void {
 					$context['lock']->release();
-					Contracts::lock( $contract->get_id(), 'follow-up' );
+					$this->take_lock( $contract->get_id(), 'follow-up' );
 				},
 			)
 		);

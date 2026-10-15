@@ -535,39 +535,6 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * A callback refused by another operation's contract lock is a 409 with the holder's label and expiry, not logged.
-	 */
-	public function test_a_locked_contract_is_a_conflict(): void {
-		$contract = $this->create_contract( null );
-		$this->register_action( 'pause', 'manage_woocommerce' );
-		wp_set_current_user( $this->create_user( 'administrator' ) );
-
-		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		Contracts::lock( $contract->get_id(), 'renewal' );
-
-		$errors = $this->capture_engine_log(
-			'error',
-			array( 'contract_id' => $contract->get_id() ),
-			function () use ( $contract ): void {
-				$response = $this->run_action( $contract->get_id(), 'pause' );
-				$data     = $this->response_data( $response );
-
-				$this->assertSame( 409, $response->get_status() );
-				$this->assertSame( 'woocommerce_subscriptions_engine_contract_locked', $data['code'] );
-				$error_data = $data['data'];
-				$this->assertIsArray( $error_data );
-				$this->assertSame( 'renewal', $error_data['operation'] );
-				$this->assertSame( '2035-01-01 00:10:00', $error_data['locked_until'] );
-			}
-		);
-
-		$this->assertSame( array(), $errors, 'A conflict is not logged as a failure.' );
-		$view = Contracts::get( $contract->get_id() );
-		$this->assertInstanceOf( ContractView::class, $view );
-		$this->assertSame( 'active', $view->get_status() );
-	}
-
-	/**
 	 * Discovery lists the owner's available actions to a store manager, whatever their permission.
 	 */
 	public function test_discovery_lists_available_actions(): void {
