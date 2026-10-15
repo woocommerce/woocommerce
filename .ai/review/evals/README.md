@@ -20,7 +20,9 @@ a8c-review eval --help
 
 If `a8c-review` is already installed, check that `eval --help` works before creating the symlink. Keep the CLI checkout in place: the symlink points to it. To make the PATH setting permanent, add the `export PATH` line to your shell startup file, such as `~/.zshrc` or `~/.bashrc`.
 
-The committed review configuration uses Claude and Codex. Exported API credentials take precedence over subscription logins. When `OPENAI_API_KEY` is set, the runner calls `codex login --with-api-key`, replacing the saved ChatGPT login. `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` overrides the Claude subscription login. This can cause unintended API billing.
+Running the full suite with this repository's settings requires Claude Code and Codex CLI. The `npm ci` command above installs both. Sign in to each with an account that has access to the configured models and enough quota.
+
+Exported API credentials take precedence over subscription logins. When `OPENAI_API_KEY` is set, the runner calls `codex login --with-api-key`, replacing the saved ChatGPT login. `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` overrides the Claude subscription login. This can cause unintended API billing.
 
 To use your subscriptions, unset these variables in the shell used for authentication and evals:
 
@@ -28,7 +30,7 @@ To use your subscriptions, unset these variables in the shell used for authentic
 unset OPENAI_API_KEY ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN
 ```
 
-Authenticate with both bundled clients from the same CLI directory:
+If you are not already signed in, run these commands from the AI Review CLI directory:
 
 ```sh
 node_modules/.bin/claude
@@ -36,7 +38,7 @@ node_modules/.bin/claude
 node_modules/.bin/codex login
 ```
 
-Existing logins can be reused. Your accounts must have access to the configured models and available quota. Live evals consume model usage.
+Existing logins can be reused. Live evals consume model usage.
 
 ## Run locally
 
