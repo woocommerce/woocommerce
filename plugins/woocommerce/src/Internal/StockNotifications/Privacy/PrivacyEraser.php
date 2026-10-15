@@ -56,6 +56,9 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			'done'           => true,
 		);
 
+		// Look up the account with the letter case as entered: `wp_users.user_email` is never
+		// normalized, so on a case-sensitive collation the lowercased form would miss it.
+		$user          = get_user_by( 'email', $email_address );
 		$email_address = EmailNormalizer::normalize( $email_address );
 
 		$notifications = NotificationQuery::get_notifications(
@@ -65,8 +68,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 		);
 
 		// Sign-ups made before an account email change keep the old email, so also match by user ID.
-		$user = get_user_by( 'email', $email_address );
-		if ( $user instanceof \WP_User && $user->ID > 0 ) {
+		if ( $user instanceof \WP_User ) {
 			$notifications = array_unique(
 				array_merge(
 					$notifications,
