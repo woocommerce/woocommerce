@@ -256,7 +256,7 @@ final class DueDispatcher {
 	}
 
 	/**
-	 * Release a dispatch lock in its own guarded step: a failed release is logged and the lock
+	 * Release a dispatch lock in its own try block: a failed release is logged and the lock
 	 * expires on its own, without failing the notification or the batch.
 	 *
 	 * @param ContractLock $lock The dispatch lock.

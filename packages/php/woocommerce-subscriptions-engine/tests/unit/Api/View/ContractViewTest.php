@@ -152,10 +152,10 @@ class ContractViewTest extends TestCase {
 		$row = array_merge(
 			$this->row(),
 			array(
-				'lock_live'      => '1',
-				'lock_token'     => 'abcdef0123456789abcdef0123456789',
-				'locked_until'   => '2026-02-01 00:10:00',
-				'lock_operation' => 'renewal',
+				'lock_live'        => '1',
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'renewal',
 			)
 		);
 
@@ -174,10 +174,10 @@ class ContractViewTest extends TestCase {
 		$row = array_merge(
 			$this->row(),
 			array(
-				'lock_live'      => '0',
-				'lock_token'     => 'abcdef0123456789abcdef0123456789',
-				'locked_until'   => '2026-02-01 00:10:00',
-				'lock_operation' => 'renewal',
+				'lock_live'        => '0',
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'renewal',
 			)
 		);
 

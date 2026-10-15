@@ -56,17 +56,17 @@ final class ContractRepository {
 	 * The contract columns every contract read selects: the row plus whether its lock is live
 	 * on the database clock. `lock_token` is stripped before hydration.
 	 */
-	private const CONTRACT_SELECT = '*, ( lock_token IS NOT NULL AND locked_until > UTC_TIMESTAMP() ) AS lock_live';
+	private const CONTRACT_SELECT = '*, ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS lock_live';
 
 	/**
 	 * SQL condition: the contract row carries no live lock.
 	 */
-	private const NO_LIVE_LOCK = '( lock_token IS NULL OR locked_until <= UTC_TIMESTAMP() )';
+	private const NO_LIVE_LOCK = '( lock_token IS NULL OR locked_until_gmt <= UTC_TIMESTAMP() )';
 
 	/**
 	 * SQL condition: the contract row carries the live lock with the bound token.
 	 */
-	private const HOLDS_LOCK = 'lock_token = %s AND locked_until > UTC_TIMESTAMP()';
+	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
 	 * Insert a new, unlocked contract and its items and addresses (parent row first). When a
@@ -81,10 +81,9 @@ final class ContractRepository {
 			throw new \RuntimeException( 'Failed to insert contract: its creation key is taken.' );
 		}
 
-		$id = (int) $contract->get_id();
-		$this->insert_children_or_discard( $id, $contract );
+		$this->insert_children_or_discard( $contract );
 
-		return $id;
+		return (int) $contract->get_id();
 	}
 
 	/**
@@ -113,10 +112,9 @@ final class ContractRepository {
 			return null;
 		}
 
-		$id   = (int) $contract->get_id();
-		$lock = self::new_lock( $id, $operation, $token );
+		$lock = self::new_lock( (int) $contract->get_id(), $operation, $token );
 
-		$this->insert_children_or_discard( $id, $contract );
+		$this->insert_children_or_discard( $contract );
 
 		return $lock;
 	}
@@ -125,16 +123,17 @@ final class ContractRepository {
 	 * Insert a new contract's items and addresses; on a failure, best-effort delete the new
 	 * contract with its children, then rethrow.
 	 *
-	 * @param int      $id       The new contract id.
-	 * @param Contract $contract Contract carrying the children.
+	 * @param Contract $contract The new contract, carrying its id and children.
 	 * @throws \Throwable The child insert failure, rethrown (a `RuntimeException` for a failed insert).
 	 */
-	private function insert_children_or_discard( int $id, Contract $contract ): void {
+	private function insert_children_or_discard( Contract $contract ): void {
+		$contract_id = (int) $contract->get_id();
+
 		try {
-			$this->insert_items( $id, $contract->get_items() );
-			$this->insert_addresses( $id, $contract->get_addresses() );
+			$this->insert_items( $contract_id, $contract->get_items() );
+			$this->insert_addresses( $contract_id, $contract->get_addresses() );
 		} catch ( \Throwable $e ) {
-			$this->delete( $id );
+			$this->delete( $contract_id );
 			throw $e;
 		}
 	}
@@ -176,7 +175,7 @@ final class ContractRepository {
 		}
 
 		if ( null !== $lock ) {
-			array_push( $names, '`lock_token`', '`locked_until`', '`lock_operation`' );
+			array_push( $names, '`lock_token`', '`locked_until_gmt`', '`lock_operation`' );
 			array_push( $placeholders, '%s', 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', '%s' );
 			array_push( $values, $lock['token'], ContractLock::TTL_SECONDS, $lock['operation'] );
 		}
@@ -227,17 +226,16 @@ final class ContractRepository {
 	 * @throws \RuntimeException If the contract has no id or the write fails.
 	 */
 	public function update_fields( Contract $contract, array $fields, ?ContractLock $lock = null ): bool {
-		$id = $contract->get_id();
-		if ( null === $id ) {
+		$contract_id = $contract->get_id();
+		if ( null === $contract_id ) {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
 		}
 
 		if ( null !== $lock ) {
-			self::assert_lock_for( $lock, $id );
+			self::assert_lock_for( $lock, $contract_id );
 		}
 
 		$storage = $contract->to_storage();
-		$columns = array();
 		foreach ( $fields as $field ) {
 			if ( 'items' === $field || 'addresses' === $field ) {
 				continue;
@@ -245,25 +243,24 @@ final class ContractRepository {
 			if ( 'extension_slug' === $field || 'creation_key' === $field || ! array_key_exists( $field, $storage ) ) {
 				throw new \InvalidArgumentException( esc_html( sprintf( 'Cannot update contract field "%s".', $field ) ) );
 			}
-			$columns[ $field ] = $storage[ $field ];
 		}
 
 		$replaces_children = in_array( 'items', $fields, true ) || in_array( 'addresses', $fields, true );
 		if ( null !== $lock || ! $replaces_children ) {
-			return $this->write_fields( $contract, $id, $columns, $fields, $lock );
+			return $this->write_fields( $contract, $fields, $lock );
 		}
 
-		$internal_lock = $this->acquire_lock( $id, self::INTERNAL_LOCK_OPERATION );
+		$internal_lock = $this->acquire_lock( $contract_id, self::INTERNAL_LOCK_OPERATION );
 		if ( null === $internal_lock ) {
-			$holder = $this->lock_holder( $id );
+			$holder = $this->get_lock_holder( $contract_id );
 			if ( ! $holder['exists'] ) {
 				return false;
 			}
-			throw self::locked_exception( $id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+			throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
 
 		try {
-			return $this->write_fields( $contract, $id, $columns, $fields, $internal_lock );
+			return $this->write_fields( $contract, $fields, $internal_lock );
 		} finally {
 			$this->release_lock( $internal_lock );
 		}
@@ -273,24 +270,24 @@ final class ContractRepository {
 	/**
 	 * The fenced row write plus the named child replacements behind {@see self::update_fields()}.
 	 *
-	 * @param Contract                       $contract Contract carrying the values.
-	 * @param int                            $id       Contract id.
-	 * @param array<string, int|string|null> $columns  Contract column values.
-	 * @param array<int, string>             $fields   Requested fields.
-	 * @param ContractLock|null              $lock     The lock, or null (row-only writes).
+	 * @param Contract           $contract Contract carrying its id and the values.
+	 * @param array<int, string> $fields   Requested fields (validated).
+	 * @param ContractLock|null  $lock     The lock, or null (row-only writes).
 	 * @return bool False when the contract row no longer exists.
 	 * @throws ContractLockedException If the fence refuses the write.
 	 */
-	private function write_fields( Contract $contract, int $id, array $columns, array $fields, ?ContractLock $lock ): bool {
-		$updated = $this->write_contract_row( $id, $columns, $lock );
+	private function write_fields( Contract $contract, array $fields, ?ContractLock $lock ): bool {
+		$contract_id = (int) $contract->get_id();
+		$columns     = array_intersect_key( $contract->to_storage(), array_flip( $fields ) );
+		$updated     = $this->write_contract_row( $contract_id, $columns, $lock );
 
 		// Every row write bumps `write_seq`, so zero rows means the fence refused the write or the row is gone.
 		if ( 0 === $updated ) {
-			$holder = $this->lock_holder( $id );
+			$holder = $this->get_lock_holder( $contract_id );
 			if ( ! $holder['exists'] ) {
 				return false;
 			}
-			throw self::locked_exception( $id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+			throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
 
 		if ( null === $lock ) {
@@ -299,12 +296,12 @@ final class ContractRepository {
 
 		if ( in_array( 'items', $fields, true ) ) {
 			$this->fence_children( $lock );
-			$this->replace_items( $id, $contract->get_items() );
+			$this->replace_items( $contract_id, $contract->get_items() );
 		}
 
 		if ( in_array( 'addresses', $fields, true ) ) {
 			$this->fence_children( $lock );
-			$this->replace_addresses( $id, $contract->get_addresses() );
+			$this->replace_addresses( $contract_id, $contract->get_addresses() );
 		}
 
 		return true;
@@ -730,7 +727,7 @@ final class ContractRepository {
 	 * index; the schedule source and the lock are residual filters, and lock liveness is read
 	 * on the database clock (`UTC_TIMESTAMP()`), not `$now`.
 	 *
-	 * Fairness: rows sort by `locked_until` - never locked first, then by when the last lock
+	 * Fairness: rows sort by `locked_until_gmt` - never locked first, then by when the last lock
 	 * ended or expired - then by due moment. A contract whose handler leaves its due moment in
 	 * place is notified again, behind contracts locked less recently, so it cannot starve
 	 * others. The sort filesorts the owners' due backlog; `LIMIT` bounds the result.
@@ -767,8 +764,8 @@ final class ContractRepository {
 				FROM {$contracts}
 				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
 				  AND schedule_source = %s
-				  AND ( lock_token IS NULL OR locked_until <= UTC_TIMESTAMP() )
-				ORDER BY locked_until ASC, next_payment_gmt ASC, id ASC
+				  AND ( lock_token IS NULL OR locked_until_gmt <= UTC_TIMESTAMP() )
+				ORDER BY locked_until_gmt ASC, next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
 			),
@@ -828,7 +825,7 @@ final class ContractRepository {
 			$values[] = $seen_next_payment_gmt;
 		}
 
-		$sql = "UPDATE {$table} SET lock_token = %s, locked_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), lock_operation = %s
+		$sql = "UPDATE {$table} SET lock_token = %s, locked_until_gmt = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), lock_operation = %s
 			WHERE id = %d{$due} AND {$no_live_lock}";
 
 		// Fixed SQL fragments only; every value is a placeholder.
@@ -849,30 +846,30 @@ final class ContractRepository {
 	 * only (it may lag on a replica), never to decide that a write landed.
 	 *
 	 * @param int $contract_id Contract id.
-	 * @return array{exists: bool, operation: ?string, locked_until: ?string}
+	 * @return array{exists: bool, operation: ?string, locked_until_gmt: ?string}
 	 */
-	public function lock_holder( int $contract_id ): array {
+	public function get_lock_holder( int $contract_id ): array {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT ( lock_token IS NOT NULL AND locked_until > UTC_TIMESTAMP() ) AS live, lock_operation, locked_until FROM {$table} WHERE id = %d", $contract_id ), ARRAY_A );
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS live, lock_operation, locked_until_gmt FROM {$table} WHERE id = %d", $contract_id ), ARRAY_A );
 
 		if ( ! is_array( $row ) ) {
 			return array(
-				'exists'       => false,
-				'operation'    => null,
-				'locked_until' => null,
+				'exists'           => false,
+				'operation'        => null,
+				'locked_until_gmt' => null,
 			);
 		}
 
 		$live = ! empty( $row['live'] );
 
 		return array(
-			'exists'       => true,
-			'operation'    => $live ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
-			'locked_until' => $live ? Coercion::coerce_nullable_string( $row['locked_until'] ?? null ) : null,
+			'exists'           => true,
+			'operation'        => $live ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
+			'locked_until_gmt' => $live ? Coercion::coerce_nullable_string( $row['locked_until_gmt'] ?? null ) : null,
 		);
 	}
 
@@ -893,8 +890,8 @@ final class ContractRepository {
 		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock = self::HOLDS_LOCK;
 
-		$sql    = "UPDATE {$table} SET locked_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), write_seq = write_seq + 1 WHERE id = %d AND {$holds_lock}";
-		$values = array( ContractLock::TTL_SECONDS, $lock->get_contract_id(), $state->token() );
+		$sql    = "UPDATE {$table} SET locked_until_gmt = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), write_seq = write_seq + 1 WHERE id = %d AND {$holds_lock}";
+		$values = array( ContractLock::TTL_SECONDS, $lock->get_contract_id(), $state->get_token() );
 
 		// Fixed SQL fragments only; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -909,14 +906,14 @@ final class ContractRepository {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
 
-		$state->stamped( ContractLock::TTL_SECONDS );
+		$state->stamp( ContractLock::TTL_SECONDS );
 		$state->mark_extended();
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Release a lock. Idempotent, and guarded by the token, so it never clears a lock another
-	 * operation took over. `locked_until` keeps the release moment (the dispatch fairness key).
+	 * operation took over. `locked_until_gmt` keeps the release moment (the dispatch fairness key).
 	 *
 	 * @param ContractLock $lock The lock.
 	 * @throws \RuntimeException If the write fails (the lock is still marked released and expires on its own).
@@ -929,7 +926,7 @@ final class ContractRepository {
 			return;
 		}
 
-		$token = $state->token();
+		$token = $state->get_token();
 		$state->mark_released();
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -937,7 +934,7 @@ final class ContractRepository {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$updated = $wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$table} SET lock_token = NULL, lock_operation = NULL, locked_until = UTC_TIMESTAMP() WHERE id = %d AND lock_token = %s",
+				"UPDATE {$table} SET lock_token = NULL, lock_operation = NULL, locked_until_gmt = UTC_TIMESTAMP() WHERE id = %d AND lock_token = %s",
 				$lock->get_contract_id(),
 				$token
 			)
@@ -979,7 +976,7 @@ final class ContractRepository {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT TIMESTAMPDIFF( SECOND, UTC_TIMESTAMP(), locked_until ) FROM {$table} WHERE id = %d AND lock_token = %s", $lock->get_contract_id(), $state->token() ) );
+		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT TIMESTAMPDIFF( SECOND, UTC_TIMESTAMP(), locked_until_gmt ) FROM {$table} WHERE id = %d AND lock_token = %s", $lock->get_contract_id(), $state->get_token() ) );
 		if ( '' !== $wpdb->last_error ) {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to verify the lock on contract %d: %s', $lock->get_contract_id(), $wpdb->last_error ) ) );
 		}
@@ -989,7 +986,8 @@ final class ContractRepository {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
 
-		if ( $state->stamped( Coercion::coerce_int( $remaining ) ) ) {
+		$state->stamp( Coercion::coerce_int( $remaining ) );
+		if ( $state->is_trusted() ) {
 			return;
 		}
 		if ( ! $state->has_extended() ) {
@@ -1022,17 +1020,17 @@ final class ContractRepository {
 	 * @throws ContractLockedException Always.
 	 */
 	private function throw_locked( int $contract_id ): void {
-		throw self::locked_exception( $contract_id, $this->lock_holder( $contract_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		throw self::locked_exception( $contract_id, $this->get_lock_holder( $contract_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 	}
 
 	/**
 	 * A conflict carrying the holder already read.
 	 *
-	 * @param int                                                            $contract_id Contract id.
-	 * @param array{exists: bool, operation: ?string, locked_until: ?string} $holder      The lock holder read.
+	 * @param int                                                                $contract_id Contract id.
+	 * @param array{exists: bool, operation: ?string, locked_until_gmt: ?string} $holder      The lock holder read.
 	 */
 	private static function locked_exception( int $contract_id, array $holder ): ContractLockedException {
-		$locked_until = null === $holder['locked_until'] ? null : new DateTimeImmutable( $holder['locked_until'], new DateTimeZone( 'UTC' ) );
+		$locked_until = null === $holder['locked_until_gmt'] ? null : new DateTimeImmutable( $holder['locked_until_gmt'], new DateTimeZone( 'UTC' ) );
 
 		return new ContractLockedException( $contract_id, $holder['operation'], $locked_until );
 	}
@@ -1273,11 +1271,11 @@ final class ContractRepository {
 			return $meta_id;
 		}
 
-		if ( $unique && $this->meta_key_exists( $contract_id, $key ) ) {
+		if ( $unique && $this->has_meta_key( $contract_id, $key ) ) {
 			return null;
 		}
 
-		$this->throw_unguarded_insert( $contract_id );
+		$this->throw_unfenced_insert( $contract_id );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
@@ -1303,7 +1301,7 @@ final class ContractRepository {
 		$values    = array( $key, maybe_serialize( $value ), $contract_id );
 		$where     = 'c.id = %d';
 		if ( null === $lock ) {
-			$where .= ' AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )';
+			$where .= ' AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )';
 		}
 		if ( $if_absent ) {
 			$where   .= " AND NOT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.contract_id = %d AND m.meta_key = %s )";
@@ -1311,7 +1309,7 @@ final class ContractRepository {
 			$values[] = $key;
 		}
 
-		// LOCK IN SHARE MODE makes the guard read block on a concurrent lock write under READ COMMITTED too.
+		// LOCK IN SHARE MODE makes the fence read block on a concurrent lock write under READ COMMITTED too.
 		$sql = "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT c.id, %s, %s FROM {$contracts} c WHERE {$where} LOCK IN SHARE MODE";
 
 		// Fixed SQL fragments only; every value is a placeholder.
@@ -1363,7 +1361,7 @@ final class ContractRepository {
 	 * @param string $key         Meta key.
 	 * @throws \RuntimeException If the read fails.
 	 */
-	private function meta_key_exists( int $contract_id, string $key ): bool {
+	private function has_meta_key( int $contract_id, string $key ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
@@ -1407,8 +1405,8 @@ final class ContractRepository {
 		if ( null !== $this->insert_meta_row( $contract_id, $key, $value, true, $lock ) ) {
 			return true;
 		}
-		if ( ! $this->meta_key_exists( $contract_id, $key ) ) {
-			$this->throw_unguarded_insert( $contract_id );
+		if ( ! $this->has_meta_key( $contract_id, $key ) ) {
+			$this->throw_unfenced_insert( $contract_id );
 		}
 		if ( null !== $lock ) {
 			return false;
@@ -1452,7 +1450,7 @@ final class ContractRepository {
 			$sql = "UPDATE {$meta} m SET m.meta_value = %s WHERE {$where}";
 		} else {
 			$sql = "UPDATE {$meta} m JOIN {$contracts} c ON c.id = m.contract_id SET m.meta_value = %s
-				WHERE {$where} AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )";
+				WHERE {$where} AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )";
 		}
 
 		// The WHERE clause is built from fixed fragments above; every value is a placeholder.
@@ -1502,7 +1500,7 @@ final class ContractRepository {
 			$sql = "DELETE m FROM {$meta} m WHERE {$where}";
 		} else {
 			$sql = "DELETE m FROM {$meta} m JOIN {$contracts} c ON c.id = m.contract_id
-				WHERE {$where} AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )";
+				WHERE {$where} AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )";
 		}
 
 		// The WHERE clause is built from fixed fragments above; every value is a placeholder.
@@ -1578,7 +1576,7 @@ final class ContractRepository {
 			return;
 		}
 
-		$holder = $this->lock_holder( $contract_id );
+		$holder = $this->get_lock_holder( $contract_id );
 		if ( $holder['exists'] ) {
 			throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
@@ -1637,7 +1635,7 @@ final class ContractRepository {
 			$this->fence_children( $lock );
 		}
 
-		$this->insert_cycle( $cycle, null === $lock );
+		$this->insert_cycle( $cycle, $lock );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
@@ -1707,7 +1705,7 @@ final class ContractRepository {
 			$sql      = "UPDATE {$cycles} SET {$set_clause} WHERE id = %d AND status = %s AND contract_id = %d";
 		} else {
 			$sql = "UPDATE {$cycles} cy JOIN {$contracts} c ON c.id = cy.contract_id SET {$set_clause}
-				WHERE cy.id = %d AND cy.status = %s AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )";
+				WHERE cy.id = %d AND cy.status = %s AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )";
 		}
 
 		// The SET clause is built from fixed fragments above; every value is a placeholder.
@@ -1763,7 +1761,7 @@ final class ContractRepository {
 		}
 
 		$status = Coercion::coerce_string( $row['status'] ?? '' );
-		$stored = $status === $to_status && self::cycle_holds_changes( $row, $changes );
+		$stored = $status === $to_status && self::has_changes( $row, $changes );
 
 		if ( null === $lock && $status === $from_status && ! $stored ) {
 			$this->throw_locked( $contract_id );
@@ -1779,7 +1777,7 @@ final class ContractRepository {
 	 * @param array<string, mixed> $row     Cycle row (`order_id`, `reason`).
 	 * @param array<string, mixed> $changes Changes: optional `order_id`, `reason`.
 	 */
-	private static function cycle_holds_changes( array $row, array $changes ): bool {
+	private static function has_changes( array $row, array $changes ): bool {
 		if ( array_key_exists( 'order_id', $changes ) ) {
 			$intended = null === $changes['order_id'] ? null : Coercion::coerce_int( $changes['order_id'] );
 			if ( Coercion::coerce_nullable_int( $row['order_id'] ?? null ) !== $intended ) {
@@ -1918,14 +1916,14 @@ final class ContractRepository {
 	 * their column lengths first, as `$wpdb->insert()` would. A failed position read-back after
 	 * the row landed logs a warning and leaves the entity's position unassigned.
 	 *
-	 * @param Cycle $cycle         Cycle to insert. Carries its contract id and kind.
-	 * @param bool  $guard_no_lock Whether the insert must find the contract with no live lock.
+	 * @param Cycle             $cycle Cycle to insert. Carries its contract id and kind.
+	 * @param ContractLock|null $lock  The caller's (fenced) lock, or null: the insert then must find the contract with no live lock.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
-	 * @throws ContractLockedException If `$guard_no_lock` and another operation holds the lock.
+	 * @throws ContractLockedException If unlocked and another operation holds the lock.
 	 * @throws \InvalidArgumentException If the contract does not exist.
 	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
 	 */
-	private function insert_cycle( Cycle $cycle, bool $guard_no_lock ): void {
+	private function insert_cycle( Cycle $cycle, ?ContractLock $lock ): void {
 		global $wpdb;
 
 		$table     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1963,9 +1961,9 @@ final class ContractRepository {
 		$name_list        = implode( ', ', $names );
 		$placeholder_list = implode( ', ', $placeholders );
 		$values[]         = $cycle->get_contract_id();
-		$fence            = $guard_no_lock ? ' AND ( c.lock_token IS NULL OR c.locked_until <= UTC_TIMESTAMP() )' : '';
+		$fence            = null === $lock ? ' AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )' : '';
 
-		// LOCK IN SHARE MODE makes the guard read block on a concurrent lock write under READ COMMITTED too.
+		// LOCK IN SHARE MODE makes the fence read block on a concurrent lock write under READ COMMITTED too.
 		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d{$fence} LOCK IN SHARE MODE";
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
@@ -1982,7 +1980,7 @@ final class ContractRepository {
 		}
 
 		if ( 0 === $inserted ) {
-			$this->throw_unguarded_insert( $cycle->get_contract_id() );
+			$this->throw_unfenced_insert( $cycle->get_contract_id() );
 		}
 
 		$id = (int) $wpdb->insert_id;
@@ -2019,8 +2017,8 @@ final class ContractRepository {
 	 * @throws \InvalidArgumentException If the contract does not exist.
 	 * @throws ContractLockedException Otherwise: the fence refused the insert (holder details best-effort).
 	 */
-	private function throw_unguarded_insert( int $contract_id ): void {
-		$holder = $this->lock_holder( $contract_id );
+	private function throw_unfenced_insert( int $contract_id ): void {
+		$holder = $this->get_lock_holder( $contract_id );
 		if ( ! $holder['exists'] ) {
 			throw new \InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
 		}
@@ -2174,20 +2172,17 @@ final class ContractRepository {
 
 	/**
 	 * Write contract columns (plus `date_updated_gmt`, and a `write_seq` bump so a matched row
-	 * always counts as changed) in one UPDATE statement, so the row never lands half-written. The statement is fenced: with `$lock` it matches only
-	 * while that lock lives, without one only while no lock lives.
+	 * always counts as changed) in one fenced UPDATE: with `$lock` it matches only while that
+	 * lock lives, without one only while no lock lives. Strings are checked against their column
+	 * lengths first, since WordPress runs without strict SQL modes and MySQL would shorten them.
 	 *
-	 * A hand-built statement skips the per-column length check `$wpdb->update()` makes, and
-	 * WordPress runs without strict SQL modes, so MySQL would silently shorten an over-long
-	 * string. Each string is checked against its column length first and refused.
-	 *
-	 * @param int                            $id      Contract id.
-	 * @param array<string, int|string|null> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
-	 * @param ContractLock|null              $lock    The caller's lock, or null.
+	 * @param int                            $contract_id Contract id.
+	 * @param array<string, int|string|null> $columns     Contract column values keyed by column name (from {@see Contract::to_storage()}).
+	 * @param ContractLock|null              $lock        The caller's lock, or null.
 	 * @return int The number of rows the statement changed.
 	 * @throws \RuntimeException If a value is longer than its column, or the write fails.
 	 */
-	private function write_contract_row( int $id, array $columns, ?ContractLock $lock ): int {
+	private function write_contract_row( int $contract_id, array $columns, ?ContractLock $lock ): int {
 		global $wpdb;
 
 		$table                       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -2211,12 +2206,12 @@ final class ContractRepository {
 			$values[]      = (string) $value;
 		}
 
-		$values[] = $id;
+		$values[] = $contract_id;
 		$set      = implode( ', ', $assignments );
 		$fence    = self::NO_LIVE_LOCK;
 		if ( null !== $lock ) {
 			$fence    = self::HOLDS_LOCK;
-			$values[] = self::state_of( $lock )->token();
+			$values[] = self::state_of( $lock )->get_token();
 		}
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.

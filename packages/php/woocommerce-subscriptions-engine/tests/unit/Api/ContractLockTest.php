@@ -153,17 +153,17 @@ class ContractLockTest extends TestCase {
 		$this->assertLessThanOrEqual( 60.0, $this->trust_left( $state ) );
 		$this->assertGreaterThan( 59.0, $this->trust_left( $state ) );
 
-		$this->assertTrue( $state->stamped( 90 ) );
+		$state->stamp( 90 );
 		$this->assertLessThanOrEqual( 30.0, $this->trust_left( $state ) );
 		$this->assertTrue( $state->is_trusted() );
 
-		$this->assertFalse( $state->stamped( 60 ) );
+		$state->stamp( 60 );
 		$this->assertFalse( $state->is_trusted() );
 
-		$this->assertFalse( $state->stamped( 0 ) );
+		$state->stamp( 0 );
 		$this->assertFalse( $state->is_trusted() );
 
-		$this->assertTrue( $state->stamped( ContractLock::TTL_SECONDS ) );
+		$state->stamp( ContractLock::TTL_SECONDS );
 		$this->assertLessThanOrEqual( 60.0, $this->trust_left( $state ) );
 	}
 
@@ -174,10 +174,10 @@ class ContractLockTest extends TestCase {
 		$state = new ContractLockState( self::TOKEN );
 		$this->assertFalse( $state->is_near_expiry() );
 
-		$state->stamped( 120 );
+		$state->stamp( 120 );
 		$this->assertTrue( $state->is_near_expiry() );
 
-		$state->stamped( 200 );
+		$state->stamp( 200 );
 		$this->assertFalse( $state->is_near_expiry() );
 	}
 
@@ -191,7 +191,7 @@ class ContractLockTest extends TestCase {
 		$this->assertTrue( $state->is_released() );
 		$this->assertFalse( $state->is_trusted() );
 
-		$this->assertFalse( $state->stamped( ContractLock::TTL_SECONDS ) );
+		$state->stamp( ContractLock::TTL_SECONDS );
 		$this->assertFalse( $state->is_trusted() );
 	}
 

@@ -96,7 +96,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertSame( 'hold', $this->lock_holder( $id )['operation'], 'The holder keeps its lock.' );
+		$this->assertSame( 'hold', $this->get_lock_holder( $id )['operation'], 'The holder keeps its lock.' );
 	}
 
 	/**
@@ -126,8 +126,8 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ), 'Only the first contract is notified.' );
 		$this->assertCount( 1, $this->calls );
 		$this->assertSame( $first, $this->calls[0]['contract']->get_id() );
-		$this->assertNull( $this->lock_holder( $second )['operation'], 'The moved contract was not locked.' );
-		$this->assertSame( 'cancel', $this->lock_holder( $third )['operation'], 'The other operation keeps its lock.' );
+		$this->assertNull( $this->get_lock_holder( $second )['operation'], 'The moved contract was not locked.' );
+		$this->assertSame( 'cancel', $this->get_lock_holder( $third )['operation'], 'The other operation keeps its lock.' );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$id = $this->create_due_contract();
 
 		$this->sut->run_batch( $this->now() );
-		$this->assertNull( $this->lock_holder( $id )['operation'], 'The lock is released when the handler returns.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'The lock is released when the handler returns.' );
 
 		$this->sut->run_batch( $this->now() );
 		$this->assertCount( 2, $this->calls );
@@ -243,7 +243,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$id = $this->create_due_contract();
 
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
-		$this->assertSame( 'follow-up', $this->lock_holder( $id )['operation'], 'The dispatcher never clears a lock it no longer holds.' );
+		$this->assertSame( 'follow-up', $this->get_lock_holder( $id )['operation'], 'The dispatcher never clears a lock it no longer holds.' );
 	}
 
 	/**
@@ -278,7 +278,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertNotSame( array(), $errors, 'The failure is logged with the contract id.' );
 		$this->assertCount( 2, $this->calls );
-		$this->assertSame( DueDispatcher::LOCK_OPERATION, $this->lock_holder( $failing )['operation'], 'The failing contract keeps its lock (back-off).' );
+		$this->assertSame( DueDispatcher::LOCK_OPERATION, $this->get_lock_holder( $failing )['operation'], 'The failing contract keeps its lock (back-off).' );
 
 		$this->pin_db_clock( '2026-02-15 00:09:59' );
 		$this->sut->run_batch( $this->now() );
@@ -311,8 +311,8 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 			$this->assertSame( 'release', $error['stage'] ?? null, 'Logged as a release failure, not a handler failure.' );
 		}
 		$this->assertSame( array( $first, $second ), $this->notified_ids() );
-		$this->assertNotNull( $this->lock_holder( $first )['operation'], 'The unreleased lock expires on its own.' );
-		$this->assertNull( $this->lock_holder( $second )['operation'] );
+		$this->assertNotNull( $this->get_lock_holder( $first )['operation'], 'The unreleased lock expires on its own.' );
+		$this->assertNull( $this->get_lock_holder( $second )['operation'] );
 	}
 
 	/**
@@ -334,7 +334,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertNotSame( array(), $errors );
 		$this->assertSame( array( $second ), $this->notified_ids() );
-		$this->assertNull( $this->lock_holder( $first )['operation'], 'Nothing ran, so the lock is released.' );
+		$this->assertNull( $this->get_lock_holder( $first )['operation'], 'Nothing ran, so the lock is released.' );
 	}
 
 	/**
@@ -345,7 +345,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$id = $this->create_due_contract();
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
-		$this->assertNull( $this->lock_holder( $id )['operation'], 'No lock is taken on a contract nobody handles.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'No lock is taken on a contract nobody handles.' );
 	}
 
 	/**
@@ -362,7 +362,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertNull( $this->lock_holder( $foreign )['operation'] );
+		$this->assertNull( $this->get_lock_holder( $foreign )['operation'] );
 	}
 
 	/**
@@ -400,7 +400,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertNull( $this->lock_holder( $id )['operation'], 'No lock is taken on a contract the engine does not schedule.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'No lock is taken on a contract the engine does not schedule.' );
 	}
 
 	/**
@@ -445,7 +445,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now(), 0 ) );
 		$this->assertSame( 0, $this->sut->run_batch( $this->now(), -1 ) );
-		$this->assertNull( $this->lock_holder( $first )['operation'], 'A no-op tick locks nothing.' );
+		$this->assertNull( $this->get_lock_holder( $first )['operation'], 'A no-op tick locks nothing.' );
 
 		$this->assertSame( 1, $this->sut->run_batch( $this->now(), 1 ) );
 		$this->assertSame( $first, $this->calls[0]['contract']->get_id(), 'The oldest-due contract goes first.' );
@@ -482,7 +482,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $table, array( 'locked_until' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
+			$wpdb->update( $table, array( 'locked_until_gmt' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
 		}
 
 		// A batch smaller than the stuck backlog: the fresh contract still makes it in.
@@ -507,10 +507,10 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $table, array( 'locked_until' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
+			$wpdb->update( $table, array( 'locked_until_gmt' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->update( $table, array( 'locked_until' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
+		$wpdb->update( $table, array( 'locked_until_gmt' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
 
 		// A batch smaller than the stuck backlog: the retry still makes it in.
 		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
@@ -650,10 +650,10 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	 * The contract's live lock holder.
 	 *
 	 * @param int $id Contract id.
-	 * @return array{exists: bool, operation: ?string, locked_until: ?string}
+	 * @return array{exists: bool, operation: ?string, locked_until_gmt: ?string}
 	 */
-	private function lock_holder( int $id ): array {
-		return ( new ContractRepository() )->lock_holder( $id );
+	private function get_lock_holder( int $id ): array {
+		return ( new ContractRepository() )->get_lock_holder( $id );
 	}
 
 	/**

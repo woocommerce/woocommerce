@@ -1293,7 +1293,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertNotNull( $this->sut->lock_holder( $id )['operation'] );
+		$this->assertNotNull( $this->sut->get_lock_holder( $id )['operation'] );
 	}
 
 	/**
@@ -1303,7 +1303,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 		$lock = $this->sut->acquire_lock( $id, 'due' );
 		$this->assertNotNull( $lock );
-		$before = $this->sut->lock_holder( $id );
+		$before = $this->sut->get_lock_holder( $id );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -1312,7 +1312,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract->set_next_payment_gmt( null );
 		$this->assertTrue( $this->sut->update_fields( $contract, array( 'next_payment_gmt' ), $lock ) );
 
-		$this->assertSame( $before, $this->sut->lock_holder( $id ) );
+		$this->assertSame( $before, $this->sut->get_lock_holder( $id ) );
 	}
 
 	/**
@@ -2098,7 +2098,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock->release();
 		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'items' ) ) );
 		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
-		$this->assertNull( $this->sut->lock_holder( $id )['operation'], 'The internal lock is released.' );
+		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'], 'The internal lock is released.' );
 	}
 
 	/**
@@ -2422,7 +2422,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertNotNull( $lock );
 		$this->assertSame( $id, $lock->get_contract_id() );
-		$this->assertSame( 'checkout', $this->sut->lock_holder( $id )['operation'] );
+		$this->assertSame( 'checkout', $this->sut->get_lock_holder( $id )['operation'] );
 		$this->assertCount( 1, $this->item_ids( $id ), 'Items are written under the lock.' );
 
 		try {
@@ -2443,7 +2443,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$first = $this->sut->insert( $this->keyed_contract( 'lite', 'order:7' ) );
 
 		$this->assertNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' ) );
-		$this->assertNull( $this->sut->lock_holder( $first )['operation'] );
+		$this->assertNull( $this->sut->get_lock_holder( $first )['operation'] );
 	}
 
 	/**

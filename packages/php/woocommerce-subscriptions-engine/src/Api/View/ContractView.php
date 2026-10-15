@@ -100,7 +100,7 @@ final class ContractView {
 
 		$lock_state       = $contract->get_lock_state();
 		$view->lock_state = null === $lock_state ? null : array(
-			'locked_until' => new DateTimeImmutable( $lock_state['locked_until'], new DateTimeZone( 'UTC' ) ),
+			'locked_until' => new DateTimeImmutable( $lock_state['locked_until_gmt'], new DateTimeZone( 'UTC' ) ),
 			'operation'    => $lock_state['operation'],
 		);
 

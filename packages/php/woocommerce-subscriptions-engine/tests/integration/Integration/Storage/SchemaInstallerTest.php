@@ -321,10 +321,10 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$expected = array(
-			'lock_token'     => 'char(32)',
-			'locked_until'   => 'datetime',
-			'lock_operation' => 'varchar(64)',
-			'creation_key'   => 'varchar(100)',
+			'lock_token'       => 'char(32)',
+			'locked_until_gmt' => 'datetime',
+			'lock_operation'   => 'varchar(64)',
+			'creation_key'     => 'varchar(100)',
 		);
 
 		foreach ( $expected as $column => $type ) {

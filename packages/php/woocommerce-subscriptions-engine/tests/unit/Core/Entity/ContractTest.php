@@ -747,17 +747,17 @@ class ContractTest extends TestCase {
 		$row = array_merge(
 			$this->valid_row(),
 			array(
-				'lock_token'     => 'abcdef0123456789abcdef0123456789',
-				'locked_until'   => '2026-02-01 00:10:00',
-				'lock_operation' => 'hold',
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'hold',
 			)
 		);
 
 		$live = Contract::from_storage( array_merge( $row, array( 'lock_live' => '1' ) ) );
 		$this->assertSame(
 			array(
-				'locked_until' => '2026-02-01 00:10:00',
-				'operation'    => 'hold',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'operation'        => 'hold',
 			),
 			$live->get_lock_state()
 		);
@@ -773,16 +773,16 @@ class ContractTest extends TestCase {
 		$row = array_merge(
 			$this->valid_row(),
 			array(
-				'lock_live'      => 1,
-				'lock_token'     => 'abcdef0123456789abcdef0123456789',
-				'locked_until'   => '2026-02-01 00:10:00',
-				'lock_operation' => 'hold',
+				'lock_live'        => 1,
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'hold',
 			)
 		);
 
 		$stored = Contract::from_storage( $row )->to_storage();
 
-		foreach ( array( 'lock_live', 'lock_token', 'locked_until', 'lock_operation' ) as $key ) {
+		foreach ( array( 'lock_live', 'lock_token', 'locked_until_gmt', 'lock_operation' ) as $key ) {
 			$this->assertArrayNotHasKey( $key, $stored );
 		}
 		$this->assertStringNotContainsString( 'abcdef0123456789abcdef0123456789', print_r( Contract::from_storage( $row ), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
@@ -794,10 +794,10 @@ class ContractTest extends TestCase {
 	public function test_create_ignores_lock_state(): void {
 		$contract = Contract::create(
 			array(
-				'extension_slug' => 'acme-subs',
-				'lock_live'      => 1,
-				'locked_until'   => '2026-02-01 00:10:00',
-				'lock_operation' => 'hold',
+				'extension_slug'   => 'acme-subs',
+				'lock_live'        => 1,
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'hold',
 			)
 		);
 

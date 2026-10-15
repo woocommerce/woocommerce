@@ -8,7 +8,7 @@
  * views ({@see ContractView}, {@see CycleView}). No transactions, no cache, no hooks.
  *
  * One lock per contract ({@see self::lock()}): a write that passes the lock is part of the
- * holder's operation; a write without one is a self-contained operation the engine guards
+ * holder's operation; a write without one is a self-contained operation the engine fences
  * itself and refuses with {@see ContractLockedException} while another operation holds the lock.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api

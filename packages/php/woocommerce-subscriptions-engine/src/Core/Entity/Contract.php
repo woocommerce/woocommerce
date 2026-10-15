@@ -249,7 +249,7 @@ final class Contract {
 	 * Read-only lock state, or null when no lock is live. Hydrated from the repository's
 	 * computed `lock_live` flag (the database clock decides liveness); never the token.
 	 *
-	 * @var array{locked_until: string, operation: string}|null
+	 * @var array{locked_until_gmt: string, operation: string}|null
 	 */
 	private $lock_state;
 
@@ -313,7 +313,7 @@ final class Contract {
 	 */
 	public static function create( array $args ): self {
 		// A new contract is always unsaved and unlocked; never adopt a caller-supplied id or lock.
-		unset( $args['id'], $args['lock_live'], $args['locked_until'], $args['lock_operation'] );
+		unset( $args['id'], $args['lock_live'], $args['locked_until_gmt'], $args['lock_operation'] );
 
 		self::assert_creation_key( $args['creation_key'] ?? null );
 
@@ -743,7 +743,7 @@ final class Contract {
 	 * The live lock's expiry (GMT string) and operation label, or null when the contract
 	 * is not locked. Read-only, as of the read; the token is never part of the entity.
 	 *
-	 * @return array{locked_until: string, operation: string}|null
+	 * @return array{locked_until_gmt: string, operation: string}|null
 	 */
 	public function get_lock_state(): ?array {
 		return $this->lock_state;
@@ -823,19 +823,19 @@ final class Contract {
 	 * `lock_live` flag is truthy and both the expiry and the operation are present.
 	 *
 	 * @param array<string, mixed> $data Raw attributes.
-	 * @return array{locked_until: string, operation: string}|null
+	 * @return array{locked_until_gmt: string, operation: string}|null
 	 */
 	private static function lock_state_from( array $data ): ?array {
-		$locked_until = Coercion::coerce_nullable_string( $data['locked_until'] ?? null );
-		$operation    = Coercion::coerce_nullable_string( $data['lock_operation'] ?? null );
+		$locked_until_gmt = Coercion::coerce_nullable_string( $data['locked_until_gmt'] ?? null );
+		$operation        = Coercion::coerce_nullable_string( $data['lock_operation'] ?? null );
 
-		if ( empty( $data['lock_live'] ) || null === $locked_until || null === $operation ) {
+		if ( empty( $data['lock_live'] ) || null === $locked_until_gmt || null === $operation ) {
 			return null;
 		}
 
 		return array(
-			'locked_until' => $locked_until,
-			'operation'    => $operation,
+			'locked_until_gmt' => $locked_until_gmt,
+			'operation'        => $operation,
 		);
 	}
 

@@ -73,31 +73,29 @@ final class ContractLockState {
 	 */
 	public function __construct( string $token ) {
 		$this->token = $token;
-		$this->stamped( ContractLock::TTL_SECONDS );
+		$this->stamp( ContractLock::TTL_SECONDS );
 	}
 
 	/**
 	 * The token.
 	 */
-	public function token(): string {
+	public function get_token(): string {
 		return $this->token;
 	}
 
 	/**
 	 * Record a database stamp that left `$remaining_seconds` until expiry (acquire, extend or
-	 * verify): trust for the window, or less when the lock ends sooner.
+	 * verify): trust for the window, or less when the lock ends sooner, and not at all with a
+	 * window or less left ({@see self::is_trusted()}).
 	 *
 	 * @param int $remaining_seconds Seconds until the stored expiry.
-	 * @return bool Whether the lock may be trusted at all (more than a window left).
 	 */
-	public function stamped( int $remaining_seconds ): bool {
+	public function stamp( int $remaining_seconds ): void {
 		$now = self::now();
 
 		$this->expires_estimate = $now + $remaining_seconds;
 		$trust                  = min( self::TRUST_WINDOW_SECONDS, $remaining_seconds - self::TRUST_WINDOW_SECONDS );
 		$this->trusted_until    = $this->released || $trust <= 0 ? 0.0 : $now + $trust;
-
-		return $this->trusted_until > 0.0;
 	}
 
 	/**
