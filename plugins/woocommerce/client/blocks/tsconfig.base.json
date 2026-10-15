@@ -149,13 +149,13 @@
 				"assets/js/base/stores/store-notices"
 			],
 			"@woocommerce/stores/woocommerce/cart": [
-				"assets/js/base/stores/woocommerce/cart"
+				"assets/js/base/stores/woocommerce/index"
 			],
 			"@woocommerce/stores/woocommerce/products": [
-				"assets/js/base/stores/woocommerce/products"
+				"assets/js/base/stores/products"
 			],
 			"@woocommerce/stores/woocommerce/shopper-lists": [
-				"assets/js/base/stores/woocommerce/shopper-lists"
+				"assets/js/base/stores/shopper-lists"
 			],
 			"@woocommerce/type-defs/*": [
 				"packages/public-api/types/type-defs/*"

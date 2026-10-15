@@ -105,6 +105,12 @@ module.exports = {
 		'@woocommerce/test-utils/msw': 'tests/js/config/msw-setup.js',
 		'^@woocommerce/entities/(.*)$': 'packages/internal/entities/$1',
 		'^@woocommerce/entities$': 'packages/internal/entities',
+		'^@woocommerce/stores/woocommerce/cart$':
+			'assets/js/base/stores/woocommerce/index',
+		'^@woocommerce/stores/woocommerce/products$':
+			'assets/js/base/stores/products',
+		'^@woocommerce/stores/woocommerce/shopper-lists$':
+			'assets/js/base/stores/shopper-lists',
 		'@woocommerce/stores/(.*)$': 'assets/js/base/stores/$1',
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',

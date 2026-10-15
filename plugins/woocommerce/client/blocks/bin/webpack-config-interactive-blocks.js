@@ -57,13 +57,13 @@ const entries = {
 		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
-		'./assets/js/base/stores/woocommerce/cart.ts',
+		'./assets/js/base/stores/woocommerce/index.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/products':
-		'./assets/js/base/stores/woocommerce/products.ts',
+		'./assets/js/base/stores/products.ts',
 	'@woocommerce/stores/woocommerce/shopper-lists':
-		'./assets/js/base/stores/woocommerce/shopper-lists.ts',
+		'./assets/js/base/stores/shopper-lists.ts',
 };
 
 module.exports = {

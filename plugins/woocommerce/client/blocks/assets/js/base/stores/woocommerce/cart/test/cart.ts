@@ -9,7 +9,7 @@ import { speak } from '@wordpress/a11y';
 /**
  * Internal dependencies
  */
-import type { Store, OptimisticCartItem, AddCartItemOutcome } from '../cart';
+import type { Store, OptimisticCartItem, AddCartItemOutcome } from '../types';
 import { triggerAddedToCartEvent } from '../legacy-events';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
@@ -19,26 +19,36 @@ const mockState = {
 	restUrl: 'https://example.com/wp-json/',
 	nonce: 'test-nonce-123',
 } as Store[ 'state' ];
+const mockActions = {} as Store[ 'actions' ];
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
 		getConfig: jest.fn(),
 		store: jest.fn( ( _name, definition ) => {
-			// The cart store calls `store()` twice: once to read `state` and
-			// once to register `actions`. Merge the definition's `state`
-			// descriptors (e.g. the `findItemInCart` selector) onto the shared
-			// mock state so the real selector runs against seeded cart lines,
-			// and carry the action generators through both calls.
+			// The `woocommerce` store is assembled from several `store()`
+			// calls, one per file, which the library merges into one store.
+			// Mirror that: merge each call's `state` descriptors (e.g. the
+			// `findItemInCart` selector) onto the shared mock state so the real
+			// selector runs against seeded cart lines, and merge each call's
+			// `actions` into one object that every call returns. Actions
+			// registered by one file are then reachable from the others, and a
+			// spy assigned to the object replaces the action for all of them.
 			if ( definition?.state ) {
 				Object.defineProperties(
 					mockState,
 					Object.getOwnPropertyDescriptors( definition.state )
 				);
 			}
+			if ( definition?.actions ) {
+				Object.defineProperties(
+					mockActions,
+					Object.getOwnPropertyDescriptors( definition.actions )
+				);
+			}
 			mockRegisteredStore = {
 				state: mockState,
-				actions: definition?.actions ?? mockRegisteredStore?.actions,
+				actions: mockActions,
 			} as MockStore;
 			return mockRegisteredStore;
 		} ),
@@ -157,7 +167,7 @@ function mockBatchFetch(): CapturedRequest[] {
  * @return A promise resolving to the freshly registered cart store actions.
  */
 async function loadCartStore(): Promise< Store[ 'actions' ] > {
-	jest.isolateModules( () => require( '../cart' ) );
+	jest.isolateModules( () => require( '../../index' ) );
 	const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
 	// Drive the refresh so the module-level nonce-ready promise resolves.
 	await runAction( actions.refreshCartItems() );
@@ -513,7 +523,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 		global.fetch = mockFetch;
 
-		jest.isolateModules( () => require( '../cart' ) );
+		jest.isolateModules( () => require( '../../index' ) );
 
 		const iterator = mockRegisteredStore?.actions.refreshCartItems();
 
@@ -541,7 +551,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const mockFetch = jest.fn();
 			global.fetch = mockFetch;
 
-			jest.isolateModules( () => require( '../cart' ) );
+			jest.isolateModules( () => require( '../../index' ) );
 			await runAction( mockRegisteredStore?.actions.refreshCartItems() );
 
 			expect( mockFetch ).not.toHaveBeenCalled();
@@ -553,7 +563,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 				.fn()
 				.mockRejectedValue( new TypeError( 'Failed to fetch' ) );
 
-			jest.isolateModules( () => require( '../cart' ) );
+			jest.isolateModules( () => require( '../../index' ) );
 			const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
 			await runAction( actions.refreshCartItems() );
 			seedCart( [] );

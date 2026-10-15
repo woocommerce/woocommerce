@@ -47,7 +47,7 @@ client/blocks/
 │   ├── blocks/              # Block implementations (cart, checkout, filters, products)
 │   │   └── product-elements-blocks/ # Reusable product element blocks
 │   ├── base/                # Shared components, context, hooks, stores
-│   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
+│   │   └── stores/          # Interactivity API stores (LOCKED)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
 │   └── utils/               # Shared utility functions
@@ -142,7 +142,8 @@ For private stores:
 
 - Not intended for third-party extension
 - Removing/changing store state is NOT a breaking change
-- `assets/js/base/stores/woocommerce/` contains cart, product-data, products stores
+- `assets/js/base/stores/` holds each separate store as one file (`products.ts`, `shopper-lists.ts`, `store-notices.ts`)
+- The `woocommerce` store lives in `assets/js/base/stores/woocommerce/`: `index.ts` registers it, `types.ts` declares its store-wide types, and `cart/` holds the cart code split by concern, with the cart-only types in `cart/types.ts`
 - Cart store uses mutation batching for performance
 
 ### IntegrationRegistry (Extension API)
