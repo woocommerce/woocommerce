@@ -197,16 +197,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 		$fingerprint = UcpRequestFingerprint::compute( $request );
 
-		if ( UcpIdempotencyStore::try_begin( $key, $fingerprint ) ) {
+		$claimed = UcpIdempotencyStore::try_begin( $key, $fingerprint );
+
+		if ( true === $claimed ) {
 			return $key;
+		}
+
+		// Storage is unreachable, which the store logs, so this write cannot be deduplicated. It
+		// proceeds unprotected rather than refused, since a `409` here would refuse every retry too.
+		if ( null === $claimed ) {
+			return '';
 		}
 
 		$existing = UcpIdempotencyStore::find( $key );
 
-		// A row that is gone was taken by someone, then purged: with a window measured in
-		// hours, that cannot be a key claimed moments ago, so it is reported as held.
+		// The row went away between the two statements, which a refused write does as it releases
+		// its key. It is free again, so the claim is retried rather than reported as held.
 		if ( null === $existing ) {
-			return $this->idempotency_in_flight();
+			return true === UcpIdempotencyStore::try_begin( $key, $fingerprint ) ? $key : $this->idempotency_in_flight();
 		}
 
 		if ( (string) $existing['request_fingerprint'] !== $fingerprint ) {

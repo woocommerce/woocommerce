@@ -30,15 +30,18 @@ class UcpIdempotencyStore {
 	/**
 	 * Claim a key for processing.
 	 *
+	 * Three outcomes: an `INSERT IGNORE` that inserts nothing cannot say by itself whether the
+	 * key was already held or the write never landed, and a caller has to tell those apart.
+	 *
 	 * @param string $key Idempotency key.
 	 * @param string $fingerprint Request fingerprint.
-	 * @return bool True when this caller created the row and so owns processing.
+	 * @return bool|null True when this caller owns processing, false when the key is already
+	 *         held, null when the record could not be written at all.
 	 */
-	public static function try_begin( string $key, string $fingerprint ): bool {
+	public static function try_begin( string $key, string $fingerprint ) {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Claiming a key is a write that must reach the database.
-		$wpdb->query(
+		$written = self::write(
 			$wpdb->prepare(
 				"INSERT IGNORE INTO {$wpdb->prefix}wc_ucp_idempotency_keys
 					(idempotency_key, request_fingerprint, state, created_at)
@@ -50,7 +53,36 @@ class UcpIdempotencyStore {
 			)
 		);
 
+		if ( ! $written ) {
+			return null;
+		}
+
 		return 1 === (int) $wpdb->rows_affected;
+	}
+
+	/**
+	 * Run a write against the record table, reporting a failure instead of swallowing it.
+	 *
+	 * A missing table, a deadlock or a dropped connection must not read as an ordinary
+	 * outcome, so the error is logged and the result handed back.
+	 *
+	 * @param string $sql Prepared statement to run.
+	 * @return bool False when the query itself failed.
+	 */
+	private static function write( string $sql ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Prepared by the caller; these writes must reach the database.
+		if ( false !== $wpdb->query( $sql ) ) {
+			return true;
+		}
+
+		wc_get_logger()->error(
+			'UCP idempotency record could not be written: ' . $wpdb->last_error,
+			array( 'source' => 'ucp-idempotency' )
+		);
+
+		return false;
 	}
 
 	/**
@@ -90,8 +122,7 @@ class UcpIdempotencyStore {
 	public static function finalize( string $key, int $status, $data ): void {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Storing the replayable response.
-		$wpdb->query(
+		self::write(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys
 					SET state = %s, response_status = %d, response_body = %s, completed_at = %s
@@ -117,8 +148,7 @@ class UcpIdempotencyStore {
 	public static function delete( string $key ): void {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Releasing the claim.
-		$wpdb->query(
+		self::write(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys WHERE idempotency_key = %s",
 				$key
@@ -155,8 +185,7 @@ class UcpIdempotencyStore {
 			$retention = DAY_IN_SECONDS;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Scheduled cleanup of an internal table.
-		$wpdb->query(
+		self::write(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys WHERE created_at < %s",
 				gmdate( 'Y-m-d H:i:s', time() - $retention )
