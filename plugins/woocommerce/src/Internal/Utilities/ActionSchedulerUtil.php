@@ -7,17 +7,22 @@ use Automattic\WooCommerce\Enums\ActionSchedulerFeature;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Compatibility layer over the copy of Action Scheduler that is actually loaded.
+ * Compatibility layer over whichever copy of Action Scheduler is loaded.
  *
- * Many plugins bundle Action Scheduler. The highest registered copy normally initializes, but a copy
- * loaded atypically can define the classes and functions first, and the newer copies then stand down.
- * The API answering calls can therefore be older than the copy WooCommerce bundles, and older than
- * what `ActionScheduler_Versions::latest_version()` reports, which only knows what was registered.
+ * Many plugins bundle Action Scheduler, and the copy that gets loaded is not always the newest one
+ * registered, nor the one WooCommerce bundles. The functions answering our calls can therefore be older
+ * than expected and lack features core relies on, such as the `unique` and `priority` arguments.
  *
- * This class reports facts about the loaded copy, probes the features core relies on
- * ({@see ActionSchedulerFeature}), tells callers when the loaded copy is ready, and wraps the calls
- * that an older copy handles wrongly: async enqueue, and scheduling with `unique` or `priority`.
- * Calls that pass neither can go to Action Scheduler directly.
+ * In essence this class replaces as_enqueue_async_action(), as_schedule_single_action(),
+ * as_schedule_recurring_action(), as_schedule_cron_action() and as_has_scheduled_action(). The wrappers
+ * emulate or drop what the loaded copy cannot do. Scheduling calls that pass neither `unique` nor
+ * `priority` can still go to Action Scheduler directly. The class also reports what is loaded, probes
+ * the features core relies on ({@see ActionSchedulerFeature}) and says when the loaded copy is ready.
+ *
+ * The rest of the API has kept the same signature since Action Scheduler 2.1.0 and can be called
+ * directly: as_unschedule_action(), as_unschedule_all_actions(), as_next_scheduled_action(),
+ * as_get_scheduled_actions() and as_get_datetime_object(). The exception is as_supports(), which only
+ * exists from 3.9.3. Use {@see ActionSchedulerUtil::supports()} instead.
  *
  * Every probe and call goes through {@see LegacyProxy}, so tests can simulate an older loaded copy.
  */
