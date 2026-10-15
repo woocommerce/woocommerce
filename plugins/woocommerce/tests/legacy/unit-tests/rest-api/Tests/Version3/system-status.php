@@ -5,6 +5,8 @@
  * @package Automattic/WooCommerce/Tests
  */
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+
 /**
  * System Status REST Tests.
  *
@@ -153,7 +155,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
-		$this->assertEquals( 35, count( $environment ) );
+		$this->assertEquals( 36, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
@@ -162,6 +164,15 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
 		$this->assertEquals( wp_get_environment_type(), $environment['wp_environment_type'] );
+
+		// The test environment loads the Action Scheduler copy bundled with WooCommerce.
+		$action_scheduler = (array) $environment['action_scheduler'];
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $action_scheduler['version'] );
+		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $action_scheduler['registered_version'] );
+		$this->assertSame( 'woocommerce', $action_scheduler['source_type'] );
+		$this->assertSame( 'WooCommerce', $action_scheduler['source_name'] );
+		$this->assertSame( ActionSchedulerUtil::get_loaded_path(), $action_scheduler['source_path'] );
+		$this->assertFalse( $action_scheduler['is_risky'] );
 	}
 
 	/**

@@ -79,6 +79,7 @@ const schemas = {
 		{ field: 'home_url', type: any( String ) },
 		{ field: 'site_url', type: any( String ) },
 		{ field: 'version', type: any( String ) },
+		{ field: 'action_scheduler', type: anything() },
 		{ field: 'log_directory', type: any( String ) },
 		{ field: 'log_directory_writable', type: any( Boolean ) },
 		{ field: 'wp_version', type: any( String ) },
@@ -113,6 +114,14 @@ const schemas = {
 			field: 'remote_get_response',
 			type: anyOf( [ 'boolean', 'string', 'number' ] ),
 		},
+	],
+	environment_action_scheduler: [
+		{ field: 'version', type: any( String ) },
+		{ field: 'registered_version', type: any( String ) },
+		{ field: 'source_type', type: any( String ) },
+		{ field: 'source_name', type: any( String ) },
+		{ field: 'source_path', type: any( String ) },
+		{ field: 'is_risky', type: any( Boolean ) },
 	],
 	database: [
 		{ field: 'wc_database_version', type: any( String ) },
@@ -302,6 +311,20 @@ test.describe( 'System Status API tests', () => {
 						external_object_cache === null,
 					`Expect "environment.external_object_cache" to be either null or a boolean.`
 				).toBeTruthy();
+			} );
+
+			await test.step( 'Verify "environment.action_scheduler" fields', () => {
+				const { action_scheduler } = environment;
+
+				for ( const {
+					field,
+					type,
+				} of schemas.environment_action_scheduler ) {
+					expect(
+						action_scheduler[ field ],
+						`Verify type of "environment.action_scheduler.${ field }"`
+					).toEqual( type );
+				}
 			} );
 		} );
 
