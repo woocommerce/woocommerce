@@ -189,7 +189,7 @@ abstract class ActionableAbility extends \WP_Ability {
 					}
 					$value = rest_sanitize_value_from_schema( $value, $args['schema'], $param );
 					if ( is_wp_error( $value ) ) {
-						return self::with_status( $value );
+						return self::with_data( $value, array( 'field' => $param ) );
 					}
 				}
 				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args['update_callback'], $value );
