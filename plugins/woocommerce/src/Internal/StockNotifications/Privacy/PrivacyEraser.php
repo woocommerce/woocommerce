@@ -208,7 +208,8 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	/**
 	 * Erase customer stock notification data for a given email address and the account it belongs to.
 	 *
-	 * This method anonymizes the user email and sets the status of the notifications to 'cancelled'.
+	 * This method anonymizes the user email and cancels Active and Pending notifications with the
+	 * 'privacy' cancellation source. Sent and already Cancelled notifications keep their status.
 	 *
 	 * @param string $email_address The email address to erase data for.
 	 *
@@ -235,9 +236,11 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );
-			$notification->set_status( NotificationStatus::CANCELLED );
-			$notification->set_cancellation_source( NotificationCancellationSource::USER );
-			$notification->set_date_cancelled( time() );
+			if ( in_array( $notification->get_status(), array( NotificationStatus::ACTIVE, NotificationStatus::PENDING ), true ) ) {
+				$notification->set_status( NotificationStatus::CANCELLED );
+				$notification->set_cancellation_source( NotificationCancellationSource::PRIVACY );
+				$notification->set_date_cancelled( time() );
+			}
 			$notification->update_meta_data( '_anonymized', 'yes' );
 			$notification->update_meta_data( 'verification_action_key', '' );
 			$notification->update_meta_data( 'unsubscribe_action_key', '' );

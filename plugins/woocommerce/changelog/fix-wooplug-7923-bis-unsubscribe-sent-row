@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep back-in-stock notifications marked as sent when a customer clicks unsubscribe in an email they already received.
