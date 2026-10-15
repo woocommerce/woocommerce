@@ -40,7 +40,13 @@ class UcpCartSchema extends CartSchema {
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
-		$this->item_schema = $this->controller->get( UcpCartItemSchema::IDENTIFIER );
+		/**
+		 * The controller returns the registered subclass; typed for static analysis.
+		 *
+		 * @var UcpCartItemSchema $item_schema
+		 */
+		$item_schema       = $this->controller->get( UcpCartItemSchema::IDENTIFIER );
+		$this->item_schema = $item_schema;
 	}
 
 	/**
