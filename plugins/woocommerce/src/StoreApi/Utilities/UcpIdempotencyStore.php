@@ -6,10 +6,12 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 /**
  * Persists UCP `Idempotency-Key` records.
  *
- * Concurrency lives at the storage layer: `try_begin()` is an atomic `INSERT IGNORE`
- * against the table's UNIQUE key column, so exactly one of several concurrent requests
- * carrying the same key owns processing. The rest read the row back and either replay the
- * stored response or report a conflict.
+ * `try_begin()` claims a key with an atomic `INSERT IGNORE` on the UNIQUE key column, so one
+ * of several concurrent requests owns processing and the rest replay or conflict.
+ *
+ * A record answers a retry of the request that created it and nothing else, so this table is
+ * never read for reporting or analytics: a stored body is a shopper's basket. Rows are
+ * deleted outright on expiry, never anonymised.
  */
 class UcpIdempotencyStore {
 	/**
@@ -218,12 +220,12 @@ class UcpIdempotencyStore {
 		 *
 		 * @since 11.3.0
 		 *
-		 * @param int $seconds Retention window. Default one day.
+		 * @param int $seconds Retention window. Default one hour.
 		 */
-		$retention = (int) apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', DAY_IN_SECONDS );
+		$retention = (int) apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', HOUR_IN_SECONDS );
 
 		if ( $retention <= 0 ) {
-			$retention = DAY_IN_SECONDS;
+			$retention = HOUR_IN_SECONDS;
 		}
 
 		$completed_cutoff = gmdate( 'Y-m-d H:i:s', time() - $retention );
