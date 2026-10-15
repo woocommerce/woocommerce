@@ -53,4 +53,3 @@ Theme content checks belong to `validate`; `build` packages the committed files.
 
 Add a standalone block theme under `themes/<slug>/`, preserving its licenses and using the slug as its text domain. Run validation with that slug, and add a changelog fragment to that theme's `changelog/` directory. Register the theme explicitly in `pnpm-workspace.yaml`; a wildcard is not required.
 
-This workspace does not yet contain a theme. Theme imports, CI, automated test suites, and release publishing are deferred.
