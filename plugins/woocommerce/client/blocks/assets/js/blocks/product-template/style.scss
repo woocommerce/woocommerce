@@ -9,12 +9,15 @@ $min-product-width: 150px;
 	}
 }
 
-.wc-block-product-template {
+:where(.wc-block-product-template) {
 	margin-top: 0;
 	margin-bottom: 0;
+	padding: 0;
+}
+
+.wc-block-product-template {
 	max-width: 100%;
 	list-style: none;
-	padding: 0;
 
 	// Unset background colors that can be inherited from Global Styles with extra specificity.
 	&.wc-block-product-template {
@@ -96,10 +99,11 @@ $min-product-width: 150px;
 	position: relative; // Create new stacking context
 	container-type: inline-size;
 	container-name: carousel;
-	// Padding to prevent focus outline from being clipped (WCAG 2.4.13).
-	padding: 4px;
 
 	.wc-block-product {
+		box-sizing: border-box;
+		// Padding to prevent focus outline from being clipped.
+		padding: 4px;
 		scroll-snap-align: center;
 		flex-basis: 0;
 		// Show 2 products in 85% of available space.

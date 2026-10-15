@@ -182,12 +182,12 @@ class SettingsController {
 				),
 
 				array(
-					'title'    => __( 'Guest sign-up', 'woocommerce' ),
+					'title'    => __( 'Require login', 'woocommerce' ),
 					'desc'     => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
 					'id'       => 'woocommerce_customer_stock_notifications_require_account',
 					'default'  => 'no',
 					'type'     => 'checkbox',
-					'desc_tip' => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
+					'desc_tip' => __( 'When enabled, guests see a login prompt instead of the sign-up form.', 'woocommerce' ),
 				),
 
 				array(

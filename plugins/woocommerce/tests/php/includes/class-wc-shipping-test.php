@@ -360,6 +360,340 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The shipping packages filter runs on every call unless caching is explicitly enabled.
+	 */
+	public function test_calculate_shipping_does_not_memoize_packages_filter_by_default(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 3, $filter_calls, 'The public filter should retain its existing timing by default.' );
+	}
+
+	/**
+	 * @testdox Package calculation exposes the packages completed so far through get_packages().
+	 */
+	public function test_calculate_shipping_exposes_in_progress_packages(): void {
+		$observed_packages = array();
+		$packages          = array(
+			'first'  => array(
+				'package_id' => 'first',
+				'rates'      => array(),
+			),
+			'second' => array(
+				'package_id' => 'second',
+				'rates'      => array(),
+			),
+		);
+		$this->sut         = $this->getMockBuilder( WC_Shipping::class )
+			->onlyMethods( array( 'calculate_shipping_for_package' ) )
+			->getMock();
+		$this->sut->method( 'calculate_shipping_for_package' )
+			->willReturnCallback(
+				function ( $package ) use ( &$observed_packages ) {
+					$observed_packages[] = $this->sut->get_packages();
+					return $package;
+				}
+			);
+
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame(
+			array(
+				array(),
+				array( 'first' => $packages['first'] ),
+			),
+			$observed_packages,
+			'Callbacks should see only packages completed before the current package.'
+		);
+	}
+
+	/**
+	 * @testdox The shipping packages filter result is memoized when caching is explicitly enabled.
+	 */
+	public function test_calculate_shipping_memoizes_packages_filter_when_enabled(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			$shipping_packages['reorganized'] = true;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first  = $this->sut->calculate_shipping( $packages );
+		$second = $this->sut->calculate_shipping( $packages );
+		$third  = $this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 1, $filter_calls, 'The filter should run once for repeated identical calls.' );
+		$this->assertArrayHasKey( 'reorganized', $first, 'The first call should return the filtered packages.' );
+		$this->assertSame( $first, $second, 'The memoized result should preserve the filter output.' );
+		$this->assertSame( $first, $third, 'The memoized result should remain stable.' );
+
+		$packages[0]['destination']['country'] = 'GB';
+		$packages[0]['destination']['state']   = '';
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Material package changes should invalidate the memo.' );
+
+		$this->sut->reset_shipping();
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 3, $filter_calls, 'Resetting shipping should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox An empty shipping packages filter result is memoized when caching is enabled.
+	 */
+	public function test_calculate_shipping_memoizes_empty_packages_filter_result_when_enabled(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$filter_calls = 0;
+		$filter       = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array();
+		};
+
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first  = $this->sut->calculate_shipping( $packages );
+		$second = $this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 1, $filter_calls, 'An empty filtered result should still be cached.' );
+		$this->assertSame( array(), $first, 'The first call should return the empty filtered result.' );
+		$this->assertSame( $first, $second, 'The empty result should be returned from the memo.' );
+	}
+
+	/**
+	 * @testdox Changing a package key invalidates the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_package_key_changes(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$package      = $this->get_package_hash_test_package();
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( array( 0 => $package ) );
+		$result = $this->sut->calculate_shipping( array( 'replacement' => $package ) );
+
+		$this->assertSame( 2, $filter_calls, 'Changing the package key should invalidate the memo.' );
+		$this->assertArrayHasKey( 'replacement', $result, 'The returned packages should use the current key.' );
+		$this->assertArrayNotHasKey( 0, $result, 'The previous package key should not be returned.' );
+	}
+
+	/**
+	 * @testdox Changing non-rate package metadata invalidates the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_non_rate_metadata_changes(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$packages[0]['package_name'] = 'Replacement package';
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Filter-visible metadata should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox Changing product data invalidates the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_product_data_changes(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->set_weight( '1' );
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$product->set_weight( '2' );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Mutable product data should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox Removing nested product data invalidates the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_nested_product_data_is_removed(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->set_category_ids( array( 123 ) );
+		$product->apply_changes();
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$product->set_category_ids( array() );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Removing an array-valued product property should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox Product dates are included in the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_memoizes_product_dates(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$date_created = new WC_DateTime( '2026-01-01 00:00:00', new DateTimeZone( 'UTC' ) );
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->set_date_created( $date_created );
+		$product->apply_changes();
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 1, $filter_calls, 'A product date should not disable memoization.' );
+
+		$date_created->modify( '+1 day' );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Changing a product date should invalidate the memo.' );
+	}
+
+	/**
+	 * @testdox Pending product metadata changes invalidate the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_invalidates_filter_memo_when_product_metadata_changes(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$packages     = array( $this->get_package_hash_test_package() );
+		$product      = $packages[0]['contents']['test_item']['data'];
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			$shipping_packages[0]['observed_metadata'] = $shipping_packages[0]['contents']['test_item']['data']->get_meta( 'shipping_cache_test' );
+			return $shipping_packages;
+		};
+
+		$product->set_object_read( true );
+		$product->add_meta_data( 'shipping_cache_test', 'before', true );
+		$metadata = $product->get_meta_data()[0];
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first           = $this->sut->calculate_shipping( $packages );
+		$metadata->value = 'after';
+		$second          = $this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Pending metadata changes should invalidate the memo.' );
+		$this->assertSame( 'before', $first[0]['observed_metadata'], 'The first result should use the original metadata.' );
+		$this->assertSame( 'after', $second[0]['observed_metadata'], 'The second result should use the pending metadata.' );
+	}
+
+	/**
+	 * @testdox Unsupported objects anywhere in package metadata disable the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_does_not_memoize_unsupported_package_metadata_objects(): void {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+
+		$metadata                          = new SplObjectStorage();
+		$packages                          = array( $this->get_package_hash_test_package() );
+		$packages[0]['extension_metadata'] = array( 'state' => $metadata );
+		$filter_calls                      = 0;
+		$filter                            = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			$shipping_packages[0]['metadata_count'] = count( $shipping_packages[0]['extension_metadata']['state'] );
+			return $shipping_packages;
+		};
+
+		$metadata->attach( new stdClass() );
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$first = $this->sut->calculate_shipping( $packages );
+		$metadata->attach( new stdClass() );
+		$second = $this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 2, $filter_calls, 'Unsupported nested objects should disable memoization.' );
+		$this->assertSame( 1, $first[0]['metadata_count'], 'The first filter result should expose the initial object state.' );
+		$this->assertSame( 2, $second[0]['metadata_count'], 'The second filter result should expose the changed object state.' );
+	}
+
+	/**
+	 * @testdox Shipping debug mode bypasses the shipping packages filter memo.
+	 */
+	public function test_calculate_shipping_does_not_memoize_in_debug_mode(): void {
+		$packages     = array( $this->get_package_hash_test_package() );
+		$filter_calls = 0;
+		$filter       = function ( $shipping_packages ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $shipping_packages;
+		};
+
+		add_filter( 'woocommerce_shipping_packages_cache_enabled', '__return_true' );
+		add_filter( 'woocommerce_shipping_packages', $filter );
+
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+		$this->sut->calculate_shipping( $packages );
+
+		$this->assertSame( 3, $filter_calls, 'Debug mode should run the filter on every call.' );
+	}
+
+	/**
 	 * Data provider for ignored package hash fields.
 	 *
 	 * @return array[]
