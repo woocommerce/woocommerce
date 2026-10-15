@@ -127,7 +127,7 @@ Adding, updating or removing a dependency can make pnpm rewrite unrelated entrie
 
 For one or a few dependencies:
 
-1. Make the change with pnpm (`add`, `update` or `remove`), then check what it did with `git diff --numstat HEAD -- :/pnpm-lock.yaml`. If the package is pinned under `overrides:` in `pnpm-workspace.yaml`, change the override instead and commit pnpm's lockfile. If neither a `package.json` nor `pnpm-workspace.yaml` changed (for example, `pnpm update` found nothing newer), restore the lockfile with `git checkout HEAD -- :/pnpm-lock.yaml` and stop.
+1. Make the change with pnpm (`add`, `update` or `remove`), then check what it did with `git diff --numstat HEAD -- :/pnpm-lock.yaml`. If the package is pinned under `overrides:` in `pnpm-workspace.yaml`, change the override instead and commit pnpm's lockfile. If the pnpm command changed neither a `package.json` nor `pnpm-workspace.yaml` (for example, `pnpm update` found nothing newer), restore the lockfile with `git checkout HEAD -- :/pnpm-lock.yaml` and stop.
 2. If the diff holds more than your dependency's entries, save pnpm's lockfile outside the repository, restore the committed one with `git checkout HEAD -- :/pnpm-lock.yaml`, and bring over only what your change needs: its `importers:` entry, the `snapshots:` and `packages:` entries its new version reaches that the restored file lacks, and for an update or removal, the deletion of entries only the old version reached. Copy entries verbatim from pnpm's file; never write or edit an entry yourself. Deleted lines are expected for updates and removals.
 3. If pnpm also changed another dependency of the same package so that it names your dependency's new version (a peer), stop and ask for review. Keeping the old entry passes every check but leaves that dependency on the old peer, and copying it can add hundreds of lines.
 4. Run `pnpm -C "$(git rev-parse --show-toplevel)" install --frozen-lockfile`. It fails on missing entries but not on extra or stale ones, so it does not show whether every change was needed.
@@ -135,7 +135,7 @@ For one or a few dependencies:
 
 To see what the branch already changed in the lockfile, run `git diff --numstat "$(git merge-base origin/trunk HEAD)" HEAD -- :/pnpm-lock.yaml` (use the PR's base branch if it is not trunk). If an earlier commit kept pnpm's rewrites that its change did not need, redo that change with these steps, or say in the PR that you committed pnpm's lockfile as written.
 
-If a trunk merge conflicts in `pnpm-lock.yaml`, take trunk's version, conclude the merge, then redo the steps for the dependencies the branch changed in a separate commit.
+If a trunk merge conflicts in `pnpm-lock.yaml`, take trunk's version and conclude the merge. Then run `pnpm install` and continue from step 2 for every dependency the branch changed, committing the result separately.
 
 ## Important Linting Guidelines
 
