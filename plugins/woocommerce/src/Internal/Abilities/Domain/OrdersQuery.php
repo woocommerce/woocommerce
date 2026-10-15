@@ -8,6 +8,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -76,6 +78,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function execute( array $input ) {
 		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
 
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
@@ -137,6 +147,17 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['date_query'][] = $modified_date_query;
 		}
 
+		$extension_args = AbilityExtensions::get_query_args( 'order', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$args = array_merge_recursive( $args, $extension_args );
+		} else {
+			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
+		}
+
 		$results = wc_get_orders( $args );
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
 		$orders  = array_values(
@@ -182,7 +203,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
@@ -267,6 +288,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return AbilityExtensions::add_query_filters_schema( $schema, 'order' );
 	}
 
 	/**
