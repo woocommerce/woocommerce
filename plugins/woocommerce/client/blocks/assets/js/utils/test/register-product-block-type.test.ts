@@ -152,6 +152,70 @@ describe( 'registerProductBlockType', () => {
 		expect( mockUnregisterBlockType ).not.toHaveBeenCalled();
 	} );
 
+	it( 'allows product blocks directly in a per-product template', () => {
+		mockPostType = 'wp_template';
+		mockTemplateSlug = 'single-product-v-neck-t-shirt';
+		mockIsSiteEditor = true;
+		const registerProductBlockType = loadRegistrationFunction();
+
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/per-product-template-block',
+		} );
+		mockContextSubscription();
+
+		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 2 );
+		expect( mockUnregisterBlockType ).toHaveBeenCalledWith(
+			'woocommerce/per-product-template-block'
+		);
+		expect( mockRegisterBlockType ).toHaveBeenLastCalledWith(
+			expect.objectContaining( {
+				name: 'woocommerce/per-product-template-block',
+				title: 'Test product block',
+			} ),
+			expect.objectContaining( {
+				ancestor: undefined,
+			} )
+		);
+	} );
+
+	it( 'registers eligible product blocks in the pattern editor without the Site Editor store', () => {
+		mockPostType = 'wp_block';
+		mockTemplateSlug = 'on-sale-products-pattern';
+		mockIsSiteEditor = false;
+		const registerProductBlockType = loadRegistrationFunction();
+
+		registerProductBlockType(
+			{
+				...blockSettings,
+				name: 'woocommerce/pattern-block',
+			},
+			{ isAvailableOnPostEditor: true }
+		);
+		registerProductBlockType( {
+			...blockSettings,
+			name: 'woocommerce/site-editor-only-block',
+		} );
+		mockContextSubscription();
+
+		expect( mockRegisterBlockType ).toHaveBeenCalledTimes( 1 );
+		expect( mockRegisterBlockType ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				name: 'woocommerce/pattern-block',
+				title: 'Test product block',
+			} ),
+			expect.objectContaining( {
+				ancestor: [ 'woocommerce/single-product' ],
+			} )
+		);
+		expect( mockRegisterBlockType ).not.toHaveBeenCalledWith(
+			expect.objectContaining( {
+				name: 'woocommerce/site-editor-only-block',
+			} ),
+			expect.anything()
+		);
+	} );
+
 	it( 're-registers a block with the ancestor required by each template', () => {
 		mockPostType = 'wp_template';
 		mockTemplateSlug = 'twentytwentyfour//coming-soon';

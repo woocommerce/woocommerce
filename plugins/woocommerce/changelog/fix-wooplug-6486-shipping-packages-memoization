@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Allow extensions to opt into request-scoped memoization of the woocommerce_shipping_packages filter when every callback is safe to cache.

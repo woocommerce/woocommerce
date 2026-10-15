@@ -142,24 +142,16 @@ h2.wc-block-mini-cart__title {
 	.wc-block-mini-cart__footer-actions,
 	.wc-block-mini-cart__footer-actions > .block-editor-inner-blocks > .block-editor-block-list__layout {
 		display: flex;
+		flex-wrap: wrap;
 		gap: $gap;
 
 		.wc-block-components-button,
 		.wp-block-button,
 		.wp-block-woocommerce-mini-cart-cart-button-block,
 		.wp-block-woocommerce-mini-cart-checkout-button-block {
-			flex-grow: 1;
+			flex: 1 1 0;
+			min-width: min-content;
 			display: inline-flex;
-		}
-
-		.wp-block-woocommerce-mini-cart-cart-button-block {
-			@media only screen and (min-width: 480px) {
-				display: inline-flex;
-			}
-		}
-
-		@media only screen and (max-width: 480px) {
-			flex-direction: column;
 		}
 	}
 
