@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace the removed `pnpm test:e2e` script in the E2E README with the `test:e2e:core-parallel` and `test:e2e:core-serial` scripts.

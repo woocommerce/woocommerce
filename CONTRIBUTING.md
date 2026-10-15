@@ -87,8 +87,8 @@ pnpm test:unit:env:watch
 cd plugins/woocommerce
 # Start the E2E environment
 pnpm env:e2e
-# Run Playwright E2E tests
-pnpm test:e2e
+# Run Playwright E2E tests (use test:e2e:core-serial for specs in serialRunSpecs)
+pnpm test:e2e:core-parallel
 
 # JavaScript tests
 pnpm --filter='@woocommerce/admin-library' test:js
