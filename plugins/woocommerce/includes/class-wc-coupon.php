@@ -924,8 +924,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @param string   $used_by  Either user ID or billing email.
-	 * @param WC_Order $order  If provided, will clear the coupons held by this order.
+	 * @param int|string $used_by  Either user ID or billing email.
+	 * @param WC_Order   $order  If provided, will clear the coupons held by this order.
 	 * @return void
 	 */
 	public function increase_usage_count( $used_by = '', $order = null ) {
@@ -943,7 +943,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @param string $used_by Either user ID or billing email.
+	 * @param int|string $used_by Either user ID or billing email.
 	 * @return void
 	 */
 	public function decrease_usage_count( $used_by = '' ) {
