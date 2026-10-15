@@ -84,6 +84,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function cleanup_helper_transients(): void {
 		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
