@@ -252,6 +252,7 @@ class OrdersScheduler extends ImportScheduler {
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 			{$where_clause}" // phpcs:ignore unprepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared SQL ok.
 		);
+		self::log_last_db_error( 'Could not count the orders to import' );
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -313,6 +314,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 {$where_clause}
 "
 		); // phpcs:ignore unprepared SQL ok.
+		self::log_last_db_error( 'Could not count the orders to import' );
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -404,7 +406,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		if ( self::is_excluded_from_import( (int) $order_id ) ) {
+		if ( self::should_skip_import( $order ) ) {
 			// The record can never finish importing, so keep it off the list Analytics settings retries.
 			self::clear_failed_order_import( $order_id );
 			return;
@@ -634,8 +636,6 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return void
 	 */
 	public static function process_pending_batch( $cursor_date = null, $cursor_id = null ) {
-		global $wpdb;
-
 		$logger  = wc_get_logger();
 		$context = array( 'source' => 'wc-analytics-order-import' );
 
@@ -671,8 +671,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		// A failed query (a broken import conditions filter, say) also returns an empty result.
 		// Leave the cursor where it is so the batch is retried once the cause is fixed.
-		if ( '' !== $wpdb->last_error ) {
-			$logger->error( 'Could not query orders to import, leaving the cursor unchanged: ' . $wpdb->last_error, $context );
+		if ( self::log_last_db_error( 'Could not query orders to import, leaving the cursor unchanged' ) ) {
 			return;
 		}
 
@@ -910,14 +909,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		/**
 		 * Filters the SQL conditions that decide which orders and refunds Analytics imports.
 		 *
-		 * The same conditions apply to the "Import historical data" count and pages, to the
-		 * scheduled import query and to each single import, so an excluded record is neither
-		 * imported nor shown as pending. Prefix column names with $table_alias: under HPOS it is
-		 * `orders` (columns `type`, `status`, `parent_order_id`), otherwise it is the posts table
-		 * name (`post_type`, `post_status`, `post_parent`). Refunds keep their order in the parent
-		 * column, so a plain "parent is 0" condition drops refunds along with child orders.
-		 * Records already imported before a condition excludes them are left in place; delete and
-		 * re-import historical data to remove them.
+		 * Conditions are inserted as raw SQL into the historical count and page queries, the scheduled
+		 * import query and the per-record check, so bind any values with $wpdb->prepare(). Prefix column
+		 * names with $table_alias: `orders` under HPOS (`type`, `status`, `parent_order_id`), otherwise the
+		 * posts table name (`post_type`, `post_status`, `post_parent`). A refund inherits the exclusion of
+		 * its parent order. Records imported before a condition excluded them keep syncing until historical
+		 * data is deleted and re-imported.
 		 *
 		 * @since 11.3.0
 		 *
@@ -945,14 +942,17 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Whether the conditions from the `woocommerce_analytics_orders_import_where_clauses` filter exclude a record.
 	 *
-	 * Costs nothing while the filter is unused and one primary-key probe otherwise.
+	 * Costs nothing while the filter is unused and one primary-key probe per record otherwise. A refund
+	 * also inherits the exclusion of its parent order, which otherwise would show a refund of a sale
+	 * Analytics never counted.
 	 *
 	 * @internal
 	 * @since 11.3.0
-	 * @param int $order_id Order or refund ID.
+	 * @param int $order_id  Order or refund ID.
+	 * @param int $parent_id For a refund, its parent order ID. Zero to check the record alone.
 	 * @return bool
 	 */
-	public static function is_excluded_from_import( int $order_id ): bool {
+	public static function is_excluded_from_import( int $order_id, int $parent_id = 0 ): bool {
 		global $wpdb;
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -970,16 +970,57 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return false;
 		}
 
+		// Evaluate the conditions on the record's own row: 1 keeps it, 0 excludes it, and no row
+		// means the record is not in this table, so the conditions cannot exclude it.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and filtered SQL conditions are interpolated; the ID is prepared.
-		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$from} WHERE {$id_column} = %d {$where} LIMIT 1", $order_id ) );
+		$kept = $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE( ( 1 {$where} ), 0 ) FROM {$from} WHERE {$id_column} = %d LIMIT 1", $order_id ) );
 
 		// A failed probe must not pass as an exclusion: the import then runs (and may fail) as usual
 		// instead of silently dropping the record and clearing its failed-import entry.
-		if ( '' !== $wpdb->last_error ) {
+		if ( '' !== $wpdb->last_error || null === $kept ) {
 			return false;
 		}
 
-		return null === $found;
+		if ( ! (int) $kept ) {
+			return true;
+		}
+
+		return $parent_id > 0 && self::is_excluded_from_import( $parent_id );
+	}
+
+	/**
+	 * Whether Analytics leaves a record out of its tables.
+	 *
+	 * True when the import conditions exclude the record and Analytics does not hold it yet. Records
+	 * imported before a condition excluded them keep syncing, so their status and totals stay accurate.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @param \WC_Abstract_Order $order Order or refund.
+	 * @return bool
+	 */
+	public static function should_skip_import( $order ): bool {
+		$parent_id = 'shop_order_refund' === $order->get_type() ? (int) $order->get_parent_id() : 0;
+
+		return self::is_excluded_from_import( (int) $order->get_id(), $parent_id ) && ! self::has_order_stats_row( $order->get_id() );
+	}
+
+	/**
+	 * Log the last database error, if there is one, to the import log.
+	 *
+	 * @param string $message What failed; the database error is appended.
+	 * @return bool Whether an error was logged.
+	 */
+	private static function log_last_db_error( string $message ): bool {
+		global $wpdb;
+
+		if ( '' === $wpdb->last_error ) {
+			return false;
+		}
+
+		wc_get_logger()->error( "{$message}: {$wpdb->last_error}", array( 'source' => 'wc-analytics-order-import' ) );
+
+		return true;
 	}
 
 	/**
