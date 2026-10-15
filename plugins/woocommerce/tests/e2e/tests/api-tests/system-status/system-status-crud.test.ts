@@ -15,11 +15,9 @@ const expect = baseExpect.extend( {
 	anyOf( received, expectedTypes ) {
 		const assertionName = 'anyOf';
 		let pass: boolean;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let matcherResult: any;
 
 		try {
-			// eslint-disable-next-line playwright/no-standalone-expect -- Custom matcher definition, not a standalone assertion.
 			baseExpect( expectedTypes ).toContain( typeof received );
 			pass = true;
 		} catch ( e ) {
@@ -43,7 +41,7 @@ const expect = baseExpect.extend( {
 					( matcherResult
 						? `Received: ${ this.utils.printReceived(
 								matcherResult.actual
-						  ) }`
+							) }`
 						: '' )
 			: () =>
 					this.utils.matcherHint(
@@ -60,7 +58,7 @@ const expect = baseExpect.extend( {
 					( matcherResult
 						? `Received: ${ this.utils.printReceived(
 								matcherResult.actual
-						  ) }`
+							) }`
 						: '' );
 
 		return {
@@ -267,7 +265,6 @@ const getExpectedWooCommerceTables = ( dbPrefix ) => {
 /* eslint-disable playwright/no-nested-step */
 test.describe( 'System Status API tests', () => {
 	test( 'can view all system status items', async ( { request } ) => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let responseJSON: any,
 			databasePrefix,
 			databaseSize,
@@ -452,6 +449,7 @@ test.describe( 'System Status API tests', () => {
 
 			for ( const dropin of dropins ) {
 				const { name, plugin } = dropin;
+
 				await test.step( `Verify dropin "${ name }"`, async () => {
 					expect( name, `Verify type of "name"` ).toEqual(
 						any( String )
