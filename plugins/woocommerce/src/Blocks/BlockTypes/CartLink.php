@@ -35,7 +35,7 @@ class CartLink extends AbstractBlock {
 			'<div %1$s><a class="wc-block-cart-link" href="%2$s"%5$s>%3$s<span class="wc-block-cart-link__text">%4$s</span></a></div>',
 			get_block_wrapper_attributes(
 				array(
-					'class' => esc_attr( $classes_and_styles['classes'] ),
+					'class' => $classes_and_styles['classes'],
 					'style' => $classes_and_styles['styles'],
 				)
 			),

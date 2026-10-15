@@ -263,8 +263,8 @@ class AddToCartForm extends AbstractBlock {
 			array_filter(
 				array(
 					'wp-block-add-to-cart-form wc-block-add-to-cart-form',
-					esc_attr( $classes_and_styles['classes'] ),
-					esc_attr( $product_classname ),
+					$classes_and_styles['classes'],
+					$product_classname,
 					$is_stepper_style ? 'wc-block-add-to-cart-form--stepper' : 'wc-block-add-to-cart-form--input',
 				)
 			)
@@ -273,7 +273,7 @@ class AddToCartForm extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class' => $classes,
-				'style' => esc_attr( $classes_and_styles['styles'] ),
+				'style' => $classes_and_styles['styles'],
 			)
 		);
 

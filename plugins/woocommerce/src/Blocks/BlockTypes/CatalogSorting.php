@@ -61,11 +61,11 @@ class CatalogSorting extends AbstractBlock {
 					array_filter(
 						[
 							'woocommerce wc-block-catalog-sorting',
-							esc_attr( $classes_and_styles['classes'] ),
+							$classes_and_styles['classes'],
 						]
 					)
 				),
-				'style' => esc_attr( $classes_and_styles['styles'] ?? '' ),
+				'style' => $classes_and_styles['styles'] ?? '',
 			)
 		);
 

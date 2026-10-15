@@ -62,8 +62,8 @@ class ProductFilterPriceSlider extends AbstractBlock {
 			array(
 				'data-wp-interactive' => 'woocommerce/product-filters',
 				'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
-				'class'               => esc_attr( $classes ),
-				'style'               => esc_attr( $style ),
+				'class'               => (string) $classes,
+				'style'               => (string) $style,
 			)
 		);
 

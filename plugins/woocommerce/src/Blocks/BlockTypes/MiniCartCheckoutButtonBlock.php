@@ -27,7 +27,7 @@ class MiniCartCheckoutButtonBlock extends AbstractInnerBlock {
 		$checkout_page_url     = get_permalink( $checkout_page_id );
 		$wrapper_attributes    = get_block_wrapper_attributes(
 			array(
-				'href'  => esc_url( $checkout_page_url ),
+				'href'  => esc_url_raw( (string) $checkout_page_url ),
 				'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__footer-checkout',
 			)
 		);
