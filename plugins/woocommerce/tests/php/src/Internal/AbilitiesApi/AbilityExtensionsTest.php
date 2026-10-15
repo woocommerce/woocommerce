@@ -910,9 +910,9 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'order',
 			'test-ext',
-			static function ( \WC_Order $subject, \WP_Ability $current ) use ( &$ability ) {
+			static function ( \WC_Order $subject, \WP_Ability $current, array $input ) use ( &$ability ) {
 				$ability = $current->get_name();
-				if ( 'yes' === $subject->get_meta( '_test_locked' ) && 'completed' === $subject->get_status() ) {
+				if ( 'yes' === $subject->get_meta( '_test_locked' ) && 'completed' === ( $input['status'] ?? '' ) ) {
 					return new \WP_Error( 'test_locked', 'Use test-ext/order-unlock first.' );
 				}
 				return null;
@@ -945,15 +945,15 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should run a validator on the changed product, after the field callbacks, and save nothing when it refuses.
+	 * @testdox Should run a validator with the input, after the field callbacks, and save nothing when it refuses.
 	 */
-	public function test_a_validator_sees_the_changed_product(): void {
+	public function test_a_validator_sees_the_input_and_the_fields(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$this->register_validator(
 			'product',
 			'other_ext',
-			static function ( \WC_Product $subject ) {
-				if ( 'Pencil' === $subject->get_name() && 'red' === $subject->get_meta( '_test_color' ) ) {
+			static function ( \WC_Product $subject, \WP_Ability $ability, array $input ) {
+				if ( 'Pen' === $subject->get_name() && 'Pencil' === ( $input['name'] ?? '' ) && 'red' === $subject->get_meta( '_test_color' ) ) {
 					return new \WP_Error( 'test_red_pencil', 'No red pencils.', array( 'status' => 409 ) );
 				}
 				return null;
@@ -1031,8 +1031,8 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->register_validator(
 			'product',
 			'other_ext',
-			static function ( \WC_Product $subject ) {
-				if ( 'Boom' === $subject->get_name() ) {
+			static function ( \WC_Product $subject, \WP_Ability $ability, array $input ) {
+				if ( 'Boom' === ( $input['name'] ?? '' ) ) {
 					throw new \RuntimeException( 'Validator broke.' );
 				}
 				return null;

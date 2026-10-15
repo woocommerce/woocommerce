@@ -103,7 +103,7 @@ abstract class ActionableAbility extends \WP_Ability {
 
 		$rejected = $this->apply_fields( $subject, $updates );
 		if ( null === $rejected && AbilityExtensions::is_enabled() ) {
-			$rejected = $this->validate( $subject );
+			$rejected = $this->validate( $subject, $input );
 		}
 		if ( null !== $rejected ) {
 			return $rejected;
@@ -187,14 +187,15 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the validators of the resource on the changed object.
+	 * Run the validators of the resource on the requested change.
 	 *
-	 * @param \WC_Data $subject Changed object.
+	 * @param \WC_Data $subject Object before the change, with the extension fields applied.
+	 * @param array    $input   Ability input.
 	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
 	 */
-	private function validate( $subject ): ?\WP_Error {
+	private function validate( $subject, array $input ): ?\WP_Error {
 		foreach ( AbilityExtensions::get_validators( $this->get_resource() ) as $args ) {
-			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
+			$rejected = self::run_callback( $args['callback'], array( $subject, $this, $input ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				return $rejected;
 			}

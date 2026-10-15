@@ -181,8 +181,9 @@ class AbilityExtensions {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility changes, `product` or `order`.
 	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
-	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
-	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
+	 *     @type callable $callback  Receives the object, the ability and the ability input, after the field
+	 *                               callbacks and before the write. The object does not have Core's change yet,
+	 *                               so the input says what will change. It returns a WP_Error to refuse the
 	 *                               change, and then nothing is saved. The error gets the namespace in its
 	 *                               data, and the 400 status when it has no status. Its message can name the
 	 *                               ability or screen to use instead. Rules:
