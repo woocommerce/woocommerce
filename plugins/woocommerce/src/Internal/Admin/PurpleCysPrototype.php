@@ -49,6 +49,8 @@ class PurpleCysPrototype {
 	public function register_hooks(): void {
 		add_action( 'admin_init', array( $this, 'handle_request' ) );
 		add_action( 'admin_init', array( $this, 'reset_purple_on_wizard_open' ) );
+		add_action( 'admin_init', array( $this, 'sync_customize_store_task' ), 20 );
+		add_action( 'switch_theme', array( $this, 'complete_customize_store_task_for_purple' ), 10, 2 );
 		add_action( 'wp_ajax_woocommerce_purple_cys_prototype_save_state', array( $this, 'handle_save_state' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 999 );
 		add_action( 'admin_head', array( $this, 'output_admin_bar_css' ) );
@@ -185,6 +187,50 @@ class PurpleCysPrototype {
 	}
 
 	/**
+	 * Option that marks the "Customize your store" task as done.
+	 */
+	const CYS_TASK_OPTION = 'woocommerce_admin_customize_store_completed';
+
+	/**
+	 * Mark the "Customize your store" task done when Purple becomes the active theme.
+	 *
+	 * @param string    $new_name  Name of the new theme.
+	 * @param \WP_Theme $new_theme The new theme.
+	 */
+	public function complete_customize_store_task_for_purple( $new_name, $new_theme ): void {
+		if ( $new_theme instanceof \WP_Theme && self::PURPLE_SLUG === $new_theme->get_stylesheet() ) {
+			update_option( self::CYS_TASK_OPTION, 'yes' );
+		}
+	}
+
+	/**
+	 * Keep the "Customize your store" task in step with Purple: done whenever Purple is active,
+	 * including the fake Active state picked from the "Purple prototype" menu.
+	 */
+	public function sync_customize_store_task(): void {
+		if ( wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$state = $this->get_settings()['state'];
+
+		if ( 'real' === $state ) {
+			$is_complete = self::PURPLE_SLUG === get_stylesheet() ? true : null;
+		} else {
+			$is_complete = 'active' === $state;
+		}
+
+		if ( null === $is_complete ) {
+			return;
+		}
+
+		$value = $is_complete ? 'yes' : 'no';
+		if ( get_option( self::CYS_TASK_OPTION ) !== $value ) {
+			update_option( self::CYS_TASK_OPTION, $value );
+		}
+	}
+
+	/**
 	 * Remove Purple whenever the setup wizard opens, so its Purple step can be tested from the start.
 	 */
 	public function reset_purple_on_wizard_open(): void {
@@ -262,7 +308,7 @@ class PurpleCysPrototype {
 	 */
 	private function delete_purple(): bool {
 		// Picking Purple in the setup wizard ticks the "Customize your store" task, so untick it too.
-		update_option( 'woocommerce_admin_customize_store_completed', 'no' );
+		update_option( self::CYS_TASK_OPTION, 'no' );
 
 		if ( ! wp_get_theme( self::PURPLE_SLUG )->exists() ) {
 			return true;
