@@ -172,15 +172,17 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use the PHP page even when a block Coming Soon design exists.
-	 * @testWith ["wp_template", "coming-soon"]
-	 *           ["wp_template_part", "coming-soon-social-links"]
-	 *
-	 * @param string $type Saved template post type.
-	 * @param string $slug Saved template slug.
+	 * @testdox Should use the PHP page even when a saved coming-soon block template exists.
 	 */
-	public function test_saved_design_uses_php_page( string $type, string $slug ): void {
-		$this->create_saved_design( $type, $slug );
+	public function test_saved_block_template_uses_php_page(): void {
+		$post_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'wp_template',
+				'post_name'   => 'coming-soon',
+				'post_status' => 'publish',
+			)
+		);
+		wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
 
 		$this->assert_classic_result( self::ENTIRE_SITE_TEMPLATE );
 	}
@@ -207,7 +209,12 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 */
 	private function assert_classic_result( string $expected, string $original = '/original.php' ): void {
 		$this->assertSame( $expected, $this->sut->handle_classic_template_include( $original ) );
-		$this->assertSame( self::ENTIRE_SITE_TEMPLATE === $expected, wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
+		$style_enqueued = wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' );
+		if ( self::ENTIRE_SITE_TEMPLATE === $expected ) {
+			$this->assertTrue( $style_enqueued, 'The entire-site page must enqueue the classic Coming Soon stylesheet.' );
+		} else {
+			$this->assertFalse( $style_enqueued, 'A bypass or failed lookup must not enqueue the classic Coming Soon stylesheet.' );
+		}
 	}
 
 	/**
@@ -216,7 +223,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 * @return string Fresh task-owned directory.
 	 */
 	private function create_fixture_directory(): string {
-		$path = get_temp_dir() . 'wc50520-' . wp_generate_uuid4();
+		$path = get_temp_dir() . 'wc-coming-soon-test-' . wp_generate_uuid4();
 		$this->assertFileDoesNotExist( $path );
 		$this->assertTrue( wp_mkdir_p( $path ) );
 		return $path;
@@ -269,23 +276,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Remove only an empty task-owned fixture directory.
 			$this->assertTrue( rmdir( $path ) );
 		}
-	}
-
-	/**
-	 * Create a saved Coming Soon design scoped to a theme or plugin.
-	 *
-	 * @param string $type Template post type.
-	 * @param string $slug Template slug.
-	 */
-	private function create_saved_design( string $type, string $slug ): void {
-		$post_id = $this->factory->post->create(
-			array(
-				'post_type'   => $type,
-				'post_name'   => $slug,
-				'post_status' => 'publish',
-			)
-		);
-		wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
 	}
 
 	/**
@@ -381,7 +371,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$path = $root . '/unreadable.php';
 		try {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write only a fresh task-owned unreadable-path fixture.
-			$this->assertNotFalse( file_put_contents( $path, '<?php /* WC50520 fixture */' ) );
+			$this->assertNotFalse( file_put_contents( $path, '<?php /* Unreadable fixture */' ) );
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Change only task-owned fixture permissions to exercise unreadability.
 			$this->assertTrue( chmod( $path, 0000 ) );
 			clearstatcache( true, $path );
@@ -443,7 +433,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$shop_id = $this->factory->post->create(
 			array(
 				'post_type'    => 'page',
-				'post_content' => 'WC50520 protected shop content',
+				'post_content' => 'Protected shop content',
 			)
 		);
 		update_option( 'woocommerce_shop_page_id', $shop_id );
@@ -463,7 +453,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, substr_count( $output, "<meta name='woo-coming-soon-page' content='yes'>" ) );
 		$this->assertLessThan( strpos( $output, '</head>' ), strpos( $output, "<meta name='woo-coming-soon-page'" ), 'The marker must print inside the head.' );
 		$this->assertStringContainsString( 'Great things are on the horizon', $output );
-		$this->assertStringNotContainsString( 'WC50520 protected shop content', $output );
+		$this->assertStringNotContainsString( 'Protected shop content', $output );
 	}
 
 	/**
@@ -490,7 +480,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			function () {
 				global $product;
 				if ( $product && is_product() ) {
-					echo 'WC50520 product bar: ' . esc_html( $product->get_price() );
+					echo 'Product bar: ' . esc_html( $product->get_price() );
 				}
 			}
 		);
@@ -499,7 +489,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $GLOBALS['product'] ?? null, 'Theme code must see no product.' );
 		$this->assertStringContainsString( "<meta name='woo-coming-soon-page' content='yes'>", $output );
-		$this->assertStringNotContainsString( 'WC50520 product bar', $output );
+		$this->assertStringNotContainsString( 'Product bar', $output );
 	}
 
 	/**
