@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
@@ -261,48 +262,7 @@ class WC_Form_Handler {
 			}
 
 			if ( ! empty( $value ) ) {
-				// Validation and formatting rules.
-				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-					foreach ( $field['validate'] as $rule ) {
-						switch ( $rule ) {
-							case 'postcode':
-								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
-								$value   = wc_format_postcode( $value, $country );
-
-								if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
-									switch ( $country ) {
-										case 'IE':
-											$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
-											break;
-										default:
-											$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
-									}
-									wc_add_notice( $postcode_validation_notice, 'error' );
-								}
-								break;
-							case 'phone':
-								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
-								$country = is_string( $country ) ? $country : '';
-								// Strip before validating, so a customer is not rejected over
-								// characters they cannot see. A value that is nothing but those
-								// characters is not a phone number.
-								$value = wc_remove_non_displayable_chars( (string) $value );
-								if ( '' === $value || ! WC_Validation::is_phone( $value, $country ) ) {
-									/* translators: %s: Phone number. */
-									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
-								}
-								break;
-							case 'email':
-								$value = strtolower( $value );
-
-								if ( ! is_email( $value ) ) {
-									/* translators: %s: Email address. */
-									wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
-								}
-								break;
-						}
-					}
-				}
+				$value = self::validate_address_field_value( $value, $field, wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) ) );
 			}
 
 			try {
@@ -359,6 +319,59 @@ class WC_Form_Handler {
 		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
 		exit;
+	}
+
+	/**
+	 * Apply an address field's validation rules to a value, adding an error notice for each rule it fails.
+	 *
+	 * @param mixed $value   Field value.
+	 * @param array $field   Field definition from WC_Countries::get_address_fields().
+	 * @param mixed $country Country code of the address.
+	 * @return mixed The value, formatted by the postcode, phone and email rules.
+	 */
+	private static function validate_address_field_value( $value, $field, $country ) {
+		if ( empty( $field['validate'] ) || ! is_array( $field['validate'] ) ) {
+			return $value;
+		}
+
+		foreach ( $field['validate'] as $rule ) {
+			switch ( $rule ) {
+				case 'postcode':
+					$value = wc_format_postcode( $value, $country );
+
+					if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
+						switch ( $country ) {
+							case 'IE':
+								$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
+								break;
+							default:
+								$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
+						}
+						wc_add_notice( $postcode_validation_notice, 'error' );
+					}
+					break;
+				case 'phone':
+					// Strip before validating, so a customer is not rejected over
+					// characters they cannot see. A value that is nothing but those
+					// characters is not a phone number.
+					$value = wc_remove_non_displayable_chars( (string) $value );
+					if ( '' === $value || ! WC_Validation::is_phone( $value, is_string( $country ) ? $country : '' ) ) {
+						/* translators: %s: Phone number. */
+						wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
+					}
+					break;
+				case 'email':
+					$value = strtolower( $value );
+
+					if ( ! is_email( $value ) ) {
+						/* translators: %s: Email address. */
+						wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
+					}
+					break;
+			}
+		}
+
+		return $value;
 	}
 
 	/**
@@ -433,7 +446,7 @@ class WC_Form_Handler {
 
 		$address = WC()->countries->get_address_fields( $source_country, $target_type . '_' );
 
-		foreach ( array_keys( $address ) as $target_key ) {
+		foreach ( $address as $target_key => $field ) {
 			$source_key = $source_type . substr( $target_key, strlen( $target_type ) );
 			$getter     = "get_{$source_key}";
 			$setter     = "set_{$target_key}";
@@ -442,6 +455,16 @@ class WC_Form_Handler {
 			// Shipping has no email field, so fall back to the account email like the edit address form does.
 			if ( 'billing_email' === $target_key && ! $value ) {
 				$value = $customer->get_email();
+			}
+
+			// The other address type can require fields the copied address doesn't have, such as a billing phone.
+			if ( ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false ) && empty( $value ) ) {
+				/* translators: %s: Field name. */
+				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $target_key ) );
+			}
+
+			if ( ! empty( $value ) ) {
+				$value = self::validate_address_field_value( $value, $field, $source_country );
 			}
 
 			try {
@@ -455,19 +478,55 @@ class WC_Form_Handler {
 			}
 		}
 
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$field_values    = array();
+
+		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
+			$field_values[ $field_key ] = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+		}
+
+		// Validate the additional fields against the target address, like the edit address form does.
+		$document_object = new DocumentObject( array( 'customer' => array( $target_type . '_address' => $field_values ) ) );
+		$document_object->set_customer( $customer );
+		$document_object->set_context( $target_type . '_address' );
+
+		$errors         = new WP_Error();
+		$persist_fields = array();
+
+		foreach ( $checkout_fields->get_contextual_fields_for_location( 'address', $document_object ) as $field_key => $field ) {
+			$value = $field_values[ $field_key ] ?? '';
+
+			if ( empty( $value ) ) {
+				if ( true === $field['required'] ) {
+					/* translators: %s: Field name. */
+					$errors->add( 'required_field', sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ) );
+				}
+				continue;
+			}
+
+			$valid_check = $checkout_fields->validate_field( $field, $value );
+
+			if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
+				$errors->add( $valid_check->get_error_code(), $valid_check->get_error_message() );
+				continue;
+			}
+
+			$persist_fields[ $field_key ] = $value;
+		}
+
+		$errors->merge_from( $checkout_fields->validate_fields_for_location( $field_values, 'address', $target_type ) );
+
+		foreach ( $errors->get_error_messages() as $error_message ) {
+			wc_add_notice( $error_message, 'error' );
+		}
+
 		if ( 0 < wc_notice_count( 'error' ) ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
 
-		$checkout_fields = Package::container()->get( CheckoutFields::class );
-
-		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
-			$value = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
-
-			if ( '' !== $value ) {
-				$checkout_fields->persist_field_for_customer( $field_key, $value, $customer, $target_type );
-			}
+		foreach ( $persist_fields as $field_key => $value ) {
+			$checkout_fields->persist_field_for_customer( $field_key, $value, $customer, $target_type );
 		}
 
 		$customer->save();
