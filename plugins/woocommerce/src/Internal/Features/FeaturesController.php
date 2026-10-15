@@ -989,9 +989,9 @@ class FeaturesController {
 	 * @return boolean TRUE if the feature is enabled by default, FALSE otherwise.
 	 */
 	private function feature_is_enabled_by_default( string $feature_id ): bool {
-		$features = $this->get_feature_definitions();
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 
-		return ! empty( $features[ $feature_id ]['enabled_by_default'] );
+		return ! empty( $definition['enabled_by_default'] );
 	}
 
 	/**
@@ -1140,9 +1140,7 @@ class FeaturesController {
 	 * @return bool True if the feature exists.
 	 */
 	private function feature_exists( string $feature_id ): bool {
-		$features = $this->get_feature_definitions();
-
-		return isset( $features[ $feature_id ] );
+		return null !== ( $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null );
 	}
 
 	/**
@@ -1258,13 +1256,9 @@ class FeaturesController {
 	 * @return string The option that enables or disables the feature.
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
-		$features = $this->get_feature_definitions();
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 
-		if ( ! empty( $features[ $feature_id ]['option_key'] ) ) {
-			return $features[ $feature_id ]['option_key'];
-		}
-
-		return "woocommerce_feature_{$feature_id}_enabled";
+		return ! empty( $definition['option_key'] ) ? $definition['option_key'] : sprintf( 'woocommerce_feature_%s_enabled', $feature_id );
 	}
 
 	/**
@@ -1276,9 +1270,9 @@ class FeaturesController {
 	 * @return bool TRUE if the compatibility checks should be skipped.
 	 */
 	public function should_skip_compatibility_checks( string $feature_id ): bool {
-		$features = $this->get_feature_definitions();
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 
-		return ! empty( $features[ $feature_id ]['skip_compatibility_checks'] );
+		return ! empty( $definition['skip_compatibility_checks'] );
 	}
 
 	/**
