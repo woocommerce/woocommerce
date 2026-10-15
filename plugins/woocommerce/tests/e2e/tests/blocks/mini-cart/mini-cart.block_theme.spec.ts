@@ -249,12 +249,12 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect( page.getByText( 'Subtotal' ) ).toBeVisible();
 
 		await expect(
-			miniCartDialog.getByRole( 'link', { name: 'View cart' } )
+			miniCartDialog.getByRole( 'link', { name: 'Cart' } )
 		).toBeVisible();
 
 		await expect(
 			miniCartDialog.getByRole( 'link', {
-				name: 'Go to checkout',
+				name: 'Checkout',
 			} )
 		).toBeVisible();
 	} );
@@ -330,7 +330,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 		await page
 			.getByRole( 'dialog' )
-			.getByRole( 'link', { name: 'View cart' } )
+			.getByRole( 'link', { name: 'Cart' } )
 			.click();
 		await expect( page ).toHaveURL( /\/cart\/?$/ );
 	} );
@@ -345,7 +345,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 		await page
 			.getByRole( 'dialog' )
-			.getByRole( 'link', { name: 'Go to checkout' } )
+			.getByRole( 'link', { name: 'Checkout' } )
 			.click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );
