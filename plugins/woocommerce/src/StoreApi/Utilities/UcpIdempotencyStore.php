@@ -127,12 +127,11 @@ class UcpIdempotencyStore {
 	}
 
 	/**
-	 * Delete records past the retention window.
+	 * Delete expired records.
 	 *
-	 * Age is the only criterion, so one sweep covers both kinds of expired row: a
-	 * `completed` record whose replay window has passed, and an `in_progress` row orphaned
-	 * by a process that died between claiming a key and storing its response. The window is
-	 * far longer than any PHP request, so a claim still being worked on is never removed.
+	 * Each kind of row has its own clock: a `completed` record follows the retention window,
+	 * an `in_progress` claim the shorter orphan window. The claim deliberately ignores the
+	 * filter, so shortening retention cannot free a claim whose request is still running.
 	 *
 	 * @return void
 	 */
@@ -140,7 +139,11 @@ class UcpIdempotencyStore {
 		global $wpdb;
 
 		/**
-		 * Filters how long a UCP idempotency record is kept, in seconds.
+		 * Filters how long a completed UCP idempotency record is kept, in seconds.
+		 *
+		 * How long a retry carrying the same key is answered from storage. One hour by default,
+		 * since an agent retries within seconds and a longer window would keep a shopper's basket
+		 * on disk after anything could replay it. Raise it for a client that retries more slowly.
 		 *
 		 * @since 11.3.0
 		 *

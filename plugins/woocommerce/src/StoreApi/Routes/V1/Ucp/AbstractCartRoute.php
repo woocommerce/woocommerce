@@ -220,10 +220,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * Whether a response may be stored for replay.
 	 *
-	 * A refusal is not: UCP reports one as a business outcome, at 200 with `ucp.status` set
-	 * to `error`, and the cart is rolled back to where it started. Nothing happened, so a
-	 * retry has to be processed again — once the stock is back, or the quantity corrected,
-	 * the same request can succeed, and a stored refusal would stand in its way.
+	 * A refusal is not: UCP reports one at 200 with `ucp.status` set to `error`, and the cart is
+	 * rolled back. Nothing happened, so a retry must run again — once the stock is back or the
+	 * quantity corrected, a stored refusal would stand in the corrected request's way.
 	 *
 	 * @param \WP_REST_Response $response Response to inspect.
 	 * @return bool

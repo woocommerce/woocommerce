@@ -4,13 +4,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 /**
- * Fingerprints a UCP request, so that an `Idempotency-Key` can be bound to the payload it
- * was first used with.
+ * Fingerprints a UCP request, binding an `Idempotency-Key` to the payload it was first used with.
  *
- * The fingerprint covers the method, the resolved route — which carries the cart id — and
- * the request body. The body is taken from the decoded JSON with keys sorted rather than
- * from the raw string, so whitespace and key order, as a proxy re-serializing a payload
- * changes them, do not make a genuine retry look like a different request.
+ * Covers the method, the resolved route — which carries the cart id — and the body. The body
+ * comes from the decoded JSON with keys sorted, not the raw string, so the whitespace and key
+ * order a proxy changes when it re-serialises cannot make a genuine retry look like a new request.
  */
 class UcpRequestFingerprint {
 	/**
