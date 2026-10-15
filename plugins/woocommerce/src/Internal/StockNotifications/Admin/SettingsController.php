@@ -187,7 +187,7 @@ class SettingsController {
 					'id'       => 'woocommerce_customer_stock_notifications_require_account',
 					'default'  => 'no',
 					'type'     => 'checkbox',
-					'desc_tip' => __( 'When enabled, guests see a log in prompt instead of the sign-up form.', 'woocommerce' ),
+					'desc_tip' => __( 'When enabled, guests see a login prompt instead of the sign-up form.', 'woocommerce' ),
 				),
 
 				array(
