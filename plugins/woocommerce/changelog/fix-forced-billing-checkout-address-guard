@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore classic checkout when shipping is forced to billing and address fields have been removed.

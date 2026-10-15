@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Log a warning when an incomplete address blocks checkout with shipping forced to billing.
