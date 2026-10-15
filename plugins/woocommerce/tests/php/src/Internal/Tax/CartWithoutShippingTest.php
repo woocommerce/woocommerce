@@ -626,7 +626,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:0' ) );
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
 	}
 
 	/**

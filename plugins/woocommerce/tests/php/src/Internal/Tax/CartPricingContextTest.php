@@ -310,19 +310,27 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	public function test_clears_hydration_context_when_controller_throws(): void {
 		$after    = null;
 		$threw    = false;
-		$throwing = function () use ( &$threw ): void {
-			$threw = true;
-			throw new \Exception( 'Cart calculation failure' );
+		$throwing = function ( $nonce_life ) use ( &$threw ) {
+			if ( $this->sut->is_active() ) {
+				$threw = true;
+				throw new \Exception( 'Cart response failure' );
+			}
+			return $nonce_life;
 		};
-		add_action( 'woocommerce_before_calculate_totals', $throwing );
 
 		$this->dispatch_test_route(
 			'/wc/store/v1/products',
-			function ( $request ) use ( &$after ) {
+			function ( $request ) use ( &$after, $throwing ) {
 				unset( $request ); // Avoid parameter not used PHPCS errors.
 				StoreApi::container();
 				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
-				$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+				// The cart controller creates a nonce after its response catch blocks.
+				add_filter( 'nonce_life', $throwing );
+				try {
+					$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+				} finally {
+					remove_filter( 'nonce_life', $throwing );
+				}
 				$after = $this->sut->is_active();
 				return rest_ensure_response( array( 'ok' => true ) );
 			}
