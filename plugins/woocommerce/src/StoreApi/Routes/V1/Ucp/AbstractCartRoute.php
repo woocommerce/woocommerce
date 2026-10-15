@@ -73,6 +73,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$claimed = $this->claim_idempotency_key( $request );
 
 		if ( $claimed instanceof \WP_REST_Response ) {
+			// The gate answers without reaching the parent, which is what stamps the Store API
+			// headers. A replayed cart body carries the one that matters rather than staying cacheable.
+			$claimed->header( 'Cache-Control', 'no-store' );
+
 			return $claimed;
 		}
 

@@ -595,4 +595,27 @@ class UcpIdempotency extends ControllerTestCase {
 		$this->assertNotNull( $record );
 		$this->assertSame( UcpIdempotencyStore::STATE_IN_PROGRESS, $record['state'] );
 	}
+
+	/**
+	 * A replayed cart body is not cacheable.
+	 */
+	public function test_a_replay_is_not_cacheable(): void {
+		$key  = wp_generate_uuid4();
+		$body = $this->cart_body( 0 );
+
+		$this->request( 'POST', '/carts', $body, $key );
+		$replay = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 'no-store', $replay->get_headers()['Cache-Control'] ?? '' );
+	}
+
+	/**
+	 * A refusal the gate produces is not cacheable either.
+	 */
+	public function test_a_gate_refusal_is_not_cacheable(): void {
+		$response = $this->request( 'POST', '/carts', $this->cart_body( 0 ) );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'no-store', $response->get_headers()['Cache-Control'] ?? '' );
+	}
 }
