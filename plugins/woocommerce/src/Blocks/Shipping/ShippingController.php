@@ -454,7 +454,7 @@ class ShippingController {
 
 		// Only pickup_location rates should get their address from the saved settings, local_pickup has another filter, and third party pickup locations should have their own filter and logic for the address as well.
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
-		if ( $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && 'pickup_location' === $chosen_method_id ) {
+if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			// The session keeps a pickup choice after the last shippable item is removed, so ignore it when the cart no longer needs shipping.
 			if ( $customer instanceof WC_Customer && wc_get_container()->get( CartWithoutShipping::class )->should_use_billing_address( $customer ) ) {
 				return $address;
