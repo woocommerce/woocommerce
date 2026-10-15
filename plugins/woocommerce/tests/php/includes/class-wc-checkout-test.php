@@ -1039,6 +1039,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$order = wc_get_order( $this->sut->create_order( self::COD_POSTED_DATA ) );
 		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
 		$order->payment_complete( 'txn_took_the_last_unit' );
+		// The retry is a new request, so its cart holds the product as it is now: out of stock.
+		WC()->cart->get_cart_from_session();
 		$this->post_checkout_form( WC_Gateway_COD::ID );
 
 		$response = $this->submit_checkout_over_ajax();

@@ -3816,6 +3816,53 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Retrying after the request died post-payment is answered with the paid order, not a stock error, when that order took the last unit.
+	 */
+	public function test_retry_after_the_paid_order_took_the_last_unit_is_answered_with_that_order() {
+		// Its own product rather than a class fixture, so enabling stock management here cannot
+		// leak into the other tests in this class.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->save();
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Same arrangement as the test above: the first POST stops before payment, then the gateway's
+		// payment_complete() runs on the order directly, which takes the last unit.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$paid_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		wc_get_order( $paid_order_id )->payment_complete( 'txn_took_the_last_unit' );
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity(), 'The paid order took the last unit.' );
+
+		// The retry is a new request, so its cart holds the product as it is now: out of stock.
+		$this->simulate_fresh_request();
+		WC()->cart->get_cart_from_session();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 200, $retry->get_status(), 'The shopper should be sent to the order, not told the product sold out: ' . print_r( $retry->get_data(), true ) );
+		$this->assertSame( $paid_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that took the last unit.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
+	}
+
+	/**
 	 * @testdox A recovered checkout empties the cart the gateway never got to.
 	 */
 	public function test_recovered_checkout_empties_the_cart() {
