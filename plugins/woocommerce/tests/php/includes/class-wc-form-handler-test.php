@@ -495,6 +495,114 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() copies the saved $source_type address into the empty $target_type address.
+	 *
+	 * @testWith ["billing", "shipping"]
+	 *           ["shipping", "billing"]
+	 * @covers WC_Form_Handler::copy_address()
+	 *
+	 * @param string $source_type Address type copied from.
+	 * @param string $target_type Address type copied into.
+	 */
+	public function test_copy_address_copies_saved_address_into_empty_address( string $source_type, string $target_type ): void {
+		$customer  = $this->create_customer_with_address( $source_type );
+		$hook_args = null;
+		add_action(
+			'woocommerce_customer_copy_address',
+			function ( ...$args ) use ( &$hook_args ) {
+				$hook_args = $args;
+			},
+			10,
+			4
+		);
+
+		$this->prepare_copy_address_request( $target_type );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$customer = new WC_Customer( $customer->get_id() );
+
+		$this->assertEmpty( wc_get_notices( 'error' ), 'Copying a saved address should not add error notices.' );
+		$this->assertSame( 'Address copied successfully.', wc_get_notices( 'success' )[0]['notice'] ?? null );
+		foreach ( array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' ) as $field ) {
+			$this->assertSame(
+				$customer->{"get_{$source_type}_{$field}"}(),
+				$customer->{"get_{$target_type}_{$field}"}(),
+				"The {$target_type}_{$field} value should match the copied {$source_type} address."
+			);
+		}
+		$this->assertSame( array( $customer->get_id(), $target_type, $source_type ), array_slice( $hook_args ?? array(), 0, 3 ), 'The copy hook should fire with the user ID and address types.' );
+	}
+
+	/**
+	 * @testdox copy_address() uses the account email when copying a shipping address into billing.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_uses_account_email_for_billing(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+
+		$this->prepare_copy_address_request( 'billing' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( 'copy-address-customer@example.test', ( new WC_Customer( $customer->get_id() ) )->get_billing_email() );
+	}
+
+	/**
+	 * @testdox copy_address() leaves an address that is already set up untouched.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_does_not_overwrite_existing_address(): void {
+		$customer = $this->create_customer_with_address( 'billing' );
+		$customer->set_shipping_address_1( '1 Existing Road' );
+		$customer->set_shipping_country( 'US' );
+		$customer->save();
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( '1 Existing Road', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'An existing shipping address should not be overwritten.' );
+		$this->assertEmpty( wc_get_notices( 'success' ), 'No success notice should be shown when nothing was copied.' );
+	}
+
+	/**
+	 * @testdox copy_address() rejects a request with an invalid nonce.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_rejects_invalid_nonce(): void {
+		$customer = $this->create_customer_with_address( 'billing' );
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$_REQUEST['_wpnonce'] = 'invalid';
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertCount( 1, wc_get_notices( 'error' ), 'An invalid nonce should add an error notice.' );
+		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'An invalid nonce should not copy the address.' );
+	}
+
+	/**
+	 * @testdox copy_address() refuses to copy a billing address whose country the store does not ship to.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_rejects_country_not_available_for_shipping(): void {
+		$customer = $this->create_customer_with_address( 'billing' );
+		add_filter(
+			'woocommerce_countries_shipping_countries',
+			function () {
+				return array( 'CA' => 'Canada' );
+			}
+		);
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertCount( 1, wc_get_notices( 'error' ), 'A country the store does not ship to should add an error notice.' );
+		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'The address should not be copied to an unavailable country.' );
+	}
+
+	/**
 	 * @testdox save_account_details() saves other account fields when an email-like display name is unchanged.
 	 *
 	 * @covers WC_Form_Handler::save_account_details()
@@ -790,5 +898,58 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->fail( 'Expected save_address() to redirect after a successful save. Notices: ' . wp_json_encode( wc_get_notices() ) );
+	}
+
+	/**
+	 * Creates the current customer with only one saved address type.
+	 *
+	 * @param string $address_type Address type to save.
+	 * @return WC_Customer
+	 */
+	private function create_customer_with_address( string $address_type ): WC_Customer {
+		$user_id = self::factory()->user->create(
+			array(
+				'user_login' => 'copy-address-customer',
+				'user_email' => 'copy-address-customer@example.test',
+				'role'       => 'customer',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		$customer = new WC_Customer( $user_id );
+		foreach ( self::provide_address_types()[ $address_type ][1] as $field => $value ) {
+			$customer->{"set_{$address_type}_{$field}"}( $value );
+		}
+		$customer->save();
+
+		return $customer;
+	}
+
+	/**
+	 * Prepares a copy address request for the given target address type.
+	 *
+	 * @param string $target_type Address type to copy into.
+	 */
+	private function prepare_copy_address_request( string $target_type ): void {
+		$_GET     = array( 'copy-address' => $target_type );
+		$_REQUEST = array( '_wpnonce' => wp_create_nonce( 'woocommerce-copy-address-' . $target_type ) );
+	}
+
+	/**
+	 * Dispatches the copy address handler and expects a redirect back to Addresses.
+	 */
+	private function dispatch_copy_address_expecting_redirect(): void {
+		try {
+			WC_Form_Handler::copy_address();
+		} catch ( RuntimeException $e ) {
+			$this->assertSame(
+				wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ),
+				$e->getMessage(),
+				'Copying an address should redirect to Addresses.'
+			);
+			return;
+		}
+
+		$this->fail( 'Expected copy_address() to redirect. Notices: ' . wp_json_encode( wc_get_notices() ) );
 	}
 }

@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes\
  */
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -48,6 +50,7 @@ class WC_Form_Handler {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'copy_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_login' ), 20 );
@@ -355,6 +358,134 @@ class WC_Form_Handler {
 
 		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
+		exit;
+	}
+
+	/**
+	 * Get the URL that copies the customer's other saved address into an empty address type.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $address_type Address type to copy into; 'billing' or 'shipping'.
+	 * @return string
+	 */
+	public static function get_copy_address_url( $address_type ) {
+		$address_type = sanitize_key( $address_type );
+
+		return wp_nonce_url(
+			add_query_arg( 'copy-address', $address_type, wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) ),
+			'woocommerce-copy-address-' . $address_type
+		);
+	}
+
+	/**
+	 * Copy the saved billing address into an empty shipping address, or vice versa, from the My Account addresses page.
+	 *
+	 * The target address is only written when it has not been set up yet, so a stale link cannot overwrite an address.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function copy_address() {
+		if ( ! isset( $_GET['copy-address'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
+			return;
+		}
+
+		$user_id = get_current_user_id();
+
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		wc_nocache_headers();
+
+		$target_type  = sanitize_key( wp_unslash( $_GET['copy-address'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
+		$source_types = array(
+			'billing'  => 'shipping',
+			'shipping' => 'billing',
+		);
+		$redirect_url = wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) );
+		$nonce_value  = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+
+		if ( ! isset( $source_types[ $target_type ] ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-copy-address-' . $target_type ) ) {
+			wc_add_notice( __( 'The address could not be copied. Please try again.', 'woocommerce' ), 'error' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$source_type = $source_types[ $target_type ];
+
+		if ( wc_get_account_formatted_address( $target_type, $user_id ) || ! wc_get_account_formatted_address( $source_type, $user_id ) ) {
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$customer         = new WC_Customer( $user_id );
+		$source_country   = 'billing' === $source_type ? $customer->get_billing_country() : $customer->get_shipping_country();
+		$target_countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+
+		if ( ! array_key_exists( $source_country, $target_countries ) ) {
+			wc_add_notice( __( 'This address uses a country that is not available for the other address type. Please add the address manually.', 'woocommerce' ), 'error' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$address = WC()->countries->get_address_fields( $source_country, $target_type . '_' );
+
+		foreach ( array_keys( $address ) as $target_key ) {
+			$source_key = $source_type . substr( $target_key, strlen( $target_type ) );
+			$getter     = "get_{$source_key}";
+			$setter     = "set_{$target_key}";
+			$value      = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}() : $customer->get_meta( $source_key );
+
+			// Shipping has no email field, so fall back to the account email like the edit address form does.
+			if ( 'billing_email' === $target_key && ! $value ) {
+				$value = $customer->get_email();
+			}
+
+			try {
+				if ( is_callable( array( $customer, $setter ) ) ) {
+					$customer->{$setter}( $value );
+				} else {
+					$customer->update_meta_data( $target_key, $value );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				wc_add_notice( $e->getMessage(), 'error' );
+			}
+		}
+
+		if ( 0 < wc_notice_count( 'error' ) ) {
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+
+		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
+			$value = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+
+			if ( '' !== $value ) {
+				$checkout_fields->persist_field_for_customer( $field_key, $value, $customer, $target_type );
+			}
+		}
+
+		$customer->save();
+
+		/**
+		 * Fires after a customer copies one of their saved addresses into the other address type from My Account.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int         $user_id     User ID being saved.
+		 * @param string      $target_type Address type that was written; 'billing' or 'shipping'.
+		 * @param string      $source_type Address type that was copied from; 'billing' or 'shipping'.
+		 * @param WC_Customer $customer    The customer object that was saved.
+		 */
+		do_action( 'woocommerce_customer_copy_address', $user_id, $target_type, $source_type, $customer );
+
+		wc_add_notice( __( 'Address copied successfully.', 'woocommerce' ) );
+		wp_safe_redirect( $redirect_url );
 		exit;
 	}
 
