@@ -254,6 +254,22 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A stored negative unverified sign-up deletion threshold renders as 0 so the settings form stays submittable.
+	 */
+	public function test_stored_negative_unverified_deletion_days_threshold_renders_as_zero() {
+		$option_id = 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold';
+		update_option( $option_id, -5 );
+
+		$settings = ( new WC_Settings_Products() )->get_settings_for_section( 'customer_stock_notifications' );
+		$field    = current( array_filter( $settings, fn( $setting ) => ( $setting['id'] ?? '' ) === $option_id ) );
+
+		$this->assertSame( 0, $field['value'] );
+		$this->assertSame( 0, $field['custom_attributes']['min'] );
+
+		delete_option( $option_id );
+	}
+
+	/**
 	 * Reset the REST server and request globals so this test does not leak them into tests that run after it.
 	 */
 	public function tearDown(): void {
