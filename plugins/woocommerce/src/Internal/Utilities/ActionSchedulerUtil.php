@@ -43,6 +43,20 @@ class ActionSchedulerUtil {
 	private const BUNDLED_PLUGIN_FILE = 'packages/action-scheduler/action-scheduler.php';
 
 	/**
+	 * The features {@see self::is_risky()} probes, in order. Kept here rather than in the enum
+	 * because the list changes as core comes to rely on more of Action Scheduler.
+	 *
+	 * @var string[]
+	 */
+	private const PROBED_FEATURES = array(
+		ActionSchedulerFeature::UNIQUE,
+		ActionSchedulerFeature::PRIORITY,
+		ActionSchedulerFeature::UNIQUE_ARGS,
+		ActionSchedulerFeature::HAS_SCHEDULED_ACTION,
+		ActionSchedulerFeature::ASYNC,
+	);
+
+	/**
 	 * Per-request memo of feature probes, keyed by ActionSchedulerFeature value.
 	 *
 	 * @var array<string, bool>
@@ -220,7 +234,7 @@ class ActionSchedulerUtil {
 	 * @return bool
 	 */
 	public static function is_risky(): bool {
-		foreach ( ActionSchedulerFeature::ALL as $feature ) {
+		foreach ( self::PROBED_FEATURES as $feature ) {
 			if ( ! self::supports( $feature ) ) {
 				return true;
 			}
