@@ -278,8 +278,7 @@ class AsyncGenerator {
 					time() + self::FEED_EXPIRY,
 					self::FEED_DELETION_ACTION,
 					array( $option_key, $feed->get_file_path() ),
-					'woo-product-feed',
-					false
+					'woo-product-feed'
 				);
 			} else {
 				$feed->flush();

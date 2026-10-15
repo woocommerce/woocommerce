@@ -1131,8 +1131,9 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+	// Not unique: this runs inside the action itself, and a unique check would see the in-progress run and schedule nothing.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 	} else {
 		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 	}

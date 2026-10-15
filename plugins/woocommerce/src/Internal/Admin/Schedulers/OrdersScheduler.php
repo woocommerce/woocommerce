@@ -536,7 +536,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		$interval = self::get_import_interval();
 
-		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group ?? '', true );
+		ActionSchedulerUtil::schedule_recurring( time(), $interval, $action_hook, array(), static::$group ?? '', true );
 	}
 
 	/**
