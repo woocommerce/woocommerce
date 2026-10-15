@@ -19,20 +19,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	private $original_resolved_route;
 
 	/**
-	 * Whether REQUEST_URI was set before the test ran.
-	 *
-	 * @var bool
-	 */
-	private $had_request_uri;
-
-	/**
-	 * The request URI the test ran with, verbatim.
-	 *
-	 * @var string|null
-	 */
-	private $original_request_uri;
-
-	/**
 	 * The authentication state WC_REST_Authentication held before the test ran.
 	 *
 	 * @var array<string, mixed>
@@ -52,13 +38,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$this->original_resolved_route = $wp->query_vars['rest_route'] ?? null;
 		unset( $wp->query_vars['rest_route'] );
 
-		$this->had_request_uri = array_key_exists( 'REQUEST_URI', $_SERVER );
-		// Stored and restored verbatim, so tearDown leaves $_SERVER exactly as it found it. Sanitizing
-		// would drop the characters these tests use to tell a WooCommerce route from one that only looks
-		// like it, and unslashing would undo what wp_magic_quotes() put there.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Round-tripped between $_SERVER and $_SERVER, never output or stored.
-		$this->original_request_uri = $this->had_request_uri ? $_SERVER['REQUEST_URI'] : null;
-
 		foreach ( array( 'user', 'error', 'auth_method' ) as $name ) {
 			$this->original_authentication_state[ $name ] = $this->authentication_property( $name )->getValue( $this->sut );
 		}
@@ -74,12 +53,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			unset( $wp->query_vars['rest_route'] );
 		} else {
 			$wp->query_vars['rest_route'] = $this->original_resolved_route;
-		}
-
-		if ( $this->had_request_uri ) {
-			$_SERVER['REQUEST_URI'] = $this->original_request_uri;
-		} else {
-			unset( $_SERVER['REQUEST_URI'] );
 		}
 
 		foreach ( $this->original_authentication_state as $name => $value ) {
