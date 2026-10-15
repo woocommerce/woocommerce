@@ -359,15 +359,3 @@ add_filter(
 	'__return_zero',
 	PHP_INT_MAX
 );
-
-/**
- * Report every email as sent during E2E runs.
- *
- * The wp-env container has no mail transport, so `wp_mail()` returns false even
- * though WP Mail Logging has already captured the message on the `wp_mail`
- * filter. Code that keys off the send result, such as Back in Stock
- * Notifications marking a sign-up as sent or cancelled, would otherwise see
- * every email as failed. Short-circuit `wp_mail()` after the log has been
- * written so the specs observe the production outcome.
- */
-add_filter( 'pre_wp_mail', '__return_true' );

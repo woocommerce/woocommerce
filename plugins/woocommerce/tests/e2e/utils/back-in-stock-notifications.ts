@@ -1060,10 +1060,18 @@ export async function getEmailLinkById(
 /**
  * Run any pending Action Scheduler jobs via the process-waiting-actions mu-plugin.
  *
+ * wp-env has no mail transport, so `wp_mail()` returns false even though WP
+ * Mail Logging has already captured the message. A failed send cancels the
+ * sign-up instead of marking it sent, so `wp_mail()` is short-circuited to
+ * report success for this context through the `e2e-filters` cookie. It is
+ * scoped here rather than in the helper plugin because other specs assert
+ * the failure path.
+ *
  * @param {Page} page Playwright page (can be on any URL).
  */
 export async function triggerStockNotificationsBatch(
 	page: Page
 ): Promise< void > {
+	await setFilterValue( page, 'pre_wp_mail', true );
 	await page.goto( '?process-waiting-actions' );
 }
