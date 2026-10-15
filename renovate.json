@@ -1,21 +1,21 @@
 {
-	"extends": [
-		"config:base"
-	],
+	"extends": [ "config:recommended" ],
 	"packageRules": [
 		{
-			"packageNames": ["automattic/jetpack-autoloader"],
+			"matchDepTypes": [ "pnpm.catalog.tooling" ],
 			"rangeStrategy": "bump"
 		},
 		{
-			"depTypeList": ["devDependencies"],
-			"extends": ["schedule:monthly"]
+			"matchDepTypes": [ "pnpm.catalog.tooling" ],
+			"matchUpdateTypes": [ "minor", "patch" ],
+			"extends": [ "schedule:monthly" ],
+			"groupName": "tooling catalog",
+			"automerge": false
+		},
+		{
+			"matchDepTypes": [ "pnpm.catalog.tooling" ],
+			"matchUpdateTypes": [ "major" ],
+			"enabled": true
 		}
-	],
-	"ignoreDeps": [
-		"woocommerce/action-scheduler",
-		"woocommerce/woocommerce-admin",
-		"woocommerce/woocommerce-blocks",
-		"woocommerce/woocommerce-rest-api"
 	]
 }

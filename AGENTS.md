@@ -326,6 +326,31 @@ This is part of the WooCommerce monorepo:
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages
 
+### Dependency catalogs
+
+Shared dependency versions are defined in `pnpm-workspace.yaml` using named pnpm catalogs. The catalog name describes a dependency's purpose and maintenance policy; each consuming package still declares it under the appropriate `dependencies`, `devDependencies`, `peerDependencies`, or `optionalDependencies` field.
+
+| Catalog | Purpose | Update considerations |
+| --- | --- | --- |
+| `wp-min` | WordPress packages aligned with our minimum supported WordPress version. | Keep versions compatible with that baseline; do not upgrade them indiscriminately to the latest release. |
+| `wp-bundled` | WordPress packages WooCommerce bundles because they are not provided as WordPress script externals. | Review compatibility and the runtime behavior shipped with WooCommerce. |
+| `tooling` | Shared tooling, including Babel, webpack, PostCSS, and Stylelint. | Validate affected builds, linting, tests, and generated assets. |
+
+Reference the catalog instead of repeating a version in each package's `package.json`:
+
+```json
+{
+  "devDependencies": {
+    "webpack": "catalog:tooling"
+  }
+}
+```
+
+- Reuse an existing catalog entry when adding a dependency already managed there.
+- Update shared versions in `pnpm-workspace.yaml` and regenerate `pnpm-lock.yaml` together. Keep consuming manifests on their catalog references.
+- Use YAML comments to explain compatibility constraints and intentional pins.
+- Prefer gradually moving remaining dependencies into catalogs, adding named catalogs when a distinct purpose or maintenance policy warrants one. This is a long-term direction, not a requirement to migrate unrelated dependencies in every change.
+
 ## Historical Context
 
 **Why two code styles?** The `plugins/woocommerce/includes/` directory predates modern PHP practices. New code uses PSR-4 and dependency injection in `plugins/woocommerce/src/`.
