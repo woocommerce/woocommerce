@@ -320,21 +320,20 @@ class MiniCart extends AbstractBlock {
 		if ( $cart ) {
 			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$product_count_color              = $attributes['productCountColor']['color'] ?? '';
 			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
-			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+			$product_count_visibility         = $attributes['productCountVisibility'] ?? 'greater_than_zero';
 			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 			$wrapper_styles                   = $classes_styles['styles'];
-			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
+			$cart_item_count                  = $cart->get_cart_contents_count();
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
-			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$badge_is_visible                 = ( 'always' === $product_count_visibility ) || ( 'never' !== $product_count_visibility && $cart_item_count > 0 );
 			$formatted_subtotal               = '';
-			$html                             = new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) );
-			$on_cart_click_behaviour          = isset( $attributes['onCartClickBehaviour'] ) ? $attributes['onCartClickBehaviour'] : 'open_drawer';
+			$html                             = $cart_item_count ? new \WP_HTML_Tag_Processor( wc_price( $cart->get_displayed_subtotal() ) ) : null;
+			$on_cart_click_behaviour          = $attributes['onCartClickBehaviour'] ?? 'open_drawer';
 
-			if ( $html->next_tag( 'bdi' ) ) {
+			if ( $html && $html->next_tag( 'bdi' ) ) {
 				while ( $html->next_token() ) {
 					if ( '#text' === $html->get_token_name() ) {
 						$formatted_subtotal .= $html->get_modifiable_text();
@@ -356,7 +355,7 @@ class MiniCart extends AbstractBlock {
 				array(
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
-					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
+					'shouldShowTaxLabel' => $cart_item_count && $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
 					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
