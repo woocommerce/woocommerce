@@ -10,6 +10,7 @@ import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import {
 	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
+	requireDoubleOptInForLoggedIn,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
@@ -103,6 +104,9 @@ test.describe(
 						customer.username,
 						customer.password
 					);
+					// Logged-in sign-ups skip double opt-in by default; these
+					// specs need them to land PENDING.
+					await requireDoubleOptInForLoggedIn( page );
 
 					// Row 1: signup while double opt-in is off → active.
 					await page.goto( product.permalink );
@@ -113,7 +117,8 @@ test.describe(
 						)
 					).toBeVisible();
 
-					// Row 2: flip double opt-in on and sign up again → pending.
+					// Row 2: flip double opt-in on and sign up again → pending
+					// (the filter above keeps it on for this logged-in customer).
 					await setBISOptions( request, baseURL!, {
 						allowSignups: true,
 						doubleOptIn: true,
@@ -219,6 +224,9 @@ test.describe(
 						customer.username,
 						customer.password
 					);
+					// Logged-in sign-ups skip double opt-in by default; these
+					// specs need them to land PENDING.
+					await requireDoubleOptInForLoggedIn( page );
 
 					await page.goto( product.permalink );
 					await signUpOnProductPage( page );
@@ -297,13 +305,16 @@ test.describe(
 						customer.username,
 						customer.password
 					);
+					// Logged-in sign-ups skip double opt-in by default; these
+					// specs need them to land PENDING.
+					await requireDoubleOptInForLoggedIn( page );
 
 					await page.goto( product.permalink );
 					await signUpOnProductPage( page );
 
 					await page.goto( MY_ACCOUNT_ENDPOINT );
 
-					// Double opt-in is on, so the signup lands in the pending table.
+					// Double opt-in is on and kept for this logged-in customer, so the signup lands in the pending table.
 					const row = page
 						.locator( `${ PENDING_TABLE } tbody tr` )
 						.filter( {

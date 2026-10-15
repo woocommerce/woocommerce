@@ -11,6 +11,7 @@ import {
 	bisNotice,
 	bisTargetProductInput,
 	expectEmailAsAdmin,
+	requireDoubleOptInForLoggedIn,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
@@ -205,6 +206,51 @@ test.describe(
 				await signUpOnProductPage( page );
 				await expect(
 					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+
+				await clearFilters( page );
+			} );
+		} );
+
+		test.describe( 'Logged-in customer, double opt-in', () => {
+			test.use( { storageState: CUSTOMER_STATE_PATH } );
+
+			test.beforeAll( async ( { baseURL } ) => {
+				await setBISOptions( request, baseURL!, {
+					allowSignups: true,
+					doubleOptIn: true,
+					requireAccount: false,
+				} );
+			} );
+
+			test( 'the signup is active straight away and no verification is requested', async ( {
+				page,
+				product,
+			} ) => {
+				// The sign-up uses the account email, so there is nothing to
+				// verify: the single opt-in notice renders, not the
+				// "follow the verification link" one.
+				await page.goto( product.permalink );
+				await signUpOnProductPage( page );
+
+				await expect(
+					page.getByText( bisNotice.success( product.name ) )
+				).toBeVisible();
+				await expect(
+					page.getByText( bisNotice.doubleOptIn )
+				).toHaveCount( 0 );
+			} );
+
+			test( 'the signup stays pending when the store keeps double opt-in on for logged-in customers', async ( {
+				page,
+				product,
+			} ) => {
+				await page.goto( product.permalink );
+				await requireDoubleOptInForLoggedIn( page );
+				await signUpOnProductPage( page );
+
+				await expect(
+					page.getByText( bisNotice.doubleOptIn )
 				).toBeVisible();
 
 				await clearFilters( page );

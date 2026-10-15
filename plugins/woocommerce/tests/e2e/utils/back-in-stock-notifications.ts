@@ -492,6 +492,26 @@ export async function disableSignupRateLimit( page: Page ): Promise< void > {
 }
 
 /**
+ * Keep double opt-in on for logged-in sign-ups made from this page's context.
+ *
+ * Logged-in customers skip double opt-in by default, since the sign-up uses their
+ * account email. Specs that need a logged-in sign-up to land PENDING opt them
+ * back in through the `woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users`
+ * filter, set via the `e2e-filters` cookie the test helper plugin reads.
+ *
+ * @param {Page} page Playwright page whose context will submit the form.
+ */
+export async function requireDoubleOptInForLoggedIn(
+	page: Page
+): Promise< void > {
+	await setFilterValue(
+		page,
+		'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users',
+		true
+	);
+}
+
+/**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
  *
  * The rate limiter is switched off for the submitting context first, so
@@ -532,6 +552,7 @@ export async function signUpOnProductPage(
  * @param {Object}  [opts.storageState]              Storage state for the signup context; a logged-out guest by default.
  * @param {string}  [opts.email]                     Email to enter; omit for a logged-in signup, where the field isn't rendered.
  * @param {RegExp}  [opts.expectedNotice]            Notice to wait for after the post; a generic success match by default.
+ * @param {boolean} [opts.requireDoubleOptIn]        Keep double opt-in on for a logged-in sign-up, so it lands PENDING.
  * @param {Object}  [opts.selectVariation]           Variation to pick before submitting, for variable products.
  * @param {Object}  [opts.selectVariation.product]   The variable product handle.
  * @param {Object}  [opts.selectVariation.variation] The variation to select.
@@ -543,6 +564,7 @@ export async function signUpInNewContext(
 		storageState?: string | { cookies: []; origins: [] };
 		email?: string;
 		expectedNotice?: RegExp;
+		requireDoubleOptIn?: boolean;
 		selectVariation?: {
 			product: BISVariableProduct;
 			variation: BISVariation;
@@ -558,6 +580,10 @@ export async function signUpInNewContext(
 	// outlive the test.
 	try {
 		await page.goto( permalink );
+
+		if ( opts.requireDoubleOptIn ) {
+			await requireDoubleOptInForLoggedIn( page );
+		}
 
 		if ( opts.selectVariation ) {
 			await selectVariation(
@@ -614,15 +640,19 @@ export async function signUpAsGuest(
  * The signup binds to the customer's account, which is what makes the emails
  * take their logged-in branch.
  *
- * @param {Browser} browser   The test's browser fixture.
- * @param {string}  permalink The product permalink.
+ * @param {Browser} browser                   The test's browser fixture.
+ * @param {string}  permalink                 The product permalink.
+ * @param {Object}  [opts]                    Signup options.
+ * @param {boolean} [opts.requireDoubleOptIn] Keep double opt-in on so the sign-up lands PENDING and a verify email is sent.
  */
 export async function signUpAsCustomer(
 	browser: Browser,
-	permalink: string
+	permalink: string,
+	opts: { requireDoubleOptIn?: boolean } = {}
 ): Promise< void > {
 	await signUpInNewContext( browser, permalink, {
 		storageState: CUSTOMER_STATE_PATH,
+		...opts,
 	} );
 }
 

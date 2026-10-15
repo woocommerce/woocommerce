@@ -54,6 +54,12 @@ Covers the scenarios from the original plugin test plan that have a target in co
   not an option, so `expireVerificationLinks()` sets it to a negative value
   through the same cookie. Both tests clear the cookie afterwards with
   `clearFilters()`.
+- Logged-in customers skip double opt-in by default (the sign-up uses their
+  account email). Specs that need a logged-in sign-up to land PENDING turn the
+  `woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users`
+  filter on through the same cookie with `requireDoubleOptInForLoggedIn()`, or
+  `signUpAsCustomer( browser, permalink, { requireDoubleOptIn: true } )` for a
+  sign-up made in a fresh context.
 - Sign-ups are rate limited per client and per e-mail
   (`woocommerce_customer_stock_notifications_signup_rate_limit_options`), and
   the suite submits the form far more often than a shopper would from one

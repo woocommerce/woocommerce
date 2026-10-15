@@ -211,7 +211,11 @@ test.describe(
 			product,
 			browser,
 		} ) => {
-			await signUpAsCustomer( browser, product.permalink );
+			// Logged-in sign-ups skip double opt-in by default; keep it on so
+			// the verify step, and the verified email, still happen.
+			await signUpAsCustomer( browser, product.permalink, {
+				requireDoubleOptIn: true,
+			} );
 
 			const verifyLink = await getEmailLinkById(
 				page,
