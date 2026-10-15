@@ -49,6 +49,12 @@ export async function validateTheme(
 		path.join( themeDirectory, file )
 	);
 	const themeSlug = path.basename( themeDirectory );
+	for ( const requiredFile of [ 'theme.json', 'templates/index.html' ] ) {
+		const file = path.join( themeDirectory, requiredFile );
+		if ( ! files.includes( file ) ) {
+			report( file, 'missing required block theme file' );
+		}
+	}
 	const stylesheetPath = path.join( themeDirectory, 'style.css' );
 	const stylesheet = await fs.readFile( stylesheetPath, 'utf8' );
 	const requiredHeaders = [

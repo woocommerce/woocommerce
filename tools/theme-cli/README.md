@@ -36,8 +36,21 @@ pnpm --filter=@woocommerce/theme-cli wp-env stop <slug>
 
 `@woocommerce/theme-cli` provides the wp-env command, dependency, and shared configuration in `tools/theme-cli/.wp-env.json`. The slug selects the theme to mount. The CLI runs wp-env from its own package, generating an ignored configuration in `tools/theme-cli/.wp-env/<slug>/.wp-env.json` to keep each theme's environment separate. Local overrides belong in `tools/theme-cli/.wp-env/<slug>/.wp-env.override.json`; relative paths are resolved from `tools/theme-cli/`. Start uses Playground by default; pass `--runtime=docker` to use Docker. Theme packages can expose shortcuts to these shared commands.
 
+## Build a theme ZIP
+
+Validate the theme first, then build its ZIP from the repository root. Replace `<slug>` with the theme directory name:
+
+```bash
+pnpm --filter=@woocommerce/theme-cli validate <slug>
+pnpm --filter=@woocommerce/theme-cli build <slug>
+```
+
+This packages the current commit's theme files into `themes/<slug>/artifacts/<slug>-<version>.zip`, with a single `<slug>/` directory. The version comes from the committed `style.css`. Assets, licenses, and `readme.txt` are included; development manifests, dependencies, local configuration, changelog fragments, and development documentation are excluded. Uncommitted edits are excluded, so commit theme changes before building their ZIP.
+
+Theme content checks belong to `validate`; `build` packages the committed files. ZIP generation does not publish a release.
+
 ## Adding a theme
 
 Add a standalone block theme under `themes/<slug>/`, preserving its licenses and using the slug as its text domain. Run validation with that slug, and add a changelog fragment to that theme's `changelog/` directory. Register the theme explicitly in `pnpm-workspace.yaml`; a wildcard is not required.
 
-This workspace does not yet contain a theme. Theme imports, ZIP packaging, CI, automated test suites, and release publishing are deferred.
+This workspace does not yet contain a theme. Theme imports, CI, automated test suites, and release publishing are deferred.

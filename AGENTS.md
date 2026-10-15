@@ -276,6 +276,9 @@ Replace `<slug>` with the directory name of an existing theme, such as `purple`:
 # Validate theme metadata, versions, patterns, assets, and PHP coding standards.
 pnpm --filter=@woocommerce/theme-cli validate <slug>
 
+# Build a ZIP from the current commit's theme files.
+pnpm --filter=@woocommerce/theme-cli build <slug>
+
 # Start the theme's local environment using Playground by default.
 pnpm --filter=@woocommerce/theme-cli wp-env start <slug>
 
@@ -292,6 +295,8 @@ pnpm --filter=@woocommerce/theme-cli lint
 `@woocommerce/theme-cli` provides the `wp-env` command, dependency, and shared configuration at `tools/theme-cli/.wp-env.json`. Pass a theme slug to select the theme to mount. The CLI runs wp-env from its own package and generates an ignored configuration under `tools/theme-cli/.wp-env/<slug>/` for a separate environment per theme. Local overrides belong in that directory's `.wp-env.override.json`. Playground is the default runtime. Keep the same `WP_ENV_HOME` for startup and shutdown when using an isolated environment.
 
 Add theme changes to that theme's own changelog; the shared CLI changelog is for tooling changes. Keep the theme package version, `style.css` version, and `readme.txt` stable tag in sync. Preserve source provenance and licenses. Live release publishing remains deferred.
+
+Builds write `themes/<slug>/artifacts/<slug>-<version>.zip` with a single theme directory and exclude development files. They package source from the current commit only.
 
 See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's README for setup details. Validation fetches schemas from `schemas.wp.org`; PHP linting uses the shared Composer dependencies and `tools/theme-cli/phpcs.xml.dist`.
 
