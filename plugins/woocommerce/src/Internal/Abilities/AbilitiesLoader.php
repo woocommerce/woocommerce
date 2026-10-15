@@ -149,7 +149,7 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			// Core's write abilities are ActionableAbility classes that WordPress builds itself.
+			// Core's product write abilities extend ActionableAbility, so WordPress builds them from their own class.
 			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
 
 			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {

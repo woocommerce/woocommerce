@@ -1,6 +1,6 @@
 <?php
 /**
- * Product update ability definition file.
+ * Product update ability class file.
  */
 
 declare( strict_types=1 );
@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the WooCommerce product update ability.
+ * The WooCommerce product update ability. It runs the steps of ActionableAbility.
  */
 class ProductUpdate extends ActionableAbility {
 

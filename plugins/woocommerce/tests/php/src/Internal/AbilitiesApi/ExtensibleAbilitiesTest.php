@@ -866,6 +866,54 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a fixed 500 error when the default save of an ActionableAbility throws.
+	 */
+	public function test_a_failed_default_save_returns_a_fixed_error(): void {
+		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$register = static function () {
+			wp_register_ability(
+				'test-ext/product-rename',
+				array(
+					'label'               => 'Rename product',
+					'description'         => 'Renames a product.',
+					'category'            => 'woocommerce',
+					'input_schema'        => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id'   => array( 'type' => 'integer' ),
+							'name' => array( 'type' => 'string' ),
+						),
+					),
+					'output_schema'       => array( 'type' => 'object' ),
+					'permission_callback' => '__return_true',
+					'ability_class'       => TestProductRenameAbility::class,
+					'meta'                => array( 'show_in_rest' => true ),
+				)
+			);
+		};
+		$throw    = static function () {
+			throw new \RuntimeException( 'Storage text.' );
+		};
+		add_action( 'wp_abilities_api_init', $register, 20 );
+		add_action( 'woocommerce_before_product_object_save', $throw );
+
+		$response = $this->run_ability_response(
+			'test-ext/product-rename',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		remove_action( 'woocommerce_before_product_object_save', $throw );
+		remove_action( 'wp_abilities_api_init', $register, 20 );
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
+		$this->assertStringNotContainsString( 'Storage text.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should not accept extension fields in the write abilities with the feature off.
 	 */
 	public function test_writes_do_not_change_with_the_feature_off(): void {

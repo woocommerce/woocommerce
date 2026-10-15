@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  * Only save() saves. The other steps must not save, send email or make HTTP
  * requests.
  *
- * The API is experimental while the `ability_contracts` feature exists.
+ * The API is experimental while the `ability_extensions` feature exists.
  *
  * @since 11.3.0
  */
@@ -58,12 +58,13 @@ abstract class ActionableAbility extends \WP_Ability {
 	 *
 	 * @param \WC_Data $subject Object to change.
 	 * @param array    $input   Ability input.
-	 * @return mixed A WP_Error rejects the change.
+	 * @return null|\WP_Error A WP_Error rejects the change, and nothing is saved.
 	 */
 	abstract public function change( $subject, array $input );
 
 	/**
-	 * The ability output for the saved object.
+	 * The ability output for the saved object. It must match the output schema
+	 * of the ability.
 	 *
 	 * @since 11.3.0
 	 *
@@ -73,16 +74,28 @@ abstract class ActionableAbility extends \WP_Ability {
 	abstract public function prepare_response( $subject );
 
 	/**
-	 * Save the changed object. The default saves a WC_Data object.
+	 * Save the changed object. The default calls WC_Data::save(). When the save
+	 * throws or leaves the object without an ID, it logs the error and returns
+	 * a WP_Error with a fixed message, so the exception text stays out of the
+	 * response.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param \WC_Data $subject Changed object.
-	 * @return mixed A WP_Error when the object was not saved.
+	 * @return null|\WP_Error Null when the object was saved, a WP_Error when it was not.
 	 */
 	public function save( $subject ) {
-		$subject->save();
-		return null;
+		try {
+			$subject->save();
+		} catch ( \Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Ability "%s" failed to save: %s', $this->get_name(), $e->getMessage() ),
+				array( 'source' => 'woocommerce-abilities' )
+			);
+			return self::save_failed();
+		}
+
+		return $subject->get_id() > 0 ? null : self::save_failed();
 	}
 
 	/**
@@ -91,7 +104,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @internal
 	 *
 	 * @param mixed $input Ability input.
-	 * @return mixed
+	 * @return mixed|\WP_Error The output of prepare_response(), or the WP_Error of the step that refused the change.
 	 */
 	public function execute_change( $input = null ) {
 		$input   = is_array( $input ) ? $input : array();
@@ -171,6 +184,9 @@ abstract class ActionableAbility extends \WP_Ability {
 						return self::with_status( $valid );
 					}
 					$value = rest_sanitize_value_from_schema( $value, $args['schema'], $param );
+					if ( is_wp_error( $value ) ) {
+						return self::with_status( $value );
+					}
 				}
 				$updates[] = array( $args['update_callback'], $value );
 			}
@@ -247,6 +263,19 @@ abstract class ActionableAbility extends \WP_Ability {
 			$schema['properties']['extensions'] = $extensions;
 		}
 		return $schema;
+	}
+
+	/**
+	 * The error for a save that failed.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function save_failed(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_save_failed',
+			__( 'The change could not be saved.', 'woocommerce' ),
+			array( 'status' => 500 )
+		);
 	}
 
 	/**

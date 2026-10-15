@@ -1,6 +1,6 @@
 <?php
 /**
- * Product create ability definition file.
+ * Product create ability class file.
  */
 
 declare( strict_types=1 );
@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the WooCommerce product create ability.
+ * The WooCommerce product create ability. It runs the steps of ActionableAbility.
  */
 class ProductCreate extends ActionableAbility {
 
