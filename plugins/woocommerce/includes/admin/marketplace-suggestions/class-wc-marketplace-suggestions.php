@@ -217,8 +217,6 @@ class WC_Marketplace_Suggestions {
 	/**
 	 * Get feed suggestions for a display context in feed order (pinned items first), without dismissed items, active plugins or items missing a title or URL.
 	 *
-	 * @since 11.3.0
-	 *
 	 * @param string $context Display context, for example products-list-empty-body.
 	 * @return array[] Feed items.
 	 */
@@ -257,7 +255,6 @@ class WC_Marketplace_Suggestions {
 	 * Add the productsListEmptySuggestions admin setting on the add products task page when it was reached from the empty products list.
 	 *
 	 * @internal
-	 * @since 11.3.0
 	 *
 	 * @param mixed $settings Admin shared settings.
 	 * @return mixed
