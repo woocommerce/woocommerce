@@ -59,7 +59,7 @@ class ContractTest extends TestCase {
 			'last_attempt_gmt'  => '2026-01-01 00:00:00',
 			'trial_end_gmt'     => null,
 			'end_gmt'           => null,
-			'schedule_source'   => Contract::SCHEDULE_SOURCE_PRIMITIVE,
+			'schedule_source'   => Contract::SCHEDULE_SOURCE_ENGINE,
 		);
 	}
 
@@ -183,7 +183,7 @@ class ContractTest extends TestCase {
 		$contract->set_selling_plan_id( 8 );
 		$contract->set_origin_order_id( 9 );
 		$contract->set_start_gmt( '2026-03-01 00:00:00' );
-		$contract->set_schedule_source( Contract::SCHEDULE_SOURCE_GATEWAY );
+		$contract->set_schedule_source( 'my_gateway' );
 		$contract->set_items( array( array( 'item_name' => 'Coffee' ), 'skipped' ) );
 		$contract->set_addresses( array( Contract::ADDRESS_BILLING => array( 'city' => 'Lisbon' ) ) );
 
@@ -192,7 +192,7 @@ class ContractTest extends TestCase {
 		$this->assertSame( 8, $contract->get_selling_plan_id() );
 		$this->assertSame( 9, $contract->get_origin_order_id() );
 		$this->assertSame( '2026-03-01 00:00:00', $contract->get_start_gmt() );
-		$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $contract->get_schedule_source() );
+		$this->assertSame( 'my_gateway', $contract->get_schedule_source() );
 		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $contract->get_items() );
 		$this->assertSame( array( 'billing' => array( 'city' => 'Lisbon' ) ), $contract->get_addresses() );
 
@@ -210,15 +210,48 @@ class ContractTest extends TestCase {
 	}
 
 	/**
-	 * @testdox set_schedule_source() refuses an unknown source.
+	 * @testdox set_schedule_source() refuses a source that is not a valid slug.
+	 * @dataProvider provide_invalid_schedule_sources
+	 *
+	 * @param string $schedule_source Invalid schedule source.
 	 */
-	public function test_set_schedule_source_rejects_an_unknown_source(): void {
+	public function test_set_schedule_source_rejects_an_invalid_slug( string $schedule_source ): void {
 		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
 
 		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( 'Contract: invalid schedule source "bogus".' );
+		$this->expectExceptionMessage( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
 
-		$contract->set_schedule_source( 'bogus' );
+		$contract->set_schedule_source( $schedule_source );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_invalid_schedule_sources(): array {
+		return array(
+			'empty'         => array( '' ),
+			'uppercase'     => array( 'MyGateway' ),
+			'space'         => array( 'my gateway' ),
+			'dot'           => array( 'my.gateway' ),
+			'markup'        => array( '<b>' ),
+			'over 64 chars' => array( str_repeat( 'a', 65 ) ),
+			'trailing LF'   => array( "my_gateway\n" ),
+		);
+	}
+
+	/**
+	 * @testdox The schedule source defaults to the engine and accepts any slug of 1-64 lowercase letters, digits, underscores or hyphens.
+	 */
+	public function test_set_schedule_source_accepts_an_open_slug(): void {
+		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
+
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $contract->get_schedule_source() );
+
+		foreach ( array( 'a', 'my-gateway_2', 'woocommerce-subscriptions-lite', str_repeat( 'a', 64 ), Contract::SCHEDULE_SOURCE_ENGINE ) as $schedule_source ) {
+			$contract->set_schedule_source( $schedule_source );
+
+			$this->assertSame( $schedule_source, $contract->get_schedule_source() );
+		}
 	}
 
 	/**
@@ -236,7 +269,7 @@ class ContractTest extends TestCase {
 		$this->assertSame( 'acme-subs', $contract->get_extension_slug() );
 		$this->assertSame( '2026-01-01 00:00:00', $contract->get_start_gmt() );
 		$this->assertSame( '2026-02-01 00:00:00', $contract->get_next_payment_gmt() );
-		$this->assertSame( Contract::SCHEDULE_SOURCE_PRIMITIVE, $contract->get_schedule_source() );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $contract->get_schedule_source() );
 	}
 
 	/**
@@ -342,7 +375,7 @@ class ContractTest extends TestCase {
 				'selling_plan_id' => 2,
 				'origin_order_id' => 3,
 				'start_gmt'       => '2026-01-01 00:00:00',
-				'schedule_source' => 'nonsense',
+				'schedule_source' => 'Not a slug',
 			)
 		);
 	}
@@ -440,7 +473,7 @@ class ContractTest extends TestCase {
 		$this->assertSame( '2026-01-01 00:00:00', $contract->get_last_attempt_gmt() );
 		$this->assertNull( $contract->get_trial_end_gmt() );
 		$this->assertNull( $contract->get_end_gmt() );
-		$this->assertSame( Contract::SCHEDULE_SOURCE_PRIMITIVE, $contract->get_schedule_source() );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $contract->get_schedule_source() );
 	}
 
 	/**

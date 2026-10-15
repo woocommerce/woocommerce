@@ -241,12 +241,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
 			message: '#^Parameter \#1 \$offset of method WC_DateTime\:\:set_utc_offset\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 1
