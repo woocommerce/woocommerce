@@ -172,6 +172,28 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send guests back to the product after logging in when an account is required.
+	 */
+	public function test_login_link_returns_guest_to_the_product_when_account_is_required(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_account', 'yes' );
+		wp_set_current_user( 0 );
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+
+		try {
+			ob_start();
+			do_action( 'woocommerce_simple_add_to_cart' );
+			$markup = ob_get_clean();
+		} finally {
+			delete_option( 'woocommerce_customer_stock_notifications_require_account' );
+		}
+
+		$expected_url = add_query_arg( 'redirect_to', rawurlencode( get_permalink( $product_id ) ), wc_get_page_permalink( 'myaccount' ) );
+
+		$this->assertStringContainsString( 'Please <a href="' . esc_url( $expected_url ) . '">log in</a> to sign up for stock notifications.', $markup, 'The login link should return the shopper to the product page after logging in.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should not render for a guest when an account is required.' );
+	}
+
+	/**
 	 * @testdox Should render the form inside the legacy Add to Cart Form block.
 	 */
 	public function test_form_is_rendered_inside_legacy_add_to_cart_form_block(): void {
