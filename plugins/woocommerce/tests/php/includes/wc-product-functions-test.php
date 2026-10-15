@@ -1044,6 +1044,57 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Stock lookup regeneration updates managed products in batches of the requested size.
+	 */
+	public function test_stock_lookup_regeneration_updates_managed_products_in_batches(): void {
+		global $wpdb;
+
+		$stock_levels = array(
+			'first'  => 3,
+			'second' => 5,
+			'third'  => 8,
+			'fourth' => 13,
+			'fifth'  => 21,
+		);
+		$fixtures     = array();
+		foreach ( $stock_levels as $case => $stock ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_manage_stock( true );
+			$product->set_stock_quantity( $stock );
+			$product->save();
+			$fixtures[ $case ] = $product->get_id();
+		}
+		$fixtures['unmanaged'] = WC_Helper_Product::create_simple_product()->get_id();
+		foreach ( $fixtures as $case => $product_id ) {
+			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
+		}
+
+		$update_statements = array();
+		$capture_updates   = function ( $query ) use ( &$update_statements, $wpdb ) {
+			if ( preg_match( '/^\s*UPDATE\s/i', $query ) && false !== strpos( $query, $wpdb->wc_product_meta_lookup ) ) {
+				$update_statements[] = $query;
+			}
+			return $query;
+		};
+		add_filter( 'query', $capture_updates );
+		try {
+			wc_update_product_lookup_tables_column( 'stock_quantity', 2 );
+		} finally {
+			remove_filter( 'query', $capture_updates );
+		}
+		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
+		$this->assertCount( 3, $update_statements, 'Five managed products with a batch size of two take three UPDATE statements.' );
+
+		$values = $this->read_stock_lookup_values( $fixtures );
+		$this->assertSame( 3.0, $values['first'] );
+		$this->assertSame( 5.0, $values['second'] );
+		$this->assertSame( 8.0, $values['third'] );
+		$this->assertSame( 13.0, $values['fourth'] );
+		$this->assertSame( 21.0, $values['fifth'] );
+		$this->assertSame( 99.0, $values['unmanaged'], 'An unmanaged product is left alone in every batch.' );
+	}
+
+	/**
 	 * Read stock lookup values for a named product fixture.
 	 *
 	 * @param array<string, int> $fixtures Named product IDs.

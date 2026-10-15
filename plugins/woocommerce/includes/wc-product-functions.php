@@ -2255,9 +2255,11 @@ function wc_update_product_lookup_tables() {
  * Populate lookup table column data.
  *
  * @since 3.6.0
- * @param string $column Column name to set.
+ * @since 11.3.0 Added the `$batch_size` parameter.
+ * @param string $column     Column name to set.
+ * @param int    $batch_size Number of products each UPDATE covers, for columns that are regenerated in batches. Default 250.
  */
-function wc_update_product_lookup_tables_column( $column ) {
+function wc_update_product_lookup_tables_column( $column, $batch_size = 250 ) {
 	if ( empty( $column ) ) {
 		return;
 	}
@@ -2288,20 +2290,28 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'stock_quantity':
-			// The subquery narrows the update to managed-stock products by primary key, so the optimizer never scans the whole lookup table.
-			$wpdb->query(
-				"
-				UPDATE
-					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_stock'
-				SET
-					lookup_table.stock_quantity = meta.meta_value
-				WHERE
-					lookup_table.product_id IN (
-						SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'
-					)
-				"
+			// Managed-stock IDs are fetched first and updated in batches: each UPDATE is bound to a short primary key list,
+			// so it never scans the whole lookup table and keeps transactions small for replication and checkout stock locks.
+			$product_ids = array_map(
+				'intval',
+				$wpdb->get_col( "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'" )
 			);
+			foreach ( array_chunk( $product_ids, max( 1, (int) $batch_size ) ) as $batch_ids ) {
+				$in_values = implode( ',', $batch_ids );
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $in_values is a list of integers.
+				$wpdb->query(
+					"
+					UPDATE
+						{$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_stock'
+					SET
+						lookup_table.stock_quantity = meta.meta_value
+					WHERE
+						lookup_table.product_id IN ( {$in_values} )
+					"
+				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
 			break;
 		case 'sku':
 		case 'global_unique_id':
