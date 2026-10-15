@@ -371,7 +371,7 @@ final class WooCommerce {
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
 		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
-		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
+		ActionSchedulerUtil::when_ready( array( $this, 'add_recurring_action_wrappers' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
