@@ -674,6 +674,8 @@ class UcpCart extends ControllerTestCase {
 
 		$this->assertCount( 1, $data['line_items'] );
 		$this->assertSame( (string) self::$variable['variation'], $data['line_items'][0]['item']['id'] );
+		// The parent title plus the variation's attribute values, as WC names a variation.
+		$this->assertSame( 'UCP Cart Tee - small', $data['line_items'][0]['item']['title'] );
 		$this->assertSame( 1200, $data['line_items'][0]['item']['price'] );
 		$this->assertSame( 2400, $this->total( $data['totals'], 'total' ) );
 	}
@@ -909,5 +911,79 @@ class UcpCart extends ControllerTestCase {
 		$request->set_query_params( array( 'id' => 'someone-elses-token' ) );
 
 		$this->assertSame( $created['id'], rest_get_server()->dispatch( $request )->get_data()['id'] );
+	}
+
+	/**
+	 * Prices come from the Store API cart response, so they follow the cart tax
+	 * display setting the storefront uses rather than the product's raw price.
+	 */
+	public function test_item_price_follows_cart_tax_display(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		$rate_id = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate'       => '10.0000',
+				'tax_rate_name'  => 'UCP VAT',
+				'tax_rate_class' => '',
+			)
+		);
+
+		try {
+			$data = $this->create_cart( array( $this->line_item( 0, 2 ) ) );
+		} finally {
+			\WC_Tax::_delete_tax_rate( $rate_id );
+			update_option( 'woocommerce_calc_taxes', 'no' );
+			update_option( 'woocommerce_tax_display_cart', 'excl' );
+		}
+
+		// 19.99 at 10%: the price shown includes tax, totals carry the tax line.
+		$this->assertSame( 2199, $data['line_items'][0]['item']['price'] );
+		$this->assertSame( 3998, $this->total( $data['totals'], 'subtotal' ) );
+		$this->assertSame( 400, $this->total( $data['totals'], 'tax' ) );
+		$this->assertSame( 4398, $this->total( $data['totals'], 'total' ) );
+	}
+
+	/**
+	 * Agents compare titles literally, so the storefront HTML formatter must not
+	 * reach them, the same way catalog keeps product names raw.
+	 */
+	public function test_item_title_is_raw(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_name( 'Frame 10x20 "Classic"' );
+		$product->set_regular_price( '7.00' );
+		$product_id = $product->save();
+
+		$data = $this->create_cart( array( array( 'item' => array( 'id' => (string) $product_id ) ) ) );
+
+		$this->assertSame( 'Frame 10x20 "Classic"', $data['line_items'][0]['item']['title'] );
+	}
+
+	/**
+	 * Errors the Store API cart validation reports, such as an extension refusing the
+	 * cart through `woocommerce_store_api_cart_errors`, reach the agent as recoverable
+	 * messages instead of surfacing at checkout.
+	 */
+	public function test_reading_a_cart_reports_store_api_cart_errors(): void {
+		$created = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+		$this->assertArrayNotHasKey( 'messages', $created );
+
+		$refuse = function ( \WP_Error $errors ) {
+			$errors->add( 'woocommerce_rest_product_partially_out_of_stock', 'Only 1 of "UCP Cart Mug" left.' );
+		};
+		add_action( 'woocommerce_store_api_cart_errors', $refuse );
+
+		try {
+			$data = $this->request( 'GET', '/carts/' . $created['id'] )->get_data();
+		} finally {
+			remove_action( 'woocommerce_store_api_cart_errors', $refuse );
+		}
+
+		$this->assertSame( 'success', $data['ucp']['status'] );
+		$this->assertCount( 1, $data['line_items'] );
+		$this->assertSame( 'out_of_stock', $data['messages'][0]['code'] );
+		$this->assertSame( 'warning', $data['messages'][0]['type'] );
+		$this->assertSame( 'recoverable', $data['messages'][0]['severity'] );
+		$this->assertSame( '$.line_items', $data['messages'][0]['path'] );
+		$this->assertSame( 'Only 1 of "UCP Cart Mug" left.', $data['messages'][0]['content'] );
 	}
 }

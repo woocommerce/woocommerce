@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -134,13 +133,29 @@ class UcpUtils {
 	}
 
 	/**
-	 * Convert a WooCommerce amount to UCP minor units.
+	 * Translate a cart error code into the UCP code closest to it.
 	 *
-	 * @param MoneyFormatter $money Money formatter configured for the store.
-	 * @param mixed          $amount Amount in major units, as WooCommerce reports it.
-	 * @return int
+	 * The cart names more reasons than UCP does, so the ones an agent can act on
+	 * differently — retry smaller, fix the quantity, or re-read the cart — stay apart
+	 * and the rest collapse.
+	 *
+	 * @param string $code Store API error code.
+	 * @return string One of `out_of_stock`, `not_found`, `invalid_quantity` or `item_unavailable`.
 	 */
-	public static function to_minor_units( MoneyFormatter $money, $amount ): int {
-		return (int) $money->format( is_scalar( $amount ) ? (string) $amount : '0' );
+	public static function cart_error_code( string $code ): string {
+		switch ( $code ) {
+			case 'woocommerce_rest_product_out_of_stock':
+			case 'woocommerce_rest_product_partially_out_of_stock':
+			case 'woocommerce_rest_product_too_many_in_cart':
+				return 'out_of_stock';
+			case 'woocommerce_rest_cart_invalid_key':
+				return 'not_found';
+			case 'woocommerce_rest_product_invalid_quantity':
+			case 'invalid_quantity':
+			case 'readonly_quantity':
+				return 'invalid_quantity';
+			default:
+				return 'item_unavailable';
+		}
 	}
 }

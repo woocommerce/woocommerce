@@ -290,10 +290,20 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
-				$this->transformer()->build_cart( $this->cart_controller->get_cart_instance(), $cart_id, $context )
+				$this->transformer()->build_cart( $this->cart_item_response(), $cart_id, $context )
 			),
 			200
 		);
+	}
+
+	/**
+	 * Build the Store API cart response for the current cart, as nested arrays.
+	 *
+	 * @return array
+	 */
+	private function cart_item_response(): array {
+		// Nested values are stdClass; decode through JSON for uniform array access.
+		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_instance() ) ), true );
 	}
 
 	/**
@@ -475,7 +485,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->cart_controller->calculate_totals();
 
 			return $this->ucp_error(
-				self::cart_error_code( $error->getErrorCode() ),
+				UcpUtils::cart_error_code( $error->getErrorCode() ),
 				$error->getMessage(),
 				'recoverable',
 				200,
@@ -484,33 +494,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Translate a cart error code into the UCP code closest to it.
-	 *
-	 * The cart names more reasons than UCP does, so the ones an agent can act on
-	 * differently — retry smaller, fix the quantity, or re-read the cart — stay apart
-	 * and the rest collapse.
-	 *
-	 * @param string $code Store API error code.
-	 * @return string One of `out_of_stock`, `not_found`, `invalid_quantity` or `item_unavailable`.
-	 */
-	private static function cart_error_code( string $code ): string {
-		switch ( $code ) {
-			case 'woocommerce_rest_product_out_of_stock':
-			case 'woocommerce_rest_product_partially_out_of_stock':
-			case 'woocommerce_rest_product_too_many_in_cart':
-				return 'out_of_stock';
-			case 'woocommerce_rest_cart_invalid_key':
-				return 'not_found';
-			case 'woocommerce_rest_product_invalid_quantity':
-			case 'invalid_quantity':
-			case 'readonly_quantity':
-				return 'invalid_quantity';
-			default:
-				return 'item_unavailable';
-		}
 	}
 
 	/**
