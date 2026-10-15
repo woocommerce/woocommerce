@@ -1489,7 +1489,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 					$decimal_product     = $fixtures->get_simple_product(
 						array(
 							'name'          => 'Decimal inspector target',
-							'regular_price' => '15.25',
+							'regular_price' => '10.25',
 							'status'        => 'publish',
 							'stock_status'  => ProductStockStatus::IN_STOCK,
 						)
@@ -1497,7 +1497,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 					$products[]          = $decimal_product;
 					$query['post__in'][] = $decimal_product->get_id();
 					$query['priceRange'] = array(
-						'max' => 15.28,
+						'max' => 10.28,
 					);
 					$query['orderBy']    = 'title';
 					$query['order']      = 'asc';
@@ -1614,7 +1614,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 			'minimum price'         => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
 			'maximum price'         => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
 			'decimal minimum price' => array( 'decimal-minimum-price', array( 'Decimal inspector target' ) ),
-			'decimal maximum price' => array( 'decimal-maximum-price', array( 'Alpha inspector target', 'Below inspector distractor', 'Decimal inspector target', 'Zulu inspector distractor' ) ),
+			'decimal maximum price' => array( 'decimal-maximum-price', array( 'Alpha inspector target', 'Below inspector distractor', 'Decimal inspector target' ) ),
 			'inclusive price'       => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
 			'created before'        => array( 'created-before', array( 'Alpha inspector target' ) ),
 			'created within'        => array( 'created-within', array( 'Zulu inspector distractor' ) ),

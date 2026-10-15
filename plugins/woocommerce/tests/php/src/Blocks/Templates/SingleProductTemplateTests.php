@@ -251,8 +251,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$this->assertContains( 'product', $filtered_classes );
 			$this->assertContains( $type_class, $filtered_classes );
 		} finally {
-			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
-			// globals it leaves exactly as the test left them.
+			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures;
+			// it leaves these two globals exactly as the test left them.
 			if ( $product_global_existed ) {
 				$GLOBALS['product'] = $product_global;
 			} else {
@@ -316,8 +316,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$this->assertContains( 'status-publish', $imageless_classes, 'The imageless product body classes must contain status-publish.' );
 			$this->assertNotContains( 'has-post-thumbnail', $imageless_classes, 'A product without an image must not contribute has-post-thumbnail.' );
 		} finally {
-			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures; these two
-			// globals it leaves exactly as the test left them.
+			// tear_down() nulls $GLOBALS['post'] and rolls back the fixtures;
+			// it leaves these two globals exactly as the test left them.
 			if ( $product_global_existed ) {
 				$GLOBALS['product'] = $product_global;
 			} else {

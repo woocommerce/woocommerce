@@ -261,7 +261,6 @@ for ( const {
 				await getProductsNameFromProductQuery( page );
 
 			expect( classicProducts.length ).toBeGreaterThan( 1 );
-			expect( productQueryProducts.length ).toBeGreaterThan( 1 );
 			expect( classicProducts ).toEqual( productQueryProducts );
 		} );
 	} );
