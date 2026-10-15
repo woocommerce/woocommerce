@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ExtensionCartUpdateArgs } from '@woocommerce/types';
+import { addAction, removeAction } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -10,6 +11,7 @@ import {
 	changeCartItemQuantity,
 	receiveCart,
 	applyExtensionCartUpdate,
+	syncCartWithIAPIStore,
 } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
 import { getIsCustomerDataDirty } from '../utils';
@@ -382,6 +384,77 @@ describe( 'receiveCart', () => {
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should fire the cart-updated action with the new and previous cart after clearing pending deletes', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'bundle-parent' }, { key: 'simple-product' } ],
+			pendingDelete: [ 'bundle-parent' ],
+		} );
+		const previousCart = select.getCartData();
+		let pendingDeleteClearedFirst = false;
+		// Record the state instead of asserting here, since errors thrown by callbacks are caught and logged.
+		const callback = jest.fn( () => {
+			pendingDeleteClearedFirst =
+				dispatch.itemIsPendingDelete.mock.calls.some(
+					( [ key, isPending ] ) =>
+						key === 'bundle-parent' && isPending === false
+				);
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated',
+			callback
+		);
+
+		try {
+			receiveCart( {
+				items: [ { key: 'simple-product' } ],
+				errors: [],
+			} as never )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated'
+			);
+		}
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith( {
+			storeCart: select.getCartData(),
+			previousStoreCart: previousCart,
+		} );
+		expect( pendingDeleteClearedFirst ).toBe( true );
+	} );
+
+	it( 'should still update the cart when a cart-updated callback throws', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'item-1' } ],
+			pendingDelete: [],
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-throws',
+			() => {
+				throw new Error( 'Extension error' );
+			}
+		);
+
+		try {
+			receiveCart( {
+				items: [ { key: 'item-2' } ],
+				errors: [],
+			} as never )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-throws'
+			);
+		}
+
+		expect( dispatch.setCartData ).toHaveBeenCalled();
+		expect( dispatch.setErrorData ).toHaveBeenCalledWith( null );
+		expect( console ).toHaveErroredWith( new Error( 'Extension error' ) );
+	} );
+
 	it( 'should handle empty pending delete list', () => {
 		const { dispatch, select } = createReceiveCartMocks( {
 			cartItems: [ { key: 'item-1' } ],
@@ -394,6 +467,106 @@ describe( 'receiveCart', () => {
 		} as never )( { dispatch, select } as never );
 
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'syncCartWithIAPIStore', () => {
+	const createSyncMocks = () => {
+		let cartData = {
+			items: [ { key: 'item-1', quantity: 1 } ],
+			errors: [] as never[],
+		};
+
+		const dispatch = {
+			setCartData: jest.fn( ( newCart ) => {
+				cartData = newCart;
+			} ),
+			setProductsPendingAdd: jest.fn(),
+			itemIsPendingQuantity: jest.fn(),
+			itemIsPendingDelete: jest.fn(),
+			setErrorData: jest.fn(),
+			receiveError: jest.fn(),
+		};
+		const select = {
+			getCartData: jest.fn( () => cartData ),
+			getCartErrors: jest.fn( () => [] ),
+		};
+
+		return { dispatch, select };
+	};
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'should fire the cart-updated action with the new and previous cart after clearing pending quantities', async () => {
+		mockApiFetchWithHeaders.mockResolvedValue( {
+			response: {
+				items: [ { key: 'item-1', quantity: 2 } ],
+				errors: [],
+			},
+		} );
+		const { dispatch, select } = createSyncMocks();
+		const previousCart = select.getCartData();
+		let pendingQuantityClearedFirst = false;
+		const callback = jest.fn( () => {
+			pendingQuantityClearedFirst =
+				dispatch.itemIsPendingQuantity.mock.calls.some(
+					( [ key, isPending ] ) =>
+						key === 'item-1' && isPending === false
+				);
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-sync',
+			callback
+		);
+
+		try {
+			await syncCartWithIAPIStore( {
+				cartItemsPendingQuantity: [ 'item-1' ],
+			} )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-sync'
+			);
+		}
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith( {
+			storeCart: select.getCartData(),
+			previousStoreCart: previousCart,
+		} );
+		expect( pendingQuantityClearedFirst ).toBe( true );
+	} );
+
+	it( 'should not fire the cart-updated action when the cart request fails', async () => {
+		mockApiFetchWithHeaders.mockRejectedValue(
+			new Error( 'Request failed' )
+		);
+		const { dispatch, select } = createSyncMocks();
+		const callback = jest.fn();
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-sync-fails',
+			callback
+		);
+
+		try {
+			await expect(
+				syncCartWithIAPIStore( {
+					cartItemsPendingQuantity: [ 'item-1' ],
+				} )( { dispatch, select } as never )
+			).rejects.toThrow( 'Request failed' );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-sync-fails'
+			);
+		}
+
+		expect( callback ).not.toHaveBeenCalled();
 	} );
 } );
 
