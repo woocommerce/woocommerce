@@ -12,11 +12,13 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use LogicException;
+use ReflectionClass;
 use ReflectionProperty;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
@@ -65,17 +67,6 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertIsArray( $row );
 
 		return $row;
-	}
-
-	/**
-	 * End a lock's trust window without waiting (the trust clock is monotonic real time).
-	 *
-	 * @param ContractLock $lock The lock.
-	 */
-	private function age_trust( ContractLock $lock ): void {
-		$deadline = new ReflectionProperty( ContractLock::class, 'trust_deadline_ns' );
-		$deadline->setAccessible( true );
-		$deadline->setValue( $lock, 0 );
 	}
 
 	private function acquire( int $id, string $operation = 'hold' ): ContractLock {
@@ -194,7 +185,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			),
 			$this->lock_columns( $id )
 		);
-		$this->assertTrue( $lock->is_released() );
+		$this->assertTrue( $this->lock_state( $lock )->is_released() );
 		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'cancel' ), 'A released contract can be locked again at once.' );
 	}
 
@@ -226,7 +217,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->pin_db_clock( '2035-01-01 00:05:00' );
 		$lock->extend();
 		$this->assertSame( '2035-01-01 00:15:00', $this->sut->lock_holder( $id )['locked_until'] );
-		$this->assertTrue( $lock->has_extended() );
+		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
 
 		$this->expectException( LogicException::class );
 		$lock->extend();
@@ -242,7 +233,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$lock->extend();
 
-		$this->assertTrue( $lock->has_extended() );
+		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
 		$this->assertTrue( $this->sut->lock_holder( $id )['live'] );
 	}
 
@@ -275,19 +266,19 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertSame( $queries, $wpdb->num_queries, 'A trusted lock costs no query.' );
 
 		$this->pin_db_clock( '2035-01-01 00:09:30' );
-		$this->age_trust( $lock );
+		$this->age_lock_trust( $lock );
 		$this->sut->fence_children( $lock );
-		$this->assertTrue( $lock->has_extended(), 'Past the window the fence extends once.' );
+		$this->assertTrue( $this->lock_state( $lock )->has_extended(), 'Past the window the fence extends once.' );
 		$this->assertSame( '2035-01-01 00:19:30', $this->sut->lock_holder( $id )['locked_until'] );
-		$this->assertTrue( $lock->is_trusted() );
+		$this->assertTrue( $this->lock_state( $lock )->is_trusted() );
 
 		$this->pin_db_clock( '2035-01-01 00:15:00' );
-		$this->age_trust( $lock );
+		$this->age_lock_trust( $lock );
 		$this->sut->fence_children( $lock );
-		$this->assertTrue( $lock->is_trusted(), 'With 270 s left the verify trusts it again.' );
+		$this->assertTrue( $this->lock_state( $lock )->is_trusted(), 'With 270 s left the verify trusts it again.' );
 
 		$this->pin_db_clock( '2035-01-01 00:18:31' );
-		$this->age_trust( $lock );
+		$this->age_lock_trust( $lock );
 		$this->expectException( ContractLockedException::class );
 		$this->sut->fence_children( $lock );
 	}
@@ -302,7 +293,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$lock->extend();
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
-		$this->age_trust( $lock );
+		$this->age_lock_trust( $lock );
 
 		$this->expectException( ContractLockedException::class );
 		$this->sut->fence_children( $lock );
@@ -317,6 +308,82 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->expectException( ContractLockedException::class );
 		$this->sut->fence_children( $lock );
+	}
+
+	/**
+	 * @testdox Past the window, a lock near expiry by the local estimate is extended without a verify read.
+	 */
+	public function test_fence_children_extends_a_lock_near_expiry_by_the_local_estimate(): void {
+		global $wpdb;
+
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+
+		$estimate = new ReflectionProperty( ContractLockState::class, 'expires_estimate' );
+		$estimate->setAccessible( true );
+		$estimate->setValue( $this->lock_state( $lock ), 0.0 );
+		$this->age_lock_trust( $lock );
+
+		$this->pin_db_clock( '2035-01-01 00:08:30' );
+		$queries = $wpdb->num_queries;
+		$this->sut->fence_children( $lock );
+
+		$this->assertSame( 1, $wpdb->num_queries - $queries, 'One extend write, no verify read.' );
+		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
+		$this->assertSame( '2035-01-01 00:18:30', $this->sut->lock_holder( $id )['locked_until'] );
+	}
+
+	/**
+	 * @testdox A lock taken over after expiry is refused on its first child write past the trust window.
+	 */
+	public function test_a_taken_over_lock_is_refused_on_the_first_child_write_past_the_window(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$old = $this->acquire( $id );
+
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->acquire( $id, 'cancel' );
+		$this->age_lock_trust( $old );
+
+		try {
+			$this->sut->add_meta( $id, '_stale', 'x', false, $old );
+			$this->fail( 'Expected the taken-over lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+
+		$this->assertSame( array(), $this->sut->get_meta( $id, '_stale' ) );
+	}
+
+	/**
+	 * @testdox A lock forged through reflection cannot write child rows once its trust is checked.
+	 */
+	public function test_a_forged_lock_cannot_write_child_rows_past_a_verify(): void {
+		$id = $this->insert_contract();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$this->acquire( $id );
+
+		$forged = ( new ReflectionClass( ContractLock::class ) )->newInstanceWithoutConstructor();
+		foreach ( array(
+			'contract_id' => $id,
+			'operation'   => 'forged',
+			'state'       => new ContractLockState( str_repeat( 'f', 32 ) ),
+		) as $name => $value ) {
+			$property = new ReflectionProperty( ContractLock::class, $name );
+			$property->setAccessible( true );
+			$property->setValue( $forged, $value );
+		}
+		$this->age_lock_trust( $forged );
+
+		try {
+			$this->sut->add_meta( $id, '_forged', 'x', false, $forged );
+			$this->fail( 'Expected the forged lock to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'hold', $e->get_operation() );
+		}
+
+		$this->assertSame( array(), $this->sut->get_meta( $id, '_forged' ) );
 	}
 
 	/**

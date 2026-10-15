@@ -10,12 +10,14 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 
 /**
  * Engine integration test case.
@@ -51,6 +53,31 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( $wpdb->prepare( 'SET timestamp = %d', $timestamp ) );
+	}
+
+	/**
+	 * A lock's private state, read through reflection (tests only).
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	protected function lock_state( ContractLock $lock ): ContractLockState {
+		$property = new ReflectionProperty( ContractLock::class, 'state' );
+		$property->setAccessible( true );
+		$state = $property->getValue( $lock );
+		$this->assertInstanceOf( ContractLockState::class, $state );
+
+		return $state;
+	}
+
+	/**
+	 * End a lock's trust window without waiting (the trust clock is monotonic real time).
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	protected function age_lock_trust( ContractLock $lock ): void {
+		$property = new ReflectionProperty( ContractLockState::class, 'trusted_until' );
+		$property->setAccessible( true );
+		$property->setValue( $this->lock_state( $lock ), 0.0 );
 	}
 
 	/**

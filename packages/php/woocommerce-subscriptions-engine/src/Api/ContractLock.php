@@ -11,6 +11,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
 use LogicException;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,8 +22,9 @@ defined( 'ABSPATH' ) || exit;
  * contract is refused with {@see ContractLockedException} while the lock lives.
  *
  * Fencing: contract-row writes check the token and expiry in the statement; child-table
- * writes trust the lock for its TTL minus a margin, then extend it once or re-verify.
- * The token is engine-generated and never readable (reflection is outside the contract).
+ * writes trust the lock for 60 seconds from its last database stamp, then extend it once
+ * when it is near expiry or re-verify it. The token and the trust state are engine-only:
+ * reflection, array casts, `var_export()` and `debug_zval_dump()` are outside the contract.
  */
 final class ContractLock {
 
@@ -30,11 +32,6 @@ final class ContractLock {
 	 * Lock lifetime in seconds, from the database clock at acquire or extend.
 	 */
 	public const TTL_SECONDS = 600;
-
-	/**
-	 * Seconds before the stored expiry after which child writes stop trusting the lock.
-	 */
-	private const TRUST_MARGIN_SECONDS = 60;
 
 	/**
 	 * Contract id.
@@ -51,61 +48,23 @@ final class ContractLock {
 	private $operation;
 
 	/**
-	 * Engine-generated token; never exposed. The repository reads it through a scope-bound closure.
+	 * Token and trust state; the repository reads it through a scope-bound closure.
 	 *
-	 * @var string
+	 * @var ContractLockState
 	 */
-	private $token; // @phpstan-ignore property.onlyWritten
+	private $state; // @phpstan-ignore property.onlyWritten
 
 	/**
-	 * Monotonic `hrtime()` moment (ns) until which child writes trust the lock.
+	 * Built by the repository through a scope-bound closure.
 	 *
-	 * @var int
+	 * @param int               $contract_id Contract id.
+	 * @param string            $operation   Operation label.
+	 * @param ContractLockState $state       Token and trust state.
 	 */
-	private $trust_deadline_ns = 0;
-
-	/**
-	 * Whether the single extend allowance is used.
-	 *
-	 * @var bool
-	 */
-	private $extended = false;
-
-	/**
-	 * Whether the lock was released.
-	 *
-	 * @var bool
-	 */
-	private $released = false;
-
-	/**
-	 * Use {@see self::issue()}.
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $operation   Operation label.
-	 * @param string $token       Engine-generated token.
-	 */
-	private function __construct( int $contract_id, string $operation, string $token ) {
+	private function __construct( int $contract_id, string $operation, ContractLockState $state ) {
 		$this->contract_id = $contract_id;
 		$this->operation   = $operation;
-		$this->token       = $token;
-	}
-
-	/**
-	 * Build a lock the repository has just stored.
-	 *
-	 * @internal Engine storage only.
-	 *
-	 * @param int    $contract_id   Contract id.
-	 * @param string $operation     Operation label.
-	 * @param string $token         The stored token.
-	 * @param int    $trust_seconds Seconds until the stored expiry.
-	 */
-	public static function issue( int $contract_id, string $operation, string $token, int $trust_seconds ): self {
-		$lock = new self( $contract_id, $operation, $token );
-		$lock->trust_for( $trust_seconds );
-
-		return $lock;
+		$this->state       = $state;
 	}
 
 	/**
@@ -142,63 +101,6 @@ final class ContractLock {
 	}
 
 	/**
-	 * Whether child writes may trust the lock without a database check.
-	 *
-	 * @internal Engine storage only.
-	 */
-	public function is_trusted(): bool {
-		return ! $this->released && self::now_ns() < $this->trust_deadline_ns;
-	}
-
-	/**
-	 * Trust the lock until the margin before an expiry `$remaining_seconds` away.
-	 *
-	 * @internal Engine storage only.
-	 *
-	 * @param int $remaining_seconds Seconds until the stored expiry.
-	 */
-	public function trust_for( int $remaining_seconds ): void {
-		$this->trust_deadline_ns = self::now_ns() + max( 0, $remaining_seconds - self::TRUST_MARGIN_SECONDS ) * 1000000000;
-	}
-
-	/**
-	 * Whether the extend allowance is used.
-	 *
-	 * @internal Engine storage only.
-	 */
-	public function has_extended(): bool {
-		return $this->extended;
-	}
-
-	/**
-	 * Use the extend allowance.
-	 *
-	 * @internal Engine storage only.
-	 */
-	public function mark_extended(): void {
-		$this->extended = true;
-	}
-
-	/**
-	 * Whether the lock was released.
-	 *
-	 * @internal Engine storage only.
-	 */
-	public function is_released(): bool {
-		return $this->released;
-	}
-
-	/**
-	 * Mark the lock released and stop trusting it.
-	 *
-	 * @internal Engine storage only.
-	 */
-	public function mark_released(): void {
-		$this->released          = true;
-		$this->trust_deadline_ns = 0;
-	}
-
-	/**
 	 * Debug output without the token.
 	 *
 	 * @return array<string, mixed>
@@ -207,8 +109,6 @@ final class ContractLock {
 		return array(
 			'contract_id' => $this->contract_id,
 			'operation'   => $this->operation,
-			'extended'    => $this->extended,
-			'released'    => $this->released,
 		);
 	}
 
@@ -250,12 +150,5 @@ final class ContractLock {
 	 */
 	public function __clone() {
 		throw new LogicException( 'A contract lock cannot be cloned.' );
-	}
-
-	/**
-	 * Monotonic now in nanoseconds.
-	 */
-	private static function now_ns(): int {
-		return (int) hrtime( true );
 	}
 }

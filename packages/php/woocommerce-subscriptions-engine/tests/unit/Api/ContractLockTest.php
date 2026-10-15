@@ -9,28 +9,73 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Api;
 
+use Closure;
 use DateTimeImmutable;
 use DateTimeZone;
 use LogicException;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
+use ReflectionProperty;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState
  */
 class ContractLockTest extends TestCase {
 
 	private const TOKEN = '0123456789abcdef0123456789abcdef';
 
-	private function issue( int $trust_seconds = ContractLock::TTL_SECONDS ): ContractLock {
-		return ContractLock::issue( 7, 'hold', self::TOKEN, $trust_seconds );
+	private function issue(): ContractLock {
+		$factory = Closure::bind(
+			static function ( string $token ): ContractLock {
+				return new ContractLock( 7, 'hold', new ContractLockState( $token ) );
+			},
+			null,
+			ContractLock::class
+		);
+
+		return $factory( self::TOKEN );
+	}
+
+	/**
+	 * Seconds of trust left on a lock state.
+	 *
+	 * @param ContractLockState $state The state.
+	 */
+	private function trust_left( ContractLockState $state ): float {
+		$property = new ReflectionProperty( ContractLockState::class, 'trusted_until' );
+		$property->setAccessible( true );
+		$until = $property->getValue( $state );
+		$this->assertIsFloat( $until );
+		$now = hrtime();
+		$this->assertIsArray( $now );
+
+		return $until - ( $now[0] + $now[1] / 1e9 );
+	}
+
+	/**
+	 * @testdox The only public methods are the accessors, extend, release and the magic methods.
+	 */
+	public function test_public_surface(): void {
+		$names = array();
+		foreach ( ( new ReflectionClass( ContractLock::class ) )->getMethods( ReflectionMethod::IS_PUBLIC ) as $method ) {
+			$names[] = $method->getName();
+		}
+		sort( $names );
+
+		$this->assertSame(
+			array( '__clone', '__debugInfo', '__serialize', '__unserialize', '__wakeup', 'extend', 'get_contract_id', 'get_operation', 'release' ),
+			$names
+		);
+		$this->assertTrue( ( new ReflectionMethod( ContractLock::class, '__construct' ) )->isPrivate() );
 	}
 
 	/**
@@ -102,45 +147,65 @@ class ContractLockTest extends TestCase {
 	}
 
 	/**
-	 * @testdox A lock with a full TTL ahead is trusted; within the margin it is not.
+	 * @testdox A stamp trusts the lock for at most 60 s, less when it ends sooner, and not at all with 60 s or less left.
 	 */
-	public function test_trust_follows_the_remaining_time(): void {
-		$lock = $this->issue();
-		$this->assertTrue( $lock->is_trusted() );
+	public function test_trust_window_follows_the_last_stamp(): void {
+		$state = new ContractLockState( self::TOKEN );
+		$this->assertTrue( $state->is_trusted() );
+		$this->assertLessThanOrEqual( 60.0, $this->trust_left( $state ) );
+		$this->assertGreaterThan( 59.0, $this->trust_left( $state ) );
 
-		$lock->trust_for( 60 );
-		$this->assertFalse( $lock->is_trusted() );
+		$this->assertTrue( $state->stamped( 90 ) );
+		$this->assertLessThanOrEqual( 30.0, $this->trust_left( $state ) );
+		$this->assertTrue( $state->is_trusted() );
 
-		$lock->trust_for( 0 );
-		$this->assertFalse( $lock->is_trusted() );
+		$this->assertFalse( $state->stamped( 60 ) );
+		$this->assertFalse( $state->is_trusted() );
 
-		$lock->trust_for( ContractLock::TTL_SECONDS );
-		$this->assertTrue( $lock->is_trusted() );
+		$this->assertFalse( $state->stamped( 0 ) );
+		$this->assertFalse( $state->is_trusted() );
+
+		$this->assertTrue( $state->stamped( ContractLock::TTL_SECONDS ) );
+		$this->assertLessThanOrEqual( 60.0, $this->trust_left( $state ) );
 	}
 
 	/**
-	 * @testdox A released lock is never trusted, even after a trust refresh.
+	 * @testdox A lock is near expiry by the local estimate when 120 s or less remain.
+	 */
+	public function test_near_expiry_estimate(): void {
+		$state = new ContractLockState( self::TOKEN );
+		$this->assertFalse( $state->is_near_expiry() );
+
+		$state->stamped( 120 );
+		$this->assertTrue( $state->is_near_expiry() );
+
+		$state->stamped( 200 );
+		$this->assertFalse( $state->is_near_expiry() );
+	}
+
+	/**
+	 * @testdox A released lock is never trusted, even after a stamp.
 	 */
 	public function test_a_released_lock_is_never_trusted(): void {
-		$lock = $this->issue();
-		$lock->mark_released();
+		$state = new ContractLockState( self::TOKEN );
+		$state->mark_released();
 
-		$this->assertTrue( $lock->is_released() );
-		$this->assertFalse( $lock->is_trusted() );
+		$this->assertTrue( $state->is_released() );
+		$this->assertFalse( $state->is_trusted() );
 
-		$lock->trust_for( ContractLock::TTL_SECONDS );
-		$this->assertFalse( $lock->is_trusted() );
+		$this->assertFalse( $state->stamped( ContractLock::TTL_SECONDS ) );
+		$this->assertFalse( $state->is_trusted() );
 	}
 
 	/**
 	 * @testdox The extend allowance is recorded once used.
 	 */
 	public function test_extend_allowance_flag(): void {
-		$lock = $this->issue();
-		$this->assertFalse( $lock->has_extended() );
+		$state = new ContractLockState( self::TOKEN );
+		$this->assertFalse( $state->has_extended() );
 
-		$lock->mark_extended();
-		$this->assertTrue( $lock->has_extended() );
+		$state->mark_extended();
+		$this->assertTrue( $state->has_extended() );
 	}
 
 	/**

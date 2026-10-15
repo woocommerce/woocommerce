@@ -414,7 +414,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->sut->run_batch( $this->now() );
 
 		$this->assertInstanceOf( ContractLock::class, $this->calls[0]['context']['lock'] );
-		$this->assertTrue( $this->calls[0]['context']['lock']->is_released(), 'Released once the handler returned.' );
+		$this->assertTrue( $this->lock_state( $this->calls[0]['context']['lock'] )->is_released(), 'Released once the handler returned.' );
 	}
 
 	/**

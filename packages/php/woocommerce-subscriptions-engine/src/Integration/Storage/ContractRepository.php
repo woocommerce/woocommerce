@@ -111,7 +111,7 @@ final class ContractRepository {
 		);
 
 		$id   = (int) $contract->get_id();
-		$lock = ContractLock::issue( $id, $operation, $token, ContractLock::TTL_SECONDS );
+		$lock = self::new_lock( $id, $operation, $token );
 
 		$this->fence_children( $lock );
 		$this->insert_items( $id, $contract->get_items() );
@@ -830,7 +830,7 @@ final class ContractRepository {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to lock contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		return 1 === $updated ? ContractLock::issue( $contract_id, $operation, $token, ContractLock::TTL_SECONDS ) : null;
+		return 1 === $updated ? self::new_lock( $contract_id, $operation, $token ) : null;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
@@ -880,10 +880,11 @@ final class ContractRepository {
 	public function extend_lock( ContractLock $lock ): void {
 		global $wpdb;
 
-		if ( $lock->is_released() ) {
+		$state = self::state_of( $lock );
+		if ( $state->is_released() ) {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
-		if ( $lock->has_extended() ) {
+		if ( $state->has_extended() ) {
 			throw new \LogicException( 'A contract lock can be extended only once.' );
 		}
 
@@ -891,7 +892,7 @@ final class ContractRepository {
 		$holds_lock = self::HOLDS_LOCK;
 
 		$sql    = "UPDATE {$table} SET locked_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ) WHERE id = %d AND {$holds_lock}";
-		$values = array( ContractLock::TTL_SECONDS, $lock->get_contract_id(), self::token_of( $lock ) );
+		$values = array( ContractLock::TTL_SECONDS, $lock->get_contract_id(), $state->token() );
 
 		// Fixed SQL fragments only; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -906,8 +907,8 @@ final class ContractRepository {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
 
-		$lock->trust_for( ContractLock::TTL_SECONDS );
-		$lock->mark_extended();
+		$state->stamped( ContractLock::TTL_SECONDS );
+		$state->mark_extended();
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
@@ -921,12 +922,13 @@ final class ContractRepository {
 	public function release_lock( ContractLock $lock ): void {
 		global $wpdb;
 
-		if ( $lock->is_released() ) {
+		$state = self::state_of( $lock );
+		if ( $state->is_released() ) {
 			return;
 		}
 
-		$token = self::token_of( $lock );
-		$lock->mark_released();
+		$token = $state->token();
+		$state->mark_released();
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
@@ -945,24 +947,29 @@ final class ContractRepository {
 		}
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`. Inside
-	 * the trust window it costs no query; past it the lock is extended once, then re-verified,
-	 * and it fails once the stored lock is within the trust margin of expiry or lost.
+	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`. Within 60 s
+	 * of the lock's last database stamp it costs no query. Past that, a lock near expiry by the
+	 * local estimate is extended once; otherwise it is re-verified on the database clock and
+	 * trusted again for up to 60 s. A lock with 60 s or less left is extended if the allowance
+	 * is unused, else refused.
 	 *
 	 * @param ContractLock $lock The held lock.
 	 * @throws ContractLockedException If the lock was released, lost or is about to expire.
+	 * @throws \RuntimeException If the verify read or the extend write fails.
 	 */
 	public function fence_children( ContractLock $lock ): void {
 		global $wpdb;
 
-		if ( $lock->is_released() ) {
+		$state = self::state_of( $lock );
+		if ( $state->is_released() ) {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
-		if ( $lock->is_trusted() ) {
+		if ( $state->is_trusted() ) {
 			return;
 		}
-		if ( ! $lock->has_extended() ) {
+		if ( ! $state->has_extended() && $state->is_near_expiry() ) {
 			$this->extend_lock( $lock );
 			return;
 		}
@@ -970,14 +977,27 @@ final class ContractRepository {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT TIMESTAMPDIFF( SECOND, UTC_TIMESTAMP(), locked_until ) FROM {$table} WHERE id = %d AND lock_token = %s", $lock->get_contract_id(), self::token_of( $lock ) ) );
+		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT TIMESTAMPDIFF( SECOND, UTC_TIMESTAMP(), locked_until ) FROM {$table} WHERE id = %d AND lock_token = %s", $lock->get_contract_id(), $state->token() ) );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to verify the lock on contract %d: %s', $lock->get_contract_id(), $wpdb->last_error ) ) );
+		}
 
-		// A lock inside its trust margin (or lost: no row) is not trusted again.
-		$lock->trust_for( null === $remaining ? 0 : Coercion::coerce_int( $remaining ) );
-		if ( ! $lock->is_trusted() ) {
+		// No row: the lock was lost.
+		if ( null === $remaining ) {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
+
+		if ( $state->stamped( Coercion::coerce_int( $remaining ) ) ) {
+			return;
+		}
+		if ( ! $state->has_extended() ) {
+			$this->extend_lock( $lock );
+			return;
+		}
+
+		$this->throw_locked( $lock->get_contract_id() );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Refuse a lock that belongs to another contract.
@@ -1000,7 +1020,8 @@ final class ContractRepository {
 	private function holds_lock( ContractLock $lock ): bool {
 		global $wpdb;
 
-		if ( $lock->is_released() ) {
+		$state = self::state_of( $lock );
+		if ( $state->is_released() ) {
 			return false;
 		}
 
@@ -1008,7 +1029,7 @@ final class ContractRepository {
 		$holds_lock = self::HOLDS_LOCK;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND {$holds_lock}", $lock->get_contract_id(), self::token_of( $lock ) ) );
+		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND {$holds_lock}", $lock->get_contract_id(), $state->token() ) );
 	}
 
 	/**
@@ -1038,17 +1059,40 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Read a lock's token. Scope-bound to the lock class, so the token has no public accessor.
+	 * Build a lock just stored with a full TTL. Scope-bound to the lock class, whose constructor is private.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   Operation label.
+	 * @param string $token       The stored token.
+	 */
+	private static function new_lock( int $contract_id, string $operation, string $token ): ContractLock {
+		static $factory = null;
+
+		if ( null === $factory ) {
+			$factory = Closure::bind(
+				static function ( int $id, string $label, ContractLockState $state ): ContractLock {
+					return new ContractLock( $id, $label, $state );
+				},
+				null,
+				ContractLock::class
+			);
+		}
+
+		return $factory( $contract_id, $operation, new ContractLockState( $token ) );
+	}
+
+	/**
+	 * A lock's token and trust state. Scope-bound to the lock class, so neither has a public accessor.
 	 *
 	 * @param ContractLock $lock The lock.
 	 */
-	private static function token_of( ContractLock $lock ): string {
+	private static function state_of( ContractLock $lock ): ContractLockState {
 		static $reader = null;
 
 		if ( null === $reader ) {
 			$reader = Closure::bind(
-				static function ( ContractLock $held ): string {
-					return $held->token;
+				static function ( ContractLock $held ): ContractLockState {
+					return $held->state;
 				},
 				null,
 				ContractLock::class
@@ -1986,7 +2030,7 @@ final class ContractRepository {
 		$fence    = self::NO_LIVE_LOCK;
 		if ( null !== $lock ) {
 			$fence    = self::HOLDS_LOCK;
-			$values[] = self::token_of( $lock );
+			$values[] = self::state_of( $lock )->token();
 		}
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
