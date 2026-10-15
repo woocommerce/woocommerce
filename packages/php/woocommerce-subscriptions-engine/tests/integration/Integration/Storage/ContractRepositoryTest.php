@@ -2351,6 +2351,45 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A failed internal-lock release is logged and keeps the write's result, or its exception.
+	 */
+	public function test_a_failed_internal_release_does_not_mask_the_write(): void {
+		$id       = $this->sut->insert( $this->make_contract() );
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_items( $this->two_items() );
+
+		$release = '/SET lock_token = NULL/';
+		$logs    = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $id ),
+			function () use ( $contract, $release ): void {
+				$this->fail_next_query( $release );
+				$this->assertTrue( $this->sut->update_fields( $contract, array( 'items' ) ), 'The landed write is reported.' );
+			}
+		);
+		$this->assertNotSame( array(), $logs, 'The failed release is logged.' );
+		$this->assertSame( array( 'Tea tin', 'Mug' ), $this->item_names( $id ) );
+
+		$this->pin_db_clock( gmdate( 'Y-m-d H:i:s', time() + 2 * ContractLock::TTL_SECONDS ) );
+		$logs = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $id ),
+			function () use ( $contract, $release ): void {
+				$this->fail_next_query( '/^\s*INSERT\s+INTO\s+\S*contract_items/i' );
+				$this->fail_next_query( $release );
+				try {
+					$this->sut->update_fields( $contract, array( 'items' ) );
+					$this->fail( 'Expected the failed item insert to throw.' );
+				} catch ( \RuntimeException $e ) {
+					$this->assertStringContainsString( 'item', $e->getMessage(), 'The write failure surfaces, not the release failure.' );
+				}
+			}
+		);
+		$this->assertNotSame( array(), $logs, 'The failed release is logged.' );
+	}
+
+	/**
 	 * @testdox Replacing addresses upserts the given types in place and removes the others.
 	 */
 	public function test_replacing_addresses_upserts_and_prunes(): void {

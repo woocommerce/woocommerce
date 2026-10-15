@@ -182,14 +182,10 @@ final class Contracts {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Write the given fields to an existing contract.
-	 *
-	 * Takes the keys of {@see self::create()} except `extension_slug`. Only
-	 * the columns of the present keys are written, so fields another writer changed in between
-	 * keep its values; `items` and `addresses` replace the whole set; `null` clears a nullable
-	 * field (and resets a money field to 0). Unknown keys raise a `_doing_it_wrong()` notice and
-	 * are ignored. Without `$lock`, a write that replaces items or addresses runs under a lock
-	 * the engine takes and releases itself.
+	 * Write the given fields (the keys of {@see self::create()} except `extension_slug`) to an
+	 * existing contract. Only the present keys are written; `items` and `addresses` replace the
+	 * whole set; `null` clears a nullable field (a money field to 0). Unknown keys raise a
+	 * `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Fields to write.
@@ -233,24 +229,18 @@ final class Contracts {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Append a cycle to a contract's chain `(contract_id, kind)`.
-	 *
-	 * The first public form of the cycle append tool: append-if-absent on the chain's
-	 * unique positions. `starts_at_gmt`, `ends_at_gmt` and `currency` are required.
-	 * `status` (a registered cycle status) defaults to `pending`; `kind` defaults to
-	 * `billing`; an absent or null `sequence_no` is assigned on append as the head's plus one;
-	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
-	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional.
-	 * Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
-	 *
-	 * Losing the append race is an outcome, not an error: when the chain position or count is
-	 * already taken, nothing is written and the call returns null, as {@see self::transition_cycle()}
-	 * returns false when its compare-and-set loses. A storage failure, such as a value longer
-	 * than its column (`kind`), throws a `RuntimeException` and writes nothing. When the row landed
-	 * but its assigned position cannot be read back, the view's `sequence_no` is 0 (logged).
+	 * Append a cycle to a contract's chain `(contract_id, kind)`, append-if-absent on the chain's
+	 * unique positions: a taken position or count is a lost race and returns null. A storage
+	 * failure throws a `RuntimeException` and writes nothing; a landed row whose position cannot
+	 * be read back has `sequence_no` 0 (logged). Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $contract_id Contract id.
-	 * @param array<string, mixed> $args        Cycle fields.
+	 * @param array<string, mixed> $args        Cycle fields: `starts_at_gmt`, `ends_at_gmt` and
+	 *                                          `currency` (required); `status` (registered, default
+	 *                                          `pending`); `kind` (default `billing`); `sequence_no`
+	 *                                          (null: the head's plus one); `count` (null: not
+	 *                                          counted; unique in the chain); `expected_total`
+	 *                                          (default 0); `order_id`.
 	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null.
 	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
 	 * @throws InvalidArgumentException If a required key is missing, a value is invalid, the contract
@@ -292,14 +282,14 @@ final class Contracts {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Move a cycle between statuses as a compare-and-set: of concurrent callers that read
-	 * `from_status`, exactly one gets true. `$args`: `from_status` (required, the status the
-	 * caller read), `to_status` (required, a registered cycle status), and `order_id` (?int) and
-	 * `reason` (?string), written when present (null clears). Unknown keys raise a
-	 * `_doing_it_wrong()` notice and are ignored. A same-status call returns true once the cycle
-	 * carries the status and the values.
+	 * `from_status`, exactly one gets true. A same-status call returns true once the cycle
+	 * carries the status and the values. Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $cycle_id Cycle id.
-	 * @param array<string, mixed> $args     `from_status`, `to_status`, optional `order_id` and `reason`.
+	 * @param array<string, mixed> $args     `from_status` (required, the status the caller read),
+	 *                                       `to_status` (required, registered), and `order_id`
+	 *                                       (?int) and `reason` (?string), written when present
+	 *                                       (null clears).
 	 * @param ContractLock|null    $lock     The caller's lock on the cycle's contract, or null.
 	 * @return bool True when this call made the transition, or for a same-status call when the
 	 *              cycle carries the status and the values.

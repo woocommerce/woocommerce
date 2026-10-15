@@ -17,14 +17,9 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepos
 defined( 'ABSPATH' ) || exit;
 
 /**
- * One operation's hold on one contract, for the synchronous section of one request.
- * A write that passes the lock is part of the holder's operation; any other write to the
- * contract is refused with {@see ContractLockedException} while the lock lives.
- *
- * Fencing: contract-row writes check the token and expiry in the statement; child-table
- * writes trust the lock for 60 seconds from its last database stamp, then extend it once
- * when it is near expiry or re-verify it. The token and the trust state are engine-only:
- * reflection, array casts, `var_export()` and `debug_zval_dump()` are outside the contract.
+ * One operation's hold on one contract for one request: writes that pass it belong to the
+ * holder's operation, and other writes are refused with {@see ContractLockedException}. The
+ * token and trust state are engine-only (reflection and array casts are outside the contract).
  */
 final class ContractLock {
 

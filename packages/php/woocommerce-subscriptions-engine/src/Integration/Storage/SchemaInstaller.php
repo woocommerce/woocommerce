@@ -263,9 +263,10 @@ final class SchemaInstaller {
 		// source the due scan dispatches) or a gateway or extension that keeps its own.
 		// `lock_token` / `locked_until_gmt` / `lock_operation` hold the per-contract lock (live
 		// while `locked_until_gmt` is ahead of the DB clock). `write_seq` is bumped by every row
-		// write, so a write that matches the row always changes it (zero rows = not matched). `creation` makes an extension's
-		// optional `creation_key` unique (NULL keys never collide); 64 + 100 characters
-		// stay within the 767-byte key limit of older InnoDB row formats.
+		// write, so a write that matches the row always changes it (zero rows = not matched).
+		// `creation` makes an extension's optional `creation_key` unique (NULL keys never
+		// collide); 64 + 100 characters stay within the 767-byte key limit of older InnoDB
+		// row formats.
 		$contracts_sql = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,

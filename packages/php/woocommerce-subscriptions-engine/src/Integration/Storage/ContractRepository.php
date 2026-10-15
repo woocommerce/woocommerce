@@ -211,11 +211,9 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity, and
-	 * replace items / addresses when named. Unnamed columns keep their stored values; the named
-	 * columns land in one statement. With `$lock` the row write lands only while that lock lives;
-	 * without one only while no lock lives, and items / addresses are then replaced under an
-	 * internal lock released before returning.
+	 * Write the named contract columns from the entity in one statement, and replace items /
+	 * addresses when named. With `$lock` the row write lands only while that lock lives; without
+	 * one only while no lock lives, and items / addresses are replaced under an internal lock.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -262,7 +260,18 @@ final class ContractRepository {
 		try {
 			return $this->write_fields( $contract, $fields, $internal_lock );
 		} finally {
-			$this->release_lock( $internal_lock );
+			// A failed release must not replace the write's result or exception; the lock expires on its own.
+			try {
+				$this->release_lock( $internal_lock );
+			} catch ( \RuntimeException $e ) {
+				wc_get_logger()->warning(
+					sprintf( 'ContractRepository::update_fields(): failed to release the internal lock on contract %d; it expires on its own. %s', $contract_id, $e->getMessage() ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => $contract_id,
+					)
+				);
+			}
 		}
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
@@ -853,8 +862,11 @@ final class ContractRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS live, lock_operation, locked_until_gmt FROM {$table} WHERE id = %d", $contract_id ), ARRAY_A );
+		$sql = "SELECT ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS live, lock_operation, locked_until_gmt
+			FROM {$table} WHERE id = %d";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( $sql, $contract_id ), ARRAY_A );
 
 		if ( ! is_array( $row ) ) {
 			return array(
@@ -975,8 +987,10 @@ final class ContractRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$remaining = $wpdb->get_var( $wpdb->prepare( "SELECT TIMESTAMPDIFF( SECOND, UTC_TIMESTAMP(), locked_until_gmt ) FROM {$table} WHERE id = %d AND lock_token = %s", $lock->get_contract_id(), $state->get_token() ) );
+		$sql = "SELECT TIMESTAMPDIFF( SECOND, UTC_TIMESTAMP(), locked_until_gmt ) FROM {$table} WHERE id = %d AND lock_token = %s";
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
+		$remaining = $wpdb->get_var( $wpdb->prepare( $sql, $lock->get_contract_id(), $state->get_token() ) );
 		if ( '' !== $wpdb->last_error ) {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to verify the lock on contract %d: %s', $lock->get_contract_id(), $wpdb->last_error ) ) );
 		}

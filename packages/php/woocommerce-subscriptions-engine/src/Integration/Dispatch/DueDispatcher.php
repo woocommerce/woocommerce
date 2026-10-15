@@ -158,14 +158,10 @@ final class DueDispatcher {
 	}
 
 	/**
-	 * Notify the owners of up to `$limit` due contracts.
-	 *
-	 * Each due contract is locked first, on the due moment the scan read (a lost lock is
-	 * skipped), then read and passed to its owner's handler with
-	 * `array( 'due_at' => DateTimeImmutable, 'lock' => ContractLock )`. The lock is released when
-	 * the handler returns. A throwing handler is logged and its lock kept until it expires, so
-	 * the contract stays closed while its state is unknown. Lock, read and release failures are
-	 * logged per contract; one contract never stalls the batch.
+	 * Notify the owners of up to `$limit` due contracts. Each is locked on the due moment the
+	 * scan read (a lost lock is skipped), read, and passed to its handler with `due_at` and the
+	 * `lock`, released when the handler returns. A throwing handler keeps its lock until expiry;
+	 * failures are logged per contract and never stall the batch.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
 	 * @param int                    $limit Maximum due contracts this tick; non-positive is a no-op.
