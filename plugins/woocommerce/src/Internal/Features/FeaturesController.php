@@ -978,7 +978,7 @@ class FeaturesController {
 		}
 
 		$default_value = ! empty( $definition['enabled_by_default'] ) ? 'yes' : 'no';
-		$option_key    = $definition['option_key'] ?? sprintf( 'woocommerce_feature_%s_enabled', $feature_id );
+		$option_key    = ! empty( $definition['option_key'] ) ? $definition['option_key'] : sprintf( 'woocommerce_feature_%s_enabled', $feature_id );
 		return 'yes' === get_option( $option_key, $default_value );
 	}
 
