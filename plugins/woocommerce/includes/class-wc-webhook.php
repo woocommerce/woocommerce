@@ -433,6 +433,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				$payload = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
 				break;
 
+			// Stock notifications only exist in v3, so the webhook's API version is ignored.
+			case 'stock_notification':
+				$payload = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( "/wc/v3/stock-notifications/{$resource_id}" );
+				break;
+
 			// Custom topics include the first hook argument.
 			case 'action':
 				$payload = array(
