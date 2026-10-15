@@ -215,7 +215,7 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Get feed suggestions for a display context, filtered the same way as marketplace-suggestions.js.
+	 * Get feed suggestions for a display context in feed order (pinned items first), without dismissed items, active plugins or items missing a title or URL.
 	 *
 	 * @since 11.3.0
 	 *
@@ -223,14 +223,24 @@ class WC_Marketplace_Suggestions {
 	 * @return array[] Feed items.
 	 */
 	private static function get_suggestions_for_context( $context ) {
-		$feed           = self::get_suggestions_api_data();
-		$dismissed      = self::get_dismissed_suggestions();
-		$active_plugins = array_map( 'dirname', (array) get_option( 'active_plugins', array() ) );
+		$feed      = self::get_suggestions_api_data();
+		$dismissed = self::get_dismissed_suggestions();
+
+		// Network-activated plugins are stored separately on multisite; the option is empty on a single site.
+		$active_plugins = array_map(
+			'dirname',
+			array_merge(
+				(array) get_option( 'active_plugins', array() ),
+				array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) )
+			)
+		);
 
 		$suggestions = array_filter(
 			$feed,
 			function ( $item ) use ( $context, $dismissed, $active_plugins ) {
 				return isset( $item['slug'], $item['context'] )
+					&& ! empty( $item['title'] )
+					&& '' !== esc_url_raw( $item['url'] ?? '' )
 					&& in_array( $context, (array) $item['context'], true )
 					&& ! in_array( $item['slug'], $dismissed, true )
 					&& ! in_array( $item['product'] ?? '', $active_plugins, true )

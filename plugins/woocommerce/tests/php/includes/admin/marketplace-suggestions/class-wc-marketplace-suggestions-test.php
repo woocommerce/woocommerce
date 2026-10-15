@@ -30,6 +30,8 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 				array_merge( $this->item( 'memberships', 'woocommerce-memberships' ), array( 'context' => array( 'products-list-empty-body', 'product-edit-meta-tab-body' ) ) ),
 				array_merge( $this->item( 'deposits', 'woocommerce-deposits' ), array( 'show-if-active' => array( 'woocommerce-bookings' ) ) ),
 				array_merge( $this->item( 'gifting', 'gifting-for-subscriptions' ), array( 'show-if-active' => array( 'woocommerce-subscriptions' ) ) ),
+				array_merge( $this->item( 'untitled', 'plugin-untitled' ), array( 'title' => '' ) ),
+				array_merge( $this->item( 'bad-url', 'plugin-bad-url' ), array( 'url' => 'javascript:alert(1)' ) ),
 			)
 		);
 		update_user_meta( get_current_user_id(), 'wc_marketplace_suggestions_dismissed_suggestions', array( 'dismissed' ) );
@@ -44,12 +46,23 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return items for the context, skipping dismissed ones, active plugins and unmet show-if-active rules.
+	 * @testdox Should return items for the context, skipping dismissed ones, active plugins, unmet show-if-active rules and items without a title or valid URL.
 	 */
 	public function test_filters_suggestions_for_context(): void {
 		$slugs = array_column( $this->get_products_list_suggestions(), 'slug' );
 
 		$this->assertSame( array( 'bookings', 'memberships', 'gifting' ), $slugs );
+	}
+
+	/**
+	 * @testdox Should treat network-activated plugins as active.
+	 */
+	public function test_treats_network_activated_plugins_as_active(): void {
+		update_site_option( 'active_sitewide_plugins', array( 'woocommerce-bookings/woocommerce-bookings.php' => time() ) );
+
+		$slugs = array_column( $this->get_products_list_suggestions(), 'slug' );
+
+		$this->assertSame( array( 'memberships', 'deposits', 'gifting' ), $slugs );
 	}
 
 	/**
