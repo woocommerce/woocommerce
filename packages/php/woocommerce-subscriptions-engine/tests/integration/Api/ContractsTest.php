@@ -945,6 +945,30 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertSame( 2, $view->get_sequence_no() );
 	}
 
+	/**
+	 * @testdox A failed position read-back after the append landed returns the cycle with position 0 and logs a warning.
+	 */
+	public function test_a_failed_position_read_back_returns_the_appended_cycle(): void {
+		$id = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args() );
+
+		$this->fail_next_query( '/^\s*SELECT sequence_no FROM\s/i' );
+		$view = null;
+		$logs = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $id ),
+			function () use ( $id, &$view ) {
+				$view = Contracts::add_cycle( $id, $this->cycle_args() );
+			}
+		);
+
+		$this->assertInstanceOf( CycleView::class, $view );
+		$this->assertSame( 0, $view->get_sequence_no() );
+		$this->assertNotSame( array(), $logs, 'The warning is logged.' );
+		$this->assertSame( $view->get_id(), $logs[0]['cycle_id'] );
+		$this->assertSame( 2, $this->cycle( $id, $view->get_id() )->get_sequence_no(), 'The row landed at the next position.' );
+	}
+
 	public function test_a_taken_count_returns_null(): void {
 		$id = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );

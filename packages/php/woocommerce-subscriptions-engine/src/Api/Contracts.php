@@ -248,7 +248,8 @@ final class Contracts {
 	 * Losing the append race is an outcome, not an error: when the chain position or count is
 	 * already taken, nothing is written and the call returns null, as {@see self::transition_cycle()}
 	 * returns false when its compare-and-set loses. A storage failure, such as a value longer
-	 * than its column (`kind`), throws a `RuntimeException` and writes nothing.
+	 * than its column (`kind`), throws a `RuntimeException` and writes nothing. When the row landed
+	 * but its assigned position cannot be read back, the view's `sequence_no` is 0 (logged).
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields.

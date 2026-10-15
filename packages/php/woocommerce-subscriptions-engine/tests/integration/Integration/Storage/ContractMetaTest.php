@@ -17,6 +17,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository
@@ -78,7 +79,7 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 
 		$queries = $wpdb->num_queries;
 		$this->assertIsInt( $this->sut->add_meta( $this->id, 'single', 'x', true ) );
-		$this->assertSame( 1, $wpdb->num_queries - $queries, 'One statement: no read before the insert.' );
+		$this->assertSame( 2, $wpdb->num_queries - $queries, 'The insert and its duplicate check: no read before the insert.' );
 
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
@@ -97,6 +98,46 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'note' ) );
 		$this->assertSame( array( 'two' ), $this->sut->get_meta( $this->id, 'locked' ) );
+	}
+
+	/**
+	 * @testdox An unlocked unique add that lands after a concurrent one removes its row and returns null.
+	 */
+	public function test_a_unique_add_racing_an_earlier_row_removes_its_duplicate(): void {
+		$this->insert_rival_before_the_duplicate_check( 'note', 'rival' );
+
+		$this->assertNull( $this->sut->add_meta( $this->id, 'note', 'mine', true ) );
+		$this->assertSame( array( 'rival' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
+	 * @testdox An unlocked update_meta that lands after a concurrent add removes its row and updates instead.
+	 */
+	public function test_an_update_racing_an_earlier_row_updates_it_instead(): void {
+		$this->insert_rival_before_the_duplicate_check( 'note', 'rival' );
+
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'mine' ) );
+		$this->assertSame( array( 'mine' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
+	/**
+	 * @testdox A failed duplicate check keeps the landed row and logs a warning.
+	 */
+	public function test_a_failed_duplicate_check_keeps_the_row(): void {
+		$this->fail_next_query( '/^\s*SELECT MIN\( id \)/i' );
+
+		$meta_id = null;
+		$logs    = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $this->id ),
+			function () use ( &$meta_id ) {
+				$meta_id = $this->sut->add_meta( $this->id, 'note', 'mine', true );
+			}
+		);
+
+		$this->assertIsInt( $meta_id );
+		$this->assertNotSame( array(), $logs, 'The warning is logged.' );
+		$this->assertSame( array( 'mine' ), $this->sut->get_meta( $this->id, 'note' ) );
 	}
 
 	/**
@@ -325,6 +366,41 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 			$wpdb->suppress_errors( $suppress );
 			remove_filter( 'query', $break );
 		}
+	}
+
+	/**
+	 * Simulate a concurrent add the absence check missed: right before the duplicate check, store
+	 * a row for `$key` with an id lower than the one just inserted (a gap reserved up front).
+	 *
+	 * @param string $key   Meta key.
+	 * @param string $value The rival row's value.
+	 */
+	private function insert_rival_before_the_duplicate_check( string $key, string $value ): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$this->sut->add_meta( $this->id, 'gap', 'x' );
+		$gap_id = (int) $wpdb->insert_id;
+		$this->sut->delete_meta( $this->id, 'gap' );
+
+		$contract_id = $this->id;
+		$rival       = static function ( $query ) use ( $table, $gap_id, $contract_id, $key, $value, &$rival ) {
+			global $wpdb;
+			if ( is_string( $query ) && 1 === preg_match( '/^\s*SELECT MIN\( id \)/i', $query ) ) {
+				remove_filter( 'query', $rival );
+				$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+					$table,
+					array(
+						'id'          => $gap_id,
+						'contract_id' => $contract_id,
+						'meta_key'    => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value'  => $value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					)
+				);
+			}
+			return $query;
+		};
+		add_filter( 'query', $rival );
 	}
 
 	private function lock(): ContractLock {

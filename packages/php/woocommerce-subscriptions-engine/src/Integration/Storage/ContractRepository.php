@@ -1270,16 +1270,15 @@ final class ContractRepository {
 	 * @throws \RuntimeException If the insert fails.
 	 */
 	public function add_meta( int $contract_id, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
-		global $wpdb;
-
 		if ( '' === $key ) {
 			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
 		}
 
 		$this->fence_meta( $contract_id, $lock );
 
-		if ( 1 === $this->insert_meta_row( $contract_id, $key, $value, $unique, $lock ) ) {
-			return (int) $wpdb->insert_id;
+		$meta_id = $this->insert_meta_row( $contract_id, $key, $value, $unique, $lock );
+		if ( null !== $meta_id ) {
+			return $meta_id;
 		}
 
 		if ( $unique && $this->meta_key_exists( $contract_id, $key ) ) {
@@ -1293,16 +1292,18 @@ final class ContractRepository {
 	/**
 	 * Insert one meta row as `INSERT ... SELECT` from the contract row: without `$lock` only while
 	 * no lock lives, with `$if_absent` only while the key has no row, both in the one statement.
+	 * The absence check is a non-locking read, so an unlocked add-if-absent then keeps its row only
+	 * when it is the key's lowest id; a later concurrent duplicate deletes itself.
 	 *
 	 * @param int               $contract_id Contract id.
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       Meta value; serialized when not scalar.
 	 * @param bool              $if_absent   Whether to insert only when the key has no row.
 	 * @param ContractLock|null $lock        The caller's (fenced) lock, or null.
-	 * @return int The number of rows inserted (0 or 1).
-	 * @throws \RuntimeException If the insert fails.
+	 * @return int|null The new meta row id, or null when nothing was inserted (or the duplicate was removed).
+	 * @throws \RuntimeException If the insert, or the removal of a duplicate, fails.
 	 */
-	private function insert_meta_row( int $contract_id, string $key, $value, bool $if_absent, ?ContractLock $lock ): int {
+	private function insert_meta_row( int $contract_id, string $key, $value, bool $if_absent, ?ContractLock $lock ): ?int {
 		global $wpdb;
 
 		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
@@ -1328,8 +1329,38 @@ final class ContractRepository {
 		if ( false === $inserted ) {
 			throw new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
+		if ( 1 !== (int) $inserted ) {
+			return null;
+		}
 
-		return (int) $inserted;
+		$meta_id = (int) $wpdb->insert_id;
+		if ( ! $if_absent || null !== $lock ) {
+			return $meta_id;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		$first_id = $wpdb->get_var( $wpdb->prepare( "SELECT MIN( id ) FROM {$meta} WHERE contract_id = %d AND meta_key = %s LOCK IN SHARE MODE", $contract_id, $key ) );
+		if ( null === $first_id ) {
+			// The row landed; a failed check keeps it rather than report the add as failed.
+			wc_get_logger()->warning(
+				sprintf( 'ContractRepository: could not check contract meta "%s" for a concurrent duplicate. %s', $key, $wpdb->last_error ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $contract_id,
+				)
+			);
+			return $meta_id;
+		}
+		if ( Coercion::coerce_int( $first_id ) >= $meta_id ) {
+			return $meta_id;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( false === $wpdb->delete( $meta, array( 'id' => $meta_id ) ) ) {
+			throw new \RuntimeException( sprintf( 'Failed to remove duplicate contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+		}
+
+		return null;
 	}
 
 	/**
@@ -1380,7 +1411,7 @@ final class ContractRepository {
 
 		$this->fence_meta( $contract_id, $lock );
 
-		if ( 1 === $this->insert_meta_row( $contract_id, $key, $value, true, $lock ) ) {
+		if ( null !== $this->insert_meta_row( $contract_id, $key, $value, true, $lock ) ) {
 			return true;
 		}
 		if ( ! $this->meta_key_exists( $contract_id, $key ) ) {
@@ -1569,7 +1600,8 @@ final class ContractRepository {
 	 *
 	 * Inserts the cycle row, assigning an unassigned `sequence_no` in the same statement (the
 	 * chain's highest plus one, or 1), and stamps the generated id and position back onto the
-	 * entity. The chain's UNIQUE indexes guard concurrent appends and duplicate counts. The
+	 * entity (left unassigned, with a warning, when that read-back fails after the row landed).
+	 * The chain's UNIQUE indexes guard concurrent appends and duplicate counts. The
 	 * INSERT selects from the contract row, so without `$lock` it lands only while no lock lives.
 	 *
 	 * @param Cycle             $cycle Cycle to append. Carries its contract id and kind.
@@ -1863,7 +1895,8 @@ final class ContractRepository {
 	/**
 	 * Insert a cycle row as `INSERT ... SELECT` from the contract row and stamp the generated id
 	 * (and an assigned `sequence_no`) back onto the entity. String values are checked against
-	 * their column lengths first, as `$wpdb->insert()` would.
+	 * their column lengths first, as `$wpdb->insert()` would. A failed position read-back after
+	 * the row landed logs a warning and leaves the entity's position unassigned.
 	 *
 	 * @param Cycle $cycle         Cycle to insert. Carries its contract id and kind.
 	 * @param bool  $guard_no_lock Whether the insert must find the contract with no live lock.
@@ -1939,7 +1972,16 @@ final class ContractRepository {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sequence_no = $wpdb->get_var( $wpdb->prepare( "SELECT sequence_no FROM `{$table}` WHERE id = %d", $id ) );
 			if ( null === $sequence_no ) {
-				throw new \RuntimeException( esc_html( sprintf( 'Failed to read the position of appended cycle %d. %s', $id, $wpdb->last_error ) ) );
+				// The append landed: report it, with the position left unassigned.
+				wc_get_logger()->warning(
+					sprintf( 'ContractRepository: could not read the position of appended cycle %d. %s', $id, $wpdb->last_error ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => $cycle->get_contract_id(),
+						'cycle_id'    => $id,
+					)
+				);
+				return;
 			}
 			$cycle->assign_sequence_no( Coercion::coerce_int( $sequence_no ) );
 		}
