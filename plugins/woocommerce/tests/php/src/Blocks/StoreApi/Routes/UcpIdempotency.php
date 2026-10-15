@@ -458,4 +458,35 @@ class UcpIdempotency extends ControllerTestCase {
 		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
 		$this->assertSame( $updated->get_data(), $replay->get_data() );
 	}
+
+	/**
+	 * An upper-case key is accepted: RFC 4122 calls a UUID case-insensitive.
+	 */
+	public function test_an_uppercase_key_is_accepted_and_replays(): void {
+		$key  = strtoupper( wp_generate_uuid4() );
+		$body = $this->cart_body( 0 );
+
+		$first = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 200, $first->get_status() );
+
+		$second = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 'true', $second->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertSame( 1, $this->stored_record_count() );
+	}
+
+	/**
+	 * The two spellings of one key address one record, rather than claiming two.
+	 */
+	public function test_key_case_does_not_split_a_record(): void {
+		$key  = wp_generate_uuid4();
+		$body = $this->cart_body( 0 );
+
+		$this->request( 'POST', '/carts', $body, strtolower( $key ) );
+		$replay = $this->request( 'POST', '/carts', $body, strtoupper( $key ) );
+
+		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertSame( 1, $this->stored_record_count() );
+	}
 }

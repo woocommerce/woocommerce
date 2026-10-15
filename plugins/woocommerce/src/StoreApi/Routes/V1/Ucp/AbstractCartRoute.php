@@ -173,7 +173,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		 * @param bool $strict Whether a key is required. Default true.
 		 */
 		$strict = (bool) apply_filters( 'woocommerce_ucp_idempotency_strict', true );
-		$key    = (string) $request->get_header( 'Idempotency-Key' );
+
+		// RFC 4122 calls a UUID case-insensitive but `wp_is_uuid()` matches lower case only, so
+		// an upper-case key would be refused. Normalising also stops two spellings claiming two rows.
+		$key = strtolower( trim( (string) $request->get_header( 'Idempotency-Key' ) ) );
 
 		if ( '' === $key || ! wp_is_uuid( $key ) ) {
 			if ( ! $strict ) {
