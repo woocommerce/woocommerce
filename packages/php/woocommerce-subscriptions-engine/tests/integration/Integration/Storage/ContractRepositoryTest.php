@@ -910,9 +910,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox append_cycle inserts a cycle reachable as the chain's current cycle.
+	 * @testdox append_cycle inserts a cycle reachable as the chain's newest cycle.
 	 */
-	public function test_append_cycle_and_find_chain_head(): void {
+	public function test_append_cycle_stores_the_newest_cycle(): void {
 		$id = $this->sut->insert( $this->make_contract() );
 
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
@@ -920,7 +920,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertNotNull( $cycle->get_id() );
 
-		$current = $this->sut->find_chain_head( $id );
+		$current = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $current );
 		$this->assertSame( $cycle->get_id(), $current->get_id() );
 		$this->assertSame( 1, $current->get_sequence_no() );
@@ -964,35 +964,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		);
 		$this->sut->append_cycle( $cycle );
 
-		$reloaded = $this->sut->find_chain_head( $id );
+		$reloaded = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
 		$this->assertSame( '9.12345678', $reloaded->get_expected_total() );
-	}
-
-	/**
-	 * @testdox find_chain_head returns the highest-sequence cycle in the chain.
-	 */
-	public function test_find_chain_head_returns_the_head(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$first = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
-		$this->sut->append_cycle( $first );
-
-		$second = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' );
-		$this->sut->append_cycle( $second );
-
-		$current = $this->sut->find_chain_head( $id );
-		$this->assertInstanceOf( Cycle::class, $current );
-		$this->assertSame( 2, $current->get_sequence_no() );
-	}
-
-	/**
-	 * @testdox find_chain_head returns null for a chain with no cycles.
-	 */
-	public function test_find_chain_head_is_null_when_empty(): void {
-		$id = $this->sut->insert( $this->make_contract() );
-
-		$this->assertNull( $this->sut->find_chain_head( $id ) );
 	}
 
 	/**
@@ -1543,7 +1517,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		);
 		$this->sut->append_cycle( $cycle );
 
-		$head = $this->sut->find_chain_head( $id );
+		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertInstanceOf( PlanSnapshot::class, $head->get_plan_snapshot() );
 		$this->assertInstanceOf( ItemsSnapshot::class, $head->get_items_snapshot() );
@@ -1556,6 +1530,17 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->sut->insert( $this->make_contract() );
 
 		return (int) $this->append_pending_cycle( $id )->get_id();
+	}
+
+	/**
+	 * The newest billing cycle of a contract, or null when its chain is empty.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function find_newest_cycle( int $contract_id ): ?Cycle {
+		$history = $this->sut->find_cycle_history( $contract_id, Cycle::KIND_BILLING, 1 );
+
+		return $history[0] ?? null;
 	}
 
 	/**
@@ -1617,7 +1602,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $table, array( 'status' => 'legacy-x' ), array( 'id' => $cycle->get_id() ) );
 
-		$head = $this->sut->find_chain_head( $id );
+		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( 'legacy-x', $head->get_status()->get_value() );
 
@@ -1823,7 +1808,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 1, $cycle->get_sequence_no() );
 		$this->assertNull( $cycle->get_count() );
-		$head = $this->sut->find_chain_head( $id );
+		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( $cycle->get_id(), $head->get_id() );
 	}
@@ -1868,25 +1853,16 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( array( 1, 2, 3 ), array( $first->get_sequence_no(), $second->get_sequence_no(), $third->get_sequence_no() ) );
 		$this->assertSame( 2, $wpdb->num_queries - $queries, 'The insert, then the read of its assigned position.' );
-		$head = $this->sut->find_chain_head( $id );
+		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( $third->get_id(), $head->get_id() );
 	}
 
 	/**
-	 * @testdox A failed chain head or contract read throws instead of reading as empty or missing.
+	 * @testdox A failed contract read throws instead of reading as missing.
 	 */
-	public function test_failed_deciding_reads_throw(): void {
+	public function test_failed_contract_read_throws(): void {
 		$id = $this->sut->insert( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_unpositioned_cycle( $id ) );
-
-		$this->fail_next_query( '/ORDER BY sequence_no DESC LIMIT 1/i' );
-		try {
-			$this->sut->find_chain_head( $id );
-			$this->fail( 'Expected the failed head read to throw.' );
-		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'chain head', $e->getMessage() );
-		}
 
 		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token/i' );
 		$this->expectException( \RuntimeException::class );

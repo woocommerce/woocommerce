@@ -669,12 +669,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox A failed item insert on update throws and keeps the previous items.
 	 */
 	public function test_update_throws_when_an_item_insert_fails(): void {
-		$id = Contracts::create(
+		$view = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => array( array( 'item_name' => 'Coffee' ) ),
 			)
-		)->get_id();
+		);
+		$id   = $view->get_id();
 
 		$this->assert_write_throws_when_child_inserts_fail(
 			SchemaInstaller::TABLE_CONTRACT_ITEMS,
@@ -691,12 +692,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox A failed address write on update throws and keeps the previous address.
 	 */
 	public function test_update_throws_when_an_address_insert_fails(): void {
-		$id = Contracts::create(
+		$view = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'addresses'      => array( 'billing' => array( 'city' => 'Lisbon' ) ),
 			)
-		)->get_id();
+		);
+		$id   = $view->get_id();
 
 		$this->assert_write_throws_when_child_inserts_fail(
 			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
@@ -1410,12 +1412,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox An unlocked update with items while another lock lives throws, writes nothing and leaves no internal lock.
 	 */
 	public function test_an_unlocked_items_update_conflicts_cleanly(): void {
-		$id   = Contracts::create(
+		$view = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => array( array( 'item_name' => 'Coffee' ) ),
 			)
-		)->get_id();
+		);
+		$id   = $view->get_id();
 		$lock = $this->take_lock( $id, 'renewal' );
 
 		try {

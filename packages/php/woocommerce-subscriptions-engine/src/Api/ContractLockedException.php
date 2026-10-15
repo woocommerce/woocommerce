@@ -16,8 +16,8 @@ use RuntimeException;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Thrown when a lock cannot be taken or a write is refused because another operation
- * holds the contract's lock, or because the caller's own lock was lost. Carries the
+ * Thrown when a write is refused because another operation holds the contract's lock,
+ * or because the caller's own lock was lost. Carries the
  * holder's operation label and expiry (null when the holder released meanwhile), never a token.
  */
 final class ContractLockedException extends RuntimeException {

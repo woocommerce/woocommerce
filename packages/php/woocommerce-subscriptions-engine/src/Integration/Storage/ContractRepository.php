@@ -6,7 +6,7 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_chain_head()}, etc.), appended one at a
+ * through purpose-built reads ({@see self::find_cycle_history()}, etc.), appended one at a
  * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
  * ({@see self::transition_cycle()}). Cycle snapshot ids are stored as given and their
  * value objects attached on read. Meta is read and written only through the meta methods.
@@ -50,7 +50,7 @@ final class ContractRepository {
 	/**
 	 * Operation label of the lock the engine takes around a multi-statement write made without one.
 	 */
-	public const INTERNAL_LOCK_OPERATION = 'subscriptions_engine';
+	private const INTERNAL_LOCK_OPERATION = 'subscriptions_engine';
 
 	/**
 	 * The contract columns every contract read selects: the row plus whether its lock is live
@@ -317,12 +317,10 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Fetch a contract by id, hydrating the live entity with its items / addresses,
-	 * plus its frozen plan terms ({@see Contract::get_plan_snapshot()}) from
-	 * `plan_snapshot_id` - so every full read carries the billing cadence off the
-	 * snapshot, with no live {@see PlanRepository} join. Cycles are NOT hydrated - they
-	 * are reached on demand through the targeted cycle reads. For list / guard paths
-	 * that do not need the children, use {@see self::find_summary()}.
+	 * Fetch a contract by id with its items, addresses and frozen plan terms
+	 * ({@see Contract::get_plan_snapshot()}, no live {@see PlanRepository} join). Cycles are
+	 * not hydrated: use the targeted cycle reads. Paths that do not need the children use
+	 * {@see self::find_summary()}.
 	 *
 	 * @param int $id Contract id.
 	 * @return Contract|null Hydrated contract, or null if not found.
@@ -727,19 +725,10 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contracts due at `$now`, least recently locked first - the due dispatcher's scan.
-	 *
-	 * A contract is due when its `next_payment_gmt` is at or before `$now`, its owner
-	 * (`extension_slug`) is one of `$owners`, the engine keeps its schedule (`schedule_source`
-	 * is {@see Contract::SCHEDULE_SOURCE_ENGINE}), and it carries no live lock. Status is not
-	 * read: whether a due contract acts is its owner's decision. Driven by the `due_owner`
-	 * index; the schedule source and the lock are residual filters, and lock liveness is read
-	 * on the database clock (`UTC_TIMESTAMP()`), not `$now`.
-	 *
-	 * Fairness: rows sort by `locked_until_gmt` - never locked first, then by when the last lock
-	 * ended or expired - then by due moment. A contract whose handler leaves its due moment in
-	 * place is notified again, behind contracts locked less recently, so it cannot starve
-	 * others. The sort filesorts the owners' due backlog; `LIMIT` bounds the result.
+	 * The due dispatcher's scan: contracts of `$owners` with an engine-kept schedule whose
+	 * `next_payment_gmt` is at or before `$now` and that carry no live lock. Status is not read:
+	 * whether a due contract acts is its owner's decision. Least recently locked first, so a
+	 * contract left due by its handler cannot starve the others.
 	 *
 	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
@@ -766,6 +755,9 @@ final class ContractRepository {
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
 		// The owner placeholder list is generated, one `%s` per owner in `$args`.
+		// Driven by the `due_owner` index; schedule source and lock are residual filters, and lock
+		// liveness is read on the database clock, not `$now`. NULL `locked_until_gmt` (never
+		// locked) sorts first; the sort filesorts the owners' due backlog and `LIMIT` bounds it.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
@@ -960,11 +952,10 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`. Within 60 s
-	 * of the lock's last database stamp it costs no query. Past that, a lock near expiry by the
-	 * local estimate is extended once; otherwise it is re-verified on the database clock and
-	 * trusted again for up to 60 s. A lock with 60 s or less left is extended if the allowance
-	 * is unused, else refused.
+	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`; within 60 s
+	 * of the lock's last database stamp it costs no query. Past that the lock is re-verified on
+	 * the database clock and trusted for up to 60 s more, or, with 60 s or less left (by the
+	 * local estimate or the database), extended once and refused after that.
 	 *
 	 * @param ContractLock $lock The held lock.
 	 * @throws ContractLockedException If the lock was released, lost or is about to expire.
@@ -1211,22 +1202,6 @@ final class ContractRepository {
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT {$select} FROM {$table} WHERE origin_order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
 
 		return $this->contracts_from_rows( is_array( $rows ) ? $rows : array() );
-	}
-
-	/**
-	 * Whether a contract row exists for `$id`.
-	 *
-	 * @param int $id Contract id.
-	 */
-	public function exists( int $id ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$found = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d", $id ) );
-
-		return null !== $found;
 	}
 
 	/**
@@ -1554,7 +1529,7 @@ final class ContractRepository {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Classify an unlocked meta update or delete that changed no row from the stored rows, never
-	 * from the lock state alone: a row for `$key` (holding `$match`, when given) that does not hold
+	 * from the lock state alone: a row for `$key` (holding `$matched`, when given) that does not hold
 	 * `$target` (or any row, for a delete) means the fence refused the write.
 	 *
 	 * @param int    $contract_id Contract id.
@@ -1628,13 +1603,10 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Append a cycle to its chain `(contract_id, kind)`.
-	 *
-	 * Inserts the cycle row, assigning an unassigned `sequence_no` in the same statement (the
-	 * chain's highest plus one, or 1), and stamps the generated id and position back onto the
-	 * entity (left unassigned, with a warning, when that read-back fails after the row landed).
-	 * The chain's UNIQUE indexes guard concurrent appends and duplicate counts. The
-	 * INSERT selects from the contract row, so without `$lock` it lands only while no lock lives.
+	 * Append a cycle to its chain `(contract_id, kind)`. An unassigned `sequence_no` becomes the
+	 * chain's highest plus one in the same INSERT, which selects from the contract row so without
+	 * `$lock` it lands only while no lock lives. The id and position are stamped back on the entity
+	 * (left unassigned, with a warning, when that read-back fails after the row landed).
 	 *
 	 * @param Cycle             $cycle Cycle to append. Carries its contract id and kind.
 	 * @param ContractLock|null $lock  The caller's lock on the cycle's contract, or null.
@@ -1654,16 +1626,15 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status:
-	 * one UPDATE that lands only while the row still carries `$from_status`. `$changes` keys
-	 * present are written: `order_id` and `reason` (null clears). With `$lock` the cycle must
-	 * belong to the lock's contract; without one the UPDATE joins the contract row and lands
-	 * only while no lock lives. A same-status call returns true whenever the row already holds the values.
+	 * Move a cycle from `$from_status` to `$to_status` in one compare-and-set UPDATE that lands
+	 * only while the row still carries `$from_status`. With `$lock` the cycle must belong to the
+	 * lock's contract; without one the UPDATE joins the contract row and lands only while no lock
+	 * lives. A same-status call returns true whenever the row already holds the values.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
 	 * @param string               $to_status   The status to write; must be a registered cycle status.
-	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string).
+	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string); present keys are written, null clears.
 	 * @param ContractLock|null    $lock        The caller's lock on the cycle's contract, or null.
 	 * @return bool True when this caller won the transition (for a same-status call: the row holds the values).
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
@@ -1807,37 +1778,6 @@ final class ContractRepository {
 		}
 
 		return true;
-	}
-
-	/**
-	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
-	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
-	 * necessarily the cycle current by date (an extension may append a head whose
-	 * period lies ahead).
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $kind        Chain kind. Defaults to billing.
-	 * @return Cycle|null The head cycle, or null if the chain has none.
-	 * @throws \RuntimeException If the read fails.
-	 */
-	public function find_chain_head( int $contract_id, string $kind = Cycle::KIND_BILLING ): ?Cycle {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE contract_id = %d AND kind = %s ORDER BY sequence_no DESC LIMIT 1", $contract_id, $kind ), ARRAY_A );
-
-		// Callers decide appends from the head; a failed read must not look like an empty chain.
-		if ( '' !== $wpdb->last_error ) {
-			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the chain head of contract %d: %s', $contract_id, $wpdb->last_error ) ) );
-		}
-
-		if ( null === $row ) {
-			return null;
-		}
-
-		return $this->hydrate_cycle( $row );
 	}
 
 	/**

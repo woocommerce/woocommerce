@@ -129,20 +129,18 @@ final class Contracts {
 	}
 
 	/**
-	 * Create a contract from explicit fields.
-	 *
-	 * Only `extension_slug` is required; the status defaults to `draft`. Dates accept a
-	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
-	 * strings, and a non-null money value requires a currency. `items` is a list of item
-	 * rows; `addresses` is keyed `billing` / `shipping`. `schedule_source` says who keeps the
-	 * payment schedule: `subscriptions_engine` (the default; the engine notifies the owner when
-	 * `next_payment_gmt` passes) or the slug (1-64 of `a-z0-9_-`) of a gateway or extension that
-	 * keeps its own schedule; the engine never dispatches those contracts. Unknown keys, also
-	 * inside item rows and addresses, raise a `_doing_it_wrong()` notice and are ignored.
+	 * Create a contract from explicit fields. `schedule_source` is `subscriptions_engine` (the
+	 * default: the engine notifies the owner when `next_payment_gmt` passes) or the slug of a
+	 * gateway or extension keeping its own schedule, whose contracts are never dispatched.
+	 * Unknown keys, also inside items and addresses, get `_doing_it_wrong()` and are ignored.
 	 *
 	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
 	 *                                   extension), `status` (a registered contract status,
 	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
+	 *                                   Dates take a `DateTimeInterface` or a GMT `Y-m-d H:i:s`
+	 *                                   string; money takes a number or numeric string and needs
+	 *                                   a currency; `items` is a list of rows; `addresses` is
+	 *                                   keyed `billing` / `shipping`.
 	 * @return ContractView The new contract, built from the written fields (no re-read): items
 	 *                      and addresses as given.
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
@@ -336,7 +334,7 @@ final class Contracts {
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       Meta value; serialized when not scalar.
 	 * @param bool              $unique      When true, add nothing if the key already exists (checked
-	 *                                       before the insert; the lock serializes facade writers).
+	 *                                       inside the insert; an unlocked duplicate deletes itself).
 	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
 	 * @throws InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
