@@ -52,6 +52,8 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	/**
 	 * Export customer stock notification data for a given email address and the account it belongs to.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param string $email_address The email address to export data for.
 	 * @param int    $page          Page number, starting at 1.
 	 *
@@ -86,6 +88,8 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 	/**
 	 * Get the personal data to export for a single sign-up.
+	 *
+	 * @since 11.3.0
 	 *
 	 * @param Notification $notification The sign-up.
 	 *
@@ -139,6 +143,8 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 	/**
 	 * Get the IDs of every sign-up belonging to an email address or the account it belongs to.
+	 *
+	 * @since 11.3.0
 	 *
 	 * @param string $email_address The email address, in the letter case the request was made with.
 	 *
