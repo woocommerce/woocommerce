@@ -40,6 +40,7 @@ final class ContractActions {
 	 *
 	 * An invalid or duplicate registration raises a `_doing_it_wrong()` notice and is not
 	 * registered (the first registration is kept). Unknown keys raise a notice and are ignored.
+	 * A callback may let a {@see ContractLockedException} propagate; the route answers 409.
 	 *
 	 * @param string               $extension_slug Owning extension slug; matches the contracts' `extension_slug`.
 	 * @param string               $action         Action slug: lowercase letters, numbers, hyphens and underscores.
