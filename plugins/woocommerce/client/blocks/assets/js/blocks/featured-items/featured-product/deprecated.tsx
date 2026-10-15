@@ -3,6 +3,7 @@
  */
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { InnerBlocks } from '@wordpress/block-editor';
+import { PRODUCT_TITLE_VARIATION_NAME } from '@woocommerce/product-elements/variations/constants';
 
 /**
  * Internal dependencies
@@ -77,8 +78,7 @@ const v1 = {
 				level: 2,
 				isLink: false,
 				textAlign: 'center',
-				__woocommerceNamespace:
-					'woocommerce/product-collection/product-title',
+				__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 			} )
 		);
 

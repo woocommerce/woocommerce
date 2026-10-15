@@ -8,21 +8,21 @@ import { page } from '@wordpress/icons';
  * Internal dependencies
  */
 import { registerElementVariation } from './utils';
+import { BLOCK_DESCRIPTION, BLOCK_TITLE } from '../summary/constants';
 import {
-	BLOCK_DESCRIPTION,
-	BLOCK_TITLE,
-} from '../../../product-elements-blocks/summary/constants';
-import blockJson from '../../block.json';
+	PRODUCT_SUMMARY_VARIATION_NAME,
+	PRODUCT_SUMMARY_NAMESPACES,
+} from './constants';
 
 export const CORE_NAME = 'core/post-excerpt';
-export const VARIATION_NAME = `${ blockJson.name }/product-summary`;
 
 const registerProductSummary = () => {
 	registerElementVariation( CORE_NAME, {
 		blockDescription: BLOCK_DESCRIPTION,
 		blockIcon: <Icon icon={ page } />,
 		blockTitle: BLOCK_TITLE,
-		variationName: VARIATION_NAME,
+		variationName: PRODUCT_SUMMARY_VARIATION_NAME,
+		namespaces: PRODUCT_SUMMARY_NAMESPACES,
 		scope: [],
 	} );
 };

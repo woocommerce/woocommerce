@@ -8,3 +8,4 @@ import './filters/get-block-attributes';
 import './filters/hide-incompatible-template-parts';
 import './filters/unregister-block-types';
 import './base/components/notice-banner/style.scss';
+import './blocks/product-elements-blocks/variations';

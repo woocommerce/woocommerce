@@ -17,6 +17,7 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  * Internal dependencies
  */
 import blockJson from './block.json';
+import { PRODUCT_TITLE_VARIATION_NAME } from '../product-elements-blocks/variations/constants';
 import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
@@ -25,7 +26,6 @@ import {
 } from './types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
-const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
 
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',
@@ -164,7 +164,7 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 					},
 				},
 				isLink: true,
-				__woocommerceNamespace: PRODUCT_TITLE_NAME,
+				__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 			},
 		],
 		[
