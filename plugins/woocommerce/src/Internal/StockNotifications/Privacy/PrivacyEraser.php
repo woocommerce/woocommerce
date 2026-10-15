@@ -60,9 +60,9 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 *
 	 * @return array Response containing the exported data and whether the export is done.
 	 */
-	public static function export_notification_data( string $email_address, int $page = 1 ): array {
-		$notification_ids = self::get_notification_ids( $email_address );
-		$page             = max( 1, $page );
+	public static function export_notification_data( $email_address, $page = 1 ): array {
+		$notification_ids = self::get_notification_ids( is_string( $email_address ) ? $email_address : '' );
+		$page             = max( 1, (int) $page );
 		$page_ids         = array_slice( $notification_ids, ( $page - 1 ) * self::EXPORT_PAGE_SIZE, self::EXPORT_PAGE_SIZE );
 		$data_to_export   = array();
 
@@ -98,7 +98,11 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 */
 	private static function get_notification_personal_data( Notification $notification ): array {
 		$product_name = MyAccountEndpoint::get_display_product_name( $notification );
-		$variation    = $notification->get_product_formatted_variation_list( true );
+		if ( '' === $product_name ) {
+			/* translators: %d: product ID */
+			$product_name = sprintf( __( 'Product #%d', 'woocommerce' ), $notification->get_product_id() );
+		}
+		$variation = $notification->get_product_formatted_variation_list( true );
 		if ( '' !== $variation ) {
 			$product_name .= ' ' . $variation;
 		}
@@ -152,13 +156,19 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 * @return array<int> Sign-up IDs in ascending order.
 	 */
 	private static function get_notification_ids( string $email_address ): array {
+		// The query drops the email clause for an empty value and would match every sign-up.
+		$normalized_email = EmailNormalizer::normalize( $email_address );
+		if ( '' === $normalized_email || ! is_email( $normalized_email ) ) {
+			return array();
+		}
+
 		// Look up the account with the letter case as entered: `wp_users.user_email` is never
 		// normalized, so on a case-sensitive collation the lowercased form would miss it.
 		$user = get_user_by( 'email', $email_address );
 
 		$notifications = NotificationQuery::get_notifications(
 			array(
-				'user_email' => EmailNormalizer::normalize( $email_address ),
+				'user_email' => $normalized_email,
 			)
 		);
 

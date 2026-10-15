@@ -158,6 +158,9 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$current_notification->set_user_id( $user_id );
 		$current_notification->set_user_email( 'new@doe.com' );
 		$current_notification->set_product_id( $product->get_id() );
+		$current_notification->set_status( NotificationStatus::SENT );
+		$current_notification->set_date_created( 1700000000 );
+		$current_notification->set_date_notified( 1700003600 );
 		$current_notification_id = $current_notification->save();
 
 		$response = PrivacyEraser::export_notification_data( 'New@Doe.COM' );
@@ -182,6 +185,48 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Pending', $values['Status'] );
 		$this->assertNotSame( '', $values['Date signed up'] );
 		$this->assertSame( '', $values['Date notified'] );
+
+		$date_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
+		$sent_values = array_column( $response['data'][2]['data'], 'value', 'name' );
+		$this->assertSame( 'Sent', $sent_values['Status'] );
+		$this->assertSame( wc_format_datetime( new \WC_DateTime( '@1700000000' ), $date_format ), $sent_values['Date signed up'] );
+		$this->assertSame( wc_format_datetime( new \WC_DateTime( '@1700003600' ), $date_format ), $sent_values['Date notified'] );
+	}
+
+	/**
+	 * @testdox Should export nothing for an empty or invalid email instead of every sign-up.
+	 */
+	public function test_privacy_exporter_ignores_empty_and_invalid_email(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 1 );
+		$notification->save();
+
+		foreach ( array( '', '   ', '0', 'not-an-email' ) as $email ) {
+			$response = PrivacyEraser::export_notification_data( $email );
+			$this->assertSame( array(), $response['data'], "Email '{$email}' should export nothing." );
+			$this->assertTrue( $response['done'] );
+		}
+
+		$erased = PrivacyEraser::erase_notification_data( '' );
+		$this->assertFalse( $erased['items_removed'] );
+		$this->assertSame( 'jon@doe.com', ( new Notification( $notification->get_id() ) )->get_user_email() );
+	}
+
+	/**
+	 * @testdox Should export the product ID when the product has been deleted.
+	 */
+	public function test_privacy_exporter_falls_back_to_product_id(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 987654 );
+		$notification->save();
+
+		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
+		$values   = array_column( $response['data'][0]['data'], 'value', 'name' );
+
+		$this->assertSame( 'Product #987654', $values['Product'] );
+		$this->assertSame( '', $values['Product URL'] );
 	}
 
 	/**
@@ -214,8 +259,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
 		$values   = array_column( $response['data'][0]['data'], 'value', 'name' );
 
-		$this->assertSame( $product->get_name() . ' ' . $notification->get_product_formatted_variation_list( true ), $values['Product'] );
-		$this->assertSame( 1, substr_count( $values['Product'], 'small' ) );
+		$this->assertSame( $product->get_name() . ' size: small', $values['Product'] );
 		$this->assertSame( $variation->get_permalink(), $values['Product URL'] );
 	}
 
