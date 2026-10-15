@@ -4,8 +4,8 @@
  *
  * Carries the payment token id plus the gateway code and human-readable title
  * frozen at the time the instrument was attached. The Core zone never loads a
- * live payment token; the Payments host binding resolves the reference when a
- * charge is attempted.
+ * live payment token; the extension that builds an order to charge carries the
+ * token onto it, and the gateway charges against the order.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject
  */
