@@ -163,7 +163,12 @@ Every command below works from any directory in the repository. For a PR that ta
 
    A missing `packages:` or `snapshots:` entry fails with `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY`, and an importer entry that disagrees with its `package.json` fails with "specifiers in the lockfile don't match". Extra entries pass, which is why step 3 copies only what your dependency reaches.
 
-5. Re-run the `git diff --numstat` check from step 1. The deleted-lines column must be `0`. Then delete `${TMPDIR:-/tmp}/pnpm-lock.pnpm-written.yaml`. For scale: `jquery` came to 8 added lines, `react-select` to 26 (its dependencies were already in the lockfile), and `yup` to 34 (four new transitive packages).
+5. Re-run the `git diff --numstat` check from step 1. The deleted-lines column must be `0`. For scale: `jquery` came to 8 added lines, `react-select` to 26 (its dependencies were already in the lockfile), and `yup` to 34 (four new transitive packages). Then stage the lockfile and delete the saved copy. The restore in step 2 also staged the merge-base lockfile, and the check above reads the working tree, so without `git add` the commit can leave out the entries you copied:
+
+   ```bash
+   git add -- :/pnpm-lock.yaml
+   rm "${TMPDIR:-/tmp}/pnpm-lock.pnpm-written.yaml"
+   ```
 
 A lockfile change makes CI run `syncpack lint` ("Validate dependencies version"). pnpm does not resolve versions published less than 24 hours ago (`minimumReleaseAge` in `pnpm-workspace.yaml`).
 
