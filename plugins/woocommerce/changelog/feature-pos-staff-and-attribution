@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add server-side POS staff and order attribution under the dev-only `point_of_sale_staff` feature flag. POS access is keyed on holding any `pos_*` WP capability — the same primitive WP uses for every other authorization decision — and is granted to existing users without altering their WP role, so the wp-admin users.php "Change role to…" dropdown can't silently revoke access. The `pos_staff` WP role is only the default role for brand-new POS-only accounts, not the gate. Adding staff uses two flows on the Staff page: the standard wp-admin → Users → Add New form with an extra POS section (for new accounts), and a user picker that routes to the unified edit screen (for existing users).
