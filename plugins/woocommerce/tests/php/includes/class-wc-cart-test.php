@@ -1394,13 +1394,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'GB' );
 		$customer->set_shipping_state( '' );
 		$customer->set_shipping_city( '' );
