@@ -14,6 +14,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\View;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 
 defined( 'ABSPATH' ) || exit;
@@ -43,6 +45,13 @@ final class ContractView {
 	 * @var array<string, array<string, mixed>>|null
 	 */
 	private $addresses;
+
+	/**
+	 * The live lock's expiry and operation label as of the read, or null.
+	 *
+	 * @var array{locked_until: DateTimeImmutable, operation: string}|null
+	 */
+	private $lock_state;
 
 	/**
 	 * Use {@see self::from_contract()}.
@@ -88,6 +97,12 @@ final class ContractView {
 
 		$view->items     = $with_children ? array_map( array( self::class, 'item' ), $contract->get_items() ) : null;
 		$view->addresses = $with_children ? array_map( array( self::class, 'address' ), $contract->get_addresses() ) : null;
+
+		$lock_state       = $contract->get_lock_state();
+		$view->lock_state = null === $lock_state ? null : array(
+			'locked_until' => new DateTimeImmutable( $lock_state['locked_until'], new DateTimeZone( 'UTC' ) ),
+			'operation'    => $lock_state['operation'],
+		);
 
 		return $view;
 	}
@@ -293,5 +308,16 @@ final class ContractView {
 	 */
 	public function get_addresses(): ?array {
 		return $this->addresses;
+	}
+
+	/**
+	 * Whether another operation holds the contract's lock, as of the read: its expiry (UTC)
+	 * and operation label, or null when the contract was not locked. Computed on the database
+	 * clock; for "operation in progress" UI. Never carries the lock token.
+	 *
+	 * @return array{locked_until: DateTimeImmutable, operation: string}|null
+	 */
+	public function get_lock_state(): ?array {
+		return $this->lock_state;
 	}
 }
