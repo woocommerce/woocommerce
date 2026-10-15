@@ -207,8 +207,8 @@ class DraftOrders {
 					++$count;
 				}
 			}
-			if ( $batch_size === $count && function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( self::DRAFT_CLEANUP_EVENT_HOOK );
+			if ( $batch_size === $count ) {
+				ActionSchedulerUtil::enqueue_async( self::DRAFT_CLEANUP_EVENT_HOOK );
 			}
 		} catch ( Exception $error ) {
 			wc_caught_exception( $error, __METHOD__ );

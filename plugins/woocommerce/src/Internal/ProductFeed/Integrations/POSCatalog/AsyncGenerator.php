@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedLockException;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ResumableFeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\WalkerProgress;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -172,7 +173,7 @@ class AsyncGenerator {
 		// group only (not args) and treats a running action as a blocker, so a unique enqueue of the next
 		// chunk would be rejected while the current chunk's action is still running. Per-job de-duplication
 		// is handled by as_unschedule_all_actions() in get_status() instead.
-		as_enqueue_async_action(
+		ActionSchedulerUtil::enqueue_async(
 			self::FEED_GENERATION_ACTION,
 			array( $option_key ),
 			'woo-product-feed',

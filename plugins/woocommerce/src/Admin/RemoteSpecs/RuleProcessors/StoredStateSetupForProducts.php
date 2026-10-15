@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Handles stored state setup for products.
@@ -127,6 +128,6 @@ class StoredStateSetupForProducts {
 		RemoteInboxNotificationsEngine::update_stored_state( $stored_state );
 
 		// Run self::run_remote_notifications asynchronously.
-		as_enqueue_async_action( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME );
+		ActionSchedulerUtil::enqueue_async( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME );
 	}
 }
