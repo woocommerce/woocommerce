@@ -7,8 +7,10 @@
  */
 import './cart/notices';
 import './cart/actions';
+import './products';
 
 export type { WooCommerceConfig, SelectedAttributes } from './types';
+export type { WooCommerceProductData } from './products';
 export type {
 	OptimisticCartItem,
 	ClientCartItem,
