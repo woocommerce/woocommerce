@@ -79,6 +79,10 @@
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
 - [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
+- [woocommerce_ucp_cart_continue_url](#woocommerce_ucp_cart_continue_url)
+- [woocommerce_ucp_idempotency_enabled](#woocommerce_ucp_idempotency_enabled)
+- [woocommerce_ucp_idempotency_retention_seconds](#woocommerce_ucp_idempotency_retention_seconds)
+- [woocommerce_ucp_idempotency_strict](#woocommerce_ucp_idempotency_strict)
 - [woocommerce_use_block_notices_in_classic_theme](#woocommerce_use_block_notices_in_classic_theme)
 - [woocommerce_valid_order_statuses_for_payment](#woocommerce_valid_order_statuses_for_payment)
 - [woocommerce_variation_option_name](#woocommerce_variation_option_name)
@@ -1994,6 +1998,99 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 ### Source
 
 - [Blocks/BlockTypes/OrderConfirmation/Status.php](../../../../../../src/Blocks/BlockTypes/OrderConfirmation/Status.php)
+
+---
+
+## woocommerce_ucp_cart_continue_url
+
+
+Filters the URL a UCP cart hands the buyer for completing the purchase.
+
+```php
+apply_filters( 'woocommerce_ucp_cart_continue_url', string $continue_url, string $cart_id )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $continue_url | string | Continue URL. |
+| $cart_id | string | Cart identifier. |
+
+### Source
+
+- [StoreApi/Utilities/UcpCartTransformer.php](../../../../../../src/StoreApi/Utilities/UcpCartTransformer.php)
+
+---
+
+## woocommerce_ucp_idempotency_enabled
+
+
+Filters whether UCP idempotency handling runs at all.
+
+```php
+apply_filters( 'woocommerce_ucp_idempotency_enabled', bool $enabled )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $enabled | bool | Whether the `Idempotency-Key` header is honoured. Default true. |
+
+### Source
+
+- [StoreApi/Routes/V1/Ucp/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/Ucp/AbstractCartRoute.php)
+
+---
+
+## woocommerce_ucp_idempotency_retention_seconds
+
+
+Filters how long a completed UCP idempotency record is kept, in seconds.
+
+```php
+apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
+```
+
+### Description
+
+How long a retry carrying the same key is answered from storage. One hour by default, since an agent retries within seconds and a longer window would keep a shopper's basket on disk after anything could replay it. Raise it for a client that retries more slowly.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $seconds | int | Retention window. Default one hour. |
+
+### Source
+
+- [StoreApi/Utilities/UcpIdempotencyStore.php](../../../../../../src/StoreApi/Utilities/UcpIdempotencyStore.php)
+
+---
+
+## woocommerce_ucp_idempotency_strict
+
+
+Filters whether a UCP write must carry an `Idempotency-Key`.
+
+```php
+apply_filters( 'woocommerce_ucp_idempotency_strict', bool $strict )
+```
+
+### Description
+
+True, the default, matches the UCP OpenAPI document, which declares the header required on every mutating cart operation: a missing or malformed key is refused at 400. False honours a key when one is sent and lets a keyless write through.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $strict | bool | Whether a key is required. Default true. |
+
+### Source
+
+- [StoreApi/Routes/V1/Ucp/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/Ucp/AbstractCartRoute.php)
 
 ---
 
