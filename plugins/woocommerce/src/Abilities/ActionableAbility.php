@@ -12,10 +12,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * An ability that changes one object and saves it one time. Register it with
  * a subclass as the `ability_class`. The execute callback loads the object,
- * checks the `extensions` input against the field schemas, changes the object
- * in memory, writes the fields with their `update_callback`, runs the validators
- * that AbilityExtensions::register_validator() adds, and then saves it. A
- * rejection from any step saves nothing.
+ * checks the `extensions` input against the field schemas, writes the fields
+ * to the object in memory with their `update_callback`, runs the validators
+ * that AbilityExtensions::register_validator() adds, and then writes the
+ * change the way the ability wrote it before: the object's own method sets
+ * and saves, and the fields ride along in that one save. A rejection from
+ * any step saves nothing.
  *
  * The input schema gets the `extensions` property of the resource, so the
  * ability accepts the fields with no extra code.
@@ -24,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
- * Only save() saves. The other steps must not save, send email or make HTTP
+ * Only write() saves. The other steps must not save, send email or make HTTP
  * requests.
  *
  * The API is experimental while the `ability_contracts` feature exists.
@@ -53,15 +55,17 @@ abstract class ActionableAbility extends \WP_Ability {
 	abstract public function load( array $input );
 
 	/**
-	 * Change the object in memory.
+	 * Apply the change and save, with the method the object offers for it. An
+	 * order status changes with WC_Order::update_status(), a product with
+	 * save(). The extension fields are already on the object in memory.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param \WC_Data $subject Object to change.
+	 * @param \WC_Data $subject Object to change, with the extension fields applied.
 	 * @param array    $input   Ability input.
-	 * @return mixed A WP_Error rejects the change.
+	 * @return mixed A WP_Error when the object was not saved.
 	 */
-	abstract public function change( $subject, array $input );
+	abstract public function write( $subject, array $input );
 
 	/**
 	 * The ability output for the saved object.
@@ -72,19 +76,6 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @return mixed
 	 */
 	abstract public function prepare_response( $subject );
-
-	/**
-	 * Save the changed object. The default saves a WC_Data object.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param \WC_Data $subject Changed object.
-	 * @return mixed A WP_Error when the object was not saved.
-	 */
-	public function save( $subject ) {
-		$subject->save();
-		return null;
-	}
 
 	/**
 	 * Run the change. This is the execute callback of the ability.
@@ -110,11 +101,6 @@ abstract class ActionableAbility extends \WP_Ability {
 			}
 		}
 
-		$changed = $this->change( $subject, $input );
-		if ( is_wp_error( $changed ) ) {
-			return $changed;
-		}
-
 		$rejected = $this->apply_fields( $subject, $updates );
 		if ( null === $rejected && AbilityExtensions::is_enabled() ) {
 			$rejected = $this->validate( $subject );
@@ -123,9 +109,9 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $rejected;
 		}
 
-		$saved = $this->save( $subject );
-		if ( is_wp_error( $saved ) ) {
-			return $saved;
+		$written = $this->write( $subject, $input );
+		if ( is_wp_error( $written ) ) {
+			return $written;
 		}
 
 		return $this->prepare_response( $subject );

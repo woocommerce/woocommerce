@@ -47,24 +47,14 @@ final class CoreActionableAbility extends ActionableAbility {
 	}
 
 	/**
-	 * Change the object in memory.
+	 * Apply the change and save, the way the definition does.
 	 *
 	 * @param \WC_Data $subject Object to change.
 	 * @param array    $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	public function change( $subject, array $input ) {
-		return $this->definition()::change( $subject, $input );
-	}
-
-	/**
-	 * Save the changed object.
-	 *
-	 * @param \WC_Data $subject Changed object.
-	 * @return null|\WP_Error
-	 */
-	public function save( $subject ) {
-		return $this->definition()::save( $subject );
+	public function write( $subject, array $input ) {
+		return $this->definition()::write( $subject, $input );
 	}
 
 	/**
