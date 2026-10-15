@@ -355,7 +355,7 @@ class ActionSchedulerUtil {
 	 *   checks uniqueness by hook alone (before 4.0.0): emulated by checking
 	 *   {@see self::has_scheduled_action()} first, which returns 0 without scheduling when a match
 	 *   exists. The check is not atomic, so two concurrent requests can both schedule; on copies
-	 *   before 3.3.0 it sees pending actions only, so an action can be scheduled again while a
+	 *   before 3.0.0 it sees pending actions only, so an action can be scheduled again while a
 	 *   previous run is in progress; and with an empty `$group` it matches a pending action in any
 	 *   group, where native unique matches only ungrouped actions.
 	 * - `$priority` on a copy without it (before 3.6.0): dropped, so the action takes the default
@@ -425,8 +425,8 @@ class ActionSchedulerUtil {
 	 * Is a matching action currently scheduled (pending or in-progress)?
 	 *
 	 * Prefers `as_has_scheduled_action`, which only exists since Action Scheduler 3.3.0. Falls back
-	 * to the much older `as_next_scheduled_action`, which on such a copy may report only pending
-	 * actions, not in-progress ones - an accepted trade.
+	 * to the much older `as_next_scheduled_action`, which also reports in-progress actions from 3.0.0;
+	 * copies before that see pending actions only - an accepted trade.
 	 *
 	 * Reports false when Action Scheduler is not loaded at all, indistinguishable from "nothing is
 	 * scheduled", and raises a doing-it-wrong notice so the condition is visible under debugging.
