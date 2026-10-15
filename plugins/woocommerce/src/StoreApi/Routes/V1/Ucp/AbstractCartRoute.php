@@ -279,7 +279,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 */
 	private function cart_item_response(): array {
 		// Nested values are stdClass; decode through JSON for uniform array access.
-		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_instance() ) ), true );
+		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
 	}
 
 	/**

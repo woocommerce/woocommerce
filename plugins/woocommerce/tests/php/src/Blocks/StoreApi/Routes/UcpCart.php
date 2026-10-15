@@ -121,7 +121,7 @@ class UcpCart extends ControllerTestCase {
 	 * The session, customer and cart the harness set up, so `simulate_new_request()`
 	 * can swap them for a test and tearDown can put them back.
 	 *
-	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null, loaded: int|null}
+	 * @var array{session: \WC_Session|null, customer: \WC_Customer|null, cart: \WC_Cart|null, loaded: int|null, totals: int|null}
 	 */
 	private $wc_globals_backup = array();
 
@@ -139,6 +139,7 @@ class UcpCart extends ControllerTestCase {
 			'customer' => WC()->customer,
 			'cart'     => WC()->cart,
 			'loaded'   => $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null,
+			'totals'   => $GLOBALS['wp_actions']['woocommerce_after_calculate_totals'] ?? null,
 		);
 
 		$this->simulate_new_request();
@@ -166,6 +167,7 @@ class UcpCart extends ControllerTestCase {
 		WC()->cart     = $this->wc_globals_backup['cart'];
 		$markers       = array(
 			'woocommerce_load_cart_from_session' => 'loaded',
+			'woocommerce_after_calculate_totals' => 'totals',
 		);
 		foreach ( $markers as $action => $key ) {
 			if ( null === $this->wc_globals_backup[ $key ] ) {
@@ -257,7 +259,7 @@ class UcpCart extends ControllerTestCase {
 		WC()->customer = null;
 		WC()->cart     = null;
 		// Per-process "already done" markers a real request would not carry over.
-		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'], $GLOBALS['wp_actions']['woocommerce_after_calculate_totals'] );
 	}
 
 	/**
@@ -835,6 +837,34 @@ class UcpCart extends ControllerTestCase {
 		$read_back = $this->request( 'GET', '/carts/' . $fresh['id'] )->get_data();
 		$this->assertSame( $fresh['id'], $read_back['id'] );
 		$this->assertSame( $fresh['line_items'], $read_back['line_items'] );
+	}
+
+	/**
+	 * A read recalculates, so totals match the prices shown.
+	 *
+	 * The session stores the totals from the last request; `prices` come from the live
+	 * product. A price change in between would otherwise show a new unit price next to
+	 * old line and cart totals.
+	 */
+	public function test_reading_a_cart_recalculates_totals(): void {
+		$created = $this->create_cart( array( $this->line_item( 0, 2 ) ) );
+		$this->assertSame( 3998, $this->total( $created['totals'], 'total' ) );
+
+		$product = wc_get_product( self::$product_ids[0] );
+		$product->set_regular_price( '10.00' );
+		$product->save();
+
+		try {
+			$this->simulate_new_request( $created['id'] );
+			$data = $this->request( 'GET', '/carts/' . $created['id'] )->get_data();
+		} finally {
+			$product->set_regular_price( '19.99' );
+			$product->save();
+		}
+
+		$this->assertSame( 1000, $data['line_items'][0]['item']['price'] );
+		$this->assertSame( 2000, $this->total( $data['line_items'][0]['totals'], 'subtotal' ) );
+		$this->assertSame( 2000, $this->total( $data['totals'], 'total' ) );
 	}
 
 	/**
