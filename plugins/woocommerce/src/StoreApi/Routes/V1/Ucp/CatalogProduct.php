@@ -62,12 +62,16 @@ class CatalogProduct extends AbstractCatalogRoute {
 		return array_merge(
 			parent::get_request_args(),
 			array(
-				'id'       => array(
+				'id'          => array(
 					'description' => __( 'Product or variant identifier.', 'woocommerce' ),
 					'type'        => array( 'string', 'integer' ),
 				),
-				'selected' => array(
+				'selected'    => array(
 					'description' => __( 'Option selections used to narrow the returned variants.', 'woocommerce' ),
+					'type'        => 'array',
+				),
+				'preferences' => array(
+					'description' => __( 'Option names in relaxation priority order; the last is dropped first when no variant matches.', 'woocommerce' ),
 					'type'        => 'array',
 				),
 			)
@@ -131,7 +135,8 @@ class CatalogProduct extends AbstractCatalogRoute {
 		}
 
 		$this->mapper()->begin_response();
-		$product = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ) );
+		$preferences = array_values( array_filter( array_map( 'strval', (array) ( $request->get_param( 'preferences' ) ?? array() ) ), 'is_scalar' ) );
+		$product     = $this->mapper()->map_detail_product( $resolved['product'], $this->normalize_selected( $selected ), $preferences );
 
 		$response = array(
 			'ucp'     => $this->ucp_metadata( 'success' ),
