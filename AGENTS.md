@@ -326,6 +326,8 @@ This is part of the WooCommerce monorepo:
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages
 
+**Dependency changes and `pnpm-lock.yaml`.** Adding, updating or removing a dependency can make pnpm rewrite unrelated lockfile lines. Before committing a lockfile change, follow "Dependency Changes" in `.ai/skills/woocommerce-dev-cycle/code-quality.md`; it says when to trim the diff to your entries and when to commit pnpm's output as written.
+
 ## Historical Context
 
 **Why two code styles?** The `plugins/woocommerce/includes/` directory predates modern PHP practices. New code uses PSR-4 and dependency injection in `plugins/woocommerce/src/`.
