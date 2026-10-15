@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityExtensions;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,7 +46,7 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
+			'input_schema'        => AbilityExtensions::add_input_schema( self::get_input_schema(), 'product' ),
 			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
@@ -98,6 +99,11 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
+		}
+
+		$rejected = AbilityExtensions::apply_input( $product, 'product', $input );
+		if ( is_wp_error( $rejected ) ) {
+			return $rejected;
 		}
 
 		$save_error = self::save_product( $product, 'woocommerce_product_create_failed' );
