@@ -457,17 +457,19 @@ CREATE TABLE $meta_table_name (
 		$args = wp_parse_args(
 			$args,
 			array(
-				'status'             => '',
-				'product_id'         => array(),
-				'user_id'            => 0,
-				'user_email'         => '',
-				'last_attempt_limit' => 0,
-				'start_date'         => 0,
-				'end_date'           => 0,
-				'limit'              => -1,
-				'offset'             => 0,
-				'order_by'           => array( 'id' => 'ASC' ),
-				'return'             => 'ids', // i.e. 'count', 'ids', 'objects'.
+				'status'              => '',
+				'product_id'          => array(),
+				'user_id'             => 0,
+				'user_email'          => '',
+				'last_attempt_limit'  => 0,
+				'start_date'          => 0,
+				'end_date'            => 0,
+				'notified_start_date' => 0,
+				'notified_end_date'   => 0,
+				'limit'               => -1,
+				'offset'              => 0,
+				'order_by'            => array( 'id' => 'ASC' ),
+				'return'              => 'ids', // i.e. 'count', 'ids', 'objects'.
 			)
 		);
 
@@ -517,14 +519,17 @@ CREATE TABLE $meta_table_name (
 			$where_values[] = gmdate( 'Y-m-d H:i:s', $args['last_attempt_limit'] );
 		}
 
-		if ( $args['start_date'] ) {
-			$where[]        = 'date_created_gmt >= %s';
-			$where_values[] = esc_sql( $args['start_date'] );
-		}
-
-		if ( $args['end_date'] ) {
-			$where[]        = 'date_created_gmt < %s';
-			$where_values[] = esc_sql( $args['end_date'] );
+		$date_ranges = array(
+			'start_date'          => 'date_created_gmt >= %s',
+			'end_date'            => 'date_created_gmt < %s',
+			'notified_start_date' => 'date_notified_gmt >= %s',
+			'notified_end_date'   => 'date_notified_gmt < %s',
+		);
+		foreach ( $date_ranges as $arg => $clause ) {
+			if ( ! empty( $args[ $arg ] ) ) {
+				$where[]        = $clause;
+				$where_values[] = esc_sql( $args[ $arg ] );
+			}
 		}
 
 		// ORDER BY clauses.
