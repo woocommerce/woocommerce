@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop checkout from sending an "Order updated" webhook for new orders that have not changed.

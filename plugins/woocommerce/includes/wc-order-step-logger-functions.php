@@ -72,8 +72,11 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			$order   = $context['order_object'];
 			$context = array_merge( extract_order_safe_data( $order ), $context );
 			unset( $context['order_object'] ); // This is super-important to avoid logging sensitive data.
-			$order->add_meta_data( '_debug_log_source', $context['source'], true );
-			$order->save();
+			// Save only the meta: a full save fires woocommerce_update_order, and with it the order.updated webhook.
+			if ( $order->get_id() > 0 ) {
+				$order->add_meta_data( '_debug_log_source', $context['source'], true );
+				$order->save_meta_data();
+			}
 		}
 
 		// Use the global logger instance which respects site's logging configuration.
@@ -93,16 +96,16 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			// We'll schedule the deletion for later in order to speed up the checkout process
 			// unless a custom (non-Woo core) orders data store is in use, because in that case there's
 			// no reliable way to query orders by meta key.
-			if ( $order && ( count( array_unique( $steps ) ) === count( $steps ) ) ) {
+			if ( $order && $order->get_id() > 0 && ( count( array_unique( $steps ) ) === count( $steps ) ) ) {
 				$order->delete_meta_data( '_debug_log_source' );
 				if ( OrderUtil::unknown_orders_data_store_in_use() ) {
 					if ( $logger instanceof WC_Logger ) {
 						$logger->clear( $context['source'] );
 					}
-					$order->save();
+					$order->save_meta_data();
 				} else {
 					$order->add_meta_data( '_debug_log_source_pending_deletion', $context['source'], true );
-					$order->save();
+					$order->save_meta_data();
 					wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderLogsDeletionProcessor::class );
 				}
 			}
