@@ -137,7 +137,8 @@ class StockNotificationsRestController extends RestApiControllerBase {
 
 		$items = array();
 		foreach ( $notifications as $notification ) {
-			$items[] = rest_ensure_response( $this->prepare_item_for_response( $notification, $request ) )->get_data();
+			// Embed the item links in the data, as WP_REST_Controller::prepare_response_for_collection() does.
+			$items[] = rest_get_server()->response_to_data( $this->prepare_item_for_response( $notification, $request ), false );
 		}
 
 		$max_pages = (int) ceil( $total / $per_page );
@@ -163,10 +164,16 @@ class StockNotificationsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	protected function get_item( WP_REST_Request $request ) {
+		$id = (int) $request['id'];
+
 		try {
-			$notification = new Notification( (int) $request['id'] );
+			// The data store throws when the row does not exist; an id of 0 is never read at all.
+			$notification = $id > 0 ? new Notification( $id ) : null;
 		} catch ( \Exception $e ) {
-			// The data store throws when the row does not exist.
+			$notification = null;
+		}
+
+		if ( ! $notification ) {
 			return new WP_Error( 'woocommerce_rest_stock_notification_invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => WP_Http::NOT_FOUND ) );
 		}
 
@@ -340,10 +347,9 @@ class StockNotificationsRestController extends RestApiControllerBase {
 				'minimum'     => 1,
 			),
 			'email'           => array(
-				'description'       => __( 'Limit result set to notifications for an email address (exact match).', 'woocommerce' ),
-				'type'              => 'string',
-				'format'            => 'email',
-				'sanitize_callback' => 'sanitize_email',
+				'description' => __( 'Limit result set to notifications for an email address (exact match).', 'woocommerce' ),
+				'type'        => 'string',
+				'format'      => 'email',
 			),
 			'after'           => array(
 				'description' => __( 'Limit response to notifications created after a given ISO8601 compliant date.', 'woocommerce' ),

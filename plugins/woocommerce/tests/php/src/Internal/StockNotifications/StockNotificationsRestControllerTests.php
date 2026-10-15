@@ -51,11 +51,12 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 		$posted_attributes = $props['posted_attributes'] ?? null;
 		unset( $props['posted_attributes'] );
 
+		$props['product_id'] ??= \WC_Helper_Product::create_simple_product()->get_id();
+
 		$notification = new Notification();
 		$notification->set_props(
 			array_merge(
 				array(
-					'product_id' => \WC_Helper_Product::create_simple_product()->get_id(),
 					'user_email' => 'shopper@example.com',
 					'status'     => NotificationStatus::ACTIVE,
 				),
@@ -155,14 +156,15 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_item_with_deleted_product(): void {
 		$product      = \WC_Helper_Product::create_simple_product();
-		$notification = $this->create_notification( array( 'product_id' => $product->get_id() ) );
+		$product_id   = $product->get_id();
+		$notification = $this->create_notification( array( 'product_id' => $product_id ) );
 		$product->delete( true );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', self::ROUTE . '/' . $notification->get_id() ) );
 		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( $product->get_id(), $data['product_id'] );
+		$this->assertSame( $product_id, $data['product_id'] );
 		$this->assertNull( $data['parent_id'] );
 		$this->assertNull( $data['variation_id'] );
 		$this->assertNull( $data['sku'] );
@@ -178,6 +180,7 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_stock_notification_invalid_id', $response->get_data()['code'] );
+		$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', self::ROUTE . '/0' ) )->get_status() );
 	}
 
 	/**
@@ -212,6 +215,7 @@ class StockNotificationsRestControllerTests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->get_collection( array( 'per_page' => 2 ) );
 		$this->assertSame( 200, $response->get_status() );
+		$this->assertArrayHasKey( '_links', $response->get_data()[0] );
 		$this->assertSame( '3', $response->get_headers()['X-WP-Total'] );
 		$this->assertSame( '2', $response->get_headers()['X-WP-TotalPages'] );
 		$this->assertSame( array( $ids[2], $ids[1] ), array_column( $response->get_data(), 'id' ) );
