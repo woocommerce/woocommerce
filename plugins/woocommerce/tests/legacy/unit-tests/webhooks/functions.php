@@ -425,13 +425,49 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Run wc_webhook_execute_queue() for one queued webhook and return the ID of its pending delivery.
+	 * @testdox Should schedule a new delivery when the pending one is more than 10 minutes away.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_a_new_delivery_when_the_pending_one_is_far_off() {
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_far_off' );
+		$arg     = 123;
+		as_schedule_single_action(
+			time() + HOUR_IN_SECONDS,
+			'woocommerce_deliver_webhook_async',
+			array(
+				'webhook_id' => $webhook->get_id(),
+				'arg'        => $arg,
+			),
+			'woocommerce-webhooks'
+		);
+
+		$this->queue_webhook_delivery( $webhook, $arg );
+
+		$this->assertCount( 2, $this->get_pending_delivery_ids( $webhook, $arg ), 'A pending delivery more than 10 minutes away should not be reused' );
+	}
+
+	/**
+	 * Run wc_webhook_execute_queue() for one queued webhook and return the ID of its single pending delivery.
 	 *
 	 * @param WC_Webhook $webhook The webhook to queue.
 	 * @param mixed      $arg     The delivery argument.
 	 * @return int
 	 */
 	private function execute_webhook_queue_for( $webhook, $arg ) {
+		$this->queue_webhook_delivery( $webhook, $arg );
+
+		$action_ids = $this->get_pending_delivery_ids( $webhook, $arg );
+		$this->assertCount( 1, $action_ids, 'Exactly one pending delivery should exist for the webhook and argument' );
+
+		return (int) reset( $action_ids );
+	}
+
+	/**
+	 * Run wc_webhook_execute_queue() for one queued webhook.
+	 *
+	 * @param WC_Webhook $webhook The webhook to queue.
+	 * @param mixed      $arg     The delivery argument.
+	 */
+	private function queue_webhook_delivery( $webhook, $arg ) {
 		global $wc_queued_webhooks;
 		$wc_queued_webhooks = array(
 			array(
@@ -441,8 +477,17 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		);
 		wc_webhook_execute_queue();
 		$wc_queued_webhooks = null;
+	}
 
-		$action_ids = as_get_scheduled_actions(
+	/**
+	 * Get the IDs of the pending deliveries scheduled for a webhook and argument.
+	 *
+	 * @param WC_Webhook $webhook The webhook.
+	 * @param mixed      $arg     The delivery argument.
+	 * @return int[]
+	 */
+	private function get_pending_delivery_ids( $webhook, $arg ) {
+		return as_get_scheduled_actions(
 			array(
 				'hook'   => 'woocommerce_deliver_webhook_async',
 				'args'   => array(
@@ -454,9 +499,6 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			),
 			'ids'
 		);
-		$this->assertCount( 1, $action_ids, 'Exactly one pending delivery should exist for the webhook and argument' );
-
-		return (int) reset( $action_ids );
 	}
 
 	/**
