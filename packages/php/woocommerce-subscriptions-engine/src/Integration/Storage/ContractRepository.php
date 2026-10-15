@@ -6,10 +6,11 @@
  * The contract is the live source of truth. A chain is NOT a stored entity: it is
  * the pair `(contract_id, kind)`, with its head and counters derived from the cycle
  * rows. The entity never carries a cycle graph in memory, so cycles are reached
- * through purpose-built reads ({@see self::find_chain_head()},
- * etc.) and written one at a time ({@see self::append_cycle()}, {@see self::update_cycle()}).
- * There is no whole-graph `save()`. Snapshots are deduped by copy-forward (reuse the
- * previous cycle's snapshot id when plan / items are unchanged), via {@see SnapshotStore}.
+ * through purpose-built reads ({@see self::find_chain_head()}, etc.), appended one at a
+ * time ({@see self::append_cycle()}) and changed only through compare-and-set writes
+ * ({@see self::claim_cycle()}, {@see self::transition_cycle()}).
+ * There is no whole-graph `save()`. Cycle snapshot ids are stored as given and their
+ * value objects attached on read; nothing writes snapshot rows on append.
  * Meta is read and written only through the meta methods ({@see self::add_meta()} etc.),
  * so a whole-contract write never rewrites meta. It opens no transactions and keeps no
  * object cache; a caller may wrap several calls in its own transaction.
@@ -42,23 +43,6 @@ final class ContractRepository {
 	 * Logger source tag.
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
-
-	/**
-	 * The per-contract typed snapshot store.
-	 *
-	 * @var SnapshotStore
-	 */
-	private $snapshots;
-
-	/**
-	 * Build a repository over the given snapshot store.
-	 *
-	 * @param SnapshotStore|null $snapshots Snapshot store; a default instance is
-	 *                                      created when omitted.
-	 */
-	public function __construct( ?SnapshotStore $snapshots = null ) {
-		$this->snapshots = $snapshots ?? new SnapshotStore();
-	}
 
 	/**
 	 * Insert a new contract and its items and addresses.
@@ -107,9 +91,9 @@ final class ContractRepository {
 	 * Persist changes to an existing contract and its child rows.
 	 *
 	 * Updates the contract row in place, then reconciles items / addresses only when
-	 * they differ (meta is never touched) - so the common renewal-cache write (status, next_payment_gmt)
-	 * does not churn child rows. The write seam a later transaction-handling change
-	 * wraps; no transaction now (see {@see self::insert()}).
+	 * they differ (meta is never touched). A `next_payment_gmt` that differs from the stored
+	 * one (including null) releases the due-dispatch claim; re-saving the stored moment keeps
+	 * it. No transaction (see {@see self::insert()}).
 	 *
 	 * @param Contract $contract Contract to update. Must have an id whose row still exists.
 	 * @return bool True when the contract row was updated (or already current).
@@ -123,7 +107,7 @@ final class ContractRepository {
 
 		$this->assert_contract_exists( $id );
 
-		$this->update_contract_row( $contract );
+		$this->write_contract_row( $id, $contract->to_storage() );
 		$this->sync_children( $contract );
 
 		return true;
@@ -132,8 +116,10 @@ final class ContractRepository {
 	/**
 	 * Write only the named contract columns (plus `date_updated_gmt`) from the entity,
 	 * and replace items / addresses when named. Unnamed columns keep their stored
-	 * values, so a concurrent write to them is not reverted. Existence is checked only
-	 * when the row write changes nothing, before any child write.
+	 * values, so a concurrent write to them is not reverted. The named columns land in one
+	 * statement, together or not at all. Writing a `next_payment_gmt` that differs from the
+	 * stored one (including null) also releases the due-dispatch claim; re-saving the stored
+	 * moment keeps it. Existence is checked only when the row write changes nothing.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -142,8 +128,6 @@ final class ContractRepository {
 	 * @throws \RuntimeException If the contract has no id or the write fails.
 	 */
 	public function update_fields( Contract $contract, array $fields ): bool {
-		global $wpdb;
-
 		$id = $contract->get_id();
 		if ( null === $id ) {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
@@ -161,16 +145,7 @@ final class ContractRepository {
 			$columns[ $field ] = $storage[ $field ];
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge( $columns, array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) ) ),
-			array( 'id' => (int) $id )
-		);
-
-		if ( false === $updated ) {
-			throw new \RuntimeException( 'Failed to update contract.' );
-		}
+		$updated = $this->write_contract_row( $id, $columns );
 
 		// Zero changed rows: a missing row, or identical values written within the same second.
 		if ( 0 === $updated && ! $this->exists( $id ) ) {
@@ -184,69 +159,6 @@ final class ContractRepository {
 		if ( in_array( 'addresses', $fields, true ) ) {
 			$this->replace_addresses( $id, $contract->get_addresses() );
 		}
-
-		return true;
-	}
-
-	/**
-	 * Update the contract row (and children) ONLY while its stored status still matches
-	 * `$expected_status` - the optimistic compare-and-set for status-sensitive writes,
-	 * mirroring {@see self::transition_cycle_status()} on the cycle side.
-	 *
-	 * The renewal engine's schedule advances read-validate-write the contract row while an
-	 * extension may change its status (a customer cancel); unconditioned, the slower writer
-	 * silently clobbers the faster one - a cancel lost to a concurrent settle would
-	 * resurrect the contract into future billing. Keying the
-	 * write on the status the caller read makes the race lose LOUDLY: no row matches,
-	 * false comes back, and the caller reports a conflict or re-reads instead of
-	 * overwriting.
-	 *
-	 * A zero-row result is disambiguated with a follow-up status read (an update whose
-	 * values happen to be byte-identical also reports zero rows), so false always means
-	 * "the stored status is no longer `$expected_status`, or the row is gone" - never a
-	 * false conflict.
-	 *
-	 * @param Contract $contract        Contract to write. Must have an id.
-	 * @param string   $expected_status The status the caller read; the write lands only while the row still carries it.
-	 * @return bool True when the row was written (children synced); false when the condition missed.
-	 * @throws \RuntimeException If the contract has no id, or the write itself errors.
-	 */
-	public function update_if_status( Contract $contract, string $expected_status ): bool {
-		global $wpdb;
-
-		$id = $contract->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge(
-				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array(
-				'id'     => (int) $id,
-				'status' => $expected_status,
-			)
-		);
-
-		if ( false === $updated ) {
-			throw new \RuntimeException( 'Failed to update contract.' );
-		}
-
-		if ( 0 === $updated ) {
-			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$current = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE id = %d", $id ) );
-			if ( $expected_status !== $current ) {
-				return false;
-			}
-		}
-
-		$this->sync_children( $contract );
 
 		return true;
 	}
@@ -658,39 +570,33 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contracts actionable for renewal at `$now`, oldest-due first - the batch dispatcher's scan.
+	 * Contracts due at `$now`, never-notified first, then least recently notified - the due dispatcher's scan.
 	 *
-	 * A contract is due when its next-due moment (`next_payment_gmt`) has passed AND its owner
-	 * (`extension_slug`) is one of `$owners` - the dispatcher passes the registered consumers.
-	 * A contract with a null or unlisted owner waits untouched (its next-due moment is never
-	 * rewritten) until its owner is listed; with no owners the scan returns nothing. A null
-	 * `next_payment_gmt` never matches the `<=` comparison.
+	 * A contract is due when its `next_payment_gmt` is at or before `$now`, its owner
+	 * (`extension_slug`) is one of `$owners`, the engine keeps its schedule (`schedule_source`
+	 * is {@see Contract::SCHEDULE_SOURCE_ENGINE}), and it carries no live due-dispatch claim.
+	 * A contract whose schedule a gateway or extension keeps is never selected: that party
+	 * triggers its own renewals. Status is not read: whether a due contract acts is its
+	 * owner's decision. Driven by the `due_owner (extension_slug, next_payment_gmt)` index;
+	 * the schedule source and the claim are residual filters.
 	 *
-	 * Interim: moves out of the engine with the renewal flow (the predicates below; the scan
-	 * then stays owner-scoped only). Until then the scan's only caller is the engine renewal
-	 * flow, so it keeps just what that flow can charge now:
+	 * `$now` is the due cutoff only; claim liveness is read on the database clock
+	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_contract()} stamps claims on.
 	 *
-	 * - the contract is `active` (status is otherwise opaque engine data; a contract in any other
-	 *   status, including an extension-registered one, is simply not selected and its next-due
-	 *   moment is left as is);
-	 * - the contract is not gateway-scheduled (the gateway owns its renewal);
-	 * - its head cycle is chargeable now:
+	 * Fairness: a handler is expected to move or clear the due moment it was notified for
+	 * (writing a different `next_payment_gmt` releases the claim). A contract whose handler
+	 * leaves it in place keeps its expired claim. Rows sort by that claim, oldest first, with
+	 * a null claim (never notified for the current due moment) ahead of all of them, then by
+	 * due moment: fresh contracts lead, and among repeats the least recently notified goes
+	 * next, so contracts stuck on an older due moment cannot starve a later-due retry. The
+	 * sort reads the owners' whole due backlog and filesorts it rather than walking
+	 * `due_owner` in order; measured cheap at realistic backlogs (about 13 ms warm for
+	 * 20,000 due rows) and acceptable before the schema freeze. `LIMIT` bounds the result.
 	 *
-	 *   - head `billed` and its period has ended (`ends_at_gmt <= now`) -> advance-ready;
-	 *   - head `pending` with an expired crash-recovery lease (`claimed_until <= now`) -> reclaim-ready.
-	 *
-	 * Any other head (`failed` awaiting dunning, `processing` awaiting its gateway, `pending` with
-	 * a live lease) is excluded in SQL, so `LIMIT` counts only actionable rows and a cluster of
-	 * non-actionable heads cannot starve healthy renewals. Driven by the
-	 * `due_owner (extension_slug, next_payment_gmt)` index (status and `schedule_source` are
-	 * residual filters); the head cycle is joined per candidate
-	 * via the `chain_seq` UNIQUE index. Returns the head fields selection needs, so the dispatcher
-	 * does not re-load the head to decide what to bill.
-	 *
-	 * @param DateTimeImmutable  $now   The cutoff moment; contracts due at or before it.
+	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
-	 * @return array<int, RenewalCandidate> Actionable renewal candidates, oldest-due first.
+	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, never-notified first, then least recently notified, then oldest-due.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -705,41 +611,22 @@ final class ContractRepository {
 		global $wpdb;
 
 		$contracts          = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$cycles             = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$cutoff             = $now->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+		$cutoff             = self::format_utc( $now );
 		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
 
-		$args = array_merge(
-			array( Cycle::KIND_BILLING, Cycle::KIND_BILLING ),
-			$owners,
-			array(
-				ContractStatus::ACTIVE,
-				Contract::SCHEDULE_SOURCE_GATEWAY,
-				$cutoff,
-				CycleStatus::BILLED,
-				$cutoff,
-				CycleStatus::PENDING,
-				$cutoff,
-				$limit,
-			)
-		);
+		$args = array_merge( $owners, array( $cutoff, Contract::SCHEDULE_SOURCE_ENGINE, $limit ) );
 
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
-		// The owner placeholder list is generated, one `%s` per registered owner in `$args`.
+		// The owner placeholder list is generated, one `%s` per owner in `$args`.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT c.id AS contract_id, cy.count AS head_count, cy.status AS head_status, cy.ends_at_gmt AS head_ends_at_gmt
-				FROM {$contracts} c
-				JOIN {$cycles} cy
-				  ON cy.contract_id = c.id AND cy.kind = %s
-				 AND cy.sequence_no = ( SELECT MAX(s.sequence_no) FROM {$cycles} s WHERE s.contract_id = c.id AND s.kind = %s )
-				WHERE c.extension_slug IN ( {$owner_placeholders} ) AND c.status = %s AND c.schedule_source <> %s AND c.next_payment_gmt IS NOT NULL AND c.next_payment_gmt <= %s
-				  AND (
-				        ( cy.status = %s AND cy.ends_at_gmt <= %s )
-				     OR ( cy.status = %s AND cy.claimed_until IS NOT NULL AND cy.claimed_until <= %s )
-				      )
-				ORDER BY c.next_payment_gmt ASC, c.id ASC
+				"SELECT id, extension_slug, next_payment_gmt
+				FROM {$contracts}
+				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
+				  AND schedule_source = %s
+				  AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )
+				ORDER BY claimed_until ASC, next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
 			),
@@ -747,11 +634,11 @@ final class ContractRepository {
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
-		// A failed scan otherwise reads exactly like "nothing due" and renewals stall
+		// A failed scan otherwise reads exactly like "nothing due" and dispatch stalls
 		// store-wide with no signal; the return stays empty either way.
 		if ( '' !== $wpdb->last_error ) {
 			wc_get_logger()->error(
-				sprintf( 'ContractRepository::find_due(): due-index scan failed - renewals may stall until this is fixed. %s', $wpdb->last_error ),
+				sprintf( 'ContractRepository::find_due(): due-index scan failed - due dispatch may stall until this is fixed. %s', $wpdb->last_error ),
 				array( 'source' => self::LOG_SOURCE )
 			);
 		}
@@ -761,16 +648,59 @@ final class ContractRepository {
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$head_count = $row['head_count'] ?? null;
-			$result[]   = new RenewalCandidate(
-				Coercion::coerce_int( $row['contract_id'] ?? 0 ),
-				null === $head_count ? null : Coercion::coerce_int( $head_count ),
-				Coercion::coerce_string( $row['head_status'] ?? '' ),
-				Coercion::coerce_string( $row['head_ends_at_gmt'] ?? '' )
+			$result[] = array(
+				'id'               => Coercion::coerce_int( $row['id'] ?? 0 ),
+				'extension_slug'   => Coercion::coerce_string( $row['extension_slug'] ?? '' ),
+				'next_payment_gmt' => Coercion::coerce_string( $row['next_payment_gmt'] ?? '' ),
 			);
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Take the due-dispatch claim on a contract for `$ttl_seconds`.
+	 *
+	 * One conditional write: it lands only while the contract still carries the
+	 * `next_payment_gmt` the caller read and no live claim, so of two overlapping
+	 * dispatchers exactly one wins. The claim is stamped and its liveness compared on the
+	 * database clock (`UTC_TIMESTAMP()`) at the moment of the write, the same clock cycle
+	 * claims use, so a claim taken late in a slow batch still lives its full TTL. Writing a
+	 * different `next_payment_gmt` (or null) releases the claim; re-saving the same moment
+	 * keeps it (see {@see self::update_fields()} and {@see self::update()}).
+	 *
+	 * @param int    $contract_id           Contract id.
+	 * @param string $seen_next_payment_gmt The `next_payment_gmt` the caller read (UTC, `Y-m-d H:i:s`).
+	 * @param int    $ttl_seconds           Claim lifetime in seconds.
+	 * @return bool True when this call took the claim.
+	 */
+	public function claim_contract( int $contract_id, string $seen_next_payment_gmt, int $ttl_seconds ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )
+				WHERE id = %d AND next_payment_gmt = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
+				$ttl_seconds,
+				$contract_id,
+				$seen_next_payment_gmt
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return 1 === $updated;
+	}
+
+	/**
+	 * Format a moment as a UTC `Y-m-d H:i:s` column value.
+	 *
+	 * @param DateTimeImmutable $moment Moment to format.
+	 */
+	private static function format_utc( DateTimeImmutable $moment ): string {
+		return $moment->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
 
 	/**
@@ -1068,26 +998,28 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Append a cycle to its chain `(contract_id, kind)`, copy-forwarding snapshots.
+	 * Append a cycle to its chain `(contract_id, kind)`.
 	 *
-	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), resolves the
-	 * cycle's snapshots (reused from `$previous` when unchanged, else inserted fresh), then
-	 * inserts the cycle row and stamps the generated id back onto the entity. The chain's
+	 * Assigns an unassigned `sequence_no` (the chain head's plus one, or 1), then inserts
+	 * the cycle row and stamps the generated id back onto the entity. The chain's
 	 * UNIQUE indexes guard concurrent appends and duplicate counts. The seam a later
 	 * transaction-handling change wraps.
 	 *
-	 * @param Cycle      $cycle    Cycle to append. Carries its contract id and kind.
-	 * @param Cycle|null $previous The chain's previous cycle, when copy-forward of its
-	 *                             snapshot ids should be considered; null for the first cycle.
+	 * With `$claim_seconds`, the cycle is appended claimed: the same INSERT stamps
+	 * `claimed_until` from the database clock, like {@see self::claim_cycle()} and
+	 * {@see self::transition_cycle()}, so the claim and the row land together. The entity's
+	 * own claim value is never written.
+	 *
+	 * @param Cycle    $cycle         Cycle to append. Carries its contract id and kind.
+	 * @param int|null $claim_seconds Claim length in seconds from the database's now, or null to append unclaimed.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the
 	 *                                 position is already claimed - the create-as-claim race).
-	 * @throws \RuntimeException If a snapshot write or the cycle insert fails for any
-	 *                          other reason (the database error is in the message).
+	 * @throws \RuntimeException If the cycle insert fails for any other reason (the
+	 *                          database error is in the message).
 	 */
-	public function append_cycle( Cycle $cycle, ?Cycle $previous = null ): void {
+	public function append_cycle( Cycle $cycle, ?int $claim_seconds = null ): void {
 		$this->assign_next_sequence_no( $cycle );
-		$this->resolve_cycle_snapshots( $cycle, $previous );
-		$this->insert_cycle( $cycle );
+		$this->insert_cycle( $cycle, $claim_seconds );
 	}
 
 	/**
@@ -1105,135 +1037,119 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update an existing cycle row.
+	 * Take the claim on a cycle in `$status` whose claim has expired or was never set, for
+	 * `$claim_seconds`. A compare-and-set on the status and the claim: among concurrent
+	 * callers exactly one matches the row. The expiry check and the new claim use the
+	 * database clock (`UTC_TIMESTAMP()`), the one clock every worker shares.
 	 *
-	 * @param Cycle $cycle Cycle to update. Must have an id whose row still exists.
-	 * @throws \RuntimeException If the cycle has no id, the update fails, or its row
-	 *                          no longer exists (stale id or concurrent delete).
+	 * @param int    $cycle_id      Cycle id.
+	 * @param string $status        The status the caller read; the compare-and-set predicate (not validated).
+	 * @param int    $claim_seconds Claim length in seconds, from the database's now.
+	 * @return bool True when this caller took the claim.
 	 */
-	public function update_cycle( Cycle $cycle ): void {
+	public function claim_cycle( int $cycle_id, string $status, int $claim_seconds ): bool {
 		global $wpdb;
 
-		$id = $cycle->get_id();
-		if ( null === $id ) {
-			throw new \RuntimeException( 'Cannot update a cycle that has no id. Use ContractRepository::append_cycle() for a new cycle.' );
-		}
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ),
-			array_merge(
-				$cycle->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array( 'id' => (int) $id )
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP()
+				WHERE id = %d AND status = %s AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )",
+				$claim_seconds,
+				$cycle_id,
+				$status
+			)
 		);
-
-		// date_updated_gmt always changes, so a matched row reports 1 affected row; 0
-		// means no row matched (stale id or concurrent delete) and must fail loudly.
-		if ( false === $updated || 0 === $updated ) {
-			throw new \RuntimeException( 'Cycle row not found during update (concurrent delete or stale id).' );
-		}
-	}
-
-	/**
-	 * Atomically reclaim a stalled `pending` cycle whose crash-recovery lease has expired,
-	 * extending the lease by `$lease_ttl_seconds`. The compare-and-set that makes reclaim
-	 * race-safe: the predicate keys on `claimed_until <= now`, so among concurrent workers
-	 * only the first to run the UPDATE matches a row - it writes the future lease, after
-	 * which every other worker's `<=` predicate matches zero rows.
-	 *
-	 * Both the expiry predicate and the fresh lease anchor on the DATABASE clock
-	 * (`UTC_TIMESTAMP()`) - the one clock every worker shares - so a worker whose PHP clock
-	 * runs fast cannot take over a lease that is still live in real terms, and the lease it
-	 * stamps means the same thing to every other worker.
-	 *
-	 * @param int $cycle_id          The stalled cycle's id.
-	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
-	 * @return bool True when this caller won the reclaim (exactly one row updated); false
-	 *              when another worker already reclaimed it (zero rows matched).
-	 */
-	public function reclaim_expired_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s AND claimed_until IS NOT NULL AND claimed_until <= UTC_TIMESTAMP()", $lease_ttl_seconds, $cycle_id, CycleStatus::PENDING ) );
-
-		// Exactly one row matched means this caller won the CAS; 0 means another worker
-		// already extended the lease (or the cycle settled) between read and write.
-		return false !== $result && 1 === $wpdb->rows_affected;
-	}
-
-	/**
-	 * Re-claim a failed cycle for an admin-triggered retry, as an atomic compare-and-set:
-	 * flip it back to `pending` and stamp a fresh lease only while it is still `failed`.
-	 * Returns true when this caller won (exactly one row matched), false when it was already
-	 * re-claimed or has since moved on.
-	 *
-	 * The fresh lease anchors on the DATABASE clock (`UTC_TIMESTAMP()`), the shared reference
-	 * clock for all lease arbitration.
-	 *
-	 * @param int $cycle_id          The cycle to re-claim.
-	 * @param int $lease_ttl_seconds The lease window to stamp, measured from the DB's now.
-	 */
-	public function reclaim_failed_cycle( int $cycle_id, int $lease_ttl_seconds ): bool {
-		global $wpdb;
-
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), date_updated_gmt = UTC_TIMESTAMP() WHERE id = %d AND status = %s", CycleStatus::PENDING, $lease_ttl_seconds, $cycle_id, CycleStatus::FAILED ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return false !== $result && 1 === $wpdb->rows_affected;
 	}
 
 	/**
-	 * Settle a cycle's outcome as an atomic compare-and-set on its status: move it from
-	 * `$from_status` to `$to_status`, stamp the settling order and reason, and clear the
-	 * crash-recovery lease - all in one UPDATE gated on the row still being in `$from_status`.
-	 * Among concurrent settlers (the post-charge reconciliation and the order-status listener
-	 * can race across workers), exactly one caller matches the row and wins; the rest match
-	 * zero rows, so status transitions - and the actions fired on them - happen exactly once.
+	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status:
+	 * one UPDATE that lands only while the row still carries `$from_status`, so among
+	 * concurrent callers exactly one wins. `$changes` keys present are written: `order_id`
+	 * and `reason` (null clears); `claim_seconds` sets a claim from the database's now, and
+	 * without it the claim is released. A same-status call only writes `$changes`, so it
+	 * returns true whenever the row still carries the status, even when nothing changed.
 	 *
-	 * `$to_status` must be a registered cycle status (the write-path allowlist). `$from_status`
-	 * is only the CAS predicate and is not validated, so a cycle carrying an unknown stored
-	 * status can still be settled out of it.
-	 *
-	 * @param int         $cycle_id    The cycle to settle.
-	 * @param string      $from_status The status the caller read; the CAS predicate.
-	 * @param string      $to_status   The settled status to write; must be registered.
-	 * @param int         $order_id    The renewal order carrying the outcome.
-	 * @param string|null $reason      Failure reason to record, or null to clear.
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
+	 * @param string               $to_status   The status to write; must be a registered cycle status.
+	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string), `claim_seconds` (int).
+	 * @return bool True when this caller won the transition (for a same-status call: the row carries the status).
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 */
-	public function transition_cycle_status( int $cycle_id, string $from_status, string $to_status, int $order_id, ?string $reason = null ): bool {
+	public function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $changes ): bool {
 		global $wpdb;
 
 		if ( ! CycleStatus::is_registered( $to_status ) ) {
-			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle_status(): cycle status "%s" is not registered.', $to_status ) ) );
+			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ) ) );
 		}
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$set    = array( 'status = %s' );
+		$values = array( $to_status );
 
-		if ( null === $reason ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = NULL, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+		if ( array_key_exists( 'order_id', $changes ) ) {
+			if ( null === $changes['order_id'] ) {
+				$set[] = 'order_id = NULL';
+			} else {
+				$set[]    = 'order_id = %d';
+				$values[] = Coercion::coerce_int( $changes['order_id'] );
+			}
+		}
+
+		if ( array_key_exists( 'reason', $changes ) ) {
+			if ( null === $changes['reason'] ) {
+				$set[] = 'reason = NULL';
+			} else {
+				$set[]    = 'reason = %s';
+				$values[] = Coercion::coerce_string( $changes['reason'] );
+			}
+		}
+
+		if ( array_key_exists( 'claim_seconds', $changes ) ) {
+			$set[]    = 'claimed_until = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
+			$values[] = Coercion::coerce_int( $changes['claim_seconds'] );
 		} else {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET status = %s, order_id = %d, reason = %s, claimed_until = NULL, date_updated_gmt = %s WHERE id = %d AND status = %s", $to_status, $order_id, $reason, gmdate( 'Y-m-d H:i:s' ), $cycle_id, $from_status ) );
+			$set[] = 'claimed_until = NULL';
 		}
 
-		return false !== $result && 1 === $wpdb->rows_affected;
+		$set[]    = 'date_updated_gmt = %s';
+		$values[] = gmdate( 'Y-m-d H:i:s' );
+		$values[] = $cycle_id;
+		$values[] = $from_status;
+
+		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$set_clause = implode( ', ', $set );
+
+		// The SET clause is built from fixed fragments above; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$result = $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET {$set_clause} WHERE id = %d AND status = %s", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+
+		if ( false === $result ) {
+			return false;
+		}
+
+		if ( 1 === $wpdb->rows_affected ) {
+			return true;
+		}
+
+		// MySQL counts changed rows, not matched ones: a same-status call whose values are
+		// already stored matches the row but changes nothing. It still succeeded when the row
+		// carries the status.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $from_status === $to_status && null !== $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND status = %s", $cycle_id, $to_status ) );
 	}
 
 	/**
 	 * The chain's head - its most-recent cycle (highest `sequence_no` in `(contract_id,
 	 * kind)`) - or null when the chain is empty. The head is the chain's growth point, not
-	 * necessarily the cycle current by date (a forced early renewal bills a head whose
-	 * period lies ahead). Snapshots are decoded into typed value objects only for an
-	 * in-flight cycle (see {@see self::hydrate_cycle()}).
+	 * necessarily the cycle current by date (an extension may append a head whose
+	 * period lies ahead).
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1256,7 +1172,7 @@ final class ContractRepository {
 
 	/**
 	 * A window of a chain's cycle history, newest first - the paginated read for
-	 * history screens. Snapshots are decoded only for any in-flight cycle in the window.
+	 * history screens.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind. Defaults to billing.
@@ -1285,10 +1201,10 @@ final class ContractRepository {
 	/**
 	 * All cycles linked to `$order_id`, across kinds and contracts. `order_id` is a
 	 * non-1:1 reference (an aggregate order may serve many cycles), so this returns
-	 * every match. Snapshots are decoded for any in-flight cycle.
+	 * every match.
 	 *
 	 * @param int $order_id WooCommerce order id.
-	 * @return array<int, Cycle> Cycles linked to the order, oldest first.
+	 * @return array<int, Cycle> Cycles linked to the order, newest first.
 	 */
 	public function find_cycles_by_order_id( int $order_id ): array {
 		global $wpdb;
@@ -1296,7 +1212,7 @@ final class ContractRepository {
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id ASC", $order_id ), ARRAY_A );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d ORDER BY id DESC", $order_id ), ARRAY_A );
 
 		$cycles = array();
 		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
@@ -1309,81 +1225,8 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Resolve a cycle's in-memory snapshot value objects into stored row ids (write-once).
-	 *
-	 * Per snapshot type: when the cycle carries a fresh value object and no stored id
-	 * yet, the id is copy-forwarded from `$previous` (when payload + schema version
-	 * match) or freshly inserted, then stamped onto the cycle. A cycle that already
-	 * carries an id is left as is - a frozen reference is never re-pointed.
-	 *
-	 * @param Cycle      $cycle    Cycle whose snapshots to resolve.
-	 * @param Cycle|null $previous The previous cycle to copy-forward from, or null.
-	 */
-	private function resolve_cycle_snapshots( Cycle $cycle, ?Cycle $previous ): void {
-		$contract_id = $cycle->get_contract_id();
-
-		$plan = $cycle->get_plan_snapshot();
-		if ( $plan instanceof PlanSnapshot && null === $cycle->get_plan_snapshot_id() ) {
-			$cycle->set_plan_snapshot_id(
-				$this->copy_forward_or_insert(
-					$contract_id,
-					SnapshotStore::TYPE_PLAN,
-					$plan->get_selling_plan_id(),
-					$plan->to_payload(),
-					$plan->get_schema_version(),
-					null === $previous ? null : $previous->get_plan_snapshot_id()
-				)
-			);
-		}
-
-		$items = $cycle->get_items_snapshot();
-		if ( $items instanceof ItemsSnapshot && null === $cycle->get_items_snapshot_id() ) {
-			$cycle->set_items_snapshot_id(
-				$this->copy_forward_or_insert(
-					$contract_id,
-					SnapshotStore::TYPE_ITEMS,
-					null,
-					$items->to_payload(),
-					$items->get_schema_version(),
-					null === $previous ? null : $previous->get_items_snapshot_id()
-				)
-			);
-		}
-	}
-
-	/**
-	 * Reuse the previous cycle's snapshot id when its payload + schema version match,
-	 * else insert a fresh row.
-	 *
-	 * The match is a strict comparison against the JSON-decoded stored payload, so
-	 * payload values must be JSON-round-trip-safe scalars: ints and strings (money as
-	 * decimal strings, never PHP floats - a float may not decode back identical,
-	 * defeating the reuse).
-	 *
-	 * @param int                      $contract_id          Owning contract id.
-	 * @param string                   $snapshot_type        Snapshot type (`plan` | `items`).
-	 * @param int|null                 $parent_id            Weak link to the source, or null.
-	 * @param array<int|string, mixed> $payload              The new snapshot payload.
-	 * @param int                      $schema_version       Payload-format version.
-	 * @param int|null                 $previous_snapshot_id The previous cycle's snapshot id, or null.
-	 * @return int The reused or newly-inserted snapshot id.
-	 */
-	private function copy_forward_or_insert( int $contract_id, string $snapshot_type, ?int $parent_id, array $payload, int $schema_version, ?int $previous_snapshot_id ): int {
-		if ( null !== $previous_snapshot_id ) {
-			$previous = $this->find_snapshot_payload( $previous_snapshot_id );
-			if ( null !== $previous && $previous['schema_version'] === $schema_version && $previous['payload'] === $payload ) {
-				return $previous_snapshot_id;
-			}
-		}
-
-		return $this->snapshots->insert( $contract_id, $snapshot_type, $parent_id, $payload, $schema_version );
-	}
-
-	/**
-	 * Hydrate a cycle row, attaching typed snapshot value objects only for an in-flight
-	 * (non-terminal) cycle. A settled record keeps its snapshot ids but skips the extra
-	 * reads to decode their payloads. {@see CycleStatus::is_terminal()} is false for an
-	 * unknown or extension-registered status, so such a cycle's snapshots are decoded.
+	 * Hydrate a cycle row, attaching typed snapshot value objects for the snapshot ids
+	 * it carries (a cycle without snapshot ids costs no extra read).
 	 *
 	 * @param array<string, mixed> $row Cycle row.
 	 * @return Cycle The hydrated cycle.
@@ -1391,46 +1234,75 @@ final class ContractRepository {
 	private function hydrate_cycle( array $row ): Cycle {
 		$cycle = Cycle::from_storage( $row );
 
-		if ( CycleStatus::is_terminal( $cycle->get_status()->get_value() ) ) {
-			return $cycle;
+		$plan_snapshot_id = $cycle->get_plan_snapshot_id();
+		if ( null !== $plan_snapshot_id ) {
+			$plan = $this->find_plan_snapshot( $plan_snapshot_id );
+			if ( $plan instanceof PlanSnapshot ) {
+				$cycle->set_plan_snapshot( $plan );
+			}
 		}
 
-		$plan = $this->find_plan_snapshot( $cycle->get_plan_snapshot_id() );
-		if ( $plan instanceof PlanSnapshot ) {
-			$cycle->set_plan_snapshot( $plan );
-		}
-
-		$items = $this->find_items_snapshot( $cycle->get_items_snapshot_id() );
-		if ( $items instanceof ItemsSnapshot ) {
-			$cycle->set_items_snapshot( $items );
+		$items_snapshot_id = $cycle->get_items_snapshot_id();
+		if ( null !== $items_snapshot_id ) {
+			$items = $this->find_items_snapshot( $items_snapshot_id );
+			if ( $items instanceof ItemsSnapshot ) {
+				$cycle->set_items_snapshot( $items );
+			}
 		}
 
 		return $cycle;
 	}
 
 	/**
-	 * Insert a cycle row and stamp the generated id back onto the entity.
+	 * Insert a cycle row and stamp the generated id back onto the entity. Hand-built so
+	 * a claim can be stamped from `UTC_TIMESTAMP()` in the same statement; string values
+	 * are checked against their column lengths first, as `$wpdb->insert()` would.
 	 *
-	 * @param Cycle $cycle Cycle to insert. Carries its contract id and kind.
+	 * @param Cycle    $cycle         Cycle to insert. Carries its contract id and kind.
+	 * @param int|null $claim_seconds Claim length in seconds from the database's now, or null for none.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
-	 * @throws \RuntimeException If the insert fails for any other reason.
+	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
 	 */
-	private function insert_cycle( Cycle $cycle ): void {
+	private function insert_cycle( Cycle $cycle, ?int $claim_seconds ): void {
 		global $wpdb;
 
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$now   = gmdate( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$inserted = $wpdb->insert(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ),
-			array_merge(
-				$cycle->to_storage(),
-				array(
-					'date_created_gmt' => $now,
-					'date_updated_gmt' => $now,
-				)
-			)
-		);
+		$columns = $cycle->to_storage();
+		unset( $columns['claimed_until'] );
+		$columns['date_created_gmt'] = $now;
+		$columns['date_updated_gmt'] = $now;
+
+		$names        = array();
+		$placeholders = array();
+		$values       = array();
+		foreach ( $columns as $column => $value ) {
+			$names[] = "`{$column}`";
+			if ( null === $value ) {
+				$placeholders[] = 'NULL';
+				continue;
+			}
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+			$placeholders[] = '%s';
+			$values[]       = (string) $value;
+		}
+
+		if ( null !== $claim_seconds ) {
+			$names[]        = '`claimed_until`';
+			$placeholders[] = 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )';
+			$values[]       = $claim_seconds;
+		}
+
+		$name_list        = implode( ', ', $names );
+		$placeholder_list = implode( ', ', $placeholders );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false === $inserted ) {
 			$db_error = $wpdb->last_error;
@@ -1447,13 +1319,10 @@ final class ContractRepository {
 	/**
 	 * Decode a stored plan snapshot row into a typed value object.
 	 *
-	 * Public so the renewal money-path can resolve a contract's own frozen plan terms
-	 * (the cadence to bill the next cycle under) from its `plan_snapshot_id`.
-	 *
 	 * @param int|null $snapshot_id Snapshot row id, or null.
 	 * @return PlanSnapshot|null The decoded value object, or null.
 	 */
-	public function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
+	private function find_plan_snapshot( ?int $snapshot_id ): ?PlanSnapshot {
 		$decoded = $this->find_snapshot_payload( $snapshot_id );
 		if ( null === $decoded ) {
 			return null;
@@ -1573,34 +1442,109 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Update the contract row in place (no child rows).
+	 * Write contract columns (plus `date_updated_gmt`) in one UPDATE statement, so the
+	 * row never lands half-written: a status and a due moment written together change
+	 * together or not at all.
 	 *
-	 * @param Contract $contract Contract whose row to update. Must have an id.
-	 * @throws \RuntimeException If the update fails.
+	 * When `next_payment_gmt` is among the columns, the same statement releases the
+	 * due-dispatch claim only if the due moment really changes: a claim belongs to the
+	 * moment it was taken on, so moving or clearing that moment frees the contract for the
+	 * next scan, while re-saving it keeps the claim and a handler cannot jump the dispatch
+	 * queue by writing the same moment back. MySQL evaluates SET assignments left to
+	 * right, so the claim is assigned first, while `next_payment_gmt` still holds the
+	 * stored value; `<=>` keeps the comparison NULL-safe.
+	 *
+	 * A hand-built statement skips the per-column length check `$wpdb->update()` makes, and
+	 * WordPress runs without strict SQL modes, so MySQL would silently shorten an over-long
+	 * string. Each string is checked against its column length first and refused like
+	 * {@see self::insert()} refuses it.
+	 *
+	 * @param int                            $id      Contract id.
+	 * @param array<string, int|string|null> $columns Contract column values keyed by column name (from {@see Contract::to_storage()}).
+	 * @return int The number of rows the statement changed.
+	 * @throws \RuntimeException If a value is longer than its column, or the write fails.
 	 */
-	private function update_contract_row( Contract $contract ): void {
+	private function write_contract_row( int $id, array $columns ): int {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $wpdb->update(
-			SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ),
-			array_merge(
-				$contract->to_storage(),
-				array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s' ) )
-			),
-			array( 'id' => (int) $contract->get_id() )
-		);
+		$table                       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$columns['date_updated_gmt'] = gmdate( 'Y-m-d H:i:s' );
+
+		foreach ( $columns as $column => $value ) {
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+		}
+
+		$assignments = array();
+		$values      = array();
+
+		if ( array_key_exists( 'next_payment_gmt', $columns ) ) {
+			$next_payment = $columns['next_payment_gmt'];
+			if ( null === $next_payment ) {
+				$assignments[] = '`claimed_until` = IF( `next_payment_gmt` <=> NULL, `claimed_until`, NULL )';
+			} else {
+				$assignments[] = '`claimed_until` = IF( `next_payment_gmt` <=> %s, `claimed_until`, NULL )';
+				$values[]      = (string) $next_payment;
+			}
+		}
+
+		foreach ( $columns as $column => $value ) {
+			if ( null === $value ) {
+				$assignments[] = "`{$column}` = NULL";
+				continue;
+			}
+			$assignments[] = "`{$column}` = %s";
+			$values[]      = (string) $value;
+		}
+
+		$values[] = $id;
+		$set      = implode( ', ', $assignments );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$updated = $wpdb->query( $wpdb->prepare( "UPDATE `{$table}` SET {$set} WHERE `id` = %d", $values ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
 		if ( false === $updated ) {
 			throw new \RuntimeException( 'Failed to update contract.' );
+		}
+
+		return (int) $updated;
+	}
+
+	/**
+	 * Refuse a string longer than its column, measured the way `$wpdb` measures it
+	 * (characters for CHAR/VARCHAR, bytes for TEXT/BLOB types). A column whose length
+	 * `$wpdb` cannot read (non-MySQL, or a non-string type such as DATETIME) is not checked.
+	 *
+	 * @param string $table  Prefixed table name.
+	 * @param string $column Column name.
+	 * @param string $value  Value about to be written.
+	 * @throws \RuntimeException If the value is longer than the column.
+	 */
+	private static function assert_fits_column( string $table, string $column, string $value ): void {
+		global $wpdb;
+
+		$length = $wpdb->get_col_length( $table, $column );
+		if ( ! is_array( $length ) ) {
+			return;
+		}
+
+		$max  = Coercion::coerce_int( $length['length'] ?? 0 );
+		$size = 'byte' === ( $length['type'] ?? '' ) ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
+		if ( $max > 0 && $size > $max ) {
+			throw new \RuntimeException(
+				esc_html( sprintf( 'Failed to write %s: the value for "%s" is longer than the column allows (%d).', $table, $column, $max ) )
+			);
 		}
 	}
 
 	/**
 	 * Guard against a stale id / concurrent delete before touching any table.
 	 *
-	 * `$wpdb->update()` returns 0 for both "matched, nothing changed" and "no row
-	 * matched", so on its own it cannot tell the parent is gone - and a child reconcile
+	 * The contract row UPDATE reports 0 changed rows for both "matched, nothing changed" and
+	 * "no row matched", so on its own it cannot tell the parent is gone - and a child reconcile
 	 * would then write orphan rows (no FK enforces the relation). This narrows but does
 	 * not fully close the race; the complete fix (a transaction with SELECT ... FOR UPDATE)
 	 * is the seam a later transaction-handling change wraps.

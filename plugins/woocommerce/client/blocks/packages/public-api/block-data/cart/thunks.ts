@@ -24,6 +24,7 @@ import {
 	type DispatchFunction,
 } from '@wordpress/data/build-types/types';
 import { __ } from '@wordpress/i18n';
+import { doAction } from '@wordpress/hooks';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
@@ -49,6 +50,32 @@ interface CartThunkArgs {
 	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
 	registry?: { dispatch: DispatchFunction };
 }
+
+/**
+ * Fires an action once a cart from the server is in the store, so extensions can react to the updated cart.
+ *
+ * @param storeCart         The cart now in the store.
+ * @param previousStoreCart The cart in the store before this update.
+ */
+const triggerCartUpdatedEvent = (
+	storeCart: Cart,
+	previousStoreCart: Cart
+) => {
+	// The editor shows a preview cart, not one from the server.
+	if ( isEditor() ) {
+		return;
+	}
+	try {
+		doAction( 'experimental__woocommerce_blocks-cart-updated', {
+			storeCart,
+			previousStoreCart,
+		} );
+	} catch ( error ) {
+		// A failing callback must not break the cart, so only log it for troubleshooting.
+		// eslint-disable-next-line no-console
+		console.error( error );
+	}
+};
 
 /**
  * A thunk used in updating the store with the cart items retrieved from a request. This also notifies the shopper
@@ -95,6 +122,8 @@ export const receiveCart =
 
 		updateCartErrorNotices( newCart.errors, oldCartErrors );
 		dispatch.setErrorData( null );
+
+		triggerCartUpdatedEvent( newCart, oldCart );
 	};
 
 /**
@@ -325,6 +354,8 @@ export const syncCartWithIAPIStore =
 
 			updateCartErrorNotices( newCart.errors, oldCartErrors );
 			dispatch.setErrorData( null );
+
+			triggerCartUpdatedEvent( newCart, oldCart );
 		} catch ( error ) {
 			// Clear pending states on error as well
 			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
