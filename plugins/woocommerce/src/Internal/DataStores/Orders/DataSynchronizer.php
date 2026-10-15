@@ -591,11 +591,12 @@ $limit_clause",
 
 		$changed_orders_count_sql = $wpdb->prepare(
 			"
-SELECT COUNT(1) FROM $orders_table orders
+SELECT $count_clause FROM $orders_table orders
 JOIN $wpdb->posts posts ON posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholder)
-  AND orders.date_updated_gmt $operator posts.post_modified_gmt",
+  AND orders.date_updated_gmt $operator posts.post_modified_gmt
+$limit_clause",
 			$order_post_types
 		);
 		// phpcs:enable
