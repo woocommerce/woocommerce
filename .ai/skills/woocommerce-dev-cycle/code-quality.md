@@ -81,7 +81,7 @@ This command:
 - Identifies code style and potential issues
 - Does not modify files
 
-**Important:** CI's "Lint - @woocommerce/plugin-woocommerce" job runs `lint:changes:branch`. Its JS half (`bin/eslint-branch.sh`) passes every changed `.js`, `.jsx`, `.ts` and `.tsx` file under `plugins/woocommerce` to ESLint, which lints each file with its nearest `eslint.config.mjs`. A `client/legacy` file gets `client/legacy/eslint.config.mjs` (which sets `max-len` to 140), and a `client/blocks` file gets the blocks config, Prettier included. A sub-package's own lint can pass while this job fails, because it lints fewer files: `pnpm --filter=@woocommerce/classic-assets lint:lang:js` only covers `js/admin/*.js` and `js/frontend/*.js`, and skips subfolders such as `js/frontend/test/`. Before pushing, run the job's command from anywhere in the repository:
+**Important:** CI's "Lint - @woocommerce/plugin-woocommerce" job runs `lint:changes:branch`. Its JS half (`bin/eslint-branch.sh`) passes every changed `.js`, `.jsx`, `.ts` and `.tsx` file under `plugins/woocommerce` to ESLint, which lints each file with its nearest `eslint.config.mjs`. A `client/legacy` file gets `client/legacy/eslint.config.mjs` (which sets `max-len` to 140), and a `client/blocks` file gets the blocks config, Prettier included. A sub-package's own lint can pass while this job fails, because it lints fewer files: `pnpm --filter=@woocommerce/classic-assets lint:lang:js` only covers `js/admin/*.js` and `js/frontend/*.js`, and skips subfolders such as `js/frontend/test/`. Before pushing, run the job's JS half from anywhere in the repository; `lint:changes:branch` runs it together with the PHP half, as the job does:
 
 ```bash
 git fetch origin trunk
