@@ -370,6 +370,26 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving the shown default when a filter adds an undisplayable status to the runtime default deletes the option, so the default filter keeps applying.
+	 */
+	public function test_saving_shown_default_deletes_option_when_runtime_default_is_superset(): void {
+		$callback = function ( $statuses ) {
+			return array_merge( $statuses, array( 'not-a-real-status' ) );
+		};
+		add_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', $callback );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_actionable_order_statuses', $callback );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'processing' ) );
+
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['default'], 'The page should drop the status it cannot display.' );
+
+		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'processing', 'on-hold' ) );
+
+		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'The shown list is a subset of the runtime default, so it must not be stored.' );
+		$this->assertContains( 'not-a-real-status', Settings::get_default_actionable_order_statuses(), 'The runtime default should keep applying the filter.' );
+	}
+
+	/**
 	 * @testdox Saving an order status list that differs from the default stores it.
 	 */
 	public function test_saving_non_default_order_statuses_stores_them(): void {
