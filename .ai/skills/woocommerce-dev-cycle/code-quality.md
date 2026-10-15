@@ -135,11 +135,11 @@ Every command below works from any directory in the repository. For a PR that ta
 
    If the second column (deleted lines) is `0` and every added line is one of the entries step 3 lists, skip to step 4.
 
-2. Otherwise, save pnpm's lockfile, then restore the merge-base one. Run both lines together, in this order: the lockfile pnpm wrote is not committed, and the restore overwrites it.
+2. Otherwise, save pnpm's lockfile, then restore your last committed one. Restoring from `HEAD` keeps the entries of dependencies the branch already committed. Run both lines together, in this order: the lockfile pnpm wrote is not committed, and the restore overwrites it.
 
    ```bash
    cp "$(git rev-parse --show-toplevel)/pnpm-lock.yaml" "${TMPDIR:-/tmp}/pnpm-lock.pnpm-written.yaml"
-   git checkout "$(git merge-base origin/trunk HEAD)" -- :/pnpm-lock.yaml
+   git checkout HEAD -- :/pnpm-lock.yaml
    ```
 
 3. Copy from the saved file into the restored one only the entries your dependency reaches, verbatim and at the position pnpm wrote them (keys are sorted, with a blank line between entries):
@@ -163,7 +163,7 @@ Every command below works from any directory in the repository. For a PR that ta
 
    A missing `packages:` or `snapshots:` entry fails with `ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY`, and an importer entry that disagrees with its `package.json` fails with "specifiers in the lockfile don't match". Extra entries pass, which is why step 3 copies only what your dependency reaches.
 
-5. Re-run the `git diff --numstat` check from step 1. The deleted-lines column must be `0`. For scale: `jquery` came to 8 added lines, `react-select` to 26 (its dependencies were already in the lockfile), and `yup` to 34 (four new transitive packages). Then stage the lockfile and delete the saved copy. The restore in step 2 also staged the merge-base lockfile, and the check above reads the working tree, so without `git add` the commit can leave out the entries you copied:
+5. Re-run the `git diff --numstat` check from step 1. The deleted-lines column must be `0`. For scale: `jquery` came to 8 added lines, `react-select` to 26 (its dependencies were already in the lockfile), and `yup` to 34 (four new transitive packages). Then stage the lockfile and delete the saved copy. The check above reads the working tree, so without `git add` the commit can leave out the entries you copied:
 
    ```bash
    git add -- :/pnpm-lock.yaml
@@ -172,7 +172,9 @@ Every command below works from any directory in the repository. For a PR that ta
 
 A lockfile change makes CI run `syncpack lint` ("Validate dependencies version"). pnpm does not resolve versions published less than 24 hours ago (`minimumReleaseAge` in `pnpm-workspace.yaml`).
 
-If a later trunk merge conflicts in `pnpm-lock.yaml`, take trunk's version (`git checkout origin/trunk -- :/pnpm-lock.yaml`), run `pnpm install`, and continue from the check in step 1.
+If `git diff --numstat "$(git merge-base origin/trunk HEAD)" HEAD -- :/pnpm-lock.yaml` shows deleted lines, an earlier commit on the branch kept pnpm's rewrites. In step 2, restore the merge-base lockfile instead (`git checkout "$(git merge-base origin/trunk HEAD)" -- :/pnpm-lock.yaml`) and copy the entries for every dependency the branch added.
+
+If a later trunk merge conflicts in `pnpm-lock.yaml`, take trunk's version (`git checkout origin/trunk -- :/pnpm-lock.yaml`) and conclude the merge. Then run `pnpm install` and follow steps 1 to 5 for every dependency the branch added, committing the result separately.
 
 Do not run `pnpm dedupe` or delete the lockfile to "clean it up": both rewrite resolutions across the workspace, which is a dependency upgrade, not a cleanup.
 
