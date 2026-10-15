@@ -111,7 +111,8 @@ describe.each( [
 			} );
 
 			expect( sent[ 0 ].body ).toBe(
-				"security=nonce&country=US&city=O'Fallon&address=1+O'Fallon+St+(rear)&company=Foo+(Pty)+Ltd!~&has_full_address=true&shipping_method%5B0%5D=flat_rate%3A1"
+				"security=nonce&country=US&city=O'Fallon&address=1+O'Fallon+St+(rear)" +
+					'&company=Foo+(Pty)+Ltd!~&has_full_address=true&shipping_method%5B0%5D=flat_rate%3A1'
 			);
 		} );
 
