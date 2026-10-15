@@ -1045,7 +1045,7 @@ class WC_Download_Handler {
 	 * @param bool                     $defer           If tracking the download should be deferred.
 	 *
 	 * @return void
-	 * @throws Exception If the loaded Action Scheduler cannot schedule unique actions matched on their args.
+	 * @throws Exception If the loaded Action Scheduler cannot schedule unique actions matched on their args; caught and logged below.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */

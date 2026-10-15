@@ -54,6 +54,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		delete_option( PTKPatternsStore::OPTION_NAME );
 		delete_option( 'woocommerce_allow_tracking' );
 
+		// A test that fails between registering and resetting a proxy mock must not leak it into later tests.
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
 		parent::tearDown();
 	}
 
