@@ -199,10 +199,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 				'product_type_alias' => array(
 					'type'        => 'string',
-					'description' => __(
-						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped; variable maps to variable products.',
-						'woocommerce'
-					),
+					'description' => self::get_product_type_alias_description(),
 					'enum'        => self::get_supported_product_type_aliases(),
 				),
 				'stock_status'       => array(

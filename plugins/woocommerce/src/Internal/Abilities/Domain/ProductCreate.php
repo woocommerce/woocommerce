@@ -88,9 +88,9 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 			return $product_config;
 		}
 
-		$product = ProductType::VARIABLE === $product_config['wc_type']
+		$product = ProductType::VARIABLE === $product_config['product_type']
 			? new VariableProductDraft()
-			: wc_get_product_object( $product_config['wc_type'] );
+			: wc_get_product_object( $product_config['product_type'] );
 
 		if ( ! $product ) {
 			return new \WP_Error(

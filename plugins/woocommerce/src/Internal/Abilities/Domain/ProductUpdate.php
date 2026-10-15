@@ -125,7 +125,7 @@ class ProductUpdate extends AbstractChangeAbility implements AbilityDefinition {
 				return $product_config;
 			}
 
-			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
+			$product = wc_get_product_object( $product_config['product_type'], $product->get_id() );
 
 			if ( ! $product ) {
 				return new \WP_Error(

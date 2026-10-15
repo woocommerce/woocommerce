@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add AbilityProductTypes::register() to the experimental ability extensions feature. An extension registers the product type alias of its own product type, with the Core fields the type accepts, and the product abilities create, update and list products of that type.
