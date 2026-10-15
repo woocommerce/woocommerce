@@ -193,13 +193,8 @@ class FulfillmentsRenderer {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
 			$provider_fulfillment   = reset( $providers );
-			$provider_slug          = $provider_fulfillment->get_shipment_provider();
-			$known_providers        = FulfillmentUtils::get_shipping_providers();
-			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
-			$provider_display_label = isset( $known_providers[ $provider_slug ] )
-				? $known_providers[ $provider_slug ]->get_name()
-				: ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
-			echo '<span>' . esc_html( $provider_display_label ) . '</span>';
+			$provider_display_label = FulfillmentUtils::get_provider_display_name( $provider_fulfillment );
+			echo '<span>' . esc_html( '' !== $provider_display_label ? $provider_display_label : '--' ) . '</span>';
 		} else {
 			echo '<span>--</span>';
 		}
