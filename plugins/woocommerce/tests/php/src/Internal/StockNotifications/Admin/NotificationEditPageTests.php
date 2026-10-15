@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
+use WC_Helper_Product;
 
 /**
  * Tests for the admin notification edit form handler.
@@ -99,7 +100,7 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 	 * @testdox Sending a notification from the edit page marks it sent when the email goes out.
 	 */
 	public function test_send_notification_marks_sent_when_email_is_sent(): void {
-		$this->email_manager->method( 'send_stock_notification_email' )->willReturn( true );
+		$this->email_manager->method( 'deliver_stock_notification' )->willReturn( true );
 		$notification_id = $this->submit_send_notification();
 
 		$notification = new Notification( $notification_id );
@@ -112,7 +113,7 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 	 * @testdox Sending a notification from the edit page leaves it active when the email fails.
 	 */
 	public function test_send_notification_keeps_status_when_email_fails(): void {
-		$this->email_manager->method( 'send_stock_notification_email' )->willReturn( false );
+		$this->email_manager->method( 'deliver_stock_notification' )->willReturn( false );
 		$notification_id = $this->submit_send_notification();
 
 		$notification = new Notification( $notification_id );
@@ -122,12 +123,50 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox "Send now" fires the sent action only when delivery succeeds.
+	 *
+	 * @dataProvider send_now_delivery_provider
+	 *
+	 * @param bool $delivered What the email manager reports back for the delivery.
+	 */
+	public function test_send_notification_fires_sent_action_only_when_delivered( bool $delivered ): void {
+		$this->email_manager->method( 'deliver_stock_notification' )->willReturn( $delivered );
+
+		$sent_action_args = array();
+		add_action(
+			'woocommerce_customer_stock_notification_sent',
+			function ( $notification, $product ) use ( &$sent_action_args ) {
+				$sent_action_args[] = array( $notification->get_id(), $product->get_id() );
+			},
+			10,
+			2
+		);
+
+		$notification_id = $this->submit_send_notification();
+		$product_id      = ( new Notification( $notification_id ) )->get_product_id();
+
+		$this->assertSame( $delivered ? array( array( $notification_id, $product_id ) ) : array(), $sent_action_args );
+	}
+
+	/**
+	 * Data provider for test_send_notification_fires_sent_action_only_when_delivered.
+	 *
+	 * @return array[]
+	 */
+	public function send_now_delivery_provider(): array {
+		return array(
+			'delivered' => array( true ),
+			'failed'    => array( false ),
+		);
+	}
+
+	/**
 	 * Submit the "send_notification" action for a new active sign-up on an in-stock product.
 	 *
 	 * @return int The notification ID.
 	 */
 	private function submit_send_notification(): int {
-		$product = \WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 
 		$notification = new Notification();
 		$notification->set_user_email( 'active@test.com' );
