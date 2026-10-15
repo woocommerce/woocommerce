@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Privacy;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
@@ -96,7 +97,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 * @return array List of name/value pairs.
 	 */
 	private static function get_notification_personal_data( Notification $notification ): array {
-		$product_name = $notification->get_product_name();
+		$product_name = MyAccountEndpoint::get_display_product_name( $notification );
 		$variation    = $notification->get_product_formatted_variation_list( true );
 		if ( '' !== $variation ) {
 			$product_name .= ' ' . $variation;

@@ -185,15 +185,59 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register the exporter alongside the eraser.
+	 */
+	public function test_privacy_exporter_is_registered(): void {
+		$privacy = new PrivacyEraser();
+		$privacy->register_erasers_exporters();
+
+		$exporters = apply_filters( 'wp_privacy_personal_data_exporters', array() );
+
+		$this->assertArrayHasKey( 'woocommerce-customer-stock-notifications', $exporters );
+		$callback = $exporters['woocommerce-customer-stock-notifications']['callback'];
+		$this->assertIsCallable( $callback );
+		$this->assertSame( array( $privacy, 'export_notification_data' ), $callback );
+	}
+
+	/**
+	 * @testdox Should export a variation as its parent title followed by the attributes once.
+	 */
+	public function test_privacy_exporter_formats_variation_name(): void {
+		$product   = \WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( $variation->get_id() );
+		$notification->save();
+
+		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
+		$values   = array_column( $response['data'][0]['data'], 'value', 'name' );
+
+		$this->assertSame( $product->get_name() . ' ' . $notification->get_product_formatted_variation_list( true ), $values['Product'] );
+		$this->assertSame( 1, substr_count( $values['Product'], 'small' ) );
+		$this->assertSame( $variation->get_permalink(), $values['Product URL'] );
+	}
+
+	/**
 	 * @testdox Should export sign-ups ten per page and report done on the last page.
 	 */
 	public function test_privacy_exporter_paginates(): void {
-		for ( $i = 1; $i <= 11; $i++ ) {
+		for ( $i = 1; $i <= 10; $i++ ) {
 			$notification = new Notification();
 			$notification->set_user_email( 'jon@doe.com' );
 			$notification->set_product_id( $i );
 			$notification->save();
 		}
+
+		$full_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 1 );
+		$this->assertCount( 10, $full_page['data'] );
+		$this->assertTrue( $full_page['done'] );
+
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 11 );
+		$notification->save();
 
 		$first_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 1 );
 		$this->assertCount( 10, $first_page['data'] );
