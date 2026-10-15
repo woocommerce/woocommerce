@@ -271,8 +271,13 @@ class PurpleCysPrototype {
 			return $this->delete_purple();
 		}
 
-		if ( ! wp_get_theme( self::RESET_THEME_SLUG )->exists() && current_user_can( 'install_themes' ) ) {
+		if ( ! $this->is_theme_usable( self::RESET_THEME_SLUG ) && current_user_can( 'install_themes' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+			// Remove a broken copy (folder present, style.css missing) so a fresh one can install.
+			if ( wp_get_theme( self::RESET_THEME_SLUG )->exists() ) {
+				delete_theme( self::RESET_THEME_SLUG );
+			}
 
 			$api = themes_api(
 				'theme_information',
@@ -288,7 +293,7 @@ class PurpleCysPrototype {
 			}
 		}
 
-		if ( wp_get_theme( self::RESET_THEME_SLUG )->exists() ) {
+		if ( $this->is_theme_usable( self::RESET_THEME_SLUG ) ) {
 			switch_theme( self::RESET_THEME_SLUG );
 		} elseif ( self::PURPLE_SLUG === get_stylesheet() ) {
 			$fallback = \WP_Theme::get_core_default_theme();
@@ -299,6 +304,17 @@ class PurpleCysPrototype {
 		}
 
 		return $this->delete_purple();
+	}
+
+	/**
+	 * Whether a theme is installed and not broken (for example, a folder left without style.css).
+	 *
+	 * @param string $slug Theme slug.
+	 * @return bool
+	 */
+	private function is_theme_usable( string $slug ): bool {
+		$theme = wp_get_theme( $slug );
+		return $theme->exists() && ! $theme->errors();
 	}
 
 	/**
