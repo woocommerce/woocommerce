@@ -169,7 +169,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 		);
 
 		$response = array(
-			'ucp'      => $this->ucp_metadata(),
+			'ucp'      => $this->ucp_metadata( 'success' ),
 			'products' => $products,
 		);
 

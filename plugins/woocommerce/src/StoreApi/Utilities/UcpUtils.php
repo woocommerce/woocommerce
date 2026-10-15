@@ -44,23 +44,18 @@ class UcpUtils {
 	 * UCP requires `capabilities` to name only the capability relevant to the
 	 * operation being answered, so each response declares exactly one.
 	 *
-	 * @param string      $capability One of the CAPABILITY_* constants.
-	 * @param string|null $status Response status, omitted from the envelope when null.
+	 * @param string $capability One of the CAPABILITY_* constants.
+	 * @param string $status Response status, `success` or `error`.
 	 * @return array
 	 */
-	public static function response_metadata( string $capability, ?string $status = null ): array {
-		$metadata = array(
+	public static function response_metadata( string $capability, string $status ): array {
+		return array(
 			'version'      => self::VERSION,
+			'status'       => $status,
 			'capabilities' => array(
 				$capability => array( self::capability_declaration( $capability ) ),
 			),
 		);
-
-		if ( null !== $status ) {
-			$metadata['status'] = $status;
-		}
-
-		return $metadata;
 	}
 
 	/**

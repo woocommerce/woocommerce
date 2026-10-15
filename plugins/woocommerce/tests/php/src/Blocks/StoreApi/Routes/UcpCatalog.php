@@ -120,6 +120,7 @@ class UcpCatalog extends ControllerTestCase {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( '2026-04-08', $data['ucp']['version'] );
+		$this->assertSame( 'success', $data['ucp']['status'] );
 		// The envelope names only the capability relevant to the operation answered.
 		$this->assertSame( array( 'dev.ucp.shopping.catalog.search' ), array_keys( $data['ucp']['capabilities'] ) );
 		$this->assertArrayHasKey( 'has_next_page', $data['pagination'] );

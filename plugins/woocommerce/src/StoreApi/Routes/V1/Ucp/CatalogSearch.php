@@ -138,7 +138,7 @@ class CatalogSearch extends AbstractCatalogRoute {
 		}
 
 		$response = array(
-			'ucp'        => $this->ucp_metadata(),
+			'ucp'        => $this->ucp_metadata( 'success' ),
 			'products'   => $mapped,
 			'pagination' => $pagination_result,
 		);
