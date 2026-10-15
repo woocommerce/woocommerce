@@ -264,6 +264,46 @@ class UcpCatalog extends ControllerTestCase {
 	}
 
 	/**
+	 * A variant id puts that variation first, takes its options as the selection,
+	 * and overrides a conflicting request selection.
+	 */
+	public function test_product_detail_by_variation_id_leads_with_that_variation(): void {
+		$children = \WC_Helper_Product::create_variation_product()->get_children();
+		// The helper's last variation: size huge, colour blue, number left as "Any".
+		$variation_id = (string) end( $children );
+
+		$data = $this->post(
+			'/catalog/product',
+			array(
+				'id'       => $variation_id,
+				'selected' => array(
+					array(
+						'name'  => 'colour',
+						'label' => 'red',
+					),
+				),
+			)
+		)->get_data();
+
+		$this->assertSame( $variation_id, $data['product']['variants'][0]['id'] );
+		$this->assertSame(
+			array(
+				array(
+					'name'  => 'size',
+					'label' => 'huge',
+				),
+				array(
+					'name'  => 'colour',
+					'label' => 'blue',
+				),
+			),
+			$data['product']['selected']
+		);
+		// The huge/blue variation with number 2 matches the same selection; nothing else does.
+		$this->assertCount( 2, $data['product']['variants'] );
+	}
+
+	/**
 	 * The opaque cursor walks forward through the result set.
 	 */
 	public function test_search_cursor_advances_to_the_next_page(): void {

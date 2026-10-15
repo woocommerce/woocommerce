@@ -222,18 +222,27 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 *
 	 * A selection narrows the variants to those matching every selected option.
 	 * One matching no variation is relaxed from its last option until one does,
-	 * and `selected` reports the options kept, as UCP requires.
+	 * and `selected` reports the options kept, as UCP requires. A request naming
+	 * a variation returns it first, with its own options as the selection.
 	 *
 	 * @param \WC_Product $product WooCommerce product.
 	 * @param array       $selected Selected option values, each `{ name, label, id? }`.
+	 * @param int         $variation_id Variation the request named, or 0 when it named the product.
 	 * @return array
 	 */
-	public function map_detail_product( \WC_Product $product, array $selected = array() ): array {
-		if ( empty( $selected ) || ! $product instanceof \WC_Product_Variable ) {
+	public function map_detail_product( \WC_Product $product, array $selected = array(), int $variation_id = 0 ): array {
+		if ( ! $product instanceof \WC_Product_Variable || ( empty( $selected ) && $variation_id <= 0 ) ) {
 			return $this->map_product( $product );
 		}
 
-		$item     = $this->item( $product );
+		$item = $this->item( $product );
+
+		// UCP: a variant id fully determines the selection state, so the
+		// request's `selected` is ignored rather than merged.
+		if ( $variation_id > 0 ) {
+			$selected = $this->variation_options_by_id( $item )[ $variation_id ] ?? array();
+		}
+
 		$matching = array();
 
 		while ( ! empty( $selected ) ) {
@@ -246,7 +255,8 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			array_pop( $selected );
 		}
 
-		$mapped             = $this->map_item( $product, $item, array(), false, empty( $matching ) ? null : $matching );
+		$required           = $variation_id > 0 ? array( $variation_id ) : array();
+		$mapped             = $this->map_item( $product, $item, $required, false, empty( $matching ) ? null : $matching );
 		$mapped['selected'] = $selected;
 
 		return $mapped;
