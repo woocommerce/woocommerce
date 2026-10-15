@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Keep WooCommerce's scheduled actions working correctly when another plugin loads an older copy of Action Scheduler.
