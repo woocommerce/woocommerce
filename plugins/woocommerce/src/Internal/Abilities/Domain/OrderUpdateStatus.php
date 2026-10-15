@@ -105,7 +105,17 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 			return $status;
 		}
 
-		if ( ! $order->update_status( $status, self::get_note( $input ), true ) ) {
+		try {
+			$updated = $order->update_status( $status, self::get_note( $input ), true );
+		} catch ( \Exception $e ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				$e->getMessage(),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! $updated ) {
 			return new \WP_Error(
 				'woocommerce_order_status_update_failed',
 				__( 'Failed to update order status.', 'woocommerce' ),
@@ -137,6 +147,12 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 		unset( $wp_filter['woocommerce_order_edit_status'] );
 		try {
 			$subject->set_status( $status, self::get_note( $input ), true );
+		} catch ( \Exception $e ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				$e->getMessage(),
+				array( 'status' => 400 )
+			);
 		} finally {
 			if ( null !== $listeners ) {
 				$wp_filter['woocommerce_order_edit_status'] = $listeners; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -164,10 +180,19 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 
 		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
 
-		if ( ! in_array( $status, self::get_allowed_order_status_slugs(), true ) ) {
+		if ( ! in_array( $status, self::get_query_order_status_slugs(), true ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_invalid',
 				__( 'Order status is invalid.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! $order->is_valid_status( $status ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_invalid',
+				/* translators: %s: order status slug. */
+				sprintf( __( 'This order cannot have the "%s" status.', 'woocommerce' ), $status ),
 				array( 'status' => 400 )
 			);
 		}
@@ -255,8 +280,8 @@ class OrderUpdateStatus extends AbstractChangeAbility implements AbilityDefiniti
 				),
 				'status' => array(
 					'type'        => 'string',
-					'description' => __( 'Order status slug without the wc- prefix.', 'woocommerce' ),
-					'enum'        => self::get_allowed_order_status_slugs(),
+					'description' => __( 'Order status slug without the wc- prefix. Custom order types may add their own statuses.', 'woocommerce' ),
+					'enum'        => self::get_query_order_status_slugs(),
 				),
 				'note'   => array(
 					'type'        => 'string',
