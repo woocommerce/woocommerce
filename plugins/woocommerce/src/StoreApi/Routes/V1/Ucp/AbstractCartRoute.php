@@ -57,10 +57,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
-	 * @param string|null $status Response status, omitted from the envelope when null.
+	 * @param string $status Response status, `success` or `error`.
 	 * @return array
 	 */
-	protected function ucp_metadata( ?string $status = null ): array {
+	protected function ucp_metadata( string $status ): array {
 		return UcpUtils::response_metadata( UcpUtils::CAPABILITY_CART, $status );
 	}
 
