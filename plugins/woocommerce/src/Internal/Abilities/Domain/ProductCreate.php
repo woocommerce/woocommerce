@@ -100,13 +100,13 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Set the product properties in memory.
+	 * Set the product properties in memory, then save the product.
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	public static function change( $subject, array $input ) {
+	public static function write( $subject, array $input ) {
 		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] ?? 'physical' );
 
 		if ( is_wp_error( $product_config ) ) {
@@ -116,19 +116,14 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 		try {
 			self::apply_product_type_config( $subject, $product_config );
 
-			return self::set_product_props_from_input( $subject, $input, $product_config );
+			$set = self::set_product_props_from_input( $subject, $input, $product_config );
+			if ( is_wp_error( $set ) ) {
+				return $set;
+			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
-	}
 
-	/**
-	 * Save the product.
-	 *
-	 * @param \WC_Product $subject Changed product.
-	 * @return null|\WP_Error
-	 */
-	public static function save( $subject ) {
 		return self::save_product( $subject, 'woocommerce_product_create_failed' );
 	}
 

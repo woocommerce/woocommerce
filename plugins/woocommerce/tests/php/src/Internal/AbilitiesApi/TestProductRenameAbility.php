@@ -36,14 +36,15 @@ class TestProductRenameAbility extends ActionableAbility {
 	}
 
 	/**
-	 * Rename the product in memory.
+	 * Rename the product and save it.
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
 	 * @return null
 	 */
-	public function change( $subject, array $input ) {
+	public function write( $subject, array $input ) {
 		$subject->set_name( $input['name'] );
+		$subject->save();
 		return null;
 	}
 

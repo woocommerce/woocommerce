@@ -10,9 +10,9 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * A domain ability that changes one object in steps and saves it one time.
- * With ability contracts on, CoreActionableAbility runs the same steps and
- * writes the extension fields before the save.
+ * A domain ability that loads one object and writes a change to it the way
+ * the object offers. With the feature on, CoreActionableAbility runs the same
+ * steps and puts the extension fields on the object before the write.
  */
 abstract class AbstractChangeAbility extends AbstractDomainAbility {
 
@@ -32,21 +32,14 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	abstract public static function load( array $input );
 
 	/**
-	 * Change the object in memory.
+	 * Apply the change and save, with the method the object offers for it. The
+	 * extension fields, when the feature is on, are already on the object.
 	 *
 	 * @param \WC_Data $subject Object to change.
 	 * @param array    $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	abstract public static function change( $subject, array $input );
-
-	/**
-	 * Save the changed object.
-	 *
-	 * @param \WC_Data $subject Changed object.
-	 * @return null|\WP_Error
-	 */
-	abstract public static function save( $subject );
+	abstract public static function write( $subject, array $input );
 
 	/**
 	 * The ability output for the saved object.
@@ -70,14 +63,9 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 			return $subject;
 		}
 
-		$changed = static::change( $subject, $input );
-		if ( is_wp_error( $changed ) ) {
-			return $changed;
-		}
-
-		$saved = static::save( $subject );
-		if ( is_wp_error( $saved ) ) {
-			return $saved;
+		$written = static::write( $subject, $input );
+		if ( is_wp_error( $written ) ) {
+			return $written;
 		}
 
 		return static::prepare_response( $subject );

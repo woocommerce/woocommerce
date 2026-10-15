@@ -734,7 +734,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call WC_Order::update_status() with the feature off, and skip it with the feature on by design.
+	 * @testdox Should call WC_Order::update_status() with the feature off and on, so an order class keeps its own rules.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
 		$calls        = 0;
@@ -779,7 +779,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$calls = $order_class::$calls;
-			$this->assertSame( $enabled ? 0 : 1, $calls, $enabled ? 'feature on' : 'feature off' );
+			$this->assertSame( 1, $calls, $enabled ? 'feature on' : 'feature off' );
 			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
 		}
 
