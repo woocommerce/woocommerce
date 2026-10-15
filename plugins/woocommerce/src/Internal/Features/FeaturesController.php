@@ -946,7 +946,7 @@ class FeaturesController {
 	 * @since 10.5.0
 	 */
 	public function get_feature_definition( string $feature_id ): ?array {
-		return $this->get_feature_definitions()[ $feature_id ] ?? null;
+		return $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 	}
 
 	/**
@@ -959,7 +959,7 @@ class FeaturesController {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public function feature_is_enabled( string $feature_id ): bool {
-		$definition = $this->get_feature_definition( $feature_id );
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 		if ( null === $definition ) {
 			return false;
 		}
