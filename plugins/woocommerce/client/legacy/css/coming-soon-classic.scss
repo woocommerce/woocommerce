@@ -1,5 +1,3 @@
-@import "variables";
-
 .woocommerce-coming-soon-classic-page {
 	margin: 0;
 }
@@ -15,18 +13,10 @@
 
 	&--entire-site {
 		display: flex;
-		font-family: system-ui, sans-serif;
-		line-height: 1.5;
 		flex-direction: column;
 		min-height: 100vh;
 		min-height: 100svh;
 		padding-inline: clamp(24px, 5vw, 80px);
-		color: $gray-900;
-		background: #fff;
-
-		a {
-			color: inherit;
-		}
 	}
 
 	&__header {
@@ -76,13 +66,10 @@
 		h1 {
 			margin-block: 0 24px;
 			font-size: clamp(32px, 5vw, 48px);
-			font-weight: 400;
-			line-height: 1.2;
 		}
 
 		p {
 			margin-block: 0;
-			font-size: 18px;
 		}
 	}
 
@@ -90,7 +77,8 @@
 		padding-inline: 24px;
 	}
 
-	&__login {
+	// Zero specificity, so a theme's button styles win.
+	:where(&__login) {
 		padding-block: 12px;
 		padding-inline: 16px;
 		border: 1px solid currentcolor;
