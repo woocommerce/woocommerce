@@ -101,8 +101,14 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return;
 		}
 
-		// Not replayable, so the key is released: the client's retry has to reprocess
-		// rather than be answered from storage.
+		// A `500` leaves it unknown whether the write landed, so the claim is kept: a retry is
+		// refused until the orphan window frees it, rather than repeating a write that may have.
+		if ( $response->get_status() >= 500 ) {
+			return;
+		}
+
+		// A refused request changed nothing, since the cart is restored on failure, so the
+		// key is released and a corrected retry is processed normally.
 		UcpIdempotencyStore::delete( $key );
 	}
 

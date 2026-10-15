@@ -572,4 +572,27 @@ class UcpIdempotency extends ControllerTestCase {
 		$this->assertNotNull( UcpIdempotencyStore::find( $running ), 'A running claim must survive a shortened retention window.' );
 		$this->assertNull( UcpIdempotencyStore::find( $finished ) );
 	}
+
+	/**
+	 * A server error keeps the claim: it is unknown whether the write landed, so a retry
+	 * must not be allowed to run it again.
+	 */
+	public function test_a_server_error_keeps_the_claim(): void {
+		add_action(
+			'woocommerce_add_to_cart',
+			static function () {
+				throw new \RuntimeException( 'Storage went away mid-write.' );
+			}
+		);
+
+		$key      = wp_generate_uuid4();
+		$response = $this->request( 'POST', '/carts', $this->cart_body( 0 ), $key );
+
+		$this->assertGreaterThanOrEqual( 500, $response->get_status() );
+
+		$record = UcpIdempotencyStore::find( $key );
+
+		$this->assertNotNull( $record );
+		$this->assertSame( UcpIdempotencyStore::STATE_IN_PROGRESS, $record['state'] );
+	}
 }
