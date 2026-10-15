@@ -736,24 +736,42 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'validate_checkout' refuses a shippable order when hidden shipping costs leave the cart without a shipping package.
+	 * @testdox Removed billing fields only bypass the missing shipping address guard when shipping is forced to billing.
+	 *
+	 * @testWith ["billing", true]
+	 *           ["shipping", true]
+	 *           ["billing_only", false]
+	 *
+	 * @param string $destination  Shipping destination setting.
+	 * @param bool   $expect_error Whether the missing address should block checkout.
 	 */
-	public function test_validate_checkout_refuses_order_without_shipping_package_when_costs_need_an_address(): void {
-		$remove_billing_address = static function ( $fields ) {
-			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
-			return $fields;
-		};
-		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+	public function test_checkout_with_removed_billing_fields_respects_shipping_destination( string $destination, bool $expect_error ): void {
+		add_filter(
+			'woocommerce_checkout_fields',
+			static function ( $fields ) {
+				unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+				return $fields;
+			}
+		);
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		update_option( 'woocommerce_ship_to_destination', $destination );
 		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			static function ( $gateways ) {
+				$gateways[ WC_Gateway_COD::ID ] = new WC_Gateway_COD();
+				return $gateways;
+			}
+		);
+		$this->expect_shipping_address_warning( ! $expect_error );
 
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		WC()->customer->set_shipping_location( 'US', 'NY', '10001', "O'Fallon" );
-		WC()->cart->calculate_totals();
-		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The order review should show a shipping rate once the cart calculator address is set.' );
-
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( 0, true );
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', 'New York' );
+		WC()->customer->set_shipping_address_1( '123 Shipping Street' );
 		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
 		$_POST         = array(
 			'billing_first_name' => 'Test',
@@ -762,34 +780,152 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'billing_email'      => 'shopper@example.com',
 			'billing_country'    => 'US',
 			'billing_state'      => 'NY',
-			'payment_method'     => 'cod',
+			'payment_method'     => WC_Gateway_COD::ID,
 		);
 
 		try {
+			WC()->cart->calculate_totals();
+			$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart calculator should initially provide a shipping rate.' );
+			$this->assertEquals( 18, WC()->cart->get_total( 'edit' ) );
+
+			// Order placement is a separate request; calculated packages only survive in the session.
+			WC()->shipping()->packages = array();
+
 			$data = $this->sut->get_posted_data();
 			$this->sut->update_session( $data );
 
 			$errors = new WP_Error();
 			$this->sut->validate_checkout( $data, $errors );
-		} finally {
-			$_POST = $original_post;
-			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-			delete_option( 'woocommerce_shipping_cost_requires_address' );
-			WC_Helper_Shipping::delete_simple_flat_rate();
-		}
 
-		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Placing the order blanks the shipping address, so shipping is no longer calculated.' );
-		$this->assertSame(
-			'Please enter an address to continue.',
-			$errors->get_error_message( 'shipping' ),
-			'Checkout must not accept a shippable order that has no shipping package.'
+			$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Removed billing fields still clear the shipping destination.' );
+			if ( $expect_error ) {
+				$this->assertSame( 'Please enter an address to continue.', $errors->get_error_message( 'shipping' ) );
+				return;
+			}
+
+			$this->assertSame( array(), $errors->get_error_messages(), 'Forced billing should retain its previous checkout behaviour.' );
+			$order_id = $this->sut->create_order( $data );
+			$this->assertIsInt( $order_id );
+			$order = wc_get_order( $order_id );
+			$this->assertSame( '', $order->get_shipping_address_1() );
+			$this->assertSame( '', $order->get_shipping_postcode() );
+			$this->assertCount( 0, $order->get_shipping_methods(), 'The compatibility exception intentionally permits an order without a shipping line.' );
+			$this->assertEquals( 0, $order->get_shipping_total() );
+			$this->assertEquals( 10, $order->get_total() );
+		} finally {
+			$_POST         = $original_post;
+			WC()->customer = $original_customer;
+			WC()->shipping()->unregister_shipping_methods();
+		}
+	}
+
+	/**
+	 * @testdox Forced billing retains normal shipping charges and existing checkout validation.
+	 *
+	 * @testWith [{}, true, "", false]
+	 *           [{"billing_postcode": ""}, true, "billing_postcode_required", true]
+	 *           [{"billing_country": ""}, true, "billing_country_required", false]
+	 *           [{"payment_method": "invalid"}, true, "payment", false]
+	 *           [{}, false, "shipping", false]
+	 *
+	 * @param array  $changes        Overrides for posted checkout data.
+	 * @param bool   $has_rates      Whether a shipping rate is available.
+	 * @param string $expected_error Expected validation error code, or an empty string for success.
+	 * @param bool   $expect_warning Whether the shipping address guard should log its bypass.
+	 */
+	public function test_forced_billing_preserves_other_checkout_validation( array $changes, bool $has_rates, string $expected_error, bool $expect_warning ): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+		if ( ! $has_rates ) {
+			add_filter( 'woocommerce_package_rates', '__return_empty_array' );
+		}
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			static function ( $gateways ) {
+				$gateways[ WC_Gateway_COD::ID ] = new WC_Gateway_COD();
+				return $gateways;
+			}
+		);
+		$this->expect_shipping_address_warning( $expect_warning );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( 0, true );
+		$original_post     = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST             = array_merge(
+			array(
+				'billing_first_name' => 'Test',
+				'billing_last_name'  => 'Shopper',
+				'billing_phone'      => '5555555555',
+				'billing_email'      => 'shopper@example.com',
+				'billing_country'    => 'US',
+				'billing_state'      => 'NY',
+				'billing_city'       => 'New York',
+				'billing_address_1'  => '123 Billing Street',
+				'billing_postcode'   => '10001',
+				'payment_method'     => WC_Gateway_COD::ID,
+			),
+			$changes
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+
+			if ( '' !== $expected_error ) {
+				$this->assertContains( $expected_error, $errors->get_error_codes() );
+				return;
+			}
+
+			$this->assertSame( array(), $errors->get_error_messages() );
+			$order_id = $this->sut->create_order( $data );
+			$this->assertIsInt( $order_id );
+			$order = wc_get_order( $order_id );
+			$this->assertSame( '123 Billing Street', $order->get_shipping_address_1() );
+			$this->assertSame( '10001', $order->get_shipping_postcode() );
+			$this->assertCount( 1, $order->get_shipping_methods() );
+			$this->assertEquals( 8, $order->get_shipping_total() );
+			$this->assertEquals( 18, $order->get_total() );
+		} finally {
+			$_POST         = $original_post;
+			WC()->customer = $original_customer;
+			WC()->shipping()->unregister_shipping_methods();
+		}
+	}
+
+	/**
+	 * Expect a diagnostic when the missing shipping address guard is bypassed.
+	 *
+	 * @param bool $expected Whether a warning should be logged.
+	 */
+	private function expect_shipping_address_warning( bool $expected ): void {
+		$logger = $this->createMock( WC_Logger_Interface::class );
+		$logger->expects( $expected ? $this->once() : $this->never() )
+			->method( 'warning' )
+			->with( $this->stringContains( 'Shipping charges may be omitted.' ), array( 'source' => 'checkout' ) );
+		add_filter(
+			'woocommerce_logging_class',
+			static function () use ( $logger ) {
+				return $logger;
+			}
 		);
 	}
 
 	/**
 	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
+	 *
+	 * @testWith ["billing"]
+	 *           ["billing_only"]
+	 *
+	 * @param string $destination Shipping destination setting.
 	 */
-	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {
+	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter( string $destination ): void {
+		update_option( 'woocommerce_ship_to_destination', $destination );
+		$this->expect_shipping_address_warning( false );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 		add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
 		WC_Helper_Shipping::create_simple_flat_rate( 8 );
