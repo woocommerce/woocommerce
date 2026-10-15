@@ -255,10 +255,11 @@ final class ContractRepository {
 
 		$internal_lock = $this->acquire_lock( $id, self::INTERNAL_LOCK_OPERATION );
 		if ( null === $internal_lock ) {
-			if ( ! $this->exists( $id ) ) {
+			$holder = $this->lock_holder( $id );
+			if ( ! $holder['exists'] ) {
 				return false;
 			}
-			$this->throw_locked( $id );
+			throw self::locked_exception( $id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
 
 		try {
@@ -285,10 +286,11 @@ final class ContractRepository {
 
 		// Every row write bumps `write_seq`, so zero rows means the fence refused the write or the row is gone.
 		if ( 0 === $updated ) {
-			if ( ! $this->lock_holder( $id )['exists'] ) {
+			$holder = $this->lock_holder( $id );
+			if ( ! $holder['exists'] ) {
 				return false;
 			}
-			$this->throw_locked( $id );
+			throw self::locked_exception( $id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
 
 		if ( null === $lock ) {
@@ -1020,10 +1022,19 @@ final class ContractRepository {
 	 * @throws ContractLockedException Always.
 	 */
 	private function throw_locked( int $contract_id ): void {
-		$holder       = $this->lock_holder( $contract_id );
+		throw self::locked_exception( $contract_id, $this->lock_holder( $contract_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+	}
+
+	/**
+	 * A conflict carrying the holder already read.
+	 *
+	 * @param int                                                            $contract_id Contract id.
+	 * @param array{exists: bool, operation: ?string, locked_until: ?string} $holder      The lock holder read.
+	 */
+	private static function locked_exception( int $contract_id, array $holder ): ContractLockedException {
 		$locked_until = null === $holder['locked_until'] ? null : new DateTimeImmutable( $holder['locked_until'], new DateTimeZone( 'UTC' ) );
 
-		throw new ContractLockedException( $contract_id, $holder['operation'], $locked_until ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		return new ContractLockedException( $contract_id, $holder['operation'], $locked_until );
 	}
 
 	/**
@@ -1368,9 +1379,9 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Update a contract's meta rows for `$key`, like `update_post_meta()`: adds a row when
-	 * the key is absent (one insert that checks the absence itself), else rewrites every row for
-	 * the key, or only the rows holding `$prev_value`.
+	 * Update a contract's meta rows for `$key`, like `update_post_meta()`: rewrites every row
+	 * for the key, or only the rows holding `$prev_value`. Only when that changes no row does it
+	 * add the key if absent (one insert that checks the absence itself), then classify the no-op.
 	 *
 	 * @param int               $contract_id Contract id.
 	 * @param string            $key         Meta key.
@@ -1384,20 +1395,49 @@ final class ContractRepository {
 	 * @throws \RuntimeException If a write fails.
 	 */
 	public function update_meta( int $contract_id, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
-		global $wpdb;
-
 		if ( '' === $key ) {
 			throw new \InvalidArgumentException( 'Contract meta key must not be empty.' );
 		}
 
 		$this->fence_meta( $contract_id, $lock );
 
+		if ( $this->update_meta_rows( $contract_id, $key, $value, $prev_value, $lock ) > 0 ) {
+			return true;
+		}
 		if ( null !== $this->insert_meta_row( $contract_id, $key, $value, true, $lock ) ) {
 			return true;
 		}
 		if ( ! $this->meta_key_exists( $contract_id, $key ) ) {
 			$this->throw_unguarded_insert( $contract_id );
 		}
+		if ( null !== $lock ) {
+			return false;
+		}
+
+		// Unlocked, the key may have been added between the update and the insert: update it once more.
+		if ( $this->update_meta_rows( $contract_id, $key, $value, $prev_value, null ) > 0 ) {
+			return true;
+		}
+		$this->throw_if_meta_refused( $contract_id, $key, null === $prev_value ? null : maybe_serialize( $prev_value ), maybe_serialize( $value ) );
+
+		return false;
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Rewrite the meta rows for `$key` (only those holding `$prev_value`, when given). Without
+	 * `$lock` the UPDATE joins the contract row and lands only while no lock lives.
+	 *
+	 * @param int               $contract_id Contract id.
+	 * @param string            $key         Meta key.
+	 * @param mixed             $value       New value; serialized when not scalar.
+	 * @param mixed             $prev_value  Only update rows holding this value; null updates all rows for the key.
+	 * @param ContractLock|null $lock        The caller's (fenced) lock, or null.
+	 * @return int The number of rows changed.
+	 * @throws \RuntimeException If the write fails.
+	 */
+	private function update_meta_rows( int $contract_id, string $key, $value, $prev_value, ?ContractLock $lock ): int {
+		global $wpdb;
 
 		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -1423,14 +1463,8 @@ final class ContractRepository {
 			throw new \RuntimeException( sprintf( 'Failed to update contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		// Unlocked and nothing changed: refused when a matching row still holds another value.
-		if ( 0 === $updated && null === $lock ) {
-			$this->throw_if_meta_refused( $contract_id, $key, null === $prev_value ? null : maybe_serialize( $prev_value ), maybe_serialize( $value ) );
-		}
-
-		return $updated > 0;
+		return (int) $updated;
 	}
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
@@ -1540,8 +1574,13 @@ final class ContractRepository {
 			throw new \RuntimeException( sprintf( 'Failed to read contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 
-		if ( Coercion::coerce_int( $pending ) > 0 && $this->lock_holder( $contract_id )['exists'] ) {
-			$this->throw_locked( $contract_id );
+		if ( Coercion::coerce_int( $pending ) < 1 ) {
+			return;
+		}
+
+		$holder = $this->lock_holder( $contract_id );
+		if ( $holder['exists'] ) {
+			throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 		}
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
@@ -1981,10 +2020,11 @@ final class ContractRepository {
 	 * @throws ContractLockedException Otherwise: the fence refused the insert (holder details best-effort).
 	 */
 	private function throw_unguarded_insert( int $contract_id ): void {
-		if ( ! $this->lock_holder( $contract_id )['exists'] ) {
+		$holder = $this->lock_holder( $contract_id );
+		if ( ! $holder['exists'] ) {
 			throw new \InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
 		}
-		$this->throw_locked( $contract_id );
+		throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 

@@ -1433,6 +1433,31 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox An unlocked items update refused by a live lock reads the holder once to report it.
+	 */
+	public function test_a_refused_internal_lock_reads_the_holder_once(): void {
+		global $wpdb;
+
+		$id = $this->contract_with_currency();
+		$this->take_lock( $id, 'renewal' );
+
+		$queries = $wpdb->num_queries;
+		try {
+			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			$this->fail( 'Expected a conflict.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'renewal', $e->get_operation() );
+		}
+
+		$update_queries = $wpdb->num_queries - $queries;
+
+		// The facade's find() costs what get() costs; the rest is one lock attempt and one holder read.
+		$queries = $wpdb->num_queries;
+		Contracts::get( $id );
+		$this->assertSame( $wpdb->num_queries - $queries + 2, $update_queries );
+	}
+
+	/**
 	 * @testdox Every write method refuses a lock for another contract.
 	 */
 	public function test_every_write_refuses_another_contracts_lock(): void {

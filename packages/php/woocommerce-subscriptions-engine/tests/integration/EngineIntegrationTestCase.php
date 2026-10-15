@@ -105,15 +105,18 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Make the next statement starting with `$prefix` match no row, as if its fence refused it,
-	 * while no lock is live by the time the write is classified.
+	 * Make the next `$times` statements starting with `$prefix` match no row, as if their fence
+	 * refused them, while no lock is live by the time the write is classified.
 	 *
 	 * @param string $prefix Start of the statement to refuse.
+	 * @param int    $times  How many matching statements to refuse.
 	 */
-	protected function refuse_next_write( string $prefix ): void {
-		$refuse = static function ( $query ) use ( $prefix, &$refuse ) {
+	protected function refuse_next_write( string $prefix, int $times = 1 ): void {
+		$refuse = static function ( $query ) use ( $prefix, &$times, &$refuse ) {
 			if ( is_string( $query ) && 0 === strpos( ltrim( $query ), $prefix ) ) {
-				remove_filter( 'query', $refuse );
+				if ( --$times < 1 ) {
+					remove_filter( 'query', $refuse );
+				}
 				return $query . ' AND 0 = 1';
 			}
 			return $query;

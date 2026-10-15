@@ -174,6 +174,27 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 		$this->assertFalse( $this->sut->update_meta( $this->id, 'note', 'four', 'missing' ) );
 	}
 
+	/**
+	 * @testdox update_meta() on an existing key is one UPDATE, with or without the lock.
+	 */
+	public function test_update_meta_on_an_existing_key_is_one_statement(): void {
+		global $wpdb;
+
+		$this->sut->add_meta( $this->id, 'note', 'one' );
+
+		$queries = $wpdb->num_queries;
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'two' ) );
+		$this->assertSame( 1, $wpdb->num_queries - $queries, 'Unlocked.' );
+
+		$lock    = $this->lock();
+		$queries = $wpdb->num_queries;
+		$this->assertTrue( $this->sut->update_meta( $this->id, 'note', 'three', null, $lock ) );
+		$this->assertSame( 1, $wpdb->num_queries - $queries, 'With a trusted lock.' );
+		$lock->release();
+
+		$this->assertSame( array( 'three' ), $this->sut->get_meta( $this->id, 'note' ) );
+	}
+
 	public function test_update_meta_to_the_same_value_reports_no_change(): void {
 		$this->sut->add_meta( $this->id, 'note', 'one' );
 

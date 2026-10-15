@@ -405,7 +405,8 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->assertFalse( $this->sut->update_meta( $id, '_anchor', 'a' ), 'The stored value: nothing to change.' );
 
-		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) . ' m' );
+		// The update runs again after its insert finds the key, so both attempts are refused.
+		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) . ' m', 2 );
 		try {
 			$this->sut->update_meta( $id, '_anchor', 'b' );
 			$this->fail( 'Expected the refused update to throw.' );
