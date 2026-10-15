@@ -58,10 +58,10 @@ final class SchemaInstaller {
 	 *         dbDelta adds the column and widens `schedule_source` in place, but does not
 	 *         drop the index or rename stored 'primitive' rows (which the due scan skips):
 	 *         pre-freeze, recreate the tables.
-	 * 2.8.0 - contract lock: contracts gain `lock_token`, `locked_until`, `lock_operation`
-	 *         and a `creation_key` with a `creation (extension_slug, creation_key)` UNIQUE
-	 *         index; contracts and cycles drop `claimed_until`. Pre-freeze, recreate the
-	 *         tables.
+	 * 2.8.0 - contract lock: contracts gain `lock_token`, `locked_until`, `lock_operation`,
+	 *         a `write_seq` counter bumped by every row write, and a `creation_key` with a
+	 *         `creation (extension_slug, creation_key)` UNIQUE index; contracts and cycles
+	 *         drop `claimed_until`. Pre-freeze, recreate the tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
@@ -262,7 +262,8 @@ final class SchemaInstaller {
 		// who keeps the payment schedule: the engine ('subscriptions_engine', the only
 		// source the due scan dispatches) or a gateway or extension that keeps its own.
 		// `lock_token` / `locked_until` / `lock_operation` hold the per-contract lock (live
-		// while `locked_until` is ahead of the DB clock). `creation` makes an extension's
+		// while `locked_until` is ahead of the DB clock). `write_seq` is bumped by every row
+		// write, so a write that matches the row always changes it (zero rows = not matched). `creation` makes an extension's
 		// optional `creation_key` unique (NULL keys never collide); 64 + 100 characters
 		// stay within the 767-byte key limit of older InnoDB row formats.
 		$contracts_sql = "CREATE TABLE {$contracts} (
@@ -281,6 +282,7 @@ final class SchemaInstaller {
   lock_token CHAR(32) NULL,
   locked_until DATETIME NULL,
   lock_operation VARCHAR(64) NULL,
+  write_seq BIGINT UNSIGNED NOT NULL DEFAULT 0,
   creation_key VARCHAR(100) NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,

@@ -891,7 +891,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update_fields writing identical values (no changed rows) does not throw.
+	 * @testdox update_fields writing identical values in the same second still changes the row (write_seq) and returns true.
 	 */
 	public function test_update_fields_with_identical_values_does_not_throw(): void {
 		global $wpdb;
@@ -900,14 +900,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 
-		// A write in a new second changes date_updated_gmt; repeat until one changes no rows.
-		$zero_rows = false;
-		for ( $i = 0; $i < 3 && ! $zero_rows; $i++ ) {
+		for ( $i = 0; $i < 2; $i++ ) {
 			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) ) );
-			$zero_rows = 0 === $wpdb->rows_affected;
+			$this->assertSame( 1, $wpdb->rows_affected, 'A matched row always counts as changed.' );
 		}
 
-		$this->assertTrue( $zero_rows, 'A write changed no rows.' );
 		$stored = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
@@ -2005,7 +2002,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An identical same-second write with the lock is a no-op that returns true.
+	 * @testdox An identical same-second write with the lock still matches and returns true.
 	 */
 	public function test_an_identical_locked_write_is_a_no_op(): void {
 		global $wpdb;
@@ -2014,12 +2011,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock     = $this->lock( $id );
 		$contract = $this->with_status( $id, ContractStatus::ACTIVE );
 
-		$zero_rows = false;
-		for ( $i = 0; $i < 3 && ! $zero_rows; $i++ ) {
+		for ( $i = 0; $i < 2; $i++ ) {
 			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
-			$zero_rows = 0 === $wpdb->rows_affected;
+			$this->assertSame( 1, $wpdb->rows_affected );
 		}
-		$this->assertTrue( $zero_rows, 'A write changed no rows.' );
 	}
 
 	/**

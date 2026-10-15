@@ -81,6 +81,23 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Make the next statement starting with `$prefix` match no row, as if its fence refused it,
+	 * while no lock is live by the time the write is classified.
+	 *
+	 * @param string $prefix Start of the statement to refuse.
+	 */
+	protected function refuse_next_write( string $prefix ): void {
+		$refuse = static function ( $query ) use ( $prefix, &$refuse ) {
+			if ( is_string( $query ) && 0 === strpos( ltrim( $query ), $prefix ) ) {
+				remove_filter( 'query', $refuse );
+				return $query . ' AND 0 = 1';
+			}
+			return $query;
+		};
+		add_filter( 'query', $refuse );
+	}
+
+	/**
 	 * Create a plan through the plan facade: a monthly billing payload owned by
 	 * {@see self::PLAN_OWNER} unless overridden.
 	 *

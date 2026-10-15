@@ -296,14 +296,14 @@ final class Contracts {
 	 * `from_status`, exactly one gets true. `$args`: `from_status` (required, the status the
 	 * caller read), `to_status` (required, a registered cycle status), and `order_id` (?int) and
 	 * `reason` (?string), written when present (null clears). Unknown keys raise a
-	 * `_doing_it_wrong()` notice and are ignored. A same-status call returns true whenever the
-	 * cycle still carries the status.
+	 * `_doing_it_wrong()` notice and are ignored. A same-status call returns true once the cycle
+	 * carries the status and the values.
 	 *
 	 * @param int                  $cycle_id Cycle id.
 	 * @param array<string, mixed> $args     `from_status`, `to_status`, optional `order_id` and `reason`.
 	 * @param ContractLock|null    $lock     The caller's lock on the cycle's contract, or null.
 	 * @return bool True when this call made the transition, or for a same-status call when the
-	 *              cycle carries the status.
+	 *              cycle carries the status and the values.
 	 * @throws InvalidArgumentException If a status is missing or unregistered, a value is invalid,
 	 *                                  the cycle does not exist, or it belongs to another contract than the lock.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.

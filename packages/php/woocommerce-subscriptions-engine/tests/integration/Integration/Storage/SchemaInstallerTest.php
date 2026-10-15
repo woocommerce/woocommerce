@@ -340,6 +340,25 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox Contracts carry a write_seq counter that starts at 0.
+	 */
+	public function test_contracts_write_seq_column(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'write_seq' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.write_seq column.' );
+		$this->assertSame( 'NO', $row['Null'] ?? null );
+		$this->assertSame( '0', $row['Default'] ?? null );
+		$type = $row['Type'] ?? null;
+		$this->assertIsString( $type );
+		$this->assertMatchesRegularExpression( '/^bigint(\(\d+\))? unsigned$/', $type );
+	}
+
+	/**
 	 * @testdox The creation index makes (extension_slug, creation_key) unique.
 	 */
 	public function test_contracts_creation_index_is_unique(): void {

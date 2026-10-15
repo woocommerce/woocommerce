@@ -18,6 +18,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -384,6 +386,89 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		}
 
 		$this->assertSame( array(), $this->sut->get_meta( $id, '_forged' ) );
+	}
+
+	/**
+	 * @testdox An unlocked row write refused by the fence throws even when the lock is gone by the re-read.
+	 */
+	public function test_a_refused_unlocked_update_throws(): void {
+		$id       = $this->insert_contract();
+		$contract = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+		$contract->set_status( ContractStatus::ON_HOLD );
+
+		$this->refuse_next_write( 'UPDATE `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ) . '` SET' );
+
+		$this->expectException( ContractLockedException::class );
+		$this->sut->update_fields( $contract, array( 'status' ) );
+	}
+
+	/**
+	 * @testdox An unlocked meta update refused by the fence throws; an update to the stored value is a no-op.
+	 */
+	public function test_a_refused_unlocked_update_meta_throws(): void {
+		$id = $this->insert_contract();
+		$this->sut->add_meta( $id, '_anchor', 'a' );
+
+		$this->assertFalse( $this->sut->update_meta( $id, '_anchor', 'a' ), 'The stored value: nothing to change.' );
+
+		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) . ' m' );
+		try {
+			$this->sut->update_meta( $id, '_anchor', 'b' );
+			$this->fail( 'Expected the refused update to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertNull( $e->get_operation() );
+		}
+
+		$this->assertSame( array( 'a' ), $this->sut->get_meta( $id, '_anchor' ) );
+	}
+
+	/**
+	 * @testdox An unlocked meta delete refused by the fence throws; deleting an absent key is a no-op.
+	 */
+	public function test_a_refused_unlocked_delete_meta_throws(): void {
+		$id = $this->insert_contract();
+		$this->sut->add_meta( $id, '_anchor', 'a' );
+
+		$this->assertFalse( $this->sut->delete_meta( $id, '_absent' ) );
+		$this->assertFalse( $this->sut->delete_meta( $id, '_anchor', 'other' ) );
+
+		$this->refuse_next_write( 'DELETE m FROM ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) );
+
+		$this->expectException( ContractLockedException::class );
+		$this->sut->delete_meta( $id, '_anchor' );
+	}
+
+	/**
+	 * @testdox An unlocked cycle transition refused by the fence throws; a lost compare-and-set returns false.
+	 */
+	public function test_a_refused_unlocked_transition_throws(): void {
+		$id    = $this->insert_contract();
+		$cycle = Cycle::create(
+			array(
+				'contract_id'   => $id,
+				'starts_at_gmt' => '2026-07-15 00:00:00',
+				'ends_at_gmt'   => '2026-08-15 00:00:00',
+				'currency'      => 'USD',
+			)
+		);
+		$this->sut->append_cycle( $cycle );
+		$cycle_id = (int) $cycle->get_id();
+
+		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 5 ) ) );
+		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array() ), 'A lost compare-and-set.' );
+
+		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ) . ' cy' );
+		try {
+			$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array() );
+			$this->fail( 'Expected the refused transition to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( $id, $e->get_contract_id() );
+		}
+
+		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ) . ' cy' );
+		$this->expectException( ContractLockedException::class );
+		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 6 ) );
 	}
 
 	/**
