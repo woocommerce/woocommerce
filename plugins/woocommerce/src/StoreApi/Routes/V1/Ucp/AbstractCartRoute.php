@@ -48,13 +48,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	private $transformer;
 
 	/**
-	 * The route's cart id once validated. Null until first resolved.
-	 *
-	 * @var string|null
-	 */
-	private $validated_cart_id;
-
-	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
@@ -162,7 +155,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * The route's cart id once its signature checks out, or '' when it does not.
+	 * The request's cart id when its signature checks out, or '' when it does not.
+	 *
+	 * Read from the request every time: the route instance outlives a request, so a
+	 * cached id would bind the next dispatch in the same process to this cart.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -171,12 +167,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return string
 	 */
 	protected function validated_cart_id( \WP_REST_Request $request ): string {
-		if ( null === $this->validated_cart_id ) {
-			$cart_id                 = $this->route_cart_id( $request );
-			$this->validated_cart_id = CartTokenUtils::validate_cart_token( $cart_id ) ? $cart_id : '';
-		}
+		$cart_id = $this->route_cart_id( $request );
 
-		return $this->validated_cart_id;
+		return CartTokenUtils::validate_cart_token( $cart_id ) ? $cart_id : '';
 	}
 
 	/**
