@@ -61,7 +61,7 @@ export default function Update( props: UpdateProps ) {
 		recordEvent( 'marketplace_product_update_failed', {
 			product_zip_slug: props.subscription.zip_slug,
 			product_id: props.subscription.product_id,
-			product_installed_version: props.subscription.local.installed,
+			product_installed_version: props.subscription.local.version,
 			product_current_version: props.subscription.version,
 			error_code: getWpAjaxErrorData( error ).code || '',
 		} );
@@ -71,7 +71,7 @@ export default function Update( props: UpdateProps ) {
 		recordEvent( 'marketplace_product_update_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
 			product_id: props.subscription.product_id,
-			product_installed_version: props.subscription.local.installed,
+			product_installed_version: props.subscription.local.version,
 			product_current_version: props.subscription.version,
 		} );
 
@@ -137,8 +137,7 @@ export default function Update( props: UpdateProps ) {
 				recordEvent( 'marketplace_product_updated', {
 					product_zip_slug: props.subscription.zip_slug,
 					product_id: props.subscription.product_id,
-					product_installed_version:
-						props.subscription.local.installed,
+					product_installed_version: props.subscription.local.version,
 					product_current_version: props.subscription.version,
 				} );
 			} )
