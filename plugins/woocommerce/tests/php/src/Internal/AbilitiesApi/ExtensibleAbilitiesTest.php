@@ -949,6 +949,56 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept extension fields in an extension ability whose input schema uses anyOf or allOf branches that refuse other properties.
+	 */
+	public function test_combinator_branches_accept_the_extensions_key(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$branch  = array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'   => array( 'type' => 'integer' ),
+				'name' => array( 'type' => 'string' ),
+			),
+			'additionalProperties' => false,
+		);
+		foreach ( array( 'anyOf', 'allOf' ) as $keyword ) {
+			$name     = 'test-ext/product-rename-' . strtolower( $keyword );
+			$register = static function () use ( $name, $keyword, $branch ) {
+				wp_register_ability(
+					$name,
+					array(
+						'label'               => 'Rename product',
+						'description'         => 'Renames a product.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'   => 'object',
+							$keyword => array( $branch ),
+						),
+						'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
+						'permission_callback' => '__return_true',
+						'ability_class'       => TestProductRenameAbility::class,
+						'meta'                => array( 'show_in_rest' => true ),
+					)
+				);
+			};
+			add_action( 'wp_abilities_api_init', $register, 20 );
+			$this->reset_registries();
+
+			$output = $this->run_ability(
+				$name,
+				array(
+					'id'         => $product->get_id(),
+					'name'       => 'Pencil',
+					'extensions' => array( 'test-ext' => array( 'color' => $keyword ) ),
+				)
+			);
+
+			remove_action( 'wp_abilities_api_init', $register, 20 );
+			$this->assertSame( array( 'color' => $keyword ), $output['extensions']['test-ext'], $keyword );
+		}
+	}
+
+	/**
 	 * @testdox Should list the writable fields one time at the top level of the product input schemas.
 	 */
 	public function test_input_schemas_list_writable_fields_one_time(): void {

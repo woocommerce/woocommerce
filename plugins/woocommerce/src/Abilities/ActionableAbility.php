@@ -229,8 +229,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Add the `extensions` property one time, at the top level of the input
 	 * schema. It lists the fields that have an update_callback, and allows null
-	 * for each one. Each `oneOf` branch only accepts the key, so the schema
-	 * does not grow with the number of branches.
+	 * for each one. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
+	 * key, so a branch with `additionalProperties` set to false does not reject
+	 * it, and the schema does not grow with the number of branches.
 	 *
 	 * @param array<string, mixed> $schema Input schema.
 	 * @return array<string, mixed>
@@ -271,11 +272,13 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$schema['properties']['extensions'] = $extensions;
-		foreach ( array_keys( $schema['oneOf'] ?? array() ) as $index ) {
-			$schema['oneOf'][ $index ]['properties']['extensions'] = array(
-				'type'        => 'object',
-				'description' => __( 'The fields are listed in the top-level extensions property.', 'woocommerce' ),
-			);
+		foreach ( array( 'oneOf', 'anyOf', 'allOf' ) as $keyword ) {
+			foreach ( array_keys( $schema[ $keyword ] ?? array() ) as $index ) {
+				$schema[ $keyword ][ $index ]['properties']['extensions'] = array(
+					'type'        => 'object',
+					'description' => __( 'The fields are listed in the top-level extensions property.', 'woocommerce' ),
+				);
+			}
 		}
 		return $schema;
 	}
