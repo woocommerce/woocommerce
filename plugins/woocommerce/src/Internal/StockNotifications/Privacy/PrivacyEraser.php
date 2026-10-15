@@ -61,29 +61,42 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 * @return array Response containing the exported data and whether the export is done.
 	 */
 	public static function export_notification_data( $email_address, $page = 1 ): array {
-		$notification_ids = self::get_notification_ids( is_string( $email_address ) ? $email_address : '' );
-		$page             = max( 1, (int) $page );
-		$page_ids         = array_slice( $notification_ids, ( $page - 1 ) * self::EXPORT_PAGE_SIZE, self::EXPORT_PAGE_SIZE );
-		$data_to_export   = array();
+		$customer       = self::get_customer( is_string( $email_address ) ? $email_address : '' );
+		$page           = max( 1, (int) $page );
+		$data_to_export = array();
+		$done           = true;
 
-		foreach ( $page_ids as $notification_id ) {
-			$notification = Factory::get_notification( $notification_id );
-			if ( ! $notification instanceof Notification ) {
-				continue;
+		if ( ! empty( $customer ) ) {
+			$notification_ids = NotificationQuery::get_notifications(
+				array(
+					'customer' => $customer,
+					'limit'    => self::EXPORT_PAGE_SIZE,
+					'offset'   => ( $page - 1 ) * self::EXPORT_PAGE_SIZE,
+				)
+			);
+
+			foreach ( $notification_ids as $notification_id ) {
+				$notification = Factory::get_notification( (int) $notification_id );
+				if ( ! $notification instanceof Notification ) {
+					continue;
+				}
+
+				$data_to_export[] = array(
+					'group_id'          => 'woocommerce_stock_notifications',
+					'group_label'       => __( 'Stock Notifications', 'woocommerce' ),
+					'group_description' => __( 'User&#8217;s WooCommerce back-in-stock notification sign-ups.', 'woocommerce' ),
+					'item_id'           => 'stock-notification-' . $notification->get_id(),
+					'data'              => self::get_notification_personal_data( $notification ),
+				);
 			}
 
-			$data_to_export[] = array(
-				'group_id'          => 'woocommerce_stock_notifications',
-				'group_label'       => __( 'Stock Notifications', 'woocommerce' ),
-				'group_description' => __( 'User&#8217;s WooCommerce back-in-stock notification sign-ups.', 'woocommerce' ),
-				'item_id'           => 'stock-notification-' . $notification->get_id(),
-				'data'              => self::get_notification_personal_data( $notification ),
-			);
+			$done = count( $notification_ids ) < self::EXPORT_PAGE_SIZE
+				|| NotificationQuery::count_notifications( array( 'customer' => $customer ) ) <= $page * self::EXPORT_PAGE_SIZE;
 		}
 
 		return array(
 			'data' => $data_to_export,
-			'done' => count( $notification_ids ) <= $page * self::EXPORT_PAGE_SIZE,
+			'done' => $done,
 		);
 	}
 
@@ -147,49 +160,31 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Get the IDs of every sign-up belonging to an email address or the account it belongs to.
+	 * Get the `customer` query values matching every sign-up of an email address and the account it belongs to.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $email_address The email address, in the letter case the request was made with.
 	 *
-	 * @return array<int> Sign-up IDs in ascending order.
+	 * @return array<int|string> The normalized email, plus the user ID when the email belongs to an account. Empty for an invalid email.
 	 */
-	private static function get_notification_ids( string $email_address ): array {
-		// The query drops the email clause for an empty value and would match every sign-up.
+	private static function get_customer( string $email_address ): array {
 		$normalized_email = EmailNormalizer::normalize( $email_address );
 		if ( '' === $normalized_email || ! is_email( $normalized_email ) ) {
 			return array();
 		}
 
+		$customer = array( $normalized_email );
+
 		// Look up the account with the letter case as entered: `wp_users.user_email` is never
 		// normalized, so on a case-sensitive collation the lowercased form would miss it.
-		$user = get_user_by( 'email', $email_address );
-
-		$notifications = NotificationQuery::get_notifications(
-			array(
-				'user_email' => $normalized_email,
-			)
-		);
-
 		// Sign-ups made before an account email change keep the old email, so also match by user ID.
+		$user = get_user_by( 'email', $email_address );
 		if ( $user instanceof \WP_User ) {
-			$notifications = array_unique(
-				array_merge(
-					$notifications,
-					NotificationQuery::get_notifications(
-						array(
-							'user_id' => $user->ID,
-						)
-					)
-				)
-			);
+			$customer[] = (int) $user->ID;
 		}
 
-		$notifications = array_map( 'intval', $notifications );
-		sort( $notifications );
-
-		return $notifications;
+		return $customer;
 	}
 
 	/**
@@ -209,11 +204,12 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			'done'           => true,
 		);
 
-		$notifications = self::get_notification_ids( $email_address );
+		$customer      = self::get_customer( $email_address );
 		$email_address = EmailNormalizer::normalize( $email_address );
+		$notifications = empty( $customer ) ? array() : NotificationQuery::get_notifications( array( 'customer' => $customer ) );
 
 		foreach ( $notifications as $notification_id ) {
-			$notification = Factory::get_notification( $notification_id );
+			$notification = Factory::get_notification( (int) $notification_id );
 			if ( ! $notification instanceof Notification ) {
 				continue;
 			}

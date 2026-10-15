@@ -467,6 +467,49 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should match sign-ups by any of the given user IDs or emails with the `customer` argument.
+	 */
+	public function test_query_notifications_with_customer() {
+
+		$by_id = new Notification();
+		$by_id->set_product_id( 1 );
+		$by_id->set_user_id( 1 );
+		$by_id->set_user_email( 'old@test.com' );
+		$by_id_id = $by_id->save();
+
+		$by_email = new Notification();
+		$by_email->set_product_id( 1 );
+		$by_email->set_user_email( 'new@test.com' );
+		$by_email_id = $by_email->save();
+
+		$other = new Notification();
+		$other->set_product_id( 1 );
+		$other->set_user_id( 2 );
+		$other->set_user_email( 'other@test.com' );
+		$other->save();
+
+		$notifications = $this->data_store->query(
+			array(
+				'customer' => array( 'New@Test.com', 1 ),
+			)
+		);
+		$this->assertSame( array( $by_id_id, $by_email_id ), $notifications );
+
+		$this->assertSame( array( $by_email_id ), $this->data_store->query( array( 'customer' => array( 'new@test.com' ) ) ) );
+		$this->assertSame( array( $by_id_id ), $this->data_store->query( array( 'customer' => array( 1 ) ) ) );
+		$this->assertSame(
+			2,
+			$this->data_store->query(
+				array(
+					'customer' => array( 'new@test.com', 1 ),
+					'return'   => 'count',
+				)
+			)
+		);
+		$this->assertSame( array(), $this->data_store->query( array( 'customer' => array( '', 0 ) ) ) );
+	}
+
+	/**
 	 * Test querying notifications with a last attempt limit.
 	 */
 	public function test_query_notifications_with_last_attempt_limit() {
