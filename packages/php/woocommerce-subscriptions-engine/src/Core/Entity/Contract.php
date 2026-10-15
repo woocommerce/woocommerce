@@ -239,6 +239,21 @@ final class Contract {
 	private $schedule_source;
 
 	/**
+	 * The extension's create-only idempotency key, or null. Unique per extension slug.
+	 *
+	 * @var string|null
+	 */
+	private $creation_key;
+
+	/**
+	 * Read-only lock state, or null when no lock is live. Hydrated from the repository's
+	 * computed `lock_live` flag (the database clock decides liveness); never the token.
+	 *
+	 * @var array{locked_until: string, operation: string}|null
+	 */
+	private $lock_state;
+
+	/**
 	 * Line items, each a plain associative array matching the items table shape.
 	 *
 	 * @var array<int, array<string, mixed>>
@@ -282,20 +297,25 @@ final class Contract {
 		$this->trial_end_gmt        = Coercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
 		$this->end_gmt              = Coercion::coerce_nullable_string( $data['end_gmt'] ?? null );
 		$this->schedule_source      = Coercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_ENGINE );
+		$this->creation_key         = Coercion::coerce_nullable_string( $data['creation_key'] ?? null );
+		$this->lock_state           = self::lock_state_from( $data );
 		$this->items                = Coercion::coerce_list_of_arrays( $data['items'] ?? null );
 		$this->addresses            = Coercion::coerce_map_of_arrays( $data['addresses'] ?? null );
 		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
 	/**
-	 * Build a new, unsaved contract. `extension_slug` is required.
+	 * Build a new, unsaved contract. `extension_slug` is required; `creation_key` is an
+	 * optional idempotency key of 1-100 characters.
 	 *
 	 * @param array<string, mixed> $args Contract attributes.
 	 * @throws DomainException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		// A new contract is always unsaved; never adopt a caller-supplied id.
-		unset( $args['id'] );
+		// A new contract is always unsaved and unlocked; never adopt a caller-supplied id or lock.
+		unset( $args['id'], $args['lock_live'], $args['locked_until'], $args['lock_operation'] );
+
+		self::assert_creation_key( $args['creation_key'] ?? null );
 
 		$contract = new self( $args );
 
@@ -310,8 +330,7 @@ final class Contract {
 	/**
 	 * Refuse money without a currency: a contract with no currency must have every total at zero.
 	 * Cross-field, so callers that change several fields check it once after the last change.
-	 * Checked against the state the caller holds: the engine opens no transaction or lock, so
-	 * concurrent writers to the currency and totals of one contract coordinate themselves.
+	 * Checked against the state the caller holds; the contract lock serializes facade writers.
 	 *
 	 * @throws DomainException If a total is non-zero while the currency is unset.
 	 */
@@ -721,6 +740,23 @@ final class Contract {
 	}
 
 	/**
+	 * The extension's create-only idempotency key, or null.
+	 */
+	public function get_creation_key(): ?string {
+		return $this->creation_key;
+	}
+
+	/**
+	 * The live lock's expiry (GMT string) and operation label, or null when the contract
+	 * is not locked. Read-only, as of the read; the token is never part of the entity.
+	 *
+	 * @return array{locked_until: string, operation: string}|null
+	 */
+	public function get_lock_state(): ?array {
+		return $this->lock_state;
+	}
+
+	/**
 	 * Line items.
 	 *
 	 * @return array<int, array<string, mixed>>
@@ -785,7 +821,45 @@ final class Contract {
 			'trial_end_gmt'        => $this->trial_end_gmt,
 			'end_gmt'              => $this->end_gmt,
 			'schedule_source'      => $this->schedule_source,
+			'creation_key'         => $this->creation_key,
 		);
+	}
+
+	/**
+	 * Build the read-only lock state from a stored row: only when the row's computed
+	 * `lock_live` flag is truthy and both the expiry and the operation are present.
+	 *
+	 * @param array<string, mixed> $data Raw attributes.
+	 * @return array{locked_until: string, operation: string}|null
+	 */
+	private static function lock_state_from( array $data ): ?array {
+		$locked_until = Coercion::coerce_nullable_string( $data['locked_until'] ?? null );
+		$operation    = Coercion::coerce_nullable_string( $data['lock_operation'] ?? null );
+
+		if ( empty( $data['lock_live'] ) || null === $locked_until || null === $operation ) {
+			return null;
+		}
+
+		return array(
+			'locked_until' => $locked_until,
+			'operation'    => $operation,
+		);
+	}
+
+	/**
+	 * Refuse a creation key that is not null or a string of 1-100 characters.
+	 *
+	 * @param mixed $creation_key Creation key to check.
+	 * @throws DomainException If `$creation_key` is not valid.
+	 */
+	private static function assert_creation_key( $creation_key ): void {
+		if ( null === $creation_key ) {
+			return;
+		}
+
+		if ( ! is_string( $creation_key ) || '' === $creation_key || mb_strlen( $creation_key ) > 100 ) {
+			throw new DomainException( 'Contract: creation_key must be a string of 1-100 characters.' );
+		}
 	}
 
 	/**

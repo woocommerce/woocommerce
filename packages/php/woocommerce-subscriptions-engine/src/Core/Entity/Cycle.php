@@ -5,7 +5,7 @@
  *
  * An immutable billing record frozen at billing (snapshot references, period
  * boundaries, `expected_total`). Only the repository's compare-and-set tools change a
- * stored cycle's `status`, `order_id`, `reason` and claim afterwards. The `count` is the chargeable number and idempotency anchor, nullable
+ * stored cycle's `status`, `order_id` and `reason` afterwards. The `count` is the chargeable number and idempotency anchor, nullable
  * for non-counting cycles (e.g. a future trial). Money is a decimal-safe string;
  * timestamps are GMT strings (`Y-m-d H:i:s`).
  *
@@ -143,15 +143,6 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
-	 * Claim expiry (GMT string), or null. Set when a caller appends a cycle claimed, claims
-	 * it, or transitions it with a claim; once it passes, another caller may claim the
-	 * cycle. The chain's UNIQUE positions remain the primary guard against a duplicate cycle.
-	 *
-	 * @var string|null
-	 */
-	private $claimed_until_gmt;
-
-	/**
 	 * Reserved retry moment (GMT string), or null. Additive column for a later
 	 * retry/dunning pass; not wired by the dispatcher yet.
 	 *
@@ -195,7 +186,6 @@ final class Cycle {
 		$this->items_snapshot_id = Coercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
 		$this->order_id          = Coercion::coerce_nullable_int( $data['order_id'] ?? null );
 		$this->extension_slug    = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->claimed_until_gmt = Coercion::coerce_nullable_string( $data['claimed_until'] ?? null );
 		$this->retry_at_gmt      = Coercion::coerce_nullable_string( $data['retry_at'] ?? null );
 	}
 
@@ -213,9 +203,8 @@ final class Cycle {
 	 * @throws DomainException If the attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		// A new cycle is always unsaved; never adopt a caller-supplied id. A claim is
-		// stamped by the database when the cycle is appended, never carried in.
-		unset( $args['id'], $args['claimed_until'] );
+		// A new cycle is always unsaved; never adopt a caller-supplied id.
+		unset( $args['id'] );
 
 		$cycle = new self( $args );
 
@@ -393,13 +382,6 @@ final class Cycle {
 	}
 
 	/**
-	 * Crash-recovery claim expiry (GMT string), or null.
-	 */
-	public function get_claimed_until_gmt(): ?string {
-		return $this->claimed_until_gmt;
-	}
-
-	/**
 	 * Reserved retry moment (GMT string), or null.
 	 */
 	public function get_retry_at_gmt(): ?string {
@@ -470,7 +452,6 @@ final class Cycle {
 			'items_snapshot_id' => $this->items_snapshot_id,
 			'order_id'          => $this->order_id,
 			'extension_slug'    => $this->extension_slug,
-			'claimed_until'     => $this->claimed_until_gmt,
 			'retry_at'          => $this->retry_at_gmt,
 		);
 	}
