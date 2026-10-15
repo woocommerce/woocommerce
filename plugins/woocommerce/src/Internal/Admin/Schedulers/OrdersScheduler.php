@@ -535,8 +535,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		}
 
 		$interval = self::get_import_interval();
+		if ( ! is_numeric( $interval ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_import_interval filter must return a number of seconds; the recurring import was not scheduled.', '11.3.0' );
+			return;
+		}
 
-		ActionSchedulerUtil::schedule_recurring( time(), $interval, $action_hook, array(), static::$group ?? '', true );
+		ActionSchedulerUtil::schedule_recurring( time(), (int) $interval, $action_hook, array(), static::$group ?? '', true );
 	}
 
 	/**

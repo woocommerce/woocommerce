@@ -1839,7 +1839,7 @@ final class WooCommerce {
 		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
 		$tracker_recurrence = is_string( $tracker_recurrence ) ? $tracker_recurrence : 'daily';
 		$core_internals     = wp_get_schedules();
-		$interval           = $core_internals[ $tracker_recurrence ]['interval'] ?? DAY_IN_SECONDS;
+		$interval           = (int) ( $core_internals[ $tracker_recurrence ]['interval'] ?? DAY_IN_SECONDS );
 		ActionSchedulerUtil::schedule_recurring( time() + 10, $interval, 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
 	}
 

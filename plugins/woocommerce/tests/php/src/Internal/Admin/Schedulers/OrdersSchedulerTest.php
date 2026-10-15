@@ -116,6 +116,25 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a non-numeric import interval from the filter schedules nothing and raises no error.
+	 */
+	public function test_non_numeric_import_interval_schedules_nothing() {
+		$this->clear_scheduled_batch_processor();
+		$this->setExpectedIncorrectUsage( OrdersScheduler::class . '::schedule_recurring_batch_processor' );
+
+		add_filter( 'woocommerce_analytics_import_interval', '__return_null' );
+
+		OrdersScheduler::schedule_recurring_batch_processor();
+
+		remove_filter( 'woocommerce_analytics_import_interval', '__return_null' );
+
+		$this->assertFalse(
+			$this->is_batch_processor_scheduled(),
+			'A non-numeric import interval should leave the batch processor unscheduled'
+		);
+	}
+
+	/**
 	 * Test that handle_scheduled_import_option_change unschedules batch processor when switching to immediate import.
 	 */
 	public function test_handle_scheduled_import_option_change_unschedules_batch_when_disabling_scheduled() {
