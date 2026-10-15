@@ -13,6 +13,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -193,6 +194,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			case 'delete_user':
 				$return = $this->is_valid_user_action( $arg );
 				break;
+			case 'before_delete_post':
+				$return = $this->is_valid_variation_delete_action( $arg );
+				break;
 		}
 
 		if ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
@@ -226,6 +230,34 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$post_type             = get_post_type( $post_id );
 
 		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
+	}
+
+	/**
+	 * Validates permanent deletions for product webhooks: only variations, skipping those already reported.
+	 *
+	 * Trashing through wp_trash_post() fires `product.deleted` and records `_wp_trash_meta_status`,
+	 * so a variation trashed that way is not reported again when it is permanently deleted.
+	 *
+	 * @since  11.3.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_variation_delete_action( $arg ) {
+		if ( 'product' !== $this->get_resource() ) {
+			return true;
+		}
+
+		if ( ! $this->is_valid_post_action( $arg ) ) {
+			return false;
+		}
+
+		$variation_id = absint( $arg );
+
+		if ( 'product_variation' !== get_post_type( $variation_id ) ) {
+			return false;
+		}
+
+		return ProductStatus::TRASH !== get_post_status( $variation_id ) || ! metadata_exists( 'post', $variation_id, '_wp_trash_meta_status' );
 	}
 
 	/**
@@ -1044,6 +1076,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'product.deleted'   => array(
 				'wp_trash_post',
+				'before_delete_post',
 			),
 			'product.restored'  => array(
 				'untrashed_post',
