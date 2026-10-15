@@ -740,13 +740,6 @@ final class Contract {
 	}
 
 	/**
-	 * The extension's create-only idempotency key, or null.
-	 */
-	public function get_creation_key(): ?string {
-		return $this->creation_key;
-	}
-
-	/**
 	 * The live lock's expiry (GMT string) and operation label, or null when the contract
 	 * is not locked. Read-only, as of the read; the token is never part of the entity.
 	 *

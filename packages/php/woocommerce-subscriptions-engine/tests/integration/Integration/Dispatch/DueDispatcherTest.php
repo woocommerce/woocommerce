@@ -126,7 +126,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ), 'Only the first contract is notified.' );
 		$this->assertCount( 1, $this->calls );
 		$this->assertSame( $first, $this->calls[0]['contract']->get_id() );
-		$this->assertFalse( $this->lock_holder( $second )['live'], 'The moved contract was not locked.' );
+		$this->assertNull( $this->lock_holder( $second )['operation'], 'The moved contract was not locked.' );
 		$this->assertSame( 'cancel', $this->lock_holder( $third )['operation'], 'The other operation keeps its lock.' );
 	}
 
@@ -138,7 +138,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$id = $this->create_due_contract();
 
 		$this->sut->run_batch( $this->now() );
-		$this->assertFalse( $this->lock_holder( $id )['live'], 'The lock is released when the handler returns.' );
+		$this->assertNull( $this->lock_holder( $id )['operation'], 'The lock is released when the handler returns.' );
 
 		$this->sut->run_batch( $this->now() );
 		$this->assertCount( 2, $this->calls );
@@ -311,8 +311,8 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 			$this->assertSame( 'release', $error['stage'] ?? null, 'Logged as a release failure, not a handler failure.' );
 		}
 		$this->assertSame( array( $first, $second ), $this->notified_ids() );
-		$this->assertTrue( $this->lock_holder( $first )['live'], 'The unreleased lock expires on its own.' );
-		$this->assertFalse( $this->lock_holder( $second )['live'] );
+		$this->assertNotNull( $this->lock_holder( $first )['operation'], 'The unreleased lock expires on its own.' );
+		$this->assertNull( $this->lock_holder( $second )['operation'] );
 	}
 
 	/**
@@ -334,7 +334,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertNotSame( array(), $errors );
 		$this->assertSame( array( $second ), $this->notified_ids() );
-		$this->assertFalse( $this->lock_holder( $first )['live'], 'Nothing ran, so the lock is released.' );
+		$this->assertNull( $this->lock_holder( $first )['operation'], 'Nothing ran, so the lock is released.' );
 	}
 
 	/**
@@ -345,7 +345,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$id = $this->create_due_contract();
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
-		$this->assertFalse( $this->lock_holder( $id )['live'], 'No lock is taken on a contract nobody handles.' );
+		$this->assertNull( $this->lock_holder( $id )['operation'], 'No lock is taken on a contract nobody handles.' );
 	}
 
 	/**
@@ -362,7 +362,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertFalse( $this->lock_holder( $foreign )['live'] );
+		$this->assertNull( $this->lock_holder( $foreign )['operation'] );
 	}
 
 	/**
@@ -400,7 +400,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertFalse( $this->lock_holder( $id )['live'], 'No lock is taken on a contract the engine does not schedule.' );
+		$this->assertNull( $this->lock_holder( $id )['operation'], 'No lock is taken on a contract the engine does not schedule.' );
 	}
 
 	/**
@@ -445,7 +445,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now(), 0 ) );
 		$this->assertSame( 0, $this->sut->run_batch( $this->now(), -1 ) );
-		$this->assertFalse( $this->lock_holder( $first )['live'], 'A no-op tick locks nothing.' );
+		$this->assertNull( $this->lock_holder( $first )['operation'], 'A no-op tick locks nothing.' );
 
 		$this->assertSame( 1, $this->sut->run_batch( $this->now(), 1 ) );
 		$this->assertSame( $first, $this->calls[0]['contract']->get_id(), 'The oldest-due contract goes first.' );
@@ -650,7 +650,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	 * The contract's live lock holder.
 	 *
 	 * @param int $id Contract id.
-	 * @return array{exists: bool, live: bool, operation: ?string, locked_until: ?string}
+	 * @return array{exists: bool, operation: ?string, locked_until: ?string}
 	 */
 	private function lock_holder( int $id ): array {
 		return ( new ContractRepository() )->lock_holder( $id );

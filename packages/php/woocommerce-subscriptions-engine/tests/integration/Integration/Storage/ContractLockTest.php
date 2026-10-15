@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
-use LogicException;
 use ReflectionClass;
 use ReflectionProperty;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
@@ -71,6 +70,18 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		return $row;
 	}
 
+	/**
+	 * End a lock's trust window and make its local expiry estimate read as near.
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	private function age_to_near_expiry( ContractLock $lock ): void {
+		$estimate = new ReflectionProperty( ContractLockState::class, 'expires_estimate' );
+		$estimate->setAccessible( true );
+		$estimate->setValue( $this->lock_state( $lock ), 0.0 );
+		$this->age_lock_trust( $lock );
+	}
+
 	private function acquire( int $id, string $operation = 'hold' ): ContractLock {
 		$lock = $this->sut->acquire_lock( $id, $operation );
 		$this->assertInstanceOf( ContractLock::class, $lock );
@@ -93,7 +104,6 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertSame(
 			array(
 				'exists'       => true,
-				'live'         => true,
 				'operation'    => 'hold',
 				'locked_until' => '2035-01-01 00:10:00',
 			),
@@ -137,7 +147,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$id = $this->insert_contract( '2026-06-20 00:00:00' );
 
 		$this->assertNull( $this->sut->acquire_lock( $id, 'due', '2026-06-15 00:00:00' ) );
-		$this->assertFalse( $this->sut->lock_holder( $id )['live'] );
+		$this->assertNull( $this->sut->lock_holder( $id )['operation'] );
 		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'due', '2026-06-20 00:00:00' ) );
 	}
 
@@ -160,7 +170,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				$this->sut->acquire_lock( $id, $operation );
 				$this->fail( 'Expected an invalid label to be refused.' );
 			} catch ( InvalidArgumentException $e ) {
-				$this->assertFalse( $this->sut->lock_holder( $id )['live'] );
+				$this->assertNull( $this->sut->lock_holder( $id )['operation'] );
 			}
 		}
 
@@ -204,53 +214,38 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$old->release();
 
 		$holder = $this->sut->lock_holder( $id );
-		$this->assertTrue( $holder['live'] );
+		$this->assertNotNull( $holder['operation'] );
 		$this->assertSame( 'cancel', $holder['operation'] );
 	}
 
 	/**
-	 * @testdox A lock extends once from the database's now; a second extend is a caller error.
+	 * @testdox The fence extends a lock near expiry even in the second it was acquired.
 	 */
-	public function test_extend_once(): void {
+	public function test_fence_extends_in_the_acquire_second(): void {
 		$id = $this->insert_contract();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->acquire( $id );
+		$this->age_to_near_expiry( $lock );
 
-		$this->pin_db_clock( '2035-01-01 00:05:00' );
-		$lock->extend();
-		$this->assertSame( '2035-01-01 00:15:00', $this->sut->lock_holder( $id )['locked_until'] );
+		$this->sut->fence_children( $lock );
+
 		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
-
-		$this->expectException( LogicException::class );
-		$lock->extend();
+		$this->assertSame( 'hold', $this->sut->lock_holder( $id )['operation'] );
 	}
 
 	/**
-	 * @testdox Extending a lock acquired in the same second still succeeds.
+	 * @testdox The fence's extend of a lost lock throws ContractLockedException.
 	 */
-	public function test_extend_in_the_acquire_second(): void {
+	public function test_fence_extend_of_a_lost_lock_throws(): void {
 		$id = $this->insert_contract();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->acquire( $id );
-
-		$lock->extend();
-
-		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
-		$this->assertTrue( $this->sut->lock_holder( $id )['live'] );
-	}
-
-	/**
-	 * @testdox Extending a lost lock throws ContractLockedException.
-	 */
-	public function test_extend_a_lost_lock(): void {
-		$id = $this->insert_contract();
-		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		$lock = $this->acquire( $id );
+		$this->age_to_near_expiry( $lock );
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
 
 		$this->expectException( ContractLockedException::class );
-		$lock->extend();
+		$this->sut->fence_children( $lock );
 	}
 
 	/**
@@ -292,7 +287,9 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$id = $this->insert_contract();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->acquire( $id );
-		$lock->extend();
+		$this->age_to_near_expiry( $lock );
+		$this->sut->fence_children( $lock );
+		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
 		$this->age_lock_trust( $lock );
@@ -321,11 +318,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$id = $this->insert_contract();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->acquire( $id );
-
-		$estimate = new ReflectionProperty( ContractLockState::class, 'expires_estimate' );
-		$estimate->setAccessible( true );
-		$estimate->setValue( $this->lock_state( $lock ), 0.0 );
-		$this->age_lock_trust( $lock );
+		$this->age_to_near_expiry( $lock );
 
 		$this->pin_db_clock( '2035-01-01 00:08:30' );
 		$queries = $wpdb->num_queries;

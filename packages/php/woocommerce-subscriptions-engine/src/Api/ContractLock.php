@@ -82,16 +82,6 @@ final class ContractLock {
 	}
 
 	/**
-	 * Extend the lock to a full TTL from the database's now. Allowed once per lock.
-	 *
-	 * @throws ContractLockedException If the lock was lost or released.
-	 * @throws LogicException If the lock was already extended.
-	 */
-	public function extend(): void {
-		( new ContractRepository() )->extend_lock( $this );
-	}
-
-	/**
 	 * Release the lock. Idempotent; never clears a lock another operation took over.
 	 *
 	 * @throws \RuntimeException If the release write fails (the lock then expires on its own).

@@ -684,7 +684,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertSame( array( 'Coffee' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
-		$this->assertFalse( ( new ContractRepository() )->lock_holder( $id )['live'], 'The internal lock is released.' );
+		$this->assertNull( ( new ContractRepository() )->lock_holder( $id )['operation'], 'The internal lock is released.' );
 	}
 
 	/**

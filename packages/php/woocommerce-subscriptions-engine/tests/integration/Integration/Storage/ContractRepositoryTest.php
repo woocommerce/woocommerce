@@ -1293,7 +1293,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertTrue( $this->sut->lock_holder( $id )['live'] );
+		$this->assertNotNull( $this->sut->lock_holder( $id )['operation'] );
 	}
 
 	/**
@@ -2098,7 +2098,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock->release();
 		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'items' ) ) );
 		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
-		$this->assertFalse( $this->sut->lock_holder( $id )['live'], 'The internal lock is released.' );
+		$this->assertNull( $this->sut->lock_holder( $id )['operation'], 'The internal lock is released.' );
 	}
 
 	/**

@@ -688,10 +688,9 @@ class ContractTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( 'order:42', $contract->get_creation_key() );
 		$this->assertSame( 'order:42', $contract->to_storage()['creation_key'] );
-		$this->assertSame( 'order:42', Contract::from_storage( $contract->to_storage() )->get_creation_key() );
-		$this->assertNull( $this->make_contract()->get_creation_key() );
+		$this->assertSame( 'order:42', Contract::from_storage( $contract->to_storage() )->to_storage()['creation_key'] );
+		$this->assertNull( $this->make_contract()->to_storage()['creation_key'] );
 	}
 
 	/**
@@ -738,7 +737,7 @@ class ContractTest extends TestCase {
 			)
 		);
 
-		$this->assertSame( $creation_key, $contract->get_creation_key() );
+		$this->assertSame( $creation_key, $contract->to_storage()['creation_key'] );
 	}
 
 	/**

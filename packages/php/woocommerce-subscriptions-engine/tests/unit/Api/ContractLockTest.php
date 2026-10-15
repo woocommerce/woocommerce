@@ -70,7 +70,7 @@ class ContractLockTest extends TestCase {
 		sort( $names );
 
 		$this->assertSame(
-			array( '__clone', '__debugInfo', '__serialize', '__unserialize', '__wakeup', 'extend', 'get_contract_id', 'get_operation', 'release' ),
+			array( '__clone', '__debugInfo', '__serialize', '__unserialize', '__wakeup', 'get_contract_id', 'get_operation', 'release' ),
 			$names
 		);
 		$this->assertTrue( ( new ReflectionMethod( ContractLock::class, '__construct' ) )->isPrivate() );

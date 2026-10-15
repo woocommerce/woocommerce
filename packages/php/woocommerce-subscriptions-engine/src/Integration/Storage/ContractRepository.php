@@ -847,7 +847,7 @@ final class ContractRepository {
 	 * only (it may lag on a replica), never to decide that a write landed.
 	 *
 	 * @param int $contract_id Contract id.
-	 * @return array{exists: bool, live: bool, operation: ?string, locked_until: ?string}
+	 * @return array{exists: bool, operation: ?string, locked_until: ?string}
 	 */
 	public function lock_holder( int $contract_id ): array {
 		global $wpdb;
@@ -860,7 +860,6 @@ final class ContractRepository {
 		if ( ! is_array( $row ) ) {
 			return array(
 				'exists'       => false,
-				'live'         => false,
 				'operation'    => null,
 				'locked_until' => null,
 			);
@@ -870,7 +869,6 @@ final class ContractRepository {
 
 		return array(
 			'exists'       => true,
-			'live'         => $live,
 			'operation'    => $live ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
 			'locked_until' => $live ? Coercion::coerce_nullable_string( $row['locked_until'] ?? null ) : null,
 		);
@@ -878,23 +876,17 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Extend a held lock to a full TTL from the database's now. Allowed once per lock.
+	 * Extend a held lock to a full TTL from the database's now, using its single extend
+	 * allowance. Called by {@see self::fence_children()} only, after checking the allowance.
 	 *
 	 * @param ContractLock $lock The held lock.
-	 * @throws ContractLockedException If the lock was released or lost.
-	 * @throws \LogicException If the lock was already extended.
+	 * @throws ContractLockedException If the lock was lost.
 	 * @throws \RuntimeException If the write fails.
 	 */
-	public function extend_lock( ContractLock $lock ): void {
+	private function extend_lock( ContractLock $lock ): void {
 		global $wpdb;
 
 		$state = self::state_of( $lock );
-		if ( $state->is_released() ) {
-			$this->throw_locked( $lock->get_contract_id() );
-		}
-		if ( $state->has_extended() ) {
-			throw new \LogicException( 'A contract lock can be extended only once.' );
-		}
 
 		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock = self::HOLDS_LOCK;
