@@ -5,7 +5,7 @@ Google Gemini by Ana Dovgal (Woo Creative & Brand studio) in June–July 2026,
 replacing earlier Reve/Midjourney assets so the licensing chain is clean for
 theme distribution. Original deliveries (with intact C2PA manifests) live in
 the studio's Google Drive; see the studio request P2 for links and history:
-https://woomarketingstudio.wordpress.com/2026/06/09/studio-request-purple-theme-placeholder-images/
+<https://woomarketingstudio.wordpress.com/2026/06/09/studio-request-purple-theme-placeholder-images/>
 
 ## Machine-readable marking (EU AI Act §50(2) alignment)
 

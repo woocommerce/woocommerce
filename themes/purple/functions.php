@@ -88,6 +88,8 @@ if ( ! function_exists( 'purple_register_pattern_categories' ) ) :
 	/**
 	 * Register the "Purple" block pattern category so the theme's
 	 * internally-used patterns can be grouped together in the inserter.
+	 *
+	 * @return void
 	 */
 	function purple_register_pattern_categories() {
 		register_block_pattern_category(
