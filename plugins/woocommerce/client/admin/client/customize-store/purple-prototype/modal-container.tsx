@@ -35,7 +35,7 @@ export const ModalContainer = ( {
 					render={ <p /> }
 				>
 					{ __(
-						'Choose the look your store starts with: Purple, the free theme built by WooCommerce, another theme from the Marketplace, or the theme you have now. You can change it any time.',
+						'Your theme sets how shoppers see your store: layout, colors and fonts. You can change it any time.',
 						'woocommerce'
 					) }
 				</Text>
@@ -54,7 +54,7 @@ export const ModalContainer = ( {
 							render={ <p /> }
 						>
 							{ __(
-								'Start with Purple, made by WooCommerce for stores, or browse themes from other developers.',
+								'Start with Purple, our free theme for stores, or pick another.',
 								'woocommerce'
 							) }
 						</Text>

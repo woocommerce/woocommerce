@@ -51,6 +51,7 @@ class PurpleCysPrototype {
 		add_action( 'admin_init', array( $this, 'reset_purple_on_wizard_open' ) );
 		add_action( 'admin_init', array( $this, 'sync_customize_store_task' ), 20 );
 		add_action( 'switch_theme', array( $this, 'complete_customize_store_task_for_purple' ), 10, 2 );
+		add_action( 'admin_footer-theme-install.php', array( $this, 'output_theme_preview_return_script' ) );
 		add_action( 'wp_ajax_woocommerce_purple_cys_prototype_save_state', array( $this, 'handle_save_state' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 999 );
 		add_action( 'admin_head', array( $this, 'output_admin_bar_css' ) );
@@ -204,30 +205,56 @@ class PurpleCysPrototype {
 	}
 
 	/**
-	 * Keep the "Customize your store" task in step with Purple: done whenever Purple is active,
-	 * including the fake Active state picked from the "Purple prototype" menu.
+	 * Mark the "Customize your store" task done while Purple is active, including the fake Active
+	 * state from the "Purple prototype" menu. Clicking any action on the CYS screen also marks it
+	 * done (client side). Only Reset Purple and opening the setup wizard untick it.
 	 */
 	public function sync_customize_store_task(): void {
 		if ( wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		$state = $this->get_settings()['state'];
+		$state     = $this->get_settings()['state'];
+		$is_active = 'real' === $state ? self::PURPLE_SLUG === get_stylesheet() : 'active' === $state;
 
-		if ( 'real' === $state ) {
-			$is_complete = self::PURPLE_SLUG === get_stylesheet() ? true : null;
-		} else {
-			$is_complete = 'active' === $state;
+		if ( $is_active && 'yes' !== get_option( self::CYS_TASK_OPTION ) ) {
+			update_option( self::CYS_TASK_OPTION, 'yes' );
 		}
+	}
 
-		if ( null === $is_complete ) {
+	/**
+	 * On WordPress's theme preview, opened from "Preview demo", send the close button back to
+	 * the screen it was opened from. That screen saves itself in session storage on click.
+	 */
+	public function output_theme_preview_return_script(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
-		$value = $is_complete ? 'yes' : 'no';
-		if ( get_option( self::CYS_TASK_OPTION ) !== $value ) {
-			update_option( self::CYS_TASK_OPTION, $value );
-		}
+		echo '<script>
+		( function () {
+			var returnUrl = window.sessionStorage.getItem( "purpleCysReturn" );
+			if ( ! returnUrl || 0 !== returnUrl.indexOf( window.location.origin + "/" ) ) {
+				return;
+			}
+			var goBack = function ( event ) {
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				window.sessionStorage.removeItem( "purpleCysReturn" );
+				window.location.href = returnUrl;
+			};
+			document.addEventListener( "click", function ( event ) {
+				if ( event.target.closest( ".close-full-overlay" ) ) {
+					goBack( event );
+				}
+			}, true );
+			document.addEventListener( "keydown", function ( event ) {
+				if ( "Escape" === event.key && document.querySelector( ".theme-install-overlay:not(:empty)" ) ) {
+					goBack( event );
+				}
+			}, true );
+		} )();
+		</script>';
 	}
 
 	/**
@@ -247,6 +274,8 @@ class PurpleCysPrototype {
 		if ( wp_get_theme( self::PURPLE_SLUG )->exists() ) {
 			$this->reset_purple( true );
 		}
+
+		update_option( self::CYS_TASK_OPTION, 'no' );
 
 		if ( 'real' !== $this->get_settings()['state'] ) {
 			$this->save_setting( 'state', 'default' );

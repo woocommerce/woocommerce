@@ -32,7 +32,7 @@ export const CurrentThemeCard = ( { theme }: CurrentThemeCardProps ) => (
 		</Text>
 		<Text className="purple-cys-theme-card__description" render={ <p /> }>
 			{ __(
-				'Stay with the theme you have and edit it in the Site Editor.',
+				'Stay with your current design and edit it in the Site Editor.',
 				'woocommerce'
 			) }
 		</Text>

@@ -1,10 +1,15 @@
 /**
  * External dependencies
  */
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, MouseEvent, ReactNode } from 'react';
 import { Button, Card } from '@wordpress/ui';
 import { external } from '@wordpress/icons';
 import clsx from 'clsx';
+
+/**
+ * Internal dependencies
+ */
+import { completeTaskThenNavigate } from '../task-completion';
 
 type ThemeCardProps = {
 	media: ReactNode;
@@ -30,6 +35,8 @@ type LinkButtonProps = Omit<
 > & {
 	href: string;
 	isExternal?: boolean;
+	// Whether following the link marks "Customize your store" done.
+	completesTask?: boolean;
 };
 
 /**
@@ -38,6 +45,7 @@ type LinkButtonProps = Omit<
 export const LinkButton = ( {
 	href,
 	isExternal = false,
+	completesTask = true,
 	disabled,
 	children,
 	...props
@@ -62,6 +70,12 @@ export const LinkButton = ( {
 			{ ...props }
 			className={ clsx( 'purple-cys-link-button', props.className ) }
 			nativeButton={ false }
+			onClick={
+				completesTask
+					? ( event: MouseEvent< HTMLElement > ) =>
+							completeTaskThenNavigate( event, href, isExternal )
+					: props.onClick
+			}
 			render={
 				// eslint-disable-next-line jsx-a11y/anchor-has-content -- Button renders its children into the anchor.
 				<a

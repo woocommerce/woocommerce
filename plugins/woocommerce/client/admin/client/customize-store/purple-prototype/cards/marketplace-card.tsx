@@ -32,7 +32,7 @@ export const MarketplaceCard = () => (
 		</Text>
 		<Text className="purple-cys-theme-card__description" render={ <p /> }>
 			{ __(
-				'Explore hundreds of free and paid themes made for WooCommerce stores, with ready-to-use designs for every industry. Paid themes come with a 30-day money-back guarantee.',
+				'Hundreds of free and paid themes for every kind of store. Paid themes have a 30-day money-back guarantee.',
 				'woocommerce'
 			) }
 		</Text>

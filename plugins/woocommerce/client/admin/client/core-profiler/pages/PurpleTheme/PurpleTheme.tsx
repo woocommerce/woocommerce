@@ -90,7 +90,7 @@ export const PurpleTheme = ( {
 					className="woocommerce-profiler__stepper-heading"
 					title={ __( 'Choose how your store looks', 'woocommerce' ) }
 					subTitle={ __(
-						'Start with Purple, our free theme designed for stores, or keep the theme you have. You can change it any time.',
+						'Start with Purple, our free theme for stores, or keep your current one. You can change it any time.',
 						'woocommerce'
 					) }
 				/>
@@ -107,7 +107,7 @@ export const PurpleTheme = ( {
 							'woocommerce'
 						) }
 						description={ __(
-							'The Purple theme gives your shop, product, cart and checkout pages a polished design from day one, so you can focus on your products.',
+							'A free theme made for stores, so your shop looks polished from day one.',
 							'woocommerce'
 						) }
 					>

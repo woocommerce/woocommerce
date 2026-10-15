@@ -8,6 +8,7 @@ import { Card, Link, Text } from '@wordpress/ui';
  * Internal dependencies
  */
 import { LinkButton } from './theme-card';
+import { completeCustomizeStoreTask } from '../task-completion';
 import { getSiteEditorUrl } from '../urls';
 import purplePreview from '../assets/purple-preview.jpg';
 
@@ -26,11 +27,11 @@ export const PurpleSuccess = ( { homeUrl }: { homeUrl: string } ) => (
 				) }
 			/>
 			<Text variant="heading-xl" render={ <h2 /> }>
-				{ __( 'Purple is live on your store', 'woocommerce' ) }
+				{ __( "Purple is now your store's theme", 'woocommerce' ) }
 			</Text>
 			<Text className="purple-cys-success__description" render={ <p /> }>
 				{ __(
-					'Make it yours in the Site Editor: pick colors and fonts, then edit your homepage and store pages.',
+					'Make it yours: pick colors and fonts, then edit your homepage and store pages.',
 					'woocommerce'
 				) }
 			</Text>
@@ -38,7 +39,11 @@ export const PurpleSuccess = ( { homeUrl }: { homeUrl: string } ) => (
 				<LinkButton href={ getSiteEditorUrl() }>
 					{ __( 'Customize in Site Editor', 'woocommerce' ) }
 				</LinkButton>
-				<Link href={ homeUrl } openInNewTab>
+				<Link
+					href={ homeUrl }
+					openInNewTab
+					onClick={ () => void completeCustomizeStoreTask() }
+				>
 					{ __( 'View store', 'woocommerce' ) }
 				</Link>
 			</div>

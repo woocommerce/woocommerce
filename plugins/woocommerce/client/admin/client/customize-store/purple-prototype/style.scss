@@ -19,6 +19,9 @@
 }
 
 .purple-cys-theme-card {
+	// A visible outline, like the other task pages' cards (for example, Collect sales tax).
+	border-color: var(--wpds-color-stroke-surface-neutral);
+
 	h2,
 	p {
 		margin: 0;
@@ -33,7 +36,7 @@
 	// The text column sets the card height, so the image is positioned out of the flow.
 	&__media {
 		position: relative;
-		flex: 0 0 320px;
+		flex: 0 0 360px;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -86,12 +89,6 @@
 		}
 	}
 
-	// Fits the tallest install state (a two-line helper) plus padding, so the card keeps its
-	// height while installing and the shorter states sit centered. Active has no helper line
-	// and isn't part of that flow, so it ends flush with its buttons.
-	&--purple:not(.is-active) &__content {
-		min-height: 356px;
-	}
 
 	&--marketplace &__content,
 	&--current-theme &__content {
@@ -130,6 +127,8 @@
 }
 
 .purple-cys-success {
+	border-color: var(--wpds-color-stroke-surface-neutral);
+
 	h2,
 	p {
 		margin: 0;

@@ -2,17 +2,25 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import { Badge, Button, Link, Text } from '@wordpress/ui';
 import { Icon, check, error } from '@wordpress/icons';
 import clsx from 'clsx';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, MouseEvent } from 'react';
 
 /**
  * Internal dependencies
  */
 import { ThemeCard, LinkButton } from './theme-card';
+import { completeCustomizeStoreTask } from '../task-completion';
 import type { PurpleState } from '../settings';
-import { PURPLE_DEMO_URL, getLivePreviewUrl, getSiteEditorUrl } from '../urls';
+import {
+	getLivePreviewUrl,
+	getPreviewDemoUrl,
+	rememberPreviewReturn,
+	getSiteEditorUrl,
+} from '../urls';
 import purplePreview from '../assets/purple-preview.jpg';
 
 type PurpleCardProps = {
@@ -36,7 +44,7 @@ const getStatusCopy = ( state: PurpleState ) => {
 		badgeIntent: 'informational' as BadgeIntent,
 	};
 	const installed = {
-		badge: __( 'Installed, not active yet', 'woocommerce' ),
+		badge: __( 'Installed, not active', 'woocommerce' ),
 		badgeIntent: 'stable' as BadgeIntent,
 	};
 
@@ -53,7 +61,7 @@ const getStatusCopy = ( state: PurpleState ) => {
 			return {
 				...installed,
 				helper: __(
-					"Activating changes your store's design: layout, menus and homepage. Your products, orders and page content stay.",
+					"Activating changes your store's design. Your products, orders and pages stay as they are.",
 					'woocommerce'
 				),
 			};
@@ -75,7 +83,7 @@ const getStatusCopy = ( state: PurpleState ) => {
 			return {
 				...freeTheme,
 				helper: __(
-					"Something went wrong. Purple couldn't be installed or activated. Your store hasn't changed. Try again, or use Appearance > Themes.",
+					"Purple couldn't be set up. Your store hasn't changed. Try again, or go to Appearance > Themes.",
 					'woocommerce'
 				),
 			};
@@ -93,12 +101,9 @@ const getStatusCopy = ( state: PurpleState ) => {
 const Benefits = () => (
 	<ul className="purple-cys-benefits">
 		{ [
-			__(
-				'Every store page designed, from shop to checkout',
-				'woocommerce'
-			),
-			__( 'Ready-made color palettes and font styles', 'woocommerce' ),
-			__( 'Kept up to date by the WooCommerce team', 'woocommerce' ),
+			__( 'Every page designed, from shop to checkout', 'woocommerce' ),
+			__( 'Ready-made colors and fonts', 'woocommerce' ),
+			__( 'Updated by the WooCommerce team', 'woocommerce' ),
 		].map( ( benefit ) => (
 			<li key={ benefit }>
 				<Icon icon={ check } size={ 20 } />
@@ -107,6 +112,54 @@ const Benefits = () => (
 		) ) }
 	</ul>
 );
+
+/**
+ * Opens WordPress's Live Preview of Purple. A theme has to be installed to preview it, and the
+ * prototype's forced states only fake the install, so make sure Purple is installed first. It
+ * isn't activated, so the store doesn't change.
+ */
+const LivePreviewButton = ( {
+	slug,
+	disabled,
+}: {
+	slug: string;
+	disabled: boolean;
+} ) => {
+	const [ isPreparing, setIsPreparing ] = useState( false );
+	const href = getLivePreviewUrl( slug );
+
+	if ( isPreparing ) {
+		return (
+			<Button variant="outline" loading disabled>
+				{ __( 'Preview on your store', 'woocommerce' ) }
+			</Button>
+		);
+	}
+
+	return (
+		<LinkButton
+			variant="outline"
+			href={ href }
+			disabled={ disabled }
+			completesTask={ false }
+			onClick={ async ( event: MouseEvent< HTMLElement > ) => {
+				event.preventDefault();
+				setIsPreparing( true );
+				await Promise.all( [
+					completeCustomizeStoreTask(),
+					apiFetch( {
+						path: '/wc-admin/onboarding/themes/install',
+						method: 'POST',
+						data: { theme: slug },
+					} ).catch( () => undefined ),
+				] );
+				window.location.href = href;
+			} }
+		>
+			{ __( 'Preview on your store', 'woocommerce' ) }
+		</LinkButton>
+	);
+};
 
 const Actions = ( {
 	state,
@@ -119,21 +172,16 @@ const Actions = ( {
 	const previewDemo = ( disabled = false ) => (
 		<LinkButton
 			variant="outline"
-			href={ PURPLE_DEMO_URL }
-			isExternal
+			href={ getPreviewDemoUrl( slug ) }
+			completesTask={ false }
+			onClick={ rememberPreviewReturn }
 			disabled={ disabled }
 		>
 			{ __( 'Preview demo', 'woocommerce' ) }
 		</LinkButton>
 	);
 	const livePreview = ( disabled = false ) => (
-		<LinkButton
-			variant="outline"
-			href={ getLivePreviewUrl( slug ) }
-			disabled={ disabled }
-		>
-			{ __( 'Live Preview', 'woocommerce' ) }
-		</LinkButton>
+		<LivePreviewButton slug={ slug } disabled={ disabled } />
 	);
 
 	switch ( state ) {
@@ -150,7 +198,7 @@ const Actions = ( {
 			return (
 				<>
 					<Button onClick={ onActivate }>
-						{ __( 'Activate', 'woocommerce' ) }
+						{ __( 'Activate Purple', 'woocommerce' ) }
 					</Button>
 					{ livePreview() }
 				</>
@@ -170,7 +218,11 @@ const Actions = ( {
 					<LinkButton href={ getSiteEditorUrl() }>
 						{ __( 'Customize in Site Editor', 'woocommerce' ) }
 					</LinkButton>
-					<Link href={ homeUrl } openInNewTab>
+					<Link
+						href={ homeUrl }
+						openInNewTab
+						onClick={ () => void completeCustomizeStoreTask() }
+					>
 						{ __( 'View store', 'woocommerce' ) }
 					</Link>
 				</>
@@ -202,9 +254,7 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 
 	return (
 		<ThemeCard
-			className={ clsx( 'purple-cys-theme-card--purple', {
-				'is-active': state === 'active',
-			} ) }
+			className="purple-cys-theme-card--purple"
 			media={
 				<img
 					src={ purplePreview }
@@ -224,7 +274,7 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 				render={ <p /> }
 			>
 				{ __(
-					'The Purple theme gives your shop, product, cart and checkout pages a polished design from day one, so you can focus on your products.',
+					'A free theme made for stores, so your shop looks polished from day one.',
 					'woocommerce'
 				) }
 			</Text>

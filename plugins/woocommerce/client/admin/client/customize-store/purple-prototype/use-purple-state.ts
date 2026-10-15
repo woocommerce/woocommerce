@@ -8,6 +8,7 @@ import { useCallback, useRef, useState } from '@wordpress/element';
  */
 import type { PurplePrototypeSettings, PurpleState } from './settings';
 import { isForcedState, runPurpleAction, PurpleAction } from './purple-actions';
+import { completeCustomizeStoreTask } from './task-completion';
 
 const getRealState = ( settings: PurplePrototypeSettings ): PurpleState => {
 	if ( settings.purpleActive ) {
@@ -33,6 +34,7 @@ export const usePurpleState = ( settings: PurplePrototypeSettings ) => {
 		async ( action: PurpleAction ) => {
 			const isInstall = action === 'install';
 			setState( isInstall ? 'installing' : 'activating' );
+			void completeCustomizeStoreTask();
 
 			try {
 				await runPurpleAction( settings, action );
