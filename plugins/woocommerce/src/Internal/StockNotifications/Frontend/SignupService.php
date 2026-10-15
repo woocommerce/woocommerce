@@ -153,6 +153,8 @@ class SignupService {
 			return new \WP_Error( self::ERROR_RATE_LIMITED );
 		}
 
+		$requires_double_opt_in = $this->requires_double_opt_in( $user_id );
+
 		// An existing rate limit window blocks these attempts too, but attempts that only find
 		// an existing active or pending sign-up, or activate an existing pending one, never claim
 		// a window themselves: they create nothing new and send no verification mail.
@@ -163,11 +165,11 @@ class SignupService {
 			}
 
 			if ( NotificationStatus::PENDING === $notification->get_status() ) {
-				if ( Config::requires_double_opt_in() ) {
+				if ( $requires_double_opt_in ) {
 					return new SignupResult( self::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN, $notification );
 				}
 
-				// Double opt-in is not required, so activate the pending notification instead of creating one.
+				// Double opt-in is not required for this customer, so activate the pending notification instead of creating one.
 				$notification->set_status( NotificationStatus::ACTIVE );
 				$saved = $notification->save();
 				if ( \is_wp_error( $saved ) || ! $saved ) {
@@ -212,7 +214,7 @@ class SignupService {
 			$notification->update_meta_data( 'posted_attributes', $posted_attributes );
 		}
 
-		if ( Config::requires_double_opt_in() ) {
+		if ( $requires_double_opt_in ) {
 			$notification->set_status( NotificationStatus::PENDING );
 		}
 
@@ -230,12 +232,45 @@ class SignupService {
 		 */
 		do_action( 'woocommerce_customer_stock_notifications_signup', $notification );
 
-		if ( Config::requires_double_opt_in() && NotificationStatus::PENDING === $notification->get_status() ) {
+		if ( $requires_double_opt_in && NotificationStatus::PENDING === $notification->get_status() ) {
 			$this->email_manager->send_verify_email( $notification );
 		}
 
-		$signup_code = Config::requires_double_opt_in() ? self::SIGNUP_SUCCESS_DOUBLE_OPT_IN : self::SIGNUP_SUCCESS;
+		$signup_code = $requires_double_opt_in ? self::SIGNUP_SUCCESS_DOUBLE_OPT_IN : self::SIGNUP_SUCCESS;
 		return new SignupResult( $signup_code, $notification );
+	}
+
+	/**
+	 * Whether a sign-up by the given customer has to be verified by email.
+	 *
+	 * Logged-in customers sign up with their account email, so by default they skip double opt-in
+	 * even when the store requires it. Stores with strict consent rules can keep it on for them.
+	 *
+	 * @param int $user_id The user ID, or 0 for a guest.
+	 * @return bool
+	 */
+	private function requires_double_opt_in( int $user_id ): bool {
+		if ( ! Config::requires_double_opt_in() ) {
+			return false;
+		}
+
+		if ( $user_id <= 0 ) {
+			return true;
+		}
+
+		/**
+		 * Filter: woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users
+		 *
+		 * Whether logged-in customers have to verify their back-in-stock sign-ups by email when the
+		 * store requires double opt-in. Logged-in sign-ups use the account email, so they skip the
+		 * verification step by default.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param bool $required Whether double opt-in applies to logged-in customers. Default false.
+		 * @param int  $user_id  The user ID.
+		 */
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_require_double_opt_in_for_logged_in_users', false, $user_id );
 	}
 
 	/**

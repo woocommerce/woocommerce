@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip back-in-stock double opt-in for logged-in customers, who sign up with their account email; a new filter lets stores keep it on for them.
