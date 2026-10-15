@@ -305,6 +305,35 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Clears the hydration context when the cart controller throws.
+	 */
+	public function test_clears_hydration_context_when_controller_throws(): void {
+		$after    = null;
+		$threw    = false;
+		$throwing = function () use ( &$threw ): void {
+			$threw = true;
+			throw new \Exception( 'Cart calculation failure' );
+		};
+		add_action( 'woocommerce_before_calculate_totals', $throwing );
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$after ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				StoreApi::container();
+				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
+				$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+				$after = $this->sut->is_active();
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		$this->assertTrue( $threw, 'The hydrated cart controller should run the failing calculation.' );
+		$this->assertFalse( $after, 'A failed cart controller should not leave its hydration context active.' );
+		$this->assert_dispatch_stack_empty( 'A failed cart controller should not leave a context on the stack.' );
+	}
+
+	/**
 	 * @testdox Restores the outer route context when a nested request catches a failed cart calculation.
 	 */
 	public function test_restores_context_after_nested_request_catches_failed_calculation(): void {

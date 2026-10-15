@@ -438,11 +438,10 @@ class ShippingController {
 	/**
 	 * Filter the location used for taxes based on the chosen pickup location.
 	 *
-	 * @param array             $address  Location args.
-	 * @param WC_Customer|mixed $customer The customer whose taxable address is being determined.
+	 * @param array $address Location args.
 	 * @return array
 	 */
-	public function filter_taxable_address( $address, $customer = null ) {
+	public function filter_taxable_address( $address ) {
 
 		if ( null === WC()->session ) {
 			return $address;
@@ -454,8 +453,10 @@ class ShippingController {
 
 		// Only pickup_location rates should get their address from the saved settings, local_pickup has another filter, and third party pickup locations should have their own filter and logic for the address as well.
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
-if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
+		if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			// The session keeps a pickup choice after the last shippable item is removed, so ignore it when the cart no longer needs shipping.
+			// Keep the one-argument method signature for subclasses while reading the filter's optional customer.
+			$customer = func_get_args()[1] ?? null;
 			if ( $customer instanceof WC_Customer && wc_get_container()->get( CartWithoutShipping::class )->should_use_billing_address( $customer ) ) {
 				return $address;
 			}
