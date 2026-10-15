@@ -1,10 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { getThemeDirectory, isMain, toolingRoot } from './theme-utils.mjs';
-
-const require = createRequire( import.meta.url );
 
 export function environmentArgs( args ) {
 	if (
@@ -38,15 +35,15 @@ export async function prepareEnvironment( slug ) {
 
 export async function runEnvironment( slug, args ) {
 	const configPath = await prepareEnvironment( slug );
-	const manifestPath = require.resolve( '@wordpress/env/package.json' );
-	const manifest = JSON.parse( await fs.readFile( manifestPath, 'utf8' ) );
-	const executable = path.resolve(
-		path.dirname( manifestPath ),
-		manifest.bin[ 'wp-env' ]
-	);
 	const result = spawnSync(
-		process.execPath,
-		[ executable, ...environmentArgs( args ), '--config', configPath ],
+		'pnpm',
+		[
+			'exec',
+			'wp-env',
+			...environmentArgs( args ),
+			'--config',
+			configPath,
+		],
 		{
 			cwd: toolingRoot,
 			stdio: 'inherit',
