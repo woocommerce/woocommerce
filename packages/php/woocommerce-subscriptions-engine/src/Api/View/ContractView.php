@@ -53,7 +53,7 @@ final class ContractView {
 	/**
 	 * Build a view of a stored contract.
 	 *
-	 * @internal Built by the engine `Api\` facades only.
+	 * @internal Built by the engine only (the `Api\` facades and the due dispatcher).
 	 *
 	 * @param Contract $contract      Stored contract.
 	 * @param bool     $with_children Whether the read loaded items and addresses.
@@ -270,7 +270,8 @@ final class ContractView {
 	}
 
 	/**
-	 * Who runs renewals: `primitive` or `gateway`.
+	 * Who keeps the payment schedule: `subscriptions_engine` (the engine dispatches the
+	 * contract when it is due) or the slug of the gateway or extension that keeps its own.
 	 */
 	public function get_schedule_source(): string {
 		return $this->fields['schedule_source'];

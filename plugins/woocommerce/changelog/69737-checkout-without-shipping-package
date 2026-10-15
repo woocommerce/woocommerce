@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the classic checkout saving orders without shipping when shipping costs are hidden until an address is entered.

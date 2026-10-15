@@ -107,6 +107,59 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Product Sale Badge applies margins once while preserving its inner badge styles.
+	 */
+	public function test_product_sale_badge_applies_margins_once(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '20' );
+		$product->set_sale_price( '15' );
+		$product->save();
+
+		$attributes = array(
+			'style' => array(
+				'spacing'    => array(
+					'margin' => array(
+						'top'    => '32px',
+						'right'  => '16px',
+						'bottom' => '48px',
+						'left'   => '24px',
+					),
+				),
+				'color'      => array(
+					'text'       => '#123456',
+					'background' => '#abcdef',
+				),
+				'border'     => array(
+					'color'  => '#654321',
+					'width'  => '3px',
+					'radius' => '8px',
+				),
+				'typography' => array(
+					'fontSize'   => '24px',
+					'lineHeight' => '1.5',
+				),
+			),
+		);
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
+		$html       = new \WP_HTML_Tag_Processor( $markup );
+
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-sale-badge' ) ) );
+		$this->assertStringNotContainsString( 'margin', (string) $html->get_attribute( 'style' ), 'The wrapper must not duplicate the inner badge margins.' );
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc-block-components-product-sale-badge' ) ) );
+		$style = str_replace( ' ', '', (string) $html->get_attribute( 'style' ) );
+
+		foreach ( $attributes['style']['spacing']['margin'] as $side => $value ) {
+			$this->assertStringContainsString( 'margin-' . $side . ':' . $value . ';', $style );
+		}
+		foreach ( array( 'color:#123456;', 'background-color:#abcdef;', 'border-color:#654321;', 'border-width:3px;', 'border-radius:8px;', 'line-height:1.5;' ) as $declaration ) {
+			$this->assertStringContainsString( $declaration, $style, 'Supported styles should remain on the inner badge.' );
+		}
+		// WordPress may resolve the custom font size to a fluid clamp() value.
+		$font_size = (string) wp_get_typography_font_size_value( array( 'size' => $attributes['style']['typography']['fontSize'] ) );
+		$this->assertStringContainsString( 'font-size:' . str_replace( ' ', '', $font_size ) . ';', $style, 'The resolved font size should remain on the inner badge.' );
+	}
+
+	/**
 	 * Sale badge content options.
 	 *
 	 * @return array<string, array{array, string}>
