@@ -139,9 +139,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Whether the loaded object takes staged changes. A Core object does. A
-	 * class that extends one takes them once it declares SupportsStagedChanges.
-	 * The default accepts every object.
+	 * Whether the loaded object takes staged changes. By default, only an
+	 * object that declares SupportsStagedChanges does. Override it for a
+	 * resource whose objects are known to save once.
 	 *
 	 * @since 11.3.0
 	 *
@@ -149,7 +149,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @return bool
 	 */
 	protected function supports_staged_changes( $subject ): bool {
-		return true;
+		return $subject instanceof SupportsStagedChanges;
 	}
 
 	/**

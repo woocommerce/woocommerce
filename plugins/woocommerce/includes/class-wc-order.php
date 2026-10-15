@@ -450,18 +450,22 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Fire woocommerce_order_edit_status for a staged manual status change, and save.
+	 * Save, then fire woocommerce_order_edit_status for a staged manual status change.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @return int Order ID.
 	 */
 	public function commit_changes() {
-		if ( ! empty( $this->status_transition['manual'] ) && ! empty( $this->status_transition['to'] ) ) {
-			do_action( 'woocommerce_order_edit_status', $this->get_id(), $this->status_transition['to'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$edited_status = ! empty( $this->status_transition['manual'] ) ? ( $this->status_transition['to'] ?? '' ) : '';
+
+		$id = parent::commit_changes();
+
+		if ( '' !== $edited_status ) {
+			do_action( 'woocommerce_order_edit_status', $this->get_id(), $edited_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		}
 
-		return parent::commit_changes();
+		return $id;
 	}
 
 	/**

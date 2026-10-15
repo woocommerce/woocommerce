@@ -36,6 +36,16 @@ class TestProductRenameAbility extends ActionableAbility {
 	}
 
 	/**
+	 * A product saves once, so every product class takes staged changes.
+	 *
+	 * @param \WC_Data $subject Loaded product.
+	 * @return bool
+	 */
+	protected function supports_staged_changes( $subject ): bool {
+		return true;
+	}
+
+	/**
 	 * Rename the product in memory.
 	 *
 	 * @param \WC_Product $subject Product.

@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\SupportsStagedChanges;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -57,13 +59,14 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	abstract public static function prepare_response( $subject ): array;
 
 	/**
-	 * Whether the loaded object takes staged changes. The default accepts every object.
+	 * Whether the loaded object takes staged changes. By default, only an
+	 * object that declares SupportsStagedChanges does.
 	 *
 	 * @param \WC_Data $subject Loaded object.
 	 * @return bool
 	 */
 	public static function supports_staged_changes( $subject ): bool {
-		return true;
+		return $subject instanceof SupportsStagedChanges;
 	}
 
 	/**

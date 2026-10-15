@@ -100,6 +100,18 @@ class ProductCreate extends AbstractChangeAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * Every product class takes staged changes: a product already sets its
+	 * props in memory and saves once, with the feature off and on, so no
+	 * product class keeps its own rules in a set-and-save method.
+	 *
+	 * @param \WC_Product $subject Loaded product.
+	 * @return bool
+	 */
+	public static function supports_staged_changes( $subject ): bool {
+		return true;
+	}
+
+	/**
 	 * Set the product properties in memory.
 	 *
 	 * @param \WC_Product $subject Product.
