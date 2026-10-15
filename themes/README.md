@@ -41,4 +41,3 @@ The CLI owns the wp-env dependency and forwards its arguments. Start uses Playgr
 
 Add a standalone block theme under `themes/<slug>/`, preserving its licenses and using the slug as its text domain. Run validation and PHP linting with that slug, and add a changelog fragment to that theme's `changelog/` directory. Register the theme explicitly in `pnpm-workspace.yaml`; a wildcard is not required.
 
-This workspace does not yet contain a theme. Local environments, ZIP packaging, CI, automated test suites, and release publishing are deferred.
