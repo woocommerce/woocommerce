@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
+
 /**
  * Fingerprints a UCP request, binding an `Idempotency-Key` to the payload it was first used with.
  *
@@ -48,30 +50,8 @@ class UcpRequestFingerprint {
 		}
 		unset( $value );
 
-		if ( ! self::is_list( $data ) ) {
+		if ( ! ArrayUtil::array_is_list( $data ) ) {
 			ksort( $data );
 		}
-	}
-
-	/**
-	 * Whether an array is a list, with keys 0 to n-1 in order.
-	 *
-	 * Stands in for `array_is_list()`, which needs PHP 8.1.
-	 *
-	 * @param array<int|string, mixed> $data Array to inspect.
-	 * @return bool
-	 */
-	private static function is_list( array $data ): bool {
-		$expected = 0;
-
-		foreach ( $data as $key => $ignored ) {
-			if ( $key !== $expected ) {
-				return false;
-			}
-
-			++$expected;
-		}
-
-		return true;
 	}
 }
