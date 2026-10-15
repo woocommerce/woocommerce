@@ -121,4 +121,98 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $other, $untouched_notification->get_user_id() );
 		$this->assertSame( 'other@doe.com', $untouched_notification->get_user_email() );
 	}
+
+	/**
+	 * @testdox Should export a user's sign-ups under their previous and current email once each, plus guest rows for the current email, and leave other users out.
+	 */
+	public function test_privacy_exporter_matches_email_and_user_id(): void {
+		$user_id = self::factory()->user->create( array( 'user_email' => 'old@doe.com' ) );
+		$other   = self::factory()->user->create( array( 'user_email' => 'other@doe.com' ) );
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$user_notification = new Notification();
+		$user_notification->set_user_id( $user_id );
+		$user_notification->set_user_email( 'old@doe.com' );
+		$user_notification->set_product_id( $product->get_id() );
+		$user_notification_id = $user_notification->save();
+
+		$guest_notification = new Notification();
+		$guest_notification->set_user_email( 'new@doe.com' );
+		$guest_notification->set_product_id( $product->get_id() );
+		$guest_notification_id = $guest_notification->save();
+
+		$other_notification = new Notification();
+		$other_notification->set_user_id( $other );
+		$other_notification->set_user_email( 'other@doe.com' );
+		$other_notification->set_product_id( $product->get_id() );
+		$other_notification->save();
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'new@doe.com',
+			)
+		);
+
+		$current_notification = new Notification();
+		$current_notification->set_user_id( $user_id );
+		$current_notification->set_user_email( 'new@doe.com' );
+		$current_notification->set_product_id( $product->get_id() );
+		$current_notification_id = $current_notification->save();
+
+		$response = PrivacyEraser::export_notification_data( 'New@Doe.COM' );
+
+		$this->assertTrue( $response['done'] );
+		$this->assertSame(
+			array(
+				'stock-notification-' . $user_notification_id,
+				'stock-notification-' . $guest_notification_id,
+				'stock-notification-' . $current_notification_id,
+			),
+			array_column( $response['data'], 'item_id' )
+		);
+
+		$item = $response['data'][0];
+		$this->assertSame( 'woocommerce_stock_notifications', $item['group_id'] );
+
+		$values = array_column( $item['data'], 'value', 'name' );
+		$this->assertSame( $product->get_name(), $values['Product'] );
+		$this->assertSame( $product->get_permalink(), $values['Product URL'] );
+		$this->assertSame( 'old@doe.com', $values['Email'] );
+		$this->assertSame( 'Pending', $values['Status'] );
+		$this->assertNotSame( '', $values['Date signed up'] );
+		$this->assertSame( '', $values['Date notified'] );
+	}
+
+	/**
+	 * @testdox Should export sign-ups ten per page and report done on the last page.
+	 */
+	public function test_privacy_exporter_paginates(): void {
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$notification = new Notification();
+			$notification->set_user_email( 'jon@doe.com' );
+			$notification->set_product_id( $i );
+			$notification->save();
+		}
+
+		$first_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 1 );
+		$this->assertCount( 10, $first_page['data'] );
+		$this->assertFalse( $first_page['done'] );
+
+		$second_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 2 );
+		$this->assertCount( 1, $second_page['data'] );
+		$this->assertTrue( $second_page['done'] );
+
+		$this->assertEmpty( array_intersect( array_column( $first_page['data'], 'item_id' ), array_column( $second_page['data'], 'item_id' ) ) );
+	}
+
+	/**
+	 * @testdox Should report done with no data when the email has no sign-ups.
+	 */
+	public function test_privacy_exporter_returns_done_when_empty(): void {
+		$response = PrivacyEraser::export_notification_data( 'nobody@doe.com' );
+
+		$this->assertSame( array(), $response['data'] );
+		$this->assertTrue( $response['done'] );
+	}
 }

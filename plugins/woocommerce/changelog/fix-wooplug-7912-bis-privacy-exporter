@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include back-in-stock notification sign-ups when exporting a customer's personal data.
