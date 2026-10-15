@@ -1075,9 +1075,9 @@ class WC_Checkout {
 	/**
 	 * Check whether missing address information should block checkout when shipping costs require an address.
 	 *
-	 * Missing billing fields can clear the shipping destination and omit shipping charges. Forced billing retains
-	 * its previous behaviour because removed fields cannot be recovered through a separate shipping form.
-	 * Stores that disable calculation through woocommerce_cart_ready_to_calc_shipping are also exempt.
+	 * Missing billing fields can clear the shipping destination and omit shipping charges. Keep the guard even
+	 * when shipping is forced to billing, and log a diagnostic because a separate shipping form is unavailable.
+	 * Stores that disable calculation through woocommerce_cart_ready_to_calc_shipping are exempt.
 	 *
 	 * @return bool
 	 */
@@ -1095,10 +1095,9 @@ class WC_Checkout {
 
 		if ( $shipping_withheld && wc_ship_to_billing_address_only() ) {
 			wc_get_logger()->warning(
-				'Skipped the missing shipping address check because shipping is forced to the billing address. Shipping charges may be omitted. Check the checkout address fields and shipping settings.',
+				'Checkout blocked because the shipping address is incomplete and shipping is forced to the billing address. Shipping costs require an address. Check that the checkout address fields and shipping settings allow customers to provide the required address.',
 				array( 'source' => 'checkout' )
 			);
-			return false;
 		}
 
 		return $shipping_withheld;

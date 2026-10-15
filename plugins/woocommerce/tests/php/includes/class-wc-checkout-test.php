@@ -736,16 +736,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Removed billing fields only bypass the missing shipping address guard when shipping is forced to billing.
+	 * @testdox Removed billing fields block checkout even when shipping is forced to billing.
 	 *
-	 * @testWith ["billing", true]
-	 *           ["shipping", true]
-	 *           ["billing_only", false]
+	 * @testWith ["billing", false]
+	 *           ["shipping", false]
+	 *           ["billing_only", true]
 	 *
-	 * @param string $destination  Shipping destination setting.
-	 * @param bool   $expect_error Whether the missing address should block checkout.
+	 * @param string $destination    Shipping destination setting.
+	 * @param bool   $expect_warning Whether the blocked checkout should log a warning.
 	 */
-	public function test_checkout_with_removed_billing_fields_respects_shipping_destination( string $destination, bool $expect_error ): void {
+	public function test_checkout_with_removed_billing_fields_blocks_orders_without_shipping( string $destination, bool $expect_warning ): void {
 		add_filter(
 			'woocommerce_checkout_fields',
 			static function ( $fields ) {
@@ -763,7 +763,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				return $gateways;
 			}
 		);
-		$this->expect_shipping_address_warning( ! $expect_error );
+		$this->expect_shipping_address_warning( $expect_warning );
 
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
@@ -798,20 +798,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->sut->validate_checkout( $data, $errors );
 
 			$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Removed billing fields still clear the shipping destination.' );
-			if ( $expect_error ) {
-				$this->assertSame( 'Please enter an address to continue.', $errors->get_error_message( 'shipping' ) );
-				return;
-			}
-
-			$this->assertSame( array(), $errors->get_error_messages(), 'Forced billing should retain its previous checkout behaviour.' );
-			$order_id = $this->sut->create_order( $data );
-			$this->assertIsInt( $order_id );
-			$order = wc_get_order( $order_id );
-			$this->assertSame( '', $order->get_shipping_address_1() );
-			$this->assertSame( '', $order->get_shipping_postcode() );
-			$this->assertCount( 0, $order->get_shipping_methods(), 'The compatibility exception intentionally permits an order without a shipping line.' );
-			$this->assertEquals( 0, $order->get_shipping_total() );
-			$this->assertEquals( 10, $order->get_total() );
+			$this->assertSame(
+				'Please enter an address to continue.',
+				$errors->get_error_message( 'shipping' ),
+				'A rate shown before checkout must not permit an order after the shipping destination is cleared.'
+			);
 		} finally {
 			$_POST         = $original_post;
 			WC()->customer = $original_customer;
@@ -831,7 +822,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param array  $changes        Overrides for posted checkout data.
 	 * @param bool   $has_rates      Whether a shipping rate is available.
 	 * @param string $expected_error Expected validation error code, or an empty string for success.
-	 * @param bool   $expect_warning Whether the shipping address guard should log its bypass.
+	 * @param bool   $expect_warning Whether the blocked checkout should log a warning.
 	 */
 	public function test_forced_billing_preserves_other_checkout_validation( array $changes, bool $has_rates, string $expected_error, bool $expect_warning ): void {
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
@@ -898,7 +889,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Expect a diagnostic when the missing shipping address guard is bypassed.
+	 * Expect a diagnostic when the missing shipping address guard blocks forced-billing checkout.
 	 *
 	 * @param bool $expected Whether a warning should be logged.
 	 */
@@ -906,7 +897,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$logger = $this->createMock( WC_Logger_Interface::class );
 		$logger->expects( $expected ? $this->once() : $this->never() )
 			->method( 'warning' )
-			->with( $this->stringContains( 'Shipping charges may be omitted.' ), array( 'source' => 'checkout' ) );
+			->with( $this->stringContains( 'Checkout blocked because the shipping address is incomplete' ), array( 'source' => 'checkout' ) );
 		add_filter(
 			'woocommerce_logging_class',
 			static function () use ( $logger ) {
