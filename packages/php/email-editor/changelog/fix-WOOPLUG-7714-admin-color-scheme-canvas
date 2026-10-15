@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Match personalization tag chips in the email editor canvas to the admin color scheme, as in the sidebar.

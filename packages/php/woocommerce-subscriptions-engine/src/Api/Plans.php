@@ -10,13 +10,8 @@
  * reaches a plan of another one (authorization is the caller's concern). Reads return
  * read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
  *
- * Billing payload contract: the engine reads one plan payload itself. Until every
- * contract carries a plan snapshot, renewal falls back to the live plan's
- * `billing_policy` and reads it with {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy::from_array()}
- * (a string `period` of day, week, month or year, a positive int `interval`, and
- * optional cycle bounds and trial). A payload of another shape is still stored, but
- * renewal parks such a contract. The snapshot's `billing_policy` is read the same way,
- * and one that fails the rule falls back to the live plan.
+ * Plan policies are stored as given; the engine does not read them. An extension may
+ * parse a `billing_policy` with {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy::from_array()}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
