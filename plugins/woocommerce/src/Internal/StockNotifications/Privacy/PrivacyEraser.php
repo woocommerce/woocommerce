@@ -160,13 +160,13 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Get the `customer` query values matching every sign-up of an email address and the account it belongs to.
+	 * Get the `customer` query values for an email address and the account it belongs to.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $email_address The email address, in the letter case the request was made with.
 	 *
-	 * @return array<int|string> The normalized email, plus the user ID when the email belongs to an account. Empty for an invalid email.
+	 * @return array<int|string> Normalized email plus user ID when there is an account. Empty for an invalid email.
 	 */
 	private static function get_customer( string $email_address ): array {
 		$normalized_email = EmailNormalizer::normalize( $email_address );
@@ -178,7 +178,6 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 
 		// Look up the account with the letter case as entered: `wp_users.user_email` is never
 		// normalized, so on a case-sensitive collation the lowercased form would miss it.
-		// Sign-ups made before an account email change keep the old email, so also match by user ID.
 		$user = get_user_by( 'email', $email_address );
 		if ( $user instanceof \WP_User ) {
 			$customer[] = (int) $user->ID;

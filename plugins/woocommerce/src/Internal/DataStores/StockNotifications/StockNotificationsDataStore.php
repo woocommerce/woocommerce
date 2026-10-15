@@ -402,9 +402,6 @@ CREATE TABLE $meta_table_name (
 	/**
 	 * Query the stock notifications.
 	 *
-	 * The `customer` argument accepts user IDs and/or email addresses and matches sign-ups
-	 * belonging to any of them, like the `customer` argument of `wc_get_orders()`.
-	 *
 	 * @param array $args The arguments.
 	 * @return array<int>|array<Notification>|int An array of notifications or the number of notifications.
 	 */
@@ -493,7 +490,6 @@ CREATE TABLE $meta_table_name (
 				$where_values     = array_merge( $where_values, $customer_emails );
 			}
 
-			// Nothing usable was given: match nothing rather than everything.
 			$where[] = empty( $customer_where ) ? '1=0' : '(' . implode( ' OR ', $customer_where ) . ')';
 		}
 
