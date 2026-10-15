@@ -1224,6 +1224,25 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A live lock hides the contract from find_due until it expires on the database clock; release reorders it by release moment.
+	 */
+	public function test_a_live_lock_hides_the_contract_until_it_expires(): void {
+		$now   = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$id    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
+		$later = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
+
+		$this->pin_db_clock( '2026-07-15 00:00:00' );
+		$this->lock( $id, 'due' );
+
+		$this->pin_db_clock( '2026-07-15 00:09:59' );
+		$this->assertSame( array( $later ), $this->due_ids( $now, 50 ), 'A live lock hides the contract.' );
+		$this->assertSame( array( $later ), $this->due_ids( $now->modify( '+1 day' ), 50 ), 'A later scan cutoff does not expire the lock; the database clock does.' );
+
+		$this->pin_db_clock( '2026-07-15 00:10:00' );
+		$this->assertSame( array( $later, $id ), $this->due_ids( $now, 50 ), 'An expired lock no longer hides it; never-locked contracts lead.' );
+	}
+
+	/**
 	 * @testdox update_fields writes the contract row in exactly one UPDATE statement.
 	 */
 	public function test_a_contract_write_is_one_update_statement(): void {

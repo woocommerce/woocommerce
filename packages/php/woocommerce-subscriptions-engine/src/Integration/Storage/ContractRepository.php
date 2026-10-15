@@ -712,33 +712,24 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Contracts due at `$now`, never-notified first, then least recently notified - the due dispatcher's scan.
+	 * Contracts due at `$now`, least recently locked first - the due dispatcher's scan.
 	 *
 	 * A contract is due when its `next_payment_gmt` is at or before `$now`, its owner
 	 * (`extension_slug`) is one of `$owners`, the engine keeps its schedule (`schedule_source`
-	 * is {@see Contract::SCHEDULE_SOURCE_ENGINE}), and it carries no live due-dispatch claim.
-	 * A contract whose schedule a gateway or extension keeps is never selected: that party
-	 * triggers its own renewals. Status is not read: whether a due contract acts is its
-	 * owner's decision. Driven by the `due_owner (extension_slug, next_payment_gmt)` index;
-	 * the schedule source and the claim are residual filters.
+	 * is {@see Contract::SCHEDULE_SOURCE_ENGINE}), and it carries no live lock. Status is not
+	 * read: whether a due contract acts is its owner's decision. Driven by the `due_owner`
+	 * index; the schedule source and the lock are residual filters, and lock liveness is read
+	 * on the database clock (`UTC_TIMESTAMP()`), not `$now`.
 	 *
-	 * `$now` is the due cutoff only; claim liveness is read on the database clock
-	 * (`UTC_TIMESTAMP()`), the clock {@see self::claim_contract()} stamps claims on.
-	 *
-	 * Fairness: a handler is expected to move or clear the due moment it was notified for
-	 * (writing a different `next_payment_gmt` releases the claim). A contract whose handler
-	 * leaves it in place keeps its expired claim. Rows sort by that claim, oldest first, with
-	 * a null claim (never notified for the current due moment) ahead of all of them, then by
-	 * due moment: fresh contracts lead, and among repeats the least recently notified goes
-	 * next, so contracts stuck on an older due moment cannot starve a later-due retry. The
-	 * sort reads the owners' whole due backlog and filesorts it rather than walking
-	 * `due_owner` in order; measured cheap at realistic backlogs (about 13 ms warm for
-	 * 20,000 due rows) and acceptable before the schema freeze. `LIMIT` bounds the result.
+	 * Fairness: rows sort by `locked_until` - never locked first, then by when the last lock
+	 * ended or expired - then by due moment. A contract whose handler leaves its due moment in
+	 * place is notified again, behind contracts locked less recently, so it cannot starve
+	 * others. The sort filesorts the owners' due backlog; `LIMIT` bounds the result.
 	 *
 	 * @param DateTimeImmutable  $now    The cutoff moment; contracts due at or before it.
 	 * @param int                $limit  Maximum rows to return (the batch size).
 	 * @param array<int, string> $owners Owner slugs whose contracts may be selected.
-	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, never-notified first, then least recently notified, then oldest-due.
+	 * @return array<int, array{id: int, extension_slug: string, next_payment_gmt: string}> Due rows, least recently locked first, then oldest-due.
 	 */
 	public function find_due( DateTimeImmutable $now, int $limit, array $owners ): array {
 		if ( $limit < 1 ) {
@@ -767,8 +758,8 @@ final class ContractRepository {
 				FROM {$contracts}
 				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
 				  AND schedule_source = %s
-				  AND ( claimed_until IS NULL OR claimed_until <= UTC_TIMESTAMP() )
-				ORDER BY claimed_until ASC, next_payment_gmt ASC, id ASC
+				  AND ( lock_token IS NULL OR locked_until <= UTC_TIMESTAMP() )
+				ORDER BY locked_until ASC, next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
 			),
