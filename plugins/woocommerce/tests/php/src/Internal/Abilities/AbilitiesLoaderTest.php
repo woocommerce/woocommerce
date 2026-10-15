@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
-use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
@@ -1417,7 +1416,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
-		$result = ProductCreate::execute(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
 				'name'               => 'Invalid Grouped Product',
 				'product_type_alias' => 'grouped',
@@ -1433,7 +1432,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject fields that are unsupported by the selected product type alias.
 	 */
 	public function test_product_create_rejects_fields_not_supported_by_product_type_alias(): void {
-		$result = ProductCreate::execute(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
 				'name'               => 'Invalid Grouped Product',
 				'product_type_alias' => 'grouped',

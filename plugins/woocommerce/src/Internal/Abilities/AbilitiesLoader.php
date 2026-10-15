@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\AbilityExtensions;
-use Automattic\WooCommerce\Internal\Abilities\Domain\CoreActionableAbility;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
@@ -149,11 +149,14 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( ! is_a( $class_name, AbilityDefinition::class, true ) ) {
+			// Core's write abilities are ActionableAbility classes that WordPress builds itself.
+			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
+
+			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {
 				continue;
 			}
 
-			$ability_name = $class_name::get_name();
+			$ability_name = $is_actionable ? $class_name::ABILITY_NAME : $class_name::get_name();
 
 			if ( '' === $ability_name ) {
 				continue;
@@ -187,8 +190,8 @@ class AbilitiesLoader {
 			}
 
 			$args = $class_name::get_registration_args();
-			if ( $is_core_ability && AbilityExtensions::is_enabled() && isset( CoreActionableAbility::DEFINITIONS[ $ability_name ] ) ) {
-				$args['ability_class'] = CoreActionableAbility::class;
+			if ( $is_actionable ) {
+				$args['ability_class'] = $class_name;
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
