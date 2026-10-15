@@ -438,8 +438,6 @@ class WC_Checkout {
 		}
 
 		try {
-			$this->kept_order_item_types = array();
-
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
 			$cart_hashes        = ( new CartController() )->get_cart_hashes();
@@ -521,8 +519,7 @@ class WC_Checkout {
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$this->set_data_from_cart( $order );
-			$this->kept_order_item_types = array();
-			$cart_order_items            = $order->get_items( $this->get_cart_order_item_types() );
+			$cart_order_items = $order->get_items( $this->get_cart_order_item_types() );
 
 			foreach ( array_keys( self::CART_HASHED_ORDER_ITEM_TYPES ) as $hash_name ) {
 				$order->update_meta_data( "_{$hash_name}_hash", $cart_hashes[ $hash_name ] );
@@ -582,8 +579,6 @@ class WC_Checkout {
 
 			return $order_id;
 		} catch ( Exception $e ) {
-			$this->kept_order_item_types = array();
-
 			if ( $order && $order instanceof WC_Order ) {
 				wc_release_coupons_for_order( $order );
 				/**
@@ -594,6 +589,9 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_order_exception', $order );
 			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
+		} finally {
+			// Reset on every path, including Errors, so a later set_data_from_cart() call adds every item type.
+			$this->kept_order_item_types = array();
 		}
 	}
 

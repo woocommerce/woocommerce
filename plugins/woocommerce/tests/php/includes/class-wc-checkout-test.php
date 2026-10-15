@@ -1034,6 +1034,32 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An Error thrown while resuming an order doesn't make a later set_data_from_cart() call skip item types.
+	 */
+	public function test_create_order_resume_error_does_not_leave_item_types_skipped(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		// This filter runs after the resumed order's kept item types are set and before set_data_from_cart().
+		add_filter(
+			'woocommerce_checkout_customer_id',
+			function () {
+				throw new Error( 'Extension error' );
+			}
+		);
+
+		try {
+			$this->resume_order( $order_id );
+			$this->fail( 'The Error should reach the caller.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Extension error', $e->getMessage() );
+		}
+
+		$order = new WC_Order();
+		$this->sut->set_data_from_cart( $order );
+
+		$this->assertCount( 1, $order->get_items(), 'set_data_from_cart() should add the line item.' );
+	}
+
+	/**
 	 * Creates an order from a cart with one product and one fee.
 	 *
 	 * @return int The order ID.
