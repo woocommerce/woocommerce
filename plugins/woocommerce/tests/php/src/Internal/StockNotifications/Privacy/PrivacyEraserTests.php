@@ -66,7 +66,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should erase a user's sign-up stored under their previous email, plus guest rows for the current email only.
+	 * @testdox Should erase a user's sign-ups under their previous and current email once each, plus guest rows for the current email only.
 	 */
 	public function test_privacy_eraser_matches_user_id_after_email_change(): void {
 		$user_id = self::factory()->user->create( array( 'user_email' => 'old@doe.com' ) );
@@ -96,10 +96,17 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 			)
 		);
 
+		// Signed up after the email change, so it matches both the email and the user ID query.
+		$current_notification = new Notification();
+		$current_notification->set_user_id( $user_id );
+		$current_notification->set_user_email( 'new@doe.com' );
+		$current_notification->set_product_id( 4 );
+		$current_notification_id = $current_notification->save();
+
 		$response = PrivacyEraser::erase_notification_data( 'new@doe.com' );
 
 		$this->assertTrue( $response['items_removed'] );
-		$this->assertCount( 2, $response['messages'] );
+		$this->assertCount( 3, $response['messages'] );
 
 		$erased_user_notification = new Notification( $user_notification_id );
 		$this->assertSame( NotificationStatus::CANCELLED, $erased_user_notification->get_status() );
@@ -107,6 +114,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertSame( wp_privacy_anonymize_data( 'email', '' ), $erased_user_notification->get_user_email() );
 
 		$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $guest_notification_id ) )->get_status() );
+		$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $current_notification_id ) )->get_status() );
 
 		$untouched_notification = new Notification( $other_notification_id );
 		$this->assertNotSame( NotificationStatus::CANCELLED, $untouched_notification->get_status() );
