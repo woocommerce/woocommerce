@@ -1064,9 +1064,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should save nothing and run no status listeners when a validator refuses an order status change with no extension fields.
+	 * @testdox Should save nothing and run no status listeners when a validator refuses an order status change in an extension ability.
 	 */
 	public function test_a_validator_refuses_a_status_change(): void {
+		$this->register_order_status_ability();
 		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_test_locked', 'yes' );
 		$order->save();
@@ -1085,14 +1086,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$changes = did_action( 'woocommerce_order_status_changed' );
 
 		$response = $this->run_ability_response(
-			'woocommerce/order-update-status',
+			'test-ext/order-status',
 			array(
 				'id'     => $order->get_id(),
 				'status' => 'completed',
 			)
 		);
 		$allowed  = $this->run_ability(
-			'woocommerce/order-update-status',
+			'test-ext/order-status',
 			array(
 				'id'     => $order->get_id(),
 				'status' => 'on-hold',
@@ -1104,8 +1105,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'Use test-ext/order-unlock first.', $response->get_data()['message'] );
 		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
-		$this->assertSame( 'on-hold', $allowed['order']['status'] );
-		$this->assertSame( 'woocommerce/order-update-status', $ability );
+		$this->assertSame( 'on-hold', $allowed['status'] );
+		$this->assertSame( 'test-ext/order-status', $ability );
 	}
 
 	/**
@@ -1234,10 +1235,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_validators_do_not_run_with_the_feature_off(): void {
 		$this->set_feature( false );
-		$order = \WC_Helper_Order::create_order();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		AbilityExtensions::register_validator(
 			array(
-				'resource'  => 'order',
+				'resource'  => 'product',
 				'namespace' => 'test-ext',
 				'callback'  => static function () {
 					return new \WP_Error( 'test_refused', 'Refused.' );
@@ -1246,14 +1247,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$output = $this->run_ability(
-			'woocommerce/order-update-status',
+			'woocommerce/product-update',
 			array(
-				'id'     => $order->get_id(),
-				'status' => 'completed',
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
 			)
 		);
 
-		$this->assertSame( 'completed', $output['order']['status'] );
+		$this->assertSame( 'Pencil', $output['product']['name'] );
 	}
 
 	/**
@@ -1309,6 +1310,38 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					)
 				);
 			}
+		);
+	}
+
+	/**
+	 * Register test-ext/order-status, an ActionableAbility of an extension that changes orders.
+	 */
+	private function register_order_status_ability(): void {
+		$this->add_test_action(
+			'wp_abilities_api_init',
+			static function () {
+				wp_register_ability(
+					'test-ext/order-status',
+					array(
+						'label'               => 'Change order status',
+						'description'         => 'Changes an order status.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'                 => 'object',
+							'properties'           => array(
+								'id'     => array( 'type' => 'integer' ),
+								'status' => array( 'type' => 'string' ),
+							),
+							'additionalProperties' => false,
+						),
+						'output_schema'       => array( 'type' => 'object' ),
+						'permission_callback' => '__return_true',
+						'ability_class'       => TestOrderStatusAbility::class,
+						'meta'                => array( 'show_in_rest' => true ),
+					)
+				);
+			},
+			20
 		);
 	}
 

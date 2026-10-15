@@ -205,15 +205,19 @@ class ExtensibleAbilities {
 	 * Use a field `update_callback` to refuse a bad value of one field. It runs
 	 * only when the input sends that field. Use a validator to refuse a change as
 	 * a whole. It runs on every change of the resource, also when the input sends
-	 * no extension fields. For example, a validator refuses a status change of an
-	 * order that is a subscription.
+	 * no extension fields. For example, a validator refuses a product change that
+	 * would break a subscription plan.
+	 *
+	 * Core's product abilities run validators. Core's order abilities keep their
+	 * trunk write for now, so validators for `order` run only in the
+	 * ActionableAbility classes of extensions.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param array $args {
 	 *     Validator arguments.
 	 *
-	 *     @type string   $resource  Resource that an ActionableAbility changes, `product` or `order`.
+	 *     @type string   $resource  Resource that an ActionableAbility changes, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
 	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
 	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
