@@ -65341,12 +65341,6 @@ parameters:
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
 		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:get_product_formatted_variation_list\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -65845,12 +65839,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
 
 		-
-			message: '#^Call to method get_name\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
 			message: '#^Call to method get_price_html\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
@@ -65912,12 +65900,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_price\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_title\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
