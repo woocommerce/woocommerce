@@ -306,8 +306,7 @@ describe( 'createMutationQueue', () => {
 				{ status: 200, body: { value: 1 } },
 				{ status: 200, body: { value: 2 } },
 			] );
-			const calls: Array< { isProcessing: boolean; value: number } > =
-				[];
+			const calls: Array< { isProcessing: boolean; value: number } > = [];
 
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
