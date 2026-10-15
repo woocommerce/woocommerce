@@ -7,6 +7,7 @@ import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
+import { getProductCollectionQuery } from '../products/utils';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -295,6 +296,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} );
 
 	test( 'Products can be filtered based on price range.', async ( {
+		page,
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
@@ -313,12 +315,24 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			max: '17.21',
 		} );
 
+		await expect
+			.poll(
+				async () =>
+					( await getProductCollectionQuery( page ) ).priceRange
+			)
+			.toEqual( { min: 15.28, max: 17.21 } );
 		await expect( pageObject.products ).toHaveCount( 2 );
 
 		await pageObject.setPriceRange( {
 			max: '17.29',
 		} );
 
+		await expect
+			.poll(
+				async () =>
+					( await getProductCollectionQuery( page ) ).priceRange
+			)
+			.toMatchObject( { max: 17.29 } );
 		await expect( pageObject.products ).toHaveCount( 5 );
 
 		await pageObject.publishAndGoToFrontend();

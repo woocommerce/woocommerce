@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add the missing space between sentences in the footer of back-in-stock notification emails.
