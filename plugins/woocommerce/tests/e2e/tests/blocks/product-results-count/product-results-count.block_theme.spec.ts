@@ -38,4 +38,19 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 		await expect( block ).toHaveText( 'Showing 1-X of X results' );
 	} );
+
+	test( 'announces the new count to screen readers after sorting', async ( {
+		page,
+	} ) => {
+		await page.goto( '/shop/' );
+
+		await page
+			.getByRole( 'combobox', { name: 'Shop order' } )
+			.selectOption( 'price' );
+
+		await expect( page ).toHaveURL( /orderby=price/ );
+		await expect( page.locator( '#a11y-speak-polite' ) ).toHaveText(
+			/^Showing .+ results Sorted by price: low to high/
+		);
+	} );
 } );
