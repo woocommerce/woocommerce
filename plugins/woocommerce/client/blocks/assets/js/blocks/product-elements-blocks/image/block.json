@@ -32,7 +32,8 @@
 		},
 		"spacing": {
 			"margin": true,
-			"padding": true
+			"padding": true,
+			"__experimentalSkipSerialization": [ "padding" ]
 		},
 		"dimensions": {
 			"aspectRatio": true,
@@ -41,7 +42,10 @@
 		"email": true
 	},
 	"selectors": {
-		"root": ".wp-block-woocommerce-product-image.wc-block-components-product-image, .wp-block-woocommerce-product-image .wc-block-components-product-image"
+		"root": ".wp-block-woocommerce-product-image.wc-block-components-product-image, .wp-block-woocommerce-product-image .wc-block-components-product-image",
+		"spacing": {
+			"padding": ".wp-block-woocommerce-product-image .wc-block-components-product-image__inner-container"
+		}
 	},
 	"ancestor": [
 		"woocommerce/all-products",

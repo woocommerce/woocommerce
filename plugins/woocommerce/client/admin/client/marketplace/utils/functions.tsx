@@ -6,6 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 import { store as coreNoticesStore } from '@wordpress/notices';
 import { Icon } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -27,7 +28,7 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
-import { NoticeOptions, NoticeStatus } from '../contexts/types';
+import { NoticeAction, NoticeOptions, NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
@@ -356,9 +357,29 @@ type WpAjaxResponse = {
 };
 
 type WpAjaxResponseData = {
+	errorCode?: string;
 	errorMessage?: string;
 	activateUrl?: string;
 };
+
+type WpAjaxError = {
+	success: false;
+	data: { message?: string; code?: string };
+};
+
+/** The message and error code of a rejected wpAjax() call, keeping only string values. */
+const getWpAjaxErrorData = ( error: unknown ): WpAjaxError[ 'data' ] => {
+	const data = ( error as { data?: { message?: unknown; code?: unknown } } )
+		?.data;
+
+	return {
+		message: typeof data?.message === 'string' ? data.message : undefined,
+		code: typeof data?.code === 'string' ? data.code : undefined,
+	};
+};
+
+/** Core's error code for a package that needs a newer PHP than the site runs. */
+const PHP_REQUIREMENT_ERROR_CODE = 'incompatible_php_required_version';
 
 function wpAjax(
 	action: string,
@@ -384,12 +405,14 @@ function wpAjax(
 				} );
 			},
 			error: ( error: WpAjaxResponseData ) => {
-				reject( {
+				const rejection: WpAjaxError = {
 					success: false,
 					data: {
 						message: error.errorMessage,
+						code: error.errorCode,
 					},
-				} );
+				};
+				reject( rejection );
 			},
 		} );
 	} );
@@ -517,14 +540,86 @@ function addNotice(
  */
 const getRefreshErrorMessage = ( error: unknown ): string => {
 	const candidate = error as
-		| { data?: { message?: unknown }; message?: unknown }
-		| undefined;
+		{ data?: { message?: unknown }; message?: unknown } | undefined;
 
 	const message = [ candidate?.data?.message, candidate?.message ].find(
 		( value ): value is string => typeof value === 'string' && value !== ''
 	);
 
 	return message ?? __( 'Unexpected error.', 'woocommerce' );
+};
+
+/**
+ * Build the notice for a failed My Subscriptions update, explaining WordPress and PHP requirement failures by error code.
+ */
+const getUpdateErrorNotice = (
+	productName: string,
+	error: unknown,
+	onRetry: () => void
+): { message: string; actions: NoticeAction[] } => {
+	const { message: wpMessage, code } = getWpAjaxErrorData( error );
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	switch ( code ) {
+		case 'incompatible_wp_required_version':
+			return {
+				message: sprintf(
+					// translators: %s is the product name.
+					__(
+						'%s couldn’t be updated. This version requires a newer version of WordPress.',
+						'woocommerce'
+					),
+					productName
+				),
+				actions: wccomSettings.updateCoreUrl
+					? [
+							{
+								label: __( 'Update WordPress', 'woocommerce' ),
+								url: wccomSettings.updateCoreUrl,
+							},
+						]
+					: [],
+			};
+		case PHP_REQUIREMENT_ERROR_CODE:
+			return {
+				message: sprintf(
+					// translators: %s is the product name.
+					__(
+						'%s couldn’t be updated. This version requires a newer version of PHP.',
+						'woocommerce'
+					),
+					productName
+				),
+				actions: wccomSettings.updatePhpUrl
+					? [
+							{
+								label: __( 'Learn more', 'woocommerce' ),
+								url: wccomSettings.updatePhpUrl,
+								openInNewTab: true,
+							},
+						]
+					: [],
+			};
+	}
+
+	let message = sprintf(
+		// translators: %s is the product name.
+		__( '%s couldn’t be updated.', 'woocommerce' ),
+		productName
+	);
+	if ( wpMessage ) {
+		message += ' ' + decodeEntities( wpMessage );
+	}
+
+	return {
+		message,
+		actions: [
+			{
+				label: __( 'Try again', 'woocommerce' ),
+				onClick: onRetry,
+			},
+		],
+	};
 };
 
 const removeNotice = ( productKey: string ) => {
@@ -642,6 +737,9 @@ export {
 	updateProduct,
 	addNotice,
 	getRefreshErrorMessage,
+	getUpdateErrorNotice,
+	getWpAjaxErrorData,
+	PHP_REQUIREMENT_ERROR_CODE,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,

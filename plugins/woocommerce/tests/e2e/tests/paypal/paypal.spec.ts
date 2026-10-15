@@ -79,24 +79,6 @@ test.describe(
 			return paypalDiv;
 		}
 
-		/**
-		 * Temporary function to remove the disabled attribute from the Save changes button, as it is currently disabled by default and prevents saving changes in tests.
-		 * This should be removed once the underlying issue is resolved and the Save changes button can be enabled as expected.
-		 * See: https://github.com/woocommerce/woocommerce/issues/63498
-		 *
-		 * @param {Page} page The Playwright Page object representing the browser page to interact with.
-		 */
-		async function enableSaveButton( page: Page ) {
-			await page.evaluate( () => {
-				const saveButton = document.querySelector(
-					'button[name="save"]'
-				);
-				if ( saveButton ) {
-					saveButton.removeAttribute( 'disabled' );
-				}
-			} );
-		}
-
 		test( 'PayPal Standard can be enabled', async ( { page } ) => {
 			await openPayments( page );
 
@@ -178,9 +160,6 @@ test.describe(
 						.locator( '#woocommerce_paypal_title' )
 						.fill( 'PayPal Custom Title ' + Date.now() );
 
-					// TODO: Temporarily removing the disabled attribute from the Save changes button.
-					await enableSaveButton( page );
-
 					await page
 						.getByRole( 'button', {
 							name: 'Save changes',
@@ -211,9 +190,6 @@ test.describe(
 					await page
 						.locator( '#woocommerce_paypal_title' )
 						.fill( originalPayPalTitle );
-
-					// TODO: Temporarily removing the disabled attribute from the Save changes button.
-					await enableSaveButton( page );
 
 					await page
 						.getByRole( 'button', {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the address entered in the order editor when calculating tax for products added to manual orders.

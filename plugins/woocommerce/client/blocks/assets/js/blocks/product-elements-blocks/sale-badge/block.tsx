@@ -21,6 +21,7 @@ import type { HTMLAttributes, ReactElement } from 'react';
  */
 import './style.scss';
 import type { BlockAttributes } from './types';
+import { getSaleBadgeDiscount } from './utils';
 
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
@@ -51,12 +52,12 @@ export const Block = ( props: Props ): ReactElement | null => {
 	let label = props.saleText || __( 'Sale', 'woocommerce' );
 	if ( isNumeric && product.type !== 'grouped' ) {
 		const prices = 'prices' in product ? product.prices : undefined;
-		const regular = Number( prices?.regular_price );
-		const price = Number( prices?.price );
-		if ( regular > 0 && price < regular ) {
-			const discount = regular - price;
-			const percentage = Math.round( ( discount / regular ) * 100 );
-			if ( props.badgeContent === 'percentage' && percentage === 0 ) {
+		const discount = getSaleBadgeDiscount( prices );
+		if ( discount ) {
+			if (
+				props.badgeContent === 'percentage' &&
+				discount.percentage === 0
+			) {
 				return null;
 			}
 			const value =
@@ -64,12 +65,12 @@ export const Block = ( props: Props ): ReactElement | null => {
 					? sprintf(
 							/* translators: %s: discount percentage. %% is the percent sign. */
 							__( '%s%%', 'woocommerce' ),
-							percentage
-					  )
+							discount.percentage
+						)
 					: formatPrice(
-							discount,
+							discount.amount,
 							getCurrencyFromPriceResponse( prices )
-					  );
+						);
 			// Parent prices are independent minima, so the editor preview may differ from the largest variation discount.
 			label =
 				product.type === 'variable'
@@ -77,10 +78,10 @@ export const Block = ( props: Props ): ReactElement | null => {
 							/* translators: %s: approximate discount for a variable product in the editor. */
 							__( 'Up to %s', 'woocommerce' ),
 							value
-					  )
+						)
 					: `${ props.prefix ?? '' }${ value }${
 							props.suffix ?? ''
-					  }`;
+						}`;
 		}
 	}
 

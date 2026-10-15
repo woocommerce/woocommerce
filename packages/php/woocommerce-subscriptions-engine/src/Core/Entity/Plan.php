@@ -1,7 +1,7 @@
 <?php
 /**
- * Plan - a subscription selling plan: cadence, pricing, and delivery policy for
- * one or more products.
+ * Plan - a stored selling plan record. Its billing, pricing and delivery policies
+ * are opaque payloads of the owning extension; the engine checks their shape only.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -10,10 +10,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use InvalidArgumentException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\DeliveryPolicy;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use DomainException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,16 +22,6 @@ defined( 'ABSPATH' ) || exit;
  * {@see self::from_storage()} when hydrating a stored row.
  */
 final class Plan {
-
-	public const DEFAULT_CATEGORY = 'SUBSCRIPTION';
-
-	public const DEFAULT_STATUS = 'active';
-
-	public const STATUS_ACTIVE = 'active';
-
-	public const STATUS_ARCHIVED = 'archived';
-
-	public const ALLOWED_STATUSES = array( self::STATUS_ACTIVE, self::STATUS_ARCHIVED );
 
 	/**
 	 * Plan id, or null before it is persisted.
@@ -50,171 +38,106 @@ final class Plan {
 	private $name;
 
 	/**
-	 * Optional description.
-	 *
-	 * @var string|null
-	 */
-	private $description;
-
-	/**
-	 * Billing cadence. Required - every plan has one.
-	 *
-	 * @var BillingPolicy
-	 */
-	private $billing_policy;
-
-	/**
-	 * Optional delivery policy.
-	 *
-	 * @var DeliveryPolicy|null
-	 */
-	private $delivery_policy;
-
-	/**
-	 * Optional pricing payload, owned and interpreted by the plan's extension.
-	 *
-	 * @var array<string, mixed>|null
-	 */
-	private $pricing_policy;
-
-	/**
-	 * Plan category.
-	 *
-	 * @var string
-	 */
-	private $category;
-
-	/**
-	 * Merchant lifecycle status.
+	 * Registered plan status.
 	 *
 	 * @var string
 	 */
 	private $status;
 
 	/**
-	 * Manual display order.
-	 *
-	 * @var int
-	 */
-	private $sort_order;
-
-	/**
-	 * Optional stable external identifier, unique at the storage layer - the
-	 * consumer-side dedup key. Immutable post-create.
-	 *
-	 * @var string|null
-	 */
-	private $merchant_code;
-
-	/**
-	 * Owning extension slug, or null until owner semantics are assigned.
+	 * Owning extension slug.
 	 *
 	 * @var string|null
 	 */
 	private $extension_slug;
 
 	/**
-	 * Use {@see self::create()} or {@see self::from_storage()}.
+	 * Billing payload, owned and interpreted by the plan's extension.
 	 *
-	 * @param int|null                  $id              Plan id, or null before save.
-	 * @param string                    $name            Display name.
-	 * @param string|null               $description     Optional description.
-	 * @param BillingPolicy             $billing_policy  Billing cadence.
-	 * @param DeliveryPolicy|null       $delivery_policy Optional delivery policy.
-	 * @param array<string, mixed>|null $pricing_policy  Optional pricing payload.
-	 * @param string                    $category        Plan category.
-	 * @param string                    $status          Merchant lifecycle status.
-	 * @param int                       $sort_order      Manual display order.
-	 * @param string|null               $merchant_code   Optional stable external identifier.
-	 * @param string|null               $extension_slug  Owning extension slug.
+	 * @var array<string, mixed>|null
 	 */
-	private function __construct(
-		?int $id,
-		string $name,
-		?string $description,
-		BillingPolicy $billing_policy,
-		?DeliveryPolicy $delivery_policy,
-		?array $pricing_policy,
-		string $category,
-		string $status,
-		int $sort_order,
-		?string $merchant_code,
-		?string $extension_slug
-	) {
-		self::validate_status( $status );
+	private $billing_policy;
 
-		$this->id              = $id;
-		$this->name            = $name;
-		$this->description     = $description;
-		$this->billing_policy  = $billing_policy;
-		$this->delivery_policy = $delivery_policy;
-		$this->pricing_policy  = $pricing_policy;
-		$this->category        = $category;
-		$this->status          = $status;
-		$this->sort_order      = $sort_order;
-		$this->merchant_code   = $merchant_code;
-		$this->extension_slug  = $extension_slug;
+	/**
+	 * Pricing payload, owned and interpreted by the plan's extension.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private $pricing_policy;
+
+	/**
+	 * Delivery payload, owned and interpreted by the plan's extension.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	private $delivery_policy;
+
+	/**
+	 * Creation time (GMT, `Y-m-d H:i:s`) as stored, or null before insert.
+	 *
+	 * @var string|null
+	 */
+	private $date_created_gmt;
+
+	/**
+	 * Last update time (GMT, `Y-m-d H:i:s`) as stored, or null before insert.
+	 *
+	 * @var string|null
+	 */
+	private $date_updated_gmt;
+
+	/**
+	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
+	 * to its property type; unknown keys are ignored, missing keys take the default.
+	 *
+	 * @param array<string, mixed> $data Raw attributes keyed by property name.
+	 */
+	private function __construct( array $data ) {
+		$this->id               = Coercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->name             = Coercion::coerce_string( $data['name'] ?? null );
+		$this->status           = Coercion::coerce_string( $data['status'] ?? null, PlanStatus::ACTIVE );
+		$this->extension_slug   = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->billing_policy   = Coercion::coerce_nullable_string_keyed( $data['billing_policy'] ?? null );
+		$this->pricing_policy   = Coercion::coerce_nullable_string_keyed( $data['pricing_policy'] ?? null );
+		$this->delivery_policy  = Coercion::coerce_nullable_string_keyed( $data['delivery_policy'] ?? null );
+		$this->date_created_gmt = Coercion::coerce_nullable_string( $data['date_created_gmt'] ?? null );
+		$this->date_updated_gmt = Coercion::coerce_nullable_string( $data['date_updated_gmt'] ?? null );
 	}
 
 	/**
-	 * Build a new, unsaved plan.
+	 * Build a new, unsaved plan. `extension_slug` and a non-empty `name` are required.
 	 *
-	 * @param array<string, mixed> $args Plan attributes.
-	 * @throws InvalidArgumentException If pricing_policy is not an object (string-keyed array) or null.
+	 * @param array<string, mixed> $args Keys `name`, `status` (default {@see PlanStatus::ACTIVE}), `extension_slug`, `billing_policy`, `pricing_policy`, `delivery_policy`.
+	 * @throws DomainException If the plan attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		$pricing_policy = self::assert_object_or_null( $args['pricing_policy'] ?? null );
+		// A new plan is always unsaved; never adopt a caller-supplied id or stored dates.
+		unset( $args['id'], $args['date_created_gmt'], $args['date_updated_gmt'] );
 
-		$billing_policy = $args['billing_policy'] ?? null;
-		if ( ! $billing_policy instanceof BillingPolicy ) {
-			throw new InvalidArgumentException( 'Plan: billing_policy is required and must be a BillingPolicy instance.' );
-		}
+		// Checked before construction, which coerces a non-array payload to null.
+		self::assert_policy( 'billing_policy', $args['billing_policy'] ?? null );
+		self::assert_policy( 'pricing_policy', $args['pricing_policy'] ?? null );
+		self::assert_policy( 'delivery_policy', $args['delivery_policy'] ?? null );
 
-		$delivery_policy = $args['delivery_policy'] ?? null;
-		if ( null !== $delivery_policy && ! $delivery_policy instanceof DeliveryPolicy ) {
-			throw new InvalidArgumentException( 'Plan: delivery_policy must be a DeliveryPolicy instance or null.' );
-		}
+		$plan = new self( $args );
 
-		return new self(
-			null,
-			ScalarCoercion::coerce_string( $args['name'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $args['description'] ?? null ),
-			$billing_policy,
-			$delivery_policy,
-			$pricing_policy,
-			ScalarCoercion::coerce_string( $args['category'] ?? null, self::DEFAULT_CATEGORY ),
-			ScalarCoercion::coerce_string( $args['status'] ?? null, self::DEFAULT_STATUS ),
-			ScalarCoercion::coerce_int( $args['sort_order'] ?? null, 0 ),
-			ScalarCoercion::coerce_nullable_string( $args['merchant_code'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $args['extension_slug'] ?? null )
-		);
+		self::assert_name( $plan->name );
+		self::assert_status( $plan->status );
+		self::assert_extension_slug( $plan->extension_slug );
+
+		return $plan;
 	}
 
 	/**
-	 * Hydrate from a stored row. Policy columns arrive JSON-decoded.
+	 * Hydrate from a stored row, without validation. Policy columns arrive JSON-decoded.
 	 *
-	 * The pricing payload is checked only for shape (object or null); its
-	 * semantics belong to the owning extension.
+	 * The stored status is taken as is: a status registered by a since-deactivated
+	 * extension still hydrates.
 	 *
 	 * @param array<string, mixed> $row Decoded plan row.
-	 * @throws InvalidArgumentException If the stored pricing_policy is not an object.
 	 */
 	public static function from_storage( array $row ): self {
-		$pricing_policy = self::assert_object_or_null( $row['pricing_policy'] ?? null );
-
-		return new self(
-			isset( $row['id'] ) ? ScalarCoercion::coerce_int( $row['id'] ) : null,
-			ScalarCoercion::coerce_string( $row['name'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $row['description'] ?? null ),
-			BillingPolicy::from_array( is_array( $row['billing_policy'] ?? null ) ? $row['billing_policy'] : array() ),
-			isset( $row['delivery_policy'] ) && is_array( $row['delivery_policy'] ) ? DeliveryPolicy::from_array( $row['delivery_policy'] ) : null,
-			$pricing_policy,
-			ScalarCoercion::coerce_string( $row['category'] ?? null, self::DEFAULT_CATEGORY ),
-			ScalarCoercion::coerce_string( $row['status'] ?? null, self::DEFAULT_STATUS ),
-			ScalarCoercion::coerce_int( $row['sort_order'] ?? null, 0 ),
-			ScalarCoercion::coerce_nullable_string( $row['merchant_code'] ?? null ),
-			ScalarCoercion::coerce_nullable_string( $row['extension_slug'] ?? null )
-		);
+		return new self( $row );
 	}
 
 	/**
@@ -243,134 +166,35 @@ final class Plan {
 	/**
 	 * Set the display name.
 	 *
-	 * @param string $name Display name.
+	 * @param string $name Display name; must not be empty.
+	 * @throws DomainException If the name is empty.
 	 */
 	public function set_name( string $name ): void {
+		self::assert_name( $name );
 		$this->name = $name;
 	}
 
 	/**
-	 * Optional description.
-	 */
-	public function get_description(): ?string {
-		return $this->description;
-	}
-
-	/**
-	 * Set the description.
-	 *
-	 * @param string|null $description Description.
-	 */
-	public function set_description( ?string $description ): void {
-		$this->description = $description;
-	}
-
-	/**
-	 * Billing cadence.
-	 */
-	public function get_billing_policy(): BillingPolicy {
-		return $this->billing_policy;
-	}
-
-	/**
-	 * Set the billing cadence.
-	 *
-	 * @param BillingPolicy $billing_policy Billing cadence.
-	 */
-	public function set_billing_policy( BillingPolicy $billing_policy ): void {
-		$this->billing_policy = $billing_policy;
-	}
-
-	/**
-	 * Optional delivery policy.
-	 */
-	public function get_delivery_policy(): ?DeliveryPolicy {
-		return $this->delivery_policy;
-	}
-
-	/**
-	 * Set the delivery policy.
-	 *
-	 * @param DeliveryPolicy|null $delivery_policy Delivery policy.
-	 */
-	public function set_delivery_policy( ?DeliveryPolicy $delivery_policy ): void {
-		$this->delivery_policy = $delivery_policy;
-	}
-
-	/**
-	 * Optional pricing payload, as stored.
-	 *
-	 * @return array<string, mixed>|null
-	 */
-	public function get_pricing_policy(): ?array {
-		return $this->pricing_policy;
-	}
-
-	/**
-	 * Set the pricing payload.
-	 *
-	 * @param array<string, mixed>|null $pricing_policy Pricing payload.
-	 * @throws InvalidArgumentException If pricing_policy is not an object (string-keyed array).
-	 */
-	public function set_pricing_policy( ?array $pricing_policy ): void {
-		$this->pricing_policy = self::assert_object_or_null( $pricing_policy );
-	}
-
-	/**
-	 * Plan category.
-	 */
-	public function get_category(): string {
-		return $this->category;
-	}
-
-	/**
-	 * Set the plan category.
-	 *
-	 * @param string $category Plan category.
-	 */
-	public function set_category( string $category ): void {
-		$this->category = $category;
-	}
-
-	/**
-	 * Merchant lifecycle status.
+	 * Plan status.
 	 */
 	public function get_status(): string {
 		return $this->status;
 	}
 
 	/**
-	 * Set the merchant lifecycle status.
+	 * Set the plan status. Setting the current status is a no-op, so a hydrated
+	 * unregistered status survives it.
 	 *
-	 * @param string $status Plan status.
-	 * @throws InvalidArgumentException If the status is unknown.
+	 * @param string $status Plan status; must be registered.
+	 * @throws DomainException If the status is not registered.
 	 */
 	public function set_status( string $status ): void {
-		self::validate_status( $status );
+		if ( $status === $this->status ) {
+			return;
+		}
+
+		self::assert_status( $status );
 		$this->status = $status;
-	}
-
-	/**
-	 * Manual display order.
-	 */
-	public function get_sort_order(): int {
-		return $this->sort_order;
-	}
-
-	/**
-	 * Set the manual display order.
-	 *
-	 * @param int $sort_order Sort order.
-	 */
-	public function set_sort_order( int $sort_order ): void {
-		$this->sort_order = $sort_order;
-	}
-
-	/**
-	 * Optional stable external identifier, or null. Immutable post-create.
-	 */
-	public function get_merchant_code(): ?string {
-		return $this->merchant_code;
 	}
 
 	/**
@@ -381,68 +205,168 @@ final class Plan {
 	}
 
 	/**
-	 * Serialize to the storage column shape (excluding generated id/timestamps).
+	 * Billing payload, as stored.
 	 *
-	 * Policy value objects are returned as arrays and the pricing payload as
-	 * stored; the repository JSON-encodes them.
+	 * @return array<string, mixed>|null
+	 */
+	public function get_billing_policy(): ?array {
+		return $this->billing_policy;
+	}
+
+	/**
+	 * Replace the billing payload.
+	 *
+	 * @param array<array-key, mixed>|null $billing_policy Billing payload; must be string-keyed.
+	 * @throws DomainException If the payload is not an object (string-keyed array).
+	 */
+	public function set_billing_policy( ?array $billing_policy ): void {
+		self::assert_policy( 'billing_policy', $billing_policy );
+		$this->billing_policy = Coercion::coerce_nullable_string_keyed( $billing_policy );
+	}
+
+	/**
+	 * Pricing payload, as stored.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function get_pricing_policy(): ?array {
+		return $this->pricing_policy;
+	}
+
+	/**
+	 * Replace the pricing payload.
+	 *
+	 * @param array<array-key, mixed>|null $pricing_policy Pricing payload; must be string-keyed.
+	 * @throws DomainException If the payload is not an object (string-keyed array).
+	 */
+	public function set_pricing_policy( ?array $pricing_policy ): void {
+		self::assert_policy( 'pricing_policy', $pricing_policy );
+		$this->pricing_policy = Coercion::coerce_nullable_string_keyed( $pricing_policy );
+	}
+
+	/**
+	 * Delivery payload, as stored.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public function get_delivery_policy(): ?array {
+		return $this->delivery_policy;
+	}
+
+	/**
+	 * Replace the delivery payload.
+	 *
+	 * @param array<array-key, mixed>|null $delivery_policy Delivery payload; must be string-keyed.
+	 * @throws DomainException If the payload is not an object (string-keyed array).
+	 */
+	public function set_delivery_policy( ?array $delivery_policy ): void {
+		self::assert_policy( 'delivery_policy', $delivery_policy );
+		$this->delivery_policy = Coercion::coerce_nullable_string_keyed( $delivery_policy );
+	}
+
+	/**
+	 * Creation time (GMT) as stored, or null before insert.
+	 */
+	public function get_date_created_gmt(): ?string {
+		return $this->date_created_gmt;
+	}
+
+	/**
+	 * Assign the creation time after a successful insert.
+	 *
+	 * @param string $date_created_gmt Stored creation time (GMT, `Y-m-d H:i:s`).
+	 */
+	public function set_date_created_gmt( string $date_created_gmt ): void {
+		$this->date_created_gmt = $date_created_gmt;
+	}
+
+	/**
+	 * Last update time (GMT) as stored, or null before insert.
+	 */
+	public function get_date_updated_gmt(): ?string {
+		return $this->date_updated_gmt;
+	}
+
+	/**
+	 * Assign the update time after a successful write.
+	 *
+	 * @param string $date_updated_gmt Stored update time (GMT, `Y-m-d H:i:s`).
+	 */
+	public function set_date_updated_gmt( string $date_updated_gmt ): void {
+		$this->date_updated_gmt = $date_updated_gmt;
+	}
+
+	/**
+	 * Serialize to the storage column shape (excluding the id and timestamps).
+	 * Policies are returned as arrays or null; the repository JSON-encodes them.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function to_storage(): array {
 		return array(
 			'name'            => $this->name,
-			'description'     => $this->description,
-			'billing_policy'  => $this->billing_policy->to_array(),
-			'delivery_policy' => null !== $this->delivery_policy ? $this->delivery_policy->to_array() : null,
-			'pricing_policy'  => $this->pricing_policy,
-			'category'        => $this->category,
 			'status'          => $this->status,
-			'sort_order'      => $this->sort_order,
-			'merchant_code'   => $this->merchant_code,
 			'extension_slug'  => $this->extension_slug,
+			'billing_policy'  => $this->billing_policy,
+			'pricing_policy'  => $this->pricing_policy,
+			'delivery_policy' => $this->delivery_policy,
 		);
 	}
 
 	/**
-	 * Validate a plan lifecycle status.
+	 * Refuse an empty or whitespace-only name.
 	 *
-	 * @param string $status Status to validate.
-	 * @throws InvalidArgumentException If the status is unknown.
+	 * @param string $name Name to check.
+	 * @throws DomainException If `$name` is empty.
 	 */
-	private static function validate_status( string $status ): void {
-		if ( ! in_array( $status, self::ALLOWED_STATUSES, true ) ) {
-			throw new InvalidArgumentException(
-				sprintf( 'Plan: invalid status "%s".', $status )
-			);
+	private static function assert_name( string $name ): void {
+		if ( '' === trim( $name ) ) {
+			throw new DomainException( 'Plan: name is required and must be a non-empty string.' );
 		}
 	}
 
 	/**
-	 * Accept a pricing payload only as an object (string-keyed array) or null.
-	 * An empty array is accepted (a JSON `{}` decodes to it).
+	 * Refuse a status that is not a registered plan status.
 	 *
-	 * @param mixed $value Candidate payload.
-	 * @return array<string, mixed>|null
-	 * @throws InvalidArgumentException If the value is a list or not an array.
+	 * @param string $status Status to check.
+	 * @throws DomainException If `$status` is not registered.
 	 */
-	private static function assert_object_or_null( $value ): ?array {
+	private static function assert_status( string $status ): void {
+		if ( ! PlanStatus::is_registered( $status ) ) {
+			throw new DomainException( sprintf( 'Plan: status "%s" is not registered.', $status ) );
+		}
+	}
+
+	/**
+	 * Refuse a missing or empty owning extension slug.
+	 *
+	 * @param string|null $extension_slug Extension slug to check.
+	 * @throws DomainException If `$extension_slug` is null or empty.
+	 */
+	private static function assert_extension_slug( ?string $extension_slug ): void {
+		if ( null === $extension_slug || '' === $extension_slug ) {
+			throw new DomainException( 'Plan: extension_slug is required and must be a non-empty string.' );
+		}
+	}
+
+	/**
+	 * Refuse a policy payload that is not an object or null. Any keyed array is an object,
+	 * including numeric keys (a JSON `{"123": ...}` decodes to an int key); only a list (keys
+	 * 0..n-1), which would come back as a JSON array, is refused. An empty array is accepted
+	 * (a JSON `{}` decodes to it). The same rule for each of the three policies.
+	 *
+	 * @param string $field Policy field name, for the error message.
+	 * @param mixed  $value Candidate payload.
+	 * @throws DomainException If the value is a non-empty list or not an array.
+	 */
+	private static function assert_policy( string $field, $value ): void {
 		if ( null === $value ) {
-			return null;
+			return;
 		}
 
-		$message = 'Plan: pricing_policy must be an object (string-keyed array) or null.';
-		if ( ! is_array( $value ) ) {
-			throw new InvalidArgumentException( $message );
+		$is_list = is_array( $value ) && array() !== $value && array_keys( $value ) === range( 0, count( $value ) - 1 );
+		if ( ! is_array( $value ) || $is_list ) {
+			throw new DomainException( sprintf( 'Plan: %s must be an object or null.', $field ) );
 		}
-
-		$out = array();
-		foreach ( $value as $key => $item ) {
-			if ( ! is_string( $key ) ) {
-				throw new InvalidArgumentException( $message );
-			}
-			$out[ $key ] = $item;
-		}
-
-		return $out;
 	}
 }

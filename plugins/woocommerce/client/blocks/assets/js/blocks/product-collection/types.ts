@@ -42,8 +42,6 @@ export interface ProductCollectionAttributes {
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
 	filterable: boolean;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -155,11 +153,7 @@ export type ProductCollectionContentProps =
 
 export type TProductCollectionOrder = 'asc' | 'desc';
 export type TProductCollectionOrderBy =
-	| 'date'
-	| 'title'
-	| 'popularity'
-	| 'price'
-	| 'rating';
+	'date' | 'title' | 'popularity' | 'price' | 'rating';
 
 export type ProductCollectionSetAttributes = (
 	attrs: Partial< ProductCollectionAttributes >
