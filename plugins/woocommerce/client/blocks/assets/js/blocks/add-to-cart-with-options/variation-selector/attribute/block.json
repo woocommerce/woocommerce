@@ -27,6 +27,5 @@
 	"supports": {
 		"inserter": false,
 		"interactivity": true
-	},
-	"style": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-style.css"
+	}
 }
