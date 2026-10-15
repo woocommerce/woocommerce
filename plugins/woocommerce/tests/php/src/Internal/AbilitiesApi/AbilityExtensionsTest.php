@@ -1187,6 +1187,96 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write extension fields to each variation of a variable product from its own extensions input.
+	 */
+	public function test_product_create_writes_fields_to_each_variation(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'               => 'Shirt',
+				'product_type_alias' => 'variable',
+				'attributes'         => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'Small', 'Large' ),
+					),
+				),
+				'variations'         => array(
+					array(
+						'attributes'    => array( 'Size' => 'Small' ),
+						'regular_price' => '10',
+						'extensions'    => array( 'test-ext' => array( 'color' => 'red' ) ),
+					),
+					array(
+						'attributes'    => array( 'Size' => 'Large' ),
+						'regular_price' => '15',
+					),
+				),
+				'extensions'         => array( 'test-ext' => array( 'color' => 'blue' ) ),
+			)
+		);
+
+		list( $small, $large ) = array_map( 'wc_get_product', $created['product']['variations'] );
+		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
+		$this->assertSame( 'red', $small->get_meta( '_test_color' ) );
+		$this->assertFalse( $large->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should run a validator on each variation and save nothing when it refuses one.
+	 */
+	public function test_a_validator_refuses_a_variation_and_nothing_is_saved(): void {
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) {
+				if ( $subject instanceof \WC_Product_Variation && '15' === $subject->get_regular_price() ) {
+					return new \WP_Error( 'test_no_fifteen', 'No variation at 15.', array( 'status' => 409 ) );
+				}
+				return null;
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-create',
+			array(
+				'name'               => 'Shirt Refused',
+				'product_type_alias' => 'variable',
+				'attributes'         => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'Small', 'Large' ),
+					),
+				),
+				'variations'         => array(
+					array(
+						'attributes'    => array( 'Size' => 'Small' ),
+						'regular_price' => '10',
+					),
+					array(
+						'attributes'    => array( 'Size' => 'Large' ),
+						'regular_price' => '15',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'other_ext', $response->get_data()['data']['namespace'] );
+		$this->assertSame( array(), wc_get_products( array( 'name' => 'Shirt Refused' ) ) );
+		$this->assertSame(
+			array(),
+			get_posts(
+				array(
+					'post_type'   => 'product_variation',
+					'post_status' => 'any',
+					'fields'      => 'ids',
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should fire woocommerce_order_edit_status one time for an accepted status change, and not at all when an extension refuses it.
 	 */
 	public function test_order_status_update_fires_the_edit_action_only_for_an_accepted_change(): void {

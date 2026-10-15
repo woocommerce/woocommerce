@@ -57,12 +57,25 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 	abstract public static function prepare_response( $subject ): array;
 
 	/**
+	 * The other objects that save() writes, each paired with its `extensions` input.
+	 *
+	 * @param \WC_Data $subject Changed subject.
+	 * @param array    $input   Ability input.
+	 * @return array<int, array{0: \WC_Data, 1: array}>
+	 */
+	public static function pending_objects( $subject, array $input ): array {
+		unset( $subject, $input );
+		return array();
+	}
+
+	/**
 	 * Run the change.
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
 	 *
 	 * @since 10.9.0
+	 * @throws \Throwable When save() throws, after the rollback.
 	 */
 	public static function execute( array $input ) {
 		$subject = static::load( $input );
@@ -75,10 +88,18 @@ abstract class AbstractChangeAbility extends AbstractDomainAbility {
 			return $changed;
 		}
 
-		$saved = static::save( $subject );
+		wc_transaction_query( 'start' );
+		try {
+			$saved = static::save( $subject );
+		} catch ( \Throwable $e ) {
+			wc_transaction_query( 'rollback' );
+			throw $e;
+		}
 		if ( is_wp_error( $saved ) ) {
+			wc_transaction_query( 'rollback' );
 			return $saved;
 		}
+		wc_transaction_query( 'commit' );
 
 		return static::prepare_response( $subject );
 	}

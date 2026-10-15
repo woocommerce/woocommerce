@@ -155,6 +155,14 @@ class ProductUpdate extends AbstractChangeAbility implements AbilityDefinition {
 			return $product_config;
 		}
 
+		if ( isset( $input['variations'] ) ) {
+			return new \WP_Error(
+				'woocommerce_product_field_unsupported',
+				__( 'Variations can only be set when the product is created.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		try {
 			if ( isset( $input['product_type_alias'] ) ) {
 				self::apply_product_type_config( $subject, $product_config );
