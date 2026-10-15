@@ -167,8 +167,8 @@ class ExtensionsWithoutSubscription {
 	/**
 	 * Whether this page load may fetch the subscription list from WooCommerce.com.
 	 *
-	 * The fetch blocks the page, so a connected store without a cached list gets one a day, or one
-	 * right after it connects. Any other refresh reads the cache, so it's free to run every time.
+	 * The fetch blocks the page, so only a connected store without a cached list fetches: once a day,
+	 * or right after it connects.
 	 *
 	 * @return bool
 	 */
@@ -177,8 +177,9 @@ class ExtensionsWithoutSubscription {
 			return false;
 		}
 
+		// Nothing to fetch: a store that isn't connected has no list, and a cached one is already in use.
 		if ( ! \WC_Helper::is_site_connected() || \WC_Helper::has_cached_subscriptions() ) {
-			return true;
+			return false;
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read only, the same signal WooSubscriptionsNotes uses.
