@@ -387,7 +387,7 @@ Enable customers to change the sorting order of the products.
 
 - **Name:** woocommerce/catalog-sorting
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity, typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity, spacing (margin, padding), typography (fontSize, textAlign)
 - **Attributes:** fontSize, useLabel
 
 ## Product Category Description - woocommerce/category-description
@@ -1060,7 +1060,7 @@ Display a collection of products from your store.
 - **Name:** woocommerce/product-collection
 - **Category:** woocommerce
 - **Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
-- **Attributes:** __privatePreviewState, collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
+- **Attributes:** collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
 
 ## No results - woocommerce/product-collection-no-results
 
@@ -1545,7 +1545,7 @@ Contains the block elements used to render a product.
 
 - **Name:** woocommerce/product-template
 - **Category:** woocommerce
-- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
+- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), shadow, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
 
 ## Top Rated Products - woocommerce/product-top-rated
 
