@@ -4,12 +4,27 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\USPSShippingProvider;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * FulfillmentUtilsTest class.
  */
 class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Register a known built-in provider so the registry lookup resolves its display name,
+	 * independently of whether the feature's own providers are registered in the test run.
+	 */
+	private function register_known_provider(): void {
+		add_filter(
+			'woocommerce_fulfillment_shipping_providers',
+			function ( $providers ) {
+				$providers[] = new USPSShippingProvider();
+				return $providers;
+			}
+		);
+	}
 	/**
 	 * Original value of the fulfillments feature flag.
 	 *
@@ -167,5 +182,202 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 		$reloaded = new Fulfillment( $fulfillment->get_id() );
 
 		$this->assertSame( '', FulfillmentUtils::resolve_provider_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name returns the registered display name for a known provider slug.
+	 */
+	public function test_get_provider_display_name_returns_registered_name_for_known_provider(): void {
+		$this->register_known_provider();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'usps',
+				'_provider_name'     => 'ignored-for-known-providers',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'USPS', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name returns the merchant-entered name for custom providers.
+	 */
+	public function test_get_provider_display_name_returns_custom_name_for_other_provider(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'other',
+				'_provider_name'     => 'My Custom Carrier',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'My Custom Carrier', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name falls back to the slug for a custom provider with no name.
+	 */
+	public function test_get_provider_display_name_falls_back_to_slug_for_other_without_name(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'other',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'other', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name ignores a non-scalar provider name instead of casting it to "Array".
+	 */
+	public function test_get_provider_display_name_ignores_non_scalar_provider_name(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'other',
+				'_provider_name'     => array( 'unexpected', 'array' ),
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'other', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name falls back to the provider name for an unknown slug.
+	 */
+	public function test_get_provider_display_name_falls_back_to_name_for_unknown_slug(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'not-a-registered-slug',
+				'_provider_name'     => 'Regional Courier',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'Regional Courier', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name falls back to the slug when an unknown provider has no name.
+	 */
+	public function test_get_provider_display_name_falls_back_to_slug_when_no_name(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'not-a-registered-slug',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertSame( 'not-a-registered-slug', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name passes the resolved label through the woocommerce_fulfillment_shipment_provider_label filter.
+	 */
+	public function test_get_provider_display_name_applies_label_filter(): void {
+		$this->register_known_provider();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'usps',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		add_filter(
+			'woocommerce_fulfillment_shipment_provider_label',
+			static function ( $label ) {
+				return $label . ' (via API)';
+			}
+		);
+
+		$this->assertSame( 'USPS (via API)', FulfillmentUtils::get_provider_display_name( $reloaded ) );
+	}
+
+	/**
+	 * @testdox get_provider_display_name keeps the resolved label when the filter returns a non-scalar.
+	 */
+	public function test_get_provider_display_name_ignores_non_scalar_filter_result(): void {
+		$this->register_known_provider();
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => 123 ),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_shipment_provider' => 'usps',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		add_filter(
+			'woocommerce_fulfillment_shipment_provider_label',
+			static function () {
+				return array( 'unexpected' );
+			}
+		);
+
+		$this->assertSame( 'USPS', FulfillmentUtils::get_provider_display_name( $reloaded ) );
 	}
 }
