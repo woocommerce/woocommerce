@@ -47,13 +47,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const LINE_ITEMS_MAX = 100;
 
 	/**
-	 * The idempotency key this request owns, or '' when it owns none.
-	 *
-	 * @var string
-	 */
-	private $claimed_key = '';
-
-	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
@@ -66,10 +59,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
 	 * Answer the request, under the `Idempotency-Key` it carries.
 	 *
-	 * The key is settled before anything else runs: a replay must not load a session or
-	 * resolve a cart id, since the write it is replaying may have ended the cart's life —
-	 * a retried `cancel` has to return the stored response, not the `not_found` its own
-	 * first run left behind.
+	 * The key is settled before anything else runs: a replay must not load a session or resolve
+	 * a cart id, since a retried `cancel` has to return the stored response rather than the
+	 * `not_found` its own first run left behind.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -78,25 +70,40 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$settled = $this->claim_idempotency_key( $request );
+		$claimed = $this->claim_idempotency_key( $request );
 
-		if ( $settled instanceof \WP_REST_Response ) {
-			return $settled;
+		if ( $claimed instanceof \WP_REST_Response ) {
+			return $claimed;
 		}
 
 		$response = $this->dispatch_ucp_request( $request );
 
-		if ( '' !== $this->claimed_key ) {
-			if ( $this->is_replayable( $response ) ) {
-				UcpIdempotencyStore::finalize( $this->claimed_key, $response->get_status(), $response->get_data() );
-			} else {
-				// Not replayable, so the key is released: the client's retry has to
-				// reprocess rather than be answered from storage.
-				UcpIdempotencyStore::delete( $this->claimed_key );
-			}
+		// The key stays local to this request: one route instance serves every dispatch in
+		// the process, so a key held on the instance would outlive the request that claimed it.
+		if ( '' !== $claimed ) {
+			$this->store_idempotent_response( $claimed, $response );
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Record the outcome of a request that owns an idempotency key.
+	 *
+	 * @param string            $key Idempotency key this request owns.
+	 * @param \WP_REST_Response $response Response the request produced.
+	 * @return void
+	 */
+	private function store_idempotent_response( string $key, \WP_REST_Response $response ): void {
+		if ( $this->is_replayable( $response ) ) {
+			UcpIdempotencyStore::finalize( $key, $response->get_status(), $response->get_data() );
+
+			return;
+		}
+
+		// Not replayable, so the key is released: the client's retry has to reprocess
+		// rather than be answered from storage.
+		UcpIdempotencyStore::delete( $key );
 	}
 
 	/**
@@ -135,11 +142,12 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
-	 * @return \WP_REST_Response|null A response settling the request on its own, or null to go on and process it.
+	 * @return \WP_REST_Response|string A response settling the request on its own, or the
+	 *         claimed key — '' when the request proceeds owning no key.
 	 */
 	private function claim_idempotency_key( \WP_REST_Request $request ) {
 		if ( in_array( strtoupper( (string) $request->get_method() ), array( 'GET', 'HEAD' ), true ) ) {
-			return null;
+			return '';
 		}
 
 		/**
@@ -150,7 +158,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		 * @param bool $enabled Whether the `Idempotency-Key` header is honoured. Default true.
 		 */
 		if ( ! apply_filters( 'woocommerce_ucp_idempotency_enabled', true ) ) {
-			return null;
+			return '';
 		}
 
 		/**
@@ -169,10 +177,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 		if ( '' === $key || ! wp_is_uuid( $key ) ) {
 			if ( ! $strict ) {
-				// A key that is not a UUID is ignored rather than stored: the column is
-				// bounded, so a longer one would be truncated and could then collide with
-				// an unrelated request's key.
-				return null;
+				// Not stored when it is not a UUID: the column is bounded, so a longer key
+				// would be truncated and could then collide with an unrelated request's.
+				return '';
 			}
 
 			return $this->ucp_error(
@@ -188,9 +195,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$fingerprint = UcpRequestFingerprint::compute( $request );
 
 		if ( UcpIdempotencyStore::try_begin( $key, $fingerprint ) ) {
-			$this->claimed_key = $key;
-
-			return null;
+			return $key;
 		}
 
 		$existing = UcpIdempotencyStore::find( $key );

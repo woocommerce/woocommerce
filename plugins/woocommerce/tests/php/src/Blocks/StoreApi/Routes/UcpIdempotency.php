@@ -434,4 +434,28 @@ class UcpIdempotency extends ControllerTestCase {
 
 		$this->assertNotSame( UcpRequestFingerprint::compute( $one ), UcpRequestFingerprint::compute( $two ) );
 	}
+
+	/**
+	 * A read dispatched after a write must not touch the write's stored response.
+	 *
+	 * One route instance serves every dispatch in the process, and `CartsById` answers both
+	 * GET and PUT from it, so a key held on the instance would be reused by the next request.
+	 */
+	public function test_a_later_read_does_not_overwrite_a_stored_write(): void {
+		$created = $this->request( 'POST', '/carts', $this->cart_body( 0 ), wp_generate_uuid4() );
+		$cart_id = $created->get_data()['id'];
+		$key     = wp_generate_uuid4();
+		$body    = $this->cart_body( 0, 3 );
+
+		$updated = $this->request( 'PUT', '/carts/' . $cart_id, $body, $key );
+		$this->assertSame( 200, $updated->get_status() );
+
+		// Same route instance, same process: the GET must own no key.
+		$this->request( 'GET', '/carts/' . $cart_id );
+
+		$replay = $this->request( 'PUT', '/carts/' . $cart_id, $body, $key );
+
+		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertSame( $updated->get_data(), $replay->get_data() );
+	}
 }
