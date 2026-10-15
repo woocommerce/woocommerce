@@ -15,7 +15,6 @@ use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use WC_Order;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\DuplicateContractException;
@@ -1361,7 +1360,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$lock->release();
 		Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
 		$this->assertSame( array( 'Cocoa' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
-		$this->assertInstanceOf( ContractLock::class, Contracts::lock( $id, 'next' ), 'The internal lock was released.' );
+		$this->assertSame( $id, Contracts::lock( $id, 'next' )->get_contract_id(), 'The internal lock was released.' );
 	}
 
 	/**

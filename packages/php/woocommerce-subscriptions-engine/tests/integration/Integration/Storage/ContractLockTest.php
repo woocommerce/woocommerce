@@ -54,7 +54,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	 * The raw lock columns of a contract row.
 	 *
 	 * @param int $id Contract id.
-	 * @return array<string, mixed>
+	 * @return array<mixed>
 	 */
 	private function lock_columns( int $id ): array {
 		global $wpdb;

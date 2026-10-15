@@ -1911,6 +1911,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @param callable $run     Code under test.
 	 */
 	private function with_failing_query( string $pattern, callable $run ): void {
+		global $wpdb;
+
 		$broken = false;
 		$break  = static function ( string $query ) use ( $pattern, &$broken ): string {
 			if ( ! $broken && 1 === preg_match( $pattern, $query ) ) {
@@ -1921,11 +1923,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		};
 
 		add_filter( 'query', $break );
-		$suppress = $GLOBALS['wpdb']->suppress_errors( true );
+		$suppress = $wpdb->suppress_errors( true );
 		try {
 			$run();
 		} finally {
-			$GLOBALS['wpdb']->suppress_errors( $suppress );
+			$wpdb->suppress_errors( $suppress );
 			remove_filter( 'query', $break );
 		}
 		$this->assertTrue( $broken, 'The targeted statement ran.' );
@@ -2375,7 +2377,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		return array_map(
 			static function ( array $item ): string {
-				return (string) $item['item_name'];
+				return is_string( $item['item_name'] ?? null ) ? $item['item_name'] : '';
 			},
 			$contract->get_items()
 		);

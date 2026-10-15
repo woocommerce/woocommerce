@@ -51,11 +51,11 @@ final class ContractLock {
 	private $operation;
 
 	/**
-	 * Engine-generated token; never exposed.
+	 * Engine-generated token; never exposed. The repository reads it through a scope-bound closure.
 	 *
 	 * @var string
 	 */
-	private $token;
+	private $token; // @phpstan-ignore property.onlyWritten
 
 	/**
 	 * Monotonic `hrtime()` moment (ns) until which child writes trust the lock.

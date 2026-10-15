@@ -554,8 +554,10 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 
 				$this->assertSame( 409, $response->get_status() );
 				$this->assertSame( 'woocommerce_subscriptions_engine_contract_locked', $data['code'] );
-				$this->assertSame( 'renewal', $data['data']['operation'] );
-				$this->assertSame( '2035-01-01 00:10:00', $data['data']['locked_until'] );
+				$error_data = $data['data'];
+				$this->assertIsArray( $error_data );
+				$this->assertSame( 'renewal', $error_data['operation'] );
+				$this->assertSame( '2035-01-01 00:10:00', $error_data['locked_until'] );
 			}
 		);
 
