@@ -648,6 +648,43 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Whether an order's line items have the same products, quantities and amounts as the cart's items.
+	 *
+	 * @param WC_Order_Item[] $line_items The order's line items.
+	 * @param WC_Cart         $cart       The cart.
+	 * @return bool
+	 */
+	private function line_items_match_cart( array $line_items, WC_Cart $cart ): bool {
+		$order_values = array();
+		foreach ( $line_items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				return false;
+			}
+			$order_values[] = $this->get_line_item_values( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_subtotal_tax(), $item->get_total(), $item->get_total_tax() );
+		}
+
+		$cart_values = array();
+		foreach ( $cart->get_cart() as $values ) {
+			$cart_values[] = $this->get_line_item_values( $values['product_id'] ?? 0, $values['variation_id'] ?? 0, $values['quantity'] ?? 0, $values['line_subtotal'] ?? 0, $values['line_subtotal_tax'] ?? 0, $values['line_total'] ?? 0, $values['line_tax'] ?? 0 );
+		}
+
+		sort( $order_values );
+		sort( $cart_values );
+
+		return $order_values === $cart_values;
+	}
+
+	/**
+	 * Joins a line item's product, quantity and amounts into one string, rounded so order and cart values compare equal.
+	 *
+	 * @param int|float|string ...$values Product ID, variation ID, quantity, subtotal, subtotal tax, total and total tax.
+	 * @return string
+	 */
+	private function get_line_item_values( ...$values ): string {
+		return implode( '|', array_map( fn( $value ) => wc_format_decimal( $value, wc_get_rounding_precision() ), $values ) );
+	}
+
+	/**
 	 * Removes the items of a resumed order that no longer match the cart, and returns the item types it kept.
 	 *
 	 * Only cart-created items of unchanged types are kept: line items, whose cart hash already matches, and types whose
@@ -673,8 +710,11 @@ class WC_Checkout {
 			$hash_name     = array_search( $item_type, self::CART_HASHED_ORDER_ITEM_TYPES, true );
 			$cart_item_ids = array_map( 'absint', (array) ( $cart_order_item_ids[ $item_type ] ?? array() ) );
 			$order_items   = $order->get_items( $item_type );
-			// Line items have no section hash, since the order's cart hash already matches.
-			$is_unchanged = false === $hash_name || $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
+			// Line items have no section hash, since the order's cart hash already matches. They're compared with the cart
+			// too, because the cart hash can miss changes and a merchant can edit a pending order's items.
+			$is_unchanged = false === $hash_name
+				? $this->line_items_match_cart( array_intersect_key( $order_items, array_flip( $cart_item_ids ) ), WC()->cart )
+				: $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
 
 			// A cart item that's no longer on the order means the type has to be added again from the cart.
 			if ( ! $is_unchanged || array_diff( $cart_item_ids, array_keys( $order_items ) ) ) {

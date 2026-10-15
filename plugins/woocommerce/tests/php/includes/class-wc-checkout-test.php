@@ -1034,6 +1034,67 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order replaces line items that no longer match the cart, even when the cart hash still matches.
+	 */
+	public function test_create_order_resume_replaces_line_items_when_cart_hash_misses_a_quantity_change(): void {
+		// A cart hash that only covers product IDs, so a quantity change doesn't change it.
+		add_filter(
+			'woocommerce_cart_hash',
+			function ( $hash, $cart_session ) {
+				unset( $hash );
+				return md5( wp_json_encode( wp_list_pluck( (array) $cart_session, 'product_id' ) ) );
+			},
+			10,
+			2
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		WC()->cart->set_quantity( array_key_first( WC()->cart->get_cart() ), 3 );
+		WC()->cart->calculate_totals();
+
+		$resumed_id = $this->resume_order( $order_id );
+
+		$this->assertSame( $order_id, $resumed_id, 'The order should still be resumed.' );
+		$this->assert_line_items_match_cart( $order_id );
+		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The line item should be replaced.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces line items a merchant edited, so they match the cart again.
+	 */
+	public function test_create_order_resume_replaces_line_items_edited_after_checkout(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$item     = array_values( $order->get_items() )[0];
+		$item->set_quantity( 2 );
+		$item->set_subtotal( (float) $item->get_subtotal() * 2 );
+		$item->set_total( (float) $item->get_total() * 2 );
+		$item->save();
+		$order->calculate_totals();
+
+		$this->resume_order( $order_id );
+
+		$this->assert_line_items_match_cart( $order_id );
+		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The edited line item should be replaced.' );
+	}
+
+	/**
+	 * Asserts that an order's line items have the cart's quantities and totals.
+	 *
+	 * @param int $order_id The order ID.
+	 */
+	private function assert_line_items_match_cart( int $order_id ): void {
+		$order      = wc_get_order( $order_id );
+		$line_items = array_values( $order->get_items() );
+		$cart_items = array_values( WC()->cart->get_cart() );
+
+		$this->assertCount( count( $cart_items ), $line_items, 'The order should have one line item per cart item.' );
+		$this->assertSame( (int) $cart_items[0]['quantity'], (int) $line_items[0]->get_quantity(), 'The line item quantity should match the cart.' );
+		$this->assertSame( (float) $cart_items[0]['line_total'], (float) $line_items[0]->get_total(), 'The line item total should match the cart.' );
+	}
+
+	/**
 	 * @testdox An Error thrown while resuming an order doesn't make a later set_data_from_cart() call skip item types.
 	 */
 	public function test_create_order_resume_error_does_not_leave_item_types_skipped(): void {
