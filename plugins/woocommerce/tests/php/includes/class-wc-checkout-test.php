@@ -1080,6 +1080,38 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox remove_order_items_not_matching_cart() keeps shipping lines while the cart hasn't evaluated shipping.
+	 */
+	public function test_remove_order_items_not_matching_cart_keeps_unevaluated_shipping(): void {
+		$order    = wc_create_order();
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$order->add_item( $shipping );
+		$order->update_meta_data( '_shipping_hash', 'stale' );
+		$order->save();
+		// A cart that needs shipping but hasn't calculated it yet.
+		$cart = $this->createMock( WC_Cart::class );
+		$cart->method( 'needs_shipping' )->willReturn( true );
+		$cart->method( 'has_calculated_shipping' )->willReturn( false );
+		$cart->method( 'get_cart' )->willReturn( array() );
+
+		$kept_types = $this->sut->remove_order_items_not_matching_cart(
+			$order,
+			$cart,
+			array(
+				'line_items' => 'line-items',
+				'shipping'   => 'shipping',
+				'fees'       => 'fees',
+				'coupons'    => 'coupons',
+				'taxes'      => 'taxes',
+			)
+		);
+
+		$this->assertContains( 'shipping', $kept_types );
+		$this->assertCount( 1, $order->get_items( 'shipping' ), 'The shipping line should stay on the order.' );
+	}
+
+	/**
 	 * Asserts that an order's line items have the cart's quantities and totals.
 	 *
 	 * @param int $order_id The order ID.

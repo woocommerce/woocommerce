@@ -522,6 +522,10 @@ class WC_Checkout {
 			$cart_order_items = $order->get_items( $this->get_cart_order_item_types() );
 
 			foreach ( array_keys( self::CART_HASHED_ORDER_ITEM_TYPES ) as $hash_name ) {
+				// Unevaluated shipping keeps its previous hash, so it's replaced once the cart evaluates it.
+				if ( 'shipping' === $hash_name && ! $this->cart_has_evaluated_shipping( WC()->cart ) ) {
+					continue;
+				}
 				$order->update_meta_data( "_{$hash_name}_hash", $cart_hashes[ $hash_name ] );
 			}
 
@@ -648,6 +652,57 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Removes the order items that no longer match the cart, and returns the item types it kept. The classic checkout and
+	 * the Store API both use it, so a resumed order keeps the same items whichever checkout updates it.
+	 *
+	 * Line items are kept while the order's cart hash matches and they still match the cart's items. Other types are
+	 * kept while their section hash matches, and shipping is also kept until the cart has evaluated it.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order              $order       The order.
+	 * @param WC_Cart               $cart        The cart.
+	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
+	 * @return string[] The kept item types.
+	 */
+	public function remove_order_items_not_matching_cart( WC_Order $order, WC_Cart $cart, array $cart_hashes ): array {
+		$kept_types = array();
+
+		if ( $order->get_cart_hash() === $cart_hashes['line_items'] && $this->line_items_match_cart( $order->get_items( OrderItemType::LINE_ITEM ), $cart ) ) {
+			$kept_types[] = OrderItemType::LINE_ITEM;
+		} else {
+			$order->remove_order_items( OrderItemType::LINE_ITEM );
+		}
+
+		foreach ( self::CART_HASHED_ORDER_ITEM_TYPES as $hash_name => $item_type ) {
+			$is_unchanged = $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
+			// Shipping isn't replaced before the cart evaluates it, so the order doesn't lose its shipping lines.
+			$is_unevaluated_shipping = OrderItemType::SHIPPING === $item_type && ! $this->cart_has_evaluated_shipping( $cart );
+
+			if ( $is_unchanged || $is_unevaluated_shipping ) {
+				$kept_types[] = $item_type;
+			} else {
+				$order->remove_order_items( $item_type );
+			}
+		}
+
+		return $kept_types;
+	}
+
+	/**
+	 * Whether the cart has evaluated shipping: it calculated it, or it needs none and its shipping methods were loaded.
+	 * A null methods value means evaluation hasn't run, while an empty array means it ran and found none.
+	 *
+	 * @param WC_Cart $cart The cart.
+	 * @return bool
+	 */
+	private function cart_has_evaluated_shipping( WC_Cart $cart ): bool {
+		return $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
+	}
+
+	/**
 	 * Whether an order's line items have the same products, quantities and amounts as the cart's items.
 	 *
 	 * @param WC_Order_Item[] $line_items The order's line items.
@@ -699,33 +754,31 @@ class WC_Checkout {
 		global $wpdb;
 
 		$cart_order_item_ids = $order->get_meta( self::CART_ORDER_ITEM_IDS_META_KEY );
-		if ( ! is_array( $cart_order_item_ids ) ) {
+		if ( ! $order instanceof WC_Order || ! is_array( $cart_order_item_ids ) ) {
 			// Without a record of the cart's items, they can't be told apart from items added by extensions.
 			$order->remove_order_items();
 			return array();
 		}
 
-		$kept_types = array();
+		// Keep only the items the cart created. A type that's missing one of them is added again from the cart.
+		$incomplete_types = array();
 		foreach ( $this->get_cart_order_item_types() as $item_type ) {
-			$hash_name     = array_search( $item_type, self::CART_HASHED_ORDER_ITEM_TYPES, true );
 			$cart_item_ids = array_map( 'absint', (array) ( $cart_order_item_ids[ $item_type ] ?? array() ) );
 			$order_items   = $order->get_items( $item_type );
-			// Line items have no section hash, since the order's cart hash already matches. They're compared with the cart
-			// too, because the cart hash can miss changes and a merchant can edit a pending order's items.
-			$is_unchanged = false === $hash_name
-				? $this->line_items_match_cart( array_intersect_key( $order_items, array_flip( $cart_item_ids ) ), WC()->cart )
-				: $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
 
-			// A cart item that's no longer on the order means the type has to be added again from the cart.
-			if ( ! $is_unchanged || array_diff( $cart_item_ids, array_keys( $order_items ) ) ) {
+			if ( array_diff( $cart_item_ids, array_keys( $order_items ) ) ) {
+				$incomplete_types[] = $item_type;
 				continue;
 			}
 
 			foreach ( array_diff( array_keys( $order_items ), $cart_item_ids ) as $item_id ) {
 				$order->remove_item( $item_id );
 			}
-			$kept_types[] = $item_type;
 		}
+
+		$kept_types = array_values(
+			array_diff( $this->remove_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes ), $incomplete_types )
+		);
 
 		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
 		$persisted_types = $wpdb->get_col(

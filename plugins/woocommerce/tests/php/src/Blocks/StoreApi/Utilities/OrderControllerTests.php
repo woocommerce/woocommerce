@@ -505,6 +505,26 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() replaces line items a merchant edited, even though the order's cart hash still matches the cart.
+	 */
+	public function test_update_order_from_cart_replaces_line_items_that_no_longer_match_the_cart(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		$order = $this->sut->create_order_from_cart();
+		$item  = array_values( $order->get_items() )[0];
+		$item->set_quantity( 2 );
+		$item->save();
+
+		$this->sut->update_order_from_cart( $order );
+
+		$items = array_values( $order->get_items() );
+		$this->assertCount( 1, $items, 'The order should have one line item per cart item.' );
+		$this->assertSame( 1, (int) $items[0]->get_quantity(), 'The line item should have the cart quantity again.' );
+	}
+
+	/**
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.
