@@ -333,15 +333,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$expected_aliases = array( 'physical', 'virtual', 'digital', 'affiliate', 'grouped' );
+		$expected_aliases = array( 'physical', 'virtual', 'digital', 'affiliate', 'grouped', 'variable' );
 
 		$this->assertSame( $expected_aliases, $query_schema['properties']['product_type_alias']['enum'] ?? array() );
 		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
 		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $update_schema ) );
 		$this->assertSame( 'physical', $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties']['product_type_alias']['default'] ?? null );
 		$this->assertArrayNotHasKey( 'default', $this->get_product_type_alias_schema_branch( $update_schema, 'physical' )['properties']['product_type_alias'] ?? array() );
-		$this->assertNotContains( 'variable', $query_schema['properties']['product_type_alias']['enum'] ?? array() );
-		$this->assertNotContains( 'variable', $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
 		$this->assertArrayNotHasKey(
 			'product_type_alias',
 			wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product']['properties'] ?? array()

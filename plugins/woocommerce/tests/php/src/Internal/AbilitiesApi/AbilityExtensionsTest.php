@@ -1237,7 +1237,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		$response = $this->run_ability_response(
+		$response = $this->dispatch_ability(
 			'woocommerce/product-create',
 			array(
 				'name'               => 'Shirt Refused',
@@ -1507,11 +1507,12 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
-			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
-			foreach ( $schema['oneOf'] as $branch ) {
+			foreach ( $schema['oneOf'] as $index => $branch ) {
 				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
 				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
+				unset( $schema['oneOf'][ $index ]['properties']['variations'] );
 			}
+			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ), 'Only the variations of a variable product repeat the fields.' );
 		}
 		$order = $this->get_ability_data( 'woocommerce/order-update-status' )['input_schema'];
 		$this->assertSame( array( 'string', 'null' ), $order['properties']['extensions']['properties']['test-ext']['properties']['tag']['type'] );
