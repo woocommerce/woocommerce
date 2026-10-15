@@ -93,4 +93,48 @@ class ProductResultsCountTest extends WP_UnitTestCase {
 		$this->assertTrue( $p->next_tag( array( 'class_name' => 'wc-block-product-results-count' ) ), 'The standalone result count wrapper should exist.' );
 		$this->assertSame( 'wc-product-results-count-0', $p->get_attribute( 'data-wp-router-region' ), 'The standalone router region should use the default query ID.' );
 	}
+
+	/**
+	 * @testdox Exposes the count as plain text for the announcement after client-side navigation.
+	 */
+	public function test_exposes_announcement_text_in_context(): void {
+		$markup = do_blocks( '<!-- wp:woocommerce/product-results-count /-->' );
+		$p      = new WP_HTML_Tag_Processor( $markup );
+
+		$this->assertTrue( $p->next_tag( array( 'class_name' => 'wc-block-product-results-count' ) ), 'The result count wrapper should exist.' );
+		$this->assertSame( 'callbacks.announceResultsCount', $p->get_attribute( 'data-wp-watch' ), 'The wrapper should register the announcement callback.' );
+
+		$context = json_decode( (string) $p->get_attribute( 'data-wp-context' ), true );
+		$this->assertIsArray( $context, 'The wrapper should carry a JSON context.' );
+		$this->assertSame( 'Showing 5–8 of 12 results', $context['announcement'] ?? null, 'The announcement should be the decoded count text.' );
+	}
+
+	/**
+	 * @testdox Joins the hidden sort label to the count with a space.
+	 */
+	public function test_announcement_includes_sort_label(): void {
+		$_GET['orderby'] = 'price'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test fixture for the sort label.
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/product-results-count /-->' );
+		} finally {
+			unset( $_GET['orderby'] );
+		}
+		$p = new WP_HTML_Tag_Processor( $markup );
+		$p->next_tag( array( 'class_name' => 'wc-block-product-results-count' ) );
+
+		$context = json_decode( (string) $p->get_attribute( 'data-wp-context' ), true );
+		$this->assertSame( 'Showing 5–8 of 12 results Sorted by price: low to high', $context['announcement'] ?? null, 'The sort label should follow the count after a space.' );
+	}
+
+	/**
+	 * @testdox Removes the template's live-region attributes inside the block.
+	 */
+	public function test_inner_paragraph_is_not_a_live_region(): void {
+		$markup = do_blocks( '<!-- wp:woocommerce/product-results-count /-->' );
+		$p      = new WP_HTML_Tag_Processor( $markup );
+
+		$this->assertTrue( $p->next_tag( array( 'class_name' => 'woocommerce-result-count' ) ), 'The inner paragraph should exist.' );
+		$this->assertNull( $p->get_attribute( 'role' ), 'The block announces the count itself, so the paragraph must not be a second live region.' );
+		$this->assertNull( $p->get_attribute( 'aria-relevant' ), 'The paragraph should not keep live-region settings.' );
+	}
 }
