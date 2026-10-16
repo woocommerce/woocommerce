@@ -148,12 +148,15 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Attach the tracking hooks when the store allows usage tracking.
+	 * Attach the tracking hooks when the store allows usage tracking, or on multisite.
+	 *
+	 * Consent is per site and a request can switch sites, so on multisite the hooks are always attached and consent is
+	 * checked for each call instead.
 	 *
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! self::is_tracking_allowed() ) {
+		if ( ! is_multisite() && ! self::is_tracking_allowed() ) {
 			return;
 		}
 

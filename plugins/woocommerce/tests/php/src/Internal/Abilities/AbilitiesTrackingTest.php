@@ -108,39 +108,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 
-		$this->sut = new class() extends AbilitiesTracking {
-			/**
-			 * Captured Tracks properties.
-			 *
-			 * @var array
-			 */
-			public array $recorded = array();
-
-			/**
-			 * Whether to behave as a long-running process.
-			 *
-			 * @var bool
-			 */
-			public bool $long_running = false;
-
-			/**
-			 * Capture the event instead of sending it.
-			 *
-			 * @param array $properties Tracks properties.
-			 */
-			protected function send_event( array $properties ): void {
-				$this->recorded[] = $properties;
-			}
-
-			/**
-			 * Report the configured process type.
-			 *
-			 * @return bool
-			 */
-			protected function is_long_running_process(): bool {
-				return $this->long_running;
-			}
-		};
+		$this->sut = $this->create_sut();
 		$this->sut->handle_init();
 	}
 
@@ -595,9 +563,12 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not attach any hooks when usage tracking is disabled.
+	 * @testdox Should not attach any hooks on a single site when usage tracking is disabled.
 	 */
 	public function test_does_not_attach_hooks_when_tracking_disabled(): void {
+		if ( is_multisite() ) {
+			$this->markTestSkipped( 'On multisite, hooks are always attached and consent is checked per call.' );
+		}
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		$sut = new AbilitiesTracking();
 
@@ -699,6 +670,36 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record calls on an opted-in site of a network when the request started on an opted-out site.
+	 */
+	public function test_records_calls_after_switching_to_opted_in_site(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+		$opted_in_site = self::factory()->blog->create();
+		switch_to_blog( $opted_in_site );
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		restore_current_blog();
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		remove_all_actions( 'mcp_adapter_pre_tool_call' );
+		$sut = $this->create_sut();
+		$sut->handle_init();
+		$this->start_mcp_tool_call();
+		$ability = wp_get_ability( self::ABILITY_ID );
+
+		$ability->execute();
+		switch_to_blog( $opted_in_site );
+		try {
+			$ability->execute();
+		} finally {
+			restore_current_blog();
+		}
+		$sut->handle_shutdown();
+
+		$this->assertCount( 1, $sut->recorded, 'Only the call on the opted-in site should be recorded' );
+	}
+
+	/**
 	 * @testdox Should record each call with the user who made it.
 	 */
 	public function test_records_user_context_of_each_call(): void {
@@ -711,6 +712,47 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( array( 'administrator', 'shop_manager' ), array_column( $this->sut->recorded, 'role' ) );
+	}
+
+	/**
+	 * Create a tracker that captures events instead of sending them.
+	 *
+	 * @return AbilitiesTracking&object{recorded: array, long_running: bool}
+	 */
+	private function create_sut(): AbilitiesTracking {
+		return new class() extends AbilitiesTracking {
+			/**
+			 * Captured Tracks properties.
+			 *
+			 * @var array
+			 */
+			public array $recorded = array();
+
+			/**
+			 * Whether to behave as a long-running process.
+			 *
+			 * @var bool
+			 */
+			public bool $long_running = false;
+
+			/**
+			 * Capture the event instead of sending it.
+			 *
+			 * @param array $properties Tracks properties.
+			 */
+			protected function send_event( array $properties ): void {
+				$this->recorded[] = $properties;
+			}
+
+			/**
+			 * Report the configured process type.
+			 *
+			 * @return bool
+			 */
+			protected function is_long_running_process(): bool {
+				return $this->long_running;
+			}
+		};
 	}
 
 	/**
