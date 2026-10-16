@@ -11,6 +11,7 @@ import type {
  * Internal dependencies
  */
 import { doesCartItemMatchAttributes } from '../../../base/utils/variations/does-cart-item-match-attributes';
+import { isCartItem } from '../../../base/stores/woocommerce/cart/is-cart-item';
 
 /** Product ID and optional selected attributes used to count cart lines. */
 type InCartQuantityTarget = {
@@ -46,7 +47,7 @@ export const getInCartQuantity = (
 
 		if (
 			target.selectedAttributes !== undefined &&
-			'type' in item &&
+			isCartItem( item ) &&
 			item.type === 'variation' &&
 			! doesCartItemMatchAttributes( item, target.selectedAttributes )
 		) {

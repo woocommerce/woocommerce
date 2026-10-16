@@ -24,7 +24,6 @@ import {
 	computeKeylessAddSuppressKeys,
 	generateErrorNotice,
 	getInfoNoticesFromCartUpdates,
-	isCartItem,
 	lineMatchesProduct,
 } from './notices';
 import type { SelectedAttributes, WooCommerceConfig } from '../types';
@@ -36,6 +35,7 @@ import type {
 	Store,
 } from './types';
 import { doesCartItemMatchAttributes } from '../../../utils/variations/does-cart-item-match-attributes';
+import { isCartItem } from './is-cart-item';
 
 type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
@@ -328,7 +328,10 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					if ( 'type' in cartItem && cartItem.type === 'variation' ) {
+					if (
+						isCartItem( cartItem ) &&
+						cartItem.type === 'variation'
+					) {
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||

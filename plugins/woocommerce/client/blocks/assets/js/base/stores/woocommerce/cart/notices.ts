@@ -20,13 +20,7 @@ import type {
 import type { SelectedAttributes } from '../types';
 import type { OptimisticCartItem, Store } from './types';
 import { doesCartItemMatchAttributes } from '../../../utils/variations/does-cart-item-match-attributes';
-
-// Guard to distinguish between optimistic and cart items.
-export function isCartItem(
-	item: OptimisticCartItem | CartItem
-): item is CartItem {
-	return 'name' in item;
-}
+import { isCartItem } from './is-cart-item';
 
 export const generateErrorNotice = (
 	error: Error | ApiErrorResponse
@@ -59,7 +53,7 @@ export function lineMatchesProduct(
 	id: number,
 	variation?: CartVariationItem[] | SelectedAttributes[]
 ): boolean {
-	if ( 'type' in item && item.type === 'variation' ) {
+	if ( isCartItem( item ) && item.type === 'variation' ) {
 		if (
 			id !== item.id ||
 			! item.variation ||
