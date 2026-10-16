@@ -52,10 +52,10 @@
 	background: $white;
 }
 
-// 4:3, like the Purple preview and theme screenshots, so both show whole and the boxes line up.
+// A shorter crop of the 4:3 previews (top kept), so the cards take less height.
 .woocommerce-profiler-purple-theme__image {
 	position: relative;
-	aspect-ratio: 4 / 3;
+	aspect-ratio: 16 / 9;
 	border-bottom: 1px solid $gray-200;
 	background: $gray-100;
 
@@ -88,6 +88,12 @@
 	> span {
 		flex-shrink: 0;
 	}
+}
+
+.woocommerce-profiler-purple-theme__title-row.is-stacked {
+	flex-direction: column;
+	align-items: flex-start;
+	gap: $gap-smaller;
 }
 
 .woocommerce-profiler-purple-theme__title {
@@ -127,13 +133,26 @@
 
 	// "Purple only" version: one card, centered.
 	&.is-purple-only {
-		grid-template-columns: minmax(300px, 600px);
+		grid-template-columns: minmax(300px, 480px);
+		margin-block-end: 0;
 	}
 }
 
-.woocommerce-profiler-purple-theme__buttons {
+.woocommerce-profiler-purple-theme__footer {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	flex-wrap: wrap;
-	gap: $gap-small;
+	margin-block: 40px 48px;
+
+	// Same as the Continue button on the other wizard steps.
+	.woocommerce-profiler-purple-theme__continue {
+		justify-content: center;
+		width: 200px;
+		height: 48px;
+		font-size: 14px;
+	}
+
+	.woocommerce-profiler-purple-theme__note {
+		margin-block-start: $gap;
+	}
 }

@@ -25,7 +25,9 @@ type ThemeOptionProps = {
 	badge?: string;
 	title: string;
 	description: string;
-	children: ReactNode;
+	// Badge on its own line above the title, instead of beside it.
+	badgeAbove?: boolean;
+	children?: ReactNode;
 };
 
 const ThemeOption = ( {
@@ -34,6 +36,7 @@ const ThemeOption = ( {
 	badge,
 	title,
 	description,
+	badgeAbove = false,
 	children,
 }: ThemeOptionProps ) => (
 	<div className="woocommerce-profiler-purple-theme__option">
@@ -41,7 +44,14 @@ const ThemeOption = ( {
 			{ image && <img src={ image } alt={ imageAlt } /> }
 		</div>
 		<div className="woocommerce-profiler-purple-theme__body">
-			<div className="woocommerce-profiler-purple-theme__title-row">
+			<div
+				className={ clsx(
+					'woocommerce-profiler-purple-theme__title-row',
+					{
+						'is-stacked': badgeAbove,
+					}
+				) }
+			>
 				{ badge && <Badge intent="informational">{ badge }</Badge> }
 				<h2 className="woocommerce-profiler-purple-theme__title">
 					{ title }
@@ -50,9 +60,11 @@ const ThemeOption = ( {
 			<p className="woocommerce-profiler-purple-theme__description">
 				{ description }
 			</p>
-			<div className="woocommerce-profiler-purple-theme__actions">
-				{ children }
-			</div>
+			{ children && (
+				<div className="woocommerce-profiler-purple-theme__actions">
+					{ children }
+				</div>
+			) }
 		</div>
 	</div>
 );
@@ -87,6 +99,14 @@ export const PurpleTheme = ( {
 			<Navigation
 				percentage={ navigationProgress }
 				onSkip={ () => complete( false ) }
+				{ ...( isPurpleOnly
+					? {
+							skipText: __(
+								'Keep my current theme',
+								'woocommerce'
+							),
+						}
+					: {} ) }
 			/>
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-purple-theme__content">
 				<Heading
@@ -112,6 +132,7 @@ export const PurpleTheme = ( {
 							'woocommerce'
 						) }
 						badge={ __( 'Free theme', 'woocommerce' ) }
+						badgeAbove={ isPurpleOnly }
 						title={ __(
 							'Built by WooCommerce, for your store',
 							'woocommerce'
@@ -121,35 +142,24 @@ export const PurpleTheme = ( {
 							'woocommerce'
 						) }
 					>
-						<div className="woocommerce-profiler-purple-theme__buttons">
-							<Button
-								className="woocommerce-profiler-purple-theme__button"
-								variant="primary"
-								__next40pxDefaultSize
-								onClick={ () => complete( true ) }
-							>
-								{ __( 'Install Purple', 'woocommerce' ) }
-							</Button>
-							{ isPurpleOnly && (
+						{ ! isPurpleOnly && (
+							<>
 								<Button
 									className="woocommerce-profiler-purple-theme__button"
-									variant="tertiary"
+									variant="primary"
 									__next40pxDefaultSize
-									onClick={ () => complete( false ) }
+									onClick={ () => complete( true ) }
 								>
+									{ __( 'Install Purple', 'woocommerce' ) }
+								</Button>
+								<p className="woocommerce-profiler-purple-theme__note">
 									{ __(
-										'Keep my current theme',
+										'We’ll install Purple and activate it as your store’s theme.',
 										'woocommerce'
 									) }
-								</Button>
-							) }
-						</div>
-						<p className="woocommerce-profiler-purple-theme__note">
-							{ __(
-								'We’ll install Purple and activate it as your store’s theme.',
-								'woocommerce'
-							) }
-						</p>
+								</p>
+							</>
+						) }
 					</ThemeOption>
 					{ ! isPurpleOnly && (
 						<ThemeOption
@@ -181,6 +191,23 @@ export const PurpleTheme = ( {
 						</ThemeOption>
 					) }
 				</div>
+				{ isPurpleOnly && (
+					<div className="woocommerce-profiler-purple-theme__footer">
+						<Button
+							className="woocommerce-profiler-purple-theme__continue"
+							variant="primary"
+							onClick={ () => complete( true ) }
+						>
+							{ __( 'Install Purple', 'woocommerce' ) }
+						</Button>
+						<p className="woocommerce-profiler-purple-theme__note">
+							{ __(
+								'We’ll install Purple and activate it as your store’s theme.',
+								'woocommerce'
+							) }
+						</p>
+					</div>
+				) }
 			</div>
 		</div>
 	);
