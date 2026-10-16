@@ -114,11 +114,11 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A refund inherits the exclusion of its parent order.
+	 * @testdox A refund inherits the exclusion of its parent order in every import path.
 	 */
 	public function test_refund_of_excluded_record_is_not_imported(): void {
-		list( , $child_id ) = $this->create_parent_child_and_refund();
-		$child_refund_id    = wc_create_refund(
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$child_refund_id                          = wc_create_refund(
 			array(
 				'order_id' => $child_id,
 				'amount'   => 1,
@@ -126,17 +126,53 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		)->get_id();
 		$this->exclude_child_orders_from_import();
 
-		OrdersScheduler::import( $child_refund_id );
-		$result = OrdersStatsDataStore::update( wc_get_order( $child_refund_id ) );
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
+		$ids   = array_map( 'intval', $items->ids );
+		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
+		$this->assertNotContains( $child_refund_id, $ids );
+		$this->assertContains( $refund_id, $ids, 'A refund of a kept order is still imported.' );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_refund_id ) );
 
-		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_refund_id ), 'On its own row the refund passes the conditions.' );
-		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_refund_id, $child_id ) );
-		$this->assertSame( -1, $result );
-		$this->assertNotContains( $child_refund_id, $this->get_imported_order_ids() );
+		OrdersScheduler::import( $child_refund_id );
+		$this->assertSame( -1, OrdersStatsDataStore::update( wc_get_order( $child_refund_id ) ) );
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertNotContains( $child_refund_id, $imported );
+		$this->assertNotContains( $child_id, $imported );
+		$this->assertContains( $parent_id, $imported );
+		$this->assertContains( $refund_id, $imported );
 	}
 
 	/**
-	 * @testdox A record imported before a condition excluded it keeps syncing.
+	 * @testdox A "skip existing" import that pages one record at a time finishes with excluded refunds present.
+	 */
+	public function test_skip_existing_import_finishes_with_excluded_refunds(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		wc_create_refund(
+			array(
+				'order_id' => $child_id,
+				'amount'   => 1,
+			)
+		);
+		$this->exclude_child_orders_from_import();
+
+		// ImportScheduler::import_batch() always reads page 1 while skipping existing records, so a
+		// counted record that never lands would be served again and again.
+		$rounds = 0;
+		do {
+			$items = OrdersScheduler::get_items( 1, 1, false, true );
+			foreach ( $items->ids as $id ) {
+				OrdersScheduler::import( (int) $id );
+			}
+			++$rounds;
+		} while ( $items->ids && $rounds < 10 );
+
+		$this->assertSame( 0, OrdersScheduler::get_items( 1, 1, false, true )->total, 'Every counted record was imported.' );
+	}
+
+	/**
+	 * @testdox A record imported before a condition excluded it keeps syncing through the scheduled batch.
 	 */
 	public function test_record_imported_before_exclusion_keeps_syncing(): void {
 		list( , $child_id ) = $this->create_parent_child_and_refund();
@@ -147,11 +183,33 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$child = wc_get_order( $child_id );
 		$child->set_status( OrderStatus::CANCELLED );
 		$child->save();
-		OrdersScheduler::import( $child_id );
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
 
-		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_id ) );
-		$this->assertFalse( OrdersScheduler::should_skip_import( $child ) );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ), 'A record Analytics holds is never excluded.' );
 		$this->assertSame( OrderInternalStatus::CANCELLED, $this->get_imported_status( $child_id ) );
+	}
+
+	/**
+	 * @testdox A new refund of an excluded order that Analytics holds is imported, so its sale is not overstated.
+	 */
+	public function test_new_refund_of_held_excluded_record_is_imported(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::import( $child_id );
+		$this->exclude_child_orders_from_import();
+
+		$child_refund_id = wc_create_refund(
+			array(
+				'order_id' => $child_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_refund_id ) );
+		$this->assertContains( $child_refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+
+		OrdersScheduler::import( $child_refund_id );
+
+		$this->assertContains( $child_refund_id, $this->get_imported_order_ids() );
 	}
 
 	/**
