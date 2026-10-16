@@ -239,4 +239,62 @@ class ProductFilters extends \WP_UnitTestCase {
 			],
 		];
 	}
+
+	/**
+	 * @testdox Overlay accessibility attributes follow the client-side open state.
+	 *
+	 * @param string $overlay_mode Overlay presentation mode.
+	 * @testWith ["mobile"]
+	 *           ["always"]
+	 */
+	public function test_overlay_accessibility_attributes( string $overlay_mode ): void {
+		$processor = new \WP_HTML_Tag_Processor( $this->render_filters( array( 'overlayMode' => $overlay_mode ) ) );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-product-filters__open-overlay' ) ), 'The overlay should have an opener.' );
+		$this->assertSame( 'state.isOverlayOpen', $processor->get_attribute( 'data-wp-bind--aria-expanded' ), 'The opener should expose whether its overlay is open.' );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-product-filters__overlay' ) ), 'The overlay should be rendered.' );
+		$this->assertSame( 'state.isOverlayHidden', $processor->get_attribute( 'data-wp-bind--inert' ), 'A closed overlay should prevent interaction with its controls.' );
+		$this->assertNull( $processor->get_attribute( 'inert' ), 'The server should not make desktop inline filters inert before hydration.' );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-product-filters__overlay-dialog' ) ), 'The overlay should have a dialog container.' );
+		$this->assertSame( 'state.overlayRole', $processor->get_attribute( 'data-wp-bind--role' ), 'Dialog semantics should follow the active overlay state.' );
+		$this->assertSame( 'state.overlayAriaModal', $processor->get_attribute( 'data-wp-bind--aria-modal' ), 'Only an open overlay should be announced as modal.' );
+		$this->assertNull( $processor->get_attribute( 'role' ), 'The closed or inline filters should not be rendered as a dialog.' );
+		$this->assertNull( $processor->get_attribute( 'aria-modal' ), 'The server should not announce the initially closed overlay as modal.' );
+		$this->assertSame( '-1', $processor->get_attribute( 'tabindex' ), 'The dialog needs a programmatic focus fallback without an extra tab stop.' );
+		$this->assertSame( 'Product Filters', $processor->get_attribute( 'aria-label' ), 'The dialog should retain its accessible name.' );
+	}
+
+	/**
+	 * @testdox Disabling the overlay leaves the filter content inline without modal behavior.
+	 */
+	public function test_disabled_overlay_keeps_filters_inline(): void {
+		$markup    = $this->render_filters( array( 'overlayMode' => 'off' ) );
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-product-filters' ) ), 'The filters wrapper should be rendered.' );
+		$this->assertNull( $processor->get_attribute( 'data-wp-on-document--keydown' ), 'Inline filters should not register modal keyboard handling.' );
+		$this->assertNull( $processor->get_attribute( 'data-wp-watch--scrolling' ), 'Inline filters should not lock page scrolling.' );
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-product-filters__content' ) ), 'Disabled overlays should render inline content.' );
+		$this->assertStringContainsString( 'Filter content', $markup, 'The inner filter content should be preserved.' );
+		$this->assertStringNotContainsString( 'wc-block-product-filters__overlay', $markup, 'Disabled overlays should not render a dialog or backdrop.' );
+	}
+
+	/**
+	 * Render the registered Product Filters block with minimal inner content.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string Rendered markup.
+	 */
+	private function render_filters( array $attributes ): string {
+		$blocks = parse_blocks(
+			sprintf(
+				'<!-- wp:woocommerce/product-filters %s --><div class="wp-block-woocommerce-product-filters"><!-- wp:paragraph --><p>Filter content</p><!-- /wp:paragraph --></div><!-- /wp:woocommerce/product-filters -->',
+				wp_json_encode( $attributes )
+			)
+		);
+
+		return render_block( $blocks[0] );
+	}
 }

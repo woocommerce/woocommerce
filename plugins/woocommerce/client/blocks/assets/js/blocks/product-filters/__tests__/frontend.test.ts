@@ -10,6 +10,7 @@ import type { ProductFiltersStore } from '../frontend';
 const mockGetContext = jest.fn();
 const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
+const mockGetElement = jest.fn();
 const mockReload = jest.fn();
 
 jest.mock( '../../../utils/navigation', () => ( {
@@ -19,6 +20,7 @@ jest.mock( '../../../utils/navigation', () => ( {
 let mockRegisteredStore: {
 	state: ProductFiltersStore[ 'state' ];
 	actions: ProductFiltersStore[ 'actions' ];
+	callbacks: ProductFiltersStore[ 'callbacks' ];
 } | null = null;
 
 jest.mock(
@@ -27,10 +29,13 @@ jest.mock(
 		getContext: mockGetContext,
 		getServerContext: mockGetServerContext,
 		getConfig: mockGetConfig,
+		getElement: mockGetElement,
+		withSyncEvent: ( callback: ( event: Event ) => void ) => callback,
 		store: jest.fn( ( _name, definition ) => {
 			mockRegisteredStore = {
 				state: definition.state,
 				actions: definition.actions,
+				callbacks: definition.callbacks,
 			};
 			return mockRegisteredStore;
 		} ),
@@ -57,10 +62,12 @@ describe( 'product filters interactivity store', () => {
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
 		mockGetConfig.mockReset();
+		mockGetElement.mockReset().mockReturnValue( { ref: null } );
 		mockReload.mockReset();
 		mockRegisteredStore = null;
 
 		jest.isolateModules( () => {
+			// eslint-disable-next-line @typescript-eslint/no-require-imports -- Re-register the store within Jest's isolated module registry.
 			require( '../frontend' );
 		} );
 	} );

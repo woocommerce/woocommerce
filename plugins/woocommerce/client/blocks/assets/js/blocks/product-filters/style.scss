@@ -31,6 +31,7 @@
 	}
 
 	.wc-block-product-filters__overlay {
+		visibility: hidden;
 		position: fixed;
 		inset: 0;
 		pointer-events: none;
@@ -38,7 +39,9 @@
 		z-index: 9999;
 		background-color: transparent;
 		// Delay the 200ms backdrop fade so it finishes with the 500ms drawer transition.
-		transition: background-color 200ms 300ms;
+		transition:
+			background-color 200ms 300ms,
+			visibility 0s 500ms;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {
@@ -111,6 +114,7 @@
 
 	&.is-overlay-opened {
 		.wc-block-product-filters__overlay {
+			visibility: visible;
 			pointer-events: auto;
 			background-color: rgba(95, 95, 95, 0.35);
 			transition-delay: 0s;
@@ -131,6 +135,13 @@
 
 	&.is-filter-drawer-disabled {
 		display: flex;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.wc-block-product-filters__overlay,
+		.wc-block-product-filters__overlay-dialog {
+			transition: none;
+		}
 	}
 }
 

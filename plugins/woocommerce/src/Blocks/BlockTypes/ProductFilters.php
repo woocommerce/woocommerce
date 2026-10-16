@@ -108,6 +108,7 @@ class ProductFilters extends AbstractBlock {
 	}
 
 	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
+		visibility: visible;
 		position: relative;
 		pointer-events: auto;
 		inset: 0;
@@ -243,7 +244,10 @@ CSS;
 
 		if ( $has_overlay ) {
 			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
-			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
+			$wrapper_attributes['data-wp-init--overlay']            = 'callbacks.initOverlay';
+			$wrapper_attributes['data-wp-watch--overlay-focus']     = 'callbacks.manageOverlayFocus';
+			$wrapper_attributes['data-wp-on-window--resize']        = 'callbacks.syncOverlayMode';
+			$wrapper_attributes['data-wp-on-document--keydown']     = 'actions.handleOverlayKeydown';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
 
@@ -255,17 +259,20 @@ CSS;
 					type="button"
 					class="wc-block-product-filters__open-overlay"
 					data-wp-on--click="actions.openOverlay"
+					data-wp-bind--aria-expanded="state.isOverlayOpen"
 				>
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M10 17.5H14V16H10V17.5ZM6 6V7.5H18V6H6ZM8 12.5H16V11H8V12.5Z" fill="currentColor"/>
 					</svg>
 					<span><?php echo esc_html__( 'Filter products', 'woocommerce' ); ?></span>
 				</button>
-				<div class="wc-block-product-filters__overlay">
+				<div class="wc-block-product-filters__overlay" data-wp-bind--inert="state.isOverlayHidden">
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
 						<div
 							class="wc-block-product-filters__overlay-dialog"
-							role="dialog"
+							data-wp-bind--role="state.overlayRole"
+							data-wp-bind--aria-modal="state.overlayAriaModal"
+							tabindex="-1"
 							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
 						>
 							<header class="wc-block-product-filters__overlay-header">

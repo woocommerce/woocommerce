@@ -17,10 +17,43 @@ import type {
 import { getClosestColor } from './utils/get-closest-color';
 import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
+import {
+	getTabbableElements,
+	isTopmostOverlay,
+	setOverlayScrolling,
+} from './utils/overlay';
 
-const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
+const {
+	getContext,
+	getElement,
+	store,
+	getServerContext,
+	getConfig,
+	withSyncEvent,
+} = iAPI;
 
 const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
+
+const overlayOpenState = new WeakMap< HTMLElement, boolean >();
+
+function getFiltersElement() {
+	return getElement().ref?.closest< HTMLElement >(
+		'.wc-block-product-filters'
+	);
+}
+
+function getOverlayDialog( element: HTMLElement ) {
+	return element.querySelector< HTMLElement >(
+		'.wc-block-product-filters__overlay-dialog'
+	);
+}
+
+function focusOverlay( element: HTMLElement ) {
+	const dialog = getOverlayDialog( element );
+	if ( dialog ) {
+		( getTabbableElements( dialog )[ 0 ] || dialog ).focus();
+	}
+}
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -78,6 +111,24 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 
 const productFiltersStore = {
 	state: {
+		get isOverlayOpen() {
+			const context = getContext< ProductFiltersContext >();
+			return Boolean(
+				context.isOverlayActive && context.isOverlayOpened
+			);
+		},
+		get isOverlayHidden() {
+			const context = getContext< ProductFiltersContext >();
+			return Boolean(
+				context.isOverlayActive && ! context.isOverlayOpened
+			);
+		},
+		get overlayRole() {
+			return state.isOverlayOpen ? 'dialog' : null;
+		},
+		get overlayAriaModal() {
+			return state.isOverlayOpen ? 'true' : null;
+		},
 		get params() {
 			const params: Record< string, string > = {};
 
@@ -188,17 +239,54 @@ const productFiltersStore = {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
 		},
-		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
+		closeOverlayOnBackdrop: withSyncEvent( ( event: MouseEvent ) => {
 			if ( event.target === event.currentTarget ) {
 				actions.closeOverlay();
 			}
-		},
+		} ),
 		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
-			if ( context.isOverlayOpened && event.key === 'Escape' ) {
+			if (
+				context.isOverlayOpened &&
+				event.key === 'Escape' &&
+				! event.defaultPrevented
+			) {
 				actions.closeOverlay();
 			}
 		},
+		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
+			const element = getFiltersElement();
+			if (
+				! element ||
+				! state.isOverlayOpen ||
+				! isTopmostOverlay( element ) ||
+				event.defaultPrevented
+			) {
+				return;
+			}
+			if ( event.key === 'Escape' ) {
+				actions.closeOverlayOnEscape( event );
+				event.preventDefault();
+			} else if ( event.key === 'Tab' ) {
+				const dialog = getOverlayDialog( element );
+				if ( ! dialog ) {
+					return;
+				}
+				const tabbable = getTabbableElements( dialog );
+				const first = tabbable[ 0 ];
+				const last = tabbable[ tabbable.length - 1 ];
+				const active = element.ownerDocument.activeElement;
+				if (
+					! first ||
+					! dialog.contains( active ) ||
+					active === dialog ||
+					( event.shiftKey ? active === first : active === last )
+				) {
+					event.preventDefault();
+					( ( event.shiftKey ? last : first ) || dialog ).focus();
+				}
+			}
+		} ),
 		removeActiveFiltersBy: (
 			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
@@ -276,13 +364,99 @@ const productFiltersStore = {
 				return;
 			}
 
+			// Capture the root before navigation can remove the originating control.
+			const element = getFiltersElement();
 			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
 				yield import( '@wordpress/interactivity-router' );
 
 			yield routerModule.actions.navigate( url.href );
+
+			const focused = element?.ownerDocument.activeElement ?? null;
+			if (
+				state.isOverlayOpen &&
+				element?.isConnected &&
+				( ! getOverlayDialog( element )?.contains( focused ) ||
+					! ( focused instanceof HTMLElement ) ||
+					! focused.getClientRects().length ||
+					getComputedStyle( focused ).visibility !== 'visible' )
+			) {
+				focusOverlay( element );
+			}
 		},
 	},
 	callbacks: {
+		initOverlay: () => {
+			callbacks.syncOverlayMode();
+			const element = getFiltersElement();
+			return () => {
+				if ( element ) {
+					setOverlayScrolling( element, false );
+					overlayOpenState.delete( element );
+				}
+			};
+		},
+		syncOverlayMode: () => {
+			const element = getFiltersElement();
+			const overlay = element?.querySelector< HTMLElement >(
+				'.wc-block-product-filters__overlay'
+			);
+			if ( ! element || ! overlay ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const wasActive = context.isOverlayActive;
+			// The theme's responsive styles determine the breakpoint, including custom viewport settings.
+			context.isOverlayActive =
+				getComputedStyle( overlay ).position === 'fixed';
+			const opener = element.querySelector< HTMLButtonElement >(
+				'.wc-block-product-filters__open-overlay'
+			);
+			if ( ! context.isOverlayActive ) {
+				const wasOpen = context.isOverlayOpened;
+				const focused = element.ownerDocument.activeElement;
+				context.isOverlayOpened = false;
+				overlay.inert = false;
+				const focusIsVisible =
+					focused instanceof HTMLElement &&
+					focused.getClientRects().length > 0 &&
+					getComputedStyle( focused ).visibility === 'visible';
+				if (
+					wasActive &&
+					( focused === opener ||
+						( overlay.contains( focused ) && ! focusIsVisible ) ||
+						( wasOpen && focused === document.body ) )
+				) {
+					focusOverlay( element );
+				}
+			} else if (
+				wasActive === false &&
+				! context.isOverlayOpened &&
+				overlay.contains( element.ownerDocument.activeElement )
+			) {
+				opener?.focus();
+			}
+		},
+		manageOverlayFocus: () => {
+			const element = getFiltersElement();
+			if ( ! element ) {
+				return;
+			}
+			const isOpen = state.isOverlayOpen;
+			const wasOpen = overlayOpenState.get( element );
+			overlayOpenState.set( element, isOpen );
+			if ( isOpen && ! wasOpen ) {
+				focusOverlay( element );
+			} else if ( wasOpen && ! isOpen ) {
+				const context = getContext< ProductFiltersContext >();
+				if ( context.isOverlayActive ) {
+					element
+						.querySelector< HTMLButtonElement >(
+							'.wc-block-product-filters__open-overlay'
+						)
+						?.focus();
+				}
+			}
+		},
 		initColors: () => {
 			const el = getElement();
 			if ( ! el.ref ) {
@@ -314,11 +488,9 @@ const productFiltersStore = {
 			}
 		},
 		scrollLimit: () => {
-			const { isOverlayOpened } = getContext< ProductFiltersContext >();
-			if ( isOverlayOpened ) {
-				document.body.style.overflow = 'hidden';
-			} else {
-				document.body.style.overflow = 'auto';
+			const element = getFiltersElement();
+			if ( element ) {
+				setOverlayScrolling( element, state.isOverlayOpen );
 			}
 		},
 		syncActiveFiltersWithServer: () => {
@@ -340,7 +512,7 @@ productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
 
-const { state, actions } = store< ProductFiltersStore >(
+const { state, actions, callbacks } = store< ProductFiltersStore >(
 	BLOCK_NAME,
 	productFiltersStore
 );
