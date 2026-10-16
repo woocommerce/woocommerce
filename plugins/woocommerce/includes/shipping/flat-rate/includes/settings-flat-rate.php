@@ -65,14 +65,19 @@ if ( ! empty( $shipping_classes ) ) {
 		ShippingClassCostBehavior::NONE        => __( "Don't add a class cost", 'woocommerce' ),
 		ShippingClassCostBehavior::UNAVAILABLE => __( "Don't offer this flat rate", 'woocommerce' ),
 	);
-	$behavior_description = '<span class="wc-flat-rate-unavailable-description" hidden>' . esc_html__( "This flat rate won't appear at checkout when the cart contains a product in this class.", 'woocommerce' ) . '</span>';
+	$method_name          = '<span class="wc-flat-rate-method-name">' . esc_html__( 'Flat rate', 'woocommerce' ) . '</span>';
+	$behavior_description = '<span class="wc-flat-rate-unavailable-description" hidden>' . sprintf(
+		/* translators: %s: shipping method name */
+		esc_html__( '"%s" won\'t appear at checkout when the cart contains a product in this class.', 'woocommerce' ),
+		$method_name
+	) . '</span>';
 
 	$settings['class_costs'] = array(
-		'title'       => __( 'Shipping class costs', 'woocommerce' ),
+		'title'       => __( 'Shipping class handling', 'woocommerce' ),
 		'type'        => 'title',
 		'default'     => '',
 		/* translators: %s: URL for link */
-		'description' => sprintf( __( 'These costs can optionally be added based on the <a target="_blank" href="%s">product shipping class</a>. Learn more about <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#shipping-classes">setting shipping class costs</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ),
+		'description' => sprintf( __( 'Choose how products in each <a target="_blank" href="%s">shipping class</a> affect this flat rate. Learn more about <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#shipping-classes">setting shipping class costs</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=shipping&section=classes' ) ),
 	);
 	foreach ( $shipping_classes as $shipping_class ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
@@ -96,14 +101,17 @@ if ( ! empty( $shipping_classes ) ) {
 			'sanitize_callback' => array( $this, 'sanitize_class_cost_behavior' ),
 		);
 		$settings[ 'class_cost_' . $shipping_class->term_id ]          = array(
-			/* translators: %s: shipping class name */
-			'title'             => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
+			'title'             => __( 'Cost', 'woocommerce' ),
 			'type'              => 'text',
 			'class'             => 'wc-shipping-modal-price',
 			'placeholder'       => __( 'N/A', 'woocommerce' ),
 			'description'       => $cost_desc,
 			'default'           => $this->get_option( 'class_cost_' . $shipping_class->slug ), // Before 2.5.0, we used slug here which caused issues with long setting names.
 			'desc_tip'          => true,
+			'custom_attributes' => array(
+				/* translators: %s: shipping class name */
+				'aria-label' => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), $shipping_class->name ),
+			),
 			'sanitize_callback' => array( $this, 'sanitize_cost' ),
 		);
 	}
@@ -114,19 +122,24 @@ if ( ! empty( $shipping_classes ) ) {
 		'class'             => 'wc-flat-rate-class-behavior',
 		'default'           => '', // Infer unset behavior from the effective cost when the option is read.
 		'options'           => $behavior_options,
-		'description'       => '<span class="wc-flat-rate-unavailable-description" hidden>' . esc_html__( "This flat rate won't appear at checkout when the cart contains a product without a shipping class.", 'woocommerce' ) . '</span>',
+		'description'       => '<span class="wc-flat-rate-unavailable-description" hidden>' . sprintf(
+			/* translators: %s: shipping method name */
+			esc_html__( '"%s" won\'t appear at checkout when the cart contains a product without a shipping class.', 'woocommerce' ),
+			$method_name
+		) . '</span>',
 		'custom_attributes' => array( 'data-cost-id' => $this->get_field_key( 'no_class_cost' ) ),
 		'sanitize_callback' => array( $this, 'sanitize_class_cost_behavior' ),
 	);
 
 	$settings['no_class_cost'] = array(
-		'title'             => __( 'No shipping class cost', 'woocommerce' ),
+		'title'             => __( 'Cost', 'woocommerce' ),
 		'type'              => 'text',
 		'class'             => 'wc-shipping-modal-price',
 		'placeholder'       => __( 'N/A', 'woocommerce' ),
 		'description'       => $cost_desc,
 		'default'           => '',
 		'desc_tip'          => true,
+		'custom_attributes' => array( 'aria-label' => __( 'No shipping class cost', 'woocommerce' ) ),
 		'sanitize_callback' => array( $this, 'sanitize_cost' ),
 	);
 

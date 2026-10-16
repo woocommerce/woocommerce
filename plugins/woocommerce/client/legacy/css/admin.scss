@@ -3874,7 +3874,8 @@ table.wc_shipping {
 
 	.wc-shipping-zone-method-fields {
 
-		> label {
+		> label,
+		.wc-flat-rate-class-row label {
 			font-size: 12px;
 			font-weight: 500;
 			line-height: 16px;
@@ -3885,6 +3886,26 @@ table.wc_shipping {
 
 			> .woocommerce-help-tip.wc-shipping-visible-help-text {
 				display: inline-block;
+			}
+		}
+
+		.wc-flat-rate-class-row {
+			display: flex;
+			gap: 24px;
+			margin-bottom: 24px;
+
+			> div {
+				flex: 1;
+				min-width: 0;
+			}
+
+			fieldset {
+				margin-bottom: 0;
+			}
+
+			@media screen and (max-width: 480px) {
+				flex-direction: column;
+				gap: 0;
 			}
 		}
 
