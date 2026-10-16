@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"build": "node scripts/build-zip.mjs",
-		"lint": "wp-scripts lint-js scripts --config ../../eslint.config.mjs --max-warnings 0 && wp-scripts lint-md-docs README.md --config ../../.markdownlint.json",
+		"lint": "wp-scripts lint-js scripts --max-warnings 0 && wp-scripts lint-md-docs README.md",
 		"validate": "node scripts/validate-theme.mjs",
 		"changelog": "composer exec -- changelogger",
 		"wp-env": "node scripts/env.mjs"
@@ -21,7 +21,10 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "**/*"
+				"changes": [
+					"**/*",
+					".markdownlint.json"
+				]
 			}
 		}
 	}
