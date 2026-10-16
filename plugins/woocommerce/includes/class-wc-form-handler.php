@@ -6,7 +6,6 @@
  */
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
@@ -487,34 +486,8 @@ class WC_Form_Handler {
 		}
 
 		// Validate the additional fields against the target address, like the edit address form does.
-		$document_object = new DocumentObject( array( 'customer' => array( $target_type . '_address' => $field_values ) ) );
-		$document_object->set_customer( $customer );
-		$document_object->set_context( $target_type . '_address' );
-
 		$errors         = new WP_Error();
-		$persist_fields = array();
-
-		foreach ( $checkout_fields->get_contextual_fields_for_location( 'address', $document_object ) as $field_key => $field ) {
-			$value = $field_values[ $field_key ] ?? '';
-
-			if ( empty( $value ) ) {
-				if ( true === $field['required'] ) {
-					/* translators: %s: Field name. */
-					$errors->add( 'required_field', sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ) );
-				}
-				continue;
-			}
-
-			$valid_check = $checkout_fields->validate_field( $field, $value );
-
-			if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
-				$errors->add( $valid_check->get_error_code(), $valid_check->get_error_message() );
-				continue;
-			}
-
-			$persist_fields[ $field_key ] = $value;
-		}
-
+		$persist_fields = $checkout_fields->get_valid_customer_field_values( $customer, $field_values, $field_values, 'address', $target_type, $errors );
 		$errors->merge_from( $checkout_fields->validate_fields_for_location( $field_values, 'address', $target_type ) );
 
 		foreach ( $errors->get_error_messages() as $error_message ) {

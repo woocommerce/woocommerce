@@ -764,7 +764,7 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->prepare_copy_address_request( 'shipping' );
 		$this->dispatch_copy_address_expecting_redirect();
 
-		$this->assertSame( 'Gate code is a required field.', wc_get_notices( 'error' )[0]['notice'] ?? null );
+		$this->assertSame( '<strong>Gate code</strong> is required', wc_get_notices( 'error' )[0]['notice'] ?? null );
 		$this->assert_copy_address_rejected( $customer->get_id(), 'shipping' );
 	}
 
