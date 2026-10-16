@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the Core E2E environment fast to start, and reset it to the seeded baseline on every start.
