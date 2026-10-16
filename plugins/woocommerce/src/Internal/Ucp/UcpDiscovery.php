@@ -35,7 +35,9 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * @since 11.3.0
 	 */
 	public function register_feature_hooks(): void {
-		if ( ! UcpUtils::is_enabled() || '' === get_option( 'permalink_structure' ) ) {
+		global $wp_rewrite;
+
+		if ( ! UcpUtils::is_enabled() || ! $wp_rewrite->using_permalinks() ) {
 			return;
 		}
 

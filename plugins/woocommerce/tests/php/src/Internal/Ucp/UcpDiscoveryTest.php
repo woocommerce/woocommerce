@@ -70,7 +70,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	public function test_rewrite_rule_registration( string $enabled, string $structure, bool $expected ): void {
 		global $wp_rewrite, $wp;
 		update_option( 'woocommerce_feature_ucp_enabled', $enabled );
-		update_option( 'permalink_structure', $structure );
+		$this->set_permalink_structure( $structure );
 
 		$this->sut->register_feature_hooks();
 
