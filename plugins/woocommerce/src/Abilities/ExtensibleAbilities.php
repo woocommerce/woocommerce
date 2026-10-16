@@ -167,7 +167,7 @@ class ExtensibleAbilities {
 			return;
 		}
 		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'The "update_callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
