@@ -118,6 +118,7 @@ export const AddToCartButton = ( {
 	className,
 	style,
 	collection,
+	noticeContext,
 }: AddToCartButtonAttributes ): JSX.Element => {
 	const {
 		id,
@@ -128,7 +129,10 @@ export const AddToCartButton = ( {
 		is_in_stock: isInStock,
 	} = product;
 	const { dispatchStoreEvent } = useStoreEvents();
-	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart( id );
+	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart(
+		id,
+		noticeContext
+	);
 	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
 
 	// Check if this is a cart-contents collection
@@ -145,7 +149,7 @@ export const AddToCartButton = ( {
 				cartQuantity,
 				productCartDetails,
 				isDescendantOfAddToCartWithOptions,
-		  } );
+			} );
 
 	const ButtonTag = allowAddToCart && ! isCartContents ? 'button' : 'a';
 	const buttonProps = {} as HTMLAnchorElement & { onClick: () => void };
@@ -286,6 +290,21 @@ const AddToCartButtonPlaceholder = ( {
 export const Block = ( props: BlockAttributes ): JSX.Element => {
 	const { className, textAlign, blockClientId, collection } = props;
 	const styleProps = useStyleProps( props );
+	const {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+		...buttonStyle
+	} = styleProps.style;
+	const blockMarginStyle = {
+		margin,
+		marginTop,
+		marginRight,
+		marginBottom,
+		marginLeft,
+	};
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext( {
 		product: props.product,
@@ -307,11 +326,12 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 					[ `align-${ textAlign }` ]: textAlign,
 				}
 			) }
+			style={ props.isAdmin ? undefined : blockMarginStyle }
 		>
 			{ isLoading ? (
 				<LoadingAddToCartButton
 					className={ styleProps.className }
-					style={ styleProps.style }
+					style={ buttonStyle }
 				/>
 			) : (
 				<>
@@ -330,7 +350,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 						( product && product?.id ? (
 							<AddToCartButton
 								product={ product }
-								style={ styleProps.style }
+								style={ buttonStyle }
 								className={ styleProps.className }
 								isAdmin={ props.isAdmin }
 								isDescendantOfAddToCartWithOptions={
@@ -340,10 +360,11 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 								}
 								productEntity={ props.product }
 								collection={ collection }
+								noticeContext={ props.noticeContext }
 							/>
 						) : (
 							<AddToCartButtonPlaceholder
-								style={ styleProps.style }
+								style={ buttonStyle }
 								className={ styleProps.className }
 								isLoading={ isLoading ?? false }
 								blockClientId={ blockClientId }

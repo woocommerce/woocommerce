@@ -109,7 +109,7 @@ const renderTabs = (
 												'woocommerce'
 											),
 											tabs[ tabKey ]?.updateCount
-									  )
+										)
 									: sprintf(
 											/* translators: %d: number of matching items */
 											_n(
@@ -119,7 +119,7 @@ const renderTabs = (
 												'woocommerce'
 											),
 											tabs[ tabKey ]?.updateCount
-									  )
+										)
 							}
 							aria-label={
 								tabKey === 'my-subscriptions'
@@ -132,7 +132,7 @@ const renderTabs = (
 												'woocommerce'
 											),
 											tabs[ tabKey ]?.updateCount
-									  )
+										)
 									: sprintf(
 											/* translators: %d: number of matching items */
 											_n(
@@ -142,7 +142,7 @@ const renderTabs = (
 												'woocommerce'
 											),
 											tabs[ tabKey ]?.updateCount
-									  )
+										)
 							}
 						>
 							<span> { tabs[ tabKey ]?.updateCount } </span>

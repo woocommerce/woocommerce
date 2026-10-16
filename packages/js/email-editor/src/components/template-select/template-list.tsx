@@ -8,7 +8,7 @@ import { blockDefault } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { EmptyState, Notice, Stack } from '@wordpress/ui';
 // @ts-expect-error No types available for this component
-// eslint-disable-next-line
+
 import { BlockPreview } from '@wordpress/block-editor';
 
 /**
@@ -51,7 +51,7 @@ function TemplateListBox( {
 		const editorSettings = getEditorSettings();
 		return {
 			// @ts-expect-error There are no types for the experimental features settings.
-			// eslint-disable-next-line no-underscore-dangle
+
 			layout: editorSettings?.__experimentalFeatures?.layout,
 		};
 	} );
@@ -143,7 +143,7 @@ export function TemplateList( {
 			selectedCategory !== null && selectedCategory !== undefined
 				? templates.filter(
 						( template ) => template.category === selectedCategory
-				  )
+					)
 				: templates,
 		[ selectedCategory, templates ]
 	);

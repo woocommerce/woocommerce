@@ -19,7 +19,7 @@ const completer: AutoCompleter = {
 			? {
 					number: search,
 					per_page: 10,
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/orders', query ),

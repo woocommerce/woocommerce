@@ -39,6 +39,7 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 			$download->set_file( $file_path_with_period_at_end );
 			$this->assertEquals( false, $download->is_allowed_filetype() );
 		} finally {
+			\Automattic\Jetpack\Constants::clear_single_constant( 'PHP_OS' );
 			$filesystem->delete( $file_path_with_period_at_end );
 		}
 	}

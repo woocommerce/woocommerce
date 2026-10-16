@@ -9,7 +9,7 @@ import {
 /**
  * Internal dependencies
  */
-import { test, expect } from '../../fixtures/fixtures';
+import { test, expect, tags } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
@@ -37,12 +37,6 @@ const wcPages = [
 				heading: 'Customers',
 				element: '.woocommerce-dropdown-button__labels',
 				text: 'All Customers',
-			},
-			{
-				name: 'Reports',
-				heading: 'Reports',
-				element: '.nav-tab-wrapper > .nav-tab-active',
-				text: 'Orders',
 			},
 			{
 				name: 'Settings',
@@ -290,3 +284,30 @@ for ( const currentPage of wcPages ) {
 		}
 	} );
 }
+
+// External sites were installed before the menu was hidden, so Reports stays visible there.
+test(
+	'hides the legacy Reports menu item on a new store',
+	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	async ( { page } ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+
+		// Target by href: role locators skip hidden elements, so they would match nothing here.
+		const reportsLink = page.locator(
+			'li.wp-menu-open > ul.wp-submenu a[href="admin.php?page=wc-reports"]'
+		);
+		await expect( reportsLink ).toHaveCount( 1 );
+		await expect( reportsLink ).toBeHidden();
+	}
+);
+
+test( 'can load the legacy Reports page directly', async ( { page } ) => {
+	await page.goto( 'wp-admin/admin.php?page=wc-reports' );
+
+	await expect(
+		page.getByRole( 'heading', { name: 'Reports' } ).first()
+	).toBeVisible();
+	await expect(
+		page.locator( '.nav-tab-wrapper > .nav-tab-active' )
+	).toContainText( 'Orders' );
+} );

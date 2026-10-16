@@ -412,12 +412,13 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 
 		$type            = strtolower( $payment_token->get_type() );
 		$list[ $type ][] = array(
-			'method'     => array(
+			'method'       => array(
 				'gateway' => $payment_token->get_gateway_id(),
 			),
-			'expires'    => esc_html__( 'N/A', 'woocommerce' ),
-			'is_default' => $payment_token->is_default(),
-			'actions'    => array(
+			'expires'      => esc_html__( 'N/A', 'woocommerce' ),
+			'is_default'   => $payment_token->is_default(),
+			'display_name' => $payment_token->get_display_name(),
+			'actions'      => array(
 				'delete' => array(
 					'url'  => $delete_url,
 					'name' => esc_html__( 'Delete', 'woocommerce' ),

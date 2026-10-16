@@ -99,7 +99,6 @@ function JustificationControls( {
 
 function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 	const layoutBlockSupport = getBlockSupport(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		blockName,
 		// @ts-expect-error No types for this exist yet.
 		layoutBlockSupportKey,
@@ -195,7 +194,6 @@ export function addAttribute() {
  */
 export const withLayoutControls = createHigherOrderComponent(
 	( BlockEdit ) => ( props ) => {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		const supportLayout = hasLayoutBlockSupport( props.name );
 
 		return [

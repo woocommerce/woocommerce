@@ -7,11 +7,14 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -33,6 +36,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_343_cleanup_foreign_keys() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_343_cleanup_foreign_keys_removes_foreign_keys() {
 		global $wpdb;
@@ -62,6 +67,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_352_drop_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_352_drop_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -87,6 +94,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_700_remove_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_700_remove_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -1152,5 +1161,174 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'no', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must not overwrite an existing option.' );
 
 		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+	}
+
+	/**
+	 * @testdox wc_update_1130_delete_stock_notification_sync_notice_option deletes the old restock notice option.
+	 */
+	public function test_wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', '<p>pending</p>' );
+		wc_update_1130_delete_stock_notification_sync_notice_option();
+		$this->assertFalse( get_option( 'wc_customer_stock_notifications_product_sync_notice' ) );
+	}
+
+	/**
+	 * @testdox Migration backfills the payment method on order and refund rows, then clears its cursor, the report cache and the payment method filter cache.
+	 */
+	public function test_wc_update_1130_backfill_order_stats_payment_method(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'cheque' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10.00,
+			)
+		);
+		$this->assertNotWPError( $refund );
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		// A child order that is not a refund, such as a scheduled payment, has no gateway until it is paid.
+		$child_order = wc_create_order( array( 'parent' => $order->get_id() ) );
+		OrdersStatsDataStore::sync_order( $child_order->get_id() );
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+
+		$get_payment_method = function ( $order_id ) use ( $wpdb, $stats_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+			return $wpdb->get_var( $wpdb->prepare( "SELECT payment_method FROM {$stats_table} WHERE order_id = %d", $order_id ) );
+		};
+
+		// Reproduce the rows as they were written before the column existed.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$wpdb->query( "UPDATE {$stats_table} SET payment_method = NULL" );
+		$this->assertNull( $get_payment_method( $order->get_id() ), 'The order row should start without a payment method.' );
+
+		// A wc-admin page load before the backfill ends caches the payment method filter without the gateway.
+		wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+		$this->assertSame( array(), OrdersDataStore::get_all_payment_methods() );
+
+		$cache_key        = 'wc_update_1130_payment_method_report';
+		$version_key      = ReportsCache::VERSION_OPTION . '-transient-version';
+		$original_version = get_transient( $version_key );
+		set_transient( $version_key, 'stale-version' );
+
+		try {
+			ReportsCache::set( $cache_key, 'stale-value' );
+			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ) );
+
+			$batches = 0;
+			while ( wc_update_1130_backfill_order_stats_payment_method() ) {
+				++$batches;
+				$this->assertLessThan( 10, $batches, 'The migration reschedules itself until every batch is done.' );
+			}
+
+			$this->assertFalse( ReportsCache::get( $cache_key ), 'The report rows cached without a payment method are invalidated on completion.' );
+		} finally {
+			delete_transient( $cache_key );
+			if ( false === $original_version ) {
+				delete_transient( $version_key );
+			} else {
+				set_transient( $version_key, $original_version );
+			}
+		}
+
+		$this->assertSame( 'cheque', $get_payment_method( $order->get_id() ) );
+		$this->assertSame( 'cheque', $get_payment_method( $refund->get_id() ), 'A refund takes the payment method of the order it refunds.' );
+		$this->assertNull( $get_payment_method( $child_order->get_id() ), 'A child order that is not a refund does not take the payment method of its parent.' );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_last_payment_method_order_id' ), 'The cursor is cleared on completion.' );
+		$this->assertSame( array( 'cheque' ), OrdersDataStore::get_all_payment_methods(), 'The payment method filter cached before the backfill ended is cleared on completion.' );
+	}
+
+	/**
+	 * @testdox Migration carries its cursor between batches, so it reaches the rows past the first batch.
+	 */
+	public function test_wc_update_1130_backfill_order_stats_payment_method_in_batches(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+		$cursor      = 'woocommerce_update_1130_last_payment_method_order_id';
+		$date        = gmdate( 'Y-m-d H:i:s' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$first_id = (int) $wpdb->get_var( "SELECT MAX(order_id) FROM {$stats_table}" ) + 1;
+		$last_id  = $first_id + 500;
+
+		// One full batch of rows and one row more. The cursor is under test, so the rows need no order behind them.
+		for ( $order_id = $first_id; $order_id <= $last_id; $order_id++ ) {
+			$wpdb->insert(
+				$stats_table,
+				array(
+					'order_id'         => $order_id,
+					'status'           => OrderInternalStatus::COMPLETED,
+					'customer_id'      => 0,
+					'date_created'     => $date,
+					'date_created_gmt' => $date,
+				),
+				array( '%d', '%s', '%d', '%s', '%s' )
+			);
+		}
+
+		// Start past the rows other tests may have left, so the batches hold only the rows above.
+		update_option( $cursor, $first_id - 1, false );
+
+		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'A full batch leaves work for another run.' );
+		$this->assertSame( $first_id + 499, (int) get_option( $cursor ), 'The cursor is saved at the last id of the batch.' );
+
+		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'The second batch resumes after the cursor.' );
+		$this->assertSame( $last_id, (int) get_option( $cursor ), 'The second batch takes the row past the first batch.' );
+
+		$this->assertFalse( wc_update_1130_backfill_order_stats_payment_method(), 'An empty batch ends the migration.' );
+		$this->assertFalse( get_option( $cursor ), 'The cursor is cleared on completion.' );
+	}
+
+	/**
+	 * @testdox Migration stops at a failed write, clears its cursor and leaves the row without a payment method.
+	 */
+	public function test_wc_update_1130_backfill_order_stats_payment_method_stops_on_failed_write(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'cheque' );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+		$cursor      = 'woocommerce_update_1130_last_payment_method_order_id';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$wpdb->query( "UPDATE {$stats_table} SET payment_method = NULL" );
+		update_option( $cursor, $order->get_id() - 1, false );
+
+		$break_update = function ( $query ) use ( $stats_table ) {
+			return 0 === strpos( $query, "UPDATE {$stats_table} " ) ? "UPDATE {$stats_table} SET no_such_column = 1" : $query;
+		};
+		add_filter( 'query', $break_update );
+		$suppressed = $wpdb->suppress_errors();
+
+		try {
+			$this->assertFalse( wc_update_1130_backfill_order_stats_payment_method(), 'A failed write does not request another run.' );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_update );
+		}
+
+		$this->assertFalse( get_option( $cursor ), 'The cursor saved by an earlier batch is cleared after a failed write.' );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT payment_method FROM {$stats_table} WHERE order_id = %d", $order->get_id() ), ARRAY_A );
+		$this->assertSame( array( 'payment_method' => null ), $row, 'The row keeps a NULL payment method after a failed write.' );
 	}
 }

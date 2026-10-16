@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Dispatchers;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use WC_Unit_Test_Case;
 
@@ -37,12 +38,21 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	private $captured_url;
 
 	/**
+	 * Mock step logger.
+	 *
+	 * @var NotificationStepLogger|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $step_logger;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut              = new InternalNotificationDispatcher();
+		$this->step_logger = $this->createMock( NotificationStepLogger::class );
+		$this->sut         = new InternalNotificationDispatcher();
+		$this->sut->init( $this->step_logger );
 		$this->captured_request = null;
 		$this->captured_url     = null;
 
@@ -193,6 +203,46 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 		$this->sut->dispatch( array() );
 
 		$this->assertNull( $this->captured_url, 'No HTTP request should be made for empty notifications' );
+	}
+
+	/**
+	 * @testdox Should log one line for the batch, naming every notification it carried.
+	 */
+	public function test_dispatch_logs_one_line_for_the_batch(): void {
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_batch_step' )
+			->with(
+				'loopback_requested',
+				'ok',
+				$this->callback(
+					fn( array $context ) => 2 === $context['batch_size']
+						&& array( 'store_order', 'store_order' ) === array_column( $context['notifications'], 'type' )
+						&& array( 1, 2 ) === array_column( $context['notifications'], 'resource_id' )
+						&& 2 === count( array_filter( array_column( $context['notifications'], 'identifier' ) ) )
+				)
+			);
+
+		$this->sut->dispatch( array( $this->create_order_mock( 1 ), $this->create_order_mock( 2 ) ) );
+	}
+
+	/**
+	 * @testdox Should log one failure for the batch when the loopback request cannot be made.
+	 */
+	public function test_dispatch_logs_request_failure(): void {
+		remove_filter( 'pre_http_request', array( $this, 'intercept_http_request' ), 10 );
+		add_filter( 'pre_http_request', fn() => new \WP_Error( 'http_request_failed', 'cURL error 7' ) );
+
+		$this->step_logger->expects( $this->once() )
+			->method( 'log_unattributed_failure' )
+			->with(
+				'loopback_requested',
+				'request_failed',
+				'warning',
+				'Loopback request failed: cURL error 7',
+				$this->callback( fn( array $context ) => 1 === $context['batch_size'] )
+			);
+
+		$this->sut->dispatch( array( $this->create_order_mock( 1 ) ) );
 	}
 
 	/**
