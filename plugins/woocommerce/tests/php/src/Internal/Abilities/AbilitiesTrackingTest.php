@@ -869,6 +869,22 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep sending later events when one pixel send throws.
+	 */
+	public function test_keeps_sending_after_one_event_fails(): void {
+		$this->sut->throw_on_send = 1;
+		$this->start_mcp_tool_call();
+		$ability = wp_get_ability( self::ABILITY_ID );
+
+		$ability->execute();
+		$ability->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 2, $this->sut->sends );
+		$this->assertCount( 1, $this->sut->recorded );
+	}
+
+	/**
 	 * @testdox Should not let a failing Tracks or consent filter break the ability call.
 	 * @testWith ["woocommerce_tracks_event_properties"]
 	 *           ["woocommerce_apply_tracking"]
@@ -928,11 +944,29 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			public bool $long_running = false;
 
 			/**
+			 * Send attempt that should throw, or 0 to send every event.
+			 *
+			 * @var int
+			 */
+			public int $throw_on_send = 0;
+
+			/**
+			 * How many sends have been attempted.
+			 *
+			 * @var int
+			 */
+			public int $sends = 0;
+
+			/**
 			 * Capture the event instead of sending it.
 			 *
 			 * @param array $properties Tracks properties.
 			 */
 			protected function send_event( array $properties ): void {
+				++$this->sends;
+				if ( $this->throw_on_send === $this->sends ) {
+					throw new \RuntimeException( 'pixel failed' );
+				}
 				$this->recorded[] = $properties;
 			}
 

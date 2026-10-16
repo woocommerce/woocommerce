@@ -461,11 +461,17 @@ class AbilitiesTracking {
 
 			$events       = $this->events;
 			$this->events = array();
-			foreach ( $events as $properties ) {
-				$this->send_event( $properties );
-			}
 		} catch ( \Throwable $e ) {
 			unset( $e );
+			return;
+		}
+
+		foreach ( $events as $properties ) {
+			try {
+				$this->send_event( $properties );
+			} catch ( \Throwable $e ) {
+				unset( $e );
+			}
 		}
 	}
 
