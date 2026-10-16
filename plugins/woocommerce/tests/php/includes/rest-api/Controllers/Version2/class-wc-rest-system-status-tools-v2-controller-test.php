@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 
 /**
  * Class WC_REST_System_Status_Tools_V2_Controller.
@@ -202,6 +203,31 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 		global $wpdb;
 
 		return $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $prefix ) . '%' ) );
+	}
+
+	/**
+	 * @testdox Clear transients invalidates analytics reports with either transient storage backend.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $external_cache Whether transients use the object cache.
+	 */
+	public function test_clear_transients_invalidates_analytics_reports( bool $external_cache ): void {
+		$previous = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_cache );
+
+		try {
+			ReportsCache::set( 'wc_report_orders_stats_test', array( 'total' => 123 ) );
+			set_transient( 'other_plugin_cache', 'kept', HOUR_IN_SECONDS );
+			$this->assertSame( array( 'total' => 123 ), ReportsCache::get( 'wc_report_orders_stats_test' ) );
+
+			$this->endpoint->execute_tool( 'clear_transients' );
+
+			$this->assertFalse( ReportsCache::get( 'wc_report_orders_stats_test' ), 'Clearing must reject cached analytics data.' );
+			$this->assertSame( 'kept', get_transient( 'other_plugin_cache' ), 'Other plugins must keep their cached data.' );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
 	}
 
 	/**
