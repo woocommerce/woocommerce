@@ -251,14 +251,14 @@ class ComingSoonRequestHandler {
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {
-				// Theme presets may omit the name or use another one, so also match the same font family and slug.
+				// Theme presets may omit the name or use another one, so also match the same primary font family and slug.
 				// Coming Soon patterns and saved templates use the bundled slugs, and need the theme to load the font files.
 				if (
 					( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] )
 					|| (
 						isset( $font['fontFamily'], $font['slug'] )
 						&& is_string( $font['fontFamily'] )
-						&& $this->unquote_font_family( $font['fontFamily'] ) === $this->unquote_font_family( $font_to_add['fontFamily'] )
+						&& $this->first_font_family( $font['fontFamily'] ) === $this->first_font_family( $font_to_add['fontFamily'] )
 						&& $font['slug'] === $font_to_add['slug']
 						&& is_array( $font['fontFace'] ?? null )
 						&& $this->has_font_face_source( $font['fontFace'] )
@@ -289,13 +289,14 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Removes optional quotes around the first family, preserving generic fallback semantics.
+	 * Gets the primary font family without optional surrounding quotes.
 	 *
 	 * @param string $font_family CSS font family list.
-	 * @return string Font family list without quotes around the first family.
+	 * @return string Primary font family.
 	 */
-	private function unquote_font_family( string $font_family ): string {
-		return preg_replace( '/^([\'"])([^\'",]+)\1(?=\s*(?:,|$))/', '$2', $font_family ) ?? $font_family;
+	private function first_font_family( string $font_family ): string {
+		$font_family = preg_replace( '/^([\'"])([^\'",]+)\1(?=\s*(?:,|$))/', '$2', $font_family ) ?? $font_family;
+		return trim( explode( ',', $font_family, 2 )[0] );
 	}
 
 	/**

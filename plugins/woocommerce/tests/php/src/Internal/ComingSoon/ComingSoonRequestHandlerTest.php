@@ -72,7 +72,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Adds a bundled font only when the theme does not already provide it by name, or by font family and slug with its own font faces.
+	 * @testdox Adds a bundled font only when the theme does not already provide it by name, or by primary font family and slug with its own font faces.
 	 * @dataProvider provider_theme_fonts
 	 *
 	 * @param array<int, array<string, mixed>> $theme_fonts    Theme font presets.
@@ -185,9 +185,10 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		);
 
 		foreach ( array(
-			'unquoted Inter'          => array( 'Inter, sans-serif', array( 'inter', 'cardo' ) ),
-			'single-quoted Inter'     => array( "'Inter', sans-serif", array( 'inter', 'cardo' ) ),
-			'quoted generic fallback' => array( '"Inter", "sans-serif"', array( 'inter', 'inter', 'cardo' ) ),
+			'unquoted Inter'             => array( 'Inter, sans-serif', array( 'inter', 'cardo' ) ),
+			'single-quoted Inter'        => array( "'Inter' , sans-serif", array( 'inter', 'cardo' ) ),
+			'quoted generic fallback'    => array( '"Inter", "sans-serif"', array( 'inter', 'cardo' ) ),
+			'additional fallback family' => array( 'Inter, Arial, sans-serif', array( 'inter', 'cardo' ) ),
 		) as $label => $case ) {
 			$cases[ $label ] = array(
 				array(
