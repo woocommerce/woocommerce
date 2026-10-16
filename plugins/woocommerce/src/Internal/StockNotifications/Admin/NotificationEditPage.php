@@ -117,17 +117,24 @@ class NotificationEditPage {
 					$notification->set_date_notified( time() );
 					$notification->save();
 
-					/**
-					 * Action: woocommerce_customer_stock_notification_sent
-					 *
-					 * @since 11.3.0
-					 *
-					 * Fires once a stock notification has been delivered and saved as sent.
-					 *
-					 * @param Notification $notification The notification that was sent.
-					 * @param \WC_Product  $product      The product the notification is about.
-					 */
-					do_action( 'woocommerce_customer_stock_notification_sent', $notification, $product );
+					try {
+						/**
+						 * Action: woocommerce_customer_stock_notification_sent
+						 *
+						 * @since 11.3.0
+						 *
+						 * Fires once a stock notification has been delivered and saved as sent.
+						 *
+						 * @param Notification $notification The notification that was sent.
+						 * @param \WC_Product  $product      The product the notification is about.
+						 */
+						do_action( 'woocommerce_customer_stock_notification_sent', $notification, $product );
+					} catch ( \Throwable $e ) {
+						wc_get_logger()->error(
+							sprintf( 'A woocommerce_customer_stock_notification_sent callback failed for notification %d: %s', $notification->get_id(), $e->getMessage() ),
+							array( 'source' => 'wc-customer-stock-notifications' )
+						);
+					}
 
 					// translators: %s user email.
 					$notice_message = sprintf( __( 'Notification sent to "%s".', 'woocommerce' ), $notification->get_user_email() );

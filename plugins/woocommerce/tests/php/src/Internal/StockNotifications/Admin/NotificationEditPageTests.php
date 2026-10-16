@@ -149,6 +149,24 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throwing `woocommerce_customer_stock_notification_sent` callback does not break the "Send now" action.
+	 */
+	public function test_send_notification_survives_throwing_sent_action_callback(): void {
+		$this->email_manager->method( 'deliver_stock_notification' )->willReturn( true );
+		add_action(
+			'woocommerce_customer_stock_notification_sent',
+			function () {
+				throw new \RuntimeException( 'Integration exploded.' );
+			}
+		);
+
+		$notification_id = $this->submit_send_notification();
+
+		$this->assertSame( NotificationStatus::SENT, ( new Notification( $notification_id ) )->get_status() );
+		$this->assertSame( 'success', get_option( NotificationsPage::ADMIN_NOTICE_OPTION_NAME )['type'] );
+	}
+
+	/**
 	 * Data provider for test_send_notification_fires_sent_action_only_when_delivered.
 	 *
 	 * @return array[]

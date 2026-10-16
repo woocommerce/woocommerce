@@ -30,7 +30,7 @@ class NotificationsProcessor {
 	/**
 	 * The logger.
 	 *
-	 * @var Logger
+	 * @var \WC_Logger_Interface
 	 */
 	private $logger;
 
@@ -246,17 +246,24 @@ class NotificationsProcessor {
 
 			$notification_product = $notification->get_product();
 			if ( $is_sent && $notification_product instanceof \WC_Product ) {
-				/**
-				 * Action: woocommerce_customer_stock_notification_sent
-				 *
-				 * @since 11.3.0
-				 *
-				 * Fires once a stock notification has been delivered and saved as sent.
-				 *
-				 * @param Notification $notification The notification that was sent.
-				 * @param WC_Product   $product      The product the notification is about.
-				 */
-				do_action( 'woocommerce_customer_stock_notification_sent', $notification, $notification_product );
+				try {
+					/**
+					 * Action: woocommerce_customer_stock_notification_sent
+					 *
+					 * @since 11.3.0
+					 *
+					 * Fires once a stock notification has been delivered and saved as sent.
+					 *
+					 * @param Notification $notification The notification that was sent.
+					 * @param WC_Product   $product      The product the notification is about.
+					 */
+					do_action( 'woocommerce_customer_stock_notification_sent', $notification, $notification_product );
+				} catch ( \Throwable $e ) {
+					$this->logger->error(
+						sprintf( 'A woocommerce_customer_stock_notification_sent callback failed for notification %d: %s', $notification->get_id(), $e->getMessage() ),
+						array( 'source' => 'wc-customer-stock-notifications' )
+					);
+				}
 			}
 		}
 
