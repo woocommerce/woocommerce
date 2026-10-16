@@ -19,7 +19,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 	private const UNTRACKED_ABILITY_ID = 'tracking-test/other';
 
-	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER' );
+	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID' );
 
 	/**
 	 * The System Under Test, with events captured instead of sent.
@@ -221,8 +221,73 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status(), 'The ability should run through REST' );
 		$this->assertCount( 2, $this->sut->recorded );
 		$this->assertSame( 'rest', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( 'wp_abilities', $this->sut->recorded[0]['rest_namespace'] );
 		$this->assertSame( 'success', $this->sut->recorded[0]['outcome'] );
-		$this->assertSame( 'php', $this->sut->recorded[1]['channel'], 'The direct call after the REST request is not a REST call' );
+		$this->assertSame( 'other', $this->sut->recorded[1]['channel'], 'The direct call after the REST request is not a REST call' );
+		$this->assertSame( 'none', $this->sut->recorded[1]['rest_namespace'] );
+	}
+
+	/**
+	 * @testdox Should record calls inside other REST routes with the route namespace only.
+	 */
+	public function test_records_namespace_of_other_rest_routes(): void {
+		$register_route = function (): void {
+			register_rest_route(
+				'tracking-test/v1',
+				'/orders/(?P<id>\d+)',
+				array(
+					'methods'             => 'GET',
+					'callback'            => fn() => wp_get_ability( self::ABILITY_ID )->execute(),
+					'permission_callback' => '__return_true',
+				)
+			);
+		};
+		rest_get_server();
+		add_action( 'rest_api_init', $register_route );
+		do_action( 'rest_api_init', rest_get_server() );
+
+		rest_do_request( new WP_REST_Request( 'GET', '/tracking-test/v1/orders/123' ) );
+		$this->sut->handle_shutdown();
+
+		$this->assertCount( 1, $this->sut->recorded );
+		$this->assertSame( 'other', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( 'tracking_test', $this->sut->recorded[0]['rest_namespace'] );
+	}
+
+	/**
+	 * @testdox Should detect MCP requests from standard MCP HTTP headers, whatever server handles them.
+	 * @testWith ["HTTP_MCP_PROTOCOL_VERSION", "2025-11-25"]
+	 *           ["HTTP_MCP_SESSION_ID", "1868a90c"]
+	 *
+	 * @param string $header Server key of the header.
+	 * @param string $value  Header value.
+	 */
+	public function test_detects_mcp_requests_from_headers( string $header, string $value ): void {
+		$_SERVER[ $header ] = $value;
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'mcp', $this->sut->recorded[0]['channel'] );
+	}
+
+	/**
+	 * @testdox Should record whether the call was authenticated with an application password.
+	 */
+	public function test_records_application_password_authentication(): void {
+		global $wp_rest_application_password_uuid;
+
+		$ability = wp_get_ability( self::ABILITY_ID );
+		$ability->execute();
+		$wp_rest_application_password_uuid = 'f5bd2b1a-0000-4000-8000-000000000000'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		try {
+			$ability->execute();
+		} finally {
+			$wp_rest_application_password_uuid = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( array( 'false', 'true' ), array_column( $this->sut->recorded, 'uses_app_password' ) );
 	}
 
 	/**
@@ -379,14 +444,14 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record direct PHP calls as the php channel.
+	 * @testdox Should record direct PHP calls as the other channel.
 	 */
 	public function test_records_direct_php_calls(): void {
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
 		$this->assertCount( 1, $this->sut->recorded );
-		$this->assertSame( 'php', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( 'other', $this->sut->recorded[0]['channel'] );
 		$this->assertSame( 'none', $this->sut->recorded[0]['external_client'] );
 	}
 

@@ -51,7 +51,7 @@ class AbilitiesTracking {
 	 *
 	 * @var string
 	 */
-	private const ABILITIES_RUN_ROUTE_REGEX = '#^/wp-abilities/v\d+/abilities/.+/run$#';
+	private const ABILITIES_RUN_ROUTE_REGEX = '#^/wp-abilities/v\d+/abilities/.+/run$#i';
 
 	/**
 	 * Value sent for properties that don't apply or are unknown.
@@ -63,7 +63,7 @@ class AbilitiesTracking {
 	/**
 	 * Open ability invocations, innermost last.
 	 *
-	 * @var array<int, array{name: string, channel: string, start: float, executing: bool}>
+	 * @var array<int, array{name: string, channel: string, rest_namespace: string, start: float, executing: bool}>
 	 */
 	private array $frames = array();
 
@@ -75,11 +75,11 @@ class AbilitiesTracking {
 	private array $events = array();
 
 	/**
-	 * Whether an MCP Adapter tool call happened in this request.
+	 * Whether this request is an MCP request: an MCP Adapter tool call happened, or the request has MCP HTTP headers.
 	 *
-	 * @var bool
+	 * @var bool|null Null until checked.
 	 */
-	private bool $is_mcp_request = false;
+	private ?bool $is_mcp_request = null;
 
 	/**
 	 * Normalized MCP client name, resolved on the first MCP tool call.
@@ -89,11 +89,11 @@ class AbilitiesTracking {
 	private string $mcp_client = self::NONE;
 
 	/**
-	 * Whether the core Abilities API run endpoint is being dispatched.
+	 * Routes of the REST requests being dispatched, outermost first.
 	 *
-	 * @var bool
+	 * @var string[]
 	 */
-	private bool $in_abilities_rest_run = false;
+	private array $rest_routes = array();
 
 	/**
 	 * Constructor.
@@ -265,6 +265,8 @@ class AbilitiesTracking {
 	/**
 	 * Handle the mcp_adapter_pre_tool_call filter, to mark the request as an MCP request.
 	 *
+	 * Covers MCP Adapter transports without MCP HTTP headers, such as STDIO.
+	 *
 	 * @internal
 	 *
 	 * @param mixed $args The tool arguments.
@@ -279,7 +281,7 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Handle the rest_request_before_callbacks filter, to detect the core Abilities API run endpoint.
+	 * Handle the rest_request_before_callbacks filter, to know which REST routes are being dispatched.
 	 *
 	 * @internal
 	 *
@@ -290,8 +292,8 @@ class AbilitiesTracking {
 	 */
 	public function handle_rest_request_before_callbacks( $response, $handler, $request ) {
 		unset( $handler );
-		if ( self::is_abilities_run_request( $request ) ) {
-			$this->in_abilities_rest_run = true;
+		if ( $request instanceof WP_REST_Request ) {
+			$this->rest_routes[] = $request->get_route();
 		}
 		return $response;
 	}
@@ -308,8 +310,8 @@ class AbilitiesTracking {
 	 */
 	public function handle_rest_request_after_callbacks( $response, $handler, $request ) {
 		unset( $handler );
-		if ( self::is_abilities_run_request( $request ) ) {
-			$this->in_abilities_rest_run = false;
+		if ( $request instanceof WP_REST_Request ) {
+			array_pop( $this->rest_routes );
 		}
 		return $response;
 	}
@@ -369,10 +371,11 @@ class AbilitiesTracking {
 		}
 
 		$this->frames[] = array(
-			'name'      => $ability_name,
-			'channel'   => $this->get_channel(),
-			'start'     => microtime( true ),
-			'executing' => $executing,
+			'name'           => $ability_name,
+			'channel'        => $this->get_channel(),
+			'rest_namespace' => $this->get_rest_namespace(),
+			'start'          => microtime( true ),
+			'executing'      => $executing,
 		);
 	}
 
@@ -425,9 +428,9 @@ class AbilitiesTracking {
 	 *
 	 * Properties are built now, so the user, site and time are those of the call rather than of shutdown.
 	 *
-	 * @param array{name: string, channel: string, start: float, executing: bool} $frame        The invocation.
-	 * @param true|WP_Error|null                                                  $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
-	 * @param bool                                                                $has_duration Whether the duration is known.
+	 * @param array{name: string, channel: string, rest_namespace: string, start: float, executing: bool} $frame        The invocation.
+	 * @param true|WP_Error|null                                                                          $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
+	 * @param bool                                                                                        $has_duration Whether the duration is known.
 	 */
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
 		if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
@@ -451,11 +454,13 @@ class AbilitiesTracking {
 		}
 
 		$event = array(
-			'ability_name'    => self::normalize_value( $frame['name'] ),
-			'outcome'         => true === $outcome ? 'success' : 'error',
-			'error_code'      => $error_code,
-			'channel'         => $frame['channel'],
-			'external_client' => 'mcp' === $frame['channel'] ? $this->mcp_client : self::NONE,
+			'ability_name'      => self::normalize_value( $frame['name'] ),
+			'outcome'           => true === $outcome ? 'success' : 'error',
+			'error_code'        => $error_code,
+			'channel'           => $frame['channel'],
+			'rest_namespace'    => $frame['rest_namespace'],
+			'uses_app_password' => function_exists( 'rest_get_authenticated_app_password' ) && rest_get_authenticated_app_password() ? 'true' : 'false',
+			'external_client'   => 'mcp' === $frame['channel'] ? $this->mcp_client : self::NONE,
 		);
 
 		if ( $has_duration ) {
@@ -476,11 +481,13 @@ class AbilitiesTracking {
 	 * @return string
 	 */
 	private function get_channel(): string {
-		if ( $this->is_mcp_request ) {
+		if ( $this->is_mcp_request() ) {
 			return 'mcp';
 		}
-		if ( $this->in_abilities_rest_run ) {
-			return 'rest';
+		foreach ( $this->rest_routes as $route ) {
+			if ( 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $route ) ) {
+				return 'rest';
+			}
 		}
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return 'cli';
@@ -488,7 +495,37 @@ class AbilitiesTracking {
 		if ( wp_doing_cron() ) {
 			return 'cron';
 		}
-		return 'php';
+		return 'other';
+	}
+
+	/**
+	 * Whether this is an MCP request.
+	 *
+	 * MCP Streamable HTTP clients send MCP-Protocol-Version on every request after initialization (2025-06-18 and
+	 * later) and Mcp-Session-Id when the server assigned a session, whichever server implementation handles them.
+	 *
+	 * @return bool
+	 */
+	private function is_mcp_request(): bool {
+		if ( null === $this->is_mcp_request ) {
+			$this->is_mcp_request = isset( $_SERVER['HTTP_MCP_PROTOCOL_VERSION'] ) || isset( $_SERVER['HTTP_MCP_SESSION_ID'] );
+		}
+		return $this->is_mcp_request;
+	}
+
+	/**
+	 * Get the namespace of the outermost REST route being dispatched, such as `wp_abilities` or `mcp`.
+	 *
+	 * Only the namespace is used: the rest of the route can hold IDs.
+	 *
+	 * @return string
+	 */
+	private function get_rest_namespace(): string {
+		if ( ! $this->rest_routes ) {
+			return self::NONE;
+		}
+		$segments = explode( '/', ltrim( $this->rest_routes[0], '/' ), 2 );
+		return self::normalize_value( $segments[0] );
 	}
 
 	/**
@@ -513,16 +550,6 @@ class AbilitiesTracking {
 	 */
 	private static function is_tracked_ability( $ability_name ): bool {
 		return is_string( $ability_name ) && 0 === strpos( $ability_name, self::ABILITY_PREFIX );
-	}
-
-	/**
-	 * Whether a REST request targets the core Abilities API run endpoint.
-	 *
-	 * @param mixed $request The request.
-	 * @return bool
-	 */
-	private static function is_abilities_run_request( $request ): bool {
-		return $request instanceof WP_REST_Request && 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $request->get_route() );
 	}
 
 	/**
