@@ -1,0 +1,14 @@
+{
+	"core": "https://wordpress.org/wordpress-latest.zip",
+	"phpVersion": "8.1",
+	"port": 8890,
+	"testsPort": 8891,
+	"testsEnvironment": false,
+	"plugins": [ "https://downloads.wordpress.org/plugin/woocommerce.zip" ],
+	"themes": [],
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true
+	}
+}

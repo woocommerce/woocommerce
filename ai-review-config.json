@@ -1115,6 +1115,7 @@
 				"plugins/woocommerce/src/Internal/Admin/Settings.php"
 			],
 			"signals": [
+				") =>",
 				"export ",
 				"export default",
 				"createElement",

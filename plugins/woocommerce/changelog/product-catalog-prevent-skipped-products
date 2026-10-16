@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent missing products in the POS catalog when products are trashed, unpublished, or hidden from POS while it builds.
