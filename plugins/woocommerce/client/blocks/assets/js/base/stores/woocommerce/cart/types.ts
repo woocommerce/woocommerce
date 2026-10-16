@@ -20,18 +20,22 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	type: string;
 };
 
-export type ClientCartItem = Omit<
-	OptimisticCartItem,
-	'variation' | 'quantity'
-> & {
-	variation?: SelectedAttributes[];
-	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
+/**
+ * The product `addCartItem` and `batchAddCartItems` add to the cart.
+ */
+export type AddCartItemPayload = {
+	/** The product or variation id. */
+	id: number;
+	/**
+	 * The amount to add to the cart. Defaults to 1 when omitted. A numeric
+	 * string from untyped data, such as a server-rendered context value, is
+	 * added as the number it holds.
+	 */
 	quantity?: number;
-	/** Optional: add this delta to current quantity instead of setting absolute quantity */
-	quantityToAdd?: number;
+	/** The selected attributes, when the product is a variation. */
+	variation?: SelectedAttributes[];
 };
 
 export type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
@@ -67,9 +71,9 @@ export type Store = {
 		restUrl: string;
 		nonce: string;
 		findItemInCart: ( args: {
-			id: ClientCartItem[ 'id' ];
-			key?: ClientCartItem[ 'key' ];
-			variation?: ClientCartItem[ 'variation' ];
+			id: number;
+			key?: string | undefined;
+			variation?: SelectedAttributes[] | undefined;
 		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
@@ -78,16 +82,37 @@ export type Store = {
 	};
 	actions: {
 		removeCartItem: ( key: string ) => Promise< void >;
+		/**
+		 * Sets the quantity of the cart line with the given key. Rejects when
+		 * `key` is missing.
+		 */
+		updateCartItem: ( args: {
+			key: string;
+			quantity: number;
+		} ) => Promise< void >;
+		/**
+		 * Adds `quantity` units (1 when omitted) of a product to the cart.
+		 * Resolves the outcome and never rejects on a request failure.
+		 */
 		addCartItem: (
-			args: ClientCartItem,
+			args: AddCartItemPayload,
 			options?: CartUpdateOptions
 		) => Promise< AddCartItemOutcome >;
+		/**
+		 * Adds several products to the cart in one cycle, each by its
+		 * `quantity` (1 when omitted).
+		 */
 		batchAddCartItems: (
-			items: ClientCartItem[],
+			items: AddCartItemPayload[],
 			options?: CartUpdateOptions
 		) => Promise< void >;
+		/**
+		 * Replaces `state.cart` with a fresh GET of the Store API cart. It
+		 * does nothing while a cart mutation is in flight or another refresh is
+		 * pending, and retries after a delay when the request fails.
+		 */
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => Promise< void >;
+		refreshCart: () => Promise< void >;
 		waitForIdle: () => Promise< void >;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
 		updateNotices: (

@@ -3,7 +3,7 @@
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
-	ClientCartItem,
+	AddCartItemPayload,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
@@ -97,7 +97,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const { quantity, selectedAttributes, groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();
 
-				const addedItems: ClientCartItem[] = [];
+				const addedItems: AddCartItemPayload[] = [];
 
 				for ( const childProductId of groupedProductIds ) {
 					if ( quantity[ childProductId ] === 0 ) {
@@ -115,9 +115,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 					addedItems.push( {
 						id: Number( childProductId ),
-						quantityToAdd: quantity[ childProductId ],
+						quantity: quantity[ childProductId ],
 						variation: selectedAttributes,
-						type: product.type,
 					} );
 				}
 

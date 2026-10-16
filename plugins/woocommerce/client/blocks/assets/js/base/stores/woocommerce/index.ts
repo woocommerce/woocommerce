@@ -11,7 +11,7 @@ import './cart/actions';
 export type { WooCommerceConfig, SelectedAttributes } from './types';
 export type {
 	OptimisticCartItem,
-	ClientCartItem,
+	AddCartItemPayload,
 	AddCartItemError,
 	AddCartItemOutcome,
 	Store,
