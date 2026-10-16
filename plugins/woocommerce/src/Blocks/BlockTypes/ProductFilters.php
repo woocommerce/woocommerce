@@ -266,7 +266,7 @@ CSS;
 						<section
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
-							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
+							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button
