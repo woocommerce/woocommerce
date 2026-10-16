@@ -66,7 +66,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td>
 						<input type="text" id="woocommerce-importer-file-url" name="file_url" class="regular-text code" />
-						<p class="description">
+						<br>
+						<small>
 							<?php
 							printf(
 								/* translators: %s: example relative file path. */
@@ -74,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'<code>wp-content/uploads/products.csv</code>'
 							);
 							?>
-						</p>
+						</small>
 					</td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
