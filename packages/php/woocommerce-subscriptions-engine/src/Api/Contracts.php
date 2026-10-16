@@ -68,22 +68,29 @@ final class Contracts {
 	);
 
 	/**
-	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`.
+	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`
+	 * and `creation_key`.
 	 *
 	 * @var array<string, true>
 	 */
 	private const CREATE_KEYS = array(
 		'extension_slug' => true,
+		'creation_key'   => true,
 	) + self::CONTRACT_KEYS;
 
 	/**
-	 * Keys accepted by {@see self::create_locked()}: the create keys plus `creation_key`.
+	 * Option keys accepted by {@see self::create()}.
 	 *
 	 * @var array<string, true>
 	 */
-	private const CREATE_LOCKED_KEYS = array(
-		'creation_key' => true,
-	) + self::CREATE_KEYS;
+	private const CREATE_OPTION_KEYS = array(
+		'operation' => true,
+	);
+
+	/**
+	 * Lock operation label of a new contract when the caller names none.
+	 */
+	private const CREATE_OPERATION = 'create';
 
 	/**
 	 * Keys accepted by {@see self::add_cycle()}, as a key map.
@@ -129,43 +136,25 @@ final class Contracts {
 	}
 
 	/**
-	 * Create a contract from explicit fields. `schedule_source` is `subscriptions_engine` (the
-	 * default: the engine notifies the owner when `next_payment_gmt` passes) or the slug of a
-	 * gateway or extension keeping its own schedule, whose contracts are never dispatched.
-	 * Unknown keys, also inside items and addresses, get `_doing_it_wrong()` and are ignored.
+	 * Create a contract locked from birth: finish building it (cycles, status) with the returned
+	 * lock, then release it. A `creation_key` (1-100 characters) makes the create idempotent per
+	 * extension; without one every call creates a contract. Unknown keys and options, also inside
+	 * items and addresses, get `_doing_it_wrong()` and are ignored.
 	 *
-	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
-	 *                                   extension), `status` (a registered contract status,
-	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
-	 *                                   Dates take a `DateTimeInterface` or a GMT `Y-m-d H:i:s`
-	 *                                   string; money takes a number or numeric string and needs
-	 *                                   a currency; `items` is a list of rows; `addresses` is
-	 *                                   keyed `billing` / `shipping`.
-	 * @return ContractView The new contract, built from the written fields (no re-read): items
-	 *                      and addresses as given.
-	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
+	 * @param array<string, mixed> $args    `extension_slug` (required, the owner), `status` (default
+	 *                                      `draft`), `creation_key`, and any of {@see self::CONTRACT_KEYS}.
+	 *                                      Dates take a `DateTimeInterface` or GMT `Y-m-d H:i:s`;
+	 *                                      money needs a currency. `schedule_source` other than
+	 *                                      `subscriptions_engine` (the default) is never dispatched.
+	 * @param array<string, mixed> $options `operation`: the lock's label (1-64 of `[a-z0-9_-]`, default `create`).
+	 * @return array{contract: ContractView, lock: ContractLock}|null The contract as written (no re-read) and its
+	 *                                                                lock; null when `creation_key` is taken.
+	 * @throws InvalidArgumentException If `extension_slug` is missing, or a value or the operation label is invalid.
 	 */
-	public static function create( array $args ): ContractView {
-		$contract = self::build( __METHOD__, $args, self::CREATE_KEYS );
-
-		( new ContractRepository() )->insert( $contract );
-
-		return ContractView::from_contract( $contract, true );
-	}
-
-	/**
-	 * Create a contract locked from birth, so an extension can finish building it (cycles,
-	 * status) before anyone else writes to it. Takes the keys of {@see self::create()} plus
-	 * `creation_key` (1-100 characters), which makes the create idempotent per extension.
-	 *
-	 * @param array<string, mixed> $args      Contract fields, as for {@see self::create()}, plus `creation_key`.
-	 * @param string               $operation Operation label (1-64 of `[a-z0-9_-]`).
-	 * @return array{contract: ContractView, lock: ContractLock}|null The new contract and its lock;
-	 *                                                                null when the extension already created a contract with this `creation_key`.
-	 * @throws InvalidArgumentException If `extension_slug` is missing, a value or the label is invalid.
-	 */
-	public static function create_locked( array $args, string $operation ): ?array {
-		$contract = self::build( __METHOD__, $args, self::CREATE_LOCKED_KEYS );
+	public static function create( array $args, array $options = array() ): ?array {
+		$filtered_options = ArgumentValidator::filter_known_keys( __METHOD__, $options, self::CREATE_OPTION_KEYS, 'option' );
+		$operation        = ArgumentValidator::validate_string( 'operation', $filtered_options['operation'] ?? self::CREATE_OPERATION );
+		$contract         = self::build( $args );
 
 		$lock = ( new ContractRepository() )->insert_locked( $contract, $operation );
 		if ( null === $lock ) {
@@ -543,13 +532,11 @@ final class Contracts {
 	/**
 	 * Validate create arguments into a new, unsaved contract.
 	 *
-	 * @param string               $method Calling method, for unknown-key notices.
-	 * @param array<string, mixed> $args   Caller fields.
-	 * @param array<string, true>  $keys   The keys the calling method accepts.
+	 * @param array<string, mixed> $args Caller fields.
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
 	 */
-	private static function build( string $method, array $args, array $keys ): Contract {
-		$filtered_args  = ArgumentValidator::filter_known_keys( $method, $args, $keys );
+	private static function build( array $args ): Contract {
+		$filtered_args  = ArgumentValidator::filter_known_keys( self::class . '::create', $args, self::CREATE_KEYS );
 		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
 		$creation_key   = ArgumentValidator::validate_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
 		unset( $filtered_args['extension_slug'], $filtered_args['creation_key'] );

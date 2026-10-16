@@ -13,11 +13,14 @@ declare( strict_types=1 );
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 /**
  * Engine integration test case.
@@ -102,6 +105,34 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$property = new ReflectionProperty( ContractLockState::class, 'trusted_until' );
 		$property->setAccessible( true );
 		$property->setValue( $this->lock_state( $lock ), 0.0 );
+	}
+
+	/**
+	 * Create a contract through the facade and release its creation lock, for fixtures that
+	 * write to it without a lock.
+	 *
+	 * @param array<string, mixed> $args `Contracts::create()` fields.
+	 */
+	protected function create_released( array $args ): ContractView {
+		$created = Contracts::create( $args );
+		$this->assertIsArray( $created );
+		$created['lock']->release();
+
+		return $created['contract'];
+	}
+
+	/**
+	 * Insert a contract through the repository and release its creation lock.
+	 *
+	 * @param Contract $contract Contract to insert.
+	 * @return int The new contract id.
+	 */
+	protected function insert_released( Contract $contract ): int {
+		$lock = ( new ContractRepository() )->insert_locked( $contract, 'create' );
+		$this->assertInstanceOf( ContractLock::class, $lock );
+		$lock->release();
+
+		return $lock->get_contract_id();
 	}
 
 	/**
@@ -292,7 +323,10 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$status         = $args['status'] ?? ContractStatus::ACTIVE;
 		$args['status'] = ContractStatus::DRAFT;
 
-		$view = Contracts::create( $args );
+		$created = Contracts::create( $args );
+		$this->assertIsArray( $created );
+		$view = $created['contract'];
+		$lock = $created['lock'];
 		$id   = $view->get_id();
 
 		Contracts::add_cycle(
@@ -305,9 +339,11 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				'ends_at_gmt'    => (string) $view->get_next_payment_gmt(),
 				'expected_total' => $view->get_billing_total(),
 				'currency'       => $view->get_currency(),
-			)
+			),
+			$lock
 		);
-		Contracts::update( $id, array( 'status' => $status ) );
+		Contracts::update( $id, array( 'status' => $status ), $lock );
+		$lock->release();
 
 		return $id;
 	}

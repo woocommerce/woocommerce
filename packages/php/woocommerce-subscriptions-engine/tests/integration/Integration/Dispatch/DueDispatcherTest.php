@@ -510,12 +510,15 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		}
 		$fresh = $this->create_due_contract( '2026-02-15 00:00:00' );
 
-		// Every stuck contract was notified before; its lock has since been released.
+		// Every stuck contract was notified before; its lock has since been released. The fresh
+		// contract's creation lock was released before that.
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update( $table, array( 'locked_until_gmt' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'locked_until_gmt' => '2026-01-10 00:00:00' ), array( 'id' => $fresh ) );
 
 		// A batch smaller than the stuck backlog: the fresh contract still makes it in.
 		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
@@ -646,11 +649,11 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	 * Create an active contract with one item, due at `$next_payment_gmt`.
 	 *
 	 * @param string               $next_payment_gmt Due moment (UTC).
-	 * @param array<string, mixed> $overrides        `Contracts::create()` fields to replace.
+	 * @param array<string, mixed> $overrides        `$this->create_released()` fields to replace.
 	 * @return int The contract id.
 	 */
 	private function create_due_contract( string $next_payment_gmt = '2026-02-15 00:00:00', array $overrides = array() ): int {
-		$contract = Contracts::create(
+		$contract = $this->create_released(
 			array_merge(
 				array(
 					'extension_slug'   => self::OWNER,

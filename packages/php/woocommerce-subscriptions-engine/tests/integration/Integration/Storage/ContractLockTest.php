@@ -43,7 +43,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	private function insert_contract( string $next_payment_gmt = '2026-06-15 00:00:00' ): int {
-		return $this->sut->insert(
+		return $this->insert_released(
 			Contract::create(
 				array(
 					'extension_slug'   => 'engine-tests',

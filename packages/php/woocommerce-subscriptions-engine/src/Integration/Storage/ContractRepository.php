@@ -64,21 +64,6 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
-	 * Insert a new, unlocked contract and its items and addresses (parent row first). When a
-	 * child insert fails, the new contract is deleted again.
-	 *
-	 * @param Contract $contract Contract to insert, without a creation key (a keyed one goes through {@see self::insert_locked()}).
-	 * @return int The new contract id.
-	 * @throws \RuntimeException If the contract row or a child row insert fails.
-	 */
-	public function insert( Contract $contract ): int {
-		$this->insert_row( $contract, null );
-		$this->insert_children_or_discard( $contract );
-
-		return (int) $contract->get_id();
-	}
-
-	/**
 	 * Insert a new contract locked from birth: the row INSERT stamps the lock, then items and
 	 * addresses follow under it. When a child insert fails, the new contract (and its lock) is
 	 * deleted again, so a retry is not blocked by its own creation key.
@@ -149,16 +134,16 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Insert the contract row, optionally stamping a lock on the database clock in the same
-	 * statement, and set the new id on the entity. Hand-built, so strings are checked against
+	 * Insert the contract row, stamping its lock on the database clock in the same statement,
+	 * and set the new id on the entity. Hand-built, so strings are checked against
 	 * their column lengths first, as `$wpdb->insert()` would.
 	 *
-	 * @param Contract                                     $contract Contract to insert.
-	 * @param array{token: string, operation: string}|null $lock     Lock to stamp, or null.
+	 * @param Contract                                $contract Contract to insert.
+	 * @param array{token: string, operation: string} $lock     Lock to stamp.
 	 * @return bool False when the `(extension_slug, creation_key)` pair is taken (nothing inserted).
 	 * @throws \RuntimeException If the insert fails for any other reason.
 	 */
-	private function insert_row( Contract $contract, ?array $lock ): bool {
+	private function insert_row( Contract $contract, array $lock ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -184,11 +169,9 @@ final class ContractRepository {
 			$values[]       = (string) $value;
 		}
 
-		if ( null !== $lock ) {
-			array_push( $names, '`lock_token`', '`locked_until_gmt`', '`lock_operation`' );
-			array_push( $placeholders, '%s', 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', '%s' );
-			array_push( $values, $lock['token'], ContractLock::TTL_SECONDS, $lock['operation'] );
-		}
+		array_push( $names, '`lock_token`', '`locked_until_gmt`', '`lock_operation`' );
+		array_push( $placeholders, '%s', 'DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND )', '%s' );
+		array_push( $values, $lock['token'], ContractLock::TTL_SECONDS, $lock['operation'] );
 
 		$name_list        = implode( ', ', $names );
 		$placeholder_list = implode( ', ', $placeholders );
@@ -236,7 +219,7 @@ final class ContractRepository {
 	public function update_fields( Contract $contract, array $fields, ?ContractLock $lock = null ): bool {
 		$contract_id = $contract->get_id();
 		if ( null === $contract_id ) {
-			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
+			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert_locked() for a new contract.' );
 		}
 
 		if ( null !== $lock ) {
@@ -767,8 +750,8 @@ final class ContractRepository {
 		// Table names cannot be bound, so they are interpolated; every value is a placeholder.
 		// The owner placeholder list is generated, one `%s` per owner in `$args`.
 		// Driven by the `due_owner` index; schedule source and lock are residual filters, and lock
-		// liveness is read on the database clock, not `$now`. NULL `locked_until_gmt` (never
-		// locked) sorts first; the sort filesorts the owners' due backlog and `LIMIT` bounds it.
+		// liveness is read on the database clock, not `$now`. Every contract is stamped by its
+		// creation lock's release; the sort filesorts the owners' due backlog and `LIMIT` bounds it.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(

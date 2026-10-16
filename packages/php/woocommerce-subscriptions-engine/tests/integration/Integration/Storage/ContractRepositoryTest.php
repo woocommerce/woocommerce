@@ -191,7 +191,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A contract round-trips its live state, children, and config, no cycle graph.
 	 */
 	public function test_contract_round_trips_its_live_state(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->assertGreaterThan( 0, $id );
 
 		$fetched = $this->sut->find( $id );
@@ -233,7 +233,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_summary reads the contract row only, without children.
 	 */
 	public function test_find_summary_reads_the_contract_row_only(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$summary = $this->sut->find_summary( $id );
 
@@ -247,11 +247,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_by_origin_order returns the matching contracts oldest first, with plan terms hydrated.
 	 */
 	public function test_find_by_origin_order_returns_matches_oldest_first(): void {
-		$first  = $this->sut->insert( $this->make_contract() );
-		$second = $this->sut->insert( $this->make_contract() );
+		$first  = $this->insert_released( $this->make_contract() );
+		$second = $this->insert_released( $this->make_contract() );
 		$other  = $this->make_contract();
 		$other->set_origin_order_id( 2002 );
-		$this->sut->insert( $other );
+		$this->insert_released( $other );
 
 		$first_contract = $this->sut->find( $first );
 		$this->assertInstanceOf( Contract::class, $first_contract );
@@ -298,7 +298,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox Meta written through the meta methods survives contract writes.
 	 */
 	public function test_meta_survives_a_whole_entity_update(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->sut->add_meta( $id, 'source_channel', 'pdp' );
 
 		$contract = $this->sut->find( $id );
@@ -316,9 +316,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox query returns contracts newest first, lightweight, honouring limit/offset.
 	 */
 	public function test_query_orders_newest_first_with_paging(): void {
-		$first  = $this->sut->insert( $this->make_contract() );
-		$second = $this->sut->insert( $this->make_contract() );
-		$third  = $this->sut->insert( $this->make_contract() );
+		$first  = $this->insert_released( $this->make_contract() );
+		$second = $this->insert_released( $this->make_contract() );
+		$third  = $this->insert_released( $this->make_contract() );
 
 		// Newest first (id DESC), and hydrated lightweight (row only, no children).
 		$all = $this->sut->query();
@@ -358,7 +358,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		string $start = '2026-06-15 00:00:00',
 		?int $origin_order_id = 1001
 	): int {
-		return $this->sut->insert(
+		return $this->insert_released(
 			Contract::create(
 				array(
 					'extension_slug'   => 'engine-tests',
@@ -695,7 +695,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox count_items_by_contract maps every requested id, zero-filling ids with no items.
 	 */
 	public function test_count_items_by_contract_maps_every_requested_id(): void {
-		$with_items = $this->sut->insert( $this->make_contract() ); // Seeds one line item.
+		$with_items = $this->insert_released( $this->make_contract() ); // Seeds one line item.
 		$no_items   = $this->insert_list_contract( ContractStatus::ACTIVE ); // Bare row, no items.
 		$absent     = 999999; // Never inserted.
 
@@ -715,7 +715,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A manual/admin contract with a null origin order round-trips.
 	 */
 	public function test_contract_round_trips_a_null_origin_order(): void {
-		$id = $this->sut->insert(
+		$id = $this->insert_released(
 			Contract::create(
 				array(
 					'extension_slug'  => 'engine-tests',
@@ -739,7 +739,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_a_stored_null_extension_slug_hydrates_as_null(): void {
 		global $wpdb;
 
-		$id = $this->sut->insert(
+		$id = $this->insert_released(
 			Contract::create(
 				array(
 					'extension_slug'  => 'engine-tests',
@@ -765,7 +765,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox update_fields persists the named contract columns.
 	 */
 	public function test_update_fields_persists_the_contract_row(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -784,7 +784,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A row-only update_fields leaves the item rows in place.
 	 */
 	public function test_a_row_only_update_leaves_children_in_place(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$item_ids_before = $this->item_ids( $id );
 
@@ -800,7 +800,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox update_fields replaces the items when named.
 	 */
 	public function test_update_fields_replaces_named_children(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -838,7 +838,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox update_fields refuses the create-only creation key and extension slug.
 	 */
 	public function test_update_fields_refuses_create_only_fields(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 
@@ -874,7 +874,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_update_fields_returns_false_for_a_deleted_contract_and_writes_no_children(): void {
 		global $wpdb;
 
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->assertTrue( $this->sut->delete( $id ) );
 
 		$stale = $this->make_contract();
@@ -895,7 +895,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_an_identical_write_still_changes_the_row(): void {
 		global $wpdb;
 
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 
@@ -913,7 +913,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox append_cycle inserts a cycle reachable as the chain's newest cycle.
 	 */
 	public function test_append_cycle_stores_the_newest_cycle(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
 		$this->sut->append_cycle( $cycle );
@@ -946,7 +946,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox expected_total round-trips at full DECIMAL(26,8) precision, not just two decimals.
 	 */
 	public function test_expected_total_round_trips_full_decimal_precision(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		// Eight fractional digits: a DECIMAL(26,2) column would truncate this on the
 		// way in, so an exact reload proves the storage scale is (26,8).
@@ -973,7 +973,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_cycle_history returns a window of cycles newest first.
 	 */
 	public function test_find_cycle_history_pages_newest_first(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		for ( $n = 1; $n <= 3; $n++ ) {
 			$this->sut->append_cycle( $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) ) );
@@ -993,8 +993,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox find_cycles_by_order_id returns every cycle linked to an order, newest first.
 	 */
 	public function test_find_cycles_by_order_id(): void {
-		$first_id  = $this->sut->insert( $this->make_contract() );
-		$second_id = $this->sut->insert( $this->make_contract() );
+		$first_id  = $this->insert_released( $this->make_contract() );
+		$second_id = $this->insert_released( $this->make_contract() );
 
 		// One aggregate order serves a cycle on each of two contracts (not 1:1).
 		$this->sut->append_cycle( $this->make_cycle( $first_id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 9090 ) );
@@ -1194,10 +1194,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A live lock hides the contract from find_due until it expires on the database clock; an expired lock sorts it behind never-locked contracts.
+	 * @testdox A live lock hides the contract from find_due until it expires on the database clock; an expired lock sorts it behind less recently locked contracts.
 	 */
 	public function test_a_live_lock_hides_the_contract_until_it_expires(): void {
-		$now   = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$now = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
+		$this->pin_db_clock( '2026-07-01 00:00:00' );
 		$id    = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 		$later = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
 
@@ -1209,7 +1210,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( $later ), $this->due_ids( $now->modify( '+1 day' ), 50 ), 'A later scan cutoff does not expire the lock; the database clock does.' );
 
 		$this->pin_db_clock( '2026-07-15 00:10:00' );
-		$this->assertSame( array( $later, $id ), $this->due_ids( $now, 50 ), 'An expired lock no longer hides it; never-locked contracts lead.' );
+		$this->assertSame( array( $later, $id ), $this->due_ids( $now, 50 ), 'An expired lock no longer hides it; the less recently locked contract leads.' );
 	}
 
 	/**
@@ -1339,13 +1340,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$fresh = $this->make_contract();
 		$fresh->set_payment_instrument( $over_long );
 		try {
-			$this->sut->insert( $fresh );
+			$this->insert_released( $fresh );
 			$this->fail( 'Expected insert() to refuse the over-long value.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertNull( $fresh->get_id(), 'Nothing is inserted.' );
 		}
 
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_payment_instrument( $over_long );
@@ -1377,7 +1378,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox An over-long cycle kind is refused by append_cycle and nothing is stored; one at the column length is written.
 	 */
 	public function test_an_over_long_cycle_kind_is_refused_on_append(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$over_long = $this->make_cycle_of_kind( $id, str_repeat( 'k', 21 ) );
 		try {
@@ -1499,7 +1500,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A billed cycle hydrates its plan and items snapshots.
 	 */
 	public function test_a_billed_cycle_hydrates_its_snapshots(): void {
-		$id           = $this->sut->insert( $this->make_contract() );
+		$id           = $this->insert_released( $this->make_contract() );
 		$snapshot_ids = $this->seed_cycle_snapshots( $id );
 		$cycle        = Cycle::create(
 			array(
@@ -1527,7 +1528,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * A pending cycle 1 on a new contract.
 	 */
 	private function pending_cycle_id(): int {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		return (int) $this->append_pending_cycle( $id )->get_id();
 	}
@@ -1570,7 +1571,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_an_unknown_stored_contract_status_round_trips(): void {
 		global $wpdb;
 
-		$id    = $this->sut->insert( $this->make_contract() );
+		$id    = $this->insert_released( $this->make_contract() );
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update( $table, array( 'status' => 'legacy-paused' ), array( 'id' => $id ) );
@@ -1594,7 +1595,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_an_unknown_stored_cycle_status_hydrates_through_every_cycle_read(): void {
 		global $wpdb;
 
-		$id    = $this->sut->insert( $this->make_contract() );
+		$id    = $this->insert_released( $this->make_contract() );
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
 		$this->sut->append_cycle( $cycle );
 
@@ -1674,7 +1675,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'extension_slug'   => $owner,
 			)
 		);
-		$id       = $this->sut->insert( $contract );
+		$id       = $this->insert_released( $contract );
 
 		if ( null !== $next_payment_gmt ) {
 			$this->sut->append_cycle(
@@ -1702,7 +1703,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_duplicate_sequence_no_is_rejected(): void {
 		global $wpdb;
 
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
 		$cycles_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1735,7 +1736,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_duplicate_count_is_rejected(): void {
 		global $wpdb;
 
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
 		$cycles_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1770,7 +1771,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * so the money-path can treat the collision as benign without masking real errors.
 	 */
 	public function test_append_cycle_throws_duplicate_cycle_exception_on_collision(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
 		$this->expectException( DuplicateCycleException::class );
@@ -1801,7 +1802,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox append_cycle assigns sequence 1 to the first unpositioned cycle and leaves the count alone.
 	 */
 	public function test_append_cycle_assigns_the_first_sequence_no(): void {
-		$id    = $this->sut->insert( $this->make_contract() );
+		$id    = $this->insert_released( $this->make_contract() );
 		$cycle = $this->make_unpositioned_cycle( $id );
 
 		$this->sut->append_cycle( $cycle );
@@ -1817,7 +1818,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox append_cycle assigns the head's sequence + 1 within the cycle's own chain.
 	 */
 	public function test_append_cycle_assigns_the_next_sequence_no_in_its_chain(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 		$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 
@@ -1837,7 +1838,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_append_without_a_sequence_no_takes_the_next_position(): void {
 		global $wpdb;
 
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$first = $this->make_unpositioned_cycle( $id );
 		$this->sut->append_cycle( $first );
@@ -1862,7 +1863,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A failed contract read throws instead of reading as missing.
 	 */
 	public function test_failed_contract_read_throws(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token/i' );
 		$this->expectException( \RuntimeException::class );
@@ -1873,7 +1874,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox Multiple non-counting cycles (count = null) coexist in one chain.
 	 */
 	public function test_multiple_null_count_cycles_coexist(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 
 		// MySQL treats NULLs as distinct, so two count = null cycles do not collide
 		// under UNIQUE(contract_id, kind, count).
@@ -1892,7 +1893,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_delete_removes_contract_children_cycles_and_snapshots(): void {
 		global $wpdb;
 
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) ) );
 
 		$this->assertTrue( $this->sut->delete( $id ) );
@@ -1983,7 +1984,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A row write with the live lock lands; without a lock it is refused while the lock lives and lands after.
 	 */
 	public function test_contract_row_writes_are_fenced(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->lock( $id, 'hold' );
 
@@ -2016,8 +2017,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A lock for another contract is refused before any write.
 	 */
 	public function test_a_lock_for_another_contract_is_refused(): void {
-		$id    = $this->sut->insert( $this->make_contract() );
-		$other = $this->sut->insert( $this->make_contract() );
+		$id    = $this->insert_released( $this->make_contract() );
+		$other = $this->insert_released( $this->make_contract() );
 		$lock  = $this->lock( $other );
 
 		$this->expectException( \InvalidArgumentException::class );
@@ -2030,7 +2031,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_an_identical_locked_write_is_a_no_op(): void {
 		global $wpdb;
 
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$lock     = $this->lock( $id );
 		$contract = $this->with_status( $id, ContractStatus::ACTIVE );
 
@@ -2044,7 +2045,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A write to a deleted contract returns false with and without a lock.
 	 */
 	public function test_a_missing_row_returns_false(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->with_status( $id, ContractStatus::ON_HOLD );
 		$lock     = $this->lock( $id );
 		$this->sut->delete( $id );
@@ -2057,7 +2058,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox An unlocked items replacement runs under an internal lock: refused while another lock lives, released after.
 	 */
 	public function test_an_unlocked_children_write_takes_an_internal_lock(): void {
-		$id    = $this->sut->insert( $this->make_contract() );
+		$id    = $this->insert_released( $this->make_contract() );
 		$items = $this->item_ids( $id );
 		$lock  = $this->lock( $id, 'hold' );
 
@@ -2081,7 +2082,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox Locked cycle appends and transitions land; unlocked ones are refused while another lock lives.
 	 */
 	public function test_cycle_writes_are_fenced(): void {
-		$id = $this->sut->insert( $this->make_contract() );
+		$id = $this->insert_released( $this->make_contract() );
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->lock( $id, 'renewal' );
 
@@ -2132,8 +2133,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A lock for one contract cannot append to or transition another contract's cycles.
 	 */
 	public function test_a_lock_cannot_write_another_contracts_cycles(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
-		$other    = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
+		$other    = $this->insert_released( $this->make_contract() );
 		$cycle_id = (int) $this->append_pending_cycle( $other )->get_id();
 		$lock     = $this->lock( $id );
 
@@ -2152,7 +2153,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A lost compare-and-set under the lock returns false; a missing cycle throws.
 	 */
 	public function test_a_lost_locked_transition_returns_false(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$cycle_id = (int) $this->append_pending_cycle( $id )->get_id();
 		$lock     = $this->lock( $id );
 
@@ -2187,7 +2188,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox Replacing items leaves exactly the new rows, in order.
 	 */
 	public function test_replacing_items_leaves_the_new_rows_in_order(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_items( $this->two_items() );
@@ -2202,7 +2203,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A failed item delete leaves old and new rows side by side, and the next replacement repairs it.
 	 */
 	public function test_a_failed_item_delete_is_repaired_by_the_next_replacement(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_items( $this->two_items() );
@@ -2229,7 +2230,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A failed item insert keeps the old item set.
 	 */
 	public function test_a_failed_item_insert_keeps_the_old_items(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_items( $this->two_items() );
@@ -2253,7 +2254,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A failed second item insert removes the first new row and leaves exactly the old set.
 	 */
 	public function test_a_failed_second_item_insert_leaves_exactly_the_old_items(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_items( $this->two_items() );
@@ -2283,47 +2284,45 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_a_failed_create_is_discarded_and_can_be_retried(): void {
 		global $wpdb;
 
-		foreach ( array( 'insert', 'insert_locked' ) as $method ) {
-			$key   = 'order:' . $method;
-			$build = function () use ( $key ): Contract {
-				$contract = $this->make_contract();
-				$storage  = $contract->to_storage();
-				return Contract::create(
-					array(
-						'extension_slug' => 'lite',
-						'creation_key'   => $key,
-						'items'          => $contract->get_items(),
-						'addresses'      => $contract->get_addresses(),
-						'currency'       => $storage['currency'],
-					)
-				);
-			};
-
-			$this->with_failing_query(
-				'/^\s*INSERT\s+INTO\s+\S*contract_addresses/i',
-				function () use ( $build, $method ): void {
-					try {
-						'insert' === $method ? $this->sut->insert( $build() ) : $this->sut->insert_locked( $build(), 'checkout' );
-						$this->fail( 'Expected the failed address insert to throw.' );
-					} catch ( \RuntimeException $e ) {
-						$this->assertStringContainsString( 'address row', $e->getMessage() );
-					}
-				},
-				1
+		$key   = 'order:1';
+		$build = function () use ( $key ): Contract {
+			$contract = $this->make_contract();
+			$storage  = $contract->to_storage();
+			return Contract::create(
+				array(
+					'extension_slug' => 'lite',
+					'creation_key'   => $key,
+					'items'          => $contract->get_items(),
+					'addresses'      => $contract->get_addresses(),
+					'currency'       => $storage['currency'],
+				)
 			);
+		};
 
-			$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-			$items     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$contracts} WHERE creation_key = %s", $key ) ) );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$items} WHERE contract_id NOT IN ( SELECT id FROM {$contracts} )" ), 'No orphaned items.' );
+		$this->with_failing_query(
+			'/^\s*INSERT\s+INTO\s+\S*contract_addresses/i',
+			function () use ( $build ): void {
+				try {
+					$this->sut->insert_locked( $build(), 'checkout' );
+					$this->fail( 'Expected the failed address insert to throw.' );
+				} catch ( \RuntimeException $e ) {
+					$this->assertStringContainsString( 'address row', $e->getMessage() );
+				}
+			},
+			1
+		);
 
-			$retry = $build();
-			'insert' === $method ? $this->sut->insert( $retry ) : $this->sut->insert_locked( $retry, 'checkout' );
-			$this->assertIsInt( $retry->get_id() );
-			$this->assertSame( array( 'Coffee bag' ), $this->item_names( (int) $retry->get_id() ) );
-		}
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$items     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_ITEMS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$contracts} WHERE creation_key = %s", $key ) ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$items} WHERE contract_id NOT IN ( SELECT id FROM {$contracts} )" ), 'No orphaned items.' );
+
+		$retry = $build();
+		$this->assertNotNull( $this->sut->insert_locked( $retry, 'checkout' ) );
+		$this->assertIsInt( $retry->get_id() );
+		$this->assertSame( array( 'Coffee bag' ), $this->item_names( (int) $retry->get_id() ) );
 	}
 
 	/**
@@ -2340,7 +2339,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			array(),
 			function () use ( $contract, &$thrown ): void {
 				try {
-					$this->sut->insert( $contract );
+					$this->insert_released( $contract );
 				} catch ( \RuntimeException $e ) {
 					$thrown = $e;
 				}
@@ -2362,7 +2361,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A failed internal-lock release is logged and keeps the write's result, or its exception.
 	 */
 	public function test_a_failed_internal_release_does_not_mask_the_write(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$contract->set_items( $this->two_items() );
@@ -2401,7 +2400,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox Replacing addresses upserts the given types in place and removes the others.
 	 */
 	public function test_replacing_addresses_upserts_and_prunes(): void {
-		$id       = $this->sut->insert( $this->make_contract() );
+		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 		$lock = $this->lock( $id );
@@ -2479,7 +2478,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 * @testdox A locked insert with a taken creation key returns null and locks nothing.
 	 */
 	public function test_a_locked_insert_with_a_duplicate_key_returns_null(): void {
-		$first = $this->sut->insert( $this->keyed_contract( 'lite', 'order:7' ) );
+		$first = $this->insert_released( $this->keyed_contract( 'lite', 'order:7' ) );
 
 		$this->assertNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' ) );
 		$this->assertNull( $this->sut->get_lock_holder( $first )['operation'] );

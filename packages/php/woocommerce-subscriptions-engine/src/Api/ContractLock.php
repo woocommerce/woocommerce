@@ -1,7 +1,7 @@
 <?php
 /**
  * ContractLock - a held per-contract lock, as returned by {@see Contracts::lock()},
- * {@see Contracts::create_locked()} and the due dispatcher.
+ * {@see Contracts::create()} and the due dispatcher.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */

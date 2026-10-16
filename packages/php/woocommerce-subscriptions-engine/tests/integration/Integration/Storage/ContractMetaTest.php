@@ -41,7 +41,7 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new ContractRepository();
-		$this->id  = $this->sut->insert( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
+		$this->id  = $this->insert_released( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
 	}
 
 	public function test_add_meta_keeps_every_value_under_one_key_in_order(): void {
@@ -253,7 +253,7 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_meta_is_scoped_to_its_contract(): void {
-		$other = $this->sut->insert( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
 		$this->sut->add_meta( $other, 'note', 'theirs' );
 
 		$this->assertSame( array(), $this->sut->get_meta( $this->id, 'note' ) );
@@ -353,7 +353,7 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	 * @testdox A meta write with a lock for another contract is refused.
 	 */
 	public function test_a_meta_write_with_another_contracts_lock_is_refused(): void {
-		$other = $this->sut->insert( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
+		$other = $this->insert_released( Contract::create( array( 'extension_slug' => 'acme-subs' ) ) );
 		$lock  = $this->sut->acquire_lock( $other, 'hold' );
 		$this->assertInstanceOf( ContractLock::class, $lock );
 

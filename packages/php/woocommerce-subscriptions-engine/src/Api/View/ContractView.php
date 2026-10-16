@@ -313,7 +313,7 @@ final class ContractView {
 	/**
 	 * The contract's live lock as of the read, whoever holds it (the caller included): its
 	 * expiry (UTC) and operation label, or null when it was not locked or the view was built from
-	 * written fields (as from `create()` and `create_locked()`). Never carries the lock token.
+	 * written fields (as from `create()`). Never carries the lock token.
 	 *
 	 * @return array{locked_until: DateTimeImmutable, operation: string}|null
 	 */

@@ -64,7 +64,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_extension_slug_only_create_is_an_empty_draft(): void {
-		$created = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$created = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) );
 		$id      = $created->get_id();
 
 		$view = $this->view( $id );
@@ -82,7 +82,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_create_stores_and_returns_every_field(): void {
-		$created = Contracts::create(
+		$created = $this->create_released(
 			array(
 				'extension_slug'       => self::EXTENSION_SLUG,
 				'status'               => ContractStatus::ACTIVE,
@@ -184,7 +184,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'shipping' => array_merge( $billing, array( 'city' => 'Porto' ) ),
 		);
 
-		$created = Contracts::create(
+		$created = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => $items,
@@ -205,7 +205,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_datetime_objects_are_stored_as_utc_strings(): void {
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug'   => self::EXTENSION_SLUG,
 				'start_gmt'        => new DateTimeImmutable( '2026-01-01 02:00:00', new DateTimeZone( 'Europe/Lisbon' ) ),
@@ -230,7 +230,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			2
 		);
 
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'custmer_id'     => 1,
@@ -245,7 +245,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_unknown_item_and_address_keys_are_ignored_with_a_notice(): void {
 		$this->setExpectedIncorrectUsage( Contracts::class );
 
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => array(
@@ -281,7 +281,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_a_missing_or_empty_extension_slug_is_rejected( array $args ): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		Contracts::create( $args );
+		$this->create_released( $args );
 	}
 
 	/**
@@ -297,7 +297,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 	public function test_an_entity_invariant_failure_is_reported_as_invalid_input(): void {
 		try {
-			Contracts::create(
+			$this->create_released(
 				array(
 					'extension_slug' => self::EXTENSION_SLUG,
 					'status'         => 'nonsense',
@@ -319,7 +319,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$before = Contracts::count();
 
 		try {
-			Contracts::create( array_merge( array( 'extension_slug' => self::EXTENSION_SLUG ), $fields ) );
+			$this->create_released( array_merge( array( 'extension_slug' => self::EXTENSION_SLUG ), $fields ) );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertSame( $before, Contracts::count(), 'Nothing is written.' );
@@ -361,7 +361,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param array<string, mixed> $fields Invalid fields.
 	 */
 	public function test_a_rejected_update_writes_none_of_its_keys( array $fields ): void {
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
@@ -400,7 +400,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_money_without_currency_is_rejected_on_update(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->expectException( InvalidArgumentException::class );
 
@@ -408,14 +408,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_null_money_value_resets_to_zero_without_a_currency(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'billing_total' => null ) ) );
 		$this->assertSame( '0.00000000', $this->view( $id )->get_billing_total() );
 	}
 
 	public function test_the_currency_cannot_be_cleared_while_a_total_is_non_zero(): void {
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
@@ -448,7 +448,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$customer = self::factory()->user->create();
 		$this->assertIsInt( $customer );
 
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'customer_id' => $customer ) ) );
 		$this->assertInstanceOf(
@@ -474,7 +474,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_update_keeps_unmentioned_payment_fields(): void {
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug'       => self::EXTENSION_SLUG,
 				'payment_method'       => 'dummy',
@@ -492,7 +492,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_update_with_no_fields_returns_the_view(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$updated = Contracts::update( $id, array() );
 
@@ -503,7 +503,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_update_returns_null_when_the_contract_is_deleted_before_the_write(): void {
 		global $wpdb;
 
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		// A concurrent delete lands after the facade read the contract and before its write.
 		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -532,7 +532,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_update_does_not_revert_a_concurrent_write_to_other_fields(): void {
 		global $wpdb;
 
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug'   => self::EXTENSION_SLUG,
 				'status'           => ContractStatus::ACTIVE,
@@ -579,7 +579,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_items_and_addresses_are_replaced_as_a_whole(): void {
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => array( array( 'item_name' => 'Coffee' ), array( 'item_name' => 'Tea' ) ),
@@ -669,7 +669,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox A failed item insert on update throws and keeps the previous items.
 	 */
 	public function test_update_throws_when_an_item_insert_fails(): void {
-		$view = Contracts::create(
+		$view = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => array( array( 'item_name' => 'Coffee' ) ),
@@ -692,7 +692,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox A failed address write on update throws and keeps the previous address.
 	 */
 	public function test_update_throws_when_an_address_insert_fails(): void {
-		$view = Contracts::create(
+		$view = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'addresses'      => array( 'billing' => array( 'city' => 'Lisbon' ) ),
@@ -712,7 +712,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_null_clears_nullable_fields(): void {
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug'   => self::EXTENSION_SLUG,
 				'selling_plan_id'  => 3,
@@ -738,7 +738,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
 		$this->setExpectedIncorrectUsage( Contracts::class );
 
@@ -766,7 +766,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_extension_slug_is_not_an_update_key(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
 
 		Contracts::update(
@@ -794,7 +794,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			2
 		);
 
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'plan_snapshot'  => array( 'selling_plan_id' => 3 ),
@@ -813,7 +813,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_a_registered_extension_status_is_accepted(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
 
-		$id = Contracts::create(
+		$id = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'status'         => 'paused-by-merchant',
@@ -827,7 +827,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * Create a contract carrying a currency, ready for cycles.
 	 */
 	private function contract_with_currency(): int {
-		return Contracts::create(
+		return $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
@@ -1304,16 +1304,30 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox create_locked() returns the new contract and its lock; writes with it land, others are refused until release.
+	 * @testdox create() returns the new contract and its lock, taken for "create" by default; writes with it land, others are refused until release.
 	 */
-	public function test_create_locked(): void {
-		$created = Contracts::create_locked(
+	public function test_create_is_locked_from_birth(): void {
+		$default = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertNotNull( $default );
+		$this->assertSame( 'create', $default['lock']->get_operation() );
+		$lock_state = $this->view( $default['contract']->get_id() )->get_lock_state();
+		$this->assertNotNull( $lock_state );
+		$this->assertSame( 'create', $lock_state['operation'] );
+		try {
+			Contracts::update( $default['contract']->get_id(), array( 'currency' => 'USD' ) );
+			$this->fail( 'Expected an unlocked write to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'create', $e->get_operation() );
+		}
+		$default['lock']->release();
+
+		$created = Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'currency'       => 'USD',
 				'creation_key'   => 'order:1',
 			),
-			'checkout'
+			array( 'operation' => 'checkout' )
 		);
 		$this->assertNotNull( $created );
 		$lock = $created['lock'];
@@ -1337,7 +1351,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A duplicate creation key is a lost race: create_locked() returns null and writes nothing; an invalid key throws.
+	 * @testdox A duplicate creation key is a lost race: create() returns null and writes nothing; an invalid key throws.
 	 */
 	public function test_a_duplicate_creation_key_returns_null(): void {
 		global $wpdb;
@@ -1346,39 +1360,52 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'extension_slug' => self::EXTENSION_SLUG,
 			'creation_key'   => 'order:9',
 		);
-		$created = Contracts::create_locked( $args, 'checkout' );
+		$created = Contracts::create( $args );
 		$this->assertNotNull( $created );
 
-		$this->assertNull( Contracts::create_locked( $args, 'checkout' ) );
+		$this->assertNull( Contracts::create( $args ) );
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s", 'order:9' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		$this->expectException( InvalidArgumentException::class );
-		Contracts::create_locked(
+		Contracts::create(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'creation_key'   => str_repeat( 'k', 101 ),
-			),
-			'checkout'
+			)
 		);
 	}
 
 	/**
-	 * @testdox create() does not take a creation key: it is an unknown key, noticed and ignored.
+	 * @testdox Without a creation key every create makes a new contract.
 	 */
-	public function test_create_ignores_a_creation_key(): void {
-		global $wpdb;
+	public function test_keyless_creates_never_collide(): void {
+		$args   = array( 'extension_slug' => self::EXTENSION_SLUG );
+		$first  = Contracts::create( $args );
+		$second = Contracts::create( $args );
 
+		$this->assertNotNull( $first );
+		$this->assertNotNull( $second );
+		$this->assertNotSame( $first['contract']->get_id(), $second['contract']->get_id() );
+	}
+
+	/**
+	 * @testdox An unknown create option is noticed and ignored; an invalid operation label throws.
+	 */
+	public function test_create_options_are_validated(): void {
 		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
-		$args = array(
-			'extension_slug' => self::EXTENSION_SLUG,
-			'creation_key'   => 'order:11',
-		);
-		Contracts::create( $args );
-		Contracts::create( $args );
+		$created = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ), array( 'skip_lock' => true ) );
+		$this->assertNotNull( $created );
+		$this->assertSame( 'create', $created['lock']->get_operation() );
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s", 'order:11' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( array( 'Checkout', 5 ) as $operation ) {
+			try {
+				Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ), array( 'operation' => $operation ) );
+				$this->fail( 'Expected an invalid operation label to throw.' );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertStringContainsString( 'operation', $e->getMessage() );
+			}
+		}
 	}
 
 	/**
@@ -1391,13 +1418,13 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'extension_slug' => self::EXTENSION_SLUG,
 			'creation_key'   => 'order:10',
 		);
-		$this->assertNotNull( Contracts::create_locked( $args, 'checkout' ) );
+		$this->assertNotNull( Contracts::create( $args ) );
 
 		$show_errors = $wpdb->show_errors( true );
 		$suppressed  = $wpdb->suppress_errors( false );
 		ob_start();
 		try {
-			$this->assertNull( Contracts::create_locked( $args, 'checkout' ) );
+			$this->assertNull( Contracts::create( $args ) );
 		} finally {
 			$output            = (string) ob_get_clean();
 			$still_suppressing = $wpdb->suppress_errors( $suppressed );
@@ -1412,7 +1439,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox An unlocked update with items while another lock lives throws, writes nothing and leaves no internal lock.
 	 */
 	public function test_an_unlocked_items_update_conflicts_cleanly(): void {
-		$view = Contracts::create(
+		$view = $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'items'          => array( array( 'item_name' => 'Coffee' ) ),
@@ -1638,7 +1665,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_meta_keeps_several_values_under_one_key(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->assertIsInt( Contracts::add_meta( $id, 'note', 'one' ) );
 		$this->assertIsInt( Contracts::add_meta( $id, 'note', array( 'two' ) ) );
@@ -1649,7 +1676,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_a_unique_meta_add_refuses_an_existing_key(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 
 		$this->assertNull( Contracts::add_meta( $id, 'note', 'two', true ) );
@@ -1657,7 +1684,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_update_meta_with_a_previous_value_and_delete_one_value(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 		Contracts::add_meta( $id, 'note', 'two' );
 
@@ -1669,7 +1696,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_only_null_matches_any_meta_value(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 		Contracts::add_meta( $id, 'note', '' );
 
@@ -1690,7 +1717,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_deleting_a_contract_removes_its_meta(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'one' );
 
 		$this->assertTrue( ( new ContractRepository() )->delete( $id ) );
@@ -1699,7 +1726,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_an_empty_meta_key_is_rejected(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 
 		$this->expectException( InvalidArgumentException::class );
 
@@ -1707,7 +1734,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	public function test_meta_survives_a_contract_update(): void {
-		$id = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
 		Contracts::add_meta( $id, 'note', 'kept' );
 
 		Contracts::update(
@@ -1768,7 +1795,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		return ( new ContractRepository() )->insert( $contract );
+		return $this->insert_released( $contract );
 	}
 
 	/**
@@ -1791,7 +1818,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		return ( new ContractRepository() )->insert( $contract );
+		return $this->insert_released( $contract );
 	}
 
 	/**
