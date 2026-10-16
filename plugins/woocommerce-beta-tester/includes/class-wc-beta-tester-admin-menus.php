@@ -148,6 +148,37 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	}
 
 	/**
+	 * Get the environment section of the SSR, one "label: value" line per field.
+	 *
+	 * Object and array values are printed as JSON.
+	 *
+	 * @param array|object $environment Environment values, already cast to their schema types.
+	 * @param array        $properties  The environment properties of the system status schema.
+	 * @return string
+	 */
+	private function get_environment_ssr_info( $environment, $properties ) {
+		$ssr = '';
+
+		foreach ( $environment as $key => $value ) {
+			if ( 'external_object_cache' === $key ) {
+				$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
+				continue;
+			}
+
+			if ( is_bool( $value ) ) {
+				$value = wc_bool_to_string( $value );
+			} elseif ( is_array( $value ) || is_object( $value ) ) {
+				$value = wp_json_encode( $value );
+			}
+
+			$label = $properties[ $key ]['description'] ?? $key;
+			$ssr  .= sprintf( "%s: %s\n", $label, $value );
+		}
+
+		return $ssr;
+	}
+
+	/**
 	 * Constructs a WC System Status Report.
 	 *
 	 * @return string
@@ -156,7 +187,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		// This function depends on the WC core global being available. Sometimes, such as when we deactivate
 		// WC to install a live branches version, WC will not be available and cause a crash if we don't exit early
 		// here.
-		if ( ! class_exists( 'WC' ) ) {
+		if ( ! function_exists( 'WC' ) ) {
 			return '';
 		}
 
@@ -188,19 +219,10 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 				$response[ $section ] = $values;
 			}
 
-			$ssr = '';
-			foreach ( $response['environment'] as $key => $value ) {
-				$index = $key;
-				if ( 'external_object_cache' === $index ) {
-					$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
-					continue;
-				}
+			$ssr = $this->get_environment_ssr_info( $response['environment'], $schema['properties']['environment']['properties'] );
 
-				if ( is_bool( $value ) ) {
-					$value = wc_bool_to_string( $value );
-				}
-
-				$ssr .= sprintf( "%s: %s\n", $schema['properties']['environment']['properties'][ $index ]['description'], $value );
+			if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
+				include_once WC_ABSPATH . 'includes/admin/plugin-updates/class-wc-plugin-updates.php';
 			}
 
 			$active_plugins   = $api->get_active_plugins();

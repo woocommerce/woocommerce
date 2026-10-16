@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include the System Status Report in the "Submit bug report" link again, and print object-typed report fields as JSON.
