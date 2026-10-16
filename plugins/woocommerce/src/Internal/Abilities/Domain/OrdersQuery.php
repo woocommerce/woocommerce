@@ -388,11 +388,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	private static function prepare_status_arg( string $status ): string {
 		$prefixed = 'wc-' . $status;
 
-		if ( array_key_exists( $prefixed, wc_get_order_statuses() ) ) {
-			return $status;
-		}
-
-		return in_array( $prefixed, get_post_stati(), true ) ? $prefixed : $status;
+		return ! wc_is_order_status( $prefixed ) && in_array( $prefixed, get_post_stati(), true ) ? $prefixed : $status;
 	}
 
 	/**
