@@ -112,13 +112,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
 		}
 
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$abilities_bootstrap = WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $abilities_bootstrap ) ) {
-				require_once $abilities_bootstrap;
-			}
-		}
-
 		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
 		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
