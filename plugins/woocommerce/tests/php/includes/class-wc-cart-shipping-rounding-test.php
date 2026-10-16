@@ -201,14 +201,16 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	 *           ["yes", 2, "no", "0.70", 0.10]
 	 *           ["no", 2, "no", "0.70", 0.11]
 	 *           ["yes", 0, "yes", "70", 10.5]
+	 *           ["no", 2, "no", "0.70", 0.10, true]
 	 *
 	 * @param string $prices_include_tax Whether product prices include tax.
 	 * @param int    $decimals           Currency decimal places.
 	 * @param string $round_at_subtotal  Whether taxes round at subtotal.
 	 * @param string $shipping_cost      Flat rate shipping cost.
 	 * @param float  $expected_tax       Expected shipping tax.
+	 * @param bool   $filter_rounding    Whether a tax filter overrides the store's rounding mode.
 	 */
-	public function test_shipping_tax_matches_order_rounding( string $prices_include_tax, int $decimals, string $round_at_subtotal, string $shipping_cost, float $expected_tax ): void {
+	public function test_shipping_tax_matches_order_rounding( string $prices_include_tax, int $decimals, string $round_at_subtotal, string $shipping_cost, float $expected_tax, bool $filter_rounding = false ): void {
 		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
@@ -254,22 +256,33 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $this->product->get_id() );
 		WC()->cart->apply_coupon( $coupon->get_code() );
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:' . $this->flat_rate_id ) );
-		WC()->cart->calculate_totals();
+		$round_tax = static function ( $rounded_tax, $value, $precision ) {
+			return round( (float) $value, $precision, PHP_ROUND_HALF_DOWN );
+		};
+		if ( $filter_rounding ) {
+			add_filter( 'wc_round_tax_total', $round_tax, 10, 3 );
+		}
 
-		$order = wc_get_order(
-			WC()->checkout()->create_order(
-				array(
-					'payment_method'   => 'bacs',
-					'billing_country'  => 'US',
-					'shipping_country' => 'US',
-					'shipping_state'   => 'NY',
+		try {
+			WC()->cart->calculate_totals();
+
+			$order = wc_get_order(
+				WC()->checkout()->create_order(
+					array(
+						'payment_method'   => 'bacs',
+						'billing_country'  => 'US',
+						'shipping_country' => 'US',
+						'shipping_state'   => 'NY',
+					)
 				)
-			)
-		);
-		$order->calculate_totals();
+			);
+			$order->calculate_totals();
 
-		$this->assertEqualsWithDelta( $expected_tax, WC()->cart->get_shipping_tax(), 0.00001, 'Cart shipping tax should use the configured tax rounding mode.' );
-		$this->assertEqualsWithDelta( $expected_tax, $order->get_shipping_tax(), 0.00001, 'Order shipping tax should match the cart.' );
-		$this->assertSame( WC()->cart->get_total( 'edit' ), $order->get_total(), 'Recalculating an order must preserve the checkout total.' );
+			$this->assertEqualsWithDelta( $expected_tax, WC()->cart->get_shipping_tax(), 0.00001, 'Cart shipping tax should use the configured tax rounding mode.' );
+			$this->assertEqualsWithDelta( $expected_tax, $order->get_shipping_tax(), 0.00001, 'Order shipping tax should match the cart.' );
+			$this->assertSame( WC()->cart->get_total( 'edit' ), $order->get_total(), 'Recalculating an order must preserve the checkout total.' );
+		} finally {
+			remove_filter( 'wc_round_tax_total', $round_tax, 10 );
+		}
 	}
 }
