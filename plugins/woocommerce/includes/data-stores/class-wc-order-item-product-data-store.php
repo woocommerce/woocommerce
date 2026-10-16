@@ -32,15 +32,17 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 */
 	public function read( &$item ) {
 		parent::read( $item );
-		$id = $item->get_id();
+		$id       = $item->get_id();
+		$total    = get_metadata( 'order_item', $id, '_line_total', true );
+		$subtotal = get_metadata( 'order_item', $id, '_line_subtotal', true );
 		$item->set_props(
 			array(
 				'product_id'   => get_metadata( 'order_item', $id, '_product_id', true ),
 				'variation_id' => get_metadata( 'order_item', $id, '_variation_id', true ),
 				'quantity'     => get_metadata( 'order_item', $id, '_qty', true ),
 				'tax_class'    => get_metadata( 'order_item', $id, '_tax_class', true ),
-				'subtotal'     => get_metadata( 'order_item', $id, '_line_subtotal', true ),
-				'total'        => get_metadata( 'order_item', $id, '_line_total', true ),
+				'total'        => $total,
+				'subtotal'     => '' === $subtotal ? $total : $subtotal,
 				'taxes'        => get_metadata( 'order_item', $id, '_line_tax_data', true ),
 			)
 		);
