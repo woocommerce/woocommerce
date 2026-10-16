@@ -1816,6 +1816,31 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Date-only "date on sale to" values with a leading weekday name (Excel "Long Date") are bumped to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_weekday_prefixed_date_only_is_end_of_day() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'Monday, January 26, 2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'Mon 26 Jan 2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'Monday 26 January 2099' ) );
+	}
+
+	/**
+	 * @testdox Weekday-prefixed "date on sale to" values with a time, and bare or relative weekdays, are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_weekday_prefixed_values_with_time_or_relative_are_preserved() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( 'Monday, January 26, 2099 00:00:00', $importer->parse_date_on_sale_to_field( 'Monday, January 26, 2099 00:00:00' ) );
+		$this->assertSame( 'Monday, January 26, 2099 10:00', $importer->parse_date_on_sale_to_field( 'Monday, January 26, 2099 10:00' ) );
+		$this->assertSame( 'next monday', $importer->parse_date_on_sale_to_field( 'next monday' ) );
+		$this->assertSame( 'monday', $importer->parse_date_on_sale_to_field( 'monday' ) );
+	}
+
+	/**
 	 * @testdox "date on sale to" Unix timestamps are normalised to ISO8601 without being shifted to end-of-day.
 	 */
 	public function test_parse_date_on_sale_to_field_unix_timestamp_preserved() {
@@ -1854,6 +1879,11 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$timed_product->set_regular_price( '10.00' );
 		$timed_product->save();
 
+		$excel_product = WC_Helper_Product::create_simple_product();
+		$excel_product->set_sku( 'issue-35321-excel-sku' );
+		$excel_product->set_regular_price( '10.00' );
+		$excel_product->save();
+
 		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
 		$tmp_path = wp_tempnam( 'wc-csv' );
 		$csv_path = $tmp_path . '.csv';
@@ -1863,6 +1893,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'"ID","date sale price starts","date sale price ends","Sale price"',
 			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
 			sprintf( '%d,"2022-10-25 09:00:00","2099-01-26 10:30:00","2.00"', $timed_product->get_id() ),
+			// Excel "Long Date" cell format.
+			sprintf( '%d,"Tuesday, October 25, 2022","Monday, January 26, 2099","2.00"', $excel_product->get_id() ),
 		);
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
 		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
@@ -1903,8 +1935,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '2099-01-26 10:30:00', $timed_date_to->date( 'Y-m-d H:i:s' ), 'explicit end time must be preserved site-local, not bumped to end-of-day' );
 		$this->assertSame( '2022-10-25 09:00:00', $timed_date_from->date( 'Y-m-d H:i:s' ), 'explicit start time must be preserved site-local' );
 
+		$updated_excel = wc_get_product( $excel_product->get_id() );
+		$this->assertSame( '2099-01-26 23:59:59', $updated_excel->get_date_on_sale_to()->date( 'Y-m-d H:i:s' ), 'weekday-prefixed date-only end date must be bumped to end-of-day' );
+		$this->assertSame( '2022-10-25 00:00:00', $updated_excel->get_date_on_sale_from()->date( 'Y-m-d H:i:s' ) );
+
 		WC_Helper_Product::delete_product( $product->get_id() );
 		WC_Helper_Product::delete_product( $timed_product->get_id() );
+		WC_Helper_Product::delete_product( $excel_product->get_id() );
 		wp_delete_file( $csv_path );
 	}
 
