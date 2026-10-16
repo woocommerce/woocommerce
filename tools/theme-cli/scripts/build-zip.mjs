@@ -1,22 +1,18 @@
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { getThemeDirectory, isMain } from './theme-utils.mjs';
+import { getThemeDirectory, isMain, runCommand } from './theme-utils.mjs';
 
 export async function buildZip( slug ) {
 	const directory = await getThemeDirectory( slug );
 	const { name } = JSON.parse(
 		await fs.readFile( path.join( directory, 'package.json' ), 'utf8' )
 	);
-	const result = spawnSync(
+	const status = runCommand(
 		'pnpm',
 		[ 'exec', 'wp-scripts', 'plugin-zip', `--root-folder=${ slug }` ],
-		{ cwd: directory, stdio: 'inherit' }
+		{ cwd: directory }
 	);
-	if ( result.error ) {
-		throw result.error;
-	}
-	if ( result.status !== 0 ) {
+	if ( status !== 0 ) {
 		throw new Error( `Could not build the ZIP for ${ slug }.` );
 	}
 	const outputDirectory = path.join( directory, 'artifacts' );

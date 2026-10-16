@@ -1,7 +1,11 @@
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { getThemeDirectory, isMain, toolingRoot } from './theme-utils.mjs';
+import {
+	getThemeDirectory,
+	isMain,
+	runCommand,
+	toolingRoot,
+} from './theme-utils.mjs';
 
 export function environmentArgs( args ) {
 	if (
@@ -40,7 +44,16 @@ export async function prepareEnvironment( slug, environment = '' ) {
 
 export async function runEnvironment( slug, args, environment = '' ) {
 	const configPath = await prepareEnvironment( slug, environment );
-	const result = spawnSync(
+	const env = { ...process.env };
+	if ( environment ) {
+		env.WP_ENV_HOME ??= path.join(
+			toolingRoot,
+			'.wp-env',
+			environment,
+			'home'
+		);
+	}
+	return runCommand(
 		'pnpm',
 		[
 			'exec',
@@ -51,26 +64,9 @@ export async function runEnvironment( slug, args, environment = '' ) {
 		],
 		{
 			cwd: toolingRoot,
-			stdio: 'inherit',
-			env: environment
-				? {
-						...process.env,
-						WP_ENV_HOME:
-							process.env.WP_ENV_HOME ??
-							path.join(
-								toolingRoot,
-								'.wp-env',
-								environment,
-								'home'
-							),
-					}
-				: process.env,
+			env,
 		}
 	);
-	if ( result.error ) {
-		throw result.error;
-	}
-	return result.status ?? 1;
 }
 
 if ( isMain( import.meta.url ) ) {
