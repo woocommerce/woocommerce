@@ -787,6 +787,59 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_checkout' charges shipping when shipping is forced to billing and the removed billing fields are the only missing address parts.
+	 *
+	 * @testWith [ "10001", "O'Fallon" ]
+	 *           [ "", "" ]
+	 *
+	 * @param string $calculator_postcode Postcode entered in the cart shipping calculator, or empty when the shopper went straight to checkout.
+	 * @param string $calculator_city     City entered in the cart shipping calculator.
+	 */
+	public function test_validate_checkout_accepts_forced_billing_order_when_removed_billing_fields_are_missing( string $calculator_postcode, string $calculator_city ): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', $calculator_postcode, $calculator_city );
+		WC()->cart->calculate_totals();
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'shipping_method'    => array( 'flat_rate' ),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'Shipping should be calculated from the country and state the shopper was asked for.' );
+		$this->assertSame( '', $errors->get_error_message( 'shipping' ), 'The order must not be blocked for an address field the store does not show.' );
+		$this->assertSame( 8.0, (float) WC()->cart->get_shipping_total(), 'The order must be charged the shipping rate.' );
+	}
+
+	/**
 	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
 	 */
 	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {

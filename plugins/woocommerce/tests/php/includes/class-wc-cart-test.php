@@ -1008,6 +1008,40 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox show_shipping() checks the billing fields when shipping is forced to the billing address, so a removed billing postcode no longer hides shipping.
+	 *
+	 * @testWith [ "billing_only", true ]
+	 *           [ "billing", false ]
+	 *           [ "shipping", false ]
+	 *
+	 * @param string $ship_to_destination Value of the woocommerce_ship_to_destination option.
+	 * @param bool   $expected            Expected show_shipping() result with an empty postcode.
+	 */
+	public function test_show_shipping_reads_billing_fields_when_shipping_is_forced_to_billing( string $ship_to_destination, bool $expected ): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
+
+		try {
+			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+
+			WC()->customer->set_shipping_location( 'US', '', '', '' );
+			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
+		} finally {
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			WC()->customer->set_shipping_location( '', '', '', '' );
+		}
+	}
+
+	/**
 	 * Test that show_shipping returns true when Local Pickup is enabled,
 	 * even when "Hide shipping costs until an address is entered" is enabled
 	 * and no customer address is set.
