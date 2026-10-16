@@ -316,6 +316,19 @@ CREATE TABLE $meta_table_name (
 			$notification->apply_changes();
 		}
 
+		/**
+		 * Action: woocommerce_update_stock_notification
+		 *
+		 * Fires after a stock notification is updated, whatever updated it (shopper, admin, processor,
+		 * retention cleanup or privacy eraser), whether or not anything changed.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int          $notification_id The notification ID.
+		 * @param Notification $notification    The notification.
+		 */
+		do_action( 'woocommerce_update_stock_notification', $notification->get_id(), $notification );
+
 		$status_to = $notification->get_status( 'edit' );
 		if ( array_key_exists( 'status', $changes ) && $status_from !== $status_to ) {
 			/**

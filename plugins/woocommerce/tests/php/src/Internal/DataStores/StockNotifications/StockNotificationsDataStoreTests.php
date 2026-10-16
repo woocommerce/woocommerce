@@ -244,6 +244,50 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_update_stock_notification with the ID once a notification is updated.
+	 */
+	public function test_update_fires_update_stock_notification_action(): void {
+		$fired = array();
+		add_action(
+			'woocommerce_update_stock_notification',
+			function ( $id, $notification ) use ( &$fired ) {
+				$fired[] = array( 'update', $id, $notification );
+			},
+			10,
+			2
+		);
+		add_action(
+			'woocommerce_stock_notification_status_changed',
+			function ( $id ) use ( &$fired ) {
+				$fired[] = array( 'status_changed', $id );
+			}
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->save();
+		$this->assertCount( 0, $fired, 'Creating does not fire an update.' );
+
+		$notification->set_user_email( 'other@test.com' );
+		$notification->save();
+		$this->assertSame( array( array( 'update', $notification->get_id(), $notification ) ), $fired );
+
+		// A status change fires the update action first, then the status change.
+		$fired = array();
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertSame( array( 'update', 'status_changed' ), array_column( $fired, 0 ) );
+
+		// The admin list table updates through the data store directly.
+		$fired = array();
+		$notification->set_product_id( 2 );
+		$this->data_store->update( $notification );
+		$this->assertCount( 1, $fired );
+		$this->assertSame( $notification->get_id(), $fired[0][1] );
+	}
+
+	/**
 	 * @testdox Should fire woocommerce_stock_notification_status_changed only when a different status is persisted.
 	 */
 	public function test_update_fires_status_changed_action(): void {
