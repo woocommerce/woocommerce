@@ -143,6 +143,44 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Paging variations from several products that share a menu_order returns each variation exactly once.
+	 */
+	public function test_get_variations_paginated_by_menu_order_return_each_variation_once(): void {
+		wp_set_current_user( $this->user );
+		$expected_ids = array();
+		for ( $p = 0; $p < 2; $p++ ) {
+			$product = new WC_Product_Variable();
+			$product->save();
+			for ( $v = 0; $v < 4; $v++ ) {
+				$variation = new WC_Product_Variation();
+				$variation->set_parent_id( $product->get_id() );
+				$variation->set_menu_order( 0 );
+				$expected_ids[] = $variation->save();
+			}
+		}
+
+		$per_page      = 3;
+		$collected_ids = array();
+		// Request one page past the last, which should come back empty.
+		$page_count = (int) ceil( count( $expected_ids ) / $per_page ) + 1;
+		for ( $page = 1; $page <= $page_count; $page++ ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+			$request->set_query_params(
+				array(
+					'orderby'  => 'menu_order',
+					'order'    => 'asc',
+					'per_page' => $per_page,
+					'page'     => $page,
+				)
+			);
+			$collected_ids = array_merge( $collected_ids, wp_list_pluck( $this->server->dispatch( $request )->get_data(), 'id' ) );
+		}
+
+		rsort( $expected_ids );
+		$this->assertSame( $expected_ids, $collected_ids, 'Every variation should appear exactly once, newest first among equal menu_order values.' );
+	}
+
+	/**
 	 * Test variations endpoint supports modified_after parameter.
 	 */
 	public function test_get_variations_with_modified_after_parameter_returns_variations_modified_after_the_date() {
