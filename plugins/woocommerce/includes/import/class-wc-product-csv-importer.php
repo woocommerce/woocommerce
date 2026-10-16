@@ -373,7 +373,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$id      = wc_get_product_id_by_sku( $sku );
 		$product = $id ? wc_get_product( $id ) : false;
 
-		if ( ! $product || ! $product->is_type( ProductType::VARIABLE ) || in_array( $product->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
+		if ( ! $product instanceof WC_Product_Variable || in_array( $product->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
 			return 0;
 		}
 

@@ -296,6 +296,37 @@ class WC_Product_CSV_Importer_Deferred_Rows_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Existing variations can still reference an extension's variable product subclass with its own type name.
+	 */
+	public function test_resolves_custom_variable_parent_type(): void {
+		list( $parent, $variation ) = $this->create_products();
+		$custom_parent              = new class() extends WC_Product_Variable {
+			/**
+			 * Get the extension's product type.
+			 *
+			 * @return string
+			 */
+			public function get_type() {
+				return 'custom-variable';
+			}
+		};
+		add_filter(
+			'woocommerce_product_class',
+			static function ( $class_name, $type ) use ( $custom_parent ) {
+				return ProductType::VARIABLE === $type ? get_class( $custom_parent ) : $class_name;
+			},
+			10,
+			2
+		);
+		$file    = $this->create_csv( array( array( $variation->get_id(), ProductType::VARIATION, 'variation-new', 'parent-old' ) ) );
+		$results = $this->run_import( $file, 1 );
+
+		$this->assertSame( array( $variation->get_id() ), $results['updated'], 'A variable subclass should remain a valid parent.' );
+		$this->assertEmpty( $results['failed'], 'A custom type name must not reject a variable parent.' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The custom variable parent should stay attached.' );
+	}
+
+	/**
 	 * @testdox Time-limited imports resume after the last consumed row, including skipped, deferred, and blank rows.
 	 * @testWith [false]
 	 *           [true]
