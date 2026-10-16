@@ -143,7 +143,7 @@ test.describe(
 			).toHaveAttribute( 'href', /email_link_action=unsubscribe/ );
 		} );
 
-		test( 'unsubscribe link in the back-in-stock email cancels the notification', async ( {
+		test( 'unsubscribe link in the back-in-stock email leaves the sent notification unchanged', async ( {
 			page,
 			product,
 			restApi,
@@ -172,14 +172,17 @@ test.describe(
 
 			// The shopper sees the outcome on the shop page they are sent to.
 			await expect(
-				page.getByText( bisNotice.unsubscribed( email, product.name ) )
+				page.getByText( bisNotice.alreadySent, { exact: true } )
 			).toBeVisible();
 
 			await page.goto( bisAdminListUrl( product.id ) );
 			const row = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row.getByText( /Cancelled/i ) ).toBeVisible();
+			await expect(
+				row.getByText( 'Sent', { exact: true } )
+			).toBeVisible();
+			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
 		} );
 
 		test( 'an unsubscribe link with a tampered key changes nothing', async ( {
@@ -207,7 +210,7 @@ test.describe(
 			// A rejected key is a no-op: no redirect to the shop, no notice.
 			await expect( page ).toHaveURL( /notification_id=/ );
 			await expect(
-				page.getByText( bisNotice.unsubscribed( email, product.name ) )
+				page.getByText( bisNotice.alreadySent, { exact: true } )
 			).toHaveCount( 0 );
 
 			await page.goto( bisAdminListUrl( product.id ) );
@@ -217,12 +220,12 @@ test.describe(
 			await expect( row ).toHaveCount( 1 );
 			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
 
-			// Positive control: the untouched link still unsubscribes, so the
-			// row above survived because of the key and not because
-			// unsubscribing is broken.
+			// Positive control: the untouched link is accepted, so the page
+			// above showed no notice because of the key and not because the
+			// link is broken.
 			await page.goto( unsubscribeLink );
 			await expect(
-				page.getByText( bisNotice.unsubscribed( email, product.name ) )
+				page.getByText( bisNotice.alreadySent, { exact: true } )
 			).toBeVisible();
 		} );
 	}
