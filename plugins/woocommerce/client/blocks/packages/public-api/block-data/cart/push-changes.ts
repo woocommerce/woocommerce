@@ -22,6 +22,8 @@ const localState = {
 	customerDataIsInitialized: false,
 	// True when a push is currently happening to avoid simultaneous pushes.
 	doingPush: false,
+	// True when a change that should be sent right away was made while a push was running.
+	pushWhenDone: false,
 	// Local cache of the last pushed customerData used for comparisons.
 	customerData: {
 		billingAddress: {} as CartBillingAddress,
@@ -197,6 +199,15 @@ const updateCustomerData = (): void => {
 			isAddressFieldForShippingRates
 		);
 
+	const finishPush = () => {
+		localState.doingPush = false;
+
+		if ( localState.pushWhenDone ) {
+			localState.pushWhenDone = false;
+			updateCustomerData();
+		}
+	};
+
 	dispatch( cartStore )
 		.updateCustomerData(
 			{
@@ -213,11 +224,11 @@ const updateCustomerData = (): void => {
 		.then( () => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
-			localState.doingPush = false;
+			finishPush();
 		} )
 		.catch( ( response ) => {
-			localState.doingPush = false;
 			processErrorResponse( response );
+			finishPush();
 		} );
 
 	// Cleared once the request has started, so the shipping rates loading state takes over without a gap.
@@ -234,6 +245,20 @@ const debouncedUpdateCustomerData = debounce( () => {
 	}
 	updateCustomerData();
 }, 1500 );
+
+/**
+ * Sends the changes without waiting for the debounce. If a push is running, they are sent as soon
+ * as it finishes; the scheduled run is kept as a fallback and finds nothing left to send.
+ */
+const pushNow = (): void => {
+	if ( localState.doingPush ) {
+		localState.pushWhenDone = true;
+		return;
+	}
+
+	debouncedUpdateCustomerData.clear();
+	updateCustomerData();
+};
 
 /**
  * After cart has fully initialized, pushes changes to the server when data in the store is changed. Updates to the
@@ -275,31 +300,23 @@ export const pushChanges = ( debounced = true ): void => {
 
 	debouncedUpdateCustomerData();
 
-	// Picking a country is a deliberate choice rather than typing, and it invalidates the
-	// shipping rates already on screen. Push it straight away so the rates reload instead of
-	// showing the previous country's options for the length of the debounce.
-	const countryChanged =
-		customerData.billingAddress.country !==
-			localState.customerData.billingAddress.country ||
-		customerData.shippingAddress.country !==
-			localState.customerData.shippingAddress.country;
+	// Picking a country or state is a deliberate choice rather than typing, and it invalidates the
+	// shipping rates already on screen. Push it straight away so the rates reload, and the Place
+	// order button is enabled again, without waiting for the debounce.
+	const pickedFieldChanged = ( [ 'country', 'state' ] as const ).some(
+		( field ) =>
+			customerData.billingAddress[ field ] !==
+				localState.customerData.billingAddress[ field ] ||
+			customerData.shippingAddress[ field ] !==
+				localState.customerData.shippingAddress[ field ]
+	);
 
-	if ( countryChanged ) {
-		// Push now rather than flushing the debounce: while a push is running this is a no-op,
-		// and the run scheduled above still sends the change once that push finishes.
-		updateCustomerData();
+	if ( pickedFieldChanged ) {
+		pushNow();
 	}
 };
 
-// Cancel the debounced updateCustomerData function and trigger it immediately.
+// Skip the debounce and send the changes now, or as soon as the running push finishes.
 export const flushChanges = (): void => {
-	if ( localState.doingPush ) {
-		// A push is already running, so this one would be a no-op anyway. Leave the scheduled
-		// run alone: flushing it here would cancel it, and the changes made during the running
-		// push would never reach the server.
-		return;
-	}
-
-	debouncedUpdateCustomerData.clear();
-	updateCustomerData();
+	pushNow();
 };
