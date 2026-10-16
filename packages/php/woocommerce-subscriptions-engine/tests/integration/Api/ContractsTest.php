@@ -1570,43 +1570,37 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A failed child insert is reported as a lock conflict when another operation holds the lock or the caller's lock was lost.
+	 * @testdox A failed child insert is reported as a lock conflict when the caller's lock was lost.
 	 */
 	public function test_a_failed_child_insert_under_a_lock_conflict_is_a_lock_conflict(): void {
-		$meta   = '/^\s*INSERT INTO \S*contract_meta .* LOCK IN SHARE MODE$/s';
+		$meta   = '/^\s*INSERT INTO \S*contract_meta .* FROM \S*subscription_contracts c WHERE c\.id = \d+/s';
 		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* FROM `?\S*subscription_contracts`? c WHERE c\.id = \d+$/s';
 
 		$id = $this->contract_with_currency();
-		$this->take_lock( $id, 'renewal' );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->take_lock( $id, 'hold' );
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->take_lock( $id, 'cancel' );
+
 		$writes = array(
-			'add_meta'        => static function () use ( $id ): void {
-				Contracts::add_meta( $id, 'k', 'v' );
+			'add_meta'        => static function () use ( $id, $lock ): void {
+				Contracts::add_meta( $id, 'k', 'v', false, $lock );
 			},
-			'add_meta unique' => static function () use ( $id ): void {
-				Contracts::add_meta( $id, 'k', 'v', true );
+			'add_meta unique' => static function () use ( $id, $lock ): void {
+				Contracts::add_meta( $id, 'k', 'v', true, $lock );
+			},
+			'add_cycle'       => function () use ( $id, $lock ): void {
+				Contracts::add_cycle( $id, $this->cycle_args(), $lock );
 			},
 		);
 		foreach ( $writes as $name => $write ) {
-			$this->fail_next_query( $meta );
+			$this->fail_next_query( 'add_cycle' === $name ? $cycles : $meta );
 			try {
 				$write();
-				$this->fail( "Expected {$name} to report the lock conflict." );
+				$this->fail( "Expected {$name} to report the lost lock." );
 			} catch ( ContractLockedException $e ) {
-				$this->assertSame( 'renewal', $e->get_operation(), "{$name} names the holder." );
+				$this->assertSame( 'cancel', $e->get_operation(), "{$name} names the new holder." );
 			}
-		}
-
-		$lost = $this->contract_with_currency();
-		$this->pin_db_clock( '2035-01-01 00:00:00' );
-		$lock = $this->take_lock( $lost, 'hold' );
-		$this->pin_db_clock( '2035-01-01 00:10:00' );
-		$this->take_lock( $lost, 'cancel' );
-		$this->fail_next_query( $cycles );
-		try {
-			Contracts::add_cycle( $lost, $this->cycle_args(), $lock );
-			$this->fail( 'Expected the lost lock to be reported.' );
-		} catch ( ContractLockedException $e ) {
-			$this->assertSame( 'cancel', $e->get_operation() );
 		}
 	}
 
@@ -1616,12 +1610,12 @@ class ContractsTest extends EngineIntegrationTestCase {
 	public function test_a_failed_child_insert_without_a_lock_conflict_is_a_database_error(): void {
 		$id = $this->contract_with_currency();
 
-		$this->fail_next_query( '/^\s*INSERT INTO \S*contract_meta .* LOCK IN SHARE MODE$/s' );
+		$this->fail_next_query( '/^\s*INSERT INTO \S*contract_meta .* FROM \S*subscription_contracts c WHERE c\.id = \d+/s' );
 		try {
 			Contracts::add_meta( $id, 'k', 'v', true );
 			$this->fail( 'Expected the failed insert to throw.' );
 		} catch ( ContractLockedException $e ) {
-			$this->fail( 'No lock is held, so the failure is not a lock conflict.' );
+			$this->fail( 'The internal lock is still held, so the failure is not a lock conflict.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertStringContainsString( 'Failed to add contract meta', $e->getMessage() );
 		}

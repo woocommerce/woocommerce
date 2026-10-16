@@ -7,10 +7,10 @@
  * read or write any contract (authorization is the caller's concern). Reads return read-only
  * views ({@see ContractView}, {@see CycleView}). No transactions, no cache, no hooks.
  *
- * One lock per contract ({@see self::lock()}): a write that passes the lock is part of the
- * holder's operation. Cycle writes require the lock; an update or meta write without one is a
- * self-contained operation the engine fences itself and refuses with
- * {@see ContractLockedException} while another operation holds the lock.
+ * One lock per contract ({@see self::lock()}): every write runs under a lock, the caller's or,
+ * for an update or meta write made without one, an internal one the engine takes for that call.
+ * Cycle writes require the caller's lock. A write is refused with {@see ContractLockedException}
+ * while another operation holds the lock.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -177,7 +177,7 @@ final class Contracts {
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Fields to write.
-	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null.
+	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null for an internal one.
 	 * @return ContractView|null The row as read before the write plus the written fields; null
 	 *                           when the contract does not exist (also when it is deleted before the write).
 	 * @throws InvalidArgumentException If a value is invalid, or the lock is for another contract.
@@ -326,9 +326,8 @@ final class Contracts {
 	 * @param int               $contract_id Contract id.
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       Meta value; serialized when not scalar.
-	 * @param bool              $unique      When true, add nothing if the key already exists (checked
-	 *                                       inside the insert; an unlocked duplicate deletes itself).
-	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
+	 * @param bool              $unique      When true, add nothing if the key already exists.
+	 * @param ContractLock|null $lock        The caller's lock on this contract, or null for an internal one.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
 	 * @throws InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
@@ -346,9 +345,9 @@ final class Contracts {
 	 * @param mixed             $value       New value; serialized when not scalar.
 	 * @param mixed             $prev_value  Only update values equal to this; null updates all. Any other
 	 *                                       value ('' and false included) matches literally.
-	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
+	 * @param ContractLock|null $lock        The caller's lock on this contract, or null for an internal one.
 	 * @return bool True when a value was added or changed; false when nothing changed.
-	 * @throws InvalidArgumentException If `$key` is empty, the key is added to a missing contract, or the lock is for another contract.
+	 * @throws InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
 	public static function update_meta( int $contract_id, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
@@ -362,8 +361,8 @@ final class Contracts {
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       Only delete values equal to this; null deletes every value for the key.
 	 *                                       Any other value ('' and false included) matches literally.
-	 * @param ContractLock|null $lock        The caller's lock on this contract, or null.
-	 * @return bool True when at least one value was deleted.
+	 * @param ContractLock|null $lock        The caller's lock on this contract, or null for an internal one.
+	 * @return bool True when at least one value was deleted; false also for a missing contract.
 	 * @throws InvalidArgumentException If `$key` is empty, or the lock is for another contract.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */

@@ -509,40 +509,105 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An unlocked meta update refused by the fence throws; an update to the stored value is a no-op.
+	 * @testdox Unlocked meta writes take and release the internal lock, are refused while another operation holds the lock, and keep their missing-contract results.
 	 */
-	public function test_a_refused_unlocked_update_meta_throws(): void {
+	public function test_unlocked_meta_writes_use_the_internal_lock(): void {
 		$id = $this->insert_contract();
-		$this->sut->add_meta( $id, '_anchor', 'a' );
 
-		$this->assertFalse( $this->sut->update_meta( $id, '_anchor', 'a' ), 'The stored value: nothing to change.' );
-
-		// The update runs again after its insert finds the key, so both attempts are refused.
-		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) . ' m', 2 );
+		$acquires = 0;
+		$count    = static function ( $query ) use ( &$acquires ) {
+			if ( is_string( $query ) && 1 === preg_match( "/lock_operation = 'engine_contract_update'/", $query ) ) {
+				++$acquires;
+			}
+			return $query;
+		};
+		add_filter( 'query', $count );
 		try {
-			$this->sut->update_meta( $id, '_anchor', 'b' );
-			$this->fail( 'Expected the refused update to throw.' );
-		} catch ( ContractLockedException $e ) {
-			$this->assertNull( $e->get_operation() );
+			$this->assertIsInt( $this->sut->add_meta( $id, '_note', 'a' ) );
+			$this->assertTrue( $this->sut->update_meta( $id, '_note', 'b' ) );
+			$this->assertFalse( $this->sut->update_meta( $id, '_note', 'b' ), 'The stored value: nothing to change.' );
+			$this->assertTrue( $this->sut->delete_meta( $id, '_note' ) );
+			$this->assertFalse( $this->sut->delete_meta( $id, '_absent' ) );
+		} finally {
+			remove_filter( 'query', $count );
 		}
+		$this->assertSame( 5, $acquires, 'Each write takes the internal lock.' );
+		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'], 'Each write releases it.' );
 
+		$this->sut->add_meta( $id, '_anchor', 'a' );
+		$this->acquire( $id, 'renewal' );
+		$writes = array(
+			'add_meta'    => function () use ( $id ): void {
+				$this->sut->add_meta( $id, '_anchor', 'b' );
+			},
+			'update_meta' => function () use ( $id ): void {
+				$this->sut->update_meta( $id, '_anchor', 'b' );
+			},
+			'delete_meta' => function () use ( $id ): void {
+				$this->sut->delete_meta( $id, '_anchor' );
+			},
+		);
+		foreach ( $writes as $name => $write ) {
+			try {
+				$write();
+				$this->fail( "Expected {$name} to be refused." );
+			} catch ( ContractLockedException $e ) {
+				$this->assertSame( 'renewal', $e->get_operation(), "{$name} names the holder." );
+			}
+		}
 		$this->assertSame( array( 'a' ), $this->sut->get_meta( $id, '_anchor' ) );
+
+		$this->assertFalse( $this->sut->delete_meta( 999999, '_anchor' ), 'A delete on a missing contract deletes nothing.' );
+		foreach ( array( 'add_meta', 'update_meta' ) as $method ) {
+			try {
+				$this->sut->$method( 999999, '_anchor', 'x' );
+				$this->fail( "Expected {$method} on a missing contract to throw." );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertSame( 'Contract 999999 does not exist.', $e->getMessage() );
+			}
+		}
 	}
 
 	/**
-	 * @testdox An unlocked meta delete refused by the fence throws; deleting an absent key is a no-op.
+	 * @testdox Every child write checks its lock itself: a lock lost past the trust window is refused by meta, item and cycle writes.
 	 */
-	public function test_a_refused_unlocked_delete_meta_throws(): void {
+	public function test_child_writes_check_a_lost_lock(): void {
 		$id = $this->insert_contract();
-		$this->sut->add_meta( $id, '_anchor', 'a' );
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->acquire( $id );
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->acquire( $id, 'cancel' );
+		$this->age_lock_trust( $lock );
 
-		$this->assertFalse( $this->sut->delete_meta( $id, '_absent' ) );
-		$this->assertFalse( $this->sut->delete_meta( $id, '_anchor', 'other' ) );
-
-		$this->refuse_next_write( 'DELETE m FROM ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) );
-
-		$this->expectException( ContractLockedException::class );
-		$this->sut->delete_meta( $id, '_anchor' );
+		$writes = array(
+			'update_meta'  => function () use ( $id, $lock ): void {
+				$this->sut->update_meta( $id, '_note', 'x', null, $lock );
+			},
+			'delete_meta'  => function () use ( $id, $lock ): void {
+				$this->sut->delete_meta( $id, '_note', null, $lock );
+			},
+			'append_cycle' => function () use ( $id, $lock ): void {
+				$this->sut->append_cycle(
+					Cycle::create(
+						array(
+							'contract_id'   => $id,
+							'starts_at_gmt' => '2026-07-15 00:00:00',
+							'ends_at_gmt'   => '2026-08-15 00:00:00',
+							'currency'      => 'USD',
+						)
+					),
+					$lock
+				);
+			},
+		);
+		foreach ( $writes as $name => $write ) {
+			try {
+				$write();
+				$this->fail( "Expected {$name} with a lost lock to be refused." );
+			} catch ( ContractLockedException $e ) {
+				$this->assertSame( 'cancel', $e->get_operation(), "{$name} names the new holder." );
+			}
+		}
 	}
 
 	/**
