@@ -608,12 +608,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 		$called_at = microtime( true ) * 1000;
 		rest_do_request( $request );
-		usleep( 50000 );
+		$returned_at = microtime( true ) * 1000;
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( 'unknown', $this->sut->recorded[0]['error_code'] );
 		$this->assertSame( 'claude_code', $this->sut->recorded[0]['external_client'], 'The client must be read while the request is active' );
-		$this->assertLessThan( $called_at + 40, (float) $this->sut->recorded[0]['_ts'], 'The event should carry the time of the call, not of shutdown' );
+		$this->assertGreaterThanOrEqual( floor( $called_at ), (float) $this->sut->recorded[0]['_ts'] );
+		$this->assertLessThanOrEqual( ceil( $returned_at ), (float) $this->sut->recorded[0]['_ts'], 'The event should carry the time of the call, not of shutdown' );
 	}
 
 	/**
