@@ -4,26 +4,63 @@
 
 ## Setup
 
-Use the monorepo's Node and pnpm versions. PHP and Composer are also required.
+Use the monorepo's Node and pnpm versions. Validation runs WordPress Theme Check in Docker, so Docker must be running. PHP and Composer are only needed for changelog commands.
 
 Run these commands from the repository root:
 
 ```bash
 pnpm install
+
+# Only needed for changelog commands.
 composer install --working-dir=tools/theme-cli
 ```
 
 ## Validation
 
+Run these commands from the repository root:
+
 ```bash
-pnpm --filter=@woocommerce/theme-cli validate <slug>
-pnpm --filter=@woocommerce/theme-cli lint
-pnpm --filter=@woocommerce/theme-cli changelog add
+# Lint and validate one theme.
+pnpm --filter=@woocommerce/theme-cli validate purple
+
+# Fix formatting and supported lint issues, then validate.
+pnpm --filter=@woocommerce/theme-cli validate purple --fix
+
+# Lint and validate every theme under themes/.
+pnpm --filter=@woocommerce/theme-cli validate --all
+pnpm --filter=@woocommerce/theme-cli validate --all --fix
 ```
 
-Validation checks metadata, matching versions, theme JSON and style variations against the minimum supported WordPress schema, pattern references, asset paths, and PHP coding standards. The command fails if either validation or PHP linting fails. Schema validation requires access to `schemas.wp.org`. PHP linting uses `tools/theme-cli/phpcs.xml.dist` and the shared Composer dependencies, selecting the theme's text domain and minimum WordPress version at runtime.
+The `validate` command runs `wp-scripts lint-js`, `wp-scripts lint-style`, and `wp-scripts lint-md-docs` for the selected theme, then invokes the official [WordPress Theme Check](https://github.com/WordPress/theme-check#usage-with-wp-cli) command, `wp theme-check run <slug>`. These are its only checks. The lint commands use the repository's shared ESLint, Stylelint, and markdownlint configurations. Theme JavaScript uses the theme slug as its translation text domain. Any lint or Theme Check failure makes validation fail. When checking all themes, it continues through the remaining themes if one fails. Themes can expose their own `validate` shortcut to the shared command.
+
+The lint commands run from the selected theme's directory in `validate-theme.mjs`, using wp-scripts' default file matching and exclusions. The shared Prettier configuration remains available for editor formatting, including HTML under each theme's `templates/` and `parts/` directories. Embedded CSS stays unchanged to preserve serialized block styles. `--fix` applies supported ESLint, Stylelint, and markdownlint fixes to the selected theme.
+
+Validation stages the current theme files using the same file exclusions as the installable ZIP, then starts a separate Docker WordPress environment derived from the shared `tools/theme-cli/.wp-env.json`. That configuration installs WooCommerce and the Theme Check plugin for both development and validation. Validation runs the official command and stops its environment afterward. Generated configuration, staged files, and cached downloads live under `tools/theme-cli/.wp-env/theme-check/`. Validation uses the shared ports (8890 by default), so stop the development environment before running it. Theme Check's exit status determines whether its check passes. The development environment keeps its existing runtime and data.
 
 Changelog entries for shared tooling live in `tools/theme-cli/changelog/`, with shared types and versioning from `tools/theme-cli/composer.json`.
+
+All themes use `tools/theme-cli/prettier.config.cjs` and the repository's root `stylelint.config.cjs` and `.markdownlint.json`. The shared Prettier config extends the WordPress preset and preserves embedded CSS in theme templates and parts. New themes inherit these rules automatically.
+
+To enable validation in the monorepo's existing CI, register the theme's `validate` command in `package.json` under `config.ci.tests`, with `changes` set to `**/*` and `events` set to `[ "pull_request" ]`. CI then runs validation on pull requests when the theme or a workspace dependency such as `@woocommerce/theme-cli` changes. Lockfile changes select all packages. Markdown-only pull requests use the shared Markdown check. Root lint configuration changes do not automatically select theme validation jobs.
+
+### Editor setup
+
+Open the repository root and run `pnpm install`. In VS Code, install Prettier (`esbenp.prettier-vscode`), Stylelint (`stylelint.vscode-stylelint`), and markdownlint (`DavidAnson.vscode-markdownlint`). Prettier discovers `themes/.prettierrc.cjs` for files under `themes/`; that file loads the shared configuration from `tools/theme-cli/prettier.config.cjs`. Files outside `themes/` keep their existing configuration. Stylelint and markdownlint discover their root configurations; CLI scripts use the same rules.
+
+For formatting and fixes on save, add the following to your workspace settings:
+
+```json
+{
+	"[html]": {
+		"editor.formatOnSave": true
+	},
+	"editor.codeActionsOnSave": {
+		"source.fixAll.stylelint": "explicit",
+		"source.fixAll.markdownlint": "explicit"
+	},
+	"stylelint.validate": [ "css", "scss" ]
+}
+```
 
 ## Local environments
 
@@ -52,4 +89,3 @@ Theme content checks belong to `validate`; `build` packages the committed files.
 ## Adding a theme
 
 Add a standalone block theme under `themes/<slug>/`, preserving its licenses and using the slug as its text domain. Run validation with that slug, and add a changelog fragment to that theme's `changelog/` directory. Register the theme explicitly in `pnpm-workspace.yaml`; a wildcard is not required.
-
