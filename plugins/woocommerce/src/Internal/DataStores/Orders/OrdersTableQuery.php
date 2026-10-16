@@ -950,8 +950,8 @@ class OrdersTableQuery {
 		}
 
 		// A short first page of a plain search already holds every match, so the count query, which repeats the
-		// search's expensive WHERE, can be skipped. A join needs a DISTINCT count instead, and a query changed by
-		// any of the filters is left alone.
+		// search's expensive WHERE, can be skipped. Conservatively keep the count for joined queries, including
+		// full-text searches, and for queries changed by filters.
 		$this->can_infer_first_page_total = ! empty( $this->args['s'] ) && '' === $join && $clauses === $pieces && $filtered_sql === $this->sql;
 
 		$this->sql = $filtered_sql;

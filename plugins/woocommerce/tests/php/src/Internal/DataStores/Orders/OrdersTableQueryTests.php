@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -21,10 +23,48 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
-	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 * Whether this class created the address full-text index.
+	 *
+	 * @var bool
+	 */
+	private static $created_address_index = false;
+
+	/**
+	 * Whether this class created the order item full-text index.
+	 *
+	 * @var bool
+	 */
+	private static $created_item_index = false;
+
+	/**
+	 * Create tables and full-text indexes before per-test transactions start.
 	 */
 	public static function wpSetUpBeforeClass(): void {
 		self::setup_cot_tables();
+
+		$db_util                     = wc_get_container()->get( DatabaseUtil::class );
+		self::$created_address_index = ! $db_util->fts_index_on_order_address_table_exists();
+		self::$created_item_index    = ! $db_util->fts_index_on_order_item_table_exists();
+		if ( self::$created_address_index ) {
+			$db_util->create_fts_index_order_address_table();
+		}
+		if ( self::$created_item_index ) {
+			$db_util->create_fts_index_order_item_table();
+		}
+	}
+
+	/**
+	 * Remove only the full-text indexes created by this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wpdb;
+
+		if ( self::$created_address_index ) {
+			wc_get_container()->get( DatabaseUtil::class )->drop_fts_index_order_address_table();
+		}
+		if ( self::$created_item_index ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_order_items DROP INDEX order_item_fts" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name uses the trusted WordPress prefix and a fixed suffix.
+		}
 	}
 
 	/**
@@ -480,14 +520,46 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A first search page with room to spare supplies the total without a count query.
+	 * Run an order query and check how many order count statements it executes.
+	 *
+	 * @param array $args                      Query arguments.
+	 * @param int   $expected_count_statements Expected number of order count statements.
+	 * @return OrdersTableQuery
+	 */
+	private function query_and_assert_count_statements( array $args, int $expected_count_statements ): OrdersTableQuery {
+		global $wpdb;
+
+		$statements = array();
+		$capture    = static function ( $sql ) use ( &$statements ) {
+			$statements[] = $sql;
+			return $sql;
+		};
+
+		add_filter( 'query', $capture );
+		try {
+			$query = new OrdersTableQuery( $args );
+		} finally {
+			remove_filter( 'query', $capture );
+		}
+
+		$count_pattern = '/^SELECT COUNT\(.*?\) FROM ' . preg_quote( $wpdb->prefix . 'wc_orders', '/' ) . '\b/i';
+		$this->assertCount( $expected_count_statements, preg_grep( $count_pattern, $statements ), 'Unexpected number of order count queries.' );
+
+		return $query;
+	}
+
+	/**
+	 * @testdox First-page totals remain correct with full-text search enabled or disabled.
 	 * @dataProvider provider_first_search_page_sizes
 	 *
 	 * @param int  $matches        Number of orders matching the search term.
 	 * @param bool $count_expected Whether the count query must still run.
+	 * @param bool $fts_enabled    Whether full-text search is enabled.
 	 */
-	public function test_first_search_page_supplies_total( int $matches, bool $count_expected ): void {
-		global $wpdb;
+	public function test_first_search_page_supplies_total( int $matches, bool $count_expected, bool $fts_enabled ): void {
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, static fn() => $fts_enabled ? 'yes' : 'no' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, static fn() => 'yes' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, static fn() => 'yes' );
 
 		$ids = array();
 		for ( $i = 0; $i < $matches; $i++ ) {
@@ -497,7 +569,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			$ids[] = $order->get_id();
 		}
 
-		$query = new OrdersTableQuery(
+		$query = $this->query_and_assert_count_statements(
 			array(
 				's'        => 'first-page@woo.test',
 				'limit'    => 5,
@@ -505,31 +577,38 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 				'orderby'  => 'ID',
 				'order'    => 'DESC',
 				'return'   => 'ids',
-			)
+			),
+			$count_expected ? 1 : 0
 		);
 
 		$this->assertSame( array_slice( array_reverse( $ids ), 0, 5 ), $query->orders );
 		$this->assertSame( $matches, $query->found_orders );
 		$this->assertSame( (int) ceil( $matches / 5 ), $query->max_num_pages );
-		if ( $count_expected ) {
-			$this->assertStringStartsWith( 'SELECT COUNT(*)', $wpdb->last_query );
+		if ( $fts_enabled ) {
+			$this->assertStringContainsString( 'AS fts_addresses ON', $query->request );
+			$this->assertStringContainsString( 'AS fts_items ON', $query->request );
 		} else {
-			$this->assertStringStartsWith( "SELECT {$wpdb->prefix}wc_orders.id", $wpdb->last_query );
+			$this->assertStringNotContainsString( 'JOIN', $query->request );
 		}
 	}
 
 	/**
-	 * Numbers of matching orders around the page size of 5.
+	 * Numbers of matching orders around the page size of 5, with both search modes.
 	 *
-	 * @return array<string, array{int, bool}>
+	 * @return array<string, array{int, bool, bool}>
 	 */
 	public static function provider_first_search_page_sizes(): array {
 		return array(
-			'no match'         => array( 0, false ),
-			'one match'        => array( 1, false ),
-			'almost full page' => array( 4, false ),
-			'full page'        => array( 5, true ),
-			'more than a page' => array( 6, true ),
+			'FTS off, no match'         => array( 0, false, false ),
+			'FTS off, one match'        => array( 1, false, false ),
+			'FTS off, almost full page' => array( 4, false, false ),
+			'FTS off, full page'        => array( 5, true, false ),
+			'FTS off, more than a page' => array( 6, true, false ),
+			'FTS on, no match'          => array( 0, false, true ),
+			'FTS on, one match'         => array( 1, true, true ),
+			'FTS on, almost full page'  => array( 4, true, true ),
+			'FTS on, full page'         => array( 5, true, true ),
+			'FTS on, more than a page'  => array( 6, true, true ),
 		);
 	}
 
@@ -541,8 +620,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @param int   $expected_orders Number of orders on the page.
 	 */
 	public function test_count_query_runs_when_page_cannot_prove_total( array $args, int $expected_orders ): void {
-		global $wpdb;
-
 		for ( $i = 0; $i < 3; $i++ ) {
 			$order = new WC_Order();
 			$order->set_billing_email( 'keep-count@woo.test' );
@@ -550,7 +627,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		$query = new OrdersTableQuery(
+		$query = $this->query_and_assert_count_statements(
 			array_merge(
 				array(
 					's'        => 'keep-count@woo.test',
@@ -559,12 +636,12 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 					'return'   => 'ids',
 				),
 				$args
-			)
+			),
+			1
 		);
 
 		$this->assertCount( $expected_orders, $query->orders );
 		$this->assertSame( 3, $query->found_orders );
-		$this->assertStringStartsWith( 'SELECT COUNT(', $wpdb->last_query );
 	}
 
 	/**
@@ -606,26 +683,24 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @param callable $callback Callback that changes the filtered value.
 	 */
 	public function test_changed_query_keeps_count( string $hook, callable $callback ): void {
-		global $wpdb;
-
 		$order = new WC_Order();
 		$order->set_billing_email( 'changed-query@woo.test' );
 		$order->save();
 
 		add_filter( $hook, $callback );
-		$query = new OrdersTableQuery(
+		$query = $this->query_and_assert_count_statements(
 			array(
 				's'        => 'changed-query@woo.test',
 				'limit'    => 5,
 				'paginate' => true,
 				'return'   => 'ids',
-			)
+			),
+			1
 		);
 		remove_filter( $hook, $callback );
 
 		$this->assertSame( array( $order->get_id() ), $query->orders );
 		$this->assertSame( 1, $query->found_orders );
-		$this->assertStringStartsWith( 'SELECT COUNT(*)', $wpdb->last_query );
 	}
 
 	/**
