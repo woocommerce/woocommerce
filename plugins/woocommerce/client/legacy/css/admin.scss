@@ -8772,6 +8772,35 @@ table.bar_chart {
 				margin: 0;
 			}
 
+			.woocommerce-importer-file-url-field-wrapper {
+				border: 1px solid #ddd;
+				box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+				background-color: #fff;
+				color: #32373c;
+				outline: 0;
+				line-height: 1;
+				display: block;
+
+				code {
+					background: none;
+					font-size: smaller;
+					margin: 0;
+					color: #999;
+					padding: 7px 0 0 7px;
+					display: inline-block;
+				}
+
+				input {
+					font-family: Consolas, Monaco, monospace;
+					border: 0;
+					margin: 0;
+					outline: 0;
+					box-shadow: none;
+					display: inline-block;
+					min-width: 100%;
+				}
+			}
+
 			small code {
 				font-size: inherit;
 				white-space: nowrap;
