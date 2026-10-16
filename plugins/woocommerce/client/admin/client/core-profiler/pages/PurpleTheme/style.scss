@@ -152,7 +152,10 @@
 		font-size: 14px;
 	}
 
-	.woocommerce-profiler-purple-theme__note {
-		margin-block-start: $gap;
-	}
+	// Stacked like "Set up my store" and "Skip guided setup" on the wizard's first screen.
+	gap: $gap;
+}
+
+.woocommerce-profiler-purple-theme__options.is-purple-only .woocommerce-profiler-purple-theme__actions {
+	padding-block-start: 0;
 }

@@ -99,14 +99,6 @@ export const PurpleTheme = ( {
 			<Navigation
 				percentage={ navigationProgress }
 				onSkip={ () => complete( false ) }
-				{ ...( isPurpleOnly
-					? {
-							skipText: __(
-								'Keep my current theme',
-								'woocommerce'
-							),
-						}
-					: {} ) }
 			/>
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-purple-theme__content">
 				<Heading
@@ -142,7 +134,15 @@ export const PurpleTheme = ( {
 							'woocommerce'
 						) }
 					>
-						{ ! isPurpleOnly && (
+						{ isPurpleOnly ? (
+							// The explanation sits in the card, so the two choices below stay together.
+							<p className="woocommerce-profiler-purple-theme__note">
+								{ __(
+									'We’ll install Purple and activate it as your store’s theme.',
+									'woocommerce'
+								) }
+							</p>
+						) : (
 							<>
 								<Button
 									className="woocommerce-profiler-purple-theme__button"
@@ -200,12 +200,13 @@ export const PurpleTheme = ( {
 						>
 							{ __( 'Install Purple', 'woocommerce' ) }
 						</Button>
-						<p className="woocommerce-profiler-purple-theme__note">
-							{ __(
-								'We’ll install Purple and activate it as your store’s theme.',
-								'woocommerce'
-							) }
-						</p>
+						<Button
+							className="woocommerce-profiler-purple-theme__continue"
+							variant="tertiary"
+							onClick={ () => complete( false ) }
+						>
+							{ __( 'Keep my current theme', 'woocommerce' ) }
+						</Button>
 					</div>
 				) }
 			</div>
