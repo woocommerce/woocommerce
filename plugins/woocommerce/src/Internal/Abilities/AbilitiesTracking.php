@@ -153,7 +153,7 @@ class AbilitiesTracking {
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! self::is_tracking_allowed() ) {
 			return;
 		}
 
@@ -367,7 +367,7 @@ class AbilitiesTracking {
 			&& 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $request->get_route() )
 			&& self::is_tracked_ability( $ability_name )
 			&& wp_has_ability( $ability_name )
-			&& \WC_Site_Tracking::is_tracking_enabled()
+			&& self::is_tracking_allowed()
 		) {
 			$this->add_event( $this->create_frame( $ability_name, false ), $response, false );
 		}
@@ -431,7 +431,7 @@ class AbilitiesTracking {
 	 */
 	private function open_frame( string $ability_name, bool $executing ): void {
 		// Consent is per site, and the site can change mid-request with switch_to_blog().
-		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! self::is_tracking_allowed() ) {
 			return;
 		}
 
@@ -529,7 +529,7 @@ class AbilitiesTracking {
 		}
 
 		// The call itself may have turned tracking off.
-		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! self::is_tracking_allowed() ) {
 			return;
 		}
 
@@ -628,6 +628,18 @@ class AbilitiesTracking {
 			return new WP_Error( $default_code );
 		}
 		return is_wp_error( $is_valid ) && $is_valid->has_errors() ? $is_valid : null;
+	}
+
+	/**
+	 * Whether the current site allows usage tracking.
+	 *
+	 * Unlike WC_Site_Tracking::is_tracking_enabled() alone, this requires the stored opt-in: that method also treats a
+	 * posted `wc_tracker_checkbox=yes` (the onboarding opt-in) as consent, and any visitor can post to the REST API.
+	 *
+	 * @return bool
+	 */
+	private static function is_tracking_allowed(): bool {
+		return 'yes' === get_option( 'woocommerce_allow_tracking' ) && \WC_Site_Tracking::is_tracking_enabled();
 	}
 
 	/**

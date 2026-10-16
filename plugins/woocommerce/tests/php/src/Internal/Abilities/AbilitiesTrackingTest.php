@@ -681,6 +681,24 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not treat a posted onboarding opt-in as consent.
+	 */
+	public function test_ignores_posted_onboarding_opt_in(): void {
+		update_option( 'woocommerce_allow_tracking', 'no' );
+		$_POST['wc_tracker_checkbox'] = 'yes';
+		$this->start_mcp_tool_call();
+
+		try {
+			wp_get_ability( self::ABILITY_ID )->execute();
+			$this->sut->handle_shutdown();
+		} finally {
+			unset( $_POST['wc_tracker_checkbox'] );
+		}
+
+		$this->assertSame( array(), $this->sut->recorded );
+	}
+
+	/**
 	 * @testdox Should record each call with the user who made it.
 	 */
 	public function test_records_user_context_of_each_call(): void {
