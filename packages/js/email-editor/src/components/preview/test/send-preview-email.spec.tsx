@@ -176,7 +176,7 @@ describe( 'SendPreviewEmail', () => {
 		);
 	} );
 
-	it( 'opens with that recipient already filled in and a usable send button', () => {
+	it( 'opens with the configured recipient filled in and a usable send button', () => {
 		renderWithPreviewState( { toEmail: 'shopkeeper@example.com' } );
 
 		expect( screen.getByTestId( 'text-control' ) ).toHaveValue(

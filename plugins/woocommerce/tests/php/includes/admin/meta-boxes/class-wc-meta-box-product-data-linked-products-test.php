@@ -93,7 +93,7 @@ class WC_Meta_Box_Product_Data_Linked_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The classic product save keeps upsells and cross-sells distinct and renders each in its own section.
+	 * @testdox The classic product save keeps upsells and cross-sells distinct, renders the upsells section, and offers the cross-sells in the cart.
 	 */
 	public function test_save_persists_and_renders_distinct_linked_products(): void {
 		$products = $this->create_linked_product_fixtures();
@@ -147,7 +147,7 @@ class WC_Meta_Box_Product_Data_Linked_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Omitting both linked-product fields clears their IDs and hides both classic sections.
+	 * @testdox Omitting both linked-product fields clears their IDs, hides the classic upsells section, and leaves the cart with no cross-sells.
 	 */
 	public function test_save_clears_and_hides_linked_products(): void {
 		$products = $this->create_linked_product_fixtures();
@@ -181,7 +181,7 @@ class WC_Meta_Box_Product_Data_Linked_Products_Test extends WC_Unit_Test_Case {
 
 		$upsell_output = $this->render_upsells( $fresh_main );
 		$this->assertStringNotContainsString( 'section class="up-sells upsells products"', $upsell_output, 'An empty upsell collection should not render its section.' );
-		$this->assertLinkedProductNamesAbsent( $products, $upsell_output, 'upsell' );
+		$this->assert_linked_product_names_absent( $products, $upsell_output, 'upsell' );
 
 		$this->assertSame(
 			array(),
@@ -320,7 +320,7 @@ class WC_Meta_Box_Product_Data_Linked_Products_Test extends WC_Unit_Test_Case {
 	 * @param string                    $output Rendered output.
 	 * @param string                    $family Human-readable family label.
 	 */
-	private function assertLinkedProductNamesAbsent( array $products, string $output, string $family ): void {
+	private function assert_linked_product_names_absent( array $products, string $output, string $family ): void {
 		foreach ( $products as $key => $product ) {
 			if ( 'main' === $key ) {
 				continue;

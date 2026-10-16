@@ -125,7 +125,9 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'can use the "Add new product" command', async ( { page } ) => {
+test( 'can use the "Add new product" command and find the analytics command', async ( {
+	page,
+} ) => {
 	const searchBox = await openCommandPalette( page );
 
 	// Analytics commands come from a separate bundle fed by PHP, so check that one reached the palette too.
