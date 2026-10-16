@@ -93,28 +93,3 @@ export function isThemeFile( relativePath ) {
 				! part.startsWith( '.' ) && ! developmentPaths.has( part )
 		);
 }
-
-export async function listThemeFiles( directory, prefix = '' ) {
-	const files = [];
-	for ( const entry of await fs.readdir( path.join( directory, prefix ), {
-		withFileTypes: true,
-	} ) ) {
-		const relativePath = prefix + entry.name;
-		if ( ! isThemeFile( relativePath ) ) {
-			continue;
-		}
-		if ( entry.isSymbolicLink() ) {
-			throw new Error(
-				`Theme files must not be symbolic links: ${ relativePath }`
-			);
-		}
-		if ( entry.isDirectory() ) {
-			files.push(
-				...( await listThemeFiles( directory, relativePath + '/' ) )
-			);
-		} else {
-			files.push( relativePath );
-		}
-	}
-	return files.sort();
-}

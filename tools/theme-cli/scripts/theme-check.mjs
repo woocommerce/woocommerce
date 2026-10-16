@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { listThemeFiles, toolingRoot } from './theme-utils.mjs';
+import { toolingRoot } from './theme-utils.mjs';
 
 export async function runThemeCheck( directory ) {
 	const slug = path.basename( directory );
@@ -14,15 +14,7 @@ export async function runThemeCheck( directory ) {
 		'theme-check',
 		slug
 	);
-	const stagedTheme = path.join( configDirectory, 'themes', slug );
-	const files = await listThemeFiles( directory );
-	await fs.rm( stagedTheme, { recursive: true, force: true } );
-	for ( const file of files ) {
-		const destination = path.join( stagedTheme, file );
-		await fs.mkdir( path.dirname( destination ), { recursive: true } );
-		await fs.copyFile( path.join( directory, file ), destination );
-	}
-	config.themes = [ stagedTheme ];
+	config.themes = [ directory ];
 	await fs.mkdir( configDirectory, { recursive: true } );
 	const configPath = path.join( configDirectory, '.wp-env.json' );
 	await fs.writeFile(
@@ -70,7 +62,15 @@ export async function runThemeCheck( directory ) {
 		if ( activateStatus !== 0 ) {
 			return activateStatus;
 		}
-		return run( [ 'run', 'cli', 'wp', 'theme-check', 'run', slug ] );
+		return run( [
+			'run',
+			'cli',
+			'wp',
+			'theme-check',
+			'run',
+			slug,
+			'--exec=WP_CLI::add_hook( "after_wp_load", fn() => add_filter( "theme_scandir_exclusions", fn( $excluded ) => array_merge( $excluded, [ "artifacts", "composer.json", "composer.lock", "package.json" ] ) ) );',
+		] );
 	} finally {
 		const stopStatus = run( [ 'stop' ] );
 		if ( stopStatus !== 0 ) {
