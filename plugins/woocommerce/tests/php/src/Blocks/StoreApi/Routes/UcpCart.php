@@ -194,6 +194,9 @@ class UcpCart extends ControllerTestCase {
 	private function request( string $method, string $path, array $body = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
 		$request->set_header( 'content-type', 'application/json' );
+		// A write needs a key of its own, since idempotency is enforced by default. The
+		// key is what these tests are not about: see the UcpIdempotency suite for that.
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
