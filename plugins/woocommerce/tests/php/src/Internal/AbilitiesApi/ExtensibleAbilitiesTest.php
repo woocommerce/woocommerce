@@ -733,6 +733,32 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a filter whose namespace or name is only numbers.
+	 */
+	public function test_a_filter_with_a_numeric_slug_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
+		$register = static function () {
+			foreach ( array( array( '0', 'gift' ), array( 'test-ext', '42' ) ) as list( $extension_namespace, $filter ) ) {
+				ExtensibleAbilities::register_query_filter(
+					array(
+						'resource'  => 'product',
+						'namespace' => $extension_namespace,
+						'filter'    => $filter,
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					)
+				);
+			}
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$schema = $this->get_ability( 'woocommerce/products-query' )['input_schema'];
+		remove_action( 'woocommerce_extensible_abilities_init', $register );
+
+		$this->assertSame( array( 'test-ext' ), array_keys( $schema['properties']['filters']['properties']['extensions']['properties'] ) );
+		$this->assertSame( array( 'has_code', 'category' ), array_keys( $schema['properties']['filters']['properties']['extensions']['properties']['test-ext']['properties'] ) );
+	}
+
+	/**
 	 * @testdox Should refuse a filter that is registered after the init action.
 	 */
 	public function test_a_filter_registered_after_the_init_action_is_refused(): void {
