@@ -730,10 +730,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$date = date_parse( $parsed );
 
 		// date_parse() reports an hour for every timed format strtotime() understands, not
-		// just "10:00", and flags relative expressions separately.
+		// just "10:00", flags relative expressions separately, and sets is_localtime when the
+		// value carries a timezone ("2099-01-26Z"), which also makes it a point in time.
 		if (
 			false === $date['year'] || false === $date['month'] || false === $date['day']
-			|| false !== $date['hour'] || isset( $date['relative'] )
+			|| false !== $date['hour'] || isset( $date['relative'] ) || ! empty( $date['is_localtime'] )
 		) {
 			return $parsed;
 		}

@@ -1766,6 +1766,17 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox "date on sale to" date-only values that carry a timezone are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_timezone_qualified_date() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26Z', $importer->parse_date_on_sale_to_field( '2099-01-26Z' ) );
+		$this->assertSame( '2099-01-26 +02:00', $importer->parse_date_on_sale_to_field( '2099-01-26 +02:00' ) );
+	}
+
+	/**
 	 * @testdox "date on sale to" values with a colonless time component are preserved (detection is via date_parse(), not a colon regex).
 	 */
 	public function test_parse_date_on_sale_to_field_preserves_colonless_time_component() {
