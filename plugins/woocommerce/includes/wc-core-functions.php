@@ -129,7 +129,7 @@ function wc_create_order( $args = array() ) {
 		// Set these fields when creating a new order but not when updating an existing order.
 		if ( ! $args['order_id'] ) {
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 		}

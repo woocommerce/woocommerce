@@ -187,7 +187,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data['cogs_total_value'] = 0;
 		}
 
-		$this->data['prices_include_tax'] = 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		$this->data['prices_include_tax'] = wc_prices_include_tax();
 
 		parent::__construct( $order );
 
