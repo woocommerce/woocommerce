@@ -26,6 +26,14 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 	 *           ["3", 0, ".", "3"]
 	 *           ["3.7", 0, ".", "3.7"]
 	 *           ["3.7", 3, ".", "3.700"]
+	 *           ["1.0E-5", 6, ".", "0.000010"]
+	 *           ["-1.0e-7", 2, ",", "-0,00000010"]
+	 *           ["1.234567890123456789e-5", 2, ".", "0.00001234567890123456789"]
+	 *           ["1.2300e+0", 2, ".", "1.2300"]
+	 *           ["1.234e+2", 2, ".", "123.40"]
+	 *           ["1e+3", 0, ".", "1000"]
+	 *           [".5e-2", 2, ".", "0.005"]
+	 *           ["0e-5", 2, ".", "0.00000"]
 	 *
 	 * @param string $value     Stored amount.
 	 * @param int    $decimals  Currency decimals.
@@ -37,6 +45,44 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_decimal_sep', $separator );
 
 		$this->assertSame( $expected, WC_Meta_Box_Order_Items::format_price_for_editing( $value ) );
+	}
+
+	/**
+	 * @testdox Filtered small numeric amounts render without losing precision.
+	 *
+	 * @testWith ["0.00001", 6, 2, ".", "0.000010"]
+	 *           ["0.0000001", 6, 6, ".", "0.00000010"]
+	 *           ["-0.0000001", 6, 2, ",", "-0,00000010"]
+	 *
+	 * @param string $amount    Stored amount.
+	 * @param int    $decimals  Currency decimals.
+	 * @param int    $precision Internal rounding precision.
+	 * @param string $separator Decimal separator.
+	 * @param string $expected  Formatted amount.
+	 */
+	public function test_editable_prices_expand_filtered_floats( string $amount, int $decimals, int $precision, string $separator, string $expected ): void {
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		update_option( 'woocommerce_price_decimal_sep', $separator );
+		add_filter( 'woocommerce_internal_rounding_precision', static fn() => $precision );
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_name( 'Sample item' );
+		$item->set_subtotal( $amount );
+		$item->set_total( $amount );
+		$order->add_item( $item );
+		$order->save();
+		$product_item_id = $item->get_id();
+		add_filter( 'woocommerce_order_item_get_total', 'floatval' );
+		add_filter( 'woocommerce_order_item_get_subtotal', 'floatval' );
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+		$xpath = $this->get_xpath_for_html( ob_get_clean() );
+
+		foreach ( array( 'line_total', 'line_subtotal' ) as $field ) {
+			$input = $xpath->query( "//input[@name='{$field}[{$product_item_id}]']" )->item( 0 );
+			$this->assertSame( $expected, $input->getAttribute( 'value' ), "$field should expand the filtered float without rounding." );
+		}
 	}
 
 	/**

@@ -409,15 +409,14 @@ jQuery( function ( $ ) {
 
 		// Keep currency padding after rounding, without removing extra precision.
 		format_price_for_editing: function( value ) {
-			var parts = parseFloat( accounting.formatNumber( value, woocommerce_admin_meta_boxes.rounding_precision, '' ) )
-				.toString().split( '.' );
+			var parts = accounting.formatNumber( value, woocommerce_admin_meta_boxes.rounding_precision, '' ).split( '.' );
+			var fraction = ( parts[ 1 ] || '' ).replace( /0+$/, '' );
+			var integer = parts[ 0 ] === '-0' && ! fraction ? '0' : parts[ 0 ];
 			var decimals = woocommerce_admin_meta_boxes.currency_format_num_decimals;
 
-			if ( decimals > 0 ) {
-				parts[ 1 ] = ( parts[ 1 ] || '' ).padEnd( decimals, '0' );
-			}
+			fraction = fraction.padEnd( decimals, '0' );
 
-			return parts.join( woocommerce_admin.mon_decimal_point );
+			return integer + ( fraction ? woocommerce_admin.mon_decimal_point + fraction : '' );
 		},
 
 		// When the qty is changed, increase or decrease costs

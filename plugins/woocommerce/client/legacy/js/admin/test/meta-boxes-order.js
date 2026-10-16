@@ -40,10 +40,16 @@ describe( 'Order item quantity changes', () => {
 		[ '.', 2, '17.6033', '52.8099', '11.10' ],
 		[ '.', 0, '17.6', '52.8', '11.1' ],
 		[ '.', 3, '17.6', '52.800', '11.100' ],
+		[ '.', 6, '0.0000001', '0.0000003', '11.100000', 8 ],
+		[ ',', 6, '-0,0000001', '-0,0000003', '11,100000', 8 ],
+		[ '.', 2, '-0.000000001', '0.00', '11.10', 8 ],
+		[ '.', 0, '0', '0', '11.1' ],
+		[ '.', 0, '10', '30', '11.1' ],
 	] )(
 		'keeps currency padding and stored precision (%s, %i, %s)',
-		( separator, decimals, amount, expectedAmount, expectedTax ) => {
+		( separator, decimals, amount, expectedAmount, expectedTax, precision = 6 ) => {
 			global.woocommerce_admin.mon_decimal_point = separator;
+			global.woocommerce_admin_meta_boxes.rounding_precision = precision;
 			global.woocommerce_admin_meta_boxes.currency_format_num_decimals =
 				decimals;
 			const tax = '3.7'.replace( '.', separator );

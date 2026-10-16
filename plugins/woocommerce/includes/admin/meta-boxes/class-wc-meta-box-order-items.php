@@ -32,6 +32,21 @@ class WC_Meta_Box_Order_Items {
 	public static function format_price_for_editing( string $value ): string {
 		$decimals = wc_get_price_decimals();
 
+		if ( preg_match( '/^([+-]?)(\d+\.?\d*|\.\d+)[eE]([+-]?\d+)$/D', $value, $matches ) ) {
+			$parts    = explode( '.', $matches[2], 2 );
+			$digits   = implode( '', $parts );
+			$position = strlen( $parts[0] ) + (int) $matches[3];
+
+			if ( $position <= 0 ) {
+				$value = '0.' . str_repeat( '0', -$position ) . $digits;
+			} elseif ( $position >= strlen( $digits ) ) {
+				$value = str_pad( $digits, $position, '0' );
+			} else {
+				$value = substr( $digits, 0, $position ) . '.' . substr( $digits, $position );
+			}
+			$value = $matches[1] . $value;
+		}
+
 		if ( '' !== $value && $decimals > 0 ) {
 			$parts = explode( '.', $value, 2 );
 			$value = $parts[0] . '.' . str_pad( $parts[1] ?? '', $decimals, '0' );
