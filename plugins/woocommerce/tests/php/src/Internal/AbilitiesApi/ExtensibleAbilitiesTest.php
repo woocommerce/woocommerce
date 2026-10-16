@@ -210,6 +210,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( 'type' => 'string' ), $order['extensions']['properties']['test-ext']['properties']['note'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['line_items']['items']['properties']['extensions']['properties']['test-ext']['properties']['gift'] );
 		$this->assertSame( array( 'type' => 'object' ), ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'customer' ) );
+		$this->assertFalse( $products['additionalProperties'] );
+		$this->assertFalse( $products['properties']['test-ext']['additionalProperties'] );
 	}
 
 	/**
@@ -304,6 +306,44 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array( 'product', 'order', 'order_item' ), array_keys( $resources->getValue() ) );
+	}
+
+	/**
+	 * @testdox Should refuse a resource name made only of digits.
+	 */
+	public function test_a_resource_name_of_only_digits_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+
+		ExtensibleAbilities::register_resource( '42' );
+
+		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources->setAccessible( true );
+		$this->assertSame( array(), $resources->getValue() );
+	}
+
+	/**
+	 * @testdox Should tell an extension to use the init action when it registers a field before the resources exist.
+	 */
+	public function test_a_field_registered_before_the_resources_points_to_the_init_action(): void {
+		$messages = array();
+		$capture  = static function ( $function_name, $message ) use ( &$messages ) {
+			$messages[] = $message;
+		};
+		add_action( 'doing_it_wrong_run', $capture, 10, 2 );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'     => 'product',
+				'namespace'    => 'test-ext',
+				'field'        => 'code',
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'T1',
+			)
+		);
+		remove_action( 'doing_it_wrong_run', $capture, 10 );
+
+		$this->assertStringContainsString( 'inside the woocommerce_extensible_abilities_init action', $messages[0] ?? '' );
 	}
 
 	/**
@@ -408,6 +448,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => array( 'description' => 'x' ) ) ) );
+		ExtensibleAbilities::register_field(
+			array_merge(
+				$valid,
+				array( 'field' => 'other' ),
+				array(
+					'schema' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				)
+			)
+		);
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(

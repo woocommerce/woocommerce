@@ -78,8 +78,8 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, __( 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
-		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ), '11.3.0' );
+		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name || ctype_digit( $resource_name ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 
@@ -101,8 +101,8 @@ class ExtensibleAbilities {
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
-	 *                                  A field with `required` must return a value that matches its schema
-	 *                                  for every object, or the ability output fails validation.
+	 *                                  It cannot set `required`, because a value that fails its schema is
+	 *                                  left out. For a field that is always present, allow null and return null.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
@@ -116,18 +116,22 @@ class ExtensibleAbilities {
 			return;
 		}
 		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
-			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] || ctype_digit( $args[ $key ] ) ) {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
 						/* translators: %s: argument name. */
-						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', 'woocommerce' ),
 						$key
 					),
 					'11.3.0'
 				);
 				return;
 			}
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', 'woocommerce' ), '11.3.0' );
+			return;
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
 			wc_doing_it_wrong(
@@ -143,6 +147,10 @@ class ExtensibleAbilities {
 		}
 		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
 			wc_doing_it_wrong( __METHOD__, __( 'The "schema" argument must be an array with a "type".', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		if ( true === ( $args['schema']['required'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "schema" argument cannot set "required". A value that fails its schema is left out, so allow null for a field that is always present.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
@@ -183,12 +191,12 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
-		if ( ! self::is_enabled() ) {
+		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
 			return $output;
 		}
 
 		$extensions = array();
-		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
@@ -232,18 +240,20 @@ class ExtensibleAbilities {
 		}
 
 		$extensions = array(
-			'type'        => 'object',
-			'description' => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
+			'type'                 => 'object',
+			'description'          => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
+			'additionalProperties' => false,
 		);
 		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
 			$extensions['properties'][ $namespace ] = array(
-				'type'       => 'object',
-				'properties' => array_map(
+				'type'                 => 'object',
+				'properties'           => array_map(
 					static function ( array $args ): array {
 						return $args['schema'];
 					},
 					$fields
 				),
+				'additionalProperties' => false,
 			);
 		}
 		$schema['properties']['extensions'] = $extensions;
@@ -270,16 +280,22 @@ class ExtensibleAbilities {
 		}
 
 		self::$reported[ $key ] = true;
-		$message                = sprintf(
-			/* translators: 1: extension namespace, 2: field name, 3: resource name, 4: validation error. */
-			__( 'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s', 'woocommerce' ),
-			$args['namespace'],
-			$args['field'],
-			$args['resource'],
-			$valid->get_error_message()
+		wc_get_logger()->error(
+			sprintf( 'Ability field "%s.%s" of "%s" was left out because its value does not match its schema: %s', $args['namespace'], $args['field'], $args['resource'], $valid->get_error_message() ),
+			array( 'source' => 'extensible-abilities' )
 		);
-		wc_get_logger()->error( $message, array( 'source' => 'extensible-abilities' ) );
-		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.3.0' );
+		wc_doing_it_wrong(
+			__CLASS__ . '::register_field',
+			sprintf(
+				/* translators: 1: extension namespace, 2: field name, 3: resource name, 4: validation error. */
+				__( 'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s', 'woocommerce' ),
+				$args['namespace'],
+				$args['field'],
+				$args['resource'],
+				$valid->get_error_message()
+			),
+			'11.3.0'
+		);
 		return false;
 	}
 }
