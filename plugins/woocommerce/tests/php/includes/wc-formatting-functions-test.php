@@ -110,6 +110,35 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_format_postcode() matches the Checkout block's formatPostcode() for the shared fixtures.
+	 * @dataProvider data_provider_format_postcode_parity
+	 *
+	 * @param string $expected Expected formatted postcode.
+	 * @param string $postcode Postcode input.
+	 * @param string $country  Country code.
+	 */
+	public function test_wc_format_postcode_matches_checkout_block( string $expected, string $postcode, string $country ): void {
+		$this->assertSame( $expected, wc_format_postcode( $postcode, $country ), "The Checkout block must format \"$postcode\" for $country the same way." );
+	}
+
+	/**
+	 * Fixtures shared with the Checkout block's formatPostcode() Jest test.
+	 *
+	 * @return array<int, array{string, string, string}>
+	 */
+	public function data_provider_format_postcode_parity(): array {
+		$fixture_path = WC_ABSPATH . 'client/blocks/assets/js/base/utils/test/format-postcode-fixtures.json';
+		$fixtures     = json_decode( (string) file_get_contents( $fixture_path ), true, 512, JSON_THROW_ON_ERROR ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local test fixture.
+
+		return array_map(
+			static function ( array $fixture ): array {
+				return array( $fixture['expected'], $fixture['postcode'], $fixture['country'] );
+			},
+			$fixtures
+		);
+	}
+
+	/**
 	 * Data provider for test_wc_format_option_price_separators.
 	 *
 	 * @return array[]

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Accept postcodes in the Checkout block that the store accepts, such as Portuguese postcodes entered without the hyphen.
