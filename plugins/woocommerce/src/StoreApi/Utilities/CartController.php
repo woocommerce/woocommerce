@@ -234,8 +234,10 @@ class CartController {
 	 *
 	 * @param string    $item_id Cart item id.
 	 * @param int|float $quantity Cart quantity.
+	 * @param bool      $refresh_totals Whether to recalculate totals now; pass false when changing several
+	 *                                  lines and calling calculate_totals() once afterwards.
 	 */
-	public function set_cart_item_quantity( $item_id, $quantity = 1 ) {
+	public function set_cart_item_quantity( $item_id, $quantity = 1, $refresh_totals = true ) {
 		$cart_item = $this->get_cart_item( $item_id );
 
 		if ( empty( $cart_item ) ) {
@@ -255,7 +257,7 @@ class CartController {
 		}
 
 		$cart = $this->get_cart_instance();
-		$cart->set_quantity( $item_id, $quantity );
+		$cart->set_quantity( $item_id, $quantity, $refresh_totals );
 	}
 
 	/**

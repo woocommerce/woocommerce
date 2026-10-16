@@ -509,7 +509,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 
 			if ( $target !== $quantity ) {
-				$this->cart_controller->set_cart_item_quantity( $key, $target );
+				// Totals are recalculated once below, not per changed line.
+				$this->cart_controller->set_cart_item_quantity( $key, $target, false );
 			}
 		}
 
