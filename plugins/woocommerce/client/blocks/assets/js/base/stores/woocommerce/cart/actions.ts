@@ -330,7 +330,10 @@ const { actions } = store< Store >(
 					if ( key ) {
 						return key === cartItem.key;
 					}
-					if ( 'type' in cartItem && cartItem.type === 'variation' ) {
+					if (
+						isCartItem( cartItem ) &&
+						cartItem.type === 'variation'
+					) {
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||

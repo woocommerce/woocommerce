@@ -29,6 +29,8 @@ jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
 type TestCartItem = OptimisticCartItem & {
 	/** Store API line type, such as `simple` or `variation`. */
 	type?: string;
+	/** Product name, which every Store API line carries. */
+	name?: string;
 	/** Cart key of the parent line, when this line is a declared child. */
 	parent_item_key?: string | null;
 	/** Custom item data attached to the line. */
@@ -50,6 +52,7 @@ const makeCartItem = (
 ): TestCartItem => ( {
 	id,
 	quantity,
+	name: `Product ${ id }`,
 	type: 'simple',
 	...overrides,
 } );
