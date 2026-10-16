@@ -8771,6 +8771,11 @@ table.bar_chart {
 				height: auto;
 				margin: 0;
 			}
+
+			small code {
+				font-size: inherit;
+				white-space: nowrap;
+			}
 		}
 
 		@media screen and (min-width: 783px) {
