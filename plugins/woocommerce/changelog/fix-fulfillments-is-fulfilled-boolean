@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fulfillments: saved fulfillments now return is_fulfilled as a boolean, so the order side panel keeps the Fulfill items button after a reload.
