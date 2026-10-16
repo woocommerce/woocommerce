@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Limit theme validation to wp-scripts and Theme Check; no production change.
