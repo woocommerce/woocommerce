@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The entry point for extensions in WooCommerce's abilities.
  *
- * An extension registers a resource inside the `woocommerce_ability_resources_init`
+ * An extension registers a resource inside the `woocommerce_extensible_abilities_resources_init`
  * action. It registers a field on a resource, such as `product`, inside the
  * `woocommerce_extensible_abilities_init` action, which fires after. An ability that formats an
  * object of that resource returns the field values under
@@ -63,7 +63,7 @@ class ExtensibleAbilities {
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
-	 * Call it inside the `woocommerce_ability_resources_init` action. A call after that action is refused.
+	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
 	 * Core registers `product`, `order` and `order_item` there. An
 	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
 	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
@@ -74,8 +74,8 @@ class ExtensibleAbilities {
 	 * @param string $resource_name Slug of the resource, such as `ticket`.
 	 */
 	public static function register_resource( string $resource_name ): void {
-		if ( did_action( 'woocommerce_ability_resources_init' ) && ! doing_action( 'woocommerce_ability_resources_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a resource inside the woocommerce_ability_resources_init action, before the fields are registered.', 'woocommerce' ), '11.3.0' );
+		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name ) {
@@ -90,7 +90,7 @@ class ExtensibleAbilities {
 	 * Register a field that the abilities of a resource return under `extensions.<namespace>.<field>`.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
-	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_ability_resources_init` action.
+	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_extensible_abilities_resources_init` action.
 	 *
 	 * @since 11.3.0
 	 *

@@ -279,10 +279,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				)
 			);
 		};
-		add_action( 'woocommerce_ability_resources_init', $register_resource, 99 );
+		add_action( 'woocommerce_extensible_abilities_resources_init', $register_resource, 99 );
 		add_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 		$this->get_output_schema( 'woocommerce/products-query' );
-		remove_action( 'woocommerce_ability_resources_init', $register_resource, 99 );
+		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource, 99 );
 		remove_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 
 		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass() );
@@ -325,7 +325,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		)['orders'];
 
-		$this->assertSame( 0, did_action( 'woocommerce_ability_resources_init' ) );
+		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_resources_init' ) );
 		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_init' ) );
 		$this->assertArrayNotHasKey( 'extensions', $this->get_output_schema( 'woocommerce/products-query' )['properties']['products']['items']['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $products[0] );
@@ -579,6 +579,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$instance->setValue( null, null );
 			}
 		}
-		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_ability_resources_init'], $wp_actions['woocommerce_extensible_abilities_init'] );
+		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_extensible_abilities_resources_init'], $wp_actions['woocommerce_extensible_abilities_init'] );
 	}
 }
