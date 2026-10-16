@@ -31,10 +31,10 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	 * Undo the global rewrite state register_feature_hooks() may have touched.
 	 */
 	public function tearDown(): void {
-		global $wp_rewrite, $wp;
+		global $wp_rewrite;
 		unset( $wp_rewrite->extra_rules_top[ self::RULE ] );
-		$wp->public_query_vars = array_diff( $wp->public_query_vars, array( UcpDiscovery::QUERY_VAR ) );
-		remove_action( 'template_redirect', array( $this->sut, 'maybe_render' ), 0 );
+		remove_filter( 'query_vars', array( $this->sut, 'add_query_var' ), 0 );
+		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
 		parent::tearDown();
 	}
 
@@ -68,15 +68,15 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	 * @param bool   $expected  Whether the rule should be registered.
 	 */
 	public function test_rewrite_rule_registration( string $enabled, string $structure, bool $expected ): void {
-		global $wp_rewrite, $wp;
+		global $wp_rewrite;
 		update_option( 'woocommerce_feature_ucp_enabled', $enabled );
 		$this->set_permalink_structure( $structure );
 
 		$this->sut->register_feature_hooks();
 
 		$this->assertSame( $expected, isset( $wp_rewrite->extra_rules_top[ self::RULE ] ) );
-		$this->assertSame( $expected, in_array( UcpDiscovery::QUERY_VAR, $wp->public_query_vars, true ) );
-		$this->assertSame( $expected ? 0 : false, has_action( 'template_redirect', array( $this->sut, 'maybe_render' ) ) );
+		$this->assertSame( $expected, in_array( UcpDiscovery::QUERY_VAR, apply_filters( 'query_vars', array() ), true ) );
+		$this->assertSame( $expected ? 0 : false, has_action( 'parse_request', array( $this->sut, 'maybe_render' ) ) );
 	}
 
 	/**

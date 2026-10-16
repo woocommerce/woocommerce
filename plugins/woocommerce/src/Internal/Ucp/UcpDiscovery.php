@@ -41,9 +41,22 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
-		add_rewrite_tag( '%' . self::QUERY_VAR . '%', '1' );
 		add_rewrite_rule( '^\.well-known/ucp/?$', 'index.php?' . self::QUERY_VAR . '=1', 'top' );
-		add_action( 'template_redirect', array( $this, 'maybe_render' ), 0, 0 );
+		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
+		add_action( 'parse_request', array( $this, 'maybe_render' ), 0 );
+	}
+
+	/**
+	 * Register the discovery query var.
+	 *
+	 * @param array $vars Public query vars.
+	 * @return array
+	 *
+	 * @since 11.3.0
+	 */
+	public function add_query_var( $vars ): array {
+		$vars[] = self::QUERY_VAR;
+		return $vars;
 	}
 
 	/**
@@ -62,14 +75,16 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	/**
 	 * Send the discovery profile for `/.well-known/ucp` requests.
 	 *
+	 * @param \WP $wp Current WordPress environment instance.
+	 *
 	 * @since 11.3.0
 	 */
-	public function maybe_render(): void {
-		if ( '1' !== get_query_var( self::QUERY_VAR ) ) {
+	public function maybe_render( \WP $wp ): void {
+		if ( '1' !== ( $wp->query_vars[ self::QUERY_VAR ] ?? '' ) ) {
 			return;
 		}
 
-		// UCP requires the profile to be publicly cacheable.
+		// UCP requires a publicly cacheable profile with a max-age of at least 60 seconds.
 		if ( ! headers_sent() ) {
 			header( 'Cache-Control: public, max-age=300' );
 		}
