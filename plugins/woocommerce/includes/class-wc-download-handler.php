@@ -98,7 +98,10 @@ class WC_Download_Handler {
 
 		$user_email = sanitize_email( str_replace( ' ', '+', $email_address ) );
 
-		if ( empty( $user_email ) ) {
+		// A uid link for an order placed without an email is authorized by the order key, plus login if the order has a customer.
+		$order_has_no_email = '' === $email_address && ! isset( $_GET['email'] );
+
+		if ( empty( $user_email ) && ! $order_has_no_email ) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
@@ -121,6 +124,11 @@ class WC_Download_Handler {
 		}
 
 		$download = new WC_Customer_Download( current( $download_ids ) );
+
+		// Without an email to match, only reach permissions that were granted without one.
+		if ( $order_has_no_email && '' !== $download->get_user_email() ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
 
 		/**
 		 * Filter download filepath.
@@ -150,7 +158,7 @@ class WC_Download_Handler {
 			self::check_downloads_remaining( $download );
 		}
 		self::check_download_expiry( $download );
-		self::check_download_login_required( $download );
+		self::check_download_login_required( $download, $order_has_no_email );
 
 		do_action(
 			'woocommerce_download_product',
@@ -218,9 +226,10 @@ class WC_Download_Handler {
 	 * Check if a download requires the user to login first.
 	 *
 	 * @param WC_Customer_Download $download Download instance.
+	 * @param bool                 $force    Require login even when the store setting is off.
 	 */
-	private static function check_download_login_required( $download ) {
-		if ( $download->get_user_id() && 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) {
+	private static function check_download_login_required( $download, $force = false ) {
+		if ( $download->get_user_id() && ( $force || 'yes' === get_option( 'woocommerce_downloads_require_login' ) ) ) {
 			if ( ! is_user_logged_in() ) {
 				if ( wc_get_page_id( 'myaccount' ) ) {
 					wp_safe_redirect( add_query_arg( 'wc_error', rawurlencode( __( 'You must be logged in to download files.', 'woocommerce' ) ), wc_get_page_permalink( 'myaccount' ) ) );

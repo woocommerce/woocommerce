@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore download links for orders without a billing email.
