@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews;
 use Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsCommentsOverrides;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
 
 /**
  * Loader Class.
@@ -73,6 +74,7 @@ class Loader {
 		wc_get_container()->get( TaxSettingsRecommendations::class );
 		wc_get_container()->get( Reviews::class );
 		wc_get_container()->get( ReviewsCommentsOverrides::class );
+		wc_get_container()->get( HposOrderExportHandler::class );
 
 		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_classes' ) );
 		add_filter( 'admin_title', array( __CLASS__, 'update_admin_title' ) );
