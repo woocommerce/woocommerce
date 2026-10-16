@@ -206,7 +206,8 @@ final class Contracts {
 			return ContractView::from_contract( $contract, true );
 		}
 
-		if ( ! $repository->update_fields( $contract, $fields, $lock ) ) {
+		$updated = $repository->update_fields( $contract, $fields, $lock );
+		if ( ! $updated ) {
 			return null;
 		}
 

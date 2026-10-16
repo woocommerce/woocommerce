@@ -1347,7 +1347,8 @@ final class ContractRepository {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		if ( false === $wpdb->delete( $meta, array( 'id' => $meta_id ) ) ) {
+		$deleted = $wpdb->delete( $meta, array( 'id' => $meta_id ) );
+		if ( false === $deleted ) {
 			throw new \RuntimeException( sprintf( 'Failed to remove duplicate contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 
@@ -1400,10 +1401,12 @@ final class ContractRepository {
 
 		$this->fence_meta( $contract_id, $lock );
 
-		if ( $this->update_meta_rows( $contract_id, $key, $value, $prev_value, $lock ) > 0 ) {
+		$updated = $this->update_meta_rows( $contract_id, $key, $value, $prev_value, $lock );
+		if ( $updated > 0 ) {
 			return true;
 		}
-		if ( null !== $this->insert_meta_row( $contract_id, $key, $value, true, $lock ) ) {
+		$meta_id = $this->insert_meta_row( $contract_id, $key, $value, true, $lock );
+		if ( null !== $meta_id ) {
 			return true;
 		}
 		if ( ! $this->has_meta_key( $contract_id, $key ) ) {
@@ -1414,7 +1417,8 @@ final class ContractRepository {
 		}
 
 		// Unlocked, the key may have been added between the update and the insert: update it once more.
-		if ( $this->update_meta_rows( $contract_id, $key, $value, $prev_value, null ) > 0 ) {
+		$updated = $this->update_meta_rows( $contract_id, $key, $value, $prev_value, null );
+		if ( $updated > 0 ) {
 			return true;
 		}
 		$this->throw_if_meta_refused( $contract_id, $key, null === $prev_value ? null : maybe_serialize( $prev_value ), maybe_serialize( $value ) );
