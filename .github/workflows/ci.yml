@@ -199,8 +199,8 @@ jobs:
           php-tools: 'cs2pr'
 
       # On PHPCS failure, lint-branch.sh writes the findings to this path as a
-      # checkstyle report, so the annotation step after 'Lint' can surface them as
-      # inline annotations on 'Files changed' while the Lint log keeps the readable
+      # checkstyle report, so the annotation step after linting can surface them as
+      # inline annotations on 'Files changed' while the PHP lint log keeps the readable
       # output. Set via GITHUB_ENV so the path is defined exactly once: the runner
       # context isn't available in job-level env, and step-level env (where runner
       # IS available) would have to repeat the path on every step that needs it.
@@ -210,19 +210,39 @@ jobs:
       - name: 'Set the PHPCS report path'
         run: echo "WC_PHPCS_CHECKSTYLE_FILE=$RUNNER_TEMP/phpcs-checkstyle.xml" >> "$GITHUB_ENV"
 
+      - parallel:
+          - name: 'Lint: JavaScript'
+            id: 'lint-js'
+            if: ${{ matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+            env:
+              LINT_COMMAND: ${{ matrix.command }}
+            run: |
+              read -r -a lint_command <<< "${LINT_COMMAND/#lint:changes:branch/lint:changes:branch:js}"
+              pnpm --filter='@woocommerce/plugin-woocommerce' "${lint_command[@]}"
+
+          - name: 'Lint: PHP'
+            id: 'lint-php'
+            if: ${{ matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+            env:
+              LINT_COMMAND: ${{ matrix.command }}
+            run: |
+              read -r -a lint_command <<< "${LINT_COMMAND/#lint:changes:branch/lint:changes:branch:php}"
+              pnpm --filter='@woocommerce/plugin-woocommerce' "${lint_command[@]}"
+
       - name: 'Lint'
         id: 'lint'
+        if: ${{ matrix.projectName != '@woocommerce/plugin-woocommerce' }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-      # Gate on the Lint step's own outcome (not job-level failure()) so this step
+      # Check the PHP or generic lint step's outcome (not job-level failure()) so this step
       # reacts only to a lint failure, never to an unrelated step failing;
       # !cancelled() is required because after a failure GitHub skips later steps
       # unless told otherwise. The report only exists when PHPCS itself failed, so
-      # a JS-only failure (or another project's) takes the empty branch.
+      # another project's lint failure takes the empty branch.
       - name: 'Lint: PHP inline annotations'
-        if: ${{ !cancelled() && steps.lint.outcome == 'failure' }}
+        if: ${{ !cancelled() && ( steps.lint-php.outcome == 'failure' || steps.lint.outcome == 'failure' ) }}
         # cs2pr exits non-zero whenever the report contains errors; finish green
-        # regardless: the Lint step already set the verdict, and a second red step
+        # regardless: linting already set the verdict, and a second red step
         # would be noise. The totals are stated first because GitHub renders roughly
         # the first 10 error and 10 warning annotations per step; past that, findings
         # exist only in this log, and a capped diff view shouldn't read as the full list.
