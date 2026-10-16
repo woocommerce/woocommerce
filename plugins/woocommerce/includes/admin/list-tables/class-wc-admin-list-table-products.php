@@ -1216,12 +1216,11 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$args['where'] .= $wpdb->prepare(
 			" AND {$wpdb->posts}.ID IN (
-				SELECT DISTINCT CAST(
+				SELECT DISTINCT
 					CASE
 						WHEN shipping_class_posts.post_type = 'product_variation' THEN shipping_class_posts.post_parent
 						ELSE shipping_class_posts.ID
-					END AS UNSIGNED
-				)
+					END
 				FROM {$wpdb->term_relationships} shipping_class_tr
 				INNER JOIN {$wpdb->term_taxonomy} shipping_class_tt
 					ON shipping_class_tt.term_taxonomy_id = shipping_class_tr.term_taxonomy_id
