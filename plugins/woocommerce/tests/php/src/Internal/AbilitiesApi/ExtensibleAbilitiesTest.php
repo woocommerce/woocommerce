@@ -177,6 +177,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						if ( 'reject' === $value || -1 === $value ) {
 							return new \WP_Error( 'test_rejected', 'Rejected.' );
 						}
+						if ( 'throw' === $value ) {
+							throw new \WC_Data_Exception( 'test_thrown', 'Thrown.' );
+						}
+						if ( 'crash' === $value ) {
+							throw new \RuntimeException( 'Crashed.' );
+						}
 						if ( null === $value ) {
 							$data->delete_meta_data( '_test_' . $field );
 							return null;
@@ -692,6 +698,32 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$saved = wc_get_product( $product->get_id() );
 		$this->assertSame( 'Pen', $saved->get_name() );
 		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should refuse the change and save nothing when an update callback throws.
+	 */
+	public function test_an_update_callback_that_throws_saves_nothing(): void {
+		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$expected = array(
+			'throw' => array( 400, 'test_thrown' ),
+			'crash' => array( 500, 'woocommerce_ability_field_update_failed' ),
+		);
+
+		foreach ( $expected as $value => list( $status, $code ) ) {
+			$response = $this->run_ability_response(
+				'woocommerce/product-update',
+				array(
+					'id'         => $product->get_id(),
+					'name'       => 'Pencil',
+					'extensions' => array( 'test-ext' => array( 'color' => $value ) ),
+				)
+			);
+
+			$this->assertSame( $status, $response->get_status(), $value );
+			$this->assertSame( $code, $response->get_data()['code'], $value );
+		}
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
 	/**

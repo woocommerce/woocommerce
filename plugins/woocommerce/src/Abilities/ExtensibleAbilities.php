@@ -278,6 +278,8 @@ class ExtensibleAbilities {
 	 *
 	 * @internal
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param string $resource_name Resource.
 	 * @return array<string, array<string, array<string, mixed>>>
 	 */

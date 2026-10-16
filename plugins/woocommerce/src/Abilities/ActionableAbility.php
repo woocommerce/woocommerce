@@ -200,11 +200,25 @@ abstract class ActionableAbility extends \WP_Ability {
 	 *
 	 * @param \WC_Data $subject Object to change.
 	 * @param array    $updates Pairs of update_callback and value from prepare_fields().
-	 * @return \WP_Error|null A WP_Error when a callback rejects a value.
+	 * @return \WP_Error|null A WP_Error when a callback rejects a value or throws.
 	 */
 	private function apply_fields( $subject, array $updates ): ?\WP_Error {
 		foreach ( $updates as list( $callback, $value ) ) {
-			$updated = call_user_func( $callback, $subject, $value );
+			try {
+				$updated = call_user_func( $callback, $subject, $value );
+			} catch ( \WC_Data_Exception $e ) {
+				return self::with_status( new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() ) );
+			} catch ( \Throwable $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Ability "%s" failed to write an extension field: %s', $this->get_name(), $e->getMessage() ),
+					array( 'source' => 'woocommerce-abilities' )
+				);
+				return new \WP_Error(
+					'woocommerce_ability_field_update_failed',
+					__( 'An extension field could not be written.', 'woocommerce' ),
+					array( 'status' => 500 )
+				);
+			}
 			if ( is_wp_error( $updated ) ) {
 				return self::with_status( $updated );
 			}
