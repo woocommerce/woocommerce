@@ -370,8 +370,8 @@ class ActionSchedulerUtil {
 	 * Same arguments and return value as the Action Scheduler function, with these degradations on
 	 * an older loaded copy:
 	 *
-	 * - `$unique` on a copy without it (before 3.5.0), or with non-empty `$args` on a copy that
-	 *   checks uniqueness by hook alone (before 4.0.0): emulated by checking
+	 * - `$unique` on a copy without it (before 3.5.0), or on a copy whose unique check ignores
+	 *   `$args` and matches by hook and group alone (before 4.0.0): emulated by checking
 	 *   {@see self::has_scheduled_action()} first, which returns 0 without scheduling when a match
 	 *   exists. The check is not atomic, so two concurrent requests can both schedule; on copies
 	 *   before 3.0.0 it sees pending actions only, so an action can be scheduled again while a
@@ -533,7 +533,7 @@ class ActionSchedulerUtil {
 			return 0;
 		}
 
-		$native_unique = $unique && self::supports( ActionSchedulerFeature::UNIQUE ) && ( empty( $args ) || self::supports( ActionSchedulerFeature::UNIQUE_ARGS ) );
+		$native_unique = $unique && self::supports( ActionSchedulerFeature::UNIQUE_ARGS );
 
 		if ( $unique && ! $native_unique && self::has_scheduled_action( $hook, $args, $group ) ) {
 			return 0;

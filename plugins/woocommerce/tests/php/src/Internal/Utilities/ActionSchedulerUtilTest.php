@@ -375,9 +375,9 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a copy that checks uniqueness by hook alone, unique with args is emulated.
+	 * @testdox On a copy whose unique check ignores args, unique is emulated with and without args.
 	 */
-	public function test_emulates_unique_with_args_on_a_copy_that_checks_uniqueness_by_hook_alone(): void {
+	public function test_emulates_unique_on_a_copy_whose_unique_check_ignores_args(): void {
 		$this->simulate_loaded_copy( '3.9.3' );
 		$calls = $this->capture_scheduling_calls();
 
@@ -388,11 +388,44 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 			array(
 				array( 'as_has_scheduled_action', self::HOOK, array( 'a' ), self::GROUP ),
 				array( 'as_schedule_single_action', 1000, self::HOOK, array( 'a' ), self::GROUP, false, 5 ),
-				array( 'as_schedule_single_action', 1000, self::HOOK, array(), self::GROUP, true, 10 ),
+				array( 'as_has_scheduled_action', self::HOOK, array(), self::GROUP ),
+				array( 'as_schedule_single_action', 1000, self::HOOK, array(), self::GROUP, false, 10 ),
 			),
 			$calls(),
-			'Unique should be emulated (checked, then passed as false) with args, and passed natively without args'
+			'Unique should be emulated (checked, then passed as false) with and without args'
 		);
+	}
+
+	/**
+	 * @testdox Emulated unique matches args exactly, whichever order the actions are scheduled in.
+	 */
+	public function test_emulated_unique_matches_args_exactly_in_either_order(): void {
+		$this->simulate_loaded_copy( '3.9.3' );
+
+		$orders = array(
+			'args first'  => array( array( 123 ), array() ),
+			'empty first' => array( array(), array( 123 ) ),
+		);
+		foreach ( $orders as $name => $order ) {
+			/** @var array<int, array{string, ?array, string}> $pending Filled by the mocks below. */
+			$pending = array();
+			$this->register_legacy_proxy_function_mocks(
+				array(
+					'as_has_scheduled_action'   => function ( string $hook, ?array $args, string $group ) use ( &$pending ) {
+						return in_array( array( $hook, $args, $group ), $pending, true );
+					},
+					'as_schedule_single_action' => function ( int $timestamp, string $hook, array $args, string $group ) use ( &$pending ) {
+						$pending[] = array( $hook, $args, $group );
+						return count( $pending );
+					},
+				)
+			);
+
+			$this->assertSame( 1, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, $order[0], self::GROUP, true ), "$name: the first action should be scheduled" );
+			$this->assertSame( 2, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, $order[1], self::GROUP, true ), "$name: an action that differs only by args should be scheduled" );
+			$this->assertSame( 0, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, $order[1], self::GROUP, true ), "$name: a true duplicate should be refused" );
+			$this->assertCount( 2, $pending, "$name: the duplicate should not reach Action Scheduler" );
+		}
 	}
 
 	/**

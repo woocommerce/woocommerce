@@ -26,7 +26,7 @@ final class ActionSchedulerFeature {
 
 	/**
 	 * Unique actions that take the action args into account, so actions that differ only by args can
-	 * coexist. Added in Action Scheduler 4.0.0; earlier copies check uniqueness by hook alone.
+	 * coexist. Added in Action Scheduler 4.0.0; earlier copies check uniqueness by hook and group alone.
 	 *
 	 * @var string
 	 */
