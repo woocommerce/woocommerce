@@ -246,9 +246,11 @@ abstract class ActionableAbility extends \WP_Ability {
 	private static function run_callback( callable $callback, array $args, array $data ): ?\WP_Error {
 		try {
 			$result = call_user_func_array( $callback, $args );
+		} catch ( \WC_Data_Exception $e ) {
+			$result = new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
-				sprintf( 'Ability extension "%s" failed: %s', implode( '', $data ), $e->getMessage() ),
+				sprintf( 'Extension callback "%s" failed: %s', implode( '', $data ), $e->getMessage() ),
 				array( 'source' => 'extensible-abilities' )
 			);
 			$result = new \WP_Error(

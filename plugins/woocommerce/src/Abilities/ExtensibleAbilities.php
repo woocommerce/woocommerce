@@ -231,6 +231,10 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_validator( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a validator inside the woocommerce_extensible_abilities_init action.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
 		foreach ( array( 'resource', 'namespace' ) as $key ) {
 			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
 				wc_doing_it_wrong(
@@ -247,6 +251,18 @@ class ExtensibleAbilities {
 		}
 		if ( ! is_callable( $args['callback'] ?? null ) ) {
 			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.3.0'
+			);
 			return;
 		}
 

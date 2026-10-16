@@ -721,7 +721,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$expected = array(
 			'throw' => array( 400, 'test_thrown' ),
-			'crash' => array( 500, 'woocommerce_ability_field_update_failed' ),
+			'crash' => array( 500, 'woocommerce_ability_extension_failed' ),
 		);
 
 		foreach ( $expected as $value => list( $status, $code ) ) {
@@ -1234,17 +1234,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should not run validators with the feature off.
 	 */
 	public function test_validators_do_not_run_with_the_feature_off(): void {
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function () {
+				return new \WP_Error( 'test_refused', 'Refused.' );
+			}
+		);
 		$this->set_feature( false );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
-		ExtensibleAbilities::register_validator(
-			array(
-				'resource'  => 'product',
-				'namespace' => 'test-ext',
-				'callback'  => static function () {
-					return new \WP_Error( 'test_refused', 'Refused.' );
-				},
-			)
-		);
 
 		$output = $this->run_ability(
 			'woocommerce/product-update',
@@ -1258,21 +1256,53 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a validator without a slug namespace or a callback.
+	 * @testdox Should refuse a validator without a slug namespace or a callback, or on an unknown resource.
 	 */
 	public function test_invalid_validators_are_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_validator' );
-
-		ExtensibleAbilities::register_validator(
-			array(
-				'resource' => 'order',
-				'callback' => '__return_null',
-			)
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				$invalid = array(
+					array(
+						'resource' => 'order',
+						'callback' => '__return_null',
+					),
+					array(
+						'resource'  => 'order',
+						'namespace' => 'test-ext',
+					),
+					array(
+						'resource'  => 'refund',
+						'namespace' => 'test-ext',
+						'callback'  => '__return_null',
+					),
+				);
+				foreach ( $invalid as $args ) {
+					ExtensibleAbilities::register_validator( $args );
+				}
+			}
 		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
+		$this->assertEmpty( ExtensibleAbilities::get_validators( 'refund' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a validator that is registered after the woocommerce_extensible_abilities_init action.
+	 */
+	public function test_a_late_validator_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_validator' );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
 		ExtensibleAbilities::register_validator(
 			array(
 				'resource'  => 'order',
 				'namespace' => 'test-ext',
+				'callback'  => '__return_null',
 			)
 		);
 
