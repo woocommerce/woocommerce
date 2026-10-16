@@ -233,12 +233,20 @@ class ExtensibleAbilities {
 	public static function register_validator( array $args ): void {
 		foreach ( array( 'resource', 'namespace' ) as $key ) {
 			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
-				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						$key
+					),
+					'11.3.0'
+				);
 				return;
 			}
 		}
 		if ( ! is_callable( $args['callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 
