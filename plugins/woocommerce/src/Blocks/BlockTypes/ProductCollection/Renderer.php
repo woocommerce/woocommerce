@@ -40,13 +40,6 @@ class Renderer {
 	);
 
 	/**
-	 * Collection IDs rendered in this request.
-	 *
-	 * @var array<int, true>
-	 */
-	private $rendered_query_ids = array();
-
-	/**
 	 * Whether an ancestor block provided a `cart` product reference context
 	 * for the Product Collection currently being rendered.
 	 *
@@ -152,13 +145,6 @@ class Renderer {
 			$this->reset_render_state();
 			return '';
 		}
-
-		$query_id = $block['attrs']['queryId'] ?? 0;
-		if ( isset( $this->rendered_query_ids[ $query_id ] ) ) {
-			// The router cannot distinguish collections sharing an ID, even when their saved queries differ.
-			wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
-		}
-		$this->rendered_query_ids[ $query_id ] = true;
 
 		$block_content = $this->enhance_product_collection_with_interactivity( $block_content, $block );
 
