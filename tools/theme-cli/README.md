@@ -41,7 +41,9 @@ Changelog entries for shared tooling live in `tools/theme-cli/changelog/`, with 
 
 All themes use `tools/theme-cli/prettier.config.cjs` and the repository's root `stylelint.config.cjs` and `.markdownlint.json`. The shared Prettier config extends the WordPress preset and preserves embedded CSS in theme templates and parts. New themes inherit these rules automatically.
 
-To enable validation in the monorepo's existing CI, register the theme's `validate` command in `package.json` under `config.ci.tests`, with `changes` set to `**/*` and `events` set to `[ "pull_request" ]`. CI then runs validation on pull requests when the theme or a workspace dependency such as `@woocommerce/theme-cli` changes. Lockfile changes select all packages. Markdown-only pull requests use the shared Markdown check. Root lint configuration changes do not automatically select theme validation jobs.
+Themes register their `validate` command in `package.json` under `config.ci.tests`, as Purple does. CI runs validation on pull requests when the theme or a workspace dependency such as `@woocommerce/theme-cli` changes. Lockfile changes select all packages. Markdown-only pull requests use the shared Markdown check. Root lint configuration changes do not automatically select theme validation jobs.
+
+The theme CLI registers its own `lint` command under `config.ci.lint`. Run `pnpm --filter=@woocommerce/theme-cli lint` to check its JavaScript and Markdown with wp-scripts. Its ESLint configuration extends the repository rules, permits console output in CLI scripts and CommonJS configuration files, and excludes generated environments and Composer dependencies.
 
 ### Editor setup
 

@@ -16,5 +16,19 @@
 	},
 	"devDependencies": {
 		"@woocommerce/theme-cli": "workspace:*"
+	},
+	"config": {
+		"ci": {
+			"tests": [
+				{
+					"name": "Theme validation",
+					"command": "validate",
+					"changes": "**/*",
+					"events": [
+						"pull_request"
+					]
+				}
+			]
+		}
 	}
 }
