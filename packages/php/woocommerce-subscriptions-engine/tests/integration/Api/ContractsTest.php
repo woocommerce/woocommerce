@@ -1458,6 +1458,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		}
 
 		$holder_reads = preg_grep( '/AS live, lock_operation/', $statements );
+		$this->assertIsArray( $holder_reads );
 		$this->assertCount( 1, $holder_reads, 'The holder is read once.' );
 		$this->assertSame( array(), preg_grep( '/^\s*(INSERT|DELETE)\b|SET lock_token = NULL/i', $statements ), 'Nothing is written or released.' );
 	}

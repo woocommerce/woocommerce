@@ -2351,7 +2351,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertStringContainsString( 'address row', $thrown->getMessage() );
 
 		$id = (int) $contract->get_id();
-		$this->assertSame( array( $id ), array_values( array_unique( array_column( $logs, 'contract_id' ) ) ), 'The failed discard is logged with the contract id.' );
+		$this->assertNotSame( array(), $logs, 'The failed discard is logged.' );
+		foreach ( $logs as $log ) {
+			$this->assertSame( $id, $log['contract_id'] ?? null, 'The log names the contract.' );
+		}
 		$this->assertNotNull( $this->sut->find_summary( $id ), 'The contract row the discard could not delete is still stored.' );
 	}
 
