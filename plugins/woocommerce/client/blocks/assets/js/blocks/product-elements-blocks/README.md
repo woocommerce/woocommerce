@@ -4,7 +4,7 @@ Product element blocks show parts of a product, such as its image, title, price,
 
 ## Structure
 
-Each element has its own directory with block metadata and the code needed for editing, saving, and rendering it. Shared editor code lives in `shared/`. The root `index.js` imports the element registration files, while `component-init.js` registers components that are loaded when needed. `frontend.ts` contains the shared product element callback for interactive updates.
+Each element has its own directory with block metadata and the code needed for editing, saving, and rendering it. Shared editor code lives in `shared/`. The root `index.js` imports the element registration files, while `component-init.js` registers components that are loaded when needed. `frontend.ts` contains the shared product element callback for interactive HTML field updates. Blocks with their own Interactivity logic, such as the button and sale badge, keep a dedicated `frontend.ts` in their directory.
 
 Shared block registration and rendering helpers live in dedicated files under `assets/js/utils/` because they are also used outside this directory. Import elements through `@woocommerce/product-elements` and helpers from their `@woocommerce/utils/<file>` paths.
 

@@ -13,11 +13,11 @@ declare( strict_types = 1 );
 class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Shipping zone used across tests.
+	 * Customer shipping address before the test, restored at teardown.
 	 *
-	 * @var WC_Shipping_Zone
+	 * @var array<string, string>
 	 */
-	private $zone;
+	private $previous_shipping_address = array();
 
 	/**
 	 * Set up test fixtures.
@@ -26,10 +26,10 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Create a shipping zone with a flat rate so CartCheckoutUtils::shipping_methods_exist() returns true.
-		$this->zone = new WC_Shipping_Zone();
-		$this->zone->set_zone_name( 'Test Zone' );
-		$this->zone->save();
-		$this->zone->add_shipping_method( 'flat_rate' );
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'Test Zone' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
 
 		// Flush the shipping method count transient so the new zone is picked up.
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
@@ -37,15 +37,18 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 
 		// Set block checkout context (not shortcode).
 		WC()->cart->cart_context = 'store-api';
+
+		// Tests clear or set the shipping address on WC()->customer, which outlives a test.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		$this->zone->delete( true );
-		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
-		WC()->cart->cart_context = 'shortcode';
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
 		parent::tearDown();
 	}
 
