@@ -21,7 +21,7 @@ const params = ( hookDoc ) => {
 						),
 					],
 				},
-		  }
+			}
 		: null;
 };
 

@@ -103,7 +103,7 @@ export default function ProductUsageNoticeModal( {
 			? __(
 					'Reactivate your subscription and benefit from:',
 					'woocommerce'
-			  )
+				)
 			: __( 'Purchase a subscription to benefit from:', 'woocommerce' );
 
 		const benefits = [
@@ -171,24 +171,24 @@ export default function ProductUsageNoticeModal( {
 					/* translators: %s is product name */
 					__( 'Renew %s', 'woocommerce' ),
 					productName
-			  )
+				)
 			: sprintf(
 					/* translators: %s is product name */
 					__( 'Subscribe to %s', 'woocommerce' ),
 					productName
-			  );
+				);
 
 		const buttonLabel = isExpired
 			? sprintf(
 					/* translators: %s is product price */
 					__( 'Renew for $%s', 'woocommerce' ),
 					productRegularPrice
-			  )
+				)
 			: sprintf(
 					/* translators: %s is product price */
 					__( 'Subscribe for $%s', 'woocommerce' ),
 					productRegularPrice
-			  );
+				);
 
 		return (
 			<Card className="primary">

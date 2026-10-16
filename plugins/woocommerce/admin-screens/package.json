@@ -1,0 +1,50 @@
+{
+	"name": "@woocommerce/admin-screens",
+	"private": true,
+	"scripts": {
+		"build": "rm -rf build ../assets/client/routes && mkdir -p ../assets/client/routes && ln -s ../assets/client/routes build && wp-build",
+		"lint": "eslint . && tsc --project tsconfig.json",
+		"watch:build": "rm -rf build ../assets/client/routes && mkdir -p ../assets/client/routes && ln -s ../assets/client/routes build && wp-build --watch"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"**/*.{ts,tsx,mjs,json}"
+				]
+			}
+		}
+	},
+	"dependencies": {
+		"@wordpress/admin-ui": "catalog:wp-bundled",
+		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/route": "catalog:wp-min",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
+	},
+	"devDependencies": {
+		"@types/react": "18.3.x",
+		"@typescript-eslint/eslint-plugin": "^8.63.0",
+		"@woocommerce/eslint-config": "workspace:*",
+		"@wordpress/browserslist-config": "next",
+		"@wordpress/build": "catalog:tooling",
+		"eslint": "^10.0.0",
+		"typescript": "5.7.x"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	],
+	"wpPlugin": {
+		"name": "woocommerce_routes",
+		"scriptGlobal": false,
+		"packageNamespace": "woocommerce",
+		"handlePrefix": "wc-routes",
+		"pages": [
+			{
+				"id": "wc-payment-settings",
+				"capability": "manage_woocommerce"
+			}
+		]
+	}
+}

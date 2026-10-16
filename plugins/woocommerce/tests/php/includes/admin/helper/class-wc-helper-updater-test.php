@@ -326,6 +326,269 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed update check should keep the cached products, without their forced auto-update, and back off for a short window.
+	 *
+	 * @testWith [500]
+	 *           [408]
+	 *           [200]
+	 *           [0]
+	 *
+	 * @param int $status HTTP status of the response (with a non-JSON body), or 0 for a transport error.
+	 */
+	public function test_update_check_preserves_cache_when_request_fails( int $status ): void {
+		$cached_data = array(
+			'hash'     => 'a-stale-hash',
+			'updated'  => time(),
+			'products' => array(
+				123 => array(
+					'version'    => '1.2.3',
+					'slug'       => 'test-plugin',
+					'autoupdate' => true,
+				),
+			),
+			'errors'   => array(),
+		);
+		set_transient( '_woocommerce_helper_updates', $cached_data, HOUR_IN_SECONDS );
+
+		$requests  = 0;
+		$http_mock = static function () use ( $status, &$requests ) {
+			++$requests;
+			return 0 === $status
+				? new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' )
+				: array(
+					'response' => array(
+						'code'    => $status,
+						'message' => get_status_header_desc( $status ),
+					),
+					'body'     => '<html><body>Bad gateway</body></html>',
+				);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result       = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+						'version'    => '1.0.0',
+					),
+				)
+			);
+			$second_check = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+						'version'    => '1.1.0',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$expected_products = array(
+			123 => array(
+				'version' => '1.2.3',
+				'slug'    => 'test-plugin',
+			),
+		);
+		$backoff_until     = (int) get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
+		$this->assertSame( $expected_products, $result, 'A failed check should serve the cached products, without a forced auto-update decided for another version' );
+		$this->assertSame( $cached_data, get_transient( '_woocommerce_helper_updates' ), 'A failed check should leave the cached update data untouched' );
+		$this->assertSame( $expected_products, $second_check, 'A check inside the backoff window should serve the cached products' );
+		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even after the installed version changed' );
+		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
+		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
+	}
+
+	/**
+	 * @testdox A failed update check with nothing cached should return no products and not cache the empty result.
+	 */
+	public function test_update_check_without_cache_returns_nothing_when_request_fails(): void {
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 6: Could not resolve host' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( array(), $result, 'With nothing cached there are no products to serve' );
+		$this->assertFalse( get_transient( '_woocommerce_helper_updates' ), 'The empty result should not be cached' );
+	}
+
+	/**
+	 * @testdox A failed update check after the cache went stale should keep serving it for a week, without its forced auto-updates.
+	 */
+	public function test_update_check_serves_stale_cache_when_request_fails(): void {
+		$payload  = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+		$products = array(
+			123 => array(
+				'version'    => '1.2.3',
+				'autoupdate' => true,
+			),
+		);
+		$fail     = false;
+
+		$http_mock = static function () use ( &$fail, $products ) {
+			return $fail
+				? new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' )
+				: array(
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'body'     => wp_json_encode( $products ),
+				);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$fresh             = $this->call_update_check( $payload );
+			$cache_ttl         = (int) get_option( '_transient_timeout__woocommerce_helper_updates' ) - time();
+			$stale             = get_transient( '_woocommerce_helper_updates' );
+			$stale['updated'] -= 13 * HOUR_IN_SECONDS;
+			set_transient( '_woocommerce_helper_updates', $stale, WEEK_IN_SECONDS );
+			$fail           = true;
+			$after_failure  = $this->call_update_check( $payload );
+			$inside_backoff = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$expected = array( 123 => array( 'version' => '1.2.3' ) );
+		$this->assertSame( $products, $fresh, 'A fresh check should keep the forced auto-update' );
+		$this->assertGreaterThan( DAY_IN_SECONDS, $cache_ttl, 'A successful check should be kept longer than it is fresh' );
+		$this->assertSame( $expected, $after_failure, 'A failed check should serve the stale cache, without forcing auto-updates' );
+		$this->assertSame( $expected, $inside_backoff, 'A check inside the backoff should serve the stale cache too' );
+		$this->assertSame( $stale, get_transient( '_woocommerce_helper_updates' ), 'A failed check should not write the cache' );
+	}
+
+	/**
+	 * @testdox A rejected update check should cache the empty result as before, without a backoff.
+	 *
+	 * @testWith [401]
+	 *           [403]
+	 *           [0]
+	 *
+	 * @param int $status HTTP status of the response, or 0 for a WP_Error about missing local credentials.
+	 */
+	public function test_update_check_caches_empty_result_when_connection_is_rejected( int $status ): void {
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => 'a-stale-hash',
+				'updated'  => time(),
+				'products' => array( 123 => array( 'version' => '1.2.3' ) ),
+				'errors'   => array(),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$http_mock = static function () use ( $status ) {
+			return 0 === $status
+				? new WP_Error( 'authentication', 'Authentication failed.', 401 )
+				: array(
+					'response' => array(
+						'code'    => $status,
+						'message' => get_status_header_desc( $status ),
+					),
+					'body'     => '',
+				);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$stored = get_transient( '_woocommerce_helper_updates' );
+		$this->assertSame( array(), $result, 'A rejected check should not serve updates the server refused' );
+		$this->assertSame( array(), $stored['products'], 'A rejected check should cache the empty result' );
+		$this->assertSame( array( 'http-error' ), $stored['errors'], 'A rejected check should be recorded as an error' );
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'A rejected check should not start the outage backoff'
+		);
+	}
+
+	/**
+	 * @testdox A manual refresh should force a fresh update check but keep serving the cached products if it fails.
+	 */
+	public function test_refresh_keeps_cached_products_when_the_forced_check_fails(): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+		ksort( $payload );
+		$hash     = md5( wp_json_encode( $payload ) );
+		$products = array(
+			123 => array(
+				'version'    => '1.2.3',
+				'autoupdate' => true,
+			),
+		);
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => $hash,
+				'updated'  => time(),
+				'products' => $products,
+				'errors'   => array(),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$update_checks = 0;
+		$http_mock     = static function ( $pre, $args, $url ) use ( &$update_checks ) {
+			if ( false !== strpos( $url, 'update-check' ) ) {
+				++$update_checks;
+			}
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			WC_Helper::refresh_helper_subscriptions();
+			$result = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
+		}
+
+		$this->assertSame( 1, $update_checks, 'A refresh should force a fresh update check' );
+		$this->assertSame( $products, $result, 'A failed check after a refresh should serve the cached products, keeping the forced auto-update made for this payload' );
+		$this->assertSame( $hash, get_transient( '_woocommerce_helper_updates' )['hash'], 'A refresh should keep the hash of the cached payload' );
+	}
+
+	/**
 	 * Test that _update_check refreshes cache when hash doesn't match.
 	 */
 	public function test_update_check_refreshes_cache_with_mismatched_hash() {
@@ -488,6 +751,77 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		// Verify count transient is cleared.
 		$this->assertFalse( get_transient( '_woocommerce_helper_updates_count' ), 'Count transient should be cleared after upgrade' );
+	}
+
+	/**
+	 * @testdox The updates count should come from cached data an update check wouldn't reuse, without making the check.
+	 */
+	public function test_updates_count_reads_stale_cache_without_a_request(): void {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+		$this->set_subscriptions( array( $this->subscription() ) );
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => 'a-stale-hash',
+				'updated'  => time() - 13 * HOUR_IN_SECONDS,
+				'products' => array( 123 => array( 'version' => '2.0.0' ) ),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$requests  = 0;
+		$http_mock = static function () use ( &$requests ) {
+			++$requests;
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$count = WC_Helper_Updater::get_updates_count();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( 1, $count, 'The active plugin behind the cached version should be counted' );
+		$this->assertSame( 0, $requests, 'Counting updates should not call WooCommerce.com' );
+	}
+
+	/**
+	 * @testdox The updates count should be 0 when the cached update data is malformed.
+	 */
+	public function test_updates_count_is_zero_for_malformed_cached_data(): void {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+		$this->set_subscriptions( array( $this->subscription() ) );
+		set_transient( '_woocommerce_helper_updates', array( 'products' => 'not-an-array' ), WEEK_IN_SECONDS );
+
+		$this->assertSame( 0, WC_Helper_Updater::get_updates_count() );
+	}
+
+	/**
+	 * @testdox A successful update check should reset the cached updates count.
+	 */
+	public function test_update_check_resets_updates_count(): void {
+		set_transient( '_woocommerce_helper_updates_count', 5, 12 * HOUR_IN_SECONDS );
+		add_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ), 10, 3 );
+
+		try {
+			$this->call_update_check(
+				array(
+					123 => array(
+						'product_id' => 123,
+						'file_id'    => 'abc123',
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', array( $this, 'mock_helper_api_response' ) );
+		}
+
+		$this->assertNotFalse( get_transient( '_woocommerce_helper_updates' ), 'The update check should cache its result' );
+		$this->assertFalse( get_transient( '_woocommerce_helper_updates_count' ), 'A new cache should reset the count computed from the old one' );
 	}
 
 	/**
@@ -1996,6 +2330,187 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				'message' => 'OK',
 			),
 			'body'     => wp_json_encode( $this->mocked_updates ),
+		);
+	}
+
+	/**
+	 * @testdox Plugins without a subscription lists an active Woo plugin the account holds no subscription for.
+	 */
+	public function test_plugins_without_subscription_lists_unsubscribed_plugin(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array( $this->subscription( array( 'product_id' => 999 ) ) ) );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A plugin with no subscription for its product should be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips a plugin the account holds any subscription for, even an expired one.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $expired Whether the subscription has expired.
+	 */
+	public function test_plugins_without_subscription_skips_subscribed_plugin( bool $expired ): void {
+		$this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array( $this->subscription( array( 'expired' => $expired ) ) ) );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'A plugin with a subscription should not be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips inactive plugins.
+	 */
+	public function test_plugins_without_subscription_skips_inactive_plugin(): void {
+		$this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array() );
+		$this->set_connected_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'An inactive plugin should not be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips the Woo Update Manager.
+	 */
+	public function test_plugins_without_subscription_skips_update_manager(): void {
+		$plugin_file = WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE;
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					$plugin_file => array(
+						'Name'    => 'WooCommerce.com Update Manager',
+						'Version' => '1.0.0',
+						'Woo'     => '18734002369816:abc123',
+					),
+				),
+			),
+			'plugins'
+		);
+		update_option( 'active_plugins', array( $plugin_file ) );
+		$this->set_connected_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'The Update Manager delivers updates and should never be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription lists every active Woo plugin when the store is not connected.
+	 */
+	public function test_plugins_without_subscription_lists_all_when_disconnected(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_subscriptions( array( $this->subscription() ) );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A store that is not connected has no subscription for any extension.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is null while a connected store's last subscriptions fetch is failing.
+	 * @testWith [429]
+	 *           [500]
+	 *
+	 * @param int $code HTTP status of the failed fetch.
+	 */
+	public function test_plugins_without_subscription_is_null_while_the_api_is_failing( int $code ): void {
+		$this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => $code,
+				'message' => 'Error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription(), 'An empty list after a failed fetch is not proof that no subscription exists.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is empty when no Woo plugin is active, even while the API is failing.
+	 */
+	public function test_plugins_without_subscription_is_empty_without_active_plugins_while_the_api_is_failing(): void {
+		$this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array() );
+		$this->set_connected_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 429,
+				'message' => 'Error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'With no active plugin to check, the empty list does not depend on the API.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is null when fetching is not allowed and the list isn't cached.
+	 */
+	public function test_plugins_without_subscription_is_null_without_cache_when_fetching_is_not_allowed(): void {
+		$this->mock_active_woo_plugin();
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'site_id'             => 45,
+				'access_token'        => 'token',
+				'access_token_secret' => 'secret',
+			)
+		);
+		delete_transient( '_woocommerce_helper_subscriptions' );
+		$fail = function () {
+			$this->fail( 'No request should be made when fetching is not allowed.' );
+		};
+		add_filter( 'pre_http_request', $fail );
+
+		try {
+			$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription( false ), 'Without the list the answer is unknown.' );
+		} finally {
+			remove_filter( 'pre_http_request', $fail );
+		}
+	}
+
+	/**
+	 * @testdox Plugins without a subscription reads the cached list when fetching is not allowed.
+	 */
+	public function test_plugins_without_subscription_reads_the_cache_when_fetching_is_not_allowed(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array() );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription( false );
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A cached list answers without a request.' );
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_plugins() report a single active Woo plugin.
+	 *
+	 * @return string The plugin file name.
+	 */
+	private function mock_active_woo_plugin(): string {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+
+		return $plugin_file;
+	}
+
+	/**
+	 * Stand in a subscriptions payload for a store connected to WooCommerce.com.
+	 *
+	 * @param array $subscriptions Subscription records.
+	 * @return void
+	 */
+	private function set_connected_subscriptions( array $subscriptions ): void {
+		$this->set_subscriptions( $subscriptions );
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'site_id'      => 45,
+				'access_token' => 'token',
+			)
 		);
 	}
 }

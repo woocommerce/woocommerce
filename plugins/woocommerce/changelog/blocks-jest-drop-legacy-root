@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Stop running legacy JS unit tests twice in the Blocks Jest suite; no production change.
+

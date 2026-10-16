@@ -73,7 +73,9 @@ export default function Stepper( {
 		}
 	}, [ activeSubStep ] );
 
-	if ( ! topLevelStep ) return null;
+	if ( ! topLevelStep ) {
+		return null;
+	}
 
 	const activeStepIndex =
 		steps.findIndex( ( step ) => step.id === activeTopLevelStep ) + 1;

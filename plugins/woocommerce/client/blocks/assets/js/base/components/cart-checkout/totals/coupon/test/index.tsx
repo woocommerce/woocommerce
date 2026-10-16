@@ -221,8 +221,8 @@ describe( 'TotalsCoupon', () => {
 			// Input should retain value and stay focused on failure
 			await waitFor( () => {
 				expect( couponInput ).toHaveValue( '5fixedcheckout' );
-				expect( couponInput ).toHaveFocus();
 			} );
+			expect( couponInput ).toHaveFocus();
 		} );
 
 		it( 'handles usage limit exceeded error', async () => {

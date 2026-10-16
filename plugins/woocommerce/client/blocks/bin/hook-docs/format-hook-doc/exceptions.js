@@ -9,7 +9,7 @@ const exceptions = ( hookDoc ) => {
 				p: `\`${ throwsDoc.types.join( ', ' ) }\` ${
 					throwsDoc.content
 				}`,
-		  }
+			}
 		: null;
 };
 

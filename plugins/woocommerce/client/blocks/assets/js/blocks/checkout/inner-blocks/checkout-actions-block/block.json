@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-actions-block",
-	"version": "1.0.0",
 	"title": "Actions",
 	"description": "Allow customers to place their order.",
 	"category": "woocommerce",

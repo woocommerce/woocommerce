@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-title",
-	"version": "1.0.0",
 	"title": "Product Title",
 	"category": "woocommerce-product-elements",
 	"description": "Display the title of a product.",

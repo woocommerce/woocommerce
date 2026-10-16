@@ -4,11 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import {
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalVStack as VStack, // eslint-disable-line
-	__experimentalSpacer as Spacer, // eslint-disable-line
-	__experimentalHeading as Heading, // eslint-disable-line
-	__experimentalView as View, // eslint-disable-line
+	__experimentalHStack as HStack,
+	__experimentalVStack as VStack,
+	__experimentalSpacer as Spacer,
+	__experimentalHeading as Heading,
+	__experimentalView as View,
 } from '@wordpress/components';
 
 /**
