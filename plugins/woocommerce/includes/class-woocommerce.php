@@ -277,10 +277,67 @@ final class WooCommerce {
 	 * WooCommerce Constructor.
 	 */
 	public function __construct() {
+		do_action( 'qm/start', 'WooCommerce::__construct/define_constants' );
 		$this->define_constants();
+		do_action( 'qm/stop', 'WooCommerce::__construct/define_constants' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/define_tables' );
 		$this->define_tables();
+		do_action( 'qm/stop', 'WooCommerce::__construct/define_tables' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/includes' );
 		$this->includes();
+		do_action( 'qm/stop', 'WooCommerce::__construct/includes' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks' );
 		$this->init_hooks();
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks' );
+
+		// DEBUG: auto-instrument all Woo callbacks on target hooks with QM timing.
+		$target_hooks = array( 'plugins_loaded', 'init', 'template_redirect', 'wp_head', 'wp_footer' );
+		$woo_path     = WP_PLUGIN_DIR . '/woocommerce/';
+		global $wp_filter;
+		foreach ( $target_hooks as $hook ) {
+			if ( ! isset( $wp_filter[ $hook ] ) ) {
+				continue;
+			}
+			foreach ( $wp_filter[ $hook ]->callbacks as $priority => &$callbacks ) {
+				foreach ( $callbacks as $id => &$cb_data ) {
+					$fn   = $cb_data['function'];
+					$file = '';
+					try {
+						if ( is_array( $fn ) ) {
+							$ref  = new ReflectionMethod( is_object( $fn[0] ) ? get_class( $fn[0] ) : $fn[0], $fn[1] );
+							$file = $ref->getFileName();
+						} elseif ( is_string( $fn ) && function_exists( $fn ) ) {
+							$ref  = new ReflectionFunction( $fn );
+							$file = $ref->getFileName();
+						} elseif ( $fn instanceof Closure ) {
+							$ref  = new ReflectionFunction( $fn );
+							$file = $ref->getFileName();
+						}
+					} catch ( ReflectionException $e ) {
+						continue;
+					}
+					if ( ! $file || strpos( $file, $woo_path ) === false ) {
+						continue;
+					}
+					$label = is_array( $fn )
+						? ( is_object( $fn[0] ) ? get_class( $fn[0] ) : $fn[0] ) . '::' . $fn[1]
+						: ( is_string( $fn ) ? $fn : 'Closure@' . basename( $file ) . ':' . $ref->getStartLine() );
+					$qm_label      = $hook . '/' . $label;
+					$original      = $fn;
+					$accepted_args = $cb_data['accepted_args'];
+					$cb_data['function'] = static function () use ( $original, $qm_label, $accepted_args ) {
+						do_action( 'qm/start', $qm_label );
+						$result = call_user_func_array( $original, array_slice( func_get_args(), 0, $accepted_args ) );
+						do_action( 'qm/stop', $qm_label );
+						return $result;
+					};
+				}
+			}
+			unset( $callbacks, $cb_data );
+		}
 	}
 
 	/**
@@ -329,6 +386,8 @@ final class WooCommerce {
 	 * @return void
 	 */
 	private function init_hooks() {
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/hooks' );
+
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
@@ -376,6 +435,10 @@ final class WooCommerce {
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 		add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/hooks' );
+
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-1' );
+
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
 		$container->get( ProductDownloadDirectories::class );
@@ -414,6 +477,9 @@ final class WooCommerce {
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( PaymentSettingsScreen::class );
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-1' );
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-2' );
+
 		/**
 		 * These classes have a register method for attaching hooks.
 		 */
@@ -442,6 +508,9 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-2' );
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-3' );
+
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
@@ -451,8 +520,13 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
 
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-3' );
+		do_action( 'qm/start', 'WooCommerce::__construct/init_hooks/DI-batch-4' );
+
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		do_action( 'qm/stop', 'WooCommerce::__construct/init_hooks/DI-batch-4' );
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
