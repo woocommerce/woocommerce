@@ -8,7 +8,7 @@ category_slug: mcp
 
 ## Introduction
 
-WooCommerce includes native support for the Model Context Protocol (MCP), enabling AI assistants and tools to interact directly with WooCommerce stores through a standardized protocol. This integration exposes WooCommerce functionality as discoverable tools that AI clients can use to perform store operations with proper authentication and permissions.
+WooCommerce registers product and order abilities in WordPress. With the MCP Adapter plugin, AI clients can discover and run these store operations through the Model Context Protocol (MCP), subject to WordPress and WooCommerce permissions.
 
 :::info
 
@@ -16,110 +16,6 @@ WooCommerce includes native support for the Model Context Protocol (MCP), enabli
 The MCP implementation in WooCommerce is currently in developer preview. Implementation details, APIs, and integration patterns may change in future releases as the feature matures.
 
 :::
-
-## Background
-
-The Model Context Protocol (MCP) is an open standard that enables AI applications to securely connect to external data sources and tools. Using MCP with WooCommerce relies on two core technologies:
-
-- **[WordPress Abilities API](https://github.com/WordPress/abilities-api)** - A standardized system for registering capabilities in WordPress, included in WordPress core
-- **[WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation, installed as the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/)
-
-This architecture allows WooCommerce to expose operations as MCP tools through the flexible WordPress Abilities system while maintaining existing security and permission models.
-
-## What's Available
-
-WooCommerce registers purpose-built abilities for core store operations. These abilities are available through the WordPress Abilities API and can be surfaced through the shared WordPress MCP adapter.
-
-### Purpose-Built WooCommerce Abilities
-
-#### Product Management
-
-- Query products with filtering and pagination
-- Create new products
-- Update existing products
-- Delete products
-
-#### Order Management
-
-- Query orders with filtering and pagination
-- Update order status
-- Add order notes
-
-All operations respect WooCommerce's existing permission system. MCP clients authenticate through the MCP Adapter as a WordPress user.
-
-### Removed in WooCommerce 11.3
-
-WooCommerce 11.3 removed the deprecated WooCommerce MCP endpoint and everything that only existed to support it:
-
-- The `/wp-json/woocommerce/mcp` endpoint and its WooCommerce REST API key authentication (`X-MCP-API-Key`). Requests to the endpoint now return HTTP 410 with a JSON-RPC error that explains how to connect through the MCP Adapter.
-- The REST-derived product and order abilities (`woocommerce/products-list`, `woocommerce/orders-get`, and similar), along with the `woocommerce_mcp_include_ability`, `woocommerce_mcp_allow_insecure_transport`, and `woocommerce_check_rest_ability_permissions_for_method` filters and the `expose_in_deprecated_woocommerce_mcp` ability metadata.
-
-Custom abilities registered by extensions or custom code that appeared in the removed endpoint don't carry over automatically. Before WooCommerce 10.9, the endpoint included abilities in the `woocommerce/` namespace; from 10.9, it included abilities with `expose_in_deprecated_woocommerce_mcp` set to `true`; and the `woocommerce_mcp_include_ability` filter could add or remove abilities in either version. The MCP Adapter's default server ignores all of these. It only exposes an ability when its `meta.mcp.public` is `true` (if `meta.mcp.public` is not set, the adapter falls back to the top-level `meta.public`). To keep a custom ability available to MCP clients, set that metadata as shown in [Adding Custom Abilities](#adding-custom-abilities).
-
-To keep using WooCommerce with MCP, install the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/) and connect your MCP client to its default server, as described in [Connecting to the MCP Server](#connecting-to-the-mcp-server). Stores that had the WooCommerce MCP feature enabled see an admin notice about the change.
-
-:::warning
-
-**Data Privacy Notice**
-Order and customer operations may expose personally identifiable information (PII) including names, email addresses, physical addresses, and payment details. You are responsible for ensuring compliance with applicable data protection regulations. Connect MCP clients as a dedicated WordPress user with only the capabilities they need, revoke Application Passwords you no longer use, and follow your organization's data retention and handling policies.
-
-:::
-
-## Architecture
-
-### Data Flow Overview
-
-The MCP integration uses a multi-layered architecture to bridge between MCP clients and WordPress:
-
-```text
-AI Client (Claude, etc.)
-    ↓ (MCP protocol over stdio/JSON-RPC)
-Local MCP Proxy (mcp-wordpress-remote)
-    ↓ (HTTP/HTTPS requests with authentication)
-Remote WordPress MCP Server (mcp-adapter)
-    ↓ (WordPress Abilities API)
-WooCommerce Abilities
-    ↓ (REST API calls or direct operations)
-WooCommerce Core
-```
-
-### Architecture Components
-
-**Local MCP Proxy** (`mcp-wordpress-remote`)
-
-- Runs locally on the developer's machine as a Node.js process
-- Converts MCP protocol messages to HTTP requests
-- Handles authentication header injection
-- Bridges the protocol gap between MCP clients and WordPress REST endpoints
-
-**Remote WordPress MCP Server** (`mcp-adapter`)
-
-- Is provided by the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/), which must be installed and active
-- Powers MCP tool discovery and execution for WordPress abilities
-
-#### WordPress Abilities System
-
-- Provides a standardized way to register and execute capabilities
-- Acts as an abstraction layer between MCP tools and actual operations
-- Enables flexible implementation approaches (direct operations, REST bridging, and so on)
-
-### Core Components
-
-**Abilities Registry** ([`AbilitiesRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesRegistry.php))
-
-- Initializes WooCommerce ability categories and loaders
-- Bridges WordPress Abilities API with WooCommerce operations
-- Enables ability discovery for MCP servers and other Abilities API consumers
-
-**Purpose-Built Domain Abilities** ([`Domain`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/Abilities/Domain))
-
-- Provide WooCommerce product and order abilities backed by domain APIs
-- Use shared WordPress MCP adapter metadata (`mcp.public` and `mcp.type`) for MCP exposure
-- Keep the ability contract focused on agent-friendly store operations
-
-### Implementation Approach
-
-WooCommerce implements its abilities as purpose-built domain abilities. These abilities use schemas and response shapes designed for agent workflows instead of automatically projecting every REST-shaped operation into MCP.
 
 ## Enabling MCP Integration
 
@@ -266,6 +162,127 @@ claude mcp add \
 ```
 
 **Troubleshooting**: For common setup issues with npx versions or SSL in local environments, see the [mcp-wordpress-remote troubleshooting guide](https://github.com/Automattic/mcp-wordpress-remote/blob/trunk/Docs/troubleshooting.md).
+
+## Discover WooCommerce Abilities
+
+The default MCP server exposes three tools: `mcp-adapter-discover-abilities`, `mcp-adapter-get-ability-info`, and `mcp-adapter-execute-ability`. A `tools/list` response shows these adapter tools, not a separate tool for each WooCommerce ability. Use the discovery tool to list available abilities, then get an ability's schema before executing it.
+
+For a local site, you can check discovery with WP-CLI:
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"mcp-adapter-discover-abilities","arguments":{}}}' | \
+  wp --path=/path/to/your/wordpress/site \
+  mcp-adapter serve \
+  --server=mcp-adapter-default-server \
+  --user=admin
+```
+
+On a WooCommerce 11.3 site, the response should include abilities such as `woocommerce/products-query` and `woocommerce/order-notes-query`. Each ability checks permissions when it runs. See the [MCP Adapter default server guide](https://github.com/WordPress/mcp-adapter/blob/trunk/docs/guides/default-server.md) for the discovery and execution flow.
+
+## Background
+
+The Model Context Protocol (MCP) is an open standard that enables AI applications to securely connect to external data sources and tools. Using MCP with WooCommerce relies on two core technologies:
+
+- **[WordPress Abilities API](https://github.com/WordPress/abilities-api)** - A standardized system for registering capabilities in WordPress, included in WordPress core
+- **[WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation, installed as the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/)
+
+This architecture allows WooCommerce to expose operations as MCP tools through the flexible WordPress Abilities system while maintaining existing security and permission models.
+
+## What's Available
+
+WooCommerce registers purpose-built abilities for core store operations. These abilities are available through the WordPress Abilities API and can be surfaced through the shared WordPress MCP adapter.
+
+### Purpose-Built WooCommerce Abilities
+
+#### Product Management
+
+- Query products with filtering and pagination
+- Create new products
+- Update existing products
+- Delete products
+
+#### Order Management
+
+- Query orders with filtering and pagination
+- Query notes for an order (`woocommerce/order-notes-query`)
+- Update order status
+- Add order notes
+
+All operations respect WooCommerce's existing permission system. MCP clients authenticate through the MCP Adapter as a WordPress user.
+
+### Removed in WooCommerce 11.3
+
+WooCommerce 11.3 removed the deprecated WooCommerce MCP endpoint and everything that only existed to support it:
+
+- The `/wp-json/woocommerce/mcp` endpoint and its WooCommerce REST API key authentication (`X-MCP-API-Key`). Requests to the endpoint now return HTTP 410 with a JSON-RPC error that explains how to connect through the MCP Adapter.
+- The REST-derived product and order abilities (`woocommerce/products-list`, `woocommerce/orders-get`, and similar), along with the `woocommerce_mcp_include_ability`, `woocommerce_mcp_allow_insecure_transport`, and `woocommerce_check_rest_ability_permissions_for_method` filters and the `expose_in_deprecated_woocommerce_mcp` ability metadata.
+
+Custom abilities registered by extensions or custom code that appeared in the removed endpoint don't carry over automatically. Before WooCommerce 10.9, the endpoint included abilities in the `woocommerce/` namespace; from 10.9, it included abilities with `expose_in_deprecated_woocommerce_mcp` set to `true`; and the `woocommerce_mcp_include_ability` filter could add or remove abilities in either version. The MCP Adapter's default server ignores all of these. It only exposes an ability when its `meta.mcp.public` is `true` (if `meta.mcp.public` is not set, the adapter falls back to the top-level `meta.public`). To keep a custom ability available to MCP clients, set that metadata as shown in [Adding Custom Abilities](#adding-custom-abilities).
+
+To keep using WooCommerce with MCP, install the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/) and connect your MCP client to its default server, as described in [Connecting to the MCP Server](#connecting-to-the-mcp-server). Stores that had the WooCommerce MCP feature enabled see an admin notice about the change.
+
+:::warning
+
+**Data Privacy Notice**
+Order and customer operations may expose personally identifiable information (PII) including names, email addresses, physical addresses, and payment details. You are responsible for ensuring compliance with applicable data protection regulations. Connect MCP clients as a dedicated WordPress user with only the capabilities they need, revoke Application Passwords you no longer use, and follow your organization's data retention and handling policies.
+
+:::
+
+## Architecture
+
+### Data Flow Overview
+
+The MCP integration uses a multi-layered architecture to bridge between MCP clients and WordPress:
+
+```text
+AI Client (Claude, etc.)
+    ↓ (MCP protocol over stdio/JSON-RPC)
+Local MCP Proxy (mcp-wordpress-remote)
+    ↓ (HTTP/HTTPS requests with authentication)
+Remote WordPress MCP Server (mcp-adapter)
+    ↓ (WordPress Abilities API)
+WooCommerce Abilities
+    ↓ (REST API calls or direct operations)
+WooCommerce Core
+```
+
+### Architecture Components
+
+**Local MCP Proxy** (`mcp-wordpress-remote`)
+
+- Runs locally on the developer's machine as a Node.js process
+- Converts MCP protocol messages to HTTP requests
+- Handles authentication header injection
+- Bridges the protocol gap between MCP clients and WordPress REST endpoints
+
+**Remote WordPress MCP Server** (`mcp-adapter`)
+
+- Is provided by the [MCP Adapter plugin](https://wordpress.org/plugins/mcp-adapter/), which must be installed and active
+- Powers MCP tool discovery and execution for WordPress abilities
+
+#### WordPress Abilities System
+
+- Provides a standardized way to register and execute capabilities
+- Acts as an abstraction layer between MCP tools and actual operations
+- Enables flexible implementation approaches (direct operations, REST bridging, and so on)
+
+### Core Components
+
+**Abilities Registry** ([`AbilitiesRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesRegistry.php))
+
+- Initializes WooCommerce ability categories and loaders
+- Bridges WordPress Abilities API with WooCommerce operations
+- Enables ability discovery for MCP servers and other Abilities API consumers
+
+**Purpose-Built Domain Abilities** ([`Domain`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/Abilities/Domain))
+
+- Provide WooCommerce product and order abilities backed by domain APIs
+- Use shared WordPress MCP adapter metadata (`mcp.public` and `mcp.type`) for MCP exposure
+- Keep the ability contract focused on agent-friendly store operations
+
+### Implementation Approach
+
+WooCommerce implements its abilities as purpose-built domain abilities. These abilities use schemas and response shapes designed for agent workflows instead of automatically projecting every REST-shaped operation into MCP.
 
 ## Extending MCP Capabilities
 
