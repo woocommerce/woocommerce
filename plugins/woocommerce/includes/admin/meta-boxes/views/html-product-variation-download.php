@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</td>
 	<td class="file_url">
 		<input type="text" class="input_text" placeholder="<?php esc_attr_e( 'https://', 'woocommerce' ); ?>" name="_wc_variation_file_urls[<?php echo esc_attr( $variation_id ); ?>][]" value="<?php echo esc_attr( $file['file'] ); ?>" />
+		<input type="hidden" name="_wc_variation_file_rendered_urls[<?php echo esc_attr( (string) $variation_id ); ?>][]" value="<?php echo esc_attr( $file['file'] ); ?>" />
 		<?php if ( $disabled_download ) : ?>
 			<span class="disabled">*</span>
 		<?php endif; ?>

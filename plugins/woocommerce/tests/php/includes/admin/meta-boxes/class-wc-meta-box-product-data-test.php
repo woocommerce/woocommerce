@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
 /**
@@ -158,6 +159,198 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The classic editor tracks the URL rendered for product and variation downloads.
+	 */
+	public function test_download_rows_track_the_rendered_url(): void {
+		$product_download_row   = $this->render_download_row( 'html-product-download.php' );
+		$variation_download_row = $this->render_download_row( 'html-product-variation-download.php', 123 );
+
+		$this->assertStringContainsString(
+			'name="_wc_file_rendered_urls[]" value="https://temporary.example.com/file.zip"',
+			$product_download_row,
+			'The product download row should retain the URL shown to the user.'
+		);
+		$this->assertStringContainsString(
+			'name="_wc_variation_file_rendered_urls[123][]" value="https://temporary.example.com/file.zip"',
+			$variation_download_row,
+			'The variation download row should retain the URL shown to the user.'
+		);
+	}
+
+	/**
+	 * @testdox The classic product save only persists a filtered download URL when it was deliberately edited.
+	 * @testWith [false, "https://license.example.com/download/file.zip"]
+	 *           [true, "https://downloads.example.com/replacement/file.zip"]
+	 *
+	 * @param bool   $edit_url Whether to edit the rendered URL before saving.
+	 * @param string $expected_stored_url Expected stored URL after saving.
+	 */
+	public function test_save_only_persists_deliberately_edited_filtered_download_url( bool $edit_url, string $expected_stored_url ): void {
+		$original_file_url = 'https://license.example.com/download/file.zip';
+		$edited_file_url   = 'https://downloads.example.com/replacement/file.zip';
+		$download_id       = 'download-id';
+		$product           = $this->create_downloadable_product( $download_id, $original_file_url );
+
+		$filter_calls = 0;
+		$this->add_incrementing_download_path_filter( 'https://temporary.example.com/file.zip', $filter_calls );
+		$editor_downloads   = ( new WC_Product_Simple( $product->get_id() ) )->get_downloads( 'edit' );
+		$rendered_file_url  = $editor_downloads[ $download_id ]->get_file();
+		$submitted_file_url = $edit_url ? $edited_file_url : $rendered_file_url;
+
+		$this->save_product_data(
+			$product,
+			'sku-' . wp_generate_uuid4(),
+			false,
+			true,
+			array(
+				'id'   => $download_id,
+				'name' => 'Updated download name',
+				'file' => $submitted_file_url,
+			),
+			$rendered_file_url
+		);
+
+		$stored_downloads = get_post_meta( $product->get_id(), '_downloadable_files', true );
+		$this->assertGreaterThanOrEqual( 2, $filter_calls, 'The filter should produce a different URL while handling the save request.' );
+		$this->assertSame( $expected_stored_url, $stored_downloads[ $download_id ]['file'], 'The save should distinguish an untouched filtered URL from a deliberate edit.' );
+		$this->assertSame( 'Updated download name', $stored_downloads[ $download_id ]['name'], 'A name-only edit should still be saved.' );
+	}
+
+	/**
+	 * @testdox The classic variation save preserves the stored URL when the filtered URL is untouched.
+	 */
+	public function test_variation_save_preserves_stored_url_for_untouched_filtered_download(): void {
+		$download_id                = 'variation-download-id';
+		list( $parent, $variation ) = $this->create_downloadable_variation( $download_id, 'https://license.example.com/download/variation.zip' );
+
+		$filter_calls = 0;
+		$this->add_incrementing_download_path_filter( 'https://temporary.example.com/variation.zip', $filter_calls );
+		$editor_downloads  = ( new WC_Product_Variation( $variation->get_id() ) )->get_downloads( 'edit' );
+		$rendered_file_url = $editor_downloads[ $download_id ]->get_file();
+		$this->save_variation_download( $parent, $variation, $download_id, $rendered_file_url );
+
+		$stored_downloads = get_post_meta( $variation->get_id(), '_downloadable_files', true );
+		$this->assertGreaterThanOrEqual( 2, $filter_calls, 'The filter should produce a different URL while handling the variation save request.' );
+		$this->assertSame( 'https://license.example.com/download/variation.zip', $stored_downloads[ $download_id ]['file'], 'The variation should retain its stored download URL.' );
+		$this->assertSame( 'Updated variation download', $stored_downloads[ $download_id ]['name'], 'The variation should still save a name-only edit.' );
+	}
+
+	/**
+	 * Render a product download row.
+	 *
+	 * @param string $template Download row template.
+	 * @param int    $variation_id Variation ID used by the variation template.
+	 * @return string
+	 */
+	private function render_download_row( string $template, int $variation_id = 0 ): string {
+		$file              = array(
+			'name' => 'Filtered download',
+			'file' => 'https://temporary.example.com/file.zip',
+		);
+		$key               = 'download-id';
+		$disabled_download = false;
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/' . $template;
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Create a downloadable product fixture.
+	 *
+	 * @param string $download_id Download ID.
+	 * @param string $file_url Stored file URL.
+	 * @return WC_Product_Simple
+	 */
+	private function create_downloadable_product( string $download_id, string $file_url ): WC_Product_Simple {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_downloadable( true );
+		$product->set_downloads(
+			array(
+				array(
+					'download_id' => $download_id,
+					'name'        => 'Original download',
+					'file'        => $file_url,
+				),
+			)
+		);
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Create a downloadable variation fixture.
+	 *
+	 * @param string $download_id Download ID.
+	 * @param string $file_url Stored file URL.
+	 * @return array{WC_Product_Variable, WC_Product_Variation}
+	 */
+	private function create_downloadable_variation( string $download_id, string $file_url ): array {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Downloadable variable product' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->set_regular_price( '10' );
+		$variation->set_downloadable( true );
+		$variation->set_downloads(
+			array(
+				array(
+					'download_id' => $download_id,
+					'name'        => 'Variation download',
+					'file'        => $file_url,
+				),
+			)
+		);
+		$variation->save();
+
+		return array( $parent, $variation );
+	}
+
+	/**
+	 * Add a download path filter that returns a different URL on each call.
+	 *
+	 * @param string $file_url Filtered file URL.
+	 * @param int    $filter_calls Number of filter calls.
+	 */
+	private function add_incrementing_download_path_filter( string $file_url, int &$filter_calls ): void {
+		add_filter(
+			'woocommerce_file_download_path',
+			static function () use ( $file_url, &$filter_calls ): string {
+				++$filter_calls;
+				return $file_url . '?signature=' . $filter_calls;
+			}
+		);
+	}
+
+	/**
+	 * Save a single variation download through the classic meta box.
+	 *
+	 * @param WC_Product_Variable  $parent_product Parent product.
+	 * @param WC_Product_Variation $variation Variation fixture.
+	 * @param string               $download_id Download ID.
+	 * @param string               $rendered_file_url URL rendered in the editor.
+	 */
+	private function save_variation_download( WC_Product_Variable $parent_product, WC_Product_Variation $variation, string $download_id, string $rendered_file_url ): void {
+		$variation_id = $variation->get_id();
+		$_POST        = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic variation request.
+			'variable_post_id'                 => array( 0 => $variation_id ),
+			'variable_enabled'                 => array( 0 => '1' ),
+			'variable_regular_price'           => array( 0 => '10' ),
+			'variable_is_downloadable'         => array( 0 => 'yes' ),
+			'_wc_variation_file_names'         => array( $variation_id => array( 'Updated variation download' ) ),
+			'_wc_variation_file_urls'          => array( $variation_id => array( $rendered_file_url ) ),
+			'_wc_variation_file_hashes'        => array( $variation_id => array( $download_id ) ),
+			'_wc_variation_file_rendered_urls' => array( $variation_id => array( $rendered_file_url ) ),
+		);
+
+		WC_Meta_Box_Product_Data::save_variations( $parent_product->get_id(), get_post( $parent_product->get_id() ) );
+	}
+
+	/**
 	 * Save a product through the public classic product data meta-box seam.
 	 *
 	 * @param WC_Product                                    $product Product to save.
@@ -165,8 +358,9 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	 * @param bool                                          $virtual Whether to submit the virtual flag.
 	 * @param bool                                          $downloadable Whether to submit the downloadable flag.
 	 * @param array{id: string, name: string, file: string} $download Download data to submit.
+	 * @param string|null                                   $rendered_file_url File URL rendered in the editor.
 	 */
-	private function save_product_data( WC_Product $product, string $sku, bool $virtual, bool $downloadable, array $download ): void {
+	private function save_product_data( WC_Product $product, string $sku, bool $virtual, bool $downloadable, array $download, ?string $rendered_file_url = null ): void {
 		$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the complete classic admin request.
 			'product-type'           => 'simple',
 			'_sku'                   => $sku,
@@ -212,6 +406,10 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 
 		if ( $downloadable ) {
 			$_POST['_downloadable'] = 'yes'; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic admin request.
+
+			if ( null !== $rendered_file_url ) {
+				$_POST['_wc_file_rendered_urls'] = array( $rendered_file_url ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic admin request.
+			}
 		}
 
 		$post = get_post( $product->get_id() );
