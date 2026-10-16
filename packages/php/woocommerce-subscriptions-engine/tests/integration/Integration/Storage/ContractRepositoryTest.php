@@ -2442,6 +2442,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s AND extension_slug = %s", 'order:42', 'lite' ) ) );
 
 		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
+		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'Order:42' ), 'checkout' ), 'Keys differing only in case are distinct.' );
+		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'ördér:42' ), 'checkout' ), 'Keys differing only in accents are distinct.' );
 		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ) );
 		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
 	}

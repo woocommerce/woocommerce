@@ -369,6 +369,20 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox The creation key column compares binary, in the table charset.
+	 */
+	public function test_contracts_creation_key_is_binary_collated(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW FULL COLUMNS FROM {$table} LIKE %s", 'creation_key' ), ARRAY_A );
+
+		$this->assertIsArray( $row );
+		$this->assertSame( $wpdb->charset . '_bin', $row['Collation'] ?? null );
+	}
+
+	/**
 	 * @testdox Contract identity columns are nullable until the extension supplies them.
 	 */
 	public function test_contracts_identity_columns_are_nullable(): void {

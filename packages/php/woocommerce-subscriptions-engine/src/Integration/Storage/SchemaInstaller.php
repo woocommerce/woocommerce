@@ -59,9 +59,9 @@ final class SchemaInstaller {
 	 *         drop the index or rename stored 'primitive' rows (which the due scan skips):
 	 *         pre-freeze, recreate the tables.
 	 * 2.8.0 - contract lock: contracts gain `lock_token`, `locked_until_gmt`, `lock_operation`,
-	 *         a `write_seq` counter bumped by every row write, and a `creation_key` with a
-	 *         `creation (extension_slug, creation_key)` UNIQUE index; contracts and cycles
-	 *         drop `claimed_until`. Pre-freeze, recreate the tables.
+	 *         a `write_seq` counter bumped by every row write, and a binary-collated
+	 *         `creation_key` with a `creation (extension_slug, creation_key)` UNIQUE index;
+	 *         contracts and cycles drop `claimed_until`. Pre-freeze, recreate the tables.
 	 *
 	 * Pre-freeze, tables are recreated rather than migrated. dbDelta adds columns but
 	 * does not change an existing column's nullability or drop unused ones, so a dev box
@@ -132,7 +132,7 @@ final class SchemaInstaller {
 		$collate = $wpdb->get_charset_collate();
 		$names   = self::get_table_names( $wpdb->prefix );
 
-		foreach ( self::get_table_definitions( $names, $collate ) as $sql ) {
+		foreach ( self::get_table_definitions( $names, $collate, $wpdb->charset ) as $sql ) {
 			dbDelta( $sql );
 		}
 
@@ -207,9 +207,10 @@ final class SchemaInstaller {
 	 *
 	 * @param array<string, string> $names   Map of logical => prefixed table names.
 	 * @param string                $collate Charset/collate clause from $wpdb.
+	 * @param string                $charset Table charset from $wpdb, or '' for the server default.
 	 * @return array<int, string>
 	 */
-	private static function get_table_definitions( array $names, string $collate ): array {
+	private static function get_table_definitions( array $names, string $collate, string $charset ): array {
 		$plans              = $names[ self::TABLE_PLANS ];
 		$plan_meta          = $names[ self::TABLE_PLAN_META ];
 		$contracts          = $names[ self::TABLE_CONTRACTS ];
@@ -266,8 +267,10 @@ final class SchemaInstaller {
 		// write, so a write that matches the row always changes it (zero rows = not matched).
 		// `creation` makes an extension's optional `creation_key` unique (NULL keys never
 		// collide); 64 + 100 characters stay within the 767-byte key limit of older InnoDB
-		// row formats.
-		$contracts_sql = "CREATE TABLE {$contracts} (
+		// row formats. The key is opaque, so it compares binary: keys differing only in case
+		// or accents are distinct.
+		$creation_key_collate = '' === $charset ? '' : " COLLATE {$charset}_bin";
+		$contracts_sql        = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   status VARCHAR(20) NOT NULL,
   customer_id BIGINT UNSIGNED NULL,
@@ -284,7 +287,7 @@ final class SchemaInstaller {
   locked_until_gmt DATETIME NULL,
   lock_operation VARCHAR(64) NULL,
   write_seq BIGINT UNSIGNED NOT NULL DEFAULT 0,
-  creation_key VARCHAR(100) NULL,
+  creation_key VARCHAR(100){$creation_key_collate} NULL,
   plan_snapshot_id BIGINT UNSIGNED NULL,
   items_snapshot_id BIGINT UNSIGNED NULL,
   billing_total DECIMAL(26,8) NOT NULL DEFAULT 0,
