@@ -244,7 +244,7 @@ CSS;
 
 		if ( $has_overlay ) {
 			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
-			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
+			$wrapper_attributes['data-wp-on-document--keydown']     = 'actions.handleOverlayKeydown';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
 
@@ -268,6 +268,7 @@ CSS;
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
 							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
+							data-wp-bind--aria-modal="context.isOverlayOpened"
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button

@@ -25,6 +25,7 @@ import {
  * Internal dependencies
  */
 import type { CartItem, Currency } from '@woocommerce/types';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 import {
 	getEntryFieldRaw,
@@ -151,23 +152,6 @@ const trimWords = ( html: string, maxWords = 15 ): string => {
 	}
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
-
-const focusableSelectors = `
-	a[href],
-	input:not([disabled]):not([type="hidden"]):not([aria-hidden]),
-	select:not([disabled]):not([aria-hidden]),
-	textarea:not([disabled]):not([aria-hidden]),
-	button:not([disabled]):not([aria-hidden]),
-	[contenteditable],
-	[tabindex]:not([tabindex^="-"])
-`;
-
-const getFocusableElements = ( container: HTMLElement | null ) =>
-	container
-		? Array.from(
-				container.querySelectorAll< HTMLElement >( focusableSelectors )
-			).filter( ( el ) => el.offsetParent !== null )
-		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',

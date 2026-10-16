@@ -15,10 +15,18 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
-const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
+const {
+	getContext,
+	getElement,
+	store,
+	getServerContext,
+	getConfig,
+	withSyncEvent,
+} = iAPI;
 
 const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
@@ -36,6 +44,17 @@ function isValidFilterOptionItem(
 		typeof item.value === 'string' &&
 		item.value.length > 0
 	);
+}
+
+function getBlockRoot(): HTMLElement | null {
+	const { ref } = getElement();
+	if ( ! ( ref instanceof Element ) ) {
+		return null;
+	}
+	if ( ref.classList.contains( 'wc-block-product-filters' ) ) {
+		return ref;
+	}
+	return ref.closest( '.wc-block-product-filters' );
 }
 
 function getFilterLabel( item: ValidFilterOptionItem ): string {
@@ -171,6 +190,7 @@ const productFiltersStore = {
 	actions: {
 		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
+			const root = getBlockRoot();
 			context.isOverlayOpened = true;
 			if ( document.getElementById( 'wpadminbar' ) ) {
 				const scrollTop = (
@@ -183,22 +203,88 @@ const productFiltersStore = {
 					`max(calc(var(--wp-admin--admin-bar--height) - ${ scrollTop }px), 0px)`
 				);
 			}
+
+			if ( ! root ) {
+				return;
+			}
+			const dialog = root.querySelector< HTMLElement >(
+				'.wc-block-product-filters__overlay-dialog'
+			);
+			if ( dialog ) {
+				getFocusableElements( dialog )[ 0 ]?.focus();
+			}
 		},
 		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
+
+			// Focus the open button so the focus target doesn't stay inside the
+			// overlay.
+			const root = getBlockRoot();
+			if ( ! root ) {
+				return;
+			}
+			const openButton = root.querySelector< HTMLElement >(
+				'.wc-block-product-filters__open-overlay'
+			);
+			if ( openButton ) {
+				openButton.focus();
+			}
 		},
 		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
 			if ( event.target === event.currentTarget ) {
 				actions.closeOverlay();
 			}
 		},
-		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
+		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
-			if ( context.isOverlayOpened && event.key === 'Escape' ) {
-				actions.closeOverlay();
+			if ( ! context.isOverlayOpened ) {
+				return;
 			}
-		},
+
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				actions.closeOverlay();
+				return;
+			}
+
+			if ( event.key !== 'Tab' ) {
+				return;
+			}
+
+			const root = getBlockRoot();
+			if ( ! root ) {
+				return;
+			}
+
+			const dialog = root.querySelector< HTMLElement >(
+				'.wc-block-product-filters__overlay-dialog'
+			);
+			if ( ! dialog ) {
+				return;
+			}
+
+			const focusableElements = getFocusableElements( dialog );
+			const first = focusableElements[ 0 ];
+			const last = focusableElements[ focusableElements.length - 1 ];
+			if ( ! first || ! last ) {
+				return;
+			}
+
+			const active = dialog.ownerDocument.activeElement;
+			const focusIsOutside = ! dialog.contains( active );
+
+			if ( event.shiftKey && ( active === first || focusIsOutside ) ) {
+				event.preventDefault();
+				last.focus();
+				return;
+			}
+
+			if ( ! event.shiftKey && ( active === last || focusIsOutside ) ) {
+				event.preventDefault();
+				first.focus();
+			}
+		} ),
 		removeActiveFiltersBy: (
 			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
