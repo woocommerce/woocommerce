@@ -57,7 +57,7 @@ trait OrderAbilityTrait {
 	 * @param array $args Arguments for get_post_stati().
 	 * @return array<int, string>
 	 */
-	protected static function get_order_type_status_slugs( array $args = array() ): array {
+	protected static function get_registered_order_status_slugs( array $args = array() ): array {
 		$statuses = array_filter(
 			get_post_stati( $args ),
 			static function ( $status ): bool {
@@ -77,9 +77,9 @@ trait OrderAbilityTrait {
 	protected static function get_query_order_status_slugs(): array {
 		return array_values(
 			array_diff(
-				array_unique( array_merge( self::get_allowed_order_status_slugs(), self::get_order_type_status_slugs() ) ),
+				array_unique( array_merge( self::get_allowed_order_status_slugs(), self::get_registered_order_status_slugs() ) ),
 				array( OrderStatus::CHECKOUT_DRAFT ),
-				self::get_order_type_status_slugs( array( 'exclude_from_search' => true ) )
+				self::get_registered_order_status_slugs( array( 'exclude_from_search' => true ) )
 			)
 		);
 	}
@@ -97,7 +97,7 @@ trait OrderAbilityTrait {
 						array( OrderUtil::class, 'remove_status_prefix' ),
 						array_merge( OrderStatus::get_all(), array_keys( wc_get_order_statuses() ) )
 					),
-					self::get_order_type_status_slugs()
+					self::get_registered_order_status_slugs()
 				)
 			)
 		);
