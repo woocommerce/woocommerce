@@ -325,24 +325,28 @@ class WC_REST_Webhooks_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The links an offset request advertises lead to the pages either side of it.
+	 * @testdox The links an offset request advertises lead to the webhooks either side of it, even when the offset is not a multiple of per_page.
+	 *
+	 * @testWith [2, 0, 4]
+	 *           [1, 0, 3]
+	 *
+	 * @param int $offset     The offset to request, over pages of 2.
+	 * @param int $prev_start Position of the first webhook the prev link should return.
+	 * @param int $next_start Position of the first webhook the next link should return.
 	 */
-	public function test_offset_pagination_links_lead_to_the_adjacent_pages(): void {
+	public function test_offset_pagination_links_lead_to_the_adjacent_pages( int $offset, int $prev_start, int $next_start ): void {
 		wp_set_current_user( 1 );
 		$webhook_ids = $this->create_webhooks( 5 );
 
 		$headers = $this->request_webhooks(
 			array(
 				'per_page' => 2,
-				'offset'   => 2,
+				'offset'   => $offset,
 			)
 		)->get_headers();
 
-		// Offset 2 over pages of 2 is page 2, so the links either side are pages 1 and 3.
-		// Following them has to move: an offset left in the link would win over its page
-		// and hand back the offset-2 slice again.
-		$this->assertSame( array_slice( $webhook_ids, 0, 2 ), $this->follow_link( $headers['Link'], 'prev' ) );
-		$this->assertSame( array_slice( $webhook_ids, 4, 2 ), $this->follow_link( $headers['Link'], 'next' ) );
+		$this->assertSame( array_slice( $webhook_ids, $prev_start, 2 ), $this->follow_link( $headers['Link'], 'prev' ) );
+		$this->assertSame( array_slice( $webhook_ids, $next_start, 2 ), $this->follow_link( $headers['Link'], 'next' ) );
 	}
 
 	/**

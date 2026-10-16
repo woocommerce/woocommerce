@@ -3885,12 +3885,27 @@ importers:
       jest-fixed-jsdom:
         specifier: ^0.0.10
         version: 0.0.10(jest-environment-jsdom@30.4.1)
+      jquery:
+        specifier: 3.7.1
+        version: 3.7.1
+      jquery4:
+        specifier: npm:jquery@4.0.0
+        version: jquery@4.0.0
       sass:
         specifier: 1.69.5
         version: 1.69.5
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
+
+  tools/theme-cli:
+    devDependencies:
+      '@wordpress/env':
+        specifier: catalog:tooling
+        version: 11.17.0(@types/node@24.12.2)
+      ajv:
+        specifier: ^8.17.1
+        version: 8.18.0
 
   tools/code-analyzer:
     dependencies:
@@ -14887,6 +14902,12 @@ packages:
 
   jpeg-js@0.4.4:
     resolution: {integrity: sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==}
+
+  jquery@3.7.1:
+    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
+
+  jquery@4.0.0:
+    resolution: {integrity: sha512-TXCHVR3Lb6TZdtw1l3RTLf8RBWVGexdxL6AC8/e0xZKEpBflBsjh9/8LXw+dkNFuOyW9B7iB3O1sP7hS0Kiacg==}
 
   js-beautify@1.15.4:
     resolution: {integrity: sha512-9/KXeZUKKJwqCXUdBxFJ3vPh467OCckSBmYDwSK/EtV090K+iMJ7zx2S3HLVDIWFQdqMIsZWbnaGiba18aWhaA==}
@@ -36571,6 +36592,10 @@ snapshots:
       '@standard-schema/spec': 1.1.0
 
   jpeg-js@0.4.4: {}
+
+  jquery@3.7.1: {}
+
+  jquery@4.0.0: {}
 
   js-beautify@1.15.4:
     dependencies:
