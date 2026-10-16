@@ -72,7 +72,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Adds a bundled font only when the theme does not already provide it by name, or by primary font family and slug with its own font faces.
+	 * @testdox Adds a bundled font only when the theme does not already provide it by name, by primary font family and slug with its own font faces, or under the bundled slug.
 	 * @dataProvider provider_theme_fonts
 	 *
 	 * @param array<int, array<string, mixed>> $theme_fonts    Theme font presets.
@@ -82,7 +82,83 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$fonts = $this->filter_theme_fonts( $theme_fonts );
 
 		$this->assertSame( $expected_slugs, array_column( $fonts, 'slug' ) );
-		$this->assertSame( $theme_fonts, array_slice( $fonts, 0, count( $theme_fonts ) ), 'Theme fonts should be kept unchanged and in order.' );
+		foreach ( $theme_fonts as $index => $theme_font ) {
+			$theme_faces = $theme_font['fontFace'] ?? array();
+			unset( $theme_font['fontFace'] );
+			$filtered_font  = $fonts[ $index ];
+			$filtered_faces = $filtered_font['fontFace'] ?? array();
+			unset( $filtered_font['fontFace'] );
+
+			$this->assertSame( $theme_font, $filtered_font, 'Theme fonts should be kept in order, with only font faces added.' );
+			$this->assertSame( $theme_faces, array_slice( $filtered_faces, 0, count( $theme_faces ) ), 'Theme font faces should be kept first.' );
+		}
+	}
+
+	/**
+	 * @testdox Adds the bundled font faces to a theme preset under the bundled slug only when it is the same font without usable files.
+	 * @dataProvider provider_theme_fonts_under_bundled_slug
+	 *
+	 * @param array<string, mixed> $theme_font        Theme font preset using a bundled slug.
+	 * @param bool                 $expect_bundled_face Whether the bundled font face should be added to the preset.
+	 */
+	public function test_experimental_filter_theme_json_theme_adds_bundled_font_faces_under_bundled_slug( array $theme_font, bool $expect_bundled_face ): void {
+		$fonts = $this->filter_theme_fonts( array( $theme_font ) );
+
+		$theme_faces = $theme_font['fontFace'] ?? array();
+		$added_faces = array_slice( $fonts[0]['fontFace'] ?? array(), count( $theme_faces ) );
+		$added_src   = array_merge( ...array_column( $added_faces, 'src' ) );
+
+		if ( $expect_bundled_face ) {
+			$this->assertCount( 1, $added_faces );
+			$this->assertStringContainsString( '/assets/fonts/', $added_src[0] );
+		} else {
+			$this->assertSame( array(), $added_faces );
+		}
+	}
+
+	/**
+	 * Theme font presets using a bundled slug, and whether the bundled font face should be added to them.
+	 *
+	 * @return array<string, array{0: array<string, mixed>, 1: bool}>
+	 */
+	public function provider_theme_fonts_under_bundled_slug(): array {
+		return array(
+			'same font without font faces'      => array(
+				array(
+					'fontFamily' => 'Inter, sans-serif',
+					'slug'       => 'inter',
+				),
+				true,
+			),
+			'same font without a usable source' => array(
+				array(
+					'fontFamily' => 'Inter, sans-serif',
+					'slug'       => 'inter',
+					'fontFace'   => array( array( 'fontFamily' => 'Inter' ) ),
+				),
+				true,
+			),
+			'same font with a usable source'    => array(
+				array(
+					'fontFamily' => 'Inter, sans-serif',
+					'slug'       => 'inter',
+					'fontFace'   => array(
+						array(
+							'fontFamily' => 'Inter',
+							'src'        => array( 'https://example.com/inter.woff2' ),
+						),
+					),
+				),
+				false,
+			),
+			'another font family'               => array(
+				array(
+					'fontFamily' => 'Theme Serif, serif',
+					'slug'       => 'cardo',
+				),
+				false,
+			),
+		);
 	}
 
 	/**
@@ -135,7 +211,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 						'slug'       => 'inter',
 					),
 				),
-				array( 'inter', 'inter', 'cardo' ),
+				array( 'inter', 'cardo' ),
 			),
 			'bundled name with another font family'   => array(
 				array(
@@ -180,7 +256,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 						),
 					),
 				),
-				array( 'cardo', 'inter', 'cardo' ),
+				array( 'cardo', 'inter' ),
 			),
 		);
 
@@ -210,8 +286,8 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		}
 
 		foreach ( array(
-			'missing source'                => array( array(), array( 'inter', 'inter', 'cardo' ) ),
-			'mixed valid and empty sources' => array( array( 'src' => array( 'https://example.com/inter.woff2', '' ) ), array( 'inter', 'inter', 'cardo' ) ),
+			'missing source'                => array( array(), array( 'inter', 'cardo' ) ),
+			'mixed valid and empty sources' => array( array( 'src' => array( 'https://example.com/inter.woff2', '' ) ), array( 'inter', 'cardo' ) ),
 		) as $label => $case ) {
 			$cases[ $label ] = array(
 				array(

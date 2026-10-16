@@ -249,8 +249,9 @@ class ComingSoonRequestHandler {
 
 		// Add WooCommerce fonts if they don't already exist.
 		foreach ( $fonts_to_add as $font_to_add ) {
-			$found = false;
-			foreach ( $font_data as $font ) {
+			$found      = false;
+			$slug_index = null;
+			foreach ( $font_data as $index => $font ) {
 				// Theme presets may omit the name or use another one, so also match the same primary font family and slug.
 				// Coming Soon patterns and saved templates use the bundled slugs, and need the theme to load the font files.
 				if (
@@ -258,7 +259,7 @@ class ComingSoonRequestHandler {
 					|| (
 						isset( $font['fontFamily'], $font['slug'] )
 						&& is_string( $font['fontFamily'] )
-						&& 0 === strcasecmp( $this->first_font_family( $font['fontFamily'] ), $this->first_font_family( $font_to_add['fontFamily'] ) )
+						&& $this->is_same_font_family( $font['fontFamily'], $font_to_add['fontFamily'] )
 						&& $font['slug'] === $font_to_add['slug']
 						&& is_array( $font['fontFace'] ?? null )
 						&& $this->has_font_face_source( $font['fontFace'] )
@@ -267,10 +268,27 @@ class ComingSoonRequestHandler {
 					$found = true;
 					break;
 				}
+
+				if ( null === $slug_index && ( $font['slug'] ?? null ) === $font_to_add['slug'] ) {
+					$slug_index = $index;
+				}
 			}
 
-			if ( ! $found ) {
+			if ( $found ) {
+				continue;
+			}
+
+			if ( null === $slug_index ) {
 				$font_data[] = $font_to_add;
+				continue;
+			}
+
+			// The theme already owns this slug, and a second preset with it would override the theme's CSS variable.
+			// Only add the bundled font files when the theme preset is the same font without usable files.
+			$font = $font_data[ $slug_index ];
+			if ( isset( $font['fontFamily'] ) && is_string( $font['fontFamily'] ) && $this->is_same_font_family( $font['fontFamily'], $font_to_add['fontFamily'] ) ) {
+				$font_faces                           = is_array( $font['fontFace'] ?? null ) ? $font['fontFace'] : array();
+				$font_data[ $slug_index ]['fontFace'] = array_merge( $font_faces, $font_to_add['fontFace'] );
 			}
 		}
 
@@ -286,6 +304,17 @@ class ComingSoonRequestHandler {
 		);
 		$theme_json->update_with( $new_data );
 		return $theme_json;
+	}
+
+	/**
+	 * Checks whether two CSS font family lists start with the same font family.
+	 *
+	 * @param string $font_family       CSS font family list.
+	 * @param string $other_font_family CSS font family list to compare with.
+	 * @return bool Whether the primary font families match, ignoring case and quotes.
+	 */
+	private function is_same_font_family( string $font_family, string $other_font_family ): bool {
+		return 0 === strcasecmp( $this->first_font_family( $font_family ), $this->first_font_family( $other_font_family ) );
 	}
 
 	/**
