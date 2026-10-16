@@ -262,7 +262,7 @@ class ComingSoonRequestHandler {
 						&& $this->is_same_font_family( $font['fontFamily'], $font_to_add['fontFamily'] )
 						&& $font['slug'] === $font_to_add['slug']
 						&& is_array( $font['fontFace'] ?? null )
-						&& $this->has_font_face_source( $font['fontFace'] )
+						&& $this->declares_font_files( $font['fontFace'] )
 					)
 				) {
 					$found = true;
@@ -284,7 +284,7 @@ class ComingSoonRequestHandler {
 			}
 
 			// The theme already owns this slug, and a second preset with it would override the theme's CSS variable.
-			// Only add the bundled font files when the theme preset is the same font without usable files.
+			// Only add the bundled font files when the theme preset is the same font without font files.
 			$font = $font_data[ $slug_index ];
 			if ( isset( $font['fontFamily'] ) && is_string( $font['fontFamily'] ) && $this->is_same_font_family( $font['fontFamily'], $font_to_add['fontFamily'] ) ) {
 				$font_faces                           = is_array( $font['fontFace'] ?? null ) ? $font['fontFace'] : array();
@@ -328,26 +328,18 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Checks whether a font face supplies sources that WordPress can use.
+	 * Checks whether any font face declares font files.
+	 *
+	 * This does not check that WordPress accepts the faces. WordPress reports invalid faces itself.
 	 *
 	 * @param array[] $font_faces Font face definitions.
-	 * @return bool Whether at least one face has a non-empty string or list of non-empty strings as its source.
+	 * @return bool Whether at least one face has a non-empty `src`.
 	 */
-	private function has_font_face_source( array $font_faces ): bool {
+	private function declares_font_files( array $font_faces ): bool {
 		foreach ( $font_faces as $font_face ) {
-			$sources = $font_face['src'] ?? array();
-			if ( empty( $sources ) || ( ! is_string( $sources ) && ! is_array( $sources ) ) ) {
-				continue;
+			if ( ! empty( $font_face['src'] ) ) {
+				return true;
 			}
-
-			// WordPress rejects the entire face if any source is empty or not a string.
-			foreach ( (array) $sources as $source ) {
-				if ( empty( $source ) || ! is_string( $source ) ) {
-					continue 2;
-				}
-			}
-
-			return true;
 		}
 
 		return false;

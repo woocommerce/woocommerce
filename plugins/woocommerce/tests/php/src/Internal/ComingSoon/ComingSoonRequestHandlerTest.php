@@ -95,7 +95,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Adds the bundled font faces to a theme preset under the bundled slug only when it is the same font without usable files.
+	 * @testdox Adds the bundled font faces to a theme preset under the bundled slug only when it is the same font without font files.
 	 * @dataProvider provider_theme_fonts_under_bundled_slug
 	 *
 	 * @param array<string, mixed> $theme_font        Theme font preset using a bundled slug.
@@ -123,14 +123,14 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_theme_fonts_under_bundled_slug(): array {
 		return array(
-			'same font without font faces'      => array(
+			'same font without font faces' => array(
 				array(
 					'fontFamily' => 'Inter, sans-serif',
 					'slug'       => 'inter',
 				),
 				true,
 			),
-			'same font without a usable source' => array(
+			'same font without a source'   => array(
 				array(
 					'fontFamily' => 'Inter, sans-serif',
 					'slug'       => 'inter',
@@ -138,7 +138,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 				),
 				true,
 			),
-			'same font with a usable source'    => array(
+			'same font with a source'      => array(
 				array(
 					'fontFamily' => 'Inter, sans-serif',
 					'slug'       => 'inter',
@@ -151,7 +151,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 				),
 				false,
 			),
-			'another font family'               => array(
+			'another font family'          => array(
 				array(
 					'fontFamily' => 'Theme Serif, serif',
 					'slug'       => 'cardo',
@@ -285,23 +285,18 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			);
 		}
 
-		foreach ( array(
-			'missing source'                => array( array(), array( 'inter', 'cardo' ) ),
-			'mixed valid and empty sources' => array( array( 'src' => array( 'https://example.com/inter.woff2', '' ) ), array( 'inter', 'cardo' ) ),
-		) as $label => $case ) {
-			$cases[ $label ] = array(
+		$cases['missing source'] = array(
+			array(
 				array(
-					array(
-						'fontFamily' => '"Inter", sans-serif',
-						'slug'       => 'inter',
-						'fontFace'   => array( array_merge( array( 'fontFamily' => 'Inter' ), $case[0] ) ),
-					),
+					'fontFamily' => '"Inter", sans-serif',
+					'slug'       => 'inter',
+					'fontFace'   => array( array( 'fontFamily' => 'Inter' ) ),
 				),
-				$case[1],
-			);
-		}
+			),
+			array( 'inter', 'cardo' ),
+		);
 
-		$cases['later usable face with a string source'] = array(
+		$cases['later face with a string source'] = array(
 			array(
 				array(
 					'fontFamily' => '"Inter", sans-serif',
