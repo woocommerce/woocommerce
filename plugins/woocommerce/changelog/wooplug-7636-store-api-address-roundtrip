@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve plain-text address values across Store API checkout round trips.

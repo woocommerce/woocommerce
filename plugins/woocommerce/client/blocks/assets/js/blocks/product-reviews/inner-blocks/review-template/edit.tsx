@@ -169,7 +169,7 @@ export default function ReviewTemplateEdit( {
 	const { commentOrder, commentsPerPage, pageComments } = useSelect(
 		( select ) => {
 			const { getSettings } = select( blockEditorStore ) as unknown as {
-				getSettings(): {
+				getSettings: () => {
 					// eslint-disable-next-line @typescript-eslint/naming-convention
 					__experimentalDiscussionSettings: {
 						commentOrder: string;
@@ -191,7 +191,7 @@ export default function ReviewTemplateEdit( {
 		( select ) => {
 			const { getEntityRecords } = select( coreStore );
 			const { getBlocks } = select( blockEditorStore ) as unknown as {
-				getBlocks( clientId: string ): BlockInstance[];
+				getBlocks: ( clientId: string ) => BlockInstance[];
 			};
 			return {
 				topLevelComments: commentQuery
@@ -199,10 +199,10 @@ export default function ReviewTemplateEdit( {
 							'root',
 							'comment',
 							commentQuery
-					  ) as ( WPComment & {
+						) as ( WPComment & {
 							// eslint-disable-next-line @typescript-eslint/naming-convention
 							_embedded?: { children?: WPComment[][] };
-					  } )[] )
+						} )[] )
 					: null,
 				blocks: getBlocks( clientId ),
 			};
@@ -231,7 +231,7 @@ export default function ReviewTemplateEdit( {
 					return {
 						id: comment.id,
 					};
-			  } )
+				} )
 			: [],
 		commentOrder
 	);

@@ -12,7 +12,7 @@ import { storeName } from '../../store/constants';
 
 jest.mock( '@wordpress/data', () => {
 	const actual =
-		jest.requireActual< typeof import('@wordpress/data') >(
+		jest.requireActual< typeof import( '@wordpress/data' ) >(
 			'@wordpress/data'
 		);
 
@@ -30,7 +30,7 @@ jest.mock( '@wordpress/core-data', () => ( { store: { name: 'core' } } ) );
 // which Jest cannot transform. Re-export the real constant so the store name
 // stays linked to `src/store/constants.ts`.
 jest.mock( '../../store', () => ( {
-	storeName: jest.requireActual< typeof import('../../store/constants') >(
+	storeName: jest.requireActual< typeof import( '../../store/constants' ) >(
 		'../../store/constants'
 	).storeName,
 } ) );
