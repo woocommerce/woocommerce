@@ -366,6 +366,8 @@ class AbilitiesTracking {
 		$ability_name         = $request['name'];
 		if (
 			is_wp_error( $response )
+			// Abilities not exposed to REST look like unknown routes to callers; probing them isn't ability usage.
+			&& 'rest_ability_not_found' !== $response->get_error_code()
 			&& $this->frames_opened === $frames_opened_before
 			&& 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $request->get_route() )
 			&& self::is_tracked_ability( $ability_name )
@@ -536,6 +538,12 @@ class AbilitiesTracking {
 			return;
 		}
 
+		// Web requests from logged-out visitors aren't merchant or agent usage, and anyone could trigger them.
+		$auth = self::get_auth_method();
+		if ( 'none' === $auth && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+			return;
+		}
+
 		$error_code = self::NONE;
 		if ( $outcome instanceof WP_Error ) {
 			$error_code = self::normalize_value( (string) $outcome->get_error_code() );
@@ -550,7 +558,7 @@ class AbilitiesTracking {
 			'error_code'      => $error_code,
 			'channel'         => $frame['channel'],
 			'rest_namespace'  => $frame['rest_namespace'],
-			'auth'            => self::get_auth_method(),
+			'auth'            => $auth,
 			'external_client' => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
 		);
 

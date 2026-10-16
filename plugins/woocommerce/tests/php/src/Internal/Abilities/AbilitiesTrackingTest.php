@@ -513,11 +513,27 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 */
 	public function test_records_cron_channel(): void {
 		add_filter( 'wp_doing_cron', '__return_true' );
+		wp_set_current_user( 0 );
 
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( 'cron', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( 'none', $this->sut->recorded[0]['auth'] );
+	}
+
+	/**
+	 * @testdox Should not record calls or REST rejections from logged-out visitors.
+	 */
+	public function test_ignores_logged_out_visitors(): void {
+		wp_set_current_user( 0 );
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->permission = false;
+		rest_do_request( new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/' . self::ABILITY_ID . '/run' ) );
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( array(), $this->sut->recorded );
 	}
 
 	/**
