@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Low stock, Out of stock, and Product backordered emails to WooCommerce > Settings > Emails, each with its own recipient, subject, heading, and template. Their recipient and enable settings move out of Settings > Products > Inventory.
