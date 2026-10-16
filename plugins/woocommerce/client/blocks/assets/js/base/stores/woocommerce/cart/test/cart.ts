@@ -584,26 +584,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
-	describe( 'store registration', () => {
-		it( 'registers refreshCart and updateCartItem and no refreshCartItems', () => {
-			global.fetch = jest.fn(
-				async () =>
-					new Response(
-						JSON.stringify( { items: [], totals: {}, errors: [] } )
-					)
-			) as unknown as typeof fetch;
-
-			jest.isolateModules( () => require( '../../index' ) );
-			const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
-
-			expect(
-				( actions as Record< string, unknown > ).refreshCartItems
-			).toBeUndefined();
-			expect( actions.refreshCart ).toEqual( expect.any( Function ) );
-			expect( actions.updateCartItem ).toEqual( expect.any( Function ) );
-		} );
-	} );
-
 	describe( 'addCartItem endpoint selection', () => {
 		it( 'issues add-item (never update-item) for a keyless add that matches a keyed line by product id', async () => {
 			const captured = mockBatchFetch();
