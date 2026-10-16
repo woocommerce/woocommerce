@@ -104,6 +104,15 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+	}
+
+	/**
 	 * Returns if delayed account creation is enabled.
 	 *
 	 * @return bool
