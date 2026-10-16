@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\Jetpack\Status;
 use WP_Error;
 use WP_REST_Request;
 
@@ -589,7 +590,8 @@ class AbilitiesTracking {
 			if ( $has_duration ) {
 				$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
 			}
-			$event['is_test'] = 'production' === wp_get_environment_type() ? 'false' : 'true';
+			// Many local installs (localhost, .local, .test, DDEV, Lando) still report production.
+			$event['is_test'] = ( 'production' !== wp_get_environment_type() || ( class_exists( Status::class ) && ( new Status() )->is_local_site() ) ) ? 'true' : 'false';
 			$event['is_a11n'] = self::is_a11n() ? 'true' : 'false';
 
 			$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
