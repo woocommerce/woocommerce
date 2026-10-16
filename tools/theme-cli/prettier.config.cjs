@@ -1,4 +1,4 @@
-const config = require( '@wordpress/prettier-config' );
+const config = require( '../../.prettierrc.js' );
 
 module.exports = {
 	...config,

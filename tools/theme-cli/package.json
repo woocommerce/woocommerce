@@ -8,6 +8,7 @@
 	},
 	"scripts": {
 		"build": "node scripts/build-zip.mjs",
+		"lint": "wp-scripts lint-js --max-warnings 0 && wp-scripts lint-md-docs README.md --config ../../.markdownlint.json",
 		"validate": "node scripts/validate-theme.mjs",
 		"changelog": "composer exec -- changelogger",
 		"wp-env": "node scripts/env.mjs"
@@ -15,5 +16,13 @@
 	"devDependencies": {
 		"@wordpress/env": "catalog:tooling",
 		"@wordpress/scripts": "32.6.0"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "**/*"
+			}
+		}
 	}
 }
