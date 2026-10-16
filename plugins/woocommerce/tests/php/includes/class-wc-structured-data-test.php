@@ -262,15 +262,25 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Breadcrumb structured data decodes HTML entities in crumb names.
+	 *
+	 * @testWith ["A Smart Girl&#8217;s Guide"]
+	 *           ["A Smart Girl&amp;#8217;s Guide"]
+	 *           ["A Smart Girl’s Guide"]
+	 *
+	 * @param string $name Breadcrumb name.
 	 */
-	public function test_breadcrumb_data_decodes_html_entities(): void {
+	public function test_breadcrumb_data_decodes_html_entities( string $name ): void {
 		$breadcrumbs = new WC_Breadcrumb();
-		$breadcrumbs->add_crumb( 'A Smart Girl&#8217;s Guide', home_url() );
+		$breadcrumbs->add_crumb( $name, home_url() );
 
 		$this->structured_data->generate_breadcrumblist_data( $breadcrumbs );
 
 		$data = $this->structured_data->get_data();
 		$this->assertSame( 'A Smart Girl’s Guide', $data[0]['itemListElement'][0]['item']['name'], 'Breadcrumb names should contain decoded characters.' );
+
+		$json   = wc_esc_json( (string) wp_json_encode( $data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true );
+		$parsed = json_decode( $json, true );
+		$this->assertSame( 'A Smart Girl’s Guide', $parsed[0]['itemListElement'][0]['item']['name'], 'Breadcrumb names should remain decoded after JSON-LD output escaping.' );
 	}
 
 	/**
