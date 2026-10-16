@@ -374,8 +374,9 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $failure       Failure to cause.
 	 * @param string $expected_code Expected error code.
+	 * @param bool   $executed      Whether the call reached execution, and so reports a duration.
 	 */
-	public function test_records_wordpress_7_1_failures( string $failure, string $expected_code ): void {
+	public function test_records_wordpress_7_1_failures( string $failure, string $expected_code, bool $executed ): void {
 		$this->skip_unless_wordpress_exposes_all_outcomes();
 		switch ( $failure ) {
 			case 'execute_error':
@@ -390,6 +391,9 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			case 'output_rejected_with_error':
 				add_filter( 'wp_ability_validate_output', fn() => new WP_Error( 'tracking_test_bad_output' ) );
 				break;
+			case 'short_circuit_error':
+				add_filter( 'wp_pre_execute_ability', fn() => new WP_Error( 'tracking_test_rate_limited' ) );
+				break;
 		}
 		$this->start_mcp_tool_call();
 
@@ -399,20 +403,21 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $this->sut->recorded );
 		$this->assertSame( 'error', $this->sut->recorded[0]['outcome'] );
 		$this->assertSame( $expected_code, $this->sut->recorded[0]['error_code'] );
-		$this->assertArrayHasKey( 'duration_ms', $this->sut->recorded[0] );
+		$this->assertSame( $executed, array_key_exists( 'duration_ms', $this->sut->recorded[0] ), 'Only executed calls report a duration' );
 	}
 
 	/**
 	 * Failures WordPress 7.1+ reports through hooks, with the expected error code.
 	 *
-	 * @return array<string, array{string, string}>
+	 * @return array<string, array{string, string, bool}>
 	 */
 	public function provide_wordpress_7_1_failures(): array {
 		return array(
-			'execute callback error' => array( 'execute_error', 'tracking_test_failure' ),
-			'permission denied'      => array( 'permission_denied', 'ability_invalid_permissions' ),
-			'input filter false'     => array( 'input_rejected_with_false', 'ability_invalid_input' ),
-			'output filter error'    => array( 'output_rejected_with_error', 'tracking_test_bad_output' ),
+			'execute callback error' => array( 'execute_error', 'tracking_test_failure', true ),
+			'permission denied'      => array( 'permission_denied', 'ability_invalid_permissions', false ),
+			'input filter false'     => array( 'input_rejected_with_false', 'ability_invalid_input', false ),
+			'output filter error'    => array( 'output_rejected_with_error', 'tracking_test_bad_output', true ),
+			'short-circuit error'    => array( 'short_circuit_error', 'tracking_test_rate_limited', false ),
 		);
 	}
 

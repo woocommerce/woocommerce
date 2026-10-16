@@ -470,7 +470,8 @@ class AbilitiesTracking {
 			}
 		}
 
-		$this->add_event( $frame, is_wp_error( $result ) ? $result : true, true );
+		// Only executed calls report a duration, so it always measures execution.
+		$this->add_event( $frame, is_wp_error( $result ) ? $result : true, $frame['executing'] );
 	}
 
 	/**
