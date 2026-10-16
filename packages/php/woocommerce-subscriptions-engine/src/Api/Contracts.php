@@ -8,8 +8,9 @@
  * views ({@see ContractView}, {@see CycleView}). No transactions, no cache, no hooks.
  *
  * One lock per contract ({@see self::lock()}): a write that passes the lock is part of the
- * holder's operation; a write without one is a self-contained operation the engine fences
- * itself and refuses with {@see ContractLockedException} while another operation holds the lock.
+ * holder's operation. Cycle writes require the lock; an update or meta write without one is a
+ * self-contained operation the engine fences itself and refuses with
+ * {@see ContractLockedException} while another operation holds the lock.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -229,13 +230,14 @@ final class Contracts {
 	 *                                          (null: the head's plus one); `count` (null: not
 	 *                                          counted; unique in the chain); `expected_total`
 	 *                                          (default 0); `order_id`.
-	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null.
+	 * @param ContractLock         $lock        The caller's lock on this contract, from {@see self::lock()},
+	 *                                          {@see self::create()} or the due handler's context.
 	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
 	 * @throws InvalidArgumentException If a required key is missing, a value is invalid, the contract
 	 *                                  does not exist, or the lock is for another contract.
-	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 */
-	public static function add_cycle( int $contract_id, array $args, ?ContractLock $lock = null ): ?CycleView {
+	public static function add_cycle( int $contract_id, array $args, ContractLock $lock ): ?CycleView {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$cycle_args = array(
@@ -278,14 +280,15 @@ final class Contracts {
 	 *                                       `to_status` (required, registered), and `order_id`
 	 *                                       (?int) and `reason` (?string), written when present
 	 *                                       (null clears).
-	 * @param ContractLock|null    $lock     The caller's lock on the cycle's contract, or null.
+	 * @param ContractLock         $lock     The caller's lock on the cycle's contract, from {@see self::lock()},
+	 *                                       {@see self::create()} or the due handler's context.
 	 * @return bool True when this call made the transition, or for a same-status call when the
 	 *              cycle carries the status and the values.
 	 * @throws InvalidArgumentException If a status is missing or unregistered, a value is invalid,
 	 *                                  the cycle does not exist, or it belongs to another contract than the lock.
-	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 */
-	public static function transition_cycle( int $cycle_id, array $args, ?ContractLock $lock = null ): bool {
+	public static function transition_cycle( int $cycle_id, array $args, ContractLock $lock ): bool {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
 		$from_status   = ArgumentValidator::validate_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
 		$to_status     = ArgumentValidator::validate_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );

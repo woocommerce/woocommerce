@@ -1614,95 +1614,80 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Append a cycle to its chain `(contract_id, kind)`. An unassigned `sequence_no` becomes the
-	 * chain's highest plus one in the same INSERT, which selects from the contract row so without
-	 * `$lock` it lands only while no lock lives. The id and position are stamped back on the entity
-	 * (left unassigned, with a warning, when that read-back fails after the row landed).
+	 * Append a cycle to its chain `(contract_id, kind)` under `$lock`. An unassigned `sequence_no`
+	 * becomes the chain's highest plus one in the same INSERT. The id and position are stamped back
+	 * on the entity (left unassigned, with a warning, when that read-back fails after the row landed).
 	 *
-	 * @param Cycle             $cycle Cycle to append. Carries its contract id and kind.
-	 * @param ContractLock|null $lock  The caller's lock on the cycle's contract, or null.
+	 * @param Cycle        $cycle Cycle to append. Carries its contract id and kind.
+	 * @param ContractLock $lock  The caller's lock on the cycle's contract.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the position is already taken).
-	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 * @throws \InvalidArgumentException If the contract does not exist, or the lock is for another contract.
 	 * @throws \RuntimeException If the cycle insert fails for any other reason (the database error is in the message).
 	 */
-	public function append_cycle( Cycle $cycle, ?ContractLock $lock = null ): void {
-		if ( null !== $lock ) {
-			self::assert_lock_for( $lock, $cycle->get_contract_id() );
-			$this->fence_children( $lock );
-		}
+	public function append_cycle( Cycle $cycle, ContractLock $lock ): void {
+		self::assert_lock_for( $lock, $cycle->get_contract_id() );
+		$this->fence_children( $lock );
 
 		$this->insert_cycle( $cycle, $lock );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Move a cycle from `$from_status` to `$to_status` in one compare-and-set UPDATE that lands
-	 * only while the row still carries `$from_status`. With `$lock` the cycle must belong to the
-	 * lock's contract; without one the UPDATE joins the contract row and lands only while no lock
-	 * lives. A same-status call returns true whenever the row already holds the values.
+	 * Move a cycle from `$from_status` to `$to_status` under `$lock` in one compare-and-set UPDATE
+	 * that lands only while the row still carries `$from_status` and belongs to the lock's
+	 * contract. A same-status call returns true whenever the row already holds the values.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
 	 * @param string               $to_status   The status to write; must be a registered cycle status.
 	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string); present keys are written, null clears.
-	 * @param ContractLock|null    $lock        The caller's lock on the cycle's contract, or null.
+	 * @param ContractLock         $lock        The caller's lock on the cycle's contract.
 	 * @return bool True when this caller won the transition (for a same-status call: the row holds the values).
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 * @throws \InvalidArgumentException If the cycle does not exist, or belongs to another contract than `$lock`.
-	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 * @throws \RuntimeException If the write fails.
 	 */
-	public function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $changes, ?ContractLock $lock = null ): bool {
+	public function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $changes, ContractLock $lock ): bool {
 		global $wpdb;
 
 		if ( ! CycleStatus::is_registered( $to_status ) ) {
 			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ) ) );
 		}
 
-		if ( null !== $lock ) {
-			$this->fence_children( $lock );
-		}
+		$this->fence_children( $lock );
 
-		// Without a lock the UPDATE joins the contract, so cycle columns are qualified.
-		$prefix = null === $lock ? 'cy.' : '';
-		$set    = array( "{$prefix}status = %s" );
+		$set    = array( 'status = %s' );
 		$values = array( $to_status );
 
 		if ( array_key_exists( 'order_id', $changes ) ) {
 			if ( null === $changes['order_id'] ) {
-				$set[] = "{$prefix}order_id = NULL";
+				$set[] = 'order_id = NULL';
 			} else {
-				$set[]    = "{$prefix}order_id = %d";
+				$set[]    = 'order_id = %d';
 				$values[] = Coercion::coerce_int( $changes['order_id'] );
 			}
 		}
 
 		if ( array_key_exists( 'reason', $changes ) ) {
 			if ( null === $changes['reason'] ) {
-				$set[] = "{$prefix}reason = NULL";
+				$set[] = 'reason = NULL';
 			} else {
-				$set[]    = "{$prefix}reason = %s";
+				$set[]    = 'reason = %s';
 				$values[] = Coercion::coerce_string( $changes['reason'] );
 			}
 		}
 
-		$set[]    = "{$prefix}date_updated_gmt = %s";
+		$set[]    = 'date_updated_gmt = %s';
 		$values[] = gmdate( 'Y-m-d H:i:s' );
 		$values[] = $cycle_id;
 		$values[] = $from_status;
+		$values[] = $lock->get_contract_id();
 
 		$cycles     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$contracts  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$set_clause = implode( ', ', $set );
-
-		if ( null !== $lock ) {
-			$values[] = $lock->get_contract_id();
-			$sql      = "UPDATE {$cycles} SET {$set_clause} WHERE id = %d AND status = %s AND contract_id = %d";
-		} else {
-			$sql = "UPDATE {$cycles} cy JOIN {$contracts} c ON c.id = cy.contract_id SET {$set_clause}
-				WHERE cy.id = %d AND cy.status = %s AND " . self::no_live_lock( 'c' );
-		}
+		$sql        = "UPDATE {$cycles} SET {$set_clause} WHERE id = %d AND status = %s AND contract_id = %d";
 
 		// The SET clause is built from fixed fragments above; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -1722,22 +1707,19 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Tell apart why a cycle transition changed no row, from the stored cycle rather than the lock
-	 * state alone. Unlocked, a row still in `$from_status` that is not already in the intended
-	 * state means the fence refused the write. Otherwise a same-status call whose values are
-	 * stored is a no-op win, and a moved status is a lost compare-and-set.
+	 * Tell apart why a cycle transition changed no row, from the stored cycle: a same-status call
+	 * whose values are stored is a no-op win, and a moved status is a lost compare-and-set.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The compare-and-set predicate.
 	 * @param string               $to_status   The status written.
 	 * @param array<string, mixed> $changes     The `order_id` / `reason` changes written.
-	 * @param ContractLock|null    $lock        The caller's lock, or null.
+	 * @param ContractLock         $lock        The caller's lock.
 	 * @return bool True for a same-status no-op, false when the status moved.
 	 * @throws \InvalidArgumentException If the cycle does not exist, or belongs to another contract than `$lock`.
-	 * @throws ContractLockedException If the fence refused the write.
 	 * @throws \RuntimeException If the read fails.
 	 */
-	private function classify_lost_transition( int $cycle_id, string $from_status, string $to_status, array $changes, ?ContractLock $lock ): bool {
+	private function classify_lost_transition( int $cycle_id, string $from_status, string $to_status, array $changes, ContractLock $lock ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1752,16 +1734,12 @@ final class ContractRepository {
 		}
 
 		$contract_id = Coercion::coerce_int( $row['contract_id'] ?? 0 );
-		if ( null !== $lock && $lock->get_contract_id() !== $contract_id ) {
+		if ( $lock->get_contract_id() !== $contract_id ) {
 			throw new \InvalidArgumentException( esc_html( sprintf( 'Cycle %d does not belong to contract %d.', $cycle_id, $lock->get_contract_id() ) ) );
 		}
 
 		$status = Coercion::coerce_string( $row['status'] ?? '' );
 		$stored = $status === $to_status && self::has_changes( $row, $changes );
-
-		if ( null === $lock && $status === $from_status && ! $stored ) {
-			$this->throw_locked( $contract_id );
-		}
 
 		return $from_status === $to_status && $stored;
 	}
@@ -1881,14 +1859,14 @@ final class ContractRepository {
 	 * their column lengths first, as `$wpdb->insert()` would. A failed position read-back after
 	 * the row landed logs a warning and leaves the entity's position unassigned.
 	 *
-	 * @param Cycle             $cycle Cycle to insert. Carries its contract id and kind.
-	 * @param ContractLock|null $lock  The caller's (fenced) lock, or null: the insert then must find the contract with no live lock.
+	 * @param Cycle        $cycle Cycle to insert. Carries its contract id and kind.
+	 * @param ContractLock $lock  The caller's (fenced) lock.
 	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
-	 * @throws ContractLockedException If unlocked and another operation holds the lock.
+	 * @throws ContractLockedException If the insert failed and `$lock` was lost.
 	 * @throws \InvalidArgumentException If the contract does not exist.
 	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
 	 */
-	private function insert_cycle( Cycle $cycle, ?ContractLock $lock ): void {
+	private function insert_cycle( Cycle $cycle, ContractLock $lock ): void {
 		global $wpdb;
 
 		$table     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1926,10 +1904,9 @@ final class ContractRepository {
 		$name_list        = implode( ', ', $names );
 		$placeholder_list = implode( ', ', $placeholders );
 		$values[]         = $cycle->get_contract_id();
-		$fence            = null === $lock ? ' AND ' . self::no_live_lock( 'c' ) : '';
 
-		// LOCK IN SHARE MODE makes the fence read block on a concurrent lock write under READ COMMITTED too.
-		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d{$fence} LOCK IN SHARE MODE";
+		// Selecting from the contract row inserts nothing for a missing contract; the row is share-locked for the statement.
+		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d LOCK IN SHARE MODE";
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared

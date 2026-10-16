@@ -546,38 +546,6 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An unlocked cycle transition refused by the fence throws; a lost compare-and-set returns false.
-	 */
-	public function test_a_refused_unlocked_transition_throws(): void {
-		$id    = $this->insert_contract();
-		$cycle = Cycle::create(
-			array(
-				'contract_id'   => $id,
-				'starts_at_gmt' => '2026-07-15 00:00:00',
-				'ends_at_gmt'   => '2026-08-15 00:00:00',
-				'currency'      => 'USD',
-			)
-		);
-		$this->sut->append_cycle( $cycle );
-		$cycle_id = (int) $cycle->get_id();
-
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 5 ) ) );
-		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::PENDING, array() ), 'A lost compare-and-set.' );
-
-		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ) . ' cy' );
-		try {
-			$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array() );
-			$this->fail( 'Expected the refused transition to throw.' );
-		} catch ( ContractLockedException $e ) {
-			$this->assertSame( $id, $e->get_contract_id() );
-		}
-
-		$this->refuse_next_write( 'UPDATE ' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ) . ' cy' );
-		$this->expectException( ContractLockedException::class );
-		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 6 ) );
-	}
-
-	/**
 	 * @testdox Reads expose the lock state only while the lock lives, and never the token.
 	 */
 	public function test_reads_expose_lock_state_not_token(): void {

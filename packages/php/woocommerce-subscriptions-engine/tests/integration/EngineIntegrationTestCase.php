@@ -14,13 +14,16 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * Engine integration test case.
@@ -133,6 +136,83 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$lock->release();
 
 		return $lock->get_contract_id();
+	}
+
+	/**
+	 * `Contracts::add_cycle()` under a lock taken for the call and released after it.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        Cycle fields.
+	 */
+	protected function add_cycle_locked( int $contract_id, array $args ): ?CycleView {
+		$lock = $this->take_lock( $contract_id, 'test' );
+		try {
+			return Contracts::add_cycle( $contract_id, $args, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * `Contracts::transition_cycle()` under a lock on the cycle's contract, taken for the call and released after it.
+	 *
+	 * @param int                  $cycle_id Cycle id.
+	 * @param array<string, mixed> $args     Transition fields.
+	 */
+	protected function transition_cycle_locked( int $cycle_id, array $args ): bool {
+		$lock = $this->take_lock( $this->get_cycle_contract_id( $cycle_id ), 'test' );
+		try {
+			return Contracts::transition_cycle( $cycle_id, $args, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * `ContractRepository::append_cycle()` under a lock taken for the call and released after it.
+	 *
+	 * @param Cycle $cycle Cycle to append.
+	 */
+	protected function append_cycle_locked( Cycle $cycle ): void {
+		$lock = $this->take_lock( $cycle->get_contract_id(), 'test' );
+		try {
+			( new ContractRepository() )->append_cycle( $cycle, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * `ContractRepository::transition_cycle()` under a lock on the cycle's contract, taken for the call and released after it.
+	 *
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status Status the caller read.
+	 * @param string               $to_status   Status to write.
+	 * @param array<string, mixed> $changes     `order_id` / `reason` changes.
+	 */
+	protected function transition_cycle_row_locked( int $cycle_id, string $from_status, string $to_status, array $changes = array() ): bool {
+		$lock = $this->take_lock( $this->get_cycle_contract_id( $cycle_id ), 'test' );
+		try {
+			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * The contract id a stored cycle belongs to.
+	 *
+	 * @param int $cycle_id Cycle id.
+	 */
+	protected function get_cycle_contract_id( int $cycle_id ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$contract_id = $wpdb->get_var( $wpdb->prepare( "SELECT contract_id FROM {$table} WHERE id = %d", $cycle_id ) );
+		$this->assertIsNumeric( $contract_id, "Cycle {$cycle_id} exists." );
+
+		return (int) $contract_id;
 	}
 
 	/**

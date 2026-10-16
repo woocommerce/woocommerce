@@ -916,7 +916,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->insert_released( $this->make_contract() );
 
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
-		$this->sut->append_cycle( $cycle );
+		$this->append_cycle_locked( $cycle );
 
 		$this->assertNotNull( $cycle->get_id() );
 
@@ -962,7 +962,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'extension_slug' => 'lite',
 			)
 		);
-		$this->sut->append_cycle( $cycle );
+		$this->append_cycle_locked( $cycle );
 
 		$reloaded = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $reloaded );
@@ -976,7 +976,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->insert_released( $this->make_contract() );
 
 		for ( $n = 1; $n <= 3; $n++ ) {
-			$this->sut->append_cycle( $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) ) );
+			$this->append_cycle_locked( $this->make_cycle( $id, $n, $n, sprintf( '2026-%02d-15 00:00:00', 6 + $n ), sprintf( '2026-%02d-15 00:00:00', 7 + $n ) ) );
 		}
 
 		$page = $this->sut->find_cycle_history( $id, Cycle::KIND_BILLING, 2, 0 );
@@ -997,10 +997,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$second_id = $this->insert_released( $this->make_contract() );
 
 		// One aggregate order serves a cycle on each of two contracts (not 1:1).
-		$this->sut->append_cycle( $this->make_cycle( $first_id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 9090 ) );
-		$this->sut->append_cycle( $this->make_cycle( $second_id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 9090 ) );
+		$this->append_cycle_locked( $this->make_cycle( $first_id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 9090 ) );
+		$this->append_cycle_locked( $this->make_cycle( $second_id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', null, null, 9090 ) );
 		// A different order on the first contract must not match.
-		$this->sut->append_cycle( $this->make_cycle( $first_id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00', null, null, 7070 ) );
+		$this->append_cycle_locked( $this->make_cycle( $first_id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00', null, null, 7070 ) );
 
 		$linked = $this->sut->find_cycles_by_order_id( 9090 );
 		$this->assertCount( 2, $linked );
@@ -1032,7 +1032,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'currency'       => 'USD',
 			)
 		);
-		$this->sut->append_cycle( $cycle );
+		$this->append_cycle_locked( $cycle );
 
 		return $cycle;
 	}
@@ -1386,7 +1386,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$over_long = $this->make_cycle_of_kind( $id, str_repeat( 'k', 21 ) );
 		try {
-			$this->sut->append_cycle( $over_long );
+			$this->append_cycle_locked( $over_long );
 			$this->fail( 'Expected append_cycle() to refuse the over-long kind.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
@@ -1395,7 +1395,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $this->sut->find_cycle_history( $id, str_repeat( 'k', 21 ) ) );
 
 		$fits = $this->make_cycle_of_kind( $id, str_repeat( 'k', 20 ) );
-		$this->sut->append_cycle( $fits );
+		$this->append_cycle_locked( $fits );
 		$this->assertNotNull( $fits->get_id(), 'A kind at the column length is written.' );
 	}
 
@@ -1415,13 +1415,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_transition_cycle_is_an_atomic_compare_and_set(): void {
 		$cycle_id = $this->pending_cycle_id();
 
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 4242 ) ) );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 4242 ) ) );
 
 		$settled = $this->find_cycle( $cycle_id );
 		$this->assertSame( CycleStatus::BILLED, $settled->get_status()->get_value() );
 		$this->assertSame( 4242, $settled->get_order_id() );
 
-		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'order_id' => 9999 ) ) );
+		$this->assertFalse( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'order_id' => 9999 ) ) );
 
 		$after = $this->find_cycle( $cycle_id );
 		$this->assertSame( CycleStatus::BILLED, $after->get_status()->get_value(), 'The losing transition writes nothing.' );
@@ -1439,10 +1439,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		while ( fmod( microtime( true ), 1.0 ) > 0.5 ) {
 			usleep( 50000 );
 		}
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ) );
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ), 'Writing the stored values again still succeeds.' );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ) );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ), 'Writing the stored values again still succeeds.' );
 
-		$this->assertFalse( $this->sut->transition_cycle( $cycle_id, CycleStatus::BILLED, CycleStatus::BILLED, array( 'order_id' => 4242 ) ), 'A cycle in another status is not matched.' );
+		$this->assertFalse( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::BILLED, CycleStatus::BILLED, array( 'order_id' => 4242 ) ), 'A cycle in another status is not matched.' );
 		$this->assertSame( CycleStatus::PENDING, $this->find_cycle( $cycle_id )->get_status()->get_value() );
 	}
 
@@ -1451,15 +1451,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_transition_cycle_order_id_is_written_only_when_present(): void {
 		$cycle_id = $this->pending_cycle_id();
-		$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) );
+		$this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) );
 
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) );
 		$failed = $this->find_cycle( $cycle_id );
 		$this->assertSame( 4242, $failed->get_order_id(), 'An omitted order_id keeps the stored one.' );
 		$this->assertSame( 'payment-failed', $failed->get_reason() );
 
 		$this->assertTrue(
-			$this->sut->transition_cycle(
+			$this->transition_cycle_row_locked(
 				$cycle_id,
 				CycleStatus::FAILED,
 				CycleStatus::CANCELLED,
@@ -1481,7 +1481,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$cycle_id = $this->pending_cycle_id();
 
 		try {
-			$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, 'never-registered', array( 'order_id' => 4242 ) );
+			$this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, 'never-registered', array( 'order_id' => 4242 ) );
 			$this->fail( 'Expected a DomainException for an unregistered target status.' );
 		} catch ( \DomainException $e ) {
 			$this->assertSame( CycleStatus::PENDING, $this->find_cycle( $cycle_id )->get_status()->get_value() );
@@ -1495,7 +1495,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
 		$cycle_id = $this->pending_cycle_id();
 
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, 'disputed', array() ) );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, 'disputed', array() ) );
 
 		$this->assertSame( 'disputed', $this->find_cycle( $cycle_id )->get_status()->get_value() );
 	}
@@ -1520,7 +1520,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 				'items_snapshot_id' => $snapshot_ids[1],
 			)
 		);
-		$this->sut->append_cycle( $cycle );
+		$this->append_cycle_locked( $cycle );
 
 		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
@@ -1601,7 +1601,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		$id    = $this->insert_released( $this->make_contract() );
 		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) );
-		$this->sut->append_cycle( $cycle );
+		$this->append_cycle_locked( $cycle );
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -1682,7 +1682,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id       = $this->insert_released( $contract );
 
 		if ( null !== $next_payment_gmt ) {
-			$this->sut->append_cycle(
+			$this->append_cycle_locked(
 				Cycle::create(
 					array(
 						'contract_id'    => $id,
@@ -1708,7 +1708,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		global $wpdb;
 
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
 		$cycles_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 		$now          = gmdate( 'Y-m-d H:i:s' );
@@ -1741,7 +1741,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		global $wpdb;
 
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
 		$cycles_table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 		$now          = gmdate( 'Y-m-d H:i:s' );
@@ -1776,10 +1776,10 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_append_cycle_throws_duplicate_cycle_exception_on_collision(): void {
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
 
 		$this->expectException( DuplicateCycleException::class );
-		$this->sut->append_cycle( $this->make_cycle( $id, 2, 1, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 2, 1, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 	}
 
 	/**
@@ -1809,7 +1809,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id    = $this->insert_released( $this->make_contract() );
 		$cycle = $this->make_unpositioned_cycle( $id );
 
-		$this->sut->append_cycle( $cycle );
+		$this->append_cycle_locked( $cycle );
 
 		$this->assertSame( 1, $cycle->get_sequence_no() );
 		$this->assertNull( $cycle->get_count() );
@@ -1823,13 +1823,13 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_append_cycle_assigns_the_next_sequence_no_in_its_chain(): void {
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
-		$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 
 		$next  = $this->make_unpositioned_cycle( $id, array( 'count' => 3 ) );
 		$other = $this->make_unpositioned_cycle( $id, array( 'kind' => 'shipping' ) );
-		$this->sut->append_cycle( $next );
-		$this->sut->append_cycle( $other );
+		$this->append_cycle_locked( $next );
+		$this->append_cycle_locked( $other );
 
 		$this->assertSame( 3, $next->get_sequence_no() );
 		$this->assertSame( 3, $next->get_count() );
@@ -1845,19 +1845,20 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id = $this->insert_released( $this->make_contract() );
 
 		$first = $this->make_unpositioned_cycle( $id );
-		$this->sut->append_cycle( $first );
+		$this->append_cycle_locked( $first );
 
 		$lock   = $this->lock( $id );
 		$second = $this->make_unpositioned_cycle( $id );
 		$this->sut->append_cycle( $second, $lock );
-		$lock->release();
 
 		$third   = $this->make_unpositioned_cycle( $id );
 		$queries = $wpdb->num_queries;
-		$this->sut->append_cycle( $third );
+		$this->sut->append_cycle( $third, $lock );
+		$append_queries = $wpdb->num_queries - $queries;
+		$lock->release();
 
 		$this->assertSame( array( 1, 2, 3 ), array( $first->get_sequence_no(), $second->get_sequence_no(), $third->get_sequence_no() ) );
-		$this->assertSame( 2, $wpdb->num_queries - $queries, 'The insert, then the read of its assigned position.' );
+		$this->assertSame( 2, $append_queries, 'Under a trusted lock: the insert, then the read of its assigned position.' );
 		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( $third->get_id(), $head->get_id() );
@@ -1882,8 +1883,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		// MySQL treats NULLs as distinct, so two count = null cycles do not collide
 		// under UNIQUE(contract_id, kind, count).
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, null, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
-		$this->sut->append_cycle( $this->make_cycle( $id, 2, null, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, null, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 2, null, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
 
 		$history = $this->sut->find_cycle_history( $id );
 		$this->assertCount( 2, $history );
@@ -1898,7 +1899,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		global $wpdb;
 
 		$id = $this->insert_released( $this->make_contract() );
-		$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) ) );
+		$this->append_cycle_locked( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00', ...$this->seed_cycle_snapshots( $id ) ) );
 
 		$this->assertTrue( $this->sut->delete( $id ) );
 		$this->assertNull( $this->sut->find( $id ) );
@@ -2083,7 +2084,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Locked cycle appends and transitions land; unlocked ones are refused while another lock lives.
+	 * @testdox Cycle appends and transitions land under the lock; one that expired and was taken over is refused.
 	 */
 	public function test_cycle_writes_are_fenced(): void {
 		$id = $this->insert_released( $this->make_contract() );
@@ -2095,41 +2096,42 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$cycle_id = (int) $cycle->get_id();
 		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::FAILED, array(), $lock ) );
 
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->lock( $id, 'cancel' );
+		$this->age_lock_trust( $lock );
 		try {
-			$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ) );
-			$this->fail( 'Expected an unlocked append to be refused.' );
+			$this->sut->append_cycle( $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' ), $lock );
+			$this->fail( 'Expected an append with a taken-over lock to be refused.' );
 		} catch ( ContractLockedException $e ) {
-			$this->assertSame( 'renewal', $e->get_operation() );
+			$this->assertSame( 'cancel', $e->get_operation() );
 		}
 		$this->assertCount( 1, $this->sut->find_cycle_history( $id ), 'Nothing is appended.' );
 
 		try {
-			$this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array() );
-			$this->fail( 'Expected an unlocked transition to be refused.' );
+			$this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array(), $lock );
+			$this->fail( 'Expected a transition with a taken-over lock to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value() );
 		}
-
-		$this->pin_db_clock( '2035-01-01 00:10:00' );
-		$this->assertTrue( $this->sut->transition_cycle( $cycle_id, CycleStatus::FAILED, CycleStatus::BILLED, array() ) );
-		$next = $this->make_cycle( $id, 2, 2, '2026-08-15 00:00:00', '2026-09-15 00:00:00' );
-		$this->sut->append_cycle( $next );
-		$this->assertNotNull( $next->get_id() );
 	}
 
 	/**
-	 * @testdox An unlocked append to an unknown contract throws and writes no orphan row.
+	 * @testdox An append to a contract deleted under the lock throws and writes no orphan row.
 	 */
 	public function test_an_append_to_an_unknown_contract_throws(): void {
 		global $wpdb;
 
+		$id   = $this->insert_released( $this->make_contract() );
+		$lock = $this->lock( $id );
+		$this->sut->delete( $id );
+
 		try {
-			$this->sut->append_cycle( $this->make_cycle( 999999, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ) );
+			$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ), $lock );
 			$this->fail( 'Expected an append to an unknown contract to throw.' );
 		} catch ( \InvalidArgumentException $e ) {
 			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", 999999 ) ) );
+			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $id ) ) );
 		}
 	}
 
@@ -2178,7 +2180,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			'/^\s*UPDATE\s+\S*cycles/i',
 			function () use ( $cycle_id ): void {
 				try {
-					$this->sut->transition_cycle( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array() );
+					$this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::BILLED, array() );
 					$this->fail( 'Expected a RuntimeException.' );
 				} catch ( \RuntimeException $e ) {
 					$this->assertStringContainsString( 'Failed to transition cycle', $e->getMessage() );

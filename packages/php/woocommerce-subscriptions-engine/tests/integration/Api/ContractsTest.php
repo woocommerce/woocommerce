@@ -920,7 +920,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args() );
 
-		$this->assertNull( Contracts::add_cycle( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A lost append returns null.' );
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A lost append returns null.' );
 		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
 	}
 
@@ -929,7 +929,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$kind = str_repeat( 'k', 21 );
 
 		try {
-			Contracts::add_cycle( $id, $this->cycle_args( array( 'kind' => $kind ) ) );
+			$this->add_cycle_locked( $id, $this->cycle_args( array( 'kind' => $kind ) ) );
 			$this->fail( 'Expected add_cycle() to refuse a kind longer than its column.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
@@ -959,7 +959,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'warning',
 			array( 'contract_id' => $id ),
 			function () use ( $id, &$view ) {
-				$view = Contracts::add_cycle( $id, $this->cycle_args() );
+				$view = $this->add_cycle_locked( $id, $this->cycle_args() );
 			}
 		);
 
@@ -974,7 +974,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
 
-		$this->assertNull( Contracts::add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) ), 'A lost append returns null.' );
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'count' => 1 ) ) ), 'A lost append returns null.' );
 		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
 	}
 
@@ -1169,8 +1169,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id    = $this->contract_with_currency();
 		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
-		$this->assertTrue( Contracts::transition_cycle( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 77 ) ) ) );
-		$this->assertFalse( Contracts::transition_cycle( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::FAILED ) ), 'A caller that read pending loses.' );
+		$this->assertTrue( $this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 77 ) ) ) );
+		$this->assertFalse( $this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::FAILED ) ), 'A caller that read pending loses.' );
 
 		$stored = $this->cycle( $id, $cycle->get_id() );
 		$this->assertSame( CycleStatus::BILLED, $stored->get_status()->get_value() );
@@ -1184,16 +1184,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id       = $this->contract_with_currency();
 		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) )->get_id();
 
-		$this->assertTrue( Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 77 ) ) ) );
+		$this->assertTrue( $this->transition_cycle_locked( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 77 ) ) ) );
 		$this->assertSame( 77, $this->cycle( $id, $cycle_id )->get_order_id() );
 
-		$this->assertTrue( Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) ) );
+		$this->assertTrue( $this->transition_cycle_locked( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) ) );
 		$failed = Contracts::get_cycles( $id, 1 )[0];
 		$this->assertSame( CycleStatus::FAILED, $failed->get_status() );
 		$this->assertSame( 'payment-failed', $failed->get_reason() );
 		$this->assertSame( 77, $failed->get_order_id(), 'An omitted order_id keeps the stored one.' );
 
-		$this->assertTrue( Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::FAILED, CycleStatus::BILLED, array( 'reason' => null ) ) ) );
+		$this->assertTrue( $this->transition_cycle_locked( $cycle_id, $this->transition( CycleStatus::FAILED, CycleStatus::BILLED, array( 'reason' => null ) ) ) );
 		$this->assertNull( Contracts::get_cycles( $id, 1 )[0]->get_reason(), 'A null reason clears it.' );
 	}
 
@@ -1205,14 +1205,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		try {
-			Contracts::transition_cycle( $cycle->get_id(), $this->transition( CycleStatus::PENDING, 'nonsense' ) );
+			$this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, 'nonsense' ) );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$this->assertSame( CycleStatus::PENDING, Contracts::get_cycles( $id, 1 )[0]->get_status() );
 		}
 
 		$this->setExpectedIncorrectUsage( Contracts::class . '::transition_cycle' );
-		$this->assertTrue( Contracts::transition_cycle( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'status' => 'x' ) ) ) );
+		$this->assertTrue( $this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'status' => 'x' ) ) ) );
 	}
 
 	/**
@@ -1226,7 +1226,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		try {
-			Contracts::transition_cycle( $cycle->get_id(), $args );
+			$this->transition_cycle_locked( $cycle->get_id(), $args );
 			$this->fail( 'Expected an InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
 			$stored = $this->cycle( $id, $cycle->get_id() );
@@ -1585,12 +1585,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 			'add_meta unique' => static function () use ( $id ): void {
 				Contracts::add_meta( $id, 'k', 'v', true );
 			},
-			'add_cycle'       => function () use ( $id ): void {
-				Contracts::add_cycle( $id, $this->cycle_args() );
-			},
 		);
 		foreach ( $writes as $name => $write ) {
-			$this->fail_next_query( 'add_cycle' === $name ? $cycles : $meta );
+			$this->fail_next_query( $meta );
 			try {
 				$write();
 				$this->fail( "Expected {$name} to report the lock conflict." );
@@ -1631,10 +1628,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* LOCK IN SHARE MODE$/s' );
 		try {
-			Contracts::add_cycle( $id, $this->cycle_args() );
+			$this->add_cycle_locked( $id, $this->cycle_args() );
 			$this->fail( 'Expected the failed insert to throw.' );
 		} catch ( ContractLockedException $e ) {
-			$this->fail( 'No lock is held, so the failure is not a lock conflict.' );
+			$this->fail( 'The caller still holds its lock, so the failure is not a lock conflict.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertStringContainsString( 'Failed to insert cycle', $e->getMessage() );
 		}
@@ -1693,7 +1690,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @param array<string, mixed> $args        Cycle fields.
 	 */
 	private function add_cycle( int $contract_id, array $args ): CycleView {
-		$view = Contracts::add_cycle( $contract_id, $args );
+		$view = $this->add_cycle_locked( $contract_id, $args );
 		$this->assertInstanceOf( CycleView::class, $view );
 
 		return $view;
