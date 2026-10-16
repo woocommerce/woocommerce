@@ -41,7 +41,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->sut = new ContractRepository();
 	}
 
-	private function insert_contract( string $next_payment_gmt = '2026-06-15 00:00:00' ): int {
+	private function insert_contract( ?string $next_payment_gmt = '2026-06-15 00:00:00' ): int {
 		return $this->insert_released(
 			Contract::create(
 				array(
@@ -141,14 +141,72 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An acquire bound to a seen due moment fails once the due moment moved.
+	 * @testdox An acquire conditioned on a column value fails once the column moved.
 	 */
-	public function test_acquire_with_a_seen_due_moment(): void {
+	public function test_acquire_with_an_equality_condition(): void {
 		$id = $this->insert_contract( '2026-06-20 00:00:00' );
 
-		$this->assertNull( $this->sut->acquire_lock( $id, 'due', '2026-06-15 00:00:00' ) );
+		$this->assertNull( $this->sut->acquire_lock( $id, 'due', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ) );
 		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'due', '2026-06-20 00:00:00' ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'due', array( 'next_payment_gmt' => '2026-06-20 00:00:00' ) ) );
+	}
+
+	/**
+	 * @testdox A null condition matches only a NULL column.
+	 */
+	public function test_acquire_with_a_null_condition(): void {
+		$set = $this->insert_contract( '2026-06-20 00:00:00' );
+		$this->assertNull( $this->sut->acquire_lock( $set, 'due', array( 'next_payment_gmt' => null ) ) );
+		$this->assertNull( $this->sut->get_lock_holder( $set )['operation'] );
+
+		$cleared = $this->insert_contract( null );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $cleared, 'due', array( 'next_payment_gmt' => null ) ) );
+	}
+
+	/**
+	 * @testdox Every condition must hold for the lock to land.
+	 */
+	public function test_acquire_requires_every_condition(): void {
+		$id = $this->insert_contract( '2026-06-20 00:00:00' );
+
+		$this->assertNull(
+			$this->sut->acquire_lock(
+				$id,
+				'due',
+				array(
+					'next_payment_gmt' => '2026-06-20 00:00:00',
+					'status'           => ContractStatus::ON_HOLD,
+				)
+			)
+		);
+		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertInstanceOf(
+			ContractLock::class,
+			$this->sut->acquire_lock(
+				$id,
+				'due',
+				array(
+					'next_payment_gmt' => '2026-06-20 00:00:00',
+					'status'           => ContractStatus::ACTIVE,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox A condition on an unlisted column or with a non-scalar value throws and locks nothing.
+	 */
+	public function test_invalid_conditions_throw(): void {
+		$id = $this->insert_contract();
+
+		foreach ( array( array( 'lock_token' => null ), array( 'customer_id' => 1 ), array( 'status' => array( ContractStatus::ACTIVE ) ) ) as $conditions ) {
+			try {
+				$this->sut->acquire_lock( $id, 'due', $conditions );
+				$this->fail( 'Expected an invalid condition to throw.' );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
+			}
+		}
 	}
 
 	/**

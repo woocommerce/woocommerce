@@ -195,7 +195,7 @@ final class DueDispatcher {
 			$contract_id = $row['id'];
 
 			try {
-				$lock = $this->contracts->acquire_lock( $contract_id, self::LOCK_OPERATION, $row['next_payment_gmt'] );
+				$lock = $this->contracts->acquire_lock( $contract_id, self::LOCK_OPERATION, array( 'next_payment_gmt' => $row['next_payment_gmt'] ) );
 				if ( null === $lock ) {
 					++$skipped;
 					continue;

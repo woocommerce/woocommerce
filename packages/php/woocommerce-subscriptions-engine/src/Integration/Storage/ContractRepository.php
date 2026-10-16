@@ -63,6 +63,15 @@ final class ContractRepository {
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
 
 	/**
+	 * Contract columns a lock may be conditioned on ({@see self::acquire_lock()}), mapped to the
+	 * column name the SQL uses.
+	 */
+	private const LOCK_CONDITION_COLUMNS = array(
+		'next_payment_gmt' => 'next_payment_gmt',
+		'status'           => 'status',
+	);
+
+	/**
 	 * Insert a new contract locked from birth: the row INSERT stamps the lock, then items and
 	 * addresses follow under it. When a child insert fails, the new contract (and its lock) is
 	 * deleted again, so a retry is not blocked by its own creation key.
@@ -794,33 +803,31 @@ final class ContractRepository {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Take the contract's lock for `$operation`: one conditional UPDATE that lands only while
-	 * no live lock is held (an expired one is taken over), stamped on the database clock. With
-	 * `$seen_next_payment_gmt` it also requires the contract still to carry that due moment.
+	 * no live lock is held (an expired one is taken over) and every condition holds, stamped on
+	 * the database clock.
 	 *
-	 * @param int         $contract_id           Contract id.
-	 * @param string      $operation             Operation label, 1-64 of `[a-z0-9_-]`.
-	 * @param string|null $seen_next_payment_gmt The due moment the caller read, or null for no check.
-	 * @return ContractLock|null The lock, or null when the contract is locked, missing or its due moment moved.
-	 * @throws \InvalidArgumentException If `$operation` is not a valid label.
+	 * @param int                  $contract_id Contract id.
+	 * @param string               $operation   Operation label, 1-64 of `[a-z0-9_-]`.
+	 * @param array<string, mixed> $conditions  Contract column => the value the caller read: a
+	 *                                          scalar must equal it, null requires NULL. Columns:
+	 *                                          {@see self::LOCK_CONDITION_COLUMNS}.
+	 * @return ContractLock|null The lock, or null when the contract is locked, missing or a condition fails.
+	 * @throws \InvalidArgumentException If `$operation` is not a valid label, or a condition column or value is not accepted.
 	 * @throws \RuntimeException If the write fails.
 	 */
-	public function acquire_lock( int $contract_id, string $operation, ?string $seen_next_payment_gmt = null ): ?ContractLock {
+	public function acquire_lock( int $contract_id, string $operation, array $conditions = array() ): ?ContractLock {
 		global $wpdb;
 
 		self::assert_operation( $operation );
+		list( $condition_sql, $condition_values ) = self::get_condition_clause( $conditions );
 
 		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$no_live_lock = self::no_live_lock();
 		$token        = self::new_token();
-		$values       = array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id );
-		$due          = '';
-		if ( null !== $seen_next_payment_gmt ) {
-			$due      = ' AND next_payment_gmt = %s';
-			$values[] = $seen_next_payment_gmt;
-		}
+		$values       = array_merge( array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id ), $condition_values );
 
 		$sql = "UPDATE {$table} SET lock_token = %s, locked_until_gmt = DATE_ADD( UTC_TIMESTAMP(), INTERVAL %d SECOND ), lock_operation = %s
-			WHERE id = %d{$due} AND {$no_live_lock}";
+			WHERE id = %d{$condition_sql} AND {$no_live_lock}";
 
 		// Fixed SQL fragments only; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -1056,6 +1063,36 @@ final class ContractRepository {
 	 */
 	private static function new_token(): string {
 		return bin2hex( random_bytes( 16 ) );
+	}
+
+	/**
+	 * The SQL for lock conditions: ` AND <column> = %s` or ` AND <column> IS NULL` per condition,
+	 * with the column name taken from the allowlist and every value a placeholder.
+	 *
+	 * @param array<string, mixed> $conditions Contract column => value.
+	 * @return array{0: string, 1: array<int, string>} The SQL fragment and its values.
+	 * @throws \InvalidArgumentException If a column is not in the allowlist or a value is neither scalar nor null.
+	 */
+	private static function get_condition_clause( array $conditions ): array {
+		$sql    = '';
+		$values = array();
+		foreach ( $conditions as $column => $value ) {
+			if ( ! isset( self::LOCK_CONDITION_COLUMNS[ $column ] ) ) {
+				throw new \InvalidArgumentException( esc_html( sprintf( 'A lock cannot be conditioned on "%s".', $column ) ) );
+			}
+			$name = self::LOCK_CONDITION_COLUMNS[ $column ];
+
+			if ( null === $value ) {
+				$sql .= " AND {$name} IS NULL";
+			} elseif ( is_scalar( $value ) ) {
+				$sql     .= " AND {$name} = %s";
+				$values[] = (string) $value;
+			} else {
+				throw new \InvalidArgumentException( esc_html( sprintf( 'The lock condition on "%s" must be a scalar or null.', $column ) ) );
+			}
+		}
+
+		return array( $sql, $values );
 	}
 
 	/**
