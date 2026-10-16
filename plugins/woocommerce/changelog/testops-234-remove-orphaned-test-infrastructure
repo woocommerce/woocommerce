@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove E2E fixtures, helpers, themes, env configs and exports that no test uses, and cover the Mini Cart server-side item count in Jest
