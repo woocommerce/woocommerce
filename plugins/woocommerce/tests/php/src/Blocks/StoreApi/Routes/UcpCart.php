@@ -801,10 +801,10 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
-	 * A caller that keeps its session can still create carts after cancelling one.
+	 * A session that outlives a cancellation can still create carts.
 	 *
-	 * The cancellation marker is sticky, so without releasing the session every later
-	 * cart in it would answer not_found.
+	 * Only a logged-in caller keeps a session across UCP requests, keyed to the user, so
+	 * there the sticky marker must be cleared or every later cart would be not_found.
 	 */
 	public function test_a_cart_can_be_created_after_cancelling_one(): void {
 		$cancelled = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
@@ -812,18 +812,12 @@ class UcpCart extends ControllerTestCase {
 
 		$fresh = $this->create_cart( array( $this->line_item( 1, 2 ) ) );
 
-		$this->assertNotSame( $cancelled['id'], $fresh['id'] );
 		$this->assertCount( 1, $fresh['line_items'] );
 		$this->assertSame( 2, $fresh['line_items'][0]['quantity'] );
 
 		$read_back = $this->request( 'GET', '/carts/' . $fresh['id'] )->get_data();
 		$this->assertSame( $fresh['id'], $read_back['id'] );
 		$this->assertSame( $fresh['line_items'], $read_back['line_items'] );
-
-		// That the cancelled id stays dead is not assertable here: the session is loaded
-		// once per process, so a second id in the same test cannot swap back to it. Over
-		// HTTP the cancelled session row survives with its marker, because shutdown saves
-		// the new session without deleting the old one.
 		$this->assertFalse( (bool) WC()->session->get( AbstractCartRoute::CANCELLED_SESSION_KEY ) );
 	}
 
@@ -857,6 +851,27 @@ class UcpCart extends ControllerTestCase {
 			'not_found',
 			$this->request( 'POST', '/carts/' . $cancelled['id'] . '/cancel' )->get_data()['messages'][0]['code']
 		);
+	}
+
+	/**
+	 * Creating a cart with a `Cart-Token` header mints a fresh session instead of
+	 * binding to the named one, so a cancelled cart cannot be revived that way.
+	 */
+	public function test_create_cart_ignores_a_cart_token_header(): void {
+		$cancelled = $this->create_cart( array( $this->line_item( 0, 1 ) ) );
+		$this->request( 'POST', '/carts/' . $cancelled['id'] . '/cancel' );
+
+		// As over HTTP, the bootstrap has already bound the session to the header's token.
+		$this->simulate_new_request( $cancelled['id'] );
+		$fresh = $this->create_cart( array( $this->line_item( 1, 1 ) ) );
+
+		$this->assertNotSame(
+			CartTokenUtils::get_cart_token_payload( $cancelled['id'] )['user_id'],
+			CartTokenUtils::get_cart_token_payload( $fresh['id'] )['user_id']
+		);
+
+		$this->simulate_new_request( $cancelled['id'] );
+		$this->assertSame( 'not_found', $this->request( 'GET', '/carts/' . $cancelled['id'] )->get_data()['messages'][0]['code'] );
 	}
 
 	/**

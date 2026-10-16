@@ -250,26 +250,15 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Release a session held by a cancelled cart, so a new cart can be created in it.
+	 * Clear the cancellation marker from a session a new cart is created in.
 	 *
-	 * The marker is sticky, so for a caller that keeps its session every later cart would
-	 * answer `not_found`. A guest gets a new id, keeping the cancelled one dead; a
-	 * logged-in session is keyed to the user, so there the cancelled id comes back to life.
+	 * A guest never reaches it: creation mints a fresh session. A logged-in session is
+	 * keyed to the user, so there the marker would make every later cart `not_found`.
 	 */
 	protected function release_cancelled_session(): void {
-		$session = WC()->session;
-
-		if ( ! $session || ! $this->cart_is_cancelled() ) {
-			return;
+		if ( WC()->session && $this->cart_is_cancelled() ) {
+			WC()->session->set( self::CANCELLED_SESSION_KEY, null );
 		}
-
-		// Only the cookie handler mints a replacement customer id here; the token handler
-		// blanks it instead, which would leave the new cart with no id to be addressed by.
-		if ( $session instanceof \WC_Session_Handler ) {
-			$session->forget_session();
-		}
-
-		$session->set( self::CANCELLED_SESSION_KEY, null );
 	}
 
 	/**
