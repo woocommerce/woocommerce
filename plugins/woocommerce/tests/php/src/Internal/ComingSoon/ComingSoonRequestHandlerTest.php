@@ -189,6 +189,8 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			'single-quoted Inter'        => array( "'Inter' , sans-serif", array( 'inter', 'cardo' ) ),
 			'quoted generic fallback'    => array( '"Inter", "sans-serif"', array( 'inter', 'cardo' ) ),
 			'additional fallback family' => array( 'Inter, Arial, sans-serif', array( 'inter', 'cardo' ) ),
+			'leading whitespace'         => array( " 'Inter', sans-serif", array( 'inter', 'cardo' ) ),
+			'lowercase Inter'            => array( 'inter, sans-serif', array( 'inter', 'cardo' ) ),
 		) as $label => $case ) {
 			$cases[ $label ] = array(
 				array(
