@@ -6,28 +6,14 @@ namespace Automattic\WooCommerce\Internal\Checkout;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
- * Tells the checkout whether a payment method should be preselected for the shopper.
+ * Forgets the shopper's payment choice when the cart empties, on stores that decide the
+ * preselected payment method through the `woocommerce_preselected_payment_method` filter.
  *
- * Some countries require the shopper to actively choose a payment method, so merchants
- * can turn preselection off. The option is on by default, matching the historic behavior.
+ * That filter runs in PaymentUtils. Without a callback on it, nothing here does anything.
  *
  * @since 11.3.0
  */
 class PaymentMethodPreselection implements RegisterHooksInterface {
-
-	/**
-	 * Name of the option that stores the merchant's choice ('yes' or 'no').
-	 */
-	public const OPTION_NAME = 'woocommerce_checkout_preselect_payment_method';
-
-	/**
-	 * Whether the checkout should preselect a payment method.
-	 *
-	 * @return bool
-	 */
-	public static function is_enabled(): bool {
-		return wc_string_to_bool( get_option( self::OPTION_NAME, 'yes' ) );
-	}
 
 	/**
 	 * Hook into the cart so a payment choice lasts one purchase.
