@@ -40,18 +40,12 @@
 			],
 			"duotone": [
 				{
-					"colors": [
-						"#111111",
-						"#f1ede2"
-					],
+					"colors": [ "#111111", "#f1ede2" ],
 					"name": "Duotone 1",
 					"slug": "duotone-1"
 				},
 				{
-					"colors": [
-						"#111111",
-						"#fffbf0"
-					],
+					"colors": [ "#111111", "#fffbf0" ],
 					"name": "Duotone 2",
 					"slug": "duotone-2"
 				}
