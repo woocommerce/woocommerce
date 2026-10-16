@@ -35,6 +35,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_343_cleanup_foreign_keys() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_343_cleanup_foreign_keys_removes_foreign_keys() {
 		global $wpdb;
@@ -64,6 +66,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_352_drop_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_352_drop_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -89,6 +93,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_700_remove_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_700_remove_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -1154,6 +1160,17 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'no', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must not overwrite an existing option.' );
 
 		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+	}
+
+	/**
+	 * @testdox wc_update_1130_delete_stock_notification_sync_notice_option deletes the old restock notice option.
+	 */
+	public function test_wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', '<p>pending</p>' );
+		wc_update_1130_delete_stock_notification_sync_notice_option();
+		$this->assertFalse( get_option( 'wc_customer_stock_notifications_product_sync_notice' ) );
 	}
 
 	/**
