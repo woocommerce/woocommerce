@@ -8,7 +8,14 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ShippingClassCostBehavior;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+
+/**
+ * The flat-rate method loading these fields.
+ *
+ * @var WC_Shipping_Flat_Rate $this
+ */
 
 // This description is shown as a tooltip, and wc_sanitize_tooltip() strips <code> tags, so the placeholders are
 // listed as `placeholder = meaning` pairs rather than relying on markup to delimit them.
@@ -53,6 +60,13 @@ $settings = array(
 $shipping_classes = WC()->shipping()->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
+	$behavior_options     = array(
+		ShippingClassCostBehavior::ADD         => __( 'Add a class cost', 'woocommerce' ),
+		ShippingClassCostBehavior::NONE        => __( "Don't add a class cost", 'woocommerce' ),
+		ShippingClassCostBehavior::UNAVAILABLE => __( "Don't offer this flat rate", 'woocommerce' ),
+	);
+	$behavior_description = '<span class="wc-flat-rate-unavailable-description" hidden>' . esc_html__( "This flat rate won't appear at checkout when the cart contains a product in this class.", 'woocommerce' ) . '</span>';
+
 	$settings['class_costs'] = array(
 		'title'       => __( 'Shipping class costs', 'woocommerce' ),
 		'type'        => 'title',
@@ -64,7 +78,24 @@ if ( ! empty( $shipping_classes ) ) {
 		if ( ! isset( $shipping_class->term_id ) ) {
 			continue;
 		}
-		$settings[ 'class_cost_' . $shipping_class->term_id ] = array(
+		/**
+		 * Shipping classes are taxonomy terms.
+		 *
+		 * @var WP_Term $shipping_class
+		 */
+		$cost_key = 'class_cost_' . $shipping_class->term_id;
+		$settings[ 'class_cost_behavior_' . $shipping_class->term_id ] = array(
+			/* translators: %s: shipping class name */
+			'title'             => sprintf( __( '"%s" shipping class', 'woocommerce' ), $shipping_class->name ),
+			'type'              => 'select',
+			'class'             => 'wc-flat-rate-class-behavior',
+			'default'           => '', // Infer unset behavior from the effective cost when the option is read.
+			'options'           => $behavior_options,
+			'description'       => $behavior_description,
+			'custom_attributes' => array( 'data-cost-id' => $this->get_field_key( $cost_key ) ),
+			'sanitize_callback' => array( $this, 'sanitize_class_cost_behavior' ),
+		);
+		$settings[ 'class_cost_' . $shipping_class->term_id ]          = array(
 			/* translators: %s: shipping class name */
 			'title'             => sprintf( __( '"%s" shipping class cost', 'woocommerce' ), esc_html( $shipping_class->name ) ),
 			'type'              => 'text',
@@ -76,6 +107,17 @@ if ( ! empty( $shipping_classes ) ) {
 			'sanitize_callback' => array( $this, 'sanitize_cost' ),
 		);
 	}
+
+	$settings['no_class_cost_behavior'] = array(
+		'title'             => __( 'No shipping class', 'woocommerce' ),
+		'type'              => 'select',
+		'class'             => 'wc-flat-rate-class-behavior',
+		'default'           => '', // Infer unset behavior from the effective cost when the option is read.
+		'options'           => $behavior_options,
+		'description'       => '<span class="wc-flat-rate-unavailable-description" hidden>' . esc_html__( "This flat rate won't appear at checkout when the cart contains a product without a shipping class.", 'woocommerce' ) . '</span>',
+		'custom_attributes' => array( 'data-cost-id' => $this->get_field_key( 'no_class_cost' ) ),
+		'sanitize_callback' => array( $this, 'sanitize_class_cost_behavior' ),
+	);
 
 	$settings['no_class_cost'] = array(
 		'title'             => __( 'No shipping class cost', 'woocommerce' ),

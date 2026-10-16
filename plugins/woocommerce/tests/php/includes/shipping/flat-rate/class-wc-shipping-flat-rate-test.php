@@ -560,4 +560,290 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 		$this->expectException( InvalidArgumentException::class );
 		$this->call_sanitize_cost->call( $this->sut, $value );
 	}
+
+	/**
+	 * @testdox Explicit class restrictions suppress only the affected flat-rate package.
+	 *
+	 * @testWith ["class", ""]
+	 *           ["class", "5"]
+	 *           ["order", ""]
+	 *           ["order", "5"]
+	 * @param string $type Calculation type.
+	 * @param string $base Base shipping cost.
+	 */
+	public function test_restricted_class_suppresses_mixed_package( string $type, string $base ): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, $base, $type, 'unavailable' );
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( array(), $this->sut->rates, 'A restricted class must suppress the whole method, even with another class cost.' );
+
+		unset( $package['contents'][1] );
+		$this->sut->calculate_shipping( $package );
+		$this->assertCount( 1, $this->sut->rates, 'The same method must remain available for a package without the restricted class.' );
+	}
+
+	/**
+	 * @testdox Missing class behavior retains the existing mixed-cart shipping cost.
+	 */
+	public function test_legacy_blank_class_keeps_mixed_package_rate(): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '', 'class' );
+
+		$blank_package             = $package;
+		$blank_package['contents'] = array( $package['contents'][1] );
+		$this->sut->calculate_shipping( $blank_package );
+		$this->assertSame( array(), $this->sut->rates, 'A blank base and blank sole class do not offer a rate.' );
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( '10', current( $this->sut->rates )->get_cost(), 'A legacy blank class adds no surcharge to the other class.' );
+	}
+
+	/**
+	 * @testdox Disabling a class surcharge keeps its saved formula for later use.
+	 */
+	public function test_no_class_cost_ignores_saved_formula(): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '5', 'class', 'none', '3 * [qty]' );
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( '15', current( $this->sut->rates )->get_cost(), 'The disabled class formula must not contribute to the total.' );
+		$this->assertSame( '3 * [qty]', $this->sut->get_option( 'class_cost_' . $classes[1]->term_id ) );
+	}
+
+	/**
+	 * @testdox A virtual item in a restricted class does not suppress shipping.
+	 */
+	public function test_virtual_product_does_not_restrict_shipping(): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$package['contents'][1]['data']->set_virtual( true );
+		$this->configure_class_costs( $classes, '', 'class', 'unavailable' );
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( '10', current( $this->sut->rates )->get_cost() );
+	}
+
+	/**
+	 * @testdox Products without a shipping class can explicitly exclude a flat rate.
+	 */
+	public function test_unclassified_product_can_restrict_shipping(): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$package['contents'][1]['data']->set_shipping_class_id( 0 );
+		$this->configure_class_costs( $classes, '5', 'class' );
+		$this->sut->instance_settings['no_class_cost_behavior'] = 'unavailable';
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( array(), $this->sut->rates );
+	}
+
+	/**
+	 * @testdox New settings preserve legacy blank and zero rates without a migration.
+	 *
+	 * @testWith ["", "none", 0]
+	 *           ["0", "add", 1]
+	 * @param string $cost Existing class cost.
+	 * @param string $behavior Expected displayed behavior.
+	 * @param int    $rate_count Expected number of rates.
+	 */
+	public function test_class_behavior_defaults_preserve_saved_costs( string $cost, string $behavior, int $rate_count ): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '', 'class', null, $cost );
+		$package['contents'] = array( $package['contents'][1] );
+		$settings            = get_option( $this->sut->get_instance_option_key() );
+
+		$this->assertSame( $behavior, $this->sut->get_option( 'class_cost_behavior_' . $classes[1]->term_id ) );
+		$this->sut->calculate_shipping( $package );
+		$this->assertCount( $rate_count, $this->sut->rates );
+		$this->assertSame( $settings, get_option( $this->sut->get_instance_option_key() ), 'Reading the new defaults must not migrate stored options.' );
+
+		$this->save_current_method_settings();
+		$this->sut = new WC_Shipping_Flat_Rate( 1 );
+		$this->sut->calculate_shipping( $package );
+		$this->assertCount( $rate_count, $this->sut->rates, 'Saving unchanged settings must preserve blank and zero availability.' );
+		$this->assertSame( $cost, $this->sut->get_option( 'class_cost_' . $classes[1]->term_id ) );
+	}
+
+	/**
+	 * @testdox Legacy slug costs remain active when the newer term-id cost is blank.
+	 */
+	public function test_class_behavior_preserves_legacy_slug_cost(): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '', 'class' );
+		update_option( 'woocommerce_flat_rate_settings', array( 'class_cost_' . $classes[1]->slug => '7' ) );
+		$this->sut           = new WC_Shipping_Flat_Rate( 1 );
+		$package['contents'] = array( $package['contents'][1] );
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertCount( 1, $this->sut->rates );
+		$this->assertSame( '7', current( $this->sut->rates )->get_cost() );
+		$this->save_current_method_settings();
+		$this->sut = new WC_Shipping_Flat_Rate( 1 );
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( '7', current( $this->sut->rates )->get_cost() );
+	}
+
+	/**
+	 * @testdox Unset class behavior preserves filtered costs before and after saving settings.
+	 *
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 * @param bool $unclassified Whether the product has no shipping class.
+	 * @param bool $disabled Whether the merchant explicitly disabled its class cost.
+	 */
+	public function test_class_behavior_preserves_filtered_cost( bool $unclassified, bool $disabled ): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '', 'class' );
+		$cost_key     = $unclassified ? 'no_class_cost' : 'class_cost_' . $classes[1]->term_id;
+		$behavior_key = $unclassified ? 'no_class_cost_behavior' : 'class_cost_behavior_' . $classes[1]->term_id;
+		if ( $unclassified ) {
+			$package['contents'][1]['data']->set_shipping_class_id( 0 );
+		}
+		$package['contents'] = array( $package['contents'][1] );
+		if ( $disabled ) {
+			$this->sut->instance_settings[ $behavior_key ] = 'none';
+		}
+		add_filter(
+			'woocommerce_shipping_flat_rate_instance_option',
+			static function ( $value, $key ) use ( $cost_key ) {
+				return $cost_key === $key ? '7' : $value;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( $disabled ? 'none' : 'add', $this->sut->get_option( $behavior_key ) );
+		$this->sut->calculate_shipping( $package );
+		$this->assertCount( $disabled ? 0 : 1, $this->sut->rates );
+		if ( ! $disabled ) {
+			$this->assertSame( '7', current( $this->sut->rates )->get_cost() );
+		}
+		$this->save_current_method_settings();
+		$this->sut = new WC_Shipping_Flat_Rate( 1 );
+		$this->sut->calculate_shipping( $package );
+		$this->assertCount( $disabled ? 0 : 1, $this->sut->rates );
+	}
+
+	/**
+	 * @testdox An explicit restriction also suppresses additional rates from the flat-rate action.
+	 */
+	public function test_restriction_skips_additional_rates_action(): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '', 'class', 'unavailable' );
+		$called = false;
+		add_action(
+			'woocommerce_flat_rate_shipping_add_rate',
+			static function () use ( &$called ) {
+				$called = true;
+			}
+		);
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertFalse( $called, 'An extension must not add another rate for an explicitly excluded method.' );
+
+		$this->sut->instance_settings[ 'class_cost_behavior_' . $classes[1]->term_id ] = 'add';
+		$this->sut->calculate_shipping( $package );
+		$this->assertTrue( $called, 'The existing action must still run for an unrestricted method.' );
+	}
+
+	/**
+	 * @testdox Invalid class behaviors fall back to the existing cost calculation.
+	 *
+	 * @testWith ["invalid"]
+	 *           [null]
+	 *           [["unavailable"]]
+	 * @param mixed $behavior Submitted setting value.
+	 */
+	public function test_invalid_class_behavior_keeps_legacy_calculation( $behavior ): void {
+		list( $package, $classes ) = $this->create_shipping_class_package();
+		$this->configure_class_costs( $classes, '5', 'class', null, '3 * [qty]' );
+		$key                                  = 'class_cost_behavior_' . $classes[1]->term_id;
+		$this->sut->instance_settings[ $key ] = $this->sut->get_field_value(
+			$key,
+			$this->sut->get_instance_form_fields()[ $key ],
+			array( $this->sut->get_field_key( $key ) => $behavior )
+		);
+
+		$this->sut->calculate_shipping( $package );
+		$this->assertSame( '18', current( $this->sut->rates )->get_cost() );
+	}
+
+	/**
+	 * Save the values currently shown by the Settings API.
+	 */
+	private function save_current_method_settings(): void {
+		$post_data = array();
+		foreach ( $this->sut->get_instance_form_fields() as $key => $field ) {
+			if ( 'title' !== $field['type'] ) {
+				$post_data[ $this->sut->get_field_key( $key ) ] = $this->sut->get_option( $key );
+			}
+		}
+		$this->sut->set_post_data( $post_data );
+		$request                 = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the request around this settings test.
+		$_REQUEST['instance_id'] = 1;
+		try {
+			$this->sut->process_admin_options();
+		} finally {
+			$_REQUEST = $request;
+		}
+	}
+
+	/**
+	 * Create two physical products in distinct shipping classes.
+	 *
+	 * @return array Package and class terms.
+	 */
+	private function create_shipping_class_package(): array {
+		$classes = array();
+		$items   = array();
+		foreach ( array( 'local', 'regional' ) as $name ) {
+			$term      = wp_insert_term( $name, 'product_shipping_class' );
+			$classes[] = get_term( $term['term_id'], 'product_shipping_class' );
+			$product   = new WC_Product_Simple();
+			$product->set_shipping_class_id( $term['term_id'] );
+			$items[] = array(
+				'data'       => $product,
+				'quantity'   => 1,
+				'line_total' => 20,
+			);
+		}
+		add_filter(
+			'woocommerce_get_shipping_classes',
+			static function () use ( $classes ) {
+				return $classes;
+			}
+		);
+
+		return array(
+			array(
+				'contents'      => $items,
+				'contents_cost' => 40,
+			),
+			$classes,
+		);
+	}
+
+	/**
+	 * Configure an instance with a priced first class and a configurable second class.
+	 *
+	 * @param array       $classes Shipping class terms.
+	 * @param string      $base Base cost.
+	 * @param string      $type Calculation type.
+	 * @param string|null $behavior Optional second-class behavior.
+	 * @param string      $cost Second-class cost.
+	 */
+	private function configure_class_costs( array $classes, string $base, string $type, ?string $behavior = null, string $cost = '' ): void {
+		$settings = array(
+			'cost'                               => $base,
+			'type'                               => $type,
+			'class_cost_' . $classes[0]->term_id => '10',
+			'class_cost_' . $classes[1]->term_id => $cost,
+		);
+		if ( null !== $behavior ) {
+			$settings[ 'class_cost_behavior_' . $classes[1]->term_id ] = $behavior;
+		}
+		update_option( 'woocommerce_flat_rate_1_settings', $settings );
+		$this->sut = new WC_Shipping_Flat_Rate( 1 );
+	}
 }

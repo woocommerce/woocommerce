@@ -686,6 +686,19 @@
 				},
 				onModalLoaded: function( event, target ) {
 					if ( target === 'wc-modal-shipping-method-settings' ) {
+						document.querySelectorAll( '.wc-flat-rate-class-behavior' ).forEach( ( behavior ) => {
+							const updateClassCost = () => {
+								const cost = document.getElementById( behavior.dataset.costId );
+								const label = document.querySelector( `label[for="${ behavior.dataset.costId }"]` );
+								const description = behavior.closest( 'fieldset' ).querySelector( '.wc-flat-rate-unavailable-description' );
+								const showCost = behavior.value === 'add';
+								cost.closest( 'fieldset' ).hidden = ! showCost;
+								label.hidden = ! showCost;
+								description.hidden = behavior.value !== 'unavailable';
+							};
+							behavior.addEventListener( 'change', updateClassCost );
+							updateClassCost();
+						} );
 						const select = $( '#woocommerce_free_shipping_requires' );
 						if ( select.length > 0 ) {
 							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
