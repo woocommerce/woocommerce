@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Regenerate product stock quantities in the lookup table in small batches, so large catalogs no longer tie up database replicas or checkout stock locks.
