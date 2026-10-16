@@ -217,6 +217,9 @@ const productFiltersStore = {
 			// The open class is applied on the next render. Until then the
 			// drawer is `visibility: hidden` and cannot take focus.
 			requestAnimationFrame( () => {
+				if ( ! context.isOverlayOpened ) {
+					return;
+				}
 				getFocusableElements( dialog )[ 0 ]?.focus();
 			} );
 		},
