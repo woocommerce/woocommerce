@@ -120,11 +120,11 @@ class ComingSoonRequestHandler {
 		$selected      = wc_locate_template( 'coming-soon/' . $template_name );
 
 		/*
-		 * Fire core's coming-soon_template filter with the arguments the block renderer passes through
-		 * get_query_template( 'coming-soon' ), so callbacks see the same contract on either renderer.
+		 * Fire core's coming-soon_template filter so callbacks can replace the page on either renderer.
+		 * The candidate list is empty because WordPress's template hierarchy is not searched here.
 		 */
 		/** This filter is documented in wp-includes/template.php */
-		$selected = apply_filters( 'coming-soon_template', $selected, 'coming-soon', array( 'coming-soon.php' ) ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		$selected = apply_filters( 'coming-soon_template', $selected, 'coming-soon', array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment -- WordPress names and documents this hook.
 		if ( ! is_string( $selected ) || ! is_file( $selected ) || ! is_readable( $selected ) ) {
 			// Never fall back to protected content when a template override cannot be loaded.
 			return '';

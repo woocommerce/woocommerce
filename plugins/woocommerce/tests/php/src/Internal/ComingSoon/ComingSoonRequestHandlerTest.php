@@ -314,7 +314,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass the original coming-soon_template filter arguments exactly once and honor a replacement.
+	 * @testdox Should fire coming-soon_template once, with no candidate templates, and honor a replacement.
 	 */
 	public function test_classic_query_template_filter(): void {
 		$template_calls = array();
@@ -329,7 +329,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( WC_ABSPATH . 'templates/single-product.php', $this->sut->handle_classic_template_include( '/original.php' ) );
-		$this->assertSame( array( array( self::ENTIRE_SITE_TEMPLATE, 'coming-soon', array( 'coming-soon.php' ) ) ), $template_calls );
+		$this->assertSame( array( array( self::ENTIRE_SITE_TEMPLATE, 'coming-soon', array() ) ), $template_calls );
 	}
 
 	/**
