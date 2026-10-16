@@ -710,6 +710,32 @@ function customize_provider_label( $label, $fulfillment ) {
 }
 ```
 
+### Privacy Filters
+
+#### `woocommerce_privacy_remove_fulfillment_personal_data_meta`
+
+Filters the fulfillment meta keys cleared when an order is anonymized through the WordPress personal-data eraser or the automatic retention cleanup.
+
+**File:** `src/Admin/Features/Fulfillments/FulfillmentsPrivacy.php`
+
+**Parameters:**
+
+-   `$meta_keys` (string[]) - The meta keys to clear. Defaults to `_tracking_number` and `_tracking_url`
+-   `$order` (WC_Order) - The order being anonymized
+
+**Return Value:** The list of meta keys to clear.
+
+**Purpose:** Add extension-stored personal data (for example a shipping label URL or an internal shipment ID) to the keys redacted during erasure.
+
+```php
+add_filter( 'woocommerce_privacy_remove_fulfillment_personal_data_meta', 'redact_custom_fulfillment_meta', 10, 2 );
+
+function redact_custom_fulfillment_meta( $meta_keys, $order ) {
+    $meta_keys[] = '_shipping_label_url';
+    return $meta_keys;
+}
+```
+
 ## Best Practices
 
 ### Hook Priority and Execution Order
