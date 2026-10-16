@@ -165,8 +165,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 			->with(
 				$this->callback(
 					function ( $args ) use ( &$loaded_page, $batch_size, $add_args_filter, $parent_exclude ) {
-						// Check pagination.
-						$this->assertEquals( ++$loaded_page, $args['page'] );
+						// Each batch resumes after the last product ID of the previous one.
+						$this->assertSame( $loaded_page * $batch_size, $args['wc_product_feed_after_id'] );
+						++$loaded_page;
 						$this->assertEquals( $batch_size, $args['limit'] );
 						$this->assertSame( 'ID', $args['orderby'] );
 						$this->assertSame( 'ASC', $args['order'] );
@@ -249,6 +250,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 				function ( $args, $integration ) use ( $mock_integration ) {
 					$this->assertSame( $mock_integration, $integration );
 					unset( $args['category'] );
+					// The walker must keep its ID order even if a filter changes it.
+					$args['orderby'] = 'date';
+					$args['order']   = 'DESC';
 					return $args;
 				},
 				10,
@@ -290,33 +294,30 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a bounded walk processes a limited number of batches, resumes from the right page,
-	 * stops at the last page, and never manages the feed lifecycle (start/end).
+	 * @testdox Should walk a bounded chunk, resume after the last walked ID, stop at the last page, and never manage the feed lifecycle.
 	 */
-	public function test_walk_processes_bounded_pages_and_resumes() {
+	public function test_walk_processes_bounded_pages_and_resumes(): void {
 		$batch_size  = 2;
 		$total       = 6;
 		$total_pages = 3;
 
-		// Build the pages of products the loader will return, keyed by page number.
-		$pages = array();
-		for ( $page = 1; $page <= $total_pages; $page++ ) {
-			$products = array();
-			for ( $i = 0; $i < $batch_size; $i++ ) {
-				$products[] = $this->create_in_memory_product( ( ( $page - 1 ) * $batch_size ) + $i + 1 );
-			}
-			$pages[ $page ] = (object) array(
-				'products'      => $products,
-				'total'         => $total,
-				'max_num_pages' => $total_pages,
-			);
-		}
-
+		// Products have IDs 1 to $total; the loader returns the first batch after the requested ID.
 		$mock_loader = $this->createMock( ProductLoader::class );
 		$this->test_container->replace( ProductLoader::class, $mock_loader );
 		$mock_loader->method( 'get_products' )->willReturnCallback(
-			function ( $args ) use ( $pages ) {
-				return $pages[ $args['page'] ];
+			function ( $args ) use ( $total, $batch_size ) {
+				$after_id  = $args['wc_product_feed_after_id'];
+				$remaining = $total - $after_id;
+				$products  = $remaining > 0 ? array_map(
+					fn( $id ) => $this->create_in_memory_product( $id ),
+					range( $after_id + 1, min( $total, $after_id + $batch_size ) )
+				) : array();
+
+				return (object) array(
+					'products'      => $products,
+					'total'         => $remaining,
+					'max_num_pages' => (int) ceil( $remaining / $batch_size ),
+				);
 			}
 		);
 
@@ -341,20 +342,24 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$mock_integration->method( 'get_feed_validator' )->willReturn( $mock_validator );
 		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
 
-		$walker = ProductWalker::from_integration( $mock_integration, $mock_feed );
-		$walker->set_batch_size( $batch_size );
+		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$sut->set_batch_size( $batch_size );
 
-		// First chunk: pages 1-2 (allotment of 2 batches reached).
-		$progress = $walker->walk_batches( null, 1, 2 );
+		// First chunk: products 1-4 (allotment of 2 batches reached).
+		$progress = $sut->walk_chunk( null, 0, 2 );
 		$this->assertSame( $total, $progress->total_count );
 		$this->assertSame( $total_pages, $progress->total_batch_count );
 		$this->assertSame( 2, $progress->processed_batches );
 		$this->assertSame( 4, $progress->processed_items );
+		$this->assertSame( 4, $progress->last_product_id );
 
-		// Final chunk: resumes at page 3 and stops at the last page even though 2 batches were allowed.
-		$progress = $walker->walk_batches( null, 3, 2 );
+		// Final chunk: resumes after product 4 and stops at the last page even though 2 batches were allowed.
+		$progress = $sut->walk_chunk( null, $progress->last_product_id, 2 );
+		$this->assertSame( 2, $progress->total_count );
+		$this->assertSame( 1, $progress->total_batch_count );
 		$this->assertSame( 1, $progress->processed_batches );
 		$this->assertSame( 2, $progress->processed_items );
+		$this->assertSame( 6, $progress->last_product_id );
 	}
 
 	/**
@@ -386,11 +391,11 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 
 		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
 		$sut->set_batch_size( 1 );
-		$sut->walk_batches( null, 1, 2 );
+		$progress = $sut->walk_chunk( null, 0, 2 );
 
 		$product_ids[] = \WC_Helper_Product::create_simple_product( true, array( 'date_created' => '2026-01-02 00:00:00' ) )->get_id();
 
-		$sut->walk_batches( null, 3 );
+		$sut->walk_chunk( null, $progress->last_product_id );
 
 		$this->assertSame( $product_ids, $exported_ids, 'Each product should be exported once, in ID order, with the new product last' );
 	}

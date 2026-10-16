@@ -24,6 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class ProductWalker {
 	/**
+	 * Query var holding the ID after which the walker's product query resumes.
+	 */
+	private const AFTER_ID_QUERY_VAR = 'wc_product_feed_after_id';
+
+	/**
 	 * The product loader.
 	 *
 	 * @var ProductLoader
@@ -125,10 +130,8 @@ class ProductWalker {
 	): self {
 		$query_args = array_merge(
 			array(
-				'status'  => array( 'publish' ),
-				'return'  => 'objects',
-				'orderby' => 'ID', // IDs are reliable, dates can break pagination.
-				'order'   => 'ASC',
+				'status' => array( 'publish' ),
+				'return' => 'objects',
 			),
 			$integration->get_product_feed_query_args()
 		);
@@ -137,6 +140,7 @@ class ProductWalker {
 		 * Allows the base arguments for querying products for product feeds to be changed.
 		 *
 		 * Variable products are not included by default, as their variations will be included.
+		 * `orderby` and `order` are always overridden with `ID` and `ASC`, as products are walked by ID.
 		 *
 		 * @since 10.5.0
 		 *
@@ -149,6 +153,10 @@ class ProductWalker {
 			$query_args,
 			$integration
 		);
+
+		// Batches resume after the last walked product ID, which only works with a stable ascending ID order.
+		$query_args['orderby'] = 'ID';
+		$query_args['order']   = 'ASC';
 
 		$instance = new self(
 			$integration->get_product_mapper(),
@@ -201,7 +209,7 @@ class ProductWalker {
 	 *
 	 * This is the simple, single-process entry point: it starts the feed, walks every batch, ends the
 	 * feed and returns the number of products processed. Callers that need to write a feed across
-	 * several processes should own the feed lifecycle themselves and use {@see walk_batches()} instead.
+	 * several processes should own the feed lifecycle themselves and use {@see walk_chunk()} instead.
 	 *
 	 * @since 10.5.0
 	 *
@@ -210,57 +218,54 @@ class ProductWalker {
 	 */
 	public function walk( ?callable $callback = null ): int {
 		$this->feed->start();
-		$progress = $this->walk_batches( $callback );
+		$progress = $this->walk_chunk( $callback );
 		$this->feed->end();
 
 		return $progress->processed_items;
 	}
 
 	/**
-	 * Walks through products, optionally limited to a bounded number of batches.
+	 * Walks through a chunk of products, optionally limited to a bounded number of batches.
 	 *
-	 * The walker does not own the feed lifecycle: the caller is responsible for starting, flushing
-	 * and ending the feed. This lets a feed be written across several processes by resuming the same
-	 * feed between calls.
+	 * The walker does not own the feed lifecycle, so a feed can be written across several processes:
+	 * walk a chunk, then resume the next one from the returned `last_product_id`. Resuming from an ID
+	 * rather than a page keeps products from being skipped when earlier ones are removed in between.
 	 *
-	 * Called with the defaults it walks every remaining page in one go; pass `$start_page` and
-	 * `$max_batches` to process a bounded slice and resume later from `processed_batches`.
+	 * @since 11.3.0
 	 *
-	 * @since 11.0.0
-	 *
-	 * @param callable|null $callback    The callback to call after each batch of products is processed.
-	 * @param int           $start_page  The 1-based page (batch) to start at.
-	 * @param int           $max_batches The maximum number of batches to process in this call.
-	 * @return WalkerProgress Items/batches processed here, plus the overall total_count and
-	 *                        total_batch_count so the caller knows whether the feed is complete.
+	 * @param callable|null $callback                The callback to call after each batch of products is processed.
+	 * @param int           $resume_after_product_id Resume after this product ID, usually the previous chunk's `last_product_id`; 0 starts from the beginning.
+	 * @param int           $max_batches             The maximum number of batches to process in this call.
+	 * @return WalkerProgress Items/batches processed here, plus the total_count and total_batch_count
+	 *                        remaining when this chunk started, so the caller knows whether the feed is complete.
 	 */
-	public function walk_batches( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
-		if ( $start_page < 1 ) {
-			$start_page = 1;
-		}
+	public function walk_chunk( ?callable $callback = null, int $resume_after_product_id = 0, int $max_batches = PHP_INT_MAX ): WalkerProgress {
+		$after_id = max( 0, $resume_after_product_id );
 		if ( $max_batches < 1 ) {
 			$max_batches = 1;
 		}
 
 		$progress = null;
-		$page     = $start_page;
 
 		// Check how much memory is available at first.
 		$initial_available_memory = $this->memory_manager->get_available_memory();
 
 		$batches_processed = 0;
 		do {
-			$result   = $this->iterate( $this->query_args, $page, $this->per_page );
+			$result   = $this->iterate( $this->query_args, $after_id, $this->per_page );
 			$iterated = count( $result->products );
 
-			// Only build the progress object once; the total/total batch count is stable across pages.
+			// Only build the progress object once, so the totals reflect what remained when this call started.
 			if ( is_null( $progress ) ) {
 				$progress = WalkerProgress::from_wc_get_products_result( $result );
 			}
+			if ( $iterated > 0 ) {
+				$after_id = end( $result->products )->get_id();
+			}
+			$progress->last_product_id  = $after_id;
 			$progress->processed_items += $iterated;
 			++$progress->processed_batches;
 			++$batches_processed;
-			++$page;
 
 			if ( is_callable( $callback ) && $iterated > 0 ) {
 				$callback( $progress );
@@ -283,7 +288,7 @@ class ProductWalker {
 			&& $batches_processed < $max_batches
 
 			// For the cases where the above are true, make sure that we do not exceed the total number of pages.
-			&& ( $progress->total_batch_count <= 0 || ( $page - 1 ) < $progress->total_batch_count )
+			&& ( $progress->total_batch_count <= 0 || $batches_processed < $progress->total_batch_count )
 		);
 
 		// The do-while body always executes at least once and assigns $progress on the first iteration.
@@ -291,29 +296,70 @@ class ProductWalker {
 	}
 
 	/**
+	 * Walks the first chunk of products and reports it as the whole feed.
+	 *
+	 * This class is internal and nothing outside WooCommerce should call this method. It's kept only
+	 * so that any unexpected caller gets a deprecation notice instead of a fatal error that takes the
+	 * site down. Resuming from a page is no longer supported, so `$start_page` is ignored.
+	 *
+	 * @since 11.0.0
+	 * @deprecated 11.3.0 Use walk_chunk(), which resumes after a product ID instead of a page.
+	 *
+	 * @param callable|null $callback    The callback to call after each batch of products is processed.
+	 * @param int           $start_page  Ignored.
+	 * @param int           $max_batches The maximum number of batches to process in this call.
+	 * @return WalkerProgress
+	 */
+	public function walk_batches( ?callable $callback = null, int $start_page = 1, int $max_batches = PHP_INT_MAX ): WalkerProgress {
+		wc_deprecated_function( __METHOD__, '11.3.0', __CLASS__ . '::walk_chunk' );
+
+		$progress                    = $this->walk_chunk( $callback, 0, $max_batches );
+		$progress->total_count       = $progress->processed_items;
+		$progress->total_batch_count = $progress->processed_batches;
+
+		return $progress;
+	}
+
+	/**
 	 * Iterates through a batch of products.
 	 *
-	 * @param array $args The arguments to pass to wc_get_products().
-	 * @param int   $page The page number to iterate through.
-	 * @param int   $limit The maximum number of products to iterate through.
+	 * @param array $args     The arguments to pass to wc_get_products().
+	 * @param int   $after_id Only include products with an ID greater than this one.
+	 * @param int   $limit    The maximum number of products to iterate through.
 	 * @return \stdClass The result of the query with properties: products, total, max_num_pages.
 	 */
-	private function iterate( array $args = array(), int $page = 1, int $limit = 100 ): \stdClass {
-		/**
-		 * Result is always stdClass when paginate=true.
-		 *
-		 * @var \stdClass $result
-		 */
-		$result = $this->product_loader->get_products(
-			array_merge(
-				$args,
-				array(
-					'page'     => $page,
-					'limit'    => $limit,
-					'paginate' => true,
+	private function iterate( array $args = array(), int $after_id = 0, int $limit = 100 ): \stdClass {
+		// WP_Query has no "ID greater than" argument, so add it to the WHERE clause of this query only.
+		$after_id_where = static function ( $where, $query ) {
+			global $wpdb;
+
+			if ( ! $query instanceof \WP_Query || '' === $query->get( self::AFTER_ID_QUERY_VAR ) ) {
+				return $where;
+			}
+
+			return $where . $wpdb->prepare( " AND {$wpdb->posts}.ID > %d", (int) $query->get( self::AFTER_ID_QUERY_VAR ) );
+		};
+
+		add_filter( 'posts_where', $after_id_where, 10, 2 );
+		try {
+			/**
+			 * Result is always stdClass when paginate=true.
+			 *
+			 * @var \stdClass $result
+			 */
+			$result = $this->product_loader->get_products(
+				array_merge(
+					$args,
+					array(
+						self::AFTER_ID_QUERY_VAR => $after_id,
+						'limit'                  => $limit,
+						'paginate'               => true,
+					)
 				)
-			)
-		);
+			);
+		} finally {
+			remove_filter( 'posts_where', $after_id_where, 10 );
+		}
 
 		foreach ( $result->products as $product ) {
 			$mapped_data = $this->mapper->map_product( $product );
