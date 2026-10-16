@@ -75,11 +75,11 @@ class AbilityExtensions {
 	 */
 	public static function register_resource( string $resource_name ): void {
 		if ( did_action( 'woocommerce_ability_resources_init' ) && ! doing_action( 'woocommerce_ability_resources_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_ability_resources_init action, before the fields are registered.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'Register a resource inside the woocommerce_ability_resources_init action, before the fields are registered.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name ) {
-			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 
@@ -112,29 +112,55 @@ class AbilityExtensions {
 	 */
 	public static function register_field( array $args ): void {
 		if ( did_action( 'woocommerce_ability_extensions_init' ) && ! doing_action( 'woocommerce_ability_extensions_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_ability_extensions_init action, before the abilities build their schemas.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_ability_extensions_init action, before the abilities build their schemas.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
 			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
-				wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), '11.3.0' );
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						$key
+					),
+					'11.3.0'
+				);
 				return;
 			}
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
-			wc_doing_it_wrong( __METHOD__, sprintf( 'The "%s" resource is not registered. Call AbilityExtensions::register_resource() first.', $args['resource'] ), '11.3.0' );
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call AbilityExtensions::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.3.0'
+			);
 			return;
 		}
 		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array with a "type".', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'The "schema" argument must be an array with a "type".', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'The "get_callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
-			wc_doing_it_wrong( __METHOD__, sprintf( 'The field "%s.%s" of "%s" is already registered.', $args['namespace'], $args['field'], $args['resource'] ), '11.3.0' );
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: 1: extension namespace, 2: field name, 3: resource name. */
+					__( 'The field "%1$s.%2$s" of "%3$s" is already registered.', 'woocommerce' ),
+					$args['namespace'],
+					$args['field'],
+					$args['resource']
+				),
+				'11.3.0'
+			);
 			return;
 		}
 
@@ -244,7 +270,14 @@ class AbilityExtensions {
 		}
 
 		self::$reported[ $key ] = true;
-		$message                = sprintf( 'Ability field "%s.%s" of "%s" was left out because its value does not match its schema: %s', $args['namespace'], $args['field'], $args['resource'], $valid->get_error_message() );
+		$message                = sprintf(
+			/* translators: 1: extension namespace, 2: field name, 3: resource name, 4: validation error. */
+			__( 'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s', 'woocommerce' ),
+			$args['namespace'],
+			$args['field'],
+			$args['resource'],
+			$valid->get_error_message()
+		);
 		wc_get_logger()->error( $message, array( 'source' => 'ability-extensions' ) );
 		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.3.0' );
 		return false;
