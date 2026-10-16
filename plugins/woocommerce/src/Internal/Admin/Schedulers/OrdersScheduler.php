@@ -929,6 +929,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		// The callers interpolate this fragment into $wpdb->prepare(), so a literal percent sign
 		// (a LIKE pattern, say) must not read as a placeholder. $wpdb->query() restores it.
+		// A parent whose conditions come out NULL counts as excluded, as it does in the per-record probe.
 		return $wpdb->add_placeholder_escape(
 			" AND (
 				EXISTS ( SELECT 1 FROM {$stats_table} AS held WHERE held.order_id = {$table_alias}.{$id} )
@@ -939,7 +940,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 						OR NOT EXISTS (
 							SELECT 1 FROM {$table_name} AS parent_order
 							WHERE parent_order.{$id} = {$table_alias}.{$parent}
-							AND NOT ( " . ( '' === $parent_conditions ? '1' : $parent_conditions ) . " )
+							AND NOT COALESCE( ( " . ( '' === $parent_conditions ? '1' : $parent_conditions ) . " ), 0 )
 							AND NOT EXISTS ( SELECT 1 FROM {$stats_table} AS parent_held WHERE parent_held.order_id = parent_order.{$id} )
 						)
 					)
