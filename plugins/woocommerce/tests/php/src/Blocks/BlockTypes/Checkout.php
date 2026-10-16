@@ -71,7 +71,7 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Checks the local pickup title is updated when the Checkout block is saved.
+	 * @testdox The local pickup title is updated when the Checkout block is saved.
 	 * @return void
 	 */
 	public function test_local_pickup_title_change() {

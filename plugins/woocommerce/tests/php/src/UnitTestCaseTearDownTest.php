@@ -54,7 +54,7 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Every piece of singleton state the teardown is responsible for is cleared.
+	 * @testdox Every piece of singleton state the teardown is responsible for is cleared.
 	 */
 	public function test_clear_wc_singleton_state_clears_what_survives_the_parent_teardown(): void {
 		$locale_filter = function ( $locale ) {
