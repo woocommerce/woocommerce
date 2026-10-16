@@ -202,6 +202,7 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	 *           ["no", 2, "no", "0.70", 0.11]
 	 *           ["yes", 0, "yes", "70", 10.5]
 	 *           ["no", 2, "no", "0.70", 0.10, true]
+	 *           ["yes", 0, "no", "70", 0.0, false, true]
 	 *
 	 * @param string $prices_include_tax Whether product prices include tax.
 	 * @param int    $decimals           Currency decimal places.
@@ -209,14 +210,16 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	 * @param string $shipping_cost      Flat rate shipping cost.
 	 * @param float  $expected_tax       Expected shipping tax.
 	 * @param bool   $filter_rounding    Whether a tax filter overrides the store's rounding mode.
+	 * @param bool   $exempt             Whether the customer is exempt from tax.
 	 */
-	public function test_shipping_tax_matches_order_rounding( string $prices_include_tax, int $decimals, string $round_at_subtotal, string $shipping_cost, float $expected_tax, bool $filter_rounding = false ): void {
+	public function test_shipping_tax_matches_order_rounding( string $prices_include_tax, int $decimals, string $round_at_subtotal, string $shipping_cost, float $expected_tax, bool $filter_rounding = false, bool $exempt = false ): void {
 		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
 		update_option( 'woocommerce_price_num_decimals', $decimals );
 		update_option( 'woocommerce_default_country', 'US:NY' );
 		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
 
 		$this->tax_rate_id = WC_Tax::_insert_tax_rate(
 			array(
@@ -253,6 +256,7 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 		WC()->shipping()->load_shipping_methods();
 		WC_Helper_Shipping::force_customer_us_address();
+		WC()->customer->set_is_vat_exempt( $exempt );
 		WC()->cart->add_to_cart( $this->product->get_id() );
 		WC()->cart->apply_coupon( $coupon->get_code() );
 		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:' . $this->flat_rate_id ) );
@@ -265,6 +269,8 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 
 		try {
 			WC()->cart->calculate_totals();
+			$rate = WC()->shipping()->get_packages()[0]['rates'][ 'flat_rate:' . $this->flat_rate_id ];
+			$this->assertStringContainsString( wc_price( (float) $shipping_cost + $expected_tax ), wc_cart_totals_shipping_method_label( $rate ), 'The offered shipping price must match the calculated shipping charge.' );
 
 			$order = wc_get_order(
 				WC()->checkout()->create_order(

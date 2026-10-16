@@ -397,7 +397,18 @@ function wc_cart_totals_shipping_method_label( $method ) {
 
 	if ( $has_cost && ! $hide_cost ) {
 		if ( WC()->cart->display_prices_including_tax() ) {
-			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
+			$shipping_tax = $method->get_shipping_tax();
+			if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) && ( ! WC()->customer || ! WC()->customer->get_is_vat_exempt() ) ) {
+				$taxes = $method->get_taxes();
+				// Keep exemption and shipping-tax overrides authoritative.
+				if ( (float) array_sum( $taxes ) === (float) $shipping_tax ) {
+					foreach ( $taxes as $rate_id => $tax ) {
+						$taxes[ $rate_id ] = wc_remove_number_precision( wc_round_tax_total( wc_add_number_precision( (float) $tax, false ), 0 ) );
+					}
+					$shipping_tax = array_sum( $taxes );
+				}
+			}
+			$label .= ': ' . wc_price( $method->cost + $shipping_tax );
 			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {
 				$label .= ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>';
 			}
