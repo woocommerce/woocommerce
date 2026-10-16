@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show add-to-cart errors in place on classic product lists, instead of redirecting to the product page or reporting a false success.
