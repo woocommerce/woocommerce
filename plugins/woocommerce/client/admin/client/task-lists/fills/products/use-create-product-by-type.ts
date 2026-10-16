@@ -15,7 +15,8 @@ import { createNoticesFromResponse } from '../../../lib/notices';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( itemsStore );
-	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
+	const [ requestingType, setRequestingType ] =
+		useState< ProductTypeKey | null >( null );
 
 	const getProductEditPageLink = async ( type: ProductTypeKey ) => {
 		try {
@@ -40,17 +41,19 @@ export const useCreateProductByType = () => {
 	};
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
-		setIsRequesting( true );
+		setRequestingType( type );
 
 		const url = await getProductEditPageLink( type );
 		if ( url ) {
+			// No reset on success: the page stays busy until the editor loads.
 			navigateTo( { url } );
+		} else {
+			setRequestingType( null );
 		}
-		setIsRequesting( false );
 	};
 
 	return {
 		createProductByType,
-		isRequesting,
+		requestingType,
 	};
 };
