@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep keyboard focus inside open product filters and prevent focus on closed filters.
