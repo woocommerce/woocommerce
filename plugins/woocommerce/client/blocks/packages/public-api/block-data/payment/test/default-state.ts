@@ -17,14 +17,11 @@ const getDefaultPaymentStateWithMocks = ( {
 	},
 	customerPaymentMethods = {},
 	globalPaymentMethods = [],
-	preselectPaymentMethod = true,
 }: {
 	isEditorMode?: boolean;
 	checkoutData?: { payment_method: string };
 	customerPaymentMethods?: Record< string, SavedPaymentMethod[] >;
 	globalPaymentMethods?: GlobalPaymentMethod[];
-	/** The store setting that decides whether a method is preselected. */
-	preselectPaymentMethod?: boolean;
 } = {} ): PaymentState => {
 	let state: PaymentState | undefined;
 
@@ -51,10 +48,6 @@ const getDefaultPaymentStateWithMocks = ( {
 						return {};
 				}
 			},
-		} ) );
-
-		jest.doMock( '@woocommerce/block-settings', () => ( {
-			shouldPreselectPaymentMethod: () => preselectPaymentMethod,
 		} ) );
 
 		// Get a fresh copy of the state
@@ -118,21 +111,6 @@ describe( 'defaultPaymentState', () => {
 				globalPaymentMethods: mockGlobalPaymentMethods,
 			} );
 			expect( state.activePaymentMethod ).toBe( 'stripe' );
-		} );
-
-		it( 'should be an empty string when the store does not preselect a payment method', () => {
-			const state = getDefaultPaymentStateWithMocks( {
-				isEditorMode: true,
-				globalPaymentMethods: [
-					{
-						id: 'stripe',
-						title: 'Stripe',
-						description: 'Pay with Stripe',
-					},
-				],
-				preselectPaymentMethod: false,
-			} );
-			expect( state.activePaymentMethod ).toBe( '' );
 		} );
 	} );
 
@@ -220,32 +198,6 @@ describe( 'defaultPaymentState', () => {
 					payment_method: 'stripe',
 					'wc-stripe-payment-token': '123',
 				} );
-			} );
-
-			it( 'should not select a saved card when the store does not preselect a payment method', () => {
-				const state = getDefaultPaymentStateWithMocks( {
-					checkoutData: { payment_method: 'stripe' },
-					customerPaymentMethods: {
-						cc: [
-							{
-								method: {
-									gateway: 'stripe',
-									brand: 'visa',
-									last4: '1234',
-								},
-								tokenId: 123,
-								is_default: true,
-								expires: '10/99',
-								actions: {},
-							},
-						],
-					},
-					preselectPaymentMethod: false,
-				} );
-
-				// The shopper's gateway stays active, but no card is picked for them.
-				expect( state.activePaymentMethod ).toBe( 'stripe' );
-				expect( state.paymentMethodData ).toEqual( {} );
 			} );
 
 			it( 'selects the default saved token for the active gateway, even when it is not first', () => {

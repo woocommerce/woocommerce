@@ -3,12 +3,12 @@
  */
 import { select, dispatch } from '@wordpress/data';
 import { PlainPaymentMethods } from '@woocommerce/types';
-import { shouldPreselectPaymentMethod } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { store as paymentStore } from '../index';
+import { checkoutData } from '../../checkout/constants';
 
 export const setDefaultPaymentMethod = async (
 	paymentMethods: PlainPaymentMethods
@@ -31,8 +31,10 @@ export const setDefaultPaymentMethod = async (
 		return;
 	}
 
-	// The store setting can require shoppers to pick a method themselves.
-	if ( ! shouldPreselectPaymentMethod() ) {
+	// When the server answered with no payment method, it decided to preselect nothing: never pick one
+	// here, and clear a selected method that the browser can no longer use rather than swap it for
+	// another. Without a server answer, as in the editor, the fallback below runs.
+	if ( checkoutData?.payment_method === '' ) {
 		if ( activePaymentMethod ) {
 			void dispatch( paymentStore ).__internalSetPaymentIdle();
 			void dispatch( paymentStore ).__internalSetActivePaymentMethod(

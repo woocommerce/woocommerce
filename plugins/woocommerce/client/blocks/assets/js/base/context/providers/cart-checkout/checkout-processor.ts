@@ -31,7 +31,7 @@ import {
 	responseTypes,
 } from '@woocommerce/types';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
-import { shouldPreselectPaymentMethod } from '@woocommerce/block-settings';
+import { isDefaultPaymentMethodFiltered } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -215,7 +215,7 @@ const CheckoutProcessor = () => {
 		}
 
 		return validatePaymentMethodSelection( {
-			preselectPaymentMethod: shouldPreselectPaymentMethod(),
+			preselectPaymentMethod: ! isDefaultPaymentMethodFiltered(),
 			hasPaymentMethods: hasAvailablePaymentMethods,
 			cartNeedsPayment,
 			activePaymentMethod,
