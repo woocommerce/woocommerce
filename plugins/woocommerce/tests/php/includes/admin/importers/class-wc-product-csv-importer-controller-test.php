@@ -699,4 +699,88 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		}
 		$this->assertSame( 'Commodity code (HS code)', $options['customs_commodity_code'], 'The commodity code option should match the export label.' );
 	}
+
+	/**
+	 * Path to the sample CSV used by the server-path tests.
+	 *
+	 * @return string
+	 */
+	private function sample_csv(): string {
+		return WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/tests/php/includes/importer/sample.csv';
+	}
+
+	/**
+	 * Test importing a file located in the uploads directory by entering a path
+	 * relative to the uploads directory (e.g. on hosts where wp-content lives
+	 * outside of ABSPATH).
+	 *
+	 * @return void
+	 */
+	public function test_server_file_in_uploads_dir() {
+		$upload_dir = wp_get_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'sample-53676.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = 'sample-53676.csv';
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$this->assertEquals( $file, $import_controller->handle_upload() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test importing a file by entering its absolute path.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_absolute_path() {
+		$upload_dir = wp_get_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'sample-53676-absolute.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = $file;
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$this->assertEquals( $file, $import_controller->handle_upload() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test that an absolute path outside of ABSPATH and the uploads directory is rejected.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_absolute_path_outside_allowed_locations() {
+		$file = sys_get_temp_dir() . '/sample-53676-outside.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = $file;
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$import_result = $import_controller->handle_upload();
+
+			$this->assertTrue( is_wp_error( $import_result ) );
+			$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test that a non-string file_url value is treated as empty rather than resolved.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_non_string_file_url() {
+		$_POST['file_url'] = array( 'sample.csv' );
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$import_result     = $import_controller->handle_upload();
+
+		$this->assertTrue( is_wp_error( $import_result ) );
+		$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
+	}
 }
