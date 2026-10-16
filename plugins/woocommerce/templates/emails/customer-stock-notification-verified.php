@@ -56,6 +56,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 	<table id="notification__footer"><tr><td>
 		<?php
 		esc_html_e( 'You have received this message because your e-mail address was used to sign up for stock notifications on our store.', 'woocommerce' );
+		echo ' ';
 
 		// Retain the legacy link ID for email styles and template overrides.
 		if ( ! $is_guest && $account_link ) {

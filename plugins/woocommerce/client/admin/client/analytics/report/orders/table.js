@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { map } from 'lodash';
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
@@ -315,13 +315,17 @@ class OrdersReportTable extends Component {
 	}
 
 	renderList( visibleItems, popoverItems ) {
+		const links = this.renderLinks( visibleItems );
+		// Without a badge, keep the link as the cell's only child so the table's
+		// `a:only-child` rule still stretches it across the cell.
+		if ( popoverItems.length <= 1 ) {
+			return links;
+		}
 		return (
-			<Fragment>
-				{ this.renderLinks( visibleItems ) }
-				{ popoverItems.length > 1 && (
-					<ViewMoreList items={ this.renderLinks( popoverItems ) } />
-				) }
-			</Fragment>
+			<div className="woocommerce-analytics__inline-list">
+				{ links }
+				<ViewMoreList items={ this.renderLinks( popoverItems ) } />
+			</div>
 		);
 	}
 
