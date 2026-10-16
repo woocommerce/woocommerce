@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"slug": "button-contrast",
+	"title": "Contrast",
+	"blockTypes": [
+		"core/button"
+	],
+	"styles": {
+		"color": {
+			"background": "var(--wp--preset--color--theme-1)",
+			"text": "var(--wp--preset--color--theme-2)"
+		},
+		"css": ".wp-block-button__link:not(.has-background):hover { background-color: color-mix(in srgb, var(--wp--preset--color--theme-1) 95%, var(--wp--preset--color--theme-2)); }"
+	}
+}
