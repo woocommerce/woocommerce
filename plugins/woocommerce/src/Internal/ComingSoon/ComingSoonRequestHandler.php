@@ -17,11 +17,16 @@ class ComingSoonRequestHandler {
 	private $coming_soon_helper = null;
 
 	/**
-	 * Whether the coming soon screen should be shown. Cache the result to avoid multiple calls to the helper.
-	 *
-	 * @var bool
+	 * Priority of the classic-theme guard: just below WordPress's default, so lower-priority callbacks still run first.
 	 */
-	private static $show_coming_soon = false;
+	private const CLASSIC_GUARD_PRIORITY = 9;
+
+	/**
+	 * Whether the coming soon screen should be shown, cached once decided for the request. Null until then.
+	 *
+	 * @var bool|null
+	 */
+	private static $show_coming_soon = null;
 
 	/**
 	 * Sets up the hook.
@@ -42,14 +47,8 @@ class ComingSoonRequestHandler {
 				}
 
 				add_filter( 'template_include', array( $this, 'handle_template_include' ) );
-				add_action(
-					'template_redirect',
-					function () {
-						// Adds the template_include callback this late so it runs after the ones other plugins register, and none of them can replace the private page.
-						add_filter( 'template_include', array( $this, 'handle_classic_template_include' ), PHP_INT_MAX );
-					},
-					PHP_INT_MAX
-				);
+				add_filter( 'template_include', array( $this, 'remove_other_template_include_callbacks' ), self::CLASSIC_GUARD_PRIORITY );
+				add_filter( 'template_include', array( $this, 'handle_classic_template_include' ), PHP_INT_MAX );
 				add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 			}
@@ -96,7 +95,37 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Selects a PHP Coming Soon template after every other template_include callback.
+	 * Unhooks every other template_include callback on classic Coming Soon requests, keeping only the PHP template selector.
+	 * Callbacks from the default priority up can then neither print, exit, nor replace the page. Lower priorities have already run.
+	 *
+	 * @internal
+	 *
+	 * @param string $template The previously selected template path.
+	 * @return string The unchanged template path.
+	 */
+	public function remove_other_template_include_callbacks( $template ) {
+		global $wp_filter;
+
+		$selector = array( $this, 'handle_classic_template_include' );
+
+		// Without the selector, removing the other callbacks would leave WordPress's default template, showing the protected page.
+		if ( false === has_filter( 'template_include', $selector ) || ! $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
+			return $template;
+		}
+
+		foreach ( $wp_filter['template_include']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( $selector !== $callback['function'] ) {
+					remove_filter( 'template_include', $callback['function'], $priority );
+				}
+			}
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Selects a PHP Coming Soon template, as the last template_include callback left on classic Coming Soon requests.
 	 *
 	 * @internal
 	 *
@@ -173,11 +202,20 @@ class ComingSoonRequestHandler {
 	 * @return bool
 	 */
 	private function should_show_coming_soon() {
-		// Early exit if already determined that the coming soon screen should be shown.
-		if ( self::$show_coming_soon ) {
-			return true;
+		// The guard and the selector both ask, so decide once per request: the exclusion filter fires and the share cookie is set only once.
+		if ( null === self::$show_coming_soon ) {
+			self::$show_coming_soon = $this->decide_show_coming_soon();
 		}
 
+		return self::$show_coming_soon;
+	}
+
+	/**
+	 * Decides whether the coming soon screen should be shown for the current request.
+	 *
+	 * @return bool
+	 */
+	private function decide_show_coming_soon() {
 		// Early exit if the user is logged in as administrator / shop manager.
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return false;
@@ -217,7 +255,6 @@ class ComingSoonRequestHandler {
 			}
 		}
 
-		self::$show_coming_soon = true;
 		return true;
 	}
 

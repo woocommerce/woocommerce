@@ -63,7 +63,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		remove_theme_support( 'block-template-parts' );
 		remove_theme_support( 'block-templates' );
 		$GLOBALS['wp_styles'] = new \WP_Styles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Isolate queued/rendered assets from other request fixtures.
-		$this->visibility->setValue( null, false );
+		$this->visibility->setValue( null, null );
 		wp_set_current_user( 0 );
 		unset( $_GET['woo-share'], $_COOKIE['woo-share'] );
 		update_option( 'woocommerce_coming_soon', 'yes' );
@@ -546,25 +546,125 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the PHP Coming Soon page when other template_include callbacks run later.
+	 * @testdox Should let only lower-priority template_include callbacks run on classic Coming Soon requests, so none can print or replace the page.
 	 */
-	public function test_classic_template_wins_over_later_template_filters(): void {
+	public function test_classic_request_removes_later_template_include_callbacks(): void {
+		$ran     = array();
+		$handler = $this->hook_handler_with_probes( $ran );
+
+		$template = null;
+		$output   = $this->capture(
+			function () use ( &$template ) {
+				$template = apply_filters( 'template_include', '/original.php' );
+			}
+		);
+
+		$this->assertSame( self::ENTIRE_SITE_TEMPLATE, $template );
+		$this->assertSame( array( 1 ), $ran, 'Only callbacks below the guard may run.' );
+		$this->assertSame( 'Printed at 1. ', $output );
+		$this->assertFalse( has_action( 'after_setup_theme', array( $handler, 'possibly_init_block_templates' ) ), 'Classic themes must not start the block template classes.' );
+	}
+
+	/**
+	 * @testdox Should leave every template_include callback in place when Coming Soon does not apply.
+	 */
+	public function test_bypass_request_keeps_template_include_callbacks(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$ran = array();
+		$this->hook_handler_with_probes( $ran );
+
+		$template = null;
+		$this->capture(
+			function () use ( &$template ) {
+				$template = apply_filters( 'template_include', '/original.php' );
+			}
+		);
+
+		$this->assertSame( '/protected-' . PHP_INT_MAX . '.php', $template );
+		$this->assertSame( array( 1, 10, 999, PHP_INT_MAX ), $ran );
+	}
+
+	/**
+	 * @testdox Should leave other template_include callbacks in place on block themes.
+	 */
+	public function test_guard_keeps_callbacks_on_block_themes(): void {
+		switch_theme( 'twentytwentytwo' );
+		add_filter( 'template_include', array( $this->sut, 'handle_classic_template_include' ), PHP_INT_MAX );
+		$probe = fn( $template ) => $template;
+		add_filter( 'template_include', $probe, 999 );
+
+		$this->sut->remove_other_template_include_callbacks( '/original.php' );
+
+		$this->assertSame( 999, has_filter( 'template_include', $probe ) );
+	}
+
+	/**
+	 * @testdox Should leave every template_include callback in place when the PHP template selector is unhooked.
+	 */
+	public function test_guard_does_nothing_without_the_selector(): void {
+		$ran     = array();
+		$handler = $this->hook_handler_with_probes( $ran );
+		remove_filter( 'template_include', array( $handler, 'handle_classic_template_include' ), PHP_INT_MAX );
+
+		$template = null;
+		$this->capture(
+			function () use ( &$template ) {
+				$template = apply_filters( 'template_include', '/original.php' );
+			}
+		);
+
+		$this->assertSame( '/protected-' . PHP_INT_MAX . '.php', $template );
+		$this->assertSame( array( 1, 10, 999, PHP_INT_MAX ), $ran );
+	}
+
+	/**
+	 * @testdox Should decide Coming Soon once per request, so an excluding filter fires once although the guard and the selector both ask.
+	 */
+	public function test_coming_soon_is_decided_once_per_request(): void {
+		$calls = 0;
+		add_filter(
+			'woocommerce_coming_soon_exclude',
+			function () use ( &$calls ) {
+				++$calls;
+				return true;
+			}
+		);
+		$ran = array();
+		$this->hook_handler_with_probes( $ran );
+
+		$this->capture(
+			function () {
+				apply_filters( 'template_include', '/original.php' );
+			}
+		);
+
+		$this->assertSame( 1, $calls );
+	}
+
+	/**
+	 * Hook a fresh handler as WooCommerce does, plus template_include probes at priorities 1, 10, 999 and PHP_INT_MAX that print and return a path.
+	 *
+	 * @param array $ran Receives the priorities of the probes that ran, in order.
+	 * @return ComingSoonRequestHandler The hooked handler.
+	 */
+	private function hook_handler_with_probes( array &$ran ): ComingSoonRequestHandler {
 		$handler = new ComingSoonRequestHandler();
 		remove_all_actions( 'plugins_loaded' );
-		remove_all_actions( 'template_redirect' );
 		remove_all_filters( 'template_include' );
 		$handler->init( wc_get_container()->get( ComingSoonHelper::class ) );
 		do_action( 'plugins_loaded' );
-		add_filter( 'template_include', fn() => '/theme-builder-999.php', 999 );
-		add_filter( 'template_include', fn() => '/theme-builder-max.php', PHP_INT_MAX );
-		do_action( 'template_redirect' );
-
-		$this->assertSame(
-			self::ENTIRE_SITE_TEMPLATE,
-			apply_filters( 'template_include', '/original.php' ),
-			'A later template_include callback must not replace the private page.'
-		);
-		$this->assertFalse( has_action( 'after_setup_theme', array( $handler, 'possibly_init_block_templates' ) ), 'Classic themes must not start the block template classes.' );
+		foreach ( array( 1, 10, 999, PHP_INT_MAX ) as $priority ) {
+			add_filter(
+				'template_include',
+				function () use ( &$ran, $priority ) {
+					$ran[] = $priority;
+					echo esc_html( 'Printed at ' . $priority . '. ' );
+					return '/protected-' . $priority . '.php';
+				},
+				$priority
+			);
+		}
+		return $handler;
 	}
 
 	/**
