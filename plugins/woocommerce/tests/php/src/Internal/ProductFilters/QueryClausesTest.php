@@ -26,7 +26,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
-	 * Callback added to the woocommerce_product_filter_taxonomy_params filter during a test.
+	 * Callback added to the woocommerce_product_filter_params filter during a test.
 	 *
 	 * @var callable|null
 	 */
@@ -53,7 +53,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	public function tearDown(): void {
 		try {
 			if ( null !== $this->taxonomy_params_filter ) {
-				remove_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+				remove_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
 				$this->taxonomy_params_filter = null;
 			}
 		} finally {
@@ -275,6 +275,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	 * @testWith ["product_cat", ["cat-1"]]
 	 *           ["product_cat", ["cat-2"]]
 	 *           ["product_cat", ["cat-1", "cat-2"]]
+	 *           ["product_cat", ["cat-1", "not-exist-slug"]]
 	 *           ["product_tag", ["tag-1"]]
 	 *           ["product_tag", ["tag-2", "tag-3"]]
 	 *
@@ -320,9 +321,9 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * @testdox Taxonomy filtering ignores selected taxonomies with no matching term.
+	 * @testdox Taxonomy filtering returns no products when a selected taxonomy has no matching terms.
 	 */
-	public function test_taxonomy_clauses_ignore_taxonomies_without_matching_terms(): void {
+	public function test_taxonomy_clauses_fail_closed_when_a_taxonomy_has_no_matching_terms(): void {
 		$chosen_taxonomies = array(
 			'product_cat' => array( 'cat-1' ),
 			'product_tag' => array( 'not-exist-slug' ),
@@ -335,7 +336,26 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
 		remove_filter( 'posts_clauses', $filter_callback );
 
-		$this->assertEqualsCanonicalizing( array( 'Product 1', 'Product 4', 'Product 5', 'Product 6' ), $received_products );
+		$this->assertSame( array(), $received_products );
+	}
+
+	/**
+	 * @testdox Taxonomy filtering ignores unknown terms when that taxonomy also has a matching term.
+	 */
+	public function test_taxonomy_clauses_ignore_unknown_terms_in_a_matching_taxonomy(): void {
+		$chosen_taxonomies = array(
+			'product_cat' => array( 'cat-1' ),
+			'product_tag' => array( 'tag-1', 'not-exist-slug' ),
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_taxonomies ) {
+			return $this->sut->add_taxonomy_clauses( $args, $chosen_taxonomies );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products = $this->get_data_from_products_array( wc_get_products( array() ) );
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$this->assertEqualsCanonicalizing( array( 'Product 1', 'Product 4' ), $received_products );
 	}
 
 	/**
@@ -421,11 +441,11 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		$brand_owner = $this->products[0];
 		$brand_slug  = $this->assign_brand_to_product( $brand_owner, 'Acme' );
 
-		$this->taxonomy_params_filter = function ( array $taxonomy_params ): array {
-			$taxonomy_params['product_brand'] = 'wc_brands';
-			return $taxonomy_params;
+		$this->taxonomy_params_filter = function ( array $params ): array {
+			$params['taxonomy']['product_brand'] = 'wc_brands';
+			return $params;
 		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $this->taxonomy_params_filter );
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
 
 		list( $where, $posts ) = $this->query_main_products( array( 'brands' => $brand_slug ) );
 

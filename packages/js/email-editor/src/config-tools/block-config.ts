@@ -26,7 +26,9 @@ export function updateBlockSettings<
 		| BlockConfiguration< TAttributes >
 ): boolean {
 	const type = getBlockType< TAttributes >( name );
-	if ( ! type ) return false;
+	if ( ! type ) {
+		return false;
+	}
 
 	const { name: blockName, ...currentSettings } = type as unknown as {
 		name: string;

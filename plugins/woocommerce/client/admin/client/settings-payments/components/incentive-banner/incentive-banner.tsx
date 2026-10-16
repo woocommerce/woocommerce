@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { Button, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
+import { Link } from '@wordpress/ui';
 import {
 	PaymentsProviderIncentive,
 	PaymentsProvider,
@@ -124,7 +124,7 @@ export const IncentiveBanner = ( {
 			provider,
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
-				? provider._links?.attach?.href ?? null
+				? ( provider._links?.attach?.href ?? null )
 				: null,
 			'wc_settings_payments__incentive_banner'
 		);
@@ -185,9 +185,8 @@ export const IncentiveBanner = ( {
 								termsLink: (
 									<Link
 										href={ incentive.tc_url }
-										target="_blank"
-										rel="noreferrer"
-										type="external"
+										rel="noopener noreferrer"
+										openInNewTab
 									>
 										{ __(
 											'Terms and Conditions',

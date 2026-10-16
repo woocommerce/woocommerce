@@ -18,7 +18,7 @@ const completer: AutoCompleter = {
 		const query = match
 			? {
 					match,
-			  }
+				}
 			: {};
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/data/download-ips', query ),
