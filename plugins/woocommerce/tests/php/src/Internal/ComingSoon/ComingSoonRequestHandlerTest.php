@@ -129,7 +129,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 *           ["excluded"]
 	 *           ["non_store"]
 	 *           ["store_404"]
-	 *           ["block_parts"]
 	 *           ["block_theme"]
 	 *
 	 * @param string $scenario Access or theme bypass condition.
@@ -159,9 +158,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 				update_option( 'woocommerce_store_pages_only', 'yes' );
 				$GLOBALS['wp_query']->set_404();
 				break;
-			case 'block_parts':
-				add_theme_support( 'block-template-parts' );
-				break;
 			case 'block_theme':
 				switch_theme( 'twentytwentytwo' );
 				$this->assertTrue( wp_is_block_theme(), 'This fixture must exercise a real block theme.' );
@@ -183,6 +179,15 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 			)
 		);
 		wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
+
+		$this->assert_classic_result( self::ENTIRE_SITE_TEMPLATE );
+	}
+
+	/**
+	 * @testdox Should use the PHP page on a classic theme with block template part support, where merchants cannot edit the block template.
+	 */
+	public function test_block_template_parts_theme_uses_php_page(): void {
+		add_theme_support( 'block-template-parts' );
 
 		$this->assert_classic_result( self::ENTIRE_SITE_TEMPLATE );
 	}
@@ -519,9 +524,16 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should defer the legacy renderer without output for an ordinary classic request.
+	 * @testdox Should defer the block renderer without output on classic themes, with or without block template part support.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $template_parts Whether the classic theme supports block template parts.
 	 */
-	public function test_legacy_renderer_defers_to_php(): void {
+	public function test_legacy_renderer_defers_to_php( bool $template_parts ): void {
+		if ( $template_parts ) {
+			add_theme_support( 'block-template-parts' );
+		}
 		$template = null;
 		$output   = $this->capture(
 			function () use ( &$template ) {

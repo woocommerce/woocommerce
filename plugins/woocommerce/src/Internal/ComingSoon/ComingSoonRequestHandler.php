@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\Jetpack\Constants;
 
 /**
@@ -72,7 +71,7 @@ class ComingSoonRequestHandler {
 	 * @internal
 	 *
 	 * @param string $template The path to the previously determined template.
-	 * @return string The path to the 'coming soon' template or any empty string to prevent further template loading in FSE themes.
+	 * @return string An empty string once the block 'coming soon' template is rendered, or the original path otherwise.
 	 */
 	public function handle_template_include( $template ) {
 		if ( $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
@@ -82,39 +81,18 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Set a short cache duration to prevents ddos attacks.
 		header( 'Cache-Control: max-age=60' );
 
-		$is_fse_theme         = wp_is_block_theme();
-		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 		add_theme_support( 'block-templates' );
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
-		if ( ! $is_fse_theme && $is_store_coming_soon ) {
-			get_header();
-		}
-
 		$this->add_coming_soon_meta();
 
 		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
-			if ( ! $is_fse_theme && $is_store_coming_soon && function_exists( 'get_the_block_template_html' ) ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo get_the_block_template_html();
-			} else {
-				include $coming_soon_template;
-			}
+			include $coming_soon_template;
 		}
 
-		if ( ! $is_fse_theme && $is_store_coming_soon ) {
-			get_footer();
-		}
-
-		if ( $is_fse_theme ) {
-			// Since we've already rendered a template, return empty string to ensure no other template is rendered.
-			return '';
-		} else {
-			// In non-FSE themes, other templates will still be rendered.
-			// We need to exit to prevent further processing.
-			exit();
-		}
+		// Since we've already rendered a template, return empty string to ensure no other template is rendered.
+		return '';
 	}
 
 	/**
@@ -180,13 +158,13 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Uses the PHP templates on classic themes without block template part support.
-	 * Themes with that support load WooCommerce block templates in the Blocks bootstrap, so they keep the block page.
+	 * Uses the PHP templates on every classic theme, including those with block template part support.
+	 * Only block themes let merchants edit the block Coming Soon template, so only they get the block page.
 	 *
 	 * @return bool Whether the PHP templates should be used.
 	 */
 	private function should_use_classic_templates() {
-		return ! BlockTemplateUtils::supports_block_templates( 'wp_template_part' );
+		return ! wp_is_block_theme();
 	}
 
 	/**
