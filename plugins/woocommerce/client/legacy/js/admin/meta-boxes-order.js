@@ -34,6 +34,52 @@ jQuery( function ( $ ) {
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
 			$( '#customer_user' ).on( 'change', this.change_customer_user );
+			$( document.body ).on(
+				'submit',
+				'form#order, form#post',
+				this.prevent_double_submit
+			);
+			$( window ).on( 'pageshow', this.reset_double_submit );
+		},
+
+		/**
+		 * Ignore repeat submissions of the order form, e.g. from a double-click on Update. Each submission
+		 * runs order actions and status change hooks again, so a second request sends duplicate emails.
+		 *
+		 * Bound to the body so handlers on the form itself run first and can still cancel the submission.
+		 */
+		prevent_double_submit: function ( e ) {
+			var $form = $( this );
+
+			if ( $form.data( 'wc-order-submitting' ) ) {
+				e.preventDefault();
+				return;
+			}
+
+			if ( e.isDefaultPrevented() ) {
+				return;
+			}
+
+			$form.data( 'wc-order-submitting', true );
+			$form
+				.find( '#woocommerce-order-actions :submit' )
+				.addClass( 'disabled' )
+				.attr( 'aria-disabled', 'true' );
+		},
+
+		/**
+		 * Unlock the order form when the browser restores the page from its back/forward cache.
+		 */
+		reset_double_submit: function ( e ) {
+			if ( ! e.originalEvent.persisted ) {
+				return;
+			}
+
+			$( 'form#order, form#post' )
+				.removeData( 'wc-order-submitting' )
+				.find( '#woocommerce-order-actions :submit' )
+				.removeClass( 'disabled' )
+				.removeAttr( 'aria-disabled' );
 		},
 
 		change_country: function( e, stickValue ) {
