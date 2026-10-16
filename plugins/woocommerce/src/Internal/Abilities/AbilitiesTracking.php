@@ -120,6 +120,20 @@ class AbilitiesTracking {
 	private array $rest_requests = array();
 
 	/**
+	 * Number of invocations opened when each REST request in $rest_requests started dispatching.
+	 *
+	 * @var int[]
+	 */
+	private array $rest_frames_opened = array();
+
+	/**
+	 * Number of invocations opened in this request.
+	 *
+	 * @var int
+	 */
+	private int $frames_opened = 0;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -314,13 +328,16 @@ class AbilitiesTracking {
 	public function handle_rest_request_before_callbacks( $response, $handler, $request ) {
 		unset( $handler );
 		if ( $request instanceof WP_REST_Request ) {
-			$this->rest_requests[] = $request;
+			$this->rest_requests[]      = $request;
+			$this->rest_frames_opened[] = $this->frames_opened;
 		}
 		return $response;
 	}
 
 	/**
 	 * Handle the rest_request_after_callbacks filter.
+	 *
+	 * Also records run requests that the Abilities API rejected before execution, for example on permission checks.
 	 *
 	 * @internal
 	 *
@@ -331,9 +348,24 @@ class AbilitiesTracking {
 	 */
 	public function handle_rest_request_after_callbacks( $response, $handler, $request ) {
 		unset( $handler );
-		if ( $request instanceof WP_REST_Request ) {
-			array_pop( $this->rest_requests );
+		if ( ! $request instanceof WP_REST_Request ) {
+			return $response;
 		}
+
+		$frames_opened_before = (int) array_pop( $this->rest_frames_opened );
+		$ability_name         = $request['name'];
+		if (
+			is_wp_error( $response )
+			&& $this->frames_opened === $frames_opened_before
+			&& 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $request->get_route() )
+			&& self::is_tracked_ability( $ability_name )
+			&& wp_has_ability( $ability_name )
+			&& \WC_Site_Tracking::is_tracking_enabled()
+		) {
+			$this->add_event( $this->create_frame( $ability_name, false ), $response, false );
+		}
+
+		array_pop( $this->rest_requests );
 		return $response;
 	}
 
@@ -391,7 +423,19 @@ class AbilitiesTracking {
 			return;
 		}
 
-		$this->frames[] = array(
+		$this->frames[] = $this->create_frame( $ability_name, $executing );
+		++$this->frames_opened;
+	}
+
+	/**
+	 * Create the record of an invocation, with the context it started in.
+	 *
+	 * @param string $ability_name The ability name.
+	 * @param bool   $executing    Whether execution already started.
+	 * @return array{name: string, channel: string, rest_namespace: string, start: float, executing: bool}
+	 */
+	private function create_frame( string $ability_name, bool $executing ): array {
+		return array(
 			'name'           => $ability_name,
 			'channel'        => $this->get_channel(),
 			'rest_namespace' => $this->get_rest_namespace(),

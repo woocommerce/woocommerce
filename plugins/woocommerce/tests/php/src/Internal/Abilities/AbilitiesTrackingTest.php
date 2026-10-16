@@ -228,6 +228,36 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record run requests rejected by the Abilities REST API before execution.
+	 */
+	public function test_records_rest_rejection_before_execution(): void {
+		$this->permission = false;
+
+		$response = rest_do_request( new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/' . self::ABILITY_ID . '/run' ) );
+		$this->sut->handle_shutdown();
+
+		$this->assertGreaterThanOrEqual( 400, $response->get_status() );
+		$this->assertCount( 1, $this->sut->recorded );
+		$this->assertSame( 'rest', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( 'error', $this->sut->recorded[0]['outcome'] );
+		$this->assertNotSame( 'none', $this->sut->recorded[0]['error_code'] );
+		$this->assertArrayNotHasKey( 'duration_ms', $this->sut->recorded[0] );
+	}
+
+	/**
+	 * @testdox Should record a REST run request that fails during execution only once.
+	 */
+	public function test_records_rest_execution_failure_once(): void {
+		$this->execute_result = new WP_Error( 'tracking_test_failure' );
+
+		rest_do_request( new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/' . self::ABILITY_ID . '/run' ) );
+		$this->sut->handle_shutdown();
+
+		$this->assertCount( 1, $this->sut->recorded );
+		$this->assertSame( 'error', $this->sut->recorded[0]['outcome'] );
+	}
+
+	/**
 	 * @testdox Should record calls inside other REST routes with the route namespace only.
 	 */
 	public function test_records_namespace_of_other_rest_routes(): void {
