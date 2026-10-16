@@ -39,4 +39,4 @@ Playground uses SQLite and does not support `wp-env run`; use wp-admin for setup
 
 3. Review and commit the generated history and version updates, preserving the imported release history in `readme.txt`. Run the development checks above.
 
-Packaging, release tags, and publishing automation are deferred in this layer. Development manifests, changelog fragments, and this guide are excluded from installable theme archives.
+Run `pnpm --filter=@woocommerce/theme-purple build` to create `artifacts/purple.zip` using wp-scripts and the package's `files` field. The archive uses current working files, including uncommitted edits. Release tags and publishing automation remain deferred.

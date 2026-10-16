@@ -7,6 +7,20 @@
 	"engines": {
 		"node": "^24.15.0"
 	},
+	"files": [
+		"assets",
+		"inc",
+		"parts",
+		"patterns",
+		"styles",
+		"templates",
+		"*.php",
+		"style.css",
+		"theme.json",
+		"screenshot.*",
+		"readme.txt",
+		"LICENSE*"
+	],
 	"scripts": {
 		"validate": "pnpm --filter=@woocommerce/theme-cli validate purple",
 		"changelog": "composer exec -- changelogger",
