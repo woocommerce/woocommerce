@@ -20,6 +20,8 @@ class DeferredRows {
 	/**
 	 * Create a queue for a source file and the current user.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param string $file Source CSV path.
 	 */
 	public function __construct( string $file ) {
@@ -28,6 +30,8 @@ class DeferredRows {
 
 	/**
 	 * Store a formatted row, using its source position to make resuming idempotent.
+	 *
+	 * @since 11.3.0
 	 *
 	 * @param int   $position Position immediately after the source row.
 	 * @param array $row Formatted row and unresolved parent reference.
@@ -43,6 +47,8 @@ class DeferredRows {
 
 	/**
 	 * Read a bounded number of rows in source order.
+	 *
+	 * @since 11.3.0
 	 *
 	 * @param int $limit Maximum rows to read.
 	 * @return array<int, array>
@@ -65,6 +71,8 @@ class DeferredRows {
 	/**
 	 * Check whether the import still has pending rows.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @return bool
 	 */
 	public function has_rows(): bool {
@@ -74,20 +82,28 @@ class DeferredRows {
 	/**
 	 * Remove a row after its final attempt.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param int $position Source row position.
+	 * @throws \RuntimeException When a stored row cannot be removed.
 	 */
 	public function delete( int $position ): void {
-		delete_option( $this->get_key( $position ) );
+		$key = $this->get_key( $position );
+		if ( ! delete_option( $key ) && false !== get_option( $key, false ) ) {
+			throw new \RuntimeException( 'Unable to remove a deferred product import row.' );
+		}
 	}
 
 	/**
 	 * Discard pending rows when restarting the same file from the beginning.
+	 *
+	 * @since 11.3.0
 	 */
 	public function clear(): void {
 		$keys = $this->get_keys( 30 );
 		while ( $keys ) {
 			foreach ( $keys as $key ) {
-				delete_option( $key );
+				$this->delete( (int) substr( $key, strlen( $this->prefix ) ) );
 			}
 			$keys = $this->get_keys( 30 );
 		}

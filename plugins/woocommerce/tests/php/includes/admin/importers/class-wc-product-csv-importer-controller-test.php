@@ -549,6 +549,53 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox AJAX imports finish all deferred batches before reporting completion or starting placeholder cleanup.
+	 */
+	public function test_deferred_rows_complete_before_cleanup(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_sku( 'deferred-parent-old' );
+		$parent->save();
+		$csv           = "ID,Type,SKU,Name,Parent\n";
+		$variation_ids = array();
+		for ( $index = 0; $index < 3; ++$index ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $parent->get_id() );
+			$variation->set_sku( 'deferred-child-old-' . $index );
+			$variation->save();
+			$variation_ids[] = $variation->get_id();
+			$csv            .= "{$variation->get_id()},variation,deferred-child-new-{$index},Child,deferred-parent-new\n";
+		}
+		$csv .= "{$parent->get_id()},variable,deferred-parent-new,Parent,\n";
+		add_filter( 'woocommerce_product_import_batch_size', array( $this, 'return_one' ) );
+
+		$position = '0';
+		for ( $batch = 0; $batch < 3; ++$batch ) {
+			$response = $this->dispatch_import_request( $position, $csv, true );
+			$position = (string) $response['data']['position'];
+			$this->assertSame( 0, $response['data']['updated'], 'Children must remain deferred until the later parent batch.' );
+		}
+
+		$response = $this->dispatch_import_request( $position, $csv, true );
+		$this->assertSame( 2, $response['data']['updated'], 'The last source batch should save the parent and one deferred child.' );
+		$this->assertSame( 99, $response['data']['percentage'], 'Pending final-pass rows must keep the import below 100 percent.' );
+		$this->assertSame( strlen( $csv ), $response['data']['position'], 'The next request should resume at EOF, not start cleanup.' );
+
+		$response = $this->dispatch_import_request( (string) $response['data']['position'], $csv, true );
+		$this->assertSame( 1, $response['data']['updated'], 'The final pass should respect the configured batch size.' );
+		$this->assertSame( 99, $response['data']['percentage'], 'The last deferred child still needs a request.' );
+		$response = $this->dispatch_import_request( (string) $response['data']['position'], $csv, true );
+		$this->assertSame( 1, $response['data']['updated'], 'Each deferred child should be processed once.' );
+		$this->assertSame( 'cleanup:0', $response['data']['position'], 'Cleanup may begin only after the pending queue is empty.' );
+		$response = $this->dispatch_import_request( 'cleanup:0', $csv, true );
+		$this->assertSame( 'done', $response['data']['position'], 'The normal cleanup phase should still complete.' );
+
+		foreach ( $variation_ids as $index => $variation_id ) {
+			$this->assertSame( 'deferred-child-new-' . $index, wc_get_product( $variation_id )->get_sku(), 'Cleanup must preserve the updated variation.' );
+			$this->assertSame( $parent->get_id(), wp_get_post_parent_id( $variation_id ), 'Cleanup must preserve the parent relationship.' );
+		}
+	}
+
+	/**
 	 * Filter callback that shrinks the import batch to a single row.
 	 *
 	 * @return int
@@ -564,17 +611,19 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string $position Import position to request.
 	 * @param string $csv      CSV contents to import.
+	 * @param bool   $update_existing Whether to update existing products.
 	 * @return array
 	 */
-	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV ): array {
+	private function dispatch_import_request( string $position, string $csv = self::MARKER_CSV, bool $update_existing = false ): array {
 		$nonce = wp_create_nonce( 'wc-product-import' );
 		$file  = $this->write_import_csv( $csv );
 
-		$_REQUEST['security'] = $nonce;
-		$_POST['security']    = $nonce;
-		$_POST['file']        = $file;
-		$_POST['position']    = $position;
-		$_POST['mapping']     = array(
+		$_REQUEST['security']     = $nonce;
+		$_POST['security']        = $nonce;
+		$_POST['file']            = $file;
+		$_POST['position']        = $position;
+		$_POST['update_existing'] = $update_existing;
+		$_POST['mapping']         = array(
 			'from' => array( 'ID', 'Type', 'SKU', 'Name', 'Parent' ),
 			'to'   => array( 'id', 'type', 'sku', 'name', 'parent_id' ),
 		);
@@ -595,7 +644,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			remove_filter( 'wp_die_ajax_handler', array( $this, 'get_throwing_die_handler' ) );
 
 			wp_delete_file( $file );
-			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_REQUEST['security'] );
+			unset( $_POST['file'], $_POST['position'], $_POST['mapping'], $_POST['security'], $_POST['update_existing'], $_REQUEST['security'] );
 		}
 
 		$decoded = json_decode( $response, true );

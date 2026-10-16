@@ -78,6 +78,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $parsed_file_positions = array();
 
 	/**
+	 * Final-pass batch size, saved before read_file() consumes the source row limit.
+	 *
+	 * @var int
+	 */
+	private $deferred_batch_size = 30;
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -101,6 +108,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$this->params = wp_parse_args( $params, $default_args );
 		$this->file   = $file;
+
+		$this->deferred_batch_size = $this->params['lines'] > 0 ? (int) $this->params['lines'] : 30;
 
 		if ( isset( $this->params['mapping']['from'], $this->params['mapping']['to'] ) ) {
 			$this->params['mapping'] = array_combine( $this->params['mapping']['from'], $this->params['mapping']['to'] );
@@ -323,15 +332,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $id;
 		}
 
+		if ( $this->parsing_update_parent ) {
+			$id = $this->get_existing_parent_id( $value );
+			if ( ! $id ) {
+				$this->unresolved_parent_skus[ $this->parsing_raw_data_index ] = $value;
+			}
+			return $id ? $id : '';
+		}
+
 		$id = wc_get_product_id_by_sku( $value );
 
 		if ( $id ) {
 			return $id;
-		}
-
-		if ( $this->parsing_update_parent ) {
-			$this->unresolved_parent_skus[ $this->parsing_raw_data_index ] = $value;
-			return '';
 		}
 
 		try {
@@ -349,6 +361,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Resolve a parent SKU only to an existing, usable variable product.
+	 *
+	 * @param string $sku Parent SKU after the parent formatting callback's transformations.
+	 * @return int Parent ID, or zero when the reference cannot be used yet.
+	 */
+	private function get_existing_parent_id( string $sku ): int {
+		$id      = wc_get_product_id_by_sku( $sku );
+		$product = $id ? wc_get_product( $id ) : false;
+
+		if ( ! $product || ! $product->is_type( ProductType::VARIABLE ) || in_array( $product->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
+			return 0;
+		}
+
+		return $product->get_id();
 	}
 
 	/**
@@ -1449,8 +1478,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data = $this->import_rows( $this->parsed_data );
 
 		if ( $this->params['update_existing'] && $this->file_position >= filesize( $this->file ) ) {
-			$limit = $this->params['lines'] > 0 ? $this->params['lines'] : 30;
-			foreach ( $queue->get_batch( $limit ) as $position => $row ) {
+			foreach ( $queue->get_batch( $this->deferred_batch_size ) as $position => $row ) {
 				if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
 					break;
 				}
@@ -1510,12 +1538,12 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			$missing_parent = false;
-			if ( $update_existing && isset( $parsed_data['_unresolved_parent_sku'] ) ) {
-				$parent_id = wc_get_product_id_by_sku( $parsed_data['_unresolved_parent_sku'] );
-				$parent    = $parent_id ? wc_get_product( $parent_id ) : false;
+			if ( $update_existing && isset( $parsed_data['_unresolved_parent_sku'] ) && empty( $parsed_data['parent_id'] ) ) {
+				$parent_sku = $parsed_data['_unresolved_parent_sku'];
+				$parent_id  = is_string( $parent_sku ) && '' !== $parent_sku ? $this->get_existing_parent_id( $parent_sku ) : 0;
 
-				if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) || in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
-					if ( ! $final_pass ) {
+				if ( ! $parent_id ) {
+					if ( ! $final_pass && is_string( $parent_sku ) && '' !== $parent_sku ) {
 						( new DeferredRows( $this->file ) )->save( $this->file_position, $parsed_data );
 						continue;
 					}
@@ -1525,8 +1553,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 
 				$parsed_data['parent_id'] = $parent_id;
-				unset( $parsed_data['_unresolved_parent_sku'] );
 			}
+			unset( $parsed_data['_unresolved_parent_sku'] );
 
 			/**
 			 * Fires before a resolved row is matched and imported, or a deferred row makes its final attempt.
