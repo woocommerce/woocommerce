@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show an error when a product from the Cart block's cross-sells list cannot be added to the cart, on Cart pages using the cross-sells inner block.

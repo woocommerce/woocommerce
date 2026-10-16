@@ -3,7 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use WC_Helper_Order;
 use WC_REST_Setting_Options_Controller;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -331,6 +333,42 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'Custom discount', $settings['couponTypes']['custom_discount'] ?? null, 'A discount type added through the filter should reach the client.' );
 		$this->assertArrayHasKey( 'percent', $settings['couponTypes'], 'Core discount types should still be included.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings list the installed payment gateways by title, then any other gateway the stored orders were paid with, by id.
+	 */
+	public function test_component_settings_include_payment_gateways_that_are_no_longer_installed(): void {
+		foreach ( array( 'bacs', 'a_removed_gateway', '' ) as $payment_method ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method( $payment_method );
+			$order->save();
+			OrdersScheduler::import( $order->get_id() );
+		}
+		// Payment gateways are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$gateways = $this->sut->add_component_settings( array() )['paymentGateways'];
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$installed = array_keys( WC()->payment_gateways()->payment_gateways() );
+		$this->assertSame( $installed, array_slice( array_keys( $gateways ), 0, count( $installed ) ), 'The installed gateways should stay first, in their order.' );
+		$this->assertSame( 'Direct bank transfer', $gateways['bacs'], 'An installed gateway should keep its title.' );
+		$this->assertSame( 'a_removed_gateway', $gateways['a_removed_gateway'], 'A gateway that is gone should be listed under its id.' );
+		$this->assertArrayNotHasKey( '', $gateways, 'An order placed without a gateway should not add an empty option.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings leave the payment gateways out outside the wc-admin app, which is the only place that reads them.
+	 */
+	public function test_component_settings_leave_payment_gateways_out_outside_wc_admin(): void {
+		set_current_screen( 'dashboard' );
+
+		$this->assertArrayNotHasKey( 'paymentGateways', $this->sut->add_component_settings( array() ) );
 	}
 
 	/**

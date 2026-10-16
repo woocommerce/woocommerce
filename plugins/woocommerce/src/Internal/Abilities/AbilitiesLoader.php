@@ -79,8 +79,6 @@ class AbilitiesLoader {
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 
-		AbilitiesRestBridge::init();
-
 		self::$initialized = true;
 	}
 
