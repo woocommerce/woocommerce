@@ -590,7 +590,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_REQUEST['_wpnonce'] = 'invalid';
 		$this->dispatch_copy_address_expecting_redirect();
 
-		$this->assertCount( 1, wc_get_notices( 'error' ), 'An invalid nonce should add an error notice.' );
+		$notices = wc_get_notices( 'error' );
+		$this->assertCount( 1, $notices, 'An invalid nonce should add an error notice.' );
+		$this->assertSame( 'The address could not be copied because the link you followed may have expired. Please try again.', $notices[0]['notice'], 'An invalid nonce should say the link may have expired.' );
 		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'An invalid nonce should not copy the address.' );
 	}
 

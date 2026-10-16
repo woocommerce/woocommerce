@@ -427,8 +427,14 @@ class WC_Form_Handler {
 		$redirect_url = wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) );
 		$nonce_value  = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
 
-		if ( ! isset( $source_types[ $target_type ] ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-copy-address-' . $target_type ) ) {
+		if ( ! isset( $source_types[ $target_type ] ) ) {
 			wc_add_notice( __( 'The address could not be copied. Please try again.', 'woocommerce' ), 'error' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-copy-address-' . $target_type ) ) {
+			wc_add_notice( __( 'The address could not be copied because the link you followed may have expired. Please try again.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
