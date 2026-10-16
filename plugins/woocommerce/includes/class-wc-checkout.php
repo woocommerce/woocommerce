@@ -762,6 +762,7 @@ class WC_Checkout {
 
 			$coupon_info = $coupon->get_short_info();
 			$item->add_meta_data( 'coupon_info', $coupon_info );
+			$coupon->add_maximum_discount_to_order_item( $item );
 
 			/**
 			 * Action hook to adjust item before save.
