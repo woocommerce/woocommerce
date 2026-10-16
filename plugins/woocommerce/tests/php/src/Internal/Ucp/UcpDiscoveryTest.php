@@ -47,13 +47,11 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'ucp', 'links' ), array_keys( $profile ) );
 		$this->assertSame( UcpUtils::VERSION, $profile['ucp']['version'] );
 		$this->assertSame( rest_url( 'wc/ucp/v1' ), $profile['ucp']['services']['dev.ucp.shopping'][0]['endpoint'] );
-		$this->assertSame(
-			array(
-				UcpUtils::CAPABILITY_CATALOG_SEARCH => array( UcpUtils::capability_declarations()[ UcpUtils::CAPABILITY_CATALOG_SEARCH ] ),
-				UcpUtils::CAPABILITY_CATALOG_LOOKUP => array( UcpUtils::capability_declarations()[ UcpUtils::CAPABILITY_CATALOG_LOOKUP ] ),
-			),
-			$profile['ucp']['capabilities']
-		);
+		$declarations = UcpUtils::capability_declarations();
+		$this->assertSame( array_keys( $declarations ), array_keys( $profile['ucp']['capabilities'] ) );
+		foreach ( $declarations as $capability => $declaration ) {
+			$this->assertSame( array( $declaration ), $profile['ucp']['capabilities'][ $capability ] );
+		}
 		$this->assertSame( home_url( '/.well-known/ucp' ), $profile['links'][0]['href'] );
 	}
 
@@ -74,7 +72,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 		$this->sut->register_feature_hooks();
 
-		$this->assertSame( $expected, isset( $wp_rewrite->extra_rules_top[ self::RULE ] ) );
+		$this->assertSame( $expected ? 'index.php?' . UcpDiscovery::QUERY_VAR . '=1' : null, $wp_rewrite->extra_rules_top[ self::RULE ] ?? null );
 		$this->assertSame( $expected, in_array( UcpDiscovery::QUERY_VAR, apply_filters( 'query_vars', array() ), true ) );
 		$this->assertSame( $expected ? 0 : false, has_action( 'parse_request', array( $this->sut, 'maybe_render' ) ) );
 	}
@@ -119,7 +117,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 			ob_end_clean();
 			return null;
 		} catch ( \WPDieException $e ) {
-			return ob_get_clean();
+			return (string) ob_get_clean();
 		} finally {
 			remove_filter( 'wp_doing_ajax', '__return_true' );
 			remove_filter( 'wp_die_ajax_handler', $die_handler );
@@ -133,7 +131,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$output = $this->render( self::RULE, '1' );
 
 		$this->assertNotNull( $output );
-		$this->assertSame( $this->sut->get_profile(), json_decode( $output, true ) );
+		$this->assertSame( $this->sut->get_profile(), json_decode( (string) $output, true ) );
 	}
 
 	/**
