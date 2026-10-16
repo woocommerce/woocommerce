@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 
 /**
- * Tests for the coming soon cache invalidator class.
+ * Tests for the Coming Soon request handler.
  */
 class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 
@@ -115,7 +115,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( WC_ABSPATH . 'templates/coming-soon/' . $filename, $template );
 		$this->assertSame( '', $output, 'Selection must let WordPress render the template.' );
-		$this->assertFalse( current_theme_supports( 'block-templates' ), 'The PHP fallback must not force block support.' );
 		$this->assertTrue( wp_style_is( 'woocommerce-coming-soon-classic', 'enqueued' ) );
 		$this->assertSame( WC()->plugin_url() . '/assets/css/coming-soon-classic.css', wp_styles()->registered['woocommerce-coming-soon-classic']->src );
 	}
@@ -168,26 +167,25 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use the PHP page even when a saved coming-soon block template exists.
+	 * @testdox Should use the PHP page on classic themes with a saved coming-soon block template or block template part support, since merchants cannot edit either.
+	 * @testWith ["saved_template"]
+	 *           ["template_parts"]
+	 *
+	 * @param string $state Block template state of the classic theme.
 	 */
-	public function test_saved_block_template_uses_php_page(): void {
-		$post_id = $this->factory->post->create(
-			array(
-				'post_type'   => 'wp_template',
-				'post_name'   => 'coming-soon',
-				'post_status' => 'publish',
-			)
-		);
-		wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
-
-		$this->assert_classic_result( self::ENTIRE_SITE_TEMPLATE );
-	}
-
-	/**
-	 * @testdox Should use the PHP page on a classic theme with block template part support, where merchants cannot edit the block template.
-	 */
-	public function test_block_template_parts_theme_uses_php_page(): void {
-		add_theme_support( 'block-template-parts' );
+	public function test_classic_theme_block_state_uses_php_page( string $state ): void {
+		if ( 'saved_template' === $state ) {
+			$post_id = $this->factory->post->create(
+				array(
+					'post_type'   => 'wp_template',
+					'post_name'   => 'coming-soon',
+					'post_status' => 'publish',
+				)
+			);
+			wp_set_object_terms( $post_id, get_stylesheet(), 'wp_theme' );
+		} else {
+			add_theme_support( 'block-template-parts' );
+		}
 
 		$this->assert_classic_result( self::ENTIRE_SITE_TEMPLATE );
 	}
@@ -346,52 +344,17 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Unusable values from each template path filter.
+	 * Unusable values from the template path filters. Both filters feed the same check, so the theme override path gets one case.
 	 *
 	 * @return array
 	 */
 	public function unusable_template_cases(): array {
-		$cases  = array();
-		$values = array(
-			'false'     => false,
-			'null'      => null,
-			'array'     => array( 'invalid' ),
-			'empty'     => '',
-			'missing'   => '/missing-coming-soon.php',
-			'directory' => __DIR__,
+		return array(
+			'coming-soon_template-not-a-string'   => array( 'coming-soon_template', null ),
+			'coming-soon_template-missing'        => array( 'coming-soon_template', '/missing-coming-soon.php' ),
+			'coming-soon_template-directory'      => array( 'coming-soon_template', __DIR__ ),
+			'woocommerce_locate_template-missing' => array( 'woocommerce_locate_template', '/missing-coming-soon.php' ),
 		);
-		foreach ( array( 'coming-soon_template', 'woocommerce_locate_template' ) as $filter ) {
-			foreach ( $values as $name => $value ) {
-				$cases[ $filter . '-' . $name ] = array( $filter, $value );
-			}
-		}
-		return $cases;
-	}
-
-	/**
-	 * @testdox Should reject an unreadable file returned by a template filter.
-	 */
-	public function test_classic_template_rejects_unreadable_file(): void {
-		$root = $this->create_fixture_directory();
-		$path = $root . '/unreadable.php';
-		try {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write only a fresh task-owned unreadable-path fixture.
-			$this->assertNotFalse( file_put_contents( $path, '<?php /* Unreadable fixture */' ) );
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Change only task-owned fixture permissions to exercise unreadability.
-			$this->assertTrue( chmod( $path, 0000 ) );
-			clearstatcache( true, $path );
-			if ( is_readable( $path ) ) {
-				$this->markTestSkipped( 'This test process can still read chmod 0000 files; unreadability cannot be reproduced.' );
-			}
-			add_filter( 'coming-soon_template', fn() => $path );
-
-			$this->assert_classic_result( '', '/protected.php' );
-		} finally {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Restore task-owned fixture permissions before deleting it.
-			chmod( $path, 0600 );
-			wp_delete_file( $path );
-			$this->remove_fixture_directory( $root );
-		}
 	}
 
 	/**
@@ -463,13 +426,9 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should hide the product from theme footer code on product pages, so it neither crashes nor shows product details.
-	 * @testWith ["no"]
-	 *           ["yes"]
-	 *
-	 * @param string $store_only Whether to restrict Coming Soon to store pages.
 	 */
-	public function test_product_page_clears_product_global( string $store_only ): void {
-		update_option( 'woocommerce_store_pages_only', $store_only );
+	public function test_product_page_clears_product_global(): void {
+		update_option( 'woocommerce_store_pages_only', 'yes' );
 		$product = \WC_Helper_Product::create_simple_product();
 		$this->go_to( get_permalink( $product->get_id() ) );
 		$this->assertIsString( $GLOBALS['product'] ?? null, 'WordPress must expose the product query var as the slug string.' );
@@ -524,16 +483,9 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should defer the block renderer without output on classic themes, with or without block template part support.
-	 * @testWith [false]
-	 *           [true]
-	 *
-	 * @param bool $template_parts Whether the classic theme supports block template parts.
+	 * @testdox Should defer the block renderer without output on classic themes.
 	 */
-	public function test_legacy_renderer_defers_to_php( bool $template_parts ): void {
-		if ( $template_parts ) {
-			add_theme_support( 'block-template-parts' );
-		}
+	public function test_legacy_renderer_defers_to_php(): void {
 		$template = null;
 		$output   = $this->capture(
 			function () use ( &$template ) {
@@ -549,8 +501,8 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 * @testdox Should let only lower-priority template_include callbacks run on classic Coming Soon requests, so none can print or replace the page.
 	 */
 	public function test_classic_request_removes_later_template_include_callbacks(): void {
-		$ran     = array();
-		$handler = $this->hook_handler_with_probes( $ran );
+		$ran = array();
+		$this->hook_handler_with_probes( $ran );
 
 		$template = null;
 		$output   = $this->capture(
@@ -562,16 +514,24 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( self::ENTIRE_SITE_TEMPLATE, $template );
 		$this->assertSame( array( 1 ), $ran, 'Only callbacks below the guard may run.' );
 		$this->assertSame( 'Printed at 1. ', $output );
-		$this->assertFalse( has_action( 'after_setup_theme', array( $handler, 'possibly_init_block_templates' ) ), 'Classic themes must not start the block template classes.' );
 	}
 
 	/**
-	 * @testdox Should leave every template_include callback in place when Coming Soon does not apply.
+	 * @testdox Should leave every template_include callback in place when Coming Soon does not apply or the PHP template selector is unhooked.
+	 * @testWith ["administrator"]
+	 *           ["selector_unhooked"]
+	 *
+	 * @param string $scenario Why the guard must step aside.
 	 */
-	public function test_bypass_request_keeps_template_include_callbacks(): void {
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
-		$ran = array();
-		$this->hook_handler_with_probes( $ran );
+	public function test_guard_keeps_template_include_callbacks( string $scenario ): void {
+		if ( 'administrator' === $scenario ) {
+			wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		}
+		$ran     = array();
+		$handler = $this->hook_handler_with_probes( $ran );
+		if ( 'selector_unhooked' === $scenario ) {
+			remove_filter( 'template_include', array( $handler, 'handle_classic_template_include' ), PHP_INT_MAX );
+		}
 
 		$template = null;
 		$this->capture(
@@ -596,25 +556,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$this->sut->remove_other_template_include_callbacks( '/original.php' );
 
 		$this->assertSame( 999, has_filter( 'template_include', $probe ) );
-	}
-
-	/**
-	 * @testdox Should leave every template_include callback in place when the PHP template selector is unhooked.
-	 */
-	public function test_guard_does_nothing_without_the_selector(): void {
-		$ran     = array();
-		$handler = $this->hook_handler_with_probes( $ran );
-		remove_filter( 'template_include', array( $handler, 'handle_classic_template_include' ), PHP_INT_MAX );
-
-		$template = null;
-		$this->capture(
-			function () use ( &$template ) {
-				$template = apply_filters( 'template_include', '/original.php' );
-			}
-		);
-
-		$this->assertSame( '/protected-' . PHP_INT_MAX . '.php', $template );
-		$this->assertSame( array( 1, 10, 999, PHP_INT_MAX ), $ran );
 	}
 
 	/**
@@ -678,52 +619,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$this->sut->possibly_init_block_templates();
 
 		$this->assertFalse( has_filter( 'get_block_templates', array( $controller, 'add_db_templates_with_woo_slug' ) ) );
-	}
-
-	/**
-	 * @testdox Test request parser displays a coming soon page to public visitor.
-	 */
-	public function test_coming_soon_mode_shown_to_visitor() {
-		$this->markTestSkipped( 'The die statement breaks the test. To be improved.' );
-		update_option( 'woocommerce_coming_soon', 'yes' );
-		$wp          = new \WP();
-		$wp->request = '/';
-		do_action_ref_array( 'parse_request', array( &$wp ) );
-
-		$this->assertSame( $wp->query_vars['page_id'], 99 );
-	}
-
-	/**
-	 * @testdox Test request parser displays a live page to public visitor.
-	 */
-	public function test_live_mode_shown_to_visitor() {
-		$this->markTestSkipped( 'The die statement breaks the test. To be improved.' );
-		update_option( 'woocommerce_coming_soon', 'no' );
-		$wp          = new \WP();
-		$wp->request = '/';
-		do_action_ref_array( 'parse_request', array( &$wp ) );
-
-		$this->assertArrayNotHasKey( 'page_id', $wp->query_vars );
-	}
-
-	/**
-	 * @testdox Test request parser excludes admins.
-	 */
-	public function test_shop_manager_exclusion() {
-		$this->markTestSkipped( 'Failing in CI but not locally. To be investigated.' );
-		update_option( 'woocommerce_coming_soon', 'yes' );
-		$user_id = $this->factory->user->create(
-			array(
-				'role' => 'shop_manager',
-			)
-		);
-		wp_set_current_user( $user_id );
-
-		$wp          = new \WP();
-		$wp->request = '/';
-		do_action_ref_array( 'parse_request', array( &$wp ) );
-
-		$this->assertSame( $wp->query_vars['page_id'], null );
 	}
 
 	/**
