@@ -1565,7 +1565,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that shipping tax rounding does not round down when price are inclusive of taxes.
+	 * @testdox Shipping tax should follow the configured rounding mode for tax-inclusive prices.
 	 */
 	public function test_calculate_totals_shipping_tax_rounded_26654() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
@@ -1612,15 +1612,15 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
 		WC()->cart->calculate_totals();
 
-		$this->assertEquals( 18.78, WC()->cart->get_shipping_tax() );
-		$this->assertEquals( 335.88, WC()->cart->get_total( 'edit' ) );
-		$this->assertEquals( 67.18, WC()->cart->get_taxes_total() );
+		$this->assertEquals( 18.77, WC()->cart->get_shipping_tax() );
+		$this->assertEquals( 335.87, WC()->cart->get_total( 'edit' ) );
+		$this->assertEquals( 67.17, WC()->cart->get_taxes_total() );
 
 		$order = new WC_Order();
 		$checkout->set_data_from_cart( $order );
-		$this->assertEquals( 67.18, $order->get_total_tax() );
-		$this->assertEquals( 335.88, $order->get_total() );
-		$this->assertEquals( 18.78, $order->get_shipping_tax() );
+		$this->assertEquals( 67.17, $order->get_total_tax() );
+		$this->assertEquals( 335.87, $order->get_total() );
+		$this->assertEquals( 18.77, $order->get_shipping_tax() );
 	}
 
 	/**

@@ -350,7 +350,7 @@ final class WC_Cart_Totals {
 				$shipping_line->taxable   = true;
 				$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
 				$shipping_line->taxes     = array_map(
-					array( $this, 'round_item_subtotal' ),
+					array( $this, 'round_line_tax' ),
 					wc_add_number_precision_deep( $shipping_object->taxes, false )
 				);
 				$shipping_line->total_tax = array_sum( $shipping_line->taxes );
