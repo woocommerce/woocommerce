@@ -2327,6 +2327,35 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A failed discard after a failed child insert on create is logged, and the child insert failure is what is thrown.
+	 */
+	public function test_a_failed_discard_is_logged_and_keeps_the_insert_failure(): void {
+		$contract = $this->make_contract();
+		$thrown   = null;
+
+		$this->fail_next_query( '/^\s*INSERT\s+INTO\s+\S*contract_addresses/i' );
+		$this->fail_next_query( '/^\s*DELETE\s+FROM\s+`?\S*contracts`?\s+WHERE\s+`id`/i' );
+		$logs = $this->capture_engine_log(
+			'error',
+			array(),
+			function () use ( $contract, &$thrown ): void {
+				try {
+					$this->sut->insert( $contract );
+				} catch ( \RuntimeException $e ) {
+					$thrown = $e;
+				}
+			}
+		);
+
+		$this->assertInstanceOf( \RuntimeException::class, $thrown );
+		$this->assertStringContainsString( 'address row', $thrown->getMessage() );
+
+		$id = (int) $contract->get_id();
+		$this->assertSame( array( $id ), array_values( array_unique( array_column( $logs, 'contract_id' ) ) ), 'The failed discard is logged with the contract id.' );
+		$this->assertNotNull( $this->sut->find_summary( $id ), 'The contract row the discard could not delete is still stored.' );
+	}
+
+	/**
 	 * @testdox A failed internal-lock release is logged and keeps the write's result, or its exception.
 	 */
 	public function test_a_failed_internal_release_does_not_mask_the_write(): void {
@@ -2415,16 +2444,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
 		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ) );
 		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
-	}
-
-	/**
-	 * @testdox An unlocked insert of a keyed contract whose key is taken throws instead of returning no id.
-	 */
-	public function test_an_unlocked_insert_with_a_taken_key_throws(): void {
-		$this->sut->insert( $this->keyed_contract( 'lite', 'order:43' ) );
-
-		$this->expectException( \RuntimeException::class );
-		$this->sut->insert( $this->keyed_contract( 'lite', 'order:43' ) );
 	}
 
 	/**

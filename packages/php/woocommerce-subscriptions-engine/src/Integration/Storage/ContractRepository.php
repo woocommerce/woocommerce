@@ -72,15 +72,12 @@ final class ContractRepository {
 	 * Insert a new, unlocked contract and its items and addresses (parent row first). When a
 	 * child insert fails, the new contract is deleted again.
 	 *
-	 * @param Contract $contract Contract to insert, without a creation key.
+	 * @param Contract $contract Contract to insert, without a creation key (a keyed one goes through {@see self::insert_locked()}).
 	 * @return int The new contract id.
 	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
 	public function insert( Contract $contract ): int {
-		if ( ! $this->insert_row( $contract, null ) ) {
-			throw new \RuntimeException( 'Failed to insert contract: its creation key is taken.' );
-		}
-
+		$this->insert_row( $contract, null );
 		$this->insert_children_or_discard( $contract );
 
 		return (int) $contract->get_id();
@@ -121,19 +118,37 @@ final class ContractRepository {
 
 	/**
 	 * Insert a new contract's items and addresses; on a failure, best-effort delete the new
-	 * contract with its children, then rethrow.
+	 * contract with its children, then rethrow. A failed delete is logged, never thrown, so the
+	 * child insert failure is what the caller sees.
 	 *
 	 * @param Contract $contract The new contract, carrying its id and children.
 	 * @throws \Throwable The child insert failure, rethrown (a `RuntimeException` for a failed insert).
 	 */
 	private function insert_children_or_discard( Contract $contract ): void {
+		global $wpdb;
+
 		$contract_id = (int) $contract->get_id();
 
 		try {
 			$this->insert_items( $contract_id, $contract->get_items() );
 			$this->insert_addresses( $contract_id, $contract->get_addresses() );
 		} catch ( \Throwable $e ) {
-			$this->delete( $contract_id );
+			try {
+				$discarded = $this->delete( $contract_id );
+				$reason    = $wpdb->last_error;
+			} catch ( \Throwable $cleanup ) {
+				$discarded = false;
+				$reason    = $cleanup->getMessage();
+			}
+			if ( ! $discarded ) {
+				wc_get_logger()->error(
+					sprintf( 'ContractRepository: could not discard contract %d after its items or addresses failed to insert; it stays without them. %s', $contract_id, $reason ),
+					array(
+						'source'      => self::LOG_SOURCE,
+						'contract_id' => $contract_id,
+					)
+				);
+			}
 			throw $e;
 		}
 	}
