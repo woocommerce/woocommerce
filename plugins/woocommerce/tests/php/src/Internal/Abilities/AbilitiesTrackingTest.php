@@ -327,9 +327,26 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record whether the call was authenticated with an application password.
+	 * @testdox Should not report Jetpack authentication for signature arguments Jetpack didn't verify.
 	 */
-	public function test_records_application_password_authentication(): void {
+	public function test_does_not_trust_unverified_jetpack_signature_arguments(): void {
+		$_GET['token']     = 'abc:1:2';
+		$_GET['signature'] = 'forged';
+
+		try {
+			wp_get_ability( self::ABILITY_ID )->execute();
+		} finally {
+			unset( $_GET['token'], $_GET['signature'] );
+		}
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'cookie', $this->sut->recorded[0]['auth'] );
+	}
+
+	/**
+	 * @testdox Should record how the caller authenticated.
+	 */
+	public function test_records_auth_method(): void {
 		global $wp_rest_application_password_uuid;
 
 		$ability = wp_get_ability( self::ABILITY_ID );
@@ -342,7 +359,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		}
 		$this->sut->handle_shutdown();
 
-		$this->assertSame( array( 'false', 'true' ), array_column( $this->sut->recorded, 'uses_app_password' ) );
+		$this->assertSame( array( 'cookie', 'application_password' ), array_column( $this->sut->recorded, 'auth' ) );
 	}
 
 	/**

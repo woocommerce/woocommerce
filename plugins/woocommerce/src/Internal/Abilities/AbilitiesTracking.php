@@ -545,13 +545,13 @@ class AbilitiesTracking {
 
 		$event = array(
 			// Not truncated: ability names have no length limit, and truncated names could collide.
-			'ability_name'      => self::normalize_value( $frame['name'], null ),
-			'outcome'           => true === $outcome ? 'success' : 'error',
-			'error_code'        => $error_code,
-			'channel'           => $frame['channel'],
-			'rest_namespace'    => $frame['rest_namespace'],
-			'uses_app_password' => function_exists( 'rest_get_authenticated_app_password' ) && rest_get_authenticated_app_password() ? 'true' : 'false',
-			'external_client'   => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
+			'ability_name'    => self::normalize_value( $frame['name'], null ),
+			'outcome'         => true === $outcome ? 'success' : 'error',
+			'error_code'      => $error_code,
+			'channel'         => $frame['channel'],
+			'rest_namespace'  => $frame['rest_namespace'],
+			'auth'            => self::get_auth_method(),
+			'external_client' => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
 		);
 
 		if ( $has_duration ) {
@@ -631,6 +631,48 @@ class AbilitiesTracking {
 			return new WP_Error( $default_code );
 		}
 		return is_wp_error( $is_valid ) && $is_valid->has_errors() ? $is_valid : null;
+	}
+
+	/**
+	 * Identify how the caller authenticated, so agents can be told apart from people in wp-admin.
+	 *
+	 * @return string `application_password`, `jetpack`, `cookie`, `other` (another REST authentication method) or
+	 *                `none` (logged out, WP-CLI or cron).
+	 */
+	private static function get_auth_method(): string {
+		if ( function_exists( 'rest_get_authenticated_app_password' ) && rest_get_authenticated_app_password() ) {
+			return 'application_password';
+		}
+		if ( self::is_jetpack_signed_request() ) {
+			return 'jetpack';
+		}
+		if ( ! is_user_logged_in() || ( defined( 'WP_CLI' ) && WP_CLI ) || wp_doing_cron() ) {
+			return 'none';
+		}
+		if ( wp_is_serving_rest_request() ) {
+			global $wp_rest_auth_cookie;
+			return true === $wp_rest_auth_cookie ? 'cookie' : 'other';
+		}
+		return 'cookie';
+	}
+
+	/**
+	 * Whether Jetpack authenticated this request with a blog or user token signature.
+	 *
+	 * Jetpack is only asked when the request carries its signature arguments, so its REST authentication isn't
+	 * initialized here on other requests.
+	 *
+	 * @return bool
+	 */
+	private static function is_jetpack_signed_request(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only checks for the presence of Jetpack's signature arguments.
+		if ( ! isset( $_GET['token'], $_GET['signature'] ) ) {
+			return false;
+		}
+		$rest_authentication = 'Automattic\Jetpack\Connection\Rest_Authentication';
+		return is_callable( array( $rest_authentication, 'is_signed_with_blog_token' ) )
+			&& is_callable( array( $rest_authentication, 'is_signed_with_user_token' ) )
+			&& ( $rest_authentication::is_signed_with_blog_token() || $rest_authentication::is_signed_with_user_token() );
 	}
 
 	/**
