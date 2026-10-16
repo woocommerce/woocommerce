@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up product filtering by counting stock statuses together.
