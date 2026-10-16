@@ -257,7 +257,7 @@ class OrdersScheduler extends ImportScheduler {
 				WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 				AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 				{$where_clause}
-				ORDER BY post_date_gmt ASC
+				ORDER BY post_date_gmt ASC, ID ASC
 				LIMIT %d
 				OFFSET %d",
 				$limit,
@@ -316,7 +316,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				WHERE type IN ( 'shop_order', 'shop_order_refund' )
 				AND status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 				{$where_clause}
-				ORDER BY date_created_gmt ASC
+				ORDER BY date_created_gmt ASC, id ASC
 				LIMIT %d
 				OFFSET %d",
 				$limit,
@@ -443,6 +443,29 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param int $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
+	}
+
+	/**
+	 * Of the given orders and refunds, the ones import() left without an order stats row (test orders, for example).
+	 *
+	 * @since 11.3.0
+	 * @param array $ids Order or refund IDs.
+	 * @return int[]
+	 */
+	protected static function get_skipped_import_ids( array $ids ): array {
+		global $wpdb;
+
+		$ids = array_map( 'absint', $ids );
+		if ( ! $ids ) {
+			return array();
+		}
+
+		$table_name   = OrdersStatsDataStore::get_db_table_name();
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name and one %d per ID are interpolated; the IDs are prepared.
+		$imported = $wpdb->get_col( $wpdb->prepare( "SELECT order_id FROM {$table_name} WHERE order_id IN ( {$placeholders} )", $ids ) );
+
+		return array_values( array_diff( $ids, array_map( 'absint', $imported ) ) );
 	}
 
 	/**
