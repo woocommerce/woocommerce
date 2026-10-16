@@ -181,4 +181,56 @@ class BlockTypesController extends WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( 'version', $result );
 	}
+
+	/**
+	 * @testdox Should output a hidden redirect field on the login and registration forms when redirect_to is set.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_hidden_input( string $hook ): void {
+		$_GET['redirect_to'] = 'https://example.com/product/?a=1&b=2';
+
+		try {
+			ob_start();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+			do_action( $hook );
+			$output = ob_get_clean();
+		} finally {
+			unset( $_GET['redirect_to'] );
+		}
+
+		$this->assertStringContainsString( '<input type="hidden" name="redirect" value="https://example.com/product/?a=1&amp;b=2" />', $output );
+	}
+
+	/**
+	 * @testdox Should output nothing on the login and registration forms when redirect_to is empty.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_nothing_without_redirect_to( string $hook ): void {
+		unset( $_GET['redirect_to'] );
+
+		ob_start();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+		do_action( $hook );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+	}
+
+	/**
+	 * Form hooks that should receive the hidden redirect field.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function redirect_to_form_hooks_provider(): array {
+		return array(
+			'login form'        => array( 'woocommerce_login_form_end' ),
+			'registration form' => array( 'woocommerce_register_form_end' ),
+		);
+	}
 }

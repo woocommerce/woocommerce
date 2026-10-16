@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Speed up product stock lookup regeneration on large stores.

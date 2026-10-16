@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show variable products in the admin products list when filtering by a shipping class set on a variation.
