@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * a subclass as the `ability_class`. The execute callback loads the object,
  * checks the `extensions` input against the field schemas, changes the object
  * in memory, writes the fields with their `update_callback`, runs the validators
- * that AbilityExtensions::register_validator() adds, and then saves it. A
+ * that ExtensibleAbilities::register_validator() adds, and then saves it. A
  * rejection from any step saves nothing.
  *
  * The input schema gets the `extensions` property of the resource, so the
@@ -129,7 +129,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$rejected = $this->apply_fields( $subject, $updates );
-		if ( null === $rejected && AbilityExtensions::is_enabled() ) {
+		if ( null === $rejected && ExtensibleAbilities::is_enabled() ) {
 			$rejected = $this->validate( $subject );
 		}
 		if ( null !== $rejected ) {
@@ -223,7 +223,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
 	 */
 	private function validate( $subject ): ?\WP_Error {
-		foreach ( AbilityExtensions::get_validators( $this->get_resource() ) as $args ) {
+		foreach ( ExtensibleAbilities::get_validators( $this->get_resource() ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				return $rejected;
@@ -249,7 +249,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Ability extension "%s" failed: %s', implode( '', $data ), $e->getMessage() ),
-				array( 'source' => 'ability-extensions' )
+				array( 'source' => 'extensible-abilities' )
 			);
 			$result = new \WP_Error(
 				'woocommerce_ability_extension_failed',

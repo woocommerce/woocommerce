@@ -1177,9 +1177,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_callback_that_throws_returns_a_clear_error(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$this->add_test_action(
-			'woocommerce_ability_extensions_init',
+			'woocommerce_extensible_abilities_init',
 			static function () {
-				AbilityExtensions::register_field(
+				ExtensibleAbilities::register_field(
 					array(
 						'resource'        => 'product',
 						'namespace'       => 'test-ext',
@@ -1236,7 +1236,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_validators_do_not_run_with_the_feature_off(): void {
 		$this->set_feature( false );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
-		AbilityExtensions::register_validator(
+		ExtensibleAbilities::register_validator(
 			array(
 				'resource'  => 'product',
 				'namespace' => 'test-ext',
@@ -1261,22 +1261,22 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a validator without a slug namespace or a callback.
 	 */
 	public function test_invalid_validators_are_refused(): void {
-		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_validator' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_validator' );
 
-		AbilityExtensions::register_validator(
+		ExtensibleAbilities::register_validator(
 			array(
 				'resource' => 'order',
 				'callback' => '__return_null',
 			)
 		);
-		AbilityExtensions::register_validator(
+		ExtensibleAbilities::register_validator(
 			array(
 				'resource'  => 'order',
 				'namespace' => 'test-ext',
 			)
 		);
 
-		$this->assertEmpty( AbilityExtensions::get_validators( 'order' ) );
+		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
 	}
 
 	/**
@@ -1292,7 +1292,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Register a validator inside woocommerce_ability_extensions_init, the way an extension does.
+	 * Register a validator inside woocommerce_extensible_abilities_init, the way an extension does.
 	 *
 	 * @param string   $resource_name       Resource.
 	 * @param string   $extension_namespace Extension namespace.
@@ -1300,9 +1300,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	private function register_validator( string $resource_name, string $extension_namespace, callable $callback ): void {
 		$this->add_test_action(
-			'woocommerce_ability_extensions_init',
+			'woocommerce_extensible_abilities_init',
 			static function () use ( $resource_name, $extension_namespace, $callback ) {
-				AbilityExtensions::register_validator(
+				ExtensibleAbilities::register_validator(
 					array(
 						'resource'  => $resource_name,
 						'namespace' => $extension_namespace,
@@ -1366,7 +1366,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 							),
 							'additionalProperties' => false,
 						),
-						'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
+						'output_schema'       => ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'product' ),
 						'permission_callback' => '__return_true',
 						'ability_class'       => TestProductRenameAbility::class,
 						'meta'                => array( 'show_in_rest' => true ),
@@ -1450,7 +1450,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		global $wp_actions;
 
 		foreach ( array( 'fields', 'reported', 'validators' ) as $property ) {
-			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
+			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
 		}

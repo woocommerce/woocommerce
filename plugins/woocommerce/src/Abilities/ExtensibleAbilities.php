@@ -199,8 +199,8 @@ class ExtensibleAbilities {
 	/**
 	 * Register a validator that can refuse a change to an object of a resource.
 	 *
-	 * Call it inside the `woocommerce_ability_extensions_init` action. Validators
-	 * run only when the `ability_extensions` feature is on.
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Validators
+	 * run only when the `extensible_abilities` feature is on.
 	 *
 	 * Use a field `update_callback` to refuse a bad value of one field. It runs
 	 * only when the input sends that field. Use a validator to refuse a change as
