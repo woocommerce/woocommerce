@@ -58,8 +58,7 @@ class Carts extends AbstractCartRoute {
 	 * Create a cart.
 	 *
 	 * The id is minted from the session the cart was loaded into, so it is the token
-	 * that addresses this cart from now on — and, inside `continue_url`, the token
-	 * that lets the buyer's browser pick the same cart up.
+	 * that addresses this cart from now on.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
