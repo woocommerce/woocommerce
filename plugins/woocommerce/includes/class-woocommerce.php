@@ -20,27 +20,16 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
-use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
-use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
-use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
-use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
-use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
-use Automattic\WooCommerce\Internal\Email\EmailLogger;
-use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
-use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
+use Automattic\WooCommerce\Utilities\LoggingUtil;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Caches\ProductCountCacheService;
@@ -329,11 +318,15 @@ final class WooCommerce {
 	 * @return void
 	 */
 	private function init_hooks() {
+		$is_admin        = is_admin();
+		$is_cli          = defined( 'WP_CLI' ) && WP_CLI;
+		$is_rest_request = $this->is_rest_api_request();
+
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
-		add_action( 'plugins_loaded', array( $this, 'init_customizer' ) );
+		add_action( 'plugins_loaded', array( $this, 'init_customizer' ) ); // Perf: skip on block themes — customizer is dead there, yet this still instantiates WC_Shop_Customizer on every request for classic themes; gate behind is_admin() at minimum.
 		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
@@ -346,7 +339,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'init', array( $this, 'load_rest_api' ) );
-		if ( $this->is_request( 'admin' ) || ( $this->is_rest_api_request() && ! $this->is_store_api_request() ) || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		if ( $is_admin || $is_cli || ( $is_rest_request && ! $this->is_store_api_request() ) ) {
 			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		}
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
@@ -384,35 +377,26 @@ final class WooCommerce {
 		$container->get( TermCount::class );
 		$container->get( DataRegenerator::class );
 		$container->get( LookupDataStore::class );
-		$container->get( MatchImageBySKU::class );
 		$container->get( RestockRefundedItemsAdjuster::class );
 		$container->get( CustomOrdersTableController::class );
 		$container->get( ProductCacheController::class );
 		$container->get( ProductTermCacheInvalidator::class );
-		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
 		$container->get( WebhookUtil::class );
-		$container->get( Marketplace::class );
-		$container->get( TimeUtil::class );
 		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( ProductCountCacheService::class );
-		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
-		$container->get( AbilitiesRegistry::class );
-		$container->get( MCPAdapterProvider::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
-		$container->get( OrderMilestoneEasterEgg::class );
+		$container->get( OrderMilestoneEasterEgg::class ); // Performance note: can be gated with is_admin() once switched getting orders counts from a caching service.
 		$container->get( CustomerEmailVerification::class );
-		$container->get( OrderLogsCleanupHelper::class );
-		$container->get( PaymentSettingsScreen::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -421,16 +405,10 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
-		$container->get( LegacySelect2UsageTracker::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
-		$container->get( EmailLogger::class )->register();
-		$container->get( VisualAttributeTermAdmin::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Email\EmailLogger::class )->register();
 		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
@@ -440,19 +418,47 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
-
-		// Classes inheriting from RestApiControllerBase.
-		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		$might_need_rest_routes_for_rest_initialization = $is_rest_request || $is_admin; // See explanation about rest_api_init + admin_init coupling above.
+		if ( $might_need_rest_routes_for_rest_initialization ) {
+			// MCP adapter routes.
+			$container->get( Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry::class );
+			$container->get( Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class );
+			// Public REST-routes.
+			$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
+			// Admin routes (settings).
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
+		}
+
+		if ( $is_admin ) {
+			$container->get( Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU::class ); // hooks woocommerce_get_settings_products (admin settings page filter).
+			$container->get( Automattic\WooCommerce\Internal\Admin\Marketplace::class ); // hooks admin_menu + admin_enqueue_scripts via init→on_init.
+			$container->get( Automattic\WooCommerce\Internal\Settings\OptionSanitizer::class ); // 6 woocommerce_admin_settings_sanitize_option_* filters, only fire during admin settings save.
+			$container->get( Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements::class ); // hooks admin_init.
+
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen::class ); // hooks admin_menu + admin_head.
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register(); // hooks admin_menu, admin_body_class, woocommerce_admin_shared_settings.
+			$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register(); // hooks admin_init.
+
+			$container->get( Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin::class )->register(); // TODO: calls wc_get_attribute_taxonomies() (DB query) eagerly on every admin load; defer to admin_init.
+			$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register(); // hooks woocommerce_debug_tools (Status > Tools page).
+			$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register(); // hooks woocommerce_debug_tools (Status > Tools page).
+		}
+
+		$might_need_handling_action_scheduler_task = $is_admin || $is_cli || defined( 'DOING_CRON' );
+		if ( $might_need_handling_action_scheduler_task ) {
+			$container->get( Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper::class );
+			$container->get( Automattic\WooCommerce\Internal\VariationGallery\Telemetry::class )->register();
+			$container->get( Automattic\WooCommerce\Internal\ProductCustoms\Telemetry::class )->register();
+		}
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
