@@ -416,16 +416,22 @@ class AbilitiesTracking {
 	 * Hand the recorded events to the Tracks client.
 	 */
 	private function flush_events(): void {
-		$last = array_key_last( $this->events );
-		if ( null !== $last && $this->events_dropped > 0 ) {
-			$this->events[ $last ]['events_dropped'] = $this->events_dropped;
-			$this->events_dropped                    = 0;
-		}
+		// Runs on shutdown, where an exception would also stop later shutdown callbacks.
+		try {
+			$last = array_key_last( $this->events );
+			if ( null !== $last && $this->events_dropped > 0 ) {
+				$this->events[ $last ]['events_dropped'] = $this->events_dropped;
+				$this->events_dropped                    = 0;
+			}
 
-		foreach ( $this->events as $properties ) {
-			$this->send_event( $properties );
+			$events       = $this->events;
+			$this->events = array();
+			foreach ( $events as $properties ) {
+				$this->send_event( $properties );
+			}
+		} catch ( \Throwable $e ) {
+			unset( $e );
 		}
-		$this->events = array();
 	}
 
 	/**
@@ -524,54 +530,59 @@ class AbilitiesTracking {
 	 * @param bool                                                                                        $has_duration Whether the duration is known.
 	 */
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
-		if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
-			if ( ! $this->is_long_running_process() ) {
-				++$this->events_dropped;
+		// Telemetry must never break the ability call: this runs third-party filters and Jetpack code inside core's hooks.
+		try {
+			if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
+				if ( ! $this->is_long_running_process() ) {
+					++$this->events_dropped;
+					return;
+				}
+				$this->flush_events();
+				\WC_Tracks_Client::send_batched_pixels();
+			}
+
+			// The call itself may have turned tracking off.
+			if ( ! self::is_tracking_allowed() ) {
 				return;
 			}
-			$this->flush_events();
-			\WC_Tracks_Client::send_batched_pixels();
+
+			// Web requests from logged-out visitors aren't merchant or agent usage, and anyone could trigger them.
+			$auth = self::get_auth_method();
+			if ( 'none' === $auth && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+				return;
+			}
+
+			$error_code = self::NONE;
+			if ( $outcome instanceof WP_Error ) {
+				$error_code = self::normalize_value( (string) $outcome->get_error_code() );
+			} elseif ( null === $outcome ) {
+				$error_code = 'unknown';
+			}
+
+			$event = array(
+				// Not truncated: ability names have no length limit, and truncated names could collide.
+				'ability_name'    => self::normalize_value( $frame['name'], null ),
+				'outcome'         => true === $outcome ? 'success' : 'error',
+				'error_code'      => $error_code,
+				'channel'         => $frame['channel'],
+				'rest_namespace'  => $frame['rest_namespace'],
+				'auth'            => $auth,
+				'external_client' => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
+			);
+
+			if ( $has_duration ) {
+				$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
+			}
+			$event['is_test'] = 'production' === wp_get_environment_type() ? 'false' : 'true';
+
+			$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
+			// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
+			unset( $properties['_dl'], $properties['_dr'] );
+
+			$this->events[] = $properties;
+		} catch ( \Throwable $e ) {
+			unset( $e );
 		}
-
-		// The call itself may have turned tracking off.
-		if ( ! self::is_tracking_allowed() ) {
-			return;
-		}
-
-		// Web requests from logged-out visitors aren't merchant or agent usage, and anyone could trigger them.
-		$auth = self::get_auth_method();
-		if ( 'none' === $auth && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
-			return;
-		}
-
-		$error_code = self::NONE;
-		if ( $outcome instanceof WP_Error ) {
-			$error_code = self::normalize_value( (string) $outcome->get_error_code() );
-		} elseif ( null === $outcome ) {
-			$error_code = 'unknown';
-		}
-
-		$event = array(
-			// Not truncated: ability names have no length limit, and truncated names could collide.
-			'ability_name'    => self::normalize_value( $frame['name'], null ),
-			'outcome'         => true === $outcome ? 'success' : 'error',
-			'error_code'      => $error_code,
-			'channel'         => $frame['channel'],
-			'rest_namespace'  => $frame['rest_namespace'],
-			'auth'            => $auth,
-			'external_client' => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
-		);
-
-		if ( $has_duration ) {
-			$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
-		}
-		$event['is_test'] = 'production' === wp_get_environment_type() ? 'false' : 'true';
-
-		$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
-		// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
-		unset( $properties['_dl'], $properties['_dr'] );
-
-		$this->events[] = $properties;
 	}
 
 	/**
@@ -692,7 +703,12 @@ class AbilitiesTracking {
 	 * @return bool
 	 */
 	private static function is_tracking_allowed(): bool {
-		return 'yes' === get_option( 'woocommerce_allow_tracking' ) && \WC_Site_Tracking::is_tracking_enabled();
+		try {
+			return 'yes' === get_option( 'woocommerce_allow_tracking' ) && \WC_Site_Tracking::is_tracking_enabled();
+		} catch ( \Throwable $e ) {
+			// The consent filters are third-party code; a failure there must not break the ability call.
+			return false;
+		}
 	}
 
 	/**

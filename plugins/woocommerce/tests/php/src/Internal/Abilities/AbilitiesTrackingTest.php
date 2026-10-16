@@ -733,6 +733,29 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not let a failing Tracks or consent filter break the ability call.
+	 * @testWith ["woocommerce_tracks_event_properties"]
+	 *           ["woocommerce_apply_tracking"]
+	 *
+	 * @param string $hook Filter that throws.
+	 */
+	public function test_tracking_failures_do_not_break_ability_calls( string $hook ): void {
+		add_filter(
+			$hook,
+			static function () {
+				throw new \RuntimeException( 'Broken filter.' );
+			}
+		);
+		$this->start_mcp_tool_call();
+
+		$result = wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( array( 'ok' => true ), $result );
+		$this->assertSame( array(), $this->sut->recorded );
+	}
+
+	/**
 	 * @testdox Should record each call with the user who made it.
 	 */
 	public function test_records_user_context_of_each_call(): void {
