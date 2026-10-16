@@ -422,6 +422,27 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A cart error the parent reports keeps its UCP code and status; only errors UCP has
+	 * no name for become transport errors.
+	 */
+	public function test_parent_errors_keep_their_cart_code(): void {
+		$route  = rest_get_server()->get_routes()['/wc/ucp/v1/carts'][0]['callback'][0];
+		$method = new \ReflectionMethod( $route, 'error_to_response' );
+		$method->setAccessible( true );
+
+		$refused = $method->invoke( $route, new \WP_Error( 'woocommerce_rest_product_out_of_stock', 'Gone.', array( 'status' => 409 ) ) );
+		$this->assertSame( 409, $refused->get_status() );
+		$this->assertSame( 'out_of_stock', $refused->get_data()['messages'][0]['code'] );
+		$this->assertSame( 'recoverable', $refused->get_data()['messages'][0]['severity'] );
+		$this->assertSame( 'Gone.', $refused->get_data()['messages'][0]['content'] );
+
+		$unknown = $method->invoke( $route, new \WP_Error( 'woocommerce_rest_cart_error', 'Session failed.', array( 'status' => 500 ) ) );
+		$this->assertSame( 500, $unknown->get_status() );
+		$this->assertSame( 'TRANSPORT_ERROR', $unknown->get_data()['messages'][0]['code'] );
+		$this->assertSame( 'unrecoverable', $unknown->get_data()['messages'][0]['severity'] );
+	}
+
+	/**
 	 * Creating a cart answers the UCP cart shape, with amounts in minor units.
 	 */
 	public function test_create_cart_returns_ucp_cart(): void {

@@ -90,7 +90,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$inherited_token = CartTokenUtils::get_request_cart_token();
 
 		try {
-			return $this->ensure_ucp_envelope( parent::get_response( $request ) );
+			return parent::get_response( $request );
 		} finally {
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
@@ -301,27 +301,28 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Re-shape an error the parent built outside the UCP envelope.
+	 * Report an error the parent raised in the UCP envelope.
 	 *
-	 * A session that fails to load, or an exception a handler lets through, is turned into
-	 * a plain Store API error upstream. A UCP client reads `ucp.status` and `messages`
-	 * instead, so the same failure is reported the way `Carts` already reports its own.
+	 * Every failure the Store API base class produces — a session that fails to load,
+	 * a `RouteException` a handler let through, an unexpected exception — funnels through
+	 * here. The cart's own code is kept where UCP has a name for it, and the HTTP status
+	 * is the parent's. The `cart` payload the parent attaches to a 409 conflict is dropped:
+	 * the UCP envelope has no slot for it, and the client re-reads the cart instead.
 	 *
-	 * @param \WP_REST_Response $response Response the parent produced.
+	 * @param \WP_Error $error WP Error object.
 	 * @return \WP_REST_Response
 	 */
-	private function ensure_ucp_envelope( \WP_REST_Response $response ): \WP_REST_Response {
-		$data = $response->get_data();
+	protected function error_to_response( $error ) {
+		$data    = $error->get_error_data();
+		$status  = is_array( $data ) && isset( $data['status'] ) ? (int) $data['status'] : 500;
+		$message = (string) $error->get_error_message();
 
-		if ( $response->get_status() < 400 || ( is_array( $data ) && isset( $data['ucp'] ) ) ) {
-			return $response;
-		}
-
-		$message = is_array( $data ) && ! empty( $data['message'] ) && is_string( $data['message'] )
-			? $data['message']
-			: __( 'The cart could not be loaded. Please try again.', 'woocommerce' );
-
-		return $this->ucp_error( 'TRANSPORT_ERROR', $message, 'unrecoverable', $response->get_status() );
+		return $this->ucp_error(
+			UcpUtils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
+			'' !== $message ? $message : __( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
+			$status >= 500 ? 'unrecoverable' : 'recoverable',
+			$status
+		);
 	}
 
 	/**
