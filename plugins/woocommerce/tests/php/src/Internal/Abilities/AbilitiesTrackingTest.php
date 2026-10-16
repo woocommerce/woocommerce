@@ -108,12 +108,28 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			public array $recorded = array();
 
 			/**
+			 * Whether to behave as a long-running process.
+			 *
+			 * @var bool
+			 */
+			public bool $long_running = false;
+
+			/**
 			 * Capture the event instead of sending it.
 			 *
 			 * @param array $properties Tracks properties.
 			 */
 			protected function send_event( array $properties ): void {
 				$this->recorded[] = $properties;
+			}
+
+			/**
+			 * Report the configured process type.
+			 *
+			 * @return bool
+			 */
+			protected function is_long_running_process(): bool {
+				return $this->long_running;
 			}
 		};
 		$this->sut->handle_init();
@@ -400,6 +416,54 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertCount( 25, $this->sut->recorded );
+	}
+
+	/**
+	 * @testdox Should send full buffers during long-running processes instead of dropping events.
+	 */
+	public function test_flushes_full_buffer_in_long_running_process(): void {
+		$this->sut->long_running = true;
+		$this->start_mcp_tool_call();
+		$ability = wp_get_ability( self::ABILITY_ID );
+
+		for ( $i = 0; $i < 30; $i++ ) {
+			$ability->execute();
+		}
+
+		$this->assertCount( 25, $this->sut->recorded, 'The first full buffer should be sent before shutdown' );
+		$this->sut->handle_shutdown();
+		$this->assertCount( 30, $this->sut->recorded );
+	}
+
+	/**
+	 * @testdox Should not record a call that turned usage tracking off.
+	 */
+	public function test_does_not_record_call_that_disables_tracking(): void {
+		$this->execute_result = static function () {
+			update_option( 'woocommerce_allow_tracking', 'no' );
+			return array( 'ok' => true );
+		};
+		$this->start_mcp_tool_call();
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( array(), $this->sut->recorded );
+	}
+
+	/**
+	 * @testdox Should record each call with the user who made it.
+	 */
+	public function test_records_user_context_of_each_call(): void {
+		$this->start_mcp_tool_call();
+		$ability = wp_get_ability( self::ABILITY_ID );
+
+		$ability->execute();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		$ability->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( array( 'administrator', 'shop_manager' ), array_column( $this->sut->recorded, 'role' ) );
 	}
 
 	/**

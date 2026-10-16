@@ -68,9 +68,9 @@ class AbilitiesTracking {
 	private array $frames = array();
 
 	/**
-	 * Event properties waiting to be sent on shutdown.
+	 * Tracks properties of events waiting to be sent.
 	 *
-	 * @var array<int, array<string, string|int>>
+	 * @var array<int, array<string, mixed>>
 	 */
 	private array $events = array();
 
@@ -324,19 +324,7 @@ class AbilitiesTracking {
 			$this->add_event( array_pop( $this->frames ), null, false );
 		}
 
-		if ( ! $this->events ) {
-			return;
-		}
-
-		$is_test = 'production' === wp_get_environment_type() ? 'false' : 'true';
-		foreach ( $this->events as $event ) {
-			$event['is_test'] = $is_test;
-			$properties       = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
-			// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
-			unset( $properties['_dl'], $properties['_dr'] );
-			$this->send_event( $properties );
-		}
-		$this->events = array();
+		$this->flush_events();
 	}
 
 	/**
@@ -349,6 +337,25 @@ class AbilitiesTracking {
 	}
 
 	/**
+	 * Whether this process can outlive many requests' worth of calls, such as an MCP STDIO server run with WP-CLI.
+	 *
+	 * @return bool
+	 */
+	protected function is_long_running_process(): bool {
+		return defined( 'WP_CLI' ) && WP_CLI;
+	}
+
+	/**
+	 * Hand the recorded events to the Tracks client.
+	 */
+	private function flush_events(): void {
+		foreach ( $this->events as $properties ) {
+			$this->send_event( $properties );
+		}
+		$this->events = array();
+	}
+
+	/**
 	 * Start tracking an invocation.
 	 *
 	 * @param string $ability_name The ability name.
@@ -356,7 +363,8 @@ class AbilitiesTracking {
 	 */
 	private function open_frame( string $ability_name, bool $executing ): void {
 		// Calls that fail without a closing hook keep their frame until shutdown, so loops must not grow this unbounded.
-		if ( count( $this->frames ) >= self::MAX_EVENTS_PER_REQUEST ) {
+		// Consent is per site, and the site can change mid-request with switch_to_blog().
+		if ( count( $this->frames ) >= self::MAX_EVENTS_PER_REQUEST || ! \WC_Site_Tracking::is_tracking_enabled() ) {
 			return;
 		}
 
@@ -413,7 +421,9 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Turn a finished invocation into event properties.
+	 * Turn a finished invocation into Tracks properties.
+	 *
+	 * Properties are built now, so the user, site and time are those of the call rather than of shutdown.
 	 *
 	 * @param array{name: string, channel: string, start: float, executing: bool} $frame        The invocation.
 	 * @param true|WP_Error|null                                                  $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
@@ -421,6 +431,15 @@ class AbilitiesTracking {
 	 */
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
 		if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
+			if ( ! $this->is_long_running_process() ) {
+				return;
+			}
+			$this->flush_events();
+			\WC_Tracks_Client::send_batched_pixels();
+		}
+
+		// The call itself may have turned tracking off.
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
 			return;
 		}
 
@@ -442,8 +461,13 @@ class AbilitiesTracking {
 		if ( $has_duration ) {
 			$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
 		}
+		$event['is_test'] = 'production' === wp_get_environment_type() ? 'false' : 'true';
 
-		$this->events[] = $event;
+		$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
+		// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
+		unset( $properties['_dl'], $properties['_dr'] );
+
+		$this->events[] = $properties;
 	}
 
 	/**
