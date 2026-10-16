@@ -53,7 +53,7 @@ export async function validateTheme( slug, fix = false ) {
 			status = 1;
 		}
 	}
-	const themeCheckStatus = await runThemeCheck( directory );
+	const themeCheckStatus = await runThemeCheck( slug );
 	return status === 0 && themeCheckStatus === 0 ? 0 : 1;
 }
 
