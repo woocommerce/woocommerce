@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid the Product Filters wrapper having dialog role when not rendering the overlay
