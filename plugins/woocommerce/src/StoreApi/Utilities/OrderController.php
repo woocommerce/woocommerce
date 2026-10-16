@@ -90,6 +90,11 @@ class OrderController {
 		$order->set_payment_method( PaymentUtils::get_default_payment_method() );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
+		if ( in_array( true, array_column( wc()->cart->get_cart(), 'line_discount_tax_adjusted' ), true ) ) {
+			$order->set_discount_total( (string) wc()->cart->get_discount_total() );
+			$order->set_discount_tax( (string) wc()->cart->get_discount_tax() );
+			$order->save();
+		}
 	}
 
 	/**
