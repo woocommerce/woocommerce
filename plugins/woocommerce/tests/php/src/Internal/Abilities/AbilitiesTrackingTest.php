@@ -416,6 +416,27 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record only slug-like error codes.
+	 * @testWith ["tracking_test_failure", "tracking_test_failure"]
+	 *           ["Tracking-Test-Failure", "tracking_test_failure"]
+	 *           ["customer@example.com", "other"]
+	 *           ["order 1234 for Jane", "other"]
+	 *
+	 * @param string $code     Error code returned by the ability.
+	 * @param string $expected Recorded error code.
+	 */
+	public function test_records_only_slug_like_error_codes( string $code, string $expected ): void {
+		$this->skip_unless_wordpress_exposes_all_outcomes();
+		$this->execute_result = new WP_Error( $code );
+		$this->start_mcp_tool_call();
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( $expected, $this->sut->recorded[0]['error_code'] );
+	}
+
+	/**
 	 * @testdox Should record a failure without a closing hook as unknown on shutdown.
 	 */
 	public function test_records_failure_without_closing_hook_as_unknown(): void {

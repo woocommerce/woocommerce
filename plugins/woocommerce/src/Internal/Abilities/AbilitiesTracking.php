@@ -554,7 +554,7 @@ class AbilitiesTracking {
 
 			$error_code = self::NONE;
 			if ( $outcome instanceof WP_Error ) {
-				$error_code = self::normalize_value( (string) $outcome->get_error_code() );
+				$error_code = self::get_error_code( $outcome );
 			} elseif ( null === $outcome ) {
 				$error_code = 'unknown';
 			}
@@ -636,6 +636,20 @@ class AbilitiesTracking {
 		}
 		$segments = explode( '/', ltrim( $this->rest_requests[0]->get_route(), '/' ), 2 );
 		return self::normalize_value( $segments[0] );
+	}
+
+	/**
+	 * Get the error code to record for an error.
+	 *
+	 * Codes are normally fixed slugs, but any filter can return an error whose code was built from input, so codes
+	 * that don't look like slugs are recorded as `other`.
+	 *
+	 * @param WP_Error $error The error.
+	 * @return string
+	 */
+	private static function get_error_code( WP_Error $error ): string {
+		$code = (string) $error->get_error_code();
+		return 1 === preg_match( '/^[A-Za-z0-9_-]{1,64}$/', $code ) ? self::normalize_value( $code ) : 'other';
 	}
 
 	/**
