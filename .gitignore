@@ -5,7 +5,6 @@ Thumbs.db
 # IDE files
 .idea
 .vscode/*
-!.vscode/settings.json
 project.xml
 project.properties
 .project

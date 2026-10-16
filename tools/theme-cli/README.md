@@ -1,6 +1,6 @@
 # WooCommerce theme CLI
 
-`@woocommerce/theme-cli` provides shared development tooling for WooCommerce themes in `themes/<slug>/`. Themes are versioned independently of WooCommerce Core. Each theme is its own private pnpm workspace package, with its own version, commands, changelog, and release lifecycle. Shared development tooling lives in the private `@woocommerce/theme-cli` workspace package, with shared Composer dependencies in `tools/theme-cli/`. Theme directories under `themes/` are discovered automatically.
+`@woocommerce/theme-cli` provides shared development tooling for WooCommerce themes in `themes/<slug>/`. Themes are versioned independently of WooCommerce Core. Each theme is its own private pnpm workspace package, with its own version, commands, changelog, and release lifecycle. Shared development tooling lives in the private `@woocommerce/theme-cli` workspace package, with shared Composer dependencies in `tools/theme-cli/`.
 
 ## Setup
 
@@ -31,40 +31,6 @@ pnpm --filter=@woocommerce/theme-cli validate --all
 pnpm --filter=@woocommerce/theme-cli validate --all --fix
 ```
 
-The `validate` command runs `wp-scripts lint-js`, `wp-scripts lint-style`, and `wp-scripts lint-md-docs` for the selected theme, then invokes the official [WordPress Theme Check](https://github.com/WordPress/theme-check#usage-with-wp-cli) command, `wp theme-check run <slug>`. These are its only checks. The lint commands use the repository's shared ESLint, Stylelint, and markdownlint configurations. Theme JavaScript uses the theme slug as its translation text domain. Any lint or Theme Check failure makes validation fail. When checking all themes, it continues through the remaining themes if one fails. Themes can expose their own `validate` shortcut to the shared command.
-
-The lint commands run from the selected theme's directory in `validate-theme.mjs`, using wp-scripts' default file matching and exclusions. The shared Prettier configuration remains available for editor formatting, including HTML under each theme's `templates/` and `parts/` directories. Embedded CSS stays unchanged to preserve serialized block styles. `--fix` applies supported ESLint, Stylelint, and markdownlint fixes to the selected theme.
-
-Validation mounts the theme directory directly in a separate Docker WordPress environment derived from the shared `tools/theme-cli/.wp-env.json`. That configuration installs WooCommerce and the Theme Check plugin for both development and validation. Validation runs the official command and stops its environment afterward. Generated configuration and cached downloads live under `tools/theme-cli/.wp-env/theme-check/`. Validation uses the shared ports (8890 by default), so stop the development environment before running it. Theme Check's exit status determines whether its check passes. The development environment keeps its existing runtime and data.
-
-WordPress already excludes `node_modules` and `vendor` when scanning themes. The Theme Check invocation uses the [WordPress theme scanning filter](https://developer.wordpress.org/reference/hooks/theme_scandir_exclusions/) to also exclude `artifacts`, `composer.json`, `composer.lock`, and `package.json`, so development metadata and built ZIPs do not produce validation failures.
-
-Changelog entries for shared tooling live in `tools/theme-cli/changelog/`, with shared types and versioning from `tools/theme-cli/composer.json`.
-
-All themes use `tools/theme-cli/prettier.config.cjs` and the repository's root `stylelint.config.cjs` and `.markdownlint.json`. The shared Prettier config extends the WordPress preset and preserves embedded CSS in theme templates and parts. New themes inherit these rules automatically.
-
-Themes register their `validate` command in `package.json` under `config.ci.tests`, as Purple does. CI runs validation on pull requests when the theme or a workspace dependency such as `@woocommerce/theme-cli` changes. Lockfile changes select all packages. Markdown-only pull requests use the shared Markdown check. Root lint configuration changes do not automatically select theme validation jobs.
-
-The theme CLI registers its own `lint` command under `config.ci.lint`. Run `pnpm --filter=@woocommerce/theme-cli lint` to check its JavaScript and Markdown with wp-scripts. Its ESLint configuration extends the repository rules, permits console output in CLI scripts and CommonJS configuration files, and excludes generated environments and Composer dependencies.
-
-### Editor setup
-
-Open the repository root and run `pnpm install`. In VS Code, install Prettier (`esbenp.prettier-vscode`), Stylelint (`stylelint.vscode-stylelint`), and markdownlint (`DavidAnson.vscode-markdownlint`). Prettier discovers `themes/.prettierrc.cjs` for files under `themes/`; that file loads the shared configuration from `tools/theme-cli/prettier.config.cjs`. Files outside `themes/` keep their existing configuration. Stylelint and markdownlint discover their root configurations; CLI scripts use the same rules.
-
-For formatting and fixes on save, add the following to your workspace settings:
-
-```json
-{
-	"[html]": {
-		"editor.formatOnSave": true
-	},
-	"editor.codeActionsOnSave": {
-		"source.fixAll.stylelint": "explicit",
-		"source.fixAll.markdownlint": "explicit"
-	},
-	"stylelint.validate": [ "css", "scss" ]
-}
-```
 
 ## Local environments
 
@@ -82,11 +48,10 @@ pnpm --filter=@woocommerce/theme-cli wp-env stop <slug>
 Validate the theme first, then build its ZIP from the repository root. Replace `<slug>` with the theme directory name:
 
 ```bash
-pnpm --filter=@woocommerce/theme-cli validate <slug>
 pnpm --filter=@woocommerce/theme-cli build <slug>
 ```
 
-The shared `build-zip.mjs` command runs `wp-scripts plugin-zip --root-folder=<slug>` using the theme's `package.json` `files` field to select theme assets, templates, PHP files, and metadata. wp-scripts follows npm's packaging rules, which also include `package.json` and README files. The shared command creates the artifacts directory and moves the ZIP to `themes/<slug>/artifacts/<slug>.zip`. Builds include current working files, including uncommitted changes.
+The command creates the artifacts directory and moves the ZIP to `themes/<slug>/artifacts/<slug>.zip`. Builds include current working files, including uncommitted changes.
 
 Theme content checks belong to `validate`; `build` creates the ZIP with wp-scripts. ZIP generation does not publish a release.
 
