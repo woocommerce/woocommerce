@@ -1212,6 +1212,50 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A skip-existing historical import still imports every real order when older test orders are skipped.
+	 * @testWith [2, 3]
+	 *           [1, 3]
+	 *
+	 * @param int $test_order_count Number of test orders created before the real ones.
+	 * @param int $real_order_count Number of real orders.
+	 */
+	public function test_import_batch_init_imports_real_orders_queued_behind_test_orders( int $test_order_count, int $real_order_count ): void {
+		global $wpdb;
+
+		$create_order = function ( int $timestamp, bool $is_test ): int {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_date_created( $timestamp );
+			if ( $is_test ) {
+				$order->update_meta_data( '_wcpay_mode', 'test' );
+			}
+			$order->save();
+			return $order->get_id();
+		};
+
+		$timestamp = strtotime( '2000-01-01 00:00:00' );
+		for ( $i = 0; $i < $test_order_count; $i++ ) {
+			$create_order( $timestamp++, true );
+		}
+		$real_order_ids = array();
+		for ( $i = 0; $i < $real_order_count; $i++ ) {
+			$real_order_ids[] = $create_order( $timestamp++, false );
+		}
+
+		$batch_size = function ( $size, $name, $action ) {
+			unset( $name ); // Avoid parameter not used PHPCS errors.
+			return 'import' === $action ? 2 : $size;
+		};
+		add_filter( 'woocommerce_analytics_regenerate_batch_size', $batch_size, 10, 3 );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		update_option( OrdersScheduler::IMPORT_STATS_OPTION, array( OrdersScheduler::$name => array( 'imported' => 0 ) ) );
+
+		OrdersScheduler::import_batch_init( false, true );
+
+		$imported_ids = array_map( 'intval', $wpdb->get_col( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats" ) );
+		$this->assertSame( array(), array_values( array_diff( $real_order_ids, $imported_ids ) ), 'Every real order should have an order stats row after the import.' );
+	}
+
+	/**
 	 * Make the next write to the tax lookup table fail, the way a database error would.
 	 *
 	 * @return callable Restores normal writes.
