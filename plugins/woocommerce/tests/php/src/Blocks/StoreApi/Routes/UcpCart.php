@@ -1066,10 +1066,10 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
-	 * Prices come from the Store API cart response, so they follow the cart tax
-	 * display setting the storefront uses rather than the product's raw price.
+	 * Item prices are pre-tax whatever the cart display setting, so price times
+	 * quantity equals the line subtotal and tax is only in the itemised totals.
 	 */
-	public function test_item_price_follows_cart_tax_display(): void {
+	public function test_item_price_is_pre_tax_under_inclusive_cart_display(): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 		$rate_id = \WC_Tax::_insert_tax_rate(
@@ -1088,8 +1088,9 @@ class UcpCart extends ControllerTestCase {
 			update_option( 'woocommerce_tax_display_cart', 'excl' );
 		}
 
-		// 19.99 at 10%: the price shown includes tax, totals carry the tax line.
-		$this->assertSame( 2199, $data['line_items'][0]['item']['price'] );
+		// 19.99 at 10%: the price stays 19.99, the tax line carries the 10%.
+		$this->assertSame( 1999, $data['line_items'][0]['item']['price'] );
+		$this->assertSame( 3998, $this->total( $data['line_items'][0]['totals'], 'subtotal' ) );
 		$this->assertSame( 3998, $this->total( $data['totals'], 'subtotal' ) );
 		$this->assertSame( 400, $this->total( $data['totals'], 'tax' ) );
 		$this->assertSame( 4398, $this->total( $data['totals'], 'total' ) );
