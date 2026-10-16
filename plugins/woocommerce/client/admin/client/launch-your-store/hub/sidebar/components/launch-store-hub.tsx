@@ -8,7 +8,7 @@ import {
 	useEffect,
 	useState,
 } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import {
@@ -37,7 +37,7 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 		context: {
 			tasklist,
 			removeTestOrders: removeTestOrdersContext,
-			testOrderCount,
+			hasTestOrders,
 			launchStoreError,
 		},
 	} = props;
@@ -146,7 +146,7 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 						</SidebarNavigationItem>
 					) }
 				</ItemGroup>
-				{ testOrderCount > 0 && (
+				{ hasTestOrders && (
 					<>
 						<div className="woocommerce-edit-site-sidebar-navigation-screen-test-data__group-header">
 							<Heading level={ 2 }>
@@ -156,13 +156,9 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 						<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-remove-test-data__group">
 							<ToggleControl
 								__nextHasNoMarginBottom
-								label={ sprintf(
-									// translators: %d is the number of test orders
-									__(
-										'Remove %d test orders',
-										'woocommerce'
-									),
-									testOrderCount
+								label={ __(
+									'Remove test orders',
+									'woocommerce'
 								) }
 								checked={ removeTestOrders }
 								onChange={ setRemoveTestOrder }
