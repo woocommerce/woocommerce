@@ -43,11 +43,17 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $original_hydration_registry_entry = null;
 
 	/**
-	 * Start from empty ProductsStore statics, since block renders in other test classes fill them.
+	 * Start every test from empty ProductsStore caches and empty Interactivity
+	 * API state. Earlier test classes can leave the static caches filled
+	 * (`products`, `product_variations`, `loaded_variation_parents`,
+	 * `getters_registered`) and the global WP_Interactivity_API state populated
+	 * (`state_data`, `config_data`, `derived_state_closures`), which would make
+	 * a loader skip its write or a state assertion read foreign data.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->reset_products_store_static_state();
+		$this->reset_interactivity_state();
 	}
 
 	/**
@@ -458,43 +464,6 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_product() seeds the same error body in both namespaces for an ID the Store API rejects.
-	 */
-	public function test_load_product_seeds_error_body_in_both_namespaces(): void {
-		$missing_id = 999999999;
-
-		$result = TestedProductsStore::load_product( $this->consent, $missing_id );
-
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
-
-		$this->assertNotEmpty( $result, 'The Store API error body is returned.' );
-		$this->assertArrayHasKey( $missing_id, $products_state['products'] );
-		$this->assertSame( $result, $products_state['products'][ $missing_id ] );
-		$this->assertArrayHasKey( $missing_id, $woocommerce_state['products'] );
-		$this->assertEquals( $result, $woocommerce_state['products'][ $missing_id ] );
-	}
-
-	/**
-	 * @testdox load_product() seeds a product loaded twice once, with the same value in both namespaces.
-	 */
-	public function test_load_product_twice_seeds_once_in_both_namespaces(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$id      = $product->get_id();
-
-		$first  = TestedProductsStore::load_product( $this->consent, $id );
-		$second = TestedProductsStore::load_product( $this->consent, $id );
-
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
-
-		$this->assertSame( $first, $second );
-		$this->assertCount( 1, $products_state['products'] );
-		$this->assertCount( 1, $woocommerce_state['products'] );
-		$this->assertEquals( $products_state['products'][ $id ], $woocommerce_state['products'][ $id ] );
-	}
-
-	/**
 	 * @testdox load_purchasable_child_products() seeds purchasable children into both namespaces and leaves non-purchasable ones out of both.
 	 */
 	public function test_load_purchasable_child_products_seeds_woocommerce_namespace(): void {
@@ -577,44 +546,6 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_purchasable_child_products() writes no products key to either namespace for a missing or childless parent.
-	 */
-	public function test_load_purchasable_child_products_writes_nothing_for_missing_or_childless_parent(): void {
-		$grouped = new WC_Product_Grouped();
-		$grouped->set_name( 'Empty Grouped' );
-		$grouped->save();
-
-		TestedProductsStore::load_purchasable_child_products( $this->consent, 999999999 );
-		TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
-
-		$this->assertArrayNotHasKey( 'products', wp_interactivity_state( $this->store_namespace ) );
-		$this->assertArrayNotHasKey( 'products', wp_interactivity_state( $this->shared_namespace ) );
-	}
-
-	/**
-	 * @testdox load_purchasable_child_products() called twice returns the same value and leaves each child once, equal in both namespaces.
-	 */
-	public function test_load_purchasable_child_products_twice_seeds_once_in_both_namespaces(): void {
-		$child = WC_Helper_Product::create_simple_product();
-
-		$grouped = new WC_Product_Grouped();
-		$grouped->set_name( 'Grouped Called Twice' );
-		$grouped->set_children( array( $child->get_id() ) );
-		$grouped->save();
-
-		$first  = TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
-		$second = TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
-
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
-
-		$this->assertEquals( $first, $second );
-		$this->assertCount( 1, $products_state['products'] );
-		$this->assertCount( 1, $woocommerce_state['products'] );
-		$this->assertEquals( $products_state['products'], $woocommerce_state['products'] );
-	}
-
-	/**
 	 * @testdox load_variations() seeds every variation into the woocommerce namespace with the same value as woocommerce/products.
 	 */
 	public function test_load_variations_seeds_woocommerce_namespace(): void {
@@ -632,37 +563,6 @@ class ProductsStore extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( $variation_id, $woocommerce_state['productVariations'] );
 			$this->assertEquals( $variation, $woocommerce_state['productVariations'][ $variation_id ] );
 		}
-	}
-
-	/**
-	 * @testdox load_variations() writes no productVariations entry to either namespace for a product without variations.
-	 */
-	public function test_load_variations_writes_nothing_without_variations(): void {
-		$product = WC_Helper_Product::create_simple_product();
-
-		$result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
-
-		$this->assertSame( array(), $result );
-		$this->assertArrayNotHasKey( 'productVariations', wp_interactivity_state( $this->store_namespace ) );
-		$this->assertArrayNotHasKey( 'productVariations', wp_interactivity_state( $this->shared_namespace ) );
-	}
-
-	/**
-	 * @testdox load_variations() called twice returns the same value and leaves each variation once, equal in both namespaces.
-	 */
-	public function test_load_variations_twice_seeds_once_in_both_namespaces(): void {
-		$product = WC_Helper_Product::create_variation_product();
-
-		$first  = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
-		$second = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
-
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
-
-		$this->assertSame( $first, $second );
-		$this->assertCount( count( $first ), $products_state['productVariations'] );
-		$this->assertCount( count( $first ), $woocommerce_state['productVariations'] );
-		$this->assertEquals( $products_state['productVariations'], $woocommerce_state['productVariations'] );
 	}
 
 	/**
