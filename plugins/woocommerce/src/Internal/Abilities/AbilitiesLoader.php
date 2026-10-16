@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
@@ -78,10 +79,58 @@ class AbilitiesLoader {
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		AbilitiesCategories::init();
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 
 		self::$initialized = true;
+	}
+
+	/**
+	 * Register the resources that Core's abilities format, so extensions can register fields on them.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function register_core_resources(): void {
+		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
+			ExtensibleAbilities::register_resource( $resource_name );
+		}
+	}
+
+	/**
+	 * Let extensions register their resources, then their ability fields, before the abilities build their schemas.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function init_extensions(): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
+			return;
+		}
+
+		/**
+		 * Fires when extensions can register their resources with ExtensibleAbilities.
+		 *
+		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
+		 * experimental `extensible_abilities` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+
+		/**
+		 * Fires when extensions can register their fields with ExtensibleAbilities.
+		 *
+		 * Fires one time, only when the experimental `extensible_abilities` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_extensible_abilities_init' );
 	}
 
 	/**
