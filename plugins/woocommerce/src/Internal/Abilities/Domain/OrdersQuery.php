@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -156,7 +156,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['date_query'][] = $modified_date_query;
 		}
 
-		$extension_args = AbilityExtensions::get_query_args( 'order', $input );
+		$extension_args = ExtensibleAbilities::get_query_args( 'order', $input );
 		if ( is_wp_error( $extension_args ) ) {
 			return $extension_args;
 		}
@@ -332,7 +332,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
-		return AbilityExtensions::add_query_filters_schema( $schema, 'order' );
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'order' );
 	}
 
 	/**

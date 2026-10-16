@@ -68,7 +68,7 @@ class AbilitiesLoader {
 	 *
 	 * @internal
 	 */
-	public const EXTENSION_QUERY_VAR = 'woocommerce_ability_extension_args';
+	public const EXTENSION_QUERY_VAR = 'woocommerce_extensible_abilities_query_args';
 
 	/**
 	 * Initialize ability registration hooks.
