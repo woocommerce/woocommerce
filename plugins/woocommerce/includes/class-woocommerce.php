@@ -664,8 +664,10 @@ final class WooCommerce {
 	/**
 	 * Returns true if the request is a store REST API request.
 	 *
-	 * The UCP namespace counts as one: like the Store API it returns data rather than rendered
-	 * pages, so callers can skip the same work — block and template registration, site tracking.
+	 * The UCP namespace counts as one while the `ucp` feature is enabled: like the Store API it
+	 * returns data rather than rendered pages, so callers can skip the same work — block and
+	 * template registration, site tracking. With the feature off the routes do not exist, and
+	 * the path is treated like any other REST request.
 	 *
 	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
 	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
@@ -678,7 +680,10 @@ final class WooCommerce {
 			return false;
 		}
 
-		$namespaces = array( 'wc/store/', 'wc/ucp/' );
+		$namespaces = array( 'wc/store/' );
+		if ( \Automattic\WooCommerce\StoreApi\Utilities\UcpUtils::is_enabled() ) {
+			$namespaces[] = 'wc/ucp/';
+		}
 
 		// Pretty permalinks: the namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
 		// path only (a leading slash anchors the prefix) so a REST-like query argument such as

@@ -143,6 +143,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	 * @testdox Should detect a UCP request as a Store API request, since it also returns data rather than pages.
 	 */
 	public function test_is_store_api_request_returns_true_for_ucp_pretty_permalinks(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/ucp/v1/carts';
 
 		$this->assertTrue( WC()->is_store_api_request(), 'A /wp-json/wc/ucp/ path should be detected as Store API.' );
@@ -152,10 +153,21 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	 * @testdox Should detect a plain-permalink UCP request as a Store API request.
 	 */
 	public function test_is_store_api_request_returns_true_for_ucp_plain_permalinks(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
 		$_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc/ucp/v1/carts';
 		$_GET['rest_route']     = '/wc/ucp/v1/carts';
 
 		$this->assertTrue( WC()->is_store_api_request(), 'A ?rest_route=/wc/ucp/ request should be detected as Store API.' );
+	}
+
+	/**
+	 * @testdox Should not detect a UCP request as a Store API request while the feature is off.
+	 */
+	public function test_is_store_api_request_returns_false_for_ucp_when_feature_is_off(): void {
+		delete_option( 'woocommerce_feature_ucp_enabled' );
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/ucp/v1/carts';
+
+		$this->assertFalse( WC()->is_store_api_request(), 'A /wp-json/wc/ucp/ path is not Store API while the feature is disabled.' );
 	}
 
 	/**
