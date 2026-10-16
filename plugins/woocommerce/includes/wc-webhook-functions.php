@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 
 /**
  * Process the web hooks at the end of the request.
@@ -54,10 +55,7 @@ function wc_webhook_execute_queue() {
 				 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
 				 */
 				$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
-				if ( ! is_numeric( $priority ) || ! is_finite( (float) $priority ) ) {
-					$priority = 10;
-				}
-				$priority = (int) max( 0, min( 255, (float) $priority ) );
+				$priority = NumberUtil::normalize_integer( $priority, 10, 0, 255 );
 
 				ActionSchedulerUtil::schedule_single( time(), 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', false, $priority );
 			}

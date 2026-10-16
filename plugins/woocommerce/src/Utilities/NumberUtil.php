@@ -37,6 +37,64 @@ final class NumberUtil {
 	}
 
 	/**
+	 * Converts a value to an integer, returning the fallback when it is not a finite number and clamping it to the given bounds.
+	 *
+	 * Fractions are truncated toward zero, like `(int)`. A number beyond the integer range saturates at PHP_INT_MIN
+	 * or PHP_INT_MAX. The fallback is returned as given, so it is not clamped.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed    $value    The value to convert.
+	 * @param int      $fallback The value to return when `$value` is not a finite number.
+	 * @param int|null $min      The lowest value to return, or null for no lower bound.
+	 * @param int|null $max      The highest value to return, or null for no upper bound.
+	 * @return int
+	 * @throws \InvalidArgumentException When `$min` is greater than `$max`.
+	 */
+	public static function normalize_integer( $value, int $fallback, ?int $min = null, ?int $max = null ): int {
+		if ( null !== $min && null !== $max && $min > $max ) {
+			throw new \InvalidArgumentException( 'The lower bound must not be greater than the upper bound.' );
+		}
+
+		if ( is_string( $value ) ) {
+			$value = trim( $value );
+		}
+
+		if ( ! is_numeric( $value ) ) {
+			return $fallback;
+		}
+
+		if ( is_string( $value ) && preg_match( '/^[+-]?\d+$/', $value ) ) {
+			// A digit string converts exactly and saturates at the integer limits, where a float would lose precision.
+			$value = (int) $value;
+		} elseif ( ! is_int( $value ) ) {
+			$value = (float) $value;
+			if ( ! is_finite( $value ) ) {
+				return $fallback;
+			}
+
+			// (float) PHP_INT_MAX is 2**63, which does not fit an int, so compare at the limits rather than cast.
+			if ( $value >= (float) PHP_INT_MAX ) {
+				$value = PHP_INT_MAX;
+			} elseif ( $value <= (float) PHP_INT_MIN ) {
+				$value = PHP_INT_MIN;
+			} else {
+				$value = (int) $value;
+			}
+		}
+
+		if ( null !== $min && $value < $min ) {
+			return $min;
+		}
+
+		if ( null !== $max && $value > $max ) {
+			return $max;
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Round a number using the built-in `round` function, but unless the value to round is numeric
 	 * (a number or a string that can be parsed as a number), apply 'floatval' first to it
 	 * (so it will convert it to 0 in most cases).

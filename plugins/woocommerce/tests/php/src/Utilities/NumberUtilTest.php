@@ -227,6 +227,98 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for test_normalize_integer.
+	 *
+	 * @return array Test cases.
+	 */
+	public function data_provider_for_test_normalize_integer(): array {
+		return array(
+			'integer'                                 => array( 7, 7 ),
+			'negative integer'                        => array( -7, -7 ),
+			'integer string'                          => array( '7', 7 ),
+			'signed integer string'                   => array( '+7', 7 ),
+			'integer string with spaces'              => array( ' 7 ', 7 ),
+			'float truncates toward zero'             => array( 7.9, 7 ),
+			'negative float truncates toward zero'    => array( -7.9, -7 ),
+			'float string truncates toward zero'      => array( '7.9', 7 ),
+			'exponent string'                         => array( '1e3', 1000 ),
+			'digit string above float precision'      => array( '9007199254740993', 9007199254740993 ),
+			'digit string beyond the integer range'   => array( '9223372036854775808', PHP_INT_MAX ),
+			'float beyond the integer range'          => array( 9223372036854775808, PHP_INT_MAX ),
+			'negative float beyond the integer range' => array( -9223372036854775809, PHP_INT_MIN ),
+			'null'                                    => array( null, 10 ),
+			'boolean true'                            => array( true, 10 ),
+			'boolean false'                           => array( false, 10 ),
+			'empty string'                            => array( '', 10 ),
+			'non-numeric string'                      => array( 'high', 10 ),
+			'hexadecimal string'                      => array( '0x1A', 10 ),
+			'array'                                   => array( array( 7 ), 10 ),
+			'infinite string'                         => array( '1e309', 10 ),
+			'infinity'                                => array( INF, 10 ),
+			'negative infinity'                       => array( -INF, 10 ),
+			'not a number'                            => array( NAN, 10 ),
+		);
+	}
+
+	/**
+	 * @testdox normalize_integer should convert finite numbers to integers and return the fallback otherwise.
+	 *
+	 * @dataProvider data_provider_for_test_normalize_integer
+	 *
+	 * @param mixed $input    The value to normalize.
+	 * @param int   $expected The expected result.
+	 */
+	public function test_normalize_integer( $input, int $expected ): void {
+		$this->assertSame( $expected, NumberUtil::normalize_integer( $input, 10 ) );
+	}
+
+	/**
+	 * Data provider for test_normalize_integer_clamps_to_the_bounds.
+	 *
+	 * @return array Test cases.
+	 */
+	public function data_provider_for_test_normalize_integer_clamps_to_the_bounds(): array {
+		return array(
+			'within both bounds'             => array( 10, 0, 255, 10 ),
+			'below the lower bound'          => array( -5, 0, 255, 0 ),
+			'above the upper bound'          => array( 300, 0, 255, 255 ),
+			'float beyond the integer range' => array( 9223372036854775808, 0, 255, 255 ),
+			'equal bounds'                   => array( 7, 3, 3, 3 ),
+			'lower bound only'               => array( -5, 0, null, 0 ),
+			'upper bound only'               => array( 300, null, 255, 255 ),
+		);
+	}
+
+	/**
+	 * @testdox normalize_integer should clamp the value to the given bounds.
+	 *
+	 * @dataProvider data_provider_for_test_normalize_integer_clamps_to_the_bounds
+	 *
+	 * @param mixed    $input    The value to normalize.
+	 * @param int|null $min      The lower bound.
+	 * @param int|null $max      The upper bound.
+	 * @param int      $expected The expected result.
+	 */
+	public function test_normalize_integer_clamps_to_the_bounds( $input, ?int $min, ?int $max, int $expected ): void {
+		$this->assertSame( $expected, NumberUtil::normalize_integer( $input, 10, $min, $max ) );
+	}
+
+	/**
+	 * @testdox normalize_integer should return the fallback as given, without clamping it.
+	 */
+	public function test_normalize_integer_does_not_clamp_the_fallback(): void {
+		$this->assertSame( 500, NumberUtil::normalize_integer( 'high', 500, 0, 255 ) );
+	}
+
+	/**
+	 * @testdox normalize_integer should throw when the lower bound is greater than the upper bound.
+	 */
+	public function test_normalize_integer_throws_when_the_bounds_are_inverted(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		NumberUtil::normalize_integer( 7, 10, 255, 0 );
+	}
+
+	/**
 	 * Data provider for test_sanitize_cost_in_current_locale.
 	 *
 	 * @return array Test cases.
