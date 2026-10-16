@@ -7,14 +7,26 @@
 		"node": "^24.15.0"
 	},
 	"scripts": {
+		"postinstall": "composer install --no-interaction",
 		"build": "node scripts/build-zip.mjs",
+		"lint": "wp-scripts lint-js scripts --max-warnings 0 && wp-scripts lint-md-docs README.md",
 		"validate": "node scripts/validate-theme.mjs",
 		"changelog": "composer exec -- changelogger",
-		"lint": "prettier --check scripts package.json composer.json .wp-env.json",
 		"wp-env": "node scripts/env.mjs"
 	},
 	"devDependencies": {
 		"@wordpress/env": "catalog:tooling",
-		"ajv": "^8.17.1"
+		"@wordpress/scripts": "32.6.0"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"**/*",
+					".markdownlint.json"
+				]
+			}
+		}
 	}
 }
