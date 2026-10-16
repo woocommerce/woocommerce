@@ -6,9 +6,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Checkout;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the PaymentMethodPreselection class.
+ * Tests for the DefaultPaymentMethod class.
  */
-class PaymentMethodPreselectionTest extends WC_Unit_Test_Case {
+class DefaultPaymentMethodTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Put back the session choice the base class doesn't reset.
