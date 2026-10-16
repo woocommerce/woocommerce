@@ -65773,12 +65773,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifyEmail.php
 
 		-
-			message: '#^@param string \$url does not accept actual type of parameter\: string\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
