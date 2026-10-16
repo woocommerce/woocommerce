@@ -1724,8 +1724,13 @@ class ListTable extends WP_List_Table {
 
 							<div class="wc-order-preview-addresses">
 								<div class="wc-order-preview-address">
-									<h2><?php esc_html_e( 'Billing details', 'woocommerce' ); ?></h2>
-									{{{ data.formatted_billing_address }}}
+									<h2>
+										<?php esc_html_e( 'Billing details', 'woocommerce' ); ?>
+										<# if ( data.has_billing_address ) { #>
+											<button type="button" class="wc-order-copy-address" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>"><span class="screen-reader-text"><?php esc_html_e( 'Copy billing address to clipboard', 'woocommerce' ); ?></span></button>
+										<# } #>
+									</h2>
+									<span class="wc-order-formatted-address">{{{ data.formatted_billing_address }}}</span>
 
 									<# if ( data.data.billing.email ) { #>
 										<strong><?php esc_html_e( 'Email', 'woocommerce' ); ?></strong>
@@ -1744,11 +1749,16 @@ class ListTable extends WP_List_Table {
 								</div>
 								<# if ( data.needs_shipping ) { #>
 									<div class="wc-order-preview-address">
-										<h2><?php esc_html_e( 'Shipping details', 'woocommerce' ); ?></h2>
+										<h2>
+											<?php esc_html_e( 'Shipping details', 'woocommerce' ); ?>
+											<# if ( data.ship_to_billing ? data.has_billing_address : data.has_shipping_address ) { #>
+												<button type="button" class="wc-order-copy-address" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>" data-tip-failed="<?php esc_attr_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>"><span class="screen-reader-text"><?php esc_html_e( 'Copy shipping address to clipboard', 'woocommerce' ); ?></span></button>
+											<# } #>
+										</h2>
 										<# if ( data.ship_to_billing ) { #>
-											{{{ data.formatted_billing_address }}}
+											<span class="wc-order-formatted-address">{{{ data.formatted_billing_address }}}</span>
 										<# } else { #>
-											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
+											<a class="wc-order-formatted-address" href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
 										<# } #>
 
 										<# if ( data.data.shipping.phone ) { #>

@@ -1,4 +1,4 @@
-/* exported wcSetClipboard, wcClearClipboard */
+/* exported wcSetClipboard, wcClearClipboard, wcCopyText */
 
 /**
  * Simple text copy functions using native browser clipboard capabilities.
@@ -21,8 +21,11 @@ function wcSetClipboard( data, $el ) {
 
 	$el.trigger( 'beforecopy' );
 	try {
-		document.execCommand( 'copy' );
-		$el.trigger( 'aftercopy' );
+		if ( document.execCommand( 'copy' ) ) {
+			$el.trigger( 'aftercopy' );
+		} else {
+			$el.trigger( 'aftercopyfailure' );
+		}
 	} catch ( err ) {
 		$el.trigger( 'aftercopyfailure' );
 	}
@@ -35,4 +38,36 @@ function wcSetClipboard( data, $el ) {
  */
 function wcClearClipboard() {
 	wcSetClipboard( '' );
+}
+
+/**
+ * Copy text to the user's clipboard.
+ *
+ * Uses the asynchronous Clipboard API where the page is a secure context, and falls
+ * back to wcSetClipboard() elsewhere. Triggers the same events as wcSetClipboard().
+ *
+ * @since 11.3.0
+ *
+ * @param string data: Text to copy to clipboard.
+ * @param object $el: jQuery element to trigger copy events on. (Default: document)
+ */
+function wcCopyText( data, $el ) {
+	if ( 'undefined' === typeof $el ) {
+		$el = jQuery( document );
+	}
+
+	if ( ! window.isSecureContext || ! navigator.clipboard || ! navigator.clipboard.writeText ) {
+		wcSetClipboard( data, $el );
+		return;
+	}
+
+	$el.trigger( 'beforecopy' );
+	navigator.clipboard.writeText( data ).then(
+		function() {
+			$el.trigger( 'aftercopy' );
+		},
+		function() {
+			$el.trigger( 'aftercopyfailure' );
+		}
+	);
 }

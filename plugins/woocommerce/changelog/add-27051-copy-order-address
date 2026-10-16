@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add buttons to copy the billing and shipping addresses to the clipboard on the order edit screen and in the order preview.
