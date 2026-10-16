@@ -5,17 +5,15 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Admin\Settings;
+namespace Automattic\WooCommerce\Internal\Admin\Screens\Settings;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Registers the wp-build admin page for payment gateway settings screens.
- *
- * This class is the only code that loads the build output in
- * `assets/client/routes`, which defines wp-build's generated functions.
  *
  * @internal
  */
@@ -37,6 +35,13 @@ final class PaymentSettingsScreen {
 	private const RENDER_FUNCTION = 'woocommerce_routes_wc_payment_settings_wp_admin_render_page';
 
 	/**
+	 * Loads the wp-build output.
+	 *
+	 * @var AdminScreens
+	 */
+	private AdminScreens $admin_screens;
+
+	/**
 	 * Register hooks.
 	 *
 	 * @internal
@@ -46,16 +51,26 @@ final class PaymentSettingsScreen {
 	}
 
 	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param AdminScreens $admin_screens Loads the wp-build output.
+	 */
+	final public function init( AdminScreens $admin_screens ): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found -- WooCommerce requires final injection methods.
+		$this->admin_screens = $admin_screens;
+	}
+
+	/**
 	 * Load the generated page when the screen is available.
 	 *
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! is_admin() || is_network_admin() || ! $this->is_available() ) {
+		if ( ! is_admin() || is_network_admin() || ! $this->is_available() || ! $this->admin_screens->load() ) {
 			return;
 		}
 
-		require_once $this->get_build_file();
 		add_action( 'admin_menu', array( $this, 'handle_admin_menu' ) );
 		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
 		add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
@@ -74,7 +89,7 @@ final class PaymentSettingsScreen {
 		return Features::is_enabled( self::FEATURE_FLAG )
 			&& function_exists( 'wp_get_entity_view_config' )
 			&& ( class_exists( 'WP_Fields_Registry' ) || class_exists( 'Gutenberg_Fields_Registry' ) )
-			&& is_readable( $this->get_build_file() );
+			&& $this->admin_screens->is_build_available();
 	}
 
 	/**
@@ -140,14 +155,5 @@ final class PaymentSettingsScreen {
 	private function is_current_page(): bool {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only compares the page slug.
 		return isset( $_GET['page'] ) && self::PAGE_SLUG === $_GET['page'];
-	}
-
-	/**
-	 * Path to the wp-build entry point.
-	 *
-	 * @return string
-	 */
-	private function get_build_file(): string {
-		return WC_ABSPATH . 'assets/client/routes/build.php';
 	}
 }
