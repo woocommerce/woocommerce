@@ -37,18 +37,18 @@ final class NumberUtil {
 	}
 
 	/**
-	 * Converts a value to an integer, returning the fallback when it is not a finite number and clamping it to the given bounds.
+	 * Converts a value to an integer clamped to the given bounds, or returns the fallback when the value is not a finite number.
 	 *
-	 * Fractions are truncated toward zero, like `(int)`. A number beyond the integer range saturates at PHP_INT_MIN
-	 * or PHP_INT_MAX. The fallback is returned as given, so it is not clamped.
+	 * Numeric strings are accepted. Fractions are truncated toward zero, like `(int)`. A number beyond the integer
+	 * range saturates at PHP_INT_MIN or PHP_INT_MAX. The fallback is returned as given, so it is not clamped.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @param mixed    $value    The value to convert.
-	 * @param int      $fallback The value to return when `$value` is not a finite number.
-	 * @param int|null $min      The lowest value to return, or null for no lower bound.
-	 * @param int|null $max      The highest value to return, or null for no upper bound.
-	 * @return int
+	 * @param int      $fallback The value to return when `$value` is not a finite number. It is not clamped.
+	 * @param int|null $min      The lowest value a numeric `$value` is raised to, or null for no lower bound.
+	 * @param int|null $max      The highest value a numeric `$value` is lowered to, or null for no upper bound.
+	 * @return int The converted value within the bounds, or the fallback.
 	 * @throws \InvalidArgumentException When `$min` is greater than `$max`.
 	 */
 	public static function normalize_integer( $value, int $fallback, ?int $min = null, ?int $max = null ): int {
@@ -60,38 +60,21 @@ final class NumberUtil {
 			$value = trim( $value );
 		}
 
-		if ( ! is_numeric( $value ) ) {
+		if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) ) {
 			return $fallback;
 		}
 
-		if ( is_string( $value ) && preg_match( '/^[+-]?\d+$/', $value ) ) {
-			// A digit string converts exactly and saturates at the integer limits, where a float would lose precision.
-			$value = (int) $value;
-		} elseif ( ! is_int( $value ) ) {
-			$value = (float) $value;
-			if ( ! is_finite( $value ) ) {
-				return $fallback;
-			}
-
-			// (float) PHP_INT_MAX is 2**63, which does not fit an int, so compare at the limits rather than cast.
-			if ( $value >= (float) PHP_INT_MAX ) {
+		// Casting a float outside the integer range is undefined and warns on PHP 8.5, so saturate it first.
+		// A numeric string needs no help: (int) converts it exactly and saturates on its own.
+		if ( is_float( $value ) ) {
+			if ( $value >= PHP_INT_MAX ) {
 				$value = PHP_INT_MAX;
-			} elseif ( $value <= (float) PHP_INT_MIN ) {
+			} elseif ( $value <= PHP_INT_MIN ) {
 				$value = PHP_INT_MIN;
-			} else {
-				$value = (int) $value;
 			}
 		}
 
-		if ( null !== $min && $value < $min ) {
-			return $min;
-		}
-
-		if ( null !== $max && $value > $max ) {
-			return $max;
-		}
-
-		return $value;
+		return min( $max ?? PHP_INT_MAX, max( $min ?? PHP_INT_MIN, (int) $value ) );
 	}
 
 	/**
