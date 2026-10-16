@@ -99,8 +99,10 @@
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
-		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
-		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
+		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run",
+		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm test:php:env:run:hpos-off",
+		"test:php:env:run": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
+		"test:php:env:run:hpos-off": "pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli env DISABLE_HPOS=1 tests/php/bin/run-phpunit.sh -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && pnpm wp-env:test run --env-cwd='wp-content/plugins/woocommerce' cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:plugincheck": "pnpm wp-env:e2e run cli wp plugin check ${PLUGIN_SLUG:-woocommerce}",
 		"test:unit": "pnpm test:php",
@@ -120,7 +122,7 @@
 		"watch:build:project:packages": "node ./bin/watch-packages.mjs",
 		"wp-env": "wp-env",
 		"wp-env:e2e": "wp-env --config .wp-env.e2e.json",
-		"wp-env:test": "wp-env --config .wp-env.test.json"
+		"wp-env:test": "wp-env --config \"${WC_TEST_ENV_CONFIG:-.wp-env.test.json}\""
 	},
 	"lint-staged": {
 		"*.php": [
@@ -166,7 +168,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -198,7 +201,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -230,7 +234,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -259,7 +264,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
@@ -821,7 +827,8 @@
 						"phpunit.xml",
 						"client/blocks/assets/js/**/block.json",
 						"client/blocks/bin/copy-blocks-json.sh",
-						"tests/php/bin/run-phpunit.sh"
+						"tests/php/bin/run-phpunit.sh",
+						"tests/php/bin/test-env-setup.sh"
 					],
 					"testEnv": {
 						"start": "env:test --debug",
