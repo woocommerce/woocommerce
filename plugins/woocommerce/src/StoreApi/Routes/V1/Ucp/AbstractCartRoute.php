@@ -452,6 +452,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @param array{by_key: array<string, int>, by_product: array<int, int>} $desired Desired quantities.
 	 * @return \WP_REST_Response|null An error response, or null when the cart was updated.
+	 * @throws \Throwable Anything other than a cart refusal, after the cart is restored.
 	 */
 	protected function apply_line_items( array $desired ) {
 		$cart     = $this->cart_controller->get_cart_instance();
@@ -459,9 +460,15 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 		try {
 			$this->reconcile_line_items( $desired );
-		} catch ( RouteException $error ) {
+		} catch ( \Throwable $error ) {
+			// Whatever threw, including a hook inside the cart, the removals already
+			// applied must not stand.
 			$cart->set_cart_contents( $snapshot );
 			$this->cart_controller->calculate_totals();
+
+			if ( ! $error instanceof RouteException ) {
+				throw $error;
+			}
 
 			return $this->ucp_error(
 				UcpUtils::cart_error_code( $error->getErrorCode() ),

@@ -868,6 +868,37 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A failure that is not a cart refusal still leaves the cart as it was.
+	 *
+	 * Removals run before adds, so a hook throwing during an add would otherwise leave
+	 * the cart emptied of what the update was replacing.
+	 */
+	public function test_update_cart_restores_contents_when_a_hook_throws(): void {
+		$created = $this->create_cart( array( $this->line_item( 0, 2 ) ) );
+
+		$explode = function () {
+			throw new \RuntimeException( 'hook failure' );
+		};
+		add_action( 'woocommerce_store_api_validate_add_to_cart', $explode );
+
+		try {
+			$response = $this->request( 'PUT', '/carts/' . $created['id'], array( 'line_items' => array( $this->line_item( 1, 1 ) ) ) );
+		} finally {
+			remove_action( 'woocommerce_store_api_validate_add_to_cart', $explode );
+		}
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'TRANSPORT_ERROR', $response->get_data()['messages'][0]['code'] );
+
+		$this->simulate_new_request( $created['id'] );
+		$data = $this->request( 'GET', '/carts/' . $created['id'] )->get_data();
+
+		$this->assertCount( 1, $data['line_items'] );
+		$this->assertSame( (string) self::$product_ids[0], $data['line_items'][0]['item']['id'] );
+		$this->assertSame( 2, $data['line_items'][0]['quantity'] );
+	}
+
+	/**
 	 * Creating a cart as a logged-in user must not touch that user's own session.
 	 *
 	 * The token handler keys a tokenless session on the user id, so without a minted
