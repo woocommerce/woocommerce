@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpIdempotencyStore;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpRequestFingerprint;
 
@@ -77,6 +78,11 @@ class UcpIdempotency extends ControllerTestCase {
 	protected function tearDown(): void {
 		delete_option( self::FEATURE_OPTION );
 		unset( $_SERVER['HTTP_CART_TOKEN'] );
+
+		// The session is loaded once per process, so a cancel in one test would mark the next test's cart cancelled.
+		if ( WC()->session ) {
+			WC()->session->set( AbstractCartRoute::CANCELLED_SESSION_KEY, null );
+		}
 
 		parent::tearDown();
 	}
