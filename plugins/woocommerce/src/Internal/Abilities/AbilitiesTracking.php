@@ -150,7 +150,8 @@ class AbilitiesTracking {
 	 * @return mixed The unchanged value.
 	 */
 	public function handle_wp_pre_execute_ability( $pre, $ability_name ) {
-		if ( ! is_a( $pre, 'WP_Filter_Sentinel' ) ) {
+		// WP_Filter_Sentinel ships with WordPress 7.1, which the PHPStan WordPress stubs predate (see #69841).
+		if ( ! $pre instanceof \WP_Filter_Sentinel ) { // @phpstan-ignore class.notFound
 			$this->close_frame( $ability_name, false, $pre );
 		}
 		return $pre;
