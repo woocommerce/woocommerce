@@ -18,6 +18,9 @@ const {
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
+const {
+	sharedOptimizationConfig,
+} = require( '@woocommerce/internal-build/webpack-optimization' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
@@ -422,6 +425,7 @@ const jsConfig = {
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
+		minimizer: sharedOptimizationConfig.minimizer,
 		splitChunks: {
 			// Not to generate chunk names because it caused a stressful workflow when deploying the plugin to WP.org
 			// See https://github.com/woocommerce/woocommerce-admin/pull/5229

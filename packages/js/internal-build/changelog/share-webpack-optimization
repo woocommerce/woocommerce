@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Provide shared WordPress-compatible JavaScript minifier settings for admin and Blocks builds.
