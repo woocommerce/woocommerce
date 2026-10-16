@@ -25,9 +25,8 @@ const ProductCollectionPlaceholder = (
 	const blockProps = useBlockProps();
 	const { clientId, tracksLocation } = props;
 
-	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
-	const { replaceBlock } = useDispatch( blockEditorStore );
+	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
 
 	const onCollectionClick = ( collectionName: CollectionName ) => {
 		recordEvent(
@@ -37,7 +36,14 @@ const ProductCollectionPlaceholder = (
 				location: tracksLocation,
 			}
 		);
-		applyCollection( collectionName, clientId, replaceBlock );
+		applyCollection(
+			collectionName,
+			props.setAttributes,
+			// @ts-expect-error Type definitions for this function are missing
+			// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
+			replaceInnerBlocks,
+			clientId
+		);
 	};
 
 	return (
