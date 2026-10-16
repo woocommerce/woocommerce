@@ -30466,24 +30466,6 @@ parameters:
 			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/shipping/flat-rate/includes/settings-flat-rate.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$slug\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/shipping/flat-rate/includes/settings-flat-rate.php
-
-		-
-			message: '#^Variable \$this might not be defined\.$#'
-			identifier: variable.undefined
-			count: 4
-			path: includes/shipping/flat-rate/includes/settings-flat-rate.php
-
-		-
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
 			count: 1

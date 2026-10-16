@@ -686,6 +686,38 @@
 				},
 				onModalLoaded: function( event, target ) {
 					if ( target === 'wc-modal-shipping-method-settings' ) {
+						document.querySelectorAll( '.wc-flat-rate-class-behavior' ).forEach( ( behavior ) => {
+							const cost = document.getElementById( behavior.dataset.costId );
+							const behaviorLabel = document.querySelector( `label[for="${ behavior.id }"]` );
+							const costLabel = document.querySelector( `label[for="${ cost.id }"]` );
+							const behaviorFieldset = behavior.closest( 'fieldset' );
+							const description = behaviorFieldset.querySelector( '.wc-flat-rate-unavailable-description' );
+							const row = document.createElement( 'div' );
+							const behaviorColumn = document.createElement( 'div' );
+							const costColumn = document.createElement( 'div' );
+							row.className = 'wc-flat-rate-class-row';
+							behaviorLabel.before( row );
+							behaviorColumn.append( behaviorLabel, behaviorFieldset );
+							costColumn.append( costLabel, cost.closest( 'fieldset' ) );
+							row.append( behaviorColumn, costColumn );
+							const updateClassCost = () => {
+								costColumn.hidden = behavior.value !== 'add';
+								description.hidden = false;
+								description.parentElement.hidden = behavior.value !== 'unavailable';
+							};
+							behavior.addEventListener( 'change', updateClassCost );
+							updateClassCost();
+						} );
+						const methodName = document.getElementById( 'woocommerce_flat_rate_title' );
+						if ( methodName ) {
+							const updateMethodName = () => {
+								document.querySelectorAll( '.wc-flat-rate-method-name' ).forEach( ( name ) => {
+									name.textContent = methodName.value;
+								} );
+							};
+							methodName.addEventListener( 'input', updateMethodName );
+							updateMethodName();
+						}
 						const select = $( '#woocommerce_free_shipping_requires' );
 						if ( select.length > 0 ) {
 							event.data.view.possiblyHideFreeShippingRequirements( { woocommerce_free_shipping_requires: select.val() } );
