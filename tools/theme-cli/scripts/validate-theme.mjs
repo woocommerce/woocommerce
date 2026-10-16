@@ -11,7 +11,7 @@ import {
 const repositoryRoot = path.resolve( toolingRoot, '../..' );
 
 export async function validateTheme( slug, fix = false ) {
-	console.log( `Validating ${ slug }` );
+	process.stdout.write( `Validating ${ slug }\n` );
 	const directory = await getThemeDirectory( slug );
 	const checks = [
 		[
@@ -75,12 +75,12 @@ if ( isMain( import.meta.url ) ) {
 					process.exitCode = 1;
 				}
 			} catch ( error ) {
-				console.error( `${ slug }: ${ error.message }` );
+				process.stderr.write( `${ slug }: ${ error.message }\n` );
 				process.exitCode = 1;
 			}
 		}
 	} catch ( error ) {
-		console.error( error.message );
+		process.stderr.write( `${ error.message }\n` );
 		process.exitCode = 1;
 	}
 }

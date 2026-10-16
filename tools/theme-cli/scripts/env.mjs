@@ -60,7 +60,7 @@ if ( isMain( import.meta.url ) ) {
 		const [ command, slug, ...args ] = process.argv.slice( 2 );
 		process.exitCode = await runEnvironment( slug, [ command, ...args ] );
 	} catch ( error ) {
-		console.error( error.message );
+		process.stderr.write( `${ error.message }\n` );
 		process.exitCode = 1;
 	}
 }

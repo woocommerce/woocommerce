@@ -28,9 +28,9 @@ export async function buildZip( slug ) {
 
 if ( isMain( import.meta.url ) ) {
 	try {
-		console.log( await buildZip( process.argv[ 2 ] ) );
+		process.stdout.write( `${ await buildZip( process.argv[ 2 ] ) }\n` );
 	} catch ( error ) {
-		console.error( error.message );
+		process.stderr.write( `${ error.message }\n` );
 		process.exitCode = 1;
 	}
 }
