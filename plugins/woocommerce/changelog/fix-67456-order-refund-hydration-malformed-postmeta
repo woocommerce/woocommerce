@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when reading an order or refund whose postmeta entry is malformed.
