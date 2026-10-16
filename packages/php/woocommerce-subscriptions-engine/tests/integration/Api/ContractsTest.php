@@ -1508,6 +1508,77 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A failed child insert is reported as a lock conflict when another operation holds the lock or the caller's lock was lost.
+	 */
+	public function test_a_failed_child_insert_under_a_lock_conflict_is_a_lock_conflict(): void {
+		$meta   = '/^\s*INSERT INTO \S*contract_meta .* LOCK IN SHARE MODE$/s';
+		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* LOCK IN SHARE MODE$/s';
+
+		$id = $this->contract_with_currency();
+		$this->take_lock( $id, 'renewal' );
+		$writes = array(
+			'add_meta'        => static function () use ( $id ): void {
+				Contracts::add_meta( $id, 'k', 'v' );
+			},
+			'add_meta unique' => static function () use ( $id ): void {
+				Contracts::add_meta( $id, 'k', 'v', true );
+			},
+			'add_cycle'       => function () use ( $id ): void {
+				Contracts::add_cycle( $id, $this->cycle_args() );
+			},
+		);
+		foreach ( $writes as $name => $write ) {
+			$this->fail_next_query( 'add_cycle' === $name ? $cycles : $meta );
+			try {
+				$write();
+				$this->fail( "Expected {$name} to report the lock conflict." );
+			} catch ( ContractLockedException $e ) {
+				$this->assertSame( 'renewal', $e->get_operation(), "{$name} names the holder." );
+			}
+		}
+
+		$lost = $this->contract_with_currency();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->take_lock( $lost, 'hold' );
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->take_lock( $lost, 'cancel' );
+		$this->fail_next_query( $cycles );
+		try {
+			Contracts::add_cycle( $lost, $this->cycle_args(), $lock );
+			$this->fail( 'Expected the lost lock to be reported.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'cancel', $e->get_operation() );
+		}
+	}
+
+	/**
+	 * @testdox A failed child insert with no lock conflict still surfaces the database error.
+	 */
+	public function test_a_failed_child_insert_without_a_lock_conflict_is_a_database_error(): void {
+		$id = $this->contract_with_currency();
+
+		$this->fail_next_query( '/^\s*INSERT INTO \S*contract_meta .* LOCK IN SHARE MODE$/s' );
+		try {
+			Contracts::add_meta( $id, 'k', 'v', true );
+			$this->fail( 'Expected the failed insert to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->fail( 'No lock is held, so the failure is not a lock conflict.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to add contract meta', $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* LOCK IN SHARE MODE$/s' );
+		try {
+			Contracts::add_cycle( $id, $this->cycle_args() );
+			$this->fail( 'Expected the failed insert to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->fail( 'No lock is held, so the failure is not a lock conflict.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to insert cycle', $e->getMessage() );
+		}
+	}
+
+	/**
 	 * @testdox find_cycles_by_order returns the cycles of every contract linked to an order, newest first.
 	 */
 	public function test_find_cycles_by_order_spans_contracts_newest_first(): void {

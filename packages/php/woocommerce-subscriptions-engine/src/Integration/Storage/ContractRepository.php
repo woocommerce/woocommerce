@@ -1334,7 +1334,9 @@ final class ContractRepository {
 		$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
 
 		if ( false === $inserted ) {
-			throw new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			$failure = new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			$this->throw_if_insert_lost_to_lock( $contract_id, $lock );
+			throw $failure;
 		}
 		if ( 1 !== (int) $inserted ) {
 			return null;
@@ -1958,6 +1960,7 @@ final class ContractRepository {
 				// A chain UNIQUE index rejected the row: the position is already taken.
 				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
 			}
+			$this->throw_if_insert_lost_to_lock( $cycle->get_contract_id(), $lock );
 			throw new \RuntimeException( esc_html( 'Failed to insert cycle. ' . $db_error ) );
 		}
 
@@ -2007,6 +2010,40 @@ final class ContractRepository {
 		throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Report a failed fenced child insert as a lock conflict when one explains it: another
+	 * operation's live lock (without `$lock`), or `$lock` no longer held. Under READ COMMITTED,
+	 * MariaDB can fail such an insert instead of selecting no row when a lock lands mid-statement.
+	 * Returns when no conflict is found (or the check fails), so the caller throws its own error.
+	 *
+	 * @param int               $contract_id Contract id.
+	 * @param ContractLock|null $lock        The caller's lock, or null.
+	 * @throws ContractLockedException If a lock conflict explains the failure.
+	 */
+	private function throw_if_insert_lost_to_lock( int $contract_id, ?ContractLock $lock ): void {
+		global $wpdb;
+
+		try {
+			$holder = $this->get_lock_holder( $contract_id );
+			$held   = true;
+			if ( null !== $lock ) {
+				$contracts  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+				$holds_lock = self::HOLDS_LOCK;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+				$held = null !== $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, self::get_state_of( $lock )->get_token() ) );
+			}
+		} catch ( \RuntimeException $e ) {
+			return;
+		}
+
+		if ( '' !== $wpdb->last_error || ! $holder['exists'] ) {
+			return;
+		}
+		if ( null === $lock ? null !== $holder['operation'] : ! $held ) {
+			throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+		}
+	}
 
 	/**
 	 * Decode a stored plan snapshot row into a typed value object.
