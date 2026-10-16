@@ -642,6 +642,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			}
 		}
 
+		// Order by ID as well to keep the ordering stable.
+		if ( empty( $query_vars['orderby'] ) || 'date' === $query_vars['orderby'] ) {
+			$query_vars['orderby'] = 'date ID';
+		}
+
 		// Status.
 		if ( empty( $query_vars['post_status'] ) ) {
 			$post_statuses = wc_get_order_statuses();

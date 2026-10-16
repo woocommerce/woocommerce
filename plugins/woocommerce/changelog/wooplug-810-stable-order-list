@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the admin orders list in a stable order when several orders share the same creation date.

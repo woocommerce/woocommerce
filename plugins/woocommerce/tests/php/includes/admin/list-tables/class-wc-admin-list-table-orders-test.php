@@ -584,4 +584,21 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 		unset( $_GET['order_date_type'], $_GET['m'], $GLOBALS['pagenow'] );
 		wp_delete_post( $order->get_id(), true );
 	}
+
+	/**
+	 * Test that ordering by date also orders by ID, so orders created at the same time keep a stable order.
+	 *
+	 * @testWith [{"orderby": ""}]
+	 *           [{"orderby": "date"}]
+	 * @param array $query_vars Query vars as they arrive via the 'request' filter.
+	 */
+	public function test_ordering_by_date_also_orders_by_id( array $query_vars ) {
+		$GLOBALS['typenow'] = 'shop_order'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$query_vars = ( new WC_Admin_List_Table_Orders() )->request_query( $query_vars );
+
+		unset( $GLOBALS['typenow'] );
+
+		$this->assertSame( 'date ID', $query_vars['orderby'] );
+	}
 }
