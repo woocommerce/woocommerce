@@ -27,6 +27,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	const ORDERS_STATUSES_ALL_CACHE_KEY = 'woocommerce_analytics_orders_statuses_all';
 
 	/**
+	 * The cache key for payment methods.
+	 */
+	const ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY = 'woocommerce_analytics_orders_payment_methods_all';
+
+	/**
 	 * Dynamically sets the date column name based on configuration
 	 *
 	 * @override ReportsDataStore::__construct()
@@ -43,6 +48,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	final public static function init() {
 		add_action( 'woocommerce_analytics_update_order_stats', array( __CLASS__, 'maybe_update_order_statuses_cache' ) );
+		add_action( 'woocommerce_analytics_update_order_stats', array( __CLASS__, 'maybe_update_payment_methods_cache' ) );
 	}
 
 	/**
@@ -172,6 +178,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
 		}
 
+		$payment_method_subquery = $this->get_payment_method_subquery( $query_args );
+		if ( $payment_method_subquery ) {
+			$where_subquery[] = $payment_method_subquery;
+		}
+
 		$refund_subquery = $this->get_refund_subquery( $query_args );
 		$this->subquery->add_sql_clause( 'from', $refund_subquery['from_clause'] );
 		if ( $refund_subquery['where_clause'] ) {
@@ -261,19 +272,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults = array_merge(
 			parent::get_default_query_vars(),
 			array(
-				'orderby'           => $this->date_column_name,
-				'product_includes'  => array(),
-				'product_excludes'  => array(),
-				'coupon_includes'   => array(),
-				'coupon_excludes'   => array(),
-				'tax_rate_includes' => array(),
-				'tax_rate_excludes' => array(),
-				'customer_type'     => null,
-				'status_is'         => array(),
-				'extended_info'     => false,
-				'refunds'           => null,
-				'order_includes'    => array(),
-				'order_excludes'    => array(),
+				'orderby'               => $this->date_column_name,
+				'product_includes'      => array(),
+				'product_excludes'      => array(),
+				'coupon_includes'       => array(),
+				'coupon_excludes'       => array(),
+				'tax_rate_includes'     => array(),
+				'tax_rate_excludes'     => array(),
+				'customer_type'         => null,
+				'payment_method_is'     => array(),
+				'payment_method_is_not' => array(),
+				'status_is'             => array(),
+				'extended_info'         => false,
+				'refunds'               => null,
+				'order_includes'        => array(),
+				'order_excludes'        => array(),
 			)
 		);
 
@@ -765,6 +778,51 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function maybe_update_order_statuses_transient( $order_id ) {
 		wc_deprecated_function( __METHOD__, '10.3.0', __CLASS__ . '::maybe_update_order_statuses_cache()' );
 		self::maybe_update_order_statuses_cache( $order_id );
+	}
+
+	/**
+	 * Get all payment methods that have been synced.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string[] Unique payment method ids.
+	 */
+	public static function get_all_payment_methods() {
+		global $wpdb;
+
+		$payment_methods = wp_cache_get( self::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+		if ( false === $payment_methods ) {
+			$table_name      = self::get_db_table_name();
+			$payment_methods = $wpdb->get_col(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SELECT DISTINCT payment_method FROM {$table_name} WHERE payment_method != '' ORDER BY payment_method"
+			);
+			wp_cache_set( self::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, $payment_methods, 'woocommerce_analytics', YEAR_IN_SECONDS );
+		}
+
+		return $payment_methods;
+	}
+
+	/**
+	 * Ensure the order payment method is present in the `get_all_payment_methods` call result.
+	 *
+	 * A refund has no payment method of its own. The order it refunds adds it.
+	 *
+	 * @internal
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function maybe_update_payment_methods_cache( $order_id ) {
+		$order          = wc_get_order( $order_id );
+		$payment_method = $order instanceof \WC_Order ? $order->get_payment_method() : '';
+		if ( $payment_method ) {
+			$payment_methods = self::get_all_payment_methods();
+			if ( ! in_array( $payment_method, $payment_methods, true ) ) {
+				$payment_methods[] = $payment_method;
+				wp_cache_set( self::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, $payment_methods, 'woocommerce_analytics', YEAR_IN_SECONDS );
+			}
+		}
 	}
 
 	/**

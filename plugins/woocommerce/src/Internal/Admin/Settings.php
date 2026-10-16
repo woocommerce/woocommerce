@@ -84,7 +84,8 @@ class Settings {
 	}
 
 	/**
-	 * Get the titles of the installed payment gateways, for the payment method column of the Orders report.
+	 * Get the payment gateways for the Orders report payment method filter and column: the installed
+	 * ones by title, then any other gateway the stored orders were paid with, by id.
 	 *
 	 * @return array Payment gateway titles, keyed by gateway id.
 	 */
@@ -93,6 +94,10 @@ class Settings {
 		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
 			$titles[ $gateway->id ] = $gateway->get_method_title();
 		}
+
+		// A gateway that is no longer installed still has orders, so it stays in the filter under its id.
+		$stored  = OrdersDataStore::get_all_payment_methods();
+		$titles += array_combine( $stored, $stored );
 
 		return $titles;
 	}

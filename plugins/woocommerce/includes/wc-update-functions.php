@@ -20,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
@@ -4213,6 +4214,8 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 
 	// The report rows cached before the column was filled would otherwise be served for a week.
 	ReportsCache::invalidate();
+	// The same goes for the Orders report payment method filter, cached for a year.
+	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
 
 	return false;
 }

@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
@@ -1174,7 +1175,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Migration backfills the payment method on order and refund rows, then clears its cursor and the report cache.
+	 * @testdox Migration backfills the payment method on order and refund rows, then clears its cursor, the report cache and the payment method filter cache.
 	 */
 	public function test_wc_update_1130_backfill_order_stats_payment_method(): void {
 		global $wpdb;
@@ -1212,6 +1213,10 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$wpdb->query( "UPDATE {$stats_table} SET payment_method = NULL" );
 		$this->assertNull( $get_payment_method( $order->get_id() ), 'The order row should start without a payment method.' );
 
+		// A wc-admin page load before the backfill ends caches the payment method filter without the gateway.
+		wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+		$this->assertSame( array(), OrdersDataStore::get_all_payment_methods() );
+
 		$cache_key        = 'wc_update_1130_payment_method_report';
 		$version_key      = ReportsCache::VERSION_OPTION . '-transient-version';
 		$original_version = get_transient( $version_key );
@@ -1241,6 +1246,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'cheque', $get_payment_method( $refund->get_id() ), 'A refund takes the payment method of the order it refunds.' );
 		$this->assertNull( $get_payment_method( $child_order->get_id() ), 'A child order that is not a refund does not take the payment method of its parent.' );
 		$this->assertFalse( get_option( 'woocommerce_update_1130_last_payment_method_order_id' ), 'The cursor is cleared on completion.' );
+		$this->assertSame( array( 'cheque' ), OrdersDataStore::get_all_payment_methods(), 'The payment method filter cached before the backfill ended is cleared on completion.' );
 	}
 
 	/**
