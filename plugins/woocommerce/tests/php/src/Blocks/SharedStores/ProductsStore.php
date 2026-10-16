@@ -36,6 +36,14 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $original_hydration_registry_entry = null;
 
 	/**
+	 * Start from empty ProductsStore statics, since block renders in other test classes fill them.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->reset_products_store_static_state();
+	}
+
+	/**
 	 * Reset static state on the ProductsStore and the global
 	 * WP_Interactivity_API instance between tests so state does not bleed.
 	 */

@@ -6,11 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsQuantitySelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Unit_Test_Case;
 
@@ -29,20 +25,28 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * REQUEST_URI before the test, restored at teardown.
+	 *
+	 * @var string|null
+	 */
+	private $request_uri_at_setup;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		// The blocks are not registered on `init` because `init` runs with a classic theme.
-		// Other test classes may have registered them already.
-		if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options' ) ) {
-			new AddToCartWithOptionsMock();
-			new AddToCartWithOptionsQuantitySelectorMock();
-			new AddToCartWithOptionsVariationSelectorMock();
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-		}
+		// go_to() sets REQUEST_URI and no base test case puts it back.
+		$this->request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+		AddToCartWithOptionsMocks::register(
+			'add-to-cart-with-options',
+			'add-to-cart-with-options-quantity-selector',
+			'add-to-cart-with-options-variation-selector',
+			'add-to-cart-with-options-variation-selector-attribute',
+			'add-to-cart-with-options-variation-selector-attribute-name'
+		);
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
 
@@ -59,6 +63,11 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			if ( null === $this->request_uri_at_setup ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $this->request_uri_at_setup;
+			}
 			$this->restore_stock_notifications_feature_option();
 		} finally {
 			parent::tearDown();
@@ -175,6 +184,28 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup = ob_get_clean();
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render when the simple product hook fires from a classic template.' );
+	}
+
+	/**
+	 * @testdox Should send guests back to the product after logging in when an account is required.
+	 */
+	public function test_login_link_returns_guest_to_the_product_when_account_is_required(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_account', 'yes' );
+		wp_set_current_user( 0 );
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+
+		try {
+			ob_start();
+			do_action( 'woocommerce_simple_add_to_cart' );
+			$markup = ob_get_clean();
+		} finally {
+			delete_option( 'woocommerce_customer_stock_notifications_require_account' );
+		}
+
+		$expected_url = add_query_arg( 'redirect_to', rawurlencode( get_permalink( $product_id ) ), wc_get_page_permalink( 'myaccount' ) );
+
+		$this->assertStringContainsString( 'Please <a href="' . esc_url( $expected_url ) . '">log in</a> to sign up for stock notifications.', $markup, 'The login link should return the shopper to the product page after logging in.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should not render for a guest when an account is required.' );
 	}
 
 	/**
