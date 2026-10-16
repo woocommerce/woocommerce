@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Disable the Place order button while shipping costs update after an address change, instead of dropping the first click.
