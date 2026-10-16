@@ -37,6 +37,23 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove the block types test_block_should_have_data_attributes() registers, since the
+	 * block type registry outlives a test.
+	 */
+	public function tearDown(): void {
+		try {
+			$registry = \WP_Block_Type_Registry::get_instance();
+			foreach ( array( 'unrelated-namespace/unrelated-block-name', 'namespace/allowed-block-name', 'allowed-namespace/block-name', 'child-of-woo/block-name' ) as $block_name ) {
+				if ( $registry->is_registered( $block_name ) ) {
+					$registry->unregister( $block_name );
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * @testdox Should identify blocks that should have data attributes.
 	 */
 	public function test_block_should_have_data_attributes(): void {
@@ -163,5 +180,57 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
 
 		$this->assertArrayNotHasKey( 'version', $result );
+	}
+
+	/**
+	 * @testdox Should output a hidden redirect field on the login and registration forms when redirect_to is set.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_hidden_input( string $hook ): void {
+		$_GET['redirect_to'] = 'https://example.com/product/?a=1&b=2';
+
+		try {
+			ob_start();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+			do_action( $hook );
+			$output = ob_get_clean();
+		} finally {
+			unset( $_GET['redirect_to'] );
+		}
+
+		$this->assertStringContainsString( '<input type="hidden" name="redirect" value="https://example.com/product/?a=1&amp;b=2" />', $output );
+	}
+
+	/**
+	 * @testdox Should output nothing on the login and registration forms when redirect_to is empty.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_nothing_without_redirect_to( string $hook ): void {
+		unset( $_GET['redirect_to'] );
+
+		ob_start();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+		do_action( $hook );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+	}
+
+	/**
+	 * Form hooks that should receive the hidden redirect field.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function redirect_to_form_hooks_provider(): array {
+		return array(
+			'login form'        => array( 'woocommerce_login_form_end' ),
+			'registration form' => array( 'woocommerce_register_form_end' ),
+		);
 	}
 }

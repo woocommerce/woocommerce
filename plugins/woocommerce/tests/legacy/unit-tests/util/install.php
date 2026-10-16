@@ -132,6 +132,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Uninstalling with WC_REMOVE_ALL_DATA removes WooCommerce experimental-feature user meta without matching core-style or third-party meta keys.
+	 *
+	 * @ddlInTransaction Uninstalling drops the WooCommerce tables.
 	 */
 	public function test_uninstall_removes_experimental_user_meta_but_preserves_other_meta() {
 		global $wpdb;

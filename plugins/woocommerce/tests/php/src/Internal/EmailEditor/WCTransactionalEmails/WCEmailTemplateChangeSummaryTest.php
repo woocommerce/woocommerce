@@ -593,6 +593,361 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $diff['copy_changes'] );
 		$this->assertSame( 'Hi.', $diff['copy_changes'][0]['before'] );
 		$this->assertSame( 'Hello.', $diff['copy_changes'][0]['after'] );
+		$this->assertTrue(
+			$diff['copy_changes'][0]['auto_resolvable'],
+			'A block the merchant never touched must stay auto-resolvable — the applier takes core\'s version from this flag.'
+		);
+	}
+
+	/**
+	 * @testdox A block the editor rewrote on save, without a merchant edit, does not read as merchant-edited.
+	 *
+	 * @dataProvider provider_editor_rewrites_of_untouched_blocks
+	 *
+	 * @param string $template_markup The block as the PHP template renders it.
+	 * @param string $saved_markup    The same block after the block editor saved the post.
+	 */
+	public function test_editor_rewrite_of_untouched_block_is_not_a_merchant_edit( string $template_markup, string $saved_markup ): void {
+		$base = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $template_markup ) )[0];
+		$post = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $saved_markup ) )[0];
+
+		$this->assertFalse(
+			WCEmailTemplateChangeSummary::merchant_changed( $base, $post ),
+			'The editor made this change by itself; reading it as an edit turns an update the merchant should get into a conflict.'
+		);
+	}
+
+	/**
+	 * Rewrites the block editor makes when it saves a block nobody edited,
+	 * as seen on the shipped templates with WordPress 7.1.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function provider_editor_rewrites_of_untouched_blocks(): array {
+		return array(
+			'align attribute migrated to style'   => array(
+				'<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center">Thanks again!</p><!-- /wp:paragraph -->',
+				'<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"}}} --><p class="has-text-align-center">Thanks again!</p><!-- /wp:paragraph -->',
+			),
+			'heading textAlign migrated to style' => array(
+				'<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">Thanks again!</h2><!-- /wp:heading -->',
+				'<!-- wp:heading {"style":{"typography":{"textAlign":"center"}}} --><h2 class="wp-block-heading has-text-align-center">Thanks again!</h2><!-- /wp:heading -->',
+			),
+			'button textAlign migrated to style'  => array(
+				'<!-- wp:button {"textAlign":"center"} --><div class="wp-block-button"><a class="wp-block-button__link has-text-align-center wp-element-button">Go</a></div><!-- /wp:button -->',
+				'<!-- wp:button {"style":{"typography":{"textAlign":"center"}}} --><div class="wp-block-button"><a class="wp-block-button__link has-text-align-center wp-element-button">Go</a></div><!-- /wp:button -->',
+			),
+			'entities decoded'                    => array(
+				'<!-- wp:paragraph --><p>We couldn&#039;t process your order &mdash; sorry.</p><!-- /wp:paragraph -->',
+				'<!-- wp:paragraph --><p>We couldn\'t process your order — sorry.</p><!-- /wp:paragraph -->',
+			),
+			'padding inside the outer tag'        => array(
+				'<!-- wp:woocommerce/email-content --><div class="wp-block-woocommerce-email-content"> ##WOO_CONTENT## </div><!-- /wp:woocommerce/email-content -->',
+				'<!-- wp:woocommerce/email-content --><div class="wp-block-woocommerce-email-content">##WOO_CONTENT##</div><!-- /wp:woocommerce/email-content -->',
+			),
+		);
+	}
+
+	/**
+	 * @testdox An edit the merchant made in the editor reads as merchant-edited, even when the visible text is unchanged.
+	 *
+	 * @dataProvider provider_merchant_edits_with_unchanged_text
+	 *
+	 * @param string $saved_markup The block after the merchant's edit.
+	 */
+	public function test_merchant_edit_with_unchanged_text_is_detected( string $saved_markup ): void {
+		$template_markup = '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-first-name]-->, read more today.</p><!-- /wp:paragraph -->';
+
+		$base = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $template_markup ) )[0];
+		$post = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $saved_markup ) )[0];
+
+		$this->assertSame( $base['inner_text'], $post['inner_text'], 'Fixture check: the visible text has to be the same, or the text comparison would catch it anyway.' );
+		$this->assertTrue(
+			WCEmailTemplateChangeSummary::merchant_changed( $base, $post ),
+			'This is the merchant\'s own work; an update must not replace it without asking.'
+		);
+	}
+
+	/**
+	 * @return array<string, array{string}>
+	 */
+	public function provider_merchant_edits_with_unchanged_text(): array {
+		return array(
+			'colour'                       => array( '<!-- wp:paragraph {"style":{"color":{"text":"#ff0000"}}} --><p class="has-text-color" style="color:#ff0000">Hi <!--[woocommerce/customer-first-name]-->, read more today.</p><!-- /wp:paragraph -->' ),
+			'bold'                         => array( '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-first-name]-->, read <strong>more</strong> today.</p><!-- /wp:paragraph -->' ),
+			'link'                         => array( '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-first-name]-->, <a href="https://example.com">read more</a> today.</p><!-- /wp:paragraph -->' ),
+			'swapped personalization tag'  => array( '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-full-name]-->, read more today.</p><!-- /wp:paragraph -->' ),
+			'block lock, no markup change' => array( '<!-- wp:paragraph {"lock":{"move":false,"remove":true}} --><p>Hi <!--[woocommerce/customer-first-name]-->, read more today.</p><!-- /wp:paragraph -->' ),
+		);
+	}
+
+	/**
+	 * @testdox A paragraph carrying both `align` and `style.typography.textAlign` is not folded, so a differing save reads as a merchant edit.
+	 *
+	 * The fold only covers the editor's own migration of a lone `align`. With
+	 * both present there is no single rewrite to undo, so the conservative
+	 * answer is "ask the merchant".
+	 */
+	public function test_paragraph_with_both_align_forms_is_not_folded(): void {
+		$template_markup = '<!-- wp:paragraph {"align":"center","style":{"typography":{"textAlign":"left"}}} --><p class="has-text-align-center">Thanks again!</p><!-- /wp:paragraph -->';
+		$saved_markup    = '<!-- wp:paragraph {"style":{"typography":{"textAlign":"center"}}} --><p class="has-text-align-center">Thanks again!</p><!-- /wp:paragraph -->';
+
+		$base = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $template_markup ) )[0];
+		$post = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $saved_markup ) )[0];
+
+		$this->assertTrue( WCEmailTemplateChangeSummary::merchant_changed( $base, $post ) );
+	}
+
+	/**
+	 * @testdox `align` on a block other than a paragraph is layout alignment and is not folded into text alignment.
+	 */
+	public function test_layout_align_on_other_blocks_is_not_folded(): void {
+		$template_markup = '<!-- wp:image {"align":"center"} --><figure class="wp-block-image aligncenter"><img src="x.png" alt=""/></figure><!-- /wp:image -->';
+		$saved_markup    = '<!-- wp:image {"style":{"typography":{"textAlign":"center"}}} --><figure class="wp-block-image aligncenter"><img src="x.png" alt=""/></figure><!-- /wp:image -->';
+
+		$base = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $template_markup ) )[0];
+		$post = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $saved_markup ) )[0];
+
+		$this->assertTrue( WCEmailTemplateChangeSummary::merchant_changed( $base, $post ) );
+	}
+
+	/**
+	 * @testdox Hand-authored block JSON with a non-array `style` does not break the attribute comparison.
+	 */
+	public function test_malformed_style_attribute_is_compared_without_error(): void {
+		$markup = '<!-- wp:paragraph {"align":"center","style":"x"} --><p class="has-text-align-center">Thanks again!</p><!-- /wp:paragraph -->';
+
+		$record = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $markup ) )[0];
+
+		$this->assertFalse( WCEmailTemplateChangeSummary::merchant_changed( $record, $record ) );
+	}
+
+	/**
+	 * @testdox Two blocks with different invalid UTF-8 markup do not hash the same.
+	 */
+	public function test_invalid_utf8_markup_still_tells_blocks_apart(): void {
+		$one = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( "<!-- wp:paragraph --><p>\xff abc</p><!-- /wp:paragraph -->" ) )[0];
+		$two = WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( "<!-- wp:paragraph --><p>\xfe xyz</p><!-- /wp:paragraph -->" ) )[0];
+
+		$this->assertNotSame( $one['inner_html_hash'], $two['inner_html_hash'] );
+	}
+
+	/**
+	 * @testdox Two-way diff: a block holding other blocks produces no entry, matching what apply does on both paths.
+	 */
+	public function test_two_way_block_holding_other_blocks_yields_no_entry(): void {
+		$quote = static fn( string $text ): array => array(
+			array(
+				'name'         => 'core/quote',
+				'inner_text'   => $text,
+				'holds_blocks' => true,
+			),
+		);
+
+		$two_way_method = new \ReflectionMethod( WCEmailTemplateChangeSummary::class, 'diff_records' );
+		$two_way_method->setAccessible( true );
+		$diff = $two_way_method->invoke( null, self::records( $quote( 'A word from us.' ) ), self::records( $quote( 'A note from us.' ) ) );
+
+		$this->assertSame( array(), $diff['copy_changes'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: a merchant edit to a block's settings alone makes core's text change a conflict.
+	 */
+	public function test_three_way_settings_only_merchant_edit_is_a_conflict(): void {
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hello.',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+					'attrs_hash' => 'attrs-merchant-locked',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertFalse(
+			$diff['copy_changes'][0]['auto_resolvable'],
+			'A settings-only merchant edit is still a merchant edit; applying core over it must be the merchant\'s call.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: a merchant edit to a block's markup alone, such as swapping a personalization tag, makes core's text change a conflict.
+	 */
+	public function test_three_way_markup_only_merchant_edit_is_a_conflict(): void {
+		// Both texts strip to "Hi , thanks" — the swapped tag lives only in the markup.
+		$base = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hi , thanks',
+					'inner_html_hash' => 'html-first-name-tag',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hey , thanks',
+					'inner_html_hash' => 'html-core-reworded',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hi , thanks',
+					'inner_html_hash' => 'html-full-name-tag',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertFalse(
+			$diff['copy_changes'][0]['auto_resolvable'],
+			'Swapping a personalization tag is a merchant edit even though the stripped text is unchanged.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: no entry when the merchant already wrote what core now says, so the drawer never offers a choice between two identical blocks.
+	 */
+	public function test_three_way_merchant_already_matches_core_yields_no_entry(): void {
+		$base            = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Hi.',
+				),
+			)
+		);
+		$already_updated = array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => 'Hello.',
+			),
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way(
+			self::records( $already_updated ),
+			$base,
+			self::records( $already_updated )
+		);
+
+		$this->assertSame(
+			array(),
+			$diff['copy_changes'],
+			'Both sides already read the same; a conflict here would be a no-op the merchant still has to clear before the one-click update.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: a block holding other blocks produces no entry, because apply never takes its content.
+	 */
+	public function test_three_way_block_holding_other_blocks_yields_no_entry(): void {
+		$quote = static fn( string $text ): array => array(
+			array(
+				'name'         => 'core/quote',
+				'inner_text'   => $text,
+				'holds_blocks' => true,
+			),
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way(
+			self::records( $quote( 'A word from us.' ) ),
+			self::records( $quote( 'A note from us.' ) ),
+			self::records( $quote( 'A note from us.' ) )
+		);
+
+		$this->assertSame(
+			array(),
+			$diff['copy_changes'],
+			'Apply leaves the content of such a block alone, so listing it would promise a change that never happens.'
+		);
+	}
+
+	/**
+	 * @testdox Three-way diff: a core change with no change of wording produces no entry, so the drawer never shows a change with identical text on both sides.
+	 *
+	 * Guards the deliberate asymmetry: the merchant's side is compared on markup,
+	 * core's on text alone. Making the two sides symmetric with
+	 * `merchant_changed()` is the tempting cleanup this test exists to stop.
+	 */
+	public function test_three_way_core_change_without_rewording_yields_no_entry(): void {
+		$unchanged = array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => 'Hi.',
+			),
+		);
+
+		$base = self::records( $unchanged );
+		$post = self::records( $unchanged );
+		$core = self::records(
+			array(
+				array(
+					'name'            => 'core/paragraph',
+					'inner_text'      => 'Hi.',
+					'inner_html_hash' => 'html-core-restyled',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertSame( array(), $diff['copy_changes'], 'Core styling a block is not a wording change; it must not reach the drawer as one.' );
+	}
+
+	/**
+	 * @testdox flatten_blocks hashes the markup that inner_text discards, ignoring line breaks and indentation.
+	 */
+	public function test_flatten_blocks_hashes_markup(): void {
+		$record = static fn( string $markup ): array => WCEmailTemplateChangeSummary::flatten_blocks( parse_blocks( $markup ) )[0];
+
+		$first_name = '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-first-name]-->, thanks</p><!-- /wp:paragraph -->';
+		$full_name  = '<!-- wp:paragraph --><p>Hi <!--[woocommerce/customer-full-name]-->, thanks</p><!-- /wp:paragraph -->';
+		$respaced   = "<!-- wp:paragraph --><p>Hi\n  <!--[woocommerce/customer-first-name]-->, thanks</p><!-- /wp:paragraph -->";
+
+		$this->assertSame(
+			$record( $first_name )['inner_text'],
+			$record( $full_name )['inner_text'],
+			'Fixture check: stripping tags hides the swapped personalization tag, which is why the markup hash exists.'
+		);
+		$this->assertNotSame( $record( $first_name )['inner_html_hash'], $record( $full_name )['inner_html_hash'], 'A swapped personalization tag must read as a change.' );
+		$this->assertSame( $record( $first_name )['inner_html_hash'], $record( $respaced )['inner_html_hash'], 'Whitespace from re-serialization must not read as a change.' );
+
+		// Spacing next to a tag is content: these two render differently.
+		$spaced   = '<!-- wp:paragraph --><p>Read <strong>more</strong> today</p><!-- /wp:paragraph -->';
+		$unspaced = '<!-- wp:paragraph --><p>Read<strong>more</strong>today</p><!-- /wp:paragraph -->';
+
+		$this->assertNotSame(
+			$record( $spaced )['inner_html_hash'],
+			$record( $unspaced )['inner_html_hash'],
+			'Spacing around inline markup changes what the merchant sees, so it counts as their edit.'
+		);
 	}
 
 	/**
@@ -1119,17 +1474,25 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * Build a list of flatten_blocks-shaped records from a simple list of name + inner_text pairs.
 	 * Each record gets a top-level path (`[$idx]`) and a null parent_name.
 	 *
-	 * @param array<int, array{name:string, inner_text:string}> $simple Simple record specs.
-	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}>
+	 * The two hashes are opaque tokens to the diff, which only compares them, so
+	 * fixtures pass literals rather than real hashes. `inner_html_hash` defaults
+	 * to one derived from `inner_text`, so a record's markup moves with its text
+	 * unless a test pins it separately.
+	 *
+	 * @param array<int, array{name:string, inner_text:string, attrs_hash?:string, inner_html_hash?:string, holds_blocks?:bool}> $simple Simple record specs.
+	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string, attrs_hash:string, inner_html_hash:string, holds_blocks:bool}>
 	 */
 	private static function records( array $simple ): array {
 		$out = array();
 		foreach ( $simple as $i => $r ) {
 			$out[] = array(
-				'path'        => array( $i ),
-				'parent_name' => null,
-				'name'        => $r['name'],
-				'inner_text'  => $r['inner_text'],
+				'path'            => array( $i ),
+				'parent_name'     => null,
+				'name'            => $r['name'],
+				'inner_text'      => $r['inner_text'],
+				'attrs_hash'      => $r['attrs_hash'] ?? 'attrs-default',
+				'inner_html_hash' => $r['inner_html_hash'] ?? 'html-of:' . $r['inner_text'],
+				'holds_blocks'    => $r['holds_blocks'] ?? false,
 			);
 		}
 		return $out;
@@ -1249,5 +1612,23 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 
 		$property->setValue( $emails_container, $current );
 		$this->injected_email_keys = array();
+	}
+
+	/**
+	 * @testdox The change-summary cache key carries a classifier version, so a payload cached under the previous rules is never served.
+	 */
+	public function test_change_summary_cache_key_is_versioned(): void {
+		$cache_key = new \ReflectionMethod( WCEmailTemplateChangeSummary::class, 'cache_key' );
+		$cache_key->setAccessible( true );
+
+		$key = $cache_key->invoke( null, 12, 'post-hash', 'core-hash', 'base-hash', 'en_US' );
+
+		$unversioned = sprintf( 'wc_email_change_summary_%d_%s', 12, md5( 'post-hash|core-hash|base-hash|en_US' ) );
+
+		$this->assertNotSame(
+			$unversioned,
+			$key,
+			'Content hashes do not move when only the classification code changes, so without a version in the key a payload cached under the old rules would survive the upgrade and drive the new behaviour. The exact key format is not pinned on purpose.'
+		);
 	}
 }

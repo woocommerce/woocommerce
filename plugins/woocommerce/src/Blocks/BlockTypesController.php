@@ -86,6 +86,7 @@ final class BlockTypesController {
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
+		add_action( 'woocommerce_register_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_filter( 'block_type_metadata', array( $this, 'handle_block_type_metadata' ) );
 		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
@@ -273,7 +274,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Order details', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -281,7 +282,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -289,7 +290,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -297,7 +298,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -305,7 +306,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
@@ -458,7 +459,7 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Adds a redirect field to the login form so blocks can redirect users after login.
+	 * Adds a redirect field to the login and registration forms so blocks can redirect users after they log in or register.
 	 */
 	public function redirect_to_field() {
 		// phpcs:ignore WordPress.Security.NonceVerification
