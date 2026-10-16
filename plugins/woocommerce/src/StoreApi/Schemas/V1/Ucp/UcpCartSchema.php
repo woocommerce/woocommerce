@@ -12,7 +12,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartController;
  * Cart schema the UCP cart routes read from.
  *
  * The Store API cart response already applies cart tax display, minor units,
- * image filters and stock validation; the UCP transformer reshapes it. Strings
+ * image filters and stock validation; the UCP cart mapper reshapes it. Strings
  * stay raw, and items come from {@see UcpCartItemSchema} for the same reason.
  *
  * @since 11.3.0

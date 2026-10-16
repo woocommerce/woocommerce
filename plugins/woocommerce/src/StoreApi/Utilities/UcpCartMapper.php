@@ -4,13 +4,14 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 /**
- * Projects a Store API cart response onto the UCP cart shape.
+ * Maps a Store API cart response onto the UCP cart shape.
  *
  * Reads {@see \Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema} output, so
  * cart tax display, minor units, image filters and stock validation follow the
- * storefront.
+ * storefront. Stateless; the catalog's {@see \Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper}
+ * is the same idea for products.
  */
-class UcpCartTransformer {
+class UcpCartMapper {
 	/**
 	 * Build the UCP cart payload.
 	 *

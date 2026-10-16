@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartR
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpCartTransformer;
+use Automattic\WooCommerce\StoreApi\Utilities\UcpCartMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
 /**
@@ -41,13 +41,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const LINE_ITEMS_MAX = 100;
 
 	/**
-	 * Cart transformer.
-	 *
-	 * @var UcpCartTransformer|null
-	 */
-	private $transformer;
-
-	/**
 	 * Build the `ucp` envelope for a response from this route.
 	 *
 	 * @param string $status Response status, `success` or `error`.
@@ -55,19 +48,6 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 */
 	protected function ucp_metadata( string $status ): array {
 		return UcpUtils::response_metadata( UcpUtils::CAPABILITY_CART, $status );
-	}
-
-	/**
-	 * Get the cart transformer.
-	 *
-	 * @return UcpCartTransformer
-	 */
-	protected function transformer(): UcpCartTransformer {
-		if ( null === $this->transformer ) {
-			$this->transformer = new UcpCartTransformer();
-		}
-
-		return $this->transformer;
 	}
 
 	/**
@@ -266,7 +246,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
-				$this->transformer()->build_cart( $this->cart_item_response(), $cart_id, $context )
+				( new UcpCartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
 			),
 			200
 		);
