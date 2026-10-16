@@ -39,13 +39,13 @@ class ProductResultsCount extends AbstractBlock {
 		woocommerce_result_count();
 		$product_results_count = (string) ob_get_clean();
 
-		$count_markup = new \WP_HTML_Tag_Processor( $product_results_count );
-		if ( $count_markup->next_tag( array( 'class_name' => 'woocommerce-result-count' ) ) ) {
+		$processor = new \WP_HTML_Tag_Processor( $product_results_count );
+		if ( $processor->next_tag( array( 'class_name' => 'woocommerce-result-count' ) ) ) {
 			// The block speaks the count after client-side navigation; a second live region would compete with it.
-			$count_markup->remove_attribute( 'role' );
-			$count_markup->remove_attribute( 'aria-relevant' );
+			$processor->remove_attribute( 'role' );
+			$processor->remove_attribute( 'aria-relevant' );
 		}
-		$product_results_count = $count_markup->get_updated_html();
+		$product_results_count = $processor->get_updated_html();
 
 		$classes = 'woocommerce wc-block-product-results-count';
 		if ( ! empty( $attributes['fontSize'] ) ) {

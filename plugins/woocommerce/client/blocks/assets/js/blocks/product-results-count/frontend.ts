@@ -17,7 +17,7 @@ type ProductResultsCountContext = {
 
 // Blocks that have run their first watch; that run is the page load, not a navigation.
 const renderedBlocks = new WeakSet< HTMLElement >();
-let pendingAnnouncement: ReturnType< typeof setTimeout > | null = null;
+let pendingAnnouncement: ReturnType< typeof setTimeout > | undefined;
 
 const productResultsCountStore = {
 	callbacks: {
@@ -29,10 +29,7 @@ const productResultsCountStore = {
 			const { announcement } =
 				getServerContext< ProductResultsCountContext >();
 
-			if ( pendingAnnouncement ) {
-				clearTimeout( pendingAnnouncement );
-				pendingAnnouncement = null;
-			}
+			clearTimeout( pendingAnnouncement );
 
 			const { ref } = getElement();
 			const isFirstRun = ! ref || ! renderedBlocks.has( ref );
@@ -45,7 +42,6 @@ const productResultsCountStore = {
 			}
 
 			pendingAnnouncement = setTimeout( () => {
-				pendingAnnouncement = null;
 				import( '@wordpress/a11y' )
 					.then( ( { speak } ) => speak( announcement, 'polite' ) )
 					.catch( () => {

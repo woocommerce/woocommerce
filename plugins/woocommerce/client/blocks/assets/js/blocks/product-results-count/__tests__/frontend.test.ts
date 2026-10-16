@@ -2,6 +2,7 @@ const mockGetServerContext = jest.fn();
 const mockGetElement = jest.fn();
 const mockSpeak = jest.fn();
 let mockCallbacks: { announceResultsCount: () => void } | null = null;
+let announcementDelayMs: number;
 
 jest.mock(
 	'@wordpress/interactivity',
@@ -46,7 +47,8 @@ describe( 'Product Results Count announcement', () => {
 		mockSpeak.mockReset();
 		mockCallbacks = null;
 		await jest.isolateModulesAsync( async () => {
-			await import( '../frontend' );
+			( { ANNOUNCEMENT_DELAY_MS: announcementDelayMs } =
+				await import( '../frontend' ) );
 		} );
 	} );
 
@@ -101,7 +103,7 @@ describe( 'Product Results Count announcement', () => {
 	it( 'waits before announcing so the router speaks first', async () => {
 		announce( 'Showing 1–16 of 28 results' );
 		announce( 'Showing all 2 results' );
-		jest.advanceTimersByTime( 499 );
+		jest.advanceTimersByTime( announcementDelayMs - 1 );
 		await new Promise( jest.requireActual( 'timers' ).setImmediate );
 
 		expect( mockSpeak ).not.toHaveBeenCalled();
