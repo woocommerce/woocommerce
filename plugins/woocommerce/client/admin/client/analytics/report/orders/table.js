@@ -314,12 +314,16 @@ class OrdersReportTable extends Component {
 	}
 
 	renderList( visibleItems, popoverItems ) {
+		const links = this.renderLinks( visibleItems );
+		// Without a badge, keep the link as the cell's only child so the table's
+		// `a:only-child` rule still stretches it across the cell.
+		if ( popoverItems.length <= 1 ) {
+			return links;
+		}
 		return (
 			<div className="woocommerce-analytics__inline-list">
-				{ this.renderLinks( visibleItems ) }
-				{ popoverItems.length > 1 && (
-					<ViewMoreList items={ this.renderLinks( popoverItems ) } />
-				) }
+				{ links }
+				<ViewMoreList items={ this.renderLinks( popoverItems ) } />
 			</div>
 		);
 	}

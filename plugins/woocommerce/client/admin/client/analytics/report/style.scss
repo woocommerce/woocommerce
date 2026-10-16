@@ -22,19 +22,11 @@
 	align-items: center;
 	max-width: 80ch;
 
-	// A name with no spaces has a min-content width of the whole name, which
-	// would otherwise set the column's floor and widen the table. Allowing a
-	// break anywhere lets it wrap inside the bounds here instead.
+	// Break anywhere so a name with no spaces can't widen the column, and give
+	// the name a 20ch floor so it doesn't shred into short lines beside the badge.
 	> a {
-		overflow-wrap: anywhere;
-	}
-
-	// Enough room that the name beside a badge doesn't shred into short lines.
-	// On the link rather than the wrapper, so the badge's fixed width isn't
-	// taken out of the name's share. Scoped so the Coupons cell — same class,
-	// usually empty — is left alone.
-	&:has(.woocommerce-view-more-list) > a {
 		min-width: 20ch;
+		overflow-wrap: anywhere;
 	}
 
 	// The badge carries overflow: hidden and text-overflow: ellipsis, so it
