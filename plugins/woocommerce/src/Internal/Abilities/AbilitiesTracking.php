@@ -577,8 +577,8 @@ class AbilitiesTracking {
 			}
 
 			$event = array(
-				// Not truncated: ability names have no length limit, and truncated names could collide.
-				'ability_name'    => self::normalize_value( $frame['name'], null ),
+				// Not truncated, and normalized per part with `__` at the `/`: either would let different abilities collide.
+				'ability_name'    => implode( '__', array_map( static fn( $part ) => self::normalize_value( $part, null ), explode( '/', $frame['name'], 2 ) ) ),
 				'outcome'         => true === $outcome ? 'success' : 'error',
 				'error_code'      => $error_code,
 				'channel'         => $frame['channel'],
