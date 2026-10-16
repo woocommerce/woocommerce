@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  * Only save() saves. The other steps must not save, send email or make HTTP
  * requests.
  *
- * The API is experimental while the `ability_extensions` feature exists.
+ * The API is experimental while the `extensible_abilities` feature exists.
  *
  * @since 11.3.0
  */
@@ -114,7 +114,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$updates = array();
-		if ( AbilityExtensions::is_enabled() ) {
+		if ( ExtensibleAbilities::is_enabled() ) {
 			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
 			$updates    = $this->prepare_fields( $extensions );
 			if ( is_wp_error( $updates ) ) {
@@ -149,7 +149,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	protected function prepare_properties( array $args ): array {
 		$args['execute_callback'] = array( $this, 'execute_change' );
-		if ( is_array( $args['input_schema'] ?? null ) && AbilityExtensions::is_enabled() ) {
+		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() ) {
 			$args['input_schema'] = $this->add_extensions_input_schema( $args['input_schema'] );
 		}
 		return parent::prepare_properties( $args );
@@ -164,7 +164,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
 	 */
 	private function prepare_fields( array $values ) {
-		$registered = AbilityExtensions::get_fields( $this->get_resource() );
+		$registered = ExtensibleAbilities::get_fields( $this->get_resource() );
 		$updates    = array();
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
@@ -226,7 +226,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
-		foreach ( AbilityExtensions::get_fields( $this->get_resource() ) as $namespace => $fields ) {
+		foreach ( ExtensibleAbilities::get_fields( $this->get_resource() ) as $namespace => $fields ) {
 			$writable = array_filter(
 				$fields,
 				static function ( array $args ): bool {

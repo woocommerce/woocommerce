@@ -163,7 +163,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			),
 		);
 		foreach ( $writable as list( $resource, $namespace, $field, $schema ) ) {
-			AbilityExtensions::register_field(
+			ExtensibleAbilities::register_field(
 				array(
 					'resource'        => $resource,
 					'namespace'       => $namespace,
@@ -839,7 +839,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						),
 						'additionalProperties' => false,
 					),
-					'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
+					'output_schema'       => ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'product' ),
 					'permission_callback' => '__return_true',
 					'ability_class'       => TestProductRenameAbility::class,
 					'meta'                => array( 'show_in_rest' => true ),

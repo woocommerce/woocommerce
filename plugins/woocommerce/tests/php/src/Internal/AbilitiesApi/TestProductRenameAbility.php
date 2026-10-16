@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 
 /**
@@ -54,6 +54,6 @@ class TestProductRenameAbility extends ActionableAbility {
 	 * @return array
 	 */
 	public function prepare_response( $subject ) {
-		return AbilityExtensions::add_fields_to_object( array( 'id' => $subject->get_id() ), 'product', $subject );
+		return ExtensibleAbilities::add_fields_to_object( array( 'id' => $subject->get_id() ), 'product', $subject );
 	}
 }
