@@ -3,11 +3,14 @@
  * Contracts - the engine's public contract facade (reads and writes).
  *
  * Extensions create and progressively build contracts from explicit argument arrays:
- * the engine records the facts it is given and decides nothing about them. Cycle tools
- * (claimed appends, cycle claims, compare-and-set transitions) let an extension run its own
- * billing flow safely under concurrency. Any caller may read or write any contract
- * (authorization is the caller's concern). Reads return read-only views ({@see ContractView},
- * {@see CycleView}). The engine opens no transaction and keeps no cache. No hooks fire.
+ * the engine records the facts it is given and decides nothing about them. Any caller may
+ * read or write any contract (authorization is the caller's concern). Reads return read-only
+ * views ({@see ContractView}, {@see CycleView}). No transactions, no cache, no hooks.
+ *
+ * One lock per contract ({@see self::lock()}): every write runs under a lock, the caller's or,
+ * for an update or meta write made without one, an internal one the engine takes for that call.
+ * Cycle writes require the caller's lock. A write is refused with {@see ContractLockedException}
+ * while another operation holds the lock.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -66,11 +69,29 @@ final class Contracts {
 	);
 
 	/**
-	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`.
+	 * Keys accepted by {@see self::create()}: the update keys plus the create-only `extension_slug`
+	 * and `creation_key`.
 	 *
 	 * @var array<string, true>
 	 */
-	private const CREATE_KEYS = array( 'extension_slug' => true ) + self::CONTRACT_KEYS;
+	private const CREATE_KEYS = array(
+		'extension_slug' => true,
+		'creation_key'   => true,
+	) + self::CONTRACT_KEYS;
+
+	/**
+	 * Option keys accepted by {@see self::create()}.
+	 *
+	 * @var array<string, true>
+	 */
+	private const CREATE_OPTION_KEYS = array(
+		'operation' => true,
+	);
+
+	/**
+	 * Lock operation label of a new contract when the caller names none.
+	 */
+	private const CREATE_OPERATION = 'create';
 
 	/**
 	 * Keys accepted by {@see self::add_cycle()}, as a key map.
@@ -87,7 +108,6 @@ final class Contracts {
 		'expected_total' => true,
 		'currency'       => true,
 		'order_id'       => true,
-		'claim_seconds'  => true,
 	);
 
 	/**
@@ -96,70 +116,78 @@ final class Contracts {
 	 * @var array<string, true>
 	 */
 	private const TRANSITION_KEYS = array(
-		'order_id'      => true,
-		'reason'        => true,
-		'claim_seconds' => true,
+		'from_status' => true,
+		'to_status'   => true,
+		'order_id'    => true,
+		'reason'      => true,
 	);
 
 	/**
-	 * Create a contract from explicit fields.
+	 * Take the contract's lock for `$operation`, for the synchronous section of this request.
+	 * Pass the lock to every write of the operation and release it when done; an unreleased
+	 * lock expires after {@see ContractLock::TTL_SECONDS}. An expired lock is taken over.
 	 *
-	 * Only `extension_slug` is required; the status defaults to `draft`. Dates accept a
-	 * `DateTimeInterface` or a GMT `Y-m-d H:i:s` string; money accepts numbers or numeric
-	 * strings, and a non-null money value requires a currency. `items` is a list of item
-	 * rows; `addresses` is keyed `billing` / `shipping`. `schedule_source` says who keeps the
-	 * payment schedule: `subscriptions_engine` (the default; the engine notifies the owner when
-	 * `next_payment_gmt` passes) or the slug (1-64 of `a-z0-9_-`) of a gateway or extension that
-	 * keeps its own schedule and triggers its own renewals; the engine never dispatches those
-	 * contracts. Unknown keys, also inside item rows and addresses, raise a `_doing_it_wrong()`
-	 * notice and are ignored. The contract row, items and addresses are separate writes and the
-	 * engine opens no transaction: wrap the call in one when a failed write must leave nothing
-	 * behind.
-	 *
-	 * @param array<string, mixed> $args Contract fields: `extension_slug` (required, the owning
-	 *                                   extension), `status` (a registered contract status,
-	 *                                   default `draft`), and any of {@see self::CONTRACT_KEYS}.
-	 * @return ContractView The new contract, built from the written fields (no re-read): items
-	 *                      and addresses as given.
-	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   Operation label (1-64 of `[a-z0-9_-]`), shown to callers that conflict.
+	 * @return ContractLock|null The held lock; null when another operation holds it or the contract does not exist.
+	 * @throws InvalidArgumentException If the label is invalid.
 	 */
-	public static function create( array $args ): ContractView {
-		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
-		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		unset( $filtered_args['extension_slug'] );
-
-		try {
-			$contract = Contract::create( array( 'extension_slug' => $extension_slug ) );
-			self::apply( $contract, $filtered_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
-		}
-
-		( new ContractRepository() )->insert( $contract );
-
-		return ContractView::from_contract( $contract, true );
+	public static function lock( int $contract_id, string $operation ): ?ContractLock {
+		return ( new ContractRepository() )->acquire_lock( $contract_id, $operation );
 	}
 
 	/**
-	 * Write the given fields to an existing contract.
+	 * Create a contract locked from birth: finish building it (cycles, status) with the returned
+	 * lock, then release it. A `creation_key` (1-100 characters) makes the create idempotent per
+	 * extension; without one every call creates a contract. Unknown keys and options, also inside
+	 * items and addresses, get `_doing_it_wrong()` and are ignored.
 	 *
-	 * Takes the keys of {@see self::create()} except `extension_slug`. Only the columns of
-	 * the present keys are written, so fields a concurrent writer changed in between keep
-	 * its values; `items` and `addresses` replace the whole set; `null` clears a
-	 * nullable field (and resets a money field to 0). Unknown keys (`extension_slug`
-	 * included) raise a `_doing_it_wrong()` notice and are ignored. Items and addresses are
-	 * replaced delete-then-insert and the engine opens no transaction: wrap the call in one
-	 * when a failed replacement must keep the previous rows.
+	 * @param array<string, mixed> $args    `extension_slug` (required, the owner), `status` (default
+	 *                                      `draft`), `creation_key`, and any of {@see self::CONTRACT_KEYS}.
+	 *                                      Dates take a `DateTimeInterface` or GMT `Y-m-d H:i:s`;
+	 *                                      money needs a currency. `schedule_source` other than
+	 *                                      `subscriptions_engine` (the default) is never dispatched.
+	 * @param array<string, mixed> $options `operation`: the lock's label (1-64 of `[a-z0-9_-]`, default `create`).
+	 * @return array{contract: ContractView, lock: ContractLock}|null The contract as written (no re-read) and its
+	 *                                                                lock; null when `creation_key` is taken.
+	 * @throws InvalidArgumentException If `extension_slug` is missing, or a value or the operation label is invalid.
+	 */
+	public static function create( array $args, array $options = array() ): ?array {
+		$filtered_options = ArgumentValidator::filter_known_keys( __METHOD__, $options, self::CREATE_OPTION_KEYS, 'option' );
+		$operation        = ArgumentValidator::validate_string( 'operation', $filtered_options['operation'] ?? self::CREATE_OPERATION );
+		$contract         = self::build( $args );
+
+		$lock = ( new ContractRepository() )->insert_locked( $contract, $operation );
+		if ( null === $lock ) {
+			return null;
+		}
+
+		return array(
+			'contract' => ContractView::from_contract( $contract, true ),
+			'lock'     => $lock,
+		);
+	}
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Write the given fields (the keys of {@see self::create()} except `extension_slug`) to an
+	 * existing contract. Only the present keys are written; `items` and `addresses` replace the
+	 * whole set; `null` clears a nullable field (a money field to 0). Unknown keys raise a
+	 * `_doing_it_wrong()` notice and are ignored.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Fields to write.
-	 * @return ContractView|null The row as read before the write plus the written fields (a column
-	 *                           another writer changed meanwhile may be stale here, not in storage);
-	 *                           null when the contract does not exist (also when it is deleted
-	 *                           before the write).
-	 * @throws InvalidArgumentException If a value is invalid.
+	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null for an internal one.
+	 * @return ContractView|null The row as read before the write plus the written fields; null
+	 *                           when the contract does not exist (also when it is deleted before the write).
+	 * @throws InvalidArgumentException If a value is invalid, or the lock is for another contract.
+	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
-	public static function update( int $contract_id, array $args ): ?ContractView {
+	public static function update( int $contract_id, array $args, ?ContractLock $lock = null ): ?ContractView {
+		if ( null !== $lock ) {
+			ContractRepository::assert_lock_for( $lock, $contract_id );
+		}
+
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
 		$repository = new ContractRepository();
@@ -179,39 +207,37 @@ final class Contracts {
 			return ContractView::from_contract( $contract, true );
 		}
 
-		if ( ! $repository->update_fields( $contract, $fields ) ) {
+		$updated = $repository->update_fields( $contract, $fields, $lock );
+		if ( ! $updated ) {
 			return null;
 		}
 
 		return ContractView::from_contract( $contract, true );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Append a cycle to a contract's chain `(contract_id, kind)`.
-	 *
-	 * The first public form of the cycle append tool: append-if-absent on the chain's
-	 * unique positions. `starts_at_gmt`, `ends_at_gmt` and `currency` are required.
-	 * `status` (a registered cycle status) defaults to `pending`; `kind` defaults to
-	 * `billing`; an absent or null `sequence_no` is assigned on append as the head's plus one;
-	 * `count` is the caller's chargeable number (absent or null for a non-counting cycle;
-	 * unique within the chain); `expected_total` defaults to 0; `order_id` is optional.
-	 * `claim_seconds` (positive int) appends the cycle claimed: the caller holds its claim for
-	 * that long, measured on the database clock like {@see self::claim_cycle()}. The contract is not read: appending to an
-	 * unknown contract id is a caller error. Unknown keys raise a `_doing_it_wrong()` notice
-	 * and are ignored.
-	 *
-	 * Losing the append race is an outcome, not an error: when the chain position or count is
-	 * already taken (another caller appended it first), nothing is written and the call returns
-	 * null, as {@see self::claim_cycle()} and {@see self::transition_cycle()} return false when
-	 * their compare-and-set loses. A storage failure, such as a value longer than its column
-	 * (`kind`), throws a `RuntimeException` and writes nothing.
+	 * Append a cycle to a contract's chain `(contract_id, kind)`, append-if-absent on the chain's
+	 * unique positions: a taken position or count is a lost race and returns null. A storage
+	 * failure throws a `RuntimeException` and writes nothing; a landed row whose position cannot
+	 * be read back has `sequence_no` 0 (logged). Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $contract_id Contract id.
-	 * @param array<string, mixed> $args        Cycle fields.
+	 * @param array<string, mixed> $args        Cycle fields: `starts_at_gmt`, `ends_at_gmt` and
+	 *                                          `currency` (required); `status` (registered, default
+	 *                                          `pending`); `kind` (default `billing`); `sequence_no`
+	 *                                          (null: the head's plus one); `count` (null: not
+	 *                                          counted; unique in the chain); `expected_total`
+	 *                                          (default 0); `order_id`.
+	 * @param ContractLock         $lock        The caller's lock on this contract, from {@see self::lock()},
+	 *                                          {@see self::create()} or the due handler's context.
 	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
-	 * @throws InvalidArgumentException If a required key is missing or a value is invalid.
+	 * @throws InvalidArgumentException If a required key is missing, a value is invalid, the contract
+	 *                                  does not exist, or the lock is for another contract.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 */
-	public static function add_cycle( int $contract_id, array $args ): ?CycleView {
+	public static function add_cycle( int $contract_id, array $args, ContractLock $lock ): ?CycleView {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
 		$cycle_args = array(
@@ -227,10 +253,6 @@ final class Contracts {
 			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
 
-		$claim_seconds = array_key_exists( 'claim_seconds', $filtered_args )
-			? ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] )
-			: null;
-
 		try {
 			$cycle = Cycle::create( $cycle_args );
 		} catch ( DomainException $e ) {
@@ -238,49 +260,38 @@ final class Contracts {
 		}
 
 		try {
-			( new ContractRepository() )->append_cycle( $cycle, $claim_seconds );
+			( new ContractRepository() )->append_cycle( $cycle, $lock );
 		} catch ( DuplicateCycleException $e ) {
 			return null;
 		}
 
 		return CycleView::from_cycle( $cycle );
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Take the claim on a cycle still in `$status` whose claim expired or was never set. A
-	 * compare-and-set on the status and the claim: of concurrent callers that read `$status`,
-	 * exactly one gets true and holds the cycle for `$claim_seconds`; the others get false.
-	 * Claims are measured on the database clock.
+	 * Move a cycle between statuses as a compare-and-set: of concurrent callers that read
+	 * `from_status`, exactly one gets true. A same-status call returns true once the cycle
+	 * carries the status and the values. Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
-	 * @param int    $cycle_id      Cycle id.
-	 * @param string $status        The status the caller read; the cycle must still carry it.
-	 * @param int    $claim_seconds Claim length in seconds (positive).
-	 * @return bool True when the caller now holds the cycle.
-	 * @throws InvalidArgumentException If `$claim_seconds` is not positive.
-	 */
-	public static function claim_cycle( int $cycle_id, string $status, int $claim_seconds ): bool {
-		return ( new ContractRepository() )->claim_cycle( $cycle_id, $status, ArgumentValidator::validate_positive_int( 'claim_seconds', $claim_seconds ) );
-	}
-
-	/**
-	 * Move a cycle from `$from_status` to `$to_status` as a compare-and-set on its status: of
-	 * concurrent callers that read `$from_status`, exactly one gets true. `$args`: `order_id`
-	 * (?int) and `reason` (?string) are written when present (omitted keeps the stored value,
-	 * null clears it); `claim_seconds` (int) holds the cycle for that long, and without it the
-	 * claim is released. Unknown keys raise a `_doing_it_wrong()` notice and are ignored.
-	 * A same-status call (`$from_status === $to_status`) only writes `$args`, so it returns
-	 * true whenever the cycle still carries the status, even when the values were already stored.
-	 *
-	 * @param int                  $cycle_id    Cycle id.
-	 * @param string               $from_status The status the caller read.
-	 * @param string               $to_status   The status to write; a registered cycle status.
-	 * @param array<string, mixed> $args        Optional `order_id`, `reason`, `claim_seconds`.
+	 * @param int                  $cycle_id Cycle id.
+	 * @param array<string, mixed> $args     `from_status` (required, the status the caller read),
+	 *                                       `to_status` (required, registered), and `order_id`
+	 *                                       (?int) and `reason` (?string), written when present
+	 *                                       (null clears).
+	 * @param ContractLock         $lock     The caller's lock on the cycle's contract, from {@see self::lock()},
+	 *                                       {@see self::create()} or the due handler's context.
 	 * @return bool True when this call made the transition, or for a same-status call when the
-	 *              cycle carries the status.
-	 * @throws InvalidArgumentException If `$to_status` is not registered or a value is invalid.
+	 *              cycle carries the status and the values.
+	 * @throws InvalidArgumentException If a status is missing or unregistered, a value is invalid,
+	 *                                  the cycle does not exist, or it belongs to another contract than the lock.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 */
-	public static function transition_cycle( int $cycle_id, string $from_status, string $to_status, array $args = array() ): bool {
+	public static function transition_cycle( int $cycle_id, array $args, ContractLock $lock ): bool {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
+		$from_status   = ArgumentValidator::validate_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
+		$to_status     = ArgumentValidator::validate_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );
 		$changes       = array();
 
 		if ( array_key_exists( 'order_id', $filtered_args ) ) {
@@ -289,16 +300,14 @@ final class Contracts {
 		if ( array_key_exists( 'reason', $filtered_args ) ) {
 			$changes['reason'] = ArgumentValidator::validate_nullable_string( 'reason', $filtered_args['reason'] );
 		}
-		if ( array_key_exists( 'claim_seconds', $filtered_args ) ) {
-			$changes['claim_seconds'] = ArgumentValidator::validate_positive_int( 'claim_seconds', $filtered_args['claim_seconds'] );
-		}
 
 		try {
-			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes );
+			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes, $lock );
 		} catch ( DomainException $e ) {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the repository message is not output.
 		}
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * The cycles linked to an order, newest first, across contracts and chain kinds (one
@@ -313,50 +322,52 @@ final class Contracts {
 
 	/**
 	 * Add a meta value to a contract, like `add_post_meta()`. A key may hold several values.
-	 * The contract is not looked up: meta for an unknown contract id is a caller error.
 	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $key         Meta key.
-	 * @param mixed  $value       Meta value; serialized when not scalar.
-	 * @param bool   $unique      When true, add nothing if the key already exists. Advisory: checked
-	 *                            before the insert with no unique index, so concurrent adds can both write.
+	 * @param int               $contract_id Contract id.
+	 * @param string            $key         Meta key.
+	 * @param mixed             $value       Meta value; serialized when not scalar.
+	 * @param bool              $unique      When true, add nothing if the key already exists.
+	 * @param ContractLock|null $lock        The caller's lock on this contract, or null for an internal one.
 	 * @return int|null The meta row id; null when `$unique` and the key exists.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @throws InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
+	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
-	public static function add_meta( int $contract_id, string $key, $value, bool $unique = false ): ?int {
-		return ( new ContractRepository() )->add_meta( $contract_id, $key, $value, $unique );
+	public static function add_meta( int $contract_id, string $key, $value, bool $unique = false, ?ContractLock $lock = null ): ?int {
+		return ( new ContractRepository() )->add_meta( $contract_id, $key, $value, $unique, $lock );
 	}
 
 	/**
 	 * Update a contract's meta values for `$key`, like `update_post_meta()`: adds the key
 	 * when absent, else rewrites every value, or only the values equal to `$prev_value`.
-	 * The absent-key check runs before the write with no unique index, so it is not a lock.
-	 * The contract is not looked up: meta for an unknown contract id is a caller error.
 	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $key         Meta key.
-	 * @param mixed  $value       New value; serialized when not scalar.
-	 * @param mixed  $prev_value  Only update values equal to this; null updates all. Any other
-	 *                            value ('' and false included) matches literally.
+	 * @param int               $contract_id Contract id.
+	 * @param string            $key         Meta key.
+	 * @param mixed             $value       New value; serialized when not scalar.
+	 * @param mixed             $prev_value  Only update values equal to this; null updates all. Any other
+	 *                                       value ('' and false included) matches literally.
+	 * @param ContractLock|null $lock        The caller's lock on this contract, or null for an internal one.
 	 * @return bool True when a value was added or changed; false when nothing changed.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @throws InvalidArgumentException If `$key` is empty, the contract does not exist, or the lock is for another contract.
+	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
-	public static function update_meta( int $contract_id, string $key, $value, $prev_value = null ): bool {
-		return ( new ContractRepository() )->update_meta( $contract_id, $key, $value, $prev_value );
+	public static function update_meta( int $contract_id, string $key, $value, $prev_value = null, ?ContractLock $lock = null ): bool {
+		return ( new ContractRepository() )->update_meta( $contract_id, $key, $value, $prev_value, $lock );
 	}
 
 	/**
 	 * Delete a contract's meta values for `$key`, like `delete_post_meta()`.
 	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $key         Meta key.
-	 * @param mixed  $value       Only delete values equal to this; null deletes every value for the key.
-	 *                            Any other value ('' and false included) matches literally.
-	 * @return bool True when at least one value was deleted.
-	 * @throws InvalidArgumentException If `$key` is empty.
+	 * @param int               $contract_id Contract id.
+	 * @param string            $key         Meta key.
+	 * @param mixed             $value       Only delete values equal to this; null deletes every value for the key.
+	 *                                       Any other value ('' and false included) matches literally.
+	 * @param ContractLock|null $lock        The caller's lock on this contract, or null for an internal one.
+	 * @return bool True when at least one value was deleted; false also for a missing contract.
+	 * @throws InvalidArgumentException If `$key` is empty, or the lock is for another contract.
+	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
-	public static function delete_meta( int $contract_id, string $key, $value = null ): bool {
-		return ( new ContractRepository() )->delete_meta( $contract_id, $key, $value );
+	public static function delete_meta( int $contract_id, string $key, $value = null, ?ContractLock $lock = null ): bool {
+		return ( new ContractRepository() )->delete_meta( $contract_id, $key, $value, $lock );
 	}
 
 	/**
@@ -519,6 +530,33 @@ final class Contracts {
 		$offset = ArgumentValidator::validate_non_negative_int( 'offset', $offset );
 
 		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
+	}
+
+	/**
+	 * Validate create arguments into a new, unsaved contract.
+	 *
+	 * @param array<string, mixed> $args Caller fields.
+	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
+	 */
+	private static function build( array $args ): Contract {
+		$filtered_args  = ArgumentValidator::filter_known_keys( self::class . '::create', $args, self::CREATE_KEYS );
+		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$creation_key   = ArgumentValidator::validate_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
+		unset( $filtered_args['extension_slug'], $filtered_args['creation_key'] );
+
+		try {
+			$contract = Contract::create(
+				array(
+					'extension_slug' => $extension_slug,
+					'creation_key'   => $creation_key,
+				)
+			);
+			self::apply( $contract, $filtered_args );
+		} catch ( DomainException $e ) {
+			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		}
+
+		return $contract;
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.

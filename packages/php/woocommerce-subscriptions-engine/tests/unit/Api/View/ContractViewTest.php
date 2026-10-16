@@ -144,4 +144,50 @@ class ContractViewTest extends TestCase {
 		$this->assertSame( array(), $empty->get_items() );
 		$this->assertSame( array(), $empty->get_addresses() );
 	}
+
+	/**
+	 * @testdox A contract read while locked exposes the lock's expiry and operation.
+	 */
+	public function test_a_live_lock_is_exposed(): void {
+		$row = array_merge(
+			$this->row(),
+			array(
+				'lock_live'        => '1',
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'renewal',
+			)
+		);
+
+		$state = ContractView::from_contract( Contract::from_storage( $row ), false )->get_lock_state();
+
+		$this->assertIsArray( $state );
+		$this->assertSame( 'renewal', $state['operation'] );
+		$this->assertSame( '2026-02-01 00:10:00', $state['locked_until']->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( 'UTC', $state['locked_until']->getTimezone()->getName() );
+	}
+
+	/**
+	 * @testdox A contract read while not locked has no lock state, and the view never holds a token.
+	 */
+	public function test_no_lock_state_and_no_token(): void {
+		$row = array_merge(
+			$this->row(),
+			array(
+				'lock_live'        => '0',
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'renewal',
+			)
+		);
+
+		$view = ContractView::from_contract( Contract::from_storage( $row ), false );
+
+		$this->assertNull( $view->get_lock_state() );
+		$this->assertNull( ContractView::from_contract( Contract::from_storage( $this->row() ), false )->get_lock_state() );
+		$this->assertStringNotContainsString( 'abcdef0123456789abcdef0123456789', print_r( $view, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		foreach ( get_class_methods( $view ) as $method ) {
+			$this->assertStringNotContainsStringIgnoringCase( 'token', str_replace( 'payment_token', '', $method ) );
+		}
+	}
 }

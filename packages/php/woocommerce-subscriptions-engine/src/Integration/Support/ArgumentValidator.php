@@ -133,22 +133,6 @@ final class ArgumentValidator {
 	}
 
 	/**
-	 * Validate and return a positive integer (a digit string is cast).
-	 *
-	 * @param string $key   Field name.
-	 * @param mixed  $value Caller value.
-	 * @throws InvalidArgumentException If the value is not a positive integer.
-	 */
-	public static function validate_positive_int( string $key, $value ): int {
-		$value = self::cast_digit_string( $value );
-		if ( ! is_int( $value ) || $value <= 0 ) {
-			throw new InvalidArgumentException( sprintf( '"%s" must be a positive integer.', esc_html( $key ) ) );
-		}
-
-		return $value;
-	}
-
-	/**
 	 * Validate and return a non-negative integer (a digit string is cast).
 	 *
 	 * @param string $key   Field name.

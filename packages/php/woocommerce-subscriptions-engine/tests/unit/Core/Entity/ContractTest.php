@@ -542,6 +542,7 @@ class ContractTest extends TestCase {
 				'trial_end_gmt',
 				'end_gmt',
 				'schedule_source',
+				'creation_key',
 			),
 			array_keys( $row )
 		);
@@ -674,5 +675,132 @@ class ContractTest extends TestCase {
 		$contract->set_status( 'legacy-paused' );
 
 		$this->assertSame( 'legacy-paused', $contract->to_storage()['status'] );
+	}
+
+	/**
+	 * @testdox A creation key round-trips through create(), to_storage() and from_storage().
+	 */
+	public function test_creation_key_round_trips(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'creation_key'   => 'order:42',
+			)
+		);
+
+		$this->assertSame( 'order:42', $contract->to_storage()['creation_key'] );
+		$this->assertSame( 'order:42', Contract::from_storage( $contract->to_storage() )->to_storage()['creation_key'] );
+		$this->assertNull( $this->make_contract()->to_storage()['creation_key'] );
+	}
+
+	/**
+	 * @testdox create() rejects an empty, over-long or non-string creation key.
+	 * @dataProvider invalid_creation_keys
+	 *
+	 * @param mixed $creation_key Invalid creation key.
+	 */
+	public function test_create_rejects_an_invalid_creation_key( $creation_key ): void {
+		$this->expectException( DomainException::class );
+
+		Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'creation_key'   => $creation_key,
+			)
+		);
+	}
+
+	/**
+	 * Invalid creation keys.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function invalid_creation_keys(): array {
+		return array(
+			'empty'      => array( '' ),
+			'192 chars'  => array( str_repeat( 'k', 192 ) ),
+			'101 chars'  => array( str_repeat( 'k', 101 ) ),
+			'non-string' => array( 42 ),
+		);
+	}
+
+	/**
+	 * @testdox A 100-character multibyte creation key is accepted.
+	 */
+	public function test_create_accepts_a_100_character_multibyte_key(): void {
+		$creation_key = str_repeat( 'é', 100 );
+
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'creation_key'   => $creation_key,
+			)
+		);
+
+		$this->assertSame( $creation_key, $contract->to_storage()['creation_key'] );
+	}
+
+	/**
+	 * @testdox from_storage() exposes the lock state only while the row says the lock is live.
+	 */
+	public function test_lock_state_follows_the_live_flag(): void {
+		$row = array_merge(
+			$this->valid_row(),
+			array(
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'hold',
+			)
+		);
+
+		$live = Contract::from_storage( array_merge( $row, array( 'lock_live' => '1' ) ) );
+		$this->assertSame(
+			array(
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'operation'        => 'hold',
+			),
+			$live->get_lock_state()
+		);
+
+		$this->assertNull( Contract::from_storage( array_merge( $row, array( 'lock_live' => '0' ) ) )->get_lock_state() );
+		$this->assertNull( Contract::from_storage( $row )->get_lock_state() );
+	}
+
+	/**
+	 * @testdox The lock columns and token never reach to_storage().
+	 */
+	public function test_lock_columns_are_not_in_to_storage(): void {
+		$row = array_merge(
+			$this->valid_row(),
+			array(
+				'lock_live'        => 1,
+				'lock_token'       => 'abcdef0123456789abcdef0123456789',
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'hold',
+			)
+		);
+
+		$stored = Contract::from_storage( $row )->to_storage();
+
+		foreach ( array( 'lock_live', 'lock_token', 'locked_until_gmt', 'lock_operation' ) as $key ) {
+			$this->assertArrayNotHasKey( $key, $stored );
+		}
+		$this->assertStringNotContainsString( 'abcdef0123456789abcdef0123456789', print_r( Contract::from_storage( $row ), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+	}
+
+	/**
+	 * @testdox create() never adopts a caller-supplied lock state.
+	 */
+	public function test_create_ignores_lock_state(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug'   => 'acme-subs',
+				'lock_live'        => 1,
+				'locked_until_gmt' => '2026-02-01 00:10:00',
+				'lock_operation'   => 'hold',
+			)
+		);
+
+		$this->assertNull( $contract->get_lock_state() );
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Integration tests for the DueDispatcher (find, claim, notify).
+ * Integration tests for the DueDispatcher (find, lock, notify).
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine
  */
@@ -13,6 +13,8 @@ use DateTimeImmutable;
 use DateTimeZone;
 use EngineIntegrationTestCase;
 use RuntimeException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
@@ -58,47 +60,96 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Overlapping ticks at the same moment notify a due contract once.
+	 * @testdox A tick that overlaps a running notification skips the contract that notification holds locked.
 	 */
-	public function test_overlapping_ticks_notify_once(): void {
-		$this->register_recording_handler();
+	public function test_an_overlapping_tick_skips_a_contract_being_notified(): void {
+		$nested = null;
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( &$nested ): void {
+					$this->calls[] = array(
+						'contract' => $contract,
+						'context'  => $context,
+					);
+					if ( null === $nested ) {
+						$nested = ( new DueDispatcher() )->run_batch( $this->now() );
+					}
+				},
+			)
+		);
 		$this->create_due_contract();
 
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
-		$this->assertSame( 0, $this->sut->run_batch( $this->now() ), 'The second tick finds the contract claimed.' );
+		$this->assertSame( 0, $nested, 'The overlapping tick finds the contract locked.' );
 		$this->assertCount( 1, $this->calls );
 	}
 
 	/**
-	 * @testdox A contract another dispatcher already claimed is not selected by the scan.
+	 * @testdox A tick that scanned before an overlapping notification released renotifies an idle handler's contract but skips a moved one.
 	 */
-	public function test_a_contract_claimed_before_the_scan_is_not_notified(): void {
-		$this->register_recording_handler();
-		$id = $this->create_due_contract();
-
-		$this->assertTrue( ( new ContractRepository() )->claim_contract( $id, '2026-02-15 00:00:00', DueDispatcher::CLAIM_TTL_SECONDS ) );
-
-		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
-		$this->assertSame( array(), $this->calls );
-	}
-
-	/**
-	 * @testdox A contract whose claim is lost between the scan and the claim is skipped.
-	 */
-	public function test_a_claim_lost_after_the_scan_is_skipped(): void {
-		$first  = $this->create_due_contract( '2026-02-14 00:00:00' );
-		$second = $this->create_due_contract( '2026-02-15 00:00:00' );
+	public function test_an_overlapping_tick_renotifies_only_a_contract_left_due(): void {
+		$first  = $this->create_due_contract( '2026-02-13 00:00:00' );
+		$idle   = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$moved  = $this->create_due_contract( '2026-02-15 00:00:00' );
+		$nested = null;
 		ConsumerRegistry::register(
 			self::OWNER,
 			array(
-				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( $first, $second ): void {
+				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( $first, $moved, &$nested ): void {
+					$this->calls[] = array(
+						'contract' => $contract,
+						'context'  => $context,
+					);
+					if ( $first === $contract->get_id() && null === $nested ) {
+						// The outer tick has scanned all three; this one notifies and releases the other two first.
+						$nested = ( new DueDispatcher() )->run_batch( $this->now() );
+					}
+					if ( $moved === $contract->get_id() ) {
+						Contracts::update( $moved, array( 'next_payment_gmt' => '2026-03-15 00:00:00' ), $context['lock'] );
+					}
+				},
+			)
+		);
+
+		$this->assertSame( 2, $this->sut->run_batch( $this->now() ), 'The outer tick notifies the first and the idle contract.' );
+		$this->assertSame( 2, $nested );
+		$this->assertSame( array( $first, $idle, $moved, $idle ), $this->notified_ids(), 'Only the contract left due is notified again.' );
+	}
+
+	/**
+	 * @testdox A contract locked before the scan is not selected.
+	 */
+	public function test_a_contract_locked_before_the_scan_is_not_notified(): void {
+		$this->register_recording_handler();
+		$id = $this->create_due_contract();
+
+		$this->take_lock( $id, 'hold' );
+
+		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( array(), $this->calls );
+		$this->assertSame( 'hold', $this->get_lock_holder( $id )['operation'], 'The holder keeps its lock.' );
+	}
+
+	/**
+	 * @testdox A contract whose due moment moves, or that another operation locks, after the scan is skipped.
+	 */
+	public function test_a_lock_lost_after_the_scan_is_skipped(): void {
+		$first  = $this->create_due_contract( '2026-02-13 00:00:00' );
+		$second = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$third  = $this->create_due_contract( '2026-02-15 00:00:00' );
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( $first, $second, $third ): void {
 					$this->calls[] = array(
 						'contract' => $contract,
 						'context'  => $context,
 					);
 					if ( $first === $contract->get_id() ) {
-						// Another writer moves the second contract after the scan read it.
+						// Other writers act on the next contracts after the scan read them.
 						Contracts::update( $second, array( 'next_payment_gmt' => '2026-02-14 12:00:00' ) );
+						$this->take_lock( $third, 'cancel' );
 					}
 				},
 			)
@@ -107,31 +158,28 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ), 'Only the first contract is notified.' );
 		$this->assertCount( 1, $this->calls );
 		$this->assertSame( $first, $this->calls[0]['contract']->get_id() );
-		$this->assertNull( $this->stored_claim( $second ), 'The lost claim wrote nothing.' );
+		$this->assertNull( $this->get_lock_holder( $second )['operation'], 'The moved contract was not locked.' );
+		$this->assertSame( 'cancel', $this->get_lock_holder( $third )['operation'], 'The other operation keeps its lock.' );
 	}
 
 	/**
-	 * @testdox A handler that leaves the due moment is re-notified only after the claim expires.
+	 * @testdox A handler that leaves the due moment in place is notified again on the next tick.
 	 */
-	public function test_an_idle_handler_is_renotified_after_the_claim_expires(): void {
+	public function test_an_idle_handler_is_renotified_on_the_next_tick(): void {
 		$this->register_recording_handler();
-		$this->create_due_contract();
+		$id = $this->create_due_contract();
 
-		$this->pin_db_clock( '2026-02-15 00:00:00' );
 		$this->sut->run_batch( $this->now() );
-		$this->pin_db_clock( '2026-02-15 00:14:59' );
-		$this->sut->run_batch( $this->now() );
-		$this->assertCount( 1, $this->calls, 'Not re-notified within the claim TTL.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'The lock is released when the handler returns.' );
 
-		$this->pin_db_clock( '2026-02-15 00:15:00' );
 		$this->sut->run_batch( $this->now() );
-		$this->assertCount( 2, $this->calls, 'Re-notified once the claim expired on the database clock.' );
+		$this->assertCount( 2, $this->calls );
 	}
 
 	/**
-	 * @testdox A handler that rewrites the due moment releases the claim and is notified on the next tick.
+	 * @testdox A handler that moves the due moment with its lock is not notified again until the new moment.
 	 */
-	public function test_moving_the_due_moment_releases_the_claim(): void {
+	public function test_moving_the_due_moment_defers_the_next_notification(): void {
 		ConsumerRegistry::register(
 			self::OWNER,
 			array(
@@ -140,16 +188,18 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 						'contract' => $contract,
 						'context'  => $context,
 					);
-					Contracts::update( $contract->get_id(), array( 'next_payment_gmt' => '2026-02-16 00:00:00' ) );
+					Contracts::update( $contract->get_id(), array( 'next_payment_gmt' => '2026-02-16 00:00:00' ), $context['lock'] );
 				},
 			)
 		);
 		$this->create_due_contract();
 
-		$this->sut->run_batch( $this->now()->modify( '+1 day' ) );
-		$this->sut->run_batch( $this->now()->modify( '+1 day +1 second' ) );
+		$this->sut->run_batch( $this->now() );
+		$this->sut->run_batch( $this->now() );
+		$this->assertCount( 1, $this->calls, 'Not due again before the new moment.' );
 
-		$this->assertCount( 2, $this->calls, 'The new due moment is notified without waiting for the claim TTL.' );
+		$this->sut->run_batch( $this->now()->modify( '+1 day' ) );
+		$this->assertCount( 2, $this->calls );
 		$this->assertEquals( new DateTimeImmutable( '2026-02-16 00:00:00', new DateTimeZone( 'UTC' ) ), $this->calls[1]['context']['due_at'] );
 	}
 
@@ -165,7 +215,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 						'contract' => $contract,
 						'context'  => $context,
 					);
-					Contracts::update( $contract->get_id(), array( 'next_payment_gmt' => null ) );
+					Contracts::update( $contract->get_id(), array( 'next_payment_gmt' => null ), $context['lock'] );
 				},
 			)
 		);
@@ -178,7 +228,58 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A throwing handler is logged, keeps its claim and does not stop the batch.
+	 * @testdox The handler gets a live lock for its contract: writes with it land, unlocked writes are refused.
+	 */
+	public function test_the_handler_writes_with_the_dispatcher_lock(): void {
+		$refused = null;
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( &$refused ): void {
+					$lock = $context['lock'];
+					$this->assertInstanceOf( ContractLock::class, $lock );
+					$this->assertSame( $contract->get_id(), $lock->get_contract_id() );
+					$this->assertSame( DueDispatcher::LOCK_OPERATION, $lock->get_operation() );
+
+					try {
+						Contracts::update( $contract->get_id(), array( 'status' => ContractStatus::CANCELLED ) );
+					} catch ( ContractLockedException $e ) {
+						$refused = $e->get_operation();
+					}
+					Contracts::update( $contract->get_id(), array( 'status' => ContractStatus::ON_HOLD ), $lock );
+				},
+			)
+		);
+		$id = $this->create_due_contract();
+
+		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( DueDispatcher::LOCK_OPERATION, $refused, 'The unlocked write inside the handler is refused.' );
+		$view = Contracts::get( $id );
+		$this->assertInstanceOf( ContractView::class, $view );
+		$this->assertSame( ContractStatus::ON_HOLD, $view->get_status() );
+	}
+
+	/**
+	 * @testdox A handler that releases the lock early does not break the dispatcher's release.
+	 */
+	public function test_a_handler_may_release_early(): void {
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => function ( ContractView $contract, array $context ): void {
+					$context['lock']->release();
+					$this->take_lock( $contract->get_id(), 'follow-up' );
+				},
+			)
+		);
+		$id = $this->create_due_contract();
+
+		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( 'follow-up', $this->get_lock_holder( $id )['operation'], 'The dispatcher never clears a lock it no longer holds.' );
+	}
+
+	/**
+	 * @testdox A throwing handler is logged, keeps its lock until it expires and does not stop the batch.
 	 */
 	public function test_a_throwing_handler_is_logged_and_the_batch_continues(): void {
 		$failing = $this->create_due_contract( '2026-02-14 00:00:00' );
@@ -187,17 +288,18 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 			self::OWNER,
 			array(
 				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( $failing ): void {
-					if ( $failing === $contract->get_id() ) {
-						throw new RuntimeException( 'Handler failure.' );
-					}
 					$this->calls[] = array(
 						'contract' => $contract,
 						'context'  => $context,
 					);
+					if ( $failing === $contract->get_id() ) {
+						throw new RuntimeException( 'Handler failure.' );
+					}
 				},
 			)
 		);
 
+		$this->pin_db_clock( '2026-02-15 00:00:00' );
 		$errors = $this->capture_engine_log(
 			'error',
 			array( 'contract_id' => $failing ),
@@ -207,9 +309,64 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		);
 
 		$this->assertNotSame( array(), $errors, 'The failure is logged with the contract id.' );
-		$this->assertCount( 1, $this->calls );
-		$this->assertSame( $healthy, $this->calls[0]['contract']->get_id() );
-		$this->assertNotNull( $this->stored_claim( $failing ), 'The failing contract keeps its claim (back-off).' );
+		$this->assertCount( 2, $this->calls );
+		$this->assertSame( DueDispatcher::LOCK_OPERATION, $this->get_lock_holder( $failing )['operation'], 'The failing contract keeps its lock (back-off).' );
+
+		$this->pin_db_clock( '2026-02-15 00:09:59' );
+		$this->sut->run_batch( $this->now() );
+		$this->assertSame( array( $failing, $healthy, $healthy ), $this->notified_ids(), 'Not re-notified while the lock lives.' );
+
+		$this->pin_db_clock( '2026-02-15 00:10:00' );
+		$this->sut->run_batch( $this->now() );
+		$this->assertContains( $failing, array_slice( $this->notified_ids(), 3 ), 'Re-notified once the lock expired on the database clock.' );
+	}
+
+	/**
+	 * @testdox A failed release after the handler is logged as a release failure and does not stop the batch.
+	 */
+	public function test_a_failed_release_is_logged_and_the_batch_continues(): void {
+		$this->register_recording_handler();
+		$first  = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$second = $this->create_due_contract( '2026-02-15 00:00:00' );
+
+		$this->fail_next_query( '/^\s*UPDATE\s+\S*contracts\s+SET\s+lock_token\s*=\s*NULL/i' );
+		$errors = $this->capture_engine_log(
+			'warning',
+			array( 'contract_id' => $first ),
+			function (): void {
+				$this->assertSame( 2, $this->sut->run_batch( $this->now() ), 'A failed release still counts as notified.' );
+			}
+		);
+
+		$this->assertNotSame( array(), $errors );
+		foreach ( $errors as $error ) {
+			$this->assertSame( 'release', $error['stage'] ?? null, 'Logged as a release failure, not a handler failure.' );
+		}
+		$this->assertSame( array( $first, $second ), $this->notified_ids() );
+		$this->assertNotNull( $this->get_lock_holder( $first )['operation'], 'The unreleased lock expires on its own.' );
+		$this->assertNull( $this->get_lock_holder( $second )['operation'] );
+	}
+
+	/**
+	 * @testdox A failed contract read after the lock is logged per contract; the lock is released and the batch continues.
+	 */
+	public function test_a_failed_read_after_the_lock_is_caught_per_contract(): void {
+		$this->register_recording_handler();
+		$first  = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$second = $this->create_due_contract( '2026-02-15 00:00:00' );
+
+		$this->fail_next_query( '/^\s*SELECT\s+\*,\s*\(\s*lock_token/i' );
+		$errors = $this->capture_engine_log(
+			'error',
+			array( 'contract_id' => $first ),
+			function (): void {
+				$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
+			}
+		);
+
+		$this->assertNotSame( array(), $errors );
+		$this->assertSame( array( $second ), $this->notified_ids() );
+		$this->assertNull( $this->get_lock_holder( $first )['operation'], 'Nothing ran, so the lock is released.' );
 	}
 
 	/**
@@ -220,7 +377,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$id = $this->create_due_contract();
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
-		$this->assertNull( $this->stored_claim( $id ), 'No claim is taken on a contract nobody handles.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'No lock is taken on a contract nobody handles.' );
 	}
 
 	/**
@@ -237,7 +394,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertNull( $this->stored_claim( $foreign ) );
+		$this->assertNull( $this->get_lock_holder( $foreign )['operation'] );
 	}
 
 	/**
@@ -275,7 +432,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( array(), $this->calls );
-		$this->assertNull( $this->stored_claim( $id ), 'No claim is taken on a contract the engine does not schedule.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'No lock is taken on a contract the engine does not schedule.' );
 	}
 
 	/**
@@ -320,11 +477,24 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 0, $this->sut->run_batch( $this->now(), 0 ) );
 		$this->assertSame( 0, $this->sut->run_batch( $this->now(), -1 ) );
-		$this->assertNull( $this->stored_claim( $first ), 'A no-op tick claims nothing.' );
+		$this->assertNull( $this->get_lock_holder( $first )['operation'], 'A no-op tick locks nothing.' );
 
 		$this->assertSame( 1, $this->sut->run_batch( $this->now(), 1 ) );
 		$this->assertSame( $first, $this->calls[0]['contract']->get_id(), 'The oldest-due contract goes first.' );
-		$this->assertSame( 2, $this->sut->run_batch( $this->now() ) );
+		$this->assertSame( 3, $this->sut->run_batch( $this->now() ), 'Idle handlers are notified again on the next tick.' );
+	}
+
+	/**
+	 * @testdox The handler receives the dispatcher's lock in its context.
+	 */
+	public function test_the_handler_context_carries_the_lock(): void {
+		$this->register_recording_handler();
+		$this->create_due_contract();
+
+		$this->sut->run_batch( $this->now() );
+
+		$this->assertInstanceOf( ContractLock::class, $this->calls[0]['context']['lock'] );
+		$this->assertTrue( $this->lock_state( $this->calls[0]['context']['lock'] )->is_released(), 'Released once the handler returned.' );
 	}
 
 	/**
@@ -340,12 +510,15 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		}
 		$fresh = $this->create_due_contract( '2026-02-15 00:00:00' );
 
-		// Every stuck contract was notified before and its claim has since expired.
+		// Every stuck contract was notified before; its lock has since been released. The fresh
+		// contract's creation lock was released before that.
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $table, array( 'claimed_until' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
+			$wpdb->update( $table, array( 'locked_until_gmt' => '2026-01-15 00:15:00' ), array( 'id' => $id ) );
 		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update( $table, array( 'locked_until_gmt' => '2026-01-10 00:00:00' ), array( 'id' => $fresh ) );
 
 		// A batch smaller than the stuck backlog: the fresh contract still makes it in.
 		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
@@ -353,7 +526,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Among notified contracts, the least recently notified goes first, so stuck older ones do not starve a later-due retry.
+	 * @testdox Among notified contracts, the least recently locked goes first, so stuck older ones do not starve a later-due retry.
 	 */
 	public function test_stuck_contracts_do_not_starve_a_later_due_retry(): void {
 		global $wpdb;
@@ -365,18 +538,18 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		}
 		$retry = $this->create_due_contract( '2026-02-10 00:00:00' );
 
-		// The stuck contracts were re-notified recently; the retry's handler threw a while ago.
+		// The stuck contracts were re-notified recently; the retry's lock expired a while ago.
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		foreach ( $stuck as $id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->update( $table, array( 'claimed_until' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
+			$wpdb->update( $table, array( 'locked_until_gmt' => '2026-02-14 00:15:00' ), array( 'id' => $id ) );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->update( $table, array( 'claimed_until' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
+		$wpdb->update( $table, array( 'locked_until_gmt' => '2026-02-10 00:15:00' ), array( 'id' => $retry ) );
 
 		// A batch smaller than the stuck backlog: the retry still makes it in.
 		$this->assertSame( 2, $this->sut->run_batch( $this->now(), 2 ) );
-		$this->assertSame( $retry, $this->calls[0]['contract']->get_id(), 'The least recently notified contract goes first despite its later due moment.' );
+		$this->assertSame( $retry, $this->calls[0]['contract']->get_id(), 'The least recently locked contract goes first despite its later due moment.' );
 	}
 
 	/**
@@ -440,6 +613,8 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->register_recording_handler();
 		$this->create_due_contract();
 
+		// The booted engine registers its own dispatcher; route the tick only to the SUT.
+		remove_all_actions( DueDispatcher::HOOK );
 		$this->sut->register_hooks();
 		do_action( DueDispatcher::HOOK ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
@@ -474,11 +649,11 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	 * Create an active contract with one item, due at `$next_payment_gmt`.
 	 *
 	 * @param string               $next_payment_gmt Due moment (UTC).
-	 * @param array<string, mixed> $overrides        `Contracts::create()` fields to replace.
+	 * @param array<string, mixed> $overrides        `$this->create_released()` fields to replace.
 	 * @return int The contract id.
 	 */
 	private function create_due_contract( string $next_payment_gmt = '2026-02-15 00:00:00', array $overrides = array() ): int {
-		$contract = Contracts::create(
+		$contract = $this->create_released(
 			array_merge(
 				array(
 					'extension_slug'   => self::OWNER,
@@ -507,18 +682,26 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * The stored due-dispatch claim of a contract.
+	 * The contract's live lock holder.
 	 *
 	 * @param int $id Contract id.
+	 * @return array{exists: bool, operation: ?string, locked_until_gmt: ?string}
 	 */
-	private function stored_claim( int $id ): ?string {
-		global $wpdb;
+	private function get_lock_holder( int $id ): array {
+		return ( new ContractRepository() )->get_lock_holder( $id );
+	}
 
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$claim = $wpdb->get_var( $wpdb->prepare( "SELECT claimed_until FROM {$table} WHERE id = %d", $id ) );
-
-		return null === $claim ? null : (string) $claim;
+	/**
+	 * The ids of the notified contracts, in call order.
+	 *
+	 * @return array<int, int>
+	 */
+	private function notified_ids(): array {
+		return array_map(
+			static function ( array $call ): int {
+				return $call['contract']->get_id();
+			},
+			$this->calls
+		);
 	}
 }
