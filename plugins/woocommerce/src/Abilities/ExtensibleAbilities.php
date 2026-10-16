@@ -20,7 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  * An ActionableAbility writes the same `extensions` input to the fields that
- * have an `update_callback`, and saves the object one time.
+ * have an `update_callback`, runs the validators of the resource, and saves
+ * the object one time.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -43,6 +44,13 @@ class ExtensibleAbilities {
 	 * @var array<string, bool>
 	 */
 	private static array $resources = array();
+
+	/**
+	 * Validators keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $validators = array();
 
 	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
@@ -189,6 +197,79 @@ class ExtensibleAbilities {
 	}
 
 	/**
+	 * Register a validator that can refuse a change to an object of a resource.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Validators
+	 * run only when the `extensible_abilities` feature is on.
+	 *
+	 * Use a field `update_callback` to refuse a bad value of one field. It runs
+	 * only when the input sends that field. Use a validator to refuse a change as
+	 * a whole. It runs on every change of the resource, also when the input sends
+	 * no extension fields. For example, a validator refuses a product change that
+	 * would break a subscription plan.
+	 *
+	 * Core's product abilities run validators. Core's order abilities keep their
+	 * trunk write for now, so validators for `order` run only in the
+	 * ActionableAbility classes of extensions.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Validator arguments.
+	 *
+	 *     @type string   $resource  Resource that an ActionableAbility changes, such as `product`.
+	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
+	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
+	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
+	 *                               change, and then nothing is saved. The error gets the namespace in its
+	 *                               data, and the 400 status when it has no status. Its message can name the
+	 *                               ability or screen to use instead. Rules:
+	 *                               1. It only reads. It does not change the object, save, send email or
+	 *                                  make HTTP requests.
+	 *                               2. It checks the ability name when the extension's own abilities
+	 *                                  change the same resource.
+	 * }
+	 */
+	public static function register_validator( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a validator inside the woocommerce_extensible_abilities_init action.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'namespace' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						$key
+					),
+					'11.3.0'
+				);
+				return;
+			}
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.3.0'
+			);
+			return;
+		}
+
+		self::$validators[ $args['resource'] ][] = $args;
+	}
+
+	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
@@ -285,6 +366,18 @@ class ExtensibleAbilities {
 	 */
 	public static function get_fields( string $resource_name ): array {
 		return self::$fields[ $resource_name ] ?? array();
+	}
+
+	/**
+	 * Validators of a resource.
+	 *
+	 * @internal
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_validators( string $resource_name ): array {
+		return self::$validators[ $resource_name ] ?? array();
 	}
 
 	/**
