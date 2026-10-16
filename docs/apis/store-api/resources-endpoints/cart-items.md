@@ -1,5 +1,7 @@
 # Cart Items API
 
+> **Soft-deprecated:** these endpoints duplicate the [Cart API](./cart.md) actions `POST /cart/add-item`, `POST /cart/update-item` and `POST /cart/remove-item`, which return the whole updated cart. Use those in new code. The endpoints below still work in Store API v1.
+
 ## List Cart Items
 
 ```http

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Load marketing and coupon extension recommendations from the recommendations endpoint, and deprecate the duplicate recommended endpoint.
