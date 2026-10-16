@@ -616,6 +616,26 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() copies the stored address values, not the values returned by getter filters.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_ignores_getter_filters(): void {
+		$customer = $this->create_customer_with_address( 'billing' );
+		add_filter(
+			'woocommerce_customer_get_billing_address_1',
+			function () {
+				return 'Filtered street';
+			}
+		);
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( '123 Market Street', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1( 'edit' ), 'The stored billing street should be copied, not the filtered one.' );
+	}
+
+	/**
 	 * @testdox copy_address() does nothing for a logged-out visitor.
 	 *
 	 * @covers WC_Form_Handler::copy_address()

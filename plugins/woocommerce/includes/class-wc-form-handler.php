@@ -435,7 +435,7 @@ class WC_Form_Handler {
 		}
 
 		$customer         = new WC_Customer( $user_id );
-		$source_country   = 'billing' === $source_type ? $customer->get_billing_country() : $customer->get_shipping_country();
+		$source_country   = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
 		$target_countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
 		if ( ! array_key_exists( $source_country, $target_countries ) ) {
@@ -450,11 +450,12 @@ class WC_Form_Handler {
 			$source_key = $source_type . substr( $target_key, strlen( $target_type ) );
 			$getter     = "get_{$source_key}";
 			$setter     = "set_{$target_key}";
-			$value      = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}() : $customer->get_meta( $source_key );
+			// Read stored values, so getter filters are not saved into the other address.
+			$value = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}( 'edit' ) : $customer->get_meta( $source_key, true, 'edit' );
 
 			// Shipping has no email field, so fall back to the account email like the edit address form does.
 			if ( 'billing_email' === $target_key && ! $value ) {
-				$value = $customer->get_email();
+				$value = $customer->get_email( 'edit' );
 			}
 
 			// The other address type can require fields the copied address doesn't have, such as a billing phone.
