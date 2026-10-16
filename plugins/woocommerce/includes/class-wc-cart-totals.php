@@ -349,11 +349,8 @@ final class WC_Cart_Totals {
 				$shipping_line->tax_class = get_option( 'woocommerce_shipping_tax_class', 'inherit' );
 				$shipping_line->taxable   = true;
 				$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
-				$shipping_line->taxes     = array_map(
-					array( $this, 'round_line_tax' ),
-					wc_add_number_precision_deep( $shipping_object->taxes, false )
-				);
-				$shipping_line->total_tax = array_sum( $shipping_line->taxes );
+				$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
+				$shipping_line->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $shipping_line->taxes ) );
 				return $shipping_line;
 			},
 			$this->cart->calculate_shipping()
@@ -885,7 +882,7 @@ final class WC_Cart_Totals {
 
 		$this->cart->set_shipping_total( $this->get_total( 'shipping_total' ) );
 		$this->cart->set_shipping_tax( $this->get_total( 'shipping_tax_total' ) );
-		$this->cart->set_shipping_taxes( wc_remove_number_precision_deep( $this->combine_item_taxes( wp_list_pluck( $this->shipping, 'taxes' ) ) ) );
+		$this->cart->set_shipping_taxes( $this->get_merged_taxes( false, 'shipping' ) );
 	}
 
 	/**

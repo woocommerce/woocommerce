@@ -196,6 +196,47 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shipping tax filters do not compound when cart taxes are merged.
+	 * @testWith [0, "no", [{"1": 10.4}], 11.0, {"1": 11.0}, "81"]
+	 *           [0, "no", [{"1": 10.4, "2": 1.6}, {"1": 10.4}], 25.0, {"1": 22.0, "2": 3.0}, "165"]
+	 *           [2, "no", [{"1": 0.104}], 0.11, {"1": 0.11}, "70.11"]
+	 *           [0, "yes", [{"1": 10.4}], 10.4, {"1": 10.4}, "80"]
+	 *
+	 * @param int    $decimals          Currency decimal places.
+	 * @param string $round_at_subtotal Whether taxes round at subtotal.
+	 * @param array  $package_taxes     Raw tax entries for each shipping package.
+	 * @param float  $expected_tax      Total shipping tax.
+	 * @param array  $expected_taxes    Shipping taxes grouped by rate.
+	 * @param string $expected_total    Cart total.
+	 */
+	public function test_shipping_tax_filter_does_not_compound( int $decimals, string $round_at_subtotal, array $package_taxes, float $expected_tax, array $expected_taxes, string $expected_total ): void {
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$rates = array();
+		foreach ( $package_taxes as $package => $taxes ) {
+			$rates[] = new WC_Shipping_Rate( 'test:' . $package, 'Shipping', 70, $taxes );
+		}
+		$cart = $this->getMockBuilder( WC_Cart::class )->onlyMethods( array( 'calculate_shipping' ) )->getMock();
+		$cart->method( 'calculate_shipping' )->willReturn( $rates );
+		add_filter( 'wc_round_tax_total', static fn( $rounded ) => 0 < $rounded ? $rounded + 1 : $rounded );
+
+		new WC_Cart_Totals( $cart );
+
+		$this->assertEqualsWithDelta( $expected_tax, $cart->get_shipping_tax(), 0.00001 );
+		$this->assertEquals( $expected_taxes, $cart->get_shipping_taxes() );
+		$this->assertSame( $expected_total, $cart->get_total( 'edit' ), 'The grand total must not filter already-rounded shipping taxes.' );
+		foreach ( $rates as $package => $rate ) {
+			$this->assertSame( $package_taxes[ $package ], $rate->get_taxes(), 'Cached shipping rates must retain their raw taxes.' );
+		}
+		if ( 1 === count( $rates ) ) {
+			$this->assertStringContainsString( wc_price( 70 + $expected_tax ), wc_cart_totals_shipping_method_label( $rates[0] ) );
+		}
+	}
+
+	/**
 	 * @testdox Cart shipping tax should match the recalculated order under each tax rounding setting.
 	 * @testWith ["yes", 0, "no", "70", 10.0]
 	 *           ["yes", 2, "no", "0.70", 0.10]
@@ -256,6 +297,7 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
 		WC()->shipping()->load_shipping_methods();
 		WC_Helper_Shipping::force_customer_us_address();
+		$customer_was_exempt = WC()->customer->get_is_vat_exempt();
 		WC()->customer->set_is_vat_exempt( $exempt );
 		WC()->cart->add_to_cart( $this->product->get_id() );
 		WC()->cart->apply_coupon( $coupon->get_code() );
@@ -289,6 +331,7 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 			$this->assertSame( WC()->cart->get_total( 'edit' ), $order->get_total(), 'Recalculating an order must preserve the checkout total.' );
 		} finally {
 			remove_filter( 'wc_round_tax_total', $round_tax, 10 );
+			WC()->customer->set_is_vat_exempt( $customer_was_exempt );
 		}
 	}
 }
