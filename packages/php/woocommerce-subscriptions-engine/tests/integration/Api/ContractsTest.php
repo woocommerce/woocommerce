@@ -1439,25 +1439,27 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 * @testdox An unlocked items update refused by a live lock reads the holder once to report it.
 	 */
 	public function test_a_refused_internal_lock_reads_the_holder_once(): void {
-		global $wpdb;
-
 		$id = $this->contract_with_currency();
 		$this->take_lock( $id, 'renewal' );
 
-		$queries = $wpdb->num_queries;
+		$statements = array();
+		$record     = static function ( $query ) use ( &$statements ) {
+			$statements[] = $query;
+			return $query;
+		};
+		add_filter( 'query', $record );
 		try {
 			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
 			$this->fail( 'Expected a conflict.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'renewal', $e->get_operation() );
+		} finally {
+			remove_filter( 'query', $record );
 		}
 
-		$update_queries = $wpdb->num_queries - $queries;
-
-		// The facade's find() costs what get() costs; the rest is one lock attempt and one holder read.
-		$queries = $wpdb->num_queries;
-		Contracts::get( $id );
-		$this->assertSame( $wpdb->num_queries - $queries + 2, $update_queries );
+		$holder_reads = preg_grep( '/AS live, lock_operation/', $statements );
+		$this->assertCount( 1, $holder_reads, 'The holder is read once.' );
+		$this->assertSame( array(), preg_grep( '/^\s*(INSERT|DELETE)\b|SET lock_token = NULL/i', $statements ), 'Nothing is written or released.' );
 	}
 
 	/**
@@ -1489,12 +1491,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 			},
 		);
 
+		$refusal = sprintf( 'The lock belongs to contract %d, not contract %d.', $lock->get_contract_id(), $id );
 		foreach ( $writes as $method => $write ) {
+			// A cycle is addressed by its id, so its refusal names the cycle and the lock's contract.
+			$expected = 'transition_cycle' === $method ? sprintf( 'Cycle %d does not belong to contract %d.', $cycle_id, $lock->get_contract_id() ) : $refusal;
 			try {
 				$write();
 				$this->fail( "Expected {$method}() to refuse the lock." );
 			} catch ( InvalidArgumentException $e ) {
-				$this->assertStringContainsString( 'contract', $e->getMessage() );
+				$this->assertSame( $expected, $e->getMessage(), "{$method}() refuses the lock." );
 			}
 		}
 		$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value() );

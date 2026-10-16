@@ -892,7 +892,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	/**
 	 * @testdox update_fields writing identical values in the same second still changes the row (write_seq) and returns true.
 	 */
-	public function test_update_fields_with_identical_values_does_not_throw(): void {
+	public function test_an_identical_write_still_changes_the_row(): void {
 		global $wpdb;
 
 		$id       = $this->sut->insert( $this->make_contract() );
@@ -1194,7 +1194,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A live lock hides the contract from find_due until it expires on the database clock; release reorders it by release moment.
+	 * @testdox A live lock hides the contract from find_due until it expires on the database clock; an expired lock sorts it behind never-locked contracts.
 	 */
 	public function test_a_live_lock_hides_the_contract_until_it_expires(): void {
 		$now   = new \DateTimeImmutable( '2026-07-15 00:00:00', new \DateTimeZone( 'UTC' ) );
