@@ -798,7 +798,10 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 		$classes = array();
 		$items   = array();
 		foreach ( array( 'local', 'regional' ) as $name ) {
-			$term      = wp_insert_term( $name, 'product_shipping_class' );
+			$term = wp_insert_term( $name, 'product_shipping_class' );
+			if ( is_wp_error( $term ) ) {
+				throw new RuntimeException( esc_html( $term->get_error_message() ) );
+			}
 			$classes[] = get_term( $term['term_id'], 'product_shipping_class' );
 			$product   = new WC_Product_Simple();
 			$product->set_shipping_class_id( $term['term_id'] );
