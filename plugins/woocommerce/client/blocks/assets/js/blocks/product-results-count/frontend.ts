@@ -15,39 +15,55 @@ type ProductResultsCountContext = {
 	announcement: string;
 };
 
-// Blocks that have run their first watch; that run is the page load, not a navigation.
-const renderedBlocks = new WeakSet< HTMLElement >();
-let pendingAnnouncement: ReturnType< typeof setTimeout > | undefined;
+// Each block's last count. A block without an entry has not run its first watch, which is the page load.
+const lastAnnouncements = new WeakMap< HTMLElement, string >();
+
+let pendingAnnouncement:
+	{ timer: ReturnType< typeof setTimeout >; isChanged: boolean } | undefined;
 
 const productResultsCountStore = {
 	callbacks: {
 		/**
 		 * Speak the new count after client-side navigation replaces it.
+		 *
+		 * Every block's watch re-runs on each navigation, so a block whose count did not
+		 * change must not replace an announcement from a block whose count did.
 		 */
 		announceResultsCount: () => {
 			// Read on every run, including the first, so the watch re-runs on every navigation.
 			const { announcement } =
 				getServerContext< ProductResultsCountContext >();
-
-			clearTimeout( pendingAnnouncement );
-
 			const { ref } = getElement();
-			const isFirstRun = ! ref || ! renderedBlocks.has( ref );
+			const previousAnnouncement = ref
+				? lastAnnouncements.get( ref )
+				: undefined;
 			if ( ref ) {
-				renderedBlocks.add( ref );
+				lastAnnouncements.set( ref, announcement );
 			}
 
-			if ( isFirstRun || ! announcement ) {
+			const isChanged = announcement !== previousAnnouncement;
+			if (
+				previousAnnouncement === undefined ||
+				! announcement ||
+				( ! isChanged && pendingAnnouncement?.isChanged )
+			) {
 				return;
 			}
 
-			pendingAnnouncement = setTimeout( () => {
-				import( '@wordpress/a11y' )
-					.then( ( { speak } ) => speak( announcement, 'polite' ) )
-					.catch( () => {
-						// A failed chunk load leaves the router's message as the only feedback.
-					} );
-			}, ANNOUNCEMENT_DELAY_MS );
+			clearTimeout( pendingAnnouncement?.timer );
+			pendingAnnouncement = {
+				isChanged,
+				timer: setTimeout( () => {
+					pendingAnnouncement = undefined;
+					import( '@wordpress/a11y' )
+						.then( ( { speak } ) =>
+							speak( announcement, 'polite' )
+						)
+						.catch( () => {
+							// A failed chunk load leaves the router's message as the only feedback.
+						} );
+				}, ANNOUNCEMENT_DELAY_MS ),
+			};
 		},
 	},
 };

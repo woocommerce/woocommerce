@@ -113,6 +113,96 @@ describe( 'Product Results Count announcement', () => {
 		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'announces an unchanged count after a navigation', async () => {
+		announce( 'Showing all 5 results' );
+		announce( 'Showing all 5 results' );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing all 5 results',
+			'polite'
+		);
+	} );
+
+	it( 'announces once when two blocks show the same new count', async () => {
+		const secondBlock = document.createElement( 'div' );
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing 1–16 of 28 results', secondBlock );
+
+		announce( 'Showing 17–28 of 28 results' );
+		announce( 'Showing 17–28 of 28 results', secondBlock );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 17–28 of 28 results',
+			'polite'
+		);
+	} );
+
+	it( 'announces the changed count when a later block is unchanged', async () => {
+		const otherQueryBlock = document.createElement( 'div' );
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
+
+		announce( 'Showing 17–28 of 28 results' );
+		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 17–28 of 28 results',
+			'polite'
+		);
+	} );
+
+	it( 'announces the changed count when an earlier block is unchanged', async () => {
+		const otherQueryBlock = document.createElement( 'div' );
+		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
+		announce( 'Showing 1–16 of 28 results' );
+
+		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
+		announce( 'Showing 17–28 of 28 results' );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 17–28 of 28 results',
+			'polite'
+		);
+	} );
+
+	it( 'does not cancel a pending announcement when another block mounts', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing 17–28 of 28 results' );
+		announce(
+			'Showing 17–28 of 28 results',
+			document.createElement( 'div' )
+		);
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 17–28 of 28 results',
+			'polite'
+		);
+	} );
+
+	it( 'announces an unchanged count on the navigation after a changed one', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing all 5 results' );
+		await settle();
+		announce( 'Showing all 5 results' );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 2 );
+		expect( mockSpeak ).toHaveBeenLastCalledWith(
+			'Showing all 5 results',
+			'polite'
+		);
+	} );
+
 	it( 'does not announce an empty count', async () => {
 		announce( 'Showing 1–16 of 28 results' );
 		announce( '' );
