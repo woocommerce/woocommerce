@@ -265,7 +265,7 @@ CSS;
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
 						<div
 							class="wc-block-product-filters__overlay-dialog"
-							role="dialog"
+							data-wp-bind--role="state.overlayDialogRole"
 							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
 						>
 							<header class="wc-block-product-filters__overlay-header">
