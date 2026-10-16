@@ -21,8 +21,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks.
-	 *
-	 * @since 11.3.0
 	 */
 	public function register(): void {
 		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
@@ -31,8 +29,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 	/**
 	 * Register the rewrite rule and renderer when UCP is enabled and pretty permalinks are on.
-	 *
-	 * @since 11.3.0
 	 */
 	public function register_feature_hooks(): void {
 		global $wp_rewrite;
@@ -51,8 +47,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 *
 	 * @param array $vars Public query vars.
 	 * @return array
-	 *
-	 * @since 11.3.0
 	 */
 	public function add_query_var( $vars ): array {
 		$vars[] = self::QUERY_VAR;
@@ -63,8 +57,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * Queue a rewrite rules flush when the UCP feature is toggled.
 	 *
 	 * @param string $feature_id Feature being toggled.
-	 *
-	 * @since 11.3.0
 	 */
 	public function maybe_flush_rewrite_rules( string $feature_id ): void {
 		if ( UcpUtils::FEATURE_ID === $feature_id ) {
@@ -76,8 +68,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * Send the discovery profile for `/.well-known/ucp` requests.
 	 *
 	 * @param \WP $wp Current WordPress environment instance.
-	 *
-	 * @since 11.3.0
 	 */
 	public function maybe_render( \WP $wp ): void {
 		if ( '1' !== ( $wp->query_vars[ self::QUERY_VAR ] ?? '' ) ) {
@@ -96,8 +86,6 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * Build the discovery profile.
 	 *
 	 * @return array
-	 *
-	 * @since 11.3.0
 	 */
 	public function get_profile(): array {
 		return array(
