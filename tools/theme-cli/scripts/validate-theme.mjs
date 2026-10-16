@@ -1,15 +1,20 @@
-import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { runThemeCheck } from './theme-check.mjs';
 import {
 	discoverThemes,
 	getThemeDirectory,
 	isMain,
+	runCommand,
 	toolingRoot,
 } from './theme-utils.mjs';
 
 const repositoryRoot = path.resolve( toolingRoot, '../..' );
 
+/**
+ * Lint a theme's JavaScript, CSS, and Markdown, then run WordPress Theme Check
+ * in a separate Docker environment.
+ *
+ */
 export async function validateTheme( slug, fix = false ) {
 	process.stdout.write( `Validating ${ slug }\n` );
 	const directory = await getThemeDirectory( slug );
@@ -41,15 +46,12 @@ export async function validateTheme( slug, fix = false ) {
 	];
 	let status = 0;
 	for ( const check of checks ) {
-		const result = spawnSync(
+		const checkStatus = runCommand(
 			'pnpm',
 			[ 'exec', 'wp-scripts', ...check, ...( fix ? [ '--fix' ] : [] ) ],
-			{ cwd: directory, stdio: 'inherit' }
+			{ cwd: directory }
 		);
-		if ( result.error ) {
-			throw result.error;
-		}
-		if ( result.status !== 0 ) {
+		if ( checkStatus !== 0 ) {
 			status = 1;
 		}
 	}
@@ -66,9 +68,7 @@ if ( isMain( import.meta.url ) ) {
 			throw new Error( 'Usage: validate-theme.mjs <slug|--all> [--fix]' );
 		}
 		const slugs =
-			targets[ 0 ] === '--all'
-				? ( await discoverThemes() ).map( ( theme ) => theme.slug )
-				: targets;
+			targets[ 0 ] === '--all' ? await discoverThemes() : targets;
 		for ( const slug of slugs ) {
 			try {
 				if ( ( await validateTheme( slug, fix ) ) !== 0 ) {
