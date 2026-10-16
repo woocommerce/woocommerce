@@ -1212,14 +1212,16 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A skip-existing historical import still imports every real order when older test orders are skipped.
-	 * @testWith [2, 3]
-	 *           [1, 3]
+	 * @testdox A skip-existing historical import imports every real order, past older test orders and skipped IDs left by an earlier run.
+	 * @testWith [2, 3, []]
+	 *           [1, 3, []]
+	 *           [0, 3, [999999991, 999999992]]
 	 *
-	 * @param int $test_order_count Number of test orders created before the real ones.
-	 * @param int $real_order_count Number of real orders.
+	 * @param int   $test_order_count  Number of test orders created before the real ones.
+	 * @param int   $real_order_count  Number of real orders.
+	 * @param int[] $stale_skipped_ids Skipped IDs already in the import stats, as a stale copy from an earlier run would hold.
 	 */
-	public function test_import_batch_init_imports_real_orders_queued_behind_test_orders( int $test_order_count, int $real_order_count ): void {
+	public function test_skip_existing_import_imports_every_real_order( int $test_order_count, int $real_order_count, array $stale_skipped_ids ): void {
 		global $wpdb;
 
 		$create_order = function ( int $timestamp, bool $is_test ): int {
@@ -1247,7 +1249,15 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_analytics_regenerate_batch_size', $batch_size, 10, 3 );
 		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
-		update_option( OrdersScheduler::IMPORT_STATS_OPTION, array( OrdersScheduler::$name => array( 'imported' => 0 ) ) );
+		update_option(
+			OrdersScheduler::IMPORT_STATS_OPTION,
+			array(
+				OrdersScheduler::$name => array(
+					'imported' => 0,
+					'skipped'  => $stale_skipped_ids,
+				),
+			)
+		);
 
 		OrdersScheduler::import_batch_init( false, true );
 
