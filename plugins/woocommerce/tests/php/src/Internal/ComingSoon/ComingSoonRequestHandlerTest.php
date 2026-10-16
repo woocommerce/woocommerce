@@ -91,7 +91,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 * @return array<string, array{0: array<int, array<string, mixed>>, 1: string[]}>
 	 */
 	public function provider_theme_fonts(): array {
-		return array(
+		$cases = array(
 			'no bundled fonts'                        => array(
 				array(
 					array(
@@ -108,12 +108,22 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 						'fontFamily' => '"Inter", sans-serif',
 						'name'       => 'Sans Serif: Inter',
 						'slug'       => 'inter',
-						'fontFace'   => array( array( 'fontFamily' => 'Inter' ) ),
+						'fontFace'   => array(
+							array(
+								'fontFamily' => 'Inter',
+								'src'        => array( 'https://example.com/inter.woff2' ),
+							),
+						),
 					),
 					array(
 						'fontFamily' => 'Cardo',
 						'slug'       => 'cardo',
-						'fontFace'   => array( array( 'fontFamily' => 'Cardo' ) ),
+						'fontFace'   => array(
+							array(
+								'fontFamily' => 'Cardo',
+								'src'        => array( 'https://example.com/cardo.woff2' ),
+							),
+						),
 					),
 				),
 				array( 'inter', 'cardo' ),
@@ -147,7 +157,12 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 					array(
 						'fontFamily' => '"Inter", sans-serif',
 						'slug'       => 'body',
-						'fontFace'   => array( array( 'fontFamily' => 'Inter' ) ),
+						'fontFace'   => array(
+							array(
+								'fontFamily' => 'Inter',
+								'src'        => array( 'https://example.com/inter.woff2' ),
+							),
+						),
 					),
 				),
 				array( 'body', 'inter', 'cardo' ),
@@ -157,12 +172,74 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 					array(
 						'fontFamily' => 'Theme Serif, serif',
 						'slug'       => 'cardo',
-						'fontFace'   => array( array( 'fontFamily' => 'Theme Serif' ) ),
+						'fontFace'   => array(
+							array(
+								'fontFamily' => 'Theme Serif',
+								'src'        => array( 'https://example.com/theme-serif.woff2' ),
+							),
+						),
 					),
 				),
 				array( 'cardo', 'inter', 'cardo' ),
 			),
 		);
+
+		foreach ( array(
+			'unquoted Inter'          => array( 'Inter, sans-serif', array( 'inter', 'cardo' ) ),
+			'single-quoted Inter'     => array( "'Inter', sans-serif", array( 'inter', 'cardo' ) ),
+			'quoted generic fallback' => array( '"Inter", "sans-serif"', array( 'inter', 'inter', 'cardo' ) ),
+		) as $label => $case ) {
+			$cases[ $label ] = array(
+				array(
+					array(
+						'fontFamily' => $case[0],
+						'slug'       => 'inter',
+						'fontFace'   => array(
+							array(
+								'fontFamily' => 'Inter',
+								'src'        => array( 'https://example.com/inter.woff2' ),
+							),
+						),
+					),
+				),
+				$case[1],
+			);
+		}
+
+		foreach ( array(
+			'missing source'                => array( array(), array( 'inter', 'inter', 'cardo' ) ),
+			'mixed valid and empty sources' => array( array( 'src' => array( 'https://example.com/inter.woff2', '' ) ), array( 'inter', 'inter', 'cardo' ) ),
+		) as $label => $case ) {
+			$cases[ $label ] = array(
+				array(
+					array(
+						'fontFamily' => '"Inter", sans-serif',
+						'slug'       => 'inter',
+						'fontFace'   => array( array_merge( array( 'fontFamily' => 'Inter' ), $case[0] ) ),
+					),
+				),
+				$case[1],
+			);
+		}
+
+		$cases['later usable face with a string source'] = array(
+			array(
+				array(
+					'fontFamily' => '"Inter", sans-serif',
+					'slug'       => 'inter',
+					'fontFace'   => array(
+						array( 'fontFamily' => 'Inter' ),
+						array(
+							'fontFamily' => 'Inter',
+							'src'        => 'https://example.com/inter.woff2',
+						),
+					),
+				),
+			),
+			array( 'inter', 'cardo' ),
+		);
+
+		return $cases;
 	}
 
 	/**

@@ -257,9 +257,11 @@ class ComingSoonRequestHandler {
 					( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] )
 					|| (
 						isset( $font['fontFamily'], $font['slug'] )
-						&& $font['fontFamily'] === $font_to_add['fontFamily']
+						&& is_string( $font['fontFamily'] )
+						&& $this->unquote_font_family( $font['fontFamily'] ) === $this->unquote_font_family( $font_to_add['fontFamily'] )
 						&& $font['slug'] === $font_to_add['slug']
-						&& ! empty( $font['fontFace'] )
+						&& is_array( $font['fontFace'] ?? null )
+						&& $this->has_font_face_source( $font['fontFace'] )
 					)
 				) {
 					$found = true;
@@ -284,6 +286,42 @@ class ComingSoonRequestHandler {
 		);
 		$theme_json->update_with( $new_data );
 		return $theme_json;
+	}
+
+	/**
+	 * Removes optional quotes around the first family, preserving generic fallback semantics.
+	 *
+	 * @param string $font_family CSS font family list.
+	 * @return string Font family list without quotes around the first family.
+	 */
+	private function unquote_font_family( string $font_family ): string {
+		return preg_replace( '/^([\'"])([^\'",]+)\1(?=\s*(?:,|$))/', '$2', $font_family ) ?? $font_family;
+	}
+
+	/**
+	 * Checks whether a font face supplies sources that WordPress can use.
+	 *
+	 * @param array[] $font_faces Font face definitions.
+	 * @return bool Whether at least one face has a non-empty string or list of non-empty strings as its source.
+	 */
+	private function has_font_face_source( array $font_faces ): bool {
+		foreach ( $font_faces as $font_face ) {
+			$sources = $font_face['src'] ?? array();
+			if ( empty( $sources ) || ( ! is_string( $sources ) && ! is_array( $sources ) ) ) {
+				continue;
+			}
+
+			// WordPress rejects the entire face if any source is empty or not a string.
+			foreach ( (array) $sources as $source ) {
+				if ( empty( $source ) || ! is_string( $source ) ) {
+					continue 2;
+				}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
