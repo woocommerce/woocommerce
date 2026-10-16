@@ -32,11 +32,6 @@ export enum noticeContexts {
 	ORDER_INFORMATION = 'wc/checkout/order-information',
 }
 
-/**
- * Id of the notice shown when an order is placed without a payment method selected.
- */
-export const PAYMENT_METHOD_REQUIRED_NOTICE_ID = 'wc-payment-method-required';
-
 export const shouldRetry = ( response: unknown ): boolean => {
 	return (
 		! isObject( response ) ||

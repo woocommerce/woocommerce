@@ -98,7 +98,6 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 						errorMessage,
 						validationErrors,
 						context = 'wc/checkout',
-						id,
 					} ) => {
 						if (
 							// TODO: for a more consistent experience across observing events we should normalize the
@@ -108,11 +107,7 @@ export const __internalEmitValidateEvent: emitValidateEventType = ( {
 							typeof errorMessage === 'string' &&
 							errorMessage
 						) {
-							// An observer can pin the notice to an id so it can remove it later.
-							void createErrorNotice( errorMessage, {
-								context,
-								...( typeof id === 'string' ? { id } : {} ),
-							} );
+							void createErrorNotice( errorMessage, { context } );
 						}
 						if (
 							isValidValidationErrorsObject( validationErrors )
