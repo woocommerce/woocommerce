@@ -126,11 +126,15 @@ class UcpCart extends ControllerTestCase {
 	private $wc_globals_backup = array();
 
 	/**
-	 * Enable the UCP routes before the REST server is built.
+	 * Enable the UCP routes and rebuild the REST server so they register.
 	 */
 	protected function setUp(): void {
-		update_option( self::FEATURE_OPTION, 'yes' );
 		parent::setUp();
+
+		// Inside the per-test transaction, so the rollback turns the flag off again;
+		// the routes register on the rebuilt server.
+		update_option( self::FEATURE_OPTION, 'yes' );
+		$this->initialize_store_api_server();
 
 		// A per-test DB transaction rolls back rows but not the WC() singletons, so a test
 		// that swaps them would leak into the next one. Keep the originals to restore.
@@ -146,10 +150,9 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
-	 * Restore the default disabled state, the cancellation marker and the WC() singletons.
+	 * Restore the cancellation marker and the WC() singletons.
 	 */
 	protected function tearDown(): void {
-		delete_option( self::FEATURE_OPTION );
 		unset( $_SERVER['HTTP_CART_TOKEN'] );
 
 		if ( WC()->session ) {
