@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"build": "node scripts/build-zip.mjs",
-		"lint": "wp-scripts lint-js --max-warnings 0 && wp-scripts lint-md-docs README.md --config ../../.markdownlint.json",
+		"lint": "wp-scripts lint-js scripts --config ../../eslint.config.mjs --max-warnings 0 && wp-scripts lint-md-docs README.md --config ../../.markdownlint.json",
 		"validate": "node scripts/validate-theme.mjs",
 		"changelog": "composer exec -- changelogger",
 		"wp-env": "node scripts/env.mjs"
